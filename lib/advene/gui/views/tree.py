@@ -302,6 +302,7 @@ class TreeWidget:
                  annotation_cb=None, controller=None):
         self.package = package
         self.controller=controller
+        self.modelclass=modelclass
 
         if annotation_cb is not None:
             self.annotation_cb = annotation_cb
@@ -412,6 +413,13 @@ class TreeWidget:
             print _("Error: unable to find an edit popup for %s") % node
         return True
 
+    def update_model(self, package):
+        """Update the model with a new package."""
+        print "update model %s" % str(package)
+        self.model = self.modelclass(package)
+        self.tree_view.set_model(self.model)
+        return
+    
     def delete_annotation(self, annotation):
         """Delete the view of annotation from the display"""
         # Invalidate the model cache
@@ -420,6 +428,8 @@ class TreeWidget:
         return
     
     def annotation_cb (self, widget=None, node=None):
+        # This method is overwritten by the calling widget to
+        # display a popup menu
         return True
 
     def create_element_cb(self, widget, elementtype=None, parent=None):
