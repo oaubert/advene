@@ -253,7 +253,10 @@ class Menu:
         add_item(element.content.data)
         add_item(_("Members:"))
         for a in element.members:
-            add_item(self.get_title(a), self.goto_annotation, a)
+            item=gtk.MenuItem(self.get_title(a))
+            m=Menu(element=a, controller=self.controller)
+            item.set_submenu(m.menu)
+            menu.append(item)
         return
 
     def make_package_menu(self, element, menu):
