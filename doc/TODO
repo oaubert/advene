@@ -1,3 +1,8 @@
+* vlc-dev: use the new start-time and stop-time functionality in core VLC to correctly
+  handle positions in start and stop.
+
+* Update EPOZ code to 1.0.2
+
 * Windows/gtk has a problem with threads. Solve using the recipe given in:
   http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
   http://www.daa.com.au/pipermail/pygtk/2004-February/006960.html
