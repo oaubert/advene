@@ -33,20 +33,7 @@ def check_changelog(maindir, version):
     return True
            
 def build_doc():
-    try:
-        import docutils.core
-    except:
-        print "Cannot build documentation. Install docutils package."
-        return
-
-    source=os.path.sep.join( ('doc', 'user.txt') )
-    dest=os.path.sep.join( ('share', 'web', 'user.html') )
-
-    if not os.path.exists(dest) or (os.path.getmtime(source) >
-                                    os.path.getmtime(dest)):
-        print "Generating HTML user documentation."
-        docutils.core.publish_file(source_path=source, destination_path=dest,
-                                   writer_name='html')
+    print "Do not forget to get the user manual from the TWiki"
 
 def get_packages_list():
     """Recursively find packages in lib.
