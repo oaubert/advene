@@ -6,6 +6,7 @@ See http://experience.univ-lyon1.fr:81/advene/
 import os
 import sys
 import urllib
+import sre
 
 import xml.dom.ext.reader.PyExpat
 
@@ -53,6 +54,10 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
            source parameter (a URL or a stream).
            Providing None for the source parameter creates a new Package.
         """
+        if sre.match('[a-zA-Z]:', uri):
+            # Windows drive: notation. Convert it to
+            # a more URI-compatible syntax
+            uri=urllib.pathname2url(uri)
         self.__uri = uri
 	self.__importer = importer
         abs_uri = self.getUri (absolute=True)
@@ -157,6 +162,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         importer = self.__importer
         if importer is not None:
             uri = util.uri.urljoin (importer.getUri (absolute, context), uri)
+            
         if absolute:
             base_uri = 'file:%s/' % urllib.pathname2url (os.getcwd ())
             uri = util.uri.urljoin(base_uri, uri)
@@ -298,7 +304,7 @@ class Import(modeled.Modeled, _impl.Ased):
         """
         rel_uri =  self._getModel().getAttributeNS(xlinkNS, 'href')
         if absolute:
-            base_uri = self.getOwnerPackage().getUri(absolute)
+            base_uri = self.getOwnerPackage().getUri(absolute=True)
             return util.uri.urljoin(base_uri, rel_uri)
         else:
             return rel_uri
