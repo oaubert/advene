@@ -11,8 +11,8 @@ class PlayerFactory:
 
     def get_player(self):
         if config.data.os == 'win32':
-            import advene.player.wmp
-            return advene.player.wmp.Player()
+            import advene.player.dummy
+            return advene.player.dummy.Player()
         else:
             import advene.player.vlcorbit
             return advene.player.vlcorbit.Player()
