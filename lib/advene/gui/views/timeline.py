@@ -26,14 +26,17 @@ class TimeLine:
     Representation of a list of annotations placed on a timeline.    
     """
     def __init__ (self, l,
-                  package=None,
                   minimum=None,
                   maximum=None,
                   adjustment=None,
                   annotation_cb=None,
-                  context_cb=None):
+                  context_cb=None,
+                  controller=None):
+        
         self.list = l
-        self.package=package
+        # We use controller to get the controller.package when we create new
+        # relations for instance
+        self.controller=controller
         
         if minimum is None or maximum is None:
             b, e = self.bounds ()
@@ -271,7 +274,7 @@ class TimeLine:
         self.toggle_annotation (ann)
         return True
         try:
-            pop = advene.gui.edit.elements.get_edit_popup (ann)
+            pop = advene.gui.edit.elements.get_edit_popup (ann, self.controller)
         except TypeError, e:
             print _("Error: unable to find an edit popup for %s:\n%s") % (ann, str(e))
         else:
@@ -297,24 +300,9 @@ class TimeLine:
         if targetType == config.data.TARGET_TYPE_ANNOTATION:
             source_uri=selection.data
             print "Creating new relation (%s, %s)" % (source_uri, widget.annotation.uri)
-            source=self.package.annotations.get(source_uri)
+            source=self.controller.package.annotations.get(source_uri)
             dest=widget.annotation
             self.create_relation_popup(source, dest)
-            # FIXME: TODO
-            # Find matching relation (we need to know the package...)
-            # source=self.package.annotations.get(source_id)
-            # dest=self.package.annotations.get(widget.annotation.id)
-            # relation_list=self.package.findMatchingRelation(source, dest)
-            # if len(relation_list) == 0:
-            #     raise Exception ('')
-            # elif len(relation_list) == 1:
-            #     # Only one relation matches: create it
-            #     rel=self.package.createRelation(relation_list[0], members=(source, dest))
-            #     # FIXME: append ?
-            # else:
-            #     # Many possible relations. Ask the user.
-            #     # FIXME...
-            #     rel=self.package.createRelation(chosen_relation, members=(source, dest))
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -327,7 +315,7 @@ class TimeLine:
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_DESTROY_WITH_PARENT,
                 gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
-                _("No relation types are defined."))
+                _("No compatible relation types are defined."))
             dialog.set_position(gtk.WIN_POS_MOUSE)
             dialog.run()
             dialog.destroy()
@@ -382,10 +370,10 @@ class TimeLine:
         """Create a relation between source and dest whose type is in optionmenu."""
         title=relations[optionmenu.get_history()]
         rtype=[ t
-                for t in self.package.relationTypes
+                for t in self.controller.package.relationTypes
                 if t.title == title ][0]
-        relation=self.package.createRelation(members=(source, dest), type=t)
-        self.package.relations.append(relation)
+        relation=self.controller.package.createRelation(members=(source, dest), type=t)
+        self.controller.package.relations.append(relation)
         print "Relation %s created." % relation
 
     def create_annotation_widget(self, annotation):
@@ -681,7 +669,12 @@ if __name__ == "__main__":
         print "Should provide a package name"
         sys.exit(1)
 
-    package = Package (uri=sys.argv[1])
+    class DummyController:
+        pass
+
+    controller=DummyController()
+    
+    controller.package = Package (uri=sys.argv[1])
     
     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
     window.set_size_request (320, 200)
@@ -703,20 +696,20 @@ if __name__ == "__main__":
         
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())
-    window.set_title (package.title or "None")
+    window.set_title (controller.package.title or "None")
     vbox = gtk.VBox()
     
     window.add (vbox)
     
-    timeline = TimeLine (package.annotations,
-                         package=package)
+    timeline = TimeLine (controller.package.annotations,
+                         controller=controller)
     vbox.add (timeline.get_packed_widget())
 
     hbox = gtk.HButtonBox()
     vbox.pack_start (hbox, expand=False)
 
     b = gtk.Button (stock=gtk.STOCK_SAVE)
-    b.connect ("clicked", validate_cb, package)
+    b.connect ("clicked", validate_cb, controller.package)
     hbox.add (b)
 
     s = gtk.HScale (timeline.ratio_adjustment)
