@@ -356,3 +356,66 @@ def parsed (target, context):
     
     # Last fallback:
     return content.data
+
+def query(target, context):
+
+    import advene.model.exception
+        
+    class QueryWrapper (object):
+
+        """
+        Return a wrapper around an element (target), having the  following
+        bevaviour:
+         - it is a dictionnary, returning a callable running target.query(key)
+           on __getitem__
+
+        The reason why all returned objects are callable is to prevent view
+        evaluation when not needed (e.g., in expressions like
+        here/query/foo/absolute_url)
+        """
+
+        def __init__ (self, target, context):
+            self._target = target
+            self._context = context
+
+        def has_key (self, key):
+            qlist=[ q
+                    for q in self._target.rootPackage.queries
+                    if q.id == key ]
+            return qlist
+
+        def __getitem__ (self, key):
+            #print "getitem %s" % key
+            def render ():
+                import advene.rules.elements
+                # Key is the query id
+                qlist=[ q
+                        for q in self._target.rootPackage.queries
+                        if q.id == key ]
+                if len(qlist) != 1:
+                    raise KeyError
+                q=qlist[0]
+                qexpr=advene.rules.elements.Query()
+                qexpr.from_dom(q.content.model)
+                return qexpr.execute(context=self._context)
+            return render
+
+        def ids (self):
+            """
+            Returns the ids of views from the root package which are valid for
+            this object.
+
+            Note that such IDs may not work in every context in TALES.
+            """
+            return [ q.id for q in self._target.rootPackage.queries ]
+
+        def keys (self):
+            """
+            Returns the ids of views from the root package which are valid for
+            this object.
+
+            Note that such IDs may not work in every context in TALES.
+            """
+            return self.ids()
+
+    return QueryWrapper(target, context)
