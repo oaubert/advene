@@ -12,6 +12,8 @@ from advene.model.view import View
 
 from gettext import gettext as _
 
+import advene.gui.popup
+
 import pygtk
 pygtk.require ('2.0')
 import gtk
@@ -19,6 +21,11 @@ import gobject
 
 class RelationView:
     """Controller for the MVC representing a relation."""
+    def popup(self, button):
+        menu = advene.gui.popup.Menu(self, controller=self.controller)
+        menu.popup()
+        return True
+
     def __init__(self, relation=None, controller=None):
         self.relation=relation
         self.controller=controller
@@ -39,7 +46,7 @@ class RelationView:
                       self.relation.members[1].id))
         b=gtk.Button()
         b.add(l)
-
+        b.connect("clicked", self.popup)
         
         return b
 
@@ -76,7 +83,7 @@ class RelationsBox:
     def get_widget_for_relation (self, relation):
         bs = [ b
                for b in self.widget.get_children()
-               if hasattr (b, 'annotation') and b.annotation == annotation ]
+               if hasattr (b, 'relation') and b.relation == relation ]
         return bs
 
     def activate_relation_handler (self, context, parameters):
