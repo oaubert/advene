@@ -519,6 +519,12 @@ class TimeLine:
         return True
 
     def mark_press_cb(self, eventbox, event, t):
+        # What is the current relative position of the
+        # mark in the window ?
+        a = self.adjustment
+        (w, h) = self.widget.window.get_size ()
+        rel = (self.unit2pixel(t) - a.value) / float(w)
+        
         f=self.fraction_adj.value
         if event.button == 1:
             f=f/2.0
@@ -532,9 +538,7 @@ class TimeLine:
         self.fraction_event(widget=None)
         
         # Center the view around the selected mark
-        (w, h) = self.widget.window.get_size ()
-        pos = self.unit2pixel (t) - w/2
-        a = self.adjustment
+        pos = self.unit2pixel (t) - ( w * rel )
         if pos < a.lower:
             pos = a.lower
         elif pos > a.upper:
