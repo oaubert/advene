@@ -497,6 +497,7 @@ class AdveneController:
         self.current_stbv=view
         if view is None:
             self.event_handler.clear_ruleset(type_='user')
+            self.event_handler.notify("ViewActivation", view=view)
             return
         rs=advene.rules.elements.RuleSet()
         rs.from_dom(catalog=self.event_handler.catalog,
