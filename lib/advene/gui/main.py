@@ -417,7 +417,8 @@ class AdveneGUI (Connect):
 
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
-        self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
+        self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller,
+                                                            embedded=True)
         self.register_view(self.logwindow)
 
         self.visualisationwidget=self.get_visualisation_widget()
@@ -480,6 +481,9 @@ class AdveneGUI (Connect):
             self.displayhbox.destroy()
             #self.popupwidget.reparent(container=None)
 
+            self.logwindow.embedded=False
+            self.logwindow.widget=self.logwindow.build_widget()
+            
             tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
             tree.get_widget().show_all()
@@ -537,7 +541,8 @@ class AdveneGUI (Connect):
 
         self.displayhbox.show_all()
 
-        self.displayhbox.pack_end(self.logwindow.widget, expand=False)
+        self.displayhbox.pack_end(self.logwindow.widget, expand=True)
+        self.logwindow.embedded=True
 
         vis.add(self.displayhbox)
         
@@ -1535,7 +1540,8 @@ class AdveneGUI (Connect):
 
     def on_view_logwindow_activate (self, button=None, data=None):
         """Open logwindow view plugin."""
-        self.logwindow.popup()
+        if not self.logwindow.embedded:
+            self.logwindow.popup()
         return True
 
     def on_view_annotations_activate (self, button=None, data=None):
