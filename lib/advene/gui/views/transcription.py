@@ -357,7 +357,7 @@ class TranscriptionView:
 
         hb=gtk.HButtonBox()
         hb.set_homogeneous(False)
-
+        
         hb.pack_start(self.display_time_toggle, expand=False)
         hb.pack_start(self.display_bounds_toggle, expand=False)
 
@@ -368,6 +368,11 @@ class TranscriptionView:
         b=gtk.Button(_("Representation"))
         b.connect("clicked", self.select_representation)
         hb.pack_start(b, expand=False)
+
+        vbox.pack_start(hb, expand=False)
+
+        hb=gtk.HButtonBox()
+        hb.set_homogeneous(False)
 
         b=gtk.Button(stock=gtk.STOCK_SAVE)
         b.connect ("clicked", self.save_transcription)
