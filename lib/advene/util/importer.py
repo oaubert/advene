@@ -50,21 +50,23 @@ import advene.util.vlclib as vlclib
 import advene.util.handyxml as handyxml
 import xml.dom
 
-def get_importer(fname):
+def get_importer(fname, **kw):
     i=None
     if fname == 'chaplin':
-        i=ChaplinImporter()
+        i=ChaplinImporter(**kw)
     elif fname == 'lsdvd':
-        i=LsDVDImporter()
+        i=LsDVDImporter(**kw)
     elif fname.endswith('.txt'):
-        i=TextImporter()
+        i=TextImporter(**kw)
     elif fname.endswith('.srt'):
-        i=SubtitleImporter()
+        i=SubtitleImporter(**kw)
     elif fname.endswith('.eaf'):
-        i=ElanImporter()
+        i=ElanImporter(**kw)
+    elif fname.endswith('.praat') or fname.endswith('.TextGrid'):
+        i=PraatImporter(**kw)
     elif fname.endswith('.xml'):
         # FIXME: we should check the XML content
-        i=XiImporter()
+        i=XiImporter(**kw)
 
     return i
     
@@ -123,6 +125,7 @@ class GenericImporter(object):
         """        
         begin += self.offset
         end += self.offset
+        print "Create annotation %s. id: %s" % (data, str(ident))
         if ident is None and self.controller is not None:
             ident=self.controller.idgenerator.get_id(Annotation)
             
@@ -663,6 +666,102 @@ class SubtitleImporter(GenericImporter):
         # FIXME: implement subtitle type detection
         self.convert(self.srt_iterator(f))
         return self.package
+
+class PraatImporter(GenericImporter):
+    """PRAAT importer.
+
+    """
+    def __init__(self, **kw):
+        super(PraatImporter, self).__init__(**kw)
+        self.name = _("PRAAT importer")
+        self.atypes={}
+        self.schema=None
+
+    def iterator(self, f):
+        l=f.readline()
+        if not 'ooTextFile' in l:
+            print "Invalid PRAAT file"
+            return
+
+        name_re=sre.compile('^(\s+)name\s*=\s*"(.+)"')
+        boundary_re=sre.compile('^(\s+)(xmin|xmax)\s*=\s*([\d\.]+)')
+        text_re=sre.compile('^(\s+)text\s*=\s*"(.*)"')
+
+        current_type=None
+        type_align=0
+
+        begin=None
+        end=None
+        content=None
+        
+        while True:
+            l=f.readline()
+            if not l:
+                break
+            l=unicode(l, 'iso-8859-1').encode('utf-8')
+            m=name_re.match(l)
+            if m:
+                ws, current_type=m.group(1, 2)
+                type_align=len(ws)
+                if not self.atypes.has_key(current_type):
+                    self.create_annotation_type(self.schema, current_type)
+                continue
+            m=boundary_re.match(l)
+            if m:
+                ws, name, t = m.group(1, 2, 3)
+                if len(ws) <= type_align:
+                    # It is either the xmin/xmax for the current type
+                    # or a upper-level xmin. Ignore.
+                    continue
+                v=long(float(t) * 1000)
+                if name == 'xmin':
+                    begin=v
+                else:
+                    end=v
+                continue
+            m=text_re.match(l)
+            if m:
+                ws, text = m.group(1, 2)
+                if len(ws) <= type_align:
+                    print "Error: invalid alignment for %s" % l
+                    continue
+                if begin is None or end is None or current_type is None:
+                    print "Error: found text tag before xmin or xmax info"
+                    print l
+                    continue
+                yield {
+                    'type': self.atypes[current_type],
+                    'begin': begin,
+                    'end': end,
+                    'content': text,
+                    }
+
+    def create_annotation_type (self, schema, id_):
+        at=schema.createAnnotationType(ident=id_)
+        #at.author=schema.author
+        at.date=schema.date
+        at.title=at.id
+        at.mimetype='text/plain'
+        schema.annotationTypes.append(at)
+        self.update_statistics('annotation-type')
+        self.atypes[id_]=at
+
+    def process_file(self, filename):
+        f=open(filename, 'r')
+
+        if self.package is None:
+            self.package=Package(uri='new_pkg', source=None)
+
+        p=self.package
+        schema=p.createSchema(ident='praat')
+        #schema.author=elan.AUTHOR
+        schema.date=self.timestamp
+        schema.title="PRAAT converted schema"
+        p.schemas.append(schema)
+        self.schema = schema
+        self.convert(self.iterator(f))
+        return self.package
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
