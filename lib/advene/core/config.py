@@ -130,6 +130,11 @@ class Config(object):
             # 0 for no, 1 for gtk_input, 2 for threading
             'mode': 2
             }
+        # Threading does not work correctly on Win32. Use gtk_input
+        # method.
+        if self.os == 'win32':            
+            self.webserver['mode'] = 1
+            
         # Global context options
         self.namespace_prefix = {'advenetool': self.namespace,
                                  'dc': 'http://purl.org/dc/elements/1.1/'}
