@@ -2,9 +2,9 @@
 """
 
 import sys
+import sre
 
 import pygtk
-#pygtk.require ('2.0')
 import gtk
 import gobject
 
@@ -14,8 +14,6 @@ import advene.core.config as config
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.bundle import AbstractBundle
-from advene.model.view import View
 
 import advene.util.importer
 
@@ -50,9 +48,16 @@ class TranscriptionEdit:
         self.tooltips=gtk.Tooltips()
 
         self.sourcefile=""
+        self.empty_re = sre.compile('^\s*$')
         
         self.timestamp_mode_toggle=gtk.CheckButton(_("Insert timestamps"))
         self.timestamp_mode_toggle.set_active (True)
+        self.tooltips.set_tip(self.timestamp_mode_toggle,
+                              _("If unchecked, allows to edit text"))
+        self.discontinuous_toggle=gtk.CheckButton(_("Discontinuous"))
+        self.discontinuous_toggle.set_active (False)
+        self.tooltips.set_tip(self.discontinuous_toggle,
+                              _("Do not generate annotations for empty text"))
         
         self.widget=self.build_widget()
 
@@ -139,8 +144,6 @@ class TranscriptionEdit:
         # Create the mark representation
         child=gtk.Button("")
         child.connect("clicked", self.remove_anchor, anchor, b)
-        # FIXME: handle right-click button to display a menu
-        # with Goto action
         child.connect("button-press-event", self.mark_button_press_cb, timestamp)
         self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
         child.timestamp=timestamp
@@ -175,8 +178,6 @@ class TranscriptionEdit:
         (compatible with advene.util.importer)
         """
 
-        # FIXME: offer an option "discontinuous" where an empty
-        # annotation (\s*) represents a discontinuity.
         t=0
         b=self.textview.get_buffer()
         begin=b.get_start_iter()
@@ -187,17 +188,25 @@ class TranscriptionEdit:
                 # Found a TextAnchor
                 timestamp=a.get_widgets()[0].timestamp
                 text=b.get_text(begin, end, include_hidden_chars=False)
-                yield { 'begin': t,
-                        'end': timestamp,
-                        'content': text }
+                if (self.discontinuous_toggle.get_active() and
+                    self.empty_re.match(text)):
+                    pass
+                else:
+                    yield { 'begin': t,
+                            'end':   timestamp,
+                            'content': text }
                 t=timestamp
                 begin=end.copy()
         # End of buffer. Create the last annotation
         timestamp=self.controller.player.stream_duration
         text=b.get_text(begin, end, include_hidden_chars=False)
-        yield { 'begin': t,
-                'end': timestamp,
-                'content': text }
+        if (self.discontinuous_toggle.get_active() and
+            self.empty_re.match(text)):
+            pass
+        else:
+            yield { 'begin': t,
+                    'end': timestamp,
+                    'content': text }
         
     def save_transcription(self, button=None):
         fs = gtk.FileSelection ("Save transcription to...")
@@ -272,7 +281,7 @@ class TranscriptionEdit:
         self.controller.modified=True
         self.controller.notify("PackageLoad", package=ti.package)
         self.controller.log(_('Converted from file %s :') % self.sourcefile)
-        self.converted.log(ti.statistics_formatted())
+        self.controller.log(ti.statistics_formatted())
         # Feedback
         dialog = gtk.MessageDialog(
             None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -310,6 +319,7 @@ class TranscriptionEdit:
         hb.set_homogeneous(False)
 
         hb.pack_start(self.timestamp_mode_toggle, expand=False)
+        hb.pack_start(self.discontinuous_toggle, expand=False)
         
         b=gtk.Button(stock=gtk.STOCK_OPEN)
         b.connect ("clicked", self.load_transcription_cb)
