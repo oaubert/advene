@@ -1,5 +1,6 @@
 import advene.model._impl as _impl
 import advene.model.annotation as annotation
+import advene.model.bundle as bundle
 import advene.model.content as content
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
@@ -230,6 +231,26 @@ class RelationType(AbstractType,
         # FIXME: return an iterator instead of a full fledged list
         return [ a for a in self.getRootPackage ().getRelations ()
                    if a.getType() == self ]
+
+    def getHackedMemberTypes (self):
+        """
+        Return a tuple of the member type's URIs
+        TODO: remove this method.
+        As its name implies, this is an awful, temporary hack.
+        However, I do not have time to do better now, and Olivier needs it.
+        Ideally, I should use a bundle here, but bundles do not accept multiple
+        occurences of the same element, which can happen here.
+        So bundle.py should be improved, with a basic Bundle class behaving only like a list, and an advanced Bundle, behaving like both a list and a dict.
+        """
+        e = self._getChild((adveneNS, "member-types"))
+        l = []
+        for i in e._get_childNodes ():
+            try:
+                uri = i.getAttributeNS (xlinkNS, 'href')
+                l.append (uri)
+            except:
+                pass
+        return tuple (l)
 
 
 # simple way to do it,
