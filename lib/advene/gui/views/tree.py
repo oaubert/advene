@@ -127,9 +127,9 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         # FIXME: should use vlclib.get_title
         title = "???"
         if isinstance (node, Annotation):
-            title = _("Annotation %s (%d, %d)") % (node.id,
-                                                   node.fragment.begin,
-                                                   node.fragment.end)
+            title = _("Annotation %s (%s, %s)") % (node.id,
+                                                   vlclib.format_time(node.fragment.begin),
+                                                   vlclib.format_time(node.fragment.end))
         elif isinstance (node, Relation):
             title = _("Relation %s") % (node.id)
         elif isinstance (node, AnnotationType):
