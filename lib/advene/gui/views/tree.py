@@ -536,7 +536,7 @@ if __name__ == "__main__":
                 return True
         elif event.keyval == gtk.keysyms.Return:
             # Open popup to edit current element
-            node=tree.get_selected_node(tree.view())
+            node=tree.get_selected_node(tree.get_widget())
             pop = advene.gui.edit.elements.get_edit_popup (node,
                                                            controller=self.controller)
             if pop is not None:
