@@ -37,11 +37,17 @@ class PlayerFactory:
                 import advene.player.vlcnative as playermodule
         else:
             #import advene.player.xine as playermodule
-            
-            # Should do some checks to verify it is present
-            import advene.player.vlcnative as playermodule
-            
-            #import advene.player.dummy as playermodule
-            #import advene.player.vlcorbit as playermodule
-            
+
+            p=config.data.player['plugin']
+
+            if p == 'vlcnative':
+                # Should do some checks to verify it is present
+                import advene.player.vlcnative as playermodule
+            elif p == 'dummy':
+                import advene.player.dummy as playermodule
+            elif p == 'vlcorbit':
+                import advene.player.vlcorbit as playermodule
+            else:
+                import advene.player.dummy as playermodule
+           
         return playermodule.Player()
