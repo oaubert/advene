@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Advene GUI.
 
 This module defines the GUI classes. The main one is L{AdveneGUI},
@@ -178,13 +176,21 @@ class AdveneGUI (Connect):
         self.annotation_views = []
 
     def update_stbv (self, widget, view):
+        """Callback for the STBV option menu.
+
+        @param widget: the calling widget
+        @type widget: a Gtk widget (OptionMenu)
+        @param view: the selected view
+        @type view: advene.model.view
+        """
         self.controller.activate_stbv(view)
         return True
 
     def updated_annotation_cb(self, context, parameters):
         """Method used to update the active views.
 
-        It will propagate the event."""
+        It will propagate the event.
+        """
         annotation=context.evaluateValue('annotation')
         for v in self.annotation_views:
             try:
@@ -212,6 +218,8 @@ class AdveneGUI (Connect):
     def main (self, args=None):
         """Mainloop : Gtk mainloop setup.
 
+        @param args: list of arguments
+        @type args: list
         """
         if args is None:
             args=[]
@@ -323,7 +331,8 @@ class AdveneGUI (Connect):
 
         This method should be called upon package loading, or when a
         new view or type is created, or when an existing one is
-        modified, in order to reflect changes."""
+        modified, in order to reflect changes.
+        """
         
         # Update the available types list
         available_types = self.controller.package.annotationTypes
@@ -447,25 +456,33 @@ class AdveneGUI (Connect):
 	return True
 
     def file_selected_cb (self, button, fs):
-        """Open and play the selected movie file."""
-        file_ = self.gui.fs.get_property ("filename")
+        """Open and play the selected movie file.
+
+        Callback used by file_selector.
+        """
+        file_ = fs.get_property ("filename")
         self.controller.player.playlist_add_item (file_)
         self.controller.update_status ("start")
         return True
 
     def annotations_load_cb (self, button, fs):
         """Load a package."""
-        file_ = self.gui.fs.get_property ("filename")
+        file_ = fs.get_property ("filename")
         self.controller.load_package (uri=file_)
         return True
 
     def annotations_save_cb (self, button, fs):
         """Save the current package."""
-        file_ = self.gui.fs.get_property ("filename")
+        file_ = fs.get_property ("filename")
         self.controller.save_package(as=file_)
         return True
 
     def register_view (self, view):
+        """Register a view plugin.
+
+        @param view: the view to register
+        @type view: a view plugin (cf advene.gui.views)
+        """
         if view not in self.annotation_views:
             self.annotation_views.append (view)
             try:
@@ -475,6 +492,8 @@ class AdveneGUI (Connect):
         return True
 
     def unregister_view (self, view):
+        """Unregister a view plugin
+        """
         if view in self.annotation_views:
             self.annotation_views.remove (view)
             try:
@@ -484,12 +503,20 @@ class AdveneGUI (Connect):
         return True
 
     def close_view_cb (self, win=None, widget=None, view=None):
-        """Generic handler called when a view is closed."""
+        """Generic handler called when a view is closed.
+        """
         self.unregister_view (view)
         widget.destroy ()
         
     def make_popup_menu (self, ann):
-        """Build a popup menu dedicated to the given annotation."""
+        """Build a popup menu dedicated to the given annotation.
+
+        @param ann: the annotation
+        @type ann: advene.model.annotation.Annotation
+
+        @return: the built menu
+        @rtype: gtk.Menu
+        """
         menu = gtk.Menu()
 
         def popup_edit (win, ann):
@@ -560,7 +587,12 @@ class AdveneGUI (Connect):
         # Ask the controller to update its status
         # If we are moving the slider, don't update the display
 
-        pos=self.controller.update()
+        try:
+            pos=self.controller.update()
+        except self.controller.player.InternalException:
+            # FIXME: something sensible to do here ?
+            print _("Internal error on video player")
+            return True
         
         if self.slider_move:
             # FIXME: we could have a cache of key images (i.e. 50 equidistant
@@ -607,6 +639,8 @@ class AdveneGUI (Connect):
         return True
 
     def on_current_type_changed (self, win=None):
+        """Callback used to select the current type of the edited annotation.
+        """
         sel = win.get_selection()
         if sel:
             t = sel[0].get_data('type')
@@ -883,6 +917,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_edit_ruleset1_activate (self, button=None, data=None):
+        """Default ruleset editing."""
         w=gtk.Window(gtk.WINDOW_TOPLEVEL)
         w.set_title(_("Default RuleSet"))
         w.connect ("destroy", lambda e: w.destroy())
@@ -932,6 +967,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_view_logwindow_activate (self, button=None, data=None):
+        """Open logwindow view plugin."""
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
         window.set_title (_("Log Window"))
@@ -942,7 +978,7 @@ class AdveneGUI (Connect):
         return True
         
     def on_view_annotations_activate (self, button=None, data=None):
-        """View loaded defined annotations."""
+        """Open treeview view plugin."""
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.set_size_request (640, 480)
 
@@ -979,6 +1015,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_start_web_browser_activate (self, button=None, data=None):
+        """Open a browser on current package's root."""
         url = self.controller.server.get_url_for_alias('advene')
         if url is not None:
             self.webbrowser.open (url)
