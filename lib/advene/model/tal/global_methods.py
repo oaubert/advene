@@ -329,7 +329,7 @@ def parsed (target, context):
         # If nothing is specified, assume text/plain and return a unique
         # dict with the key 'value'
         return { 'value': content.data }
-    if content.mimetype == 'x-advene/structured':
+    if content.mimetype == 'application/x-advene-structured':
         import urllib
         
         d={}
