@@ -869,7 +869,7 @@ class TimeLine:
         hbox = gtk.HButtonBox()
         vbox.pack_start (hbox, expand=False)
 
-        fraction_adj = gtk.Adjustment (value=0.1,
+        fraction_adj = gtk.Adjustment (value=1.0,
                                        lower=0.01,
                                        upper=1.0,
                                        step_incr=.01,
