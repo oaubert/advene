@@ -627,6 +627,12 @@ class AdveneController:
                 self.cached_duration = self.player.stream_duration
 
         return pos
+
+    def delete_annotation(self, annotation):
+        """Remove the annotation from the package."""
+        self.package.annotations.remove(annotation)
+        self.notify('AnnotationDelete', annotation=annotation)
+        return True
     
 if __name__ == '__main__':
     c = AdveneController()
