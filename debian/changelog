@@ -15,7 +15,8 @@ advene (0.10) unstable; urgency=low
 
   * Autocompletion facility in evaluator window
   
-  * All imports (view, schema, ...) work
+  * All imports (view, schema, ...) work. A GUI is accessible to view them from
+    the Edit menu, but it does not yet update the package contents.
   
   * New actions: ActivateSTBV, DisplayPopup2, DisplayPopup3, SendUserEvent
   
