@@ -260,13 +260,16 @@ class Action:
     @ivar parameters: the action's parameters
     @type parameters: dict
     @ivar catalog: the associated catalog
+    @ivar category: the category that this action belongs to
+    @type category: string
     @type catalog: ECACatalog
     @ivar doc: the action documentation
     @ivar registeredaction: the corresponding registeredaction
     @ivar immediate: indicates that the action should be executed at once and not scheduled
     @type immediate: boolean
     """
-    def __init__ (self, registeredaction=None, method=None, catalog=None, doc=""):
+    def __init__ (self, registeredaction=None, method=None,
+                  catalog=None, doc="", category="generic"):
         self.parameters={}
         if registeredaction is not None:
             self.name=registeredaction.name
@@ -276,12 +279,14 @@ class Action:
             self.doc=registeredaction.description
             self.registeredaction=registeredaction
             self.immediate=registeredaction.immediate
+            self.category=registeredaction.category
         elif method is not None:
             self.bind(method)
             self.name="internal"
             self.doc=doc
             self.registeredaction=None
-            self.catalog=None
+            self.catalog=catalog
+            self.category=category
             self.immediate=False
         else:
             raise Exception("Error in Action constructor.")
@@ -902,6 +907,8 @@ class RegisteredAction:
 
     @ivar name: the action name
     @type name: string
+    @ivar category: the category this action belongs to
+    @type category: string
     @ivar method: the action method (ignored)
     @ivar description: the action description
     @ivar parameters: the action parameters
@@ -914,6 +921,7 @@ class RegisteredAction:
                  method=None,
                  description="No available description",
                  parameters=None,
+                 category="generic",
                  immediate=False):
         self.name=name
         # The method attribute is in fact ignored, since we always lookup in the
@@ -928,6 +936,8 @@ class RegisteredAction:
         # If immediate, the action will be run in the main thread, and not
         # in the scheduler thread.
         self.immediate=immediate
+        # The available categories are described in Catalog
+        self.category=category
 
     def add_parameter(self, name, description):
         """Add a new parameter to the action."""
@@ -962,9 +972,9 @@ class ECACatalog:
         'ViewCreate':             _("Creation of a new view"),
         'ViewEditEnd':            _("Ending editing of a view"),
         'ViewDelete':             _("Suppression of a view"),
-        'QueryCreate':             _("Creation of a new query"),
-        'QueryEditEnd':            _("Ending editing of a query"),
-        'QueryDelete':             _("Suppression of a query"),
+        'QueryCreate':            _("Creation of a new query"),
+        'QueryEditEnd':           _("Ending editing of a query"),
+        'QueryDelete':            _("Suppression of a query"),
         'SchemaCreate':           _("Creation of a new schema"),
         'SchemaEditEnd':          _("Ending editing of a schema"),
         'SchemaDelete':           _("Suppression of a schema"),
@@ -1019,6 +1029,13 @@ class ECACatalog:
                   'PlayerResume', 'PlayerStop', 'ApplicationStart', 'ViewActivation',
                   'UserEvent')
 
+    action_categories={
+        'generic': _("Generic actions"),
+        'player': _("Basic player control"),
+        'advanced': _("Advanced player control"),
+        'gui': _("GUI actions")
+        }
+               
     def __init__(self):
         # Dict of registered actions, indexed by name
         self.actions={}
