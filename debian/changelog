@@ -17,9 +17,13 @@ advene (0.10) unstable; urgency=low
   
   * All imports (view, schema, ...) work
   
-  * New action: ActivateSTBV, DisplayPopup2, DisplayPopup3
+  * New actions: ActivateSTBV, DisplayPopup2, DisplayPopup3, SendUserEvent
+  
+  * Added UserEvent event
   
   * Window sizes are memorized from one session to another
+  
+  * Navigation popups now use SingletonPopup (only one is displayed)
 
  -- 
 
