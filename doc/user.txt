@@ -1,8 +1,119 @@
-* Syntaxe TALES
+=====================================
+Documentation utilisateur pour Advene
+=====================================
+
+Création d'un recueil
+*********************
+
+Lors du lancement de l'application, un recueil de base est chargé. Il
+définit un type d'annotation *Texte simple* et un type de relation
+*Relation élémentaire*. Il est donc possible de commencer
+immédiatement à annoter un film avec ce schéma initial.
+
+Sélection du support vidéo
+--------------------------
+
+Le choix du support vidéo s'effectue à travers l'interface graphique
+de l'application. On peut choisir un DVD par l'icône représentant un
+DVD (il faut alors préciser le titre et le chapitre où le film
+commence), ou bien un fichier vidéo par l'icône représentant une
+touche *Eject*.
+
+Une fois le support choisi, il est possible de naviguer dans le film
+par le biais des touches de navigation (lecture, pause, avance et
+retour rapide) et par le biais du curseur indiquant la position
+courante.
+
+Création des annotations
+------------------------
+
+Les annotations se créent en cours de visualisation. Au début du
+fragment vidéo concernant l'annotation, il faut utiliser (en faisant
+attention que la fenêtre de l'application soit active) la touche
+*Entrée* ou bien la touche *Espace*. 
+
+Ces deux touches permettent de rentrer en mode d'édition d'une
+nouvelle annotation. La différence entre les deux est que la touche
+*Espace* met automatiquement le film en pause.
+
+Il est possible d'utiliser les commandes de navigation dans le film
+pendant l'édition d'une annotation. La touche *Tab* permet notamment
+de mettre le film en pause ou bien de le relancer.
+
+À la fin du fragment vidéo concernant l'annotation, on valide
+l'annotation par la touche *Entrée*
+
+Deux remarques :
+
+- on voit que cette méthode ne permet pas d'éditer simultanément
+  plusieurs nouvelles annotations
+
+- dans le cas où plusieurs types d'annotation sont définis dans le
+  recueil, il faut au préalable (avant le début de l'édition) choisir
+  le type d'annotation que l'on souhaite créer en le choisissant dans
+  la liste intitulée *Type courant*
+
+Visualisation des annotations
+-----------------------------
+
+Après avoir créé quelques annotations, il devient possible de les
+visualiser par le biais de l'interface graphique et par le biais du
+serveur web. Nous allons détailler quelques un de ces modules de
+visualisation.
+
+Vue en ligne de temps
++++++++++++++++++++++
+
+La vue en ligne de temps est accessible par le biais du menu
+*Vue*. Elle offre une représentation linéaire des annotations, où
+chaque ligne représente un type d'annotation. Le curseur en bas à
+gauche de la fenêtre indique la portion du film représentée à
+l'écran. Pour représenter l'intégralité du film, il faut donc le fixer
+à 1.
+
+En cliquant sur les boutons représentant les annotations, on accède à
+un menu permettant entre autres de les éditer et d'accéder directement
+au fragment de la vidéo correspondant.
+
+Vue arborescente
+++++++++++++++++
+
+Une vue arborescente du contenu du recueil est accessible dans la
+fenêtre principale de l'application. Il est également possible d'en
+ouvrir de nouvelles par le biais du menu *Vue*.
+
+L'intérêt de cette vue est de permettre la création de nouveaux
+éléments dans le recueil, par le biais des menus contextuels
+accessible par un clic droit sur les éléments.
+
+Le menu contextuel du recueil (élément racine de l'arbre) permet de
+créer de nouveaux schémas, de nouvelles vues ou de nouvelles requêtes.
+
+Le menu contextuel des schémas permet de créer de nouveaux types
+ d'annotation ou de relation à l'intérieur du schéma concerné.
+
+Vue hypertexte
+++++++++++++++
+
+Un serveur web intégré à l'application, utilisant le mécanisme des
+ vues du modèle Advene, permet d'accéder au contenu du recueil par le
+ biais d'un simple navigateur web.
+
+Pour cela, on peut utiliser l'élément *Lancer le navigateur web* du
+menu *Vue* ou bien indiquer directement l'URL adéquate au navigateur:
+
+http://localhost:1234/packages/advene/
+
+Des vues définies par défaut dans le recueil modèle permettent de
+naviguer à l'intérieur du recueil.
+
+Syntaxe TALES 
+*************
 
 La syntaxe TALES (TAL Expression Syntax) est utilisée pour adresser
 des éléments du modèle Advene. Elle est utilisée dans plusieurs
 composants d'Advene :
+
 - dans le serveur web (construction des adresses)
 - dans les vues dynamiques (définition des conditions et paramètres
   des actions)
@@ -12,10 +123,11 @@ composants d'Advene :
 Il est donc important de comprendre cette syntaxe pour pouvoir
 profiter au mieux des possibilités offertes par Advene.
 
-* Le modèle Advene
+Le modèle Advene
+----------------
 
 Hiérarchie (package, schemas, annotation-/relationTypes, annotations,
-relations, views)
+relations, views) FIXME
 
 Cette hiérarchie peut être considérée comme un système de fichiers,
 dans lequel on va trouver des éléments. Une expression TALES
@@ -26,7 +138,8 @@ par plusieurs chemins. Ainsi, une annotation se trouvera dans le
 "répertoire" /annotations et dans le "répertoire"
 /annotationTypes/simple-text/annotations"
 
- * Utilisation dans le serveur web
+Utilisation dans le serveur web
+-------------------------------
 
 Le serveur web intégré à Advene interprète directement des expressions
 TALES. Il est donc possible de naviguer à l'intérieur de la structure
@@ -41,27 +154,29 @@ http://localhost:1234/packages/advene/annotationTypes/simple-text/annotations/i8
 renverra l'annotation i810 contenue dans les annotations de type
 simple-text
 
-* Utilisation dans les vues statiques
+Utilisation dans les vues statiques
+-----------------------------------
 
 Les éléments de base sont:
 
-here : l'élément courant
+- ``here`` : l'élément courant
 
-options : un ensemble d'éléments optionnels accessibles:
-   - options/package_url : l'URL du recueil courant
-   - options/snapshot    : un accès aux snapshots mémorisés
-   - options/config      : des options de configuration
+- ``options`` : un ensemble d'éléments optionnels accessibles :
+  - ``options/package_url`` : l'URL du recueil courant
+  - ``options/snapshot``    : un accès aux snapshots mémorisés
+  - ``options/config``      : des options de configuration
 
-* Utilisation dans les vues dynamiques
+Utilisation dans les vues dynamiques
+------------------------------------
 
 Des éléments semblables sont disponibles dans les vues dynamiques,
 mais plus d'éléments "basiques" sont définis, dont certains sont
 ne sont définis que lors d'événements particuliers :
 
-package : le recueil courant
-annotation : l'annotation ayant déclenché l'événement
-relation : la relation ayant déclenché l'événement
-activeAnnotations: la liste des annotations actives
-player : le lecteur vidéo
-event : le nom de l'événement
+- ``package`` : le recueil courant
+- ``annotation`` : l'annotation ayant déclenché l'événement
+- ``relation`` : la relation ayant déclenché l'événement
+- ``activeAnnotations`` : la liste des annotations actives
+- ``player`` : le lecteur vidéo
+- ``event`` : le nom de l'événement
 
