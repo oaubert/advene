@@ -32,6 +32,31 @@ except ImportError:
     Please check your installation or set the PYTHONPATH environment variable."""
     sys.exit(1)    
 
+if config.data.os == 'win32':
+  import _winreg
+
+  def getGtkPath():
+      subkey = 'Software/GTK/2.0/'.replace('/','\\')
+      path = None
+      for hkey in _winreg.HKEY_LOCAL_MACHINE, _winreg.HKEY_CURRENT_USER:
+          reg = _winreg.OpenKey(HKEY_LOCAL_MACHINE, subkey)
+          try:
+              try:
+                  path, value = _winreg.QueryValueEx(reg, "DllPath")
+              except _winreg.WindowsError:
+                  pass
+              else:
+                  return path
+          finally:
+              _winreg.CloseKey(reg)
+
+
+  path = getGtkPath()
+  if path is None:
+    raise ImportError("Couldn't find GTK DLLs.")
+  os.environ['PATH'] += ';'+path.encode('utf8')
+  print "Found GTK DLLs at %s" % path
+
 import advene.gui.main
 
 if __name__ == '__main__':
