@@ -127,9 +127,6 @@ class AdveneGUI (Connect):
 
     def __init__ (self):
         """Initializes the GUI and other attributes.
-
-        @param gladefile: the name of the GLADE XML file containing the interface definition
-        @type gladefile: string
         """
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
@@ -493,8 +490,8 @@ class AdveneGUI (Connect):
     def set_current_type (self, t):
         """Set the current annotation type.
 
-        @param name: annotation type
-        @type name: string
+        @param t: annotation type
+        @type t: AnnotationType
         """
         if t is not None:
             self.current_type = t
@@ -649,41 +646,56 @@ class AdveneGUI (Connect):
             code.traceback.print_exception (e, v, tb)
         return True
 
-    def log (self, msg):
+    def log (self, msg, level=None):
         """Add a new log message to the logmessage window.
 
         @param msg: the message
         @type msg: string
+        @param level: the error level
+        @type level: int
         """
         buf = self.gui.logmessages.get_buffer ()
         mes = "".join((time.strftime("%T"), " - ", str(msg), "\n"))
+        # FIXME: handle level (bold?)
         buf.insert_at_cursor (mes)
         endmark = buf.create_mark ("end", buf.get_end_iter (), True)
         self.gui.logmessages.scroll_mark_onscreen (endmark)
         return
+
+    def parse_parameter(self, context, parameters, name, default_value):
+        if parameters.has_key(name):
+            try:
+                result=context.evaluateValue(parameters[name])
+            except advene.model.tal.context.AdveneTalesException, e:
+                try:
+                    rulename=context.evaluateValue('rule')
+                except advene.model.tal.context.AdveneTalesException:
+                    rulename=_("Unknown rule")
+                self.controller.log(_("Rule %s: Error in the evaluation of the parameter %s:" % (rulename, name)))
+                self.controller.log(str(e)[:160])
+                result=default_value
+        else:
+            result=default_value
+        return result
+
 
     def action_message_log (self, context, parameters):
         """Event Handler for the message action.
 
         Essentialy a wrapper for the X{log} method.
 
-        @param message: the message to display
-        @type message: string
+        The parameters should have a 'message' key.
         """
-        if parameters.has_key('message'):
-            message=context.evaluateValue(parameters['message']).replace('\\n', '\n')
-        else:
-            message=_("No message...")
-        
+        message=self.parse_parameter(context, parameters, 'message', _("No message..."))
+        message=message.replace('\\n', '\n')
         self.log (message)
         return True
 
     def action_popup (self, context, parameters):
-        if parameters.has_key('message'):
-            message=context.evaluateValue(parameters['message']).replace('\\n', '\n')
-        else:
-            message=_("No message...")
-        duration=context.evaluateValue(parameters['duration'])
+        message=self.parse_parameter(context, parameters, 'message', _("No message..."))
+        message=message.replace('\\n', '\n')
+
+        duration=self.parse_parameter(context, parameters, 'duration', None)
         if duration == "" or duration == 0:
             duration = None
         l = gtk.Label(message)
@@ -696,18 +708,11 @@ class AdveneGUI (Connect):
             self.singletonpopup.undisplay()
             return True
 
-        if parameters.has_key('message'):
-            message=context.evaluateValue(parameters['message']).replace('\\n', '\n')
-        else:
-            message=_("Click to go to another position")
-        if parameters.has_key('position'):
-            position=long(context.evaluateValue(parameters['position']))
-        else:
-            position=0
-        if parameters.has_key('duration'):
-            duration=context.evaluateValue(parameters['duration'])
-        else:
-            duration=None
+        message=self.parse_parameter(context, parameters, 'message', _("Click to go to another position"))
+        message=message.replace('\\n', '\n')
+
+        position=self.parse_parameter(context, parameters, 'position', 0)
+        duration=self.parse_parameter(context, parameters, 'duration', None)
         if duration == "" or duration == 0:
             duration = None
         b=gtk.Button(message)
@@ -725,20 +730,20 @@ class AdveneGUI (Connect):
 
             vbox=gtk.VBox()
 
-            description=context.evaluateValue(parameters['description']).replace('\\n', '\n')
+            description=self.parse_parameter(context, parameters, 'description', _("Make a choice"))
+            description=description.replace('\\n', '\n')
             vbox.add(gtk.Label(description))
 
             for i in range(1, size+1):
-                message=context.evaluateValue(parameters['message%d' % i]).replace('\\n', '\n')
-                position=context.evaluateValue(parameters['position%d' % i])
+                message=self.parse_parameter(context, parameters,
+                                             'message%d' % i, _("Choice %d") % i)
+                message=message.replace('\\n', '\n')
+                position=self.parse_parameter(context, parameters, 'position%d' % i, 0)
                 b=gtk.Button(message)
                 b.connect("clicked", handle_response, position)
                 vbox.add(b)
 
-            if parameters.has_key('duration'):
-                duration=context.evaluateValue(parameters['duration'])
-            else:
-                duration=None
+            duration=self.parse_parameter(context, parameters, 'duration', None)
             if duration == "" or duration == 0:
                 duration = None
             self.singletonpopup.display(widget=vbox, timeout=duration)
