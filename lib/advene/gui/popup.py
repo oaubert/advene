@@ -51,7 +51,25 @@ class Menu:
         return True
 
     def activate_annotation (self, widget, ann):
-        self.controller.notify("AnnotationActivation", annotation=ann)
+        self.controller.notify("AnnotationActivate", annotation=ann)
+        return True
+
+    def desactivate_annotation (self, widget, ann):
+        self.controller.notify("AnnotationDeactivate", annotation=ann)
+        return True
+
+    def activate_related (self, widget, ann):
+        for r in ann.relations:
+            for a in r.members:
+                if a != ann:
+                    self.activate_annotation(widget, a)
+        return True
+
+    def desactivate_related (self, widget, ann):
+        for r in ann.relations:
+            for a in r.members:
+                if a != ann:
+                    self.desactivate_annotation(widget, a)
         return True
 
     def activate_stbv (self, view):
@@ -190,12 +208,29 @@ class Menu:
         menu.show_all()
         return menu
 
+    def activate_submenu(self, element):
+        """Build an "activate" submenu for the given annotation"""
+        submenu=gtk.Menu()
+        def add_item(*p, **kw):
+            self.add_menuitem(submenu, *p, **kw)
+            
+        add_item(_("Activate"), self.activate_annotation, element)
+        add_item(_("Desactivate"), self.desactivate_annotation, element)
+        if element.relations:
+            add_item(_("Activate related"), self.activate_related, element)
+            add_item(_("Desactivate related"), self.desactivate_related, element)
+        submenu.show_all()
+        return submenu
+    
     def make_annotation_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
 
         add_item(_("Go to..."), self.goto_annotation, element)
-        add_item(_("Activate..."), self.activate_annotation, element)
+
+        item = gtk.MenuItem(_("Highlight"))
+        item.set_submenu(self.activate_submenu(element))
+        menu.append(item)
 
         add_item("")
 
