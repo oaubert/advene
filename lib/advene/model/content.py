@@ -110,7 +110,12 @@ class Content(modeled.Modeled,
         if self._getModel().hasAttributeNS(None, 'mime-type'):
             return self._getModel().getAttributeNS(None, 'mime-type')
         else:
-            return self._getParent().getType().getMimetype()
+            try:
+                mt=self._getParent().getType().getMimetype()
+            except AttributeError:
+                # The type does not define a mimetype (Query for instance)
+                mt=None
+            return mt
 
     def setMimetype(self, value):
         """Set the content's mime-type"""
