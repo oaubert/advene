@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-03-11 18:52+0100\n"
+"POT-Creation-Date: 2005-03-12 16:56+0100\n"
 "PO-Revision-Date: 2005-03-05 19:16+0100\n"
 "Last-Translator: Olivier Aubert <olivier.aubert@liris.cnrs.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
@@ -489,7 +489,7 @@ msgstr ""
 #: ../lib/advene/gui/edit/elements.py:292
 #: ../lib/advene/gui/edit/elements.py:331
 #: ../lib/advene/gui/edit/elements.py:405 ../lib/advene/gui/edit/create.py:91
-#: ../lib/advene/gui/views/browser.py:385
+#: ../lib/advene/gui/views/browser.py:390
 #: ../lib/advene/gui/views/sequence.py:174
 msgid "Type"
 msgstr ""
@@ -621,7 +621,7 @@ msgid "Attribute"
 msgstr ""
 
 #: ../lib/advene/gui/edit/elements.py:1162
-#: ../lib/advene/gui/views/browser.py:389
+#: ../lib/advene/gui/views/browser.py:394
 msgid "Value"
 msgstr ""
 
@@ -1088,19 +1088,19 @@ msgstr "Komentaraj attributoj"
 msgid "Exception: %s"
 msgstr ""
 
-#: ../lib/advene/gui/views/browser.py:311
+#: ../lib/advene/gui/views/browser.py:316
 msgid "Insert path"
 msgstr ""
 
-#: ../lib/advene/gui/views/browser.py:315
+#: ../lib/advene/gui/views/browser.py:320
 msgid "Insert value"
 msgstr ""
 
-#: ../lib/advene/gui/views/browser.py:382
+#: ../lib/advene/gui/views/browser.py:387
 msgid "Path"
 msgstr ""
 
-#: ../lib/advene/gui/views/browser.py:397
+#: ../lib/advene/gui/views/browser.py:402
 msgid "Should provide a package name"
 msgstr ""
 
@@ -1974,118 +1974,118 @@ msgstr ""
 msgid "Unknown STBV identifier: %s"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:399
+#: ../lib/advene/core/webserver.py:387
 msgid "Media information"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:414
+#: ../lib/advene/core/webserver.py:404
 msgid "File added"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:415
+#: ../lib/advene/core/webserver.py:405
 #, python-format
 msgid "<p><strong>%s has been added to the playlist</strong></p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:418
+#: ../lib/advene/core/webserver.py:408
 #, python-format
 msgid "<p><strong>Error: cannot add %s to the playlist.</strong></p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:427
+#: ../lib/advene/core/webserver.py:417
 msgid "Access to packages snapshots"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:437
+#: ../lib/advene/core/webserver.py:427
 #, python-format
 msgid "Available snapshots for %s"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:444
+#: ../lib/advene/core/webserver.py:434
 #, python-format
 msgid ""
 "<p><a href=\"/media/snapshot/%s?mode=inline\">Display with inline images</"
 "a></p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:450
+#: ../lib/advene/core/webserver.py:440
 msgid "Done"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:452
+#: ../lib/advene/core/webserver.py:442
 msgid "Pending"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:498
+#: ../lib/advene/core/webserver.py:487
 msgid "Malformed request"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:544
+#: ../lib/advene/core/webserver.py:533
 msgid "<p>No GUI is available."
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:546
+#: ../lib/advene/core/webserver.py:535
 #, python-format
 msgid "<p>Current adhoc views: %s</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:547
+#: ../lib/advene/core/webserver.py:536
 msgid ""
 "<p>You can open a new <a href=\"/application/adhoc/tree\">tree view</a>, a "
 "new <a href=\"/application/adhoc/timeline\">timeline</a> or a new <a href=\"/"
 "application/adhoc/transcription\">transcription</a>.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:550
+#: ../lib/advene/core/webserver.py:539
 #, python-format
 msgid "<p>Current stbv: %s</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:551
+#: ../lib/advene/core/webserver.py:540
 #, python-format
 msgid "<p>You can activate the following STBV:</p><ul>%s</ul>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:559 ../lib/advene/core/webserver.py:572
+#: ../lib/advene/core/webserver.py:548 ../lib/advene/core/webserver.py:561
 msgid "Application information"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:611 ../lib/advene/core/webserver.py:953
-#: ../lib/advene/core/webserver.py:958 ../lib/advene/core/webserver.py:1302
-#: ../lib/advene/core/webserver.py:1464
+#: ../lib/advene/core/webserver.py:603 ../lib/advene/core/webserver.py:945
+#: ../lib/advene/core/webserver.py:950 ../lib/advene/core/webserver.py:1294
+#: ../lib/advene/core/webserver.py:1456
 msgid "Error"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:612
+#: ../lib/advene/core/webserver.py:604
 #, python-format
 msgid "<p>The GUI view %s does not exist.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:643
+#: ../lib/advene/core/webserver.py:635
 msgid "Access control"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:653
+#: ../lib/advene/core/webserver.py:645
 #, python-format
 msgid "<strong>Error: %s is an invalid hostname.</strong>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:659
+#: ../lib/advene/core/webserver.py:651
 #, python-format
 msgid "<p>Removed %s from authorized hosts list.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:661
+#: ../lib/advene/core/webserver.py:653
 #, python-format
 msgid "<p>Cannot remove %s from authorized hosts list.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:665
+#: ../lib/advene/core/webserver.py:657
 #, python-format
 msgid "<p>Added %s to authorized hosts list.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:667
+#: ../lib/advene/core/webserver.py:659
 #, python-format
 msgid ""
 "\n"
@@ -2102,11 +2102,11 @@ msgid ""
 "        "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:687
+#: ../lib/advene/core/webserver.py:679
 msgid "Server Administration"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:695
+#: ../lib/advene/core/webserver.py:687
 #, python-format
 msgid ""
 "\n"
@@ -2128,15 +2128,15 @@ msgid ""
 "        "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:721
+#: ../lib/advene/core/webserver.py:713
 msgid "Available files"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:746
+#: ../lib/advene/core/webserver.py:738
 msgid "Loaded package(s)"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:748
+#: ../lib/advene/core/webserver.py:740
 msgid ""
 "\n"
 "        <h1>Loaded package(s)</h1>\n"
@@ -2150,7 +2150,7 @@ msgid ""
 "        "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:760
+#: ../lib/advene/core/webserver.py:752
 #, python-format
 msgid ""
 "<tr>\n"
@@ -2164,37 +2164,37 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:824 ../lib/advene/core/webserver.py:845
-#: ../lib/advene/core/webserver.py:935 ../lib/advene/core/webserver.py:1013
-#: ../lib/advene/core/webserver.py:1031 ../lib/advene/core/webserver.py:1034
-#: ../lib/advene/core/webserver.py:1047 ../lib/advene/core/webserver.py:1176
-#: ../lib/advene/core/webserver.py:1182 ../lib/advene/core/webserver.py:1188
-#: ../lib/advene/core/webserver.py:1552 ../lib/advene/core/webserver.py:1558
-#: ../lib/advene/core/webserver.py:1565 ../lib/advene/core/webserver.py:1569
+#: ../lib/advene/core/webserver.py:816 ../lib/advene/core/webserver.py:837
+#: ../lib/advene/core/webserver.py:927 ../lib/advene/core/webserver.py:1005
+#: ../lib/advene/core/webserver.py:1023 ../lib/advene/core/webserver.py:1026
+#: ../lib/advene/core/webserver.py:1039 ../lib/advene/core/webserver.py:1168
+#: ../lib/advene/core/webserver.py:1174 ../lib/advene/core/webserver.py:1180
+#: ../lib/advene/core/webserver.py:1544 ../lib/advene/core/webserver.py:1550
+#: ../lib/advene/core/webserver.py:1557 ../lib/advene/core/webserver.py:1561
 msgid "<h1>Error</h1>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:825 ../lib/advene/core/webserver.py:936
+#: ../lib/advene/core/webserver.py:817 ../lib/advene/core/webserver.py:928
 msgid "<p>Cannot set the value : invalid path</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:851
+#: ../lib/advene/core/webserver.py:843
 msgid "Value successfuly updated"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:855 ../lib/advene/core/webserver.py:859
+#: ../lib/advene/core/webserver.py:847 ../lib/advene/core/webserver.py:851
 msgid "Unable to update this value."
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:916
+#: ../lib/advene/core/webserver.py:908
 msgid "Setting value"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:959
+#: ../lib/advene/core/webserver.py:951
 msgid "<p>Invalid request</p>."
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:966
+#: ../lib/advene/core/webserver.py:958
 #, python-format
 msgid ""
 "\n"
@@ -2206,7 +2206,7 @@ msgid ""
 "                    "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:981
+#: ../lib/advene/core/webserver.py:973
 #, python-format
 msgid ""
 "\n"
@@ -2218,7 +2218,7 @@ msgid ""
 "                            "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1002
+#: ../lib/advene/core/webserver.py:994
 msgid ""
 "\n"
 "                     <h1>Error</h1>\n"
@@ -2227,12 +2227,12 @@ msgid ""
 "                     "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1014
+#: ../lib/advene/core/webserver.py:1006
 #, python-format
 msgid "<p>Error while creating view %s</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1023
+#: ../lib/advene/core/webserver.py:1015
 #, python-format
 msgid ""
 "\n"
@@ -2242,32 +2242,32 @@ msgid ""
 "                     "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1032
+#: ../lib/advene/core/webserver.py:1024
 #, python-format
 msgid "<p>Cannot create an object of type %s.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1035 ../lib/advene/core/webserver.py:1048
+#: ../lib/advene/core/webserver.py:1027 ../lib/advene/core/webserver.py:1040
 #, python-format
 msgid "<p>Cannot perform the action <em>%s</em> on <code>%s</code></p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1043
+#: ../lib/advene/core/webserver.py:1035
 #, python-format
 msgid "Value of %s successfuly updated"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1156
+#: ../lib/advene/core/webserver.py:1148
 #, python-format
 msgid "<p>Unknown request: %s</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1168
+#: ../lib/advene/core/webserver.py:1160
 #, python-format
 msgid "<p>Package <strong>%s</strong> not loaded</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1177
+#: ../lib/advene/core/webserver.py:1169
 #, python-format
 msgid ""
 "<p>There was an error in the template code.</p>\n"
@@ -2275,14 +2275,14 @@ msgid ""
 "            <p>Error message: <em>%s</em></p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1183
+#: ../lib/advene/core/webserver.py:1175
 #, python-format
 msgid ""
 "<p>There was an error in the expression.</p>\n"
 "            <pre>%s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1189
+#: ../lib/advene/core/webserver.py:1181
 #, python-format
 msgid ""
 "<p>Cannot resolve TALES expression %s on package %s<p><pre>\n"
@@ -2291,43 +2291,43 @@ msgid ""
 "            %s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1245
+#: ../lib/advene/core/webserver.py:1237
 msgid "You should specify an alias"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1250
+#: ../lib/advene/core/webserver.py:1242
 msgid "You should specify an uri"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1253
+#: ../lib/advene/core/webserver.py:1245
 #, python-format
 msgid "Package %s loaded"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1257
+#: ../lib/advene/core/webserver.py:1249
 #, python-format
 msgid "<p>Cannot load package %s</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1263
+#: ../lib/advene/core/webserver.py:1255
 #, python-format
 msgid "Package %s deleted"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1269
+#: ../lib/advene/core/webserver.py:1261
 #, python-format
 msgid "Package %s saved"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1276
+#: ../lib/advene/core/webserver.py:1268
 msgid "Server reset"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1279
+#: ../lib/advene/core/webserver.py:1271
 msgid "Server status"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1280
+#: ../lib/advene/core/webserver.py:1272
 #, python-format
 msgid ""
 "\n"
@@ -2335,94 +2335,94 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1286
+#: ../lib/advene/core/webserver.py:1278
 msgid "<p>No package loaded</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1299
+#: ../lib/advene/core/webserver.py:1291
 #, fuzzy
 msgid "Default display mode"
 msgstr "Defauxlta regularo"
 
-#: ../lib/advene/core/webserver.py:1303
+#: ../lib/advene/core/webserver.py:1295
 #, python-format
 msgid "<p>Unknown admin command</p><pre>Command: %s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1311
+#: ../lib/advene/core/webserver.py:1303
 msgid "No favicon"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1328
+#: ../lib/advene/core/webserver.py:1320
 #, python-format
 msgid "<p>Invalid data request %s</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1349
+#: ../lib/advene/core/webserver.py:1341
 #, python-format
 msgid "<p>%s not found.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1361
+#: ../lib/advene/core/webserver.py:1353
 msgid "Advene webserver"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1362
+#: ../lib/advene/core/webserver.py:1354
 #, python-format
 msgid ""
 "<p>Welcome on the <a href=\"http://liris.cnrs.fr/advene/\">Advene</a> "
 "webserver run by %s on %s:%d.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1366
+#: ../lib/advene/core/webserver.py:1358
 msgid ""
 " <p>No package is loaded. You can access the <a href=\"/admin\">server "
 "administration page</a>.<p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1373
+#: ../lib/advene/core/webserver.py:1365
 #, python-format
 msgid "the <a href=\"/packages/%s/view/%s\">loaded package's default view</a>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1375
+#: ../lib/advene/core/webserver.py:1367
 #, python-format
 msgid "the <a href=\"/packages/%s\">loaded package's data</a>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1377
+#: ../lib/advene/core/webserver.py:1369
 msgid "the <a href=\"/packages\">loaded packages' data</a>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1378
+#: ../lib/advene/core/webserver.py:1370
 #, python-format
 msgid ""
 " <p>You can either access %s or the <a href=\"/admin\">server administration "
 "page</a>.<p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1380
+#: ../lib/advene/core/webserver.py:1372
 #, python-format
 msgid ""
 "<hr><p align=\"right\"><em>Document generated by <a href=\"http://liris.cnrs."
 "fr/advene/\">Advene</a> v. %s.</em></p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1465
+#: ../lib/advene/core/webserver.py:1457
 #, python-format
 msgid "The TALES expression %s is not valid."
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1517
+#: ../lib/advene/core/webserver.py:1509
 msgid "Content mode not available on non-content data"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1533 ../lib/advene/core/webserver.py:1538
+#: ../lib/advene/core/webserver.py:1525 ../lib/advene/core/webserver.py:1530
 #, python-format
 msgid "TALES evaluation - %s"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1553 ../lib/advene/core/webserver.py:1570
+#: ../lib/advene/core/webserver.py:1545 ../lib/advene/core/webserver.py:1562
 #, python-format
 msgid ""
 "<p>There was an error in the template code.</p>\n"
@@ -2430,21 +2430,21 @@ msgid ""
 "                <p>Error message: <em>%s</em></p>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1559
+#: ../lib/advene/core/webserver.py:1551
 #, python-format
 msgid ""
 "<p>There was an error in the TALES expression.</p>\n"
 "                <pre>%s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1566
+#: ../lib/advene/core/webserver.py:1558
 #, python-format
 msgid ""
 "<p>There was an error.</p>\n"
 "                <pre>%s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1588
+#: ../lib/advene/core/webserver.py:1580
 #, python-format
 msgid ""
 "\n"
@@ -2458,7 +2458,7 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1606
+#: ../lib/advene/core/webserver.py:1598
 msgid ""
 "\n"
 "            </select> View: <select name=\"view\" onchange=\"submit()\">\n"
@@ -2466,7 +2466,7 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1624
+#: ../lib/advene/core/webserver.py:1616
 #, python-format
 msgid ""
 "<hr>\n"
@@ -2475,7 +2475,7 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webserver.py:1933
+#: ../lib/advene/core/webserver.py:1925
 msgid "Server ready to serve requests."
 msgstr ""
 
