@@ -238,7 +238,6 @@ class TranscriptionEdit:
         ti.defaultype=at
         ti.process_file('transcription')
 
-        # Feedback
         self.controller.modified=True
         self.controller.notify("PackageLoad", package=ti.package)
         self.controller.log(_('Converted from file %s :') % self.sourcefile)
@@ -250,6 +249,14 @@ class TranscriptionEdit:
                 self.controller.log('\t%d %ss' % (v, k))
             else:
                 self.controller.log('\t%d %s' % (v, k))
+        # Feedback
+        dialog = gtk.MessageDialog(
+            None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+            gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+            _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
+        response=dialog.run()
+        dialog.destroy()
+        
         return True
     
     def get_widget (self):
