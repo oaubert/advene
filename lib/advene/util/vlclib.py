@@ -17,7 +17,7 @@ from advene.model.tal.context import AdveneContext, AdveneTalesException
 
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
-    
+
     Converts the FOURCC used by VideoLan into the corresponding
     rawcode specification used by the python Image module.
 
@@ -39,7 +39,7 @@ class TitledElement:
     def __init__(self, value=None, title=""):
         self.value=value
         self.title=title
- 
+
 class TypedString(str):
     """String with a mimetype attribute.
     """
@@ -49,7 +49,7 @@ class TypedString(str):
 
 def snapshot2png (image, output=None):
     """Convert a VLC RGBPicture to PNG.
-    
+
     output is either a filename or a stream. If not given, the image
     will be returned as a buffer.
 
@@ -62,7 +62,7 @@ def snapshot2png (image, output=None):
     if image.height == 0:
         print "Error : %s" % a.data
         return ""
-    
+
     if image.type == "PNG":
         # Image is already PNG
         return image.data
@@ -175,12 +175,12 @@ def matching_relationtypes(package, ann1, ann2):
         # lat=[ absolute_uri(package, t) for t in rt.getHackedMemberTypes() ]
         # t1=ann1.type.uri
         # t2=ann2.type.uri
-        
+
         # Id version
         lat= [ get_id(t) for t in rt.getHackedMemberTypes() ]
         t1=get_id(ann1.type.uri)
         t2=get_id(ann2.type.uri)
-        
+
         #print "Testing (%s, %s) matching %s" % (t1, t2, lat)
         if t1 == lat[0] and t2 == lat[1]:
             r.append(rt)
@@ -194,7 +194,7 @@ def get_title(controller, element, representation=None):
         return element
     if (isinstance(element, Annotation) or isinstance(element, Relation)
         and controller is not None):
-        
+
         if representation is not None and representation != "":
             c=controller.event_handler.build_context(event='Display', here=element)
             try:
@@ -204,14 +204,14 @@ def get_title(controller, element, representation=None):
             if not r:
                 r=element.id
             return r
-        
+
         expr=element.type.getMetaData(config.data.namespace, "representation")
         if expr is None or expr == '' or sre.match('^\s+', expr):
             r=element.content.data
             if not r:
                 r=element.id
             return r
-        
+
         elif controller is not None:
             c=controller.event_handler.build_context(event='Display', here=element)
             try:
@@ -219,7 +219,7 @@ def get_title(controller, element, representation=None):
             except AdveneTalesException:
                 r=element.content.data
             if not r:
-                r=element.id                
+                r=element.id
             return r
     if hasattr(element, 'title') and element.title:
         return unicode(element.title)
@@ -241,7 +241,7 @@ def get_valid_members (el):
     @rtype: list
     """
     # FIXME: try to sort items in a meaningful way
-    
+
     # FIXME: return only simple items if not in expert mode
     l = []
     try:
@@ -277,8 +277,20 @@ def import_element(package, element, controller):
         s=p.importSchema(element)
         p.schemas.append(s)
         controller.notify("SchemaCreate", schema=s)
+    elif element.viewableClass == 'annotation':
+        a=p.importAnnotation(element)
+        p.annotations.append(a)
+        controller.notify("AnnotationCreate", annotation=a)
+    elif element.viewableClass == 'relation':
+        r=p.importRelation(element)
+        p.relations.append(r)
+        controller.notify("RelationCreate", relation=r)
+    elif element.viewableClass == 'query':
+        q=p.importQuery(element)
+        p.queries.append(q)
+        controller.notify("QueryCreate", query=q)    
     else:
-        print "%s Not supported yet." % element.viewableClass
+        print "Import element of class %s not supported yet." % element.viewableClass
 
 def unimport_element(package, element, controller):
     p=package
@@ -286,8 +298,17 @@ def unimport_element(package, element, controller):
         p.views.remove(element)
         controller.notify("ViewDelete", view=v)
     elif element.viewableClass == 'schema':
-        p.schemas.remove(s)
-        controller.notify("SchemaDelete", schema=s)
+        p.schemas.remove(element)
+        controller.notify("SchemaDelete", schema=element)
+    elif element.viewableClass == 'annotation':
+        p.annotations.remove(element)
+        controller.notify("AnnotationDelete", annotation=element)
+    elif element.viewableClass == 'relation':
+        p.relations.remove(element)
+        controller.notify("RelationDelete", relation=element)
+    elif element.viewableClass == 'query':
+        p.queries.remove(element)
+        controller.notify("QueryDelete", query=element)
     else:
         print "%s Not supported yet." % element.viewableClass
 
