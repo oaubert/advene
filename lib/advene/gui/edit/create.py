@@ -106,7 +106,7 @@ class CreateElementPopup(object):
                 type_list = [ ViewType('text/html', _("HTML template")),
                               ViewType('application/x-advene-ruleset', _("Ruleset")) ]
             else:
-                print "Error in advene.gui.edit.create.build_widget: invalid type %s" % self.type_
+                print _("Error in advene.gui.edit.create.build_widget: invalid type %s") % self.type_
                 return None
 
             if not type_list:
@@ -154,6 +154,7 @@ class CreateElementPopup(object):
                                              duration=self.controller.player.stream_duration))
             el.title=id_
             self.parent.annotations.append(el)
+            self.controller.notify('AnnotationEditEnd', annotation=el)
         elif self.type_ == Relation:
             el=self.parent.createRelation(
                 ident=id_,
@@ -163,6 +164,7 @@ class CreateElementPopup(object):
                 members=())
             el.title=id_
             self.parent.relations.append(el)
+            self.controller.notify('RelationEditEnd', relation=el)
         elif self.type_ == View:
             el=self.parent.createView(
                 ident=id_,
@@ -176,6 +178,7 @@ class CreateElementPopup(object):
                 # Create an empty ruleset to begin with
                 el.content.data="<ruleset xmlns='http://liris.cnrs.fr/advene/ruleset'></ruleset>"
             self.parent.views.append(el)
+            self.controller.notify('ViewEditEnd', view=el)
         elif self.type == Schema:
             el=self.parent.createSchema(
                 ident=id_,
@@ -183,8 +186,20 @@ class CreateElementPopup(object):
                 date=self.get_date())
             el.title=id_
             self.parent.schemas.append(el)
-        else:
+            self.controller.notify('SchemaEditEnd', schema=el)
+        elif self.type == AnnotationType:
+            if not isinstance(self.parent, Schema):
+                print _("Error: bad invocation of CreateElementPopup")
+                el=None
+            else:
+                el=self.parent.createAnnotationType(
+                    ident=id_,
+                    author=config.data.userid,
+                    date=self.get_date())
+                el.title=id_
+            self.controller.notify('AnnotationTypeEditEnd', annotationtype=el)
             #FIXME: complete
+        else:
             el=None
             print "Not implemented yet."
             
@@ -192,7 +207,7 @@ class CreateElementPopup(object):
         
         if el is not None:
             try:
-                pop = advene.gui.edit.elements.get_edit_popup (el, self.controller)
+                pop = advene.gui.edit.elements.get_edit_popup (el, controller=self.controller)
             except TypeError, e:
                 print _("Error: unable to find an edit popup for %s:\n%s") % (el, str(e))
             else:
