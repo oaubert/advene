@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Advene controller.
 
 The L{AdveneEventHandler} is used by the application to handle events
