@@ -1,3 +1,10 @@
+* Fix the simpletal problem: all string values should be unicode
+
+* Make the annotation edit entry a multiline entry.
+
+* In ECA elements, TALES expression could be prefixed by string: by
+default, using the ${} syntax to evaluate expressions ???
+
 * Content: how to represent structured data ? Cf MPEG7 DS ?
 
 * Assistants:
