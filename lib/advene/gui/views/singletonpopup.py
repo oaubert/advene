@@ -48,7 +48,7 @@ class SingletonPopup:
         self.show()
         return True
 
-    def undisplay(self):
+    def undisplay(self, widget=None):
         if self.widget is not None:
             self.widget.destroy()
             self.widget=None
@@ -88,18 +88,20 @@ class SingletonPopup:
 
         self.widget=gtk.Label(_("Navigation popup"))
         self.vbox.add(self.widget)
-        
+
         if self.controller.gui:
             self.controller.gui.register_view (self)
-        window.connect ("destroy", lambda w: True)
 
-        hb=gtk.HButtonBox()
-
-        b=gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect("clicked", self.hide)
-        hb.add(b)
-        
-        mainbox.pack_start(hb, expand=False)
+        if self.container is None:
+            window.connect ("destroy", lambda w: True)
+            
+            hb=gtk.HButtonBox()
+            
+            b=gtk.Button(stock=gtk.STOCK_CLOSE)
+            b.connect("clicked", self.hide)
+            hb.add(b)
+            
+            mainbox.pack_start(hb, expand=False)
         
         return window
 
