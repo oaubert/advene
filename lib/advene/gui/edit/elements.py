@@ -88,11 +88,10 @@ class EditElementPopup (object):
         """Create the editing widget (and return it)."""
         raise Exception ("This method should be defined in the subclasses.")
 
-    def validate_cb (self, button=None, event=None, callback=None):
-        """Method called when validating a form."""
+    def apply_cb (self, button=None, event=None, callback=None):
+        """Method called when applying a form."""
         for f in self.forms:
             f.update_element ()
-        self.window.destroy ()
 
         # The children classes can define a notify method, which will
         # be called upon modification of the element, in order to
@@ -104,6 +103,12 @@ class EditElementPopup (object):
         
         if callback is not None:
             callback (element=self.element)
+        return True
+        
+    def validate_cb (self, button=None, event=None, callback=None):
+        """Method called when validating a form."""
+        self.apply_cb(button, event, callback)
+        self.window.destroy ()
         return True
 
     def close_cb (self, button=None, data=None):
@@ -146,6 +151,10 @@ class EditElementPopup (object):
 
         b = gtk.Button (stock=gtk.STOCK_OK)
         b.connect ("clicked", self.validate_cb, callback)
+        hbox.add (b)
+
+        b = gtk.Button (stock=gtk.STOCK_APPLY)
+        b.connect ("clicked", self.apply_cb, callback)
         hbox.add (b)
 
         b = gtk.Button (stock=gtk.STOCK_CANCEL)
