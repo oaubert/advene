@@ -571,7 +571,7 @@ class TimeLine:
     
     def mouse_pressed_cb(self, widget=None, event=None):
         retval = False
-        if event.button == 3:
+        if event.button == 3 or event.button == 1:
             self.context_cb (timel=self, position=self.pixel2unit(event.x))
             retval = True
         return retval
@@ -754,6 +754,7 @@ class TimeLine:
         for text, tooltip, icon, callback, arg in tb_list:
             #b=gtk.RadioToolButton(group="mode", stock_id=icon)
             #b.set_tooltip(tips, tooltip)
+            # FIXME: deprecated
             tb.append_item(text, tooltip, None,
                            gtk.image_new_from_stock(icon,
                                                     gtk.ICON_SIZE_SMALL_TOOLBAR),
