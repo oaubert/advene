@@ -617,7 +617,7 @@ class AdveneGUI (Connect):
         menu.show_all()
         return menu
 
-    def annotation_popup_cb (widget=None, ann=None):
+    def annotation_popup_cb (self, widget=None, ann=None):
         """Callback used to invoke the popup menu.
         """
         menu = self.make_popup_menu(ann)
