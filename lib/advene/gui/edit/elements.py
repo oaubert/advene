@@ -514,18 +514,8 @@ class EditRuleSetForm (EditForm):
     def update_element (self):
         """Update the element fields according to the values in the view."""
         self.edit.update_value()
-
-        # FIXME: this is not very clean (too many manipulations)
-        # We should generate the XML tree directly
-        di = xml.dom.DOMImplementation.DOMImplementation()
-        # FIXME: hardcoded NS URI should move to config
-        rulesetdom = di.createDocument("http://liris.cnrs.fr/advene/ruleset", "ruleset", None)
-        self.edit.model.to_dom(rulesetdom)
-
-        stream=StringIO.StringIO()
-        xml.dom.ext.PrettyPrint(rulesetdom, stream)
-        setattr(self.element, 'data', stream.getvalue())
-        stream.close()
+        setattr(self.element, self.edit.model.xml_repr())
+        return True
 
     def get_view (self):
         """Generate a view widget to edit the ruleset."""        
