@@ -72,11 +72,12 @@ class GenericImporter(object):
     @type statistics: dict
     FIXME...
     """
-    def __init__(self, author=None, package=None, defaulttype=None):
+    def __init__(self, author=None, package=None, defaulttype=None, controller=None):
         self.package=package
         if author is None:
             author=config.data.userid
         self.author=author
+        self.controller=controller
         self.timestamp=time.strftime("%F")
         self.time_regexp=sre.compile('(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d+)[.,]?(?P<ms>\d+)?')
         self.defaulttype=defaulttype
@@ -94,7 +95,7 @@ class GenericImporter(object):
             }
         self.name = _("Generic importer")
 
-        self.optionparser = optparse.OptionParser(usage="Usage: %prog [options] source-file destination-file")
+        self.optionparser = optparse.OptionParser(usage=_("Usage: %prog [options] source-file destination-file"))
         self.optionparser.add_option("-o", "--offset",
                                      action="store", type="int", dest="offset", default=0,
                                      help=_("Specify the offset in ms"))
@@ -120,6 +121,9 @@ class GenericImporter(object):
         """        
         begin += self.offset
         end += self.offset
+        if ident is None and self.controller is not None:
+            ident=self.controller.idgenerator.get_id(Annotation)
+            
         if ident is None:
             a=self.package.createAnnotation(type=type_,
                                             fragment=MillisecondFragment(begin=begin, end=end))
@@ -141,7 +145,7 @@ class GenericImporter(object):
         kl.sort()
         for k in kl:
             v=self.statistics[k]
-            res.append("\t%s" % vlclib.format_element_name(v, k))
+            res.append("\t%s" % vlclib.format_element_name(k, v))
         return "\n".join(res)
     
     def init_package(self,
