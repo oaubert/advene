@@ -17,7 +17,7 @@ import advene.gui.popup
 class AccumulatorPopup:
     """View displaying a limited number of popups.
     """
-    def __init__ (self, size=5, controller=None, autohide=False, container=None):
+    def __init__ (self, size=4, controller=None, autohide=False, container=None):
         self.size=size
         self.controller=controller
         self.container=container
@@ -39,7 +39,7 @@ class AccumulatorPopup:
         timeout is in ms.
         """
         if title is None:
-            title=""
+            title="X"
         if len(self.widgets) >= self.size:
             # Remove the last one
             self.undisplay(self.widgets[0][0])
@@ -55,16 +55,22 @@ class AccumulatorPopup:
         f.set_label_widget(b)
         f.add(widget)
 
-        # FIXME: handle same size (cf gtk.SizeGroup)
-        
         self.widgets.append( (widget, hidetime, f) )
         self.widgets.sort(lambda a,b: cmp(a[1],b[1]))
-        self.hbox.add(f)
+        self.hbox.pack_start(f, expand=False)
 
         f.show_all()
         self.show()
         return True
 
+    
+    def get_popup_width(self):
+        """Return the requested popup width
+
+        According to the hbox size and the max number of popups.
+        """
+        return self.hbox.get_allocation().width / self.size
+    
     def undisplay(self, widget=None):
         # Find the associated frame
         frames=[ t for t in self.widgets if t[0] == widget ]
