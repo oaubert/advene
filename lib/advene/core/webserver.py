@@ -252,7 +252,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write (_("""<h1>No available mediaplayer</h1>"""))
         else:
             l = self.server.controller.player.playlist_get_list ()
-            self.server.controller.player.update_status ()
+            self.server.update_status ()
             self.wfile.write (_("""
             <h1>Current STBV: %s</h1>
 
@@ -466,14 +466,14 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     position = query['position']
                 else:
                     self.send_redirect ("/media")
-                self.server.controller.update_status ("set", long(position))
+                self.server.update_status ("set", long(position))
                 self.send_no_content()
             elif command == 'pause':
-                self.server.controller.update_status ("pause")
+                self.server.update_status ("pause")
                 ref=self.headers.get('Referer', "/media")
                 self.send_no_content()
             elif command == 'stop':
-                self.server.controller.update_status ("stop")
+                self.server.update_status ("stop")
                 ref=self.headers.get('Referer', "/media")
                 self.send_no_content()
             elif command == 'stbv':
@@ -494,8 +494,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     stbv=stbvlist[0]
 
-                self.server.controller.activate_stbv(view=stbv)
-                #self.server.controller.update_status("play", 0)                
+                self.server.activate_stbv(view=stbv)
+                #self.server.update_status("play", 0)                
                 self.send_no_content()
                     
     def handle_access (self, l, query):
@@ -1671,9 +1671,14 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
                                package=p,
                                imagecache=imagecache.ImageCache (id_))
 
-    def update_status(self, status, position):
-        if self.controller.player is not None:
-            self.controller.player.update_status(status, position)
+    def update_status (self, *args, **kw):
+        self.controller.queue_action(self.controller.update_status,
+                                     *args, **kw)
+        return True
+    
+    def activate_stbv  (self, *args, **kw):
+        self.controller.queue_action(self.controller.activate_stbv,
+                                     *args, **kw)
         return True
     
     # End of controller methods
