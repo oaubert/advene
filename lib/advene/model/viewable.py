@@ -10,6 +10,20 @@ import advene.model.util as util
 
 from util.auto_properties import auto_properties
 
+class TypedUnicode(unicode):
+    """Unicode string with a mimetype attribute.
+    """
+    def __init__(self, *p, **kw):
+        super(TypedUnicode, self).__init__(*p, **kw)
+        self.contenttype='text/plain'
+        
+class TypedString(str):
+    """String with a mimetype attribute.
+    """
+    def __init__(self, *p, **kw):
+        super(TypedString, self).__init__(*p, **kw)
+        self.contenttype='text/plain'
+
 class Viewable(object):
     """
     A viewable is an object on which advene Views can be applied. A viewable has
@@ -111,7 +125,9 @@ class Viewable(object):
         context.setLocal('view', view)
         context.interpret(view_source, mimetype, result)
         context.popLocals ()
-        return result.getvalue().decode('utf-8')
+        s=TypedString(result.getvalue().decode('utf-8'))
+        s.contenttype=view.getContent().getMimetype()
+        return s
 
     def findDefaultView(self):
         v = self.getDefaultView()
