@@ -1,88 +1,71 @@
-=====================================
-Documentation utilisateur pour Advene
-=====================================
-
-Note: cette documentation est au format _reST: http://docutils.sourceforge.net/docs/rst/quickref.html
-
-Création d'un recueil
-*********************
+---+ Documentation utilisateur pour Advene
+ 
+---++ Création d'un recueil
 
 Lors du lancement de l'application, un recueil de base est chargé. Il
-définit un type d'annotation *Texte simple* et un type de relation
-*Relation élémentaire*. Il est donc possible de commencer
+définit un type d'annotation _Texte simple_ et un type de relation
+_Relation élémentaire_. Il est donc possible de commencer
 immédiatement à annoter un film avec ce schéma initial.
 
-Sélection du support vidéo
---------------------------
+---+++ Sélection du support vidéo
 
 Le choix du support vidéo s'effectue à travers l'interface graphique
 de l'application. On peut choisir un DVD par l'icône représentant un
 DVD (il faut alors préciser le titre et le chapitre où le film
 commence), ou bien un fichier vidéo par l'icône représentant une
-touche *Eject*.
+touche _Eject_.
 
 Une fois le support choisi, il est possible de naviguer dans le film
 par le biais des touches de navigation (lecture, pause, avance et
 retour rapide) et par le biais du curseur indiquant la position
 courante.
 
-Création des annotations
-------------------------
+---+++ Création des annotations
 
-Création au vol
-===============
+---++++ Création au vol
 
 Les annotations se créent en cours de visualisation. Au début du
 fragment vidéo concernant l'annotation, il faut utiliser (en faisant
 attention que la fenêtre de l'application soit active) la touche
-*Entrée* ou bien la touche *Espace*. 
+_Entrée_ ou bien la touche _Espace_. 
 
 Ces deux touches permettent de rentrer en mode d'édition d'une
 nouvelle annotation. La différence entre les deux est que la touche
-*Espace* met automatiquement le film en pause.
+_Espace_ met automatiquement le film en pause.
 
 Il est possible d'utiliser les commandes de navigation dans le film
-pendant l'édition d'une annotation. La touche *Tab* permet notamment
+pendant l'édition d'une annotation. La touche _Tab_ permet notamment
 de mettre le film en pause ou bien de le relancer.
 
 À la fin du fragment vidéo concernant l'annotation, on valide
-l'annotation par la touche *Entrée*
+l'annotation par la touche _Entrée_.
 
 Deux remarques :
+   * on voit que cette méthode ne permet pas d'éditer simultanément plusieurs nouvelles annotations
+   * dans le cas où plusieurs types d'annotation sont définis dans le  recueil, il faut au préalable (avant le début de l'édition) choisir  le type d'annotation que l'on souhaite créer en le choisissant dans  la liste intitulée _Type courant_.
 
-- on voit que cette méthode ne permet pas d'éditer simultanément
-  plusieurs nouvelles annotations
-
-- dans le cas où plusieurs types d'annotation sont définis dans le
-  recueil, il faut au préalable (avant le début de l'édition) choisir
-  le type d'annotation que l'on souhaite créer en le choisissant dans
-  la liste intitulée *Type courant*
-
-Création par import d'autres formats
-====================================
+---++++ Création par import d'autres formats
 
 Un module d'import permet de générer un ensemble d'annotations (et
 bien souvent également de schémas) à partir d'un fichier dans un autre
 format. Les format supportés pour l'instant (version 0.16) sont :
 
-- un format texte élémentaire (fichiers ``.txt``), où chaque ligne
-  contient le temps de début, le temps de fin et le contenu de
-  l'annotation, séparés par des espaces.
-- le format de sous-titre SRT (fichiers ``.srt``).
-- le format Xi (fichiers ``.xml``)
-- le format ELAN (fichiers ``.eaf``)
+   * un format texte élémentaire (fichiers =.txt=), où chaque ligne
+   * contient le temps de début, le temps de fin et le contenu de l'annotation, séparés par des espaces.
+   * le format de sous-titre SRT (fichiers =.srt=).
+   * le format Xi (fichiers =.xml=)
+   * le format ELAN (fichiers =.eaf=)
 
-L'import de données s'effectue par le menu *Fichier/Importer un fichier*
+L'import de données s'effectue par le menu _Fichier/Importer un fichier_
 
-Création par alignement d'une transcription
-===========================================
+---++++ Création par alignement d'une transcription
 
 Il est possible, à partir d'une transcription textuelle du contenu de
 la vidéo, de poser simplement des bornes temporelles et de générer à
 partir du texte et des bornes temporelles des annotations.
 
 Pour accéder à cette fonctionnalité, il faut utiliser le menu
-*Fichier/Importer une transcription*
+_Fichier/Importer une transcription_.
 
 Après avoir lancé la lecture de la vidéo, on pose des bornes en
 cliquant dans le texte aux bons moments. Il est possible de supprimer
@@ -91,22 +74,20 @@ droit sur une borne permet d'accéder directement au temps associé dans
 la vidéo, ainsi que d'effectuer de petits ajustements du temps
 associé.
 
-À la fin de l'édition des bornes, cliquez sur *Convertir* pour
+À la fin de l'édition des bornes, cliquez sur _Convertir_ pour
 convertir le texte en annotaions, dans un type choisi.
 
-Visualisation des annotations
------------------------------
+---++ Visualisation des annotations
 
 Après avoir créé quelques annotations, il devient possible de les
 visualiser par le biais de l'interface graphique et par le biais du
 serveur web. Nous allons détailler quelques un de ces modules de
 visualisation.
 
-Vue en ligne de temps
-+++++++++++++++++++++
+---+++ Vue en ligne de temps
 
 La vue en ligne de temps est accessible par le biais du menu
-*Vue*. Elle offre une représentation linéaire des annotations, où
+_Vue_. Elle offre une représentation linéaire des annotations, où
 chaque ligne représente un type d'annotation. Le curseur en bas à
 gauche de la fenêtre indique la portion du film représentée à
 l'écran. Pour représenter l'intégralité du film, il faut donc le fixer
@@ -119,12 +100,11 @@ au fragment de la vidéo correspondant.
 Pour accéder à un moment quelconque de la vidéo, il suffit de cliquer
 dans la fenêtre.
 
-Vue arborescente
-++++++++++++++++
+---+++ Vue arborescente
 
 Une vue arborescente du contenu du recueil est accessible dans la
 fenêtre principale de l'application. Il est également possible d'en
-ouvrir de nouvelles par le biais du menu *Vue*.
+ouvrir de nouvelles par le biais du menu _Vue_.
 
 L'intérêt de cette vue est de permettre la création de nouveaux
 éléments dans le recueil, par le biais des menus contextuels
@@ -136,23 +116,21 @@ créer de nouveaux schémas, de nouvelles vues ou de nouvelles requêtes.
 Le menu contextuel des schémas permet de créer de nouveaux types
  d'annotation ou de relation à l'intérieur du schéma concerné.
 
-Vue hypertexte
-++++++++++++++
+---+++ Vue hypertexte
 
 Un serveur web intégré à l'application, utilisant le mécanisme des
  vues du modèle Advene, permet d'accéder au contenu du recueil par le
  biais d'un simple navigateur web.
 
-Pour cela, on peut utiliser l'élément *Lancer le navigateur web* du
-menu *Vue* ou bien indiquer directement l'URL adéquate au navigateur:
+Pour cela, on peut utiliser l'élément _Lancer le navigateur web_ du
+menu _Vue_ ou bien indiquer directement l'URL adéquate au navigateur:
 
 http://localhost:1234/packages/advene/
 
 Des vues définies par défaut dans le recueil modèle permettent de
 naviguer à l'intérieur du recueil.
 
-Vue transcription
-+++++++++++++++++
+---+++ Vue transcription
 
 Cette vue permet d'afficher l'ensemble des annotations d'un même type
 concaténées de manière à produire un texte. Sa principale utilité est
@@ -161,29 +139,26 @@ manière à localiser une annotation dans l'ensemble du texte.
 
 On accède à cette vue de deux manières : soit en cliquant avec le
 bouton droit sur un type d'annotation dans une vue arborescente, et en
-choisissant l'item "Transcription", soit à partir du menu "Vues" de
+choisissant l'item _Transcription_, soit à partir du menu _Vues_ de
 l'application principale.
 
-Syntaxe TALES 
-*************
+---++ Syntaxe TALES 
 
-La syntaxe TALES (TAL Expression Syntax) est utilisée dans plusieurs
+La syntaxe TALES (_TAL Expression Syntax_) est utilisée dans plusieurs
 composants d'Advene pour adresser des éléments du modèle Advene :
 
-- dans le serveur web (construction des adresses)
-- dans les vues dynamiques (définition des conditions et paramètres
-  des actions)
-- dans les vues statiques (motifs de remplacement)
-- dans les requètes simples (définition des conditions)
+   * dans le serveur web (construction des adresses)
+   * dans les vues dynamiques (définition des conditions et paramètres des actions)
+   * dans les vues statiques (motifs de remplacement)
+   * dans les requètes simples (définition des conditions)
 
 Il est donc important de comprendre cette syntaxe, et le modèle
 sous-jacent, pour pouvoir profiter au mieux des possibilités offertes
 par Advene.
 
-Le modèle Advene
-----------------
+---+++ Le modèle Advene
 
-Hiérarchie (package, schemas, annotation-/relationTypes, annotations,
+Hiérarchie (package, schemas, annotationTypes, relationTypes, annotations,
 relations, views) FIXME
 
 Cette hiérarchie peut être considérée comme un système de fichiers,
@@ -192,44 +167,43 @@ correspondra alors à un chemin d'accès dans ce système de fichiers.
 
 Une particularité d'Advene est que des éléments peuvent être accédés
 par plusieurs chemins. Ainsi, une annotation se trouvera dans le
-"répertoire" ``package/annotations`` et dans le "répertoire"
-``package/annotationTypes/simple-text/annotations``.
+"répertoire" =package/annotations= et dans le "répertoire"
+=package/annotationTypes/simple_text/annotations=.
 
-Utilisation dans le serveur web
--------------------------------
+---+++ Utilisation dans le serveur web
 
 Le serveur web intégré à Advene interprète directement des expressions
 TALES. Il est donc possible de naviguer à l'intérieur de la structure
 de données pour explorer son contenu.
 
 Le point de départ des expressions TALES est l'URL
-http://localhost:1234/packages/advene
+http://localhost:1234/packages/advene/
 
 Ce qui suit sera évalué comme une expression TALES.
 
 Ainsi, 
-http://localhost:1234/packages/advene/annotationTypes/simple-text/annotations/i810
-renverra l'annotation i810 contenue dans les annotations de type
-*simple-text*
 
-Utilisation dans les vues statiques
------------------------------------
+http://localhost:1234/packages/advene/annotationTypes/simple_text/annotations/i810
+
+renverra l'annotation i810 contenue dans les annotations de type
+_simple-text_.
+
+---+++ Utilisation dans les vues statiques
 
 Les vues statiques (UTBV) permettent de spécifier un mode de rendu
 pour un élément quelconque du modèle. Elles consistent en des modèles
-de documents (*templates*) utilisant la syntaxe TAL. TAL utilise TALES
+de documents (_templates_) utilisant la syntaxe TAL. TAL utilise TALES
 pour spécifier quel contenu doit être inséré aux endroits précisés.
 
 Les éléments de base des expressions TALES sont:
 
-- ``here`` : l'élément courant
-- ``options`` : un ensemble d'éléments optionnels accessibles :
-  - ``options/package_url`` : l'URL du recueil courant
-  - ``options/snapshot``    : un accès aux snapshots mémorisés
-  - ``options/config``      : des options de configuration
+   * =here= : l'élément courant
+   * =options= : un ensemble d'éléments optionnels accessibles :
+      * =options/package_url= : l'URL du recueil courant
+      * =options/snapshot=    : un accès aux snapshots mémorisés
+      * =options/config=      : des options de configuration
 
-Utilisation dans les vues dynamiques
-------------------------------------
+---+++ Utilisation dans les vues dynamiques
 
 Des éléments semblables sont disponibles dans les vues dynamiques,
 afin de spécifier à la fois les conditions devant être remplies et les
@@ -237,38 +211,35 @@ paramètres des actions à effectuer. Par contre, plus d'éléments "de
 base" sont accessibles, dont certains ne sont définis que lors
 d'événements particuliers :
 
-- ``package`` : le recueil courant
-- ``annotation`` : l'annotation ayant déclenché l'événement
-- ``relation`` : la relation ayant déclenché l'événement
-- ``activeAnnotations`` : la liste des annotations actives
-- ``player`` : le lecteur vidéo
-- ``event`` : le nom de l'événement
+   * =package= : le recueil courant
+   * =annotation= : l'annotation ayant déclenché l'événement
+   * =relation= : la relation ayant déclenché l'événement
+   * =activeAnnotations= : la liste des annotations actives
+   * =player= : le lecteur vidéo
+   * =event= : le nom de l'événement
 
-Utilisation dans les requêtes
------------------------------
+---+++ Utilisation dans les requêtes
 
 Les requêtes utilisent également une syntaxe TALES permettant de
 spécifier
 
-1. l'ensemble sur lequel on va appliquer un filtre
+1. l'ensemble des éléments sur lequel on va appliquer un filtre
 2. les conditions de prise en compte d'un élément
 3. la valeur de retour
 
 Pour les deux derniers paramètres, un élément de base supplémentaire
-est défini. Il a pour nom ``element`` et prend la valeur de l'élément
-testé.
+est défini. Il a pour nom =element= et prend la valeur de l'élément
+testé. Rappelons que l'élément de base _here_ correspond alors à la
+valeur de l'élément sur lequel on applique la requète.
 
 Ainsi, pour obtenir les annotations de même type précédant
 l'annotation sur laquelle on applique la requête, et en retourner les
 identificateurs, on utilise la syntaxe suivante :
 
-- Ensemble d'origine: ``here/type/annotations``
-- Condition:  ``element`` is before (Allen) ``here``
-- Valeur de retour: ``element/id``
+   * Ensemble d'origine: =here/type/annotations=
+   * Condition:  =element= _is before (Allen)_ =here=
+   * Valeur de retour: =element/id=
 
 et appliquer la requête sur l'annotation désirée par le biais d'une
-expression TALES:
-``/package/annotations/last/query/annotations-before``
-
-De cette façon, l'élément de base ``here`` correspondra à
-l'annotation.
+expression TALES :
+=/package/annotations/last/query/annotations_before=
