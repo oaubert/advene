@@ -156,7 +156,7 @@ class CreateElementPopup(object):
         return time.strftime("%F")
 
     def is_valid_id(self, i):
-        return sre.match('^[a-zA-Z_]+$', i)
+        return sre.match('^[a-zA-Z0-9_]+$', i)
     
     def validate_cb(self, button, window):
         id_ = self.id_entry.get_text()
