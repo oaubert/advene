@@ -14,6 +14,7 @@ import gtk
 import gobject
 import pango
 import sre
+import os
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
@@ -728,6 +729,7 @@ class EditContentForm(EditForm):
         self.mimetype.set_text(self.element.mimetype)
         self.mimetype.set_editable(self.mimetypeeditable)
         hbox.pack_start(self.mimetype)
+
         vbox.pack_start(hbox, expand=False)
         
         if self.element.mimetype == 'application/x-advene-ruleset':
@@ -751,7 +753,9 @@ class EditTextForm (EditForm):
         self.field = field
         self.controller=controller
         self.editable = True
+        self.fname=None
         self.view = None
+        self.tooltips=gtk.Tooltips()
 
     def set_editable (self, boolean):
         self.editable = boolean
@@ -766,19 +770,112 @@ class EditTextForm (EditForm):
         setattr (self.element, self.field, text)
         return True
 
+    def key_pressed_cb (self, win, event):
+        if event.state & gtk.gdk.CONTROL_MASK:
+            if event.keyval == gtk.keysyms.s:
+                self.content_save()
+                return True
+            elif event.keyval == gtk.keysyms.o:
+                self.content_open()
+                return True
+            elif event.keyval == gtk.keysyms.r:
+                self.content_reload()
+                return True
+        return False
+
+    def content_reload(self, b=None):
+        self.content_open(fname=self.fname)
+        return True
+
+    def content_open(self, b=None, fname=None):
+        if fname is None:
+            fname=advene.gui.util.get_filename(default_file=self.fname)
+        if fname is not None:
+            try:
+                f=open(fname, 'r')
+            except IOError, e:
+                dialog = gtk.MessageDialog(
+                    None, gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
+                    _("Cannot read the data:\n%s") % unicode(e))
+                dialog.run()
+                dialog.destroy()
+                return True
+            b=self.view.get_buffer()
+            begin,end = b.get_bounds ()
+            b.delete(begin, end)
+            b.set_text("".join(f.readlines()))
+            f.close()
+            self.fname=fname
+        return True
+    
+    def content_save(self, b=None, fname=None):
+        if fname is None:
+            fname=advene.gui.util.get_filename(title=_("Save content to..."),
+                                               action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                               button=gtk.STOCK_SAVE,
+                                               default_file=self.fname)
+        if fname is not None:
+            if os.path.exists(fname):
+                os.rename(fname, fname + '~')
+            try:
+                f=open(fname, 'w')
+            except IOError, e:
+                dialog = gtk.MessageDialog(
+                    None, gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
+                    _("Cannot save the data:\n%s") % unicode(e))
+                dialog.run()
+                dialog.destroy()
+                return True
+            b=self.view.get_buffer()
+            begin,end = b.get_bounds ()
+            f.write(b.get_text(begin, end))
+            f.close()
+            self.fname=fname
+        return True
+    
     def get_view (self):
         """Generate a view widget for editing text attribute."""
+        vbox=gtk.VBox()
+
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS) 
+
+        b=gtk.ToolButton()
+        b.set_stock_id(gtk.STOCK_OPEN)
+        b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
+        b.connect("clicked", self.content_open)
+        tb.insert(b, -1)
+        
+        b=gtk.ToolButton()
+        b.set_stock_id(gtk.STOCK_SAVE)
+        b.set_tooltip(self.tooltips, _("Save to a file (C-s)"))
+        b.connect("clicked", self.content_save)
+        tb.insert(b, -1)
+
+        b=gtk.ToolButton()
+        b.set_stock_id(gtk.STOCK_REFRESH)
+        b.set_tooltip(self.tooltips, _("Reload the file (C-r)"))
+        b.connect("clicked", self.content_reload)
+        tb.insert(b, -1)
+
+        tb.show_all()
+        vbox.pack_start(tb, expand=False)
+        
         textview = gtk.TextView ()
         textview.set_editable (self.editable)
         textview.set_wrap_mode (gtk.WRAP_CHAR)
-        textview.get_buffer ().insert_at_cursor (getattr(self.element, self.field))
+        textview.get_buffer ().set_text (getattr(self.element, self.field))
+        textview.connect ("key-press-event", self.key_pressed_cb)
         self.view = textview
 
         scroll_win = gtk.ScrolledWindow ()
         scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         scroll_win.add(textview)
 
-        return scroll_win
+        vbox.add(scroll_win)
+        return vbox
 
 class EditRuleSetForm (EditForm):
     """Create a RuleSet edit form for the given element (a view, presumably)."""
