@@ -1211,6 +1211,7 @@ class AdveneGUI (Connect):
                 f=self.annotation.fragment
                 if f.end < f.begin:
                     f.begin, f.end = f.end, f.begin
+                self.annotation.setAuthor(config.data.userid)
                 c.package.annotations.append (self.annotation)
                 self.log (_("New annotation: %s") % self.annotation)
                 self.gui.current_annotation.set_text ('['+_('None')+']')
