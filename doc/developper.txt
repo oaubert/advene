@@ -45,6 +45,14 @@ containing translated text. Then, use ``make pot`` to generate the
 translation templates, and ``make update-po`` to update the various
 translation files (``fr.po`` for instance).
 
+Release
+-------
+
+To release a new version, you have to update :
+- ``lib/advene/core/version.py`` -- the version module
+- ``advene.iss`` -- the Windows installer config file
+- ``debian/changelog`` -- the changelog file
+
 View plugin infrastructure
 --------------------------
 
