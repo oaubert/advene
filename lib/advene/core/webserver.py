@@ -529,20 +529,22 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
           C{/application/adhoc} opens the given ad-hoc view. It takes
           the view name as next element in the path. Accessible views
-          are: C{tree}, C{timeline}, C{transcription}.
+          are: C{tree}, C{timeline}, C{transcription}, C{transcribe}.
 
           The transcription view can take an optional C{type}
           parameter, either as next element in the URI or as a
           C{type=...} parameter. To open the transcription view on the
           annotation-type simple_text, you can simply use:
           C{/application/adhoc/transcription/simple_text}
+
+          The transcribe view takes a mandatory C{url} parameter.
         """
         def current_adhoc():
             if not c.gui:
                 self.wfile.write(_("""<p>No GUI is available."""))
             else:
                 self.wfile.write(_("""<p>Current adhoc views: %s</p>""") % ", ".join([ v.view_name for v in c.gui.annotation_views]))
-                self.wfile.write(_("""<p>You can open a new <a href="/application/adhoc/tree">tree view</a>, a new <a href="/application/adhoc/timeline">timeline</a> or a new <a href="/application/adhoc/transcription">transcription</a></p>"""))
+                self.wfile.write(_("""<p>You can open a new <a href="/application/adhoc/tree">tree view</a>, a new <a href="/application/adhoc/timeline">timeline</a> or a new <a href="/application/adhoc/transcription">transcription</a>.</p>"""))
 
         def current_stbv():
             self.wfile.write(_("""<p>Current stbv: %s</p>""") % c.get_title(c.current_stbv))
@@ -598,6 +600,12 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                            atid)
 
                     c.queue_action(c.gui.on_transcription1_activate, None, atid)
+                    self.send_no_content()
+                elif view == 'transcribe':
+                    url=None
+                    if query.has_key('url'):
+                        url=query['url']
+                    c.queue_action(c.gui.on_import_transcription1_activate, None, url)
                     self.send_no_content()
                 else:
                     self.start_html (_('Error'))
