@@ -3,12 +3,15 @@
 import sys
 import os
 
+
 import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
 
 from gettext import gettext as _
+
+import advene.core.config as config
 
 import advene.gui.popup
 import advene.gui.util
@@ -225,12 +228,20 @@ class Importer:
         self.sourcepackage=sourcepackage
         self.widget=self.build_widget()
 
-    def add_package_cb(self, button, fs):
-        """Import a new package."""
-        file_ = fs.get_property ("filename")
+    def add_package(self, button=None):
+        if config.data.path['data']:
+            d=config.data.path['data']
+        else:
+            d=None        
+        filename=advene.gui.util.get_filename(title=_("Choose the package to import"),
+                                              action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                              button=gtk.STOCK_OPEN,
+                                              default_dir=d)
+        if not filename:
+            return True
 
         # Determine a default alias for the filename
-        alias=os.path.splitext( os.path.basename(file_) )[0]
+        alias=os.path.splitext( os.path.basename(filename) )[0]
         alias=alias.lower()
 
         alias=advene.gui.util.entry_dialog(title=_('Enter the package alias'),
@@ -242,7 +253,7 @@ class Importer:
 
         # p = advene.model.package.Package(uri=file_, importer=self.controller.package)
         i = advene.model.package.Import(parent=self.controller.package,
-                                        uri=file_)
+                                        uri=filename)
         i.as=alias
         self.controller.package.imports.append(i)
         
@@ -251,13 +262,6 @@ class Importer:
 
         return True
         
-    def add_package(self, button=None):
-        if not self.controller.gui:
-            return False
-        self.controller.gui.file_selector (callback=self.add_package_cb,
-                                           label=_("Choose the package to import"))
-        return True
-    
     def build_widget(self):
         vbox=gtk.VBox()
 
