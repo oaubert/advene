@@ -1,0 +1,621 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML><HEAD><TITLE>Advene Users Wiki: AdveneUserGuide</TITLE>
+<META NAME='KEYWORDS' CONTENT='Advene, User, Guide'/>
+<LINK REL="stylesheet" HREF="advene.css">
+</HEAD><BODY BGCOLOR="white">
+<div class=wikitext><h1>Documentation utilisateur pour Advene / <span class="english">Advene user guide</span></h1>
+
+<p>
+This document is a copy of the original document, which may be more complete : <a
+href="http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneUserGuide">http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneUserGuide</a>.
+<p>
+<h2>Avertissement / <span class="english">Warning</span></h2>
+
+<p>
+Cette documentation utilisateur est loin d'être complète : elle ne décrit pas toutes
+les fonctionnalités d'Advene, et n'est pas complètement bilingue. En tant qu'utilisateur
+de ce wiki, vous pouvez éditer le texte et ajouter vos propres corrections et précisions. Pour faciliter l'identification des auteurs, vous pouvez vous enregistrer comme utilisateur via le menu Preferences.
+Cette documentation est incluse comme fichier d'aide dans toute distribution d'Advene.
+<p>
+<span class="english">
+This user guide is far from being complete: not fully descriptive nor fully bilingual. 
+As a wiki user, you can edit the text, and add your own corrections or precisions. Please register with a username in the Preferences menu, so that we can identify contributors.
+This guide will be included as help file in any Advene release.
+<p>
+</span><span class="question">
+Pour ajouter une question ou une annotation dans le texte, utilisez le style <em>question</em> / If you wich to add a question or a note in the text, you can use the question style mark.
+<p>
+<p>
+<h2>Table des matières / <span class="english">Table of contents</span></h2>
+
+<p>
+<dl><dt> </dt><dd>1. <a href="wiki.pl?AdveneUserGuide#Cr_ation_d_un_recueil_Creating_a_package">Création d'un recueil / <span class="english">Creating a package</span></a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>1.1. <a href="wiki.pl?AdveneUserGuide#S_lection_du_support_vid_o_Selecting_the_video_data">Sélection du support vidéo / <span class="english">Selecting the video data</span></a></dd>
+<dt> </dt><dd>1.2. <a href="wiki.pl?AdveneUserGuide#Cr_ation_des_annotations_Creating_annotations">Création des annotations / <span class="english">Creating annotations</span></a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>1.2.1. <a href="wiki.pl?AdveneUserGuide#Cr_ation_au_vol_Creation_at_visualization_time">Création au vol / <span class="english">Creation at visualization time</span></a></dd>
+<dt> </dt><dd>1.2.2. <a href="wiki.pl?AdveneUserGuide#Cr_ation_par_import_d_autres_formats_Creation_by_importing_other_formats">Création par import d'autres formats / <span class="english">Creation by importing other formats</span></a></dd>
+<dt> </dt><dd>1.2.3. <a href="wiki.pl?AdveneUserGuide#Cr_ation_par_alignement_d_une_transcription_Creation_by_alignment_transcription">Création par alignement d'une transcription / <span class="english">Creation by alignment transcription</span></a></dd>
+<dt> </dt><dd></dd></dl>
+
+</dd></dl>
+
+2. <a href="wiki.pl?AdveneUserGuide#Visualisation_des_annotations_Visualizing_annotations">Visualisation des annotations / <span class="english">Visualizing annotations</span></a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>2.1. <a href="wiki.pl?AdveneUserGuide#Vue_en_ligne_de_temps_Timeline_view">Vue en ligne de temps / <span class="english">Timeline view</span></a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>2.1.1. <a href="wiki.pl?AdveneUserGuide#Transmutation_d_annotations_Annotation_transmutation">Transmutation d'annotations / <span class="english">Annotation transmutation</span></a></dd>
+<dt> </dt><dd></dd></dl>
+
+2.2. <a href="wiki.pl?AdveneUserGuide#Vue_arborescente_Tree_view">Vue arborescente / <span class="english">Tree view</span></a></dd>
+<dt> </dt><dd>2.3. <a href="wiki.pl?AdveneUserGuide#Vue_hypertexte_Hypertext_view">Vue hypertexte / <span class="english">Hypertext view</span></a></dd>
+<dt> </dt><dd>2.4. <a href="wiki.pl?AdveneUserGuide#Vue_transcription_Transcription_view">Vue transcription / <span class="english">Transcription view</span></a></dd>
+<dt> </dt><dd></dd></dl>
+
+3. <a href="wiki.pl?AdveneUserGuide#Syntaxe_TALES_TALES_syntax">Syntaxe TALES / <span class="english">TALES syntax</span></a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>3.1. <a href="wiki.pl?AdveneUserGuide#Le_mod_le_Advene_The_Advene_model">Le modèle Advene / <span class="english">The Advene model</span></a></dd>
+<dt> </dt><dd>3.2. <a href="wiki.pl?AdveneUserGuide#Utilisation_de_TALES_dans_le_serveur_web_TALES_use_in_the_web_server">Utilisation de TALES dans le serveur web / <span class="english">TALES use in the web server</span></a></dd>
+<dt> </dt><dd>3.3. <a href="wiki.pl?AdveneUserGuide#Utilisation_de_TALES_dans_les_vues_statiques_TALES_use_in_the_static_views">Utilisation de TALES dans les vues statiques / <span class="english">TALES use in the static views</span></a></dd>
+<dt> </dt><dd>3.4. <a href="wiki.pl?AdveneUserGuide#Utilisation_de_TALES_dans_les_vues_dynamiques_TALES_use_in_the_dynamic_views">Utilisation de TALES dans les vues dynamiques / <span class="english">TALES use in the dynamic views</span></a></dd>
+<dt> </dt><dd>3.5. <a href="wiki.pl?AdveneUserGuide#Utilisation_de_TALES_dans_les_requ_tes_TALES_use_in_the_queries">Utilisation de TALES dans les requêtes / <span class="english">TALES use in the queries</span></a></dd>
+<dt> </dt><dd></dd></dl>
+
+4. <a href="wiki.pl?AdveneUserGuide#Vues_dynamiques_Dynamic_views">Vues dynamiques / <span class="english">Dynamic views</span></a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>4.1. <a href="wiki.pl?AdveneUserGuide#D_finition_Definition">Définition / <span class="english">Definition</span></a></dd>
+<dt> </dt><dd>4.2. <a href="wiki.pl?AdveneUserGuide#D_marrage_automatique_Automatic_launching">Démarrage automatique / <span class="english">Automatic launching</span></a></dd>
+<dt> </dt><dd></dd></dl>
+
+5. <a href="wiki.pl?AdveneUserGuide#Vues_statiques_Static_views">Vues statiques / <span class="english">Static views</span></a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>5.1. <a href="wiki.pl?AdveneUserGuide#Vue_statique_par_d_faut_Default_static_view">Vue statique par défaut / <span class="english">Default static view</span></a></dd>
+<dt> </dt><dd></dd></dl>
+
+6. <a href="wiki.pl?AdveneUserGuide#D_finition_d_un_sch_ma_Schema_definition">Définition d'un schéma / <span class="english">Schema definition</span></a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>6.1. <a href="wiki.pl?AdveneUserGuide#Cr_ation_d_un_nouveau_sch_ma_New_schema_creation">Création d'un nouveau schéma / <span class="english">New schema creation</span></a></dd>
+<dt> </dt><dd>6.2. <a href="wiki.pl?AdveneUserGuide#Ajout_d_un_type_d_annotation_un_sch_ma_Adding_an_annotation_type_to_a_schema">Ajout d'un type d'annotation à un schéma / <span class="english">Adding an annotation type to a schema</span></a></dd>
+<dt> </dt><dd>6.3. <a href="wiki.pl?AdveneUserGuide#Ajout_d_un_type_de_relation_un_sch_ma_Adding_an_relation_type_to_a_schema">Ajout d'un type de relation à un schéma / <span class="english">Adding an relation type to a schema</span></a></dd>
+<dt> </dt><dd></dd></dl>
+
+7. <a href="wiki.pl?AdveneUserGuide#dition_des_l_ments_du_recueil_Package_elements_edition">Édition des éléments du recueil / <span class="english">Package elements edition</span></a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>7.1. <a href="wiki.pl?AdveneUserGuide#Points_communs_aux_l_ment_d_un_recueil_Shared_attributes">Points communs aux élément d'un recueil / <span class="english">Shared attributes</span></a></dd>
+<dt> </dt><dd>7.2. <a href="wiki.pl?AdveneUserGuide#Attributs_sp_cifique_aux_recueils_Package_specific_attributes">Attributs spécifique aux recueils / <span class="english">Package specific attributes</span></a></dd>
+<dt> </dt><dd>7.3. <a href="wiki.pl?AdveneUserGuide#Types_d_annotation_Annotation_types">Types d'annotation / <span class="english">Annotation types</span></a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>7.3.1. <a href="wiki.pl?AdveneUserGuide#Forme_structur_e_simpliste_Simplistic_structured_form">Forme structurée simpliste / <span class="english">Simplistic structured form</span></a></dd>
+<dt> </dt><dd></dd></dl>
+
+7.4. <a href="wiki.pl?AdveneUserGuide#Types_de_relation_Relation_types">Types de relation / <span class="english">Relation types</span></a></dd>
+<dt> </dt><dd>7.5. <a href="wiki.pl?AdveneUserGuide#Vues_Views">Vues / <span class="english">Views</span></a></dd>
+<dt> </dt><dd></dd></dl>
+
+</dd></dl>
+
+
+<p>
+<p>
+<h2><a name="Cr_ation_d_un_recueil_Creating_a_package"></a>1. Création d'un recueil / <span class="english">Creating a package</span></h2>
+
+<p>
+Lors du lancement de l'application, un recueil de base est chargé. Il
+contient un schéma appelé <em>Texte simple</em> qui définit un 
+type d'annotation <em>Annotation texte</em> et un type de relation
+<em>Relation élémentaire</em>. Il est donc possible de commencer
+immédiatement à annoter une vidéo avec ce schéma initial.
+<p>
+</span><span class="english">
+When the application is launched, a base package is loaded. It contains 
+one schema <em>Texte simple</em> (Simple text), which defines 
+one annotation type <em>Annotation texte</em> (Textual annotation) and one relation type 
+<em>Relation élémentaire</em> (Elementary relation). It is thus possible to 
+immediately annotate a video  with this initial schema.
+<p>
+<h3><a name="S_lection_du_support_vid_o_Selecting_the_video_data"></a>1.1. Sélection du support vidéo / <span class="english">Selecting the video data</span></h3>
+
+<p>
+Le choix du support vidéo s'effectue à travers l'interface graphique
+de l'application. On peut choisir un DVD par l'icône représentant un
+DVD (il faut alors préciser le titre et le chapitre où le film
+commence), ou bien un fichier vidéo par l'icône représentant une
+touche <em>Eject</em>.
+<p>
+<p>
+</span><span class="english">
+The choice of the video data is done through the application Graphical User Interface (GUI). It is possible to select either a DVD, through the DVD icon (and the select the appropriate title and chapter), or a video file through the <em>Eject</em> icon.
+<p>
+Une fois le support choisi, il est possible de naviguer dans le film
+par le biais des boutons de navigation (lecture, pause, avance et
+retour rapide) et par le biais du curseur indiquant la position
+courante.
+<p>
+</span><span class="english">
+Once the video data selected, it is possible to navigate in the movie with the navigation buttons (play, pause, fast forward and rewind) and with the cursor. 
+<p>
+<h3><a name="Cr_ation_des_annotations_Creating_annotations"></a>1.2. Création des annotations / <span class="english">Creating annotations</span></h3>
+
+<p>
+<h4><a name="Cr_ation_au_vol_Creation_at_visualization_time"></a>1.2.1. Création au vol / <span class="english">Creation at visualization time</span></h4>
+
+<p>
+Les annotations se créent en cours de visualisation. Au début du
+fragment vidéo concernant l'annotation, il faut utiliser (en faisant
+attention que la fenêtre de l'application soit active) la touche
+<em>Entrée</em> ou bien la touche <em>Espace</em>. 
+<p>
+</span><span class="english">
+The annotations are created in course of visualization. At the beginning of the annotation, it is necessary to use (in attention that the window of the application is active) the key <em>Enter</em> or the <em>Space</em> key.
+<p>
+Ces deux touches permettent de rentrer en mode d'édition d'une
+nouvelle annotation. La différence entre les deux est que la touche
+<em>Espace</em> met automatiquement le film en pause.
+<p>
+</span><span class="english">
+Both keys change to the edition mode of a new annotation. The difference is that the key <em>Space</em> automatically puts the film in pause.
+<p>
+Il est possible d'utiliser les commandes de navigation dans le film
+pendant l'édition d'une annotation. La touche <em>Tab</em> permet notamment
+de mettre le film en pause ou bien de le relancer.
+<p>
+</span><span class="english">
+It is possible to use the film navigation icons during the edition of an annotation. The <em>Tab</em> key in particular allows you to put the film in pause or to start it again.
+<p>
+À la fin du fragment vidéo concernant l'annotation, on valide
+l'annotation par la touche <em>Entrée</em>.
+<p>
+</span><span class="english">
+At the end of the video fragment concerning the annotation, you can validate the annotation by the key <em>Enter</em>.
+<p>
+Deux remarques :
+<UL >
+<li> on voit que cette méthode ne permet pas d'éditer simultanément plusieurs nouvelles annotations
+<li> dans le cas où plusieurs types d'annotation sont définis dans le  recueil, il faut au préalable (avant le début de l'édition) choisir  le type d'annotation que l'on souhaite créer en le choisissant dans  la liste intitulée <em>Type courant</em>.
+</UL>
+<p>
+</span><span class="english">
+Two notes: 
+<UL >
+<li> This method does not make possible to publish several new annotations simultaneously.
+<li> If several types of annotation are defined in the collection, it is necessary (before the beginning of the edition) to choose the type of annotation which you wishes to create by choosing it in the Current Type list.
+</UL>
+<p>
+<h4><a name="Cr_ation_par_import_d_autres_formats_Creation_by_importing_other_formats"></a>1.2.2. Création par import d'autres formats / <span class="english">Creation by importing other formats</span></h4>
+
+<p>
+Un module d'import permet de générer un ensemble d'annotations (et
+bien souvent également de schémas) à partir d'un fichier dans un autre
+format. Les format supportés pour l'instant (version 0.16) sont :
+<p>
+<UL >
+<li> un format texte élémentaire (fichiers <tt>.txt</tt>), où chaque ligne contient le temps de début, le temps de fin et le contenu de l'annotation, séparés par des espaces.
+<li> le format de sous-titre SRT (fichiers <tt>.srt</tt>).
+<li> le format Xi (fichiers <tt>.xml</tt>)
+<li> le format ELAN (fichiers <tt>.eaf</tt>)
+</UL>
+<p>
+L'import de données s'effectue par le menu <em>Fichier/Importer<a href="wiki.pl?action=edit&id=AdveneUserGuide/Importer" accesskey="e" class=wikipageedit>?</a> un fichier</em>
+<p>
+</span><span class="english">
+The import module can generate a package of annotations (and often also diagrams) from another format file. The formats supported at the moment (version 0.16) are:
+<UL >
+<li> Elementary text (.txt files), where each line contains the time of beginning, the time of the end and the contents of the annotation, separated by spaces. 
+<li> the subtitle format SRT (.srt files). 
+<li> format Xi (xml files)
+<li> the format ELAN (.eaf files).
+</UL>
+<p>
+</span><span class="english">
+You can import external data in the menu <em>File/Import<a href="wiki.pl?action=edit&id=AdveneUserGuide/Import" accesskey="e" class=wikipageedit>?</a> file</em> 
+<p>
+<p>
+<h4><a name="Cr_ation_par_alignement_d_une_transcription_Creation_by_alignment_transcription"></a>1.2.3. Création par alignement d'une transcription / <span class="english">Creation by alignment transcription</span></h4>
+
+<p>
+Il est possible, à partir d'une transcription textuelle du contenu de
+la vidéo, de poser simplement des bornes temporelles et de générer à
+partir du texte et des bornes temporelles des annotations. Pour accéder à cette 
+fonctionnalité, il faut utiliser le menu
+<em>Fichier/Importer<a href="wiki.pl?action=edit&id=AdveneUserGuide/Importer" accesskey="e" class=wikipageedit>?</a> une transcription</em>.
+<p>
+</span><span class="english">
+It is possible, from a textual transcription of the contents of the video, to simply pose temporal terminals, to generate annotations, from the text with temporal terminals of the annotations. To reach this function, it is necessary to use the menu <em>Fichier/Importer<a href="wiki.pl?action=edit&id=AdveneUserGuide/Importer" accesskey="e" class=wikipageedit>?</a> une transcription</em>.
+<p>
+Après avoir lancé la lecture de la vidéo, on pose des bornes en
+cliquant dans le texte aux bons moments. Un décalage est automatiquement 
+ajouté pour tenir compte du temps de réaction. Le décalage est mis par défaut à la 
+valeur -200 ms, et il est possible de la modifier. Il est possible de supprimer
+des bornes posées par erreur en cliquant dessus. Par ailleurs, un clic
+droit sur une borne permet d'accéder directement au temps associé dans
+la vidéo, ainsi que d'effectuer de petits ajustements du temps associé. 
+Il est également possible de signaler que tout ce qui suivra cette 
+borne (jusqu'à la prochaine) ne doit pas servir à la génération des 
+annotations. Ceci est signalé visuellement par un changement de couleur
+de la borne.
+<p>
+</span><span class="english">
+After launching the video, one can drop a terminal just by clicking in the text at the right moment. A time difference
+is automatically added, for taking into account reaction time. Its default value is -200ms, but it is possible to adjust it.
+Clicking on a false terminal deletes it. A right click on a terminal gives access to several commands: move the player 
+to the moment it indicates, make temporal adjustments. It is also possible to mark the terminal to indicate 
+that advene should not to take into account the text between this terminal and the following. Marking the terminal changes
+its color.
+<p>
+À la fin de l'édition des bornes, cliquez sur <em>Convertir</em> pour
+convertir le texte en annotations, dans un type choisi. A tout moment, 
+vous pouvez enregistrer et recharger votre travail dans la fenêtre de transcription.
+<p>
+</span><span class="english">
+After finishing editing the terminals, click on <em>convert</em> to convert 
+the text into annotations of one type. At any moment, you can save and 
+reload your transcription work in the import transcription window.
+<p>
+<h2><a name="Visualisation_des_annotations_Visualizing_annotations"></a>2. Visualisation des annotations / <span class="english">Visualizing annotations</span></h2>
+
+<p>
+Après avoir créé quelques annotations, il devient possible de les
+visualiser par le biais de l'interface graphique et par le biais du
+serveur web. Nous allons détailler quelques un de ces modules de
+visualisation.
+<p>
+<h3><a name="Vue_en_ligne_de_temps_Timeline_view"></a>2.1. Vue en ligne de temps / <span class="english">Timeline view</span></h3>
+
+<p>
+La vue en ligne de temps est accessible par le biais du menu
+<em>Vue</em>. Elle offre une représentation linéaire des annotations, où
+chaque ligne représente un type d'annotation. Le curseur en bas à
+gauche de la fenêtre indique la portion du film représentée à
+l'écran. Pour représenter l'intégralité du film, il faut donc le fixer
+à 1. Un click gauche sur les marques temporelles en haut double le facteur
+de zoom, alors qu'un click droit le réduit de moitié.  Les touches
+1 à 9 permettent également de zoomer, de 1 pour toute la longueur
+à 9 pour le plus petit facteur. Pour accéder à un 
+moment quelconque de la vidéo, il suffit de cliquer
+avec le bouton droit dans la fenêtre (Windows: ne fonctionne pas).
+<p>
+</span><span class="english">
+The timeline view shows a linear representation of the annotations, where
+each line corresponds to an annotation type. The slider in the lower 
+left-hand corner of the window indicates the zoom factor. A click on 
+the timestamps marks that are on the top of the window changes the 
+zoom factor: left-click zooms in, right-click zooms out. The keys 1 to 9
+also set the zoom factor (1 displays the whole timeline, 9 displays 
+a small fraction of the timeline)
+<p>
+<h4><a name="Transmutation_d_annotations_Annotation_transmutation"></a>2.1.1. Transmutation d'annotations / <span class="english">Annotation transmutation</span></h4>
+
+<p>
+Pour changer le type d'une annotation, il suffit d'effectuer un glisser-déplacer sur le type d'annotation correspondant dans la légende de la ligne de temps. Si l'icône de suppression est active, l'annotation d'origine sera supprimée ; sinon, elle sera simplement dupliquée avec un nouveau type.
+<p>
+</span><span class="english">
+To change the type of an annotation, just drag and drop one annotation upon the 
+desired annotation type on the right of the windows. If the delete icon is 
+activated, the orginal annotation will be deleted, otherwise, it will simply
+be duplicated in a new type.
+<p>
+<h3><a name="Vue_arborescente_Tree_view"></a>2.2. Vue arborescente / <span class="english">Tree view</span></h3>
+
+<p>
+Une vue arborescente du contenu du recueil est accessible dans la
+fenêtre principale de l'application. Il est également possible d'en
+ouvrir de nouvelles par le biais du menu <em>Vue</em>.
+<p>
+L'intérêt de cette vue est de permettre la création de nouveaux
+éléments dans le recueil, par le biais des menus contextuels
+accessible par un clic droit sur les éléments.
+<p>
+Le menu contextuel du recueil (élément racine de l'arbre) permet de
+créer de nouveaux schémas, de nouvelles vues ou de nouvelles requêtes.
+<p>
+Le menu contextuel des schémas permet de créer de nouveaux types
+<PRE >
+ d'annotation ou de relation à l'intérieur du schéma concerné.
+</PRE>
+<p>
+<h3><a name="Vue_hypertexte_Hypertext_view"></a>2.3. Vue hypertexte / <span class="english">Hypertext view</span></h3>
+
+<p>
+Un serveur web intégré à l'application, utilisant le mécanisme des
+<PRE >
+ vues du modèle Advene, permet d'accéder au contenu du recueil par le
+ biais d'un simple navigateur web.
+</PRE>
+<p>
+Pour cela, on peut utiliser l'élément <em>Lancer le navigateur web</em> du
+menu <em>Vue</em> ou bien indiquer directement l'URL adéquate au navigateur:
+<p>
+<a href="http://localhost:1234/packages/advene/">http://localhost:1234/packages/advene/</a>
+<p>
+Des vues définies par défaut dans le recueil modèle permettent de
+naviguer à l'intérieur du recueil.
+<p>
+<h3><a name="Vue_transcription_Transcription_view"></a>2.4. Vue transcription / <span class="english">Transcription view</span></h3>
+
+<p>
+Cette vue permet d'afficher l'ensemble des annotations d'un même type
+concaténées de manière à produire un texte. Sa principale utilité est
+de présenter un ensemble d'annotation transcrivant un dialogue de
+manière à localiser une annotation dans l'ensemble du texte.
+<p>
+On accède à cette vue de deux manières : soit en cliquant avec le
+bouton droit sur un type d'annotation dans une vue arborescente, et en
+choisissant l'item <em>Transcription</em>, soit à partir du menu <em>Vues</em> de
+l'application principale.
+<p>
+<p>
+-- <a name="TALESSyntax"></a>
+<h2><a name="Syntaxe_TALES_TALES_syntax"></a>3. Syntaxe TALES / <span class="english">TALES syntax</span></h2>
+
+<p>
+La syntaxe TALES (<em>TAL Expression Syntax</em>) est utilisée dans plusieurs
+composants d'Advene pour adresser des éléments du modèle Advene :
+<p>
+<UL >
+<li> dans le serveur web (construction des adresses)
+<li> dans les vues dynamiques (définition des conditions et paramètres des actions)
+<li> dans les vues statiques (motifs de remplacement)
+<li> dans les requètes simples (définition des conditions)
+</UL>
+<p>
+Il est donc important de comprendre cette syntaxe, et le modèle
+sous-jacent, pour pouvoir profiter au mieux des possibilités offertes
+par Advene.
+<p>
+<h3><a name="Le_mod_le_Advene_The_Advene_model"></a>3.1. Le modèle Advene / <span class="english">The Advene model</span></h3>
+
+<p>
+Hiérarchie (package, schemas, annotationTypes, relationTypes, annotations,
+relations, views) FIXME
+<p>
+Cette hiérarchie peut être considérée comme un système de fichiers,
+dans lequel on va trouver des éléments. Une expression TALES
+correspondra alors à un chemin d'accès dans ce système de fichiers.
+<p>
+Une particularité d'Advene est que des éléments peuvent être accédés
+par plusieurs chemins. Ainsi, une annotation se trouvera dans le
+"répertoire" <tt>package/annotations</tt> et dans le "répertoire"
+<tt>package/annotationTypes/simple''text/annotations</tt>.
+<p>
+<h3><a name="Utilisation_de_TALES_dans_le_serveur_web_TALES_use_in_the_web_server"></a>3.2. Utilisation de TALES dans le serveur web / <span class="english">TALES use in the web server</span></h3>
+
+<p>
+Le serveur web intégré à Advene interprète directement des expressions
+TALES. Il est donc possible de naviguer à l'intérieur de la structure
+de données pour explorer son contenu.
+<p>
+Le point de départ des expressions TALES est l'URL
+<a href="http://localhost:1234/packages/advene/">http://localhost:1234/packages/advene/</a>
+<p>
+Ce qui suit sera évalué comme une expression TALES.
+<p>
+Ainsi, 
+<p>
+<a href="http://localhost:1234/packages/advene/annotationTypes/simple''text/annotations/a4">http://localhost:1234/packages/advene/annotationTypes/simple''text/annotations/a4</a>
+<p>
+renverra l'annotation d'identificateur <tt>a4</tt> contenue dans les annotations de type
+<tt>simple''text</tt>.
+<p>
+<h3><a name="Utilisation_de_TALES_dans_les_vues_statiques_TALES_use_in_the_static_views"></a>3.3. Utilisation de TALES dans les vues statiques / <span class="english">TALES use in the static views</span></h3>
+
+<p>
+Les vues statiques (UTBV) permettent de spécifier un mode de rendu
+pour un élément quelconque du modèle. Elles consistent en des modèles
+de documents (<em>templates</em>) utilisant la syntaxe TAL. TAL utilise TALES
+pour spécifier quel contenu doit être inséré aux endroits précisés.
+<p>
+Les éléments de base des expressions TALES sont:
+<p>
+<UL >
+<li> <tt>here</tt> : l'élément courant
+<li> <tt>request</tt> : les paramètres passés à la vue (via l'interface web, par une expression du type <tt><a href="http://.../element?foo">http://.../element?foo</a></tt>1&amp;bar<tt>toto</tt>
+<li> <tt>options</tt> : un ensemble d'éléments optionnels accessibles :
+<UL >
+<li> <tt>options/package''url</tt> : l'URL du recueil courant
+<li> <tt>options/snapshot</tt> : un accès aux snapshots mémorisés
+<li> <tt>options/config</tt> : des options de configuration
+</UL>
+</UL>
+<p>
+-- <a name="STBVRootElements"></a>
+<h3><a name="Utilisation_de_TALES_dans_les_vues_dynamiques_TALES_use_in_the_dynamic_views"></a>3.4. Utilisation de TALES dans les vues dynamiques / <span class="english">TALES use in the dynamic views</span></h3>
+
+<p>
+Des éléments semblables sont disponibles dans les vues dynamiques,
+afin de spécifier à la fois les conditions devant être remplies et les
+paramètres des actions à effectuer. Par contre, plus d'éléments "de
+base" sont accessibles, dont certains ne sont définis que lors
+d'événements particuliers :
+<p>
+<UL >
+<li> <tt>package</tt> : le recueil courant
+<li> <tt>annotation</tt> : l'annotation ayant déclenché l'événement
+<li> <tt>relation</tt> : la relation ayant déclenché l'événement
+<li> <tt>activeAnnotations</tt> : la liste des annotations actives
+<li> <tt>player</tt> : le lecteur vidéo
+<li> <tt>event</tt> : le nom de l'événement
+</UL>
+<p>
+-- <a name="QueryRootElements"></a>
+<p>
+<h3><a name="Utilisation_de_TALES_dans_les_requ_tes_TALES_use_in_the_queries"></a>3.5. Utilisation de TALES dans les requêtes / <span class="english">TALES use in the queries</span></h3>
+
+<p>
+Les requêtes utilisent également une syntaxe TALES permettant de
+spécifier
+<PRE >
+   1. l'ensemble des éléments sur lequel on va appliquer un filtre
+   2. les conditions de prise en compte d'un élément
+   3. la valeur de retour
+</PRE>
+<p>
+Pour les deux derniers paramètres, un élément de base supplémentaire
+est défini. Il a pour nom <tt>element</tt> et prend la valeur de l'élément
+testé. Rappelons que l'élément de base <em>here</em> correspond alors à la
+valeur de l'élément sur lequel on applique la requète.
+<p>
+Ainsi, pour obtenir les annotations de même type précédant
+l'annotation sur laquelle on applique la requête, et en retourner les
+identificateurs, on utilise la syntaxe suivante :
+<p>
+<UL >
+<li> Ensemble d'origine: <tt>here/type/annotations</tt>
+<li> Condition:  <tt>element</tt> <em>is before (Allen)</em> <tt>here</tt>
+<li> Valeur de retour: <tt>element/id</tt>
+</UL>
+<p>
+et appliquer la requête sur l'annotation désirée par le biais d'une
+expression TALES :
+<tt>/package/annotations/last/query/annotations''before</tt>
+<p>
+<h2><a name="Vues_dynamiques_Dynamic_views"></a>4. Vues dynamiques / <span class="english">Dynamic views</span></h2>
+
+<p>
+<h3><a name="D_finition_Definition"></a>4.1. Définition / <span class="english">Definition</span></h3>
+
+<p>
+Une vue dynamique est un ensemble de règles, qui seront appliquées lors de la lecture d'une vidéo. La lecture de la vidéo, couplée à la structure d'annotation, permet de générer un certain nombre d 'événements (<tt>AnnotationBegin<a href="wiki.pl?action=edit&id=AnnotationBegin" accesskey="e" class=wikipageedit>?</a></tt>, <tt>AnnotationEnd<a href="wiki.pl?action=edit&id=AnnotationEnd" accesskey="e" class=wikipageedit>?</a></tt>, <tt>PlayerPause<a href="wiki.pl?action=edit&id=PlayerPause" accesskey="e" class=wikipageedit>?</a></tt>, etc). Une règle va préciser 
+<OL >
+<li> L'événement qui peut la déclencher
+<li> Un ensemble de conditions à vérifier
+<li> Un ensemble d'actions à effectuer
+</OL>
+<p>
+La syntaxe des conditions utilise la [[TALESSyntax][syntaxe TALES]], enrichie d'un certain nombre d'[<a name="STBVRootElements"></a>[éléments racine]] spécifiques au contexte (l'annotation déclenchante, l'événement lui-même, etc).
+<p>
+L'utilisation la plus courante est de filtrer l'événement <tt>AnnotationBegin<a href="wiki.pl?action=edit&id=AnnotationBegin" accesskey="e" class=wikipageedit>?</a></tt> sur un type d'annotation particulier, ce qui donne la syntaxe suivante :
+<p>
+<tt>annotation/type</tt> <em>est égal à</em> <tt>packages/annotationTypes/foobar</tt>
+<p>
+-- <a name="DefaultSTBV"></a>
+<h3><a name="D_marrage_automatique_Automatic_launching"></a>4.2. Démarrage automatique / <span class="english">Automatic launching</span></h3>
+
+<p>
+Il est possible de spécifier une vue dynamique par défaut, qui sera activée dès le chargement du recueil. Pour cela, il faut éditer le recueil lui-même (via la vue en arbre) et indiquer dans le champ <em>Vue dynamique par défaut</em> l'identificateur de la vue dynamique.
+<p>
+Si on souhaite de plus effectuer des actions particulières (affichage d'un message, démarrage du lecteur vidéo, etc), il suffit de spécifier dans la vue dynamique une règle réagissant à l'événement <em>Activation de la vue</em>.
+<p>
+<h2><a name="Vues_statiques_Static_views"></a>5. Vues statiques / <span class="english">Static views</span></h2>
+
+<p>
+-- <a name="DefaultUTBV"></a>
+<h3><a name="Vue_statique_par_d_faut_Default_static_view"></a>5.1. Vue statique par défaut / <span class="english">Default static view</span></h3>
+
+<p>
+Il est possible de spécifier une vue statique par défaut, qui sera chargée lors de l'appui sur le bouton <em>Navigateur web</em> dans la barre d'outils. Pour cela, il faut éditer le recueil lui-même (via la vue en arbre) et indiquer dans le champ <em>Vue statique par défaut</em> 
+l'identificateur de la vue.
+<p>
+<h2><a name="D_finition_d_un_sch_ma_Schema_definition"></a>6. Définition d'un schéma / <span class="english">Schema definition</span></h2>
+
+<p>
+<h3><a name="Cr_ation_d_un_nouveau_sch_ma_New_schema_creation"></a>6.1. Création d'un nouveau schéma / <span class="english">New schema creation</span></h3>
+
+<p>
+La création d'un nouveau schéma s'effectue à partir de la vue arborescente. Il faut cliquer-droit sur le recueil et sélectionner <em>Créer un nouveau schéma</em>, puis fournir les informations demandées.
+<p>
+<h3><a name="Ajout_d_un_type_d_annotation_un_sch_ma_Adding_an_annotation_type_to_a_schema"></a>6.2. Ajout d'un type d'annotation à un schéma / <span class="english">Adding an annotation type to a schema</span></h3>
+
+<p>
+La création d'un nouveau type d'annotation s'effectue à partir de la vue arborescente. Il faut cliquer-droit sur le schéma dans lequel on souhaite créer le nouveau type et sélectionner <em>Créer un nouveau type d'annotation</em>, puis fournir les informations demandées.
+<p>
+<h3><a name="Ajout_d_un_type_de_relation_un_sch_ma_Adding_an_relation_type_to_a_schema"></a>6.3. Ajout d'un type de relation à un schéma / <span class="english">Adding an relation type to a schema</span></h3>
+
+<p>
+La création d'un nouveau type de relation s'effectue à partir de la vue arborescente. Il faut cliquer-droit sur le schéma dans lequel on souhaite créer le nouveau type et sélectionner <em>Créer un nouveau type de relation</em>, puis fournir les informations demandées.
+<p>
+<h2><a name="dition_des_l_ments_du_recueil_Package_elements_edition"></a>7. Édition des éléments du recueil / <span class="english">Package elements edition</span></h2>
+
+<p>
+L'édition des éléments du recueil est acccessible à partir des différentes vues. Nous conseillons dans un premier temps d'utiliser la vue arborescente afin de percevoir la structure des informations.
+<p>
+<h3><a name="Points_communs_aux_l_ment_d_un_recueil_Shared_attributes"></a>7.1. Points communs aux élément d'un recueil / <span class="english">Shared attributes</span></h3>
+
+<p>
+L'ensemble des éléments du modèle possèdent les attributs suivants :
+<p>
+<PRE >
+   URI: l'URI de l'élément (i.e. l'URI du recueil + l'identificateur de l'élément)
+</PRE>
+<p>
+<PRE >
+   id: l'identificateur de l'élément (sauf pour le recueil)
+</PRE>
+<p>
+<PRE >
+   Titre: le titre de l'élément (qui sera affiché de préférence à l'identificateur dans les  différentes vues)
+</PRE>
+<p>
+<PRE >
+   Auteur: le créateur de l'élément
+</PRE>
+<p>
+<PRE >
+   Date: la date de création de l'élément
+</PRE>
+<p>
+<PRE >
+   Description: une description en quelques mots de l'élément
+</PRE>
+<p>
+Les attributs <tt>URI</tt> et <tt>id</tt> ne sont pas modifiables (ils se retrouvent donc en gras). 
+<p>
+<h3><a name="Attributs_sp_cifique_aux_recueils_Package_specific_attributes"></a>7.2. Attributs spécifique aux recueils / <span class="english">Package specific attributes</span></h3>
+
+<p>
+Les recueils possèdent deux attributs supplémentaires, <em>[<a name="DefaultSTBV"></a>[Vue dynamique par défaut]]</em> et <em>[<a name="DefaultUTBV"></a>[Vue statique par défaut]]</em>, qui permettent de spécifier des vues à activer par défaut lors du chargement du recueil ou de l'activation du navigateur web. 
+<p>
+<h3><a name="Types_d_annotation_Annotation_types"></a>7.3. Types d'annotation / <span class="english">Annotation types</span></h3>
+
+<p>
+Les types d'annotations permettent de spécifier de plus le type MIME du contenu de leurs annotations (champ <em>Type MIME</em>), ainsi qu'une expression de génération de la représentation des annotations (champ <em>Représentation</em>).
+<p>
+Pour le premier champ, les valeurs sont typiquement
+<UL >
+<li> <tt>text/plain</tt>: du texte simple
+<li> <tt>application/x-advene-structured</tt>: une [<a name="AdveneStructured"></a>[forme structurée simpliste]]
+<li> <tt>text/xml</tt>: du XML
+</UL>
+<p>
+Le second champ (<em>Représentation</em>) permet d'indiquer une expression à appliquer à l'annotation du type édité. Son utilisation typique est dans le cas d'un type d'annotation structuré (sous la forme structurée simpliste, ou en XML, etc), où on ne veut pas représenter les annotations correspondantes par l'intégralité de leur contenu. On peut alors préciser le champ à utiliser pour construire la représentation, via une expression TALES.
+<p>
+Ainsi, une annotation structurée possédant les champs <tt>titre</tt>, <tt>contenu</tt> et <tt>numero</tt> pourra utiliser comme représentation
+<p>
+<tt>here/content/parsed/titre</tt>
+<p>
+voire
+<p>
+<tt>string:${here/content/parsed/numero}: ${here/content/parsed/titre}</tt>
+<p>
+-- <a name="AdveneStructured"></a>
+<h4><a name="Forme_structur_e_simpliste_Simplistic_structured_form"></a>7.3.1. Forme structurée simpliste / <span class="english">Simplistic structured form</span></h4>
+
+<p>
+La forme structurée simpliste permet de créer facilement des annotations contenant différents champs. Pour cela, on crée autant de lignes que de champs, où chaque ligne est de la forme <pre>nom=valeur</pre>
+<p>
+Ainsi, une annotation structurée possédant les champs <tt>titre</tt>, <tt>contenu</tt> et <tt>numero</tt> pourra contenir
+<pre>
+numero=42
+titre=Surprise !
+contenu=Le héros entre dans la pièce et découvre tous ses amis.
+</pre>
+<p>
+L'exploitation de ce type de contenu s'effectue dans les expressions TALES par le biais de la méthode <tt>parsed</tt> appliquée au contenu. Ainsi, pour accéder au numéro du plan, on utilise la syntaxe <tt>here/content/parsed/numero</tt>
+<p>
+<h3><a name="Types_de_relation_Relation_types"></a>7.4. Types de relation / <span class="english">Relation types</span></h3>
+
+<p>
+Les types de relations permettent de contraindre le type des annotations mises en relation. Cela s'effectue dans la fenêtre d'édition via le champ <em>Membres</em> où il est possible d'insérer, de supprimer et de réordonner les types d'annotations.
+<p>
+<h3><a name="Vues_Views"></a>7.5. Vues / <span class="english">Views</span></h3>
+
+<p>
+Les vues sont applicables sur tout élément du modèle. Il est possible de contraindre leur utilisation à certains types d'éléments en précisant les champs <em>Classe</em> et <em>Type</em>. Le champ <em>Classe</em> est par défaut fixé à <tt>'''</tt>, indiquant le caractère générique de la vue. Si on souhaite restreindre son application à un recueil, il faut indiquer <tt>package</tt>. Les différentes valeurs possibles sont :
+<UL >
+<li> <tt>package</tt>
+<li> <tt>schema</tt>
+<li> <tt>annotation-type</tt>
+<li> <tt>relation-type</tt>
+<li> <tt>view</tt>
+<li> <tt>annotation</tt>
+<li> <tt>relation</tt>
+<li> <tt>list</tt> : Dans ce cas, on peut préciser le type des éléments contenus dans la liste, dans le champ <em>Type</em>
+</UL>
+<p>
+Chaque vue possède un type MIME, définissant son contenu. Ce champ contient généralement les valeurs <tt>text/html</tt> (du HTML), <tt>image/svg+xml</tt> (du SVG) ou <tt>text/plain</tt> (du simple texte).
+<p>
+Un cas particulier est celui des vues dynamiques, qui utilisent un type interne : <tt>application/x-advene-ruleset</tt>, et doivent s'appliquer a un recueil.
+<p>
+</div><hr class=wikilinefooter>
+Last edited March 13, 2005 7:38 pm by
+OlivierAubert</div></body></html>

@@ -1,3 +1,5 @@
+* STBV: add include facility, to include basic STBVs
+
 * webserver: implement a wiki-like syntax in views that dynamically generates links to Advene elements/TALES expressions (define a application/x-advene-wiki that will get converted into a 
 
 * timeline: add init parameter "whole package" (or None: if self.list is None, use self.controller.package.annotations)
@@ -60,9 +62,6 @@ common mime-types -> wait for gtk2.6 with CellRendererCombo
   * implement get_aspect_ratio (or get_dimensions ?)
   * implement get_api_version()
   * implement get/set_rate
-
-* TranscriptionEdit: handle drag'n drop on marks to relocate them. At
-least, implement a -1/+1 character.
 
 * GUI views: convert action buttons to toolbars
 

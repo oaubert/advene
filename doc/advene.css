@@ -1,0 +1,85 @@
+body {
+	margin-top: 0px;
+	margin-right: 0px;
+	padding-top: 0px; padding-bottom: 0px; 
+	padding-left: 0px; padding-right: 0px; 
+	font-family: sans-serif, Arial;
+       	background-color: white; 
+	}
+
+a:link {
+	font-weight:bold;
+	}	
+
+a:visited {
+	font-weight:bold;
+	}
+
+a:active {
+	font-weight:bold;
+	}
+
+a:hover {
+	font-weight:bold;
+	}
+
+h1 { text-align: center; }
+h2 {
+  color: black; 
+  font-weight: bold;
+  font-variant: small-caps;
+  padding: 0pt 0pt; margin: 2pt 0pt;
+  text-align: center; 
+  border-top: solid thin;
+  border-bottom: solid thin;
+}
+h3 {
+  color: black; 
+  padding: 0pt 0pt;
+  margin: 0pt 0pt; 
+}
+p { text-align: justify; }
+p.figure { text-align: center; }
+p.cartouche { text-align: right;
+		width: 33%;
+		font-size: small;
+		padding: 5px 5px 5px 5px;
+		border-width: 1px;
+		border-style: solid;
+		}
+
+span.en { font-style: italic; }
+
+div.menu { border: solid thin;
+	   text-align: center;
+  	   background-color: #bbbbff;
+	   margin-bottom: 1em;
+	}
+
+div.header {
+	text-align: center;
+	max-width: 80%;
+	background-color: #bbbbff;
+	}	
+
+div.header-right {
+	position: absolute;
+	top: 1em;
+	right: 1em;
+	}
+
+div.footer {
+	border-top: solid thin;
+	text-align: right;
+}
+
+div.contents {
+	margin: .5em .5em .5em .5em;
+}
+
+.francais {  background-color:#9999ff; } 
+
+.english { background-color:#99ff99; }
+
+.question { background-color:#ff9999; }
+
