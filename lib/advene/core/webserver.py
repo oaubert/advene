@@ -245,6 +245,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             l = self.server.controller.player.playlist_get_list ()
             self.server.controller.player.update_status ()
             self.wfile.write (_("""
+            <h1>Current STBV: %s</h1>
+
             <h1>Player status</h1>
             <table border="1">
             <tr>
@@ -253,9 +255,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             <td>Player status</td><td>%s</td>
             </tr>
             </table>
-            """) % (self.server.controller.player.current_position_value,
-                   self.server.controller.player.stream_duration,
-                   repr(self.server.controller.player.status)))
+            """) % (
+                str(self.server.controller.current_stbv),
+                self.server.controller.player.current_position_value,
+                self.server.controller.player.stream_duration,
+                repr(self.server.controller.player.status)))
                 
             if len(l) == 0:
                 self.wfile.write (_("""<h1>No playlist</h1>"""))
@@ -292,6 +296,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           - C{/media/play}
           - C{/media/pause}
           - C{/media/stop}
+          - C{/media/stbv}
 
         Accessing the folder itself will display the media status.
         
@@ -354,6 +359,18 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         @type l: list
         @param query: the options given in the URL
         @type query: dict
+
+        The X{/media/stbv} element
+        --------------------------
+
+          The C{/media/stbv} element activates a new stbv. It takes one
+          argument (in the form of URL-option):
+
+            - C{id=...} : the STBV id
+
+          If no argument is given, its deactivates the STBV
+
+
         """
         if len(l) == 0:
             # Display media information
@@ -444,6 +461,22 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_redirect(ref)
             elif command == 'stop':
                 self.server.controller.update_status ("stop")
+                ref=self.headers.get('Referer', "/media")
+                self.send_redirect(ref)
+            elif command == 'stbv':
+                if query.has_key ('id'):
+                    stbvid=query['id']
+                    stbvlist=[ v
+                               for v in self.server.controller.package.views
+                               if v.id == stbvid ]
+                    if len(stbvlist) != 1:
+                        self.send_error(404, _('Unknown STBV identifier: %s') % stbvid)
+                        return
+                    else:
+                        stbv=stbvlist[0]
+                else:
+                    stbv=None
+                self.server.controller.activate_stbv(view=stbv)
                 ref=self.headers.get('Referer', "/media")
                 self.send_redirect(ref)
             else:
