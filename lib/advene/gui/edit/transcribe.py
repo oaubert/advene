@@ -241,14 +241,7 @@ class TranscriptionEdit:
         self.controller.modified=True
         self.controller.notify("PackageLoad", package=ti.package)
         self.controller.log(_('Converted from file %s :') % self.sourcefile)
-        kl=ti.statistics.keys()
-        kl.sort()
-        for k in kl:
-            v=ti.statistics[k]
-            if v > 1:
-                self.controller.log('\t%d %ss' % (v, k))
-            else:
-                self.controller.log('\t%d %s' % (v, k))
+        self.converted.log(ti.statistics_formatted())
         # Feedback
         dialog = gtk.MessageDialog(
             None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
