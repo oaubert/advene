@@ -93,7 +93,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image19">
+			<widget class="GtkImage" id="image20">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -115,7 +115,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image20">
+			<widget class="GtkImage" id="image21">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -150,6 +150,12 @@
 		      <property name="label">gtk-quit</property>
 		      <property name="use_stock">True</property>
 		      <signal name="activate" handler="on_exit" last_modification_time="Mon, 27 Jan 2003 14:07:57 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkSeparatorMenuItem" id="separator5">
+		      <property name="visible">True</property>
 		    </widget>
 		  </child>
 		</widget>
@@ -823,24 +829,6 @@
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">True</property>
 		      <signal name="clicked" handler="on_open1_activate" last_modification_time="Wed, 13 Oct 2004 22:38:39 GMT"/>
-		    </widget>
-		    <packing>
-		      <property name="expand">False</property>
-		      <property name="homogeneous">False</property>
-		    </packing>
-		  </child>
-
-		  <child>
-		    <widget class="GtkToolButton" id="toolbutton23">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Package history</property>
-		      <property name="label" translatable="yes">File history</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/filehistory.xpm</property>
-		      <property name="visible_horizontal">True</property>
-		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
-		      <signal name="clicked" handler="on_filehistory_clicked" last_modification_time="Wed, 02 Mar 2005 16:49:35 GMT"/>
 		    </widget>
 		    <packing>
 		      <property name="expand">False</property>

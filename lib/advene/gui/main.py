@@ -504,6 +504,10 @@ class AdveneGUI (Connect):
                     return True
                 gtk.timeout_add(400, sleeper)
 
+        # Populate the file history menu
+        for filename in config.data.preferences['history']:
+            self.append_file_history_menu(filename)
+
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
         gtk.timeout_add (100, self.update_display)
@@ -703,21 +707,25 @@ class AdveneGUI (Connect):
         type_combo.show_all()
         return True
 
-    def build_file_history_menu(self):
+    def append_file_history_menu(self, filename):
+        """Add the filename at the end of the filemenu Glade widget.
+        """
         def open_history_file(button, fname):
             try:
                 self.controller.load_package (uri=fname)
             except OSError, e:
                 self.log(_("Cannot load package %s:\n%s") % (fname, unicode(e)))
             return True
+
+        # We cannot set the widget name to something more sensible (like
+        # filemenu) because Glade resets names when editing the menu
+        menu=self.gui.get_widget('menuitem1_menu')
+        i=gtk.MenuItem(label=unicode(os.path.basename(filename)))
+        i.connect('activate', open_history_file, filename)
+        self.tooltips.set_tip(i, _("Open %s") % filename)
         
-        menu=gtk.Menu()
-        for fname in config.data.preferences['history']:
-            i=gtk.MenuItem(label=os.path.basename(fname))
-            i.connect('activate', open_history_file, fname)
-            menu.append(i)
-        menu.show_all()
-        return menu
+        i.show()
+        menu.append(i)
 
     def build_utbv_menu(self):
         def open_utbv(button, u):
@@ -742,7 +750,7 @@ class AdveneGUI (Connect):
             menu.append(i)
         
         for utbv in c.package.views:
-            if (utbv.matchFilter['class'] in ('*', 'package')
+            if (utbv.matchFilter['class'] == 'package'
                 and utbv.content.mimetype == 'text/html'):
                 i=gtk.MenuItem(label=c.get_title(utbv))
                 i.connect('activate', open_utbv, "%s/view/%s" % (url,
@@ -798,6 +806,14 @@ class AdveneGUI (Connect):
                      vlclib.format_element_name('relation',
                                                 len(self.controller.package.relations))
                      ))
+
+        f=self.controller.package.uri
+        h=config.data.preferences['history']
+        if not f in h:
+            h.append(f)
+            self.append_file_history_menu(f)
+            # Keep the 5 last elements
+            config.data.preferences['history']=h[-5:]
         self.update_gui()
 
         self.update_window_title()
@@ -1434,11 +1450,6 @@ class AdveneGUI (Connect):
                                               default_dir=d)
         if filename:
             self.controller.load_package (uri=filename)
-            h=config.data.preferences['history']
-            if not filename in h:
-                h.append(filename)
-            # Keep the 5 last elements
-            h=h[-5:]
 	return True
 
     def on_save1_activate (self, button=None, data=None):
