@@ -17,6 +17,7 @@ from advene.model.view import View
 from advene.model.query import Query
 from advene.model.bundle import StandardXmlBundle
 
+from advene.gui.views.transcription import TranscriptionView
 import advene.gui.util
 import advene.util.vlclib
 import advene.gui.edit.elements
@@ -95,6 +96,39 @@ class Menu:
             pop.edit ()
         return True
 
+    def display_transcription(self, widget, annotationtype):
+        transcription = TranscriptionView(controller=self.controller,
+                                          annotationtype=annotationtype)
+        
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window.set_size_request (640, 480)
+
+        window.set_title (_("Transcription for %s") % (annotationtype.title
+                                                       or annotationtype.id))
+
+        vbox = gtk.VBox()
+        
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        vbox.add (sw)
+        sw.add_with_viewport (transcription.get_widget())
+        if self.controller.gui:
+            self.controller.gui.register_view (transcription)
+            window.connect ("destroy", self.controller.gui.close_view_cb,
+                            window, transcription)
+
+        hb=gtk.HButtonBox()
+        b=gtk.Button(stock=gtk.STOCK_CLOSE)
+        b.connect ("clicked", lambda w: window.destroy ())
+        hb.add(b)
+
+        vbox.pack_start(hb, expand=False)
+        
+        window.add(vbox)
+        
+        window.show_all()
+        return True
+    
     def popup_get_offset(self):
         d = gtk.Dialog(title='Enter an offset',
                        parent=None,
@@ -335,6 +369,7 @@ class Menu:
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
+        add_item(_("Display as transcription"), self.display_transcription, element)
         return
 
     def make_relationtype_menu(self, element, menu):
