@@ -8,15 +8,31 @@ try:
   import advene.gui.main
 except ImportError:
   # The package was not installed in a standard place (or PYTHONPATH
-  # is not correctly set). Print a warning and try to find if we are
-  # in a development tree.
+  # is not correctly set). Try to find if we are in a development tree.
   (maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
   if subdir == 'bin' and  os.path.exists(os.sep.join((maindir, "setup.py"))):
     # Chances are that we were in a development tree...
     libpath=os.sep.join((maindir, "lib"))
-    print "Guessed package path: %s" % libpath
+    print "Guessed package path: %s." % libpath
     sys.path.insert (0, libpath)
+    
+    import advene.core.config as config
+    # We override any modification that could have been made in
+    # .advenerc. Rationale: if the .advenerc was really correct, it
+    # would have set the correct package path in the first place.
+    print "Overriding 'resources' and 'web' config paths"
+    config.data.path['resources']=os.path.sep.join((maindir, 'share'))
+    config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
+
+    # Check for MediaControl.so
+    if not os.path.exists(config.data.typelib):
+      print """Error: cannot find the typelib file (%s) to control the player.
+      Check that the vlc-plugin-corba is correctly installed.
+      Aborting.""" % config.data.typelib
+      sys.exit(1)
+      
     import advene.gui.main
+
   else:
     print """Cannot guess a valid directory.
     Please check your installation or set the PYTHONPATH environment variable."""
