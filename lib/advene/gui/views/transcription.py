@@ -62,7 +62,9 @@ class TranscriptionView:
         b=self.textview.get_buffer()
 
         activated_tag = b.create_tag("activated")
-        activated_tag.set_property("weight", pango.WEIGHT_BOLD)
+        #activated_tag.set_property("weight", pango.WEIGHT_BOLD)
+        activated_tag.set_property("background", "black")
+        activated_tag.set_property("foreground", "white")
 
         currenttag = b.create_tag("current")
         currenttag.set_property("background", "lightblue")
