@@ -44,6 +44,10 @@ def generate_data_dir(dir_, prefix="", postfix=""):
 def generate_data_files():
     r=generate_data_dir("share", postfix=os.path.sep+"advene")
     r.extend(generate_data_dir("doc", prefix="share"+os.path.sep, postfix=os.path.sep+"advene"))
+    if os.path.isdir("locale"):
+        r.extend(generate_data_dir("locale", prefix="share"+os.path.sep))
+    else:
+        print """**WARNING** You should generate the locales with "cd po; make mo"."""
     return r
 
 myname = "Olivier Aubert"
