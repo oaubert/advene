@@ -1476,7 +1476,7 @@ class AdveneGUI (Connect):
             dialog.destroy()
             if response != gtk.RESPONSE_YES:
                 return True
-            i=advene.util.importer.get_importer('lsdvd')
+            i=advene.util.importer.get_importer('lsdvd', controller=self.controller)
             i.package=self.controller.package
             i.process_file('lsdvd')
             self.controller.modified=True
@@ -1497,7 +1497,7 @@ class AdveneGUI (Connect):
                                               button=gtk.STOCK_OPEN)
         if not filename:
             return True
-        i=advene.util.importer.get_importer(filename)
+        i=advene.util.importer.get_importer(filename, controller=self.controller)
         if i is None:
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
