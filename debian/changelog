@@ -4,6 +4,18 @@ advene (project) unstable; urgency=low
   * Added a --no-embedded option
   * Timeline : implemented annotation alignment (by drag'n drop)
   * Added some views (history, urlstack, popups) around the video window
+  * identifiers are now generated through the IDGenerator module
+  * New player module: mplayer (incomplete)
+  * TranscriptionEdit : 
+     * added adjustment possibilities for the marks
+     * it is now possible to create a new annotation type when doing the conversion
+     * "Save" action preserves timestamps
+     * "Ignore text" functionality
+  * Popups now use the AccumulatorPopup
+  * Added history as default view in the GUI
+  * Importer: use the userid as author for imported elements
+  * Added default_utbv and default_stbv metadata to package
+  * New action: OpenURL
   
  --
 
