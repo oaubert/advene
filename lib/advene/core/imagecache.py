@@ -12,16 +12,22 @@ import Image
 class ImageCache(dict):
     """ImageCache class.
 
-    It interacts with the player to return annotation snapshots.
+    It interacts with the player to return annotation snapshots. It approximates
+    key values to a given precision (20 by default).
     
     @ivar not_yet_available_image: the image returned for not-yet-captured images
     @type not_yet_available_image: PNG data
+    @ivar epsilon: the precision for key values
+    @type epsilon: integer
     """
-    def __init__ (self, name=None):
+    def __init__ (self, name=None, epsilon=20):
         """Initialize the Imagecache
 
         @param name: id of a previously saved ImageCache.
         @type name: string
+
+        @param epsilon: value of the precision
+        @type epsilon: integer
         """
         # It is a dictionary whose keys are the positions
         # (in ms) and values the snapshot in PNG format.
@@ -36,6 +42,7 @@ class ImageCache(dict):
         self.not_yet_available_image = ostream.getvalue()
         ostream.close ()
 
+        self.epsilon = epsilon
         if name is not None:
             self.load (name)
 
@@ -46,12 +53,11 @@ class ImageCache(dict):
         @type key: long
         """
         if not dict.has_key (self, key):
-            self[key] = self.not_yet_available_image
+            dict.__setitem__(self, key, self.not_yet_available_image)
         
     def has_key (self, key):
         try:
-            key = long(key)
-            self.init_value (key)
+            self.approximate(long(key))
             return True
         except:
             return False
@@ -67,17 +73,53 @@ class ImageCache(dict):
         @return: an image
         @rtype: PNG data
         """
-        key = long(key)
-        self.init_value (key)
-
+        key = self.approximate(long(key))
         return dict.__getitem__(self, key)
 
+    def __setitem__ (self, key, value):
+        """Set the snapshot for the image corresponding to the position key.
+        
+        @param key: the key
+        @type key: long
+        @param value: an image
+        @type value: PNG data
+        """
+        key = self.approximate(long(key))
+        return dict.__setitem__(self, key, value)
+
+    def approximate (self, key):
+        """Return an approximate key value for key.
+
+        If there is an existing key no further than self.epsilon, then return it.
+        Else, initialize data for key and return key.
+        """
+        if dict.has_key(self, key):
+            return key
+        
+        valids = [ (pos, abs(pos-key))
+                   for pos in self.keys()
+                   if abs(pos - key) <= self.epsilon ]
+        valids.sort(lambda a,b: cmp(a[1], b[1]))
+        
+        if valids:
+            key = valids[0][0]
+            print "Approximate key: %d (%d)" % valids[0]
+##             if len(valids) > 1:
+##                 print "Imagecache: more than 1 valid snapshot for %d: %s" % (key,
+##                                                                              valids)
+        else:
+            self.init_value (key)
+
+        return key
+    
     def missing_snapshots (self):
         """Return a list of positions of missing snapshots.
 
         @return: a list of keys
         """
-        return [ pos for pos in self.keys() if dict.__getitem__(self, pos) == self.not_yet_available_image ]
+        return [ pos
+                 for pos in self.keys()
+                 if dict.__getitem__(self, pos) == self.not_yet_available_image ]
 
     def is_initialized (self, key):
         """Return True if the given key is initialized.
@@ -85,8 +127,8 @@ class ImageCache(dict):
         @return True if the given key is initialized.
         @rtype boolean
         """
-        self.init_value (key)
-        if self[key] == self.not_yet_available_image:
+        key = self.approximate(long(key))
+        if dict.__getitem__(self, key) == self.not_yet_available_image:
             return False
         else:
             return True
@@ -101,7 +143,6 @@ class ImageCache(dict):
         @type name: string
         """
         directory=config.data.path['imagecache']
-        print "Request to save %s" % name
         if not os.path.isdir (directory):
             if os.path.exists (directory):
                 # File exists, but is not a directory.
@@ -120,7 +161,7 @@ class ImageCache(dict):
 
         for k in self.keys():
             f = open(os.sep.join ([d, str(k)]), "w")
-            f.write (self[k])
+            f.write (dict.__getitem__(self, k))
             f.close ()
 
         return
@@ -139,7 +180,7 @@ class ImageCache(dict):
         else:
             for n in os.listdir (d):
                 f = open(os.sep.join ([d, n]), "r")
-                self[long(n)] = f.read ()
+                dict.__setitem__(self, long(n), f.read ())
                 f.close ()
 
     def ids (self):
