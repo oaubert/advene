@@ -450,9 +450,14 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if isinstance(f, unicode):
                         f=f.encode('utf8')
                     self.server.controller.player.playlist_add_item (f)
-                if not query.has_key ('position'):
+                if len(param) != 0:
+                    # First parameter is the position
+                    position = param[0]                    
+                elif query.has_key ('position'):
+                    position = query['position']
+                else:
                     self.send_redirect ("/media")
-                self.server.controller.update_status ("set", long(query['position']))
+                self.server.controller.update_status ("set", long(position))
                 ref=self.headers.get('Referer', "/media")
                 self.send_redirect(ref)
             elif command == 'pause':
