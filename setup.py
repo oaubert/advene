@@ -6,6 +6,22 @@ from distutils.extension import Extension
 
 import os, string, re, sys
 
+def build_doc():
+    try:
+        import docutils.core
+    except:
+        print "Cannot build documentation. Install docutils package."
+        return
+
+    source=os.path.sep.join( ('doc', 'user.txt') )
+    dest=os.path.sep.join( ('share', 'web', 'user.html') )
+
+    if not os.path.exists(dest) or (os.path.getmtime(source) >
+                                    os.path.getmtime(dest)):
+        print "Generating HTML user documentation."
+        docutils.core.publish_file(source_path=source, destination_path=dest,
+                                   writer_name='html')
+
 def get_packages_list():
     """Recursively find packages in lib.
 
@@ -42,6 +58,7 @@ def generate_data_dir(dir_, prefix="", postfix=""):
     return l
 
 def generate_data_files():
+    build_doc()
     r=generate_data_dir("share", postfix=os.path.sep+"advene")
     r.extend(generate_data_dir("doc", prefix="share"+os.path.sep, postfix=os.path.sep+"advene"))
     if os.path.isdir("locale"):
