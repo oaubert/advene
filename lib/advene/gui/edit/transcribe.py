@@ -51,15 +51,20 @@ class TranscriptionEdit:
         self.sourcefile=""
         self.empty_re = sre.compile('^\s*$')
         
-        self.timestamp_mode_toggle=gtk.CheckButton(_("Insert timestamps"))
+        self.timestamp_mode_toggle=gtk.ToggleToolButton()
+        self.timestamp_mode_toggle.set_label(_("Timestamps"))
+        self.timestamp_mode_toggle.set_stock_id(gtk.STOCK_INDEX)
         self.timestamp_mode_toggle.set_active (True)
-        self.tooltips.set_tip(self.timestamp_mode_toggle,
-                              _("If unchecked, allows to edit text"))
+        self.timestamp_mode_toggle.set_tooltip(self.tooltips,
+                                               _("If unchecked, allows to edit text"))
+        
         # Discontinuous is True by default
-        self.discontinuous_toggle=gtk.CheckButton(_("Discontinuous"))
+        self.discontinuous_toggle=gtk.ToggleToolButton()
+        self.discontinuous_toggle.set_label(_("Discontinuous"))
         self.discontinuous_toggle.set_active (True)
-        self.tooltips.set_tip(self.discontinuous_toggle,
-                              _("Do not generate annotations for empty text"))
+        self.discontinuous_toggle.set_stock_id(gtk.STOCK_REMOVE)
+        self.discontinuous_toggle.set_tooltip(self.tooltips,
+                                              _("Do not generate annotations for empty text"))
                     
         self.default_color = gtk.gdk.color_parse ('lightblue')
         self.ignore_color = gtk.gdk.color_parse ('tomato')
@@ -352,6 +357,31 @@ class TranscriptionEdit:
         """Return the TreeView widget."""
         return self.widget
 
+    def get_toolbar(self, window):
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS) 
+        radiogroup_ref=None
+
+        tb_list = (
+            (_("Open"), _("Open"), gtk.STOCK_OPEN, self.load_transcription_cb),
+            (_("Save"), _("Save"), gtk.STOCK_SAVE, self.save_transcription),
+            (_("Convert"), _("Convert"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
+            (_("Close"), _("Close"), gtk.STOCK_CLOSE, lambda w: window.destroy()),
+            )
+
+        for text, tooltip, icon, callback in tb_list:
+            b=gtk.ToolButton(label=text)
+            b.set_stock_id(icon)
+            b.set_tooltip(self.tooltips, tooltip)
+            b.connect("clicked", callback)
+            tb.insert(b, -1)
+
+        tb.insert(self.timestamp_mode_toggle, -1)
+        tb.insert(self.discontinuous_toggle, -1)
+            
+        tb.show_all()
+        return tb
+    
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
@@ -367,6 +397,7 @@ class TranscriptionEdit:
         if self.controller.gui:
             toolbar=self.controller.gui.get_player_control_toolbar()
             hb.add(toolbar)
+        hb.add(self.get_toolbar(window))
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -376,31 +407,6 @@ class TranscriptionEdit:
             self.controller.gui.register_view (self)
             window.connect ("destroy", self.controller.gui.close_view_cb,
                             window, self)
-
-        # FIXME: convert buttons to toolbar
-        hb=gtk.HButtonBox()
-        hb.set_homogeneous(False)
-
-        hb.pack_start(self.timestamp_mode_toggle, expand=False)
-        hb.pack_start(self.discontinuous_toggle, expand=False)
-        
-        b=gtk.Button(stock=gtk.STOCK_OPEN)
-        b.connect ("clicked", self.load_transcription_cb)
-        hb.pack_start(b, expand=False)
-
-        b=gtk.Button(stock=gtk.STOCK_SAVE)
-        b.connect ("clicked", self.save_transcription)
-        hb.pack_start(b, expand=False)
-
-        b=gtk.Button(stock=gtk.STOCK_CONVERT)
-        b.connect ("clicked", self.convert_transcription_cb)
-        hb.pack_start(b, expand=False)
-
-        b=gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect ("clicked", lambda w: window.destroy ())
-        hb.pack_start(b, expand=False)
-
-        vbox.pack_start(hb, expand=False)
 
         window.add(vbox)
 
