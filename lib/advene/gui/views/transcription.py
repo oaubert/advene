@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """Transcription view.
 """
 
