@@ -301,7 +301,7 @@ class Player(object):
                     self.mc.start (position)
                 else:
                     self.mc.set_media_position (position)
-            elif status == "":
+            elif status == "" or status == None:
                 pass
             else:
                 print "******* Error : unknown status %s in mediacontrol.py" % status
