@@ -308,7 +308,31 @@ class TranscriptionView:
         self.generate_buffer_content()
 
         return True
-        
+
+    def save_transcription(self, button=None):
+        fs = gtk.FileSelection ("Save transcription to...")
+
+        def close_and_save(button, fs):
+            self.save_output(filename=fs.get_filename())
+            fs.destroy()
+            return True
+
+        fs.ok_button.connect_after ("clicked", close_and_save, fs)
+        fs.cancel_button.connect ("clicked", lambda win: fs.destroy ())
+
+        fs.show ()
+        return True
+
+    def save_output(self, filename=None):
+        b=self.textview.get_buffer()
+        begin,end=b.get_bounds()
+        out=b.get_text(begin, end)
+        f=open(filename, "w")
+        f.write(out)
+        f.close()
+        self.controller.log(_("Transcription saved to %s") % filename)
+        return True
+    
     def get_widget (self):
         """Return the TreeView widget."""
         return self.widget
@@ -334,21 +358,26 @@ class TranscriptionView:
                             window, self)
 
         hb=gtk.HButtonBox()
+        hb.set_homogeneous(False)
 
-        hb.add(self.display_time_toggle)
-        hb.add(self.display_bounds_toggle)
+        hb.pack_start(self.display_time_toggle, expand=False)
+        hb.pack_start(self.display_bounds_toggle, expand=False)
 
         b=gtk.Button(_("Separator"))
         b.connect("clicked", self.select_separator)
-        hb.add(b)
+        hb.pack_start(b, expand=False)
 
         b=gtk.Button(_("Representation"))
         b.connect("clicked", self.select_representation)
-        hb.add(b)
+        hb.pack_start(b, expand=False)
+
+        b=gtk.Button(stock=gtk.STOCK_SAVE)
+        b.connect ("clicked", self.save_transcription)
+        hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_CLOSE)
         b.connect ("clicked", lambda w: window.destroy ())
-        hb.add(b)
+        hb.pack_start(b, expand=False)
 
         vbox.pack_start(hb, expand=False)
 
