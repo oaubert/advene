@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """Helper GUI classes and methods.
 
 This module provides generic edit forms for the various Advene
