@@ -309,16 +309,25 @@ class TranscriptionEdit:
         return True
 
     def load_transcription(self, filename=None):
-        # FIXME: handle [xx:xx:xx.xxx] timestamps and generate marks accordingly
         b=self.textview.get_buffer()
+        begin,end=b.get_bounds()
+        b.delete(begin, end)
+        
         try:
             f=open(filename, 'r')
         except Exception, e:
             self.controller.log(_("Cannot read %s: %s") % (filename, str(e)))
             return
-        data=unicode("".join(f.readlines())).encode('utf-8')
-        b.set_text(data)
+        data=unicode("".join(f.readlines()))
         self.sourcefile=filename
+        
+        mark_re=sre.compile('([^\]]*)\[(\d+:\d+:\d+.?\d*)\]')
+        for m in mark_re.finditer(data):
+            text, timestamp = m.group(1,2)
+            t=vlclib.convert_time(timestamp)
+            b.insert_at_cursor(text)
+            it=b.get_iter_at_mark(b.get_insert())
+            self.create_timestamp_mark(t, it)
         return
 
     def convert_transcription_cb(self, button=None):
