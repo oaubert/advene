@@ -74,7 +74,7 @@ class CreateElementPopup(object):
         pass
 
     def generate_id(self):
-        return self.prefix[self.type_] + str(id(self)) + str(time.clock())
+        return self.prefix[self.type_] + str(id(self)) + str(time.clock()).replace('.','')
 
     def update_type(self, widget, t):
         self.chosen_type = t
@@ -93,8 +93,6 @@ class CreateElementPopup(object):
 
         self.id_entry = gtk.Entry()
         self.id_entry.set_text(self.generate_id())
-        # FIXME: connect on changed a method to ensure that the id is valid
-        # (no space or URL-forbidden characters)
         hbox.pack_start(self.id_entry)
 
         vbox.add(hbox)
