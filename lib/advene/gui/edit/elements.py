@@ -67,11 +67,9 @@ class EditElementPopup (object):
         """Create an edit window for the given element."""
         self.element = el
         self.controller = controller
-        self.window = gtk.Window (gtk.WINDOW_TOPLEVEL)
-        self.window.set_position(gtk.WIN_POS_MOUSE)
+        self.window=None
         self.vbox = gtk.VBox ()
         self.vbox.connect ("key-press-event", self.key_pressed_cb)
-        self.window.add (self.vbox)
         self.editable=True
         # List of defined forms in the window
         self.forms = []
@@ -95,6 +93,9 @@ class EditElementPopup (object):
 
     def apply_cb (self, button=None, event=None, callback=None):
         """Method called when applying a form."""
+        if not self.editable:
+            return True
+        
         for f in self.forms:
             if not f.check_validity():
                 return False
@@ -117,12 +118,14 @@ class EditElementPopup (object):
     def validate_cb (self, button=None, event=None, callback=None):
         """Method called when validating a form."""
         if self.apply_cb(button, event, callback):
-            self.window.destroy ()
+            if self.window is not None:
+                self.window.destroy ()
         return True
 
     def close_cb (self, button=None, data=None):
         """Method called when closing a form."""
-        self.window.destroy ()
+        if self.window is not None:
+            self.window.destroy ()
         return True
 
     def key_pressed_cb (self, button=None, event=None):
@@ -166,8 +169,9 @@ class EditElementPopup (object):
         fr.add (widget)
         return fr
 
-    def edit (self, callback=None):
-        """Display the edit window."""
+    def edit (self, callback=None, modal=False):
+        """Display the edit window.
+        """
         self.key_cb[gtk.keysyms.Return] = self.validate_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
 
@@ -178,30 +182,73 @@ class EditElementPopup (object):
             
         self.vbox.add (self.make_widget (editable=self.editable))
 
-        # Button bar
-        hbox = gtk.HButtonBox()
-
-        b = gtk.Button (stock=gtk.STOCK_OK)
-        b.connect ("clicked", self.validate_cb, callback)
-        hbox.add (b)
-
-        b = gtk.Button (stock=gtk.STOCK_APPLY)
-        b.connect ("clicked", self.apply_cb, callback)
-        hbox.add (b)
-
-        b = gtk.Button (stock=gtk.STOCK_CANCEL)
-        b.connect ("clicked", lambda w: self.window.destroy ())
-        hbox.add (b)
-
-        self.vbox.pack_start (hbox, expand=False)
         if self.editable:
-            self.window.set_title (_("Edit %s") % self.get_title())
+            title=_("Edit %s") % self.get_title()
         else:
-            self.window.set_title (_("View %s (read-only)") % self.get_title())
+            title=_("View %s (read-only)") % self.get_title()
 
-        if self.controller.gui:
-            self.controller.gui.init_window_size(self.window, 'editpopup')
-        self.window.show_all ()
+        if modal:
+            d = gtk.Dialog(title=title,
+                           parent=None,
+                           flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL,
+                           buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                                     gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
+
+            d.vbox.add(self.vbox)
+            d.vbox.show_all()
+            
+            def keypressed_cb(widget=None, event=None):
+                if event.keyval == gtk.keysyms.Return:
+                    d.response(gtk.RESPONSE_ACCEPT)
+                    return True
+                elif event.keyval == gtk.keysyms.Escape:
+                    d.response(gtk.RESPONSE_REJECT)
+                    return True
+                return False
+            d.connect("key_press_event", keypressed_cb)
+
+            while True:
+                res=d.run()
+                retval=False
+                if res == gtk.RESPONSE_ACCEPT:
+                    retval=self.apply_cb()
+                elif res == gtk.RESPONSE_REJECT:
+                    retval=True
+
+                if retval:
+                    d.destroy()
+                    break
+                
+            return self.element
+        else:
+            # Non-modal case
+            self.window = gtk.Window (gtk.WINDOW_TOPLEVEL)
+            self.window.set_position(gtk.WIN_POS_MOUSE)
+            self.window.set_title(title)
+
+            # Button bar
+            hbox = gtk.HButtonBox()
+
+            b = gtk.Button (stock=gtk.STOCK_OK)
+            b.connect ("clicked", self.validate_cb, callback)
+            hbox.add (b)
+
+            b = gtk.Button (stock=gtk.STOCK_APPLY)
+            b.connect ("clicked", self.apply_cb, callback)
+            hbox.add (b)
+
+            b = gtk.Button (stock=gtk.STOCK_CANCEL)
+            b.connect ("clicked", self.close_cb)
+            hbox.add (b)
+
+            self.vbox.pack_start (hbox, expand=False)
+
+            self.window.add(self.vbox)
+
+            if self.controller.gui:
+                self.controller.gui.init_window_size(self.window, 'editpopup')
+            self.window.show_all ()
+            return self.element
 
     def display (self):
         """Display the display window (not editable)."""
