@@ -57,7 +57,6 @@ import imghdr
 
 import advene.util.vlclib as vlclib
 import advene.core.imagecache as imagecache
-import advene.core.mediacontrol as mediacontrol
 
 import SocketServer
 import BaseHTTPServer
@@ -1664,10 +1663,11 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
 
 if __name__ == "__main__":
     import atexit
-
+    import advene.core.mediacontrol as mediacontrol
     
     server = AdveneWebServer(controller=None)
-    server.player=mediacontrol.Player ()
+    f=mediacontrol.PlayerFactory()
+    server.player=f.get_player()
     atexit.register (server.stop_player)
 
     if len(sys.argv) > 1:
