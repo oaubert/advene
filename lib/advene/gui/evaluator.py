@@ -1,4 +1,4 @@
-"""Python evaluator.
+"""Python expressions evaluator.
 
 """
 import sys
@@ -6,12 +6,12 @@ import StringIO
 import traceback
 import gtk
 import sre
+import __builtin__
 
 from gettext import gettext as _
 
 class Window:
-    def __init__(self, controller=None, globals_=None, locals_=None):
-        self.controller=controller
+    def __init__(self, globals_=None, locals_=None):
         if globals_ is None:
             globals_ = {}
         if locals_ is None:
@@ -22,11 +22,6 @@ class Window:
 
     def get_widget(self):
         return self.widget
-
-    def update_views(self, *p, **kw):
-        # Hackish, but it will update the display
-        self.controller.notify("PackageLoad", package=self.controller.package)
-        return True
 
     def clear_output(self, *p, **kw):
         b=self.output.get_buffer()
@@ -73,21 +68,42 @@ class Window:
         return True
 
     def help(self, *p, **kw):
+        self.clear_output()
         self.log("""Evaluator window help:
+
+        F1: display this help
         Control-Return: evaluate the expression
         Control-l: clear the expression buffer
         Control-w: close the window
         Control-u: update the interface views
-        Control-PageUp/PageDown: Scroll the result window
+        Control-PageUp/PageDown: scroll the result window
         Control-d: display completion possibilities
         Tab: perform autocompletion
+        ?:   display docstring for element before cursor
         """)
         return True
 
+    def display_doc(self, expr):
+        try:
+            res=eval(expr, self.globals_, self.locals_)
+            d=res.__doc__
+            self.clear_output()
+            self.log(unicode(d))
+        except Exception, e:
+            f=StringIO.StringIO()
+            traceback.print_exc(file=f)
+            self.clear_output()
+            self.log(f.getvalue())
+            f.close()
+        return True
+        
     def evaluate_expression(self, *p, **kw):
         b=self.source.get_buffer()
         begin,end=b.get_bounds()
         expr=b.get_text(begin, end)
+        if expr.endswith('?'):
+            self.display_doc(expr[:-1])
+            return True
         try:
             res=eval(expr, self.globals_, self.locals_)
             self.clear_output()
@@ -118,10 +134,12 @@ class Window:
         begin,end=b.get_bounds()
         cursor=b.get_iter_at_mark(b.get_insert())
         expr=b.get_text(begin, cursor)
-        if " " in expr:
-            expr=expr[expr.rindex(" "):]
         if expr.endswith('.'):
             expr=expr[:-1]
+        for c in (' ', '(', ','):
+            if c in expr:
+                expr=expr[expr.rindex(c)+1:]
+                print "using %s from %s" % (expr, c)
 
         completion=None
 
@@ -130,18 +148,29 @@ class Window:
             res=eval(expr, self.globals_, self.locals_)
             completion=dir(res)
         except Exception, e:
-            # Maybe we have the beginning of an attribute.
-            m=sre.match('^(.+?)\.(\w+)$', expr)
-            if m:
-                expr=m.group(1)
-                attr=m.group(2)
-                try:
-                    res=eval(expr, self.globals_, self.locals_)
-                    completion=[ a
-                                 for a in dir(res)
-                                 if a.startswith(attr) ]
-                except Exception, e:
-                    pass
+            if not '.' in expr:
+                # Beginning of an element name (in global() or locals() or builtins)
+                v=dict(self.globals_)
+                v.update(self.locals_)
+                v.update(__builtin__.__dict__)
+                completion=[ a
+                             for a in v
+                             if a.startswith(expr) ]
+                attr=expr
+            else:         
+                # Maybe we have the beginning of an attribute.
+                m=sre.match('^(.+?)\.(\w+)$', expr)
+                if m:
+                    expr=m.group(1)
+                    attr=m.group(2)
+                    try:
+                        res=eval(expr, self.globals_, self.locals_)
+                        completion=[ a
+                                     for a in dir(res)
+                                     if a.startswith(attr) ]
+                    except Exception, e:
+                        pass
+
 
         self.clear_output()
         if completion is None:
@@ -182,6 +211,14 @@ class Window:
                 item=self.display_completion()                
                 return True
 
+            if event.keyval == gtk.keysyms.question:
+                b=self.source.get_buffer()
+                begin,end=b.get_bounds()
+                cursor=b.get_iter_at_mark(b.get_insert())
+                expr=b.get_text(begin, cursor)
+                self.display_doc(expr)
+                return True
+
             if event.state & gtk.gdk.CONTROL_MASK:
                 if event.keyval == gtk.keysyms.w:
                     window.destroy()
@@ -220,11 +257,9 @@ class Window:
         window.connect ("destroy", lambda e: window.destroy())
         window.set_title (_("Python evaluation"))
 
-        if self.controller.gui:
-            self.controller.gui.init_window_size(window, 'evaluator')
-
         window.add (self.get_widget())
         window.show_all()
+        self.help()
         return window
 
     def build_widget(self):
@@ -239,7 +274,7 @@ class Window:
         s.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         s.add(self.source)
         f.add(s)
-        vbox.add(f)
+        vbox.pack_start(f, expand=False)
 
         self.output=gtk.TextView()
         self.output.set_editable(False)
@@ -253,10 +288,6 @@ class Window:
         vbox.add(f)
 
         hb=gtk.HButtonBox()
-
-        b=gtk.Button(_("Update views"))
-        b.connect("clicked", self.update_views)
-        hb.add(b)
 
         b=gtk.Button(_("Clear output"))
         b.connect("clicked", self.clear_output)
@@ -277,19 +308,7 @@ class Window:
         return vbox
 
 if __name__ == "__main__":
-    class DummyController:
-        pass
-
-    def notify(*p, **kw):
-        print "Notify (%s, %s)" % (p, kw)
-        return True
-
-    controller=DummyController()
-    controller.notify = notify
-    controller.gui=None
-    controller.package=None
-
-    ev=Window(controller=controller, globals_=globals())
+    ev=Window(globals_=globals())
 
     window=ev.popup()
 
