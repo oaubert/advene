@@ -169,8 +169,8 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
 
     ``def on_change_element([self,] element):``
     """
-    def change_cb(optionmenu, elements):
-        self.on_change_element(elements[optionmenu.get_history()])
+    def change_cb(optionmenu, elements, on_change_element):
+        on_change_element(elements[optionmenu.get_history()])
         return True
 
     # List of elements, with the same index as the menus
@@ -190,7 +190,7 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
 
     optionmenu.set_menu(menu)
     optionmenu.set_history(index)
-    optionmenu.connect("changed", change_cb, items)
+    optionmenu.connect("changed", change_cb, items, on_change_element)
     optionmenu.set_sensitive(editable)
     optionmenu.show()
     return optionmenu
