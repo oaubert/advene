@@ -170,11 +170,14 @@ class AdveneController:
 
         # FIXME: check the return value (media file to play) or better,
         # rewrite parse_command_line
-        self.parse_command_line (args)
+        file_to_play=self.parse_command_line (args)
 
         # If no package is defined yet, load the template
         if self.package is None:
             self.load_package ()
+
+        if file_to_play:
+            self.set_default_media(file_to_play)
         return True
     
     def create_position (self, value=0, key=None, origin=None):
@@ -226,7 +229,7 @@ class AdveneController:
                 elif os.path.splitext(s)[1] in ('.xml', '.advene', '.adv'):
                     # It should be an annotation file. Load it.
                     self.load_package (uri=s)
-                elif s.endswith('.mpg') or s.endswith('.avi'):
+                else:
                     file_to_play = s
         return file_to_play
 
@@ -236,8 +239,11 @@ class AdveneController:
         return mediafile
 
     def set_default_media (self, uri):
-        mediafile = self.package.setMetaData (config.data.namespace,
-                                              "mediafile", uri)
+        if isinstance(uri, unicode):
+            uri=uri.encode('utf8')
+        self.package.setMetaData (config.data.namespace, "mediafile", uri)
+        self.player.playlist_clear()
+        self.player.playlist_add_item (uri)
 
     def restart_player (self):
         """Restart the media player."""
@@ -382,9 +388,7 @@ class AdveneController:
         if self.get_default_media() is None:
             pl = self.player.playlist_get_list()
             if pl:
-                self.package.setMetaData (config.data.namespace,
-                                          "mediafile",
-                                          pl[0])
+                self.package.set_default_media(pl[0])
         self.package.save(as=as)
         self.modified=False
         self.event_handler.notify ("PackageSave")
