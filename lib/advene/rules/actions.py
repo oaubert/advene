@@ -40,6 +40,13 @@ class DefaultActionsRepository:
             )
                  )
         l.append(RegisteredAction(
+            name="PlayerGoto",
+            method=self.PlayerGoto,
+            description=_("Go to the given position"),
+            parameters={'position': _("Goto position (in ms)")}
+            )
+                 )
+        l.append(RegisteredAction(
             name="PlayerStop",
             method=self.PlayerStop,
             description=_("Stop the player"),
@@ -115,6 +122,18 @@ class DefaultActionsRepository:
         if position is not None:
             position=long(position)
         self.controller.player.update_status ("start", position)
+        return True
+
+    def PlayerGoto (self, context, parameters):
+        """Goto the given position."""
+        position=self.parse_parameter(context, parameters, 'position', None)
+        if position is not None:
+            position=long(position)
+        c=self.controller
+        pos = c.create_position (value=position,
+                                 key=c.player.MediaTime,
+                                 origin=c.player.AbsolutePosition)
+        self.controller.player.update_status ("set", pos)
         return True
 
     def PlayerStop (self, context, parameters):
