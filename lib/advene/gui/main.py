@@ -710,8 +710,11 @@ class AdveneGUI (Connect):
 
         @return: a boolean (~desactivation)
         """
-        self.log (_("Package %s saved. %d annotations.") % (self.controller.package.uri,
-                                                            len(self.controller.package.annotations)))
+        self.log (_("Package %s saved: %d annotations and %s relations.")
+                  % (self.controller.package.uri,
+                     len(self.controller.package.annotations),
+                     len(self.controller.package.relations)
+                     ))
         return True
 
     def manage_package_load (self, context, parameters):
@@ -1169,6 +1172,8 @@ class AdveneGUI (Connect):
             if response == gtk.RESPONSE_YES:
                 self.on_save1_activate()
                 return False
+            if response == gtk.RESPONSE_NO:
+                self.controller.modified=False
             
         if self.controller.on_exit():
             gtk.main_quit()
