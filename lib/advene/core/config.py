@@ -237,7 +237,7 @@ class Config(object):
 
         @return: the list of arguments
         """
-        args = [ '--intf', 'corba', '--plugin-path', self.path['plugins'] ]
+        args = [ '--plugin-path', self.path['plugins'] ]
         if self.player['verbose'] is not None:
             args.append ('--verbose')
             args.append (self.player['verbose'])
