@@ -477,6 +477,7 @@ class AdveneGUI (Connect):
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
         gtk.timeout_add (100, self.update_display)
+        print "Running GUI"
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
