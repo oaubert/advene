@@ -13,18 +13,19 @@ import os
 import advene.core.config as config
 import advene.core.version
 
-import gettext
-gettext.install('advene', unicode=True)
-#gettext.install('advene', localedir=config.data.path['locale'], unicode=True)
-gettext.textdomain('advene')
-from gettext import gettext as _
-
-# For gtk/glade
 import pygtk
-#pygtk.require ('2.0')
 import gtk
 import gtk.glade
-gtk.glade.bindtextdomain('advene')
+
+import gettext
+
+print "Using localedir %s" % config.data.path['locale']
+
+gettext.bindtextdomain('advene', config.data.path['locale'])
+gettext.textdomain('advene')
+gtk.glade.bindtextdomain('advene', config.data.path['locale'])
+
+gettext.install('advene', localedir=config.data.path['locale'], unicode=True)
 
 import textwrap
 
