@@ -29,6 +29,9 @@ courante.
 Création des annotations
 ------------------------
 
+Création au vol
+===============
+
 Les annotations se créent en cours de visualisation. Au début du
 fragment vidéo concernant l'annotation, il faut utiliser (en faisant
 attention que la fenêtre de l'application soit active) la touche
@@ -54,6 +57,32 @@ Deux remarques :
   recueil, il faut au préalable (avant le début de l'édition) choisir
   le type d'annotation que l'on souhaite créer en le choisissant dans
   la liste intitulée *Type courant*
+
+Création par import d'autres formats
+====================================
+
+Un module d'import permet de générer un ensemble d'annotations (et
+bien souvent également de schémas) à partir d'un fichier dans un autre
+format. Les format supportés pour l'instant (version 0.16) sont :
+
+- un format texte élémentaire (fichiers ``.txt``), où chaque ligne
+  contient le temps de début, le temps de fin et le contenu de
+  l'annotation, séparés par des espaces.
+- le format de sous-titre SRT (fichiers ``.srt``).
+- le format Xi (fichiers ``.xml``)
+- le format ELAN (fichiers ``.eaf``)
+
+L'import de données s'effectue par le menu *Fichier/Importer un fichier*
+
+Création par alignement d'une transcription
+===========================================
+
+Il est possible, à partir d'une transcription textuelle du contenu de
+la vidéo, de poser simplement des bornes temporelles et de générer à
+partir du texte et des bornes temporelles des annotations.
+
+Pour accéder à cette fonctionnalité, il faut utiliser le menu
+*Fichier/Importer une transcription*
 
 Visualisation des annotations
 -----------------------------
