@@ -604,6 +604,13 @@ class AdveneGUI (Connect):
         menu.show_all()
         return menu
 
+    def annotation_popup_cb (widget=None, ann=None):
+        """Callback used to invoke the popup menu.
+        """
+        menu = self.make_popup_menu(ann)
+        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        return True
+
     def update_display (self):
         """Update the interface.
 
@@ -837,11 +844,6 @@ class AdveneGUI (Connect):
                 return True
             return False
 
-        def annotation_cb (widget=None, ann=None):
-            menu = self.make_popup_menu(ann)
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
-            return True
-
         def context_cb (timel=None, position=None):
             # This callback is called on a right-mouse-button press
             # in the timeline display. It is called with the
@@ -897,7 +899,7 @@ class AdveneGUI (Connect):
         t = advene.gui.views.timeline.TimeLine (self.controller.package.annotations,
                                                 minimum=0,
                                                 maximum=duration,
-                                                annotation_cb=annotation_cb,
+                                                annotation_cb=self.annotation_popup_cb,
                                                 context_cb=context_cb,
                                                 controller=self.controller)
         window.timeline = t
@@ -1012,17 +1014,12 @@ class AdveneGUI (Connect):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.set_size_request (640, 480)
 
-        def annotation_cb (widget=None, ann=None):
-            menu = self.make_popup_menu(ann)
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
-            return True
-        
         window.set_title (_("Package %s") % (self.controller.package.title or _("No title")))
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         window.add (sw)
         tree = advene.gui.views.tree.TreeWidget(self.controller.package,
-                                                annotation_cb=annotation_cb,
+                                                annotation_cb=self.annotation_popup_cb,
                                                 controller=self.controller)
         sw.add (tree.get_widget())
         self.register_view (tree)
