@@ -59,7 +59,7 @@ import advene.gui.edit.dvdselect
 import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.evaluator
-import advene.gui.views.singletonpopup
+from advene.gui.views.singletonpopup import SingletonPopup
 import advene.gui.edit.imports
 from advene.gui.views.transcription import TranscriptionView
 import advene.gui.edit.transcribe
@@ -436,18 +436,17 @@ class AdveneGUI (Connect):
 
         self.displayhbox.show_all()
 
-        hbox=gtk.HBox()
-        self.displayhbox.pack_start(hbox, expand=False)
-        
-        # Create the SingletonPopup instance
-        self.singletonpopup=advene.gui.views.singletonpopup.SingletonPopup(controller=self.controller,
-                                                                           autohide=False,
-                                                                           container=hbox)
-
-
+        self.displayhbox.pack_end(self.logwindow.widget, expand=False)
         
         self.gui.get_widget("displayvbox").add(self.displayhbox)
         
+
+        hbox=gtk.HBox()
+        # Create the SingletonPopup instance
+        self.singletonpopup=SingletonPopup(controller=self.controller,
+                                           autohide=False,
+                                           container=hbox)
+        self.gui.get_widget("displayvbox").add(hbox)
 
         self.controller.event_handler.internal_rule (event="PackageLoad",
                                                      method=self.manage_package_load)
