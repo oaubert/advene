@@ -258,13 +258,13 @@ def formatted (target, context):
         return None
     
     res = {
-        'begin': '--:--:--.---',
-        'end'  : '--:--:--.---'
+        'begin': u'--:--:--.---',
+        'end'  : u'--:--:--.---'
         }
     t =  target.begin
-    res['begin'] = "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)
+    res['begin'] = u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)
     t =  target.end
-    res['end'] = "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)
+    res['end'] = u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)
     return res
 
 def first (target, context):
