@@ -1,4 +1,63 @@
-* sound_[sg]et_volume: normalize volume in [0..100]
+* timeline: add init parameter "whole package" (or None: if self.list is None, use self.controller.package.annotations)
+
+* Implement zeroconf support: http://www.amk.ca/python/zeroconf
+
+* Views: design a parent class with facilities to register views,
+precise their parameters (usable from actions and webserver
+invocation).
+
+* transcribe: note taking facility (enter text, when clicking on
+ctrl-enter insert a timestamp mark)
+
+* make navigation history accessible from TALES (/options/history ?)
+
+* keep a viewed_segments structure to propose a view "Shot not yet
+viewed sequences"
+
+* EditContent: add button "External editor"
+
+* Remove show_all() calls in EditElement popups
+
+* InteractiveQuery: propose other output modes
+
+* timeadjustment: make Play create an internal rule that pauses the
+player at the end of the fragment
+
+* Advene tutorial in advene, with a video capture of an interaction session
+
+* pyvlc: find the bug triggered when no option is given to MediaControl (stack corruption?)
+
+* vlc: use picture+mosaic to implement video embedded inside video (to
+quickly preview a fragment)
+
+* transcription : catch the AnnotationEditEnd event and update the
+  display
+
+* Expand the notify action to add a "comment" parameter to specify the
+context of the action, in order to build an interaction history and
+maybe replay the hypervideo. Need to determine the context structure.
+
+* New action: display a fragment of a video then continue from the
+position where the link was activated. Parameters: fragment to play,
+return position
+
+* webserver: handle full html documents (with headings) either by
+using a specific mimetype (text/x-full-html) or if
+res.startswith('<html>') [useful for Kupu]
+
+* assistant: speech decomposition (only extracts timestamps). Use speech-tools ? http://www.cstr.ed.ac.uk/projects/speech_tools/manual-1.2.0/x737.htm
+
+* Model: maintain creation date + modification date for elements
+
+* EditElement: offer a combobox for the mimetype field, populated with
+common mime-types -> wait for gtk2.6 with CellRendererCombo
+
+* MediaControl.idl :
+  * sound_[sg]et_volume: normalize volume in [0..100]
+  * implement set_visual in API
+  * implement get_aspect_ratio (or get_dimensions ?)
+  * implement get_api_version()
+  * implement get/set_rate
 
 * TranscriptionEdit: handle drag'n drop on marks to relocate them. At
 least, implement a -1/+1 character.
@@ -12,37 +71,31 @@ least, implement a -1/+1 character.
 * transcribe: add a small timeline on the top that displays the
 position of current marks in the video (with small lines)
 
-* transcribe: ability to mark some text as "ignored"
-
 * Popups: white on black background
-
-* popups : add context (timecode + snapshot) + title frame
 
 * Implement a generic VisualisationWidget that can be either embedded
 in the main Advene, either in its own window (video + views) -> cf gui.visualisationwidget
 
-* fix bug (segmentation fault) when an annotation.begin == 0 (cf event handler)
-
 * controller.update: implement a future_approaching and a
 future_leaving to implement a -2 seconds before / +2 seconds after
 annotation event.
-
-* TranscriptionEdit: when saving and loading, handle [[xx:xx:xx]]
-timestamps marks -> DONE for saving
 
 * Windows: package libsnapshot_plugin.dll (with MediaControl ?)
 
 * Importer: fix automatic filter selection (get_importer) esp. for XML
 files (use DTD)
 
+* Importer GUI : button "Select a specific importer"
+
 * Add a "release" script that updates the version number in:
   debian/changelog
   lib/advene/core/version.py (+ date)
   advene.iss
++ wget Twiki:AdveneUserGuide to doc/user.html
 
 * Add parameters to TimeLine view (displayed annotation types, zoom)
 
-* Morphix image : use Ubuntu as a base (pygtk included). Manque vlc + python-vlc
+* Morphix image : use Ubuntu as a base (pygtk included). Missing: vlc + python-vlc
 
 * Rewrite webserver using Twisted (and maybe use it also for ECAEngine)
 
@@ -57,30 +110,17 @@ reimplement a native widget for annotations
 alignement plus facile par la suite (couplé avec les fonctions
 d'alignement dans la timeline).
 
-* Edit metadata: fix empty metadata pb (UTF8 newline) -> hacked
-  related to: GUI: do not put newline in representation field when editing annotation types
-
 * browser: select base element (annotation, package, ...)
-
-* Fix STBV activation from webserver (implement an action queue in
-controller and register actions in it, which are run in idle gtk loop)
-
-* Importer: add "Converted from ..." in generated package description
-
-* Importer GUI : button "Select a specific importer"
-
-* Check the encoding of get_default_media (seems to be incorrect wrt utf8)
-
-* GUI: implement Recent Files functionality (using the freedesktop.org convention?)
-
-* model: rewrite the model with a new format (.zip) using
-http://effbot.org/zone/celementtree.htm ?
-
-* model: implement a data PATH variable to look for packages. Insert
-the current package's pwd first as default.
 
 * GUI: use icons and graphic files from openclipart, to alleviate any
 copyright problems
+
+* Mandrake: need
+pygtk2
+pyxml
+python-imaging (warning: version 1.1.4-6 (from Mandrake 10.1) is broken, use version 1.1.4-3 (from Mandrake 10.0) instead)
+simpletal (install from source)
+vlc
 
 * Morphix image:
 Need to add :
@@ -129,25 +169,7 @@ transcode -H 10 -z -k -o snapshot -y jpg,null -i /dev/dvd -x dvd,null -T 21,1 -c
 when there is a syntax error in a TALES expression (missing string or
 badly written symbol) and display a meaningful message
 
-* Merge gui.edit.timechooser and gui.views.history
-
 * Rename advene.util.vlclib to something more meaningful (advene.util.helper)
-
-* Import elements GUI: implement "Add/Remove package" -> ready, but need the corresponding method in the model to remove
-
-* Model: Pb in imported packages:
-  [ s.title for s in p.imports[1].package.schemas ] works but
-  [ s.id for s in p.imports[1].package.schemas ] does not:
-
- File "advene/model/modeled.py", line 185, in getId
-  File "/usr/local/src/advene-project/lib/advene/model/package.py", line 258, in getQnamePrefix
-    raise AdveneException ("item %s has no QName prefix in %s" %
-AdveneException: item Package (english_teacher.xml) has no QName prefix in Package (../examples/unicode.xml
-
-* Model: Implement importElement methods (or at least, document the existing ones and add an importPackage() to be able to specify the package's alias)
-
-* Model: implement relationtype.members R/W (and make that a list of
-AnnotationTypes rather than their ids) -> DONE for R/W.
 
 * Transcription: complete annotation edition
 
@@ -159,8 +181,6 @@ AnnotationTypes rather than their ids) -> DONE for R/W.
 * Complete the bootstrap package
 
 * corba: Add the 'repeat' property on all items in the playlist -> cf repeat config in vlcrc
-
-* Implement completion in TALES fields ?
 
 * Edit element popup: check that the data was not modified before closing
 
@@ -225,6 +245,28 @@ the DOM and do not restore it before saving, so it gets lost.
 (for instance, snapshot_url and media_control for annotations) in
 order to avoid using too many global methods.
 
+* Import elements GUI: implement "Add/Remove package" -> ready, but need the corresponding method in the model to remove
+
+* Model: Pb in imported packages:
+  [ s.title for s in p.imports[1].package.schemas ] works but
+  [ s.id for s in p.imports[1].package.schemas ] does not:
+
+ File "advene/model/modeled.py", line 185, in getId
+  File "/usr/local/src/advene-project/lib/advene/model/package.py", line 258, in getQnamePrefix
+    raise AdveneException ("item %s has no QName prefix in %s" %
+AdveneException: item Package (english_teacher.xml) has no QName prefix in Package (../examples/unicode.xml
+
+* Model: Implement importElement methods (or at least, document the existing ones and add an importPackage() to be able to specify the package's alias)
+
+* Model: implement relationtype.members R/W (and make that a list of
+AnnotationTypes rather than their ids) -> DONE for R/W.
+
+* model: rewrite the model with a new format (.zip) using
+http://effbot.org/zone/celementtree.htm ?
+
+* model: implement a data PATH variable to look for packages. Insert
+the current package's pwd first as default.
+
 * Bug in queries (rest not empty even if applied to 1-element lists)
 
 * EditAnnotationPopup: implement Next and Previous
@@ -255,19 +297,11 @@ and install it into /usr/lib/orbit-2.0
 * Watch Europython:
 http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
 
-* http://weblex.ens-lsh.fr/projects/xitools/format_xi/
-
-* Make the request object accessible in AdveneContext
-
 * Query MPEG7: http://www.idealliance.org/papers/extreme03/html/2001/Liu01/EML2001Liu01.html
 
 * STBV action: display an activable link
 
 * Try to remove the dependency on PIL by using pixbuf loader to convert snapshots to PNG.
-
-* Timeline: add the possibility to add new annotations by clicking on the type
-
-* Create a TALES evaluator/editor widget (from browser?)
 
 * Create a Sequential editor (to accomodate existing work)
 
@@ -773,4 +807,76 @@ each type. -> cf advene.core.idgenerator
 * Create a CellRenderer for time values (with time adjustment integrated) -> DONE
 
 * Create a unique logger in controller and use exclusively this one in all modules -> DONE
+
+* Timeline: clone an annotation to another type by DND on the type -> DONE
+
+* Activation of rules: not immediate -> DONE
+
+* transcribe: ability to mark some text as "ignored" -> DONE
+
+* fix bug (segmentation fault) when an annotation.begin == 0 (cf event handler) -> DONE
+
+* Edit metadata: fix empty metadata pb (UTF8 newline) -> hacked
+  related to: GUI: do not put newline in representation field when
+  editing annotation types, model related problem (XML Pretty Printer messes output)
+
+* Create a TALES evaluator/editor widget (from browser?) -> DONE
+
+* TALES : offer a validity checking -> DONE
+
+* TranscriptionEdit: when saving and loading, handle [[xx:xx:xx]]
+timestamps marks -> DONE 
+
+* Timeline: add the possibility to add new annotations by clicking on the type -> DONE
+
+* Check the encoding of get_default_media (seems to be incorrect wrt utf8)
+
+* transcribe: 
+   * Add Save/Save as functionality + Control-S shortcut
+   * Handle ignored annotations in load/save
+
+* popups : fixed sized for popups. -> DONE
+
+* popups : add context (timecode + snapshot) + title frame -> DONE
+
+* Importer: add "Converted from ..." in generated package description -> DONE
+
+* notify: handle 'immediate' param -> DONE
+
+* Fix STBV activation from webserver (implement an action queue in
+controller and register actions in it, which are run in idle gtk loop) -> DONE
+
+* GUI: implement Recent Files functionality (using the freedesktop.org convention?) -> DONE
+
+* Merge gui.edit.timechooser and gui.views.history -> removed timechooser
+
+* Implement completion in TALES fields -> cf tales.TALESEntry
+
+* webserver: should move query parameters to "request" root element instead of "options" -> DONE
+
+* http://weblex.ens-lsh.fr/projects/xitools/format_xi/ -> DONE
+
+* Make the request object accessible in AdveneContext -> DONE
+
+* website: developpers wanted: -> DONE
+  VLC:
+    - frame-precise positionning
+    - handle position parameters for start/stop/pause/snapshot
+    - fix snapshot (timestamps)
+  Player: implement support for other players
+  Web:
+    - develop new admin views
+    - integrate kupu
+
+* webserver: implement /application/stbv/Nom (instead of /media/stbv)
+                       /application/adhoc/(tree|timeline|transcription) -> DONE
+
+* transcribe: handle 0 mark -> DONE
+
+* InteractiveQuery, display results in a timeline (use _interactive query id) -> DONE
+
+* transcribe: make timing offset a editable field -> popup menu only
+displays "-offset / +offset" -> DONE
+
+* export-views: excel-export view (CSV) -> DONE
 
