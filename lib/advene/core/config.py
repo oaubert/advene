@@ -60,9 +60,7 @@ class Config(object):
     """
 
     def __init__ (self):
-        if os.environ.has_key('HOMEDRIVE'):
-            # Windows environment.
-            sys.path.insert(0, 'win32')
+        if os.sys.platform == 'win32':
             self.os='win32'
         else:
             self.os='linux'
