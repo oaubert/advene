@@ -253,6 +253,15 @@ class TimeLine:
                                             self.format_time(a.fragment.end))
         self.tooltips.set_tip(b, tip)
         return True
+
+    def update_model(self, package):
+        # FIXME: todo
+        # - clear layer_position and reinit
+        # - reset layout dimensions
+        self.list=package.annotations
+        self.widget.foreach(self.remove_widget)
+        self.populate()
+        pass
     
     def update_annotation (self, element=None):
         """Update an annotation's representation."""
