@@ -303,8 +303,9 @@ class CreateElementPopup(object):
             return True
         return False
     
-    def popup(self):
+    def popup(self, modal=False):
         window = gtk.Window (gtk.WINDOW_TOPLEVEL)
+        window.set_modal(modal)
         window.set_title(_("Creation: %s") % element_label[self.type_])
         
         vbox = gtk.VBox()
