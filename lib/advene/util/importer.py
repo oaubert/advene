@@ -322,7 +322,7 @@ class LsDVDImporter(GenericImporter):
         if self.package is None:
             # We created a new package. Set the mediafile
             # FIXME: should specify title
-            p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
+            p.setMetaData (config.data.namespace, "mediafile", "dvd@1,1")
             self.package=p
         self.defaulttype=at
         f=os.popen(self.command, "r")
@@ -371,7 +371,7 @@ class ChaplinImporter(GenericImporter):
         if self.package is None:
             self.package=p
             # FIXME: should specify title
-            p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
+            p.setMetaData (config.data.namespace, "mediafile", "dvd@1,1")
         self.defaulttype=at
         self.convert(self.iterator(f))
         return self.package
@@ -458,12 +458,24 @@ class ElanImporter(GenericImporter):
         return "".join(l)
 
     def iterator(self, elan):
+        valid_id_re = sre.compile('[^a-zA-Z_0-9]')
         for tier in elan.TIER:
+            if not hasattr(tier, 'ANNOTATION'):
+                # Empty tier
+                continue
             for an in tier.ANNOTATION:
                 d={}
 
-                d['type']=self.atypes[tier.LINGUISTIC_TYPE_REF.replace(' ','_')]
+                tid = tier.LINGUISTIC_TYPE_REF.replace(' ','_') + '__' + tier.TIER_ID.replace(' ', '_')
 
+                tid=valid_id_re.sub('', tid)
+
+                if not self.atypes.has_key(tid):
+                    self.create_annotation_type(self.schema, tid)
+
+                d['type']=self.atypes[tid]
+                #d['type']=self.atypes[tier.TIER_ID.replace(' ','_')]
+                
                 if hasattr(an, 'ALIGNABLE_ANNOTATION'):
                     # Annotation on a timeline
                     al=an.ALIGNABLE_ANNOTATION[0]
@@ -526,6 +538,16 @@ class ElanImporter(GenericImporter):
             self.package.relations.append(r)
             self.update_statistics('relation')
 
+    def create_annotation_type (self, schema, id_):
+        at=schema.createAnnotationType(ident=id_)
+        #at.author=schema.author
+        at.date=schema.date
+        at.title=at.id
+        at.mimetype='text/plain'
+        schema.annotationTypes.append(at)
+        self.update_statistics('annotation-type')
+        self.atypes[at.id]=at
+        
     def process_file(self, filename):
         elan=handyxml.xml(filename)
 
@@ -552,17 +574,10 @@ class ElanImporter(GenericImporter):
                 self.anchors[a.TIME_SLOT_ID] = 0
 
         # Process types
-        for lt in elan.LINGUISTIC_TYPE:
-            i=lt.LINGUISTIC_TYPE_ID
-            i=i.replace(' ', '_')
-            at=schema.createAnnotationType(ident=i)
-            #at.author=schema.author
-            at.date=schema.date
-            at.title=at.id
-            at.mimetype='text/plain'
-            schema.annotationTypes.append(at)
-            self.update_statistics('annotation-type')
-            self.atypes[at.id]=at
+        #for lt in elan.LINGUISTIC_TYPE:
+        #    i=lt.LINGUISTIC_TYPE_ID
+        #    i=i.replace(' ', '_')
+        #    self.create_annotation_type(schema, i)
 
         self.convert(self.iterator(elan))
         self.create_relations()
