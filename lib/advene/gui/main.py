@@ -1307,12 +1307,15 @@ class AdveneGUI (Connect):
             elif event.keyval == gtk.keysyms.o:
                 # Open an annotation file
                 self.on_open1_activate (win, None)
+                return True
             elif event.keyval == gtk.keysyms.e:
                 # Popup the evaluator window
                 self.popup_evaluator()
+                return True
             elif event.keyval == gtk.keysyms.s:
                 # Save the current annotation file
                 self.on_save1_activate (win, None)
+                return True
             elif event.keyval == gtk.keysyms.Return:
                 # We do something special on C-return, so
                 # go to the following test (Return)
@@ -1329,17 +1332,20 @@ class AdveneGUI (Connect):
                 if self.current_type is None:
                     # FIXME: should display a warning
                     return True
-                f = MillisecondFragment (begin=c.player.current_position_value-config.data.reaction_time,
+                f = MillisecondFragment (begin=max(c.player.current_position_value-config.data.reaction_time, 0),
                                          duration=30000)
                 ident=self.controller.idgenerator.get_id(Annotation)
                 self.annotation = c.package.createAnnotation(type = self.current_type,
                                                              ident=ident,
                                                              fragment=f)
+                self.annotation.content.data=""
+                #c.package.annotations.append(self.annotation)
                 self.log (_("Defining a new annotation..."))
                 self.controller.notify ("AnnotationCreate", annotation=self.annotation)
+                return True
             else:
                 # End the annotation. Store it in the annotation list
-                self.annotation.fragment.end = c.player.current_position_value-config.data.reaction_time
+                self.annotation.fragment.end = max(c.player.current_position_value-config.data.reaction_time, 0)
                 f=self.annotation.fragment
                 if f.end < f.begin:
                     f.begin, f.end = f.end, f.begin
@@ -1354,7 +1360,7 @@ class AdveneGUI (Connect):
                     # Continuous editing mode: we immediately start a new annotation
                     if self.current_type is None:
                         return True
-                    f = MillisecondFragment (begin=c.player.current_position_value-config.data.reaction_time,
+                    f = MillisecondFragment (begin=max(c.player.current_position_value-config.data.reaction_time, 0),
                                              duration=30000)
                     ident=self.controller.idgenerator.get_id(Annotation)                
                     self.annotation = c.package.createAnnotation(type = self.current_type,
@@ -1364,7 +1370,7 @@ class AdveneGUI (Connect):
                     self.controller.notify ("AnnotationCreate", annotation=self.annotation)
                 if c.player.status == c.player.PauseStatus:
                     c.update_status ("resume")
-            return True
+                return True
         elif event.keyval == gtk.keysyms.space:
             # Pausing annotation mode
             if self.annotation is None:
@@ -1382,12 +1388,13 @@ class AdveneGUI (Connect):
                 self.log (_("Defining a new annotation (Tab to resume the play)"))
             else:
                 self.annotation.content.data += " "
-            self.update_display ()
+            #self.update_display ()
             return True
         elif event.keyval == gtk.keysyms.BackSpace:
             if self.annotation != None:
                 self.annotation.content.data = self.annotation.content.data[:-1]
-                self.update_display ()
+                # Cf below
+                #self.update_display ()
                 return True
             else:
                 return False
@@ -1412,16 +1419,18 @@ class AdveneGUI (Connect):
             self.controller.update_status ("set", pos)
             return True
         elif event.keyval == gtk.keysyms.Page_Down:
-            # Next chapter
+            # FIXME: Next chapter
             return True
         elif event.keyval == gtk.keysyms.Page_Up:
-            # Previous chapter
+            # FIXME: Previous chapter
             return True
         elif event.keyval > 32 and event.keyval < 256:
             k = chr(event.keyval)
-            if self.annotation:
+            if self.annotation is not None:
                 self.annotation.content.data += k
-                self.update_display ()
+                # Calling update_display freezes the GUI (which
+                # uses gtk.threads_enter/leave. Do not do it.
+                #self.update_display ()
                 return True
         return True
 
