@@ -527,7 +527,7 @@ class EditAnnotationTypePopup (EditElementPopup):
                          controller=self.controller,
                          editable=editable)
         self.register_form(f)
-        vbox.add(f.get_view())
+        vbox.pack_start(f.get_view(), expand=False)
         
         return vbox
 
@@ -564,7 +564,7 @@ class EditRelationTypePopup (EditElementPopup):
                          editable=editable)
         self.register_form(f)
         
-        vbox.add(f.get_view())
+        vbox.pack_start(f.get_view(), expand=False)
         
         return vbox
 
