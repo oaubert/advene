@@ -256,10 +256,10 @@ class TextImporter(GenericImporter):
     """Text importer.
 
     In addition to the parameters of GenericImporter, you can specify
-
+    
     regexp: a regexp with named matching parentheses (coded
-            as "(?P<name>\d+)" for instance, see sre doc) returning
-            the parameters needed by GenericImporter.convert
+    as"(?P<name>\d+)" for instance, see sre doc) returning the
+    parameters needed by GenericImporter.convert
 
     encoding: the default encoding for the textfile
     """
