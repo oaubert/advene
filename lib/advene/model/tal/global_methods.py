@@ -253,6 +253,10 @@ def formatted (target, context):
     import advene.model.fragment
     import advene.model.exception
     import time
+
+    if isinstance(target, int) or isinstance(target, long):
+        return u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(target / 1000)),
+                             target % 1000)
     
     if not isinstance(target, advene.model.fragment.MillisecondFragment):
         return None
