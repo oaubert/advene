@@ -49,7 +49,7 @@ if config.data.os == 'win32':
   except ImportError:
     # Gtk DLLs are not in the PATH. Try to get their directory
     # from the registry
-    path=get_registry_value('Software\\GTK\\2.0', 'Path')
+    path=config.data.get_registry_value('Software\\GTK\\2.0', 'Path')
     if path is None:
       raise ImportError("Couldn't find GTK DLLs.")
     os.environ['PATH'] += ';'+path.encode('utf8')
