@@ -150,7 +150,8 @@ class AdveneTreeModel(gtk.GenericTreeModel):
             title = _("Package %s") % (node.title or _("No Title"))
         else:
             title = str(node)
-        if hasattr(node, 'isImported') and node.isImported():
+        if ((hasattr(node, 'isImported') and node.isImported())
+            or (hasattr(node, 'schema') and node.schema.isImported())):
             title += " (*)"
 
         return title
