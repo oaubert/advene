@@ -10,6 +10,7 @@ import copy
 import advene.rules.elements
 from advene.rules.elements import Event, Condition, ConditionList, Action, ActionList
 from advene.rules.elements import Rule, RuleSet
+import advene.core.config as config
 
 from gettext import gettext as _
 
@@ -19,24 +20,24 @@ class EditGeneric:
 
     def get_model(self):
         return self.model
-    
+
     def update_value(self):
         """Updates the value of the represented element.
 
         After that, the element can be access throught get_model().
         """
         pass
-    
+
     def build_option(self, elements, current, on_change_element, editable=True):
         """Build an OptionMenu.
 
         elements is a dict holding (key, values) where the values will be used as labels
         current is the current activated element (i.e. one of the keys)
         on_change_element is the method which will be called upon option modification.
-        
+
         Its signature is:
             def on_change_element([self,] optionmenu, elements):
-                
+
         elements will be a list of keys with the same index as the optionmenu, i.e. :
             chosen_key=elements[optionmenu.get_history()]
         """
@@ -54,7 +55,7 @@ class EditGeneric:
             items.append(k)
             if (k == current): index = cnt
             cnt += 1
-            
+
         optionmenu.set_menu(menu)
         optionmenu.set_history(index)
         optionmenu.connect("changed", on_change_element, items)
@@ -72,7 +73,7 @@ class EditRuleSet(EditGeneric):
         self.editable=editable
         self.widget=self.build_widget()
 
-    def remove_rule(self, button):
+    def remove_rule_cb(self, button):
         """Remove the currently activated rule."""
         if not self.editable:
             return True
@@ -99,22 +100,29 @@ class EditRuleSet(EditGeneric):
 
         hb=gtk.HButtonBox()
 
+        b=gtk.Button(stock=gtk.STOCK_COPY)
+        b.connect("drag_data_get", self.drag_sent)
+        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.rule_drag_type, gtk.gdk.ACTION_COPY)
+        hb.pack_start(b, expand=False)
+
         b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect("clicked", self.add_rule)
+        b.connect("clicked", self.add_rule_cb)
         b.set_sensitive(self.editable)
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
-        b.connect("clicked", self.remove_rule)
+        b.connect("clicked", self.remove_rule_cb)
         b.set_sensitive(self.editable)
         hb.pack_start(b, expand=False)
+
         vbox.add(hb)
-        
         return vbox
 
-    def add_rule(self, button):
+    def add_rule_cb(self, button):
         if not self.editable:
             return True
+        # Create a new default Rule
         event=Event("AnnotationBegin")
         ra=self.catalog.get_action("Message")
         action=Action(registeredaction=ra, catalog=self.catalog)
@@ -123,6 +131,13 @@ class EditRuleSet(EditGeneric):
         rule=Rule(name=_("New rule"),
                   event=event,
                   action=action)
+        self.add_rule(rule)
+        return True
+
+    def add_rule(self, rule):
+        # Insert the given rule
+        if not self.editable:
+            return True
         edit=EditRule(rule, self.catalog)
         l=gtk.Label(rule.name)
         edit.set_update_label(l)
@@ -139,30 +154,71 @@ class EditRuleSet(EditGeneric):
             for e in self.editlist:
                 e.update_value()
         #print "update_value for %d rules" % len(self.model)
-        
         # Clear the list (we need to keep the same reference as before)
-        # del self.model[:]        
-        
+        # del self.model[:]
+
+    def drag_sent(self, widget, context, selection, targetType, eventTime):
+        #print "drag_sent event from %s" % widget.annotation.content.data
+        if targetType == config.data.TARGET_TYPE_RULE:
+            # Get the current rule's content
+
+            current=self.widget.get_current_page()
+            w=self.widget.get_nth_page(current)
+            l=[edit
+               for edit in self.editlist
+               if edit.get_widget() == w ]
+            if len(l) == 1:
+                edit=l[0]
+                # We have the model. Convert it to XML
+                selection.set(selection.target, 8, edit.model.xml_repr())
+            elif len(l) > 1:
+                print "Error in drag"
+            return True
+
+        else:
+            print "Unknown target type for drag: %d" % targetType
+        return True
+
+    def drag_received(self, widget, context, x, y, selection, targetType, time):
+        #print "drag_received event for %s" % widget.annotation.content.data
+        if targetType == config.data.TARGET_TYPE_RULE:
+            xml=selection.data
+            #print "Should create the rule: %s" % xml
+            rule=Rule()
+            rule.from_xml_string(xml, catalog=self.catalog)
+            self.add_rule(rule)
+        else:
+            print "Unknown target type for drop: %d" % targetType
+        return True
+
+
     def build_widget(self):
         # Create a notebook:
         notebook=gtk.Notebook()
         notebook.set_tab_pos(gtk.POS_LEFT)
         notebook.popup_enable()
         notebook.set_scrollable(True)
-        
+
+        notebook.connect("drag_data_received", self.drag_received)
+        notebook.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                               gtk.DEST_DEFAULT_HIGHLIGHT |
+                               gtk.DEST_DEFAULT_ALL,
+                               config.data.rule_drag_type,
+                               gtk.gdk.ACTION_COPY)
+
         for rule in self.model:
             edit=EditRule(rule, self.catalog, editable=self.editable)
             l=gtk.Label(rule.name)
             edit.set_update_label(l)
             self.editlist.append(edit)
             notebook.append_page(edit.get_widget(), l)
-            
+
         #b=gtk.Button(rule.name)
         #b.connect("clicked", popup_edit, rule, catalog)
         #b.show()
         #vbox.add(b)
         return notebook
-    
+
 class EditQuery(EditGeneric):
     """Edit form for Query"""
     def __init__(self, query, controller=None, editable=True):
@@ -173,7 +229,7 @@ class EditQuery(EditGeneric):
         self.editconditionlist=[]
         self.editable=editable
         self.widget=self.build_widget()
-        
+
     def update_value(self):
         if not self.editable:
             return True
@@ -183,7 +239,7 @@ class EditQuery(EditGeneric):
             self.model.rvalue=None
         else:
             self.model.rvalue=v
-        
+
         for w in self.editconditionlist:
             w.update_value()
 
@@ -205,7 +261,7 @@ class EditQuery(EditGeneric):
                        rhs="string:???")
         self.add_condition_widget(cond, conditionsbox)
         return True
-    
+
     def add_condition_widget(self, cond, conditionsbox):
         hb=gtk.HBox()
         conditionsbox.add(hb)
@@ -216,9 +272,9 @@ class EditQuery(EditGeneric):
             print str(e)
             print "for a query"
             w = gtk.Label("Error in query")
-            
+
         self.editconditionlist.append(w)
-        
+
         hb.add(w.get_widget())
         w.get_widget().show()
 
@@ -229,16 +285,16 @@ class EditQuery(EditGeneric):
         hb.pack_start(b, expand=False)
 
         hb.show()
-        
+
         return True
 
     def build_widget(self):
         frame=gtk.Frame()
-        
+
         vbox=gtk.VBox()
         frame.add(vbox)
         vbox.show()
-        
+
         # Event
         ef=gtk.Frame(_("For all elements in "))
         self.sourceentry=gtk.Entry()
@@ -250,17 +306,16 @@ class EditQuery(EditGeneric):
 
         # Return value
         vf=gtk.Frame(_("Return "))
-        # FIXME: Add tooltip to indicate the 'element' root
         self.valueentry=gtk.Entry()
         v=self.model.rvalue
-        if v is None:
+        if v is None or v == '':
             v='element'
         self.valueentry.set_text(v)
         self.valueentry.set_editable(self.editable)
         vf.add(self.valueentry)
         vf.show_all()
         vbox.pack_start(vf, expand=gtk.FALSE)
-        
+
         # Conditions
         cf=gtk.Frame(_("If the element matches "))
         conditionsbox=gtk.VBox()
@@ -274,30 +329,30 @@ class EditQuery(EditGeneric):
         hb.pack_start(b, expand=gtk.FALSE)
         hb.set_homogeneous(gtk.FALSE)
         conditionsbox.pack_start(hb, expand=gtk.FALSE, fill=gtk.FALSE)
-        
+
         cf.show_all()
-        
+
         if isinstance(self.model.condition, advene.rules.elements.ConditionList):
             for c in self.model.condition:
                 self.add_condition_widget(c, conditionsbox)
-                
+
         vbox.pack_start(cf, expand=gtk.FALSE)
 
         frame.show()
 
         return frame
 
-    
+
 class EditRule(EditGeneric):
     def __init__(self, rule, catalog=None, editable=True):
         # Original rule
         self.model=rule
-        
+
         self.catalog=catalog
         self.editable=editable
-        
+
         self.namelabel=None
-        
+
         self.editactionlist=[]
         self.editconditionlist=[]
         self.widget=self.build_widget()
@@ -305,11 +360,18 @@ class EditRule(EditGeneric):
     def set_update_label(self, l):
         """Specify a label to be updated when the rule name changes"""
         self.namelabel=l
-        
+
+    def drag_sent(self, widget, context, selection, targetType, eventTime):
+        if targetType == config.data.TARGET_TYPE_RULE:
+            selection.set(selection.target, 8, self.model.xml_repr())
+        else:
+            print "Unknown target type for drag: %d" % targetType
+        return True
+
     def update_value(self):
         if not self.editable:
             return True
-        
+
         self.editevent.update_value()
         for w in self.editactionlist:
             w.update_value()
@@ -317,7 +379,7 @@ class EditRule(EditGeneric):
             w.update_value()
 
         self.model.name=self.name_entry.get_text()
-        
+
         self.model.event=Event(self.editevent.current_event)
 
         if self.editconditionlist:
@@ -335,7 +397,7 @@ class EditRule(EditGeneric):
             self.namelabel.set_label(entry.get_text())
         self.framelabel.set_markup("Rule <b>%s</b>" % entry.get_text())
         return True
-    
+
     def remove_condition(self, widget, conditionwidget, hbox):
         self.editconditionlist.remove(conditionwidget)
         hbox.destroy()
@@ -352,7 +414,7 @@ class EditRule(EditGeneric):
                        rhs="string:???")
         self.add_condition_widget(cond, conditionsbox)
         return True
-    
+
     def add_condition_widget(self, cond, conditionsbox):
         hb=gtk.HBox()
         conditionsbox.add(hb)
@@ -363,12 +425,12 @@ class EditRule(EditGeneric):
             print str(e)
             print "for rule %s" % self.model.name
             w = gtk.Label("Error in rule %s" % self.model.name)
-            
+
         self.editconditionlist.append(w)
-        
+
         hb.add(w.get_widget())
         w.get_widget().show()
-        
+
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
         b.set_sensitive(self.editable)
         b.connect("clicked", self.remove_condition, w, hb)
@@ -376,7 +438,7 @@ class EditRule(EditGeneric):
         hb.pack_start(b, expand=False)
 
         hb.show()
-        
+
         return True
 
     def add_action(self, widget, actionsbox):
@@ -387,7 +449,7 @@ class EditRule(EditGeneric):
 
     def add_action_widget(self, action, actionsbox):
         """Add an action widget to the given actionsbox."""
-        
+
         hb=gtk.HBox()
         actionsbox.add(hb)
 
@@ -410,21 +472,29 @@ class EditRule(EditGeneric):
         self.framelabel.set_markup("Rule <b>%s</b>" % self.model.name)
         self.framelabel.show()
         frame.set_label_widget(self.framelabel)
-        
+
         vbox=gtk.VBox()
         frame.add(vbox)
         vbox.show()
-        
+
         # Rule name
         hbox=gtk.HBox()
-        hbox.add(gtk.Label(_("Rule name")))
+
+        hbox.pack_start(gtk.Label(_("Rule name")), expand=False)
         self.name_entry=gtk.Entry()
         self.name_entry.set_text(self.model.name)
         self.name_entry.set_editable(self.editable)
         self.name_entry.connect("changed", self.update_name)
         hbox.add(self.name_entry)
+
+        b=gtk.Button(stock=gtk.STOCK_COPY)
+        b.connect("drag_data_get", self.drag_sent)
+        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.rule_drag_type, gtk.gdk.ACTION_COPY)
+        hbox.pack_start(b, expand=False)
+
         hbox.show_all()
-        vbox.pack_start(hbox, expand=gtk.FALSE)
+        vbox.pack_start(hbox, expand=False)
 
         # Event
         ef=gtk.Frame(_("Event"))
@@ -449,12 +519,15 @@ class EditRule(EditGeneric):
         conditionsbox.pack_start(hb, expand=gtk.FALSE, fill=gtk.FALSE)
 
         cf.show_all()
-        
+
         if isinstance(self.model.condition, advene.rules.elements.ConditionList):
             for c in self.model.condition:
                 self.add_condition_widget(c, conditionsbox)
-        #FIXME: else?
-        
+        else:
+            if self.model.condition != self.model.default_condition:
+                # Should not happen
+                raise Exception("condition should be a conditionlist")
+
         vbox.pack_start(cf, expand=False)
 
         # Actions
@@ -472,10 +545,10 @@ class EditRule(EditGeneric):
 
         for a in self.model.action:
             self.add_action_widget(a, actionsbox)
-            
+
         vbox.pack_start(af, expand=gtk.FALSE)
         af.show_all()
-        
+
         frame.show()
 
         return frame
@@ -488,7 +561,7 @@ class EditEvent(EditGeneric):
         self.expert=expert
         self.editable=editable
         self.widget=self.build_widget()
-        
+
     def update_value(self):
         # Nothing to update. The parent has the responsibility to
         # fetch the current_event value.
@@ -528,7 +601,7 @@ class EditCondition(EditGeneric):
 
         self.current_operator=self.model.operator
         self.editable=editable
-        
+
         # Widgets:
         self.lhs=None # Entry
         self.rhs=None # Entry
@@ -586,7 +659,7 @@ class EditCondition(EditGeneric):
         operators={}
         operators.update(Condition.binary_operators)
         operators.update(Condition.unary_operators)
-        
+
         self.operator=self.build_option(operators,
                                         self.current_operator,
                                         self.on_change_operator,
@@ -596,9 +669,9 @@ class EditCondition(EditGeneric):
         hbox.add(self.operator)
         hbox.add(self.rhs)
         hbox.show()
-        
+
         self.update_widget()
-        
+
         return hbox
 
 class EditAction(EditGeneric):
@@ -608,11 +681,16 @@ class EditAction(EditGeneric):
         self.editable=editable
         self.current_name=action.name
         self.current_parameters=dict(action.parameters)
-        
+
+        # Cache the parameters value. Indexed by action name.
+        # Used when using the mousewheel on the action name list:
+        # it should keep the parameters values
+        self.cached_parameters={}
+
         # Dict of parameter widgets (modified when the action name changes)
         # indexed by parameter name
         self.paramlist={}
-        
+
         self.catalog=catalog
         self.tooltips=gtk.Tooltips()
         self.widget=self.build_widget()
@@ -638,27 +716,34 @@ class EditAction(EditGeneric):
             res=l[:]
         res.sort()
         return res
-        
+
     def on_change_name(self, widget, names):
         if names[widget.get_history()] == self.current_name:
             return True
+        # Cache the old parameters values
+        self.cached_parameters[self.current_name]=self.current_parameters.copy()
+
         self.current_name=names[widget.get_history()]
         for w in self.paramlist.values():
             w.destroy()
         self.paramlist={}
-        
+
         ra=self.catalog.get_action(self.current_name)
-        self.current_parameters=dict(ra.parameters)
-        for name in self.sorted(ra.parameters):
+        if self.cached_parameters.has_key(self.current_name):
+            self.current_parameters=self.cached_parameters[self.current_name]
+        else:
+            self.current_parameters={}.fromkeys(ra.parameters, "")
+
+        for name in self.sorted(self.current_parameters):
             p=self.build_parameter_widget(name,
-                                          "",
+                                          self.current_parameters[name],
                                           ra.describe_parameter(name))
             self.paramlist[name]=p
             p.show_all()
             self.widget.add(p)
-            
+
         return True
-        
+
     def on_change_parameter(self, entry, name):
         value=entry.get_text()
         self.current_parameters[name]=value
@@ -668,16 +753,16 @@ class EditAction(EditGeneric):
         hbox=gtk.HBox()
         label=gtk.Label(name)
         hbox.pack_start(label, expand=False)
-        
+
         entry=gtk.Entry()
         entry.set_text(value)
         entry.set_editable(self.editable)
         entry.connect("changed", self.on_change_parameter, name)
 
-        self.tooltips.set_tip(entry, description)        
+        self.tooltips.set_tip(entry, description)
         hbox.pack_start(entry)
         return hbox
-        
+
     def build_widget(self):
         vbox=gtk.VBox()
 
@@ -705,15 +790,15 @@ class EditAction(EditGeneric):
                 vbox.add(p)
 
         vbox.add(gtk.HSeparator())
-                
+
         vbox.show_all()
         return vbox
 
 if __name__ == "__main__":
     default='default_rules.xml'
-    
+
     import sys
-    
+
     if len(sys.argv) < 2:
         print "No name provided. Using %s." % default
         filename=default
@@ -730,13 +815,13 @@ if __name__ == "__main__":
             self.imagecache={}
 
     controller=Controller()
-    
+
     import advene.rules.actions
     catalog=advene.rules.elements.ECACatalog()
-    
+
     for a in advene.rules.actions.DefaultActionsRepository(controller=controller).get_default_actions():
             catalog.register_action(a)
-            
+
     ruleset=RuleSet()
     if filename.endswith('.xml'):
         ruleset.from_xml(catalog=catalog, uri=filename)
@@ -748,7 +833,7 @@ if __name__ == "__main__":
     w.connect ("destroy", lambda e: gtk.main_quit())
 
     vbox=gtk.VBox()
-    vbox.set_homogeneous (gtk.FALSE)    
+    vbox.set_homogeneous (gtk.FALSE)
     w.add(vbox)
 
     edit=EditRuleSet(ruleset, catalog)
@@ -756,13 +841,13 @@ if __name__ == "__main__":
     vbox.add(edit.get_widget())
 
     hb=gtk.HButtonBox()
-    
+
     b=gtk.Button(stock=gtk.STOCK_ADD)
-    b.connect("clicked", edit.add_rule)
+    b.connect("clicked", edit.add_rule_cb)
     hb.pack_start(b, expand=False)
 
     b=gtk.Button(stock=gtk.STOCK_REMOVE)
-    b.connect("clicked", edit.remove_rule)
+    b.connect("clicked", edit.remove_rule_cb)
     hb.pack_start(b, expand=False)
 
     def save_ruleset(button):
@@ -777,7 +862,7 @@ if __name__ == "__main__":
         dialog.run()
         dialog.destroy()
         return True
-    
+
     b=gtk.Button(stock=gtk.STOCK_SAVE)
     b.connect("clicked", save_ruleset)
     hb.pack_start(b, expand=False)
@@ -790,7 +875,7 @@ if __name__ == "__main__":
 
     vbox.pack_start(hb, expand=gtk.FALSE)
     vbox.show()
-    
+
     w.show()
-    
+
     gtk.mainloop()
