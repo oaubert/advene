@@ -69,7 +69,7 @@ class Config(object):
             # Advene resources (.glade, template, ...) path
             'resources': '/usr/share/advene',
             # Advene data files default path
-            'data': '/tmp',
+            'data': self.get_homedir(),
             # Imagecache save directory
             'imagecache': '/tmp/advene',
             # Web data files
@@ -134,21 +134,25 @@ class Config(object):
                                       0,
                                       self.TARGET_TYPE_ANNOTATION ) ]
 
-
+    def get_homedir(self):
+        if os.environ.has_key('HOME'):
+            return os.environ['HOME']
+        elif os.environ.has_key('HOMEPATH'):
+            # Windows
+            return os.sep.join((os.environ['HOMEDRIVE'],
+                                os.environ['HOMEPATH']))
+        else:
+            raise Exception ('Unable to find homedir')
+        
     def read_config_file (self):
         """Read the configuration file ~/.advenerc.
         """
-        # FIXME: The conffile name could be a command-line option
-        if os.environ.has_key('HOME'):
-            homedir=os.environ['HOME']
-            file='.advenerc'
-        elif os.environ.has_key('HOMEDRIVE'):
-            # Windows
-            homedir=os.sep.join((os.environ['HOMEDRIVE'],
-                                 os.environ['HOMEPATH']))
+        # FIXME: The conffile name/path could be a command-line option
+        homedir=self.get_homedir()
+        if self.os == 'win32':
             file='advene.ini'
         else:
-            raise Exception ('Unable to find homedir')
+            file='.advenerc'
 
         conffile=os.sep.join((homedir, file))
         try:
@@ -226,6 +230,9 @@ class Config(object):
         @return: the absolute pathname of the IOR file
         @rtype: string
         """
+        # FIXME
+        #d=self.get_homedir()
+        
         if sys.platform == 'win32':
             if os.environ.has_key ('TEMP'):
                 d = os.environ['TEMP']
