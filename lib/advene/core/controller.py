@@ -280,6 +280,8 @@ class AdveneController:
     def get_default_media (self):
         mediafile = self.package.getMetaData (config.data.namespace,
                                               "mediafile")
+        if mediafile is None or mediafile == "":
+            return ""
         m=self.dvd_regexp.match(mediafile)
         if m:
             title,chapter=m.group(1, 2)
