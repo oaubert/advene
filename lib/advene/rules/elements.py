@@ -14,6 +14,8 @@ import urllib
 
 import xml.dom.ext.reader.PyExpat
 
+import advene.core.config
+
 from gettext import gettext as _
 
 class Event(str):
@@ -81,7 +83,7 @@ class Condition:
         'not': _('is not true'),
         'value': _('is true')
         }
-    
+
     def __init__(self, lhs=None, rhs=None, operator=None):
         self.lhs=lhs
         self.rhs=rhs
@@ -91,7 +93,7 @@ class Condition:
         """Test if the Condition is true by default.
         """
         return self.match == self.truematch
-    
+
     def match(self, context):
         """Test if the condition matches the context."""
         if self.operator in self.binary_operators:
@@ -105,9 +107,25 @@ class Condition:
             elif self.operator == 'contains':
                 return right in left
             elif self.operator == 'greater':
-                return right >= left
+                # If it is possible to convert the values to
+                # floats, then do it. Else, compare string values
+                try:
+                    rv=float(right)
+                    lv=float(left)
+                except ValueError:
+                    rv=right
+                    lv=left
+                return rv >= lv
             elif self.operator == 'lower':
-                return right <= left
+                # If it is possible to convert the values to
+                # floats, then do it. Else, compare string values
+                try:
+                    rv=float(right)
+                    lv=float(left)
+                except ValueError:
+                    rv=right
+                    lv=left
+                return rv <= lv
             else:
                 raise Exception("Unknown operator: %s" % self.operator)
         elif self.operator in self.unary_operators:
@@ -129,6 +147,32 @@ class Condition:
         It can be used to replace the match method.
         """
         return True
+
+    def from_dom(self, node):
+        if node._get_nodeName() != 'condition':
+            raise Exception("Bad invocation of Condition.from_dom")
+        if node.hasAttribute('operator'):
+            self.operator=node.getAttribute('operator')
+        else:
+            self.operator='value'
+        if not node.hasAttribute('lhs'):
+            raise Exception("Invalid condition (no value) in rule %s." % rule)
+        self.lhs=node.getAttribute('lhs')
+        if node.hasAttribute('rhs'):
+            self.rhs=node.getAttribute('rhs')
+        else:
+            self.rhs=None
+        return
+
+    def to_dom(self, dom):
+        """Creates a DOM representation of the condition.
+        """
+        condnode=dom.createElement('condition')
+        condnode.setAttribute('operator', self.operator)
+        condnode.setAttribute('lhs', self.lhs)
+        if self.operator in self.binary_operators:
+            condnode.setAttribute('rhs', self.rhs)
+        return condnode
 
 class ActionList(list):
     """List of actions.
@@ -315,21 +359,8 @@ class RuleSet(list):
             
             # Conditions
             for condnode in rulenode.getElementsByTagName('condition'):
-                if condnode.hasAttribute('operator'):
-                    operator=condnode.getAttribute('operator')
-                else:
-                    operator='value'
-                if not condnode.hasAttribute('lhs'):
-                    raise Exception("Invalid condition (no value) in rule %s." % rule)
-                lhs=condnode.getAttribute('lhs')
-                if condnode.hasAttribute('rhs'):
-                    rhs=condnode.getAttribute('rhs')
-                else:
-                    rhs=None
-                rule.add_condition(Condition(lhs=lhs,
-                                             rhs=rhs,
-                                             operator=operator))
-
+                rule.add_condition(Condition().from_dom(condnode))
+                
             # Actions
             for actionnode in rulenode.getElementsByTagName('action'):
                 name=actionnode.getAttribute('name')
@@ -381,12 +412,7 @@ class RuleSet(list):
                 for cond in rule.condition:
                     if cond == rule.default_condition:
                         continue
-                    condnode=dom.createElement('condition')
-                    rulenode.appendChild(condnode)
-                    condnode.setAttribute('operator', cond.operator)
-                    condnode.setAttribute('lhs', cond.lhs)
-                    if cond.operator in cond.binary_operators:
-                        condnode.setAttribute('rhs', cond.rhs)
+                    rulenode.appendChild(cond.to_dom(dom))
             if isinstance(rule.action, ActionList):
                 l=rule.action
             else:
@@ -556,23 +582,129 @@ class Query:
         self.condition=condition
         self.controller=controller
 
+    def build_context(self, here=None, **kw):
+        """Build an AdveneContext.
+
+        @param kw: additional parameters
+        @type kw: dict
+        @return: the built context
+        @rtype: AdveneContext
+        """
+        options = {
+            'package_url': u"/packages/advene",
+            'namespace_prefix': advene.core.config.data.namespace_prefix
+            }
+        globals={
+            }
+        context = advene.model.tal.context.AdveneContext (here=here,
+                                                          options=options)
+        globals.update(kw)
+        for k in globals:
+            context.addGlobal(k, globals[k])
+        return context
+    
+    def add_condition(self, condition):
+        """Add a new condition
+
+        @param condition: the new condition
+        @type condition: Condition
+        """
+        if self.condition is None:
+            self.condition=ConditionList()
+        self.condition.append(condition)
+        
+    def from_xml(self, uri=None):
+        """Read the query from a URI.
+
+        @param uri: the source URI        
+        """
+        reader=xml.dom.ext.reader.PyExpat.Reader()
+        di=reader.fromStream(open(uri, 'r'))
+        querynode=di._get_documentElement()
+        self.from_dom(domelement=querynode) 
+       
+    def to_xml(self, uri=None, stream=None):
+        """Save the query to the given URI or stream."""
+        di = xml.dom.DOMImplementation.DOMImplementation()
+        # FIXME: hardcoded NS URI
+        querydom = di.createDocument("http://liris.cnrs.fr/advene/ruleset", "query", None)
+        self.to_dom(querydom)
+        if stream is None:
+            stream=open(uri, 'w')
+            xml.dom.ext.PrettyPrint(rulesetdom, stream)
+            stream.close()
+        else:
+            xml.dom.ext.PrettyPrint(rulesetdom, stream)
+        
+    def xml_repr(self):
+        """Return the XML representation of the ruleset."""
+        s=StringIO.StringIO()
+        self.to_xml(stream=s)
+        buf=s.getvalue()
+        s.close()
+        return buf
+
+    def from_dom(self, domelement=None):
+        """Read the Query from a DOM element.
+
+        @param domelement: the DOM element
+        """
+        if domelement._get_nodeName() != 'query':
+            raise Exception("Invalid DOM element for Query")
+
+        sourcenodes=domelement.getElementsByTagName('source')
+        if len(sourcenodes) == 1:
+            self.source=sourcenodes[0].getAttribute('value')
+        elif len(sourcenodes) == 0:
+            raise Exception("No source associated to query")
+        else:
+            raise Exception("Multiple sources are associated to query")
+        
+        # Conditions
+        for condnode in rulenode.getElementsByTagName('condition'):
+            self.add_condition(Condition().from_dom(condnode))
+
+        return
+
+    def to_dom(self, dom):
+        """Save the query in the given DOM element."""
+        qnode=dom._get_documentElement()
+        sourcenode=dom.createElement('source')
+        qnode.appendChild(sourcenode)
+        sourcenode.setAttribute('value', self.source)
+
+        if self.condition is not None:
+            if isinstance(self.condition, Condition):
+                l=[self.condition]
+            else:
+                l=self.condition
+            for cond in l:
+                if cond is None:
+                    continue
+                qnode.appendChild(cond.to_dom(dom))
+
     def execute(self, context):
         """Execute the query.
 
         @return: the list of elements matching the query or a boolean
         """
         s=context.evaluateValue(self.source)
+
+        if self.condition is None:
+            return s
+        
         # Temporary evaluation context
-        c=self.controller.event_handler.build_context('QueryEvent',
-                                                      here=None)
+        c=self.build_context(here=None)
         if hasattr(s, '__getitem__'):
             # It is either a real list or a Bundle
             # (for isinstance(someBundle, list) == False !
+            # FIXME: should we use a Bundle ?
             r=[]
             for e in s:
                 c.addGlobal('here', e)
                 if self.condition.match(c):
                     r.append(e)
+            return r
         else:
             # What do we do in this case ?
             c.addGlobal('here', s)
