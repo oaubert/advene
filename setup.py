@@ -28,6 +28,7 @@ def check_changelog(maindir, version):
     if not l.startswith('advene (' + version + ')'):
         print "The changelog does not seem to correspond to version " + version
         print l
+        print "Update either the changelog or the lib/advene/core/version.py file"
         sys.exit(1)
     return True
            
