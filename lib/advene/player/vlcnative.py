@@ -19,12 +19,12 @@ class Snapshot:
             self.height=d['height']
             self.data=d['data']
             self.type=d['type']
-            code=self.type
-            t="%c%c%c%c" % (code & 0xff,
-                          code >> 8 & 0xff,
-                          code >> 16 & 0xff,
-                          code >> 24)
-            print "Snapshot: (%d,%d) %s" % (self.width, self.height, t)
+#            code=self.type
+#            t="%c%c%c%c" % (code & 0xff,
+#                          code >> 8 & 0xff,
+#                          code >> 16 & 0xff,
+#                          code >> 24)
+#            print "Snapshot: (%d,%d) %s" % (self.width, self.height, t)
 
 class Player(object):
     """Wrapper class for a native vlc.MediaControl object.
@@ -116,7 +116,7 @@ class Player(object):
         """
         # FIXME: pass options
 #        self.mc = VLC.MediaControl( [ '--filter', 'clone', '--clone-vout-list', 'snapshot,x11' ])
-        self.mc = VLC.MediaControl( "--filter clone --snapshot-width 160 --snapshot-height 100".split() )
+        self.mc = VLC.MediaControl( "--filter clone".split() )
 
         # 0 relative position
         pos = VLC.Position ()
