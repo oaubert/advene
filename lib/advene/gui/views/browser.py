@@ -127,6 +127,7 @@ class Browser:
         # 640 / 4
         self.column_width=160
         self.rootcolumn=None
+        self.current_value=None
         self.widget=self.build_widget()
 
     def get_widget(self):
@@ -217,8 +218,31 @@ class Browser:
         if len(val) > 80:
             val=val[:77]+'...'
         self.valuelabel.set_text(val)
+        self.current_value=element
+        if (hasattr(self.current_value, 'viewableType') and
+            self.current_value.viewableType == 'annotation-list'
+            or isinstance(self.current_value, list)):
+            self.view_button.set_sensitive(True)
+        else:
+            self.view_button.set_sensitive(False)
         return
 
+    def display_timeline(self, button=None):
+        """Display the results as annotations in a timeline.
+        """
+        duration = self.controller.cached_duration
+        if duration <= 0:
+            if self.controller.package.annotations:
+                duration = max([a.fragment.end for a in self.controller.package.annotations])
+            else:
+                duration = 0
+        t=advene.gui.views.timeline.TimeLine(self.current_value,
+                                             minimum=0,
+                                             maximum=duration,
+                                             controller=self.controller)
+        t.popup()
+        return True
+    
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.connect ("destroy", lambda e: window.destroy())
@@ -231,6 +255,11 @@ class Browser:
 
         hbox = gtk.HButtonBox()
         vbox.pack_start (hbox, expand=False)
+
+        self.view_button = gtk.Button (stock=gtk.STOCK_FIND)
+        self.view_button.connect ("clicked", self.display_timeline)
+        self.view_button.set_sensitive(False)
+        hbox.add (self.view_button)
 
         b = gtk.Button (stock=gtk.STOCK_CLOSE)
         b.connect ("clicked", lambda w: window.destroy ())
