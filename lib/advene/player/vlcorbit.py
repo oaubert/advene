@@ -1,4 +1,10 @@
-"""VLC player access.
+"""VLC player control through CORBA.
+
+Note: as the rest of the application is CORBA-agnostic, we should not
+expose anything CORBA-specific to the application. That is why the
+constants are redefined as class attributes, and the create_position
+method is provided to build the adequate Position instances.
+
 """
 
 import time
@@ -238,7 +244,7 @@ class Player(object):
             self.orb, self.mc = self.launcher.init ()
             m = self.get_default_media()
             if m is not None and m != "":
-                self.mc.playlist_add_item (m)
+                self.mc.playlist_add_item (str(m))
 
     def get_default_media (self):
         """Return the default media path (used when starting the player).
