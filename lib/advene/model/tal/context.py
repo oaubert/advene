@@ -46,14 +46,24 @@ class _advene_context (simpleTALES.Context):
        contained in the context."""
 
     def __init__ (self, options):
-	simpleTALES.Context.__init__(self, options)
+	simpleTALES.Context.__init__(self, options, allowPythonPath=True)
+
+    def addLocals (self, localVarList):
+	    # For compatibility with code using simpletal 3.6 (migration phase)
+	    # Pop the current locals onto the stack
+	    self.pushLocals()
+	    for name,value in localVarList:
+			self.setLocal(name, value)
 
     def traversePathPreHook(self, obj, path):
 	"""Called before any TALES standard evaluation"""
 
+	print "Prehook for %s on %s" % (obj, path)
+
         val = None
 
 	if self.methods.has_key(path):
+	    print "Evaluating %s on %s" % (path, obj)
 	    val = self.methods[path](obj, self)
 	    # If the result is None, the method is not appliable
 	    # and we should try other access ways (attributes,...) on the
@@ -61,13 +71,13 @@ class _advene_context (simpleTALES.Context):
 
         if val is None and hasattr (obj, 'getQName'):
             if self.locals.has_key('view'):
-                ref = self.locals['view'].value ()
+                ref = self.locals['view']
             elif self.globals.has_key('view'):
-                ref = self.globals['view'].value ()
+                ref = self.globals['view']
             elif self.locals.has_key('here'):
-                ref = self.locals['here'].value ()
+                ref = self.locals['here']
             elif self.globals.has_key('here'):
-                ref = self.globals['here'].value ()
+                ref = self.globals['here']
             else:
                 ref = None
             if ref is not None:
@@ -76,95 +86,43 @@ class _advene_context (simpleTALES.Context):
                 ns_dict[''] = pkg.getUri (absolute=True)
                 val = obj.getQName (path, ns_dict, None)
 
-	if val is not None and not isinstance (val, ContextVariable):
-	    val = ContextVariable (val)
+	#if val is not None and not isinstance (val, ContextVariable):
+	#    val = ContextVariable (val)
+	print "Returning %s"  % val
         return val
 
     def traversePathPostHook(self, obj, path):
 	"""Called if default TALES traversePath can not resolve path on obj"""
 	return None
     
-    def evaluatePython (self, expr):
-	globals = dict(zip (self.globals.keys(),
-			    map(ContextVariable.value, self.globals.values())))
-	locals = dict(zip (self.locals.keys(),
-			   map(ContextVariable.value, self.locals.values())))
-	return ContextVariable(eval(expr, globals, locals))
-
-
     def traversePathStep (self, val, path, resolved_stack, canCall=1):
                         # intermediate path elements should never be called
 			self.log.debug ("Looking for path element %s" % path)
-			temp = NoCallVariable (val).value()
-
+			try:
+				if (isinstance (val, ContextVariable)): temp = val.value((index,pathList))
+				elif (callable (val)):temp = apply (val, ())
+				else: temp = val
+			except ContextVariable, e:
+				# Fast path for those functions that return values
+				return e.value()
+				
 			val = self.traversePathPreHook (temp, path)
 			if val is not None:
-				pass # traversePathPreHook did the work
-			elif (hasattr (temp, path)):
-				val = getattr (temp, path)
-				if (not isinstance (val, ContextVariable)):
-					val = ContextVariable (val)
-			elif (hasattr (temp, 'has_key') and temp.has_key (path)):
-				val = temp[path]
-				if (not isinstance (val, ContextVariable)):
-					val = ContextVariable (val)
-			else:
-				self.log.debug ("Not found.")
-				val = self.traversePathPostHook(temp, path)
+				return val # traversePathPreHook did the work
 
+			if (hasattr (temp, path)):
+				val = getattr (temp, path)
+			else:
+				try:
+					try:
+						val = temp[path]
+					except TypeError:
+						val = temp[int(path)]
+				except:
+					#self.log.debug ("Not found.")
+					raise PATHNOTFOUNDEXCEPTION
                         resolved_stack.insert(0, (path, val) )
 			return val
-
-    def evaluate (self, expr, originalAtts = None):
-		# Returns a ContextVariable
-		self.log.debug ("Evaluating %s" % expr)
-		if (originalAtts is not None):
-			# Call from outside
-			self.globals['attrs'] = ContextVariable(originalAtts)
-			# Check for an correct for trailing/leading quotes
-			if (expr[0] == '"' or expr[0] == "'"):
-				expr = expr [1:]
-			if (expr[-1] == '"' or expr[-1] == "'"):
-				expr = expr [0:-1]
-			
-		# Supports path, exists, nocall, not, and string
-		expr = expr.strip()
-		if (expr[0:5] == 'path:'):
-			return self.evaluatePath (expr[5:].strip ())
-		elif (expr[0:7] == 'exists:'):
-			return self.evaluateExists (expr[7:].strip ())
-		elif (expr[0:7] == 'nocall:'):
-			return self.evaluateNoCall (expr[7:].strip ())
-		elif (expr[0:4] == 'not:'):
-			return self.evaluateNot (expr[4:].strip ())
-		elif (expr[0:7] == 'string:'):
-			return self.evaluateString (expr[7:].strip ())
-		elif (expr[0:7] == 'python:'):
-			return self.evaluatePython (expr[7:].strip ())
-		else:
-			# Not specified - so it's a path
-			return self.evaluatePath (expr)
-		
-    def evaluatePath (self, expr):
-                # FIXED: take exceptions into account when evaluating '|'
-		self.log.debug ("Evaluating path expression %s" % expr)
-		allPaths = expr.split ('|')
-                allPaths.reverse()
-                if len(allPaths)==1:
-                    return self.traversePath (allPaths[0])
-                else:
-                    while len (allPaths)>0:
-                        path = allPaths.pop()
-                        try:
-                            pathResult = self.evaluate(path.strip ())
-                            if pathResult is None:
-                                raise AdveneTalesPathException
-                        except AdveneTalesPathException:
-                            if len (allPaths) == 0:
-                                raise
-                        else:
-                            return pathResult
-                    return simpleTALES.nothingVariable
 
     def traversePath (self, expr, canCall=1):
 		"""Overridden version of simpleTALES.Context.traversePath"""
@@ -172,19 +130,54 @@ class _advene_context (simpleTALES.Context):
 	#       traversePathStep, so that it can be cleanly overridden, i.e.,
 	#       without involving all the copy stuff :-(
 		self.log.debug ("Traversing path %s" % expr)
+		# Check for and correct for trailing/leading quotes
+		if (expr.startswith ('"') or expr.startswith ("'")):
+			if (expr.endswith ('"') or expr.endswith ("'")):
+				expr = expr [1:-1]
+			else:
+				expr = expr [1:]
+		elif (expr.endswith ('"') or expr.endswith ("'")):
+			expr = expr [0:-1]
 		pathList = expr.split ('/')
 		path = pathList[0]
+		
+		if path.startswith ('?'):
+			path = path[1:]
+			if self.locals.has_key(path):
+				path = self.locals[path]
+				if (isinstance (path, ContextVariable)): path = path.value()
+				elif (callable (path)):path = apply (path, ())
+			
+			elif self.globals.has_key(path):
+				path = self.globals[path]
+				if (isinstance (path, ContextVariable)): path = path.value()
+				elif (callable (path)):path = apply (path, ())
+				#self.log.debug ("Dereferenced to %s" % path)
 		if self.locals.has_key(path):
 			val = self.locals[path]
 		elif self.globals.has_key(path):
 			val = self.globals[path]  
 		else:
-			# If we can't find it then return None
-			return None
+			raise PATHNOTFOUNDEXCEPTION
+		        # If we can't find it then return None
+			# return None
 
                 resolved_stack = [ (path, val) ]
-                self.addLocals( (('__resolved_stack', resolved_stack),) )
+		self.pushLocals()
+                self.setLocal( '__resolved_stack', resolved_stack )
+		index = 1
 		for path in pathList[1:]:
+			if path.startswith ('?'):
+				path = path[1:]
+				if self.locals.has_key(path):
+					path = self.locals[path]
+					if (isinstance (path, ContextVariable)): path = path.value()
+					elif (callable (path)):path = apply (path, ())
+				elif self.globals.has_key(path):
+					path = self.globals[path]
+					if (isinstance (path, ContextVariable)): path = path.value()
+					elif (callable (path)):path = apply (path, ())
+			
 			val = self.traversePathStep(val, path, resolved_stack,
                                                     canCall)
 			if val is None:
@@ -194,8 +187,8 @@ class _advene_context (simpleTALES.Context):
                 self.popLocals()
 
 		#self.log.debug ("Found value %s" % str (val))
-		if (not canCall):
-				val = NoCallVariable (val)
+		##if (not canCall):
+		##		val = NoCallVariable (val)
 		return val
 
 
@@ -211,9 +204,9 @@ class AdveneContext(_advene_context):
 
     def __str__ (self):
         return u"<pre>AdveneContext\nGlobals:\n\t%s\nLocals:\n\t%s</pre>" % (
-		"\n\t".join([ "%s: %s" % (k, unicode(v.value()).replace("<", "&lt;"))
+		"\n\t".join([ "%s: %s" % (k, unicode(v).replace("<", "&lt;"))
 			      for k, v in self.globals.iteritems() ]),
-		"\n\t".join([ "%s: %s" % (k, unicode(v.value()).replace("<", "&lt;"))
+		"\n\t".join([ "%s: %s" % (k, unicode(v).replace("<", "&lt;"))
 			      for k, v in self.locals.iteritems() ]))
 
 	
@@ -271,10 +264,10 @@ class AdveneContext(_advene_context):
         will be used directly. If it is another instance, a new AdveneContext
         will be created with this instance as global symbol 'here'.
         """
-        r = self.evaluate (expr)
-        if r is not None:
-            return r.value()
-        else:
-            raise AdveneTalesException(
-                     'TALES epression %s returned None in context %s' %
-								   (expr, self))
+	try:
+		r = self.evaluate (expr)
+	except simpletal.simpleTALES.PathNotFoundException, e:
+		raise AdveneTalesException(
+			'TALES epression %s returned None in context %s' %
+			(e, self))
+	return r
