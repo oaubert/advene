@@ -57,6 +57,7 @@ class ECAEngine:
         self.catalog=advene.rules.elements.ECACatalog()
         for a in advene.rules.actions.DefaultActionsRepository(controller=controller).get_default_actions():
             self.catalog.register_action(a)
+        self.modifying_events = self.catalog.modifying_events
         self.scheduler=sched.scheduler(time.time, time.sleep)
         self.schedulerthread=threading.Thread(target=self.scheduler.run)
 
@@ -296,6 +297,11 @@ class ECAEngine:
         except KeyError:
             return
 
+        # This does not belong here, but it is the more convenient and
+        # maybe more effective way to implement it
+        if event_name in self.modifying_events:
+            self.controller.modified=True
+            
         actions=[ rule.action
                   for rule in a
                   if rule.condition.match(context) ]

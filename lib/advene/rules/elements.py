@@ -7,6 +7,7 @@ events that match a condition."""
 
 import sre
 import sys
+import sets
 
 import urllib
 
@@ -649,6 +650,20 @@ class ECACatalog:
         'ApplicationStart':       _("Start of the application"),
         'ApplicationEnd':         _("End of the application")
         }
+
+    modifying_events=sets.Set((
+        'AnnotationEditEnd',
+        'AnnotationDelete',
+        'RelationEditEnd',
+        'RelationDelete',
+        'ViewEditEnd',
+        'ViewDelete',
+        'SchemaEditEnd',
+        'SchemaDelete',
+        'AnnotationTypeEditEnd',
+        'RelationTypeEditEnd',
+        'AnnotationTypeDelete',
+        'RelationTypeDelete'))
 
     # Basic events are exposed to the user when defining new STBV
     basic_events=('AnnotationBegin', 'AnnotationEnd', 'PlayerStart', 'PlayerPause',
