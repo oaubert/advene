@@ -1,12 +1,13 @@
 """mplayer control class.
 
-We reuse code from the pymp project
-
+We reuse code from the pymp project :
+http://jdolan.dyndns.org/jaydolan/pymp.html
 """
 
 import os, fcntl, gobject
+import sre
 
-STATUS_TIMEOUT = 1000
+STATUS_TIMEOUT = 50
 
 # Dummy classes to match pymp API
 class Control:
@@ -154,6 +155,7 @@ class Player:
     
     def display_text (self, message, begin, end):
         self.log("display_text %s" % str(message))
+        self.mplayer.cmd("osd_show_text %s" % message)
 
     def get_stream_information(self):
         s=StreamInformation()
@@ -277,6 +279,7 @@ class Mplayer:
 	def __init__(self, pymp):
 		
 		self.pymp = pymp
+                self.re_time=sre.compile("(A|V):\s+(\d+\.\d+)")
 		
 	#
 	#   Plays the specified target.
@@ -375,8 +378,9 @@ class Mplayer:
 				if line.find("ANS_LENGTH=") != -1:
 					 line = line[line.find("ANS_LENGTH=")+11:] #strip out everything before this
 					 self.totalTime = int(line[:line.find("\n")])
-				if line.startswith("A:") or line.startswith("V:"):
-					 curTime = int(line[2:line.find(".")])+1 #due to rounding, this time SHOULD be always 1 second behind, so add 1
+                                m=self.re_time.match(line)
+                                if m:
+                                    curTime = float(m.group(2))
 			except StandardError:
 				break
 									
