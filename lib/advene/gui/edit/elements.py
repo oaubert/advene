@@ -191,7 +191,7 @@ class EditElementPopup (object):
                               types=None,
                               labels=None):
         """Shortcut for creating an Attributes form and registering it."""
-        f = EditAttributesForm (element)
+        f = EditAttributesForm (element, controller=self.controller)
         f.set_attributes (fields)
         if editable and editables is not None:
             f.set_editable (editables)
@@ -241,7 +241,7 @@ class EditAnnotationPopup (EditElementPopup):
         vbox.pack_start (f.get_view (), expand=False)
 
         # Annotation content
-        f = EditTextForm (self.element.content, 'data')
+        f = EditTextForm (self.element.content, 'data', controller=self.controller)
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
@@ -296,7 +296,7 @@ class EditRelationPopup (EditElementPopup):
         vbox.pack_start(self.framed(hb, _("Members")), expand=True)
 
         # Relation content
-        f = EditTextForm (self.element.content, 'data')
+        f = EditTextForm (self.element.content, 'data', controller=self.controller)
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
@@ -342,9 +342,9 @@ class EditViewPopup (EditElementPopup):
         # View content
         # FIXME: we should use a generic mimetype plugin detection
         if self.element.content.mimetype == 'application/x-advene-ruleset':
-            f = EditRuleSetForm (self.element.content, 'model')
+            f = EditRuleSetForm (self.element.content, 'model', controller=self.controller)
         else:
-            f = EditTextForm (self.element.content, 'data')
+            f = EditTextForm (self.element.content, 'data', controller=self.controller)
 
         f.set_editable (editable)
         t = f.get_view ()
@@ -467,9 +467,10 @@ class EditForm:
 
 class EditTextForm (EditForm):
     """Create a textview edit form for the given element."""
-    def __init__ (self, element, field):
+    def __init__ (self, element, field, controller=None):
         self.element = element
         self.field = field
+        self.controller=controller
         self.editable = False
         self.view = None
 
@@ -499,10 +500,11 @@ class EditTextForm (EditForm):
 
 class EditRuleSetForm (EditForm):
     """Create a RuleSet edit form for the given element (a view, presumably)."""
-    def __init__ (self, element, field):
+    def __init__ (self, element, field, controller=None):
         # Element is a view.content, field should be "data" or "model" ?
         self.element = element
         self.field = field
+        self.controller=controller
         self.editable = False
         self.view = None
 
@@ -526,20 +528,13 @@ class EditRuleSetForm (EditForm):
         stream.close()
 
     def get_view (self):
-        """Generate a view widget to edit the ruleset."""
-
-        # FIXME: we generate a dummy catalog, but we should get the
-        # controller.event_handler one instead. Maybe we should store
-        # it in the config module.
-        catalog=advene.rules.elements.ECACatalog()
-        for a in advene.rules.actions.DefaultActionsRepository(controller=None).get_default_actions():
-            catalog.register_action(a)
-
+        """Generate a view widget to edit the ruleset."""        
         rs=advene.rules.elements.RuleSet()
-        rs.from_dom(catalog=catalog,
+        rs.from_dom(catalog=self.controller.event_handler.catalog,
                     domelement=getattr(self.element, self.field))
 
-        self.edit=advene.gui.edit.rules.EditRuleSet(rs, catalog=catalog)
+        self.edit=advene.gui.edit.rules.EditRuleSet(rs,
+                                                    catalog=self.controller.event_handler.catalog)
 
         self.view = self.edit.get_packed_widget()
 
@@ -558,8 +553,9 @@ class EditAttributesForm (EditForm):
     COLUMN_EDITABLE=3
     COLUMN_WEIGHT=4
     
-    def __init__ (self, el):
+    def __init__ (self, el, controller=None):
         self.element = el
+        self.controller=controller
         self.attributes = ()  # Visible attributes
         self.editable = ()    # Editable attributes
         self.labels = {}      # Specific labels for attributes
