@@ -198,6 +198,13 @@ class Menu:
             self.controller.notify('QueryDelete', query=el)
         return True
 
+    def delete_elements (self, widget, el, elements):
+        p=el.ownerPackage
+        if isinstance(el, AnnotationType) or isinstance(el, RelationType):
+            for e in elements:
+                self.delete_element(widget, e)
+        return True
+
     def add_menuitem(self, menu=None, item=None, action=None, *param, **kw):
         if item is None or item == "":
             i = gtk.SeparatorMenuItem()
@@ -337,12 +344,14 @@ class Menu:
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
+        add_item(_("Delete all annotations..."), self.delete_elements, element, element.annotations)
         add_item(_("Display as transcription"), self.display_transcription, element)
         return
 
     def make_relationtype_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        add_item(_("Delete all relations..."), self.delete_elements, element, element.relations)
         #add_item(_("Create a new relation..."), self.create_element, Relation, element)
         return
 
