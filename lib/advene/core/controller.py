@@ -136,7 +136,8 @@ class AdveneController:
             name="Message",
             method=self.message_log,
             description=_("Display a message"),
-            parameters={'message': _("String to display.")}
+            parameters={'message': _("String to display.")},
+            category='gui',
             ))
 
     def register_gui(self, gui):
