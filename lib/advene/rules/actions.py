@@ -120,6 +120,14 @@ class DefaultActionsRepository:
             )
                  )
 
+        l.append(RegisteredAction(
+            name="ActivateSTBV",
+            method=self.ActivateSTBV,
+            description=_("Activate a STBV"),
+            parameters={'viewid': _("STBV id")}
+            )
+                 )
+
         return l
 
     def Message(self, context, parameters):
@@ -288,6 +296,16 @@ class DefaultActionsRepository:
             self.controller.player.sound_set_volume(config.data.volume)
         return True
 
+    def ActivateSTBV (self, content, parameters):
+        """Activate the given STBV."""
+        stbvid=context.evaluateValue('viewid')
+        if stbvid is None:
+            return True
+        stbv=context.evaluateValue('package/views/%s' % stbvid)
+        if stbv is not None and stbv.content.data == 'application/x-advene-ruleset':
+            self.controller.activate_stbv(stbv)
+        return True
+    
     def AnnotationMute(self, context, parameters):
         """Zero the volume for the duration of the annotation."""
         annotation=context.evaluateValue('annotation')
