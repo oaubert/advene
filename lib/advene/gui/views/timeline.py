@@ -330,9 +330,6 @@ class TimeLine:
         relationtypes=advene.util.vlclib.matching_relationtypes(self.controller.package,
                                                                 source,
                                                                 dest)
-        print "Relations: %s" % relationtypes
-        #relations=[ t.title for t in source.getRelationsWith(dest) ]
-        
         if not relationtypes:
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_DESTROY_WITH_PARENT,
