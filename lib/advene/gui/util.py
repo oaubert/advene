@@ -206,28 +206,38 @@ def get_filename(title="Open a file",
         return True
 
     def do_preview(button):
+        def format_item(name, plural, length):
+            if length == 0:
+                return _("No %s") % name
+            elif length == 1:
+                return _("1 %s") % name
+            else:
+                return _("%d %s") % (length, plural)
+            
         if hasattr(button, '_filename') and button._filename:
-            # FIXME: replace with meaningful info
+            button.set_label(_("Wait..."))
             try:
                 p=advene.model.package.Package(uri=button._filename)
             except Exception, e:
                 m="Error:\n%s" % str(e)
             else:
                 m=_("""Package %s:
-%d schemas
-%d annotation(s) in %d type(s)
-%d relation(s) in %d type(s)
-%d querie(s)
-%d view(s)
+%s
+%s in %s
+%s in %s
+%s
+%s
 
 Description:
 %s
 """) % (p.title,
-        len(p.schemas),
-        len(p.annotations), len(p.annotationTypes),
-        len(p.relations), len(p.relationTypes),
-        len(p.queries),
-        len(p.views),
+        format_item(_('schema'), _('schemas'), len(p.schemas)),
+        format_item(_('annotation'), _('annotations'), len(p.annotations)),
+        format_item(_('annotation type'), _('annotation types'), len(p.annotationTypes)),
+        format_item(_('relation'), _('relations'), len(p.relations)),
+        format_item(_('relation type'), _('relation types'), len(p.relationTypes)),
+        format_item(_('query'), _('queries'), len(p.queries)),
+        format_item(_('view'), _('views'), len(p.views)),
         p.getMetaData(config.data.namespace_prefix['dc'],
                       'description'))
         
@@ -353,8 +363,10 @@ class CategorizedSelector:
                                     mode=self.COLUMN_MODE)
         column.set_resizable(True)
         treeview.append_column(column)
-        
-        vbox.add(treeview)
+
+        sw=gtk.ScrolledWindow()
+        sw.add(treeview)
+        vbox.pack_start(sw, expand=True)
 
         hbox=gtk.HButtonBox()
 
@@ -364,7 +376,7 @@ class CategorizedSelector:
         b=gtk.Button(stock=gtk.STOCK_CANCEL)
         b.connect("clicked", lambda w: self.popup_hide())
         hbox.add(b)
-        vbox.add(hbox)
+        vbox.pack_start(hbox, expand=False)
         
         vbox.show_all()
         
@@ -395,6 +407,10 @@ class CategorizedSelector:
             w=gtk.Window()
             w.set_title(self.title)
             w.add(self.widget)
+            # FIXME: hardcoded values are bad
+            # but we do not have access to
+            # advene.gui.main.init_window_size
+            w.set_default_size(240,300)
             self.popup=w
         self.popup.set_position(gtk.WIN_POS_MOUSE)
         self.popup.show_all()
