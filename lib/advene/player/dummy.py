@@ -206,3 +206,7 @@ class Player:
         self.status = s.streamstatus
         self.stream_duration = s.length
         self.current_position_value = s.position
+
+    def set_visual(self, xid):
+        return True
+    
