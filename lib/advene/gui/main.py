@@ -438,10 +438,14 @@ class AdveneGUI (Connect):
         @param name: annotation type
         @type name: string
         """
-        self.current_type = t
-        type_combo=self.gui.get_widget ("current_type_combo")
-        type_combo.entry.set_text (t.title)
-
+        if t is not None:
+            self.current_type = t
+            type_combo=self.gui.get_widget ("current_type_combo")
+            type_combo.entry.set_text (t.title)
+        else:
+            self.current_type = None
+            self.gui.get_widget ("current_type_combo").entry.set_text (_("None"))
+            
     def on_edit_current_stbv_clicked(self, button):
         widget = self.gui.get_widget("stbv_combo").get_menu().get_active()
         stbv=widget.get_data("stbv")
@@ -532,7 +536,10 @@ class AdveneGUI (Connect):
                                     b.get_data('type').title))
         type_combo.list.append_items(labels)
         type_combo.list.show_all()
-        self.set_current_type (available_types[0])
+        if available_types:
+            self.set_current_type (available_types[0])
+        else:
+            self.set_current_type(None)
 
         self.update_stbv_menu()
         return
@@ -857,6 +864,9 @@ class AdveneGUI (Connect):
             self.controller.position_update ()
             if self.annotation is None:
                 # Start a new annotation
+                if self.current_type is None:
+                    # FIXME: should display a warning
+                    return True
                 self.annotation = self.controller.package.createAnnotation(type = self.current_type,
                                                                            fragment = MillisecondFragment (begin=self.controller.player.current_position_value, duration=30000))
                 self.log (_("Defining a new annotation..."))
@@ -879,6 +889,9 @@ class AdveneGUI (Connect):
                 if self.controller.player.status != self.controller.player.PauseStatus:
                     self.controller.update_status ("pause")
                 self.controller.position_update ()
+                if self.current_type is None:
+                    # FIXME: should display a warning
+                    return True
                 self.annotation = self.controller.package.createAnnotation (type = self.current_type,
                                                                             fragment = MillisecondFragment (begin=self.controller.player.current_position_value, duration=30000))
                 self.controller.notify ("AnnotationCreate", annotation=self.annotation)
