@@ -441,6 +441,7 @@ class EditPackagePopup (EditElementPopup):
         return True
     
     def make_widget (self, editable=False):
+        vbox=gtk.VBox()
         f = self.make_registered_form (element=self.element,
                                        fields=('uri', 'title',
                                                'author', 'date'),
@@ -451,7 +452,17 @@ class EditPackagePopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        return f.get_view ()
+
+        vbox.pack_start(f.get_view(), expand=False)
+        
+        f = EditMetaForm(title=_("Description"),
+                         element=self.element, name='description',
+                         namespaceid='dc', controller=self.controller,
+                         editable=editable)
+        self.register_form(f)
+        
+        vbox.pack_start(f.get_view(), expand=False)
+        return vbox    
 
 class EditSchemaPopup (EditElementPopup):
     def can_edit (el):
