@@ -1397,7 +1397,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # Generating navigation footer
         if displaymode != "raw":
             levelup = self.path[:self.path.rindex("/")]
-            auto_components = vlclib.get_valid_members (objet)
+            auto_components = [ c
+                                for c in vlclib.get_valid_members (objet)
+                                if not c.startswith('----') ]
             auto_components.sort()
             try:
                 auto_views = objet.validViews
