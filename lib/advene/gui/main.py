@@ -174,6 +174,15 @@ class AdveneGUI (Connect):
         p=self.controller.player
         self.active_player_status=(p.PlayingStatus, p.PauseStatus,
                                    p.ForwardStatus, p.BackwardStatus)
+        self.statustext={
+            p.PlayingStatus  : _("Playing"),
+            p.PauseStatus    : _("Pause"),
+            p.ForwardStatus  : _("Forward"),
+            p.BackwardStatus : _("Backward"),
+            p.InitStatus     : _("Init"),
+            p.EndStatus      : _("End"),    
+            p.UndefinedStatus: _("Undefined"),
+            }
         self.gui.player_status = self.gui.get_widget ("player_status")
         self.oldstatus = "NotStarted"
 
@@ -934,7 +943,7 @@ class AdveneGUI (Connect):
 
             if self.controller.player.status != self.oldstatus:
                 self.oldstatus = self.controller.player.status
-                self.gui.player_status.set_text (repr(self.controller.player.status)[:-6])
+                self.gui.player_status.set_text (self.statustext[self.controller.player.status])
 
             if (self.annotation is not None
                 and self.annotation.content.data != self.gui.current_annotation.get_text()):
@@ -954,7 +963,7 @@ class AdveneGUI (Connect):
             self.gui.slider.set_value (0)
             if self.controller.player.status != self.oldstatus:
                 self.oldstatus = self.controller.player.status
-                self.gui.player_status.set_text (repr(self.controller.player.status)[:-6])
+                self.gui.player_status.set_text (self.statustext[self.controller.player.status])
             # New position_update call to handle the starting case (the first
             # returned status is None)
             self.controller.position_update ()
@@ -1545,7 +1554,7 @@ class AdveneGUI (Connect):
         self.slider_move = True
 
     def on_slider_button_release_event (self, button=None, data=None):
-        p = self.controller.create_position (value = self.gui.slider.get_value ())
+        p = self.controller.create_position (value = long(self.gui.slider.get_value ()))
         self.controller.update_status('set', p)
         self.slider_move = False
 
