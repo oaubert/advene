@@ -102,6 +102,9 @@ class Player:
         self.position_update()
         pass
 
+    def dvd_uri(self, title=None, chapter=None):
+        return "dvd://%s" % str(title)
+
     def log(self, *p):
         print "Mplayer plugin : %s" % p
         
