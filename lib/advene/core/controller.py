@@ -105,8 +105,6 @@ class AdveneController:
         self.package = None
         self.modified = False
         
-        self.preferences = config.data.preferences
-
         playerfactory=advene.core.mediacontrol.PlayerFactory()
         self.player = playerfactory.get_player()
         self.player.get_default_media = self.get_default_media
@@ -527,6 +525,8 @@ class AdveneController:
 
     def on_exit (self, source=None, event=None):
         """General exit callback."""
+        # Save preferences
+        config.data.save_preferences()
         # Terminate the web server
         try:
             self.server.stop_serving ()
