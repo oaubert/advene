@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """Widget used to select the DVD chapter in Advene.
 """
 
