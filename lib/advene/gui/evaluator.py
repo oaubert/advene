@@ -124,7 +124,7 @@ class Window:
             begin,end=b.get_bounds()
         expr=b.get_text(begin, end)
         symbol=None
-        m=sre.match('(\w+)=(.+)', expr)
+        m=sre.match('([\w\.]+)=(.+)', expr)
         if m is not None:
             symbol=m.group(1)
             expr=m.group(2)
@@ -136,8 +136,22 @@ class Window:
             self.clear_output()
             self.log(unicode(res))
             if symbol is not None:
-                self.log('\n\n[Value stored in %s]' % symbol)
-                self.locals_[symbol]=res
+                if not '.' in symbol:
+                    self.log('\n\n[Value stored in %s]' % symbol)
+                    self.locals_[symbol]=res
+                else:
+                    m=sre.match('(.+)\.(\w+)$', symbol)
+                    if m:
+                        obj, attr = m.group(1, 2)
+                        try:
+                            o=eval(obj, self.globals_, self.locals_)
+                        except Exception, e:
+                            self.log('\n\n[Unable to store data in %s.%s]'
+                                     % (obj, attr))
+                            return True
+                        setattr(o, attr, res)
+                        self.log('\n\n[Value stored in %s]' % symbol)
+                        
         except Exception, e:
             f=StringIO.StringIO()
             traceback.print_exc(file=f)
