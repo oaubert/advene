@@ -174,7 +174,7 @@ class Player(object):
             elif not isinstance(position, VLC.Position):
                 p=long(position)
                 position = VLC.Position ()
-                position.origin = VLC.RelativePosition
+                position.origin = VLC.AbsolutePosition
                 position.key = VLC.MediaTime
                 position.value = p
             if status == "pause":
