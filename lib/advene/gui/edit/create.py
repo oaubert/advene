@@ -45,9 +45,10 @@ class ViewType:
         return self.title
     
 class CreateElementPopup(object):
-    def __init__(self, type_=None, parent=None):
+    def __init__(self, type_=None, parent=None, controller=None):
         self.type_=type_
         self.parent=parent
+        self.controller=controller
         # FIXME: This would be better in a central place
         self.prefix = {
             Package: "p",
@@ -77,7 +78,7 @@ class CreateElementPopup(object):
     def build_widget(self):
         vbox = gtk.VBox()
 
-        l = gtk.Label("To create a new element of type %s,\nyou must give the following information." % element_label[self.type_])
+        l = gtk.Label(_("To create a new element of type %s,\nyou must give the following information.") % element_label[self.type_])
         vbox.add(l)
 
         # Identifier
@@ -108,7 +109,16 @@ class CreateElementPopup(object):
                 print "Error in advene.gui.edit.create.build_widget: invalid type %s" % self.type_
                 return None
 
-            # FIXME: check if there is at least one type. Display a warning else.
+            if not type_list:
+                dialog = gtk.MessageDialog(
+                    None, gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
+                    _("No available type."))
+                dialog.set_position(gtk.WIN_POS_MOUSE)
+                dialog.run()
+                dialog.destroy()
+                return None
+            
             self.chosen_type = type_list[0]
             
             menu = gtk.Menu()
@@ -133,21 +143,15 @@ class CreateElementPopup(object):
     def validate_cb(self, button, window):
         id_ = self.id_entry.get_text()
         t = self.chosen_type
-        # Really create the element
-        print "Creating an element of type %s with id %s" % (element_label[self.type_], id_)
-        if t is not None:
-            print "\tType is %s" % t
 
         if self.type_ == Annotation:
-            # FIXME: it would be great to initialize the duration to
-            # controller.player.stream_duration
             el=self.parent.createAnnotation(
                 ident=id_,
                 type=t,
                 author=config.data.userid,
                 date=self.get_date(),
                 fragment=MillisecondFragment(begin=0,
-                                             duration=2000))
+                                             duration=self.controller.player.stream_duration))
             el.title=id_
             self.parent.annotations.append(el)
         elif self.type_ == Relation:
@@ -180,7 +184,7 @@ class CreateElementPopup(object):
             el.title=id_
             self.parent.schemas.append(el)
         else:
-            #FIXME
+            #FIXME: complete
             el=None
             print "Not implemented yet."
             
@@ -188,7 +192,7 @@ class CreateElementPopup(object):
         
         if el is not None:
             try:
-                pop = advene.gui.edit.elements.get_edit_popup (el)
+                pop = advene.gui.edit.elements.get_edit_popup (el, self.controller)
             except TypeError, e:
                 print _("Error: unable to find an edit popup for %s:\n%s") % (el, str(e))
             else:
