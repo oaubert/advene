@@ -18,11 +18,12 @@ import gtk
 import gobject
 
 class BrowserColumn:
-    def __init__(self, element=None, name="", callback=None):
+    def __init__(self, element=None, name="", callback=None, parent=None):
         self.model=element
         self.name=name
         self.callback=callback
         self.next=None
+        self.previous=parent
         self.widget=self.build_widget()
 
     def get_widget(self):
@@ -76,7 +77,7 @@ class BrowserColumn:
             self.liststore.append([att])
         self.model=element
         self.name=name
-        self.label.set_text(name)
+        self.label.set_label(name)
         # Destroy all following columns
         self.next=None
         return True
@@ -85,6 +86,11 @@ class BrowserColumn:
         att=widget.get_model()[treepath[0]][0]
         if self.callback:
             self.callback(self, att)
+        return True
+
+    def on_column_activation(self, widget):
+        if self.callback:
+            self.callback(self.previous, self.name)
         return True
     
     def on_button_press(self, widget, event):
@@ -114,7 +120,8 @@ class BrowserColumn:
     def build_widget(self):
         vbox=gtk.VBox()
 
-        self.label=gtk.Label(self.name)
+        self.label=gtk.Button(self.name)
+        self.label.connect("clicked", self.on_column_activation)
         vbox.pack_start(self.label, expand=False)
 
         sw = gtk.ScrolledWindow()
@@ -162,7 +169,7 @@ class Browser:
         # We could use here=columnbrowser.model, but then the traversal
         # of path is not done and absolute_url does not work
         context = advene.model.tal.context.AdveneContext (here=self.package,
-                                                    options=self.default_options())
+                                                          options=self.default_options())
         path=[]
         col=self.rootcolumn
         while col is not columnbrowser:
@@ -194,7 +201,8 @@ class Browser:
         
         if columnbrowser.next is None:
             # Create a new columnbrowser
-            col=BrowserColumn(element=el, name=attribute, callback=self.clicked_callback)
+            col=BrowserColumn(element=el, name=attribute, callback=self.clicked_callback,
+                              parent=columnbrowser)
             col.widget.set_property("width-request", self.column_width)
             self.hbox.pack_start(col.get_widget(), expand=False)
             columnbrowser.next=col
@@ -250,7 +258,8 @@ class Browser:
         self.hbox = gtk.HBox()
 
         self.rootcolumn=BrowserColumn(element=self.package, name='package',
-                                      callback=self.clicked_callback)
+                                      callback=self.clicked_callback,
+                                      parent=None)
         self.rootcolumn.widget.set_property("width-request", self.column_width)
         self.hbox.pack_start(self.rootcolumn.get_widget(), expand=False)
 
