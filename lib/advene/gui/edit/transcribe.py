@@ -54,8 +54,9 @@ class TranscriptionEdit:
         self.timestamp_mode_toggle.set_active (True)
         self.tooltips.set_tip(self.timestamp_mode_toggle,
                               _("If unchecked, allows to edit text"))
+        # Discontinuous is True by default
         self.discontinuous_toggle=gtk.CheckButton(_("Discontinuous"))
-        self.discontinuous_toggle.set_active (False)
+        self.discontinuous_toggle.set_active (True)
         self.tooltips.set_tip(self.discontinuous_toggle,
                               _("Do not generate annotations for empty text"))
         
@@ -293,15 +294,13 @@ class TranscriptionEdit:
 
         at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to generate"), create=True)
 
-        print "at = " + str(at)
-        
         if at is None:
             self.controller.log(_("Conversion cancelled"))
             return True
 
-        ti=TranscriptionImporter(transcription_edit=self)
-        ti.package=self.controller.package
-        ti.defaultype=at
+        ti=TranscriptionImporter(package=self.controller.package,
+                                 defaulttype=at,
+                                 transcription_edit=self)
         ti.process_file('transcription')
 
         self.controller.modified=True
