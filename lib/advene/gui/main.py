@@ -53,7 +53,6 @@ import advene.gui.edit.dvdselect
 import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.evaluator
-from advene.gui.views.transcription import TranscriptionView
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -1032,23 +1031,6 @@ class AdveneGUI (Connect):
         return self.on_exit (button, data)
 
     def on_cut1_activate (self, button=None, data=None):
-        transcription = TranscriptionView(controller=self.controller,
-                                          annotationtype=self.current_type)
-        
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_size_request (640, 480)
-        
-        window.set_title (_("AnnotationType %s") % (self.current_type.title
-                                                    or self.current_type.id))
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        window.add (sw)
-        sw.add (transcription.get_widget())
-        self.register_view (transcription)
-
-        window.connect ("destroy", self.close_view_cb, window, transcription)
-        window.show_all()
-
         print "Not implemented yet."
 	return True
 
