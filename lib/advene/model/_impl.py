@@ -290,11 +290,15 @@ class Ided(object):
         You would probably rather use the id property.
         """
         if value:
-            self._getModel().setAttributeNS(None, "id", unicode(value))
+            self._set_id (self._getModel(), value)
         else:
             raise AttributeError("id is a required attribute")
  
     id = property(getId, setId)
+
+    def _set_id (element, value):
+        element.setAttributeNS(None, "id", unicode(value))
+    _set_id = staticmethod (_set_id)
 
 class Uried(Ided):
     """An implementation for the id property interpreted as a URI fragment.

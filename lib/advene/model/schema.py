@@ -1,5 +1,6 @@
 import advene.model._impl as _impl
 import advene.model.annotation as annotation
+import advene.model.content as content
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
 
@@ -25,40 +26,91 @@ class AbstractType(modeled.Importable,
         """Return the schema containing this type"""
         return self._getParent()
 
-    def getMimetype(self):
-        """Return the mime type of the element (None if not defined)"""
-        content_type = self._getChild((adveneNS, 'content-type'))
-        if content_type:
-            return content_type.getAttributeNS(None, 'mime-type')
-        else:
-            return None
-
-    def setMimetype(self, value):
-        """
-        FIXME
-        """
-        advene.model.util.mimetype.MimeType (value)
-        content_type = self._getChild((adveneNS, 'content-type'))
-        if content_type is None:
-            model = self._getModel ()
-            content_type = model.createElementNS (adveneNS, 'content-type')
-            model.appendChild (content_type)
-            
-        content_type.setAttributeNS(None, 'mime-type', value)
-
     def getId (self):
         """
         Handle a special case when a type is defined in an imported schema.
         The type does not consider itself to be imported (which is true wrt the
         schema) but is (indirectly) imported wrt to the package.
         """
-        id_ = super (AbstractType, self).getId ()
+        ident = super (AbstractType, self).getId ()
         schema = self.getSchema()
         if not self.isImported () and schema.isImported ():
             prefix = self.getRootPackage ().getQnamePrefix (schema._getParent())
-            return "%s:%s" % (prefix, id_)
+            return "%s:%s" % (prefix, ident)
         else:
-            return id_
+            return ident
+
+
+    # contentv type implementation
+    
+    def __get_content_type_element (self):
+        return self._getChild (match=(adveneNS, 'content-type'))
+
+    def getMimetype (self):
+        """If this annotation type has a content-type, return its
+        mime-type, else return None."""
+        cte = self.__get_content_type_element ()
+        if cte is not None:
+            return cte.getAttributeNS (None, 'mime-type')
+        return None
+    
+    def setMimetype (self, value):
+        """Set the mime-type of this type's content-type. Create the content
+        type if necessary. If value is None, remove the content-type. """
+        cte = self.__get_content_type_element ()
+        if value is not None:
+            advene.model.util.mimetype.MimeType (value)
+            if cte is None:
+                cte = self._getDocument ().createElementNS (adveneNS, "content-type")
+                self._getModel ().appendChild (cte)
+            cte.setAttributeNS (None, 'mime-type', unicode (value))
+        else:
+            if cte is not None:
+                self._getModel ().removeChild (cte)
+    
+    def delMimetype (self):
+        """Remove this annotation-type's content-type."""
+        self.setMimetype (None)
+
+
+    def __get_content_schema_element (self, cte = None):
+        if cte is None:
+            cte = self.__get_content_type_element ()
+        if cte is None:
+            raise TypeError ('schema has not content-type, cannot have content-schema')
+        cselist = cte.getElementsByTagNameNS (adveneNS, 'content-schema')
+        if len (cselist) > 0:
+            return cselist[0]
+        return None
+
+
+    __content_schema = None
+
+    def getContentSchema (self):
+        if self.__content_schema is None:
+            cse = self.__get_content_schema_element ()
+            if cse is not None:
+                self.__content_schema = content.Content (self, cse)
+        return self.__content_schema
+    
+    def delContentSchema (self):
+        cte = self.__get_content_type_element ()
+        if cte is None:
+            return
+        if self.__content_schema is not None:
+            cse = self.__content_schema._getModel ()
+            del self.__content_schema
+        else:
+            cse = self.__get_content_schema_element (cte)
+        cte.removeChild (cse)
+
+    def addContentSchema (self, mimetype):
+        cte = self.__get_content_type_element ()
+        if cte is None:
+            raise TypeError ('schema has not content-type, cannot have content-schema')
+        cse = self._getDocument ().createElementNS (adveneNS, 'content-schema')
+        cte.appendChild (cse)
+        self.getContentSchema ().setMimetype (mimetype)
             
 
 class AnnotationType(AbstractType,
@@ -66,14 +118,37 @@ class AnnotationType(AbstractType,
     """Annotation Type element. Is Viewable and has a content."""
     #__metaclass__ = auto_properties
 
-    def __init__(self, parent, element):
+    def __init__(self, # mode 1 & 2
+                 parent, # mode 1 & 2,
+                 element = None, # mode 1
+                 ident = None, # mode 2
+                ):
         """
         The constructor has two modes of calling
          - giving it a DOM element (constructing from XML)
-         - TODO: giving it id, [mimetype], ... (constructing from scratch)
+         - giving it ident (constructing from scratch)
         """
-        AbstractType.__init__(self, parent, element,
+        if element is not None:
+            # should be mode 1, checking parameter consistency
+            if ident is not None:
+                raise TypeError("incompatible parameter 'ident'")
+            # mode 1 initialization
+            AbstractType.__init__(self, parent, element,
                             parent.getOwnerPackage().getAnnotationTypes.im_func)
+
+        else:
+            # should be mode 2, checling parameter consistency
+            if ident is None:
+                raise TypeError("parameter 'ident' required")
+
+            # mode 2 initialization
+            doc = parent._getDocument()
+            element = doc.createElementNS(self.getNamespaceUri(),
+                                          self.getLocalName())
+            AbstractType.__init__(self, parent, element,
+                            parent.getOwnerPackage().getAnnotationTypes.im_func)
+            self.setId(ident)
+            
 
     def __str__(self):
         """Return a nice string representation of the element"""
@@ -108,14 +183,36 @@ class RelationType(AbstractType,
 
     #__metaclass__ = auto_properties
 
-    def __init__(self, parent, element):
+    def __init__(self, # mode 1 & 2
+                 parent, # mode 1 & 2,
+                 element = None, # mode 1
+                 ident = None, # mode 2
+                ):
         """
         The constructor has two modes of calling
          - giving it a DOM element (constructing from XML)
-         - TODO: giving it id, [mimetype], ... (constructing from scratch)
+         - giving it ident (constructing from scratch)
         """
-        AbstractType.__init__(self, parent, element,
+        if element is not None:
+            # should be mode 1, checking parameter consistency
+            if ident is not None:
+                raise TypeError("incompatible parameter 'ident'")
+            # mode 1 initialization
+            AbstractType.__init__(self, parent, element,
                             parent.getOwnerPackage().getRelationTypes.im_func)
+
+        else:
+            # should be mode 2, checling parameter consistency
+            if ident is None:
+                raise TypeError("parameter 'ident' required")
+
+            # mode 2 initialization
+            doc = parent._getDocument()
+            element = doc.createElementNS(self.getNamespaceUri(),
+                                          self.getLocalName())
+            AbstractType.__init__(self, parent, element,
+                            parent.getOwnerPackage().getRelationTypes.im_func)
+            self.setId(ident)
 
     def __str__(self):
         """Return a nice string representation of the element"""
@@ -169,7 +266,33 @@ class Schema(modeled.Importable,
     """A Schema defines Annotation types and Relation types."""
     __metaclass__ = auto_properties
 
-    def __init__(self, parent, element):
+    def __init__(self, parent, element=None, ident=None):
+        """
+        The constructor has two modes of calling
+         - giving it a DOM element (constructing from XML)
+         - giving it ident (constructing from scratch)
+        """
+        
+        if element is not None:
+            # should be mode 1, checking parameter consistency
+            if ident is not None:
+                raise TypeError("incompatible parameters 'element' and 'ident'")
+        else:
+            # should be mode 2, checking parameter consistency
+            if ident is None:
+                raise TypeError("parameter 'element' or 'ident' is required")
+            # mode 2 initialization
+            doc = parent._getDocument()
+            element = doc.createElementNS(self.getNamespaceUri(),
+                                          self.getLocalName())
+            _impl.Ided._set_id (element, ident)
+            
+            e = doc.createElementNS(self.getNamespaceUri(), "annotation-types")
+            element.appendChild(e)
+            e = doc.createElementNS(self.getNamespaceUri(), "relation-types")
+            element.appendChild(e)
+        
+        # common to mode 1 and mode 2
         modeled.Importable.__init__(self, element, parent,
                                     locator=parent.getSchemas.im_func)
 

@@ -10,8 +10,8 @@ from constants import *
 import util.dom
 import util.uri
 
-from util.auto_properties import auto_properties
-from util.mimetype import MimeType
+from advene.model.util.auto_properties import auto_properties
+from advene.model.util.mimetype import MimeType
 
 class Content(modeled.Modeled,
               viewable.Viewable.withClass('content', 'getMimetype')):
@@ -27,6 +27,11 @@ class Content(modeled.Modeled,
     def __init__(self, parent, element):
         modeled.Modeled.__init__(self, element, parent)
 
+    def getDomElement (self):
+        """Return the DOM element representing this content."""
+        # FIXME: is this what we need? is this what we want?
+        return self._getModel ()
+        
     def getData(self):
         """Return the data associated to the Content"""
         data = StringIO()
@@ -83,7 +88,7 @@ class Content(modeled.Modeled,
             self._getModel().setAttributeNS(xlinkNS, 'xlink:href', uri)
         else:
             if self._getModel().hasAttributeNS(xlinkNS, 'href'):
-                self._getModel().delAttributeNS(xlinkNS, 'href')
+                self._getModel().removeAttributeNS(xlinkNS, 'href')
 
     def delUri(self):
         """Delete the content's URI"""
@@ -109,8 +114,9 @@ class Content(modeled.Modeled,
     def setMimetype(self, value):
         """Set the content's mime-type"""
         if value is None and self._getModel().hasAttributeNS(None, 'mime-type'):
-            self._getModel().delAttributeNS(None, 'mime-type')
+            self._getModel().removeAttributeNS(None, 'mime-type')
         else:
+            MimeType (value)
             self._getModel().setAttributeNS(None, 'mime-type', unicode(value))
 
     def getPlugin (self):
