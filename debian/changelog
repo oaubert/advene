@@ -1,6 +1,7 @@
 advene (0.7) unstable; urgency=low
 
   * Unicode-related bug fixes 
+  * Some user documentation (doc/user.txt)
   * Added a "display" meta-attribute to AnnotationTypes and
     RelationTypes. When present, it defines a TALES expression returning
     the representation of the annotation in the timeline view. It is
@@ -9,7 +10,7 @@ advene (0.7) unstable; urgency=low
   * We can now parse XML content data (using the 'parsed' global method)
   * Implemented Query support and editing
 
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 11 May 2004 23:12:37 +0200
 
 advene (0.6) unstable; urgency=low
 
