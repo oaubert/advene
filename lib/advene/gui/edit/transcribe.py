@@ -204,6 +204,25 @@ class TranscriptionEdit:
         item.connect("activate", popup_modify, button, self.delay.value)
         menu.append(item)
 
+        item = gtk.MenuItem(_("-1 sec"))
+        item.connect("activate", popup_modify, button, -1000)
+        menu.append(item)
+        item = gtk.MenuItem(_("-0.5 sec"))
+        item.connect("activate", popup_modify, button, -500)
+        menu.append(item)
+        item = gtk.MenuItem(_("-0.1 sec"))
+        item.connect("activate", popup_modify, button, -100)
+        menu.append(item)
+        
+        item = gtk.MenuItem(_("+1 sec"))
+        item.connect("activate", popup_modify, button, 1000)
+        menu.append(item)
+        item = gtk.MenuItem(_("+0.5 sec"))
+        item.connect("activate", popup_modify, button, 500)
+        menu.append(item)
+        item = gtk.MenuItem(_("+0.1 sec"))
+        item.connect("activate", popup_modify, button, 100)
+        
         menu.show_all()
         
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
