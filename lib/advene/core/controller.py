@@ -235,7 +235,7 @@ class AdveneController:
         """
         if not self.imagecache.is_initialized (position):
             # FIXME: only 0-relative position for the moment
-            print "Update snapshot for %d" % position
+            # print "Update snapshot for %d" % position
             try:
                 i = self.player.snapshot (self.player.relative_position)
             except self.player.InternalException, e:
@@ -263,7 +263,9 @@ class AdveneController:
         """
         file_to_play = None
         for s in args:
-            if s.startswith ('-'):
+            if s.startswith('-p'):
+                config.data.player['plugin']=s[2:]
+            elif s.startswith ('-'):
                 print _("Unknown option: %s") % s
             else:
                 if s == "dvd":
