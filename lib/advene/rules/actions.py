@@ -90,6 +90,17 @@ class DefaultActionsRepository:
             )
                  )
         l.append(RegisteredAction(
+            name="DisplayMarker",
+            method=self.DisplayMarker,
+            description=_("Display a marker"),
+            parameters={'shape': _("Marker shape (rectangle, circle, triangle)"),
+                        'color': _("Marker color"),
+                        'x': _("x-position (percentage of screen)"),
+                        'y': _("y-position (percentage of screen)"),
+                        'duration': _("Duration of the caption in ms")}
+            )
+                 )
+        l.append(RegisteredAction(
             name="AnnotationMute",
             method=self.AnnotationMute,
             description=_("Zero the volume during the annotation"),
@@ -191,6 +202,43 @@ class DefaultActionsRepository:
             duration=config.data.preferences['default_caption_duration']
 
         c=self.controller
+        end = c.create_position (value=duration,
+                                 key=c.player.MediaTime,
+                                 origin=c.player.RelativePosition)
+        c.player.display_text (message.encode('utf8'), begin, end)
+        return True
+
+    def DisplayMarker (self, context, parameters):
+        """Display a marker on the video.
+
+        If the 'duration' parameter is not defined, a default duration will be used.
+        Parameters:
+        Shape: rectangle, triangle, circle
+        Color: named color
+        Position: x, y in percentage of the screen. (0,0) is on top-left.
+        Duration: in ms
+        """
+        shape=self.parse_parameter(context, parameters, 'shape', 'rectangle')
+        color=self.parse_parameter(context, parameters, 'color', 'white')
+        x=self.parse_parameter(context, parameters, 'x', '95')
+        y=self.parse_parameter(context, parameters, 'y', '95')
+        duration=self.parse_parameter(context, parameters, 'duration', None)
+
+        if shape == 'rectangle':
+            code='<rect x="%s%%" y="%s%%" width="4em" height="4em" fill="%s" />' % (x, y, color)
+        elif shape == 'circle':
+            code='<circle cx="%s%%" cy="%s%%" radius="4em" height="4em" fill="%s" />' % (x, y, color)
+        else:
+            code='<text x="%s%%" y="%s%%" color="%s">TODO</text>' % (x, y, color)
+
+        message="""<svg version='1' preserveAspectRatio='xMinYMin meet' viewBox='0 0 800 600'>%s</svg>""" % code
+        
+        c=self.controller
+        begin = c.player.relative_position
+        if duration is not None:
+            duration=long(duration)
+        else:
+            duration=config.data.preferences['default_caption_duration']
         end = c.create_position (value=duration,
                                  key=c.player.MediaTime,
                                  origin=c.player.RelativePosition)
