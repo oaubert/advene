@@ -327,8 +327,15 @@ class AdveneGUI (Connect):
         # Update the Message action (GUI version)
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
             name="Message",
-            method=self.message_log,
+            method=self.action_message_log,
             description=_("Display a message"),
+            parameters={'message': _("String to display.")}
+            ))
+
+        self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
+            name="Popup",
+            method=self.action_popup,
+            description=_("Display a popup"),
             parameters={'message': _("String to display.")}
             ))
 
@@ -558,7 +565,7 @@ class AdveneGUI (Connect):
         self.gui.logmessages.scroll_mark_onscreen (endmark)
         return
 
-    def message_log (self, context, parameters):
+    def action_message_log (self, context, parameters):
         """Event Handler for the message action.
 
         Essentialy a wrapper for the X{log} method.
@@ -569,10 +576,23 @@ class AdveneGUI (Connect):
         if parameters.has_key('message'):
             message=context.evaluateValue(parameters['message'])
         else:
-            message="No message..."
+            message=_("No message...")
         self.log (message)
         return True
-            
+
+    def action_popup (self, context, parameters):
+        if parameters.has_key('message'):
+            message=context.evaluateValue(parameters['message'])
+        else:
+            message=_("No message...")
+        dialog = gtk.MessageDialog(
+            None, gtk.DIALOG_DESTROY_WITH_PARENT,
+            gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
+            message)
+        dialog.connect("response", lambda w,e: dialog.destroy())
+        response=dialog.show()
+        return True
+
     def file_selector (self, callback=None, label="Select a file",
                        default=""):
         """Display the generic file selector.
