@@ -363,13 +363,26 @@ class AdveneGUI (Connect):
 
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
             name="PopupGoto2",
-            method=self.action_popup_goto2,
+            method=self.generate_action_popup_goton(2),
             description=_("Display a popup with 2 options"),
             parameters={'description': _("General description"),
                         'message1': _("First option description"),
                         'position1': _("First position"),
                         'message2': _("Second option description"),
                         'position2': _("Second position"),
+                        }
+            ))
+        self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
+            name="PopupGoto3",
+            method=self.generate_action_popup_goton(3),
+            description=_("Display a popup with 3 options"),
+            parameters={'description': _("General description"),
+                        'message1': _("First option description"),
+                        'position1': _("First position"),
+                        'message2': _("Second option description"),
+                        'position2': _("Second position"),
+                        'message3': _("Third option description"),
+                        'position3': _("Third position"),
                         }
             ))
 
@@ -696,40 +709,37 @@ class AdveneGUI (Connect):
         dialog.show()
         return True
 
-    def action_popup_goto2 (self, context, parameters):
-        """Display a popup with 2 choices."""
-        for k in ('description',
-                  'message1', 'position1',
-                  'message2', 'position2'):
-            if not parameters.has_key(k):
-                raise Exception(_("Invalid invocation of DisplayPopup2: missing %s") % k)
+    def generate_action_popup_goton(self, size):
+        def generate (context, parameters):
+            """Display a popup with 'size' choices."""
+            description=context.evaluateValue(parameters['description'])
+            message=range(size+1)
+            position=range(size+1)
+            for i in range(1, size+1):
+                message[i]=context.evaluateValue(parameters['message%d' % i])
+                position[i]=context.evaluateValue(parameters['position%d' % i])
+
+            def handle_response(widget, response, dialog):
+                if response > 0:
+                    self.controller.update_status("set", long(position[response]))
+                dialog.destroy()
                 return True
 
-        description=context.evaluateValue(parameters['description'])
-        message1=context.evaluateValue(parameters['message1'])
-        position1=context.evaluateValue(parameters['position1'])
-        message2=context.evaluateValue(parameters['message2'])
-        position2=context.evaluateValue(parameters['position2'])
-
-        def handle_response(widget, response, dialog):
-            if response == 1:
-                self.controller.update_status("set", long(position1))
-            elif response == 2:
-                self.controller.update_status("set", long(position2))
-            dialog.destroy()
+            buttons=[]
+            for i in range(1, size+1):
+                buttons.extend( (message[i].encode('utf8'), i) )
+            buttons.extend( (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ) )
+            
+            dialog = gtk.Dialog(title=_("Make a choice"),
+                                parent=None,
+                                flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                                buttons=tuple(buttons))
+            l=gtk.Label(description)
+            dialog.vbox.add(l)
+            dialog.connect("response", handle_response, dialog)
+            dialog.show_all()
             return True
-        
-        dialog = gtk.Dialog(title=_("Make a choice"),
-                            parent=None,
-                            flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                            buttons=( message1.encode('utf8'), 1,
-                                      message2.encode('utf8'), 2,
-                                      gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
-        l=gtk.Label(description)
-        dialog.vbox.add(l)
-        dialog.connect("response", handle_response, dialog)
-        dialog.show_all()
-        return True
+        return generate
 
     def file_selector (self, callback=None, label="Select a file",
                        default=""):
