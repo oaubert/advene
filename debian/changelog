@@ -7,6 +7,7 @@ advene (0.6-1) unstable; urgency=low
     useful for structured content for instance.
   * The timeline legend is now vertically synchronized with the elements
   * We can now parse XML content data (using the 'parsed' global method)
+  * Implemented Query support and editing
 
  --
 
