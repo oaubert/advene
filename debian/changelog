@@ -1,3 +1,14 @@
+advene (project) unstable; urgency=low
+
+  * A treeview is available in the main application window
+  * Implemented history navigation
+  * DVD title/chapter selector
+  * Display a warning when trying to quit the application with unsaved data
+  * Added a button to quickly edit the current STBV
+  * Numerous bug fixes
+
+ --
+
 advene (0.5) unstable; urgency=low
 
   * The "Update snapshots" functionality is back.
