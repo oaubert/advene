@@ -81,6 +81,9 @@ class TranscriptionEdit:
         self.textview.set_editable(True)
         self.textview.set_wrap_mode (gtk.WRAP_CHAR)
 
+        # 0-mark at the beginning
+        self.create_timestamp_mark(0, self.textview.get_buffer().get_start_iter())
+
         self.textview.connect("button-press-event", self.button_press_event_cb)
 
         vbox.add(self.textview)
@@ -392,20 +395,23 @@ class TranscriptionEdit:
         return True
 
     def load_transcription(self, filename=None):
-        b=self.textview.get_buffer()
-        begin,end=b.get_bounds()
-        b.delete(begin, end)
-        
         try:
             f=open(filename, 'r')
         except Exception, e:
             self.controller.log(_("Cannot read %s: %s") % (filename, str(e)))
             return
         data=unicode("".join(f.readlines()))
-        
+
+        b=self.textview.get_buffer()
+        begin,end=b.get_bounds()
+        b.delete(begin, end)
+                
         mark_re=sre.compile('\[(I?)(\d+:\d+:\d+.?\d*)\]([^\[]*)')
 
-        last_time=None
+        # 0-mark at the beginning
+        self.create_timestamp_mark(0, begin)
+        last_time=0
+        
         m=mark_re.search(data)
         if m:
             # Handle the start case: there may be some text before the
