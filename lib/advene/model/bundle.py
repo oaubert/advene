@@ -310,12 +310,12 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
     This class implements a bundle wraping XML elements.
 
     This abstract method requires a number of methods:
-     * _get_namespace_uri : returning the NS URI of the elements to be included
-     * _get_local_name : returning the local name of the elements to be included
-     * _make_item : a callable taking a parent and an element and returning an 
-       item
-     * _get_element : a callable taking an element and returning its item
-     * _getViewableType : a method returning the viewable type
+      - _get_namespace_uri : returning the NS URI of the elements to be included
+      - _get_local_name : returning the local name of the elements to be included
+      - _make_item : a callable taking a parent and an element and returning an 
+        item
+      - _get_element : a callable taking an element and returning its item
+      - _getViewableType : a method returning the viewable type
     """
 
     def __init__ (self, parent, element):
