@@ -338,7 +338,28 @@ class AdveneController:
                                           package=self.package,
                                           imagecache=self.imagecache)
         return True
-    
+
+    def get_stbv_list(self):
+        return [ v
+                 for v in self.package.views
+                 if v.content.mimetype == 'application/x-advene-ruleset' ]
+
+    def activate_stbv(self, view=None):
+        """Activates a given STBV.
+
+        If view is None, then reset the user STBV.
+        """
+        if view is None:
+            self.event_handler.clear_ruleset(type_='user')
+            return
+        rs=advene.rules.elements.RuleSet()
+        rs.from_dom(catalog=self.event_handler.catalog,
+                    domelement=view.content.model,
+                    origin=view.uri)
+        self.event_handler.set_ruleset(rs, type_='user')
+        self.event_handler.notify("ViewActivation", view=view)
+        return
+        
     def handle_http_request (self, source, condition):
         """Handle a HTTP request.
 
