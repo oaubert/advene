@@ -556,13 +556,11 @@ class TreeWidget:
         vbox.add (sw)
         sw.add (self.get_widget())
         if self.controller.gui:
-            self.controller.gui.register_view (tree)
+            self.controller.gui.register_view (self)
             window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
 
-        s=config.data.preferences['windowsize']['treeview']
-        window.set_default_size (s[0], s[1])
         if self.controller.gui:
-            window.connect ("size_allocate", self.controller.gui.resize_cb, 'treeview')
+            self.controller.gui.init_window_size(window, 'treeview')
 
         self.buttonbox = gtk.HButtonBox()
 
