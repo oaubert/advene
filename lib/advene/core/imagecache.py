@@ -9,6 +9,13 @@ import cStringIO
 
 import Image
 
+class TypedString(str):
+    """String with a mimetype attribute.
+    """
+    def __init__(self, *p, **kw):
+        super(TypedString, self).__init__(*p, **kw)
+        self.contenttype='text/plain'
+
 class ImageCache(dict):
     """ImageCache class.
 
@@ -36,10 +43,13 @@ class ImageCache(dict):
         dict.__init__ (self)
 
         # The content of the not_yet_available_file file
+        # FIXME: we should get it from a resource file in advene share directory
         i = Image.new ('RGB', (160,100), color=255)
         ostream = cStringIO.StringIO ()
         i.save (ostream, 'png')
-        self.not_yet_available_image = ostream.getvalue()
+        s=TypedString(ostream.getvalue())
+        s.contenttype='image/png'
+        self.not_yet_available_image = s
         ostream.close ()
 
         self.epsilon = epsilon
