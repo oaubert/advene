@@ -6,14 +6,15 @@ import advene.core.config as config
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.bundle import AbstractBundle
+from advene.model.bundle import AbstractBundle, StandardXmlBundle
 from advene.model.query import Query
 from advene.model.view import View
+
 
 from gettext import gettext as _
 
 import advene.gui.edit.elements
-import advene.gui.edit.create
+from advene.gui.edit.create import CreateElementPopup
 import advene.gui.popup
 
 import advene.util.vlclib as vlclib
@@ -447,7 +448,20 @@ class TreeWidget:
                     pop = advene.gui.edit.elements.get_edit_popup (node,
                                                                    controller=self.controller)
                 except TypeError, e:
-                    print _("Error: unable to find an edit popup for %s:\n%s") % (node, str(e))
+                    if isinstance(node, StandardXmlBundle):
+                        if node.viewableType == 'query-list':
+                            cr = CreateElementPopup(type_=Query,
+                                                    parent=self.package,
+                                                    controller=self.controller)
+                        elif node.viewableType == 'view-list':
+                            cr = CreateElementPopup(type_=View,
+                                                    parent=self.package,
+                                                    controller=self.controller)
+                        elif node.viewableType == 'schema-list':
+                            cr = CreateElementPopup(type_=Schema,
+                                                    parent=self.package,
+                                                    controller=self.controller)
+                        cr.popup()
                 else:
                     pop.edit ()
                 retval=True
@@ -523,9 +537,15 @@ class TreeWidget:
 
     def update_model(self, package):
         """Update the model with a new package."""
-        print "update model %s" % str(package)
+        print "Treeview: update model %s" % str(package)
+        # Get current path
+        oldpath=self.get_cursor()[0]
         self.model = self.modelclass(package)
         self.tree_view.set_model(self.model)
+        # Return to old path if possible
+        if oldpath is not None:
+            self.expand_to_path(oldpath)
+            self.set_cursor(oldpath)
         return
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
