@@ -33,6 +33,13 @@ def fourcc2rawcode (code):
                            code >> 24)
     return conv[fourcc]
 
+class TitledElement:
+    """Dummy element, to accomodate the get_title method.
+    """
+    def __init__(self, value=None, title=""):
+        self.value=value
+        self.title=title
+ 
 class TypedString(str):
     """String with a mimetype attribute.
     """
