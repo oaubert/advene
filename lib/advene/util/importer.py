@@ -50,18 +50,18 @@ import xml.dom
 def get_importer(fname):
     i=None
     if fname == 'chaplin':
-        i=ChaplinImporter(author='chaplin-importer')
+        i=ChaplinImporter()
     elif fname == 'lsdvd':
-        i=LsDVDImporter(author='lsdvd-importer')
+        i=LsDVDImporter()
     elif fname.endswith('.txt'):
-        i=TextImporter(author='text-importer')
+        i=TextImporter()
     elif fname.endswith('.srt'):
-        i=SubtitleImporter(author='subtitle-importer')
+        i=SubtitleImporter()
     elif fname.endswith('.eaf'):
-        i=ElanImporter(author='elan-importer')
+        i=ElanImporter()
     elif fname.endswith('.xml'):
         # FIXME: we should check the XML content
-        i=XiImporter(author='xi-importer')
+        i=XiImporter()
 
     return i
     
@@ -72,8 +72,10 @@ class GenericImporter(object):
     @type statistics: dict
     FIXME...
     """
-    def __init__(self, author='importer', package=None, defaulttype=None):
+    def __init__(self, author=None, package=None, defaulttype=None):
         self.package=package
+        if author is None:
+            author=config.data.userid
         self.author=author
         self.timestamp=time.strftime("%F")
         self.time_regexp=sre.compile('(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d+)[.,]?(?P<ms>\d+)?')
