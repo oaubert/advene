@@ -191,10 +191,6 @@ class CategorizedSelector:
 
     We use a treeview to display elements.
 
-    FIXME: we could also return a gtk.Button with a label that changes
-    according to the selected value, to save time for the calling application
-
-
     @ivar elements: list of  elements
     @type elements: list
     @ivar categories: list of categories
@@ -209,6 +205,8 @@ class CategorizedSelector:
     @type callback: method
     @ivar editable: indicates if the data is editable
     @type editable: boolean
+    @ivar button: a gtk.Button with a label matching the selected value
+    @type button: gtk.Button
     """
     COLUMN_ELEMENT=0
     COLUMN_LABEL=1
