@@ -109,14 +109,16 @@ class AdveneController:
         self.player = playerfactory.get_player()
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
+
         # FIXME: should be removed (CORBA dependent)
-        try:
-            # Kill spurious vlc player
-            os.system("/usr/bin/killall -9 vlc")
-            os.unlink(config.data.iorfile)
-        except OSError:
-            pass
-        
+        if config.os != 'win32':
+            try:
+                # Kill spurious vlc player
+                os.system("/usr/bin/killall -9 vlc")
+                os.unlink(config.data.iorfile)
+            except OSError:
+                pass
+
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
         # Used in update_status to emit appropriate notifications
@@ -156,8 +158,6 @@ class AdveneController:
         print "+-------------------------------------------------------"        
     
     def init(self, args=None):
-        """Mainloop : CORBA initalization
-        """
         if args is None:
             args=[]
 
@@ -195,6 +195,7 @@ class AdveneController:
         if file_to_play:
             self.set_default_media(file_to_play)
 
+        
         self.player.check_player()
         
         return True
@@ -220,7 +221,7 @@ class AdveneController:
             except self.player.InternalException, e:
                 print "Exception in snapshot: %s" % e.message
                 return False
-            if i.height != 0:
+            if i is not None and i.height != 0:
                 self.imagecache[position] = vlclib.snapshot2png (i)
         else:
             # FIXME: do something useful (warning) ?                
