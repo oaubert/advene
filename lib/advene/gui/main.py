@@ -709,7 +709,10 @@ class AdveneGUI (Connect):
             position=long(context.evaluateValue(parameters['position']))
         else:
             position=0
-        duration=context.evaluateValue(parameters['duration'])
+        if parameters.has_key('duration'):
+            duration=context.evaluateValue(parameters['duration'])
+        else:
+            duration=None
         if duration == "" or duration == 0:
             duration = None
         b=gtk.Button(message)
@@ -737,7 +740,10 @@ class AdveneGUI (Connect):
                 b.connect("clicked", handle_response, position)
                 vbox.add(b)
 
-            duration=context.evaluateValue(parameters['duration'])
+            if parameters.has_key('duration'):
+                duration=context.evaluateValue(parameters['duration'])
+            else:
+                duration=None
             if duration == "" or duration == 0:
                 duration = None
             self.singletonpopup.display(widget=vbox, timeout=duration)
