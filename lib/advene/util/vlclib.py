@@ -1,4 +1,3 @@
-#! /usr/bin/python
 """VLC library functions."""
 
 import advene.core.config as config
