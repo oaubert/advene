@@ -113,7 +113,7 @@ class ImageCache(dict):
         
         if valids:
             key = valids[0][0]
-            print "Approximate key: %d (%d)" % valids[0]
+#            print "Approximate key: %d (%d)" % valids[0]
 ##             if len(valids) > 1:
 ##                 print "Imagecache: more than 1 valid snapshot for %d: %s" % (key,
 ##                                                                              valids)
