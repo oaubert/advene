@@ -132,8 +132,8 @@ class Player:
 
     def stop(self, position): 
         self.log("stop %s" % str(position))
-        self.mplayer.cmd("gui_stop")
-
+        self.pause(position)
+        
     def exit(self):
         self.log("exit")
         self.mplayer.close()
