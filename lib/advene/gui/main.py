@@ -233,6 +233,20 @@ class AdveneGUI (Connect):
             
         return True
     
+    def query_lifecycle(self, context, parameters):
+        """Method used to update the active views.
+
+        It will propagate the event.
+        """
+        query=context.evaluateValue('query')
+        event=context.evaluateValue('event')
+        for v in self.annotation_views:
+            try:
+                v.update_query(query=query, event=event)
+            except AttributeError:
+                pass
+        return True
+    
     def schema_lifecycle(self, context, parameters):
         """Method used to update the active views.
 
@@ -339,6 +353,10 @@ class AdveneGUI (Connect):
         for e in ('ViewCreate', 'ViewEditEnd', 'ViewDelete'):
             self.controller.event_handler.internal_rule (event=e,
                                                          method=self.view_lifecycle)
+        # View lifecycle
+        for e in ('QueryCreate', 'QueryEditEnd', 'QueryDelete'):
+            self.controller.event_handler.internal_rule (event=e,
+                                                         method=self.query_lifecycle)
         # Schema lifecycle
         for e in ('SchemaCreate', 'SchemaEditEnd', 'SchemaDelete'):
             self.controller.event_handler.internal_rule (event=e,
