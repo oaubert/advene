@@ -1,10 +1,6 @@
 
 import advene.core.config as config
 
-import ORBit, CORBA
-ORBit.load_typelib (config.data.typelib)
-import VLC
-
 from gettext import gettext as _
 
 import advene.util.vlclib as vlclib
@@ -174,11 +170,12 @@ class DefaultActionsRepository:
             duration=long(duration)
         else:
             duration=config.data.preferences['default_caption_duration']
-            
-        end = self.controller.create_position (value=duration,
-                                               key=VLC.MediaTime,
-                                               origin=VLC.RelativePosition)
-        self.controller.player.display_text (message, begin, end)
+
+        c=self.controller
+        end = c.create_position (value=duration,
+                                 key=c.player.MediaTime,
+                                 origin=c.player.RelativePosition)
+        c.player.display_text (message, begin, end)
         return True
 
     def AnnotationCaption (self, context, parameters):
@@ -190,10 +187,11 @@ class DefaultActionsRepository:
         if annotation is not None:
             begin = self.controller.player.relative_position
             duration=annotation.fragment.end - self.controller.player.current_position_value
-            end = self.controller.create_position (value=duration,
-                                                   key=VLC.MediaTime,
-                                                   origin=VLC.RelativePosition)
-            self.controller.player.display_text (message, begin, end)
+            c=self.controller
+            end = c.create_position (value=duration,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.RelativePosition)
+            c.player.display_text (message, begin, end)
         return True
 
     def SoundOff (self, context, parameters):
