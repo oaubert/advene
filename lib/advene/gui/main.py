@@ -8,6 +8,7 @@ C{on_} prefix).
 
 import sys, time
 import cStringIO
+import os
 
 import advene.core.config as config
 
@@ -859,34 +860,52 @@ class AdveneGUI (Connect):
             elif event.keyval == gtk.keysyms.s:
                 # Save the current annotation file
                 self.on_save1_activate (win, None)
+            elif event.keyval == gtk.keysyms.Return:
+                # We do something special on C-return, so
+                # go to the following test (Return)
+                pass
             else:
                 return False
             
         if event.keyval == gtk.keysyms.Return:
             # Non-pausing annotation mode
-            self.controller.position_update ()
+            c=self.controller
+            c.position_update ()
             if self.annotation is None:
                 # Start a new annotation
                 if self.current_type is None:
                     # FIXME: should display a warning
                     return True
-                self.annotation = self.controller.package.createAnnotation(type = self.current_type,
-                                                                           fragment = MillisecondFragment (begin=self.controller.player.current_position_value, duration=30000))
+                f = MillisecondFragment (begin=c.player.current_position_value,
+                                         duration=30000)
+                self.annotation = c.package.createAnnotation(type = self.current_type,
+                                                             fragment=f)                
                 self.log (_("Defining a new annotation..."))
                 self.controller.notify ("AnnotationCreate", annotation=self.annotation)
             else:
                 # End the annotation. Store it in the annotation list
-                self.annotation.fragment.end = self.controller.player.current_position_value
+                self.annotation.fragment.end = c.player.current_position_value
                 f=self.annotation.fragment
                 if f.end < f.begin:
                     f.begin, f.end = f.end, f.begin
-                self.controller.package.annotations.append (self.annotation)
+                c.package.annotations.append (self.annotation)
                 self.log (_("New annotation: %s") % self.annotation)
                 self.gui.current_annotation.set_text ('['+_('None')+']')
-                self.controller.notify ("AnnotationEditEnd", annotation=self.annotation)
-                if self.controller.player.status == self.controller.player.PauseStatus:
-                    self.controller.update_status ("resume")
+                c.notify ("AnnotationEditEnd", annotation=self.annotation)
                 self.annotation = None
+                if event.state & gtk.gdk.CONTROL_MASK:
+                    # Continuous editing mode: we immediately start a new annotation
+                    if self.current_type is None:
+                        # FIXME: should display a warning
+                        return True
+                    f = MillisecondFragment (begin=c.player.current_position_value,
+                                             duration=30000)
+                    self.annotation = c.package.createAnnotation(type = self.current_type,
+                                                                 fragment=f)                
+                    self.log (_("Defining a new annotation..."))
+                    self.controller.notify ("AnnotationCreate", annotation=self.annotation)
+                if c.player.status == c.player.PauseStatus:
+                    c.update_status ("resume")
             return True
         elif event.keyval == gtk.keysyms.space:
             # Pausing annotation mode
@@ -1167,6 +1186,10 @@ class AdveneGUI (Connect):
         popup=browser.popup()
         return True
 
+    def on_evaluator2_activate (self, button=None, data=None):
+        self.popup_evaluator()
+        return True
+
     def on_navigationhistory1_activate (self, button=None, data=None):
         h=advene.gui.views.history.HistoryNavigation(self.controller, self.navigation_history)
         h.popup()
@@ -1413,6 +1436,14 @@ class AdveneGUI (Connect):
     def on_update_snapshots_ok_clicked (self, button=None, data=None):
         self.controller.stop_update_snapshots()
         self.gui.get_widget ("update-snapshots").hide ()
+        return True
+
+    def on_help1_activate (self, button=None, data=None):
+        # FIXME: display user help.
+        help=os.sep.join( (config.data.path['web'], 'user.html') )
+        if os.access(help, os.R_OK):
+            self.webbrowser.open (help)
+        # FIXME: display a warning if not found
         return True
     
 if __name__ == '__main__':
