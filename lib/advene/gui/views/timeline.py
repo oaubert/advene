@@ -11,6 +11,7 @@ from advene.model.bundle import AbstractBundle
 from advene.model.view import View
 
 import advene.util.vlclib as vlclib
+import advene.gui.util
 
 from gettext import gettext as _
 
@@ -90,6 +91,12 @@ class TimeLine:
 
         # Dictionary holding the vertical position for each type
         self.layer_position = {}
+
+        # Annotation subject to resizing methods
+        self.resized_annotation = None
+
+        # Default drag mode : create a relation
+        self.drag_mode = "relation"
         
         # Adjustment corresponding to the Virtual display
         # The page_size is the really displayed area
@@ -287,9 +294,15 @@ class TimeLine:
             else:
                 print "Unknown event %s" % event
         return True
-        
+
+    def select_for_resize(self, widget, ann):
+        self.resized_annotation=ann
+        return True
+    
     def annotation_cb (self, widget, ann):
         menu=advene.gui.popup.Menu(ann, controller=self.controller)
+        menu.add_menuitem(menu.menu, _("Select for resize"), self.select_for_resize, ann)
+        menu.menu.show_all()
         menu.popup()
         return True
 
@@ -334,58 +347,17 @@ class TimeLine:
             dialog.run()
             dialog.destroy()
             return True
-        
-        w=gtk.Window(gtk.WINDOW_POPUP)
-        w.set_title(_("Create a relation"))
-        w.set_position(gtk.WIN_POS_MOUSE)
 
-        f=gtk.Frame(_("Create a relation"))
-        w.add(f)
-        
-        vbox=gtk.VBox()
-        f.add(vbox)
-
-        l=gtk.Label()
-        l.set_markup(_("Choose the type of relation\n you want to set between\n%s\nand\n%s")
-                     % (source.id, dest.id))
-        vbox.add(l)
-
-        optionmenu = gtk.OptionMenu()
-
-        menu=gtk.Menu()
-        for r in relationtypes:
-            item = gtk.MenuItem(r.title)
-            item.show()
-            menu.append(item)
-        optionmenu.set_menu(menu)
-
-        optionmenu.show()
-        vbox.add(optionmenu)
-        
-        hbox=gtk.HButtonBox()
-        vbox.add(hbox)
-        b=gtk.Button(stock=gtk.STOCK_CANCEL)
-        b.connect("clicked", lambda e: w.destroy())
-        hbox.pack_start(b, expand=False)
-
-        def on_create_relation(widget, window):
-            self.create_relation_option(source, dest, optionmenu, relationtypes)
-            window.destroy()
-            return True
-        
-        b=gtk.Button(stock=gtk.STOCK_OK)
-        b.connect("clicked", on_create_relation, w) 
-        hbox.pack_start(b, expand=False)
-
-        w.show_all()
+        rt=advene.gui.util.list_selector(title=_("Create a relation"),
+                                         text=_("Choose the type of relation\n you want to set between\n%s\nand\n%s") % (source.id, dest.id),
+                                         members=relationtypes,
+                                         controller=self.controller)
+        if rt is not None:
+            relation=self.controller.package.createRelation(members=(source, dest),
+                                                            type=rt)
+            self.controller.package.relations.append(relation)
+            self.controller.notify("RelationCreate", relation=relation)
         return True
-
-    def create_relation_option(self, source, dest, optionmenu, relationtypes):
-        """Create a relation between source and dest whose type is in optionmenu."""
-        rtype=relationtypes[optionmenu.get_history()]
-        relation=self.controller.package.createRelation(members=(source, dest), type=rtype)
-        self.controller.package.relations.append(relation)
-        print "Relation %s created." % relation
 
     def button_press_handler(self, widget, event, annotation):
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
@@ -541,6 +513,12 @@ class TimeLine:
             timel.activate_selection()
             return True
 
+        def set_value(win, position, attr):
+            if self.resized_annotation is not None:
+                setattr(self.resized_annotation.fragment, attr, long(position))
+                self.controller.notify("AnnotationEditEnd", annotation=self.resized_annotation)
+            return True
+
         item = gtk.MenuItem(_("Position %s") % vlclib.format_time(position))
         menu.append(item)
 
@@ -555,6 +533,14 @@ class TimeLine:
         item.connect("activate", copy_value, position)
         menu.append(item)
 
+        if self.resized_annotation is not None:
+            item = gtk.MenuItem(_("Set %s.begin") % self.resized_annotation.id)
+            item.connect("activate", set_value, position, 'begin')
+            menu.append(item)
+            item = gtk.MenuItem(_("Set %s.end") % self.resized_annotation.id)
+            item.connect("activate", set_value, position, 'end')
+            menu.append(item)
+            
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
@@ -585,11 +571,8 @@ class TimeLine:
     
     def mouse_pressed_cb(self, widget=None, event=None):
         retval = False
-        button = event.button
-        x = event.x
-        y = event.y
-        if button == 3:
-            self.context_cb (timel=self, position=self.pixel2unit(x))
+        if event.button == 3:
+            self.context_cb (timel=self, position=self.pixel2unit(event.x))
             retval = True
         return retval
 
@@ -743,6 +726,40 @@ class TimeLine:
 
         return vbox
 
+    def set_drag_mode(self, button, mode):
+        self.drag_mode = mode
+        return True
+    
+    def get_toolbar(self):
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS)        
+        tb_list = (
+            ("_Relations", "Create relations",
+             gtk.STOCK_CONVERT, self.set_drag_mode, "relation"),
+            
+            ("_BeginBegin", "Set the same begin time",
+             gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-begin"),
+
+            ("_BeginEnd", "Align the destination begin time to the source end time",
+             gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-end"),
+
+
+            ("_EndEnd", "Align the destination end time to the source end time",
+             gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-end"),
+
+            ("_EndBegin", "Align the destination end time to the source begin time",
+             gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-begin"),
+
+            )
+        for text, tooltip, icon, callback, arg in tb_list:
+            #b=gtk.RadioToolButton(group="mode", stock_id=icon)
+            #b.set_tooltip(tips, tooltip)
+            tb.append_item(text, tooltip, None,
+                           gtk.image_new_from_stock(icon,
+                                                    gtk.ICON_SIZE_SMALL_TOOLBAR),
+                           callback, arg)
+        return tb
+    
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
@@ -754,6 +771,9 @@ class TimeLine:
 
         window.add (vbox)
 
+        self.toolbar = self.get_toolbar()
+        vbox.pack_start(self.toolbar, expand=False)
+        
         vbox.add (self.get_packed_widget())
 
         hbox = gtk.HButtonBox()
@@ -777,7 +797,7 @@ class TimeLine:
         hbox.add (self.highlight_activated_toggle)
         hbox.add (self.scroll_to_activated_toggle)
 
-        b = gtk.Button (stock=gtk.STOCK_OK)
+        b = gtk.Button (stock=gtk.STOCK_CLOSE)
         if self.controller.gui:
             b.connect ("clicked", self.controller.gui.close_view_cb, window, self)
         else:
