@@ -114,8 +114,9 @@ class BrowserColumn:
         return vbox
         
 class Browser:
-    def __init__(self, element=None):
+    def __init__(self, element=None, controller=None):
         self.element=element
+        self.controller=controller
         self.path=[element]
         # 640 / 4
         self.column_width=160
@@ -212,6 +213,28 @@ class Browser:
         self.valuelabel.set_text(val)
         return
 
+    def popup(self):
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window.connect ("destroy", lambda e: window.destroy())
+        window.set_title (vlclib.get_title(self.controller, self.element))
+
+        vbox = gtk.VBox()
+
+        window.add (vbox)
+        vbox.add (self.widget)
+
+        hbox = gtk.HButtonBox()
+        vbox.pack_start (hbox, expand=False)
+
+        b = gtk.Button (stock=gtk.STOCK_CLOSE)
+        b.connect ("clicked", lambda w: window.destroy ())
+        hbox.add (b)
+
+        vbox.set_homogeneous (gtk.FALSE)
+
+        window.show_all()
+        return window
+        
     def scroll_event(self, widget=None, event=None):
         if event.state & gtk.gdk.CONTROL_MASK:
             a=widget.get_hadjustment()
@@ -275,6 +298,7 @@ class Browser:
         vbox.show_all()
         return vbox
 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print _("Should provide a package name")
@@ -282,37 +306,9 @@ if __name__ == "__main__":
 
     package = Package (uri=sys.argv[1])
     
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    window.set_size_request (320, 200)
-
-    def validate_cb (win, package):
-        filename="/tmp/package.xml"
-        package.save (as=filename)
-        print "Package saved as %s" % filename
-        gtk.main_quit ()
-        
-    window.connect ("destroy", lambda e: gtk.main_quit())
-    window.set_title (package.title or _("No package title"))
-    
-    vbox = gtk.VBox()
-    
-    window.add (vbox)
-
     browser = Browser(element=package)
-    vbox.add (browser.get_widget())
-
-    hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=gtk.FALSE)
-
-    b = gtk.Button (stock=gtk.STOCK_SAVE)
-    b.connect ("clicked", validate_cb, package)
-    hbox.add (b)
-
-    b = gtk.Button (stock=gtk.STOCK_QUIT)
-    b.connect ("clicked", lambda w: window.destroy ())
-    hbox.add (b)
-
-    vbox.set_homogeneous (gtk.FALSE)
-
-    window.show_all()
+    
+    p=browser.popup()
+    p.connect ("destroy", lambda e: gtk.main_quit())
+    
     gtk.main ()
