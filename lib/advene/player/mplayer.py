@@ -113,7 +113,7 @@ class Player:
         
     def get_media_position(self, origin, key):
         self.log("get_media_position")
-        return self.pymp.control.current_position_value * 1000
+        return long(self.pymp.control.current_position_value * 1000)
 
     def set_media_position(self, position):
         self.log("set_media_position %s" % str(position))
@@ -173,8 +173,8 @@ class Player:
                 self.status=self.PlayingStatus
             s.streamstatus=self.status
             self.mplayer.queryStatus()
-            s.position=self.pymp.control.current_position_value * 1000
-            s.length=self.mplayer.totalTime * 1000
+            s.position=long(self.pymp.control.current_position_value * 1000)
+            s.length=long(self.mplayer.totalTime * 1000)
             s.url=self.pymp.playlist[self.pymp.playlist.current_index]
         else:
             self.status=self.UndefinedStatus 
