@@ -84,6 +84,12 @@ class Window:
         return True
 
     def display_doc(self, expr):
+        if expr == '':
+            self.help()
+            return True
+        for c in ('.', '(', ' '):
+            while expr.endswith(c):
+                expr=expr[:-1]
         try:
             res=eval(expr, self.globals_, self.locals_)
             d=res.__doc__
