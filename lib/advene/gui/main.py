@@ -1297,13 +1297,7 @@ class AdveneGUI (Connect):
 
     def on_view_logwindow_activate (self, button=None, data=None):
         """Open logwindow view plugin."""
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-
-        window.set_title (_("Log Window"))
-        window.add (self.logwindow.get_widget())
-
-        window.connect ("destroy", self.close_view_cb, window, self.logwindow)
-        window.show_all()
+        self.logwindow.popup()
         return True
 
     def on_view_annotations_activate (self, button=None, data=None):
@@ -1614,7 +1608,7 @@ class AdveneGUI (Connect):
         st={ 'Icons only': gtk.TOOLBAR_ICONS,
              'Text only': gtk.TOOLBAR_TEXT,
              'Both': gtk.TOOLBAR_BOTH }
-        s=advene.gui.util.list_selector(title=_("Choose the toolbar style"),
+        s=advene.gui.util.list_selector(title=_("Choose the toolbar style."),
                                          text=_("Choose the toolbar style."),
                                          members=st,
                                          controller=self.controller)
