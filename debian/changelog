@@ -1,3 +1,20 @@
+advene (project) unstable; urgency=low
+
+  * New action: DisplayMarker
+  * When editing actions, parameters are now sorted
+  * New component: advene.util.importer which can import data from text
+    files, srt files, lsdvd, chaplin, xi files. Usable as command-line
+    tool for the moment.
+  * Validity checks in data input (fragment-related)
+  * The player is now launched at application start
+  * It is now possible to save the output of the evaluator window with C-s
+  * Browser is now accessible from generic popup for all elements
+  * New shortcut: Control-Return validates current annotation and begins
+    editing a new one
+  * Annotations in timeline are bold if they have relations
+
+ --
+
 advene (0.8) unstable; urgency=low
 
   * New actions: PlayerGoto, Popup, PopupGoto
