@@ -23,9 +23,11 @@ import gobject
 
 class TimeLine:
     """
-    Representation of a list of annotations placed on a timeline.    
+    Representation of a list of annotations placed on a timeline.
+
+    If l is None, then use controller.package.annotations (and handle updates accordingly).
     """
-    def __init__ (self, l,
+    def __init__ (self, l=None,
                   minimum=None,
                   maximum=None,
                   adjustment=None,
@@ -309,15 +311,19 @@ class TimeLine:
     
     def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
-        if event == 'AnnotationActivate':
+        if self.list is None:
+            l=self.controller.package.annotations
+        else:
+            l=self.list
+        if event == 'AnnotationActivate' and annotation in l:
             self.activate_annotation(annotation)
             if self.scroll_to_activated_toggle.get_active():
                 self.scroll_to_annotation(annotation)
             return True
-        if event == 'AnnotationDeactivate':
+        if event == 'AnnotationDeactivate' and annotation in l:
             self.desactivate_annotation(annotation)
             return True
-        if event == 'AnnotationCreate':
+        if event == 'AnnotationCreate' and annotation in l:
             b=self.create_annotation_widget(annotation)
             self.widget.show_all()
             return True
@@ -453,7 +459,9 @@ class TimeLine:
             return True
 
         rt=advene.gui.util.list_selector(title=_("Create a relation"),
-                                         text=_("Choose the type of relation\n you want to set between\n%s\nand\n%s") % (source.id, dest.id),
+                                         text=_("Choose the type of relation\n you want to set between\n%s\nand\n%s") % (
+            self.controller.get_title(source),
+            self.controller.get_title(dest)),
                                          members=relationtypes,
                                          controller=self.controller)
         if rt is not None:
@@ -537,7 +545,11 @@ class TimeLine:
     
     def populate (self):
         u2p = self.unit2pixel
-        for annotation in self.list:
+        if self.list is None:
+            l=self.controller.package.annotations
+        else:
+            l=self.list
+        for annotation in l:
             self.create_annotation_widget(annotation)
 
         self.widget.set_size (u2p (self.maximum - self.minimum),
@@ -635,7 +647,11 @@ class TimeLine:
         """
         minimum=sys.maxint
         maximum=0
-        for a in self.list:
+        if self.list is None:
+            l=self.controller.package.annotations
+        else:
+            l=self.list
+        for a in l:
             if a.fragment.begin < minimum:
                 minimum = a.fragment.begin
             if a.fragment.end > maximum:
