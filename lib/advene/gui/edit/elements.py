@@ -591,6 +591,7 @@ class EditQueryForm (EditForm):
         self.edit.update_value()
         # FIXME: we ignore on purpose the self.field attribute
         setattr(self.element, 'data', self.edit.model.xml_repr())
+        setattr(self.element, 'mimetype', 'application/x-advene-simplequery')
         return True
 
     def get_view (self):
