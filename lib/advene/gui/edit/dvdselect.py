@@ -41,8 +41,8 @@ class DVDSelect:
         return self.titlewidget.get_value()
 
     def get_url(self):
-        return "dvd:///dev/dvd@%d,%d" % (self.get_title(),
-                                         self.get_chapter())
+        return "dvdsimple:///dev/dvd@%d,%d" % (self.get_title(),
+                                               self.get_chapter())
 
     def preview(self, button=None):
         if not hasattr(self, 'oldplaylist'):
