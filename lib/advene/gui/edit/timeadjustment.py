@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """Widget used to adjust times in Advene.
 
 It depends on a Controller instance to be able to interact with the video player.
