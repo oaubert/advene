@@ -1,0 +1,67 @@
+* Syntaxe TALES
+
+La syntaxe TALES (TAL Expression Syntax) est utilisée pour adresser
+des éléments du modèle Advene. Elle est utilisée dans plusieurs
+composants d'Advene :
+- dans le serveur web (construction des adresses)
+- dans les vues dynamiques (définition des conditions et paramètres
+  des actions)
+- dans les vues statiques (motifs de remplacement)
+- dans les requètes simples (définition des conditions)
+
+Il est donc important de comprendre cette syntaxe pour pouvoir
+profiter au mieux des possibilités offertes par Advene.
+
+* Le modèle Advene
+
+Hiérarchie (package, schemas, annotation-/relationTypes, annotations,
+relations, views)
+
+Cette hiérarchie peut être considérée comme un système de fichiers,
+dans lequel on va trouver des éléments. Une expression TALES
+correspondra alors à un chemin d'accès dans ce système de fichiers.
+
+Une particularité d'Advene est que des éléments peuvent être accédés
+par plusieurs chemins. Ainsi, une annotation se trouvera dans le
+"répertoire" /annotations et dans le "répertoire"
+/annotationTypes/simple-text/annotations"
+
+ * Utilisation dans le serveur web
+
+Le serveur web intégré à Advene interprète directement des expressions
+TALES. Il est donc possible de naviguer à l'intérieur de la structure
+de données pour explorer son contenu.
+
+Le point de départ des expressions TALES est l'URL
+http://localhost:1234/packages/advene
+Ce qui suit sera évalué comme une expression TALES.
+
+Ainsi, 
+http://localhost:1234/packages/advene/annotationTypes/simple-text/annotations/i810
+renverra l'annotation i810 contenue dans les annotations de type
+simple-text
+
+* Utilisation dans les vues statiques
+
+Les éléments de base sont:
+
+here : l'élément courant
+
+options : un ensemble d'éléments optionnels accessibles:
+   - options/package_url : l'URL du recueil courant
+   - options/snapshot    : un accès aux snapshots mémorisés
+   - options/config      : des options de configuration
+
+* Utilisation dans les vues dynamiques
+
+Des éléments semblables sont disponibles dans les vues dynamiques,
+mais plus d'éléments "basiques" sont définis, dont certains sont
+ne sont définis que lors d'événements particuliers :
+
+package : le recueil courant
+annotation : l'annotation ayant déclenché l'événement
+relation : la relation ayant déclenché l'événement
+activeAnnotations: la liste des annotations actives
+player : le lecteur vidéo
+event : le nom de l'événement
+
