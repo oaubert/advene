@@ -107,6 +107,11 @@ class TimeLine:
         self.adjustment.set_value (u2p(minimum))
 
         self.populate ()
+        # Add empty annotation types:
+        for at in self.controller.package.annotationTypes:
+            self.layer_position.setdefault (at,
+                                            max(self.layer_position.values() or (1,)) + self.button_height + 10)
+        
         self.draw_marks ()
 
         self.draw_current_mark()
@@ -262,6 +267,10 @@ class TimeLine:
             self.maximum = e
         self.widget.foreach(self.remove_widget, self.widget)
         self.populate()
+        # Add empty annotation types:
+        for at in package.annotationTypes:
+            self.layer_position.setdefault (at,
+                                            max(self.layer_position.values() or (1,)) + self.button_height + 10)
         self.ratio_event()
         self.legend.foreach(self.remove_widget, self.legend)
         self.update_legend_widget(self.legend)
@@ -464,7 +473,7 @@ class TimeLine:
 
         self.widget.set_size (u2p (self.maximum - self.minimum),
                               max(self.layer_position.values() or (0,))
-                              + self.button_height + 10)
+                              + self.button_height + 10)        
         self.widget.show_all ()
 
     def remove_marks(self, widget=None, data=None):
