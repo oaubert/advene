@@ -16,12 +16,12 @@ class Window:
         if locals_ is None:
             locals_ = {}
         self.globals_ = globals_
-        self.locals_ = locals_            
+        self.locals_ = locals_
         self.widget=self.build_widget()
 
     def get_widget(self):
         return self.widget
-    
+
     def update_views(self, *p, **kw):
         # Hackish, but it will update the display
         self.controller.notify("PackageLoad", package=self.controller.package)
@@ -32,7 +32,31 @@ class Window:
         begin,end=b.get_bounds()
         b.delete(begin, end)
         return True
-        
+
+    def save_output_cb(self, *p, **kw):
+        fs = gtk.FileSelection ("Save output to...")
+
+        def close_and_save(button, fs):
+            self.save_output(filename=fs.get_filename())
+            fs.destroy()
+            return True
+
+        fs.ok_button.connect_after ("clicked", close_and_save, fs)
+        fs.cancel_button.connect ("clicked", lambda win: fs.destroy ())
+
+        fs.show ()
+        return True
+
+    def save_output(self, filename=None):
+        b=self.output.get_buffer()
+        begin,end=b.get_bounds()
+        out=b.get_text(begin, end)
+        f=open(filename, "w")
+        f.write(out)
+        f.close()
+        print "output saved to %s" % filename
+        return True
+
     def clear_expression(self, *p, **kw):
         b=self.source.get_buffer()
         begin,end=b.get_bounds()
@@ -77,11 +101,11 @@ class Window:
         window.set_size_request (640, 400)
 
         def key_pressed_cb (win, event):
-            
+
             if event.keyval == gtk.keysyms.F1:
                 self.help()
                 return True
-            
+
             if event.state & gtk.gdk.CONTROL_MASK:
                 if event.keyval == gtk.keysyms.w:
                     window.destroy()
@@ -95,7 +119,9 @@ class Window:
                 elif event.keyval == gtk.keysyms.u:
                     self.update_views()
                     return True
-                
+                elif event.keyval == gtk.keysyms.s:
+                    self.save_output_cb()
+                    return True
             return False
 
         window.connect ("key-press-event", key_pressed_cb)
@@ -105,10 +131,10 @@ class Window:
         window.add (self.get_widget())
         window.show_all()
         return window
-    
+
     def build_widget(self):
         vbox=gtk.VBox()
-        
+
         self.source=gtk.TextView ()
         self.source.set_editable(True)
         self.source.set_wrap_mode (gtk.WRAP_CHAR)
@@ -140,21 +166,21 @@ class Window:
         b=gtk.Button(_("Clear output"))
         b.connect("clicked", self.clear_output)
         hb.add(b)
-        
+
         b=gtk.Button(_("Clear expression"))
         b.connect("clicked", self.clear_expression)
         hb.add(b)
-        
+
         b=gtk.Button(_("Evaluate expression"))
         b.connect("clicked", self.evaluate_expression)
         hb.add(b)
-        
+
         vbox.pack_start(hb, expand=False)
 
         vbox.show_all()
 
         return vbox
-    
+
 if __name__ == "__main__":
     class DummyController:
         pass
@@ -162,7 +188,7 @@ if __name__ == "__main__":
     def notify(*p, **kw):
         print "Notify (%s, %s)" % (p, kw)
         return True
-    
+
     controller=DummyController()
     controller.notify = notify
     controller.package=None
