@@ -160,11 +160,17 @@ class EditQuery(EditGeneric):
     def __init__(self, query):
         self.model=query
         self.sourceentry=None
+        self.valueentry=None
         self.editconditionlist=[]
         self.widget=self.build_widget()
         
     def update_value(self):
         self.model.source=self.sourceentry.get_text()
+        v=self.valueentry.get_text()
+        if v == '' or v == 'element':
+            self.model.rvalue=None
+        else:
+            self.model.rvalue=v
         
         for w in self.editconditionlist:
             w.update_value()
@@ -181,9 +187,9 @@ class EditQuery(EditGeneric):
         return True
 
     def add_condition(self, widget, conditionsbox):
-        cond=Condition(lhs="annotation/type/title",
-                       operator="equals",
-                       rhs="string: ???")
+        cond=Condition(lhs="element/content/data",
+                       operator="contains",
+                       rhs="string:???")
         self.add_condition_widget(cond, conditionsbox)
         return True
     
@@ -220,15 +226,27 @@ class EditQuery(EditGeneric):
         vbox.show()
         
         # Event
-        ef=gtk.Frame(_("Return elements from "))
+        ef=gtk.Frame(_("For all elements in "))
         self.sourceentry=gtk.Entry()
         self.sourceentry.set_text(self.model.source)
         ef.add(self.sourceentry)
         ef.show_all()
         vbox.pack_start(ef, expand=gtk.FALSE)
 
+        # Return value
+        vf=gtk.Frame(_("Return "))
+        # FIXME: Add tooltip to indicate the 'element' root
+        self.valueentry=gtk.Entry()
+        v=self.model.rvalue
+        if v is None:
+            v='here'
+        self.valueentry.set_text(v)
+        vf.add(self.valueentry)
+        vf.show_all()
+        vbox.pack_start(vf, expand=gtk.FALSE)
+        
         # Conditions
-        cf=gtk.Frame(_("If they match "))
+        cf=gtk.Frame(_("If the element matches "))
         conditionsbox=gtk.VBox()
         cf.add(conditionsbox)
 
