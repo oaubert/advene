@@ -11,7 +11,17 @@ advene (0.10) unstable; urgency=low
   
   * Implemented read-only edit popup for imported elements
 
- --
+  * The MIME-Type is displayed/editable on all content-editing windows
+
+  * Autocompletion facility in evaluator window
+  
+  * All imports (view, schema, ...) work
+  
+  * New action: ActivateSTBV
+  
+  * Window sizes are memorized from one session to another
+
+ -- 
 
 advene (0.9) unstable; urgency=low
 
