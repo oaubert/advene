@@ -29,6 +29,7 @@ which will return the package containing the converted annotations
 import sys
 import time
 import sre
+import os
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation
@@ -115,7 +116,7 @@ class GenericImporter(object):
                 raise Exception("Begin is mandatory")
             if 'end' in d:
                 end=d['end']
-            elif duration in d:
+            elif 'duration' in d:
                 end=begin+d['duration']
             else:
                 raise Exception("end or duration is missing")
@@ -193,6 +194,39 @@ class TextImporter(GenericImporter):
         
     def process_file(self, filename):
         f=open(filename, 'r')
+        if self.package is None:
+            self.create_package()
+        self.convert(self.iterator(f))
+        return self.package
+
+class LsDVDImporter(GenericImporter):
+    """lsdvd importer.
+    """
+    def __init__(self, regexp=None, encoding=None, **kw):
+        super(LsDVDImporter, self).__init__(**kw)
+        self.encoding='latin1'
+
+    def iterator(self, f):
+        #Chapter: 01, Length: 00:01:16, Start Cell: 01
+        reg=sre.compile("^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d\d)")
+        begin=1
+        for l in f:
+            l=l.rstrip()
+            l=unicode(l, self.encoding).encode('utf-8')
+            m=reg.search(l)
+            if m is not None:
+                d=m.groupdict()
+                duration=1000*(long(d['s'])+60*long(d['m'])+3600*long(d['h']))
+                res={'content': "Chapter %s" % d['chapter'],
+                     'begin': begin,
+                     'duration': duration}
+                begin += duration + 10
+                yield res
+
+    def process_file(self, filename):
+        if filename != 'lsdvd':
+            pass
+        f=os.popen("/usr/bin/lsdvd -c", "r")
         if self.package is None:
             self.create_package()
         self.convert(self.iterator(f))
@@ -302,7 +336,9 @@ if __name__ == "__main__":
     fname=sys.argv[1]
     pname=sys.argv[2]
 
-    if fname.endswith('.txt'):
+    if fname == 'lsdvd':
+        i=LsDVDImporter()
+    elif fname.endswith('.txt'):
         i=TextImporter(author='textimporter')
     elif fname.endswith('.srt'):
         i=SubtitleImporter(author='subtitle-importer')
@@ -318,7 +354,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # FIXME: i.process_options()
-    # (for .sub conversion for instance)
+    # (for .sub conversion for instance, --fps, --offset)
     print "Converting %s to %s" % (fname, pname)
     p=i.process_file(fname)
     p.save(pname)
