@@ -23,7 +23,7 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
 from advene.model.query import Query
-from advene.rules.elements import RuleSet
+from advene.rules.elements import RuleSet, Rule, Event, Action
 
 import advene.gui.edit.rules
 import advene.gui.edit.elements
@@ -226,7 +226,21 @@ class CreateElementPopup(object):
             if t.id == 'application/x-advene-ruleset':
                 # Create an empty ruleset to begin with
                 r=RuleSet()
+
+                # Create a new default Rule
+                event=Event("AnnotationBegin")
+                catalog=self.controller.event_handler.catalog
+                ra=catalog.get_action("Message")
+                action=Action(registeredaction=ra, catalog=catalog)
+                for p in ra.parameters:
+                    action.add_parameter(p, "(%s)" % ra.parameters[p])
+                rule=Rule(name=_("New rule"),
+                          event=event,
+                          action=action)
+                r.add_rule(rule)
+                
                 el.content.data=r.xml_repr()
+                
             self.parent.views.append(el)
             self.controller.notify('ViewCreate', view=el)
         elif self.type_ == Schema:
