@@ -98,6 +98,8 @@ class AdveneController:
 
         # GUI (optional)
         self.gui=None
+        # Useful for debug in the evaluator window
+        self.config=config.data
         
         # STBV
         self.current_stbv = None
@@ -152,12 +154,19 @@ class AdveneController:
             pid=l.rstrip().split()[-1]
             processes.append(pid)
         f.close()
+        mess="""
+        +------------------------------------------------------+
+        | The following processes seem to use the %s port:     |
+        | %s |
+        +------------------------------------------------------+
+        """ % (pat, processes)
+        mess=mess.lstrip()
         # FIXME: make that a popup window
-        print "+-------------------------------------------------------"
-        print "|The following processes seem to use the %s port:" % pat
-        print "| %s |" % processes
-        print "+-------------------------------------------------------"        
-    
+        if self.gui:
+            print mess
+        else:
+            print mess
+        
     def init(self, args=None):
         if args is None:
             args=[]
@@ -185,8 +194,6 @@ class AdveneController:
                 self.serverthread = threading.Thread (target=self.server.serve_forawhile)
                 self.serverthread.start ()
 
-        # FIXME: check the return value (media file to play) or better,
-        # rewrite parse_command_line
         file_to_play=self.parse_command_line (args)
 
         # If no package is defined yet, load the template
