@@ -460,8 +460,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if isinstance(f, unicode):
                         f=f.encode('utf8')
                     self.server.controller.player.playlist_add_item (f)
+                    
                 if query.has_key('stbv'):
                     self.activate_stbvid(query['stbv'])
+
                 if len(param) != 0:
                     # First parameter is the position
                     position = param[0]
@@ -469,6 +471,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     position = query['position']
                 else:
                     position = 0
+                    
                 self.server.update_status ("set", long(position))
                 self.send_no_content()
             elif command == 'pause':
@@ -1350,10 +1353,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(_("""<p>Welcome on the <a href="http://liris.cnrs.fr/advene/">Advene</a> webserver run by %s on %s:%d.</p>""") %
                          (config.data.userid, self.server.server_name, self.server.server_port))
 
-        if len(self.server.aliases) == 0:
+        if len(self.server.packages) == 0:
             self.wfile.write(_(""" <p>No package is loaded. You can access the <a href="/admin">server administration page</a>.<p>"""))
         else:
-            if len(self.server.aliases) == 1:
+            if len(self.server.packages) == 1:
                 alias=self.server.packages.keys()[0]
                 p=self.server.packages[alias]
                 defaultview=p.getMetaData(config.data.namespace, 'default_utbv')
