@@ -11,13 +11,27 @@ class PlayerFactory:
         pass
 
     def get_player(self):
-        if config.data.os == 'win32':
-            p=self.get_player_win32()
+        p=config.data.player['plugin']
+        print "mediacontrol: %s" % p
+        
+        if p == 'vlcnative':
+            # Should do some checks to verify it is present
+            if config.data.os == 'win32':
+                return self.nativevlc_win32_import()
+            else:
+                import advene.player.vlcnative as playermodule
+        elif p == 'dummy':
+            import advene.player.dummy as playermodule
+        elif p == 'vlcorbit':
+            import advene.player.vlcorbit as playermodule
+        elif p == 'mplayer':
+            import advene.player.mplayer as playermodule
         else:
-            p=self.get_player_unix()
-        return p
+            import advene.player.dummy as playermodule
+            
+        return playermodule.Player()
 
-    def get_player_win32(self):
+    def nativevlc_win32_import(self):
         # Try to determine wether VLC is installed or not
         vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','Path')
 
@@ -42,22 +56,4 @@ class PlayerFactory:
                 print "Cannot cd to %s. The player certainly won't work." % vlcpath
             import advene.player.vlcnative as playermodule
 
-        return playermodule.Player()
-
-    def get_player_unix(self):
-        #import advene.player.xine as playermodule
-
-        p=config.data.player['plugin']
-        print "mediacontrol: %s" % p
-        
-        if p == 'vlcnative':
-            # Should do some checks to verify it is present
-            import advene.player.vlcnative as playermodule
-        elif p == 'dummy':
-            import advene.player.dummy as playermodule
-        elif p == 'vlcorbit':
-            import advene.player.vlcorbit as playermodule
-        else:
-            import advene.player.dummy as playermodule
-            
         return playermodule.Player()
