@@ -258,6 +258,14 @@ class AdveneGUI (Connect):
             parameters={'message': _("String to display.")}
             ))
 
+        # We add a Treeview in the main app window
+        tree = advene.gui.views.tree.TreeWidget(self.controller.package,
+                                                annotation_cb=self.annotation_popup_cb,
+                                                controller=self.controller)
+        self.gui.get_widget("html_scrollwindow").add (tree.get_widget())
+        tree.get_widget().show_all()
+        self.register_view (tree)
+
         self.controller.event_handler.internal_rule (event="AnnotationEditEnd",
                                                      method=self.on_annotation_edit_end)
         self.controller.event_handler.internal_rule (event="PackageLoad",
@@ -391,7 +399,12 @@ class AdveneGUI (Connect):
         # Update the main window title
         self.gui.get_widget ("win").set_title(" - ".join((_("Advene"),
                                                           self.controller.package.title or "No title")))
-        # FIXME: update the various views (or close them all ?)
+        for v in self.annotation_views:
+            try:
+                v.update_model(self.controller.package)
+            except AttributeError:
+                pass
+        
         return True
     
     def handle_http_request (self, source, condition):
