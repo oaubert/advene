@@ -12,6 +12,8 @@ from advene.model.schema import Schema, AnnotationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
 
+import advene.util.vlclib
+
 from gettext import gettext as _
 
 import advene.gui.edit.elements
@@ -325,8 +327,13 @@ class TimeLine:
     def create_relation_popup(self, source, dest):
         """Display a popup to create a binary relation between source and dest.
         """
-        relations=[ t.title for t in source.getRelationsWith(dest) ]
-        if not relations:
+        relationtypes=advene.util.vlclib.matching_relationtypes(self.controller.package,
+                                                                source,
+                                                                dest)
+        print "Relations: %s" % relationtypes
+        #relations=[ t.title for t in source.getRelationsWith(dest) ]
+        
+        if not relationtypes:
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_DESTROY_WITH_PARENT,
                 gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
@@ -354,8 +361,8 @@ class TimeLine:
         optionmenu = gtk.OptionMenu()
 
         menu=gtk.Menu()
-        for r in relations:
-            item = gtk.MenuItem(r)
+        for r in relationtypes:
+            item = gtk.MenuItem(r.title)
             item.show()
             menu.append(item)
         optionmenu.set_menu(menu)
@@ -370,7 +377,7 @@ class TimeLine:
         hbox.pack_start(b, expand=False)
 
         def on_create_relation(widget, window):
-            self.create_relation_option(source, dest, optionmenu, relations)
+            self.create_relation_option(source, dest, optionmenu, relationtypes)
             window.destroy()
             return True
         
@@ -381,12 +388,9 @@ class TimeLine:
         w.show_all()
         return True
 
-    def create_relation_option(self, source, dest, optionmenu, relations):
+    def create_relation_option(self, source, dest, optionmenu, relationtypes):
         """Create a relation between source and dest whose type is in optionmenu."""
-        title=relations[optionmenu.get_history()]
-        rtype=[ t
-                for t in self.controller.package.relationTypes
-                if t.title == title ][0]
+        rtype=relationtypes[optionmenu.get_history()]
         relation=self.controller.package.createRelation(members=(source, dest), type=rtype)
         self.controller.package.relations.append(relation)
         print "Relation %s created." % relation
