@@ -123,6 +123,31 @@ def format_time (val=0):
     # Format: HH:MM:SS.mmm
     return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
 
+time_regexp=sre.compile('(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d+)[.,]?(?P<ms>\d+)?')
+def convert_time(s):
+    """Convert a time string as long.
+
+    If the parameter is a number, it is considered as a ms value.
+    Else we try to parse a hh:mm:ss.xxx value
+    """
+    try:
+        val=long(s)
+    except ValueError:
+        # It was not a number. Try to determine its format.
+        m=time_regexp.match(s)
+        if m:
+            t=m.groupdict()
+            for k in t:
+                if t[k] is None:
+                    t[k]=0
+                t[k] = long(t[k])
+            if 'ms' not in t:
+                t['ms'] = 0
+            val= t['ms'] + t['s'] * 1000 + t['m'] * 60000 + t['h'] * 3600000
+        else:
+            raise Exception("Unknown time format for %s" % s)
+    return val
+
 def matching_relationtypes(package, ann1, ann2):
     """Return a list of relationtypes that can be used
     to link ann1 and ann2. We use the id (i.e. the fragment part from the URI)
@@ -294,3 +319,4 @@ def format_element_name(name, count=None):
         return _("1 %s") % element_declinations[name][0]
     else:
         return _("%d %s") % (count, element_declinations[name][1])
+
