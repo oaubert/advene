@@ -1,0 +1,31 @@
+#! /usr/bin/env python
+
+import advene
+import advene.tal
+import advene.tal.context
+
+import events
+import ecaengine
+
+import config
+
+config.data.player['snapshot']=False
+
+class Toto:
+ pass
+controller=Toto()
+
+controller.annotation=None
+controller.package=None
+controller.active_annotations=[]
+controller.player=None
+controller.imagecache={}
+
+e=ecaengine.ECAEngine(controller)
+e.read_ruleset_from_file('default_rules.txt')
+
+import eventgui
+rule=e.ruleset[3]
+
+view=eventgui.RuleWidget(rule)
+

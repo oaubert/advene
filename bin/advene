@@ -1,0 +1,6 @@
+#! /bin/sh
+
+PYTHONPATH=/usr/local/src/advene-project/lib
+export PYTHONPATH
+
+python ${PYTHONPATH}/advene/gui/main.py $@

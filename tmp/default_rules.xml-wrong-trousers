@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ruleset xmlns='http://liris.cnrs.fr/advene/ruleset'>
+  <rule name='Take snapshot on begin'>
+    <event name='AnnotationBegin'/>
+    <action name='Snapshot'>
+      <param name='position' value='annotation/fragment/begin'/>
+    </action>
+  </rule>
+  <rule name='Take snapshot on end'>
+    <event name='AnnotationEnd'/>
+    <action name='Snapshot'>
+      <param name='position' value='annotation/fragment/end'/>
+    </action>
+  </rule>
+  <rule name='Display watching tips'>
+    <event name='AnnotationBegin'/>
+    <condition operator='equals' rhs='string:Watching tips' lhs='annotation/type/title'/>
+    <action name='AnnotationCaption'>
+      <param name='message' value='annotation/content/data'/>
+    </action>
+  </rule>
+  <rule name='Display narrative'>
+    <event name='AnnotationBegin'/>
+    <condition operator='equals' rhs='string:Narrative' lhs='annotation/type/title'/>
+    <action name='AnnotationCaption'>
+      <param name='message' value='annotation/content/data'/>
+    </action>
+  </rule>
+  <rule name='Display questions'>
+    <event name='AnnotationBegin'/>
+    <condition operator='equals' rhs='string:General Purpose Question' lhs='annotation/type/title'/>
+    <action name='AnnotationCaption'>
+      <param name='message' value='annotation/content/data'/>
+    </action>
+  </rule>
+  <rule name='Pause after questions'>
+    <event name='AnnotationEnd'/>
+    <condition operator='equals' rhs='string:General Purpose Question' lhs='annotation/type/title'/>
+    <action name='PlayerPause'>
+    </action>
+  </rule>
+</ruleset>

@@ -1,0 +1,15 @@
+#! /usr/bin/perl
+
+while (<>)
+{
+    if (/\b(on_\w+)/)
+    {
+	$callback = $1;
+	print <<"EOF";
+    def ${callback} (self, button=None, data=None):
+	print "${callback} activated (%s, %s, %s)" % (self, button, data)
+	return gtk.TRUE
+
+EOF
+    }
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+ <head>
+ <title>Test Content Document</title>
+
+ <meta http-equiv="Pragma" content="no-cache" />
+ <meta http-equiv="Cache-Control" content="no-cache, must-revalidate" />
+
+ <meta name="Subject" content="" />
+ <meta name="Publisher" content="No publisher" />
+ <meta name="Description" content="Document-centric editing overview." />
+ <meta name="Contributors" content="" />
+ <meta name="Effective_date" content="None" />
+ <meta name="Expiration_date" content="None" />
+ <meta name="Type" content="Document" />
+ <meta name="Format" content="text/html" />
+ <meta name="Language" content="" />
+ <meta name="Rights" content="" />
+ </head>
+ <style type="text/css">
+
+    table {
+        border-width: 0px;
+        padding: 3px;
+    }
+
+    table.plain td {
+        border-width: 1px;
+        border-style: solid;
+        border-color: black;
+    }
+
+    table.listing {
+        border-width: 0px;
+    }
+
+    table.listing td {
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;
+    }
+    
+    table.listing th {
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;
+        background-color: gray;
+        color: white;
+    }
+    
+    table.grid {
+        border-width: 0px;
+    }
+
+    table.grid td {
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;
+    }
+    
+    table.grid th {
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;
+    }
+    
+    table.data {
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;
+    }
+
+    table.data td {
+        border-style: solid;
+        border-width: 1px;
+        border-color: gray;
+    }
+    
+    table.data th {
+        border-style: solid;
+        border-width: 1px;
+        border-color: gray;
+    }
+    
+ </style>
+<body>
+
+<h1>Document-Centric Editing</h1>
+
+<p>There are two approaches to editing content in Zope/CMF/Plone.  The
+first is a <em>data-oriented</em> approach.  With
+this, <code>&lt;form&gt;</code> designs are the best fit, as you have
+many pieces of information to collect about the resource.  The second is a 
+<em>document-oriented</em> approach, where the essence of the resource
+is unstructured, and the form elements simply provide metadata for
+that unstructured information.</p>
+
+<p>Most information in organizations is unstructured, as studies show.
+For these cases, a rich editor like Epoz makes sense.  Equally, these
+cases point towards a <em>document-centric</em> approach, rather than
+<a title="HTML Specification" href="http://www.w3.org/Markup">HTML</a> 
+forms.</p>
+
+<p>The following table shows different aspects, and happens to give us a chance to test table editing in Epoz:</p>
+
+<h4>Comparing Data- and Document-Centric</h4>
+<table border="0" class="plain" cellspacing="0">
+<tbody>
+    <tr>
+        <th>&nbsp;</th>
+        <th>Data</th>
+        <th>Document</th>
+    </tr>
+    <tr>
+        <td>Implementation</td>
+        <td>forms</td>
+        <td>iframes</td>
+    </tr>
+    <tr>
+        <td>Metadata</td>
+        <td>form elements</td>
+        <td>iframe document "head"</td>
+    </tr>
+</tbody>
+</table>
+
+
+</body>
+</html>

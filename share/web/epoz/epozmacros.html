@@ -1,0 +1,432 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      >
+<head>
+  <title>Test Editor</title>
+<!--  <metal:css define-macro="epoz_styles"> -->
+    <link href="epozstyles.css" rel="stylesheet" type="text/css" />
+    <link href="epozcustom.css" rel="stylesheet" type="text/css" />
+<!--  </metal:css> -->
+ 
+<!--  <metal:jsmacro define-macro="epoz_jsincludes" tal:omit-tag=""> -->
+<!--    <metal:slot define-slot="jsincludes"> -->
+      <script type="text/javascript" src="dom2_events.js"></script>
+      <script type="text/javascript" src="sarissa.js"></script>
+      <script type="text/javascript" src="epozeditor.js"></script>
+<!--    </metal:slot> -->
+<!--    <metal:script define-slot="extra_scripts" /> -->
+<!--  </metal:jsmacro> -->
+
+</head>
+<body onload="epoz = initEpoz(document.getElementById('epoz-editor')); epozui = epoz.getTool('ui');">
+
+
+<h1>Epoz Editor Test Page</h1>
+
+<div class="epoz-fulleditor">
+  <div metal:define-macro="epoz_fulleditor" xmlns:epoz="http://epozeditor.org/xml/namespaces/epoz">
+
+<!-- Start toolbar -->
+
+  <div class="epoz-tb" id="toolbar" metal:define-macro="epoz_toolbar">
+    <span id="epoz-tb-buttons">
+      <span class="epoz-tb-buttongroup" style="float: right">
+	<button class="epoz-logo" title="Go to the Epoz website"
+		i18n:attributes="title"
+	onclick="window.open('http://sourceforge.net/projects/epoz');">&nbsp;</button>
+      </span>
+      <select id="epoz-tb-styles" onchange="epozui.setTextStyle(this.options[this.selectedIndex].value);">
+	<option value="P" i18n:translate="paragraph-normal">
+	  Normal
+	</option>
+	<option value="H1">
+	  <span tal:omit-tag="" i18n:translate="heading">Heading</span> 1
+        </option>
+        <option value="H2">
+          <span tal:omit-tag="" i18n:translate="heading">Heading</span> 2
+        </option>
+        <option value="H3">
+          <span tal:omit-tag="" i18n:translate="heading">Heading</span> 3
+        </option>
+        <option value="H4">
+          <span tal:omit-tag="" i18n:translate="heading">Heading</span> 4
+        </option>
+        <option value="H5">
+          <span tal:omit-tag="" i18n:translate="heading">Heading</span> 5
+        </option>
+	<option value="H6">
+	  <span tal:omit-tag="" i18n:translate="heading">Heading</span> 6
+        </option>
+        <option value="PRE" i18n:translate="paragraph-formatted">
+	  Formatted
+	</option>
+      </select>
+      <span class="epoz-tb-buttongroup">
+	<button class="epoz-save" title="Save"
+	onclick="epozui.saveButtonHandler()">&nbsp;</button>
+      </span>
+      <span class="epoz-tb-buttongroup">
+	<button class="epoz-bold" title="Bold"
+		i18n:attributes="title"
+	onclick="epozui.basicButtonHandler('bold');">&nbsp;</button>
+	<button class="epoz-italic" title="Italic"
+		i18n:attributes="title"
+	onclick="epozui.basicButtonHandler('italic');">&nbsp;</button>
+	<button class="epoz-underline" title="Underline"
+		i18n:attributes="title"
+	onclick="epozui.basicButtonHandler('underline');">&nbsp;</button>
+      </span>
+      <span class="epoz-tb-buttongroup">
+	<button class="epoz-subscript" title="Subscript"
+                i18n:attributes="title"
+                onclick="epozui.basicButtonHandler('subscript');">&nbsp;</button>
+        <button class="epoz-superscript" title="Superscript"
+                i18n:attributes="title"
+                onclick="epozui.basicButtonHandler('superscript');">&nbsp;</button>
+      </span>
+      <span class="epoz-tb-buttongroup">
+        <!-- Note: the event handlers are attached to these buttons dynamically, like for tools -->
+        <button class="epoz-forecolor" id="epoz-forecolor" title="Text Color"
+                i18n:attributes="title">&nbsp;</button>
+        <button class="epoz-hilitecolor" id="epoz-hilitecolor" title="Background Color"
+                i18n:attributes="title">&nbsp;</button>
+      </span>
+      <span class="epoz-tb-buttongroup">
+        <button class="epoz-justifyleft" title="Left Justify"
+                i18n:attributes="title"
+                onclick="epozui.basicButtonHandler('justifyleft');">&nbsp;</button>
+        <button class="epoz-justifycenter" title="Center"
+                i18n:attributes="title"
+                onclick="epozui.basicButtonHandler('justifycenter');">&nbsp;</button>
+        <button class="epoz-justifyright" title="Right Justify"
+                i18n:attributes="title"
+                onclick="epozui.basicButtonHandler('justifyright');">&nbsp;</button>
+      </span>
+      <span class="epoz-tb-buttongroup">
+        <!-- list button events are set on the list tool -->
+        <button class="epoz-insertorderedlist" title="Numbered List"
+                id="epoz-list-ol-addbutton" i18n:attributes="title">&nbsp;</button>
+        <button class="epoz-insertunorderedlist" title="Unordered List"
+                id="epoz-list-ul-addbutton" i18n:attributes="title">&nbsp;</button>
+        <button class="epoz-outdent" title="Outdent"
+                i18n:attributes="title"
+                onclick="epozui.basicButtonHandler('outdent');">&nbsp;</button>
+        <button class="epoz-indent" title="Indent"
+                i18n:attributes="title"
+                onclick="epozui.basicButtonHandler('indent');">&nbsp;</button>
+        <button class="epoz-inserthorizontalrule" title="Ruled Line"
+                i18n:attributes="title"
+                onclick="epozui.basicButtonHandler('inserthorizontalrule');">&nbsp;</button>
+      </span>
+      <span class="epoz-tb-buttongroup">
+        <button class="epoz-undo" title="Undo"
+                i18n:attributes="title"
+                onclick="epozui.basicButtonHandler('undo');">&nbsp;</button>
+        <button class="epoz-redo" title="Redo"
+                i18n:attributes="title"
+                onclick="epozui.basicButtonHandler('redo');">&nbsp;</button>
+      </span>
+      <metal:buttons define-slot="extra_buttons" />
+    </span>
+    <select id="epoz-ulstyles">
+      <option value="disc" i18n:translate="list-disc">&#9679;</option>
+      <option value="square" i18n:translate="list-square">&#9632;</option>
+      <option value="circle" i18n:translate="list-circle">&#9675;</option>
+      <option value="none" i18n:translate="list-nobullet">no bullet</option>
+    </select>
+    <select id="epoz-olstyles">
+      <option value="decimal" 
+      i18n:translate="list-decimal">1</option>
+      <option value="upper-roman" 
+      i18n:translate="list-upperroman">I</option>
+      <option value="lower-roman" 
+      i18n:translate="list-lowerroman">i</option>
+      <option value="upper-alpha" 
+      i18n:translate="list-upperalpha">A</option>
+      <option value="lower-alpha" 
+      i18n:translate="list-loweralpha">a</option>
+    </select>
+    
+  </div>
+
+<!-- end toolbar -->
+
+  <div class="epoz-toolboxes" metal:define-macro="epoz_toolboxes">
+
+    <div class="epoz-toolbox" id="epoz-toolbox-debug" metal:define-slot="epoz_toolbox_debug">
+      <!-- start epoz toolbox debug -->
+      
+      <h1 i18n:translate="debug-log">Debug Log</h1>
+
+      <div id="epoz-toolbox-debuglog" style="height: 150px;">
+      </div>
+
+      <!-- end epoz toolbox debug -->
+    </div>
+
+
+<!--    var showtaltool = new ShowTALTool('epoz-attributes-input', 'epoz-content-input',
+				      'epoz-replace-input', 'epoz-repeat-input',
+                                      'epoz-define-input'); -->
+
+    <div class="epoz-toolbox" id="epoz-toolbox-tal" metal:define-slot="epoz_toolbox_tal">
+      <!-- start epoz toolbox tal -->
+    
+      <h1 i18n:translate="tal">TAL</h1>
+
+      <div class="epoz-toolbox-label">
+        <span tal:omit-tag="" i18n:translate="">
+	  TAL attributes.
+        </span>
+      </div>
+      <table width="100%">
+	<tr>
+	  <td>Node name</td>
+	  <td><input id="epoz-node-name" type="text" size="8"/></td>
+	</tr>
+	<tr>
+	  <td>Attributes</td>
+	  <td><input id="epoz-attributes-input" type="text" size="25"/></td>
+	</tr>
+	<tr>
+	  <td>Content</td>
+	  <td><input id="epoz-content-input" type="text" size="25"/></td>
+	</tr>
+	<tr>
+	  <td>Replace</td>
+	  <td><input id="epoz-replace-input" type="text" size="25"/></td>
+	</tr>
+	<tr>
+	  <td>Repeat</td>
+	  <td><input id="epoz-repeat-input" type="text" size="25"/></td>
+	</tr>
+	<tr>
+	  <td>Define</td>
+	  <td><input id="epoz-define-input" type="text" size="25"/></td>
+	</tr>
+      </table>
+      
+      <!-- end epoz toolbox tal -->
+    </div>
+
+    <div class="epoz-toolbox" id="epoz-toolbox-links" metal:define-slot="epoz_toolbox_links">
+      <!-- start epoz toolbox links -->
+    
+      <h1 i18n:translate="links">Links</h1>
+
+      <div id="epoz-toolbox-addlink">
+	<div class="epoz-toolbox-label">
+	  <!--           Link to items matching the keyword  -->
+          <span tal:omit-tag="" i18n:translate="items-matching-keyword">
+	    Link the highlighted text to this URL
+          </span>:
+	</div>
+
+	<input id="epoz-link-input"
+               class="epoz-toolbox-st" 
+               type="text" size="14" />
+	<button id="epoz-link-button"
+		class="epoz-toolbox-action">Make Link</button>
+        <div id="epoz-link-results" class="epoz-toolbox-results" 
+	     onclick="epozui.linkResource(event);"></div>
+
+      </div>
+
+      <div id="epoz-toolbox-editlink">
+	<div class="epoz-toolbox-label">
+	  <!--           Link to items matching the keyword  -->
+          <span tal:omit-tag="" i18n:translate="items-matching-keyword">
+	    Modify properties of current link
+          </span>:
+	</div>
+
+      <table id="epoz-toolbox-linktable">
+        <tbody>
+          <tr>
+            <td>Target</td>
+            <td><input id="epoz-link-href" size="18" /></td>
+          </tr>
+          <tr>
+            <td>Title</td>
+            <td><input id="epoz-link-title" size="18" /></td>
+          </tr>
+        </tbody>
+      </table>
+
+      </div>
+
+      <!-- end epoz toolbox links -->
+    </div>
+
+    <div class="epoz-toolbox" id="epoz-toolbox-properties" metal:define-slot="epoz_toolbox_properties">
+      <!-- start epoz toolbox properties -->
+      
+      <h1>Properties</h1>
+
+      <table id="epoz-properties">
+        <tbody>
+          <tr>
+            <td>Title</td>
+            <td><input id="epoz-properties-title" />
+	    </td>
+          </tr>
+          <tr>
+            <td colspan="2">Description</td>
+          </tr>
+          <tr>
+            <td colspan="2">
+	      <textarea id="epoz-properties-description"></textarea>
+	    </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- end epoz toolbox properties -->
+    </div>
+
+    <div class="epoz-toolbox" id="epoz-toolbox-images" metal:define-slot="epoz_toolbox_images">
+      <!-- start epoz toolbox images -->
+    
+      <h1 i18n:translate="images">Images</h1>
+
+      <div class="epoz-toolbox-label">
+        <span tal:omit-tag="" i18n:translate="">
+	  Insert image at the following URL
+        </span>:
+      </div>
+
+      <input id="epoz-image-input"
+	     value="boa.jpg"
+             class="epoz-toolbox-st" 
+             type="text" size="14" />
+      <button id="epoz-image-addbutton" class="epoz-toolbox-action">Insert Image</button>
+
+      <!-- end epoz toolbox images -->
+    </div>
+
+    <div class="epoz-toolbox" id="epoz-toolbox-tables" metal:define-slot="epoz_toolbox_tables">
+      <!-- start epoz toolbox tables -->
+      
+      <h1 i18n:translate="table-inspector">Tables</h1>
+
+      <table width="100%">
+        <tbody>
+          <tr>
+            <td>Table Class</td>
+            <td>
+              <select id="epoz-table-classchooser">
+                <option value="plain">Plain</option>
+                <option value="listing">Listing</option>
+                <option value="grid">Grid</option>
+                <option value="data">Data</option>
+              </select>
+            </td>
+          </tr>
+	  <tr>
+            <td colspan="2">
+              <div id="epoz-toolbox-addtable">
+                <table width="100%">
+                  <tr>
+                    <td>Rows</td>
+                    <td><input id="epoz-table-newrows"/></td>
+                  </tr>
+                  <tr>
+                    <td>Columns</td>
+                    <td><input id="epoz-table-newcols"/></td>
+                  </tr>
+                  <tr>
+                    <td>Headings</td>
+                    <td>
+                      <input id="epoz-table-makeheader" type="checkbox"/> Create
+                    </td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td><button id="epoz-table-addtable-button">Add</button></td>
+                  </tr>
+                </table>
+              </div>
+              <div id="epoz-toolbox-edittable">
+                <table width="100%">
+                  <tr>
+                    <td>Col Align</td>
+                    <td>
+                      <select id="epoz-table-alignchooser">
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                        </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Column</td>
+                    <td>
+                        <button id="epoz-table-addcolumn-button">Add</button>
+                        <button id="epoz-table-delcolumn-button">Remove</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Row</td>
+                    <td>
+                      <button id="epoz-table-addrow-button">Add</button> 
+                      <button id="epoz-table-delrow-button">Remove</button></td>
+                  </tr>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- end epoz toolbox tables -->
+    </div>
+    <div class="epoz-toolbox" id="epoz-toolbox-extra">
+      <!-- start epoz toolbox extra -->
+
+      <metal:toolbox define-slot="extra_toolbox" />
+
+      <!-- end epoz toolbox extra -->
+    </div>
+
+  </div>
+
+  <!-- End toolboxes  -->
+
+  <table id="epoz-colorchooser" cellpadding="0" cellspacing="0" style="position: fixed; border-style: solid; border-color: black; border-width: 1px;"></table>
+        
+  <script type="text/javascript">
+      function startEpoz() {
+          try {
+              epoz.initialize();
+          } catch(e) {
+              window.setTimeout("startEpoz()", 100);
+          }
+      };
+  </script>
+  <div class="epoz-editorframe" metal:define-slot="epoz_editorframe">
+    <iframe id="epoz-editor" frameborder="0" src="fulldoc.html"
+            reloadsrc="1" usecss="1"
+	    metal:define-macro="epoz_editorframe"
+            tal:attributes="src nothing"
+            onload="startEpoz()"></iframe>
+
+  </div>
+</div>
+
+<script type="text/javascript">
+  // Important!! IE can't do this in the onload handler, it leads 
+  // to double events everywhere
+  var d = document.getElementById("epoz-editor").contentWindow.document;
+  if (_SARISSA_IS_IE) {
+    d.designMode = "On";
+  }
+</script>
+
+</div>
+
+</body>
+</html>

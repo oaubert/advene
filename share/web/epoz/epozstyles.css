@@ -1,0 +1,180 @@
+/*****************************************************************************
+ *
+ * Epoz common styles
+ *
+ * Copyright (c) 2003 Epoz Contributors. See CREDITS.txt
+ *
+ * Instead of customizing this file, it is recommended to customize
+ * epozcustom.css. Feel free to use whole or parts of this for your
+ * own designs, but give credit where credit is due.
+ *
+ *****************************************************************************/
+
+
+div.epoz-fulleditor {
+  font-family: Verdana, "Lucida Grande", Helvetica, Arial, sans-serif;
+  border: solid 3px ButtonHighlight;
+  margin: 0.2em;
+  height: 100%;
+}
+
+div.epoz-fulleditor .epoz-editorframe {
+  margin-right: 20em;
+}
+
+div.epoz-smalleditor .epoz-editorframe {
+  margin-right: 0.2em;
+}
+
+div.epoz-smalleditor {
+  font-family: Verdana, "Lucida Grande", Helvetica, Arial, sans-serif;
+  border: solid 3px ButtonHighlight;
+  margin: 0.2em;
+  height: 100%;
+}
+
+.epoz-tb {
+  padding: 3px;
+  margin-bottom: 0.4em;
+}
+
+.epoz-tb-buttongroup {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+#epoz-tb-buttons button {
+  margin-top: 0;
+  margin-left: 0;
+  height: 26px;
+  width: 26px;
+  background-repeat: no-repeat;
+}
+
+#epoz-tb-buttons button:hover {
+  cursor: pointer;
+}
+
+.epoz-save {background-image: url("epozimages/save.gif");}
+.epoz-bold {background-image: url("epozimages/bold.gif");}
+.epoz-italic {background-image: url("epozimages/italic.gif");}
+.epoz-hilitecolor {background-image: url("epozimages/bgcolor.gif");}
+.epoz-justifycenter {background-image: url("epozimages/centre.gif");}
+.epoz-inserthorizontalrule {background-image: url("epozimages/hr.gif");}
+.epoz-hyperlink {background-image: url("epozimages/hyperlink.gif");}
+.epoz-image {background-image: url("epozimages/image.gif");}
+.epoz-indent {background-image: url("epozimages/indent.gif");}
+.epoz-italic {background-image: url("epozimages/italic.gif");}
+.epoz-justifyleft {background-image: url("epozimages/left_just.gif");}
+.epoz-insertunorderedlist {background-image: url("epozimages/list.gif");}
+.epoz-insertorderedlist {background-image: url("epozimages/numbered.gif");}
+.epoz-outdent {background-image: url("epozimages/outdent.gif");}
+.epoz-redo {background-image: url("epozimages/redo.gif");}
+.epoz-justifyright {background-image: url("epozimages/right_just.gif");}
+.epoz-space {background-image: url("epozimages/space.gif");}
+.epoz-subscript {background-image: url("epozimages/subscript.gif");}
+.epoz-superscript {background-image: url("epozimages/superscript.gif");}
+.epoz-table {background-image: url("epozimages/table.gif");}
+.epoz-forecolor {background-image: url("epozimages/textcolor.gif");}
+.epoz-underline {background-image: url("epozimages/underline.gif");}
+.epoz-undo {background-image: url("epozimages/undo.gif");}
+.epoz-logo {background-image: url("epozimages/epoz_icon.gif");}
+
+div.epoz-editorframe {
+ 
+  margin-left: 0.3em;
+  margin-bottom: 0.3em;
+  border: solid 2px ButtonFace;
+}
+
+
+#epoz-editor {
+  height: 450px;
+  width: 99%;
+}
+
+div.epoz-toolboxes {
+  float: right;	
+  border: solid 2px ButtonFace;
+  height: 100%;
+  width: 19.4em;
+  margin-right: 0.3em;
+  margin-bottom: 0.3em;
+  font-size: 0.8em;
+}
+
+div.epoz-toolbox {
+  margin-bottom: 1em;
+}
+
+div.epoz-toolbox h1 {
+  text-align: center;
+  width: 100%;
+  background-color: ButtonFace;
+  margin-top: 0;
+  font-size: 1.1em;
+}
+
+div.epoz-toolbox-label, span.epoz-toolbox-searchterm, 
+input.epoz-toolbox-st, button.epoz-toolbox-action, 
+div.epoz-toolbox-results {
+  margin-left: 0.2em;
+  margin-right: 0.2em;
+}
+
+div.epoz-toolbox-label {
+  margin-bottom: 0.4em;
+}
+
+div.epoz-toolbox-results {
+  border: solid 2px ButtonFace;
+  margin-top: 0.8em;
+  text-decoration: underline;
+  padding: 0.2em;
+  display: none;
+}
+
+div.epoz-toolbox table#epoz-toolbox-addtable input, 
+div.epoz-toolbox table#epoz-toolbox-edittable input {
+  width: 20px;
+}
+
+
+table#epoz-toolbox-addtable {
+
+}
+
+
+#epoz-toolbox-editlink, #epoz-toolbox-edittable,
+#epoz-ulstyles, #epoz-olstyles {
+  display: none;
+}
+
+
+div#epoz-colorchooser {
+  position: absolute;
+  visibility: hidden;
+  border: solid black 1px;
+  background-color: white;
+  padding: 0.2em;
+  font-size: small;
+}
+
+div#epoz-fgcolorchooser div:hover {
+  /* border: outset 1px; */
+}
+
+#epoz-toolbox-properties input {
+  width: 16em;
+}
+
+textarea#epoz-properties-description {
+  width: 22em;
+}
+
+table#epoz-properties input, table#epoz-toolbox-linktable input,
+div.epoz-toolbox input, textarea#epoz-properties-description {
+  font-size: x-small;
+  font-family: Verdana, "Lucida Grande", Helvetica, Arial, sans-serif;
+
+}

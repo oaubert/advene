@@ -1,0 +1,1486 @@
+# Advene french translation
+# Copyright (C)2004 Olivier Aubert
+# This file is distributed under the same license as the Advene package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: oaubert@lisi.univ-lyon1.fr\n"
+"POT-Creation-Date: 2004-01-14 00:45+0100\n"
+"PO-Revision-Date: 2004-01-27 19:43+0100\n"
+"Last-Translator: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>\n"
+"MIME-Version: 1.0\n"
+"Language-Team: advene@liris.cnrs.fr\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: advenetool:219 advenetool:220
+msgid ""
+"*** WARNING*** : gtk.threads_init not available.\n"
+"This may lead to unexpected behaviour."
+msgstr ""
+"***Avertissement***: gtk.threads_init n'est pas disponible.\n"
+"Ceci peut provoquer un fonctionnement aléatoire."
+
+#: advenetool:241 actions.py:34 advenetool:233
+msgid "Display a message"
+msgstr "Affiche un message"
+
+#: advenetool:242 advenetool:234
+msgid "String to display."
+msgstr "Chaîne de caractères à afficher"
+
+#: advenetool:254 advenetool:261
+msgid "Using Mainloop input handling for webserver..."
+msgstr "Le serveur web effectuera son traitement dans la boucle principale..."
+
+#: advenetool:257 advenetool:264
+msgid "Using threads for webserver..."
+msgstr "Le serveur web utilisera les threads"
+
+#: advenetool:284 advenetool:291
+msgid "Writing profiler info"
+msgstr "Écriture de l'information de profilage"
+
+#: advenetool:366 advenetool:373
+msgid "Restarting player..."
+msgstr "Redémarrage du lecteur multimédia..."
+
+#: advenetool:369 advenetool:376
+msgid "Unable to start the player."
+msgstr "Impossible de lancer le lecteur."
+
+#: advenetool:466 advenetool:473
+#, python-format
+msgid "Unknown option: %s"
+msgstr "Option inconnue: %s"
+
+#: advenetool:502 advenetool:509
+msgid "All snapshots are up-to-date."
+msgstr "Toutes les captures d'écran sont à jour."
+
+#: advenetool:509 advenetool:516
+#, python-format
+msgid "End of stream (%s). Quitting"
+msgstr "Fin du flux (%s)."
+
+#: advenetool:562 advenetool:569
+msgid ""
+"Cannot load package: the following annotations do not have Millisecond "
+"fragments:"
+msgstr ""
+"Impossible de charger le recueil: les annotations suivantes\n"
+"n'ont pas de fragment de type Milliseconde :"
+
+#: advenetool:566 advenetool:573
+#, python-format
+msgid "Package %s loaded. %d annotations."
+msgstr "Recueil %s chargé. %d annotations."
+
+#: advenetool:591 advenetool:598
+msgid "AdveneTool"
+msgstr "AdveneTool"
+
+#: advenetool:720 advenetool:727
+#, python-format
+msgid "%d annotations saved to %s"
+msgstr "%d annotations sauvées dans %s"
+
+#: advenetool:810 advenetool:817
+#, python-format
+msgid "Annotation %s"
+msgstr "Annotation %s"
+
+#: advenetool:816 packagemodel.py:404 advenetool:823
+msgid "Edit"
+msgstr "Éditer"
+
+#: advenetool:820 advenetool:1155 advenetool:827 advenetool:1162
+msgid "Go to..."
+msgstr "Aller à..."
+
+#: advenetool:834 advenetool:841
+#, python-format
+msgid "Begin: %s"
+msgstr "Début : %s"
+
+#: advenetool:839 advenetool:846
+#, python-format
+msgid "End: %s"
+msgstr "Fin : %s"
+
+#: advenetool:992 advenetool:999
+msgid "Defining a new annotation..."
+msgstr "Définition d'une nouvelle annotation..."
+
+#: advenetool:998 advenetool:1005
+#, python-format
+msgid "New annotation: %s"
+msgstr "Nouvelle annotation : %s"
+
+#: advenetool:1014 advenetool:1021
+msgid "Defining a new annotation (Tab to resume the play)"
+msgstr ""
+"Définition d'une nouvelle annotation. Utilisez Tab pour relancer la vidéo."
+
+#: advenetool:1067 advenetool:1074
+msgid "Load a package"
+msgstr "Charger un recueil"
+
+#: advenetool:1087 advenetool:1094
+msgid "Save the current package"
+msgstr "Sauvegarder le recueil courant"
+
+#: advenetool:1149 advenetool:1156
+#, python-format
+msgid "Position %s"
+msgstr "Position %s"
+
+#: advenetool:1159 advenetool:1166
+msgid "Copy value into clipboard"
+msgstr "Copier la position dans le presse-papier"
+
+#: advenetool:1234 packagemodel.py:104 advenetool:1252
+#, python-format
+msgid "Package %s"
+msgstr "Recueil %s"
+
+#: advenetool:1234 advenetool:1252
+msgid "No title"
+msgstr "Pas de titre"
+
+#: advenetool:1249 advenetool:1267
+msgid "**** Media information ****"
+msgstr "**** Information sur le média ****"
+
+#: advenetool:1251 advenetool:1269
+#, python-format
+msgid "Current playlist : %s"
+msgstr "Liste courante    : %s"
+
+#: advenetool:1252 advenetool:1270
+#, python-format
+msgid "Current position : %d"
+msgstr "Position courante : %d"
+
+#: advenetool:1253 advenetool:1271
+#, python-format
+msgid "Input size       : %d"
+msgstr "Taille du fichier : %d"
+
+#: advenetool:1254 advenetool:1272
+#, python-format
+msgid "Mux rate (byte/s): %d"
+msgstr "Taux de codage (octets/s): %d"
+
+#: advenetool:1255 advenetool:1273
+#, python-format
+msgid "Status           : %s"
+msgstr "Statut            : %s"
+
+#: advenetool:1257 advenetool:1275
+msgid "Player not active."
+msgstr "Le lecteur n'est pas actif."
+
+#: advenetool:1302 advenetool:1320
+msgid "Select a movie file"
+msgstr "Choisissez un fichier vidéo"
+
+#: advenetool:1405 advenetool:1423
+msgid "Restarting VLC player..."
+msgstr "Redémarrage du lecteur..."
+
+#: advenetool:1423 advenetool:1441
+msgid ""
+"Error: the player is not run with the snapshot functionality. Configure it "
+"and try again."
+msgstr ""
+"Erreur: la fonctionnalité de capture d'écran n'est pas activée dans le "
+"lecteur. Configurez-le et essayez de nouveau."
+
+#: advenetool:1474 advenetool:1492
+#, python-format
+msgid "Got exception %s. Stopping services..."
+msgstr "Reçu l'exception %s. Arrêt des services."
+
+#: advenetool:1476 advenetool:1494
+msgid "*** Exception ***"
+msgstr "*** Exception ***"
+
+#: actions.py:35 actions.py:77 actions.py:85
+msgid "Message to display"
+msgstr "Message à afficher"
+
+#: actions.py:41
+msgid "Start the player"
+msgstr "Démarrer le lecteur"
+
+#: actions.py:42
+msgid "Start position (in ms)"
+msgstr "Position de début (en ms)"
+
+#: actions.py:48
+msgid "Stop the player"
+msgstr "Arrêter le lecteur"
+
+#: actions.py:49
+msgid "Stop position (in ms)"
+msgstr "Position d'arrêt (en ms)"
+
+#: actions.py:55
+msgid "Pause the player"
+msgstr "Mettre le lecteur en pause"
+
+#: actions.py:56
+msgid "Pause position (in ms)"
+msgstr "Position de pause (en ms)"
+
+#: actions.py:62
+msgid "Resume the player"
+msgstr "Relancer le lecteur"
+
+#: actions.py:63
+msgid "Resume position (in ms)"
+msgstr "Position de relance (en ms)"
+
+#: actions.py:69
+msgid "Take a snapshot"
+msgstr "Prendre une capture d'écran"
+
+#: actions.py:70
+msgid "Snapshot position (in ms)"
+msgstr "Position de la capture d'écran (en ms)"
+
+#: actions.py:76
+msgid "Display a caption"
+msgstr "Afficher un sous-titre"
+
+#: actions.py:78
+msgid "Duration of the caption"
+msgstr "Durée du sous-titre"
+
+#: actions.py:84
+msgid "Display a caption during the annotation timeframe"
+msgstr "Afficher un sous-titre pendant la durée d'une annotation"
+
+#: actions.py:93
+msgid "** Message ** "
+msgstr "** Message ** "
+
+#: audio.py:23 audio.py:26 audio.py:29 audio.py:32
+msgid "Sound support not available"
+msgstr "Le support pour le son n'est pas disponible."
+
+#: edit.py:54 gui.py:198
+msgid "Begin"
+msgstr "Début"
+
+#: edit.py:60 gui.py:199
+msgid "End"
+msgstr "Fin"
+
+#: eventgui.py:68
+msgid "New rule"
+msgstr "Nouvelle règle"
+
+#: eventgui.py:153
+msgid "Rule name"
+msgstr "Nom de la règle"
+
+#: eventgui.py:160
+msgid "Event"
+msgstr "Événement"
+
+#: eventgui.py:167
+msgid "If"
+msgstr "Si"
+
+#: eventgui.py:193
+msgid "Then"
+msgstr "Alors"
+
+#: eventgui.py:227
+msgid "When the "
+msgstr "Quand le/la"
+
+#: eventgui.py:239
+msgid " occurs,"
+msgstr " intervient,"
+
+#: advenetool:1235
+msgid "Log Window"
+msgstr "Fenêtre de journal"
+
+#: events.py:45
+msgid "is equal to"
+msgstr "est égal à"
+
+#: events.py:46
+msgid "is different from"
+msgstr "est différent de"
+
+#: events.py:47
+msgid "contains"
+msgstr "contient"
+
+#: events.py:48
+msgid "is greater than"
+msgstr "est supérieur à"
+
+#: events.py:49
+msgid "is lower than"
+msgstr "est inférieur à"
+
+#: events.py:53
+msgid "is not true"
+msgstr "n'est pas vrai"
+
+#: events.py:54
+msgid "is true"
+msgstr "est vrai"
+
+#: events.py:384
+msgid "Beginning of an annotation"
+msgstr "Début d'une annotation"
+
+#: events.py:385
+msgid "End of an annotation"
+msgstr "Fin d'une annotation"
+
+#: events.py:386
+msgid "Starting editing of a new annotation"
+msgstr "Début de l'édition d'une nouvelle annotation"
+
+#: events.py:387
+msgid "Ending editing of a new annotation"
+msgstr "Fin de l'édition d'une nouvelle annotation"
+
+#: events.py:388
+msgid "Activation of an annotation"
+msgstr "Activation d'une annotation"
+
+#: events.py:389
+msgid "Activation of a relation"
+msgstr "Activation d'une relation"
+
+#: events.py:390
+msgid "Activating a link"
+msgstr "Activation d'un lien"
+
+#: events.py:391
+msgid "Player start"
+msgstr "Lecture"
+
+#: events.py:392
+msgid "Player stop"
+msgstr "Stop"
+
+#: events.py:393
+msgid "Player pause"
+msgstr "Pause"
+
+#: events.py:394
+msgid "Player resume"
+msgstr "Relance"
+
+#: events.py:395
+msgid "Going to a given position"
+msgstr "Déplacement à une position donnée"
+
+#: events.py:396
+msgid "Loading a new package"
+msgstr "Chargement d'un nouveau recueil"
+
+#: events.py:397
+msgid "Saving the package"
+msgstr "Sauvegarde du recueil"
+
+#: events.py:398
+msgid "Start of the application"
+msgstr "Début de l'application"
+
+#: events.py:399
+msgid "End of the application"
+msgstr "Fin de l'application"
+
+#: gui.py:26
+#, python-format
+msgid "No edit popup available for element %s"
+msgstr "Pas de fenêtre d'édition disponible pour l'élément %s"
+
+#: gui.py:130
+#, python-format
+msgid "Edit %s"
+msgstr "Éditer %s"
+
+#: gui.py:148
+#, python-format
+msgid "Display %s"
+msgstr "Afficher %s"
+
+#: gui.py:184 gui.py:225 gui.py:283 gui.py:303
+msgid "Id"
+msgstr "Id"
+
+#: gui.py:185 gui.py:238
+msgid "Type"
+msgstr "Type"
+
+#: gui.py:186 gui.py:226 gui.py:265 gui.py:284 gui.py:304
+msgid "URI"
+msgstr "URI"
+
+#: gui.py:187 gui.py:227 gui.py:267 gui.py:286 gui.py:306 advene.glade:1041
+msgid "Author"
+msgstr "Auteur"
+
+#: gui.py:188 gui.py:228 gui.py:268 gui.py:287 gui.py:307 advene.glade:1065
+msgid "Date"
+msgstr "Date"
+
+#: gui.py:208 gui.py:248
+msgid "Content"
+msgstr "Contenu"
+
+#: gui.py:237
+msgid "Class"
+msgstr "Classe"
+
+#: gui.py:240
+msgid "Match Filter"
+msgstr "Masque de filtrage"
+
+#: gui.py:266 gui.py:285 gui.py:305 advene.glade:1113
+msgid "Title"
+msgstr "Titre"
+
+#: gui.py:308
+msgid "MIME Type"
+msgstr "Type MIME"
+
+#: gui.py:413
+msgid "Expecting an integer."
+msgstr "Un entier est attendu."
+
+#: gui.py:439
+#, python-format
+msgid ""
+"The %s attribute could not be updated:\n"
+"\n"
+"%s\n"
+"\n"
+"Resetting to the original value."
+msgstr ""
+"L'attribut %s ne peut pas être mis à jour:\n"
+"\n"
+"%s\n"
+"\n"
+"Il est remis à son ancienne valeur."
+
+#: gui.py:478
+#, python-format
+msgid ""
+"The following attributes could not be updated:\n"
+"\n"
+"%s"
+msgstr ""
+"Les attributs suivants n'ont pas été mis à jour :\n"
+"\n"
+"%s"
+
+#: gui.py:495
+msgid "Attribute"
+msgstr "Attribut"
+
+#: gui.py:503
+msgid "Value"
+msgstr "Valeur"
+
+#: logwindow.py:99
+msgid "Log a message"
+msgstr "Journaliser un message"
+
+#: logwindow.py:100
+msgid "Message to log."
+msgstr "Message à journaliser"
+
+#: packagemodel.py:94
+#, python-format
+msgid "Annotation %s (%d, %d)"
+msgstr "Annotation %s (%d, %d)"
+
+#: packagemodel.py:98
+#, python-format
+msgid "Annotation Type %s"
+msgstr "Type d'Annotation %s"
+
+#: packagemodel.py:100
+#, python-format
+msgid "Schema %s"
+msgstr "Schéma %s"
+
+#: packagemodel.py:102
+#, python-format
+msgid "View %s"
+msgstr "Vue %s"
+
+#: packagemodel.py:104
+msgid "No Title"
+msgstr "Pas de titre"
+
+#: packagemodel.py:291
+msgid "Package View"
+msgstr "Vue du recueil"
+
+#: packagemodel.py:324 packagemodel.py:359 timeline.py:266
+#, python-format
+msgid ""
+"Error: unable to find an edit popup for %s:\n"
+"%s"
+msgstr ""
+"Erreur : impossible d'ouvrir une fenêtre d'édition pour %s:\n"
+"%s"
+
+#: packagemodel.py:380
+#, python-format
+msgid "Error: unable to find an edit popup for %s"
+msgstr "Erreur : impossible d'ouvrir une fenêtre d'édition pour %s"
+
+#: packagemodel.py:410
+msgid "Picture..."
+msgstr "Image..."
+
+#: packagemodel.py:414
+msgid "Display"
+msgstr "Afficher"
+
+#: timeadjustment.py:51
+#, python-format
+msgid "Decrement value by %.2f s"
+msgstr "Décrémenter la valeur de %.2f s"
+
+#: timeadjustment.py:53
+#, python-format
+msgid "Increment value by %.2f s"
+msgstr "Incrémenter la valeur de %.2f s"
+
+#: timeline.py:46
+msgid "Highlight active annotations"
+msgstr "Signaler les annotations actives"
+
+#: timeline.py:50
+msgid "Scroll to active annotation"
+msgstr "Défilement automatique"
+
+#: timeline.py:247 timeline.py:323
+#, python-format
+msgid ""
+"%s\n"
+"Begin: %s\tEnd: %s"
+msgstr ""
+"%s\n"
+"Début: %s\\tFin:%s"
+
+#: timeline.py:418
+#, python-format
+msgid "Time: %s"
+msgstr "Temps: %s"
+
+#: vlclib.py:185
+msgid "Cannot start the player"
+msgstr "Impossible de lancer le lecteur"
+
+#: vlclib.py:198
+#, python-format
+msgid "Cannot read the IOR file %s"
+msgstr "Impossible de lire le fichier IOR %s"
+
+#: vlclib.py:242
+msgid "Unable to get a MediaControl object."
+msgstr "Impossible d'obtenir un objet MediaControl"
+
+#: advene.glade:8
+msgid "DVD Annote"
+msgstr "Advene"
+
+#: advene.glade:31
+msgid "_File"
+msgstr "_Fichier"
+
+#: advene.glade:95
+msgid "_Edit"
+msgstr "_Édition"
+
+#: advene.glade:146
+msgid "Edit package properties"
+msgstr "Éditer les propriétés du recueil"
+
+#: advene.glade:147
+msgid "P_ackage properties"
+msgstr "_Propriétés du recueil"
+
+#: advene.glade:156
+msgid "Interface preferences"
+msgstr "Préférences de l'interface"
+
+#: advene.glade:157
+msgid "P_references"
+msgstr "P_références"
+
+#: advene.glade:170
+msgid "_View"
+msgstr "_Vues"
+
+#: advene.glade:179
+msgid "Displays the existing annotations"
+msgstr "Affiche les annotations existantes"
+
+#: advene.glade:180
+msgid "_Annotations"
+msgstr "_Annotations"
+
+#: advene.glade:189
+msgid "Display annotations on a timeline"
+msgstr "Vue temporelle des annotations"
+
+#: advene.glade:190
+msgid "_Timeline"
+msgstr "Ligne de _Temps"
+
+#: advene.glade:199
+msgid "_LogWindow"
+msgstr "Journa_L"
+
+#: advene.glade:208
+msgid "Display information about the media"
+msgstr "Informations sur le média"
+
+#: advene.glade:209
+msgid "_MediaInformation"
+msgstr "Informations _Média"
+
+#: advene.glade:218
+msgid "_Start Web Browser"
+msgstr "Lancer le navigateur _Web"
+
+#: advene.glade:231
+msgid "_Player"
+msgstr "_Lecteur"
+
+#: advene.glade:240
+msgid "Save the contents of the ImageCache to disk"
+msgstr "Sauvegarde le contenu du cache d'images"
+
+#: advene.glade:241
+msgid "Save _ImageCache"
+msgstr "Sauvegarder le cache"
+
+#: advene.glade:250
+msgid "_Update snapshots"
+msgstr "MàJ des _vignettes"
+
+#: advene.glade:259
+msgid "_Restart player"
+msgstr "_Redémarrer le lecteur"
+
+#: advene.glade:268
+msgid "_Configure player"
+msgstr "_Configurer le lecteur"
+
+#: advene.glade:281
+msgid "_Help"
+msgstr "_Aide"
+
+#: advene.glade:290
+msgid "_About"
+msgstr "À _Propos"
+
+#: advene.glade:316
+msgid "Rewind"
+msgstr "Retour rapide"
+
+#: advene.glade:338
+msgid "Play"
+msgstr "Lecture"
+
+#: advene.glade:360
+msgid "Pause"
+msgstr "Pause"
+
+#: advene.glade:382
+msgid "Stop"
+msgstr "Stop"
+
+#: advene.glade:404
+msgid "Forward"
+msgstr "Avance rapide"
+
+#: advene.glade:426
+msgid "Add file"
+msgstr "Sélectionner un fichier"
+
+#: advene.glade:448
+msgid "Select DVD"
+msgstr "Sélectionner un DVD"
+
+#: advene.glade:470
+msgid "Exit"
+msgstr "Sortie"
+
+#: advene.glade:521
+msgid "Position"
+msgstr "Position"
+
+#: advene.glade:556
+msgid "Edited annotation"
+msgstr "Annotation éditée"
+
+#: advene.glade:586 advene.glade:641 advene.glade:1143 advene.glade:1164
+#: advene.glade:1185 advene.glade:1206 advene.glade:1313
+msgid "*"
+msgstr "*"
+
+#: advene.glade:601
+msgid "Current type"
+msgstr "Type courant"
+
+#: advene.glade:656
+msgid "None"
+msgstr "Aucun"
+
+#: advene.glade:674
+msgid "Player Status"
+msgstr "Statut du lecteur"
+
+#: advene.glade:698
+msgid "N/C"
+msgstr "N/C"
+
+#: advene.glade:796
+msgid "About"
+msgstr "À propos"
+
+#: advene.glade:821
+msgid ""
+"Advene\n"
+"\n"
+"Annotate DVDs,\n"
+"Exchange on the NEt !"
+msgstr ""
+"Advene\n"
+"\n"
+"Annotations de DVd \n"
+"échangées sur le NEt"
+
+#: advene.glade:866
+msgid "Close about box"
+msgstr "Fermer la boite à propos"
+
+#: advene.glade:891 advene.glade:1002
+msgid "Preferences"
+msgstr "Préférences"
+
+#: advene.glade:955
+msgid "Display annotations in video window"
+msgstr "Afficher les annotations dans la fenêtre vidéo"
+
+#: advene.glade:1022
+msgid "Package properties"
+msgstr "Propriétés du recueil"
+
+#: advene.glade:1089
+msgid "Associated media"
+msgstr "Média associé"
+
+#: advene.glade:1260 advene.glade:1580
+msgid "Player properties"
+msgstr "Propriétés du lecteur"
+
+#: advene.glade:1284
+msgid "Display annotations as subtitles"
+msgstr "Afficher les annotations en sous-titre"
+
+#: advene.glade:1326
+msgid "TrueType Font"
+msgstr "Fonte TrueType"
+
+#: advene.glade:1355
+msgid "Take snapshots while playing"
+msgstr "Activer les copies d'écran"
+
+#: advene.glade:1416
+msgid "Snapshot dimensions (w,h)"
+msgstr "Dimensions des copies d'écran (largeur, hauteur)"
+
+#: advene.glade:1445
+msgid "Display VLC player debug messages"
+msgstr "Afficher les messages de debug de VLC"
+
+#: advene.glade:1487
+msgid "Debug level (0: min, 2: max)"
+msgstr "Niveau de debug (0: min, 2: max)"
+
+#: advene.glade:1600
+msgid "Update snapshots"
+msgstr "Mettre à jour les copies d'écran"
+
+#: advene.glade:1616
+msgid "Snapshots update"
+msgstr "MàJ copies d'écran"
+
+#: adveneserver.py:144
+#, python-format
+msgid ""
+"\n"
+"        <html><head><title>%(title)s</title>\n"
+"        </head><body>\n"
+"        <p>\n"
+"        <a href=\"/admin\">Server administration</a> |\n"
+"        <a href=\"/admin/status\">Server status</a> |\n"
+"        <a href=\"/media\">Media control</a> |\n"
+"        <a href=\"%(path)s?mode=raw\">Raw view</a>\n"
+"        </p>\n"
+"        Location: %(locationbar)s\n"
+"        <hr>\n"
+"        "
+msgstr ""
+"\n"
+"<html><head><title>%(title)s</title>\n"
+"</head><body>\n"
+"<p>\n"
+"<a href=\"/admin\">Administration du serveur</a> |\n"
+"<a href=\"/admin/status\">Statut du serveur</a> |\n"
+"<a href=\"/media\">Contrôle du lecteur</a> |\n"
+"<a href=\"%(path)s?mode=raw\">Vue brute</a>\n"
+"</p>\n"
+"Chemin courant : %(locationbar)s\n"
+"<hr>"
+
+#: adveneserver.py:175
+#, python-format
+msgid ""
+"\n"
+"        <html><head><title>Redirect to %(location)s</title>\n"
+"        </head><body>\n"
+"        <p>You should be redirected to %(location)s</p>\n"
+"        </body></html>\n"
+"        "
+msgstr ""
+"\n"
+"        <html><head><title>Redirection vers %(location)s</title>\n"
+"        </head><body>\n"
+"        <p>Vous devriez être redirigé vers %(location)s</p>\n"
+"        </body></html>\n"
+"        "
+
+#: adveneserver.py:209
+msgid "<h1>No available mediaplayer</h1>"
+msgstr "<h1>Aucune capture d'écran.</h1>"
+
+#: adveneserver.py:213
+#, python-format
+msgid ""
+"\n"
+"            <h1>Player status</h1>\n"
+"            <table border=\"1\">\n"
+"            <tr>\n"
+"            <td>Current position</td><td>%d</td>\n"
+"            <td>Input size</td><td>%d</td>\n"
+"            <td>Player status</td><td>%s</td>\n"
+"            </tr>\n"
+"            </table>\n"
+"            "
+msgstr ""
+"\n"
+"            <h1>Statut du lecteur</h1>\n"
+"            <table border=\"1\">\n"
+"            <tr>\n"
+"            <td>Position courante</td><td>%d</td>\n"
+"            <td>Taille</td><td>%d</td>\n"
+"            <td>Statut</td><td>%s</td>\n"
+"            </tr>\n"
+"            </table>\n"
+"            "
+
+#: adveneserver.py:227
+msgid "<h1>No playlist</h1>"
+msgstr "<h1>Aucun film chargé</h1>"
+
+#: adveneserver.py:229
+#, python-format
+msgid ""
+"<h1>Current playlist</h1>\n"
+"                <ul>%s</ul>"
+msgstr ""
+"<h1>Films chargés</h1>\n"
+"                <ul>%s</ul>"
+
+#: adveneserver.py:231
+msgid ""
+"\n"
+"                <form action=\"/media/play\" method=\"GET\">\n"
+"                Starting pos: <input type=\"text\" name=\"bc\" value=\"0\">\n"
+"                <input type=\"submit\" value=\"Play\">\n"
+"                </form>\n"
+"                <a href=\"/media/stop\">Stop</a> | <a href=\"/media/pause"
+"\">Pause</a><br>\n"
+"                "
+msgstr ""
+"\n"
+"                <form action=\"/media/play\" method=\"GET\">\n"
+"                Position de départ (en ms): <input type=\"text\" name=\"bc\" "
+"value=\"0\">\n"
+"                <input type=\"submit\" value=\"Démarrer\">\n"
+"                </form>\n"
+"                <a href=\"/media/stop\">Stop</a> | <a href=\"/media/pause"
+"\">Pause</a><br>\n"
+"                "
+
+#: adveneserver.py:238
+msgid ""
+"<hr />\n"
+"            <form action=\"/media/load\" method=\"GET\">\n"
+"            Add a new file (<em>dvd</em> to play a DVD):\n"
+"            <input type=\"text\" name=\"filename\">\n"
+"            <input type=\"submit\" value=\"Add\">\n"
+"            </form>"
+msgstr ""
+"<hr />\n"
+"            <form action=\"/media/load\" method=\"GET\">\n"
+"            Ajouter un nouveau fichier (<em>dvd</em> pour un DVD):\n"
+"            <input type=\"text\" name=\"filename\">\n"
+"            <input type=\"submit\" value=\"Ajouter\">\n"
+"            </form>"
+
+#: adveneserver.py:244
+msgid ""
+"<h3><a href=\"/media/snapshot\">Access to current packages snapshots</h3>"
+msgstr "<h3><a href=\"/media/snapshot\">Accéder aux captures d'écran</h3>"
+
+#: adveneserver.py:326
+msgid "Media information"
+msgstr "Information sur le média"
+
+#: adveneserver.py:338
+msgid "File added"
+msgstr "Fichier ajouté"
+
+#: adveneserver.py:339
+#, python-format
+msgid "<p><strong>%s has been added to the playlist</strong></p>"
+msgstr "<p><strong>%s a été ajouté à la liste</strong></p>"
+
+#: adveneserver.py:342
+#, python-format
+msgid "<p><strong>Error: cannot add %s to the playlist.</strong></p>"
+msgstr "<p><strong>Erreur: impossible d'ajouter %s à la liste.</strong></p>"
+
+#: adveneserver.py:351
+msgid "Access to packages snapshots"
+msgstr "Accès aux catpures d'écran"
+
+#: adveneserver.py:361
+#, python-format
+msgid "Available snapshots for %s"
+msgstr "Captures d'écran disponibles pour le recueil %s"
+
+#: adveneserver.py:368
+#, python-format
+msgid ""
+"<p><a href=\"/media/snapshot/%s?mode=inline\">Display with inline images</"
+"a></p>"
+msgstr ""
+"<p><a href=\"/media/snapshot/%s?mode=inline\">Afficher les vignettes</a></p>"
+
+#: adveneserver.py:374
+msgid "Done"
+msgstr "Fait"
+
+#: adveneserver.py:376
+msgid "Pending"
+msgstr "En attente"
+
+#: adveneserver.py:414
+msgid "Malformed request"
+msgstr "Requête erronée"
+
+#: adveneserver.py:444
+msgid "Access control"
+msgstr "Contrôle d'accès"
+
+#: adveneserver.py:452
+#, python-format
+msgid "<strong>Error: cannot add %s to authorized hosts list.</strong>"
+msgstr ""
+"<strong>Erreur: impossible d'ajouter %s aux machines autorisées.</strong>"
+
+#: adveneserver.py:454
+#, python-format
+msgid ""
+"\n"
+"        <h1>Authorized hosts</h1>\n"
+"        <table border=\"1\">\n"
+"        <tr><th>Host</th><th>IP Addr</th></tr>\n"
+"        %s\n"
+"        </table>\n"
+"        <form method=\"GET\">\n"
+"        Add a new hostname to the list :<br>\n"
+"        <input type=\"text\" name=\"hostname\"><br>\n"
+"        <input type=\"submit\" value=\"Add\">\n"
+"        </form>\n"
+"        "
+msgstr ""
+"\n"
+"        <h1>Machines autorisées</h1>\n"
+"        <table border=\"1\">\n"
+"        <tr><th>Machine</th><th>Adresse IP</th></tr>\n"
+"        %s\n"
+"        </table>\n"
+"        <form method=\"GET\">\n"
+"        Ajouter une nouvelle machine à la liste :<br>\n"
+"        <input type=\"text\" name=\"hostname\"><br>\n"
+"        <input type=\"submit\" value=\"Ajouter\">\n"
+"        </form>\n"
+"        "
+
+#: adveneserver.py:475
+msgid "Server Administration"
+msgstr "Administration du serveur"
+
+#: adveneserver.py:476
+#, fuzzy
+msgid ""
+"\n"
+"        <p><a href=\"/admin/status\">Display the server status</a></p>\n"
+"        <p><a href=\"/admin/access\">Sets the access list</a></p>\n"
+"        <p><a href=\"/admin/reset\">Reset the server</a></p>\n"
+"        <p><a href=\"/media\">Media control</a></p>\n"
+"        <p><a href=\"/admin/list\">List available files</a></p>\n"
+"        <p><a href=\"/packages\">List loaded packages</a></p>\n"
+"        <form action=\"/admin/display\" method=\"POST\">\n"
+"        <p>Display mode: <select name=\"mode\">\n"
+"        <option value=\"default\" selected>Default (with navigation "
+"interface)</option>\n"
+"        <option value=\"raw\">Raw (only the views)</option>\n"
+"        </select>\n"
+"        <input type=\"submit\" value=\"Set\">\n"
+"        <hr>\n"
+"        <p>Load an annotation list :\n"
+"        <form action=\"/admin/load\" method=\"GET\">\n"
+"        Alias: <input type=\"text\" name=\"alias\" /><br>\n"
+"        URI:   <input type=\"text\" name=\"uri\" /><br>\n"
+"        <input type=\"submit\" value=\"Load\" />\n"
+"        </form>\n"
+"        </body></html>\n"
+"        "
+msgstr ""
+"\n"
+"        <p><a href=\"/admin/status\">Afficher le statut du serveur</a></p>\n"
+"        <p><a href=\"/admin/access\">Régler le contrôle d'accès</a></p>\n"
+"        <p><a href=\"/admin/reset\">Réinitialiser le serveur</a></p>\n"
+"        <p><a href=\"/media\">Contrôle du lecteur</a></p>\n"
+"        <p><a href=\"/admin/list\">Afficher les fichiers disponibles</a></p>\n"
+"        <p><a href=\"/packages\">Afficher les recueils chargés</a></p>\n"
+"        <form action=\"/admin/display\" method=\"POST\">\n"
+"        <p>Mode d'affichage : <select name=\"mode\">\n"
+"        <option value=\"default\" selected>Par défaut (avec l'interface de navigation)</option>\n"
+"        <option value=\"raw\">Brut (seulement les vues)</option>\n"
+"        </select>\n"
+"        <input type=\"submit\" value=\"Fixer\">\n"
+"        <hr>\n"
+"        <p>Charger un nouveau recueil :\n"
+"        <form action=\"/admin/load\" method=\"GET\">\n"
+"        Alias: <input type=\"text\" name=\"alias\" /><br>\n"
+"        URI:   <input type=\"text\" name=\"uri\" /><br>\n"
+"        <input type=\"submit\" value=\"Charger\" />\n"
+"        </form>\n"
+"        </body></html>\n"
+"        "
+
+#: adveneserver.py:505
+msgid "Available files"
+msgstr "Fichiers disponibles"
+
+#: adveneserver.py:530
+msgid "Loaded packages"
+msgstr "Recueils chargés"
+
+#: adveneserver.py:532
+msgid ""
+"\n"
+"        <h1>Loaded packages</h1>\n"
+"        <table border=\"1\" width=\"50%\">\n"
+"        <tr>\n"
+"        <th>Alias</th>\n"
+"        <th>Action</th>\n"
+"        <th>URI</th>\n"
+"        <th>Annotations</th>\n"
+"        </tr>\n"
+"        "
+msgstr ""
+"\n"
+"        <h1>Recueils chargés</h1>\n"
+"        <table border=\"1\" width=\"50%\">\n"
+"        <tr>\n"
+"        <th>Alias</th>\n"
+"        <th>Action</th>\n"
+"        <th>URI</th>\n"
+"        <th>Annotations</th>\n"
+"        </tr>\n"
+"        "
+
+#: adveneserver.py:544
+#, python-format
+msgid ""
+"<tr>\n"
+"            <td><a href=\"/packages/%(alias)s\">%(alias)s</a></td>\n"
+"            <td align=\"center\"><a href=\"/admin/load?alias=%(alias)s&uri=%"
+"(uri)s\">Reload</a>|<a href=\"/admin/delete?alias=%(alias)s\">Drop</a>|<a "
+"href=\"/admin/save?alias=%(alias)s\">Save</a></td>\n"
+"            <td>%(uri)s</td>\n"
+"            <td>%(size)d</td>\n"
+"            </tr>\n"
+"            "
+msgstr ""
+"<tr>\n"
+"            <td><a href=\"/packages/%(alias)s\">%(alias)s</a></td>\n"
+"            <td align=\"center\"><a href=\"/admin/load?alias=%(alias)s&uri=%"
+"(uri)s\">Recharger</a>|<a href=\"/admin/delete?alias=%(alias)s\">Supprimer</"
+"a>|<a href=\"/admin/save?alias=%(alias)s\">Sauver</a></td>\n"
+"            <td>%(uri)s</td>\n"
+"            <td>%(size)d</td>\n"
+"            </tr>\n"
+"            "
+
+#: adveneserver.py:615
+msgid "Setting value"
+msgstr "Mise à jour"
+
+#: adveneserver.py:633
+msgid "<h1>Error</h1><p>Cannot set the value : invalid path</p>"
+msgstr ""
+"<h1>Erreur</h1><p>Impossible de mettre à jour : chemin d'accès invalide</p>"
+
+#: adveneserver.py:643 adveneserver.py:644
+#, python-format
+msgid ""
+"\n"
+"                <h1>Display mode</h1>\n"
+"                <p>Display mode is now <code>%s</code></p>\n"
+"                "
+msgstr ""
+"\n"
+"                <h1>Mode d'affichage</h1>\n"
+"                <p>Le mode d'affichage est actuellement <code>%s</code></p>\n"
+"                "
+
+#: adveneserver.py:668 adveneserver.py:673 adveneserver.py:956
+#: adveneserver.py:1069 adveneserver.py:669 adveneserver.py:674
+#: adveneserver.py:955 adveneserver.py:1068 adveneserver.py:954
+#: adveneserver.py:1067
+msgid "Error"
+msgstr "Erreur"
+
+#: adveneserver.py:674 adveneserver.py:675
+msgid "<p>Invalid request</p>."
+msgstr "<p>Requête invalide</p>"
+
+#: adveneserver.py:681 adveneserver.py:682
+#, python-format
+msgid ""
+"\n"
+"                    <h1>Value updated</h1>\n"
+"                    The value of %s has been updated to\n"
+"                    <pre>\n"
+"                    %s\n"
+"                    </pre>\n"
+"                    "
+msgstr ""
+"\n"
+"                    <h1>Contenu mis à jour</h1>\n"
+"                    Le contenu de %s a été fixé à :\n"
+"                    <pre>\n"
+"                    %s\n"
+"                    </pre>\n"
+"                    "
+
+#: adveneserver.py:696 adveneserver.py:697
+#, python-format
+msgid ""
+"\n"
+"                            <h1>Value updated</h1>\n"
+"                            The value of %s has been updated to\n"
+"                            <pre>\n"
+"                            %s\n"
+"                            </pre>\n"
+"                            "
+msgstr ""
+"\n"
+"                    <h1>Contenu mis à jour</h1>\n"
+"                    Le contenu de %s a été fixé à :\n"
+"                    <pre>\n"
+"                    %s\n"
+"                    </pre>\n"
+"                    "
+
+#: adveneserver.py:717 adveneserver.py:718
+msgid ""
+"\n"
+"                     <h1>Error</h1>\n"
+"                     <p>Cannot create an element in something else than a "
+"package.</p>\n"
+"                     "
+msgstr ""
+"\n"
+"                     <h1>Erreur</h1>\n"
+"                     <p>Impossible de créer un élément dans un autre "
+"contexte que celui d'un recueil.</p>\n"
+"                     "
+
+#: adveneserver.py:728
+#, python-format
+msgid ""
+"\n"
+"                         <h1>Error</h1>\n"
+"                         <p>Error while creating view %s</p>"
+msgstr ""
+"\n"
+"                         <h1>Erreur</h1>\n"
+"                         <p>Erreur lors de la création de la vue %s</p>"
+
+#: adveneserver.py:738 adveneserver.py:739
+#, python-format
+msgid ""
+"\n"
+"                     <h1>View <em>%s</em> created</h1>\n"
+"                     <p>The view <a href=\"%s\">%s</a> was successfully "
+"created.</p>\n"
+"                     "
+msgstr ""
+"\n"
+"                     <h1>Vue <em>%s</em> créée</h1>\n"
+"                     <p>La vue <a href=\"%s\">%s</a> a été correctement "
+"créée.</p>\n"
+"                     "
+
+#: adveneserver.py:746
+#, python-format
+msgid ""
+"\n"
+"                     <h1>Error</h1>\n"
+"                     <p>Cannot create an object of type %s.</p>\n"
+"                     "
+msgstr ""
+"\n"
+"                     <h1>Erreur</h1>\n"
+"                     <p>Impossible de créer un objet du type %s.</p>\n"
+"                     "
+
+#: adveneserver.py:751
+#, python-format
+msgid ""
+"\n"
+"                <h1>Error</h1>\n"
+"                <p>Cannot perform the action <em>%s></em> on <code>%s</"
+"code></p>\n"
+"                "
+msgstr ""
+"\n"
+"                <h1>Erreur</h1>\n"
+"                <p>Impossible d'effectuer l'action <em>%s></em> sur <code>%"
+"s</code></p>\n"
+"                "
+
+#: adveneserver.py:845 adveneserver.py:844 adveneserver.py:843
+#, python-format
+msgid "<p>Package <strong>%s</strong> not loaded</p>"
+msgstr "<p>Le recueil <strong>%s</strong> n'est pas chargé</p>"
+
+#: adveneserver.py:855 adveneserver.py:854 adveneserver.py:853
+#, python-format
+msgid ""
+"<p>Cannot resolve TALES expression %s on package %s<p><pre>\n"
+"                %s\n"
+"                %s\n"
+"                %s</pre>"
+msgstr ""
+"<p>Impossible d'interpéter l'expression TALES %s sur le recueil %s<p><pre>\n"
+"                %s\n"
+"                %s\n"
+"                %s</pre>"
+
+#: adveneserver.py:867 adveneserver.py:866 adveneserver.py:865
+#, python-format
+msgid "<p>Unknown request: %s</p>"
+msgstr "<p>Requête inconnue : %s</p>"
+
+#: adveneserver.py:911 adveneserver.py:910 adveneserver.py:909
+msgid "You should specify an alias"
+msgstr "Vous devez spécifier un alias"
+
+#: adveneserver.py:916 adveneserver.py:915 adveneserver.py:914
+msgid "You should specify an uri"
+msgstr "Vous devez spécifier une URI"
+
+#: adveneserver.py:919 adveneserver.py:918 adveneserver.py:917
+#, python-format
+msgid "Package %s loaded"
+msgstr "Recueil %s chargé"
+
+#: adveneserver.py:923 adveneserver.py:922 adveneserver.py:921
+#, python-format
+msgid "<p>Cannot load package %s</p>"
+msgstr "<p>Impossible de charger le recueil %s</p>"
+
+#: adveneserver.py:929 adveneserver.py:928 adveneserver.py:927
+#, python-format
+msgid "Package %s deleted"
+msgstr "Recueil %s supprimé"
+
+#: adveneserver.py:935 adveneserver.py:934 adveneserver.py:933
+#, python-format
+msgid "Package %s saved"
+msgstr "Recueil %s sauvegardé"
+
+#: adveneserver.py:942 adveneserver.py:941 adveneserver.py:940
+msgid "Server reset"
+msgstr "Serveur réinitialisé"
+
+#: adveneserver.py:945 adveneserver.py:944 adveneserver.py:943
+msgid "Server status"
+msgstr "Statut du serveur"
+
+#: adveneserver.py:946 adveneserver.py:945 adveneserver.py:944
+#, python-format
+msgid ""
+"\n"
+"            <p>%d packages loaded.</p>\n"
+"            "
+msgstr ""
+"\n"
+"            <p>%d recueils chargés.</p>\n"
+"            "
+
+#: adveneserver.py:952 adveneserver.py:951 adveneserver.py:950
+msgid "<p>No package loaded</p>"
+msgstr "<p>Aucun recueil chargé</p>"
+
+#: adveneserver.py:957 adveneserver.py:956 adveneserver.py:955
+#, python-format
+msgid "<p>Unknown admin command</p><pre>Command: %s</pre>"
+msgstr "<p>Commande d'administration inconnue</p><pre>Commande : %s</pre>"
+
+#: adveneserver.py:1104 adveneserver.py:1103 adveneserver.py:1102
+#, python-format
+msgid ""
+"\n"
+"                    <h1>Error</h1>\n"
+"                    %s\n"
+"                    "
+msgstr ""
+"\n"
+"                    <h1>Erreur</h1>\n"
+"                    %s\n"
+"                    "
+
+#: adveneserver.py:1120 adveneserver.py:1119 adveneserver.py:1118
+msgid "Content mode not available on non-content data"
+msgstr ""
+"Le mode <em>Contenu</em> n'est pas applicable aux données qui ne sont pas "
+"des contenus."
+
+#: adveneserver.py:1125 adveneserver.py:1124 adveneserver.py:1123
+#, python-format
+msgid "TALES evaluation - %s"
+msgstr "Evaluation TALES - %s"
+
+#: adveneserver.py:1127 adveneserver.py:1126 adveneserver.py:1125
+#, python-format
+msgid ""
+"\n"
+"        <p>Evaluating expression \"<strong>%s</strong>\" on package %s</p>\n"
+"        <hr>\n"
+"        "
+msgstr ""
+"\n"
+"        <p>Évaluation de l'expression \"<strong>%s</strong>\" sur le recueil "
+"%s</p>\n"
+"        <hr>\n"
+"        "
+
+#: adveneserver.py:1132 adveneserver.py:1131 adveneserver.py:1130
+#, python-format
+msgid "<p>Type %s :</p>"
+msgstr "<p>Type %s :</p>"
+
+#: adveneserver.py:1143 adveneserver.py:1142 adveneserver.py:1141
+#, python-format
+msgid "<h1>Error</h1>%s"
+msgstr "<h1>Erreur</h1>%s"
+
+#: adveneserver.py:1157 adveneserver.py:1156 adveneserver.py:1155
+#, python-format
+msgid ""
+"\n"
+"        <hr>\n"
+"        <p>\n"
+"        Location: %s<br>\n"
+"        <form name=\"navigation\" method=\"GET\">\n"
+"        <a href=\"%s\">Up one level</a> |\n"
+"        Next level :\n"
+"        <select name=\"path\" onchange=\"submit()\">\n"
+"        "
+msgstr ""
+"\n"
+"        <hr>\n"
+"        <p>\n"
+"        Chemin courant : %s<br>\n"
+"        <form name=\"navigation\" method=\"GET\">\n"
+"        <a href=\"%s\">Remonter d'un niveau</a> |\n"
+"        Niveau suivant :\n"
+"        <select name=\"path\" onchange=\"submit()\">\n"
+"        "
+
+#: adveneserver.py:1169
+msgid "<option selected>view</option>"
+msgstr "<option selected>view</option>"
+
+#: adveneserver.py:1175 adveneserver.py:1174 adveneserver.py:1173
+msgid ""
+"\n"
+"        </select> View: <select name=\"view\" onchange=\"submit()\">\n"
+"        <option selected></option>\n"
+"        "
+msgstr ""
+"\n"
+"        </select> Vue : <select name=\"view\" onchange=\"submit()\">\n"
+"        <option selected></option>\n"
+"        "
+
+#: adveneserver.py:1453 adveneserver.py:1452 adveneserver.py:1451
+msgid "Server ready to serve requests."
+msgstr "Le serveur est prêt à répondre aux requêtes."
+
+#: adveneserver.py:633 adveneserver.py:729 adveneserver.py:747
+#: adveneserver.py:750
+msgid "<h1>Error</h1>"
+msgstr "<h1>Erreur</h1>"
+
+#: adveneserver.py:634
+msgid "<p>Cannot set the value : invalid path</p>"
+msgstr "<p>Impossible de mettre à jour : chemin invalide</p>"
+
+#: adveneserver.py:748
+#, python-format
+msgid "<p>Cannot create an object of type %s.</p>"
+msgstr "<p>Impossible de créer un objet de type %s.</p>"
+
+#: adveneserver.py:730
+#, python-format
+msgid "<p>Error while creating view %s</p>"
+msgstr "<p>Erreur lors de la création de la vue %s.</p>"
+
+#: adveneserver.py:751
+#, python-format
+msgid "<p>Cannot perform the action <em>%s</em> on <code>%s</code></p>"
+msgstr "<p>Impossible d'effectuer l'action <em>%s</em> sur <code>%s</code></p>"

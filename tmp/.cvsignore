@@ -1,0 +1,4 @@
+*.so
+*.gladep
+.deps
+*.pyc

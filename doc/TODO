@@ -1,0 +1,215 @@
+* Add a notebook view in the place of the defunct HTML widget
+
+* Write the correct VLC/Python module -> DONE
+
+* Use gettext to internationalize the application (cf http://listas.aditel.org/archivos/python-es/2003-February/003642.html for glade) -> DONE
+
+* The advene python modules should be in /usr/lib/advene (with subdirectories advenetool, advene, util), cf below -> DONE in Debian package
+
+* Fix for SVG module :
+ - find a way to trigger the svg module rather than the freetype module
+ - write an example subtitle file with SVG contents
+
+* Build a debian package. Cf
+http://www-106.ibm.com/developerworks/linux/library/l-debpkg.html -> DONE (badly)
+
+* The view method should return a Content object, so that we can get its mimetype
+
+* The content object should provide a "dom tree" access method
+
+* The package/annotationTypes should have an 'ids' method, to be able to retrieve ids as keys (all bundles in fact).
+
+* Needed method: package.findMatchingRelation(source_ann, dest_ann) -> DONE
+
+*** Create a RelationBox view plugin -> DONE
+
+*** Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
+
+* Restructure code (and take the opportunity to move to another
+  versioning system [arch or svn for instance]) :
+Cf http://sial.org/howto/subversion/cvs-migrate/ for migration hints.
+http://www.onlamp.com/pub/a/onlamp/2002/10/31/subversion.html
+
+  advenelib/advene -> advene/model/...
+                  /util -> advene/model/util/
+
+  advenetool -> 
+                advene/core
+                           config.py
+                           controller.py (GUI independant parts of advenetool)
+                           webserver.py (ex. adveneserver.py)
+                           mediacontrol.py
+                           imagecache.py
+			   util.py (utilities with very small dependencies)
+                advene/gui
+                          main.py (ex. advenetool, w/o controller)
+                          views/
+                                timeline.py
+                                tree.py (ex. packagemodel.py)
+                                logwindow.py
+                          edit/
+                               generic.py (generic edit classes)
+                               elements.py (edit Advene elements [generic], ex. gui.py)
+                               annotation.py (edit annotation (specific), ex. edit.py)
+                               rules.py (edit Advene rules, ex. eventgui.py)
+                               timeadjustment.py
+                               config.py (edit Advene configuration)
+			       tales.py (edit TALES expressions)
+                          util.py (image/png2pixbuf)
+                advene/rules
+                             ecaengine.py (main engine)
+                             elements.py (ex. events.py)
+                             actions.py (default actions)
+                advene/util
+                           vlclib.py (???)
+                           client.py
+                           spawn.py
+                advene/share/
+                             pixmaps/...
+                             advene.glade[p]
+                             template.xml
+                             default_rules.txt
+			     format/advene.rng
+                advene/doc/
+                           html/... (epydoc generated)
+                           README
+                           TODO
+		advene/po/...
+                advene/scripts/...
+                advene/debian/
+                              control
+
+* Adveneserver: use logging.Logger to log HTTP accesses
+
+* Add sound_set_volume and sound_get_volume to MediaControl.idl -> DONE
+
+* Style setting:
+sendmail_styles="""
+style "green_button"
+{
+  fg[PRELIGHT] = { 1.0, 1.0, 1.0 }
+  bg[PRELIGHT] = { 0, 0.75, 0 }
+}
+widget "sendmail.*.Send*" style "green_button"
+
+style "blue_text"
+{
+  text[NORMAL] = { 0, 0, 0.75 }
+}
+widget "sendmail.*.mail" style "blue_text"
+"""
+gtk.rc_parse_string(sendmail_styles)
+
+* Rules: add a "internal" flag to indicate whether to save/edit or not
+  the rule (internal=True by default) -> DONE (rule.origin)
+
+* Add /usr/share/doc/... for all debian packages (and
+  examples/client.py for vlc-plugin-corba)
+
+* Create a ContextualizedBundle which understands to namespaces
+
+* Implement attributes first and last in bundles (easy) -> DONE (in global_methods)
+
+* Put relations in a <relations></relations> container, so that we
+  have a consistent package/relations/ access (else, relation/absolute_url
+  returns annotations/id, which is misleading) -> half DONE (absolute_url fixed)
+
+* Find a meaningful way to concisely display relations and annotations.
+
+* ! Handle unicode correctly and everywhere (GUI, adveneserver, XML,
+  ...) -> half DONE (needs a patch to SimpleTAL)
+
+* Reorganize adveneserver code
+
+* Incorporate EPOZ :
+  * add a config.data['web'] = dir variable -> DONE
+  * Handle the /data URL (picks data in config['web']) -> DONE
+  * Add epoz in config['web'] -> DONE
+  * Add epoz for add-view
+
+* Add a /config directory, holding config values for the user (esp.
+  edit window width and height) and implement PUT method on it
+  through a /options/config dict in TALES -> DONE
+
+* Correct all edit plugins (to correctly update values) -> DONE
+  * Add self.model everywhere
+  * Add self.editlist everywhere, to register edit plugins inside
+    the self edit plugin.  update_value will be called upon these.
+
+* Ref sur zpt: http://www.advogato.org/article/350.html
+
+* Adveneserver: implement PUT (to please epoz) -> DONE
+
+* EPOZ: implement data templates according to the edited element,
+  by hacking around LinkTool
+  For packages
+   annotations (List of annotations)
+   relations   (List of all relations)
+   annotations/i... (Precise annotation)
+   annotations/i.../snapshot_url (Annotation for snapshot)
+   annotations/i.../content/data (Content of annotation)
+   annotations/i.../fragment/formatted/begin (Start time of the annotation)
+
+* EPOZ: implement parent search for defines/repeat -> DONE (TALContext)
+
+* TALES vs XPath: cf http://zope.org/Wikis/zope-xml/XPath (Pt_Xpath)
+   Search TALES in http://lambda.weblogs.com/discuss/msgReader$4575
+http://lists.webarch.co.uk/pipermail/petal/2002-July/000022.html
+http://pywork.sourceforge.net/doc/node9.html
+
+* Mailing-list TAL:
+http://marc.free.net.ph/mindex/zope-zpt@20031122.114501.00000000.html
+
+* Remove gtk dependency from vlclib (so that we can start adveneserver
+without DISPLAY)
+
+* EPOZ: strip http:... prefix from drag and drop results.
+* Create TALContext object: -> DONE
+     Constructor(selNode) : takes a node 
+     get_define(name): get the define for the given name
+     set_define(name, value): set the define
+     list_define(): get the list of defined names
+     get_repeat(name): get the repeat for the given name
+     list_repeat(): get the list of repeat loop items
+     get_content(): get the content
+     set_content(string): set the content
+
+* Ruleset editing (eventgui.py) : give the possibility to edit only a
+subset (according to rule.origin) -> DONE (filter parameter)
+
+* bootstrap.xml : how to use properly ? Can a package exist with no view.
+
+* Once bootstrap.xml works correctly, put it somewhere pertinent and
+use it in the template.xml file
+
+* EPOZ: derive LinkTool into TALContentTool and TALImageTool, to be
+able to define content/replace (just replace with <span/> will be
+simpler) and snapshot integration.
+
+* Ruleset edit : add the possibility to organize the order of rules
+
+* Implement an 'advene browser' à la NextStep file manager -> DONE
+ 
+* browser: focus on the currently selected column -> DONE
+
+* Global methods :
+  * isa : make more robust (work on non-advene elements ? at least, not throw
+    an exception and return 'unknown')
+  * formatted : make more robust
+  * first, last, rest, meta, snapshot_url, view : idem
+  * authorUrl on package ???
+
+* Implement an image-based timestamp chooser (with all_snapshots()) -> almost DONE
+
+* Make some attributes inherited (esp. author for annotations, media for fragments)
+
+* Use popup-menu signal (cf http://cvs.gnome.org/bonsai/cvsblame.cgi?file=gtk%2B%2Fdocs%2Freference%2Fgtk/migrating-checklist.sgml&rev=HEAD&root=/cvs/gnome)
+
+* debian package: fix web/web not in the right directory, default_rules.xml
+
+* Rules: define independant rulesets in packages
+
+* Rule: add an "ViewActivation" event, to define actions to be taken on STBV activation
+
+* Windows: start application
+http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com

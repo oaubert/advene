@@ -1,0 +1,8 @@
+* Structure of the Advene code
+
+** Advene model
+
+- the Advene model is implemented in lib/advene/model. It offers
+  access to the data, supports saving/loading data from xml packages,
+  and deals with TAL/TALES issues.
+
