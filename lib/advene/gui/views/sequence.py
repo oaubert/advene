@@ -41,6 +41,7 @@ class AdveneListModel(gtk.GenericTreeModel):
     COLUMN_DATA=2
     COLUMN_TYPE=3
     COLUMN_ELEMENT=4
+    COLUMN_EDITABLE=5
     
     def __init__(self, elements):
         gtk.GenericTreeModel.__init__(self)
@@ -65,7 +66,7 @@ class AdveneListModel(gtk.GenericTreeModel):
         # Data is stored as:
         # begin, end, content, type, annotation
         types=(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING,
-               gobject.TYPE_STRING, gobject.TYPE_PYOBJECT)
+               gobject.TYPE_STRING, gobject.TYPE_PYOBJECT, gobject.TYPE_BOOLEAN)
         return types[index]
 
     def on_get_path(self, node): # FIXME
@@ -91,6 +92,8 @@ class AdveneListModel(gtk.GenericTreeModel):
             return unicode(node.content.data)
         elif column == self.COLUMN_TYPE:
             return unicode(node.type.title or node.type.id)
+        elif column == self.COLUMN_EDITABLE:
+            return True
         else:
             return node
 
@@ -151,19 +154,27 @@ class SequenceEditor:
         
         # Define the 4 cell renderers
         cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_("Begin"), cell, text=0)
+        column = gtk.TreeViewColumn(_("Begin"), cell,
+                                    text=AdveneListModel.COLUMN_BEGIN,
+                                    editable=AdveneListModel.COLUMN_EDITABLE)
         tree_view.append_column(column)
 
         cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_("End"), cell, text=1)
+        column = gtk.TreeViewColumn(_("End"), cell,
+                                    text=AdveneListModel.COLUMN_END,
+                                    editable=AdveneListModel.COLUMN_EDITABLE)
+
         tree_view.append_column(column)
 
         cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_("Data"), cell, text=2)
+        column = gtk.TreeViewColumn(_("Data"), cell,
+                                    text=AdveneListModel.COLUMN_DATA,
+                                    editable=AdveneListModel.COLUMN_EDITABLE)
         tree_view.append_column(column)
 
         cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_("Type"), cell, text=3)
+        column = gtk.TreeViewColumn(_("Type"), cell,
+                                    text=AdveneListModel.COLUMN_TYPE)
         tree_view.append_column(column)
 
         tree_view.connect("button_press_event", self.tree_view_button_cb)
