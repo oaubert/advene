@@ -117,15 +117,18 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
         return self.getEnd() - self.getBegin()
 
     def __eq__(self, other):
-        if isinstance(other, ByteCountFragment):
+        if type(self) == type(other):
             return self.getBegin() == other.getBegin() \
                    and self.getEnd() == other.getEnd()
+        else:
+            return False
 
     def __contains__(self, other):
-        if isinstance(other, ByteCountFragment):
+        if type(self) == type(other):
             return self.getBegin() <= other.getBegin() \
                    and other.getEnd() <= self.getEnd()
         else:
+            # FIXME: there is a wrong implicit conversion here
             return self.getBegin() <= long(other) <= self.getEnd()
 
     def isBounded(self):
@@ -141,6 +144,7 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
     def clone(self):
         """ Clone this fragment into a new unbounded fragment.
         """
+        # FIXME: badly placed method
         return ByteCountFragment(begin=self.getBegin(), end=self.getEnd())
 
     def _bound(self, element):
@@ -203,7 +207,7 @@ class MillisecondFragment(AbstractNbeFragment):
     #
 
     def __str__(self):
-        """Return a string representation of the ByteCount fragment"""
+        """Return a string representation of the Millisecond fragment"""
         return "Milliseconds (%d,%d)" % (self.getBegin(), self.getEnd())
 
 class __UnknownFragment(AbstractFragment):
