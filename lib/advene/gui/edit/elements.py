@@ -198,7 +198,7 @@ class EditAnnotationPopup (EditElementPopup):
     can_edit = staticmethod (can_edit)
 
     def notify(self, element):
-        self.controller.event_handler.notify("AnnotationEditEnd", annotation=element)
+        self.controller.notify("AnnotationEditEnd", annotation=element)
         return True
     
     def make_widget (self, editable=False):
@@ -244,7 +244,7 @@ class EditRelationPopup (EditElementPopup):
     can_edit = staticmethod (can_edit)
         
     def notify(self, element):
-        self.controller.event_handler.notify("RelationEditEnd", annotation=element)
+        self.controller.notify("RelationEditEnd", relation=element)
         return True
     
     def make_widget (self, editable=False):
