@@ -39,8 +39,10 @@ class PlayerLauncher:
         if config.os == 'win32':
             self.launcher=None
         else:
+            args=[ '--intf', 'corba' ]
+            args.extend(config.player_args)
             self.launcher = spawn.ProcessLauncher (name=config.player['name'],
-                                                   args=config.player_args,
+                                                   args=args,
                                                    path=config.path['vlc'])
         self.orb=None
         self.mc=None
@@ -364,7 +366,7 @@ class Player(object):
             self.current_position_value = 0
 
     def dvd_uri(self, chapter, title):
-        return "dvdsimple:///dev/dvd@%s,%s" % (str(chapter), str(title))
+        return "dvdsimple:///dev/dvd@%s:%s" % (str(chapter), str(title))
     
     def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
