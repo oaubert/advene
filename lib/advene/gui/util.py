@@ -185,6 +185,27 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
     optionmenu.show_all()
     return optionmenu
 
+def get_filename(title="Open a file",
+                 action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                 button=gtk.STOCK_OPEN,
+                 default_dir=None):
+    fs=gtk.FileChooserDialog(title=title,
+                             parent=None,
+                             action=action,
+                             buttons=( button,
+                                       gtk.RESPONSE_OK,
+                                       gtk.STOCK_CANCEL,
+                                       gtk.RESPONSE_CANCEL ))
+    if default_dir:
+        fs.set_current_folder(default_dir)
+    res=fs.run()
+    filename=None
+    if res == gtk.RESPONSE_OK:
+        filename=fs.get_filename()
+    fs.destroy()
+    
+    return filename
+
 class CategorizedSelector:
     """Widget displaying items sorted along categories.
 
