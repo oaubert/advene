@@ -1,7 +1,7 @@
 
 <package xmlns='http://experience.univ-lyon1.fr/advene/ns' xmlns:dc='http://purl.org/dc/elements/1.1/' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:tst='http://experience.univ-lyon1.fr/advene/ns/test' id='test' dc:creator='oaubert' dc:date='2004-01-20'>
   <meta>
-    <title xmlns='http://purl.org/dc/elements/1.1/'>Template package</title>
+    <title xmlns='http://purl.org/dc/elements/1.1/'>Recueil initial</title>
   </meta>
   <imports>
   </imports>
@@ -258,7 +258,7 @@ Content :&lt;br />
 &lt;a title="Editer la vue" tal:attributes="href string:${v/absolute_url}/view/edit-content">Editer&lt;/a>
 &lt;span tal:condition='python: v.match(v.rootPackage)'>
 &lt;span  tal:condition='python:not "ruleset" in v.content.mimetype'>
-| &lt;a title="Édition graphique de la vue" tal:attributes="href string:${v/absolute_url}/view/epoz">Epoz&lt;/a>
+| &lt;a title="Edition graphique de la vue" tal:attributes="href string:${v/absolute_url}/view/epoz">Epoz&lt;/a>
 | &lt;a title="Appliquer la vue sur ownerPackage" tal:attributes="href string:${v/rootPackage/absolute_url}/view/${v/id}">Appliquer&lt;/a> &lt;/span>
 &lt;/span>
 &lt;span  tal:condition='python:"ruleset" in v.content.mimetype'>
