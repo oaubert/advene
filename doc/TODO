@@ -1,6 +1,17 @@
+* Surveiller Europython:
+http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
+
+* UID generator: http://www.alcyone.com/software/uid/
+
+* http://weblex.ens-lsh.fr/projects/xitools/format_xi/
+
+* View: affichage transcription avec mise en valeur des extraits actifs
+
+* Make the request object accessible in AdveneContext
+
 * Move gui.edit.annotation into gui.edit.element.EditAnnotationPopup
 
-* Conditions: implement regexp match
+* Conditions: implement Allen's relations ?
 
 * Envoyer package et infos à Denis pour portage windows
 
@@ -67,6 +78,7 @@ to implement a "Return to last position")
   handle positions in start and stop.
 
 * Update EPOZ code to 1.0.2 / kupu
+http://article.gmane.org/gmane.comp.web.kupu.devel/10
 
 * Windows/gtk has a problem with threads. Solve using the recipe given in:
   http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
@@ -338,3 +350,5 @@ events) -> DONE
 
 * Add a notebook view in the place of the defunct HTML widget -> treeview
 
+
+* Conditions: implement regexp match -> DONE
