@@ -1,30 +1,33 @@
-"""Import external data.
+"""
+Import external data.
+=====================   
 
 Provides a generic framework to import/convert external data.
 
 The general idea is:
-* Create an instance of Importer, called im.
-  If the destination package already exists, call the constructor with
-  package and defaultype named parameters.
 
-* Initialisation:
-  * If the destination package already exists, set the
-    im.package
-    and
-    im.defaultype
-    to appropriate values
-
-  * If you want to create a new package with specific type and schema id, use
-    im.init_package(schemaid=..., annotationtypeid=...)
-
-  * If nothing is given, a default package will be created, with a
-    default schema and annotationtype
-
-* Conversion:
-Call the
-im.process_file(filename)
-which will return the package containing the converted annotations
-
+  - Create an instance of Importer, called im.
+    If the destination package already exists, call the constructor with
+    package and defaultype named parameters.
+  
+  - Initialisation:
+    - If the destination package already exists, set the
+      ``im.package``
+      and
+      ``im.defaultype``
+      to appropriate values
+  
+    - If you want to create a new package with specific type and schema id, use
+      ``im.init_package(schemaid=..., annotationtypeid=...)``
+  
+    - If nothing is given, a default package will be created, with a
+      default schema and annotationtype
+  
+  - Conversion:
+  Call
+  ``im.process_file(filename)``
+  which will return the package containing the converted annotations
+  
 im.statistics hold a dictionary containing the creation statistics.
 """
 
@@ -177,12 +180,13 @@ class GenericImporter(object):
 
         Source is an iterator or a list returning dictionaries.
         The following keys MUST be defined:
-        - begin (in ms)
-        - end or duration (in ms)
-        - content
+          - begin (in ms)
+          - end or duration (in ms)
+          - content
+          
         The following keys are optional:
-        - id
-        - type (which must be a *type*, not a type-id)
+          - id
+          - type (which must be a *type*, not a type-id)
         """
         if self.package is None:
             self.package, self.defaulttype=self.init_package()
