@@ -3,7 +3,6 @@
 # Advene browser, a la NeXT's workspace manager
 
 import sys
-import time
 
 # Advene part
 import advene.core.config as config
@@ -144,7 +143,8 @@ class Browser:
     def __init__(self, package=None):
         self.package=package
         self.path=[package]
-        self.column_width=640 / 4
+        # 640 / 4
+        self.column_width=160
         self.rootcolumn=None
         self.widget=self.build_widget()
 
