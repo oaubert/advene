@@ -36,6 +36,7 @@ import advene.rules.ecaengine
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
+from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.view import View
 from advene.model.fragment import MillisecondFragment
 import advene.model.constants
@@ -57,7 +58,7 @@ from advene.gui.views.history import HistoryNavigation
 import advene.gui.edit.rules
 import advene.gui.edit.dvdselect
 import advene.gui.edit.elements
-import advene.gui.edit.create
+from advene.gui.edit.create import CreateElementPopup
 import advene.gui.evaluator
 from advene.gui.views.singletonpopup import SingletonPopup
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
@@ -329,7 +330,6 @@ class AdveneGUI (Connect):
         # position update and the player reaction.
         # If it is corrected, it should always work because of the
         # snapshot cache in the player. To be tested...
-        # FIXME: notify the History view
         self.controller.update_snapshot(long(position_before))
         self.navigation_history.append(position_before)
         return True
@@ -637,9 +637,9 @@ class AdveneGUI (Connect):
             dialog.destroy()
             if response != gtk.RESPONSE_YES:
                 return True
-            cr = advene.gui.edit.create.CreateElementPopup(type_=View,
-                                                           parent=self.controller.package,
-                                                           controller=self.controller)
+            cr = CreateElementPopup(type_=View,
+                                    parent=self.controller.package,
+                                    controller=self.controller)
             cr.popup()
             return True
         try:
@@ -1026,19 +1026,24 @@ class AdveneGUI (Connect):
 
         Return: the AnnotationType, or None if the action was cancelled.
         """
-        # FIXME: handle create==True case
         at=None
-        
+
         if text is None:
             text=_("Choose an annotation type.")
 
-        ats=self.controller.package.annotationTypes
+        ats=list(self.controller.package.annotationTypes)
+
+        if create:
+            newat=vlclib.TitledElement(value=None,
+                                       title=_("Create a new annotation type"))
+            ats.append(newat)
+            
         if len(ats) == 1:
             at=ats[0]
         elif len(ats) > 1:
             at=advene.gui.util.list_selector(title=_("Choose an annotation type"),
                                              text=text,
-                                             members=self.controller.package.annotationTypes,
+                                             members=ats,
                                              controller=self.controller)
         else:
             dialog = gtk.MessageDialog(
@@ -1049,8 +1054,77 @@ class AdveneGUI (Connect):
             dialog.destroy()
             return None
 
+        if create and at == newat:
+            # Create a new annotation type
+            sc=self.ask_for_schema(text=_("Select the schema where you want to\ncreate the new annotation type."), create=True)
+            if sc is None:
+                return None
+
+            cr=CreateElementPopup(type_=AnnotationType,
+                                  parent=sc,
+                                  controller=self.controller)
+            at=cr.popup(modal=True)
+            if at:
+                try:
+                    pop = advene.gui.edit.elements.get_edit_popup (at, self.controller)
+                except TypeError, e:
+                    print _("Error: unable to find an edit popup for %s:\n%s") % (at, unicode(e))
+                else:
+                    at=pop.edit (modal=True)
+                
         return at
         
+    def ask_for_schema(self, text=None, create=False):
+        """Display a popup asking to choose a schema.
+
+        If create then offer the possibility to create a new one.
+
+        Return: the Schema, or None if the action was cancelled.
+        """
+        schema=None
+
+        if text is None:
+            text=_("Choose a schema.")
+
+        schemas=list(self.controller.package.schemas)
+
+        if create:
+            newschema=vlclib.TitledElement(value=None,
+                                           title=_("Create a new schema"))
+            schemas.append(newschema)
+            
+        if len(schemas) == 1:
+            schema=schemas[0]
+        elif len(schemas) > 1:
+            schema=advene.gui.util.list_selector(title=_("Choose a schema"),
+                                                 text=text,
+                                                 members=schemas,
+                                                 controller=self.controller)
+        else:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("No schema is defined."))
+            response=dialog.run()
+            dialog.destroy()
+            return None
+
+        if create and schema == newschema:
+            cr = CreateElementPopup(type_=Schema,
+                                    parent=self.controller.package,
+                                    controller=self.controller)
+            schema=cr.popup(modal=True)
+            if schema:
+                try:
+                    pop = advene.gui.edit.elements.get_edit_popup (schema,
+                                                                   self.controller)
+                except TypeError, e:
+                    print _("Error: unable to find an edit popup for %s:\n%s") % (schema,
+                                                                                  unicode(e))
+                else:
+                    at=pop.edit (modal=True)
+            
+        return schema
         
     def on_current_type_combo_changed (self, combo=None):
         """Callback used to select the current type of the edited annotation.
