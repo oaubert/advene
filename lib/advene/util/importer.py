@@ -43,6 +43,7 @@ from advene.model.package import Package
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 
+import advene.util.vlclib as vlclib
 import advene.util.handyxml as handyxml
 import xml.dom
 
@@ -123,6 +124,16 @@ class GenericImporter(object):
         self.package.annotations.append(a)
         self.update_statistics('annotation')
 
+    def statistics_formatted(self):
+        """Return a string representation of the statistics."""
+        res=[]
+        kl=i.statistics.keys()
+        kl.sort()
+        for k in kl:
+            v=i.statistics[k]
+            res.append("\t%s" % vlclib.format_element_name(v, k))
+        return "\n".join(res)
+    
     def init_package(self,
                      filename=None,
                      annotationtypeid='imported-type',
@@ -364,7 +375,7 @@ class ChaplinImporter(GenericImporter):
 
     def process_file(self, filename):
         if filename != 'chaplin':
-            pass
+            return None
         f=os.popen(self.command, "r")
         p, at=self.init_package(schemaid='dvd',
                                   annotationtypeid='chapter')
@@ -478,7 +489,8 @@ class ElanImporter(GenericImporter):
 
                 d['type']=self.atypes[tid]
                 #d['type']=self.atypes[tier.TIER_ID.replace(' ','_')]
-                
+
+                #print "Creating " + al.ANNOTATION_ID
                 if hasattr(an, 'ALIGNABLE_ANNOTATION'):
                     # Annotation on a timeline
                     al=an.ALIGNABLE_ANNOTATION[0]
