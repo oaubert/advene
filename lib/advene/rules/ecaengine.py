@@ -190,12 +190,12 @@ class ECAEngine:
         for i in self.scheduler.queue:
             self.scheduler.cancel(i[0])
  
-    def build_context(self, event, kw):
+    def build_context(self, event, **kw):
         """Build an AdveneContext.
 
         @param event: the event name
         @type event: string
-        @param kw: the parameters
+        @param kw: additional parameters
         @type kw: dict
         @return: the built context
         @rtype: AdveneContext
@@ -291,7 +291,7 @@ class ECAEngine:
         @type **kw: depending on the context
         """
         #print "notify %s for %s" % (event_name, str(kw))
-        context=self.build_context(event_name, kw)
+        context=self.build_context(event_name, **kw)
         try:
             a=self.ruledict[event_name]
         except KeyError:
