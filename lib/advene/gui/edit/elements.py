@@ -92,20 +92,29 @@ class EditElementPopup (object):
         for f in self.forms:
             f.update_element ()
         self.window.destroy ()
+
+        # The children classes can define a notify method, which will
+        # be called upon modification of the element, in order to
+        # notify the system of the modification
+        try:
+            self.notify(self.element)
+        except AttributeError:
+            pass
+        
         if callback is not None:
             callback (element=self.element)
-        return gtk.TRUE
+        return True
 
     def close_cb (self, button=None, data=None):
         """Method called when closing a form."""
         self.window.destroy ()
-        return gtk.TRUE
+        return True
 
     def key_pressed_cb (self, button=None, event=None):
         if self.key_cb.has_key (event.keyval):
             return self.key_cb[event.keyval] (button, event)
         else:
-            return gtk.FALSE
+            return False
 
     def get_title (self):
         """Return the element title."""
@@ -142,7 +151,7 @@ class EditElementPopup (object):
         b.connect ("clicked", lambda w: self.window.destroy ())
         hbox.add (b)
 
-        self.vbox.pack_start (hbox, expand=gtk.FALSE)
+        self.vbox.pack_start (hbox, expand=False)
         self.window.set_title (_("Edit %s") % self.get_title())
         self.window.show_all ()
 
@@ -159,7 +168,7 @@ class EditElementPopup (object):
         b.connect ("clicked", lambda w: self.window.destroy ())
         hbox.add (b)
 
-        self.vbox.pack_start (hbox, expand=gtk.FALSE)
+        self.vbox.pack_start (hbox, expand=False)
 
         self.window.set_title (_("Display %s") % self.get_title())
         self.window.show_all ()
@@ -187,7 +196,11 @@ class EditAnnotationPopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, Annotation)
     can_edit = staticmethod (can_edit)
-        
+
+    def notify(self, element):
+        self.controller.event_handler.notify("AnnotationEditEnd", annotation=element)
+        return True
+    
     def make_widget (self, editable=False):
         vbox = gtk.VBox ()
 
@@ -203,7 +216,7 @@ class EditAnnotationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (f.get_view (), expand=gtk.FALSE)
+        vbox.pack_start (f.get_view (), expand=False)
 
         # Fragment data
         f = self.make_registered_form (element=self.element.fragment,
@@ -214,14 +227,14 @@ class EditAnnotationPopup (EditElementPopup):
                                        labels={'begin': _('Begin'),
                                                'end': _('End')}
                                        )
-        vbox.pack_start (f.get_view (), expand=gtk.FALSE)
+        vbox.pack_start (f.get_view (), expand=False)
 
         # Annotation content
         f = EditTextForm (self.element.content, 'data')
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
-        vbox.pack_start(self.framed(t, _("Content")), expand=gtk.TRUE)
+        vbox.pack_start(self.framed(t, _("Content")), expand=True)
 
         return vbox
 
@@ -230,6 +243,10 @@ class EditRelationPopup (EditElementPopup):
         return isinstance (el, Relation)
     can_edit = staticmethod (can_edit)
         
+    def notify(self, element):
+        self.controller.event_handler.notify("RelationEditEnd", annotation=element)
+        return True
+    
     def make_widget (self, editable=False):
         vbox = gtk.VBox ()
 
@@ -245,7 +262,7 @@ class EditRelationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (f.get_view (), expand=gtk.FALSE)
+        vbox.pack_start (f.get_view (), expand=False)
 
         def edit_popup(button, element):
             try:
@@ -272,7 +289,7 @@ class EditRelationPopup (EditElementPopup):
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
-        vbox.pack_start(self.framed(t, _("Content")), expand=gtk.TRUE)
+        vbox.pack_start(self.framed(t, _("Content")), expand=True)
 
         return vbox
 
@@ -294,7 +311,7 @@ class EditViewPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (f.get_view (), expand=gtk.FALSE)
+        vbox.pack_start (f.get_view (), expand=False)
 
         # matchFilter
         f = self.make_registered_form (element=self.element.matchFilter,
@@ -305,7 +322,7 @@ class EditViewPopup (EditElementPopup):
                                                'type':  _('Type')}
                                        )
         vbox.pack_start (self.framed(f.get_view (), _("Match Filter")),
-                         expand=gtk.FALSE)
+                         expand=False)
 
         # View content
         # FIXME: we should use a generic mimetype plugin detection
@@ -317,7 +334,7 @@ class EditViewPopup (EditElementPopup):
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
-        vbox.pack_start (self.framed(t, _("Content")), expand=gtk.TRUE)
+        vbox.pack_start (self.framed(t, _("Content")), expand=True)
 
         return vbox
 
@@ -650,7 +667,7 @@ class EditAttributesForm (EditForm):
                                     text=self.COLUMN_VALUE,
                                     editable=self.COLUMN_EDITABLE,
                                     weight=self.COLUMN_WEIGHT)
-        column.set_clickable(gtk.FALSE)
+        column.set_clickable(False)
         treeview.append_column(column)
 
         weight = {False: pango.WEIGHT_BOLD,
@@ -672,7 +689,7 @@ class EditAttributesForm (EditForm):
                       self.COLUMN_WEIGHT, weight[editable])
 
         # Tweak the display:
-        treeview.set_headers_visible (gtk.FALSE)
+        treeview.set_headers_visible (False)
         treeview.set_border_width (1)
         self.view = treeview
         return treeview
@@ -692,12 +709,12 @@ if __name__ == "__main__":
             # The Control-key is held. Special actions :
             if event.keyval == gtk.keysyms.q:
                 gtk.main_quit ()
-                return gtk.TRUE
+                return True
 
     def update_cb (win, form):
         form.update_element()
         win.get_toplevel().destroy()
-        return gtk.TRUE
+        return True
     
     window.connect ("key_press_event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())
@@ -719,7 +736,7 @@ if __name__ == "__main__":
     b = gtk.Button (stock=gtk.STOCK_OK)
     b.connect ("clicked", update_cb, form)
     hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=gtk.FALSE)
+    vbox.pack_start (hbox, expand=False)
     hbox.add (b)
 
     window.show_all()
