@@ -210,6 +210,18 @@ class TreeViewImporter:
                                                  self.controller)
                    for c in model[path].iterchildren():
                        c[self.COLUMN_IMPORTED] = True
+               elif element.viewableClass == 'schema':
+                   vlclib.import_element(self.controller.package,
+                                         element,
+                                         self.controller)
+                   # The user selected a schema, it automatically
+                   # imports its types
+                   for c in model[path].iterchildren():
+                       c[self.COLUMN_IMPORTED] = True
+               elif element.viewableClass in ('annotation-type',
+                                              'relation-type'):
+                   # We should import the parent schema
+                   print "Annotation types and relation types are not directly importable.\nImport their schema instead."
                else:
                    vlclib.import_element(self.controller.package,
                                          element,
@@ -223,6 +235,11 @@ class TreeViewImporter:
                    vlclib.unimport_element(self.controller.package,
                                            element,
                                            self.controller)
+                   if element.viewableClass == 'schema':
+                       # The user selected a schema, 
+                       # show the types as non-imported
+                       for c in model[path].iterchildren():
+                           c[self.COLUMN_IMPORTED] = False
                elif element.viewableClass == 'list':
                    # The user selected a whole category.
                    for e in element:
@@ -232,10 +249,13 @@ class TreeViewImporter:
                                                    self.controller)
                    for c in model[path].iterchildren():
                        c[self.COLUMN_IMPORTED] = False
+               elif element.viewableClass in ('annotation-type',
+                                              'relation-type'):
+                   # We should import the parent schema
+                   print "Annotation types and relation types are not directly importable.\nImport their schema instead."
                else:
                    # Package
                    print "FIXME"
-                   pass
 
         return False
 
