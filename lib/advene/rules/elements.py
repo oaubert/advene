@@ -526,6 +526,46 @@ class RuleSet(list):
             raise Exception("Syntax error in file %s:\n%s" % (filename, l))
         f.close()
 
+class Query:
+    """Simple Query component.
+
+    This query component returns a set of data matching a condition
+    from a given source. If the source is not a list, it will return a
+    boolean.
+    
+    @ivar source: the source of the data
+    @type source: a TALES expression
+    @ivar condition: the matching condition
+    @type condition: a Condition
+    @ivar controller: the controller
+    """
+    def __init__(self, source=None, condition=None, controller=None):
+        self.source=source
+        self.condition=condition
+        self.controller=controller
+
+    def execute(self, context):
+        """Execute the query.
+
+        @return: the list of elements matching the query or a boolean
+        """
+        s=context.evaluateValue(self.source)
+        # Temporary evaluation context
+        c=self.controller.event_handler.build_context('QueryEvent',
+                                                      here=None)
+        if hasattr(s, '__getitem__'):
+            # It is either a real list or a Bundle
+            # (for isinstance(someBundle, list) == False !
+            r=[]
+            for e in s:
+                c.addGlobal('here' e)
+                if self.condition.match(c):
+                    r.append(e)
+        else:
+            # What do we do in this case ?
+            c.addGlobal('here', s)
+            return self.condition.match(c)
+
 class RegisteredAction:
     """Registered action.
 
