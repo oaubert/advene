@@ -126,7 +126,9 @@ class TreeViewImporter:
 
     def build_widget(self):
         vbox=gtk.VBox()
-        
+
+        # FIXME: implement package removal from the list
+        # FIXME: implement "import all elements" actions (popup menu?)
         self.store=self.build_liststore()
 
         treeview=gtk.TreeView(model=self.store)
@@ -164,7 +166,7 @@ class Importer:
     def build_widget(self):
         vbox=gtk.VBox()
 
-        vbox.pack_start(gtk.Label("Elements imported from %s" % self.sourcepackage.uri),
+        vbox.pack_start(gtk.Label("Elements imported into %s" % self.controller.package.title),
                         expand=False)
 
         scroll_win = gtk.ScrolledWindow ()
@@ -173,7 +175,8 @@ class Importer:
         
         ti=TreeViewImporter(controller=self.controller)
         scroll_win.add_with_viewport(ti.widget)
-        
+
+        # FIXME: add a button to add a new package
         return vbox
 
     def popup(self):
