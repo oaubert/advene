@@ -1338,11 +1338,11 @@ class AdveneGUI (Connect):
         """View mediainformation."""
         self.controller.position_update ()
         self.log (_("**** Media information ****"))
-        self.log (_("Cached duration   : %d") % self.controller.cached_duration)
+        self.log (_("Cached duration   : %s") % vlclib.format_time(self.controller.cached_duration))
         if self.controller.player.is_active():
             self.log (_("Current playlist : %s") % str(self.controller.player.playlist_get_list ()))
-            self.log (_("Current position : %d") % self.controller.player.current_position_value)
-            self.log (_("Duration         : %d") % self.controller.player.stream_duration)
+            self.log (_("Current position : %s") % vlclib.format_time(self.controller.player.current_position_value))
+            self.log (_("Duration         : %s") % vlclib.format_time(self.controller.player.stream_duration))
             self.log (_("Status           : %s") % repr(self.controller.player.status))
         else:
             self.log (_("Player not active."))
