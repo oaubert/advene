@@ -42,8 +42,15 @@ class Player:
     EndStatus=5
     UndefinedStatus=6
 
+    PositionKeyNotSupported=Exception()
+    PositionOriginNotSupported=Exception()
+    InvalidPosition=Exception()
+    PlaylistException=Exception()
+    InternalException=Exception()
+
     def __init__(self):
         self.playlist=[]
+        self.status=Player.UndefinedStatus
         self.position_update()
         pass
 
@@ -60,15 +67,25 @@ class Player:
     
     def start(self, position):
         self.log("start %s" % str(position))
+        self.status=Player.PlayingStatus
 
     def pause(self, position): 
         self.log("pause %s" % str(position))
+        if self.status == Player.PlayingStatus:
+            self.status=Player.PauseStatus
+        else:
+            self.status=Player.PlayingStatus
 
     def resume(self, position):
         self.log("resume %s" % str(position))
+        if self.status == Player.PlayingStatus:
+            self.status=Player.PauseStatus
+        else:
+            self.status=Player.PlayingStatus
 
     def stop(self, position): 
         self.log("stop %s" % str(position))
+        self.status=Player.UndefinedStatus
 
     def exit(self):
         self.log("exit")
@@ -100,7 +117,7 @@ class Player:
             s.url=self.playlist[0]
         s.length=0
         s.position=0
-        s.streamstatus=Player.UndefinedStatus
+        s.streamstatus=self.status
         return s
 
     def sound_get_volume(self):
@@ -136,7 +153,7 @@ class Player:
         @param position: the position
         @type position: long
         """
-        print "vlchttp update_status %s" % status
+        print "dummy update_status %s" % status
         
         if status == "start" or status == "set":
             if position is None:
@@ -167,7 +184,7 @@ class Player:
             elif status == "" or status == None:
                 pass
             else:
-                print "******* Error : unknown status %s in vlchttp" % status
+                print "******* Error : unknown status %s in dummy player" % status
         self.position_update ()
 
     def is_active(self):
