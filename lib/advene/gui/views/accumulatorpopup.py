@@ -7,6 +7,7 @@ import time
 import gtk
 import gobject
 import pango
+#from threading import Lock
 
 from gettext import gettext as _
 
@@ -14,10 +15,24 @@ import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.popup
 
+class DummyLock:
+    def __init__(self):
+        self.count=0
+        
+    def acquire(self):
+        #print "acquire %d" % self.count
+        self.count += 1
+        return True
+
+    def release(self):
+        #print "release %d" % self.count
+        self.count -= 1
+        return True
+    
 class AccumulatorPopup:
     """View displaying a limited number of popups.
     """
-    def __init__ (self, size=4, controller=None, autohide=False, container=None):
+    def __init__ (self, size=3, controller=None, autohide=False, container=None):
         self.size=size
         self.controller=controller
         self.container=container
@@ -29,6 +44,8 @@ class AccumulatorPopup:
 
         # List of tuples (widget, hidetime, frame)
         self.widgets=[]
+        # Lock on self.widgets
+        self.lock=DummyLock()
         
         self.window=self.build_widget()
 
@@ -59,10 +76,12 @@ class AccumulatorPopup:
         f.set_label_widget(b)
         f.add(widget)
 
+        self.lock.acquire()
         for t in self.widgets:
             self.set_color(t[2].get_label_widget(), self.old_color)
         self.widgets.append( (widget, hidetime, f) )
         self.widgets.sort(lambda a,b: cmp(a[1],b[1]))
+        self.lock.release()
         self.hbox.pack_start(f, expand=False)
 
         f.show_all()
@@ -84,15 +103,19 @@ class AccumulatorPopup:
     
     def undisplay(self, widget=None):
         # Find the associated frame
+        self.lock.acquire()
+        
         frames=[ t for t in self.widgets if t[0] == widget ]
         if not frames:
             return True
+        if len(frames) > 1:
+            print "Inconsistency in accumulatorpopup"
+        t=frames[0]
+        self.widgets.remove(t)
+        self.lock.release()
         
         # We found at least one (and hopefully only one) matching record
         t[2].destroy()
-
-        # Regenerate the widgets list
-        self.widgets = [ t for t in self.widgets if t[0] != widget ]        
         if not self.widgets and self.autohide:
             self.window.hide()
         return True
@@ -112,9 +135,11 @@ class AccumulatorPopup:
         # in a first approximation, update_position will itself
         # quietly loop
         if self.widgets:
+            self.lock.acquire()
             t=self.widgets[0][1]
             if t is not None and time.time() >= t:
                 self.undisplay(self.widgets[0][0])
+            self.lock.release()
         return True
     
     def build_widget(self):
