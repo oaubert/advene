@@ -1,11 +1,14 @@
-Package: advene
-Version: 0.3
+Source: advene
+Maintainer: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.0
 Section: graphics
 Priority: optional
+
+Package: advene
 Architecture: i386
-Depends: python (>=2.3), python-gtk2 (>=2.0), python-glade2 (>=2.0), python-pyorbit (>=2.0), vlc (>= 0.7.0), vlc-plugin-corba, advenelib (>=0.3)
+Depends: python (>=2.3), python-gtk2 (>=2.0), python-glade2 (>=2.0), python-pyorbit (>=2.0), vlc (>= 0.7.0), vlc-plugin-corba
 Recommends: www-browser
-Maintainer: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>
 Description: Annotate DVDs, Exchange on the Net.
  The Advene (Annotate DVd, Exchange on the NEt) project is aimed
  towards communities exchanging discourses (analysis, studies) about
