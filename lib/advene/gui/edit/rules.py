@@ -571,9 +571,9 @@ class EditCondition(EditGeneric):
         if self.editable:
             c=self.model
             c.operator=self.current_operator
-            c.lhs=self.lhs.entry.get_text()
+            c.lhs=self.lhs.get_text()
             if c.operator in Condition.binary_operators:
-                c.rhs=self.rhs.entry.get_text()
+                c.rhs=self.rhs.get_text()
         return True
 
     def update_widget(self):
@@ -600,14 +600,14 @@ class EditCondition(EditGeneric):
     def build_widget(self):
         hbox=gtk.HBox()
 
-        self.lhs=gtk.Combo()
-        self.lhs.entry.set_text(self.model.lhs or "")
-        self.lhs.set_sensitive(self.editable)
+        self.lhs=gtk.Entry()
+        self.lhs.set_text(self.model.lhs or "")
+        self.lhs.set_editable(self.editable)
         self.lhs.show()
 
-        self.rhs=gtk.Combo()
-        self.rhs.entry.set_text(self.model.rhs or "")
-        self.rhs.set_sensitive(self.editable)
+        self.rhs=gtk.Entry()
+        self.rhs.set_text(self.model.rhs or "")
+        self.rhs.set_editable(self.editable)
         self.rhs.hide()
 
         operators={}
