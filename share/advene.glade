@@ -93,7 +93,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image15">
+			<widget class="GtkImage" id="image16">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -115,7 +115,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image16">
+			<widget class="GtkImage" id="image17">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -125,6 +125,16 @@
 			  <property name="ypad">0</property>
 			</widget>
 		      </child>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="import_transcription1">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Import annotations from a timestamped transcription</property>
+		      <property name="label" translatable="yes">Import _Transcription</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_import_transcription1_activate" last_modification_time="Fri, 11 Feb 2005 15:42:43 GMT"/>
 		    </widget>
 		  </child>
 
