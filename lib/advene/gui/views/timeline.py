@@ -255,8 +255,14 @@ class TimeLine:
     def update_annotation (self, element=None):
         """Update an annotation's representation."""
         bs = self.get_widget_for_annotation (element)
-        for b in bs:
-            self.update_button (b)
+        if bs:
+            for b in bs:
+                self.update_button (b)
+        else:
+            # If it does not exist yet, we should create it if it is now in self.list
+            if element in self.list:
+                self.create_annotation_widget(element)
+        return True
         
     def annotation_cb (self, widget, ann):
         # This method can be overriden by the Timeline parent in order
@@ -313,8 +319,9 @@ class TimeLine:
         return gtk.TRUE
 
     def create_relation_popup(self, source, dest):
-        """Create a binary relation between source and dest."""
-        relations=[ t.title for t in self.package.relationTypes ]
+        """Display a popup to create a binary relation between source and dest.
+        """
+        relations=[ t.title for t in source.getRelationsWith(dest) ]
         if not relations:
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -379,36 +386,43 @@ class TimeLine:
         relation=self.package.createRelation(members=(source, dest), type=t)
         self.package.relations.append(relation)
         print "Relation %s created." % relation
+
+    def create_annotation_widget(self, annotation):
+        u2p = self.unit2pixel
+        b = gtk.Button(annotation.content.data)
+        
+        b.annotation = annotation
+        b.active = False
+        b.connect("clicked", self.annotation_cb, annotation)
+        b.set_size_request(u2p(annotation.fragment.duration),
+                           self.button_height)
+        # Get the default height for the annotation type. If not defined,
+        # set it to the following value.
+        pos = self.layer_position.setdefault (annotation.type,
+                                              max(self.layer_position.values() or (1,)) + self.button_height + 10)
+
+        self.widget.put(b, u2p(annotation.fragment.begin), pos)
+        tip = _("%s\nBegin: %s\tEnd: %s") % (annotation.content.data,
+                                             self.format_time(annotation.fragment.begin),
+                                             self.format_time(annotation.fragment.end))
+        self.tooltips.set_tip(b, tip)
+        # The button can generate drags
+        b.connect("drag_data_get", self.drag_sent)
+        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.annotation_drag_type, gtk.gdk.ACTION_LINK)
+        # The button can receive drops (to create relations)
+        b.connect("drag_data_received", self.drag_received)
+        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.annotation_drag_type, gtk.gdk.ACTION_LINK)
+        b.show()
+        return b
     
     def populate (self):
         u2p = self.unit2pixel
         for annotation in self.list:
-            b = gtk.Button(annotation.content.data)
-            
-            b.annotation = annotation
-            b.active = False
-            b.connect("clicked", self.annotation_cb, annotation)
-            b.set_size_request(u2p(annotation.fragment.duration),
-                               self.button_height)
-            pos = self.layer_position.setdefault (annotation.type,
-                                                  max(self.layer_position.values() or (1,)) + self.button_height + 10)
-
-            self.widget.put(b, u2p(annotation.fragment.begin), pos)
-            tip = _("%s\nBegin: %s\tEnd: %s") % (annotation.content.data,
-                                                 self.format_time(annotation.fragment.begin),
-                                                 self.format_time(annotation.fragment.end))
-            self.tooltips.set_tip(b, tip)
-            # The button can generate drags
-            b.connect("drag_data_get", self.drag_sent)
-            b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                              config.data.annotation_drag_type, gtk.gdk.ACTION_LINK)
-            # The button can receive drops (to create relations)
-            b.connect("drag_data_received", self.drag_received)
-            b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                            gtk.DEST_DEFAULT_HIGHLIGHT |
-                            gtk.DEST_DEFAULT_ALL,
-                            config.data.annotation_drag_type, gtk.gdk.ACTION_LINK)
-
+            self.create_annotation_widget(annotation)
 
         self.widget.set_size (u2p (self.maximum - self.minimum),
                               max(self.layer_position.values() or (0,))
