@@ -56,7 +56,7 @@ msgstr "Editer les elements importes d'autres recueils"
 
 #: ../share/advene.glade:230
 msgid "Package _Imports"
-msgstr "Éléments _Importes"
+msgstr "Elements _Importes"
 
 #: ../share/advene.glade:239
 msgid "Edit the default ruleset"
@@ -128,7 +128,7 @@ msgstr "Naviguer dans les donnees du recueil"
 
 #: ../share/advene.glade:332
 msgid "_Package Browser"
-msgstr "_Navigateur du recueil"
+msgstr "Navigateur du recueil"
 
 #: ../share/advene.glade:341
 msgid "_Start Web Browser"
