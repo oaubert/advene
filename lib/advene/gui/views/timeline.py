@@ -284,7 +284,7 @@ class TimeLine:
     def update_model(self, package):
         """Update the whole model.
         """
-        self.list=package.annotations
+        #self.list=package.annotations
         self.layer_position.clear()
         self.minimum = 0
         duration = package.getMetaData (config.data.namespace, "duration")
@@ -968,10 +968,10 @@ class TimeLine:
 
         radiogroup_ref=None
         tb_list = (
-            (_("No Display"), _("Do not display relations"),
-             gtk.STOCK_REMOVE, set_over_mode, False),
             (_("Relations"), _("Display relations"),
              gtk.STOCK_REDO, set_over_mode, True),
+            (_("No Display"), _("Do not display relations"),
+             gtk.STOCK_REMOVE, set_over_mode, False),
             )
 
         for text, tooltip, icon, callback, arg in tb_list:
