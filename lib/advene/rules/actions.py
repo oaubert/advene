@@ -158,6 +158,15 @@ class DefaultActionsRepository:
             )
                  )
 
+        l.append(RegisteredAction(
+            name="OpenURL",
+            method=self.OpenURL,
+            description=_("Open a URL in the web browser"),
+            parameters={'url': _("URL")},
+            category='gui',
+            )
+                 )
+
         return l
 
     def Message(self, context, parameters):
@@ -331,7 +340,7 @@ class DefaultActionsRepository:
     def ActivateSTBV (self, context, parameters):
         """Activate the given STBV."""
         stbvid=self.parse_parameter(context, parameters, 'viewid', None)
-        if stbvid is None:
+        if not stbvid:
             return True
         stbv=context.evaluateValue('package/views/%s' % stbvid)
         if stbv is not None and stbv.content.data == 'application/x-advene-ruleset':
@@ -370,3 +379,12 @@ class DefaultActionsRepository:
                                                     condition=cond,
                                                     method=self.SoundOn)
         return True
+
+    def OpenURL (self, context, parameters):
+        """Open the given URL in the web browser."""
+        url=self.parse_parameter(context, parameters, 'url', None)
+        if not url:
+            return True
+        self.controller.open_url(url)
+        return True
+
