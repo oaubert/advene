@@ -404,7 +404,7 @@ class AdveneController:
         """Save a package.
 
         @param as: the URI of the package
-        @type uri: string
+        @type as: string
         """
         if as is None:
             as=self.package.uri
@@ -506,7 +506,7 @@ class AdveneController:
         source.handle_request ()
         return True
         
-    def log (self, msg):
+    def log (self, msg, level=None):
         """Add a new log message.
 
         Should be overriden by the application (GUI for instance)
@@ -514,7 +514,11 @@ class AdveneController:
         @param msg: the message
         @type msg: string
         """
-        print msg
+        if self.gui:
+            self.gui.log(msg, level)
+        else:
+            # FIXME: handle the level parameter
+            print msg
         return
 
     def message_log (self, context, parameters):
@@ -522,8 +526,10 @@ class AdveneController:
 
         Essentialy a wrapper for the X{log} method.
 
-        @param message: the message to display
-        @type message: string
+        @param context: the action context
+        @type context: TALContext
+        @param parameters: the parameters (should have a 'message' one)
+        @type parameters: dict
         """
         if parameters.has_key('message'):
             message=context.evaluateValue(parameters['message'])
