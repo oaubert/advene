@@ -1,13 +1,27 @@
+* Make the main buttonbox of the main window a toolbar
+
+* Add a file operations toolbar (new/open/save, import, etc)
+
+* views should return a TypedString(unicode) with a contenttype or mimetype attribute -> DONE
+
+* player: implement dvd_uri(chapter, title, uri?) that returns a
+valid DVD uri for the given player
+
+* To build vlcmodule: 
+gcc -pthread -shared build/temp.linux-i686-2.3/vlcmodule.o build/temp.linux-i686-2.3/mediacontrol-init.o build/temp.linux-i686-2.3/mediacontrol-core.o /usr/lib/libtheora.a /usr/local/lib/libx264.a -L/usr/lib/vlc -L/usr/lib -lvlc -lrt -ldl -lpthread -lm -li420_rgb_mmx -li420_yuy2_mmx -li420_ymga_mmx -li422_yuy2_mmx -lfaad -lavcodec -lavformat -lhal -ldbus-1 -ltheora -lx264 -lfaad -lffmpeg -lpostproc -lmemcpymmx -lmemcpymmxext -lmemcpy3dn /usr/local/lib/libfaad.a /usr/lib/libtheora.a /usr/local/lib/libx264.a -lavcodec -o build/lib.linux-i686-2.3/vlc.so -fpic -fPIC
+
+* Fonctionnalité de sauvegarde automatique reguliere en cas de plantage
+
+* Use transcode to extract screenshots (cf dvd:rip). Command line:
+transcode -H 10 -z -k -o snapshot -y jpg,null -i /dev/dvd -x dvd,null -T 21,1 -c 00:00:10.0-00:00:10.5
+
+* Put an example package on the web site and a video of an example interaction
+
+* web site: list current features (import, etc)
+
 * Add new action: open new ad-hoc view
 
 * Save ad-hoc view parameters as another view
-
-* VLC idea:
-r8623 | zorglub | 2004-09-01 22:02:17 +0200 (Wed, 01 Sep 2004) | 2 lines
-Changed paths:
-   M /trunk/modules/control/rc.c
-Added "is_playing", "get_title", "get_time" and "get_length" to get
-computer-readable output (forthird-party programs)
 
 * In Context (or the GUI), catch AdveneTalesException that happens
 when there is a syntax error in a TALES expression (missing string or
@@ -31,7 +45,7 @@ AdveneException: item Package (english_teacher.xml) has no QName prefix in Packa
 * Model: Implement importElement methods (or at least, document the existing ones and add an importPackage() to be able to specify the package's alias)
 
 * Model: implement relationtype.members R/W (and make that a list of
-AnnotationTypes rather than their ids)
+AnnotationTypes rather than their ids) -> DONE for R/W.
 
 * sound_[sg]et_volume: normalize volume in [0..100]
 
@@ -68,8 +82,6 @@ AnnotationTypes rather than their ids)
 
 * Make the absolute time specification work for display_text (rather
   than relative positions)
-
-* Organize event names and conditions along categories
 
 * UTBV: implement Undo in textview (cf gtksourceview)
 
@@ -131,9 +143,6 @@ annotation, of the same type or not.
 * Treeview: add the elements attributes as annotation/relation children.
 
 * Implement Xine Advene player
-
-* player: implemented dvd_uri(chapter, title) that returns a valid DVD
-uri for the given player
 
 * MediaControl.idl: get_capabilities() returning a list of
   capabilities ("snapshot", "caption", "svg")
@@ -606,3 +615,4 @@ separator, display marks, apply expression (for structured content) -> DONE
 * bootstrap: Implement queries next and next_global that return the next
 annotation of the same type, or global -> DONE
 
+* Organize action names and conditions along categories -> DONE
