@@ -252,6 +252,22 @@ def snapshot_url (target, context):
     return "%s/options/snapshot/%s" % (options['package_url'],
                                        str(begin))
 
+def player_url (target, context):
+    import advene.model.annotation
+    import advene.model.fragment
+    import advene.model.exception
+    
+    begin=""
+    if isinstance(target, advene.model.annotation.Annotation):
+        begin = target.fragment.begin
+    elif isinstance(target, advene.model.fragment.MillisecondFragment):
+        begin = target.begin
+    else:
+        return None
+    
+    #options = context.globals['options'].value()
+    return "/media/play/%s" % str(begin)
+
 def formatted (target, context):
     import advene.model.fragment
     import advene.model.exception
