@@ -1,3 +1,11 @@
+advene (project) unstable; urgency=low
+
+  * Action and Condition selection is now categorized
+  
+  * Implemented (unusable) vlchttp (too slow)
+
+ --
+
 advene (0.11) unstable; urgency=low
 
   * It is possible to save the output of the transcription view
