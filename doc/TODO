@@ -30,6 +30,35 @@ elements suivant id
 
 * Element editing: add description field and edit content-type attribute
 
+* Interface to edit imports
+
+* Implement Xine Advene player
+
+* player: implemented dvd_uri(chapter, title) that returns a valid DVD
+uri for the given player
+
+* Fix bug in queries: the context is not inherited by the query method, so
+  here gets reset to another value
+
+* MediaControl.idl: get_capabilities() returning a list of
+  capabilities ("snapshot", "caption", "svg")
+
+* Clean the mediafile handling. It should be stored in fragments, or
+at least all fragments should be scan upon package loading to
+determine the available stream(s) and propose them to the user.
+
+* Fix slider update (movie duration) 
+
+* Interface with http://www.archive.org/movies/ (XML files)
+
+* VLC: zoom functionality (crop?)
+
+* Architecture generique d'import d'annotations externes (annotations, schemas)
+
+* Convertisseur ELAN (http://www.mpi.nl/tools/elan.html) , Anvil
+
+* Bug: STBV menu not correctly updated
+
 * vlc-plugin-corba: rename MediaControl.so to MediaControl_module.so
 and install it into /usr/lib/orbit-2.0
 
@@ -110,6 +139,8 @@ to implement a "Return to last position")
 
 * Update EPOZ code to 1.0.2 / kupu
 http://article.gmane.org/gmane.comp.web.kupu.devel/10
+Transmit python data to javascript:
+http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/285099
 
 * Windows/gtk has a problem with threads. Solve using the recipe given in:
   http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
@@ -118,6 +149,8 @@ http://article.gmane.org/gmane.comp.web.kupu.devel/10
 * Fix for SVG module :
  - find a way to trigger the svg module rather than the freetype module
  - write an example subtitle file with SVG contents
+
+* Create a simple SVG editor (rectangle and ellipse) and integrate it in Advene
 
 * The view method should return a Content object, so that we can get
  its mimetype. *or* return a specialized class derived from (str,
@@ -398,4 +431,8 @@ events) -> DONE
 * New actions: GotoPopup (display a message and propose to go to another position) and InfoPopup (display information) -> DONE
               
 * In AnnotationTypes edit popup, give access to the "display" meta attribute -> DONE
+
+* When choosing a video file or DVD, update the package mediafile property -> DONE
+
+* New action: DisplayMarker (shape, color, position, duration) -> DONE
 
