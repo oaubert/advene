@@ -822,8 +822,6 @@ class AdveneGUI (Connect):
 
     def on_exit(self, source=None, event=None):
         """Generic exit callback."""
-        self.controller.on_exit()
-
         if self.controller.modified:
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -834,6 +832,7 @@ class AdveneGUI (Connect):
             if response != gtk.RESPONSE_YES:
                 return False
             
+        self.controller.on_exit()
         gtk.main_quit()
         return True
 
@@ -874,6 +873,9 @@ class AdveneGUI (Connect):
             else:
                 # End the annotation. Store it in the annotation list
                 self.annotation.fragment.end = self.controller.player.current_position_value
+                f=self.annotation.fragment
+                if f.end < f.begin:
+                    f.begin, f.end = f.end, f.begin
                 self.controller.package.annotations.append (self.annotation)
                 self.log (_("New annotation: %s") % self.annotation)
                 self.gui.current_annotation.set_text ('['+_('None')+']')
