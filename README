@@ -3,16 +3,17 @@ Advene prototype
 * Requirements:
 
 The only supported player for the moment is VLC through a CORBA
-module. You have to install CORBA support for VLC (see
-http://liris.cnrs.fr/advene/download/) to access movies.
+module or a native VLC plugin. You have to install CORBA support for VLC
+(see http://liris.cnrs.fr/advene/download/) or the python-vlc plugin
+to access movies.
 
 You will need the following python packages :
 
-python-gtk2 (>=2.0)
-python-glade2 (>=2.0)
+python-gtk2 (>=2.4)
+python-glade2 (>=2.4)
 python-pyorbit (>=2.0)
 python-xml (>=0.8.0)
-python-simpletal (>=3.6)
+python-simpletal (>=3.9)
 python-imaging
 
 * Testing
@@ -30,3 +31,5 @@ python setup.py install
 * Documentation
 
 An incomplete user guide is in doc/user.txt
+
+The changelog is in debian/changelog
