@@ -100,7 +100,8 @@ if __name__ == "__main__":
     
     class DummyController:
         def __init__(self):
-            self.player = advene.core.mediacontrol.Player ()
+            f=advene.core.mediacontrol.PlayerFactory()
+            self.player = f.get_player()
             self.player.check_player()
 
     def key_pressed_cb (win, event):
