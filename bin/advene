@@ -43,7 +43,7 @@ if config.data.os == 'win32':
           try:
               try:
                   path, value = _winreg.QueryValueEx(reg, "DllPath")
-              except _winreg.WindowsError:
+              except _winreg.error:
                   pass
               else:
                   return path
