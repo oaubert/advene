@@ -79,6 +79,7 @@ class Config(object):
                 # Movie files search path. _ is the
                 # current package path
                 'moviepath': '_',
+                'locale': '/usr/share/advene/locale',
                 }
         else:
             self.path = {
@@ -99,6 +100,7 @@ class Config(object):
                 # Movie files search path. _ is the
                 # current package path
                 'moviepath': '_',
+                'locale': 'c:\\Program Files\\Advene\\locale',                
                 }
             
         # Web-related preferences
