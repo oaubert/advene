@@ -389,6 +389,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             command = l[0]
             param = l[1:]
+            if query.has_key('stbv'):
+                self.activate_stbvid(query['stbv'])
             if command == 'load':
                 if query.has_key ('filename'):
                     name = urllib.unquote(query['filename'])
@@ -461,9 +463,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         f=f.encode('utf8')
                     self.server.controller.player.playlist_add_item (f)
                     
-                if query.has_key('stbv'):
-                    self.activate_stbvid(query['stbv'])
-
                 if len(param) != 0:
                     # First parameter is the position
                     position = param[0]
@@ -476,11 +475,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.server.update_status ("start", long(position))
                 self.server.update_status ("set", long(position))
                 self.send_no_content()
-            elif command == 'pause':
-                self.server.update_status ("pause")
-                self.send_no_content()
-            elif command == 'stop':
-                self.server.update_status ("stop")
+            elif command in ('pause', 'stop', 'resume'):
+                self.server.update_status (command)
                 self.send_no_content()
             elif command == 'stbv':
                 if len(param) != 0:
