@@ -65,6 +65,14 @@ class TranscriptionEdit:
 
     def build_widget(self):
         vbox = gtk.VBox()
+
+        hb=gtk.HBox()
+        vbox.pack_start(hb, expand=False)
+        
+        if self.controller.gui:
+            toolbar=self.controller.gui.get_player_control_toolbar()
+            hb.add(toolbar)
+
         self.textview = gtk.TextView()
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
