@@ -18,7 +18,6 @@ from gettext import gettext as _
 import advene.gui.edit.elements
 
 import pygtk
-#pygtk.require ('2.0')
 import gtk
 import gobject
 
@@ -305,6 +304,11 @@ class TimeLine:
         menu.popup()
         return True
 
+    def annotation_type_cb (self, widget, anntype):
+        menu=advene.gui.popup.Menu(anntype, controller=self.controller)
+        menu.popup()
+        return True
+
     def dump_adjustment (self):
         a = self.adjustment
         print ("Lower: %.1f\tUpper: %.1f\tValue: %.1f\tPage size: %.1f"
@@ -353,6 +357,29 @@ class TimeLine:
                 self.align_annotations(source, dest, self.drag_mode)
             else:
                 print "Unknown drag mode: %s" % self.drag_mode
+        else:
+            print "Unknown target type for drop: %d" % targetType
+        return True
+
+    def type_drag_received(self, widget, context, x, y, selection, targetType, time):
+        if targetType == config.data.target_type['annotation']:
+            source_uri=selection.data
+            source=self.controller.package.annotations.get(source_uri)
+            dest=widget.annotationtype
+
+            if self.delete_transmuted_toggle.get_active() and source.relations:
+                dialog = gtk.MessageDialog(
+                    None, gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
+                    _("Cannot delete the annotation : it has relations."))
+                dialog.set_position(gtk.WIN_POS_MOUSE)
+                dialog.run()
+                dialog.destroy()
+                return True
+                
+            self.controller.transmute_annotation(source,
+                                                 dest,
+                                                 delete=self.delete_transmuted_toggle.get_active())
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -705,11 +732,22 @@ class TimeLine:
         width=0
         height=0
         for t in self.layer_position.keys():
-            l = gtk.Label (t.title)
-            (w, h) = l.get_layout().get_pixel_size()
-            width = max (width, w)
-            height = max (height, self.layer_position[t] + h)
-            layout.put (l, 0, self.layer_position[t])
+            b=gtk.Button(self.controller.get_title(t))
+            layout.put (b, 0, self.layer_position[t])
+            b.annotationtype=t
+            b.show()
+            b.connect("clicked", self.annotation_type_cb, t)
+            # The button can receive drops (to transmute annotations)
+            b.connect("drag_data_received", self.type_drag_received)
+            b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                            gtk.DEST_DEFAULT_HIGHLIGHT |
+                            gtk.DEST_DEFAULT_ALL,
+                            config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+            
+            a=b.get_allocation()
+            width=max(width, a.width)
+            height=max (height, self.layer_position[t] + a.height)
+
         layout.set_size (width, height)
         return
     
@@ -741,7 +779,7 @@ class TimeLine:
         hpaned.add2 (sw)
 
         (w, h) = self.legend.get_size ()
-        hpaned.set_position (w)
+        hpaned.set_position (min(w, 100))
         vbox.add (hpaned)
         
         #hgrade = stripchart.HGradeZoom()
@@ -788,7 +826,12 @@ class TimeLine:
             
             if radiogroup_ref is None:
                 radiogroup_ref=b
-            
+
+        self.delete_transmuted_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_DELETE)
+        self.delete_transmuted_toggle.set_tooltip(self.tooltips, _("Delete the original transmuted annotation"))
+        self.delete_transmuted_toggle.set_active(False)
+        tb.insert(self.delete_transmuted_toggle, -1)
+        tb.show_all()
         return tb
     
     def popup(self):
