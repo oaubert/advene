@@ -8,6 +8,7 @@ from gettext import gettext as _
 
 import sys
 import time
+import sre
 
 import pygtk
 pygtk.require('2.0')
@@ -115,8 +116,8 @@ class CreateElementPopup(object):
                 else:
                     type_list = self.parent.relationTypes
             elif self.type_ == View:
-                type_list = [ ViewType('text/html', _("HTML template")),
-                              ViewType('application/x-advene-ruleset', _("Dynamic view")) ]
+                type_list = [ ViewType('application/x-advene-ruleset', _("Dynamic view")),
+                              ViewType('text/html', _("HTML template")) ]
             elif self.type_ == Query:
                 type_list = [ ViewType('application/x-advene-simplequery', _("Simple query")) ]
             else:
@@ -153,9 +154,23 @@ class CreateElementPopup(object):
 
     def get_date(self):
         return time.strftime("%F")
+
+    def is_valid_id(self, i):
+        return sre.match('^[a-zA-Z_]+$', i)
     
     def validate_cb(self, button, window):
         id_ = self.id_entry.get_text()
+        # Check validity of id.
+        if not self.is_valid_id(id_):
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
+                _("The identifier %s is not valid.\nIt must be composed of non-accentuated alphabetic characters\nUnderscore is allowed.") % id_)
+            dialog.set_position(gtk.WIN_POS_MOUSE)
+            dialog.run()
+            dialog.destroy()
+            return True
+        
         t = self.chosen_type
 
         if self.type_ == Annotation:
