@@ -150,15 +150,14 @@ class AdveneGUI (Connect):
         self.gui.get_widget('about_web_button').set_label("Advene %s"
                                                           % advene.core.version.version)
 
-        # Define combobox contents
+        # Define combobox cell renderers
         for n in ("stbv_combo", "current_type_combo"):
             combobox=self.gui.get_widget(n)
             cell = gtk.CellRendererText()
             combobox.pack_start(cell, True)
             combobox.add_attribute(cell, 'text', 0)
+            
         self.current_type=None
-        # Populate default STBV and type lists
-        self.update_gui()
   
         # Declaration of the fileselector
         self.gui.fs = gtk.FileSelection ("Select a file")
@@ -201,16 +200,8 @@ class AdveneGUI (Connect):
         # List of active annotation views (timeline, tree, ...)
         self.annotation_views = []
 
-    def update_stbv (self, widget, view):
-        """Callback for the STBV option menu.
-
-        @param widget: the calling widget
-        @type widget: a Gtk widget (OptionMenu)
-        @param view: the selected view
-        @type view: advene.model.view
-        """
-        self.controller.activate_stbv(view)
-        return True
+        # Populate default STBV and type lists
+        self.update_gui()
 
     def annotation_lifecycle(self, context, parameters):
         """Method used to update the active views.
@@ -258,7 +249,8 @@ class AdveneGUI (Connect):
             self.update_stbv_list()
             # Not ideal (we could edit the non-activated view) but it is
             # better for the general case (use of the Edit button)
-            self.controller.activate_stbv(view)
+            if event in ('ViewCreate', 'ViewEditEnd'):
+                self.controller.activate_stbv(view)
 
         return True
 
@@ -322,7 +314,6 @@ class AdveneGUI (Connect):
         return True
 
     def on_view_activation(self, context, parameters):
-        print "on_view_activation %s" % self.controller.current_stbv
         combo = self.gui.get_widget("stbv_combo")
         store = combo.get_model()
         i = store.get_iter_first()
@@ -331,6 +322,7 @@ class AdveneGUI (Connect):
                 combo.set_active_iter(i)
                 return True
             i=store.iter_next(i)
+        
         return True
 
     def updated_position_cb (self, context, parameters):
@@ -343,7 +335,6 @@ class AdveneGUI (Connect):
         # FIXME: notify the History view
         self.controller.update_snapshot(long(position_before))
         self.navigation_history.append(position_before)
-        print "New navigation history: %s" % self.navigation_history
         return True
 
     def main (self, args=None):
@@ -560,76 +551,57 @@ class AdveneGUI (Connect):
             pop.edit ()
         return True
 
-    def update_stbv_model(self, store=None):
-        """Update a TreeModel matching the current STBV list.
+    def generate_list_model(self, elements, active_element):
+        """Update a TreeModel matching the elements list.
 
         Element 0 is the label.
         Element 1 is the element (stbv).
         """
-        if store is None:
-            store=gtk.ListStore(str, object)
-        else:
-            store.clear()
-
-        # Default item
-        active_iter=store.append( (_("None"), None) )
-        for v in self.controller.get_stbv_list():
-            i=store.append( ( v.title or v.id, v ) )
-            if v == self.controller.current_stbv:
-                active_iter=i
-
-        return store, active_iter
-        
-    def update_type_model(self, store=None):
-        """Update a TreeModel matching the current type list.
-
-        Element 0 is the label.
-        Element 1 is the element (stbv).
-        """
-        if store is None:
-            store=gtk.ListStore(str, object)
-        else:
-            store.clear()
-
-        # Default item: if the list is empty
-        if ( (not self.controller.package)
-             or (not self.controller.package.annotationTypes) ):
-            i=store.append( (_("None"), None) )
-            return store, i
-
-        # FIXME: we could sort the annotationTypes list
+        store=gtk.ListStore(str, object)
         active_iter=None
-        for at in self.controller.package.annotationTypes:
-            i=store.append( ( at.title or at.id, at ) )
-            if at == self.current_type:
+        for e in elements:
+            i=store.append( ( vlclib.get_title(self.controller, e), e ) )
+            if e == active_element:
                 active_iter=i
-
         return store, active_iter
-        
+                
     def update_stbv_list (self):
         """Update the STBV list.
         """
         stbv_combo = self.gui.get_widget("stbv_combo")
-        store=stbv_combo.get_model()
-        st, i = self.update_stbv_model(store=store)
-        if store is None:
-            stbv_combo.set_model(st)
+        l=[ None ]
+        l.extend(self.controller.get_stbv_list())
+        st, i = self.generate_list_model(l,
+                                         self.controller.current_stbv)
+        stbv_combo.set_model(st)
+        if i is None:
+            i=st.get_iter_first()
+        # To ensure that the display is updated
+        stbv_combo.set_active(-1)
         stbv_combo.set_active_iter(i)
+        stbv_combo.show_all()
         return True
 
     def update_type_list (self):
         """Update the annotation type list.
         """
         type_combo=self.gui.get_widget ("current_type_combo")
-        store=type_combo.get_model()
-        st, i = self.update_type_model(store=store)
-        if store is None:
-            type_combo.set_model(st)
-        if i is not None:
-            type_combo.set_active_iter(i)
+        if self.controller.package:
+            l=list(self.controller.package.annotationTypes)
+            l.sort(lambda a,b: cmp(a.title, b.title))
         else:
-            # No active type. Select the first one.
-            self.set_current_type(store[0][1])
+            l=[ None ]
+        if self.current_type is None and l:
+            self.current_type=l[0]
+        st, i = self.generate_list_model(l,
+                                         self.current_type)
+        type_combo.set_model(st)
+        if i is None:
+            i=st.get_iter_first()
+        # To ensure that the display is updated
+        type_combo.set_active(-1)        
+        type_combo.set_active_iter(i)
+        type_combo.show_all()
         return True
 
     def update_gui (self):
@@ -664,6 +636,7 @@ class AdveneGUI (Connect):
         self.log (_("Package %s loaded. %d annotations.") % (self.controller.package.uri,
                                                              len(self.controller.package.annotations)))
         self.update_gui()
+        
         # Update the main window title
         self.gui.get_widget ("win").set_title(" - ".join((_("Advene"),
                                                           self.controller.package.title or "No title")))
@@ -1019,14 +992,13 @@ class AdveneGUI (Connect):
         return True
 
     def on_stbv_combo_changed (self, combo=None):
-        """Callback used to select the current type of the edited annotation.
+        """Callback used to select the current stbv.
         """
         i=combo.get_active_iter()
         if i is None:
             return False
         stbv=combo.get_model().get_value(i, 1)
         self.controller.activate_stbv(stbv)
-        #print "Current stbv changed to " + str(stbv)
         return True
 
     def on_exit(self, source=None, event=None):
