@@ -69,7 +69,11 @@ class AnnotationEdit:
         #self.plugin=self.get_plugin_for_annotation(annotation)
         #vbox.pack_start (plugin.get_widget(), expand=gtk.FALSE)
 
-        self.plugin=advene.gui.edit.elements.EditAnnotationPopup(annotation)
+        # FIXME: for the moment, fragment information is displayed in
+        # 2 places (timeadjustments and EditAnnotationPopup. This is
+        # source of a synchronisation problem        
+        self.plugin=advene.gui.edit.elements.EditAnnotationPopup(annotation,
+                                                                 controller=self.controller)
         vbox.pack_start(self.plugin.make_widget(editable=True), expand=gtk.FALSE)
         
         # Button bar
@@ -80,7 +84,7 @@ class AnnotationEdit:
         hbox.add (b)
 
         b = gtk.Button (stock=gtk.STOCK_CANCEL)
-        b.connect ("clicked", lambda w: self.widget.destroy ())
+        b.connect ("clicked", lambda w: self.window.destroy ())
         hbox.add (b)
 
         vbox.pack_start (hbox, expand=gtk.FALSE)
@@ -97,10 +101,10 @@ class AnnotationEdit:
         return gtk.TRUE
 
     def validate_cb(self, widget):
-        # Update the values of the annotation attributes according to the
-        # form data (esp. times)
-        # FIXME: update the timeadjustment values as well
-        # and check that begin < end
+        """Update the values of the annotation attributes.
+        
+        according to the form data (esp. times) """
+        
         if self.begin.value >= self.end.value:
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -109,10 +113,16 @@ class AnnotationEdit:
             dialog.connect("response", lambda w, e: dialog.destroy())
             dialog.show()
             return False
-        self.annotation.fragment.begin=self.begin.value
-        self.annotation.fragment.end=self.end.value 
-        val=self.plugin.validate_cb(widget)
 
+        val=self.plugin.validate_cb(widget)
+        
+        self.annotation.fragment.begin=self.begin.value
+        self.annotation.fragment.end=self.end.value
+        
+        # We do not need to notify here, since the plugin (for the moment) does it
+        # already.
+        # self.controller.notify("AnnotationEditEnd", annotation=self.annotation)
+        
         self.window.destroy()
         return val
         
