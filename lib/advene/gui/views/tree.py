@@ -44,9 +44,7 @@ class AdveneTreeModel(gtk.GenericTreeModel):
         self.childrencache = {}
 
     def remove_element (self, e):
-        """Remove an element from the cache.
-
-        Currently implemented only for Annotations.
+        """Remove an element from the model.
         """
         parent=self.nodeParent(e)
         path=self.on_get_path(e)
@@ -54,6 +52,26 @@ class AdveneTreeModel(gtk.GenericTreeModel):
             self.row_deleted(path)
             #self.clear_cache()
             del (self.childrencache[parent])
+
+    def update_element(self, e):
+        """Update an element.
+
+        This is called when a element has been modified or created.
+        """
+        print "update element %s" % e
+        #self.clear_cache()
+        parent=self.nodeParent(e)
+        try:
+            del (self.childrencache[parent])
+        except KeyError:
+            pass
+        path=self.on_get_path(e)
+        # FIXME: check if the element is new. If yes,
+        # emit row_inserted. Else, emit row_changed.
+        if path is not None:
+            self.row_inserted(path, self.get_iter(path))
+            self.row_changed(path, self.get_iter(path))
+        return
         
     def on_get_flags(self):
         return 0
@@ -413,6 +431,13 @@ class TreeWidget:
             print _("Error: unable to find an edit popup for %s") % node
         return True
 
+    def update_annotation(self, annotation):
+        """Update the annotation.
+        """
+        self.model.update_element(annotation)
+        # FIXME: todo
+        return
+    
     def update_model(self, package):
         """Update the model with a new package."""
         print "update model %s" % str(package)
