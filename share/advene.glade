@@ -637,8 +637,8 @@
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open a tree view</property>
 		      <property name="label" translatable="yes">TreeView</property>
-		      <property name="icon">pixmaps/tree.xpm</property>
 		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/tree.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -655,8 +655,8 @@
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open a timeline view</property>
 		      <property name="label" translatable="yes">Timeline</property>
-		      <property name="icon">pixmaps/timeline.png</property>
 		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/timeline.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -673,8 +673,8 @@
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open a transcription view</property>
 		      <property name="label" translatable="yes">Transcription</property>
-		      <property name="icon">pixmaps/transcription.png</property>
 		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/transcription.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -691,8 +691,8 @@
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open a package browser view</property>
 		      <property name="label" translatable="yes">Explorer</property>
-		      <property name="icon">pixmaps/browser.png</property>
 		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/browser.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -709,8 +709,8 @@
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open the URL stack view</property>
 		      <property name="label" translatable="yes">URL Stack</property>
-		      <property name="icon">pixmaps/url.png</property>
 		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/url.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -727,8 +727,8 @@
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open the webbrowser</property>
 		      <property name="label" translatable="yes">WebBrowser</property>
-		      <property name="icon">pixmaps/web.png</property>
 		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/web.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -747,6 +747,121 @@
 	      <property name="expand">True</property>
 	      <property name="fill">True</property>
 	    </packing>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="padding">0</property>
+	  <property name="expand">False</property>
+	  <property name="fill">True</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkHandleBox" id="handlebox3">
+	  <property name="visible">True</property>
+	  <property name="shadow_type">GTK_SHADOW_OUT</property>
+	  <property name="handle_position">GTK_POS_LEFT</property>
+	  <property name="snap_edge">GTK_POS_TOP</property>
+
+	  <child>
+	    <widget class="GtkToolbar" id="toolbar_fileop">
+	      <property name="visible">True</property>
+	      <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+	      <property name="toolbar_style">GTK_TOOLBAR_ICONS</property>
+	      <property name="tooltips">True</property>
+	      <property name="show_arrow">True</property>
+
+	      <child>
+		<widget class="GtkToolButton" id="toolbutton17">
+		  <property name="visible">True</property>
+		  <property name="stock_id">gtk-new</property>
+		  <property name="visible_horizontal">True</property>
+		  <property name="visible_vertical">True</property>
+		  <property name="is_important">False</property>
+		  <signal name="clicked" handler="on_new1_activate" last_modification_time="Wed, 13 Oct 2004 22:32:44 GMT"/>
+		</widget>
+		<packing>
+		  <property name="expand">False</property>
+		  <property name="homogeneous">True</property>
+		</packing>
+	      </child>
+
+	      <child>
+		<widget class="GtkToolButton" id="toolbutton22">
+		  <property name="visible">True</property>
+		  <property name="stock_id">gtk-open</property>
+		  <property name="visible_horizontal">True</property>
+		  <property name="visible_vertical">True</property>
+		  <property name="is_important">False</property>
+		  <signal name="clicked" handler="on_open1_activate" last_modification_time="Wed, 13 Oct 2004 22:38:39 GMT"/>
+		</widget>
+		<packing>
+		  <property name="expand">False</property>
+		  <property name="homogeneous">True</property>
+		</packing>
+	      </child>
+
+	      <child>
+		<widget class="GtkToolButton" id="toolbutton18">
+		  <property name="visible">True</property>
+		  <property name="stock_id">gtk-save</property>
+		  <property name="visible_horizontal">True</property>
+		  <property name="visible_vertical">True</property>
+		  <property name="is_important">False</property>
+		  <signal name="clicked" handler="on_save1_activate" last_modification_time="Wed, 13 Oct 2004 22:33:04 GMT"/>
+		</widget>
+		<packing>
+		  <property name="expand">False</property>
+		  <property name="homogeneous">True</property>
+		</packing>
+	      </child>
+
+	      <child>
+		<widget class="GtkToolButton" id="toolbutton19">
+		  <property name="visible">True</property>
+		  <property name="stock_id">gtk-save-as</property>
+		  <property name="visible_horizontal">True</property>
+		  <property name="visible_vertical">True</property>
+		  <property name="is_important">False</property>
+		  <signal name="clicked" handler="on_save_as1_activate" last_modification_time="Wed, 13 Oct 2004 22:33:44 GMT"/>
+		</widget>
+		<packing>
+		  <property name="expand">False</property>
+		  <property name="homogeneous">True</property>
+		</packing>
+	      </child>
+
+	      <child>
+		<widget class="GtkToolButton" id="toolbutton21">
+		  <property name="visible">True</property>
+		  <property name="stock_id">gtk-properties</property>
+		  <property name="visible_horizontal">True</property>
+		  <property name="visible_vertical">True</property>
+		  <property name="is_important">False</property>
+		  <signal name="clicked" handler="on_package_import1_activate" last_modification_time="Wed, 13 Oct 2004 22:36:23 GMT"/>
+		</widget>
+		<packing>
+		  <property name="expand">False</property>
+		  <property name="homogeneous">True</property>
+		</packing>
+	      </child>
+
+	      <child>
+		<widget class="GtkToolButton" id="toolbutton20">
+		  <property name="visible">True</property>
+		  <property name="tooltip" translatable="yes">Import external data</property>
+		  <property name="stock_id">gtk-convert</property>
+		  <property name="visible_horizontal">True</property>
+		  <property name="visible_vertical">True</property>
+		  <property name="is_important">False</property>
+		  <signal name="clicked" handler="on_import_file1_activate" last_modification_time="Wed, 13 Oct 2004 22:34:59 GMT"/>
+		</widget>
+		<packing>
+		  <property name="expand">False</property>
+		  <property name="homogeneous">True</property>
+		</packing>
+	      </child>
+	    </widget>
 	  </child>
 	</widget>
 	<packing>
