@@ -30,7 +30,8 @@ import advene.rules.elements
 import advene.rules.ecaengine
 
 from advene.model.package import Package 
-from advene.model.annotation import Annotation
+from advene.model.annotation import Annotation, Relation
+from advene.model.view import View
 from advene.model.fragment import MillisecondFragment
 import advene.model.constants
 import advene.model.tal.context
@@ -47,6 +48,8 @@ import advene.gui.views.browser
 import advene.gui.views.history
 import advene.gui.edit.rules
 import advene.gui.edit.dvdselect
+import advene.gui.edit.elements
+import advene.gui.edit.create
 
 from advene.gui.edit.annotation import AnnotationEdit
 from advene.gui.edit.timeadjustment import TimeAdjustment
@@ -342,6 +345,31 @@ class AdveneGUI (Connect):
         type_combo=self.gui.get_widget ("current_type_combo")
         type_combo.entry.set_text (t.title)
 
+    def on_edit_current_stbv_clicked(self, button):
+        widget = self.gui.get_widget("stbv_combo").get_menu().get_active()
+        stbv=widget.get_data("stbv")
+        if stbv is None:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
+                _("Do you want to create a new dynamic view?"))
+            response=dialog.run()
+            dialog.destroy()
+            if response != gtk.RESPONSE_YES:
+                return True
+            cr = advene.gui.edit.create.CreateElementPopup(type_=View,
+                                                           parent=self.controller.package,
+                                                           controller=self.controller)
+            cr.popup()
+            return True
+        try:
+            pop = advene.gui.edit.elements.get_edit_popup (stbv, self.controller)
+        except TypeError, e:
+            print _("Error: unable to find an edit popup for %s:\n%s") % (stbv, unicode(e))
+        else:
+            pop.edit ()
+        return True
+    
     def update_stbv_menu (self):
         """Update the STBV menu."""
         stbv_menu = self.gui.get_widget("stbv_combo").get_menu()
@@ -350,12 +378,14 @@ class AdveneGUI (Connect):
             stbv_menu.remove(c)
         
         default_item = gtk.MenuItem(_("None"))
+        default_item.set_data("stbv", None)
         default_item.connect("activate", self.update_stbv, None)
         default_item.show()
         stbv_menu.append(default_item)
 
         for v in self.controller.get_stbv_list():
             i = gtk.MenuItem(v.title or v.id)
+            i.set_data("stbv", v)
             i.connect("activate", self.update_stbv, v)
             i.show()
             stbv_menu.append(i)
