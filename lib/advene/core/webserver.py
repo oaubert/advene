@@ -40,6 +40,7 @@ from advene.model.content import Content
 
 import advene.model.tal.context
 import simpletal.simpleTAL
+import simpletal.simpleTALES as simpleTALES
 
 import sys
 import os
@@ -291,14 +292,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write (_("""<h3><a href="/media/snapshot">Access to current packages snapshots</h3>"""))
 
     def activate_stbvid(self, stbvid):
-        stbvlist=[ v
-                   for v in self.server.controller.package.views
-                   if v.id == stbvid ]
-        if len(stbvlist) != 1:
+        stbv=vlclib.get_id(self.server.controller.package.views, stbvid)
+        if stbv is None:
             self.send_error(404, _('Unknown STBV identifier: %s') % stbvid)
             return
-        else:
-            stbv=stbvlist[0]
         self.server.activate_stbv(view=stbv)
         return
 
@@ -830,6 +827,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                                               options=self.default_options(alias))
             context.pushLocals()
             context.setLocal('request', query)
+            context.setLocal('package', self.server.packages[alias])
 
             try:
                 objet = context.evaluateValue (expr)
@@ -939,6 +937,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             context = advene.model.tal.context.AdveneContext (here=self.server.packages[alias],
                                                               options=self.default_options(alias))
+            context.pushLocals()
+            context.setLocal('request', query)
+            context.setLocal('package', self.server.packages[alias])
+            
             try:
                 objet = context.evaluateValue (expr)
             except AdveneException, e:
@@ -1444,6 +1446,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                                           options=self.default_options(alias))
         context.pushLocals()
         context.setLocal('request', query)
+        context.setLocal (u'package', p)        
         # FIXME: the following line is a hack for having qname-keys work
         #        It is a hack because obviously, p is not a "view"
         context.setLocal (u'view', p)
@@ -1537,6 +1540,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                                               options=self.default_options(alias))
             context.pushLocals()
             context.setLocal('request', query)
+            context.setLocal('package', p)
+            # FIXME: should be default view
             context.setLocal(u'view', objet)
             try:
                 self.wfile.write (objet.view (context=context).encode('utf-8'))
@@ -1546,6 +1551,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 <p>Tag name: <strong>%s</strong></p>
                 <p>Error message: <em>%s</em></p>""") % (cgi.escape(e.location),
                                                          e.errorDescription))
+            except simpleTALES.ContextContentException, e:
+                self.wfile.write(_("<h1>Error</h1>"))
+                self.wfile.write(_("""<p>An invalid character is in the Context:</p>
+                <p>Error message: <em>%s</em></p><pre>%s</pre>""")
+                                 % (e.errorDescription, unicode(c).encode(utf-8)))
             except AdveneException, e:
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>There was an error in the TALES expression.</p>
