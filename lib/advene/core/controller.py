@@ -141,6 +141,15 @@ class AdveneController:
 
     def register_gui(self, gui):
         self.gui=gui
+
+    def build_context(self, here=None):
+        return advene.model.tal.context.AdveneContext(here=here,
+                                                      options={
+            u'package_url': u"/packages/advene",
+            u'snapshot': self.imagecache,
+            u'namespace_prefix': config.data.namespace_prefix,
+            u'config': config.data.web,
+            })
         
     def busy_port_info(self):
         """Display the processes using the webserver port.
@@ -465,7 +474,7 @@ class AdveneController:
             for a in self.package.annotations:
                 self.imagecache.init_value (a.fragment.begin)
                 self.imagecache.init_value (a.fragment.end)
-                
+
         # Update the webserver
         if config.data.webserver['mode']:
             self.server.register_package (alias='advene',
