@@ -236,6 +236,45 @@ class LsDVDImporter(GenericImporter):
         self.convert(self.iterator(f))
         return self.package
 
+class ChaplinImporter(GenericImporter):
+    """lsdvd importer.
+    """
+    def __init__(self, **kw):
+        super(ChaplinImporter, self).__init__(**kw)
+        self.command="/usr/bin/chaplin -c"
+        #   chapter 03  begin:    200.200 005005 00:03:20.05
+        self.regexp="^\s*chapter\s*(?P<chapter>\d+)\s*begin:\s*.+(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d\d)"
+        self.encoding='latin1'
+
+    def iterator(self, f):
+        reg=sre.compile(self.regexp)
+        begin=1
+        end=1
+        chapter=None
+        for l in f:
+            l=l.rstrip()
+            l=unicode(l, self.encoding).encode('utf-8')
+            m=reg.search(l)
+            if m is not None:
+                d=m.groupdict()
+                end=1000*(long(d['s'])+60*long(d['m'])+3600*long(d['h']))
+                if chapter is not None:
+                    res={ 'content': "Chapter %s" % chapter,
+                          'begin': begin,
+                          'end': end }
+                    yield res
+                chapter=d['chapter']
+                begin=end
+
+    def process_file(self, filename):
+        if filename != 'chaplin':
+            pass
+        f=os.popen(self.command, "r")
+        if self.package is None:
+            self.create_package()
+        self.convert(self.iterator(f))
+        return self.package
+
 class XiImporter(GenericImporter):
     """Xi importer.
     """
@@ -340,7 +379,15 @@ if __name__ == "__main__":
     fname=sys.argv[1]
     pname=sys.argv[2]
 
-    if fname == 'lsdvd':
+    if fname == 'chaplin':
+        i=ChaplinImporter()
+        p, at=i.create_package(schemaid='dvd',
+                               annotationtypeid='chapter')
+        i.package=p
+        i.defaulttype=at
+        # FIXME: should specify title
+        p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")        
+    elif fname == 'lsdvd':
         i=LsDVDImporter()
         p, at=i.create_package(schemaid='dvd',
                                annotationtypeid='chapter')
