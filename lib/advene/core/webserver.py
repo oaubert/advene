@@ -289,6 +289,18 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             <input type="submit" value="Add">
             </form>"""))
         self.wfile.write (_("""<h3><a href="/media/snapshot">Access to current packages snapshots</h3>"""))
+
+    def activate_stbvid(self, stbvid):
+        stbvlist=[ v
+                   for v in self.server.controller.package.views
+                   if v.id == stbvid ]
+        if len(stbvlist) != 1:
+            self.send_error(404, _('Unknown STBV identifier: %s') % stbvid)
+            return
+        else:
+            stbv=stbvlist[0]
+        self.server.activate_stbv(view=stbv)
+        return
         
     def handle_media (self, l, query):
         """Handles X{/media} access requests.
@@ -349,7 +361,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         The X{/media/play} element
         --------------------------
 
-          The C{/media/play} starts the media player. It can take two
+          The C{/media/play} starts the media player. It can take three
           optional arguments (in the form of URL-options):
 
             - C{filename=...} : if specified, the media player will load the
@@ -357,6 +369,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             - C{position=...} : if specified, the player will start at the
               given position (in ms). Else, it will start
               at the beginning.
+            - C{stbv=...} : the id of a STBV to activate
 
         The X{/media/stop} and X{/media/pause} elements
         -----------------------------------------------
@@ -459,6 +472,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if isinstance(f, unicode):
                         f=f.encode('utf8')
                     self.server.controller.player.playlist_add_item (f)
+                if query.has_key('stbv'):
+                    self.activate_stbvid(query['stbv'])
                 if len(param) != 0:
                     # First parameter is the position
                     position = param[0]                    
@@ -484,17 +499,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     self.send_error (404, _('Malformed request'))
                     return
-                
-                stbvlist=[ v
-                           for v in self.server.controller.package.views
-                           if v.id == stbvid ]
-                if len(stbvlist) != 1:
-                    self.send_error(404, _('Unknown STBV identifier: %s') % stbvid)
-                    return
-                else:
-                    stbv=stbvlist[0]
-
-                self.server.activate_stbv(view=stbv)
+                self.activate_stbvid(stbvid)
                 #self.server.update_status("play", 0)                
                 self.send_no_content()
                     
