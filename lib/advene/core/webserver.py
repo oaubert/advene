@@ -1675,7 +1675,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         if self.controller.player is not None:
             self.controller.player.update_status(status, position)
         return True
-
+    
     # End of controller methods
     
     def register_package (self, alias, package, imagecache):
@@ -1692,7 +1692,11 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.aliases[package] = alias
         self.imagecaches[alias] = imagecache
         if self.controller.player is not None and self.controller.player.is_active():
-            mediafile = package.getMetaData (config.data.namespace, "mediafile")
+            if self.controller == self:
+                mediafile = package.getMetaData (config.data.namespace,
+                                                 "mediafile")
+            else:
+                mediafile=self.controller.get_default_media()
             if (mediafile is not None and mediafile != "" and
                 mediafile not in self.controller.player.playlist_get_list()):
                 if isinstance(mediafile, unicode):
