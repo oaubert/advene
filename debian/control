@@ -7,7 +7,7 @@ Priority: optional
 
 Package: advene
 Architecture: i386
-Depends: ${python:Depends}, python-gtk2 (>=2.0), python-glade2 (>=2.0), python-pyorbit (>=2.0), vlc (>= 0.7.1), vlc-plugin-corba, python-xml (>=0.8.0), python-simpletal (>=3.6), python-imaging
+Depends: ${python:Depends}, python-gtk2 (>=2.0), python-glade2 (>=2.0), python-pyorbit (>=2.0), vlc (>= 0.7.2), vlc-plugin-corba, python-xml (>=0.8.0), python-simpletal (>=3.9), python-imaging
 Recommends: www-browser
 Description: Annotate DVDs, Exchange on the Net
  The Advene (Annotate DVd, Exchange on the NEt) project is aimed
