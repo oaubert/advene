@@ -64,6 +64,9 @@ class AdveneController:
     @ivar package: the package currently loaded
     @type package: advene.model.Package
 
+    @ivar modified: indicates if the data has been modified
+    @type modified: boolean
+    
     @ivar preferences: the current preferences
     @type preferences: dict
 
@@ -92,7 +95,8 @@ class AdveneController:
         self.cached_duration = 0
         
         self.package = None
-
+        self.modified = False
+        
         self.preferences = config.data.preferences
         
         self.player = advene.core.mediacontrol.Player ()
@@ -356,6 +360,7 @@ class AdveneController:
                                           "mediafile",
                                           pl[0])
         self.package.save(as=as)
+        self.modified=False
         self.event_handler.notify ("PackageSave")
     
     def manage_package_load (self, context, parameters):
@@ -375,6 +380,7 @@ class AdveneController:
             self.log (", ".join(l))
             return True
 
+        self.modified=False
         # Get the cached duration
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
@@ -473,6 +479,8 @@ class AdveneController:
             self.player.exit()
         except:
             pass
+        
+        return True
 
     def move_position (self, value, relative=True):
         """Helper method : fast forward or rewind by value milliseconds.
