@@ -127,10 +127,10 @@ class GenericImporter(object):
     def statistics_formatted(self):
         """Return a string representation of the statistics."""
         res=[]
-        kl=i.statistics.keys()
+        kl=self.statistics.keys()
         kl.sort()
         for k in kl:
-            v=i.statistics[k]
+            v=self.statistics[k]
             res.append("\t%s" % vlclib.format_element_name(v, k))
         return "\n".join(res)
     
