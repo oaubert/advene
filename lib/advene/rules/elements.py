@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """Event framework for Advene.
 
 The event framework makes it possible to bind actions to specific
