@@ -715,10 +715,12 @@ class AdveneGUI (Connect):
 
         @return: a boolean (~desactivation)
         """
-        self.log (_("Package %s saved: %d annotations and %s relations.")
+        self.log (_("Package %s saved: %s and %s.")
                   % (self.controller.package.uri,
-                     len(self.controller.package.annotations),
-                     len(self.controller.package.relations)
+                     vlclib.format_element_name('annotation',
+                                                len(self.controller.package.annotations)),
+                     vlclib.format_element_name('relation',
+                                                len(self.controller.package.relations))
                      ))
         return True
 
@@ -729,10 +731,12 @@ class AdveneGUI (Connect):
 
         @return: a boolean (~desactivation)
         """
-        self.log (_("Package %s loaded: %d annotations and %s relations.")
+        self.log (_("Package %s loaded: %s and %s.")
                   % (self.controller.package.uri,
-                     len(self.controller.package.annotations),
-                     len(self.controller.package.relations)
+                     vlclib.format_element_name('annotation',
+                                                len(self.controller.package.annotations)),
+                     vlclib.format_element_name('relation',
+                                                len(self.controller.package.relations))
                      ))
         self.update_gui()
 
