@@ -64,6 +64,7 @@ class EditElementPopup (object):
         self.element = el
         self.controller = controller
         self.window = gtk.Window (gtk.WINDOW_TOPLEVEL)
+        self.window.set_position(gtk.WIN_POS_MOUSE)
         self.vbox = gtk.VBox ()
         self.vbox.connect ("key-press-event", self.key_pressed_cb)
         self.window.add (self.vbox)
