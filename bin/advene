@@ -71,11 +71,11 @@ if __name__ == '__main__':
       sys.exit(1)
       
   # FIXME: remove once the win32 support is correct
-  if config.data.os != "win32" and not os.path.exists(config.data.typelib):
-    print """The %s file does not exist.
-    Either the VLC plugin is not installed or it is badly configured.
-    Check your .advenerc file.""" % config.data.typelib
-    sys.exit(1)
+  #if config.data.os != "win32" and not os.path.exists(config.data.typelib):
+  #  print """The %s file does not exist.
+  #  Either the VLC plugin is not installed or it is badly configured.
+  #  Check your .advenerc file.""" % config.data.typelib
+  #  sys.exit(1)
     
   gladefile=config.data.advenefile (config.data.gladefilename)
   if not os.path.exists(gladefile):
