@@ -11,6 +11,7 @@ It is meant to be used this way::
 """
 import sys
 import os
+import cPickle
 
 class Config(object):
     """Configuration information, platform specific.
@@ -48,7 +49,7 @@ class Config(object):
 
     @ivar webserver: webserver options (port number and running mode)
     @type webserver: dict
-    
+
     @ivar orb_max_tries: maximum number of tries for VLC launcher
     @type orb_max_tries: int
     """
@@ -81,12 +82,26 @@ class Config(object):
             'edit-width': 80,
             'edit-height': 25,
             }
-        
+
         self.namespace = "http://experience.univ-lyon1.fr/advene/ns/advenetool"
 
         # These files are stored in the resources directory
         self.templatefilename = "template.xml"
         self.gladefilename = "advene.glade"
+
+        # Generic options
+        self.preferences = {
+            # Various sizes of windows.
+            'windowsize': { 'main': (800, 600),
+                            'editpopup': (640,480),
+                            'evaluator': (800, 600),
+                            'relationview': (640, 480),
+                            'sequenceview': (640, 480),
+                            'timelineview': (800, 400),
+                            'transcriptionview': (640, 480),
+                            'treeview': (800, 600),
+                            }
+            }
 
         # Player options
         self.player_preferences = {
@@ -121,7 +136,7 @@ class Config(object):
 
         # Used to memorize the volume level
         self.sound_volume=0
-        
+
 
         # How many times do we try to read the iorfile before quitting ?
         self.orb_max_tries=7
@@ -146,24 +161,59 @@ class Config(object):
                                 os.environ['HOMEPATH']))
         else:
             raise Exception ('Unable to find homedir')
-        
+
+    def read_preferences(self):
+        homedir=self.get_homedir()
+        if self.os == 'win32':
+            filename='advene.prefs'
+        else:
+            filename='.advene_prefs'
+        preffile=os.sep.join((homedir, filename))
+        try:
+            f = open(preffile, "r")
+        except IOError:
+            return False
+        try:
+            prefs=cPickle.load(f)
+        except:
+            return False
+        self.preferences = prefs
+        return True
+
+    def save_preferences(self):
+        homedir=self.get_homedir()
+        if self.os == 'win32':
+            filename='advene.prefs'
+        else:
+            filename='.advene_prefs'
+        preffile=os.sep.join((homedir, filename))
+        try:
+            f = open(preffile, "w")
+        except IOError:
+            return False
+        try:
+            cPickle.dump(self.preferences, f)
+        except:
+            return False
+        return True
+
     def read_config_file (self):
         """Read the configuration file ~/.advenerc.
         """
         # FIXME: The conffile name/path could be a command-line option
         homedir=self.get_homedir()
         if self.os == 'win32':
-            file='advene.ini'
+            filename='advene.ini'
         else:
-            file='.advenerc'
+            filename='.advenerc'
 
-        conffile=os.sep.join((homedir, file))
+        conffile=os.sep.join((homedir, filename))
         try:
             file = open(conffile, "r")
         except IOError:
             self.config_file=''
             return False
-        
+
         config=sys.modules['advene.core.config']
         for li in file:
             if li.startswith ("#"):
@@ -235,7 +285,7 @@ class Config(object):
         """
         # FIXME
         #d=self.get_homedir()
-        
+
         if sys.platform == 'win32':
             if os.environ.has_key ('TEMP'):
                 d = os.environ['TEMP']
@@ -264,4 +314,5 @@ class Config(object):
 
 data = Config ()
 data.read_config_file ()
+data.read_preferences()
 #print "Read config file %s" % data.config_file
