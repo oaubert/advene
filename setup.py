@@ -42,8 +42,8 @@ def generate_data_dir(dir_, prefix="", postfix=""):
     return l
 
 def generate_data_files():
-    r=generate_data_dir("share", postfix="/advene")
-    r.extend(generate_data_dir("doc", prefix="share/", postfix="/advene"))
+    r=generate_data_dir("share", postfix=os.path.sep+"advene")
+    r.extend(generate_data_dir("doc", prefix="share"+os.path.sep, postfix=os.path.sep+"advene"))
     return r
 
 myname = "Olivier Aubert"
