@@ -588,8 +588,10 @@ class AdveneGUI (Connect):
 
         Callback used by file_selector.
         """
-        file_ = fs.get_property ("filename")        
-        self.controller.player.playlist_add_item (unicode(file_, 'utf8').encode('utf8'))
+        file_ = fs.get_property ("filename")
+        if isinstance(file_, unicode):
+            file_=file_.encode('utf8')
+        self.controller.player.playlist_add_item (file_)
         self.controller.update_status ("start")
         return True
 
@@ -1147,7 +1149,9 @@ class AdveneGUI (Connect):
             self.controller.set_default_media(url)
             sel.get_widget().destroy()
             self.controller.player.playlist_clear()
-            self.controller.player.playlist_add_item (unicode(url,'utf8').encode('utf8'))
+            if isinstance(url, unicode):
+                url=url.encode('utf8')
+            self.controller.player.playlist_add_item (url)
             self.controller.update_status ("start")
             window.destroy()
             return True

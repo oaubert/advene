@@ -67,15 +67,17 @@ def quit ():
 	mc.exit()
 	return True
 
-def test (file="/tmp/k.mpg"):
-	mc.playlist_add_item (unicode(file,'utf8').encode('utf8'))
-	print "%s added..." % file
+def test (mediafile="/tmp/k.mpg"):
+	if isinstance(mediafile, unicode):
+                mediafile=mediafile.encode('utf8')
+	mc.playlist_add_item (mediafile)
+	print "%s added..." % mediafile
 
-def save (data, file="/tmp/data.raw"):
-	f = open(file, "w")
+def save (data, file_="/tmp/data.raw"):
+	f = open(file_, "w")
 	f.write (data)
 	f.close ()
-	print "Data saved in %s" % file
+	print "Data saved in %s" % file_
 
 def init ():
 	global pos, rpos, apos, p, player, mc

@@ -364,7 +364,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if name == 'dvd':
                         name = "dvd:///dev/dvd"
                     try:
-                        name=unicode(name, 'utf8').encode('utf8')
+                        if isinstance(name, unicode):
+                            name=name.encode('utf8')
                         self.server.controller.player.playlist_add_item (name)
                         
                         self.start_html (_("File added"))
@@ -424,7 +425,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write (i[position])
             elif command == 'play':
                 if query.has_key ('filename'):
-                    f=unicode(query['filename'], 'utf8').encode('utf8')
+                    f=query['filename']
+                    if isinstance(f, unicode):
+                        f=f.encode('utf8')
                     self.server.controller.player.playlist_add_item (f)
                 if not query.has_key ('position'):
                     self.send_redirect ("/media")
@@ -1602,7 +1605,9 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
             mediafile = package.getMetaData (config.data.namespace, "mediafile")
             if (mediafile is not None and mediafile != "" and
                 mediafile not in self.controller.player.playlist_get_list()):
-                self.controller.player.playlist_add_item (unicode(mediafile, 'utf8').encode('utf8'))
+                if isinstance(mediafile, unicode):
+                    mediafile=mediafile.encode('utf8')
+                self.controller.player.playlist_add_item (mediafile)
 
     def unregister_package (self, alias):
         """Remove a package from the loaded packages lists.
