@@ -97,7 +97,10 @@ class Window:
             res=eval(expr, self.globals_, self.locals_)
             d=res.__doc__
             self.clear_output()
-            self.log(unicode(d))
+            if d is not None:
+                self.log(unicode(d))
+            else:
+                self.log(_("No available documentation for %s") % expr)
         except Exception, e:
             f=StringIO.StringIO()
             traceback.print_exc(file=f)
@@ -156,7 +159,6 @@ class Window:
         for c in (' ', '(', ','):
             if c in expr:
                 expr=expr[expr.rindex(c)+1:]
-                print "using %s from %s" % (expr, c)
         m=sre.match('(\w+)=(.+)', expr)
         if m is not None:
             expr=m.group(2)
@@ -342,7 +344,7 @@ class Window:
         return vbox
 
 if __name__ == "__main__":
-    ev=Window(globals_=globals())
+    ev=Window(globals_=globals(), locals_=locals())
 
     window=ev.popup()
 
