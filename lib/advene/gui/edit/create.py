@@ -158,7 +158,11 @@ class CreateElementPopup(object):
     def is_valid_id(self, i):
         return sre.match('^[a-zA-Z0-9_]+$', i)
     
-    def validate_cb(self, button, window):
+    def do_create_element(self):
+        """Create the element according to the widget data.
+
+        @return: the created element, None if an error occurred
+        """
         id_ = self.id_entry.get_text()
         # Check validity of id.
         if not self.is_valid_id(id_):
@@ -169,7 +173,7 @@ class CreateElementPopup(object):
             dialog.set_position(gtk.WIN_POS_MOUSE)
             dialog.run()
             dialog.destroy()
-            return True
+            return None
         
         t = self.chosen_type
 
@@ -282,17 +286,7 @@ class CreateElementPopup(object):
         else:
             el=None
             print "Not implemented yet."
-            
-        window.destroy()
-        
-        if el is not None:
-            try:
-                pop = advene.gui.edit.elements.get_edit_popup (el, controller=self.controller)
-            except TypeError, e:
-                print _("Error: unable to find an edit popup for %s:\n%s") % (el, str(e))
-            else:
-                pop.edit ()
-        return True
+        return el
 
     def key_pressed_cb (self, win, event):
         if event.keyval == gtk.keysyms.Return:
@@ -304,31 +298,44 @@ class CreateElementPopup(object):
         return False
     
     def popup(self, modal=False):
-        window = gtk.Window (gtk.WINDOW_TOPLEVEL)
-        window.set_modal(modal)
-        window.set_title(_("Creation: %s") % element_label[self.type_])
-        
-        vbox = gtk.VBox()
-        window.add(vbox)
-        
-        vbox.add (self.widget)
+        if modal:
+            flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL
+        else:
+            gtk.DIALOG_DESTROY_WITH_PARENT
+        d = gtk.Dialog(title=_("Creation: %s") % element_label[self.type_],
+                       parent=None,
+                       flags=flags,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
 
-        # Button bar
-        hbox = gtk.HButtonBox()
+        d.vbox.add(self.widget)
 
-        b = gtk.Button (stock=gtk.STOCK_OK)
-        b.connect ("clicked", self.validate_cb, window)
-        hbox.add (b)
+        def keypressed_cb(widget=None, event=None):
+            if event.keyval == gtk.keysyms.Return:
+                d.response(gtk.RESPONSE_ACCEPT)
+                return True
+            elif event.keyval == gtk.keysyms.Escape:
+                d.response(gtk.RESPONSE_REJECT)
+                return True
+            return False
+        d.connect("key_press_event", keypressed_cb)
 
-        b = gtk.Button (stock=gtk.STOCK_CANCEL)
-        b.connect ("clicked", lambda w: window.destroy ())
-        hbox.add (b)
+        res=d.run()
+        retval=None
+        if res == gtk.RESPONSE_ACCEPT:
+            retval=self.do_create_element()
+        d.destroy()
 
-        vbox.pack_start (hbox, expand=False)
+        if retval is not None and not modal:
+            try:
+                pop = advene.gui.edit.elements.get_edit_popup (retval,
+                                                               controller=self.controller)
+            except TypeError, e:
+                print _("Error: unable to find an edit popup for %s:\n%s") % (retval, str(e))
+            else:
+                pop.edit ()
 
-        window.connect("key_press_event", self.key_pressed_cb)
-        window.show_all ()
-        return True
+        return retval
     
 if __name__ == "__main__":
     if len(sys.argv) < 2:
