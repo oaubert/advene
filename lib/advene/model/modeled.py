@@ -271,7 +271,7 @@ class Factory:
                 if args:
                     raise AdveneException, ('createX factory methods only accept keyword arguments')
                 return theClass (parent=self, **kw)
-            _create.__doc__ = theClass.__init__.__doc__        
+            setattr(_create, '__doc__', theClass.__init__.__doc__)
 
             def _import (self, instance):
                 """

@@ -84,8 +84,8 @@ class Annotation(modeled.Importable, content.WithContent,
 
             # mode 2 initialization
             doc = parent._getDocument()
-            element = doc.createElementNS(self.getNamespaceUri(),
-                                               self.getLocalName())
+            element = doc.createElementNS(Annotation.getNamespaceUri(),
+                                          Annotation.getLocalName())
             modeled.Importable.__init__(self, element, parent)
 
             e = doc.createElementNS(None,"dummyFragment")
@@ -133,7 +133,7 @@ class Annotation(modeled.Importable, content.WithContent,
         """Set the type of this annotation"""
         op = self.getOwnerPackage ()
         if type is None:
-            raise AttributeException("type is a required attribute")
+            raise AttributeError("type is a required attribute")
         elif type in op.getAnnotationTypes():
             type_uri = type.getUri (absolute=False, context=op)
             self._getModel().setAttributeNS(None, "type", type_uri)
@@ -358,7 +358,7 @@ class Relation(modeled.Importable, content.WithContent,
         """Set the type of this relation"""
         op = self.getOwnerPackage ()
         if type is None:
-            raise AttributeException("type is a required attribute")
+            raise AttributeError("type is a required attribute")
         elif type in op.getRelationTypes():
             type_uri = type.getUri (absolute=False, context=op)
             self._getModel().setAttributeNS(None, "type", type_uri)

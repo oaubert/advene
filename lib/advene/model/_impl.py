@@ -167,7 +167,7 @@ class Authored(Metaed):
            You would probably rather use the authorUrl property.
         """
         attnode, eltnode = self.__prepareAuthorNodes()
-        if eltnode and eltnote.hasAttributeNS (xlinkNS, 'href'):
+        if eltnode and eltnode.hasAttributeNS (xlinkNS, 'href'):
             return eltnode.getAttributeNS (xlinkNS, 'href')
         return None
 

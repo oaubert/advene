@@ -1,15 +1,14 @@
-import _impl
-import annotation
-import modeled
-import viewable
+import advene.model._impl as _impl
+import advene.model.annotation as annotation
+import advene.model.modeled as modeled
+import advene.model.viewable as viewable
 
-import util.mimetype
-import util.uri
+import advene.model.util.mimetype
 
-from bundle import ImportBundle
-from constants import *
+from advene.model.bundle import ImportBundle
+from advene.model.constants import *
 
-from util.auto_properties import auto_properties
+from advene.model.util.auto_properties import auto_properties
 
 class AbstractType(modeled.Importable,
                    _impl.Uried, _impl.Authored, _impl.Dated, _impl.Titled):
@@ -38,7 +37,7 @@ class AbstractType(modeled.Importable,
         """
         FIXME
         """
-        util.mimetype.MimeType (value)
+        advene.model.util.mimetype.MimeType (value)
         content_type = self._getChild((adveneNS, 'content-type'))
         if content_type is None:
             model = self._getModel ()
@@ -53,13 +52,13 @@ class AbstractType(modeled.Importable,
         The type does not consider itself to be imported (which is true wrt the
         schema) but is (indirectly) imported wrt to the package.
         """
-        id = super (AbstractType, self).getId ()
+        id_ = super (AbstractType, self).getId ()
         schema = self.getSchema()
         if not self.isImported () and schema.isImported ():
             prefix = self.getRootPackage ().getQnamePrefix (schema._getParent())
-            return "%s:%s" % (prefix, id)
+            return "%s:%s" % (prefix, id_)
         else:
-            return id
+            return id_
             
 
 class AnnotationType(AbstractType,

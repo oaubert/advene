@@ -14,7 +14,8 @@ class auto_properties(type):
     If a "getFoo" or "setFoo" method is defined, then so will be the
     correponding property "foo".  """
     
-    def __init__(cls, name, bases, dict):
+    def __init__(self, name, bases, dict):
+        cls=self
         super(auto_properties, cls).__init__(name, bases, dict)
         props = {}
         for name, f in dict.iteritems():

@@ -14,17 +14,17 @@ import util.uri
 from util.auto_properties import auto_properties
 
 import _impl
-import annotation
-import content
-import modeled
-import query
-import schema
-import view
-import viewable
+import advene.model.annotation as annotation
+import advene.model.content as content
+import advene.model.modeled as modeled
+import advene.model.query as query
+import advene.model.schema as schema
+import advene.model.view as view
+import advene.model.viewable as viewable
 
-from bundle import StandardXmlBundle, ImportBundle, InverseDictBundle, SumBundle
-from constants import *
-
+from advene.model.bundle import StandardXmlBundle, ImportBundle, InverseDictBundle, SumBundle
+from advene.model.constants import *
+from advene.model.exception import AdveneException
 
 # the following constant is used as a default value in in Package.__init__
 # to know whether the passed uri must be used to get a stream.
@@ -251,7 +251,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             for i in self.getImports():
                 if item == i.getPackage():
                     return i.getAs()
-        elif isinstance (item, Schema):
+        elif isinstance (item, schema.Schema):
             for s in self.getSchemas():
                 if item == s:
                     return s.getId()

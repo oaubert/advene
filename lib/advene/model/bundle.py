@@ -40,13 +40,13 @@ Permitted dict operations are
 Note also that iter(b) iterates over its values (as for lists). Iterating over keys required the _iterkeys_ method.
 """
 
-import util.uri
+import advene.model.util.uri
 
-import modeled
-import viewable
+import advene.model.modeled as modeled
+import advene.model.viewable as viewable
 
-from constants import *
-from exception import AdveneException
+from advene.model.constants import *
+from advene.model.exception import AdveneException
 
 
 class AbstractBundle (object):
@@ -509,7 +509,7 @@ class RefBundle (AbstractXmlBundle):
     def _make_item (self, parent, element):
         href = element.getAttributeNS (xlinkNS, 'href')
         base_uri = self._getParent ().getUri (absolute=True)
-        uri = util.uri.urljoin(base_uri, href)
+        uri = advene.model.util.uri.urljoin(base_uri, href)
         try:
             r = self.__source[uri]
         except KeyError:
@@ -542,7 +542,7 @@ class RefBundle (AbstractXmlBundle):
     def _assert_add_item (self, item):
         # INTEGRITY CONSTRAINT: xxx
         assert item in self.__source, \
-               '%s does not belong to the package' % href
+               '%s does not belong to the package' % item
         return super (RefBundle, self)._assert_add_item (item)
 
     def _getViewableType (self):
@@ -577,7 +577,7 @@ class InverseDictBundle (StandardXmlBundle):
         del self.__inverse_dict[self.__inverse_key (item)]        
 
     def insert (self, item, index):
-        super (InverseDictBundle, self).insert (self, item, index=0)
+        super (InverseDictBundle, self).insert (self, item, index=index)
         self.__inverse_dict[self.__inverse_key (item)] = item.getUri (
                                                                   absolute=True)
 

@@ -1,12 +1,12 @@
 import cStringIO
 
-import modeled
-import tal.context
+import advene.model.modeled as modeled
+import advene.model.tal.context
 
-from constants import *
-from exception import AdveneException
+from advene.model.constants import *
+from advene.model.exception import AdveneException
 
-import util
+import advene.model.util as util
 
 from util.auto_properties import auto_properties
 
@@ -86,7 +86,7 @@ class Viewable(object):
         in dico."""        
 
         if context is None:
-            context = tal.context.AdveneContext(self,{})
+            context = advene.model.tal.context.AdveneContext(self,{})
 
         view = None
         if view_id is None:
@@ -152,7 +152,7 @@ class Viewable(object):
             return None
 
     def setDefaultView(self, value):
-        if isInstance(self, modeled.Modeled):
+        if isinstance(self, modeled.Modeled):
             if value:
                 views = self.getOwnerPackage().getViews()
                 for id_ in views.ids():
@@ -188,8 +188,10 @@ __system_default_view = cStringIO.StringIO("""<!-- ADVENE DEFAULT VIEW-->
 <span tal:replace='here'>the object</span>""")
 
 def getSystemDefaultView():
+    global __system_default_view
     __system_default_view.seek(0)
     return __system_default_view
 
 def setSystemDefaultView(v):
+    global __system_default_view
     __system_default_view = v

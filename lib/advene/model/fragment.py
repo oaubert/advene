@@ -128,8 +128,8 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
             return self.getBegin() <= other.getBegin() \
                    and other.getEnd() <= self.getEnd()
         else:
-            # FIXME: there is a wrong implicit conversion here
-            return self.getBegin() <= long(other) <= self.getEnd()
+            o = long(other)
+            return self.getBegin() <= o and o <= self.getEnd()
 
     def isBounded(self):
         """ Return whether this fragment is bounded, i.e. represents a document
