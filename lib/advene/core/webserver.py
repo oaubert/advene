@@ -259,15 +259,15 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             <h1>Player status</h1>
             <table border="1">
             <tr>
-            <td>Current position</td><td>%d</td>
-            <td>Input size</td><td>%d</td>
+            <td>Current position</td><td>%s</td>
+            <td>Input size</td><td>%s</td>
             <td>Player status</td><td>%s</td>
             </tr>
             </table>
             """) % (
                 str(self.server.controller.current_stbv),
-                self.server.controller.player.current_position_value,
-                self.server.controller.player.stream_duration,
+                vlclib.format_time(self.server.controller.player.current_position_value),
+                vlclib.format_time(self.server.controller.player.stream_duration),
                 repr(self.server.controller.player.status)))
                 
             if len(l) == 0:
