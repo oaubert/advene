@@ -65,6 +65,7 @@ from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
 from advene.gui.views.transcription import TranscriptionView
 from advene.gui.edit.transcribe import TranscriptionEdit
+from advene.gui.views.interactivequery import InteractiveQuery
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -1534,6 +1535,12 @@ class AdveneGUI (Connect):
     def on_quit1_activate (self, button=None, data=None):
         """Gtk callback to quit."""
         return self.on_exit (button, data)
+
+    def on_find1_activate (self, button=None, data=None): 
+        iq = InteractiveQuery(here=self.controller.package,
+                              controller=self.controller)
+        iq.popup()
+	return True
 
     def on_cut1_activate (self, button=None, data=None):
         print "Not implemented yet."
