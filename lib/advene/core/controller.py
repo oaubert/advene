@@ -115,7 +115,8 @@ class AdveneController:
             try:
                 # Kill spurious vlc player
                 os.system("/usr/bin/killall -9 vlc")
-                os.unlink(config.data.iorfile)
+                if os.access(config.data.iorfile, os.R_OK):
+                    os.unlink(config.data.iorfile)
             except OSError:
                 pass
 
