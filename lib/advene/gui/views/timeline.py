@@ -762,20 +762,20 @@ class TimeLine:
         radiogroup_ref=None
         
         tb_list = (
-            ("_Relations", "Create relations",
+            (_("_Relations"), _("Create relations"),
              gtk.STOCK_CONVERT, self.set_drag_mode, "relation"),
             
-            ("_BeginBegin", "Set the same begin time as the selected annotation",
+            (_("_BeginBegin"), _("Set the same begin time as the selected annotation"),
              gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-begin"),
 
-            ("_BeginEnd", "Align the begin time to the selected end time",
+            (_("_BeginEnd"), _("Align the begin time to the selected end time"),
              gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-end"),
 
 
-            ("_EndEnd", "Align the end time to the selected end time",
+            (_("_EndEnd"), _("Align the end time to the selected end time"),
              gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-end"),
 
-            ("_EndBegin", "Align the end time to the selected begin time",
+            (_("_EndBegin"), _("Align the end time to the selected begin time"),
              gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-begin"),
 
             )
