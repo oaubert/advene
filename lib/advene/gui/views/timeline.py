@@ -34,8 +34,6 @@ class TimeLine:
                   controller=None):
         
         self.list = l
-        # We use controller to get the controller.package when we create new
-        # relations for instance
         self.controller=controller
         
         if minimum is None or maximum is None:
@@ -194,8 +192,8 @@ class TimeLine:
                                                 method=self.desactivate_annotation_handler)
         
     def unregister_callback (self, controller=None):
-        controller.event_handler.remove_rule(self.beginrule)
-        controller.event_handler.remove_rule(self.endrule)
+        controller.event_handler.remove_rule(self.beginrule, type_="internal")
+        controller.event_handler.remove_rule(self.endrule, type_="internal")
     
     def activate_annotation (self, annotation, buttons=None):
         """Activate the representation of the given annotation."""
