@@ -341,3 +341,11 @@ def format_element_name(name, count=None):
     else:
         return _("%d %s") % (count, element_declinations[name][1])
 
+def get_id(source, id_):
+    """Return the element whose id is id_ in source.
+    """
+    l=[ e for e in source if e.id == id_ ]
+    if len(l) != 1:
+        return None
+    else:
+        return l[0]
