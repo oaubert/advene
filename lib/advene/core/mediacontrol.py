@@ -15,7 +15,10 @@ class PlayerFactory:
             import os
             # Hack needed to get the vlc module running correctly
             # (find the interfaces)
-            os.chdir('C:\\cygwin\\home\\oaubert\\vlc-0.8.1')
+            try:
+                os.chdir('C:\\cygwin\\home\\oaubert\\vlc-0.8.1')
+	    except:
+                pass
             import advene.player.vlcnative as playermodule
         else:
             #import advene.player.xine as playermodule
