@@ -272,6 +272,8 @@ class AdveneController:
         for s in args:
             if s.startswith('-p'):
                 config.data.player['plugin']=s[2:]
+            elif s == '--no-embedded':
+                config.data.player['embedded']=False
             elif s.startswith ('-'):
                 print _("Unknown option: %s") % s
             else:

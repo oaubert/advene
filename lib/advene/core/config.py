@@ -134,6 +134,7 @@ class Config(object):
         # Player options
         self.player = {
             'plugin': 'vlcnative',
+            'embedded': True,
             'name': 'vlc',
             'osdfont': '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
             'verbose': None, # None, 0, 1, 2

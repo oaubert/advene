@@ -492,6 +492,8 @@ class AdveneGUI (Connect):
         
         # The player is initialized. We can register the drawable id
         try:
+            if not config.data.player['embedded']:
+                raise Exception()
             if config.data.os == 'win32':
                 visual_id=self.drawable.window.handle
             else:
