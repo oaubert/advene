@@ -1,6 +1,16 @@
+* sound_[sg]et_volume: normalize volume in [0..100]
+
+* gui.edit.element: Implement EditElementListForm, based on ListStore?
+or ButtonBox?, to allow the edition of members of relations and
+members of relationtypes. Parameters: field, membertypes or memberids
+
 * player: implement vlchttp
 
-* Transcription: display timestamps in the text
+* Transcription: access to options: display timestamps, edit
+annotations, select separator, display marks, apply expression (for
+structured content)
+
+* Transcription: complete annotation edition
 
 * Annotation chanson: paroles / refrain /couplet + UTBV/STBV (transcription)
 
@@ -51,6 +61,8 @@
 * Implement copy/rename of id for all elements
 
 * Model related:
+
+** Allow to specify preferred package (bootstrap) for default views
 
 ** schema.author error ?? Cf importer.py (ElanImporter)
 
