@@ -21,6 +21,16 @@ class Position:
         self.key = None
         self.value = None
 
+
+class PositionOriginNotSupported(Exception):
+    pass
+
+class PlaylistException(Exception):
+    pass
+
+class InternalException(Exception):
+    pass
+
 class PositionKeyNotSupported(Exception):
     pass
 
@@ -51,10 +61,9 @@ PlayingStatus    = PlayerStatus (0)
 PauseStatus      = PlayerStatus (1)
 ForwardStatus    = PlayerStatus (2)
 BackwardStatus   = PlayerStatus (3)
-RewindStatus     = PlayerStatus (4)
-NotStartedStatus = PlayerStatus (5)
-StartStatus      = PlayerStatus (6)
-UndefinedStatus  = PlayerStatus (7)
+InitStatus       = PlayerStatus (4)
+EndStatus        = PlayerStatus (5)
+UndefinedStatus  = PlayerStatus (6)
 
 class StreamInformation:
     def __init__(self):
