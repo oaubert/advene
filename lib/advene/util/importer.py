@@ -30,6 +30,7 @@ import sys
 import time
 import sre
 import os
+import optparse
 
 import advene.core.config as config
 
@@ -40,6 +41,24 @@ from advene.model.fragment import MillisecondFragment
 import advene.util.handyxml as handyxml
 import xml.dom
 
+def get_importer(fname):
+    i=None
+    if fname == 'chaplin':
+        i=ChaplinImporter(author='chaplin-importer')
+    elif fname == 'lsdvd':
+        i=LsDVDImporter(author='lsdvd-importer')
+    elif fname.endswith('.txt'):
+        i=TextImporter(author='text-importer')
+    elif fname.endswith('.srt'):
+        i=SubtitleImporter(author='subtitle-importer')
+    elif fname.endswith('.eaf'):
+        i=ElanImporter(author='elan-importer')
+    elif fname.endswith('.xml'):
+        # FIXME: we should check the XML content
+        i=XiImporter(author='xi-importer')
+
+    return i
+    
 class GenericImporter(object):
     def __init__(self, author='importer', package=None, defaulttype=None):
         self.package=package
@@ -49,6 +68,15 @@ class GenericImporter(object):
         self.defaulttype=defaulttype
         # Default offset in ms
         self.offset=0
+        self.name = _("Generic importer")
+
+        self.optionparser = optparse.OptionParser(usage="Usage: %prog [options] source-file destination-file")
+        self.optionparser.add_option("-o", "--offset",
+                                     action="store", type="int", dest="offset", default=0,
+                                     help=_("Specify the offset in ms"))
+
+    def process_options(self, option_list):
+        (self.options, self.args) = self.optionparser.parse_args(args=option_list)
 
     def process_file(self, filename):
         """Abstract method.
@@ -203,12 +231,16 @@ class TextImporter(GenericImporter):
 
     def __init__(self, regexp=None, encoding=None, **kw):
         super(TextImporter, self).__init__(**kw)
+        self.name = _("Text importer")
         if regexp is None:
             regexp="(?P<begin>\d+)\s(?P<end>\d+)\s(?P<content>.+)"
         self.regexp=sre.compile(regexp)
         if encoding is None:
             encoding='latin1'
         self.encoding=encoding
+        self.optionparser.add_option("-r", "--regexp",
+                                     action="store", type="string", dest="regexp", default=None,
+                                     help=_("Specify the regexp used to parse data"))
 
     def iterator(self, f):
         for l in f:
@@ -233,6 +265,7 @@ class LsDVDImporter(GenericImporter):
     """
     def __init__(self, regexp=None, encoding=None, **kw):
         super(LsDVDImporter, self).__init__(**kw)
+        self.name = _("lsdvd importer")
         self.command="/usr/bin/lsdvd -c"
         #Chapter: 01, Length: 00:01:16, Start Cell: 01
         self.regexp="^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<duration>[0-9:]+)"
@@ -259,7 +292,12 @@ class LsDVDImporter(GenericImporter):
             pass
         f=os.popen(self.command, "r")
         if self.package is None:
-            self.create_package()
+            p, at=self.create_package(schemaid='dvd',
+                                      annotationtypeid='chapter')
+            self.package=p
+            self.defaulttype=at
+            # FIXME: should specify title
+            p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
         self.convert(self.iterator(f))
         return self.package
 
@@ -268,6 +306,7 @@ class ChaplinImporter(GenericImporter):
     """
     def __init__(self, **kw):
         super(ChaplinImporter, self).__init__(**kw)
+        self.name = _("chaplin importer")
         self.command="/usr/bin/chaplin -c"
         #   chapter 03  begin:    200.200 005005 00:03:20.05
         self.regexp="^\s*chapter\s*(?P<chapter>\d+)\s*begin:\s*.+(?P<begin>[0-9:])\s*$"
@@ -299,8 +338,15 @@ class ChaplinImporter(GenericImporter):
         if filename != 'chaplin':
             pass
         f=os.popen(self.command, "r")
+
         if self.package is None:
-            self.create_package()
+            p, at=self.create_package(schemaid='dvd',
+                                      annotationtypeid='chapter')
+            self.package=p
+            self.defaulttype=at
+            # FIXME: should specify title
+            p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
+
         self.convert(self.iterator(f))
         return self.package
 
@@ -309,6 +355,7 @@ class XiImporter(GenericImporter):
     """
     def __init__(self, **kw):
         super(XiImporter, self).__init__(**kw)
+        self.name = _("Xi importer")
         self.factors = {'s': 1000,
                         'ms': 1}
         self.anchors={}
@@ -333,6 +380,12 @@ class XiImporter(GenericImporter):
     def process_file(self, filename):
         xi=handyxml.xml(filename)
 
+        if self.package is None:
+            p, at=self.create_package(schemaid='xi-schema',
+                                      annotationtypeid='xi-verbal')
+            self.package=p
+            self.defaulttype=at
+
         # self.signals init
         for s in xi.Signals[0].Signal:
             self.signals[s.id] = s.loc
@@ -347,6 +400,10 @@ class XiImporter(GenericImporter):
                 print "Erreur: plusieurs fichiers sources, non supportes"
                 sys.exit(1)
 
+        if self.package.getMetaData(config.data.namespace, "mediafile") in (None, ""):
+            self.package.setMetaData (config.data.namespace,
+                                      "mediafile", filename)
+
         self.convert(self.iterator(xi))
         return self.package
 
@@ -355,6 +412,7 @@ class ElanImporter(GenericImporter):
     """
     def __init__(self, **kw):
         super(ElanImporter, self).__init__(**kw)
+        self.name = _("ELAN importer")
         self.anchors={}
         self.atypes={}
         self.schema=None
@@ -481,6 +539,7 @@ class SubtitleImporter(GenericImporter):
     """
     def __init__(self, encoding=None, **kw):
         super(SubtitleImporter, self).__init__(**kw)
+        self.name = _("Subtitle (SRT) importer")
         if encoding is None:
             encoding='latin1'
         self.encoding=encoding
@@ -528,40 +587,14 @@ if __name__ == "__main__":
     fname=sys.argv[1]
     pname=sys.argv[2]
 
-    if fname == 'chaplin':
-        i=ChaplinImporter(author='chaplin-importer')
-        p, at=i.create_package(schemaid='dvd',
-                               annotationtypeid='chapter')
-        i.package=p
-        i.defaulttype=at
-        # FIXME: should specify title
-        p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
-    elif fname == 'lsdvd':
-        i=LsDVDImporter(author='lsdvd-importer')
-        p, at=i.create_package(schemaid='dvd',
-                               annotationtypeid='chapter')
-        i.package=p
-        i.defaulttype=at
-        p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
-    elif fname.endswith('.txt'):
-        i=TextImporter(author='text-importer')
-    elif fname.endswith('.srt'):
-        i=SubtitleImporter(author='subtitle-importer')
-    elif fname.endswith('.eaf'):
-        i=ElanImporter(author='elan-importer')
-    elif fname.endswith('.xml'):
-        # FIXME: we should check the XML content
-        i=XiImporter(author='xi-importer')
-        p, at=i.create_package(schemaid='xi-schema',
-                               annotationtypeid='xi-verbal')
-        i.package=p
-        i.defaulttype=at
-    else:
+    i = get_importer(fname)
+    if i is None:
         print "No importer for %s" % fname
         sys.exit(1)
 
     # FIXME: i.process_options()
+    i.process_options(sys.argv[1:])
     # (for .sub conversion for instance, --fps, --offset)
-    print "Converting %s to %s" % (fname, pname)
+    print "Converting %s to %s using %s" % (fname, pname, i.name)
     p=i.process_file(fname)
     p.save(pname)
