@@ -41,9 +41,9 @@ class Annotation(modeled.Importable, content.WithContent,
                  ):
         """
         The constructor has two modes of calling
-         - giving it an element
+         - giving it a DOM element (constructing from XML)
          - giving it type,fragment,[ident],[date],[author],[authorUrl],
-           [context],[content_data|content_stream]
+           [context],[content_data|content_stream] (constructing from scratch)
         """
 
         _impl.Uried.__init__(self, parent=parent)
@@ -258,9 +258,9 @@ class Relation(modeled.Importable, content.WithContent,
                  ):
         """
         The constructor has two modes of calling
-         - giving it an element
+         - giving it a DOM element (constructing from XML)
          - giving it type,members,[ident],[date],[author],[authorUrl],
-           [context],[content_data|content_stream]
+           [context],[content_data|content_stream] (constructing from scratch)
         """
 
         _impl.Uried.__init__(self, parent=parent)

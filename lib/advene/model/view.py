@@ -151,9 +151,10 @@ class View(modeled.Importable, content.WithContent,
                  ):
         """
         The constructor has two modes of calling
-         - giving it an element
+         - giving it a DOM element (constructing from XML)
          - giving it clazz,[type],[ident],[title],[date],[author],[authorUrl],
-           [content_data|content_stream],[content_mimetype]
+           [content_data|content_stream],[content_mimetype] (constructing from
+           scratch)
         """
         _impl.Uried.__init__(self, parent=parent)
 

@@ -68,6 +68,11 @@ class AnnotationType(AbstractType,
     #__metaclass__ = auto_properties
 
     def __init__(self, parent, element):
+        """
+        The constructor has two modes of calling
+         - giving it a DOM element (constructing from XML)
+         - TODO: giving it id, [mimetype], ... (constructing from scratch)
+        """
         AbstractType.__init__(self, parent, element,
                             parent.getOwnerPackage().getAnnotationTypes.im_func)
 
@@ -105,6 +110,11 @@ class RelationType(AbstractType,
     #__metaclass__ = auto_properties
 
     def __init__(self, parent, element):
+        """
+        The constructor has two modes of calling
+         - giving it a DOM element (constructing from XML)
+         - TODO: giving it id, [mimetype], ... (constructing from scratch)
+        """
         AbstractType.__init__(self, parent, element,
                             parent.getOwnerPackage().getRelationTypes.im_func)
 

@@ -162,7 +162,8 @@ class AbstractBundle (object):
 
 class ListBundle (AbstractBundle):
     """
-    A class of bundle constructed from a list of valid items.
+    A class of bundle constructed from a list of items.
+    Prerequisite: all items must have a getUri(absolute) method.
     """
 
     def __init__ (self, the_list):
