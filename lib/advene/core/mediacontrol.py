@@ -12,10 +12,10 @@ class PlayerFactory:
 
     def get_player(self):
         if config.data.os == 'win32':
-            self.get_player_win32()
+            p=self.get_player_win32()
         else:
-            self.get_player_unix()
-        return playermodule.Player()
+            p=self.get_player_unix()
+        return p
 
     def get_player_win32(self):
         # Try to determine wether VLC is installed or not
@@ -42,11 +42,14 @@ class PlayerFactory:
                 print "Cannot cd to %s. The player certainly won't work." % vlcpath
             import advene.player.vlcnative as playermodule
 
+        return playermodule.Player()
+
     def get_player_unix(self):
         #import advene.player.xine as playermodule
 
         p=config.data.player['plugin']
-
+        print "mediacontrol: %s" % p
+        
         if p == 'vlcnative':
             # Should do some checks to verify it is present
             import advene.player.vlcnative as playermodule
@@ -57,3 +60,4 @@ class PlayerFactory:
         else:
             import advene.player.dummy as playermodule
             
+        return playermodule.Player()
