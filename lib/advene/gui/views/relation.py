@@ -137,6 +137,26 @@ class RelationsBox:
         """Return the display widget."""
         return self.widget
 
+    def update_relation (self, element=None, event=None):
+        """Update a relation's representation."""
+        if event == 'RelationCreate':
+            # If it does not exist yet, we should create it if it is now in self.list
+            if element in self.list:
+                v=RelationView(relation=element, controller=self.controller)
+                self.relationviews.append(v)
+                self.widget.pack_start(v.get_widget(), expand=False)
+            return True
+
+        bs = self.get_widget_for_relation (element)
+        for b in bs:
+            if event == 'RelationEditEnd':
+                self.update_button (b)
+            elif event == 'RelationDelete':
+                b.destroy()
+            else:
+                print "Unknown event %s" % event
+        return True
+
     def update_relation (self, element=None):
         """Update a relation's representation."""
         bs = self.get_widget_for_relation (element)
