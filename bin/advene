@@ -13,7 +13,7 @@ except ImportError:
   if subdir == 'bin' and  os.path.exists(os.sep.join((maindir, "setup.py"))):
     # Chances are that we were in a development tree...
     libpath=os.sep.join((maindir, "lib"))
-    print "Guessed package path: %s." % libpath
+    print "You seem to have a development tree at:\n%s." % libpath
     sys.path.insert (0, libpath)
     
     import advene.core.config as config
