@@ -1,4 +1,4 @@
-advene (project) unstable; urgency=low
+advene (0.17) unstable; urgency=low
 
   * Main GUI :
     * Video output is now embedded
@@ -12,17 +12,24 @@ advene (project) unstable; urgency=low
     * remove all elements from a given annotationtype or relationtype from
       the contextual menu
     * The webbrowser icon now displays a UTBV menu
-
+    * The Edit/Find functionality is implemented (using InteractiveQuery)
+    * Results from the Advene browser can be displayed in a line
+  
   * New action: OpenURL
 
   * Added default_utbv and default_stbv metadata to package
   
   * New config variables: 
-     * config.data.webserver['displaymode'] : default display mode (default or raw)
+     * config.data.webserver['displaymode'] : default display 
+       mode (default or raw)
      * config.data.path['moviepath'] : movie files search path
   
   * Webserver:
+     * Default display mode is now 'raw'
      * query parameters are available through the 'request' root element
+     * /media/play now accepts a ?stbv=... parameter
+     * implemented /application/adhoc to open GUI views and 
+       /application/stbv to activate STBVs
   
   * Timeline : 
      * implemented annotation alignment (by drag'n drop)
@@ -35,7 +42,8 @@ advene (project) unstable; urgency=low
   * New player module: mplayer (incomplete)
   
   * TranscriptionEdit :
-     * added adjustment possibilities for the marks
+     * added adjustment possibilities for the marks, using adjustable
+       reaction time value
      * it is now possible to create a new annotation type/schema 
        when doing the conversion
      * "Save" action preserves timestamps
@@ -44,6 +52,7 @@ advene (project) unstable; urgency=low
        and ignored text
      * added player control toolbar
      * C-s shortcut to save transcription
+     * Insert a default 0-mark
   
   * Importer
     * implemented PRAAT import
@@ -58,6 +67,8 @@ advene (project) unstable; urgency=low
       (player interaction, STBV selection, etc)
     * Edit elements forms now do a simple check 
       for the validity of TALES expressions
+    * Re-generated API documentation in doc/html
+    * Added an example bin/sample_player
   
  --
 
