@@ -47,7 +47,6 @@ import posixpath
 import urlparse
 import urllib
 import cgi
-import cStringIO
 import socket
 import select
 import inspect
@@ -647,7 +646,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             try:
                 objet = context.evaluateValue (expr)
             except AdveneException, e:
-                self.send_error(501, _("<h1>Error</h1>") + unicode(e))
+                self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
                 return
 
             # We can update only data attributes
@@ -774,7 +773,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 objet = context.evaluateValue (expr)
             except AdveneException, e:
                 self.start_html (_("Error"), duplicate_title=True)
-                self.wfile.write (unicode(e))
+                self.wfile.write (unicode(e.args[0]).encode('utf-8'))
                 return
 
             if not query.has_key('action') or not query.has_key('data'):
@@ -998,7 +997,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except AdveneException, e:
             self.wfile.write(_("<h1>Error</h1>"))
             self.wfile.write(_("""<p>There was an error in the expression.</p>
-            <pre>%s</pre>""") % cgi.escape(e))
+            <pre>%s</pre>""") % cgi.escape(unicode(e.args[0]).encode('utf-8')))
         except:
             t, v, tr = sys.exc_info()
             import code
@@ -1240,13 +1239,15 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         context.addGlobal (u'view', p)
         if 'epoz' in tales:
             context.addGlobal (u"epozmacros", self.server.epoz_macros)
-        
+
         try:
             objet = context.evaluateValue (expr)
         except AdveneException, e:
             self.start_html (_("Error"), duplicate_title=True)
-            self.wfile.write (_("""The TALES expression is not valid."""))
-            self.wfile.write (unicode(e))
+            self.wfile.write (_("""The TALES expression %s is not valid.""") % tales)
+            print "Exc %s" % type(repr(e))
+            print "a %s" % unicode(e.args)
+            self.wfile.write (unicode(e.args[0]).encode('utf-8'))
             return
 
         displaymode = self.server.displaymode
@@ -1255,7 +1256,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # with a content-type method : if it is HTML, we return it normally ;
         # if it is some other thing, we return it with the correct content-type
         # header).
-        if self.image_type (str(objet)) is not None:
+        if isinstance(objet, str) and self.image_type (objet) is not None:
             displaymode = 'image'
         if query.has_key('mode'):
             displaymode = query['mode']
@@ -1304,7 +1305,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             # FIXME: maybe add more elements to context (view, ?)
             #context.log = advene.model.tal.context.DebugLogger ()
             try:
-                self.wfile.write (objet.view (context=context))
+                self.wfile.write (objet.view (context=context).encode('utf-8'))
             except simpletal.simpleTAL.TemplateParseException, e:
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>There was an error in the template code.</p>
@@ -1314,14 +1315,14 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             except AdveneException, e:
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>There was an error in the TALES expression.</p>
-                <pre>%s</pre>""") % cgi.escape(unicode(e)))
+                <pre>%s</pre>""") % cgi.escape(unicode(e.args[0]).encode('utf-8')))
         else:
             try:
-                self.wfile.write (str(objet))
+                self.wfile.write (unicode(objet).encode('utf-8'))
             except AdveneException, e:
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>There was an error.</p>
-                <pre>%s</pre>""") % cgi.escape(e))
+                <pre>%s</pre>""") % cgi.escape(unicode(e.args[0]).encode('utf-8')))
             except simpletal.simpleTAL.TemplateParseException, e:
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>There was an error in the template code.</p>
