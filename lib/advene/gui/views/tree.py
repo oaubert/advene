@@ -1,5 +1,3 @@
-#! /usr/bin/python
-
 import sys
 
 # Advene part
@@ -25,7 +23,7 @@ pygtk.require ('2.0')
 import gtk
 import gobject
 
-class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource):
+class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest):
     COLUMN_TITLE=0
     COLUMN_ELEMENT=1
     
@@ -126,6 +124,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource):
         return self.on_get_path(node)
 
     def title (self, node):
+        # FIXME: should use vlclib.get_title
         title = "???"
         if isinstance (node, Annotation):
             title = _("Annotation %s (%d, %d)") % (node.id,
@@ -374,7 +373,7 @@ class TreeWidget:
 
         tree_view = gtk.TreeView(self.model)
         self.tree_view = tree_view
-        
+
         select = tree_view.get_selection()
         select.set_mode(gtk.SELECTION_SINGLE)
         
