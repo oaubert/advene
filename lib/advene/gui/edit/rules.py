@@ -273,7 +273,9 @@ class EditQuery(EditGeneric):
 
         # Event
         ef=gtk.Frame(_("For all elements in "))
-        self.sourceentry=TALESEntry(self.model.source, controller=self.controller)
+        self.sourceentry=TALESEntry(context=self.model,
+                                    controller=self.controller)
+        self.sourceentry.set_text(self.model.source)
         self.sourceentry.set_editable(self.editable)
         ef.add(self.sourceentry.widget)
         ef.show_all()
@@ -281,7 +283,8 @@ class EditQuery(EditGeneric):
 
         # Return value
         vf=gtk.Frame(_("Return "))
-        self.valueentry=TALESEntry(controller=self.controller)
+        self.valueentry=TALESEntry(context=self.model,
+                                   controller=self.controller)
         v=self.model.rvalue
         if v is None or v == '':
             v='element'
