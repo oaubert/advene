@@ -131,7 +131,7 @@ class Condition:
             if self.operator == 'equals':
                 return left == right
             if self.operator == 'different':
-                return left == right
+                return left != right
             elif self.operator == 'contains':
                 return right in left
             elif self.operator == 'greater':
