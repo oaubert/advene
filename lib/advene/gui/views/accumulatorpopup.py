@@ -24,6 +24,9 @@ class AccumulatorPopup:
         # Hide the window if there is no widget
         self.autohide = autohide
 
+        self.new_color = gtk.gdk.color_parse ('tomato')
+        self.old_color = gtk.Button().get_style().bg[0]        
+
         # List of tuples (widget, hidetime, frame)
         self.widgets=[]
         
@@ -52,9 +55,12 @@ class AccumulatorPopup:
         f=gtk.Frame()
         b=gtk.Button(title)
         b.connect("clicked", self.undisplay_cb, widget)
+        self.set_color(b, self.new_color)
         f.set_label_widget(b)
         f.add(widget)
 
+        for t in self.widgets:
+            self.set_color(t[2].get_label_widget(), self.old_color)
         self.widgets.append( (widget, hidetime, f) )
         self.widgets.sort(lambda a,b: cmp(a[1],b[1]))
         self.hbox.pack_start(f, expand=False)
@@ -63,6 +69,11 @@ class AccumulatorPopup:
         self.show()
         return True
 
+    def set_color(self, button, color):
+        for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                      gtk.STATE_PRELIGHT):
+            button.modify_bg (style, color)
     
     def get_popup_width(self):
         """Return the requested popup width
@@ -78,8 +89,6 @@ class AccumulatorPopup:
             return True
         
         # We found at least one (and hopefully only one) matching record
-        widget.hide()
-        widget.destroy()
         t[2].destroy()
 
         # Regenerate the widgets list
