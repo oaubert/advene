@@ -197,6 +197,8 @@ class Player(object):
                 self.check_player ()
                 if self.status == VLC.PlayingStatus:
                     self.mc.pause (position)
+                elif self.status == VLC.PauseStatus:
+                    self.mc.resume (position)                   
             elif status == "resume":
                 self.check_player()
                 if self.status == VLC.PauseStatus:
