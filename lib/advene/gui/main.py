@@ -271,7 +271,6 @@ class AdveneGUI (Connect):
 
         # We add a Treeview in the main app window
         tree = advene.gui.views.tree.TreeWidget(self.controller.package,
-                                                annotation_cb=self.annotation_popup_cb,
                                                 controller=self.controller)
         self.gui.get_widget("html_scrollwindow").add (tree.get_widget())
         tree.get_widget().show_all()
@@ -547,91 +546,6 @@ class AdveneGUI (Connect):
         self.unregister_view (view)
         widget.destroy ()
         
-    def make_popup_menu (self, ann):
-        """Build a popup menu dedicated to the given annotation.
-
-        @param ann: the annotation
-        @type ann: advene.model.annotation.Annotation
-
-        @return: the built menu
-        @rtype: gtk.Menu
-        """
-        menu = gtk.Menu()
-
-        def popup_edit (win, ann):
-            edit_widget=AnnotationEdit(ann, self.controller)
-            edit_widget.popup()
-            return True
-            
-            #try:
-            #    pop = gui.get_edit_popup (ann)
-            #except TypeError, e:
-            #    print _("Error: unable to find an edit popup for %s:\n%s") % (ann, str(e))
-            #else:
-            #    pop.edit ()
-            #return True
-
-        def popup_goto (win, ann):
-            c=self.controller
-            pos = c.create_position (value=ann.fragment.begin,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
-            return True
-
-        def popup_delete(win, ann):
-            p=ann.ownerPackage
-            p.annotations.remove(ann)
-            self.controller.notify('AnnotationDelete', annotation=ann)
-            return True
-            
-        item = gtk.MenuItem(_("Annotation %s") % ann.id)
-        menu.append(item)
-
-        item = gtk.SeparatorMenuItem()
-        menu.append(item)
-        
-        item = gtk.MenuItem(_("Edit"))
-        item.connect("activate", popup_edit, ann)
-        menu.append(item)
-            
-        item = gtk.MenuItem(_("Delete"))
-        item.connect("activate", popup_delete, ann)
-        menu.append(item)
-            
-        item = gtk.MenuItem(_("Go to..."))
-        item.connect("activate", popup_goto, ann)
-        menu.append(item)
-
-        item = gtk.MenuItem()
-        i = gtk.Image()
-        i.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.imagecache[ann.fragment.begin]))
-        item.add (i)
-        item.connect("activate", popup_goto, ann, self.controller)
-        menu.append(item)
-
-        item = gtk.MenuItem(ann.content.data)
-        menu.append(item)
-
-        item = gtk.MenuItem(_("Begin: %s")
-                            % self.format_time (ann.fragment.begin))
-        item.set_right_justified (True)
-        menu.append(item)
-
-        item = gtk.MenuItem(_("End: %s") % self.format_time (ann.fragment.end))
-        item.set_right_justified (True)
-        menu.append(item)
-
-        menu.show_all()
-        return menu
-
-    def annotation_popup_cb (self, widget=None, ann=None):
-        """Callback used to invoke the popup menu.
-        """
-        menu = self.make_popup_menu(ann)
-        menu.popup(None, None, None, 0, gtk.get_current_event_time())
-        return True
-
     def update_display (self):
         """Update the interface.
 
@@ -882,43 +796,6 @@ class AdveneGUI (Connect):
                 return True
             return False
 
-        def context_cb (timel=None, position=None):
-            # This callback is called on a right-mouse-button press
-            # in the timeline display. It is called with the
-            # current position (in ms)
-            menu = gtk.Menu()
-
-            def popup_goto (win, position):
-                c=self.controller
-                pos = c.create_position (value=position,
-                                         key=c.player.MediaTime,
-                                         origin=c.player.AbsolutePosition)
-                self.controller.update_status (status="set", position=pos)
-                return True
-
-            def copy_value(win, position):
-                timel.set_selection(position)
-                timel.activate_selection()
-                return True
-                
-            item = gtk.MenuItem(_("Position %s") % timel.format_time(position))
-            menu.append(item)
-
-            item = gtk.SeparatorMenuItem()
-            menu.append(item)
-
-            item = gtk.MenuItem(_("Go to..."))
-            item.connect("activate", popup_goto, position)
-            menu.append(item)
-
-            item = gtk.MenuItem(_("Copy value into clipboard"))
-            item.connect("activate", copy_value, position)
-            menu.append(item)
-            
-            menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
-            return True
-            
         window.connect ("key-press-event", key_pressed_cb)
 
         window.set_title (self.controller.package.title or "???")
@@ -937,8 +814,6 @@ class AdveneGUI (Connect):
         t = advene.gui.views.timeline.TimeLine (self.controller.package.annotations,
                                                 minimum=0,
                                                 maximum=duration,
-                                                annotation_cb=self.annotation_popup_cb,
-                                                context_cb=context_cb,
                                                 controller=self.controller)
         window.timeline = t
         timeline_widget = t.get_packed_widget()
@@ -1057,7 +932,6 @@ class AdveneGUI (Connect):
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         window.add (sw)
         tree = advene.gui.views.tree.TreeWidget(self.controller.package,
-                                                annotation_cb=self.annotation_popup_cb,
                                                 controller=self.controller)
         sw.add (tree.get_widget())
         self.register_view (tree)
