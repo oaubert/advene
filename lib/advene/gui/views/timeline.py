@@ -12,7 +12,7 @@ from advene.model.schema import Schema, AnnotationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
 
-import advene.util.vlclib
+import advene.util.vlclib as vlclib
 
 from gettext import gettext as _
 
@@ -230,12 +230,13 @@ class TimeLine:
     def update_button (self, b):
         a = b.annotation
         u2p = self.unit2pixel
-        b.set_label (a.content.data)
+        title=vlclib.get_title(self.controller, a)
+        b.set_label (title)
         b.set_size_request(u2p(a.fragment.duration),
                            self.button_height)
         
         self.widget.move(b, u2p(a.fragment.begin), self.layer_position[a.type])
-        tip = _("%s\nBegin: %s\tEnd: %s") % (a.content.data,
+        tip = _("%s\nBegin: %s\tEnd: %s") % (title,
                                             self.format_time(a.fragment.begin),
                                             self.format_time(a.fragment.end))
         self.tooltips.set_tip(b, tip)
@@ -311,9 +312,9 @@ class TimeLine:
     def create_relation_popup(self, source, dest):
         """Display a popup to create a binary relation between source and dest.
         """
-        relationtypes=advene.util.vlclib.matching_relationtypes(self.controller.package,
-                                                                source,
-                                                                dest)
+        relationtypes=vlclib.matching_relationtypes(self.controller.package,
+                                                    source,
+                                                    dest)
         if not relationtypes:
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -384,7 +385,8 @@ class TimeLine:
     
     def create_annotation_widget(self, annotation):
         u2p = self.unit2pixel
-        b = gtk.Button(annotation.content.data)
+        title=vlclib.get_title(self.controller, annotation)
+        b = gtk.Button(title)
         
         b.annotation = annotation
         b.active = False
@@ -398,7 +400,7 @@ class TimeLine:
                                               max(self.layer_position.values() or (1,)) + self.button_height + 10)
 
         self.widget.put(b, u2p(annotation.fragment.begin), pos)
-        tip = _("%s\nBegin: %s\tEnd: %s") % (annotation.content.data,
+        tip = _("%s\nBegin: %s\tEnd: %s") % (title,
                                              self.format_time(annotation.fragment.begin),
                                              self.format_time(annotation.fragment.end))
         self.tooltips.set_tip(b, tip)
