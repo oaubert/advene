@@ -97,6 +97,7 @@ class DefaultActionsRepository:
                         'color': _("Marker color"),
                         'x': _("x-position (percentage of screen)"),
                         'y': _("y-position (percentage of screen)"),
+                        'size': _("Size (arbitrary units)"),
                         'duration': _("Duration of the caption in ms")}
             )
                  )
@@ -213,8 +214,8 @@ class DefaultActionsRepository:
 
         If the 'duration' parameter is not defined, a default duration will be used.
         Parameters:
-        Shape: rectangle, triangle, circle
-        Color: named color
+        Shape: rectangle, circle.
+        Color: named color.
         Position: x, y in percentage of the screen. (0,0) is on top-left.
         Duration: in ms
         """
@@ -222,12 +223,22 @@ class DefaultActionsRepository:
         color=self.parse_parameter(context, parameters, 'color', 'white')
         x=self.parse_parameter(context, parameters, 'x', '95')
         y=self.parse_parameter(context, parameters, 'y', '95')
+        size=self.parse_parameter(context, parameters, 'size', '4')
         duration=self.parse_parameter(context, parameters, 'duration', None)
 
         if shape == 'rectangle':
-            code='<rect x="%s%%" y="%s%%" width="4em" height="4em" fill="%s" />' % (x, y, color)
+            code='<rect x="%s%%" y="%s%%" width="%sem" height="%sem" fill="%s" />' % (x, y, size, size, color)
         elif shape == 'circle':
-            code='<circle cx="%s%%" cy="%s%%" radius="4em" height="4em" fill="%s" />' % (x, y, color)
+            code='<circle cx="%s%%" cy="%s%%" r="%sem" fill="%s" />' % (x, y, size, color)
+        elif shape == 'triangle':
+            # Size is 800x600 (see code below)
+            x=long(x)*8
+            y=long(y)*6
+            s=long(size)*10
+            code='<polygon fill="%s" points="%d,%d %d,%d %d,%d" />' % (color,
+                                                                       x-s, y+s,
+                                                                       x+s, y+s,
+                                                                       x, y-s)
         else:
             code='<text x="%s%%" y="%s%%" color="%s">TODO</text>' % (x, y, color)
 
