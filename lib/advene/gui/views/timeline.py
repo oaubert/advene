@@ -241,8 +241,8 @@ class TimeLine:
         
         self.widget.move(b, u2p(a.fragment.begin), self.layer_position[a.type])
         tip = _("%s\nBegin: %s\tEnd: %s") % (title,
-                                            self.format_time(a.fragment.begin),
-                                            self.format_time(a.fragment.end))
+                                            vlclib.format_time(a.fragment.begin),
+                                            vlclib.format_time(a.fragment.end))
         self.tooltips.set_tip(b, tip)
         return True
 
@@ -419,8 +419,8 @@ class TimeLine:
 
         self.widget.put(b, u2p(annotation.fragment.begin), pos)
         tip = _("%s\nBegin: %s\tEnd: %s") % (title,
-                                             self.format_time(annotation.fragment.begin),
-                                             self.format_time(annotation.fragment.end))
+                                             vlclib.format_time(annotation.fragment.begin),
+                                             vlclib.format_time(annotation.fragment.end))
         self.tooltips.set_tip(b, tip)
         # The button can generate drags
         b.connect("drag_data_get", self.drag_sent)
@@ -485,16 +485,13 @@ class TimeLine:
             a.mark = t
             a.pos = 1
             self.widget.put (a, u2p(t), a.pos)
-            l = gtk.Label (self.format_time (t))
+            l = gtk.Label (vlclib.format_time (t))
             l.mark = t
             l.pos = 10
             self.widget.put (l, u2p(t), l.pos)
             t += step
         self.widget.show_all ()
         
-    def format_time (self, t):
-            return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)
-
     def bounds (self):
         """Bounds of the list.
         
@@ -546,7 +543,7 @@ class TimeLine:
             timel.activate_selection()
             return True
 
-        item = gtk.MenuItem(_("Position %s") % timel.format_time(position))
+        item = gtk.MenuItem(_("Position %s") % vlclib.format_time(position))
         menu.append(item)
 
         item = gtk.SeparatorMenuItem()
