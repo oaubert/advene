@@ -395,9 +395,12 @@ def query(target, context):
                 if len(qlist) != 1:
                     raise KeyError
                 q=qlist[0]
-                qexpr=advene.rules.elements.Query()
-                qexpr.from_dom(q.content.model)
-                return qexpr.execute(context=self._context)
+                if q.content.mimetype == 'application/x-advene-simplequery':
+                    qexpr=advene.rules.elements.Query()
+                    qexpr.from_dom(q.content.model)
+                    return qexpr.execute(context=self._context)
+                else:
+                    raise Exception("Unsupported query type for %s" % q.id)
             return render
 
         def ids (self):
