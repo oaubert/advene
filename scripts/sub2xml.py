@@ -7,6 +7,12 @@
 # vlc/modules/demux/util/sub.c
 # for the subtitles decoding part
 
+# FIXME: this should be made a module integrable into Advene,
+# which would take as parameters:
+# - the type of the destination annotations
+# - the offset and fps
+# and would populate the current package
+
 import sys
 import re
 import time
