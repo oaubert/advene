@@ -29,7 +29,7 @@ class SingletonPopup:
         self.hidetime=None
         self.window=self.build_widget()
 
-    def display(self, widget=None, timeout=None):
+    def display(self, widget=None, timeout=None, title=None):
         """Display the given widget.
 
         timeout is in ms.
