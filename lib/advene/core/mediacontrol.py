@@ -3,6 +3,7 @@
 import advene.core.config as config
 import time
 
+from gettext import gettext as _
 
 import ORBit, CORBA
 ORBit.load_typelib (config.data.typelib)
@@ -75,7 +76,6 @@ class PlayerLauncher:
         tries=0
         while tries < self.config.orb_max_tries:
             try:
-                #print "Try %d" % tries
                 ior = open(iorfile).readline()
                 break
             except:
