@@ -1,3 +1,7 @@
+* Advenelib: implement AnnotationType and RelationType creation methods.
+
+* Create a unique logger in controller and use exclusively this one in all modules.
+
 * vlc-dev: use the new start-time and stop-time functionality in core VLC to correctly
   handle positions in start and stop.
 
@@ -23,7 +27,8 @@
 * Clean-up the player interface (which is now spread across
   advene.util.vlclib.VLCPlayer and advene.core.mediacontrol.MediaControl) -> half DONE
   (everything is in mediacontrol now, but we should unify this and provide a clean API
-   to ease portability across different players)
+   to ease portability across different players). Idea: provide a
+   PlayerFactory which returns a Player instance (more flexible).
 
 * Add a notebook view in the place of the defunct HTML widget
 
