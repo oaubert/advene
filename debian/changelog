@@ -1,4 +1,4 @@
-advene (project) unstable; urgency=low
+advene (0.9) unstable; urgency=low
 
   * New action: DisplayMarker
   
@@ -27,7 +27,7 @@ advene (project) unstable; urgency=low
   
   * Annotations are accessible from the relation popup menu
 
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Fri, 18 Jun 2004 19:36:20 +0200
 
 advene (0.8) unstable; urgency=low
 
