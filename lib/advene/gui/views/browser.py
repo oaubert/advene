@@ -232,6 +232,9 @@ class Browser:
 
         vbox.set_homogeneous (gtk.FALSE)
 
+        if self.controller.gui:
+            self.controller.gui.init_window_size(window, 'browserview')
+
         window.show_all()
         return window
         
