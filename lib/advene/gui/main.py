@@ -733,6 +733,14 @@ class AdveneGUI (Connect):
             # FIXME: something sensible to do here ?
             print _("Internal error on video player")
             return True
+        except Exception, e:
+            # Catch-all exception, in order to keep the mainloop
+            # runnning
+            print _("Got exception %s. Trying to continue.") % str(e)
+            import code
+            e, v, tb = sys.exc_info()
+            code.traceback.print_exception (e, v, tb)
+            return True
         
         if self.slider_move:
             # FIXME: we could have a cache of key images (i.e. 50 equidistant
