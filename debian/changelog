@@ -12,6 +12,7 @@ advene (project) unstable; urgency=low
   * New shortcut: Control-Return validates current annotation and begins
     editing a new one
   * Annotations in timeline are bold if they have relations
+  * Added the possibility to edit description of AnnotationTypes (to be extended)
 
  --
 
