@@ -510,6 +510,14 @@ class TimeLine:
         return minimum, maximum
 
     def key_pressed_cb (self, win, event):
+        if event.state & gtk.gdk.CONTROL_MASK:
+            # The Control-key is held. Special actions :
+            if event.keyval == gtk.keysyms.q:
+                win.emit('destroy')
+            return True
+        if event.keyval == gtk.keysyms.Escape:
+            win.emit('destroy')
+            return True        
         if event.keyval >= 49 and event.keyval <= 57:
             self.display_fraction_event (widget=win, fraction=1.0/pow(2, event.keyval-49))
             return True
@@ -739,6 +747,69 @@ class TimeLine:
 
         return vbox
 
+    def popup(self):
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+
+        window.connect ("key-press-event", self.key_pressed_cb)
+
+        window.set_title (self.controller.package.title or "???")
+
+        vbox = gtk.VBox()
+
+        window.add (vbox)
+
+        vbox.add (self.get_packed_widget())
+
+        hbox = gtk.HButtonBox()
+        vbox.pack_start (hbox, expand=False)
+
+        fraction_adj = gtk.Adjustment (value=0.1,
+                                       lower=0.01,
+                                       upper=1.0,
+                                       step_incr=.01,
+                                       page_incr=.02)
+
+        def zoom_event (win=None, timel=None, adj=None):
+            timel.display_fraction_event (widget=win, fraction=adj.value)
+            return True
+
+        s = gtk.HScale (fraction_adj)
+        s.set_digits(2)
+        s.connect ("value-changed", zoom_event, self, fraction_adj)
+        hbox.add (s)
+
+        hbox.add (self.highlight_activated_toggle)
+        hbox.add (self.scroll_to_activated_toggle)
+
+        b = gtk.Button (stock=gtk.STOCK_OK)
+        if self.controller.gui:
+            b.connect ("clicked", self.controller.gui.close_view_cb, window, self)
+        else:
+            b.connect ("clicked", lambda w: window.destroy())
+        hbox.add (b)
+
+        vbox.set_homogeneous (False)
+
+        if self.controller.gui:
+            window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
+
+        self.controller.gui.register_view (self)
+
+        height=max(self.layer_position.values() or (1,)) + 3 * self.button_height
+
+        s=config.data.preferences['windowsize']['timelineview']
+        window.set_default_size (s[0], height)
+        if self.controller.gui:
+            window.connect ("size_allocate", self.controller.gui.resize_cb, 'timelineview')
+        window.show_all()
+
+        # Make sure that the timeline display is in sync with the
+        # fraction widget value
+        self.display_fraction_event (window,
+                                  fraction=fraction_adj.value)
+
+        return window
+    
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Should provide a package name"
@@ -750,54 +821,10 @@ if __name__ == "__main__":
     controller=DummyController()
     
     controller.package = Package (uri=sys.argv[1])
-    
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    window.set_size_request (320, 200)
-
-    def key_pressed_cb (win, event):
-        if event.state & gtk.gdk.CONTROL_MASK:
-            # The Control-key is held. Special actions :
-            if event.keyval == gtk.keysyms.q:
-                gtk.main_quit ()
-                return True
-        return False
-            
-
-    def validate_cb (win, package):
-        filename="/tmp/package.xml"
-        package.save (as=filename)
-        print "Package saved as %s" % filename
-        gtk.main_quit ()
-        
-    window.connect ("key-press-event", key_pressed_cb)
-    window.connect ("destroy", lambda e: gtk.main_quit())
-    window.set_title (controller.package.title or "None")
-    vbox = gtk.VBox()
-    
-    window.add (vbox)
+    controller.gui = None
     
     timeline = TimeLine (controller.package.annotations,
                          controller=controller)
-    vbox.add (timeline.get_packed_widget())
-
-    hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=False)
-
-    b = gtk.Button (stock=gtk.STOCK_SAVE)
-    b.connect ("clicked", validate_cb, controller.package)
-    hbox.add (b)
-
-    s = gtk.HScale (timeline.ratio_adjustment)
-    s.connect ("value-changed", timeline.ratio_event)
-    hbox.add (s)
+    timeline.popup()
     
-    b = gtk.Button (stock=gtk.STOCK_CANCEL)
-    b.connect ("clicked", lambda w: window.destroy ())
-    hbox.add (b)
-
-    vbox.set_homogeneous (False)
-    height=max(timeline.layer_position.values() or (1,)) + 3 * timeline.button_height
-    window.set_default_size (640, height)
-
-    window.show_all()
     gtk.main ()
