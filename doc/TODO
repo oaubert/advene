@@ -1,6 +1,16 @@
-* Edit element popup: check that the data was not modified before closing
+* Implement completion in TALES fields ?
 
-* Specify mimetype in view editing window
+* Upgrade simpletal support to 3.9
+
+* Action: DisplayPopup2, DisplayPopup3, DisplayPopup4 with additional
+parameters (general message + message1,position1 + message2,position2,
+...)
+
+* GUI for advene.util.importer
+
+* Interface to edit imports
+
+* Edit element popup: check that the data was not modified before closing
 
 * Should snapshots be done with annotations drawn or without ??
 
@@ -9,9 +19,6 @@
   "snapshot-schema" defining "snapshot" annotation types, that would
   be linked through a "snapshot-relation" relation with the
   corresponding annotations.
-
-* Return a "301 Not modified" in webserver upon /media/play... actions
-  instead of a redirect
 
 * RelationTypeEditPopup: allow to specify the annotation types.
 
@@ -37,16 +44,11 @@
 
 * Implement copy/rename of id for all elements
 
-* gui.popup should have a reference to the main gui, so that it can call
-  register_view and close_view_cb
-
 * Views should memorize their position/size
 
 * Model related:
 
 ** schema.author error ?? Cf importer.py (ElanImporter)
-
-** Make import work
 
 ** Bug in util.uri.urljoin if pkg_uri == 'dummy:1' (get does not work
 in bundles). To exhibit: in ElanImporter, change the uri of the new
@@ -73,9 +75,6 @@ determine the available stream(s) and propose them to the user.
  its mimetype. *or* return a specialized class derived from (str,
  object) that adds a mimetype property
 
-** The package/annotationTypes should have an 'ids' method, to be able
-to retrieve ids as keys (all bundles in fact).
-
 ** Create a ContextualizedBundle which understands namespaces
 
 ** Make the package a .zip file, with a MANIFEST, data.xml and
@@ -84,14 +83,6 @@ resources/ directory
 ** Fix package generation: upon loading, we discard the initial
 processing instruction (<?xml version="1.0" encoding="UTF-8"?>) from
 the DOM and do not restore it before saving, so it gets lost.
-
-
-
-* Action: DisplayPopup2, DisplayPopup3, DisplayPopup4 with additional
-parameters (general message + message1,position1 + message2,position2,
-...)
-
-* GUI for advene.util.importer
 
 * Add access to media duration from TALES
 
@@ -111,8 +102,6 @@ annotation, of the same type or not.
 * Treeview: add the elements attributes as annotation/relation children.
 
 * Element editing: add description field and edit content-type attribute
-
-* Interface to edit imports
 
 * Implement Xine Advene player
 
@@ -527,4 +516,18 @@ events) -> DONE
 
 * Segmentation fault upon quitting with window manager button -> DONE
 
+* Specify mimetype in view editing window -> DONE
+
+* In create popup, link "Return" to validation -> DONE
+
+* Return a "204 No content" in webserver upon /media/play... actions
+  instead of a redirect -> DONE
+
+* gui.popup should have a reference to the main gui, so that it can call
+  register_view and close_view_cb -> DONE (in controller)
+
+* Make import work -> DONE
+
+** The package/annotationTypes should have an 'ids' method, to be able
+to retrieve ids as keys (all bundles in fact) -> HACKED in bundles
 
