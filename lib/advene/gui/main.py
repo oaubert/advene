@@ -889,8 +889,7 @@ class AdveneGUI (Connect):
             a=p.annotations[-1]
         except IndexError:
             a=None
-        ev=advene.gui.evaluator.Window(controller=self.controller,
-                                       globals_={},
+        ev=advene.gui.evaluator.Window(globals_={},
                                        locals_={'package': p,
                                                 'p': p,
                                                 'a': a,
