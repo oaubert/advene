@@ -521,10 +521,26 @@ class TranscriptionEdit:
         return tb
 
     def key_pressed_cb (self, win, event):
+        c=self.controller
+        p=c.player
+        if event.keyval == gtk.keysyms.Tab:
+            if p.status == p.PlayingStatus or c.update_status("resume"):
+                c.update_status("pause")
+            else:
+                c.update_status("start")
+            return True
+        
         if event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.s:
                 # Save file
                 self.save_transcription_cb()
+            elif event.keyval == gtk.keysyms.Return:
+                # Insert current timestamp mark
+                if p.status == p.PlayingStatus or p.status == p.PauseStatus:
+                    b=self.textview.get_buffer()
+                    it=b.get_iter_at_mark(b.get_insert())
+                    self.create_timestamp_mark(p.current_position_value,
+                                               it)
             return True
     
     def popup(self):
