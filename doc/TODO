@@ -1,8 +1,8 @@
 * GUI for advene.util.importer
 
-* Le modele devrait verifier la validité des données (pas d'id en double)
+* The model should check the data validity (no duplicated id, valid id syntax, etc)
 
-* Add access to package duration from TALES
+* Add access to media duration from TALES
 
 * Bug in queries (rest not empty even if applied to 1-element lists)
 
@@ -16,18 +16,17 @@ exception)
 
 * EditAnnotationPopup: implement Next and Previous
 
+* Implement in the standard lib the notion of previous/next
+annotation, of the same type or not.
+
 * Register all editing popup windows to close them upon package reload
 
-* Treeview: ajouter les attributs des éléments en fils d'annotation (relation, etc)
+* Treeview: add the elements attributes as annotation/relation children.
 
-* Implementer en standard la notion de annotation precedente/suivante
-de meme type ou pas
+* Model: annotations should be sorted according to fragment.begin
 
-* Modele: les annotations devraient etre triees selon fragment.begin (dur)
-
-* En attendant, implementer un hook a LoadPackage et a
-AnnotationEditEnd qui trie les annotations suivant fragment et autres
-elements suivant id
+* Before that, implement a hook for LoadPackage and AnnotationEditEnd
+which sorts the annotations upon package load.
 
 * Element editing: add description field and edit content-type attribute
 
@@ -49,7 +48,7 @@ determine the available stream(s) and propose them to the user.
 
 * VLC: zoom functionality (crop?)
 
-* Convertisseur ELAN (http://www.mpi.nl/tools/elan.html) , Anvil
+* Anvil converter
 
 * Bug: STBV menu not correctly updated
 
@@ -64,14 +63,14 @@ order to avoid using too many global methods.
 
 * Window to confirm quitting: use "Save package? Yes No Cancel"
 
-* Surveiller Europython:
+* Watch Europython:
 http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
 
 * UID generator: http://www.alcyone.com/software/uid/
 
 * http://weblex.ens-lsh.fr/projects/xitools/format_xi/
 
-* View: affichage transcription avec mise en valeur des extraits actifs
+* View: display transcription with highlighting of active fragments
 
 * Make the request object accessible in AdveneContext
 
@@ -83,8 +82,6 @@ http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
   widget.window.handle (in Win32)
 
 * STBV action: display an activable link
-
-* Check id validity (no spaces) when creating elements (views)
 
 * Try to remove the dependency on PIL by using pixbuf loader to convert snapshots to PNG.
 
@@ -459,3 +456,7 @@ events) -> DONE
 * Architecture generique d'import d'annotations externes (annotations, schemas) -> DONE
 
 * Find a way to specify the version number in the sources and use it in setup.py  -> DONE
+
+* Check id validity (no spaces) when creating elements (views) -> DONE
+
+* ELAN converter (http://www.mpi.nl/tools/elan.html) -> DONE
