@@ -17,10 +17,10 @@ Source: \devel\gtk\bin\libpng12.dll; DestDir: {app}
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.15
+AppVerName=Advene 0.16
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.15
+VersionInfoVersion=0.16
 VersionInfoCompany=LIRIS
 PrivilegesRequired=poweruser
 LicenseFile=debian\copyright
