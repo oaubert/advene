@@ -30,7 +30,7 @@ class RelationView:
     def activate(self, button):
         print "Relation %s activated" % self.relation.id
         if self.controller:
-            self.controller.event_handler.notify("RelationActivation", relation=self.relation)
+            self.controller.notify("RelationActivation", relation=self.relation)
         return True
     
     def build_widget(self):
