@@ -123,9 +123,9 @@ class ImageCache(dict):
 
     def is_initialized (self, key):
         """Return True if the given key is initialized.
-
-        @return True if the given key is initialized.
-        @rtype boolean
+        
+        @return: True if the given key is initialized.
+        @rtype: boolean
         """
         key = self.approximate(long(key))
         if dict.__getitem__(self, key) == self.not_yet_available_image:
