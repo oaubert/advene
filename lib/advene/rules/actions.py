@@ -304,13 +304,13 @@ class DefaultActionsRepository:
 
         if annotation is not None:
             c=self.controller
-            #begin = self.controller.player.relative_position
-            #duration=annotation.fragment.end - self.controller.player.current_position_value
-            #end = c.create_position (value=duration,
-            #                         key=c.player.MediaTime,
-            #                         origin=c.player.RelativePosition)
-            begin = c.create_position (value=annotation.fragment.begin)
-            end = c.create_position (value=annotation.fragment.end)
+            begin = c.player.relative_position
+            duration=annotation.fragment.end - c.player.current_position_value
+            end = c.create_position (value=duration,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.RelativePosition)
+            #begin = c.create_position (value=annotation.fragment.begin)
+            #end = c.create_position (value=annotation.fragment.end)
             c.player.display_text (message.encode('utf8'), begin, end)
         return True
 
