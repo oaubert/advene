@@ -249,6 +249,7 @@ class CreateElementPopup(object):
                 el.author=config.data.userid
                 el.date=self.get_date()
                 el.title=id_
+                el.mimetype='text/plain'
             self.parent.annotationTypes.append(el)
             self.controller.notify('AnnotationTypeCreate', annotationtype=el)
         elif self.type_ == RelationType:
@@ -261,6 +262,7 @@ class CreateElementPopup(object):
                 el.author=config.data.userid
                 el.date=self.get_date()
                 el.title=id_
+                el.mimetype='text/plain'
             self.parent.relationTypes.append(el)
             self.controller.notify('RelationTypeCreate', relationtype=el)
         else:
