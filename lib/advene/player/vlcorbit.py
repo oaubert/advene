@@ -363,6 +363,9 @@ class Player(object):
             self.stream_duration = 0
             self.current_position_value = 0
 
+    def dvd_uri(self, chapter, title):
+        return "dvdsimple:///dev/dvd@%s,%s" % (str(chapter), str(title))
+    
     def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
         
