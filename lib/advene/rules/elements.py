@@ -162,7 +162,7 @@ class Condition:
             self.rhs=node.getAttribute('rhs')
         else:
             self.rhs=None
-        return
+        return self
 
     def to_dom(self, dom):
         """Creates a DOM representation of the condition.
@@ -376,6 +376,7 @@ class RuleSet(list):
                     action.add_parameter(p_name, p_value)
                 rule.add_action(action)
             self.append(rule)
+        return self
 
     def to_xml(self, uri=None, stream=None):
         """Save the ruleset to the given URI or stream."""
@@ -661,10 +662,10 @@ class Query:
             raise Exception("Multiple sources are associated to query")
         
         # Conditions
-        for condnode in rulenode.getElementsByTagName('condition'):
+        for condnode in domelement.getElementsByTagName('condition'):
             self.add_condition(Condition().from_dom(condnode))
 
-        return
+        return self
 
     def to_dom(self, dom):
         """Save the query in the given DOM element."""
