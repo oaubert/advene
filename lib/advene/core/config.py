@@ -149,7 +149,9 @@ class Config(object):
             'port': 1234,
             # Whether to launch the HTTP server in the gtk interface
             # 0 for no, 1 for gtk_input, 2 for threading
-            'mode': 1
+            'mode': 1,
+            # 'default' or 'raw'
+            'displaymode': 'default',
             }
         # Threading does not work correctly on Win32. Use gtk_input
         # method.
