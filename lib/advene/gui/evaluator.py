@@ -107,6 +107,11 @@ class Window:
         b=self.source.get_buffer()
         begin,end=b.get_bounds()
         expr=b.get_text(begin, end)
+        symbol=None
+        m=sre.match('(\w+)=(.+)', expr)
+        if m is not None:
+            symbol=m.group(1)
+            expr=m.group(2)
         if expr.endswith('?'):
             self.display_doc(expr[:-1])
             return True
@@ -114,6 +119,9 @@ class Window:
             res=eval(expr, self.globals_, self.locals_)
             self.clear_output()
             self.log(unicode(res))
+            if symbol is not None:
+                self.log('\n\n[Value stored in %s]' % symbol)
+                self.locals_[symbol]=res
         except Exception, e:
             f=StringIO.StringIO()
             traceback.print_exc(file=f)
