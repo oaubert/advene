@@ -1250,8 +1250,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except AdveneException, e:
             self.start_html (_("Error"), duplicate_title=True)
             self.wfile.write (_("""The TALES expression %s is not valid.""") % tales)
-            print "Exc %s" % type(repr(e))
-            print "a %s" % unicode(e.args)
+            #print "Exc %s" % type(repr(e))
+            #print "a %s" % unicode(e.args)
             self.wfile.write (unicode(e.args[0]).encode('utf-8'))
             return
 
