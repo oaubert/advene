@@ -15,10 +15,21 @@ class Query(modeled.Importable, viewable.Viewable.withClass('query'),
     """Query object offering query capabilities on the model"""
     __metaclass__ = auto_properties
 
-    def __init__(self, parent, element):
+    def __init__(self, parent=None, ident=None, element=None):
+        _impl.Uried.__init__(self, parent=parent)
+        doc = parent._getDocument()
+        element = doc.createElementNS(self.getNamespaceUri(),
+                                      self.getLocalName())
         modeled.Importable.__init__(self, element, parent,
-                                                    parent.getQueries.im_func)
-        _impl.Uried.__init__(self, parent=self._getParent())
+                                    parent.getViews.im_func)
+
+        if ident is None:
+            # FIXME: cf thread
+            # Weird use of hash() -- will this work?
+            # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
+            ident = u"q" + unicode(id(self)) + unicode(time.clock()).replace('.','')
+        self.setId(ident)
+        
 
     # dom dependant methods
 
