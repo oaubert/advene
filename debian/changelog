@@ -1,36 +1,53 @@
 advene (project) unstable; urgency=low
 
-  * Video output is now embedded
-  * Added a --no-embedded option
+  * Main GUI :
+    * Video output is now embedded
+    * Added a --no-embedded option
+    * Added some views (navigation history, urlstack, popups) 
+      around the video window
+    * Popups now use the AccumulatorPopup
+    * Screenshots are now displayed in popups
+    * File history is available (next to the open button)
+
+  * New action: OpenURL
+
+  * Added default_utbv and default_stbv metadata to package
+  
+  * New config variables: 
+     * config.data.webserver['displaymode'] : default display mode (default or raw)
+     * config.data.path['moviepath'] : movie files search path
+  
   * Timeline : 
      * implemented annotation alignment (by drag'n drop)
      * annotations can be transmuted (by DND on an annotation type)
      * all annotation types (event empty ones) are displayed
      * new zoom possibility by clicking on timestamps labels
-  * Added some views (history, urlstack, popups) around the video window
-  * Identifiers are now generated through the IDGenerator module (more readable ids)
+     * relations can be displayed by moving the cursor 
+       over the annotation widgets (option controlled by toolbar)  
+  
   * New player module: mplayer (incomplete)
+  
   * TranscriptionEdit :
      * added adjustment possibilities for the marks
-     * it is now possible to create a new annotation type/schema when doing the conversion
+     * it is now possible to create a new annotation type/schema 
+       when doing the conversion
      * "Save" action preserves timestamps
      * "Ignore text" functionality
-     * Load/save transcription files handles [xx:xx:xx.xxx] timestamps
+     * Load/save transcription files handles [xx:xx:xx.xxx] timestamps,
+       and ignored text
      * added player control toolbar
-  * Popups now use the AccumulatorPopup
-  * Added history as default view in the GUI
-  * Importer: use the userid as author for imported elements
-  * Added default_utbv and default_stbv metadata to package
-  * New action: OpenURL
-  * Implemented support for moviepath (config.data.path['moviepath'])
-  * Use an event queue for notify events, so that the GUI does not freeze when 
-    receiving input from webserver (player interaction, STBV selection, etc)
-  * Edit elements forms now do a simple check for the validity of TALES
-    expressions
-  * New config variables: 
-     * config.data.webserver['displaymode'] : default display mode (default or raw)
-     * config.data.path['moviepath'] : movie files search path
-  * Element edit widget: a simple validity check is applied on TALES expressions
+     * C-s shortcut to save transcription
+  
+  * Internal
+    * Identifiers are now generated through the IDGenerator 
+      module (more readable ids)
+    * Importer: use the userid as author for imported elements
+    * Evaluator: implemented dict key completion
+    * Use an event queue for notify events, so that the GUI 
+      does not freeze when receiving input from webserver 
+      (player interaction, STBV selection, etc)
+    * Edit elements forms now do a simple check 
+      for the validity of TALES expressions
   
  --
 
