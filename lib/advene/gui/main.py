@@ -460,11 +460,11 @@ class AdveneGUI (Connect):
     
     def update_stbv_menu (self):
         """Update the STBV menu."""
+        print "Updating stbv menu"
         stbv_menu = self.gui.get_widget("stbv_combo").get_menu()
         if stbv_menu is None:
             # Application initialization
             stbv_menu = gtk.Menu()
-            self.gui.get_widget("stbv_combo").set_menu(stbv_menu)
 
         for c in stbv_menu.get_children():
             stbv_menu.remove(c)
@@ -485,7 +485,7 @@ class AdveneGUI (Connect):
         stbv_menu.set_active(0)
         stbv_menu.reposition()
         stbv_menu.show_all()
-        self.gui.get_widget("stbv_combo").show_all()
+        self.gui.get_widget("stbv_combo").set_menu(stbv_menu)
         return True
 
     def update_gui (self):
@@ -658,10 +658,7 @@ class AdveneGUI (Connect):
         Callback used by file_selector.
         """
         file_ = fs.get_property ("filename")
-        if isinstance(file_, unicode):
-            file_=file_.encode('utf8')
-        self.controller.player.playlist_add_item (file_)
-        self.controller.update_status ("start")
+        self.controller.set_default_media(file_)
         return True
 
     def annotations_load_cb (self, button, fs):
@@ -1234,12 +1231,8 @@ class AdveneGUI (Connect):
         def validate(button=None, sel=None, window=None):
             self.controller.update_status("stop")
             url=sel.get_url()
-            self.controller.set_default_media(url)
             sel.get_widget().destroy()
-            self.controller.player.playlist_clear()
-            if isinstance(url, unicode):
-                url=url.encode('utf8')
-            self.controller.player.playlist_add_item (url)
+            self.controller.set_default_media(url)
             self.controller.update_status ("start")
             window.destroy()
             return True
@@ -1297,9 +1290,7 @@ class AdveneGUI (Connect):
         self.controller.package.date = self.gui.get_widget ("prop_date").get_text ()
 
         mediafile = self.gui.get_widget ("prop_media").get_text ()
-        self.controller.package.setMetaData (config.data.namespace,
-                                  "mediafile",
-                                  mediafile)
+        self.controller.set_default_media(mediafile)
         id_ = vlclib.mediafile2id (mediafile)
         self.controller.imagecache.save (id_)
 
