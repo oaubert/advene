@@ -40,6 +40,13 @@ class TitledElement:
         self.value=value
         self.title=title
 
+class TypedUnicode(unicode):
+    """Unicode string with a mimetype attribute.
+    """
+    def __init__(self, *p, **kw):
+        super(TypedUnicode, self).__init__(*p, **kw)
+        self.contenttype='text/plain'
+        
 class TypedString(str):
     """String with a mimetype attribute.
     """
