@@ -1,6 +1,58 @@
-* GUI for advene.util.importer
+* gui.popup should have a reference to the main gui, so that it can call
+  register_view and close_view_cb
 
-* The model should check the data validity (no duplicated id, valid id syntax, etc)
+* Views should memorize their position/size
+
+* Model related:
+
+** schema.author error ?? Cf importer.py (ElanImporter)
+
+** Make import work
+
+** Bug in util.uri.urljoin if pkg_uri == 'dummy:1' (get does not work
+in bundles). To exhibit: in ElanImporter, change the uri of the new
+package to 'dummy:1'
+
+** The model should check the data validity (no duplicated id, valid id syntax, etc)
+
+** Model: proper handling of exceptions (for instance, a view is
+imported and its id changes in the imported package -> KeyError
+exception)
+
+** Model: annotations should be sorted according to fragment.begin
+
+** Before that, implement a hook for LoadPackage and AnnotationEditEnd
+which sorts the annotations upon package load.
+
+** Clean the mediafile handling. It should be stored in fragments, or
+at least all fragments should be scanned upon package loading to
+determine the available stream(s) and propose them to the user.
+
+** Make some attributes inherited (esp. author for annotations, media for fragments)
+
+** The view method should return a Content object, so that we can get
+ its mimetype. *or* return a specialized class derived from (str,
+ object) that adds a mimetype property
+
+** The package/annotationTypes should have an 'ids' method, to be able
+to retrieve ids as keys (all bundles in fact).
+
+** Create a ContextualizedBundle which understands namespaces
+
+** Make the package a .zip file, with a MANIFEST, data.xml and
+resources/ directory
+
+** Fix package generation: upon loading, we discard the initial
+processing instruction (<?xml version="1.0" encoding="UTF-8"?>) from
+the DOM and do not restore it before saving, so it gets lost.
+
+
+
+* Action: DisplayPopup2, DisplayPopup3, DisplayPopup4 with additional
+parameters (general message + message1,position1 + message2,position2,
+...)
+
+* GUI for advene.util.importer
 
 * Add access to media duration from TALES
 
@@ -10,10 +62,6 @@
 
 * mediainformation: bugfix (player never active?)
 
-* Model: proper handling of exceptions (for instance, a view is
-imported and its id changes in the imported package -> KeyError
-exception)
-
 * EditAnnotationPopup: implement Next and Previous
 
 * Implement in the standard lib the notion of previous/next
@@ -22,11 +70,6 @@ annotation, of the same type or not.
 * Register all editing popup windows to close them upon package reload
 
 * Treeview: add the elements attributes as annotation/relation children.
-
-* Model: annotations should be sorted according to fragment.begin
-
-* Before that, implement a hook for LoadPackage and AnnotationEditEnd
-which sorts the annotations upon package load.
 
 * Element editing: add description field and edit content-type attribute
 
@@ -39,10 +82,6 @@ uri for the given player
 
 * MediaControl.idl: get_capabilities() returning a list of
   capabilities ("snapshot", "caption", "svg")
-
-* Clean the mediafile handling. It should be stored in fragments, or
-at least all fragments should be scanned upon package loading to
-determine the available stream(s) and propose them to the user.
 
 * Interface with http://www.archive.org/movies/ (XML files)
 
@@ -74,8 +113,6 @@ http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
 
 * Make the request object accessible in AdveneContext
 
-* Conditions: implement Allen's relations ?
-
 * Query MPEG7: http://www.idealliance.org/papers/extreme03/html/2001/Liu01/EML2001Liu01.html
 
 * To embed windows in gtk, use widget.window.xid (in X11) and
@@ -86,10 +123,6 @@ http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
 * Try to remove the dependency on PIL by using pixbuf loader to convert snapshots to PNG.
 
 * Timeline: add the possibility to add new annotations by clicking on the type
-
-* Fix package generation: upon loading, we discard the initial
-processing instruction (<?xml version="1.0" encoding="UTF-8"?>) from
-the DOM and do not restore it before saving, so it gets lost.
 
 * Create a CellRenderer for time values (with time adjustment integrated)
 
@@ -140,16 +173,8 @@ http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/285099
 
 * Fix for SVG module :
  - find a way to trigger the svg module rather than the freetype module
- - write an example subtitle file with SVG contents
 
 * Create a simple SVG editor (rectangle and ellipse) and integrate it in Advene
-
-* The view method should return a Content object, so that we can get
- its mimetype. *or* return a specialized class derived from (str,
- object) that adds a mimetype property
-
-* The package/annotationTypes should have an 'ids' method, to be able
-to retrieve ids as keys (all bundles in fact).
 
 * Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
 
@@ -169,8 +194,6 @@ style "blue_text"
 widget "sendmail.*.mail" style "blue_text"
 """
 gtk.rc_parse_string(sendmail_styles)
-
-* Create a ContextualizedBundle which understands namespaces
 
 * Find a meaningful way to concisely display relations and annotations.
 
@@ -216,8 +239,6 @@ simpler) and snapshot integration.
   * authorUrl on package ???
 
 * Implement an image-based timestamp chooser (with all_snapshots()) -> almost DONE
-
-* Make some attributes inherited (esp. author for annotations, media for fragments)
 
 * Use popup-menu signal (cf http://cvs.gnome.org/bonsai/cvsblame.cgi?file=gtk%2B%2Fdocs%2Freference%2Fgtk/migrating-checklist.sgml&rev=HEAD&root=/cvs/gnome)
 
@@ -460,3 +481,8 @@ events) -> DONE
 * Check id validity (no spaces) when creating elements (views) -> DONE
 
 * ELAN converter (http://www.mpi.nl/tools/elan.html) -> DONE
+
+* Add numbers in valid identifiers -> DONE
+
+* Conditions: implement Allen's relations -> DONE
+
