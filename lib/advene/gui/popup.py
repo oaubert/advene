@@ -75,6 +75,11 @@ class Menu:
             pop.edit ()
         return True
 
+    def browse_element (self, widget, el):
+        browser = advene.gui.views.browser.Browser(el)
+        browser.popup()
+        return True
+
     def delete_element (self, widget, el):
         p=el.ownerPackage
         if isinstance(el, Annotation):
@@ -157,6 +162,7 @@ class Menu:
 
         # Common to all other elements:
         add_item(_("Edit"), self.edit_element, element)
+        add_item(_("Browse"), self.browse_element, element)
 
         # Common to deletable elements
         if type(element) in (Annotation, Relation, View, Query,
