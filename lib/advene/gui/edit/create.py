@@ -23,6 +23,7 @@ from advene.model.view import View
 from advene.model.query import Query
 from advene.rules.elements import RuleSet, Rule, Event, Action
 
+import advene.gui.util
 import advene.gui.edit.rules
 import advene.gui.edit.elements
 import advene.rules.actions
@@ -74,8 +75,8 @@ class CreateElementPopup(object):
     def generate_id(self):
         return self.prefix[self.type_] + str(id(self)) + str(time.clock()).replace('.','')
 
-    def update_type(self, widget, t):
-        self.chosen_type = t
+    def update_type(self, combo):
+        self.chosen_type = combo.get_model().get_value(combo.get_active_iter(), 1)
         return True
     
     def build_widget(self):
@@ -131,21 +132,24 @@ class CreateElementPopup(object):
                 return None
 
             self.chosen_type = type_list[0]
-            
-            menu = gtk.Menu()
-            
-            for t in type_list:
-                i = gtk.MenuItem(t.title or t.id)
-                i.connect("activate", self.update_type, t)
-                i.show()
-                menu.append(i)
 
-            type_menu = gtk.OptionMenu()            
-            type_menu.set_menu(menu)
-            hbox.pack_start(type_menu)
+            store, i=advene.gui.util.generate_list_model(type_list,
+                                                          controller=self.controller,
+                                                          active_element=self.chosen_type)
+
+
+            type_combo = gtk.ComboBox(store)
+            type_combo.set_active(-1)
+            type_combo.set_active_iter(i)
+            cell = gtk.CellRendererText()
+            type_combo.pack_start(cell, True)
+            type_combo.add_attribute(cell, 'text', 0)
+            type_combo.connect("changed", self.update_type)
+            hbox.pack_start(type_combo)
             
             vbox.add(hbox)
 
+        vbox.show_all()
         return vbox
 
     def get_date(self):
