@@ -136,6 +136,10 @@ class AdveneController:
         
         if config.data.launch_http_server:
             self.server = advene.core.webserver.AdveneWebServer(controller=self)
+            # FIXME: we should check that no error is reported. If there is one,
+            # we should display a informative text ("there may be an existing application
+            # using the %d port"
+            
             # If == 1, it is the responbility of the Gtk app to set the input loop
             if config.data.launch_http_server == 2:
                 self.serverthread = threading.Thread (target=self.server.serve_forawhile)
@@ -552,9 +556,15 @@ class AdveneController:
         @param position: an optional position
         @type position: VLC.Position
         """
-        self.player.update_status (status, position)
-        if self.status2eventname.has_key (status):
-            self.event_handler.notify (self.status2eventname[status], position=position)
+        try:
+            self.player.update_status (status, position)
+        except Exception, e:
+            # FIXME: we should catch more specific exceptions and
+            # devise a better feedback than a simple print
+            print _("Raised exception in update_status: %s") % str(e)
+        else:
+            if self.status2eventname.has_key (status):
+                self.event_handler.notify (self.status2eventname[status], position=position)
         return
     
     def position_update (self):
