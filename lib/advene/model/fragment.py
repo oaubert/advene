@@ -259,11 +259,12 @@ class __FragmentFactory(dict):
        They are retrieved with the dict [] operator.
        
        Fragment classes must verify the following:
-       - have a getNamespaceUri() static or class method
-       - have a getLocalName() static or class method
-       - have a getAttributes() static method returning a dict
-       - they should be unmutable: the right way of changing the fragment of
-         an annotation is to re-set it rather than modifying the existing one
+       
+         - have a getNamespaceUri() static or class method
+         - have a getLocalName() static or class method
+         - have a getAttributes() static method returning a dict
+         - they should be unmutable: the right way of changing the fragment of
+           an annotation is to re-set it rather than modifying the existing one
     """
 
     def __init__(self):
