@@ -138,6 +138,10 @@ class AdveneGUI (Connect):
         self.gui = gtk.glade.XML(gladefile, domain=gettext.textdomain())
         self.connect (self.gui)
 
+        # Resize the main window
+        window=self.gui.get_widget('win')
+        self.init_window_size(window, 'main')
+        
         # Frequently used GUI widgets
         self.gui.logmessages = self.gui.get_widget("logmessages")
         self.gui.slider = self.gui.get_widget ("slider")
@@ -162,7 +166,7 @@ class AdveneGUI (Connect):
         # Declaration of the fileselector
         self.gui.fs = gtk.FileSelection ("Select a file")
         self.gui.fs.ok_button.connect_after ("clicked", lambda win: self.gui.fs.hide ())
-        self.gui.fs.cancel_button.connect ("clicked", lambda win: self.gui.fs.destroy ())
+        self.gui.fs.cancel_button.connect ("clicked", lambda win: self.gui.fs.hide ())
         if config.data.path['data']:
             d=config.data.path['data']
             if os.path.isdir(d) and not d.endswith(os.path.sep):
@@ -472,10 +476,6 @@ class AdveneGUI (Connect):
                            gtk.gdk.INPUT_READ,
                            self.handle_http_request)
 
-        # Resize the main window
-        window=self.gui.get_widget('win')
-        self.init_window_size(window, 'main')
-        
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
         gtk.timeout_add (100, self.update_display)
@@ -495,7 +495,7 @@ class AdveneGUI (Connect):
 
     def init_window_size(self, window, name):
         s=config.data.preferences['windowsize'].setdefault(name, (640,480))
-        window.set_default_size (s[0], s[1])
+        window.set_default_size (*s)
         window.connect ("size_allocate", self.resize_cb, name)
         return True
     
@@ -503,6 +503,7 @@ class AdveneGUI (Connect):
         """Memorize the new dimensions of the widget."""
         config.data.preferences['windowsize'][name] = (allocation.width,
                                                        allocation.height)
+        #print "New size for %s: %s" %  (name, config.data.preferences['windowsize'][name])
         return False
     
     def set_current_type (self, t):
@@ -775,12 +776,12 @@ class AdveneGUI (Connect):
         self.gui.fs.set_property ("select-multiple", False)
         self.gui.fs.set_property ("show-fileops", False)
 
+        # Disconnecting the old callback
+        try:
+            self.gui.fs.ok_button.disconnect (self.gui.fs.connect_id)
+        except:
+            pass
         if callback:
-            # Disconnecting the old callback
-            try:
-                self.gui.fs.ok_button.disconnect (self.gui.fs.connect_id)
-            except:
-                pass
             # Connecting the new one
             self.gui.fs.connect_id = self.gui.fs.ok_button.connect ("clicked", callback, self.gui.fs)
         self.gui.fs.show ()
@@ -881,7 +882,7 @@ class AdveneGUI (Connect):
             a=p.annotations[-1]
         except IndexError:
             a=None
-        ev=advene.gui.evaluator.Window(globals_={},
+        ev=advene.gui.evaluator.Window(globals_=globals(),
                                        locals_={'package': p,
                                                 'p': p,
                                                 'a': a,
@@ -893,6 +894,7 @@ class AdveneGUI (Connect):
         ev.hbox.add(b)
 
         self.init_window_size(w, 'evaluator')
+        
         return True
 
     def update_display (self):
