@@ -155,9 +155,9 @@ class Viewable(object):
         if isInstance(self, modeled.Modeled):
             if value:
                 views = self.getOwnerPackage().getViews()
-                for id in views.ids():
-                    if views[id] is value:
-                        self._getModel().setAttributeNS(None,'default-view', id)
+                for id_ in views.ids():
+                    if views[id_] is value:
+                        self._getModel().setAttributeNS(None,'default-view', id_)
                         return
                 raise AdveneException("%s not in owner package of %s" %
                                                                    (value,self))
