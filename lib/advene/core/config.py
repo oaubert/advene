@@ -128,6 +128,9 @@ class Config(object):
         # Update delay for position marker in views (in ms)
         self.slow_update_delay=200
 
+        # Reaction time offset (in ms) used when setting annotations
+        self.reaction_time=200
+
         # DragNDrop data
         self.TARGET_TYPE_ANNOTATION=42
         self.annotation_drag_type=[ ( "application/x-advene-annotation-id",

@@ -876,7 +876,7 @@ class AdveneGUI (Connect):
                 if self.current_type is None:
                     # FIXME: should display a warning
                     return True
-                f = MillisecondFragment (begin=c.player.current_position_value,
+                f = MillisecondFragment (begin=c.player.current_position_value--config.data.reaction_time,
                                          duration=30000)
                 self.annotation = c.package.createAnnotation(type = self.current_type,
                                                              fragment=f)                
@@ -884,7 +884,7 @@ class AdveneGUI (Connect):
                 self.controller.notify ("AnnotationCreate", annotation=self.annotation)
             else:
                 # End the annotation. Store it in the annotation list
-                self.annotation.fragment.end = c.player.current_position_value
+                self.annotation.fragment.end = c.player.current_position_value-config.data.reaction_time
                 f=self.annotation.fragment
                 if f.end < f.begin:
                     f.begin, f.end = f.end, f.begin
@@ -898,7 +898,7 @@ class AdveneGUI (Connect):
                     if self.current_type is None:
                         # FIXME: should display a warning
                         return True
-                    f = MillisecondFragment (begin=c.player.current_position_value,
+                    f = MillisecondFragment (begin=c.player.current_position_value-config.data.reaction_time,
                                              duration=30000)
                     self.annotation = c.package.createAnnotation(type = self.current_type,
                                                                  fragment=f)                
