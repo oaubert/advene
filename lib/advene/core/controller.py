@@ -582,6 +582,10 @@ class AdveneController:
         """
         position_before=self.player.current_position_value
         try:
+            if hasattr(position, 'value'):
+                print "update_status %s %i" % (status, position.value)
+            else:
+                print "update_status %s %s" % (status, position)
             self.player.update_status (status, position)
         except Exception, e:
             # FIXME: we should catch more specific exceptions and
