@@ -747,7 +747,8 @@ class EditRuleSetForm (EditForm):
 
         self.edit=advene.gui.edit.rules.EditRuleSet(rs,
                                                     catalog=self.controller.event_handler.catalog,
-                                                    editable=self.editable)
+                                                    editable=self.editable,
+                                                    controller=self.controller)
         self.view = self.edit.get_packed_widget()
 
         scroll_win = gtk.ScrolledWindow ()
