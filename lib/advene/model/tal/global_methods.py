@@ -56,7 +56,7 @@ def absolute_url(target, context):
                 break
             else:
                 suffix.insert (0, name)
-        print "Generated %s" % path
+        #print "Generated %s" % path
        
     if path is not None and context is not None:
         options = context.globals['options']
