@@ -894,7 +894,13 @@ class AdveneGUI (Connect):
                                                 'p': p,
                                                 'a': a,
                                                 'c': self.controller })
-        ev.popup()
+        w=ev.popup()
+        b=gtk.Button(stock=gtk.STOCK_CLOSE)
+        b.connect("clicked", lambda b: w.destroy())
+        b.show()
+        ev.hbox.add(b)
+
+        self.init_window_size(w, 'evaluator')
         return True
 
     def update_display (self):
