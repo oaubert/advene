@@ -107,7 +107,10 @@ class Menu:
         offset=advene.gui.util.entry_dialog(title='Enter an offset',
                                             text=_("Give the offset to use\non specified element.\nIt is in ms and can be\neither positive or negative."),
                                             default="0")
-        return long(offset)
+        if offset is not None:
+            return long(offset)
+        else:
+            return offset
     
     def offset_element (self, widget, el):
         offset = self.popup_get_offset()
@@ -287,9 +290,9 @@ class Menu:
         add_item("")
 
         item = gtk.MenuItem()
-        i = gtk.Image()
-        i.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.imagecache[element.fragment.begin]))
-        item.add (i)
+        item.add(advene.gui.util.image_from_position(self.controller,
+                                                     position=element.fragment.begin,
+                                                     height=60))
         item.connect("activate", self.goto_annotation, element)
         menu.append(item)
 
