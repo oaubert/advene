@@ -33,9 +33,9 @@ from gettext import gettext as _
 
 import advene.gui.edit.elements
 import advene.gui.edit.create
+import advene.gui.popup
 
-
-class AdveneListModel(gtk.GenericTreeModel):
+class SequenceModel(gtk.GenericTreeModel):
     COLUMN_BEGIN=0
     COLUMN_END=1
     COLUMN_DATA=2
@@ -60,11 +60,11 @@ class AdveneListModel(gtk.GenericTreeModel):
         return 0
     
     def on_get_n_columns(self):
-        return 5
+        return 6
     
     def on_get_column_type(self, index):
         # Data is stored as:
-        # begin, end, content, type, annotation
+        # begin, end, content, type, annotation, element, editable
         types=(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING,
                gobject.TYPE_STRING, gobject.TYPE_PYOBJECT, gobject.TYPE_BOOLEAN)
         return types[index]
@@ -135,7 +135,7 @@ class SequenceEditor:
         # annotations
         self.controller=controller
         self.package=controller.package
-        self.model = AdveneListModel(self.package.annotations)
+        self.model = SequenceModel(self.package.annotations)
 
         self.widget=self.build_widget()
 
@@ -155,26 +155,26 @@ class SequenceEditor:
         # Define the 4 cell renderers
         cell = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_("Begin"), cell,
-                                    text=AdveneListModel.COLUMN_BEGIN,
-                                    editable=AdveneListModel.COLUMN_EDITABLE)
+                                    text=SequenceModel.COLUMN_BEGIN,
+                                    editable=SequenceModel.COLUMN_EDITABLE)
         tree_view.append_column(column)
 
         cell = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_("End"), cell,
-                                    text=AdveneListModel.COLUMN_END,
-                                    editable=AdveneListModel.COLUMN_EDITABLE)
+                                    text=SequenceModel.COLUMN_END,
+                                    editable=SequenceModel.COLUMN_EDITABLE)
 
         tree_view.append_column(column)
 
         cell = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_("Data"), cell,
-                                    text=AdveneListModel.COLUMN_DATA,
-                                    editable=AdveneListModel.COLUMN_EDITABLE)
+                                    text=SequenceModel.COLUMN_DATA,
+                                    editable=SequenceModel.COLUMN_EDITABLE)
         tree_view.append_column(column)
 
         cell = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_("Type"), cell,
-                                    text=AdveneListModel.COLUMN_TYPE)
+                                    text=SequenceModel.COLUMN_TYPE)
         tree_view.append_column(column)
 
         tree_view.connect("button_press_event", self.tree_view_button_cb)
@@ -199,7 +199,7 @@ class SequenceEditor:
         node = None
         if it is not None:
             node = tree_view.get_model().get_value (it,
-                                                    AdveneListModel.COLUMN_ELEMENT)
+                                                    SequenceModel.COLUMN_ELEMENT)
         return node
     
     def tree_select_cb(self, tree_view, event):
@@ -234,104 +234,29 @@ class SequenceEditor:
                 path, col, cx, cy = t
                 iter = model.get_iter(path)
                 node = model.get_value(iter,
-                                       AdveneListModel.COLUMN_ELEMENT)
+                                       SequenceModel.COLUMN_ELEMENT)
                 widget.get_selection().select_path (path)
                 if button == 3:
-                    menu = self.make_popup_menu(node, path)
-                    menu.popup(None, None, None, button, event.time)
+                    menu=advene.gui.popup.Menu(node, controller=self.controller)
+                    menu.popup()
                     retval = True
         return retval
-
-    def popup_edit (self, button=None, node=None, path=None):
-        try:
-            pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                           controller=self.controller)
-        except TypeError, e:
-            print _("Error: unable to find an edit popup for %s:\n%s") % (node, str(e))
-        else:
-            pop.edit ()
-        return True
-    
-    def popup_delete (self, button=None, node=None, path=None):
-        print "Popup delete %s %s" % (node, path)
-        assert isinstance (node, Annotation)
-        # Remove the element from the data
-        a = node.rootPackage.annotations
-        i = a.index (node)
-        del (a[i])
-        # Invalidate the model cache
-        self.model.remove_element (node)
-        return True
-    
-    def popup_display (self, button=None, node=None, path=None):
-        pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                       controller=self.controller)
-        if pop is not None:
-            pop.display ()
-        else:
-            print _("Error: unable to find an edit popup for %s") % node
-        return True
-
-    def annotation_cb (self, widget=None, node=None):
-        return True
-
-    def create_element_cb(self, widget, elementtype=None, parent=None):
-        print "Creating a %s in %s" % (elementtype, parent)
-        cr = advene.gui.edit.create.CreateElementPopup(type_=elementtype,
-                                                       parent=parent)
-        cr.popup()
-        return True
-    
-    def make_popup_menu(self, node=None, path=None):
-        menu = gtk.Menu()
-
-        def add_menuitem(menu, item, action, *param):
-            item = gtk.MenuItem(item)
-            item.connect("activate", action, *param)
-            menu.append(item)
-            
-        if isinstance (node, Package):
-            title=node.title
-        elif isinstance (node, AbstractBundle):
-            title = node.viewableType
-        else:
-            try:
-                title=node.id
-            except:
-                title="????"
-        item = gtk.MenuItem("%s %s" % (node.viewableClass, title))
-        menu.append(item)
-
-        item = gtk.SeparatorMenuItem()
-        menu.append(item)
-
-        add_menuitem(menu, _("Edit"), self.popup_edit, node, path)
-
-        if isinstance (node, Annotation):
-            add_menuitem(menu, _("Picture..."), self.annotation_cb, node)
-
-        if isinstance(node, Package):
-            add_menuitem(menu, _("Create a new view..."), self.create_element_cb, View, node)
-            add_menuitem(menu, _("Create a new annotation..."), self.create_element_cb, Annotation, node)
-            add_menuitem(menu, _("Create a new relation..."), self.create_element_cb, Relation, node)
-            add_menuitem(menu, _("Create a new schema..."), self.create_element_cb, Schema, node)
-
-        add_menuitem(menu, _("Display"), self.popup_display, node, path)
-
-        menu.show_all()
-        return menu
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Should provide a package name"
         sys.exit(1)
 
+    import advene.core.imagecache
+    
     class DummyController:
-        pass
+        def notify(self, *p, **kw):
+            print "Notify %s %s" % (p, kw)
 
     controller=DummyController()
     
     controller.package = Package (uri=sys.argv[1])
+    controller.imagecache = advene.core.imagecache.ImageCache()
     
     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
     window.set_size_request (640, 480)
@@ -376,15 +301,15 @@ if __name__ == "__main__":
             if event.keyval == gtk.keysyms.q:
                 gtk.main_quit ()
                 return True
-        elif event.keyval == gtk.keysyms.Return:
-            # Open popup to edit current element
-            node=seq.get_selected_node()
-            pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                           controller=controller)
-            if pop is not None:
-                pop.display ()
-            else:
-                print _("Error: unable to find an edit popup for %s") % node
+            elif event.keyval == gtk.keysyms.Return:
+                # Ctrl-return to Open popup to edit current element
+                node=seq.get_selected_node()
+                pop = advene.gui.edit.elements.get_edit_popup (node,
+                                                               controller=controller)
+                if pop is not None:
+                    pop.display ()
+                else:
+                    print _("Error: unable to find an edit popup for %s") % node
         return False            
 
     window.connect ("key-press-event", key_pressed_cb)
