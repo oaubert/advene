@@ -4,6 +4,8 @@ advene (project) unstable; urgency=low
   
   * Implemented (unusable) vlchttp (too slow)
 
+  * Implemented update of relationtype.membertypes
+
  --
 
 advene (0.11) unstable; urgency=low
