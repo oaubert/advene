@@ -369,6 +369,8 @@ class AdveneGUI (Connect):
 
         self.controller.event_handler.internal_rule (event="PackageLoad",
                                                      method=self.manage_package_load)
+        self.controller.event_handler.internal_rule (event="PackageSave",
+                                                     method=self.manage_package_save)
         # Annotation lifecycle
         for e in ('AnnotationCreate', 'AnnotationEditEnd', 'AnnotationDelete',
                   'AnnotationActivate', 'AnnotationDeactivate'):
@@ -552,6 +554,17 @@ class AdveneGUI (Connect):
 
         self.update_stbv_menu()
         return
+
+    def manage_package_save (self, context, parameters):
+        """Event Handler executed after saving a package.
+
+        self.controller.package should be defined.
+
+        @return: a boolean (~desactivation)
+        """
+        self.log (_("Package %s saved. %d annotations.") % (self.controller.package.uri,
+                                                            len(self.controller.package.annotations)))
+        return True
 
     def manage_package_load (self, context, parameters):
         """Event Handler executed after loading a package.
