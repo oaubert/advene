@@ -216,7 +216,9 @@ class Player(object):
         if self.dvd_device is None:
             return ""
         else:
-            return "dvdsimple://%s@%s:%s" % (str(title), str(chapter))
+            return "dvdsimple://%s@%s:%s" % (self.dvd_device,
+                                             str(title),
+                                             str(chapter))
 
     def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
