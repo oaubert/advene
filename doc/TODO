@@ -1,3 +1,5 @@
+* webserver: implement a wiki-like syntax in views that dynamically generates links to Advene elements/TALES expressions (define a application/x-advene-wiki that will get converted into a 
+
 * timeline: add init parameter "whole package" (or None: if self.list is None, use self.controller.package.annotations)
 
 * Implement zeroconf support: http://www.amk.ca/python/zeroconf
