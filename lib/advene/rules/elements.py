@@ -632,10 +632,10 @@ class Query:
         self.to_dom(querydom)
         if stream is None:
             stream=open(uri, 'w')
-            xml.dom.ext.PrettyPrint(rulesetdom, stream)
+            xml.dom.ext.PrettyPrint(querydom, stream)
             stream.close()
         else:
-            xml.dom.ext.PrettyPrint(rulesetdom, stream)
+            xml.dom.ext.PrettyPrint(querydom, stream)
         
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
