@@ -15,6 +15,7 @@ from gettext import gettext as _
 
 import advene.gui.edit.elements
 import advene.gui.edit.create
+import advene.gui.popup
 
 import pygtk
 pygtk.require ('2.0')
@@ -319,14 +320,10 @@ class FlatTreeModel(AdveneTreeModel):
         return (children is not None and children)
 
 class TreeWidget:
-    def __init__(self, package, modelclass=DetailedTreeModel,
-                 annotation_cb=None, controller=None):
+    def __init__(self, package, modelclass=DetailedTreeModel, controller=None):
         self.package = package
         self.controller=controller
         self.modelclass=modelclass
-
-        if annotation_cb is not None:
-            self.annotation_cb = annotation_cb
 
         self.model = modelclass(package)
 
@@ -401,39 +398,11 @@ class TreeWidget:
                                        AdveneTreeModel.COLUMN_ELEMENT)
                 widget.get_selection().select_path (path)
                 if button == 3:
-                    menu = self.make_popup_menu(node, path)
-                    menu.popup(None, None, None, button, event.time)
+                    menu = advene.gui.popup.Menu(node, controller=self.controller)
+                    menu.popup()
                     retval = True
         return retval
-
-    def popup_edit (self, button=None, node=None, path=None):
-        try:
-            pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                           controller=self.controller)
-        except TypeError, e:
-            print _("Error: unable to find an edit popup for %s:\n%s") % (node, str(e))
-        else:
-            pop.edit ()
-        return True
     
-    def popup_delete (self, button=None, node=None, path=None):
-        print "Popup delete %s %s" % (node, path)
-        # FIXME: implement delete for other elements: Relation, Relation/AnnotationType
-        # Schema, View
-        assert isinstance (node, Annotation)
-        # Remove the element from the data
-        self.controller.delete_annotation(node)
-        return True
-    
-    def popup_display (self, button=None, node=None, path=None):
-        pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                       controller=self.controller)
-        if pop is not None:
-            pop.display ()
-        else:
-            print _("Error: unable to find an edit popup for %s") % node
-        return True
-
     def update_annotation(self, annotation):
         """Update the annotation.
         """
@@ -455,76 +424,6 @@ class TreeWidget:
         self.model.remove_element (annotation)
         return
     
-    def annotation_cb (self, widget=None, node=None):
-        # This method is overwritten by the calling widget to
-        # display a popup menu
-        return True
-
-    def create_element_cb(self, widget, elementtype=None, parent=None):
-        print "Creating a %s in %s" % (elementtype, parent)
-        cr = advene.gui.edit.create.CreateElementPopup(type_=elementtype,
-                                                       parent=parent,
-                                                       controller=self.controller)
-        cr.popup()
-        return True
-
-    def delete_element_cb(self, widget, element):
-        p=element.ownerPackage
-        if isinstance(element, Annotation):
-            p.annotations.remove(element)
-            self.controller.notify('AnnotationDelete', annotation=element)
-        elif isinstance(element, Relation):
-            p.relations.remove(element)
-            self.controller.notify('RelationDelete', relation=element)
-        return True
-    
-    def make_popup_menu(self, node=None, path=None):
-        menu = gtk.Menu()
-
-        def add_menuitem(menu, item, action, *param):
-            item = gtk.MenuItem(item)
-            item.connect("activate", action, *param)
-            menu.append(item)
-            
-        if isinstance (node, Package):
-            title=node.title
-        elif isinstance (node, AbstractBundle):
-            title = node.viewableType
-        else:
-            try:
-                title=node.id
-            except:
-                title="????"
-        item = gtk.MenuItem("%s %s" % (node.viewableClass, title))
-        menu.append(item)
-
-        item = gtk.SeparatorMenuItem()
-        menu.append(item)
-
-        add_menuitem(menu, _("Edit"), self.popup_edit, node, path)
-
-        if isinstance (node, Annotation):
-            add_menuitem(menu, _("Picture..."), self.annotation_cb, node)
-            add_menuitem(menu, _("Delete annotation"), self.delete_element_cb, node)
-
-        if isinstance(node, Relation):
-            add_menuitem(menu, _("Delete relation"), self.delete_element_cb, node)
-
-        if isinstance(node, Package):
-            add_menuitem(menu, _("Create a new view..."), self.create_element_cb, View, node)
-            add_menuitem(menu, _("Create a new annotation..."), self.create_element_cb, Annotation, node)
-            add_menuitem(menu, _("Create a new relation..."), self.create_element_cb, Relation, node)
-            add_menuitem(menu, _("Create a new schema..."), self.create_element_cb, Schema, node)
-
-        if isinstance(node, Schema):
-            add_menuitem(menu, _("Create a new annotation type..."), self.create_element_cb, AnnotationType, node)
-            add_menuitem(menu, _("Create a new relation type..."), self.create_element_cb, RelationType, node)
-
-        add_menuitem(menu, _("Display"), self.popup_display, node, path)
-
-        menu.show_all()
-        return menu
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Should provide a package name"

@@ -31,8 +31,6 @@ class TimeLine:
                   minimum=None,
                   maximum=None,
                   adjustment=None,
-                  annotation_cb=None,
-                  context_cb=None,
                   controller=None):
         
         self.list = l
@@ -54,20 +52,7 @@ class TimeLine:
         # Scroll the window to display the activated annotations 
         self.scroll_to_activated_toggle=gtk.CheckButton(_("Scroll to active annotation"))
         self.scroll_to_activated_toggle.set_active (True)
-        
-        # The annotation_cb is called with the corresponding annotation
-        # as parameter. It can be overriden by the TimeLine parent, in order
-        # to define more precisely the interaction model
-        if annotation_cb is not None:
-            self.annotation_cb=annotation_cb
-
-        # The context_cb is called upon right mouse button press.
-        # It is given the timeline as well as the position in ms as parameter.
-        # It can be overriden by the TimeLine parent, in order
-        # to define more precisely the interaction model
-        if context_cb is not None:
-            self.context_cb=context_cb
-            
+                    
         # FIXME: Hardcoded values are bad...
         # Maybe we should ask pango the height of 'l' plus margins
         self.button_height = 30
@@ -286,16 +271,8 @@ class TimeLine:
         return True
         
     def annotation_cb (self, widget, ann):
-        # This method can be overriden by the Timeline parent in order
-        # to give more precise control
-        self.toggle_annotation (ann)
-        return True
-        try:
-            pop = advene.gui.edit.elements.get_edit_popup (ann, self.controller)
-        except TypeError, e:
-            print _("Error: unable to find an edit popup for %s:\n%s") % (ann, str(e))
-        else:
-            pop.edit (callback=self.update_annotation)
+        menu=advene.gui.popup.Menu(ann, controller=self.controller)
+        menu.popup()
         return True
 
     def dump_adjustment (self):
@@ -515,8 +492,42 @@ class TimeLine:
         return False
 
     def context_cb (self, timel=None, position=None):
-        print _("Time: %s") % timel.format_time (position)
+        # This callback is called on a right-mouse-button press
+        # in the timeline display. It is called with the
+        # current position (in ms)
+        menu = gtk.Menu()
 
+        def popup_goto (win, position):
+            c=self.controller
+            pos = c.create_position (value=position,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            self.controller.update_status (status="set", position=pos)
+            return True
+
+        def copy_value(win, position):
+            timel.set_selection(position)
+            timel.activate_selection()
+            return True
+
+        item = gtk.MenuItem(_("Position %s") % timel.format_time(position))
+        menu.append(item)
+
+        item = gtk.SeparatorMenuItem()
+        menu.append(item)
+
+        item = gtk.MenuItem(_("Go to..."))
+        item.connect("activate", popup_goto, position)
+        menu.append(item)
+
+        item = gtk.MenuItem(_("Copy value into clipboard"))
+        item.connect("activate", copy_value, position)
+        menu.append(item)
+
+        menu.show_all()
+        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        return True
+            
     def set_selection_marker (self, position):
         x=self.unit2pixel(position)
         if self.selection_marker is None:
