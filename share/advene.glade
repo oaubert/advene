@@ -759,55 +759,6 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkCombo" id="current_type_combo">
-	      <property name="visible">True</property>
-	      <property name="value_in_list">True</property>
-	      <property name="allow_empty">False</property>
-	      <property name="case_sensitive">False</property>
-	      <property name="enable_arrow_keys">True</property>
-	      <property name="enable_arrows_always">True</property>
-	      <signal name="selection-changed" handler="on_current_type_combo_selection_change:" last_modification_time="Thu, 15 May 2003 15:20:01 GMT"/>
-
-	      <child internal-child="entry">
-		<widget class="GtkEntry" id="current_type_entry">
-		  <property name="visible">True</property>
-		  <property name="can_focus">True</property>
-		  <property name="editable">False</property>
-		  <property name="visibility">True</property>
-		  <property name="max_length">0</property>
-		  <property name="text" translatable="yes"></property>
-		  <property name="has_frame">True</property>
-		  <property name="invisible_char" translatable="yes">*</property>
-		  <property name="activates_default">False</property>
-		</widget>
-	      </child>
-
-	      <child internal-child="list">
-		<widget class="GtkList" id="combo-list1">
-		  <property name="visible">True</property>
-		  <property name="selection_mode">GTK_SELECTION_BROWSE</property>
-		  <signal name="selection_changed" handler="on_current_type_combo_selection_changed" last_modification_time="Thu, 15 May 2003 15:24:49 GMT"/>
-
-		  <child>
-		    <widget class="GtkListItem" id="listitem29">
-		      <property name="visible">True</property>
-		      <property name="can_focus">True</property>
-		      <property name="label" translatable="yes">None</property>
-		    </widget>
-		  </child>
-		</widget>
-	      </child>
-	    </widget>
-	    <packing>
-	      <property name="left_attach">1</property>
-	      <property name="right_attach">2</property>
-	      <property name="top_attach">1</property>
-	      <property name="bottom_attach">2</property>
-	      <property name="y_options"></property>
-	    </packing>
-	  </child>
-
-	  <child>
 	    <widget class="GtkLabel" id="label20">
 	      <property name="visible">True</property>
 	      <property name="label" translatable="yes">Player Status</property>
@@ -886,10 +837,9 @@
 	      <property name="spacing">0</property>
 
 	      <child>
-		<widget class="GtkOptionMenu" id="stbv_combo">
+		<widget class="GtkComboBox" id="stbv_combo">
 		  <property name="visible">True</property>
-		  <property name="can_focus">True</property>
-		  <property name="history">-1</property>
+		  <signal name="changed" handler="on_stbv_combo_changed" last_modification_time="Tue, 12 Oct 2004 20:42:13 GMT"/>
 		</widget>
 		<packing>
 		  <property name="padding">0</property>
@@ -978,6 +928,21 @@
 	      <property name="right_attach">2</property>
 	      <property name="top_attach">2</property>
 	      <property name="bottom_attach">3</property>
+	      <property name="x_options">fill</property>
+	      <property name="y_options">fill</property>
+	    </packing>
+	  </child>
+
+	  <child>
+	    <widget class="GtkComboBox" id="current_type_combo">
+	      <property name="visible">True</property>
+	      <signal name="changed" handler="on_current_type_combo_changed" last_modification_time="Tue, 12 Oct 2004 20:42:00 GMT"/>
+	    </widget>
+	    <packing>
+	      <property name="left_attach">1</property>
+	      <property name="right_attach">2</property>
+	      <property name="top_attach">1</property>
+	      <property name="bottom_attach">2</property>
 	      <property name="x_options">fill</property>
 	      <property name="y_options">fill</property>
 	    </packing>
