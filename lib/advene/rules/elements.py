@@ -494,7 +494,7 @@ class ECACatalog:
         'PlayerSet': _("Going to a given position"),
         'PackageLoad': _("Loading a new package"),
         'PackageSave': _("Saving the package"),
-        'ViewActivation': _("Start of a dynamic view"),
+        'ViewActivation': _("Start of the dynamic view"),
         'ApplicationStart': _("Start of the application"),
         'ApplicationEnd': _("End of the application")
         }
