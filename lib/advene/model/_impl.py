@@ -341,8 +341,8 @@ class Uried(Ided):
         want to set the parameter _absolute_.
         """
         base = self.__base.getUri (absolute, context)
-        id = Ided.getId (self) # avoid overridden versions of getId
-        return advene.model.util.uri.push (base, id)
+        id_ = Ided.getId (self) # avoid overridden versions of getId
+        return advene.model.util.uri.push (base, id_)
 
     uri = property(getUri)
 
