@@ -165,10 +165,11 @@ class EditRuleSet(EditGeneric):
     
 class EditQuery(EditGeneric):
     """Edit form for Query"""
-    def __init__(self, query, editable=True):
+    def __init__(self, query, controller=None, editable=True):
         self.model=query
         self.sourceentry=None
         self.valueentry=None
+        self.controller=controller
         self.editconditionlist=[]
         self.editable=editable
         self.widget=self.build_widget()
