@@ -164,7 +164,7 @@ class Config(object):
             object = compile (li, conffile, 'single')
             try:
                 exec object
-            except e:
+            except Exception, e:
                 print "Error in %s:\n%s" % (conffile, str(e))
         file.close ()
 
