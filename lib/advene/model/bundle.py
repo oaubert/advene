@@ -354,7 +354,7 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
             if e._get_namespaceURI () != ns \
             or e._get_localName () !=ln:
                 continue
-            item = make_item (parent, e)
+            item = make_item (parent, element=e)
             list_append (item)
 
             uri = item.getUri (absolute=True)
@@ -507,7 +507,7 @@ class RefBundle (AbstractXmlBundle):
     def _get_local_name (self):
         return self.__local_name
 
-    def _make_item (self, parent, element):
+    def _make_item (self, parent=None, element=None):
         href = element.getAttributeNS (xlinkNS, 'href')
         base_uri = self._getParent ().getUri (absolute=True)
         uri = advene.model.util.uri.urljoin(base_uri, href)
@@ -582,8 +582,8 @@ class InverseDictBundle (StandardXmlBundle):
         self.__inverse_dict[self.__inverse_key (item)] = item.getUri (
                                                                   absolute=True)
 
-    def _make_item (self, parent, element):
-        item = super (InverseDictBundle, self)._make_item (parent, element)
+    def _make_item (self, parent=None, element=None):
+        item = super (InverseDictBundle, self)._make_item (parent=parent, element=element)
         self.__inverse_dict[self.__inverse_key (item)] = item.getUri (
                                                                   absolute=True)
         return item
