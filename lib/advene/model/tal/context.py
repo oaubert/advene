@@ -100,11 +100,12 @@ class _advene_context (simpleTALES.Context):
                 ref = self.globals['here']
             else:
                 ref = None
-            if ref is not None:
-                pkg = ref.getOwnerPackage ()
-                ns_dict = pkg.getImports ().getInverseDict ()
-                ns_dict[''] = pkg.getUri (absolute=True)
-                val = obj.getQName (path, ns_dict, None)
+	    if ref is None:
+	        ref = obj
+	    pkg = ref.getOwnerPackage ()
+	    ns_dict = pkg.getImports ().getInverseDict ()
+	    ns_dict[''] = pkg.getUri (absolute=True)
+	    val = obj.getQName (path, ns_dict, None)
 
         return val
 
