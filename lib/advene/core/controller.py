@@ -415,9 +415,12 @@ class AdveneController:
         return True
 
     def get_stbv_list(self):
-        return [ v
-                 for v in self.package.views
-                 if v.content.mimetype == 'application/x-advene-ruleset' ]
+        if self.package:
+            return [ v
+                     for v in self.package.views
+                     if v.content.mimetype == 'application/x-advene-ruleset' ]
+        else:
+            return []
 
     def activate_stbv(self, view=None):
         """Activates a given STBV.
