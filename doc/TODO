@@ -1,6 +1,32 @@
-* Add parameters to TimeLine view (displayed annotation types, zoom)
+* Popups: white on black background
 
-* TranscriptionEdit: add a player control toolbar
+* popups : add context (timecode + snapshot) + title frame
+
+* Implement a generic VisualisationWidget that can be either embedded
+in the main Advene, either in its own window (video + views).
+
+* fix bug (segmentation fault) when an annotation.begin == 0 (cf event handler)
+
+* controller.update: implement a future_approaching and a
+future_leaving to implement a -2 seconds before / +2 seconds after
+annotation event.
+
+* main: implement a get_control_toolbar() method
+
+* TranscriptionEdit: add a player control toolbar (in fact, the player
+control toolbar should be available in all views)
+
+* Windows: package libsnapshot_plugin.dll (with MediaControl ?)
+
+* Importer: fix automatic filter selection (get_importer) esp. for XML
+files (use DTD)
+
+* Add a "release" script that updates the version number in:
+  debian/changelog
+  lib/advene/core/version.py (+ date)
+  advene.iss
+
+* Add parameters to TimeLine view (displayed annotation types, zoom)
 
 * Morphix image : use Ubuntu as a base (pygtk included). Manque vlc + python-vlc
 
@@ -11,8 +37,6 @@
 * Correct bug when no type is present (cf export_views.xml)
 
 * timeline: directly create annotations
-
-* timeline (362): remove deprecated OptionMenu
 
 * DND on annotations in timeline : offer menu: Align annotations/Create relation. If same type, only offer "Extend to reach this annotation" ?
 
@@ -732,4 +756,6 @@ valid DVD uri for the given player -> DONE
 * Importer: mark the imported package as non_saved
 
 * EditTranscription: view for editing a transcription and putting timestamps (live) in it, in order to generate annotations. -> DONE
+
+* timeline (362): remove deprecated OptionMenu -> DONE
 
