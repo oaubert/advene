@@ -1,3 +1,7 @@
+* Add new action: open new ad-hoc view
+
+* Save ad-hoc view parameters as another view
+
 * VLC idea:
 r8623 | zorglub | 2004-09-01 22:02:17 +0200 (Wed, 01 Sep 2004) | 2 lines
 Changed paths:
@@ -11,7 +15,7 @@ badly written symbol) and display a meaningful message
 
 * Merge gui.edit.timechooser and gui.views.history
 
-* Rename advene.util.vlclib to something more meaningful (misc?)
+* Rename advene.util.vlclib to something more meaningful (helper)
 
 * Import elements GUI: implement "Add/Remove package" -> ready, but need the corresponding method in the model to remove
 
@@ -594,3 +598,11 @@ to implement a "Return to last position") -> DONE (navigation history)
 separator, display marks, apply expression (for structured content) -> DONE
 
 * Implement an image-based timestamp chooser (with all_snapshots()) -> DONE
+
+* create.py: when creating a new dynamic view, create also the first rule -> DONE
+
+* Transcription view: add a "Save as" button -> DONE
+
+* bootstrap: Implement queries next and next_global that return the next
+annotation of the same type, or global -> DONE
+
