@@ -448,6 +448,10 @@ class TreeWidget:
         self.update_element(view, event)
         return
     
+    def update_query(self, query=None, event=None):
+        self.update_element(query, event)
+        return
+    
     def update_schema(self, schema=None, event=None):
         self.update_element(schema, event)
         return
