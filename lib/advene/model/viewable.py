@@ -105,7 +105,10 @@ class Viewable(object):
         result = cStringIO.StringIO()
         #result.write((u"<!-- view %s applied to %s -->\n"
         #              % (unicode(view), unicode(self))).encode('utf-8'))
-        context.addLocals( (('here', self), ('view', view)) )
+        #context.addLocals( (('here', self), ('view', view)) )
+        context.pushLocals()
+        context.setLocal('here', self)
+        context.setLocal('view', view)
         context.interpret(view_source, mimetype, result)
         context.popLocals ()
         return result.getvalue().decode('utf-8')
