@@ -239,6 +239,11 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if as.startswith('file:///'):
             as = as[7:]
 
+        if sre.match('|/', as):
+            # Windows drive: notation. Convert it from
+            # a more URI-compatible syntax
+            as=urllib.url2pathname(as)
+
         stream = open (as, "w")
         self.serialize(stream)
         stream.close ()
