@@ -542,7 +542,11 @@ class ElanImporter(GenericImporter):
             raise Exception('Cannot process non-millisecond fragments')
 
         for a in elan.TIME_ORDER[0].TIME_SLOT:
-            self.anchors[a.TIME_SLOT_ID] = long(a.TIME_VALUE)
+            try:
+                self.anchors[a.TIME_SLOT_ID] = long(a.TIME_VALUE)
+            except AttributeError, e:
+                # FIXME: should not silently ignore error
+                self.anchors[a.TIME_SLOT_ID] = 0
 
         # Process types
         for lt in elan.LINGUISTIC_TYPE:
