@@ -354,7 +354,7 @@ class TreeWidget:
         store, it = selection.get_selected()
         node = None
         if it is not None:
-            node = tree_view.get_model().get_value (iter,
+            node = tree_view.get_model().get_value (it,
                                                     advene.gui.edit.elements.EditAttributesForm.COLUMN_VALUE)
         return node
     
@@ -483,8 +483,8 @@ if __name__ == "__main__":
     sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
     vbox.add (sw)
         
-    tree = TreeWidget(package, modelclass=FlatTreeModel)
-    #tree = TreeWidget(package, modelclass=DetailedTreeModel)
+    #tree = TreeWidget(package, modelclass=FlatTreeModel)
+    tree = TreeWidget(package, modelclass=DetailedTreeModel)
     
     sw.add (tree.get_widget())
 
