@@ -51,6 +51,8 @@ class BrowserColumn:
 
     def row_activated(self, widget, treepath, treecolumn):
         att=widget.get_model()[treepath[0]][0]
+        if att.startswith('----'):
+            return True
         if self.callback:
             self.callback(self, att)
         return True
@@ -68,6 +70,8 @@ class BrowserColumn:
                 store, it = selection.get_selected()
                 if it is not None:
                     att = widget.get_model().get_value (it, 0)
+        if att and att.startswith('----'):
+            return True                    
         if att and self.callback:
             self.callback(self, att)
             return True
@@ -79,6 +83,8 @@ class BrowserColumn:
             store, it = selection.get_selected()
             if it is not None:
                 att = model.get_value (it, 0)
+        if att and att.startswith('----'):
+            return True
         if att and self.callback:
             self.callback(self, att)
             return True
