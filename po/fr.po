@@ -1,13 +1,12 @@
 # Advene french translation
 # Copyright (C)2004 Olivier Aubert
 # This file is distributed under the same license as the Advene package.
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-03-27 17:46+0200\n"
-"PO-Revision-Date: 2005-03-27 17:47+0200\n"
+"PO-Revision-Date: 2005-03-27 18:00+0200\n"
 "Last-Translator: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
 "MIME-Version: 1.0\n"
