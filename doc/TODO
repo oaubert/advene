@@ -1,3 +1,5 @@
+* Debian package: add python-xml python-simpletal dependencies
+
 * Advenelib: implement AnnotationType and RelationType creation methods.
 
 * Create a unique logger in controller and use exclusively this one in all modules.
