@@ -279,7 +279,7 @@ class EditQuery(EditGeneric):
         self.sourceentry.set_editable(self.editable)
         ef.add(self.sourceentry.widget)
         ef.show_all()
-        vbox.pack_start(ef, expand=gtk.FALSE)
+        vbox.pack_start(ef, expand=False)
 
         # Return value
         vf=gtk.Frame(_("Return "))
@@ -292,7 +292,7 @@ class EditQuery(EditGeneric):
         self.valueentry.set_editable(self.editable)
         vf.add(self.valueentry.widget)
         vf.show_all()
-        vbox.pack_start(vf, expand=gtk.FALSE)
+        vbox.pack_start(vf, expand=False)
 
         # Conditions
         cf=gtk.Frame(_("If the element matches "))
@@ -304,9 +304,9 @@ class EditQuery(EditGeneric):
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect("clicked", self.add_condition, conditionsbox)
         b.set_sensitive(self.editable)
-        hb.pack_start(b, expand=gtk.FALSE)
-        hb.set_homogeneous(gtk.FALSE)
-        conditionsbox.pack_start(hb, expand=gtk.FALSE, fill=gtk.FALSE)
+        hb.pack_start(b, expand=False)
+        hb.set_homogeneous(False)
+        conditionsbox.pack_start(hb, expand=False, fill=False)
 
         cf.show_all()
 
@@ -314,7 +314,7 @@ class EditQuery(EditGeneric):
             for c in self.model.condition:
                 self.add_condition_widget(c, conditionsbox)
 
-        vbox.pack_start(cf, expand=gtk.FALSE)
+        vbox.pack_start(cf, expand=False)
 
         frame.show()
 
@@ -478,7 +478,7 @@ class EditRule(EditGeneric):
                                  editable=self.editable, controller=self.controller)
         ef.add(self.editevent.get_widget())
         ef.show_all()
-        vbox.pack_start(ef, expand=gtk.FALSE)
+        vbox.pack_start(ef, expand=False)
 
         # Conditions
         cf=gtk.Frame(_("If"))
@@ -490,9 +490,9 @@ class EditRule(EditGeneric):
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect("clicked", self.add_condition, conditionsbox)
         b.set_sensitive(self.editable)
-        hb.pack_start(b, expand=gtk.FALSE)
-        hb.set_homogeneous(gtk.FALSE)
-        conditionsbox.pack_start(hb, expand=gtk.FALSE, fill=gtk.FALSE)
+        hb.pack_start(b, expand=False)
+        hb.set_homogeneous(False)
+        conditionsbox.pack_start(hb, expand=False, fill=False)
 
         cf.show_all()
 
@@ -515,14 +515,14 @@ class EditRule(EditGeneric):
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect("clicked", self.add_action, actionsbox)
         b.set_sensitive(self.editable)
-        hb.pack_start(b, expand=gtk.FALSE)
-        hb.set_homogeneous(gtk.FALSE)
-        actionsbox.pack_start(hb, expand=gtk.FALSE, fill=gtk.FALSE)
+        hb.pack_start(b, expand=False)
+        hb.set_homogeneous(False)
+        actionsbox.pack_start(hb, expand=False, fill=False)
 
         for a in self.model.action:
             self.add_action_widget(a, actionsbox)
 
-        vbox.pack_start(af, expand=gtk.FALSE)
+        vbox.pack_start(af, expand=False)
         af.show_all()
 
         frame.show()
@@ -550,7 +550,7 @@ class EditEvent(EditGeneric):
 
     def build_widget(self):
         hbox=gtk.HBox()
-        hbox.set_homogeneous(gtk.FALSE)
+        hbox.set_homogeneous(False)
 
         label=gtk.Label(_("When the "))
         hbox.pack_start(label)
@@ -834,7 +834,7 @@ if __name__ == "__main__":
     w.connect ("destroy", lambda e: gtk.main_quit())
 
     vbox=gtk.VBox()
-    vbox.set_homogeneous (gtk.FALSE)
+    vbox.set_homogeneous (False)
     w.add(vbox)
 
     edit=EditRuleSet(ruleset, catalog, controller=controller)
@@ -874,7 +874,7 @@ if __name__ == "__main__":
 
     hb.show_all()
 
-    vbox.pack_start(hb, expand=gtk.FALSE)
+    vbox.pack_start(hb, expand=False)
     vbox.show()
 
     w.show()
