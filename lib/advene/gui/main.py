@@ -62,6 +62,7 @@ import advene.gui.evaluator
 import advene.gui.views.singletonpopup
 import advene.gui.edit.imports
 from advene.gui.views.transcription import TranscriptionView
+import advene.gui.edit.transcribe
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -1234,14 +1235,13 @@ class AdveneGUI (Connect):
             self.controller.modified=True
             self.controller.notify("PackageLoad", package=i.package)
             self.log('Converted from file %s :' % filename)
-            kl=i.statistics.keys()
-            kl.sort()
-            for k in kl:
-                v=i.statistics[k]
-                if v > 1:
-                    self.log('\t%d %ss' % (v, k))
-                else:
-                    self.log('\t%d %s' % (v, k))
+            self.log(i.statistics_formatted())
+        return True
+
+    def on_import_transcription1_activate (self, button=None, data=None):
+        te=advene.gui.edit.transcribe.TranscriptionEdit(controller=self.controller)
+        window = te.popup()
+        window.connect ("destroy", lambda w: w.destroy())
         return True
 
     def on_quit1_activate (self, button=None, data=None):
