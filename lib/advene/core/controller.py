@@ -664,12 +664,15 @@ class AdveneController:
 
         If view is None, then reset the user STBV.
         """
-        if view == self.current_stbv:
-            return
+        # Do not use the following test: if we modify a single rule
+        # from a ruleset, and click "Apply", the view id does not
+        # change but its contents do, so we must take it into account.
+        #if view == self.current_stbv:
+        #    return
         self.current_stbv=view
         if view is None:
             self.event_handler.clear_ruleset(type_='user')
-            self.event_handler.notify("ViewActivation", view=view)
+            self.event_handler.notify("ViewActivation", view=None)
             return
         rs=advene.rules.elements.RuleSet()
         rs.from_dom(catalog=self.event_handler.catalog,
