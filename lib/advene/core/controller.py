@@ -347,10 +347,17 @@ class AdveneController:
                     file_to_play = s
         return file_to_play, package_to_load
 
-    def get_default_url(self):
+    def get_default_url(self, root=False):
+        """Return the default package URL.
+
+        If root, then return only the package URL even if it defines
+        a default view.
+        """
         url = self.server.get_url_for_alias('advene')
         if not url:
             return None
+        if root:
+            return url
         defaultview=self.package.getMetaData(config.data.namespace, 'default_utbv')
         if defaultview:
             url="%s/view/%s" % (url, defaultview)
