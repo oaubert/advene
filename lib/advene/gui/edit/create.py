@@ -277,6 +277,15 @@ class CreateElementPopup(object):
             else:
                 pop.edit ()
         return True
+
+    def key_pressed_cb (self, win, event):
+        if event.keyval == gtk.keysyms.Return:
+            self.validate_cb(win, win)
+            return True
+        elif event.keyval == gtk.keysyms.Escape:
+            win.destroy()
+            return True
+        return False
     
     def popup(self):
         window = gtk.Window (gtk.WINDOW_TOPLEVEL)
@@ -299,6 +308,8 @@ class CreateElementPopup(object):
         hbox.add (b)
 
         vbox.pack_start (hbox, expand=False)
+
+        window.connect("key_press_event", self.key_pressed_cb)
         window.show_all ()
         return True
     
