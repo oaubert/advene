@@ -65,6 +65,12 @@ class TranscriptionEdit:
         self.discontinuous_toggle.set_stock_id(gtk.STOCK_REMOVE)
         self.discontinuous_toggle.set_tooltip(self.tooltips,
                                               _("Do not generate annotations for empty text"))
+
+        self.delay=gtk.Adjustment(value=-config.data.reaction_time,
+                                  lower=-5000,
+                                  upper=5000,
+                                  step_incr=10,
+                                  page_incr=100)
                     
         self.default_color = gtk.gdk.color_parse ('lightblue')
         self.ignore_color = gtk.gdk.color_parse ('tomato')
@@ -122,7 +128,7 @@ class TranscriptionEdit:
         p=self.controller.player
         if (p.status == p.PlayingStatus or p.status == p.PlayingStatus):
             # Check that preceding mark.timestamp is lower
-            t=p.current_position_value - config.data.reaction_time
+            t=p.current_position_value + self.delay.value
             m, i=self.find_preceding_mark(it)
             if m is not None and m.timestamp >= t:
                 self.controller.log(_("Invalid timestamp mark"))
@@ -189,25 +195,9 @@ class TranscriptionEdit:
         item = gtk.MenuItem(_("Ignore the following text (toggle)"))
         item.connect("activate", popup_ignore, button)
         menu.append(item)
-        
-        item = gtk.MenuItem(_("-1 sec"))
-        item.connect("activate", popup_modify, button, -1000)
-        menu.append(item)
-        item = gtk.MenuItem(_("-0.5 sec"))
-        item.connect("activate", popup_modify, button, -500)
-        menu.append(item)
-        item = gtk.MenuItem(_("-0.1 sec"))
-        item.connect("activate", popup_modify, button, -100)
-        menu.append(item)
-            
-        item = gtk.MenuItem(_("+1 sec"))
-        item.connect("activate", popup_modify, button, 1000)
-        menu.append(item)
-        item = gtk.MenuItem(_("+0.5 sec"))
-        item.connect("activate", popup_modify, button, 500)
-        menu.append(item)
-        item = gtk.MenuItem(_("+0.1 sec"))
-        item.connect("activate", popup_modify, button, 100)
+
+        item = gtk.MenuItem(_("Offset"))
+        item.connect("activate", popup_modify, button, self.delay.value)
         menu.append(item)
             
         menu.show_all()
@@ -521,6 +511,12 @@ class TranscriptionEdit:
             toolbar=self.controller.gui.get_player_control_toolbar()
             hb.add(toolbar)
         hb.add(self.get_toolbar(window))
+
+        # Spinbutton for reaction time
+        l=gtk.Label(_("Reaction time"))
+        hb.pack_start(l, expand=False)
+        sp=gtk.SpinButton(self.delay)
+        hb.pack_start(sp, expand=False)
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
