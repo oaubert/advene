@@ -283,11 +283,14 @@ class TranscriptionEdit:
                 return a.get_widgets()[0], it.copy()
         return None, None
 
-    def parse_transcription(self, show_ignored=False):
+    def parse_transcription(self, show_ignored=False, strip_blank=True):
         """Parse the transcription text.
 
         If show_ignored, then generate a 'ignored' key for ignored
         texts.
+
+        If strip_blank, then strip leading and trailing whitespace and
+        newline for each annotation.
         
         Return : a iterator on a dict with keys
         'begin', 'end', 'content' 
@@ -306,7 +309,8 @@ class TranscriptionEdit:
                 child=a.get_widgets()[0]
                 timestamp=child.timestamp
                 text=b.get_text(begin, end, include_hidden_chars=False)
-                text=text.rstrip().lstrip()
+                if strip_blank:
+                    text=text.rstrip().lstrip()
                 if (self.discontinuous_toggle.get_active() and
                     self.empty_re.match(text)):
                     pass
@@ -361,7 +365,8 @@ class TranscriptionEdit:
     def save_transcription(self, filename=None):
         f=open(filename, "w")
         last=None
-        for d in self.parse_transcription(show_ignored=True):
+        for d in self.parse_transcription(show_ignored=True,
+                                          strip_blank=False):
             if d['ignored']:
                 f.writelines( ( '[I%s]' % vlclib.format_time(d['begin']),
                                 d['content'],
