@@ -371,7 +371,8 @@ class RuleSet(list):
                     action=Action(registeredaction=catalog.get_action(name), catalog=catalog)
                 else:
                     # FIXME: we should just display warnings if the action
-                    # is not defined ?
+                    # is not defined ? Or maybe accept it in the case it is defined
+                    # in a module loaded later at runtime
                     raise Exception("Undefined action in %s: %s" % (origin, name))
                 for paramnode in actionnode.getElementsByTagName('param'):
                     p_name=paramnode.getAttribute('name')
@@ -384,8 +385,7 @@ class RuleSet(list):
     def to_xml(self, uri=None, stream=None):
         """Save the ruleset to the given URI or stream."""
         di = xml.dom.DOMImplementation.DOMImplementation()
-        # FIXME: hardcoded NS URI
-        rulesetdom = di.createDocument("http://liris.cnrs.fr/advene/ruleset", "ruleset", None)
+        rulesetdom = di.createDocument(advene.core.config.data.namespace, "ruleset", None)
         self.to_dom(rulesetdom)
         if stream is None:
             stream=open(uri, 'w')
