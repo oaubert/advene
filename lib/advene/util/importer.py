@@ -13,10 +13,10 @@ The general idea is:
     and
     im.defaultype
     to appropriate values
-  
+
   * If you want to create a new package with specific type and schema id, use
     im.create_package(schemaid=..., annotationtypeid=...)
-  
+
   * If nothing is given, a default package will be created, with a
     default schema and annotationtype
 
@@ -45,6 +45,7 @@ class GenericImporter(object):
         self.package=package
         self.author=author
         self.timestamp=time.strftime("%F")
+        self.time_regexp=sre.compile('(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d+)[.,](?P<ms>\d+)?')
         self.defaulttype=defaulttype
         # Default offset in ms
         self.offset=0
@@ -56,7 +57,7 @@ class GenericImporter(object):
         self.convert annotations with a dictionary as parameter.
         """
         pass
-    
+
     def create_annotation (self, type_=None, begin=None, end=None,
                            data=None, ident=None, author=None,
                            timestamp=None, title=None):
@@ -70,7 +71,7 @@ class GenericImporter(object):
         else:
             a=self.package.createAnnotation(type=type_,
                                             ident=ident,
-                                            fragment=MillisecondFragment(begin=begin, end=end))            
+                                            fragment=MillisecondFragment(begin=begin, end=end))
         a.author=author
         a.date=timestamp
         a.title=title
@@ -85,13 +86,13 @@ class GenericImporter(object):
         Returns a tuple (package, annotationtype)
         """
         p=Package(uri=filename, source=None)
-        
+
         s=p.createSchema(ident=schemaid)
         s.author=self.author
         s.date=self.timestamp
         s.title=s.id
         p.schemas.append(s)
-        
+
         at=s.createAnnotationType(ident=annotationtypeid)
         at.author=self.author
         at.date=self.timestamp
@@ -100,6 +101,28 @@ class GenericImporter(object):
         s.annotationTypes.append(at)
 
         return p, at
+
+    def convert_time(self, s):
+        """Convert a time string as long.
+
+        If the parameter is a number, it is considered as a ms value.
+        Else we try to parse a hh:mm:ss.xxx value
+        """
+        try:
+            val=long(s)
+        except ValueError:
+            # It was not a number. Try to determine its format.
+            m=self.time_regexp.match(s)
+            if m:
+                t=m.groupdict()
+                for k in t:
+                    t[k] = long(t[k])
+                if 'ms' not in t:
+                    t['ms'] = 0
+                val= t['ms'] + t['s'] * 1000 + t['m'] * 60000 + t['h'] * 3600000
+            else:
+                raise Exception("Unknown time format for %s" % s)
+        return val
 
     def convert(self, source):
         """Converts the source elements to annotations.
@@ -117,13 +140,13 @@ class GenericImporter(object):
             self.package, self.defaulttype=self.create_package()
         for d in source:
             try:
-                begin=d['begin']
+                begin=self.convert_time(d['begin'])
             except KeyError:
                 raise Exception("Begin is mandatory")
             if 'end' in d:
-                end=d['end']
+                end=self.convert_time(d['end'])
             elif 'duration' in d:
-                end=begin+d['duration']
+                end=begin+self.convert_time(d['duration'])
             else:
                 raise Exception("end or duration is missing")
             try:
@@ -174,10 +197,10 @@ class TextImporter(GenericImporter):
     regexp: a regexp with named matching parentheses (coded
             as "(?P<name>\d+)" for instance, see sre doc) returning
             the parameters needed by GenericImporter.convert
-            
+
     encoding: the default encoding for the textfile
     """
-    
+
     def __init__(self, regexp=None, encoding=None, **kw):
         super(TextImporter, self).__init__(**kw)
         if regexp is None:
@@ -197,7 +220,7 @@ class TextImporter(GenericImporter):
 
     def set_regexp(self, r):
         self.regexp=sre.compile(r)
-        
+
     def process_file(self, filename):
         f=open(filename, 'r')
         if self.package is None:
@@ -212,7 +235,7 @@ class LsDVDImporter(GenericImporter):
         super(LsDVDImporter, self).__init__(**kw)
         self.command="/usr/bin/lsdvd -c"
         #Chapter: 01, Length: 00:01:16, Start Cell: 01
-        self.regexp="^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d\d)"
+        self.regexp="^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<duration>[0-9:]+)"
         self.encoding='latin1'
 
     def iterator(self, f):
@@ -224,7 +247,7 @@ class LsDVDImporter(GenericImporter):
             m=reg.search(l)
             if m is not None:
                 d=m.groupdict()
-                duration=1000*(long(d['s'])+60*long(d['m'])+3600*long(d['h']))
+                duration=self.convert_time(d['duration'])
                 res={'content': "Chapter %s" % d['chapter'],
                      'begin': begin,
                      'duration': duration}
@@ -247,7 +270,7 @@ class ChaplinImporter(GenericImporter):
         super(ChaplinImporter, self).__init__(**kw)
         self.command="/usr/bin/chaplin -c"
         #   chapter 03  begin:    200.200 005005 00:03:20.05
-        self.regexp="^\s*chapter\s*(?P<chapter>\d+)\s*begin:\s*.+(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d\d)"
+        self.regexp="^\s*chapter\s*(?P<chapter>\d+)\s*begin:\s*.+(?P<begin>[0-9:])\s*$"
         self.encoding='latin1'
 
     def iterator(self, f):
@@ -261,7 +284,7 @@ class ChaplinImporter(GenericImporter):
             m=reg.search(l)
             if m is not None:
                 d=m.groupdict()
-                end=1000*(long(d['s'])+60*long(d['m'])+3600*long(d['h']))
+                end=self.convert_time(d['begin'])
                 if chapter is not None:
                     res={ 'content': "Chapter %s" % chapter,
                           'begin': begin,
@@ -306,7 +329,7 @@ class XiImporter(GenericImporter):
 
             d['content']=content
             yield d
-            
+
     def process_file(self, filename):
         xi=handyxml.xml(filename)
 
@@ -334,6 +357,7 @@ class ElanImporter(GenericImporter):
         super(ElanImporter, self).__init__(**kw)
         self.anchors={}
         self.atypes={}
+        self.schema=None
         self.relations=[]
 
     def xml_to_text(self, element):
@@ -353,8 +377,9 @@ class ElanImporter(GenericImporter):
         for tier in elan.TIER:
             for an in tier.ANNOTATION:
                 d={}
-                d['type']=self.atypes[tier.LINGUISTIC_TYPE_REF]
-                
+
+                d['type']=self.atypes[tier.LINGUISTIC_TYPE_REF.replace(' ','_')]
+
                 if hasattr(an, 'ALIGNABLE_ANNOTATION'):
                     # Annotation on a timeline
                     al=an.ALIGNABLE_ANNOTATION[0]
@@ -382,17 +407,30 @@ class ElanImporter(GenericImporter):
                     raise Exception('Unknown annotation type')
 
     def create_relations(self):
-        """Postprocess the package to create relations."""        
-        # We could store in self.relations the origin annotationtypes
-        # and create corresponding relation types for each couple
+        """Postprocess the package to create relations."""
         for (source_id, dest_id) in self.relations:
             source=self.package.annotations['#'.join( (self.package.uri,
                                                        source_id) ) ]
             dest=self.package.annotations['#'.join( (self.package.uri,
                                                      dest_id) ) ]
+
+            #print "Relation %s -> %s" % (source, dest)
+            rtypeid='_'.join( ('rt', source.type.id, dest.type.id) )
+            try:
+                rtype=self.package.relationTypes['#'.join( (self.package.uri,
+                                                            rtypeid) ) ]
+            except KeyError:
+                rtype=self.schema.createRelationType(ident=rtypeid)
+                #rt.author=schema.author
+                rtype.date=self.schema.date
+                rtype.title="Relation between %s and %s" % (source.type.id,
+                                                            dest.type.id)
+                rtype.mimetype='text/plain'
+                self.schema.relationTypes.append(rtype)
+
             r=self.package.createRelation(
-                ident='r'+source_id+'_'+dest_id,
-                type=self.rtype,
+                ident='_'.join( ('r', source_id, dest_id) ),
+                type=rtype,
                 author=source.author,
                 date=source.date,
                 members=(source, dest))
@@ -403,39 +441,34 @@ class ElanImporter(GenericImporter):
         elan=handyxml.xml(filename)
 
         if self.package is None:
-            self.package=Package(uri='dummy:1', source=None)
-    
-        p=self.package        
+            self.package=Package(uri='new_pkg', source=None)
+
+        p=self.package
         schema=p.createSchema(ident='elan')
         #schema.author=elan.AUTHOR
         schema.date=elan.DATE
         schema.title="ELAN converted schema"
         p.schemas.append(schema)
-        
+        self.schema = schema
+
         # self.anchors init
         if elan.HEADER[0].TIME_UNITS != 'milliseconds':
             raise Exception('Cannot process non-millisecond fragments')
-        
+
         for a in elan.TIME_ORDER[0].TIME_SLOT:
             self.anchors[a.TIME_SLOT_ID] = long(a.TIME_VALUE)
 
         # Process types
         for lt in elan.LINGUISTIC_TYPE:
-            at=schema.createAnnotationType(ident=lt.LINGUISTIC_TYPE_ID)
+            i=lt.LINGUISTIC_TYPE_ID
+            i=i.replace(' ', '_')
+            at=schema.createAnnotationType(ident=i)
             #at.author=schema.author
             at.date=schema.date
             at.title=at.id
             at.mimetype='text/plain'
             schema.annotationTypes.append(at)
             self.atypes[at.id]=at
-
-        rt=schema.createRelationType(ident='elan_ref')
-        #rt.author=schema.author
-        rt.date=schema.date
-        rt.title="ELAN reference"
-        rt.mimetype='text/plein'
-        schema.relationTypes.append(rt)
-        self.rtype=rt
 
         self.convert(self.iterator(elan))
         self.create_relations()
@@ -445,7 +478,7 @@ class SubtitleImporter(GenericImporter):
     """Subtitle importer.
 
     srt importer
-    """    
+    """
     def __init__(self, encoding=None, **kw):
         super(SubtitleImporter, self).__init__(**kw)
         if encoding is None:
@@ -453,8 +486,8 @@ class SubtitleImporter(GenericImporter):
         self.encoding=encoding
 
     def srt_iterator(self, f):
-        base='(\d\d):(\d\d):(\d+),(\d+)'
-        pattern=sre.compile(base + '.+' + base)
+        base='\d\d:\d\d:\d+[,.]\d+'
+        pattern=sre.compile('(?P<begin>' + base + ').+(P?<end>' + base + ')')
         for l in f:
             tc=None
             content=[]
@@ -462,12 +495,8 @@ class SubtitleImporter(GenericImporter):
                 line=line.rstrip()
                 match=pattern.search(line)
                 if match is not None:
-                    l=[ long(i) for i in  match.groups()]
-                    (h,m,s,ms) = l[:4]
-                    b = ms + s * 1000 + m * 60000 + h * 3600000
-                    (h,m,s,ms) = l[4:]
-                    e = ms + s * 1000 + m * 60000 + h * 3600000
-                    tc=(b,e)
+                    d=match.groupdict()
+                    tc=(d['begin'], d['end'])                  
                 elif len(line) == 0:
                     # Empty line: end of subtitle
                     # Convert if and reset the data
@@ -481,7 +510,7 @@ class SubtitleImporter(GenericImporter):
                     if tc is not None:
                         content.append(unicode(line, self.encoding).encode('utf-8'))
                     # else We could check line =~ /^\d+$/
-                        
+
     def process_file(self, filename):
         f=open(filename, 'r')
         if self.package is None:
@@ -506,7 +535,7 @@ if __name__ == "__main__":
         i.package=p
         i.defaulttype=at
         # FIXME: should specify title
-        p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")        
+        p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
     elif fname == 'lsdvd':
         i=LsDVDImporter(author='lsdvd-importer')
         p, at=i.create_package(schemaid='dvd',
