@@ -213,6 +213,16 @@
 		  </child>
 
 		  <child>
+		    <widget class="GtkMenuItem" id="navigationhistory1">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Display navigation history</property>
+		      <property name="label" translatable="yes">navigation_history</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_navigationhistory1_activate" last_modification_time="Sun, 02 May 2004 15:46:45 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
 		    <widget class="GtkMenuItem" id="separator2">
 		      <property name="visible">True</property>
 		    </widget>
