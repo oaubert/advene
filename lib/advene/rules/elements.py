@@ -8,6 +8,7 @@ events that match a condition."""
 import sre
 import sys
 import sets
+import StringIO
 
 import urllib
 
@@ -345,19 +346,29 @@ class RuleSet(list):
                 rule.add_action(action)
             self.append(rule)
 
-    def to_xml(self, uri=None):
-        """Save the ruleset to the given URI."""
+    def to_xml(self, uri=None, stream=None):
+        """Save the ruleset to the given URI or stream."""
         di = xml.dom.DOMImplementation.DOMImplementation()
         # FIXME: hardcoded NS URI
         rulesetdom = di.createDocument("http://liris.cnrs.fr/advene/ruleset", "ruleset", None)
         self.to_dom(rulesetdom)
-        stream=open(uri, 'w')
-        xml.dom.ext.PrettyPrint(rulesetdom, stream)
-        stream.close()
+        if stream is None:
+            stream=open(uri, 'w')
+            xml.dom.ext.PrettyPrint(rulesetdom, stream)
+            stream.close()
+        else:
+            xml.dom.ext.PrettyPrint(rulesetdom, stream)
         
+    def xml_repr(self):
+        """Return the XML representation of the ruleset."""
+        s=StringIO.StringIO()
+        self.to_xml(stream=s)
+        buf=s.getvalue()
+        s.close()
+        return buf
+
     def to_dom(self, dom):
         """Save the ruleset in the given DOM element."""
-        #rulesetnode=domtree.createElement('ruleset')
         rulesetnode=dom._get_documentElement()
         for rule in self:
             rulenode=dom.createElement('rule')
