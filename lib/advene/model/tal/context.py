@@ -190,7 +190,7 @@ class _advene_context (simpleTALES.Context):
 			if val is None:
 				raise AdveneTalesPathException(
                                   "'%s' in %s returned None in context %s" %
-						     (path, pathList, self))
+						     (path, pathList, unicode(self)))
                 self.popLocals()
 
 		#self.log.debug ("Found value %s" % str (val))
@@ -210,10 +210,10 @@ class AdveneContext(_advene_context):
     defaultMethods = staticmethod(defaultMethods)
 
     def __str__ (self):
-        return "<pre>AdveneContext\nGlobals:\n\t%s\nLocals:\n\t%s</pre>" % (
-		"\n\t".join([ "%s: %s" % (k, str(v.value()).replace("<", "&lt;"))
+        return u"<pre>AdveneContext\nGlobals:\n\t%s\nLocals:\n\t%s</pre>" % (
+		"\n\t".join([ "%s: %s" % (k, unicode(v.value()).replace("<", "&lt;"))
 			      for k, v in self.globals.iteritems() ]),
-		"\n\t".join([ "%s: %s" % (k, str(v.value()).replace("<", "&lt;"))
+		"\n\t".join([ "%s: %s" % (k, unicode(v.value()).replace("<", "&lt;"))
 			      for k, v in self.locals.iteritems() ]))
 
 	
