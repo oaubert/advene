@@ -1,4 +1,5 @@
-* Implement query in global_methods
+* To embed windows in gtk, use widget.window.xid (in X11) and
+  widget.window.handle (in Win32)
 
 * Write document on TALES syntax and base elements
 
@@ -58,9 +59,6 @@ to implement a "Return to last position")
 * Windows/gtk has a problem with threads. Solve using the recipe given in:
   http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
   http://www.daa.com.au/pipermail/pygtk/2004-February/006960.html
-
-* Query language: either python-based (very generic) or reusing the
-  rules framework (conditions)
 
 * Clean-up the player interface (which is now spread across
   advene.util.vlclib.VLCPlayer and advene.core.mediacontrol.MediaControl) -> half DONE
@@ -319,3 +317,9 @@ events) -> DONE
 * Implement a representation meta-attribute that gives a TALES
   expression whose evaluation will return the representation string of
   the element (useful for parsed elements for instance) -> DONE (meta 'display')
+
+* Query language: either python-based (very generic) or reusing the
+  rules framework (conditions) -> DONE
+
+* Implement query in global_methods -> DONE
+
