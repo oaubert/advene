@@ -418,44 +418,9 @@ class AdveneGUI (Connect):
         self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
         self.register_view(self.logwindow)
 
-        # We add a Treeview in the main app window
-        #tree = advene.gui.views.tree.TreeWidget(self.controller.package,
-        #controller=self.controller)
-        #self.gui.get_widget("html_scrollwindow").add (tree.get_widget())
-        #tree.get_widget().show_all()
-        #self.register_view (tree)
-        self.drawable=gtk.DrawingArea()
-        self.drawable.set_size_request(320,200)
-        self.gui.get_widget("vpaned").set_position(200)
-        self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
-        self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
-
-        self.displayhbox=gtk.HBox()
-
-        self.navigation_history=HistoryNavigation(controller=self.controller,
-                                                  container=self.displayhbox)
-        self.navigation_history.popup()
+        self.visualisationwidget=self.get_visualisation_widget()
+        self.gui.get_widget("displayvbox").add(self.visualisationwidget)
         
-        self.displayhbox.pack_start(self.drawable, expand=True)
-
-        self.displayhbox.show_all()
-
-        self.displayhbox.pack_end(self.logwindow.widget, expand=False)
-                                  
-        
-        self.gui.get_widget("displayvbox").add(self.displayhbox)
-        
-
-        hbox=gtk.HBox()
-        # Create the SingletonPopup instance
-        #self.popupwidget=SingletonPopup(controller=self.controller,
-        #                                   autohide=False,
-        #                                   container=hbox)
-        self.popupwidget=AccumulatorPopup(controller=self.controller,
-                                             autohide=False,
-                                             container=hbox)
-        self.gui.get_widget("displayvbox").add(hbox)
-
         self.controller.event_handler.internal_rule (event="PackageLoad",
                                                      method=self.manage_package_load)
         self.controller.event_handler.internal_rule (event="PackageSave",
@@ -511,7 +476,7 @@ class AdveneGUI (Connect):
             print "Cannot set visual: %s" % str(e)
             # Use available space to display a treeview (should be configurable ?)
             self.displayhbox.destroy()
-            self.popupwidget.reparent(container=None)
+            #self.popupwidget.reparent(container=None)
 
             tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
@@ -539,10 +504,46 @@ class AdveneGUI (Connect):
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
         gtk.timeout_add (100, self.update_display)
-        print "Running GUI"
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
+    def get_visualisation_widget(self):
+        vis=gtk.VBox()
+        # We add a Treeview in the main app window
+        #tree = advene.gui.views.tree.TreeWidget(self.controller.package,
+        #controller=self.controller)
+        #self.gui.get_widget("html_scrollwindow").add (tree.get_widget())
+        #tree.get_widget().show_all()
+        #self.register_view (tree)
+        
+        self.drawable=gtk.DrawingArea()
+        self.drawable.set_size_request(320,200)
+        self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
+        self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
+
+        self.displayhbox=gtk.HBox()
+
+        self.navigation_history=HistoryNavigation(controller=self.controller,
+                                                  container=self.displayhbox)
+        self.navigation_history.popup()
+        
+        self.displayhbox.pack_start(self.drawable, expand=True)
+
+        self.displayhbox.show_all()
+
+        self.displayhbox.pack_end(self.logwindow.widget, expand=False)
+
+        vis.add(self.displayhbox)
+        
+
+        hbox=gtk.HBox()
+        self.popupwidget=AccumulatorPopup(controller=self.controller,
+                                          autohide=False,
+                                          container=hbox)
+        vis.add(hbox)
+        vis.show_all()
+        return vis
+    
     def debug_cb(self, window, event, *p):
         print "Got event %s (%d, %d) in window %s" % (str(event),
                                                       event.x,
