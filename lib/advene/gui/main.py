@@ -724,8 +724,11 @@ class AdveneGUI (Connect):
 
         @return: a boolean (~desactivation)
         """
-        self.log (_("Package %s loaded. %d annotations.") % (self.controller.package.uri,
-                                                             len(self.controller.package.annotations)))
+        self.log (_("Package %s loaded: %d annotations and %s relations.")
+                  % (self.controller.package.uri,
+                     len(self.controller.package.annotations),
+                     len(self.controller.package.relations)
+                     ))
         self.update_gui()
 
         self.update_window_title()
