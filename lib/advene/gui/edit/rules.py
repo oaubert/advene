@@ -337,10 +337,11 @@ class EditRule(EditGeneric):
         return frame
 
 class EditEvent(EditGeneric):
-    def __init__(self, event, catalog):
+    def __init__(self, event, catalog, expert=False):
         self.model=event
         self.current_event=event
         self.catalog=catalog
+        self.expert=expert
         self.widget=self.build_widget()
         
     def update_value(self):
@@ -359,7 +360,7 @@ class EditEvent(EditGeneric):
         label=gtk.Label(_("When the "))
         hbox.pack_start(label)
 
-        eventlist=self.catalog.get_described_events()
+        eventlist=self.catalog.get_described_events(expert=self.expert)
         if self.current_event not in eventlist:
             # The event was not in the list. It must be because
             # it is an expert-mode event. Add it manually.
