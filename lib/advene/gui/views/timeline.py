@@ -237,7 +237,7 @@ class TimeLine:
         return (long(v / self.ratio_adjustment.value)) or 1
 
     def pixel2unit (self, v):
-        return (v) * self.ratio_adjustment.value
+        return v * self.ratio_adjustment.value
     
     def get_widget (self):
         """Return the display widget."""
@@ -255,9 +255,11 @@ class TimeLine:
                                             self.format_time(a.fragment.begin),
                                             self.format_time(a.fragment.end))
         self.tooltips.set_tip(b, tip)
-        
+        return True
+    
     def update_annotation (self, element=None):
         """Update an annotation's representation."""
+        print "Updating annotation %s" % element.content.data
         bs = self.get_widget_for_annotation (element)
         if bs:
             for b in bs:
