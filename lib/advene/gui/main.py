@@ -1529,7 +1529,7 @@ class AdveneGUI (Connect):
             config.data.player['verbose'] = self.gui.get_widget ("player_debug_level").get_value_as_int ()
         else:
             config.data.player['verbose'] = None
-        self.restart_player ()
+        self.controller.restart_player ()
         return True
 
     def on_player_properties_ok_clicked (self, button=None, data=None):
