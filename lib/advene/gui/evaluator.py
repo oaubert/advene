@@ -8,8 +8,6 @@ import gtk
 import sre
 import __builtin__
 
-from gettext import gettext as _
-
 class Window:
     def __init__(self, globals_=None, locals_=None):
         if globals_ is None:
@@ -100,7 +98,7 @@ class Window:
             if d is not None:
                 self.log(unicode(d))
             else:
-                self.log(_("No available documentation for %s") % expr)
+                self.log("No available documentation for %s" % expr)
         except Exception, e:
             f=StringIO.StringIO()
             traceback.print_exc(file=f)
@@ -300,7 +298,7 @@ class Window:
 
         window.connect ("key-press-event", key_pressed_cb)
         window.connect ("destroy", lambda e: window.destroy())
-        window.set_title (_("Python evaluation"))
+        window.set_title ("Python evaluation")
 
         window.add (self.get_widget())
         window.show_all()
@@ -314,7 +312,7 @@ class Window:
         self.source.set_editable(True)
         self.source.set_wrap_mode (gtk.WRAP_CHAR)
 
-        f=gtk.Frame(_("Expression"))
+        f=gtk.Frame("Expression")
         s=gtk.ScrolledWindow()
         s.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         s.add(self.source)
@@ -325,7 +323,7 @@ class Window:
         self.output.set_editable(False)
         self.output.set_wrap_mode (gtk.WRAP_CHAR)
 
-        f=gtk.Frame(_("Result"))
+        f=gtk.Frame("Result")
         self.resultscroll=gtk.ScrolledWindow()
         self.resultscroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.resultscroll.add(self.output)
@@ -334,19 +332,19 @@ class Window:
 
         hb=gtk.HButtonBox()
 
-        b=gtk.Button(_("_Save output"))
+        b=gtk.Button("_Save output")
         b.connect("clicked", self.save_output_cb)
         hb.add(b)
 
-        b=gtk.Button(_("Clear _output"))
+        b=gtk.Button("Clear _output")
         b.connect("clicked", self.clear_output)
         hb.add(b)
 
-        b=gtk.Button(_("Clear _expression"))
+        b=gtk.Button("Clear _expression")
         b.connect("clicked", self.clear_expression)
         hb.add(b)
 
-        b=gtk.Button(_("E_valuate expression"))
+        b=gtk.Button("E_valuate expression")
         b.connect("clicked", self.evaluate_expression)
         hb.add(b)
 
