@@ -541,6 +541,15 @@ class TranscriptionEdit:
                     it=b.get_iter_at_mark(b.get_insert())
                     self.create_timestamp_mark(p.current_position_value,
                                                it)
+            elif event.keyval == gtk.keysyms.Right:
+                c.move_position (config.data.player_preferences['time_increment'])
+                return True
+            elif event.keyval == gtk.keysyms.Left:
+                c.move_position (-config.data.player_preferences['time_increment'])
+                return True
+            elif event.keyval == gtk.keysyms.Home:
+                c.update_status ("set", self.controller.create_position (0))
+                return True
             return True
     
     def popup(self):
