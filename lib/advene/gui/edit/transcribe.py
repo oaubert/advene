@@ -7,7 +7,6 @@ import pygtk
 #pygtk.require ('2.0')
 import gtk
 import gobject
-import pango
 
 import advene.core.config as config
 
@@ -18,6 +17,8 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
 
+import advene.util.importer
+
 import advene.util.vlclib as vlclib
 
 from gettext import gettext as _
@@ -26,12 +27,30 @@ import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.popup
 
+class TranscriptionImporter(advene.util.importer.GenericImporter):
+    """Transcription importer.
+    """
+    def __init__(self, transcription_edit=None, **kw):
+        super(TranscriptionImporter, self).__init__(**kw)
+        self.transcription_edit=transcription_edit
+        self.name = _("Transcription importer")
+
+    def process_file(self, filename):
+        if filename != 'transcription':
+            return None
+        if self.package is None:
+            self.init_package()
+        self.convert(self.transcription_edit.parse_transcription())
+        return self.package
+
 class TranscriptionEdit:
     def __init__ (self, controller=None):
         self.controller=controller
         self.package=controller.package
         self.tooltips=gtk.Tooltips()
 
+        self.sourcefile=""
+        
         self.timestamp_mode_toggle=gtk.CheckButton(_("Insert timestamps"))
         self.timestamp_mode_toggle.set_active (True)
         
@@ -43,7 +62,6 @@ class TranscriptionEdit:
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
         self.textview.set_wrap_mode (gtk.WRAP_CHAR)
-        b=self.textview.get_buffer()
 
         self.textview.connect("button-press-event", self.button_press_event_cb)
 
@@ -91,6 +109,8 @@ class TranscriptionEdit:
         # Create the mark representation
         child=gtk.Button("")
         child.connect("clicked", self.remove_anchor, anchor, b)
+        # FIXME: handle right-click button to display a menu
+        # with Goto action
         self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
         child.timestamp=timestamp
         child.show()
@@ -111,7 +131,7 @@ class TranscriptionEdit:
         for (b, e, a) in l:
             it=b.get_iter_at_mark(b.get_insert())
             self.create_timestamp_mark(b, it)
-            self.insert_at_cursor(unicode(a.content.data))
+            b.insert_at_cursor(unicode(a.content.data))
             it=b.get_iter_at_mark(b.get_insert())
             self.create_timestamp_mark(e, it)
         return            
@@ -119,11 +139,14 @@ class TranscriptionEdit:
     def parse_transcription(self):
         """Parse the transcription text.
 
-        Return : a list of tuples
-        (begin, end, data)
+        Return : a iterator on a dict with keys
+        'begin', 'end', 'content' 
+        (compatible with advene.util.importer)
         """
+
+        # FIXME: offer an option "discontinuous" where an empty
+        # annotation (\s*) represents a discontinuity.
         t=0
-        result=[]
         b=self.textview.get_buffer()
         begin=b.get_start_iter()
         end=begin.copy()
@@ -133,15 +156,17 @@ class TranscriptionEdit:
                 # Found a TextAnchor
                 timestamp=a.get_widgets()[0].timestamp
                 text=b.get_text(begin, end, include_hidden_chars=False)
-                result.append( (t, timestamp, text) )
-                
+                yield { 'begin': t,
+                        'end': timestamp,
+                        'content': text }
                 t=timestamp
                 begin=end.copy()
         # End of buffer. Create the last annotation
         timestamp=self.controller.player.stream_duration
         text=b.get_text(begin, end, include_hidden_chars=False)
-        result.append( (t, timestamp, text) )
-        return result
+        yield { 'begin': t,
+                'end': timestamp,
+                'content': text }
         
     def save_transcription(self, button=None):
         fs = gtk.FileSelection ("Save transcription to...")
@@ -187,22 +212,45 @@ class TranscriptionEdit:
         try:
             f=open(filename, 'r')
         except Exception, e:
-            self.controller.log("Cannot read %s: %s" % (filename, str(e)))
+            self.controller.log(_("Cannot read %s: %s") % (filename, str(e)))
             return
         data=unicode("".join(f.readlines())).encode('utf-8')
         b.set_text(data)
+        self.sourcefile=filename
         return
 
     def convert_transcription_cb(self, button=None):
-        # Ask for the annotation type (offer the possibility to create one)
-        # Create annotations        
-        res=self.parse_transcription()
-        for (b,e,t) in res:
-            print "%s\t%s\t%s" % (vlclib.format_time(b),
-                                  vlclib.format_time(e),
-                                  t)
+        print "convert transcription"
+        if not self.controller.gui:
+            self.controller.log(_("Cannot convert the data : no associated package"))
+            return True
+
+        at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to generate"), create=True)
+
+        print "at = " + str(at)
+        
+        if at is None:
+            self.controller.log(_("Conversion cancelled"))
+            return True
+
+        ti=TranscriptionImporter(transcription_edit=self)
+        ti.package=self.controller.package
+        ti.defaultype=at
+        ti.process_file('transcription')
+
+        # Feedback
+        self.controller.modified=True
+        self.controller.notify("PackageLoad", package=ti.package)
+        self.controller.log(_('Converted from file %s :') % self.sourcefile)
+        kl=ti.statistics.keys()
+        kl.sort()
+        for k in kl:
+            v=ti.statistics[k]
+            if v > 1:
+                self.controller.log('\t%d %ss' % (v, k))
+            else:
+                self.controller.log('\t%d %s' % (v, k))
         return True
-    
     
     def get_widget (self):
         """Return the TreeView widget."""
