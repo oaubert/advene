@@ -1,3 +1,5 @@
+* Create a Sequential editor (to accomodate existing work)
+
 * Fix the simpletal problem: all string values should be unicode
 
 * Make the annotation edit entry a multiline entry.
@@ -5,7 +7,8 @@
 * In ECA elements, TALES expression could be prefixed by string: by
 default, using the ${} syntax to evaluate expressions ???
 
-* Content: how to represent structured data ? Cf MPEG7 DS ?
+* Content: how to represent structured data ? Cf MPEG7 DS ? (grep
+  source for x-advene/structured)
 
 * Assistants:
   - shot detection
@@ -152,15 +155,9 @@ http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
 
 * Tree view : implement "Add/Remove" option in popup menus (Add new view, Add new type, ...)
 
-* Propagate AnnotationEditEnd and RelationEditEnd events in active views
-
-* Timeline: add the possibility to add new annotations by clicking on the type
-
-* Timeline : usability improvements. Select the displayed types and their order.
+* Propagate AnnotationEditEnd and RelationEditEnd events in active views -> DONE
 
 * Add a "Edit" button next to the STBV optionmenu
-
-* Create a Sequential editor (to accomodate existing work)
 
 ------------- Archive ---------------
 * Write the correct VLC/Python module -> DONE
@@ -296,4 +293,6 @@ without DISPLAY) -> DONE
 * Create a GUI to be able to select and preview the right
   chapter/title for a DVD (in order to correctly initialize the
   package.media property) -> DONE
+
+* Timeline: add the possibility to add new annotations by clicking on the type
 
