@@ -815,6 +815,7 @@ class AdveneGUI (Connect):
         buf = self.gui.logmessages.get_buffer ()
         mes = "".join((time.strftime("%H:%M:%S"), " - ", str(msg), "\n"))
         # FIXME: handle level (bold?)
+        buf.place_cursor(buf.get_end_iter ())
         buf.insert_at_cursor (mes)
         endmark = buf.create_mark ("end", buf.get_end_iter (), True)
         self.gui.logmessages.scroll_mark_onscreen (endmark)
