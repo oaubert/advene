@@ -114,7 +114,11 @@ class Player(object):
     def __init__ (self):
         """Wrapper initialization.
         """
-        self.mc = VLC.MediaControl( [ "--filter", "clone", "--plugin-path", config.data.path['plugins'] ] )
+        if config.data.os == 'win32':
+            args=[ "--filter", "clone", "--plugin-path", config.data.path['plugins'] ]
+        else:
+            args=[ "--filter", "clone" ]
+        self.mc = VLC.MediaControl( args )
 
         # 0 relative position
         pos = VLC.Position ()
