@@ -44,7 +44,6 @@ class TimeLine:
                 minimum = b
             if maximum is None:
                 maximum = e
-        width=maximum - minimum
         self.minimum = minimum
         self.maximum = maximum
 
@@ -374,7 +373,7 @@ class TimeLine:
         rtype=[ t
                 for t in self.controller.package.relationTypes
                 if t.title == title ][0]
-        relation=self.controller.package.createRelation(members=(source, dest), type=t)
+        relation=self.controller.package.createRelation(members=(source, dest), type=rtype)
         self.controller.package.relations.append(relation)
         print "Relation %s created." % relation
 
