@@ -31,6 +31,13 @@ def fourcc2rawcode (code):
                            code >> 24)
     return conv[fourcc]
 
+class TypedString(str):
+    """String with a mimetype attribute.
+    """
+    def __init__(self, *p, **kw):
+        super(TypedString, self).__init__(*p, **kw)
+        self.contenttype='text/plain'
+
 def snapshot2png (image, output=None):
     """Convert a VLC RGBPicture to PNG.
     
@@ -59,7 +66,8 @@ def snapshot2png (image, output=None):
     else:
         ostream = StringIO.StringIO ()
         i.save(ostream, 'png')
-        return ostream.getvalue()
+        v=TypedString(ostream.getvalue())
+        v.contenttype='image/png'
 
 def mediafile2id (mediafile):
     """Returns an id (with encoded /) corresponding to the mediafile.
