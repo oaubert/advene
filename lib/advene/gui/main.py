@@ -41,7 +41,6 @@ import advene.model.tal.context
 import advene.core.mediacontrol
 from advene.core.imagecache import ImageCache
 import advene.util.vlclib as vlclib
-import advene.gui.util
 
 import advene.util.importer
 
@@ -103,7 +102,6 @@ class AdveneGUI (Connect):
     @ivar gui: the GUI model from libglade
     @ivar gui.logmessages: the logmessages window
     @ivar gui.slider: the slider widget
-    @ivar gui.fs: the fileselector widget
     @ivar gui.current_annotation: the current annotation text widget
     @ivar gui.player_status: the player_status widget
 
@@ -162,16 +160,6 @@ class AdveneGUI (Connect):
             combobox.add_attribute(cell, 'text', 0)
             
         self.current_type=None
-  
-        # Declaration of the fileselector
-        self.gui.fs = gtk.FileSelection ("Select a file")
-        self.gui.fs.ok_button.connect_after ("clicked", lambda win: self.gui.fs.hide ())
-        self.gui.fs.cancel_button.connect ("clicked", lambda win: self.gui.fs.hide ())
-        if config.data.path['data']:
-            d=config.data.path['data']
-            if os.path.isdir(d) and not d.endswith(os.path.sep):
-                d=d + os.path.sep
-            self.gui.fs.set_filename (d)
 
         self.gui.current_annotation = self.gui.get_widget ("current_annotation")
         self.gui.current_annotation.set_text ('['+_('None')+']')
@@ -757,94 +745,6 @@ class AdveneGUI (Connect):
             return True
         return generate
 
-    def file_selector (self, callback=None, label="Select a file",
-                       default=""):
-        """Display the generic file selector.
-
-        Callbacks are X{file_selected_cb}, X{annotations_load_cb},
-        X{annotations_save_cb}.
-
-        @param callback: method to be called on validation
-        @type callback: method
-        @param label: label of the fileselector window
-        @type label: string
-        @param default: default filename
-        @type default: string
-        """
-        self.gui.fs.set_property ("title", label)
-        self.gui.fs.set_property ("filename", default)
-        self.gui.fs.set_property ("select-multiple", False)
-        self.gui.fs.set_property ("show-fileops", False)
-
-        # Disconnecting the old callback
-        try:
-            self.gui.fs.ok_button.disconnect (self.gui.fs.connect_id)
-        except:
-            pass
-        if callback:
-            # Connecting the new one
-            self.gui.fs.connect_id = self.gui.fs.ok_button.connect ("clicked", callback, self.gui.fs)
-        self.gui.fs.show ()
-	return True
-
-    def file_selected_cb (self, button, fs):
-        """Open and play the selected movie file.
-
-        Callback used by file_selector.
-        """
-        file_ = fs.get_property ("filename")
-        self.controller.set_default_media(file_)
-        return True
-
-    def annotations_load_cb (self, button, fs):
-        """Load a package."""
-        file_ = fs.get_property ("filename")
-        self.controller.load_package (uri=file_)
-        return True
-
-    def annotations_save_cb (self, button, fs):
-        """Save the current package."""
-        file_ = fs.get_property ("filename")
-        self.controller.save_package(as=file_)
-        return True
-
-    def data_import_cb (self, button, fs):
-        """Import data from an external file."""
-        file_ = fs.get_property ("filename")
-        i=advene.util.importer.get_importer(file_)
-        if i is None:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                _("The format of the file\n%s\nis not recognized.") % file_)
-            response=dialog.run()
-            dialog.destroy()
-        else:
-            # FIXME: build a dialog to enter optional parameters
-            # FIXME: handle the multiple possibilities case (for XML esp.)
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
-                _("Do you confirm the import of data from\n%s\nby the %s filter?") % (
-                file_, i.name))
-            response=dialog.run()
-            dialog.destroy()
-            if response != gtk.RESPONSE_YES:
-                return True
-            i.package=self.controller.package
-            i.process_file(file_)
-            self.controller.notify("PackageLoad", package=i.package)
-            self.log('Converted from file %s :' % file_)
-            kl=i.statistics.keys()
-            kl.sort()
-            for k in kl:
-                v=i.statistics[k]
-                if v > 1:
-                    self.log('\t%d %ss' % (v, k))
-                else:
-                    self.log('\t%d %s' % (v, k))
-        return True
-
     def register_view (self, view):
         """Register a view plugin.
 
@@ -1147,8 +1047,17 @@ class AdveneGUI (Connect):
 
     def on_open1_activate (self, button=None, data=None):
         """Open a file selector to load a package."""
-        self.file_selector (callback=self.annotations_load_cb,
-                            label=_("Load a package"))
+        if config.data.path['data']:
+            d=config.data.path['data']
+        else:
+            d=None
+
+        filename=advene.gui.util.get_filename(title=_("Load a package"),
+                                              action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                              button=gtk.STOCK_OPEN,
+                                              default_dir=d)
+        if filename:
+            self.controller.load_package (uri=filename)
 	return True
 
     def on_save1_activate (self, button=None, data=None):
@@ -1161,9 +1070,17 @@ class AdveneGUI (Connect):
 	return True
 
     def on_save_as1_activate (self, button=None, data=None):
-        """Save the annotation list with a new name."""
-        self.file_selector (callback=self.annotations_save_cb,
-                            label=_("Save the current package"))
+        """Save the package with a new name."""
+        if config.data.path['data']:
+            d=config.data.path['data']
+        else:
+            d=None
+        filename=advene.gui.util.get_filename(title=_("Save the current package"),
+                                              action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                              button=gtk.STOCK_SAVE,
+                                              default_dir=d)
+        if filename:
+            self.controller.save_package(as=filename)
 	return True
 
     def on_import_dvd_chapters1_activate (self, button=None, data=None):
@@ -1193,8 +1110,44 @@ class AdveneGUI (Connect):
         return True
         
     def on_import_file1_activate (self, button=None, data=None):
-        self.file_selector (callback=self.data_import_cb,
-                            label=_("Choose the file to import"))
+        filename=advene.gui.util.get_filename(title=_("Choose the file to import"),
+                                              action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                              button=gtk.STOCK_OPEN,
+                                              default_dir=d)
+        if not filename:
+            return True
+        i=advene.util.importer.get_importer(filename)
+        if i is None:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("The format of the file\n%s\nis not recognized.") % file_)
+            response=dialog.run()
+            dialog.destroy()
+        else:
+            # FIXME: build a dialog to enter optional parameters
+            # FIXME: handle the multiple possibilities case (for XML esp.)
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
+                _("Do you confirm the import of data from\n%s\nby the %s filter?") % (
+                file_, i.name))
+            response=dialog.run()
+            dialog.destroy()
+            if response != gtk.RESPONSE_YES:
+                return True
+            i.package=self.controller.package
+            i.process_file(file_)
+            self.controller.notify("PackageLoad", package=i.package)
+            self.log('Converted from file %s :' % file_)
+            kl=i.statistics.keys()
+            kl.sort()
+            for k in kl:
+                v=i.statistics[k]
+                if v > 1:
+                    self.log('\t%d %ss' % (v, k))
+                else:
+                    self.log('\t%d %s' % (v, k))
         return True
 
     def on_quit1_activate (self, button=None, data=None):
@@ -1407,8 +1360,12 @@ class AdveneGUI (Connect):
 	return True
 
     def on_b_addfile_clicked (self, button=None, data=None):
-        self.file_selector (callback=self.file_selected_cb,
-                            label=_("Select a movie file"))
+        """Open a movie file"""
+        filename=advene.gui.util.get_filename(title=_("Select a movie file"),
+                                              action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                              button=gtk.STOCK_OPEN)
+        if filename:
+            self.controller.set_default_media(filename)
 	return True
 
     def on_b_selectdvd_clicked (self, button=None, data=None):
