@@ -1326,7 +1326,7 @@ class AdveneGUI (Connect):
                 if f.end < f.begin:
                     f.begin, f.end = f.end, f.begin
                 self.annotation.setAuthor(config.data.userid)
-                self.annotation.setDate(time.strftime("%F"))
+                self.annotation.setDate(time.strftime("%Y-%m-%d"))
                 c.package.annotations.append (self.annotation)
                 self.log (_("New annotation: %s") % self.annotation)
                 self.gui.current_annotation.set_text ('['+_('None')+']')

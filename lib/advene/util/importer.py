@@ -83,7 +83,7 @@ class GenericImporter(object):
             author=config.data.userid
         self.author=author
         self.controller=controller
-        self.timestamp=time.strftime("%F")
+        self.timestamp=time.strftime("%Y-%m-%d")
         self.defaulttype=defaulttype
         # Default offset in ms
         self.offset=0
@@ -587,7 +587,7 @@ class ElanImporter(GenericImporter):
 
         p=self.package
         schema=p.createSchema(ident='elan')
-        #schema.author=elan.AUTHOR
+        schema.author=config.data.userid
         schema.date=elan.DATE
         schema.title="ELAN converted schema"
         p.schemas.append(schema)
@@ -753,7 +753,7 @@ class PraatImporter(GenericImporter):
 
         p=self.package
         schema=p.createSchema(ident='praat')
-        #schema.author=elan.AUTHOR
+        schema.author=config.data.userid
         schema.date=self.timestamp
         schema.title="PRAAT converted schema"
         p.schemas.append(schema)

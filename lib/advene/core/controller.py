@@ -421,7 +421,7 @@ class AdveneController:
         self.package.annotations.append(an)
         an.author=config.data.userid
         an.content.data=annotation.content.data
-        an.setDate(time.strftime("%F"))
+        an.setDate(time.strftime("%Y-%m-%d"))
         # FIXME: check if the types are compatible
         self.notify("AnnotationCreate", annotation=an)
 

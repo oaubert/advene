@@ -142,7 +142,7 @@ class CreateElementPopup(object):
         return vbox
 
     def get_date(self):
-        return time.strftime("%F")
+        return time.strftime("%Y-%m-%d")
 
     def is_valid_id(self, i):
         return sre.match('^[a-zA-Z0-9_]+$', i)
