@@ -44,23 +44,21 @@ def absolute_url(target, context):
     if path is None:
         if context is None:
             return None
-        #resolved_stack = context.locals['__resolved_stack'].value()
         resolved_stack = context.locals['__resolved_stack']
         if resolved_stack is None or len (resolved_stack) == 0:
             return None
         suffix = [resolved_stack[0][0]]
         for i in resolved_stack[1:]:
             name, obj = i
-            #path = _abs_url (obj.value())
             path = _abs_url (obj)
             if path is not None:
                 path = "%s/%s" % (path, "/".join (suffix))
                 break
             else:
                 suffix.insert (0, name)
+        print "Generated %s" % path
        
     if path is not None and context is not None:
-        #options = context.globals['options'].value()
         options = context.globals['options']
         if options.has_key('package_url'):
             path = '%s%s' % (options['package_url'], path)
@@ -155,7 +153,6 @@ def meta(target, context):
     class MetaNSWrapper(object):
         def __init__(self, target, context):
             self.__target = target
-            #options = context.globals['options'].value()
             options = context.globals['options']
             self.__ns_dict = options.get('namespace_prefix', {})
     
@@ -181,7 +178,7 @@ def view(target, context):
 
     import advene.model.viewable
     import advene.model.exception
-        
+
     class ViewWrapper (object):
 
         """
@@ -203,17 +200,13 @@ def view(target, context):
             self._context = context
 
         def __call__ (self):
-            print "Calling ViewWrapper on %s" % self._target
             return self._target.view (context=self._context)
     
         def has_key (self, key):
-            print "Calling has_key(%s) on %s" % (key, self._target)
             v = self._target._find_named_view (key, self._context)
             return v is not None
 
         def __getitem__ (self, key):
-            print "Calling getitem(%s) on %s" % (key, self._target)
-            #print "getitem %s" % key
             def render ():
                 return self._target.view (view_id=key, context=self._context)
             return render
@@ -237,7 +230,7 @@ def view(target, context):
             return self._target.getValidViews()
 
     if isinstance (target, advene.model.viewable.Viewable):
-        return ViewWrapper (target, context)
+        return context.wrap_nocall(ViewWrapper (target, context))
     else:
         return None
 
@@ -318,8 +311,8 @@ def parsed (target, context):
     """Parse the content being passed as target.
 
     This method parses the data of the content according to its
-    mime-type. The most common parser is an XML parser (FIXME: not
-    implemented yet). It applies on a content object:
+    mime-type. The most common parser is an XML parser. It applies on
+    a content object:
 
     a.content.parsed.key1
 
@@ -342,7 +335,8 @@ def parsed (target, context):
     XML data
     ========
 
-    Not implemented yet.
+    It returns a Node object whose attributes are the different
+    attributes and children of the node.
 
     @return: a data structure
     """
