@@ -1,0 +1,71 @@
+#! /usr/bin/python
+
+import sys
+import os
+
+try:
+  import advene.core.config as config
+except ImportError:
+  # The package was not installed in a standard place (or PYTHONPATH
+  # is not correctly set). Try to find if we are in a development tree.
+  (maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
+  if subdir == 'bin' and  os.path.exists(os.sep.join((maindir, "setup.py"))):
+    # Chances are that we were in a development tree...
+    libpath=os.sep.join((maindir, "lib"))
+    print "You seem to have a development tree at:\n%s." % libpath
+    sys.path.insert (0, libpath)
+    
+    import advene.core.config as config
+    # We override any modification that could have been made in
+    # .advenerc. Rationale: if the .advenerc was really correct, it
+    # would have set the correct package path in the first place.
+    print "Overriding 'resources' and 'web' config paths"
+    config.data.path['resources']=os.path.sep.join((maindir, 'share'))
+    config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
+
+    if config.data.os == 'win32':
+        # Windows environment.
+        sys.path.insert(0, os.sep.join((libpath, 'advene', 'win32')))
+        print "Using fake CORBA for win32 from %s" % sys.path[0]
+  else:
+    print """Cannot guess a valid directory.
+    Please check your installation or set the PYTHONPATH environment variable."""
+    sys.exit(1)    
+
+import advene.gui.main
+
+if __name__ == '__main__':
+
+  # Check for directories
+  for d in ('resources', 'web'):
+    if not os.path.exists(config.data.path[d]):
+      print """Error: the %s directory does not exist.
+      Advene seems to be either badly installed or badly configured
+      (maybe both).
+      Aborting.""" % config.data.typelib
+      sys.exit(1)
+      
+  # FIXME: remove once the win32 support is correct
+  if config.data.os != "win32" and not os.path.exists(config.data.typelib):
+    print """The %s file does not exist.
+    Either the VLC plugin is not installed or it is badly configured.
+    Check your .advenerc file.""" % config.data.typelib
+    sys.exit(1)
+    
+  gladefile=config.data.advenefile (config.data.gladefilename)
+  if not os.path.exists(gladefile):
+    print """The %s file does not exist.
+    Either the Advene software is not installed or it is badly configured.
+    Check your .advenerc file.""" % gladefile
+    sys.exit(1)
+
+  v = advene.gui.main.AdveneGUI ()
+  try:
+    v.main (sys.argv[1:])
+  except Exception, e:
+    print _("Got exception %s. Stopping services...") % str(e)
+    v.on_exit ()
+    print _("*** Exception ***")
+    import code
+    e, v, tb = sys.exc_info()
+    code.traceback.print_exception (e, v, tb)
