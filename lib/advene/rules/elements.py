@@ -73,26 +73,30 @@ class Condition:
     """
 
     binary_operators={
-        'equals': _("is equal to"),
-        'different': _("is different from"),
-        'contains': _("contains"),
-        'greater': _("is greater than"),
-        'lower': _("is lower than"),
-        'matches': _("matches the regexp"),
-        'before': _("is before (Allen)"),
-        'meets': _("meets (Allen)"),
-        'overlaps': _("overlaps (Allen)"),
-        'during': _("during (Allen)"),
-        'starts': _("starts (Allen)"),
-        'finishes': _("finishes (Allen)")
-        # 'equals': missing (cf before)
+        'equals': (_("is equal to"), 'basic'),
+        'different': (_("is different from"), 'basic' ),
+        'contains': (_("contains"), 'basic' ),
+        'greater': (_("is greater than"), 'basic' ),
+        'lower': (_("is lower than"), 'basic' ),
+        'matches': (_("matches the regexp"), 'basic' ),
+        'before': (_("is before"), 'allen' ),
+        'meets': (_("meets"), 'allen' ),
+        'overlaps': (_("overlaps"), 'allen' ),
+        'during': (_("during"), 'allen' ),
+        'starts': (_("starts"), 'allen' ),
+        'finishes': (_("finishes"), 'allen' ),
+        # 'equals': "equals (Allen)" missing (cf before)
         }
     # Unary operators apply on the LHS
     unary_operators={
-        'not': _('is not true'),
-        'value': _('is true')
+        'not': (_('is not true'), 'basic' ),
+        'value': (_('is true'), 'basic' ),
         }
 
+    condition_categories={
+        'basic': _("Basic conditions"),
+        'allen': _("Allen relations"),
+        }
     def __init__(self, lhs=None, rhs=None, operator=None):
         self.lhs=lhs
         self.rhs=rhs
@@ -1107,10 +1111,7 @@ class ECACatalog:
         if expert:
             return dict(self.event_names)
         else:
-            d={}
-            for k in self.basic_events:
-                d[k]=self.describe_event(k)
-            return d
+            return dict([ (k, self.describe_event(k)) for k in self.basic_events ])
 
     def get_described_actions(self, expert=False):
         """Return a dict holding all the actions with their description.
@@ -1120,9 +1121,7 @@ class ECACatalog:
         @return: a dictionary of descriptions indexed by name.
         @rtype: dict
         """
-        d={}
-        for a in self.actions:
-            d[a]=self.describe_action(a)
+        d=dict( [ (a, self.describe_action(a)) for a in self.actions ] )
         return d
 
     def get_actions(self, expert=False):
