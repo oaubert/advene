@@ -1163,30 +1163,8 @@ class AdveneGUI (Connect):
         return True
 
     def on_browser1_activate (self, button=None, data=None):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_size_request (320, 200)
-
-        window.connect ("destroy", lambda e: window.destroy())
-        window.set_title (self.controller.package.title or _("No package title"))
-
-        vbox = gtk.VBox()
-
-        window.add (vbox)
-
         browser = advene.gui.views.browser.Browser(self.controller.package)
-        vbox.add (browser.get_widget())
-
-        hbox = gtk.HButtonBox()
-        vbox.pack_start (hbox, expand=False)
-
-        b = gtk.Button (stock=gtk.STOCK_CLOSE)
-        b.connect ("clicked", lambda w: window.destroy ())
-        hbox.add (b)
-
-        vbox.set_homogeneous (gtk.FALSE)
-
-        window.show_all()
-        
+        popup=browser.popup()
         return True
 
     def on_navigationhistory1_activate (self, button=None, data=None):
