@@ -19,7 +19,7 @@ from advene.model.bundle import StandardXmlBundle
 
 from advene.gui.views.transcription import TranscriptionView
 import advene.gui.util
-import advene.util.vlclib
+import advene.util.vlclib as vlclib
 import advene.gui.edit.elements
 
 class Menu:
@@ -138,6 +138,17 @@ class Menu:
     def delete_element (self, widget, el):
         p=el.ownerPackage
         if isinstance(el, Annotation):
+            rels=[ vlclib.get_title(self.controller, r.id)
+                   for r in el.rootPackage.relations
+                   if el in r.members ]
+            if rels:
+                dialog = gtk.MessageDialog(
+                    None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
+                    _("Cannot delete the annotation %s:\nThe following relation(s) use it:\n%s") % (vlclib.get_title(self.controller, el), ", ".join(rels)))
+                dialog.run()
+                dialog.destroy()
+                return True
             p.annotations.remove(el)
             self.controller.notify('AnnotationDelete', annotation=el)
         elif isinstance(el, Relation):
@@ -284,8 +295,8 @@ class Menu:
 
         add_item(element.content.data[:40])
         add_item(_("Begin: %s")
-                 % advene.util.vlclib.format_time (element.fragment.begin))
-        add_item(_("End: %s") % advene.util.vlclib.format_time (element.fragment.end))
+                 % vlclib.format_time (element.fragment.begin))
+        add_item(_("End: %s") % vlclib.format_time (element.fragment.end))
         return
 
     def make_relation_menu(self, element, menu):
