@@ -367,9 +367,9 @@ class AdveneController:
         if self.get_default_media() is None:
             pl = self.player.playlist_get_list()
             if pl:
-                mediafile = self.package.setMetaData (config.data.namespace,
-                                                      "mediafile",
-                                                      pl[0])
+                self.package.setMetaData (config.data.namespace,
+                                          "mediafile",
+                                          pl[0])
         self.package.save(as=as)
         self.event_handler.notify ("PackageSave")
     
@@ -405,9 +405,9 @@ class AdveneController:
                     self.player.playlist_add_item (mediafile)
                     
             # Load the imagecache
-            id = vlclib.mediafile2id (mediafile)
+            id_ = vlclib.mediafile2id (mediafile)
             self.imagecache.clear ()
-            self.imagecache.load (id)
+            self.imagecache.load (id_)
             # Populate the missing keys
             for a in self.package.annotations:
                 self.imagecache.init_value (a.fragment.begin)
@@ -503,12 +503,6 @@ class AdveneController:
             self.update_status ("set", self.create_position (value=value,
                                                              key=VLC.MediaTime,
                                                              origin=VLC.AbsolutePosition))
-
-    def update_corba (self, orb):
-        """Manage CORBA calls (in corba-server mode)."""
-        if self.orb.work_pending ():
-            self.orb.perform_work ()
-        return True
 
     def generate_sorted_lists (self, position):        
         """Return two sorted lists valid for a given position.
