@@ -250,24 +250,23 @@ class TimeLine:
         self.populate()
         pass
     
-    def update_annotation (self, element=None):
+    def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
-        print "Updating annotation %s" % element.content.data
-        bs = self.get_widget_for_annotation (element)
+        if event == 'AnnotationCreate':
+            # If it does not exist yet, we should create it if it is now in self.list
+            if annotation in self.list:
+                self.create_annotation_widget(annotation)
+            return True
+
+        bs = self.get_widget_for_annotation (annotation)
         if bs:
             for b in bs:
-                self.update_button (b)
-        else:
-            # If it does not exist yet, we should create it if it is now in self.list
-            if element in self.list:
-                self.create_annotation_widget(element)
-        return True
-        
-    def delete_annotation (self, element=None):
-        """Delete an annotation's representation."""
-        bs = self.get_widget_for_annotation (element)
-        for b in bs:
-            b.destroy()
+                if event == 'AnnotationEditEnd':
+                    self.update_button (b)
+                elif event == 'AnnotationDelete':
+                    b.destroy()
+                else:
+                    print "Unknown event %s" % event
         return True
         
     def annotation_cb (self, widget, ann):

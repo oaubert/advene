@@ -49,7 +49,10 @@ class AdveneTreeModel(gtk.GenericTreeModel):
 
     def remove_element (self, e):
         """Remove an element from the model.
+
+        The problem is that we do not know its previous path.
         """
+        #FIXME: find a way to correctly do this.
         parent=self.nodeParent(e)
         path=self.on_get_path(e)
         if path is not None:
@@ -57,24 +60,22 @@ class AdveneTreeModel(gtk.GenericTreeModel):
             #self.clear_cache()
             del (self.childrencache[parent])
 
-    def update_element(self, e):
+    def update_element(self, e, created=False):
         """Update an element.
 
         This is called when a element has been modified or created.
         """
-        print "update element %s" % e
-        #self.clear_cache()
         parent=self.nodeParent(e)
         try:
             del (self.childrencache[parent])
         except KeyError:
             pass
         path=self.on_get_path(e)
-        # FIXME: check if the element is new. If yes,
-        # emit row_inserted. Else, emit row_changed.
         if path is not None:
-            self.row_inserted(path, self.get_iter(path))
-            self.row_changed(path, self.get_iter(path))
+            if created:
+                self.row_inserted(path, self.get_iter(path))
+            else:
+                self.row_changed(path, self.get_iter(path))
         return
         
     def on_get_flags(self):
@@ -402,14 +403,51 @@ class TreeWidget:
                     menu.popup()
                     retval = True
         return retval
-    
-    def update_annotation(self, annotation):
+
+    def update_element(self, element=None, event=None):
+        if event.endswith('Create'):
+            self.model.update_element(element, created=True)
+        elif event.endswith('EditEnd'):
+            self.model.update_element(element, created=False)
+        elif event.endswith('Delete'):
+            # FIXME: remove_element is incorrect for the moment
+            #        so do a global update
+            #self.model.remove_element (element)
+            self.update_model(element.rootPackage)
+        else:
+            return "Unknown event %s" % event
+        return
+        
+    def update_annotation(self, annotation=None, event=None):
         """Update the annotation.
         """
-        self.model.update_element(annotation)
-        # FIXME: todo
+        self.update_element(annotation, event)
+        return
+
+    def update_relation(self, relation=None, event=None):
+        """Update the relation.
+        """
+        self.update_element(relation, event)
+        return
+
+    def update_view(self, view=None, event=None):
+        self.update_element(view, event)
         return
     
+    def update_schema(self, schema=None, event=None):
+        self.update_element(schema, event)
+        return
+    
+    def update_annotationtype(self, annotationtype=None, event=None):
+        self.update_element(annotationtype, event)
+        return
+    
+    def update_relation(self, relationtype=None, event=None):
+        """Update the relationtype
+        """
+        self.update_element(relationtype, event)
+        return
+
     def update_model(self, package):
         """Update the model with a new package."""
         print "update model %s" % str(package)
@@ -417,12 +455,6 @@ class TreeWidget:
         self.tree_view.set_model(self.model)
         return
     
-    def delete_annotation(self, annotation):
-        """Delete the view of annotation from the display"""
-        # Invalidate the model cache
-        print "Delete annotation %s" % annotation.id
-        self.model.remove_element (annotation)
-        return
     
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -155,7 +155,7 @@ class AdveneGUI (Connect):
             self.gui.fs.set_filename (config.data.path['data'])
 
         self.gui.current_annotation = self.gui.get_widget ("current_annotation")
-        self.on_annotation_edit_end (None, None)
+        self.gui.current_annotation.set_text ('['+_('None')+']')
 
         # Player status
         p=self.controller.player
@@ -186,49 +186,98 @@ class AdveneGUI (Connect):
         """
         self.controller.activate_stbv(view)
         return True
-
-    def deleted_annotation_cb(self, context, parameters): 
-        """Method used to update the active views.
-
-        It will propagate the event.
-        """
-        annotation=context.evaluateValue('annotation')
-        for v in self.annotation_views:
-            try:
-                v.delete_annotation(annotation)
-            except AttributeError:
-                pass
-        return True
        
-    def updated_annotation_cb(self, context, parameters):
+    def annotation_lifecycle(self, context, parameters):
         """Method used to update the active views.
 
         It will propagate the event.
         """
         annotation=context.evaluateValue('annotation')
+        event=context.evaluateValue('event')
         for v in self.annotation_views:
             try:
-                v.update_annotation(annotation)
+                v.update_annotation(annotation=annotation, event=event)
             except AttributeError:
                 pass
         return True
 
-    def updated_view_cb(self, context, parameters):
-        """Method used to update the GUI.
+    def relation_lifecycle(self, context, parameters):
+        """Method used to update the active views.
+
+        It will propagate the event.
+        """
+        relation=context.evaluateValue('relation')
+        event=context.evaluateValue('event')
+        for v in self.annotation_views:
+            try:
+                v.update_relation(relation=relation, event=event)
+            except AttributeError:
+                pass
+        return True
+
+    def view_lifecycle(self, context, parameters):
+        """Method used to update the active views.
+
+        It will propagate the event.
         """
         view=context.evaluateValue('view')
-        self.update_stbv_menu()
+        event=context.evaluateValue('event')
+        for v in self.annotation_views:
+            try:
+                v.update_view(view=view, event=event)
+            except AttributeError:
+                pass
+
+        if view.content.mimetype == 'application/x-advene-ruleset':
+            self.update_stbv_menu()
+            
         return True
     
-    def updated_relation_cb(self, context, parameters):
+    def schema_lifecycle(self, context, parameters):
         """Method used to update the active views.
 
-        It will propagate the event."""
-        relation=context.evaluateValue('relation')
+        It will propagate the event.
+        """
+        schema=context.evaluateValue('schema')
+        event=context.evaluateValue('event')
         for v in self.annotation_views:
-            v.update_relation(relation)
-        return True
+            try:
+                v.update_schema(schema=schema, event=event)
+            except AttributeError:
+                pass
 
+        return True
+    
+    def annotationtype_lifecycle(self, context, parameters):
+        """Method used to update the active views.
+
+        It will propagate the event.
+        """
+        at=context.evaluateValue('annotationtype')
+        event=context.evaluateValue('event')
+        for v in self.annotation_views:
+            try:
+                v.update_annotationtype(annotationtype=at, event=event)
+            except AttributeError:
+                pass
+        # Update the current type menu
+        self.update_gui()
+        return True
+    
+    def relationtype_lifecycle(self, context, parameters):
+        """Method used to update the active views.
+
+        It will propagate the event.
+        """
+        rt=context.evaluateValue('relationtype')
+        event=context.evaluateValue('event')
+        for v in self.annotation_views:
+            try:
+                v.update_relationtype(relationtype=rt, event=event)
+            except AttributeError:
+                pass
+        return True
+    
     def updated_position_cb (self, context, parameters):
         position_before=context.evaluateValue('position_before')
         # Note: it works for the moment only because we take an
@@ -275,18 +324,33 @@ class AdveneGUI (Connect):
         tree.get_widget().show_all()
         self.register_view (tree)
 
-        self.controller.event_handler.internal_rule (event="AnnotationEditEnd",
-                                                     method=self.on_annotation_edit_end)
         self.controller.event_handler.internal_rule (event="PackageLoad",
                                                      method=self.manage_package_load)
-        self.controller.event_handler.internal_rule (event="AnnotationEditEnd",
-                                                     method=self.updated_annotation_cb)
-        self.controller.event_handler.internal_rule (event="AnnotationDelete",
-                                                     method=self.deleted_annotation_cb)
-        self.controller.event_handler.internal_rule (event="RelationEditEnd",
-                                                     method=self.updated_relation_cb)
-        self.controller.event_handler.internal_rule (event="ViewEditEnd",
-                                                     method=self.updated_view_cb)
+        # Annotation lifecycle
+        for e in ('AnnotationCreate', 'AnnotationEditEnd', 'AnnotationDelete'):
+            self.controller.event_handler.internal_rule (event=e,
+                                                         method=self.annotation_lifecycle)
+        # Relation lifecycle
+        for e in ('RelationCreate', 'RelationEditEnd', 'RelationDelete'):
+            self.controller.event_handler.internal_rule (event=e,
+                                                         method=self.relation_lifecycle)
+        # View lifecycle
+        for e in ('ViewCreate', 'ViewEditEnd', 'ViewDelete'):
+            self.controller.event_handler.internal_rule (event=e,
+                                                         method=self.view_lifecycle)
+        # Schema lifecycle
+        for e in ('SchemaCreate', 'SchemaEditEnd', 'SchemaDelete'):
+            self.controller.event_handler.internal_rule (event=e,
+                                                         method=self.schema_lifecycle)
+        # AnnotationType lifecycle
+        for e in ('AnnotationTypeCreate', 'AnnotationTypeEditEnd', 'AnnotationTypeDelete'):
+            self.controller.event_handler.internal_rule (event=e,
+                                                         method=self.annotationtype_lifecycle)
+        # RelationType lifecycle
+        for e in ('RelationTypeCreate', 'RelationTypeEditEnd', 'RelationTypeDelete'):
+            self.controller.event_handler.internal_rule (event=e,
+                                                         method=self.relationtype_lifecycle)
+
         self.controller.event_handler.internal_rule (event="PlayerSet",
                                                      method=self.updated_position_cb)
 
@@ -327,10 +391,6 @@ class AdveneGUI (Connect):
         """
         return self.format_time (val)
 
-    def on_annotation_edit_end (self, context, parameters):
-        """Event handler used to reset the current annotation field."""
-        self.gui.current_annotation.set_text ('['+_('None')+']')
-        
     def set_current_type (self, t):
         """Set the current annotation type.
 
@@ -698,12 +758,13 @@ class AdveneGUI (Connect):
                 self.annotation = self.controller.package.createAnnotation(type = self.current_type,
                                                                            fragment = MillisecondFragment (begin=self.controller.player.current_position_value, duration=30000))
                 self.log (_("Defining a new annotation..."))
-                self.controller.notify ("AnnotationEditBegin", annotation=self.annotation)
+                self.controller.notify ("AnnotationCreate", annotation=self.annotation)
             else:
                 # End the annotation. Store it in the annotation list
                 self.annotation.fragment.end = self.controller.player.current_position_value
                 self.controller.package.annotations.append (self.annotation)
                 self.log (_("New annotation: %s") % self.annotation)
+                self.gui.current_annotation.set_text ('['+_('None')+']')
                 self.controller.notify ("AnnotationEditEnd", annotation=self.annotation)
                 if self.controller.player.status == self.controller.player.PauseStatus:
                     self.controller.update_status ("resume")
@@ -718,7 +779,7 @@ class AdveneGUI (Connect):
                 self.controller.position_update ()
                 self.annotation = self.controller.package.createAnnotation (type = self.current_type,
                                                                             fragment = MillisecondFragment (begin=self.controller.player.current_position_value, duration=30000))
-                self.controller.notify ("AnnotationEditBegin", annotation=self.annotation)
+                self.controller.notify ("AnnotationCreate", annotation=self.annotation)
                 self.log (_("Defining a new annotation (Tab to resume the play)"))
             else:
                 self.annotation.content.data += " "
