@@ -84,6 +84,16 @@ partir du texte et des bornes temporelles des annotations.
 Pour accéder à cette fonctionnalité, il faut utiliser le menu
 *Fichier/Importer une transcription*
 
+Après avoir lancé la lecture de la vidéo, on pose des bornes en
+cliquant dans le texte aux bons moments. Il est possible de supprimer
+des bornes posées par erreur en cliquant dessus. Par ailleurs, un clic
+droit sur une borne permet d'accéder directement au temps associé dans
+la vidéo, ainsi que d'effectuer de petits ajustements du temps
+associé.
+
+À la fin de l'édition des bornes, cliquez sur *Convertir* pour
+convertir le texte en annotaions, dans un type choisi.
+
 Visualisation des annotations
 -----------------------------
 
@@ -105,6 +115,9 @@ l'écran. Pour représenter l'intégralité du film, il faut donc le fixer
 En cliquant sur les boutons représentant les annotations, on accède à
 un menu permettant entre autres de les éditer et d'accéder directement
 au fragment de la vidéo correspondant.
+
+Pour accéder à un moment quelconque de la vidéo, il suffit de cliquer
+dans la fenêtre.
 
 Vue arborescente
 ++++++++++++++++
