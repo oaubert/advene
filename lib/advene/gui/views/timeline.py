@@ -797,10 +797,8 @@ class TimeLine:
 
         height=max(self.layer_position.values() or (1,)) + 3 * self.button_height
 
-        s=config.data.preferences['windowsize']['timelineview']
-        window.set_default_size (s[0], height)
         if self.controller.gui:
-            window.connect ("size_allocate", self.controller.gui.resize_cb, 'timelineview')
+            self.controller.gui.init_window_size(window, 'timelineview')
         window.show_all()
 
         # Make sure that the timeline display is in sync with the
