@@ -1,3 +1,16 @@
+advene (0.8) unstable; urgency=low
+
+  * New actions: PlayerGoto, Popup, PopupGoto
+  * Added regexp support in conditions
+  * Added missing dependency on python-imaging
+  * The "display" meta-attribute for annotationTypes has been renamed
+    "representation"
+  * It is now possible to edit the 'representation' attribute for
+    AnnotationTypes
+  * Added a python evaluator window (Control-e to invoke)
+  
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue,  1 Jun 2004 00:14:31 +0200
+
 advene (0.7) unstable; urgency=low
 
   * Unicode-related bug fixes 
