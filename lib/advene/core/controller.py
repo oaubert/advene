@@ -160,14 +160,28 @@ class AdveneController:
         return True
 
     def process_queue(self):
+        """Batch process pending events.
+
+        We process all the pending events since the last notification.
+        Cannot use a while loop on event_queue, since triggered
+        events can generate new notification.
+        """
+        # Dump the pending events into a local queue
+        ev=[]
         try:
-            (method, args, kw) = self.event_queue.get_nowait()
-            #print "Process action: %s" % str(method)
-            method(*args, **kw)
+            while True:
+                e=self.event_queue.get_nowait()
+                ev.append(e) 
         except Queue.Empty:
             pass
-        except Exception, e:
-            self.queue_action(self.log, _("Exception :") + str(e))
+        
+        # Now we can process the events
+        for (method, args, kw) in ev:
+            #print "Process action: %s" % str(method)
+            try:
+                method(*args, **kw)
+            except Exception, e:
+                self.queue_action(self.log, _("Exception :") + str(e))
         return True
     
     def register_gui(self, gui):
@@ -253,6 +267,9 @@ class AdveneController:
         return self.player.create_position(value=value, key=key, origin=origin)
     
     def notify (self, event_name, *param, **kw):
+        #print "Notify %s (%s): %s" % (event_name,
+        #                              vlclib.format_time(self.player.current_position_value),
+        #                              str(kw))
         if kw.has_key('immediate'):
             del kw['immediate']
             self.event_handler.notify(event_name, *param, **kw)
@@ -554,7 +571,7 @@ class AdveneController:
             self.package.author = config.data.userid
         else:
             self.package = Package (uri=uri)
-        self.event_handler.notify ("PackageLoad")
+        self.notify ("PackageLoad")
     
     def save_package (self, as=None):
         """Save a package.
@@ -580,7 +597,7 @@ class AdveneController:
                 self.package.set_default_media(pl[0])
         self.package.save(as=as)
         self.modified=False
-        self.event_handler.notify ("PackageSave")
+        self.notify ("PackageSave")
         if old_uri != as:
             # Reload the package with the new name
             self.log(_("Package URI has changed. Reloading package with new URI."))
@@ -672,14 +689,14 @@ class AdveneController:
         self.current_stbv=view
         if view is None:
             self.event_handler.clear_ruleset(type_='user')
-            self.event_handler.notify("ViewActivation", view=None)
+            self.notify("ViewActivation", view=None)
             return
         rs=advene.rules.elements.RuleSet()
         rs.from_dom(catalog=self.event_handler.catalog,
                     domelement=view.content.model,
                     origin=view.uri)
         self.event_handler.set_ruleset(rs, type_='user')
-        self.event_handler.notify("ViewActivation", view=view)
+        self.notify("ViewActivation", view=view)
         return
         
     def handle_http_request (self, source, condition):
@@ -787,12 +804,14 @@ class AdveneController:
         future_begins.sort(lambda a, b: cmp(a[1], b[1]))
         future_ends.sort(lambda a, b: cmp(a[2], b[2]))
 
-        #print "Position: %d" % position
-        #print "Begins: %s\nEnds: %s" % (future_begins, future_ends)
+        #print "Position: %s" % vlclib.format_time(position)
+        #print "Begins: %s\nEnds: %s" % ([ a[0].id for a in future_begins[:4] ],
+        #                                [ a[0].id for a in future_ends[:4] ])
         return future_begins, future_ends
 
     def reset_annotation_lists (self):
         """Reset the future annotations lists."""
+        #print "reset annotation lists"
         self.future_begins = None
         self.future_ends = None
         self.active_annotations = []
@@ -810,6 +829,8 @@ class AdveneController:
         """
         position_before=self.player.current_position_value
         #print "update status: %s" % status
+        if status == 'set' or status == 'start':
+            self.reset_annotation_lists()            
         try:
             # if hasattr(position, 'value'):
             #     print "update_status %s %i" % (status, position.value)
@@ -825,12 +846,11 @@ class AdveneController:
             e, v, tb = sys.exc_info()
             code.traceback.print_exception (e, v, tb)
         else:
-            if status == 'set' or status == 'start':
-                self.reset_annotation_lists()
             if self.status2eventname.has_key (status) and notify:
-                self.event_handler.notify (self.status2eventname[status],
-                                           position=position,
-                                           position_before=position_before)
+                self.notify (self.status2eventname[status],
+                             position=position,
+                             position_before=position_before,
+                             immediate=True)
         return
     
     def position_update (self):
@@ -865,10 +885,11 @@ class AdveneController:
         Hence, it is a critical execution path and care should be
         taken with the code used here.
         """
+        # Process the event queue
         self.process_queue()
         
         pos=self.position_update ()
-        #print "--------------------- %d / %d" % (pos, self.player.stream_duration)
+
         if pos < self.last_position:
             # We did a seek compared to the last time, so we 
             # invalidate the future_begins and future_ends lists
@@ -884,11 +905,12 @@ class AdveneController:
             a, b, e = self.future_begins[0]
             while b <= pos:
                 # Ignore if we were after the annotation end
-                if e > pos:
-                    self.event_handler.notify ("AnnotationBegin",
-                                               annotation=a)                            
-                    self.active_annotations.append(a)
                 self.future_begins.pop(0)
+                if e > pos:
+                    self.notify ("AnnotationBegin",
+                                 annotation=a,
+                                 immediate=True)
+                    self.active_annotations.append(a)
                 if self.future_begins:
                     a, b, e = self.future_begins[0]
                 else:
@@ -902,9 +924,10 @@ class AdveneController:
                     self.active_annotations.remove(a)
                 except ValueError:
                     pass
-                self.event_handler.notify ("AnnotationEnd",
-                                           annotation=a)
-                self.future_ends.pop(0)
+                self.future_ends.pop(0)                
+                self.notify ("AnnotationEnd",
+                             annotation=a,
+                             immediate=True)
                 if self.future_ends:
                     a, b, e = self.future_ends[0]
                 else:
