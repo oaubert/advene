@@ -47,7 +47,7 @@ class Player:
         pass
 
     def log(self, *p):
-        print "Dummy player: ", *p
+        print "Dummy player: %s" % *p
         
     def get_media_position(self, origin, key):
         self.log("get_media_position")
