@@ -312,6 +312,26 @@ class TimeLine:
                % (a.lower, a.upper, a.value, a.page_size))
         print "Ratio: %.3f" % self.rapport
 
+    def align_annotations(self, source, dest, mode):
+        new={
+            'begin': source.fragment.begin,
+            'end': source.fragment.end
+            }
+        if '-' in mode:
+            (s, d) = mode.split('-')
+            new[s]=getattr(dest.fragment, d)
+        elif mode == 'align':
+            for k in ('begin', 'end'):
+                new[k]=getattr(dest.fragment, k)
+        else:
+            print "Unknown drag mode: %s" % mode
+
+        if new['begin'] < new['end']:
+            for k in ('begin', 'end'):
+                setattr(source.fragment, k, new[k])
+        self.controller.notify("AnnotationEditEnd", annotation=source)
+        return True
+            
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
@@ -324,10 +344,16 @@ class TimeLine:
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
-            print "Creating new relation (%s, %s)" % (source_uri, widget.annotation.uri)
             source=self.controller.package.annotations.get(source_uri)
             dest=widget.annotation
-            self.create_relation_popup(source, dest)
+
+            if self.drag_mode == 'relation':
+                self.create_relation_popup(source, dest)
+            elif self.drag_mode in ( 'begin-begin', 'begin-end',
+                                     'end-begin', 'end-end', 'align' ):
+                self.align_annotations(source, dest, self.drag_mode)
+            else:
+                print "Unknown drag mode: %s" % self.drag_mode
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -732,33 +758,38 @@ class TimeLine:
     
     def get_toolbar(self):
         tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)        
+        tb.set_style(gtk.TOOLBAR_ICONS) 
+        radiogroup_ref=None
+        
         tb_list = (
             ("_Relations", "Create relations",
              gtk.STOCK_CONVERT, self.set_drag_mode, "relation"),
             
-            ("_BeginBegin", "Set the same begin time",
+            ("_BeginBegin", "Set the same begin time as the selected annotation",
              gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-begin"),
 
-            ("_BeginEnd", "Align the destination begin time to the source end time",
+            ("_BeginEnd", "Align the begin time to the selected end time",
              gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-end"),
 
 
-            ("_EndEnd", "Align the destination end time to the source end time",
+            ("_EndEnd", "Align the end time to the selected end time",
              gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-end"),
 
-            ("_EndBegin", "Align the destination end time to the source begin time",
+            ("_EndBegin", "Align the end time to the selected begin time",
              gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-begin"),
 
             )
+
         for text, tooltip, icon, callback, arg in tb_list:
-            #b=gtk.RadioToolButton(group="mode", stock_id=icon)
-            #b.set_tooltip(tips, tooltip)
-            # FIXME: deprecated
-            tb.append_item(text, tooltip, None,
-                           gtk.image_new_from_stock(icon,
-                                                    gtk.ICON_SIZE_SMALL_TOOLBAR),
-                           callback, arg)
+            b=gtk.RadioToolButton(group=radiogroup_ref,
+                                  stock_id=icon)
+            b.set_tooltip(self.tooltips, tooltip)
+            b.connect("clicked", callback, arg)
+            tb.insert(b, -1)
+            
+            if radiogroup_ref is None:
+                radiogroup_ref=b
+            
         return tb
     
     def popup(self):
