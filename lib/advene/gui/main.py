@@ -41,6 +41,7 @@ import advene.model.tal.context
 import advene.core.mediacontrol
 from advene.core.imagecache import ImageCache
 import advene.util.vlclib as vlclib
+import advene.gui.util
 
 import advene.util.importer
 
@@ -58,6 +59,7 @@ import advene.gui.edit.create
 import advene.gui.evaluator
 import advene.gui.views.singletonpopup
 import advene.gui.edit.imports
+from advene.gui.views.transcription import TranscriptionView
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -666,7 +668,7 @@ class AdveneGUI (Connect):
         @type msg: string
         """
         buf = self.gui.logmessages.get_buffer ()
-        mes = str(msg) + "\n"
+        mes = "".join((time.strftime("%T"), " - ", str(msg), "\n"))
         buf.insert_at_cursor (mes)
         endmark = buf.create_mark ("end", buf.get_end_iter (), True)
         self.gui.logmessages.scroll_mark_onscreen (endmark)
@@ -831,6 +833,15 @@ class AdveneGUI (Connect):
             i.package=self.controller.package
             i.process_file(file_)
             self.controller.notify("PackageLoad")
+            self.log('Converted from file %s :' % file_)
+            kl=i.statistics.keys()
+            kl.sort()
+            for k in kl:
+                v=i.statistics[k]
+                if v > 1:
+                    self.log('\t%d %ss' % (v, k))
+                else:
+                    self.log('\t%d %s' % (v, k))
         return True
 
     def register_view (self, view):
@@ -965,15 +976,14 @@ class AdveneGUI (Connect):
     def on_exit(self, source=None, event=None):
         """Generic exit callback."""
         if self.controller.modified:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
-                _("Your package has been modified but not saved.\nQuit anyway?"))
-            response=dialog.run()
-            dialog.destroy()
-            if response != gtk.RESPONSE_YES:
-                return True
-
+            response=advene.gui.util.yes_no_cancel_popup(title=_("Package modified"),
+                                                         text=_("Your package has been modified but not saved.\nSave it now?"))
+            if response == gtk.RESPONSE_CANCEL:
+                return True            
+            if response == gtk.RESPONSE_YES:
+                self.on_save1_activate()
+                return False
+            
         if self.controller.on_exit():
             gtk.main_quit()
             return False
@@ -1035,7 +1045,6 @@ class AdveneGUI (Connect):
                 if event.state & gtk.gdk.CONTROL_MASK:
                     # Continuous editing mode: we immediately start a new annotation
                     if self.current_type is None:
-                        # FIXME: should display a warning
                         return True
                     f = MillisecondFragment (begin=c.player.current_position_value-config.data.reaction_time,
                                              duration=30000)
@@ -1054,7 +1063,6 @@ class AdveneGUI (Connect):
                     self.controller.update_status ("pause")
                 self.controller.position_update ()
                 if self.current_type is None:
-                    # FIXME: should display a warning
                     return True
                 self.annotation = self.controller.package.createAnnotation (type = self.current_type,
                                                                             fragment = MillisecondFragment (begin=self.controller.player.current_position_value, duration=30000))
@@ -1222,25 +1230,37 @@ class AdveneGUI (Connect):
         vbox.add(edit.get_widget())
         edit.get_widget().show()
 
-        hb=gtk.HButtonBox()
-
-        b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect("clicked", edit.add_rule)
-        hb.pack_start(b, expand=False)
-
-        b=gtk.Button(stock=gtk.STOCK_REMOVE)
-        b.connect("clicked", edit.remove_rule)
-        hb.pack_start(b, expand=False)
-
-        def save_ruleset(button, type_):
+        def validate_ruleset(button, type_):
             edit.update_value()
             # edit.model has been edited
             self.controller.event_handler.set_ruleset(edit.model, type_=type_)
             w.destroy()
             return True
 
-        b=gtk.Button(stock=gtk.STOCK_OK)
+        def save_ruleset(button, type_):
+            edit.update_value()
+            # edit.model has been edited
+            self.controller.event_handler.set_ruleset(edit.model, type_=type_)
+            # FIXME: implement ruleset save
+            print "Not implemented yet"
+            return True
+
+        hb=gtk.HButtonBox()
+
+        b=gtk.Button(stock=gtk.STOCK_ADD)
+        b.connect("clicked", edit.add_rule_cb)
+        hb.pack_start(b, expand=False)
+
+        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b.connect("clicked", edit.remove_rule_cb)
+        hb.pack_start(b, expand=False)
+
+        b=gtk.Button(stock=gtk.STOCK_SAVE)
         b.connect("clicked", save_ruleset, 'default')
+        hb.pack_start(b, expand=False)
+
+        b=gtk.Button(stock=gtk.STOCK_OK)
+        b.connect("clicked", validate_ruleset, 'default')
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_CANCEL)
@@ -1274,6 +1294,32 @@ class AdveneGUI (Connect):
         tree.popup()
         return True
 
+    def on_transcription1_activate (self, button=None, data=None):
+        """Open transcription view."""
+        at=None
+        ats=self.controller.package.annotationTypes
+        if len(ats) == 1:
+            at=ats[0]
+        elif len(ats) > 1:
+            at=advene.gui.util.list_selector(title=_("Choose the annotation type"),
+                                             text=_("Choose the annotation type to display as transcription."),
+                                             members=self.controller.package.annotationTypes,
+                                             controller=self.controller)
+        else:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("No annotation type is defined."))
+            response=dialog.run()
+            dialog.destroy()
+            return True
+        
+        if at is not None:
+            transcription = TranscriptionView(controller=self.controller,
+                                              annotationtype=at)
+            transcription.popup()
+        return True
+    
     def on_browser1_activate (self, button=None, data=None):
         browser = advene.gui.views.browser.Browser(self.controller.package)
         popup=browser.popup()
