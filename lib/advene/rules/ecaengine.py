@@ -19,11 +19,7 @@ import advene.rules.actions
 
 class ECAEngine:
     def __init__ (self, controller):
-        self.rulesets = {
-            'default': advene.rules.elements.RuleSet(),
-            'internal': advene.rules.elements.RuleSet(),
-            'user': advene.rules.elements.RuleSet()
-            }
+        self.clear_state()
         self.ruledict = {}
         self.controller=controller
         self.catalog=advene.rules.elements.ECACatalog()
@@ -31,6 +27,21 @@ class ECAEngine:
             self.catalog.register_action(a)
         self.scheduler=sched.scheduler(time.time, time.sleep)
         self.schedulerthread=threading.Thread(target=self.scheduler.run)
+
+    def get_state(self):
+        """Return a state of the current rulesets."""
+        return self.rulesets.copy()
+
+    def set_state(self, state):
+        for k, v in state.iteritems():
+            self.set_ruleset(v, type_=k)
+
+    def clear_state(self):
+        self.rulesets = {
+            'default': advene.rules.elements.RuleSet(),
+            'internal': advene.rules.elements.RuleSet(),
+            'user': advene.rules.elements.RuleSet()
+            }
 
     def clear_ruleset(self, type_='user'):
         self.rulesets[type_] = advene.rules.elements.RuleSet()
@@ -141,7 +152,7 @@ class ECAEngine:
         @param event_name: the event name
         @type event_name: string
         """
-        print "notify %s for %s" % (event_name, str(kw))
+        #print "notify %s for %s" % (event_name, str(kw))
         context=self.build_context(event_name, kw)
         try:
             a=self.ruledict[event_name]
