@@ -474,7 +474,6 @@ class AdveneGUI (Connect):
     
     def update_stbv_menu (self):
         """Update the STBV menu."""
-        print "Updating stbv menu"
         stbv_menu = self.gui.get_widget("stbv_combo").get_menu()
         if stbv_menu is None:
             # Application initialization
@@ -738,7 +737,8 @@ class AdveneGUI (Connect):
                                        globals_={},
                                        locals_={'package': p,
                                                 'p': p,
-                                                'a': a})
+                                                'a': a,
+                                                'c': self.controller })
         ev.popup()
         return True
     
