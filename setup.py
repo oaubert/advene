@@ -54,7 +54,7 @@ myname = "Olivier Aubert"
 myemail = "olivier.aubert@liris.cnrs.fr"
 
 setup (name = "advene",
-       version = "0.6",
+       version = "0.7",
        description = "Annotate DVds, Exchange on the NEt",
        keywords = "dvd,video,annotation",
        author = myname,

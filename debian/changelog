@@ -1,4 +1,4 @@
-advene (0.6-1) unstable; urgency=low
+advene (0.7) unstable; urgency=low
 
   * Unicode-related bug fixes 
   * Added a "display" meta-attribute to AnnotationTypes and
