@@ -16,6 +16,26 @@ python-xml (>=0.8.0)
 python-simpletal (>=3.9)
 python-imaging
 
+* Windows version
+
+You should install in this order (note the version numbers) :
+
+Gtk/win32 v. 2.4 : http://gladewin32.sourceforge.net/
+
+Python    v. 2.3 : http://www.python.org/ftp/python/2.3.4/Python-2.3.4.exe
+[ From http://python.org/ ]
+
+PyGtk for python2.3: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/binaries/pygtk-2.4.1.win32-py2.3.exe
+[ From http://www.pygtk.org ]
+
+Python Imaging Library : http://effbot.org/downloads/PIL-1.1.4.win32-py2.3.exe
+[ From http://www.pythonware.com/products/pil/ ]
+
+PyXML 0.8 : http://prdownloads.sourceforge.net/pyxml/PyXML-0.8.4.win32-py2.3.exe?download
+[ From http://pyxml.sourceforge.net/ ]
+
+VLC 0.8.1 [ From http://www.videolan.org/ ] 
+
 * Testing
 
 You can run the script bin/advene directly from the source
