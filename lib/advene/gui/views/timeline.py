@@ -474,7 +474,7 @@ class TimeLine:
         self.widget.show_all ()
         
     def format_time (self, t):
-            return "%s.%03d" % (time.strftime("%M:%S", time.gmtime(t / 1000)), t % 1000)
+            return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)
 
     def bounds (self):
         """Bounds of the list.
