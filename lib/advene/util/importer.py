@@ -31,6 +31,8 @@ import time
 import sre
 import os
 
+import advene.core.config as config
+
 from advene.model.package import Package
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
@@ -204,11 +206,13 @@ class LsDVDImporter(GenericImporter):
     """
     def __init__(self, regexp=None, encoding=None, **kw):
         super(LsDVDImporter, self).__init__(**kw)
+        self.command="/usr/bin/lsdvd -c"
+        #Chapter: 01, Length: 00:01:16, Start Cell: 01
+        self.regexp="^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d\d)"
         self.encoding='latin1'
 
     def iterator(self, f):
-        #Chapter: 01, Length: 00:01:16, Start Cell: 01
-        reg=sre.compile("^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d\d)")
+        reg=sre.compile(self.regexp)
         begin=1
         for l in f:
             l=l.rstrip()
@@ -226,7 +230,7 @@ class LsDVDImporter(GenericImporter):
     def process_file(self, filename):
         if filename != 'lsdvd':
             pass
-        f=os.popen("/usr/bin/lsdvd -c", "r")
+        f=os.popen(self.command, "r")
         if self.package is None:
             self.create_package()
         self.convert(self.iterator(f))
@@ -338,6 +342,11 @@ if __name__ == "__main__":
 
     if fname == 'lsdvd':
         i=LsDVDImporter()
+        p, at=i.create_package(schemaid='dvd',
+                               annotationtypeid='chapter')
+        i.package=p
+        i.defaulttype=at
+        p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
     elif fname.endswith('.txt'):
         i=TextImporter(author='textimporter')
     elif fname.endswith('.srt'):
