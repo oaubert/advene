@@ -662,7 +662,11 @@ class EditForm(object):
             if expr is None:
                 expr=""
             if sre.match('^\s+', expr):
-                print "Messed up metadata for %s" % element.id
+                try:
+                    i=element.id
+                except AttributeError:
+                    i=str(element)
+                print "Messed up metadata for %s" % i
                 expr=""
             return expr
         return get_method
@@ -673,6 +677,10 @@ class EditForm(object):
             if value is None or value == "":
                 value=""
             if sre.match('^\s+', value):
+                try:
+                    i=element.id
+                except AttributeError:
+                    i=str(element)
                 print "Messed up value for %s" % element.id
                 value=""
             element.setMetaData(namespace, data, unicode(value))
