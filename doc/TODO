@@ -1,17 +1,8 @@
 * Add a notebook view in the place of the defunct HTML widget
 
-* Write the correct VLC/Python module -> DONE
-
-* Use gettext to internationalize the application (cf http://listas.aditel.org/archivos/python-es/2003-February/003642.html for glade) -> DONE
-
-* The advene python modules should be in /usr/lib/advene (with subdirectories advenetool, advene, util), cf below -> DONE in Debian package
-
 * Fix for SVG module :
  - find a way to trigger the svg module rather than the freetype module
  - write an example subtitle file with SVG contents
-
-* Build a debian package. Cf
-http://www-106.ibm.com/developerworks/linux/library/l-debpkg.html -> DONE (badly)
 
 * The view method should return a Content object, so that we can get its mimetype
 
@@ -19,11 +10,130 @@ http://www-106.ibm.com/developerworks/linux/library/l-debpkg.html -> DONE (badly
 
 * The package/annotationTypes should have an 'ids' method, to be able to retrieve ids as keys (all bundles in fact).
 
+*** Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
+
+* Adveneserver: use logging.Logger to log HTTP accesses
+
+* Style setting:
+sendmail_styles="""
+style "green_button"
+{
+  fg[PRELIGHT] = { 1.0, 1.0, 1.0 }
+  bg[PRELIGHT] = { 0, 0.75, 0 }
+}
+widget "sendmail.*.Send*" style "green_button"
+
+style "blue_text"
+{
+  text[NORMAL] = { 0, 0, 0.75 }
+}
+widget "sendmail.*.mail" style "blue_text"
+"""
+gtk.rc_parse_string(sendmail_styles)
+
+* Add /usr/share/doc/... for all debian packages (and
+  examples/client.py for vlc-plugin-corba)
+
+* Create a ContextualizedBundle which understands to namespaces
+
+* Find a meaningful way to concisely display relations and annotations.
+
+* ! Handle unicode correctly and everywhere (GUI, adveneserver, XML,
+  ...) -> half DONE (needs a patch to SimpleTAL)
+
+* Reorganize adveneserver code
+
+* EPOZ: implement data templates according to the edited element,
+  by hacking around LinkTool
+  For packages
+   annotations (List of annotations)
+   relations   (List of all relations)
+   annotations/i... (Precise annotation)
+   annotations/i.../snapshot_url (Annotation for snapshot)
+   annotations/i.../content/data (Content of annotation)
+   annotations/i.../fragment/formatted/begin (Start time of the annotation)
+
+* TALES vs XPath: cf http://zope.org/Wikis/zope-xml/XPath (Pt_Xpath)
+   Search TALES in http://lambda.weblogs.com/discuss/msgReader$4575
+http://lists.webarch.co.uk/pipermail/petal/2002-July/000022.html
+http://pywork.sourceforge.net/doc/node9.html
+
+* Mailing-list TAL:
+http://marc.free.net.ph/mindex/zope-zpt@20031122.114501.00000000.html
+
+* Reference on zpt: http://www.advogato.org/article/350.html
+
+* Remove gtk dependency from vlclib (so that we can start adveneserver
+without DISPLAY)
+
+* EPOZ: strip http:... prefix from drag and drop results.
+* Create TALContext object: -> DONE
+     Constructor(selNode) : takes a node 
+     get_define(name): get the define for the given name
+     set_define(name, value): set the define
+     list_define(): get the list of defined names
+     get_repeat(name): get the repeat for the given name
+     list_repeat(): get the list of repeat loop items
+     get_content(): get the content
+     set_content(string): set the content
+
+* bootstrap.xml : how to use properly ? Can a package exist with no view ?
+
+* Once bootstrap.xml works correctly, put it somewhere pertinent and
+use it as the template.xml file
+
+* EPOZ: derive LinkTool into TALContentTool and TALImageTool, to be
+able to define content/replace (just replace with <span/> will be
+simpler) and snapshot integration.
+
+* Ruleset edit : add the possibility to organize the order of rules
+
+* Global methods :
+  * isa : make more robust (work on non-advene elements ? at least, not throw
+    an exception and return 'unknown')
+  * formatted : make more robust
+  * first, last, rest, meta, snapshot_url, view : idem
+  * authorUrl on package ???
+
+* Implement an image-based timestamp chooser (with all_snapshots()) -> almost DONE
+
+* Implement an ApproximateImageCache with a ic.epsilon value
+
+* Make some attributes inherited (esp. author for annotations, media for fragments)
+
+* Use popup-menu signal (cf http://cvs.gnome.org/bonsai/cvsblame.cgi?file=gtk%2B%2Fdocs%2Freference%2Fgtk/migrating-checklist.sgml&rev=HEAD&root=/cvs/gnome)
+
+* debian package: fix web/web not in the right directory, default_rules.xml
+
+* Windows: start application
+http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
+
+* Tree view : implement "Add/Remove" option in popup menus (Add new view, Add new type, ...)
+
+* Propagate AnnotationEditEnd and RelationEditEnd events in active views
+
+* Timeline: add the possibility to add new annotations by clicking on the type
+
+* Metadata : cache the stream duration (for GUI purposes)
+
+* Add a "Edit" button next to the STBV optionmenu
+
+* Create a Sequential editor (to accomodate existing work)
+
+
+------------- Archive ---------------
+* Write the correct VLC/Python module -> DONE
+
+* Use gettext to internationalize the application (cf http://listas.aditel.org/archivos/python-es/2003-February/003642.html for glade) -> DONE
+
+* The advene python modules should be in /usr/lib/advene (with subdirectories advenetool, advene, util), cf below -> DONE in Debian package
+
+* Build a debian package. Cf
+http://www-106.ibm.com/developerworks/linux/library/l-debpkg.html -> DONE (badly)
+
 * Needed method: package.findMatchingRelation(source_ann, dest_ann) -> DONE
 
 *** Create a RelationBox view plugin -> DONE
-
-*** Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
 
 * Restructure code (and take the opportunity to move to another
   versioning system [arch or svn for instance]) :
@@ -79,55 +189,18 @@ http://www.onlamp.com/pub/a/onlamp/2002/10/31/subversion.html
                 advene/debian/
                               control
 
-* Adveneserver: use logging.Logger to log HTTP accesses
-
 * Add sound_set_volume and sound_get_volume to MediaControl.idl -> DONE
-
-* Style setting:
-sendmail_styles="""
-style "green_button"
-{
-  fg[PRELIGHT] = { 1.0, 1.0, 1.0 }
-  bg[PRELIGHT] = { 0, 0.75, 0 }
-}
-widget "sendmail.*.Send*" style "green_button"
-
-style "blue_text"
-{
-  text[NORMAL] = { 0, 0, 0.75 }
-}
-widget "sendmail.*.mail" style "blue_text"
-"""
-gtk.rc_parse_string(sendmail_styles)
 
 * Rules: add a "internal" flag to indicate whether to save/edit or not
   the rule (internal=True by default) -> DONE (rule.origin)
   But we do not use it : instead, the ecaengine uses multiple rulesets
   ('default', 'internal' and 'user' by default)
 
-* Add /usr/share/doc/... for all debian packages (and
-  examples/client.py for vlc-plugin-corba)
-
-* Create a ContextualizedBundle which understands to namespaces
-
 * Implement attributes first and last in bundles (easy) -> DONE (in global_methods)
 
 * Put relations in a <relations></relations> container, so that we
   have a consistent package/relations/ access (else, relation/absolute_url
   returns annotations/id, which is misleading) -> half DONE (absolute_url fixed)
-
-* Find a meaningful way to concisely display relations and annotations.
-
-* ! Handle unicode correctly and everywhere (GUI, adveneserver, XML,
-  ...) -> half DONE (needs a patch to SimpleTAL)
-
-* Reorganize adveneserver code
-
-* Incorporate EPOZ :
-  * add a config.data['web'] = dir variable -> DONE
-  * Handle the /data URL (picks data in config['web']) -> DONE
-  * Add epoz in config['web'] -> DONE
-  * Add epoz for add-view
 
 * Add a /config directory, holding config values for the user (esp.
   edit window width and height) and implement PUT method on it
@@ -140,92 +213,23 @@ gtk.rc_parse_string(sendmail_styles)
 
 * Adveneserver: implement PUT (to please epoz) -> DONE
 
-* EPOZ: implement data templates according to the edited element,
-  by hacking around LinkTool
-  For packages
-   annotations (List of annotations)
-   relations   (List of all relations)
-   annotations/i... (Precise annotation)
-   annotations/i.../snapshot_url (Annotation for snapshot)
-   annotations/i.../content/data (Content of annotation)
-   annotations/i.../fragment/formatted/begin (Start time of the annotation)
+* Incorporate EPOZ :
+  * add a config.data['web'] = dir variable -> DONE
+  * Handle the /data URL (picks data in config['web']) -> DONE
+  * Add epoz in config['web'] -> DONE
+  * Add epoz for add-view
 
 * EPOZ: implement parent search for defines/repeat -> DONE (TALContext)
-
-* TALES vs XPath: cf http://zope.org/Wikis/zope-xml/XPath (Pt_Xpath)
-   Search TALES in http://lambda.weblogs.com/discuss/msgReader$4575
-http://lists.webarch.co.uk/pipermail/petal/2002-July/000022.html
-http://pywork.sourceforge.net/doc/node9.html
-
-* Mailing-list TAL:
-http://marc.free.net.ph/mindex/zope-zpt@20031122.114501.00000000.html
-
-* Reference on zpt: http://www.advogato.org/article/350.html
-
-* Remove gtk dependency from vlclib (so that we can start adveneserver
-without DISPLAY)
-
-* EPOZ: strip http:... prefix from drag and drop results.
-* Create TALContext object: -> DONE
-     Constructor(selNode) : takes a node 
-     get_define(name): get the define for the given name
-     set_define(name, value): set the define
-     list_define(): get the list of defined names
-     get_repeat(name): get the repeat for the given name
-     list_repeat(): get the list of repeat loop items
-     get_content(): get the content
-     set_content(string): set the content
 
 * Ruleset editing (eventgui.py) : give the possibility to edit only a
 subset (according to rule.origin) -> DONE (filter parameter)
   Re-DONE : cf note on ecaengine before
 
-* bootstrap.xml : how to use properly ? Can a package exist with no view ?
-
-* Once bootstrap.xml works correctly, put it somewhere pertinent and
-use it as the template.xml file
-
-* EPOZ: derive LinkTool into TALContentTool and TALImageTool, to be
-able to define content/replace (just replace with <span/> will be
-simpler) and snapshot integration.
-
-* Ruleset edit : add the possibility to organize the order of rules
-
 * Implement an 'advene browser' à la NextStep file manager -> DONE
  
 * browser: focus on the currently selected column -> DONE
 
-* Global methods :
-  * isa : make more robust (work on non-advene elements ? at least, not throw
-    an exception and return 'unknown')
-  * formatted : make more robust
-  * first, last, rest, meta, snapshot_url, view : idem
-  * authorUrl on package ???
-
-* Implement an image-based timestamp chooser (with all_snapshots()) -> almost DONE
-
-* Implement an ApproximateImageCache with a ic.epsilon value
-
-* Make some attributes inherited (esp. author for annotations, media for fragments)
-
-* Use popup-menu signal (cf http://cvs.gnome.org/bonsai/cvsblame.cgi?file=gtk%2B%2Fdocs%2Freference%2Fgtk/migrating-checklist.sgml&rev=HEAD&root=/cvs/gnome)
-
-* debian package: fix web/web not in the right directory, default_rules.xml
-
 * Rules: define independant rulesets in packages -> DONE
 
 * Rule: add an "ViewActivation" event, to define actions to be taken on STBV activation -> DONE
-
-* Windows: start application
-http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
-
-* Tree view : implement "Add/Remove" option in popup menus (Add new view, Add new type, ...)
-
-* Propagate AnnotationEditEnd and RelationEditEnd events in active views
-
-* Timeline: add the possibility to add new annotations by clicking on the type
-
-* Metadata : cache the stream duration (for GUI purposes)
-
-* Add a "Edit" button next to the STBV optionmenu
 
