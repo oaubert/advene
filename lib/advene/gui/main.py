@@ -1538,7 +1538,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_import_transcription1_activate (self, button=None, data=None):
-        te=TranscriptionEdit(controller=self.controller)
+        te=TranscriptionEdit(controller=self.controller, filename=data)
         window = te.popup()
         window.connect ("destroy", lambda w: w.destroy())
         return True
@@ -1554,19 +1554,19 @@ class AdveneGUI (Connect):
 	return True
 
     def on_cut1_activate (self, button=None, data=None):
-        print "Not implemented yet."
+        print "Cut: Not implemented yet."
 	return True
 
     def on_copy1_activate (self, button=None, data=None):
-        print "Not implemented yet."
+        print "Copy: Not implemented yet."
 	return True
 
     def on_paste1_activate (self, button=None, data=None):
-        print "Not implemented yet."
+        print "Paste: Not implemented yet."
 	return True
 
     def on_delete1_activate (self, button=None, data=None):
-        print "Not implemented yet."
+        print "Delete: Not implemented yet (cf popup menu)."
 	return True
 
     def on_timeline1_activate (self, button=None, data=None):
