@@ -524,26 +524,37 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """
         self.start_html (_('Access control'), duplicate_title=True)
 
-        # FIXME: add "action" support for adding and deleting hosts.
+        ip=None
         if query.has_key('hostname'):
+            # FIXME: handle the * case
             try:
                 ip = socket.gethostbyname (query['hostname'])
-                self.server.authorized_hosts[ip] = query['hostname']
             except:
-                self.wfile.write (_("""<strong>Error: cannot add %s to authorized hosts list.</strong>""") % query['hostname'])
-                
+                self.wfile.write (_("""<strong>Error: %s is an invalid hostname.</strong>""") % query['hostname'])
+            if ip is not None:
+                if query.has_key("action") and query['action'] == 'del':
+                    # Remove the hostname
+                    if ip in self.server.authorized_hosts:
+                        del self.server.authorized_hosts[ip]
+                        self.wfile.write (_("""<p>Removed %s from authorized hosts list.</p>""") % query['hostname'])                        
+                    else:
+                        self.wfile.write (_("""<p>Cannot remove %s from authorized hosts list.</p>""") % query['hostname'])                        
+                else:
+                    # Add it to the ACL
+                    self.server.authorized_hosts[ip] = query['hostname']
+                    self.wfile.write (_("""<p>Added %s to authorized hosts list.</p>""") % query['hostname'])
+
         self.wfile.write (_("""
         <h1>Authorized hosts</h1>
         <table border="1">
-        <tr><th>Host</th><th>IP Addr</th></tr>
+        <tr><th>Host</th><th>IP Addr</th><th>Action</th></tr>
         %s
         </table>
         <form method="GET">
         Add a new hostname to the list :<br>
-        <input type="text" name="hostname"><br>
-        <input type="submit" value="Add">
+        <input type="text" name="hostname"><input type="submit" value="Add">
         </form>
-        """) % "\n".join(["""<tr><td>%s</td><td>%s</td></tr>""" % (ip, name)
+        """) % "\n".join(["""<tr><td>%s</td><td>%s</td><td><a href="/admin/access?hostname=%s&action=del">Remove</a></td></tr>""" % (ip, name, name)
                          for (name, ip) in self.server.authorized_hosts.items()]))
         return
     
@@ -556,11 +567,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.start_html (_("Server Administration"), duplicate_title=True)
         self.wfile.write(_("""
         <p><a href="/admin/status">Display the server status</a></p>
-        <p><a href="/admin/access">Sets the access list</a></p>
+        <p><a href="/admin/access">Update the access list</a></p>
         <p><a href="/admin/reset">Reset the server</a></p>
         <p><a href="/media">Media control</a></p>
         <p><a href="/admin/list">List available files</a></p>
-        <p><a href="/packages">List loaded packages</a></p>
+        <p><a href="/packages">List loaded packages</a> (%s)</p> 
         <form action="/admin/display" method="POST">
         <p>Display mode: <select name="mode">
         <option value="default" selected>Default (with navigation interface)</option>
@@ -568,14 +579,15 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         </select>
         <input type="submit" value="Set">
         <hr>
-        <p>Load an annotation list :
+        <p>Load a package :
         <form action="/admin/load" method="GET">
         Alias: <input type="text" name="alias" /><br>
         URI:   <input type="text" name="uri" /><br>
         <input type="submit" value="Load" />
         </form>
         </body></html>
-        """))
+        """) % " | ".join( ['<a href="/packages/%s">%s</a>' % (alias, alias)
+                            for alias in self.server.packages.keys() ] ))
 
     def display_packages_list (self):
         """Display available Advene files.
@@ -608,10 +620,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         @type embedded: boolean        
         """
         if not embedded:
-            self.start_html (_("Loaded packages"))
+            self.start_html (_("Loaded package(s)"))
             
         self.wfile.write (_("""
-        <h1>Loaded packages</h1>
+        <h1>Loaded package(s)</h1>
         <table border="1" width="50%">
         <tr>
         <th>Alias</th>
@@ -1140,7 +1152,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif command == 'status':
             self.start_html (_('Server status'), duplicate_title=True)
             self.wfile.write (_("""
-            <p>%d packages loaded.</p>
+            <p>%d package(s) loaded.</p>
             """) % len(self.server.packages))
             if len(self.server.packages) > 0:
                 self.display_loaded_packages (embedded=True)
