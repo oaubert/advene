@@ -94,3 +94,42 @@ def format_time (val=0):
     # Format: HH:MM:SS.mmm
     return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)),
                        t % 1000)
+
+def matching_relationtypes(package, ann1, ann2):
+    """Return a list of relationtypes that can be used
+    to link ann1 and ann2. We use the id (i.e. the fragment part from the URI)
+    to match"""
+    # FIXME: works only on binary relations for the moment.
+    r=[]
+    for rt in package.relationTypes:
+        # Absolutize URIs
+        # FIXME: horrible hack. Does not even work on
+        # imported packages
+        def absolute_uri(package, uri):
+            if uri.startswith('#'):
+                return package.uri + uri
+            else:
+                return uri
+
+        def get_id(uri):
+            try:
+                i=uri[uri.index('#')+1:]
+            except ValueError:
+                i=uri
+            return unicode(i)
+
+        # URI version
+        # lat=[ absolute_uri(package, t) for t in rt.getHackedMemberTypes() ]
+        # t1=ann1.type.uri
+        # t2=ann2.type.uri
+        
+        # Id version
+        lat= [ get_id(t) for t in rt.getHackedMemberTypes() ]
+        t1=get_id(ann1.type.uri)
+        t2=get_id(ann2.type.uri)
+        
+        print "Testing (%s, %s) matching %s" % (t1, t2, lat)
+        if t1 == lat[0] and t2 == lat[1]:
+            r.append(rt)
+    print "Matching: %s" % r
+    return r
