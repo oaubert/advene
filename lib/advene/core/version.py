@@ -1,3 +1,3 @@
-version="0.11"
-date="20040916"
+version="0.13"
+date="20050124"
 major,minor=[ long(s) for s in version.split('.') ]
