@@ -1158,7 +1158,8 @@ class AdveneGUI (Connect):
 
     def on_import_dvd_chapters1_activate (self, button=None, data=None):
         # FIXME: loosy test
-        if 'dvd' in self.controller.get_default_media():
+        if (self.controller.get_default_media() is None
+            or 'dvd' in self.controller.get_default_media()):
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                 gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
@@ -1167,9 +1168,9 @@ class AdveneGUI (Connect):
             dialog.destroy()
             if response != gtk.RESPONSE_YES:
                 return True
-            i=advene.util.importer.get_importer('chaplin')
+            i=advene.util.importer.get_importer('lsdvd')
             i.package=self.controller.package
-            i.process_file('chaplin')
+            i.process_file('lsdvd')
             self.controller.notify('PackageLoad')
         else:
             dialog = gtk.MessageDialog(
@@ -1352,7 +1353,7 @@ class AdveneGUI (Connect):
             self.log (_("Current playlist : %s") % str(self.controller.player.playlist_get_list ()))
             self.log (_("Current position : %s") % vlclib.format_time(self.controller.player.current_position_value))
             self.log (_("Duration         : %s") % vlclib.format_time(self.controller.player.stream_duration))
-            self.log (_("Status           : %s") % repr(self.controller.player.status))
+            self.log (_("Status           : %s") % self.statustext[self.controller.player.status])
         else:
             self.log (_("Player not active."))
         return True
