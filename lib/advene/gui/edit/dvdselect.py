@@ -25,7 +25,7 @@ class DVDSelect:
             self.init(current)
 
     def init(self, current):
-        m = re.match("dvd\w*:.+@(\d+),(\d+)", current)
+        m = re.match("dvd\w*:.+@(\d+)[,:](\d+)", current)
         if m is not None:
             (title, chapter) = m.groups()
             self.titlewidget.set_value(long(title))
@@ -39,7 +39,8 @@ class DVDSelect:
         return self.titlewidget.get_value()
 
     def get_url(self):
-        return "dvdsimple:///dev/dvd@%d,%d" % (self.get_title(),
+        # FIXME: should ask the DVD module for the right MRL syntax
+        return "dvdsimple:///dev/dvd@%d:%d" % (self.get_title(),
                                                self.get_chapter())
 
     def preview(self, button=None):
