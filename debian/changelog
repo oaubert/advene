@@ -7,7 +7,7 @@ advene (0.10) unstable; urgency=low
   * Implemented Allen's relations in conditions
 
   * Implemented TranscriptionView (accessible from popup menu on
-    AnnotationType)
+    AnnotationType).
   
   * Implemented read-only edit popup for imported elements
 
@@ -23,7 +23,7 @@ advene (0.10) unstable; urgency=low
   
   * Window sizes are memorized from one session to another
   
-  * Navigation popups now use SingletonPopup (only one is displayed)
+  * Navigation popups now use SingletonPopup (only one is displayed, timeout handled)
 
  -- 
 
