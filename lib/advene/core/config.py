@@ -130,6 +130,7 @@ class Config(object):
             'gui': { 'popup-textwidth': 40 },
             # File history
             'history': [],
+            'history-size-limit': 5,
             }
 
         # Player options

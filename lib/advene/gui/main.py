@@ -813,7 +813,7 @@ class AdveneGUI (Connect):
             h.append(f)
             self.append_file_history_menu(f)
             # Keep the 5 last elements
-            config.data.preferences['history']=h[-5:]
+            config.data.preferences['history']=h[-config.data.preferences['history-size-limit']:]
         self.update_gui()
 
         self.update_window_title()
