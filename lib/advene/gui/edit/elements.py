@@ -507,8 +507,22 @@ class EditPackagePopup (EditElementPopup):
                          namespaceid='dc', controller=self.controller,
                          editable=editable)
         self.register_form(f)
-        
         vbox.pack_start(f.get_view(), expand=False)
+
+        f = EditMetaForm(title=_("Default dynamic view"),
+                         element=self.element, name='default_stbv',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+
+        f = EditMetaForm(title=_("Default static view"),
+                         element=self.element, name='default_utbv',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+        
         return vbox    
 
 class EditSchemaPopup (EditElementPopup):
