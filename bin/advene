@@ -22,11 +22,6 @@ except ImportError:
     print "Overriding 'resources' and 'web' config paths"
     config.data.path['resources']=os.path.sep.join((maindir, 'share'))
     config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
-
-    if config.data.os == 'win32':
-        # Windows environment.
-        sys.path.insert(0, os.sep.join((libpath, 'advene', 'win32')))
-        print "Using fake CORBA for win32 from %s" % sys.path[0]
   else:
     print """Cannot guess a valid directory.
     Please check your installation or set the PYTHONPATH environment variable."""
@@ -51,11 +46,16 @@ if config.data.os == 'win32':
               _winreg.CloseKey(reg)
 
 
-  path = getGtkPath()
-  if path is None:
-    raise ImportError("Couldn't find GTK DLLs.")
-  os.environ['PATH'] += ';'+path.encode('utf8')
-  print "Found GTK DLLs at %s" % path
+  try:
+    import pygtk
+  except ImportError:
+    # Gtk DLLs are not in the PATH. Try to get their directory
+    # from the registry
+    path = getGtkPath()
+    if path is None:
+      raise ImportError("Couldn't find GTK DLLs.")
+    os.environ['PATH'] += ';'+path.encode('utf8')
+    print "Found GTK DLLs at %s" % path
 
 import advene.gui.main
 
