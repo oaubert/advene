@@ -212,9 +212,9 @@ simpler) and snapshot integration.
 
 * debian package: fix web/web not in the right directory, default_rules.xml
 
-* Rules: define independant rulesets in packages
+* Rules: define independant rulesets in packages -> DONE
 
-* Rule: add an "ViewActivation" event, to define actions to be taken on STBV activation
+* Rule: add an "ViewActivation" event, to define actions to be taken on STBV activation -> DONE
 
 * Windows: start application
 http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
@@ -222,3 +222,5 @@ http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
 * Tree view : implement "Add/Remove" option in popup menus (Add new view, Add new type, ...)
 
 * Propagate AnnotationEditEnd and RelationEditEnd events in active views
+
+* Timeline: add the possibility to add new annotations by clicking on the type
