@@ -1,13 +1,12 @@
 """LogWindow plugin for Advene.
 
-This view defines a new action, Log. It will be invoked with a HTML
-fragment as parameter.  Every invocation will be stored in a
-timestamped clickable list."""
+This view defines a new action, Log. It will be invoked with a text
+and an associated URL as parameter.  Every invocation will be stored
+in a timestamped clickable list."""
 
 import sys
 import time
 
-# Advene part
 import advene.core.config as config
 from advene.model.package import Package
 from advene.model.annotation import Annotation
@@ -25,9 +24,9 @@ import gobject
 import advene.rules.elements
 
 class LogWindow:
-    def __init__ (self, controller=None):
-        self.widget=self.build_widget()
+    def __init__ (self, controller=None, container=None):
         self.controller=controller
+        self.container=container
         self.tooltips=gtk.Tooltips()
         # Timeout for messages in ms
         self.timeout=5000
@@ -35,6 +34,7 @@ class LogWindow:
         # It should be sorted in timestamp order, so that the expiry
         # can be more quickly done
         self.data=[]
+        self.widget=self.build_widget()        
         self.window=None
 
     def build_widget(self):
@@ -53,9 +53,10 @@ class LogWindow:
         b.connect("clicked", lambda b: self.clear_data())
         hb.pack_start(b, expand=False)
 
-        b=gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect("clicked", self.hide)
-        hb.pack_start(b, expand=False)
+        if self.container is None:
+            b=gtk.Button(stock=gtk.STOCK_CLOSE)
+            b.connect("clicked", self.hide)
+            hb.pack_start(b, expand=False)
 
         w.pack_start(hb, expand=False)
 
