@@ -246,9 +246,21 @@ class TimeLine:
         # - clear layer_position and reinit
         # - reset layout dimensions
         self.list=package.annotations
-        self.widget.foreach(self.remove_widget)
+        self.layer_position.clear()
+        self.minimum = 0
+        duration = package.getMetaData (config.data.namespace, "duration")
+        if duration is not None:
+            self.maximum = long(duration)
+        else:
+            b,e=self.bounds()
+            self.maximum = e
+        self.ratio_adjustment.value=3600.0
+        self.widget.foreach(self.remove_widget, self.widget)
         self.populate()
-        pass
+        self.legend.foreach(self.remove_widget, self.legend)
+        self.update_legend_widget(self.legend)
+        self.legend.show_all()
+        return
     
     def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
@@ -561,8 +573,9 @@ class TimeLine:
             retval = True
         return retval
 
-    def remove_widget(self, widget=None, data=None):
-        self.widget.remove(widget)
+    def remove_widget(self, widget=None, layout=None):
+        layout.remove(widget)
+        return True
 
     def update_layout (self):
         (w, h) = self.widget.get_size ()
@@ -656,19 +669,26 @@ class TimeLine:
             return True
         return False
 
-    def get_legend_widget (self):
-        """Return a Layout containing the legend widget."""
-        legend = gtk.Layout ()
-        width = 0
-        height = 0
+    def update_legend_widget(self, layout):
+        """Update the legend widget.
+
+        Its content may have changed.
+        """
+        width=0
+        height=0
         for t in self.layer_position.keys():
             l = gtk.Label (t.title)
             (w, h) = l.get_layout().get_pixel_size()
             width = max (width, w)
             height = max (height, self.layer_position[t] + h)
-            legend.put (l, 0, self.layer_position[t])
-        #print "Legend (%d, %d)" % (width, height)
-        legend.set_size (width, height)
+            layout.put (l, 0, self.layer_position[t])
+        layout.set_size (width, height)
+        return
+    
+    def build_legend_widget (self):
+        """Return a Layout containing the legend widget."""
+        legend = gtk.Layout ()
+        self.update_legend_widget(legend)
         return legend
         
     def get_packed_widget (self):
@@ -677,8 +697,9 @@ class TimeLine:
 
         hpaned = gtk.HPaned ()
 
-        legend = self.get_legend_widget ()
-        hpaned.add1 (legend)
+        # FIXME: connect scrolladjustments for legend and layout
+        self.legend = self.build_legend_widget ()
+        hpaned.add1 (self.legend)
         
         sw = gtk.ScrolledWindow ()
         sw.set_policy (gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
@@ -686,7 +707,7 @@ class TimeLine:
         sw.add (self.get_widget())
         hpaned.add2 (sw)
 
-        (w, h) = legend.get_size ()
+        (w, h) = self.legend.get_size ()
         hpaned.set_position (w)
         vbox.add (hpaned)
         
