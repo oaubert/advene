@@ -146,8 +146,7 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
     def clone(self):
         """ Clone this fragment into a new unbounded fragment.
         """
-        # FIXME: badly placed method
-        return ByteCountFragment(begin=self.getBegin(), end=self.getEnd())
+        return self.__class__(begin=self.getBegin(), end=self.getEnd())
 
     def _bound(self, element):
         """ Bound this fragment to the document owning the given element.
