@@ -142,7 +142,7 @@ def get_title(controller, element):
         expr=element.type.getMetaData(config.data.namespace, "representation")
         if expr is None or expr == '':
             return element.content.data
-        else:
+        elif controler is not None:
             c=controller.event_handler.build_context(event='Display', here=element)
             return c.evaluateValue(expr)
     # FIXME: handle the other elements if necessary
