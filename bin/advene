@@ -26,7 +26,7 @@ except ImportError:
     if config.data.os == 'win32':
         # Windows environment.
         sys.path.insert(0, os.sep.join((libpath, 'advene', 'win32')))
-        print "New syspath: %s" % sys.path
+        print "Using fake CORBA for win32 from %s" % sys.path[0]
   else:
     print """Cannot guess a valid directory.
     Please check your installation or set the PYTHONPATH environment variable."""
