@@ -15,6 +15,7 @@ import advene.core.version
 
 import gettext
 gettext.install('advene', unicode=True)
+#gettext.install('advene', localedir=config.data.path['locale'], unicode=True)
 gettext.textdomain('advene')
 from gettext import gettext as _
 
@@ -653,7 +654,7 @@ class AdveneGUI (Connect):
         @type level: int
         """
         buf = self.gui.logmessages.get_buffer ()
-        mes = "".join((time.strftime("%T"), " - ", str(msg), "\n"))
+        mes = "".join((time.strftime("%H:%M:%S"), " - ", str(msg), "\n"))
         # FIXME: handle level (bold?)
         buf.insert_at_cursor (mes)
         endmark = buf.create_mark ("end", buf.get_end_iter (), True)
@@ -1151,15 +1152,15 @@ class AdveneGUI (Connect):
                 None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                 gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
                 _("Do you confirm the import of data from\n%s\nby the %s filter?") % (
-                file_, i.name))
+                filename, i.name))
             response=dialog.run()
             dialog.destroy()
             if response != gtk.RESPONSE_YES:
                 return True
             i.package=self.controller.package
-            i.process_file(file_)
+            i.process_file(filename)
             self.controller.notify("PackageLoad", package=i.package)
-            self.log('Converted from file %s :' % file_)
+            self.log('Converted from file %s :' % filename)
             kl=i.statistics.keys()
             kl.sort()
             for k in kl:
