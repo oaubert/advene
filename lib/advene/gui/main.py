@@ -596,8 +596,9 @@ class AdveneGUI (Connect):
         if i is None:
             i=st.get_iter_first()
         # To ensure that the display is updated
-        type_combo.set_active(-1)        
-        type_combo.set_active_iter(i)
+        type_combo.set_active(-1)
+        if i is not None:
+            type_combo.set_active_iter(i)
         type_combo.show_all()
         return True
 
@@ -929,6 +930,39 @@ class AdveneGUI (Connect):
 
         return True
 
+    def ask_for_annotation_type(self, text=None, create=False):
+        """Display a popup asking to choose an annotation type.
+
+        If create then offer the possibility to create a new one.
+
+        Return: the AnnotationType, or None if the action was cancelled.
+        """
+        # FIXME: handle create==True case
+        at=None
+        
+        if text is None:
+            text=_("Choose an annotation type.")
+
+        ats=self.controller.package.annotationTypes
+        if len(ats) == 1:
+            at=ats[0]
+        elif len(ats) > 1:
+            at=advene.gui.util.list_selector(title=_("Choose an annotation type"),
+                                             text=text,
+                                             members=self.controller.package.annotationTypes,
+                                             controller=self.controller)
+        else:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("No annotation type is defined."))
+            response=dialog.run()
+            dialog.destroy()
+            return None
+
+        return at
+        
+        
     def on_current_type_combo_changed (self, combo=None):
         """Callback used to select the current type of the edited annotation.
         """
@@ -1323,24 +1357,7 @@ class AdveneGUI (Connect):
 
     def on_transcription1_activate (self, button=None, data=None):
         """Open transcription view."""
-        at=None
-        ats=self.controller.package.annotationTypes
-        if len(ats) == 1:
-            at=ats[0]
-        elif len(ats) > 1:
-            at=advene.gui.util.list_selector(title=_("Choose the annotation type"),
-                                             text=_("Choose the annotation type to display as transcription."),
-                                             members=self.controller.package.annotationTypes,
-                                             controller=self.controller)
-        else:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                _("No annotation type is defined."))
-            response=dialog.run()
-            dialog.destroy()
-            return True
-        
+        at=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."), create=False)
         if at is not None:
             transcription = TranscriptionView(controller=self.controller,
                                               annotationtype=at)
