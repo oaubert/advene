@@ -81,7 +81,15 @@ class GenericImporter(object):
         # Default offset in ms
         self.offset=0
         # Dictionary holding the number of created elements
-        self.statistics={}
+        self.statistics={
+            'annotation': 0,
+            'relation': 0,
+            'annotation-type': 0,
+            'relation-type' : 0,
+            'schema': 0,
+            'view': 0,
+            'package': 0,
+            }
         self.name = _("Generic importer")
 
         self.optionparser = optparse.OptionParser(usage="Usage: %prog [options] source-file destination-file")
