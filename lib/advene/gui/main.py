@@ -39,9 +39,12 @@ import advene.model.constants
 import advene.model.tal.context
 
 import advene.core.mediacontrol
-
 from advene.core.imagecache import ImageCache
 import advene.util.vlclib as vlclib
+
+import advene.util.importer
+
+# GUI elements
 import advene.gui.util
 import advene.gui.views.tree
 import advene.gui.views.timeline
@@ -803,6 +806,33 @@ class AdveneGUI (Connect):
         self.controller.save_package(as=file_)
         return True
 
+    def data_import_cb (self, button, fs):
+        """Import data from an external file."""
+        file_ = fs.get_property ("filename")
+        i=advene.util.importer.get_importer(file_)
+        if i is None:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("The format of the file\n%s\nis not recognized.") % file_)
+            response=dialog.run()
+            dialog.destroy()
+        else:
+            # FIXME: build a dialog to enter optional parameters
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
+                _("Do you confirm the import of data from\n%s\nby the %s filter?") % (
+                file_, i.name))
+            response=dialog.run()
+            dialog.destroy()
+            if response != gtk.RESPONSE_YES:
+                return True
+            i.package=self.controller.package
+            i.process_file(file_)
+            self.controller.notify("PackageLoad")
+        return True
+
     def register_view (self, view):
         """Register a view plugin.
 
@@ -1111,9 +1141,9 @@ class AdveneGUI (Connect):
 	return True
 
     def on_import_file1_activate (self, button=None, data=None):
-        # FIXME
-        print "on_import_file1_activate activated (%s, %s, %s)" % (self, button, data)
-        return gtk.TRUE
+        self.file_selector (callback=self.data_import_cb,
+                            label=_("Choose the file to import"))
+        return True
 
     def on_quit1_activate (self, button=None, data=None):
         """Gtk callback to quit."""
