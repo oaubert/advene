@@ -194,21 +194,46 @@
 		  </child>
 
 		  <child>
+		    <widget class="GtkMenuItem" id="logwindow1">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">_LogWindow</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_view_logwindow_activate" last_modification_time="Mon, 15 Dec 2003 21:33:56 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
 		    <widget class="GtkMenuItem" id="browser1">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Browse the package's data</property>
-		      <property name="label" translatable="yes">_Browser</property>
+		      <property name="label" translatable="yes">_Package Browser</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_browser1_activate" last_modification_time="Wed, 21 Apr 2004 13:43:37 GMT"/>
 		    </widget>
 		  </child>
 
 		  <child>
-		    <widget class="GtkMenuItem" id="logwindow1">
+		    <widget class="GtkMenuItem" id="start_web_browser">
 		      <property name="visible">True</property>
-		      <property name="label" translatable="yes">_LogWindow</property>
+		      <property name="label" translatable="yes">_Start Web Browser</property>
 		      <property name="use_underline">True</property>
-		      <signal name="activate" handler="on_view_logwindow_activate" last_modification_time="Mon, 15 Dec 2003 21:33:56 GMT"/>
+		      <signal name="activate" handler="on_start_web_browser_activate" last_modification_time="Tue, 22 Jul 2003 13:12:03 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="separator3">
+		      <property name="visible">True</property>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="evaluator2">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Open python evaluator window</property>
+		      <property name="label" translatable="yes">Evaluator</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_evaluator2_activate" last_modification_time="Wed, 16 Jun 2004 20:59:52 GMT"/>
 		    </widget>
 		  </child>
 
@@ -223,16 +248,10 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkMenuItem" id="separator2">
-		      <property name="visible">True</property>
-		    </widget>
-		  </child>
-
-		  <child>
 		    <widget class="GtkMenuItem" id="edit_ruleset1">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Edit the default ruleset</property>
-		      <property name="label" translatable="yes">_Edit Ruleset</property>
+		      <property name="label" translatable="yes">_Edit Default Ruleset</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_edit_ruleset1_activate" last_modification_time="Wed, 14 Jan 2004 01:04:45 GMT"/>
 		    </widget>
@@ -245,15 +264,6 @@
 		      <property name="label" translatable="yes">_MediaInformation</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_view_mediainformation_activate" last_modification_time="Wed, 19 Feb 2003 08:36:54 GMT"/>
-		    </widget>
-		  </child>
-
-		  <child>
-		    <widget class="GtkMenuItem" id="start_web_browser">
-		      <property name="visible">True</property>
-		      <property name="label" translatable="yes">_Start Web Browser</property>
-		      <property name="use_underline">True</property>
-		      <signal name="activate" handler="on_start_web_browser_activate" last_modification_time="Tue, 22 Jul 2003 13:12:03 GMT"/>
 		    </widget>
 		  </child>
 		</widget>
@@ -319,6 +329,15 @@
 
 	      <child>
 		<widget class="GtkMenu" id="menuitem4_menu">
+
+		  <child>
+		    <widget class="GtkImageMenuItem" id="help1">
+		      <property name="visible">True</property>
+		      <property name="label">gtk-help</property>
+		      <property name="use_stock">True</property>
+		      <signal name="activate" handler="on_help1_activate" last_modification_time="Wed, 16 Jun 2004 20:53:39 GMT"/>
+		    </widget>
+		  </child>
 
 		  <child>
 		    <widget class="GtkMenuItem" id="about1">
