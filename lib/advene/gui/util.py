@@ -316,7 +316,8 @@ class CategorizedSelector:
         if self.button is not None:
             return self.button
         b=gtk.Button(self.description_getter(self.current))
-        b.connect("clicked", lambda w: self.popup_show())
+        if self.editable:
+            b.connect("clicked", lambda w: self.popup_show())
         b.show()
         self.button=b
         return b
@@ -335,6 +336,7 @@ class CategorizedSelector:
             w.set_title(self.title)
             w.add(self.widget)
             self.popup=w
+        self.popup.set_position(gtk.WIN_POS_MOUSE)
         self.popup.show_all()
         return True
 
