@@ -163,7 +163,7 @@ class RelationsBox:
         
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
-        if targetType == config.data.TARGET_TYPE_ANNOTATION:
+        if targetType == config.data.target_type['annotation']:
             selection.set(selection.target, 8, widget.annotation.uri)
         else:
             print "Unknown target type for drag: %d" % targetType
@@ -171,7 +171,7 @@ class RelationsBox:
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
-        if targetType == config.data.TARGET_TYPE_ANNOTATION:
+        if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
             print "Creating new relation (%s, %s)" % (source_uri, widget.annotation.uri)
             source=self.package.annotations.get(source_uri)
