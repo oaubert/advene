@@ -137,7 +137,7 @@ class TimeAdjustment:
         
     def update_value_cb(self, widget, increment):
         self.value=self.value + increment
-        value=self.check_bound_value(value)
+        self.value=self.check_bound_value(self.value)
         if self.sync_video:
             self.controller.move_position(self.value, relative=False)            
         self.update_display()
