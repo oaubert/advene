@@ -1044,6 +1044,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.do_GET_data(parameters, query)
         elif command == 'debug':
             self.do_GET_debug ()
+        elif command == 'favicon.ico':
+            self.do_GET_favicon()
         else:
             self.send_error(404,
                             _("""<p>Unknown request: %s</p>""")
@@ -1172,6 +1174,22 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.start_html (_('Error'), duplicate_title=True)
             self.wfile.write (_("""<p>Unknown admin command</p><pre>Command: %s</pre>""") % command)
 
+    def do_GET_favicon(self):
+        ico=config.data.advenefile( ( 'pixmaps', 'dvd.ico' ) )
+
+        try:
+            f=open(ico, 'rb')
+        except IOError:
+            self.send_error(404, _("No favicon"))
+            return
+        self.send_response (200)
+        self.send_header ('Content-type', 'image/x-icon')
+        self.send_header ('Cache-Control', 'max-age=6000')
+        self.end_headers ()
+        self.wfile.write(f.read())
+        f.close()
+        return True
+    
     def do_GET_data (self, parameters, query):
         datadir=config.data.path['web']
         if '..' in parameters:
