@@ -805,7 +805,8 @@ class AdveneController:
             #     print "update_status %s %i" % (status, position.value)
             # else:
             #     print "update_status %s %s" % (status, position)
-            self.player.update_status (status, position)
+            if self.player.playlist_get_list():
+                self.player.update_status (status, position)
         except Exception, e:
             # FIXME: we should catch more specific exceptions and
             # devise a better feedback than a simple print
