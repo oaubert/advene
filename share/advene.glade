@@ -505,7 +505,7 @@
 		      <property name="icon">pixmaps/play.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
+		      <property name="is_important">True</property>
 		      <signal name="clicked" handler="on_b_play_clicked" last_modification_time="Wed, 13 Oct 2004 21:23:38 GMT"/>
 		    </widget>
 		    <packing>
@@ -523,7 +523,7 @@
 		      <property name="icon">pixmaps/pause.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
+		      <property name="is_important">True</property>
 		      <signal name="clicked" handler="on_b_pause_clicked" last_modification_time="Wed, 13 Oct 2004 21:21:59 GMT"/>
 		    </widget>
 		    <packing>
@@ -541,7 +541,7 @@
 		      <property name="icon">pixmaps/stop.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
+		      <property name="is_important">True</property>
 		      <signal name="clicked" handler="on_b_stop_clicked" last_modification_time="Wed, 13 Oct 2004 21:24:17 GMT"/>
 		    </widget>
 		    <packing>
@@ -801,7 +801,7 @@
 		    </widget>
 		    <packing>
 		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
+		      <property name="homogeneous">False</property>
 		    </packing>
 		  </child>
 
@@ -812,12 +812,12 @@
 		      <property name="stock_id">gtk-open</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
+		      <property name="is_important">True</property>
 		      <signal name="clicked" handler="on_open1_activate" last_modification_time="Wed, 13 Oct 2004 22:38:39 GMT"/>
 		    </widget>
 		    <packing>
 		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
+		      <property name="homogeneous">False</property>
 		    </packing>
 		  </child>
 
@@ -831,7 +831,7 @@
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
-		      <signal name="clicked" handler="on_filehistory_clicked" last_modification_time="Sat, 26 Feb 2005 23:59:35 GMT"/>
+		      <signal name="clicked" handler="on_filehistory_clicked" last_modification_time="Wed, 02 Mar 2005 16:49:35 GMT"/>
 		    </widget>
 		    <packing>
 		      <property name="expand">False</property>
@@ -846,12 +846,12 @@
 		      <property name="stock_id">gtk-save</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
+		      <property name="is_important">True</property>
 		      <signal name="clicked" handler="on_save1_activate" last_modification_time="Wed, 13 Oct 2004 22:33:04 GMT"/>
 		    </widget>
 		    <packing>
 		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
+		      <property name="homogeneous">False</property>
 		    </packing>
 		  </child>
 
@@ -867,7 +867,7 @@
 		    </widget>
 		    <packing>
 		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
+		      <property name="homogeneous">False</property>
 		    </packing>
 		  </child>
 
@@ -883,7 +883,7 @@
 		    </widget>
 		    <packing>
 		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
+		      <property name="homogeneous">False</property>
 		    </packing>
 		  </child>
 
@@ -899,7 +899,7 @@
 		    </widget>
 		    <packing>
 		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
+		      <property name="homogeneous">False</property>
 		    </packing>
 		  </child>
 		</widget>
@@ -1187,7 +1187,7 @@
 	<widget class="GtkVPaned" id="vpaned">
 	  <property name="visible">True</property>
 	  <property name="can_focus">True</property>
-	  <property name="position">50</property>
+	  <property name="position">1</property>
 
 	  <child>
 	    <widget class="GtkVBox" id="displayvbox">
