@@ -203,17 +203,17 @@ Pour les deux derniers paramètres, un élément de base supplémentaire
 est défini. Il a pour nom ``element`` et prend la valeur de l'élément
 testé.
 
-Ainsi, pour filtrer l'ensemble des annotations d'un recueil dont le
-contenu contient le mot ``test``, et en retourner l'identificateur, on
+Ainsi, pour obtenir les annoations de même type précédent l'annotation
+sur laquelle on applique la requête, et en retourner l'identificateur, on
 utilise la syntaxe suivante :
 
-- Ensemble d'origine: ``here/annotations``
-- Condition:  ``element/content/data`` contains ``string:test``
+- Ensemble d'origine: ``here/type/annotations``
+- Condition:  ``element/fragment/begin`` is lower than ``here/fragment/begin``
 - Valeur de retour: ``element/id``
 
-et appliquer la requête sur le recueil: de cette façon, l'élément de
-base ``here`` correspondra au recueil source. On peut également
-décider de l'appliquer à un type d'annotation, qui comprend également
-un attribut ``annotations``.
+et appliquer la requête sur l'annotation désirée par le biais d'une
+expression TALES:
+``/package/annotations/last/query/annotations-before``
 
-
+De cette façon, l'élément de base ``here`` correspondra à
+l'annotation.

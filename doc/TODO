@@ -106,7 +106,8 @@ the DOM and do not restore it before saving, so it gets lost.
 default, using the ${} syntax to evaluate expressions ???
 
 * Content: how to represent structured data ? Cf MPEG7 DS ? (hackingly
-  half DONE, grep source for application/x-advene-structured)
+  half DONE, grep source for application/x-advene-structured). Or
+http://www.rexx.com/~dkuhlman/generateDS.html (XML-Schema) Or SOAPy
 
 * Assistants:
   - shot detection
@@ -457,3 +458,4 @@ events) -> DONE
 
 * Architecture generique d'import d'annotations externes (annotations, schemas) -> DONE
 
+* Find a way to specify the version number in the sources and use it in setup.py  -> DONE
