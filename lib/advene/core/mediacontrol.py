@@ -24,6 +24,8 @@ class Player(object):
     @ivar relative_position: a predefined position (0-relative)
     @type relative_position: VLC.Position
 
+    Status attributes :
+    
     @ivar current_position_value: the current player position (in ms)
     @type current_position_value: int
     @ivar stream_duration: the current stream duration
@@ -165,7 +167,7 @@ class Player(object):
                 print "******* Error : unknown status %s in mediacontrol.py" % status
 
         self.position_update ()
-
+        
     def position_update (self):
         """Updates the current status information."""
         if self.mc is not None:
@@ -173,6 +175,13 @@ class Player(object):
             self.status = s.streamstatus
             self.stream_duration = s.length
             self.current_position_value = s.position
+            # FIXME: the returned values are wrong just after a player start
+            # (pressing Play button)
+            # Workaround for now:
+            # If the duration is larger than 24h, then set it to 0
+            if self.stream_duration > 86400000:
+                self.stream_duration = 0
+                self.current_position_value = 0
         else:
             self.status = VLC.UndefinedStatus
             self.stream_duration = 0
