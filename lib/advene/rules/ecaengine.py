@@ -291,17 +291,19 @@ class ECAEngine:
         @type **kw: depending on the context
         """
         #print "notify %s for %s" % (event_name, str(kw))
+
+        # Set the controller.modified state
+        # This does not belong here, but it is the more convenient and
+        # maybe more effective way to implement it
+        if event_name in self.modifying_events:
+            self.controller.modified=True
+            
         context=self.build_context(event_name, **kw)
         try:
             a=self.ruledict[event_name]
         except KeyError:
             return
 
-        # This does not belong here, but it is the more convenient and
-        # maybe more effective way to implement it
-        if event_name in self.modifying_events:
-            self.controller.modified=True
-            
         actions=[ rule.action
                   for rule in a
                   if rule.condition.match(context) ]
