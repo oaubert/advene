@@ -259,12 +259,12 @@ def formatted (target, context):
     
     res = {
         'begin': u'--:--:--.---',
-        'end'  : u'--:--:--.---'
+        'end'  : u'--:--:--.---',
+        'duration': u'--:--:--.---'
         }
-    t =  target.begin
-    res['begin'] = u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)
-    t =  target.end
-    res['end'] = u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)
+    for k in res.keys():
+        t=getattr(target, k)
+        res[k] = u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)    
     return res
 
 def first (target, context):
@@ -398,7 +398,10 @@ def query(target, context):
                 if q.content.mimetype == 'application/x-advene-simplequery':
                     qexpr=advene.rules.elements.Query()
                     qexpr.from_dom(q.content.model)
-                    return qexpr.execute(context=self._context)
+                    self._context.addLocals( [ ('here', self._target) ] )
+                    res=qexpr.execute(context=self._context)
+                    self._context.popLocals()
+                    return res
                 else:
                     raise Exception("Unsupported query type for %s" % q.id)
             return render
@@ -427,7 +430,7 @@ def sorted (target, context):
     """Returns a sorted list of annotations"""
     if hasattr(target, 'viewableType') and target.viewableType == 'annotation-list' or (
         isinstance(target, list) and len(target) > 0 and hasattr(target[0], 'fragment')):
-        l=target[:]
+        l=list(target[:])
         def compare(a, b):
             return cmp(a.fragment.begin, b.fragment.begin)
         l.sort(compare)
