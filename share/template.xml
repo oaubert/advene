@@ -26,7 +26,7 @@
       <relation-types>
         <relation-type id='basic-relation'>
           <meta>
-            <dc:title>Relation elementaire</dc:title>
+            <dc:title>Relation élémentaire</dc:title>
             <dc:description>Simple mise en relation de deux annotations.</dc:description>
           </meta>
           <member-type xlink:href='#annotation'/>
