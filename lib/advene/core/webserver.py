@@ -693,6 +693,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
          fragment) = urlparse.urlparse (self.path)
         
         stringpath = stringpath.replace ('%3A', ':')
+        query = self.query2dict (stringquery)
 
         print "Handling PUT request for %s" % stringpath
         
@@ -718,6 +719,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 
             context = advene.model.tal.context.AdveneContext (here=self.server.packages[alias],
                                                               options=self.default_options(alias))
+            context.pushLocals()
+            context.setLocal('request', query)        
+            
             try:
                 objet = context.evaluateValue (expr)
             except AdveneException, e:
@@ -809,6 +813,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
          fragment) = urlparse.urlparse (self.path)
         
         stringpath = stringpath.replace ('%3A', ':')
+        pathquery = self.query2dict (stringquery)
 
         # A trailing / would give an empty last value in the path
         path = stringpath.split('/')[1:]
@@ -843,7 +848,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 expr = "here/%s" % tales
                 
             context = advene.model.tal.context.AdveneContext (here=self.server.packages[alias],
-                                                        options=self.default_options(alias))
+                                                              options=self.default_options(alias))
             try:
                 objet = context.evaluateValue (expr)
             except AdveneException, e:
@@ -1288,6 +1293,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         An autodetect feature will force the display mode to C{image}
         if the object is an image (depending on the return value of
         L{image_type}).
+
+        All other other parameters given on the URL path are kepts in
+        the C{query} dictionary, which is available in TALES
+        expressions through the C{request/} root element.
         
         @param p: the package in which the expression should be evaluated
         @type p: advene.model.Package
@@ -1301,7 +1310,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         if query is None:
             query={}
-        query.update(self.default_options(alias))
 
         if tales == "":
             expr = "here"
@@ -1310,10 +1318,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             expr = "here/%s" % tales
 
-        context = advene.model.tal.context.AdveneContext (here=p, options=query)
+        context = advene.model.tal.context.AdveneContext (here=p,
+                                                          options=self.default_options(alias))
+        context.pushLocals()
+        context.setLocal('request', query)        
         # FIXME: the following line is a hack for having qname-keys work
         #        It is a hack because obviously, p is not a "view"
-        context.addGlobal (u'view', p)
+        context.setLocal (u'view', p)
         if 'epoz' in tales:
             context.addGlobal (u"epozmacros", self.server.epoz_macros)
 
@@ -1377,7 +1388,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 return
             
         # Last case: default or raw
-        # FIXME: epoz support is kind of a hack for now. 
+        # FIXME: epoz support is kind of a hack for now.
+        # Should test the result of view(). If it starts with <html>,
+        # consider it a complete file and do not generate headers.
+        # *or* use a specific mimetype (text/x-full-html)
         # FIXME: we should return a meaningful title
 
         if displaymode != "raw":
@@ -1396,9 +1410,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if hasattr (objet, 'view') and callable (objet.view):
             
             context = advene.model.tal.context.AdveneContext (here=objet,
-                                                              options=query)
-            # FIXME: maybe add more elements to context (view, ?)
-            #context.log = advene.model.tal.context.DebugLogger ()
+                                                              options=self.default_options(alias))
+            context.pushLocals()
+            context.setLocal('request', query)        
+            context.setLocal(u'view', objet)
             try:
                 self.wfile.write (objet.view (context=context).encode('utf-8'))
             except simpletal.simpleTAL.TemplateParseException, e:
