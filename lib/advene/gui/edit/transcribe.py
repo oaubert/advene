@@ -48,7 +48,7 @@ class TranscriptionEdit:
         self.package=controller.package
         self.tooltips=gtk.Tooltips()
 
-        self.sourcefile=""
+        self.sourcefile=None
         self.empty_re = sre.compile('^\s*$')
         
         self.timestamp_mode_toggle=gtk.ToggleToolButton()
@@ -69,6 +69,8 @@ class TranscriptionEdit:
         self.default_color = gtk.gdk.color_parse ('lightblue')
         self.ignore_color = gtk.gdk.color_parse ('tomato')
 
+        self.marks = []
+        
         self.widget=self.build_widget()
 
     def build_widget(self):
@@ -85,7 +87,9 @@ class TranscriptionEdit:
         vbox.show_all()
         return vbox
 
-    def remove_anchor(self, button, anchor, b):
+    def remove_timestamp_mark(self, button, anchor, child):
+        b=self.textview.get_buffer()
+        self.marks.remove(child)
         begin=b.get_iter_at_child_anchor(anchor)
         end=begin.copy()
         end.forward_char()
@@ -212,7 +216,7 @@ class TranscriptionEdit:
         anchor=b.create_child_anchor(it)
         # Create the mark representation
         child=gtk.Button("")
-        child.connect("clicked", self.remove_anchor, anchor, b)
+        child.connect("clicked", self.remove_timestamp_mark, anchor, child)
         child.connect("button-press-event", self.mark_button_press_cb)
         self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
         child.timestamp=timestamp
@@ -220,7 +224,10 @@ class TranscriptionEdit:
         self.set_color(child, self.default_color)
         child.show()
         self.textview.add_child_at_anchor(child, anchor)
-        return
+        
+        self.marks.append(child)
+        self.marks.sort(lambda a,b: cmp(a.timestamp, b.timestamp))
+        return child
         
     def populate(self, annotations):
         """Populate the buffer with data taken from the given annotations.
@@ -276,9 +283,12 @@ class TranscriptionEdit:
                 return a.get_widgets()[0], it.copy()
         return None, None
 
-    def parse_transcription(self):
+    def parse_transcription(self, show_ignored=False):
         """Parse the transcription text.
 
+        If show_ignored, then generate a 'ignored' key for ignored
+        texts.
+        
         Return : a iterator on a dict with keys
         'begin', 'end', 'content' 
         (compatible with advene.util.importer)
@@ -301,11 +311,16 @@ class TranscriptionEdit:
                     self.empty_re.match(text)):
                     pass
                 elif ignore_next:
-                    pass
+                    if show_ignored:
+                        yield { 'begin': t,
+                                'end':   timestamp,
+                                'content': text,
+                                'ignored': True }
                 else:
                     yield { 'begin': t,
                             'end':   timestamp,
-                            'content': text }
+                            'content': text,
+                            'ignored': False }
                 ignore_next=child.ignore                    
                 t=timestamp
                 begin=end.copy()
@@ -316,11 +331,16 @@ class TranscriptionEdit:
             self.empty_re.match(text)):
             pass
         elif ignore_next:
-            pass
+            if show_ignored:
+                yield { 'begin': t,
+                        'end':   timestamp,
+                        'content': text,
+                        'ignored': True }
         else:
             yield { 'begin': t,
                     'end': timestamp,
-                    'content': text }
+                    'content': text,
+                    'ignored': False }
         
     def save_transcription(self, button=None):
         fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
@@ -333,8 +353,13 @@ class TranscriptionEdit:
     def save_output(self, filename=None):
         f=open(filename, "w")
         last=None
-        for d in self.parse_transcription():
-            if last != d['begin']:
+        for d in self.parse_transcription(show_ignored=True):
+            if d['ignored']:
+                f.writelines( ( '[I%s]' % vlclib.format_time(d['begin']),
+                                d['content'],
+                                '[%s]' % vlclib.format_time(d['end']) ) )
+            
+            elif last != d['begin']:
                 f.writelines( ( '[%s]' % vlclib.format_time(d['begin']),
                                 d['content'],
                                 '[%s]' % vlclib.format_time(d['end']) ) )
@@ -363,15 +388,32 @@ class TranscriptionEdit:
             self.controller.log(_("Cannot read %s: %s") % (filename, str(e)))
             return
         data=unicode("".join(f.readlines()))
-        self.sourcefile=filename
         
-        mark_re=sre.compile('([^\]]*)\[(\d+:\d+:\d+.?\d*)\]')
-        for m in mark_re.finditer(data):
-            text, timestamp = m.group(1,2)
-            t=vlclib.convert_time(timestamp)
-            b.insert_at_cursor(text)
-            it=b.get_iter_at_mark(b.get_insert())
-            self.create_timestamp_mark(t, it)
+        mark_re=sre.compile('\[(I?)(\d+:\d+:\d+.?\d*)\]([^\[]*)')
+
+        last_time=None
+        m=mark_re.search(data)
+        if m:
+            # Handle the start case: there may be some text before the
+            # first mark
+            b.insert_at_cursor(data[:m.start()])
+            for m in mark_re.finditer(data):
+                # We set the sourcefile if it was already a timestamped
+                # transcription: we do not want to overwrite a plain
+                # transcription by mistake
+                self.sourcefile=filename
+                ignore, timestamp, text = m.group(1, 2, 3)
+                t=vlclib.convert_time(timestamp)
+                if last_time != t or ignore:
+                    it=b.get_iter_at_mark(b.get_insert())
+                    mark=self.create_timestamp_mark(t, it)
+                    if ignore:
+                        mark.ignore=True
+                        self.set_color(mark, self.ignore_color)
+                    last_time = t
+                b.insert_at_cursor(text)
+        else:
+            b.insert_at_cursor(data)
         return
 
     def convert_transcription_cb(self, button=None):
