@@ -841,7 +841,12 @@ class AdveneGUI (Connect):
         duration=self.parse_parameter(context, parameters, 'duration', None)
         if duration == "" or duration == 0:
             duration = None
-        l = gtk.Label(message)
+
+        hbox=gtk.HBox()
+        hbox.add(advene.gui.util.image_from_position(self.controller,
+                                                     height=40))
+        hbox.add(gtk.Label(message))
+        vbox.pack_start(hbox, expand=False)
 
         self.popupwidget.display(widget=l, timeout=duration, title=_("Information popup"))
         return True
@@ -864,10 +869,25 @@ class AdveneGUI (Connect):
         duration=self.parse_parameter(context, parameters, 'duration', None)
         if duration == "" or duration == 0:
             duration = None
-        b=gtk.Button(message)
+
         vbox=gtk.VBox()
-        l=gtk.Label(description)
-        vbox.pack_start(l, expand=False)
+
+        hbox=gtk.HBox()
+        hbox.add(advene.gui.util.image_from_position(self.controller,
+                                                     height=40))
+        hbox.add(gtk.Label(description))
+        vbox.pack_start(hbox, expand=False)
+
+
+        b=gtk.Button()
+        
+        hbox=gtk.HBox()
+        hbox.add(advene.gui.util.image_from_position(self.controller,
+                                                     position,
+                                                     height=40))
+        hbox.add(gtk.Label(message))            
+        b.add(hbox)
+        
         vbox.pack_start(b, expand=False)
         
         b.connect("clicked", handle_response, position, vbox)
@@ -890,7 +910,12 @@ class AdveneGUI (Connect):
             description=description.replace('\\n', '\n')
             description=textwrap.fill(description,
                                       config.data.preferences['gui']['popup-textwidth'])
-            vbox.add(gtk.Label(description))
+
+            hbox=gtk.HBox()
+            hbox.add(advene.gui.util.image_from_position(self.controller,
+                                                         height=40))
+            hbox.add(gtk.Label(description))            
+            vbox.add(hbox)
 
             for i in range(1, size+1):
                 message=self.parse_parameter(context, parameters,
@@ -899,7 +924,15 @@ class AdveneGUI (Connect):
                 message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
                 position=self.parse_parameter(context, parameters, 'position%d' % i, 0)
-                b=gtk.Button(message)
+                b=gtk.Button()
+
+                hbox=gtk.HBox()
+                hbox.add(advene.gui.util.image_from_position(self.controller,
+                                                             position,
+                                                             height=40))
+                hbox.add(gtk.Label(message))            
+                b.add(hbox)
+                
                 b.connect("clicked", handle_response, position, vbox)
                 vbox.add(b)
 
