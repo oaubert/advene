@@ -514,7 +514,7 @@ class EditRuleSetForm (EditForm):
     def update_element (self):
         """Update the element fields according to the values in the view."""
         self.edit.update_value()
-        setattr(self.element, self.edit.model.xml_repr())
+        setattr(self.element, 'data', self.edit.model.xml_repr())
         return True
 
     def get_view (self):
