@@ -26,6 +26,7 @@ class TimeAdjustment:
         self.small_increment=100
         # Large increment: 1 sec
         self.large_increment=1000
+        self.image=None
         self.widget=self.make_widget()
         self.update_display()
         
@@ -72,7 +73,7 @@ class TimeAdjustment:
 
         hbox.show_all()
         
-        vbox.pack_start(hbox, expand=gtk.FALSE)
+        vbox.pack_start(hbox, expand=False)
         vbox.show_all()
         return vbox
 
@@ -117,7 +118,7 @@ class TimeAdjustment:
             if self.sync_video:
                 self.controller.move_position(self.value, relative=False)            
             self.update_display()
-        return gtk.TRUE
+        return True
             
     def update_display(self):
         """Updates the value displayed in the entry according to the current value."""
@@ -129,7 +130,7 @@ class TimeAdjustment:
         if self.sync_video:
             self.controller.move_position(self.value, relative=False)            
         self.update_display()
-        return gtk.TRUE
+        return True
     
     def get_widget(self):
         return self.widget
@@ -153,8 +154,8 @@ if __name__ == "__main__":
             # The Control-key is held. Special actions :
             if event.keyval == gtk.keysyms.q:
                 gtk.main_quit ()
-                return gtk.TRUE
-        return gtk.FALSE
+                return True
+        return False
                         
     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
     window.connect ("key-press-event", key_pressed_cb)
