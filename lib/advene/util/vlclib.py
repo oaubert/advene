@@ -46,6 +46,11 @@ def snapshot2png (image, output=None):
     if image.height == 0:
         print "Error : %s" % a.data
         return ""
+    
+    if image.type == "PNG":
+        # Image is already PNG
+        return image.data
+
     i = Image.fromstring ("RGB", (image.width, image.height), image.data,
                           "raw", fourcc2rawcode(image.type))
     if output is not None:
