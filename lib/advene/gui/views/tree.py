@@ -22,6 +22,9 @@ import gtk
 import gobject
 
 class AdveneTreeModel(gtk.GenericTreeModel):
+    COLUMN_TITLE=0
+    COLUMN_ELEMENT=1
+    
     def nodeParent (self, node):
         raise Exception("This has to be implemented in subclasses.")
 
@@ -141,7 +144,7 @@ class AdveneTreeModel(gtk.GenericTreeModel):
         return title
     
     def on_get_value(self, node, column):
-        if column == 0:
+        if column == AdveneTreeModel.COLUMN_TITLE:
             return self.title(node)
         else:
             return node
@@ -360,7 +363,7 @@ class TreeWidget:
         node = None
         if it is not None:
             node = tree_view.get_model().get_value (it,
-                                                    advene.gui.edit.elements.EditAttributesForm.COLUMN_VALUE)
+                                                    AdveneTreeModel.COLUMN_ELEMENT)
         return node
     
     def tree_select_cb(self, tree_view, event):
@@ -395,7 +398,7 @@ class TreeWidget:
                 path, col, cx, cy = t
                 iter = model.get_iter(path)
                 node = model.get_value(iter,
-                                       advene.gui.edit.elements.EditAttributesForm.COLUMN_VALUE)
+                                       AdveneTreeModel.COLUMN_ELEMENT)
                 widget.get_selection().select_path (path)
                 if button == 3:
                     menu = self.make_popup_menu(node, path)
