@@ -27,7 +27,7 @@ class EditGeneric:
         """
         pass
     
-    def build_option(self, elements, current, on_change_element):
+    def build_option(self, elements, current, on_change_element, editable=True):
         """Build an OptionMenu.
 
         elements is a dict holding (key, values) where the values will be used as labels
@@ -58,21 +58,24 @@ class EditGeneric:
         optionmenu.set_menu(menu)
         optionmenu.set_history(index)
         optionmenu.connect("changed", on_change_element, items)
-
+        optionmenu.set_sensitive(editable)
         optionmenu.show()
         return optionmenu
 
 class EditRuleSet(EditGeneric):
     """Edit form for RuleSets"""
-    def __init__(self, ruleset, catalog=None):
+    def __init__(self, ruleset, catalog=None, editable=True):
         self.model=ruleset
         # List of used EditRule instances
         self.editlist=[]
         self.catalog=catalog
+        self.editable=editable
         self.widget=self.build_widget()
 
     def remove_rule(self, button):
         """Remove the currently activated rule."""
+        if not self.editable:
+            return True
         current=self.widget.get_current_page()
         w=self.widget.get_nth_page(current)
         l=[edit
@@ -98,17 +101,21 @@ class EditRuleSet(EditGeneric):
 
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect("clicked", self.add_rule)
+        b.set_sensitive(self.editable)
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
         b.connect("clicked", self.remove_rule)
+        b.set_sensitive(self.editable)
         hb.pack_start(b, expand=False)
         vbox.add(hb)
         
         return vbox
 
     def add_rule(self, button):
-        event=Event("ApplicationStart")
+        if not self.editable:
+            return True
+        event=Event("AnnotationBegin")
         ra=self.catalog.get_action("Message")
         action=Action(registeredaction=ra, catalog=self.catalog)
         for p in ra.parameters:
@@ -128,8 +135,9 @@ class EditRuleSet(EditGeneric):
         return True
 
     def update_value(self):
-        for e in self.editlist:
-            e.update_value()
+        if self.editable:
+            for e in self.editlist:
+                e.update_value()
         #print "update_value for %d rules" % len(self.model)
         
         # Clear the list (we need to keep the same reference as before)
@@ -143,7 +151,7 @@ class EditRuleSet(EditGeneric):
         notebook.set_scrollable(True)
         
         for rule in self.model:
-            edit=EditRule(rule, self.catalog)
+            edit=EditRule(rule, self.catalog, editable=self.editable)
             l=gtk.Label(rule.name)
             edit.set_update_label(l)
             self.editlist.append(edit)
@@ -157,14 +165,17 @@ class EditRuleSet(EditGeneric):
     
 class EditQuery(EditGeneric):
     """Edit form for Query"""
-    def __init__(self, query):
+    def __init__(self, query, editable=True):
         self.model=query
         self.sourceentry=None
         self.valueentry=None
         self.editconditionlist=[]
+        self.editable=editable
         self.widget=self.build_widget()
         
     def update_value(self):
+        if not self.editable:
+            return True
         self.model.source=self.sourceentry.get_text()
         v=self.valueentry.get_text()
         if v == '' or v == 'element':
@@ -182,8 +193,9 @@ class EditQuery(EditGeneric):
         return
 
     def remove_condition(self, widget, conditionwidget, hbox):
-        self.editconditionlist.remove(conditionwidget)
-        hbox.destroy()
+        if self.editable:
+            self.editconditionlist.remove(conditionwidget)
+            hbox.destroy()
         return True
 
     def add_condition(self, widget, conditionsbox):
@@ -198,7 +210,7 @@ class EditQuery(EditGeneric):
         conditionsbox.add(hb)
 
         try:
-            w=EditCondition(cond)
+            w=EditCondition(cond, editable=self.editable)
         except Exception, e:
             print str(e)
             print "for a query"
@@ -208,8 +220,9 @@ class EditQuery(EditGeneric):
         
         hb.add(w.get_widget())
         w.get_widget().show()
-        
+
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b.set_sensitive(self.editable)
         b.connect("clicked", self.remove_condition, w, hb)
         b.show()
         hb.pack_start(b, expand=False)
@@ -229,6 +242,7 @@ class EditQuery(EditGeneric):
         ef=gtk.Frame(_("For all elements in "))
         self.sourceentry=gtk.Entry()
         self.sourceentry.set_text(self.model.source)
+        self.sourceentry.set_editable(self.editable)
         ef.add(self.sourceentry)
         ef.show_all()
         vbox.pack_start(ef, expand=gtk.FALSE)
@@ -241,6 +255,7 @@ class EditQuery(EditGeneric):
         if v is None:
             v='element'
         self.valueentry.set_text(v)
+        self.valueentry.set_editable(self.editable)
         vf.add(self.valueentry)
         vf.show_all()
         vbox.pack_start(vf, expand=gtk.FALSE)
@@ -254,10 +269,11 @@ class EditQuery(EditGeneric):
         hb=gtk.HBox()
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect("clicked", self.add_condition, conditionsbox)
+        b.set_sensitive(self.editable)
         hb.pack_start(b, expand=gtk.FALSE)
         hb.set_homogeneous(gtk.FALSE)
         conditionsbox.pack_start(hb, expand=gtk.FALSE, fill=gtk.FALSE)
-
+        
         cf.show_all()
         
         if isinstance(self.model.condition, advene.rules.elements.ConditionList):
@@ -272,12 +288,13 @@ class EditQuery(EditGeneric):
 
     
 class EditRule(EditGeneric):
-    def __init__(self, rule, catalog=None):
+    def __init__(self, rule, catalog=None, editable=True):
         # Original rule
         self.model=rule
         
         self.catalog=catalog
-
+        self.editable=editable
+        
         self.namelabel=None
         
         self.editactionlist=[]
@@ -289,6 +306,9 @@ class EditRule(EditGeneric):
         self.namelabel=l
         
     def update_value(self):
+        if not self.editable:
+            return True
+        
         self.editevent.update_value()
         for w in self.editactionlist:
             w.update_value()
@@ -326,9 +346,9 @@ class EditRule(EditGeneric):
         return True
 
     def add_condition(self, widget, conditionsbox):
-        cond=Condition(lhs="annotation/type/title",
+        cond=Condition(lhs="annotation/type/id",
                        operator="equals",
-                       rhs="string: ???")
+                       rhs="string:???")
         self.add_condition_widget(cond, conditionsbox)
         return True
     
@@ -337,7 +357,7 @@ class EditRule(EditGeneric):
         conditionsbox.add(hb)
 
         try:
-            w=EditCondition(cond)
+            w=EditCondition(cond, editable=self.editable)
         except Exception, e:
             print str(e)
             print "for rule %s" % self.model.name
@@ -349,6 +369,7 @@ class EditRule(EditGeneric):
         w.get_widget().show()
         
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b.set_sensitive(self.editable)
         b.connect("clicked", self.remove_condition, w, hb)
         b.show()
         hb.pack_start(b, expand=False)
@@ -369,12 +390,13 @@ class EditRule(EditGeneric):
         hb=gtk.HBox()
         actionsbox.add(hb)
 
-        w=EditAction(action, self.catalog)
+        w=EditAction(action, self.catalog, editable=self.editable)
         self.editactionlist.append(w)
         hb.add(w.get_widget())
         w.get_widget().show()
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
         b.connect("clicked", self.remove_action, w, hb)
+        b.set_sensitive(self.editable)
         b.show()
         hb.pack_start(b, expand=False)
 
@@ -397,6 +419,7 @@ class EditRule(EditGeneric):
         hbox.add(gtk.Label(_("Rule name")))
         self.name_entry=gtk.Entry()
         self.name_entry.set_text(self.model.name)
+        self.name_entry.set_editable(self.editable)
         self.name_entry.connect("changed", self.update_name)
         hbox.add(self.name_entry)
         hbox.show_all()
@@ -404,7 +427,8 @@ class EditRule(EditGeneric):
 
         # Event
         ef=gtk.Frame(_("Event"))
-        self.editevent=EditEvent(self.model.event, self.catalog)
+        self.editevent=EditEvent(self.model.event, self.catalog,
+                                 editable=self.editable)
         ef.add(self.editevent.get_widget())
         ef.show_all()
         vbox.pack_start(ef, expand=gtk.FALSE)
@@ -418,6 +442,7 @@ class EditRule(EditGeneric):
         hb=gtk.HBox()
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect("clicked", self.add_condition, conditionsbox)
+        b.set_sensitive(self.editable)
         hb.pack_start(b, expand=gtk.FALSE)
         hb.set_homogeneous(gtk.FALSE)
         conditionsbox.pack_start(hb, expand=gtk.FALSE, fill=gtk.FALSE)
@@ -429,7 +454,7 @@ class EditRule(EditGeneric):
                 self.add_condition_widget(c, conditionsbox)
         #FIXME: else?
         
-        vbox.pack_start(cf, expand=gtk.FALSE)
+        vbox.pack_start(cf, expand=False)
 
         # Actions
         af=gtk.Frame(_("Then"))
@@ -439,6 +464,7 @@ class EditRule(EditGeneric):
         # Add Action button
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect("clicked", self.add_action, actionsbox)
+        b.set_sensitive(self.editable)
         hb.pack_start(b, expand=gtk.FALSE)
         hb.set_homogeneous(gtk.FALSE)
         actionsbox.pack_start(hb, expand=gtk.FALSE, fill=gtk.FALSE)
@@ -454,11 +480,12 @@ class EditRule(EditGeneric):
         return frame
 
 class EditEvent(EditGeneric):
-    def __init__(self, event, catalog, expert=False):
+    def __init__(self, event, catalog, expert=False, editable=True):
         self.model=event
         self.current_event=event
         self.catalog=catalog
         self.expert=expert
+        self.editable=editable
         self.widget=self.build_widget()
         
     def update_value(self):
@@ -467,7 +494,8 @@ class EditEvent(EditGeneric):
         pass
 
     def on_change_event(self, widget, eventlist):
-        self.current_event=eventlist[widget.get_history()]
+        if self.editable:
+            self.current_event=eventlist[widget.get_history()]
         return True
 
     def build_widget(self):
@@ -483,7 +511,8 @@ class EditEvent(EditGeneric):
             # it is an expert-mode event. Add it manually.
             eventlist[self.current_event]=self.catalog.describe_event(self.current_event)
 
-        eventname=self.build_option(eventlist, self.current_event, self.on_change_event)
+        eventname=self.build_option(eventlist, self.current_event, self.on_change_event,
+                                    editable=self.editable)
         hbox.add(eventname)
 
         label=gtk.Label(_(" occurs,"))
@@ -493,11 +522,12 @@ class EditEvent(EditGeneric):
         return hbox
 
 class EditCondition(EditGeneric):
-    def __init__(self, condition):
+    def __init__(self, condition, editable=True):
         self.model=condition
 
         self.current_operator=self.model.operator
-
+        self.editable=editable
+        
         # Widgets:
         self.lhs=None # Entry
         self.rhs=None # Entry
@@ -506,15 +536,12 @@ class EditCondition(EditGeneric):
         self.widget=self.build_widget()
 
     def update_value(self):
-        c=self.model
-
-        c.operator=self.current_operator
-        
-        c.lhs=self.lhs.entry.get_text()
-
-        if c.operator in Condition.binary_operators:
-            c.rhs=self.rhs.entry.get_text()
-            
+        if self.editable:
+            c=self.model
+            c.operator=self.current_operator
+            c.lhs=self.lhs.entry.get_text()
+            if c.operator in Condition.binary_operators:
+                c.rhs=self.rhs.entry.get_text()
         return True
 
     def update_widget(self):
@@ -543,13 +570,16 @@ class EditCondition(EditGeneric):
 
         self.lhs=gtk.Combo()
         self.lhs.entry.set_text(self.model.lhs or "")
+        self.lhs.set_sensitive(self.editable)
         self.lhs.show()
 
         self.rhs=gtk.Combo()
         self.rhs.entry.set_text(self.model.rhs or "")
+        self.rhs.set_sensitive(self.editable)
         self.rhs.hide()
 
         self.operator = gtk.OptionMenu()
+        self.operator.set_sensitive(self.editable)
         self.operator.show()
 
         operators={}
@@ -558,7 +588,8 @@ class EditCondition(EditGeneric):
         
         self.operator=self.build_option(operators,
                                         self.current_operator,
-                                        self.on_change_operator)
+                                        self.on_change_operator,
+                                        editable=self.editable)
 
         hbox.add(self.lhs)
         hbox.add(self.operator)
@@ -570,9 +601,10 @@ class EditCondition(EditGeneric):
         return hbox
 
 class EditAction(EditGeneric):
-    def __init__(self, action, catalog):
+    def __init__(self, action, catalog, editable=True):
         self.model=action
-        
+
+        self.editable=editable
         self.current_name=action.name
         self.current_parameters=dict(action.parameters)
         
@@ -585,6 +617,8 @@ class EditAction(EditGeneric):
         self.widget=self.build_widget()
 
     def update_value(self):
+        if not self.editable:
+            return
         ra=self.catalog.get_action(self.current_name)
         self.model = Action(registeredaction=ra, catalog=self.catalog)
         regexp=sre.compile('^(\(.+\)|)$')
@@ -636,6 +670,7 @@ class EditAction(EditGeneric):
         
         entry=gtk.Entry()
         entry.set_text(value)
+        entry.set_editable(self.editable)
         entry.connect("changed", self.on_change_parameter, name)
 
         self.tooltips.set_tip(entry, description)        
@@ -647,7 +682,8 @@ class EditAction(EditGeneric):
 
         vbox.add(gtk.HSeparator())
         actions=self.catalog.get_described_actions()
-        self.name=self.build_option(actions, self.current_name, self.on_change_name)
+        self.name=self.build_option(actions, self.current_name, self.on_change_name,
+                                    editable=self.editable)
         vbox.add(self.name)
 
         if self.model.registeredaction:

@@ -71,6 +71,7 @@ class EditElementPopup (object):
         self.vbox = gtk.VBox ()
         self.vbox.connect ("key-press-event", self.key_pressed_cb)
         self.window.add (self.vbox)
+        self.editable=True
         # List of defined forms in the window
         self.forms = []
         # Dictionary of callbacks according to keys
@@ -87,7 +88,7 @@ class EditElementPopup (object):
         return False
     can_edit = staticmethod (can_edit)
     
-    def make_widget (self, editable=False):
+    def make_widget (self, editable=True):
         """Create the editing widget (and return it)."""
         raise Exception ("This method should be defined in the subclasses.")
 
@@ -169,7 +170,12 @@ class EditElementPopup (object):
         self.key_cb[gtk.keysyms.Return] = self.validate_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
 
-        self.vbox.add (self.make_widget (editable=True))
+        if self.element.isImported():
+            self.editable=False
+        elif hasattr(self.element, 'schema') and self.element.schema.isImported():
+            self.editable=False
+            
+        self.vbox.add (self.make_widget (editable=self.editable))
 
         # Button bar
         hbox = gtk.HButtonBox()
@@ -187,7 +193,11 @@ class EditElementPopup (object):
         hbox.add (b)
 
         self.vbox.pack_start (hbox, expand=False)
-        self.window.set_title (_("Edit %s") % self.get_title())
+        if self.editable:
+            self.window.set_title (_("Edit %s") % self.get_title())
+        else:
+            self.window.set_title (_("View %s (read-only)") % self.get_title())
+            
         self.window.show_all ()
 
     def display (self):
@@ -236,7 +246,7 @@ class EditAnnotationPopup (EditElementPopup):
         self.controller.notify("AnnotationEditEnd", annotation=element)
         return True
     
-    def make_widget (self, editable=False):
+    def make_widget (self, editable=True):
         vbox = gtk.VBox ()
 
         # Annotation data
@@ -264,12 +274,6 @@ class EditAnnotationPopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(self.framed(t, _("Content")), expand=True)
         
-##         # Annotation content
-##         f = EditTextForm (self.element.content, 'data', controller=self.controller)
-##         f.set_editable (editable)
-##         t = f.get_view ()
-##         self.register_form (f)
-
         return vbox
 
 class EditRelationPopup (EditElementPopup):
@@ -281,7 +285,7 @@ class EditRelationPopup (EditElementPopup):
         self.controller.notify("RelationEditEnd", relation=element)
         return True
     
-    def make_widget (self, editable=False):
+    def make_widget (self, editable=True):
         vbox = gtk.VBox ()
 
         # Annotation data
@@ -344,7 +348,7 @@ class EditViewPopup (EditElementPopup):
         self.controller.notify("ViewEditEnd", view=element)
         return True
     
-    def make_widget (self, editable=False):
+    def make_widget (self, editable=True):
         vbox = gtk.VBox ()
 
         f = self.make_registered_form (element=self.element,
@@ -394,7 +398,7 @@ class EditQueryPopup (EditElementPopup):
         self.controller.notify("QueryEditEnd", query=element)
         return True
     
-    def make_widget (self, editable=False):
+    def make_widget (self, editable=True):
         vbox = gtk.VBox ()
 
         f = self.make_registered_form (element=self.element,
@@ -432,8 +436,6 @@ class EditPackagePopup (EditElementPopup):
         return True
     
     def make_widget (self, editable=False):
-        # Package data
-        # Annotation data
         f = self.make_registered_form (element=self.element,
                                        fields=('uri', 'title',
                                                'author', 'date'),
@@ -455,7 +457,7 @@ class EditSchemaPopup (EditElementPopup):
         self.controller.notify("SchemaEditEnd", schema=element)
         return True
     
-    def make_widget (self, editable=False):
+    def make_widget (self, editable=True):
         vbox=gtk.VBox()
         
         f = self.make_registered_form (element=self.element,
@@ -473,7 +475,8 @@ class EditSchemaPopup (EditElementPopup):
         
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
-                         namespaceid='dc', controller=self.controller)
+                         namespaceid='dc', controller=self.controller,
+                         editable=editable)
         self.register_form(f)
         
         vbox.add(f.get_view())
@@ -510,13 +513,15 @@ class EditAnnotationTypePopup (EditElementPopup):
         # FIXME: should be in a hidable frame
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
-                         namespaceid='dc', controller=self.controller)
+                         namespaceid='dc', controller=self.controller,
+                         editable=editable)
         self.register_form(f)
         vbox.add(f.get_view())
 
         f = EditMetaForm(title=_("Representation"),
                          element=self.element, name='representation',
-                         controller=self.controller)
+                         controller=self.controller,
+                         editable=editable)
         self.register_form(f)
         vbox.add(f.get_view())
         
@@ -551,7 +556,8 @@ class EditRelationTypePopup (EditElementPopup):
 
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
-                         namespaceid='dc', controller=self.controller)
+                         namespaceid='dc', controller=self.controller,
+                         editable=editable)
         self.register_form(f)
         
         vbox.add(f.get_view())
@@ -602,7 +608,8 @@ class EditForm(object):
 
 class EditContentForm(EditForm):
     """Create an edit form for the given content."""
-    def __init__ (self, element, controller=None, mimetypeeditable=True):
+    def __init__ (self, element, controller=None,
+                  editable=True, mimetypeeditable=True):
         # self.element is a Content object
         self.element = element
         self.controller=controller
@@ -612,7 +619,8 @@ class EditContentForm(EditForm):
         self.contentform = None
         # self.mimetype is a gtk.Entry
         self.mimetype = None
-        self.mimetypeeditable = mimetypeeditable
+        self.editable=editable
+        self.mimetypeeditable = mimetypeeditable and editable
 
     def set_editable (self, bool):
         self.editable = bool
@@ -645,6 +653,7 @@ class EditContentForm(EditForm):
             self.contentform = EditTextForm (self.element, 'data',
                                              controller=self.controller)
 
+        self.contentform.set_editable(self.editable)
         vbox.add(self.contentform.get_view())
         return vbox
     
@@ -654,18 +663,19 @@ class EditTextForm (EditForm):
         self.element = element
         self.field = field
         self.controller=controller
-        self.editable = False
+        self.editable = True
         self.view = None
 
-    def set_editable (self, bool):
-        self.editable = bool
+    def set_editable (self, boolean):
+        self.editable = boolean
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
-        buf = self.view.get_buffer()
-        start_iter, end_iter = buf.get_bounds ()
-        text = buf.get_text (start_iter, end_iter)
-        setattr (self.element, self.field, text)
+        if self.editable:
+            buf = self.view.get_buffer()
+            start_iter, end_iter = buf.get_bounds ()
+            text = buf.get_text (start_iter, end_iter)
+            setattr (self.element, self.field, text)
 
     def get_view (self):
         """Generate a view widget for editing text attribute."""
@@ -688,16 +698,17 @@ class EditRuleSetForm (EditForm):
         self.element = element
         self.field = field
         self.controller=controller
-        self.editable = False
+        self.editable = True
         self.view = None
 
-    def set_editable (self, boo):
-        self.editable = boo
+    def set_editable (self, boolean):
+        self.editable = boolean
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
-        self.edit.update_value()
-        setattr(self.element, 'data', self.edit.model.xml_repr())
+        if self.editable:
+            self.edit.update_value()
+            setattr(self.element, 'data', self.edit.model.xml_repr())
         return True
 
     def get_view (self):
@@ -707,8 +718,8 @@ class EditRuleSetForm (EditForm):
                     domelement=getattr(self.element, self.field))
 
         self.edit=advene.gui.edit.rules.EditRuleSet(rs,
-                                                    catalog=self.controller.event_handler.catalog)
-
+                                                    catalog=self.controller.event_handler.catalog,
+                                                    editable=self.editable)
         self.view = self.edit.get_packed_widget()
 
         scroll_win = gtk.ScrolledWindow ()
@@ -718,11 +729,12 @@ class EditRuleSetForm (EditForm):
         return scroll_win
 
 class EditFragmentForm(EditForm):
-    def __init__(self, element=None, controller=None):
+    def __init__(self, element=None, controller=None, editable=True):
         self.begin=None
         self.end=None
         self.element = element
         self.controller = controller
+        self.editable=editable
 
     def check_validity(self):
         if self.begin.value >= self.end.value:
@@ -737,6 +749,8 @@ class EditFragmentForm(EditForm):
             return True
         
     def update_element(self):
+        if not self.editable:
+            return True
         if not self.check_validity():
             return False
 
@@ -748,13 +762,16 @@ class EditFragmentForm(EditForm):
         hbox=gtk.HBox()
 
         self.begin=TimeAdjustment(value=self.element.begin,
-                                  controller=self.controller)
+                                  controller=self.controller,
+                                  editable=self.editable)
         f=gtk.Frame()
         f.set_label(_("Begin"))
         f.add(self.begin.get_widget())
         hbox.add(f)
         
-        self.end=TimeAdjustment(value=self.element.end, controller=self.controller)
+        self.end=TimeAdjustment(value=self.element.end,
+                                controller=self.controller,
+                                editable=self.editable)
         f=gtk.Frame()
         f.set_label(_("End"))
         f.add(self.end.get_widget())
@@ -765,12 +782,12 @@ class EditFragmentForm(EditForm):
     
 class EditQueryForm (EditForm):
     """Create a Query edit form for the given element (a view, presumably)."""
-    def __init__ (self, element, field, controller=None):
+    def __init__ (self, element, field, controller=None, editable=True):
         # Element is a view.content, field should be "data" or "model" ?
         self.element = element
         self.field = field
         self.controller=controller
-        self.editable = False
+        self.editable = editable
         self.view = None
 
     def set_editable (self, boo):
@@ -778,6 +795,8 @@ class EditQueryForm (EditForm):
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
+        if not self.editable:
+            return True
         self.edit.update_value()
         # FIXME: we ignore on purpose the self.field attribute
         setattr(self.element, 'data', self.edit.model.xml_repr())
@@ -788,9 +807,10 @@ class EditQueryForm (EditForm):
         """Generate a view widget to edit the ruleset."""
         q=advene.rules.elements.Query()
         q.from_dom(domelement=getattr(self.element, self.field))
-                   
 
-        self.edit=advene.gui.edit.rules.EditQuery(q)
+        self.edit=advene.gui.edit.rules.EditQuery(q,
+                                                  controller=self.controller,
+                                                  editable=self.editable)
         self.view = self.edit.get_widget()
 
         scroll_win = gtk.ScrolledWindow ()
@@ -800,11 +820,12 @@ class EditQueryForm (EditForm):
         return scroll_win
 
 class EditGenericForm(EditForm):
-    def __init__(self, title=None, getter=None, setter=None, controller=None):
+    def __init__(self, title=None, getter=None, setter=None, controller=None, editable=True):
         self.title=title
         self.getter=getter
         self.setter=setter
         self.controller=controller
+        self.editable=editable
         self.entry=None
         self.view=None
 
@@ -819,25 +840,29 @@ class EditGenericForm(EditForm):
         if v is None:
             v=""
         self.entry.set_text(v)
+        self.entry.set_editable(self.editable)
         hbox.pack_start(self.entry)
 
         hbox.show_all()
         return hbox
 
     def update_element(self):
-        v=self.entry.get_text()
-        self.setter(v)
+        if self.editable:
+            v=self.entry.get_text()
+            self.setter(v)
         return True
     
 class EditMetaForm(EditGenericForm):
     def __init__(self, title=None, element=None, name=None,
-                 namespaceid='advenetool', controller=None):
+                 namespaceid='advenetool', controller=None,
+                 editable=True):
         getter=self.metadata_get_method(element, name, namespaceid)
         setter=self.metadata_set_method(element, name, namespaceid)
         super(EditMetaForm, self).__init__(title=title,
                                            getter=getter,
                                            setter=setter,
-                                           controller=controller)
+                                           controller=controller,
+                                           editable=editable)
     
 class EditAttributesForm (EditForm):
     """Creates an edit form for the given element."""
