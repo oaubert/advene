@@ -7,7 +7,7 @@ Source: dist\w9xpopen.exe; DestDir: {app}
 Source: dist\share\*; DestDir: {app}\share; Flags: recursesubdirs
 Source: dist\doc\*; DestDir: {app}\doc; Flags: recursesubdirs
 Source: dist\locale\*; DestDir: {app}\locale; Flags: recursesubdirs
-Source: share\pixmaps\dvd_small.png; DestDir: {app}; DestName: advene.png
+Source: share\pixmaps\dvd.ico; DestDir: {app}; DestName: advene.ico
 Source: \devel\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs
 Source: \devel\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs
 Source: \devel\gtk\lib\locale\fr\*; DestDir: {app}\lib\locale\fr; Flags: recursesubdirs
@@ -30,4 +30,4 @@ VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 [Registry]
 Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
 [Icons]
-Name: {group}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.png
+Name: {group}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; IconIndex: 0
