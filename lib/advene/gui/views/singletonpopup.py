@@ -103,6 +103,15 @@ class SingletonPopup:
         
         return window
 
+    def reparent(self, container=None):
+        """Set a new container for the singleton popup."""
+        self.container=container
+        self.widget.destroy()
+        self.vbox.destroy()
+        self.window.destroy()
+        self.window=self.build_widget()
+        return self.window
+    
     def get_widget (self):
         """Return the TreeView widget."""
         return self.window
