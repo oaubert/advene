@@ -79,13 +79,13 @@ if __name__ == '__main__':
     Check your .advenerc file.""" % gladefile
     sys.exit(1)
 
-  v = advene.gui.main.AdveneGUI (sys.argv[1:])
+  gui = advene.gui.main.AdveneGUI (sys.argv[1:])
   try:
-    v.main ()
+    gui.main ()
   except Exception, e:
     print _("Got exception\n\n%s\n\n. Stopping services...") % str(e)
     print _("*** Exception ***")
     import code
     e, v, tb = sys.exc_info()
     code.traceback.print_exception (e, v, tb)
-    v.on_exit ()
+    gui.on_exit ()
