@@ -3,6 +3,8 @@ from cStringIO import StringIO
 import modeled
 import viewable
 
+import xml.dom.ext.reader.PyExpat
+
 from constants import *
 
 import util.dom
@@ -47,7 +49,11 @@ class Content(modeled.Modeled,
         self.setData(None)
 
     def getModel(self):
-        return self._getModel()
+        data = self.getData()
+        # FIXME: We should ensure that we can parse it as XML
+        reader = xml.dom.ext.reader.PyExpat.Reader()
+        element = reader.fromString(data)._get_documentElement()
+        return element
     
     def getUri (self, absolute=True):
         """
@@ -83,10 +89,6 @@ class Content(modeled.Modeled,
         """Delete the content's URI"""
         self.setUri(None)
 
-    def getModel(self):
-        """Return the XML Document instance."""
-        return self._getModel()
-        
     def getStream(self):
         """Return a stream to access the content's data
         FIXME: read/write ?
