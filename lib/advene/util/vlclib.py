@@ -169,18 +169,33 @@ def get_title(controller, element, representation=None):
         return element
     if (isinstance(element, Annotation) or isinstance(element, Relation)
         and controller is not None):
+        
         if representation is not None and representation != "":
             c=controller.event_handler.build_context(event='Display', here=element)
-            return c.evaluateValue(representation)
+            try:
+                r=c.evaluateValue(representation)
+            except AdveneTalesException:
+                r=element.content.data
+            if not r:
+                r=element.id
+            return r
+        
         expr=element.type.getMetaData(config.data.namespace, "representation")
         if expr is None or expr == '' or sre.match('^\s+', expr):
-            return element.content.data
+            r=element.content.data
+            if not r:
+                r=element.id
+            return r
+        
         elif controller is not None:
             c=controller.event_handler.build_context(event='Display', here=element)
             try:
                 r=c.evaluateValue(expr)
             except AdveneTalesException:
                 r=element.content.data
+            if not r:
+                r=element.id                
+            return r
     if hasattr(element, 'title'):
         return unicode(element.title)
     if hasattr(element, 'id'):
