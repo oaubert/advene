@@ -227,7 +227,9 @@ class AdveneGUI (Connect):
                 pass
 
         if view.content.mimetype == 'application/x-advene-ruleset':
-            self.update_stbv_menu()
+            # Not ideal (we could edit the non-activated view) but it is
+            # better for the general case (use of the Edit button)
+            self.controller.activate_stbv(view)
             
         return True
     
@@ -288,6 +290,10 @@ class AdveneGUI (Connect):
                 v.update_relationtype(relationtype=rt, event=event)
             except AttributeError:
                 pass
+        return True
+
+    def on_view_activation(self, context, parameters):
+        self.update_stbv_menu()
         return True
     
     def updated_position_cb (self, context, parameters):
@@ -386,6 +392,9 @@ class AdveneGUI (Connect):
         self.controller.event_handler.internal_rule (event="PlayerSet",
                                                      method=self.updated_position_cb)
 
+        self.controller.event_handler.internal_rule (event="ViewActivation",
+                                                     method=self.on_view_activation)
+        
         self.controller.init(args)
         
         if config.data.webserver['mode'] == 1:
@@ -468,6 +477,9 @@ class AdveneGUI (Connect):
 
         for c in stbv_menu.get_children():
             stbv_menu.remove(c)
+
+
+        current_stbv_index=0
         
         default_item = gtk.MenuItem(_("None"))
         default_item.set_data("stbv", None)
@@ -475,14 +487,18 @@ class AdveneGUI (Connect):
         default_item.show()
         stbv_menu.append(default_item)
 
+        index=1
         for v in self.controller.get_stbv_list():
             i = gtk.MenuItem(v.title or v.id)
             i.set_data("stbv", v)
+            if v == self.controller.current_stbv:
+                current_stbv_index=index
             i.connect("activate", self.update_stbv, v)
             i.show()
             stbv_menu.append(i)
+            index += 1
 
-        stbv_menu.set_active(0)
+        stbv_menu.set_active(current_stbv_index)
         stbv_menu.reposition()
         stbv_menu.show_all()
         self.gui.get_widget("stbv_combo").set_menu(stbv_menu)

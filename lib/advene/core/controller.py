@@ -95,6 +95,9 @@ class AdveneController:
         self.future_ends = None
         self.last_position = -1
         self.cached_duration = 0
+
+        # STBV
+        self.current_stbv = None
         
         self.package = None
         self.modified = False
@@ -140,6 +143,7 @@ class AdveneController:
             pid=l.rstrip().split()[-1]
             processes.append(pid)
         f.close()
+        # FIXME: make that a popup window
         print "+-------------------------------------------------------"
         print "|The following processes seem to use the %s port:" % pat
         print "| %s |" % processes
@@ -464,6 +468,7 @@ class AdveneController:
 
         If view is None, then reset the user STBV.
         """
+        self.current_stbv=view
         if view is None:
             self.event_handler.clear_ruleset(type_='user')
             return
@@ -687,9 +692,9 @@ class AdveneController:
                     break
 
         # Update the cached duration if necessary
-        if self.cached_duration <= 0:
-            if self.player.stream_duration > 0:
-                self.cached_duration = self.player.stream_duration
+        if self.cached_duration <= 0 and self.player.stream_duration > 0:
+            print "updating cached duration"
+            self.cached_duration = self.player.stream_duration
 
         return pos
 
