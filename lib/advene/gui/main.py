@@ -151,7 +151,10 @@ class AdveneGUI (Connect):
         self.gui.fs.ok_button.connect_after ("clicked", lambda win: self.gui.fs.hide ())
         self.gui.fs.cancel_button.connect ("clicked", lambda win: self.gui.fs.destroy ())
         if config.data.path['data']:
-            self.gui.fs.set_filename (config.data.path['data'])
+            d=config.data.path['data']
+            if os.path.isdir(d) and not d.endswith(os.path.sep):
+                d=d + os.path.sep
+            self.gui.fs.set_filename (d)
 
         self.gui.current_annotation = self.gui.get_widget ("current_annotation")
         self.gui.current_annotation.set_text ('['+_('None')+']')
