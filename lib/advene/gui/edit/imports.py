@@ -1,6 +1,8 @@
 """GUI to import package elements.
 """
 import sys
+import os
+
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -175,6 +177,56 @@ class Importer:
         self.sourcepackage=sourcepackage
         self.widget=self.build_widget()
 
+    def add_package_cb(self, button, fs):
+        """Import a new package."""
+        file_ = fs.get_property ("filename")
+
+        # Determine a default alias for the filename
+        alias=os.path.splitext( os.path.basename(file_) )[0]
+        alias=alias.lower()
+        
+        d = gtk.Dialog(title='Enter the package alias',
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
+        l=gtk.Label(_("Specify the alias which will be used\nas prefix for the package's elements."))
+        l.show()
+        d.vbox.add(l)
+        
+        e=gtk.Entry()
+        e.show()
+        e.set_text(alias)
+        d.vbox.add(e)
+
+        res=d.run()
+        if res == gtk.RESPONSE_ACCEPT:
+            try:
+                retval=e.get_text()
+            except ValueError:
+                retval=None
+        else:
+            retval=None
+
+        d.destroy()
+        if retval is None:
+            # The user canceled the action
+            return True
+
+        alias=retval
+
+        # FIXME: to be implemented in the model
+        #self.controller.package.importPackage(uri=file_, alias=alias)
+        print "Will be implemented soon."
+        return True
+        
+    def add_package(self, button=None):
+        if not self.controller.gui:
+            return False
+        self.controller.gui.file_selector (callback=self.add_package_cb,
+                                           label=_("Choose the package to import"))
+        return True
+    
     def build_widget(self):
         vbox=gtk.VBox()
 
@@ -188,7 +240,16 @@ class Importer:
         ti=TreeViewImporter(controller=self.controller)
         scroll_win.add_with_viewport(ti.widget)
 
-        # FIXME: add a button to add a new package
+        hb=gtk.HButtonBox()
+
+        b=gtk.Button(stock=gtk.STOCK_ADD)
+        b.connect("clicked", self.add_package)
+        hb.pack_start(b, expand=False)
+
+        vbox.pack_start(hb, expand=False)
+
+        hb.show_all()
+        
         return vbox
 
     def popup(self):
