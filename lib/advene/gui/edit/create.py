@@ -21,6 +21,7 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
+from advene.model.query import Query
 from advene.rules.elements import RuleSet
 
 import advene.gui.edit.rules
@@ -35,6 +36,7 @@ element_label = {
     AnnotationType: _("Annotation Type"),
     RelationType: _("Relation Type"),
     View: _("View"),
+    Query: _("Query"),
     }
 
 class ViewType:
@@ -59,6 +61,7 @@ class CreateElementPopup(object):
             AnnotationType: "at-",
             RelationType: "rt-",
             View: "view-",
+            Query: "query-",
             }
         self.chosen_type = None
         self.widget=self.build_widget()
@@ -89,12 +92,14 @@ class CreateElementPopup(object):
 
         self.id_entry = gtk.Entry()
         self.id_entry.set_text(self.generate_id())
+        # FIXME: connect on changed a method to ensure that the id is valid
+        # (no space or URL-forbidden characters)
         hbox.pack_start(self.id_entry)
 
         vbox.add(hbox)
 
         # Choose a type
-        if self.type_ in (Annotation, Relation, View):
+        if self.type_ in (Annotation, Relation, View, Query):
             hbox = gtk.HBox()
             l = gtk.Label(_("Type"))
             hbox.pack_start(l)
@@ -112,6 +117,8 @@ class CreateElementPopup(object):
             elif self.type_ == View:
                 type_list = [ ViewType('text/html', _("HTML template")),
                               ViewType('application/x-advene-ruleset', _("Dynamic view")) ]
+            elif self.type_ == Query:
+                type_list = [ ViewType('application/x-advene-simplequery', _("Simple query")) ]
             else:
                 print _("Error in advene.gui.edit.create.build_widget: invalid type %s") % self.type_
                 return None
@@ -181,12 +188,24 @@ class CreateElementPopup(object):
             el.title=id_
             parent.relations.append(el)
             self.controller.notify('RelationCreate', relation=el)
+        elif self.type_ == Query:
+            el=self.parent.createQuery(ident=id_)
+            el.author=config.data.userid
+            el.date=self.get_date()
+            el.title=id_
+            el.content.mimetype=t.id
+            if t.id == 'application/x-advene-simplequery':
+                # Create a basic query
+                q=advene.rules.elements.Query(source="here")
+                el.content.data=q.xml_repr()
+            self.parent.views.append(el)
+            self.controller.notify('QueryCreate', query=el)
         elif self.type_ == View:
             el=self.parent.createView(
                 ident=id_,
                 author=config.data.userid,
                 date=self.get_date(),
-                clazz=self.parent.viewableClass,
+                clazz=self.parent.viewableClass,                
                 content_mimetype=t.id,
                 )
             el.title=id_
