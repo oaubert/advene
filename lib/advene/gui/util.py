@@ -150,7 +150,7 @@ def entry_dialog(title=None,
     return ret
 
 def build_optionmenu(elements, current, on_change_element, editable=True):
-    """Build an OptionMenu.
+    """Build an ComboBox.
 
     elements is a dict holding (key, values) where the values will be used as labels
     current is the current activated element (i.e. one of the keys)
@@ -160,30 +160,27 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
 
     ``def on_change_element([self,] element):``
     """
-    def change_cb(optionmenu, elements, on_change_element):
-        on_change_element(elements[optionmenu.get_history()])
+    def change_cb(combobox, on_change_element):
+        i=combobox.get_active_iter()
+        element=combobox.get_model().get_value(i, 1)
+        on_change_element(element)
         return True
 
-    # List of elements, with the same index as the menus
-    optionmenu = gtk.OptionMenu()
-
-    items=[]
-    cnt=0
-    index=0
-    menu=gtk.Menu()
+    store=gtk.ListStore(str, object)
+    active_iter=None
     for k, v in elements.iteritems():
-        item = gtk.MenuItem(v)
-        item.show()
-        menu.append(item)
-        items.append(k)
-        if (k == current): index = cnt
-        cnt += 1
+        i=store.append( (v, k) )
+        if k == current:
+            active_iter=i
 
-    optionmenu.set_menu(menu)
-    optionmenu.set_history(index)
-    optionmenu.connect("changed", change_cb, items, on_change_element)
+    optionmenu = gtk.ComboBox(model=store)
+    cell = gtk.CellRendererText()
+    optionmenu.pack_start(cell, True)
+    optionmenu.add_attribute(cell, 'text', 0)
+    optionmenu.set_active_iter(active_iter)
+    optionmenu.connect("changed", change_cb, on_change_element)
     optionmenu.set_sensitive(editable)
-    optionmenu.show()
+    optionmenu.show_all()
     return optionmenu
 
 class CategorizedSelector:
