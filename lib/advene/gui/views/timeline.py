@@ -803,8 +803,15 @@ class TimeLine:
 
         window.add (vbox)
 
-        self.toolbar = self.get_toolbar()
-        vbox.pack_start(self.toolbar, expand=False)
+        hb=gtk.HBox()
+        
+        toolbar = self.get_toolbar()
+        hb.add(toolbar)
+        if self.controller.gui:
+            toolbar=self.controller.gui.get_player_control_toolbar()
+            hb.add(toolbar)
+
+        vbox.pack_start(hb, expand=False)
         
         vbox.add (self.get_packed_widget())
 
