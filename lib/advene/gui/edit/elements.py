@@ -33,11 +33,11 @@ import StringIO
 
 _edit_popup_list = []
 
-def get_edit_popup (el):
+def get_edit_popup (el, controller=None):
     """Return the right edit popup for the given element."""
     for c in _edit_popup_list:
         if c.can_edit (el):
-            return c(el)
+            return c(el, controller)
     raise TypeError(_("No edit popup available for element %s") % el)
 
 class EditPopupClass (type):
@@ -59,9 +59,10 @@ class EditElementPopup (object):
     """
     __metaclass__ = EditPopupClass
     
-    def __init__ (self, ann):
-        """Create an edit window for the given annotation."""
-        self.element = ann
+    def __init__ (self, el, controller=None):
+        """Create an edit window for the given element."""
+        self.element = el
+        self.controller = controller
         self.window = gtk.Window (gtk.WINDOW_TOPLEVEL)
         self.vbox = gtk.VBox ()
         self.vbox.connect ("key-press-event", self.key_pressed_cb)
@@ -248,7 +249,7 @@ class EditRelationPopup (EditElementPopup):
 
         def edit_popup(button, element):
             try:
-                pop = get_edit_popup (element)
+                pop = get_edit_popup (element, self.controller)
             except TypeError, e:
                 print _("Error: unable to find an edit popup for %s:\n%s") % (element, str(e))
             else:
