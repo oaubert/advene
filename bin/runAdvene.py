@@ -47,6 +47,7 @@ if __name__ == "__main__":
         "a = p.annotations[-1]",
         "r = p.relations[-1]",
         "v = p.views[-1]",
+        "q = p.queries[-1]",
         "s = p.schemas[-1]",
         "at = p.annotationTypes[-1]",
         "rt = p.relationTypes[-1]",
