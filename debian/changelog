@@ -26,6 +26,10 @@ advene (0.10) unstable; urgency=low
   
   * Navigation popups now use SingletonPopup (only one is displayed, timeout handled)
 
+  * Basic GUI for importing external data (menu File/Import).
+  
+  * DVD chapter import is accessible in the File menu (it needs the chaplin program)
+  
  -- 
 
 advene (0.9) unstable; urgency=low
