@@ -12,6 +12,20 @@ from gettext import gettext as _
 # vlcorbit.py
 import vlc as VLC
 
+class Snapshot:
+    def __init__(self, d=None):
+        if d is not None:
+            self.width=d['width']
+            self.height=d['height']
+            self.data=d['data']
+            self.type=d['type']
+            code=self.type
+            t="%c%c%c%c" % (code & 0xff,
+                          code >> 8 & 0xff,
+                          code >> 16 & 0xff,
+                          code >> 24)
+            print "Snapshot: (%d,%d) %s" % (self.width, self.height, t)
+
 class Player(object):
     """Wrapper class for a native vlc.MediaControl object.
 
@@ -102,7 +116,7 @@ class Player(object):
         """
         # FIXME: pass options
 #        self.mc = VLC.MediaControl( [ '--filter', 'clone', '--clone-vout-list', 'snapshot,x11' ])
-        self.mc = VLC.MediaControl( [ '--vout', 'x11' ] )
+        self.mc = VLC.MediaControl( "--filter clone --snapshot-width 160 --snapshot-height 100".split() )
 
         # 0 relative position
         pos = VLC.Position ()
@@ -247,5 +261,9 @@ class Player(object):
 
     def check_player(self):
         # FIXME: correctly implement this
-        print "check player"
+        print "Check player"
         return True
+
+    def snapshot(self, position):
+        d=self.mc.snapshot(position)
+        return Snapshot(d)
