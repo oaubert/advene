@@ -317,7 +317,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           - C{/media/play}
           - C{/media/pause}
           - C{/media/stop}
-          - C{/media/stbv}
 
         Accessing the folder itself will display the media status.
 
@@ -381,17 +380,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         @type l: list
         @param query: the options given in the URL
         @type query: dict
-
-        The X{/media/stbv} element
-        --------------------------
-
-          The C{/media/stbv} element activates a new stbv. It takes one
-          argument (in the form of URL-option):
-
-            - C{id=...} : the STBV id
-
-          If no argument is given, its deactivates the STBV
-
 
         """
         if len(l) == 0:
@@ -517,7 +505,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         Accessing the folder itself will display the application status.
 
         The X{/application/stbv} element
-        --------------------------
+        --------------------------------
 
           C{/application/stbv} activates the given STBV. It takes the STBV id as
           next element in the path, or as C{id=...} parameter. Note that it only
@@ -525,7 +513,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           C{/application/play?stbv=...} URI.
 
         The X{/application/adhoc} element
-        --------------------------
+        ---------------------------------
 
           C{/application/adhoc} opens the given ad-hoc view. It takes
           the view name as next element in the path. Accessible views
@@ -868,7 +856,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         this way.
 
         Manipulating package data
-        -------------------------
+        =========================
 
         The package data can be manipulated in this way. The
         appropriate action is specified through the C{action}
@@ -876,7 +864,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         C{delete}.
 
         Updating data
-        -------------
+        =============
 
         The update of an element of the object addressed by the POSTed
         URL is done by giving the name of the object attribute that we
@@ -897,7 +885,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           </form>
 
         Creating new data
-        -----------------
+        =================
 
         The creation of new elements in a package is done by
         specifying the C{action=create} parameter.
