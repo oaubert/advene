@@ -119,9 +119,7 @@ class AnnotationEdit:
         self.annotation.fragment.begin=self.begin.value
         self.annotation.fragment.end=self.end.value
         
-        # We do not need to notify here, since the plugin (for the moment) does it
-        # already.
-        # self.controller.notify("AnnotationEditEnd", annotation=self.annotation)
+        self.controller.notify("AnnotationEditEnd", annotation=self.annotation)
         
         self.window.destroy()
         return val
