@@ -8,9 +8,15 @@ form of a list, specifying timestamps and content.
 The data is presented as follows :
 
 |  Begin   |  End   | Data      | Type* |
+
 """
 
 import sys
+
+import pygtk
+pygtk.require ('2.0')
+import gtk
+import gobject
 
 # Advene part
 import advene.core.config as config
@@ -21,17 +27,21 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
 
+import advene.util.vlclib as vlclib
+
 from gettext import gettext as _
 
 import advene.gui.edit.elements
 import advene.gui.edit.create
 
-import pygtk
-pygtk.require ('2.0')
-import gtk
-import gobject
 
 class AdveneListModel(gtk.GenericTreeModel):
+    COLUMN_BEGIN=0
+    COLUMN_END=1
+    COLUMN_DATA=2
+    COLUMN_TYPE=3
+    COLUMN_ELEMENT=4
+    
     def __init__(self, elements):
         gtk.GenericTreeModel.__init__(self)
         self.elements = elements
@@ -73,13 +83,13 @@ class AdveneListModel(gtk.GenericTreeModel):
         return self.on_get_path(node)
 
     def on_get_value(self, node, column):
-        if column == 0:
-            return unicode(node.fragment.begin)
-        elif column == 1:
-            return unicode(node.fragment.end)
-        elif column == 2:
+        if column == self.COLUMN_BEGIN:
+            return unicode(vlclib.format_time(node.fragment.begin))
+        elif column == self.COLUMN_END:
+            return unicode(vlclib.format_time(node.fragment.end))
+        elif column == self.COLUMN_DATA:
             return unicode(node.content.data)
-        elif column == 3:
+        elif column == self.COLUMN_TYPE:
             return unicode(node.type.title or node.type.id)
         else:
             return node
@@ -178,13 +188,13 @@ class SequenceEditor:
         node = None
         if it is not None:
             node = tree_view.get_model().get_value (it,
-                                                    advene.gui.edit.elements.EditAttributesForm.COLUMN_VALUE)
+                                                    AdveneListModel.COLUMN_ELEMENT)
         return node
     
     def tree_select_cb(self, tree_view, event):
         # On double-click, edit element
         if event.type == gtk.gdk._2BUTTON_PRESS:
-            node = self.get_selected_node (tree_view)
+            node = self.get_selected_node ()
             if node is not None:
                 try:
                     pop = advene.gui.edit.elements.get_edit_popup (node,
@@ -213,7 +223,7 @@ class SequenceEditor:
                 path, col, cx, cy = t
                 iter = model.get_iter(path)
                 node = model.get_value(iter,
-                                       advene.gui.edit.elements.EditAttributesForm.COLUMN_VALUE)
+                                       AdveneListModel.COLUMN_ELEMENT)
                 widget.get_selection().select_path (path)
                 if button == 3:
                     menu = self.make_popup_menu(node, path)
@@ -343,7 +353,7 @@ if __name__ == "__main__":
     b.connect ("clicked", validate_cb, controller.package)
     hbox.add (b)
 
-    b = gtk.Button (stock=gtk.STOCK_CANCEL)
+    b = gtk.Button (stock=gtk.STOCK_QUIT)
     b.connect ("clicked", lambda w: window.destroy ())
     hbox.add (b)
 
