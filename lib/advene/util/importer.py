@@ -317,20 +317,20 @@ class LsDVDImporter(GenericImporter):
     def process_file(self, filename):
         if filename != 'lsdvd':
             pass
-        f=os.popen(self.command, "r")
         p, at=self.init_package(schemaid='dvd',
-                                  annotationtypeid='chapter')
+                                annotationtypeid='chapter')
         if self.package is None:
             # We created a new package. Set the mediafile
             # FIXME: should specify title
             p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
             self.package=p
         self.defaulttype=at
+        f=os.popen(self.command, "r")
         self.convert(self.iterator(f))
         return self.package
 
 class ChaplinImporter(GenericImporter):
-    """lsdvd importer.
+    """Chaplin importer.
     """
     def __init__(self, **kw):
         super(ChaplinImporter, self).__init__(**kw)
