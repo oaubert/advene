@@ -432,6 +432,9 @@ class AdveneController:
         """
         if as is None:
             as=self.package.uri
+
+        old_uri = self.package.uri
+        
         # Check if we know the stream duration. If so, save it as
         # package metadata
         if self.cached_duration > 0:
@@ -446,6 +449,10 @@ class AdveneController:
         self.package.save(as=as)
         self.modified=False
         self.event_handler.notify ("PackageSave")
+        if old_uri != as:
+            # Reload the package with the new name
+            self.log(_("Package URI has changed. Reloading package with new URI."))
+            self.load_package(uri=as)
     
     def manage_package_load (self, context, parameters):
         """Event Handler executed after loading a package.
