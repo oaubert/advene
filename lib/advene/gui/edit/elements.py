@@ -129,6 +129,24 @@ class EditElementPopup (object):
         else:
             return False
 
+    def metadata_get_method(self, element, data, namespaceid='advenetool'):
+        namespace = config.data.namespace_prefix[namespaceid]
+        def get_method():
+            expr=element.getMetaData(namespace, data)
+            if expr is None:
+                expr=""
+            return expr
+        return get_method
+
+    def metadata_set_method(self, element, data, namespaceid='advenetool'):
+        namespace = config.data.namespace_prefix[namespaceid]
+        def set_method(value):
+            if value is None or value == "":
+                value=""
+            self.element.setMetaData(namespace, data, unicode(value))
+            return True
+        return set_method
+        
     def get_title (self):
         """Return the element title."""
         c = self.element.viewableClass
@@ -442,18 +460,6 @@ class EditAnnotationTypePopup (EditElementPopup):
         self.controller.notify("AnnotationTypeEditEnd", annotationtype=element)
         return True
 
-    def get_representation(self):
-        expr=self.element.getMetaData(config.data.namespace, "representation")
-        if expr is None:
-            expr=""
-        return expr
-
-    def set_representation(self, value):
-        if value is None or value == "":
-            value=""
-        self.element.setMetaData(config.data.namespace, "representation", unicode(value))
-        return True
-    
     def make_widget (self, editable=False):
         vbox = gtk.VBox()
         
@@ -471,10 +477,20 @@ class EditAnnotationTypePopup (EditElementPopup):
                                                'mimetype': _('MIME Type')}
                                        )
         vbox.add(f.get_view())
-        
+
+        # FIXME: should be in a hidable frame 
+        f = EditGenericForm(title=_("Description"),
+                            getter=self.metadata_get_method(self.element,
+                                                            'description', namespaceid='dc'),
+                            setter=self.metadata_set_method(self.element, 'description',
+                                                            namespaceid='dc'),
+                            controller=self.controller)
+        self.register_form(f)
+        vbox.add(f.get_view())
+
         f = EditGenericForm(title=_("Representation"),
-                            getter=self.get_representation,
-                            setter=self.set_representation,
+                            getter=self.metadata_get_method(self.element, 'representation'),
+                            setter=self.metadata_set_method(self.element, 'representation'),
                             controller=self.controller)
         self.register_form(f)
         vbox.add(f.get_view())
