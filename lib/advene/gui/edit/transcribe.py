@@ -24,6 +24,7 @@ from gettext import gettext as _
 import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.popup
+import advene.gui.util
 
 class TranscriptionImporter(advene.util.importer.GenericImporter):
     """Transcription importer.
@@ -236,45 +237,37 @@ class TranscriptionEdit:
                     'content': text }
         
     def save_transcription(self, button=None):
-        fs = gtk.FileSelection ("Save transcription to...")
-
-        def close_and_save(button, fs):
-            self.save_output(filename=fs.get_filename())
-            fs.destroy()
-            return True
-
-        fs.ok_button.connect_after ("clicked", close_and_save, fs)
-        fs.cancel_button.connect ("clicked", lambda win: fs.destroy ())
-
-        fs.show ()
+        fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
+                                           action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                           button=gtk.STOCK_SAVE)
+        if fname is not None:
+            self.save_output(filename=fname)
         return True
 
     def save_output(self, filename=None):
-        # FIXME: find a way to insert timestamps and recover them later
-        b=self.textview.get_buffer()
-        begin,end=b.get_bounds()
-        out=b.get_text(begin, end)
         f=open(filename, "w")
-        f.write(out)
+        last=None
+        for d in self.parse_transcription():
+            if last != d['begin']:
+                f.writelines( ( '[%s]' % vlclib.format_time(d['begin']),
+                                d['content'],
+                                '[%s]' % vlclib.format_time(d['end']) ) )
+            else:
+                f.writelines( ( d['content'],
+                                '[%s]' % vlclib.format_time(d['end']) ) )
+            last=d['end']
         f.close()
         self.controller.log(_("Transcription saved to %s") % filename)
         return True
     
     def load_transcription_cb(self, button=None):
-        fs = gtk.FileSelection ("Select transcription file to load")
-
-        def close_and_save(button, fs):
-            self.load_transcription(filename=fs.get_filename())
-            fs.destroy()
-            return True
-
-        fs.ok_button.connect_after ("clicked", close_and_save, fs)
-        fs.cancel_button.connect ("clicked", lambda win: fs.destroy ())
-
-        fs.show ()
+        fname=advene.gui.util.get_filename(title=_("Select transcription file to load"))
+        if fname is not None:
+            self.load_transcription(filename=fname)
         return True
 
     def load_transcription(self, filename=None):
+        # FIXME: handle [xx:xx:xx.xxx] timestamps and generate marks accordingly
         b=self.textview.get_buffer()
         try:
             f=open(filename, 'r')
