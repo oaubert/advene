@@ -14,6 +14,7 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
+from advene.model.query import Query
 
 import advene.gui.util
 import advene.util.vlclib
@@ -117,6 +118,9 @@ class Menu:
         elif isinstance(el, View):
             p.views.remove(el)
             self.controller.notify('ViewDelete', view=el)
+        elif isinstance(el, Query):
+            p.queries.remove(el)
+            self.controller.notify('QueryDelete', query=el)
         return True
 
     def add_menuitem(self, menu=None, item=None, action=None, *param, **kw):
@@ -149,7 +153,8 @@ class Menu:
         add_item(_("Edit"), self.edit_element, element)
 
         # Common to deletable elements
-        if type(element) in (Annotation, Relation, View, Schema, AnnotationType, RelationType):
+        if type(element) in (Annotation, Relation, View, Query,
+                             Schema, AnnotationType, RelationType):
             add_item(_("Delete"), self.delete_element, element)
 
         specific_builder={
@@ -160,6 +165,7 @@ class Menu:
             Schema: self.make_schema_menu,
             View: self.make_view_menu,
             Package: self.make_package_menu,
+            Query: self.make_query_menu,
             }
 
         try:
@@ -209,6 +215,7 @@ class Menu:
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
         #add_item(_("Create a new relation..."), self.create_element, Relation, element)
         add_item(_("Create a new schema..."), self.create_element, Schema, element)
+        add_item(_("Create a new query..."), self.create_element, Query, element)
         return
     
     def make_schema_menu(self, element, menu):
@@ -230,6 +237,11 @@ class Menu:
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
         #add_item(_("Create a new relation..."), self.create_element, Relation, element)
+        return
+
+    def make_query_menu(self, element, menu):
+        def add_item(*p, **kw):
+            self.add_menuitem(menu, *p, **kw)
         return
 
     def make_view_menu(self, element, menu):
