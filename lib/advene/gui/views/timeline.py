@@ -779,7 +779,7 @@ class TimeLine:
         hpaned.add2 (sw)
 
         (w, h) = self.legend.get_size ()
-        hpaned.set_position (min(w, 100))
+        hpaned.set_position (max(w, 100))
         vbox.add (hpaned)
         
         #hgrade = stripchart.HGradeZoom()
