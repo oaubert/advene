@@ -114,9 +114,9 @@ class BrowserColumn:
         return vbox
         
 class Browser:
-    def __init__(self, package=None):
-        self.package=package
-        self.path=[package]
+    def __init__(self, element=None):
+        self.element=element
+        self.path=[element]
         # 640 / 4
         self.column_width=160
         self.rootcolumn=None
@@ -135,25 +135,33 @@ class Browser:
     def clicked_callback(self, columnbrowser, attribute):
         # We could use here=columnbrowser.model, but then the traversal
         # of path is not done and absolute_url does not work
-        context = advene.model.tal.context.AdveneContext (here=self.package,
+        context = advene.model.tal.context.AdveneContext (here=self.element,
                                                           options=self.default_options())
-        path=[]
-        col=self.rootcolumn
-        while col is not columnbrowser:
-            col=col.next
-            path.append(col.name)
-        path.append(attribute)
 
+        # Rebuild path
+        path=['here']
+        if columnbrowser is not None:
+            col=self.rootcolumn
+            while (col is not columnbrowser) and (col is not None):
+                col=col.next
+                if col is not None:
+                    path.append(col.name)
+            path.append(attribute)
+            
         try:
-            el=context.evaluateValue("here/%s" % "/".join(path))
-        except AdveneException, e:
+            el=context.evaluateValue("/".join(path))
+        except Exception, e:
             # Delete all next columns
-            cb=columnbrowser.next
+            if columnbrowser is None:
+                cb=self.rootcolumn.next
+            else:
+                cb=columnbrowser.next
             while cb is not None:
                 cb.widget.destroy()
                 cb=cb.next
-            columnbrowser.next=None
-            columnbrowser.listview.get_selection().unselect_all()
+            if columnbrowser is not None:
+                columnbrowser.next=None
+                columnbrowser.listview.get_selection().unselect_all()
             
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -165,8 +173,15 @@ class Browser:
             return
         
         self.update_view(path, el)
-        
-        if columnbrowser.next is None:
+
+        if columnbrowser is None:
+            # We selected  the rootcolumn. Delete the next ones
+            cb=self.rootcolumn.next
+            while cb is not None:
+                cb.widget.destroy()
+                cb=cb.next
+            self.rootcolumn.next=None
+        elif columnbrowser.next is None:
             # Create a new columnbrowser
             col=BrowserColumn(element=el, name=attribute, callback=self.clicked_callback,
                               parent=columnbrowser)
@@ -187,7 +202,7 @@ class Browser:
         return True
 
     def update_view(self, path, element):
-        self.pathlabel.set_text("/"+"/".join(path))
+        self.pathlabel.set_text("/".join(path))
         self.typelabel.set_text(unicode(type(element)))
         val=unicode(element)
         if '\n' in val:
@@ -229,7 +244,7 @@ class Browser:
         
         self.hbox = gtk.HBox()
 
-        self.rootcolumn=BrowserColumn(element=self.package, name='package',
+        self.rootcolumn=BrowserColumn(element=self.element, name='here',
                                       callback=self.clicked_callback,
                                       parent=None)
         self.rootcolumn.widget.set_property("width-request", self.column_width)
@@ -246,14 +261,14 @@ class Browser:
             return hb
         
         # Display the type/value of the current element
-        self.pathlabel = gtk.Label("/")
+        self.pathlabel = gtk.Label("here")
         self.pathlabel.set_selectable(True)
         vbox.pack_start(name_label(_("Path"), self.pathlabel), expand=False)
 
-        self.typelabel = gtk.Label("Package")
+        self.typelabel = gtk.Label(unicode(type(self.element)))
         vbox.pack_start(name_label(_("Type"), self.typelabel), expand=False)
 
-        self.valuelabel = gtk.Label("package")
+        self.valuelabel = gtk.Label("here")
         self.valuelabel.set_selectable(True)
         vbox.pack_start(name_label(_("Value"), self.valuelabel), expand=False)
         
@@ -283,7 +298,7 @@ if __name__ == "__main__":
     
     window.add (vbox)
 
-    browser = Browser(package)
+    browser = Browser(element=package)
     vbox.add (browser.get_widget())
 
     hbox = gtk.HButtonBox()
