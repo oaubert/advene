@@ -430,7 +430,7 @@ class TimeLine:
         b.add(l)
         b.annotation = annotation
         b.active = False
-        b.connect("clicked", self.annotation_cb, annotation)
+        #b.connect("clicked", self.annotation_cb, annotation)
         b.connect("button-press-event", self.button_press_handler, annotation)
         b.set_size_request(u2p(annotation.fragment.duration),
                            self.button_height)
