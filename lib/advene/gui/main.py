@@ -2,7 +2,7 @@
 
 """Advene GUI.
 
-This module defines the GUI classes. The main one is L{DVDControl},
+This module defines the GUI classes. The main one is L{AdveneGUI},
 which is instantiated with a GLADE XML file. It defines the important
 methods and the various GUI callbacks (generally all methods with the
 C{on_} prefix).
@@ -25,11 +25,6 @@ import gtk.glade
 gtk.glade.bindtextdomain('advene')
 
 import webbrowser
-
-# For CORBA
-import ORBit, CORBA
-ORBit.load_typelib (config.data.typelib)
-import VLC
 
 import advene.core.controller
 
@@ -87,7 +82,7 @@ class Connect:
         """Generic exit callback."""
         gtk.main_quit()
 
-class DVDControl (Connect):
+class AdveneGUI (Connect):
     """Main GUI class.
 
     Some entry points in the methods:
@@ -123,7 +118,7 @@ class DVDControl (Connect):
     """
     
     def __init__ (self):
-        """Initializes the GUI, CORBA and other attributes.
+        """Initializes the GUI and other attributes.
 
         @param gladefile: the name of the GLADE XML file containing the interface definition
         @type gladefile: string
@@ -164,6 +159,11 @@ class DVDControl (Connect):
 
         self.gui.current_annotation = self.gui.get_widget ("current_annotation")
         self.on_annotation_edit_end (None, None)
+
+        # Player status
+        p=self.controller.player
+        self.active_player_status=(p.PlayingStatus, p.PauseStatus,
+                                   p.ForwardStatus, p.BackwardStatus)
         self.gui.player_status = self.gui.get_widget ("player_status")
         self.oldstatus = "NotStarted"
 
@@ -191,6 +191,13 @@ class DVDControl (Connect):
                 v.update_annotation(annotation)
             except AttributeError:
                 pass
+        return True
+
+    def updated_view_cb(self, context, parameters):
+        """Method used to update the GUI.
+        """
+        view=context.evaluateValue('view')
+        self.update_stbv_menu()
         return True
     
     def updated_relation_cb(self, context, parameters):
@@ -235,6 +242,8 @@ class DVDControl (Connect):
                                                      method=self.updated_annotation_cb)
         self.controller.event_handler.internal_rule (event="RelationEditEnd",
                                                      method=self.updated_relation_cb)
+        self.controller.event_handler.internal_rule (event="ViewEditEnd",
+                                                     method=self.updated_view_cb)
 
         self.controller.init(args)
         
@@ -272,28 +281,6 @@ class DVDControl (Connect):
         @rtype: string
         """
         return self.format_time (val)
-
-    def create_position (self, value=0, key=VLC.MediaTime,
-                         origin=VLC.AbsolutePosition):
-        """Create a VLC Position.
-        
-        Returns a VLC.Position object initialized to the right value, by
-        default using a MediaTime in AbsolutePosition.
-
-        @param value: the value
-        @type value: int
-        @param key: the Position key
-        @type key: VLC.Key
-        @param origin: the Position origin
-        @type origin: VLC.Origin
-        @return: a position
-        @rtype: VLC.Position
-        """
-        p = VLC.Position ()
-        p.origin = origin
-        p.key = key
-        p.value = value
-        return p
 
     def on_annotation_edit_end (self, context, parameters):
         """Event handler used to reset the current annotation field."""
@@ -520,8 +507,8 @@ class DVDControl (Connect):
 
         def popup_goto (win, ann, controller):
             pos = controller.create_position (value=ann.fragment.begin,
-                                                   key=VLC.MediaTime,
-                                                   origin=VLC.AbsolutePosition)
+                                              key=controller.player.MediaTime,
+                                              origin=controller.player.AbsolutePosition)
             controller.update_status (status="set", position=pos)
             
         item = gtk.MenuItem(_("Annotation %s") % ann.id)
@@ -580,9 +567,7 @@ class DVDControl (Connect):
             # snapshots, and display them to make the navigation in the
             # stream easier
             pass
-        elif self.controller.player.status in (VLC.PlayingStatus, VLC.PauseStatus,
-                                               VLC.ForwardStatus, VLC.BackwardStatus):
-
+        elif self.controller.player.status in self.active_player_status:
             # Update the display
             d = self.controller.cached_duration
             if d > 0 and d != self.gui.slider.get_adjustment ().upper:
@@ -667,7 +652,7 @@ class DVDControl (Connect):
                 self.controller.package.annotations.append (self.annotation)
                 self.log (_("New annotation: %s") % self.annotation)
                 self.controller.notify ("AnnotationEditEnd", annotation=self.annotation)
-                if self.controller.player.status == VLC.PauseStatus:
+                if self.controller.player.status == self.controller.player.PauseStatus:
                     self.controller.update_status ("resume")
                 self.annotation = None
             return True
@@ -675,7 +660,7 @@ class DVDControl (Connect):
             # Pausing annotation mode
             if self.annotation is None:
                 # Not defining any annotation yet. Pause the stream
-                if self.controller.player.status != VLC.PauseStatus:
+                if self.controller.player.status != self.controller.player.PauseStatus:
                     self.controller.update_status ("pause")
                 self.controller.position_update ()
                 self.annotation = self.controller.package.createAnnotation (type = self.current_type,
@@ -706,10 +691,11 @@ class DVDControl (Connect):
         elif event.keyval == gtk.keysyms.Home:            
             self.controller.update_status ("set", self.controller.create_position (0))
             return True
-        elif event.keyval == gtk.keysyms.End:            
-            pos = self.controller.create_position (value = -config.data.preferences['time_increment'],
-                                                   key = VLC.MediaTime,
-                                                   origin = VLC.ModuloPosition)
+        elif event.keyval == gtk.keysyms.End:
+            c=self.controller
+            pos = c.create_position (value = -config.data.preferences['time_increment'],
+                                     key = c.player.MediaTime,
+                                     origin = c.player.ModuloPosition)
             self.controller.update_status ("set", pos)
             return True
         elif event.keyval == gtk.keysyms.Page_Down:
@@ -799,9 +785,10 @@ class DVDControl (Connect):
             menu = gtk.Menu()
 
             def popup_goto (win, position):
-                pos = self.controller.create_position (value=position,
-                                                       key=VLC.MediaTime,
-                                                       origin=VLC.AbsolutePosition)
+                c=self.controller
+                pos = c.create_position (value=position,
+                                         key=c.player.MediaTime,
+                                         origin=c.player.AbsolutePosition)
                 self.controller.update_status (status="set", position=pos)
                 return True
 
@@ -1010,14 +997,14 @@ class DVDControl (Connect):
 	return True
         
     def on_b_rewind_clicked (self, button=None, data=None):
-        if self.controller.player.status == VLC.PlayingStatus:
+        if self.controller.player.status == self.controller.player.PlayingStatus:
             self.controller.move_position (-config.data.preferences['time_increment'])
 	return True
 
     def on_b_play_clicked (self, button=None, data=None):
-        if self.controller.player.status == VLC.PauseStatus:
+        if self.controller.player.status == self.controller.player.PauseStatus:
             self.controller.update_status ("resume")
-        elif self.controller.player.status != VLC.PlayingStatus:
+        elif self.controller.player.status != self.controller.player.PlayingStatus:
             self.controller.update_status ("start")
         return True
 
@@ -1030,7 +1017,7 @@ class DVDControl (Connect):
 	return True
 
     def on_b_forward_clicked (self, button=None, data=None):
-        if self.controller.player.status == VLC.PlayingStatus:
+        if self.controller.player.status == self.controller.player.PlayingStatus:
             self.controller.move_position (config.data.preferences['time_increment'])
 	return True
 
@@ -1138,7 +1125,7 @@ class DVDControl (Connect):
         return True
 
     def on_restart_player1_activate (self, button=None, data=None):
-        self.log (_("Restarting VLC player..."))
+        self.log (_("Restarting player..."))
         self.controller.restart_player ()
         return True
 
@@ -1184,7 +1171,7 @@ class DVDControl (Connect):
         return True
     
 if __name__ == '__main__':
-    v = DVDControl ()
+    v = AdveneGUI ()
     try:
         v.main (sys.argv[1:])
     except Exception, e:
