@@ -369,8 +369,8 @@ class TreeWidget:
                     print _("Error: unable to find an edit popup for %s:\n%s") % (node, str(e))
                 else:
                     pop.edit ()
-                return gtk.TRUE
-        return gtk.FALSE
+                return True
+        return False
         
     def debug_cb (self, *p, **kw):
         print "Debug cb:\n"
@@ -378,7 +378,7 @@ class TreeWidget:
         print "KW: %s" % str(kw)
 
     def tree_view_button_cb(self, widget=None, event=None):
-        retval = gtk.FALSE
+        retval = False
         button = event.button
         x = int(event.x)
         y = int(event.y)
@@ -394,7 +394,7 @@ class TreeWidget:
                 if button == 3:
                     menu = self.make_popup_menu(node, path)
                     menu.popup(None, None, None, button, event.time)
-                    retval = gtk.TRUE
+                    retval = True
         return retval
 
     def popup_edit (self, button=None, node=None, path=None):
@@ -404,7 +404,7 @@ class TreeWidget:
             print _("Error: unable to find an edit popup for %s:\n%s") % (node, str(e))
         else:
             pop.edit ()
-        return gtk.TRUE
+        return True
     
     def popup_delete (self, button=None, node=None, path=None):
         print "Popup delete %s %s" % (node, path)
@@ -415,7 +415,7 @@ class TreeWidget:
         del (a[i])
         # Invalidate the model cache
         self.model.remove_element (node)
-        return gtk.TRUE
+        return True
     
     def popup_display (self, button=None, node=None, path=None):
         pop = advene.gui.edit.elements.get_edit_popup (node)
@@ -423,14 +423,23 @@ class TreeWidget:
             pop.display ()
         else:
             print _("Error: unable to find an edit popup for %s") % node
-        return gtk.TRUE
+        return True
 
     def annotation_cb (self, widget=None, node=None):
-        return gtk.TRUE
+        return True
+
+    def create_element_cb(self, widget, elementtype=None, parent=None):
+        print "Creating a %s in %s" % (elementtype, parent)
+        return True
     
     def make_popup_menu(self, node=None, path=None):
         menu = gtk.Menu()
 
+        def add_menuitem(menu, item, action, *param):
+            item = gtk.MenuItem(item)
+            item.connect("activate", action, *param)
+            menu.append(item)
+            
         if isinstance (node, Package):
             title=node.title
         elif isinstance (node, AbstractBundle):
@@ -445,20 +454,19 @@ class TreeWidget:
 
         item = gtk.SeparatorMenuItem()
         menu.append(item)
-        
-        item = gtk.MenuItem(_("Edit"))
-        #item.set_data("layer", lyr)
-        item.connect("activate", self.popup_edit, node, path)
-        menu.append(item)
+
+        add_menuitem(menu, _("Edit"), self.popup_edit, node, path)
 
         if isinstance (node, Annotation):
-            item = gtk.MenuItem(_("Picture..."))
-            item.connect("activate", self.annotation_cb, node)
-            menu.append(item)
+            add_menuitem(menu, _("Picture..."), self.annotation_cb, node)
 
-        item = gtk.MenuItem(_("Display"))
-        item.connect("activate", self.popup_display, node, path)
-        menu.append(item)
+        if isinstance(node, Package):
+            add_menuitem(menu, _("Create a new view..."), self.create_element_cb, View, node)
+            add_menuitem(menu, _("Create a new annotation..."), self.create_element_cb, Annotation, node)
+            add_menuitem(menu, _("Create a new relation..."), self.create_element_cb, Relation, node)
+            add_menuitem(menu, _("Create a new schema..."), self.create_element_cb, Schema, node)
+
+        add_menuitem(menu, _("Display"), self.popup_display, node, path)
 
         menu.show_all()
         return menu
@@ -489,7 +497,7 @@ if __name__ == "__main__":
     sw.add (tree.get_widget())
 
     hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=gtk.FALSE)
+    vbox.pack_start (hbox, expand=False)
 
     def validate_cb (win, package):
         filename="/tmp/package.xml"
@@ -506,14 +514,14 @@ if __name__ == "__main__":
     b.connect ("clicked", lambda w: window.destroy ())
     hbox.add (b)
 
-    vbox.set_homogeneous (gtk.FALSE)
+    vbox.set_homogeneous (False)
 
     def key_pressed_cb (win, event):
         if event.state & gtk.gdk.CONTROL_MASK:
             # The Control-key is held. Special actions :
             if event.keyval == gtk.keysyms.q:
                 gtk.main_quit ()
-                return gtk.TRUE
+                return True
         elif event.keyval == gtk.keysyms.Return:
             # Open popup to edit current element
             node=tree.get_selected_node(tree.view())
@@ -522,7 +530,7 @@ if __name__ == "__main__":
                 pop.display ()
             else:
                 print _("Error: unable to find an edit popup for %s") % node
-        return gtk.FALSE            
+        return False            
 
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())
