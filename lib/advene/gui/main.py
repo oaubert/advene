@@ -144,6 +144,8 @@ class AdveneGUI (Connect):
         # Resize the main window
         window=self.gui.get_widget('win')
         self.init_window_size(window, 'main')
+
+        self.tooltips = gtk.Tooltips()
         
         # Frequently used GUI widgets
         self.gui.logmessages = self.gui.get_widget("logmessages")
@@ -509,6 +511,10 @@ class AdveneGUI (Connect):
 
     def get_visualisation_widget(self):
         vis=gtk.VBox()
+
+        tb=self.get_player_control_toolbar()
+        vis.pack_start(tb, expand=False)
+        
         # We add a Treeview in the main app window
         #tree = advene.gui.views.tree.TreeWidget(self.controller.package,
         #controller=self.controller)
@@ -543,6 +549,29 @@ class AdveneGUI (Connect):
         vis.add(hbox)
         vis.show_all()
         return vis
+
+    def get_player_control_toolbar(self):
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS) 
+        radiogroup_ref=None
+        
+        tb_list = (
+            (_("Rewind"), _("Rewind"), 'rw.xpm', self.on_b_rewind_clicked),
+            (_("Play"), _("Play"), 'play.xpm', self.on_b_play_clicked),
+            (_("Pause"), _("Pause"), 'pause.xpm', self.on_b_pause_clicked),
+            (_("Stop"), _("Stop"), 'stop.xpm', self.on_b_stop_clicked),
+            (_("Forward"), _("Forward"), 'ff.xpm', self.on_b_forward_clicked),
+            )
+
+        for text, tooltip, icon, callback in tb_list:
+            i=gtk.Image()
+            i.set_from_file( config.data.advenefile( ( 'pixmaps', icon ) ) )
+            b=gtk.ToolButton(icon_widget=i, label=text)
+            b.set_tooltip(self.tooltips, tooltip)
+            b.connect("clicked", callback)
+            tb.insert(b, -1)
+        tb.show_all()
+        return tb
     
     def debug_cb(self, window, event, *p):
         print "Got event %s (%d, %d) in window %s" % (str(event),
