@@ -154,12 +154,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if not cache:
             self.no_cache ()
         self.end_headers ()
-        
-        self.wfile.write("<html><head><title>%s</title>" % title)
-        if head_section is not None:
-            self.wfile.write(head_section)
 
-        self.wfile.write("</head><body %s>" % body_attributes)
+        if mode == "navigation":
+            self.wfile.write("<html><head><title>%s</title>" % title)
+            if head_section is not None:
+                self.wfile.write(head_section)
+
+            self.wfile.write("</head><body %s>" % body_attributes)
 #         if epoz:
 #             self.wfile.write(
 #                 """<script src="/data/epoz/dom2_events.js" type="text/javascript"></script>
@@ -174,7 +175,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 #         else:
 #             self.wfile.write("</head><body>")
 
-        if mode == "navigation":
             self.wfile.write (_("""
             <p>
             <a href="/admin">Server administration</a> |
@@ -187,7 +187,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             """) % { 'locationbar': self.location_bar (),
                      'path': self.path})
             
-        if duplicate_title:
+        if duplicate_title and mode == 'navigation':
             self.wfile.write("<h1>%s</h1>\n" % title)        
 
     def send_redirect (self, location):
