@@ -100,6 +100,7 @@ class Config(object):
                             'timelineview': (800, 400),
                             'transcriptionview': (640, 480),
                             'treeview': (800, 600),
+                            'browserview': (800, 600),
                             }
             }
 
