@@ -437,8 +437,22 @@ class EditAnnotationTypePopup (EditElementPopup):
     def notify(self, element):
         self.controller.notify("AnnotationTypeEditEnd", annotationtype=element)
         return True
+
+    def get_representation(self):
+        expr=self.element.getMetaData(config.data.namespace, "representation")
+        if expr is None:
+            expr=""
+        return expr
+
+    def set_representation(self, value):
+        if value is None or value == "":
+            value=""
+        self.element.setMetaData(config.data.namespace, "representation", unicode(value))
+        return True
     
     def make_widget (self, editable=False):
+        vbox = gtk.VBox()
+        
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'title',
                                                'author', 'date', 'mimetype'),
@@ -452,9 +466,16 @@ class EditAnnotationTypePopup (EditElementPopup):
                                                'date':   _('Date'),
                                                'mimetype': _('MIME Type')}
                                        )
-
-        # FIXME: add access to meta "representation" element
-        return f.get_view ()
+        vbox.add(f.get_view())
+        
+        f = EditGenericForm(title=_("Representation"),
+                            getter=self.get_representation,
+                            setter=self.set_representation,
+                            controller=self.controller)
+        self.register_form(f)
+        vbox.add(f.get_view())
+        
+        return vbox
 
 class EditRelationTypePopup (EditElementPopup):
     def can_edit (el):
@@ -645,7 +666,33 @@ class EditQueryForm (EditForm):
 
         return scroll_win
 
+class EditGenericForm(EditForm):
+    def __init__(self, title=None, getter=None, setter=None, controller=None):
+        self.title=title
+        self.getter=getter
+        self.setter=setter
+        self.controller=controller
+        self.entry=None
+        self.view=None
 
+    def get_view(self):
+        hbox = gtk.HBox()
+
+        l=gtk.Label(self.title)
+        hbox.pack_start(l)
+
+        self.entry=gtk.Entry()
+        self.entry.set_text(self.getter())
+        hbox.pack_start(self.entry)
+
+        hbox.show_all()
+        return hbox
+
+    def update_element(self):
+        v=self.entry.get_text()
+        self.setter(v)
+        return True
+    
 class EditAttributesForm (EditForm):
     """Creates an edit form for the given element."""
     COLUMN_LABEL=0
