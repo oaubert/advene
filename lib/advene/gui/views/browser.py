@@ -266,7 +266,7 @@ class Browser:
         b.connect ("clicked", lambda w: window.destroy ())
         hbox.add (b)
 
-        vbox.set_homogeneous (gtk.FALSE)
+        vbox.set_homogeneous (False)
 
         if self.controller.gui:
             self.controller.gui.init_window_size(window, 'browserview')
@@ -325,7 +325,7 @@ class Browser:
         b.connect ("clicked", cancel)
         hbox.add (b)
 
-        vbox.set_homogeneous (gtk.FALSE)
+        vbox.set_homogeneous (False)
 
         if self.controller and self.controller.gui:
             self.controller.gui.init_window_size(window, 'browserview')
