@@ -107,7 +107,7 @@ class TranscriptionEdit:
             print "Error in get_iter_at_location"
             return False
 
-        c=self.controller.player
+        p=self.controller.player
         if (p.status == p.PlayingStatus or p.status == p.PlayingStatus):
             self.create_timestamp_mark(p.current_position_value - config.data.reaction_time,
                                        it)
