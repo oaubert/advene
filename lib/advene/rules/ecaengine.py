@@ -8,6 +8,7 @@ import advene.core.config as config
 import time
 import sched
 import threading
+import copy
 
 import sre
 
@@ -43,7 +44,7 @@ class ECAEngine:
         return self.rulesets[type_]
 
     def set_ruleset(self, rs, type_='user'):
-        self.rulesets[type_] = copy.deepcopy(rs)
+        self.rulesets[type_] = copy.copy(rs)
         self.update_rulesets()
         
     def read_ruleset_from_file(self, filename, type_='user'):
@@ -140,6 +141,7 @@ class ECAEngine:
         @param event_name: the event name
         @type event_name: string
         """
+        print "notify %s for %s" % (event_name, str(kw))
         context=self.build_context(event_name, kw)
         try:
             a=self.ruledict[event_name]
