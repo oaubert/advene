@@ -1,3 +1,11 @@
+advene (project) unstable; urgency=low
+
+  * Normalize DVD naming scheme: dvd@title:chapter
+  * Implemented TALESEntry (use browser to get TALES expressions)
+  * Implemented TranscriptionEdit
+
+ --
+
 advene (0.15) unstable; urgency=low
 
   * New Win32 related fixes (mostly build-related)
