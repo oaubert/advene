@@ -36,7 +36,7 @@ class Content(modeled.Modeled,
         """Return the data associated to the Content"""
         data = StringIO()
         advene.model.util.dom.printElementText(self._getModel(), data)
-        d=data.getvalue()
+        d=data.getvalue().decode('utf-8')
         return d
 
     def setData(self, data):
@@ -102,7 +102,7 @@ class Content(modeled.Modeled,
         uri = self.getUri(absolute=True)
         if not uri:
             # TODO: maybe find a better way to get a stream from the DOM
-            return StringIO(self.getData())
+            return StringIO(self.getData().encode('utf-8'))
         return advene.model.util.uri.open(uri)
 
     def getMimetype(self):

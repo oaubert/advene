@@ -58,7 +58,7 @@ class Metaed(object):
 
         r = StringIO()
         advene.model.util.dom.printElementText(e, r)
-        return r.getvalue()
+        return r.getvalue().decode('utf-8')
                 
 
     def setMetaData(self, namespace_uri, name, value):

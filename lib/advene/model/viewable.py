@@ -103,11 +103,12 @@ class Viewable(object):
         mimetype = view.getContent().getMimetype()
 
         result = cStringIO.StringIO()
-        result.write("<!-- view %s applied to %s -->\n" % (str(view), str(self)))
+        result.write((u"<!-- view %s applied to %s -->\n"
+                      % (unicode(view), unicode(self))).encode('utf-8'))
         context.addLocals( (('here', self), ('view', view)) )
         context.interpret(view_source, mimetype, result)
         context.popLocals ()
-        return result.getvalue()
+        return result.getvalue().decode('utf-8')
 
     def findDefaultView(self):
         v = self.getDefaultView()
@@ -185,7 +186,7 @@ class Viewable(object):
                     return ()
 
 __system_default_view = cStringIO.StringIO("""<!-- ADVENE DEFAULT VIEW-->
-<span tal:replace='here'>the object</span>""")
+<span tal:replace='here'>the object</span>""".encode('utf-8'))
 
 def getSystemDefaultView():
     global __system_default_view

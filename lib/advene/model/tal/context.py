@@ -251,7 +251,7 @@ class AdveneContext(_advene_context):
             stream = StringIO ()
 
         if isinstance (view_source, str) or isinstance (view_source, unicode):
-            view_source = StringIO (view_source)
+            view_source = StringIO (unicode(view_source).encode('utf-8'))
             
         if mimetype is None or mimetype == 'text/html':
             compiler = simpleTAL.HTMLTemplateCompiler ()
