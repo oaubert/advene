@@ -24,7 +24,7 @@ Embedding AdveneServer
 Running AdveneServer standalone
 ===============================
 
-  The AdveneServer can be run independtly. In this case, it can maintain
+  The AdveneServer can be run indepently. In this case, it can maintain
   and give access to a number of different packages.  
 """
 
