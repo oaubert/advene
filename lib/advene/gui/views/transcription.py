@@ -48,6 +48,7 @@ class TranscriptionView:
             mark = b.create_mark("b_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
                                  left_gravity=True)
+            #b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.begin))
             b.insert_at_cursor(a.content.data)
             mark = b.create_mark("e_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
@@ -130,6 +131,40 @@ class TranscriptionView:
         """Return the TreeView widget."""
         return self.widget
 
+    def popup(self):
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+
+        s=config.data.preferences['windowsize']['transcriptionview']
+        window.set_default_size (s[0], s[1])
+        if self.controller.gui:
+            window.connect ("size_allocate",
+                            self.controller.gui.resize_cb, 'transcriptionview')
+
+        window.set_title (_("Transcription for %s") % (self.model.title
+                                                       or self.model.id))
+
+        vbox = gtk.VBox()
+        
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        vbox.add (sw)
+        sw.add_with_viewport (self.get_widget())
+        if self.controller.gui:
+            self.controller.gui.register_view (self)
+            window.connect ("destroy", self.controller.gui.close_view_cb,
+                            window, self)
+
+        hb=gtk.HButtonBox()
+        b=gtk.Button(stock=gtk.STOCK_CLOSE)
+        b.connect ("clicked", lambda w: window.destroy ())
+        hb.add(b)
+
+        vbox.pack_start(hb, expand=False)
+        
+        window.add(vbox)
+        
+        window.show_all()
+        return window
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -144,44 +179,11 @@ if __name__ == "__main__":
     
     controller.package = Package (uri=sys.argv[1])
 
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    window.set_size_request (640, 480)
-
-    window.set_border_width(10)
-    window.set_title (controller.package.title)
-    vbox = gtk.VBox()
-    
-    window.add (vbox)
-    
-    sw = gtk.ScrolledWindow()
-    sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-    vbox.add (sw)
-
     transcription = TranscriptionView(controller=controller,
                                       annotationtype=controller.package.annotationTypes[0])
     
-    sw.add_with_viewport (transcription.get_widget())
-
-    hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=False)
-
-    def validate_cb (win, package):
-        filename="/tmp/package.xml"
-        package.save (as=filename)
-        print "Package saved as %s" % filename
-        gtk.main_quit ()
-        
-
-    b = gtk.Button (stock=gtk.STOCK_SAVE)
-    b.connect ("clicked", validate_cb, controller.package)
-    hbox.add (b)
-
-    b = gtk.Button (stock=gtk.STOCK_QUIT)
-    b.connect ("clicked", lambda w: window.destroy ())
-    hbox.add (b)
-
-    vbox.set_homogeneous (False)
-
+    window = transcription.popup()
+    
     i = 0
     def key_pressed_cb (win, event):
         global i
@@ -203,6 +205,5 @@ if __name__ == "__main__":
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())
 
-    window.show_all()
     gtk.main ()
 
