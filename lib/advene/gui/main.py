@@ -425,6 +425,7 @@ class AdveneGUI (Connect):
 
         self.visualisationwidget=self.get_visualisation_widget()
         self.gui.get_widget("displayvbox").add(self.visualisationwidget)
+        self.gui.get_widget("vpaned").set_position(-1)
         
         self.controller.event_handler.internal_rule (event="PackageLoad",
                                                      method=self.manage_package_load)
@@ -1893,11 +1894,11 @@ class AdveneGUI (Connect):
         return True
 
     def on_help1_activate (self, button=None, data=None):
-        # FIXME: display user help.
-        help=os.sep.join( (config.data.path['web'], 'user.html') )
-        if os.access(help, os.R_OK):
-            self.webbrowser.open (help)
-        # FIXME: display a warning if not found
+        helpfile=os.sep.join( (config.data.path['web'], 'user.html') )
+        if os.access(helpfile, os.R_OK):
+            self.webbrowser.open (helpfile)
+        else:
+            self.log(_("Unable to find the help file at %s") % helpfile)
         return True
 
     def on_toolbar_style1_activate (self, button=None, data=None):
