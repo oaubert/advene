@@ -37,6 +37,9 @@ import sre
 import os
 import optparse
 
+import gettext
+gettext.install('advene', unicode=True)
+
 import advene.core.config as config
 
 from advene.model.package import Package
@@ -156,6 +159,10 @@ class GenericImporter(object):
         """
         if self.package is None:
             p=Package(uri=filename, source=None)
+            if filename is not None:
+                p.setMetaData(config.data.namespace_prefix['dc'],
+                              description,
+                              _("Converted from %s") % filename)
             self.update_statistics('package')
         else:
             p=self.package
@@ -282,7 +289,7 @@ class TextImporter(GenericImporter):
     def process_file(self, filename):
         f=open(filename, 'r')
         if self.package is None:
-            self.init_package()
+            self.init_package(filename=filename)
         self.convert(self.iterator(f))
         return self.package
 
@@ -317,7 +324,8 @@ class LsDVDImporter(GenericImporter):
     def process_file(self, filename):
         if filename != 'lsdvd':
             pass
-        p, at=self.init_package(schemaid='dvd',
+        p, at=self.init_package(filename=filename,
+                                schemaid='dvd',
                                 annotationtypeid='chapter')
         if self.package is None:
             # We created a new package. Set the mediafile
@@ -366,8 +374,9 @@ class ChaplinImporter(GenericImporter):
         if filename != 'chaplin':
             return None
         f=os.popen(self.command, "r")
-        p, at=self.init_package(schemaid='dvd',
-                                  annotationtypeid='chapter')
+        p, at=self.init_package(filename=filename,
+                                schemaid='dvd',
+                                annotationtypeid='chapter')
         if self.package is None:
             self.package=p
             # FIXME: should specify title
@@ -406,8 +415,9 @@ class XiImporter(GenericImporter):
     def process_file(self, filename):
         xi=handyxml.xml(filename)
 
-        p, at=self.init_package(schemaid='xi-schema',
-                                  annotationtypeid='xi-verbal')
+        p, at=self.init_package(filename=filename,
+                                schemaid='xi-schema',
+                                annotationtypeid='xi-verbal')
         if self.package is None:
             self.package=p
         self.defaulttype=at
@@ -644,7 +654,8 @@ class SubtitleImporter(GenericImporter):
     def process_file(self, filename):
         f=open(filename, 'r')
 
-        p,at=self.init_package(schemaid='subtitle-schema',
+        p,at=self.init_package(filename=filename,
+                               schemaid='subtitle-schema',
                                annotationtypeid='subtitle')
         if self.package is None:
             self.package=p
