@@ -218,6 +218,7 @@ class EditAnnotationPopup (EditElementPopup):
                                        )
         vbox.pack_start (f.get_view (), expand=False)
 
+        # FIXME: maybe we should use here a specific plugin (from timeadjustment)
         # Fragment data
         f = self.make_registered_form (element=self.element.fragment,
                                        fields=('begin', 'end'),
@@ -298,6 +299,10 @@ class EditViewPopup (EditElementPopup):
         return isinstance (el, View)
     can_edit = staticmethod (can_edit)
         
+    def notify(self, element):
+        self.controller.notify("ViewEditEnd", view=element)
+        return True
+    
     def make_widget (self, editable=False):
         vbox = gtk.VBox ()
 
@@ -363,6 +368,10 @@ class EditSchemaPopup (EditElementPopup):
         return isinstance (el, Schema)
     can_edit = staticmethod (can_edit)
         
+    def notify(self, element):
+        self.controller.notify("SchemaEditEnd", schema=element)
+        return True
+    
     def make_widget (self, editable=False):
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'title',
@@ -382,6 +391,10 @@ class EditAnnotationTypePopup (EditElementPopup):
         return isinstance (el, AnnotationType)
     can_edit = staticmethod (can_edit)
         
+    def notify(self, element):
+        self.controller.notify("AnnotationTypeEditEnd", annotationtype=element)
+        return True
+    
     def make_widget (self, editable=False):
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'title',
@@ -403,6 +416,10 @@ class EditRelationTypePopup (EditElementPopup):
         return isinstance (el, RelationType)
     can_edit = staticmethod (can_edit)
         
+    def notify(self, element):
+        self.controller.notify("RelationTypeEditEnd", relationtype=element)
+        return True
+    
     def make_widget (self, editable=False):
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'title',
@@ -486,7 +503,7 @@ class EditRuleSetForm (EditForm):
         """Update the element fields according to the values in the view."""
         self.edit.update_value()
 
-        # FIXME: this is not very clean (to many manipulations)
+        # FIXME: this is not very clean (too many manipulations)
         # We should generate the XML tree directly
         di = xml.dom.DOMImplementation.DOMImplementation()
         # FIXME: hardcoded NS URI should move to config
