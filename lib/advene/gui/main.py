@@ -9,7 +9,6 @@ C{on_} prefix).
 """
 
 import sys, time
-import re
 import cStringIO
 
 import advene.core.config as config
@@ -63,9 +62,9 @@ class Connect:
     """    
     def create_dictionary (self):
         """Create a (name, function) dictionary for the current class."""
-        dict = {}
-        self.create_dictionary_for_class (self.__class__, dict)
-        return dict
+        d = {}
+        self.create_dictionary_for_class (self.__class__, d)
+        return d
     
     def create_dictionary_for_class (self, a_class, dict):
         """Create a (name, function) dictionary for the specified class."""
@@ -75,9 +74,9 @@ class Connect:
         for iteration in dir(a_class):
             dict[iteration] = getattr(self, iteration)
 
-    def connect (self):
+    def connect (self, gui):
         """Connect the class methods with the UI."""
-        self.gui.signal_autoconnect(self.create_dictionary ())
+        gui.signal_autoconnect(self.create_dictionary ())
 
     def gtk_widget_hide (self, widget):
         """Generic hide() method."""
@@ -135,7 +134,7 @@ class DVDControl (Connect):
         gtk.glade.bindtextdomain(gettext.textdomain())
         gtk.glade.textdomain(gettext.textdomain())
         self.gui = gtk.glade.XML(gladefile, domain=gettext.textdomain())
-        self.connect ()
+        self.connect (self.gui)
         
         # Frequently used GUI widgets
         self.gui.logmessages = self.gui.get_widget("logmessages")
@@ -198,7 +197,7 @@ class DVDControl (Connect):
         """Method used to update the active views.
 
         It will propagate the event."""
-        annotation=context.evaluateValue('relation')
+        relation=context.evaluateValue('relation')
         for v in self.annotation_views:
             v.update_relation(relation)
         return True
@@ -259,10 +258,9 @@ class DVDControl (Connect):
         @return: the formatted string
         @rtype: string
         """ 
-        t = long(val)
+        (s, ms) = divmod(long(val), 1000)
         # Format: HH:MM:SS.mmm
-        return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)),
-                           t % 1000)
+        return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s), ms)
        
     def format_slider_value (self, slider=None, val=0):
         """Formats a value (in milliseconds) into a time string.
@@ -391,7 +389,7 @@ class DVDControl (Connect):
         # will not execute update_display.
         try:
             source.handle_request ()
-        except:
+        except Exception, e:
             print _("Got exception %s in web server") % str(e)
             import code
             e, v, tb = sys.exc_info()
@@ -463,21 +461,21 @@ class DVDControl (Connect):
 
     def file_selected_cb (self, button, fs):
         """Open and play the selected movie file."""
-        file = self.gui.fs.get_property ("filename")
-        self.controller.player.playlist_add_item (file)
+        file_ = self.gui.fs.get_property ("filename")
+        self.controller.player.playlist_add_item (file_)
         self.controller.update_status ("start")
         return True
 
     def annotations_load_cb (self, button, fs):
         """Load a package."""
-        file = self.gui.fs.get_property ("filename")
-        self.controller.load_package (uri=file)
+        file_ = self.gui.fs.get_property ("filename")
+        self.controller.load_package (uri=file_)
         return True
 
     def annotations_save_cb (self, button, fs):
         """Save the current package."""
-        file = self.gui.fs.get_property ("filename")
-        self.controller.save_package(as=file)
+        file_ = self.gui.fs.get_property ("filename")
+        self.controller.save_package(as=file_)
         return True
 
     def register_view (self, view):
@@ -1083,8 +1081,8 @@ class DVDControl (Connect):
         self.controller.package.setMetaData (config.data.namespace,
                                   "mediafile",
                                   mediafile)
-        id = vlclib.mediafile2id (mediafile)
-        self.controller.imagecache.save (id)
+        id_ = vlclib.mediafile2id (mediafile)
+        self.controller.imagecache.save (id_)
 
         self.controller.package.title = self.gui.get_widget ("prop_title").get_text ()
 
