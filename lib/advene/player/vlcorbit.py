@@ -8,6 +8,7 @@ method is provided to build the adequate Position instances.
 """
 
 import time
+import sys
 
 import advene.core.config as config
 
