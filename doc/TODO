@@ -1,3 +1,25 @@
+* Item File->properties : nombre d'elements (ann, rel, etc)
+
+* subtitles.xml -> clean up
+
+* export.xml -> export_views.xml
+
+* edit DC description for packages and display it on import
+
+* bootstrap: supprimer stbv pause adter annotation
+
+* Test if relations exist when deleting annotations
+
+* Implementer Search on annotations
+
+* Fix fileselector bug
+
+* tree.py: fix on_get_iter (cf tutorial)
+
+* A creuser: http://veejay.sourceforge.net/
+
+* Upgrade to gtk2.4 (fix DeprecationWarnings)
+
 * Make the main buttonbox of the main window a toolbar
 
 * Add a file operations toolbar (new/open/save, import, etc)
