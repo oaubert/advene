@@ -459,6 +459,9 @@ class ElanImporter(GenericImporter):
 
     def iterator(self, elan):
         valid_id_re = sre.compile('[^a-zA-Z_0-9]')
+        # List of tuples (annotation-id, related-annotation-uri) of
+        # forward referenced annotations
+        self.forward_references = []
         for tier in elan.TIER:
             if not hasattr(tier, 'ANNOTATION'):
                 # Empty tier
@@ -492,11 +495,17 @@ class ElanImporter(GenericImporter):
                     d['content']=self.xml_to_text(ref.ANNOTATION_VALUE[0].node)
                     # Related annotation:
                     rel_id = ref.ANNOTATION_REF
-                    rel_an=self.package.annotations['#'.join( (self.package.uri,
-                                                               rel_id) ) ]
-                    # We reuse the related annotation fragment
-                    d['begin'] = rel_an.fragment.begin
-                    d['end'] = rel_an.fragment.end
+                    rel_uri = '#'.join( (self.package.uri, rel_id) )
+                    
+                    if self.package.annotations.has_key(rel_uri):
+                        rel_an=self.package.annotations[rel_uri]
+                        # We reuse the related annotation fragment
+                        d['begin'] = rel_an.fragment.begin
+                        d['end'] = rel_an.fragment.end
+                    else:
+                        self.forward_references.append( (d['id'], rel_uri) )
+                        d['begin'] = 0
+                        d['end'] = 0
                     self.relations.append( (rel_id, d['id']) )
                     yield d
                 else:
@@ -547,7 +556,16 @@ class ElanImporter(GenericImporter):
         schema.annotationTypes.append(at)
         self.update_statistics('annotation-type')
         self.atypes[at.id]=at
-        
+
+    def fix_forward_references(self):
+        for (an_id, rel_uri) in self.forward_references:
+            an_uri = '#'.join( (self.package.uri, an_id) )
+            an=self.package.annotations[an_uri]
+            rel_an=self.package.annotations[rel_uri]
+            # We reuse the related annotation fragment
+            an.fragment.begin = rel_an.fragment.begin
+            an.fragment.end   = rel_an.fragment.end
+
     def process_file(self, filename):
         elan=handyxml.xml(filename)
 
@@ -580,6 +598,7 @@ class ElanImporter(GenericImporter):
         #    self.create_annotation_type(schema, i)
 
         self.convert(self.iterator(elan))
+        self.fix_forward_references()
         self.create_relations()
         return self.package
 
