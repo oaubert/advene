@@ -235,7 +235,7 @@ class AdveneController:
             try:
                 i = self.player.snapshot (self.player.relative_position)
             except self.player.InternalException, e:
-                print "Exception in snapshot: %s" % e.message
+                print "Exception in snapshot: %s" % e
                 return False
             if i is not None and i.height != 0:
                 self.imagecache[position] = vlclib.snapshot2png (i)
@@ -263,7 +263,7 @@ class AdveneController:
                 print _("Unknown option: %s") % s
             else:
                 if s == "dvd":
-                    file_to_play = "dvd:///dev/dvd"
+                    file_to_play = "dvdsimple:///dev/dvd"
                 elif os.path.splitext(s)[1] in ('.xml', '.advene', '.adv'):
                     # It should be an annotation file. Load it.
                     self.load_package (uri=s)
@@ -748,8 +748,9 @@ if __name__ == '__main__':
         c.main ()
     except Exception, e:
         print _("Got exception %s. Stopping services...") % str(e)
-        c.on_exit ()
-        print _("*** Exception ***")
         import code
         e, v, tb = sys.exc_info()
         code.traceback.print_exception (e, v, tb)
+        c.on_exit ()
+        print _("*** Exception ***")
+        #e, v, tb = sys.exc_info()
