@@ -758,11 +758,13 @@ class EditTextForm (EditForm):
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
-        if self.editable:
-            buf = self.view.get_buffer()
-            start_iter, end_iter = buf.get_bounds ()
-            text = buf.get_text (start_iter, end_iter)
-            setattr (self.element, self.field, text)
+        if not self.editable:
+            return False
+        buf = self.view.get_buffer()
+        start_iter, end_iter = buf.get_bounds ()
+        text = buf.get_text (start_iter, end_iter)
+        setattr (self.element, self.field, text)
+        return True
 
     def get_view (self):
         """Generate a view widget for editing text attribute."""
@@ -809,10 +811,11 @@ class EditRuleSetForm (EditForm):
         
     def update_element (self):
         """Update the element fields according to the values in the view."""
-        if self.editable:
-            if not self.edit.update_value():
-                return False
-            setattr(self.element, 'data', self.edit.model.xml_repr())
+        if not self.editable:
+            return False
+        if not self.edit.update_value():
+            return False
+        setattr(self.element, 'data', self.edit.model.xml_repr())
         return True
 
     def get_view (self):
@@ -855,10 +858,9 @@ class EditFragmentForm(EditForm):
         
     def update_element(self):
         if not self.editable:
-            return True
+            return False
         if not self.check_validity():
             return False
-
         self.element.begin=self.begin.value
         self.element.end=self.end.value
         return True
@@ -916,7 +918,7 @@ class EditQueryForm (EditForm):
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if not self.editable:
-            return True
+            return False
         if not self.edit.update_value():
             return False
         # FIXME: we ignore on purpose the self.field attribute
@@ -968,9 +970,10 @@ class EditGenericForm(EditForm):
         return hbox
 
     def update_element(self):
-        if self.editable:
-            v=self.entry.get_text()
-            self.setter(v)
+        if not self.editable:
+            return False
+        v=self.entry.get_text()
+        self.setter(v)
         return True
     
 class EditMetaForm(EditGenericForm):
@@ -1134,6 +1137,7 @@ class EditAttributesForm (EditForm):
                 % "\n".join ([ "%s: %s" % (at, str(e)) for (at, e) in invalid ]))
             dialog.connect("response", lambda w, e: dialog.destroy())
             dialog.show()
+        return True
 
     def get_view (self):
         """Generate a view widget for editing el attributes.
@@ -1281,10 +1285,11 @@ class EditElementListForm(EditForm):
         return vbox
 
     def update_element(self):
-        if self.editable:
-            # Rebuild list from self.store
-            elements=[ e[self.COLUMN_ELEMENT] for e in self.store ]
-            setattr(self.model, self.field, elements)
+        if not self.editable:
+            return False
+        # Rebuild list from self.store
+        elements=[ e[self.COLUMN_ELEMENT] for e in self.store ]
+        setattr(self.model, self.field, elements)
         return True    
 
 if __name__ == "__main__":

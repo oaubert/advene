@@ -27,7 +27,7 @@ class EditGeneric:
 
         After that, the element can be accessed through get_model().
         """
-        pass
+        return True
 
     def invalid_items(self):
         """Returns the names of invalid items.
@@ -128,20 +128,22 @@ class EditRuleSet(EditGeneric):
         return i
     
     def update_value(self):
-        if self.editable:
-            iv=self.invalid_items()
-            if iv:
-                dialog = gtk.MessageDialog(
-                    None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                    _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
-                    "\n".join(iv)
-                    )
-                response=dialog.run()
-                dialog.destroy()
-                return False
-            for e in self.editlist:
-                e.update_value()
+        if not self.editable:
+            return False
+        iv=self.invalid_items()
+        if iv:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
+                "\n".join(iv)
+                )
+            response=dialog.run()
+            dialog.destroy()
+            return False
+        for e in self.editlist:
+            e.update_value()
+        return True
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
@@ -238,7 +240,7 @@ class EditQuery(EditGeneric):
 
     def update_value(self):
         if not self.editable:
-            return True
+            return False
         self.model.source=self.sourceentry.get_text()
         v=self.valueentry.get_text()
         if v == '' or v == 'element':
@@ -253,7 +255,7 @@ class EditQuery(EditGeneric):
             self.model.condition=ConditionList([ e.model for e in self.editconditionlist ])
         else:
             self.model.condition=None
-        return
+        return True
 
     def remove_condition(self, widget, conditionwidget, hbox):
         if self.editable:
@@ -389,7 +391,7 @@ class EditRule(EditGeneric):
     
     def update_value(self):
         if not self.editable:
-            return True
+            return False
 
         self.editevent.update_value()
         for w in self.editactionlist:
@@ -409,7 +411,7 @@ class EditRule(EditGeneric):
         # Rebuild actionlist from editactionlist
         self.model.action=ActionList([ e.model for e in self.editactionlist ])
 
-        return
+        return True
 
     def update_name(self, entry):
         if self.namelabel:
@@ -581,7 +583,7 @@ class EditEvent(EditGeneric):
     def update_value(self):
         # Nothing to update. The parent has the responsibility to
         # fetch the current_event value.
-        pass
+        return True
 
     def on_change_event(self, event):
         if self.editable:
@@ -635,12 +637,13 @@ class EditCondition(EditGeneric):
         return iv
     
     def update_value(self):
-        if self.editable:
-            c=self.model
-            c.operator=self.current_operator
-            c.lhs=self.lhs.get_text()
-            if c.operator in Condition.binary_operators:
-                c.rhs=self.rhs.get_text()
+        if not self.editable:
+            return False
+        c=self.model
+        c.operator=self.current_operator
+        c.lhs=self.lhs.get_text()
+        if c.operator in Condition.binary_operators:
+            c.rhs=self.rhs.get_text()
         return True
 
     def update_widget(self):
@@ -737,7 +740,7 @@ class EditAction(EditGeneric):
     
     def update_value(self):
         if not self.editable:
-            return
+            return False
         ra=self.catalog.get_action(self.current_name)
         self.model = Action(registeredaction=ra, catalog=self.catalog)
         regexp=sre.compile('^(\(.+\)|)$')
@@ -746,7 +749,7 @@ class EditAction(EditGeneric):
             if not regexp.match(v):
                 #print "Updating %s = %s" % (n, v)
                 self.model.add_parameter(n, v)
-        return
+        return True
 
     def sorted(self, l):
         """Return a sorted version of the list."""
