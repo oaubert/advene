@@ -360,7 +360,7 @@ class EditQueryPopup (EditElementPopup):
     can_edit = staticmethod (can_edit)
         
     def notify(self, element):
-        self.controller.notify("QueryEditEnd", view=element)
+        self.controller.notify("QueryEditEnd", query=element)
         return True
     
     def make_widget (self, editable=False):
