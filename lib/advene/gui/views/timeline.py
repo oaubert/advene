@@ -67,6 +67,7 @@ class TimeLine:
             self.context_cb=context_cb
             
         # FIXME: Hardcoded values are bad...
+        # Maybe we should ask pango the height of 'l' plus margins
         self.button_height = 30
         
         # Shortcut
@@ -128,11 +129,11 @@ class TimeLine:
         # Another application claimed the selection. Remove the marker.
         self.selected_position = 0
         self.remove_selection_marker()
-        return gtk.TRUE
+        return True
     
     def set_selection(self, value):
         self.selected_position = long(value)
-        return gtk.TRUE
+        return True
     
     def activate_selection(self):
         # Define which selections we can handle
@@ -150,7 +151,7 @@ class TimeLine:
         print "Debug event."
         if data is not None:
             print "Data: %s" % data
-        return gtk.TRUE
+        return True
     
     def get_widget_for_annotation (self, annotation):
         bs = [ b
@@ -169,7 +170,7 @@ class TimeLine:
             self.update_position (annotation.fragment.begin)
             if self.highlight_activated_toggle.get_active():
                 self.activate_annotation (annotation)
-        return gtk.TRUE
+        return True
             
     def desactivate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
@@ -181,7 +182,7 @@ class TimeLine:
                     a.set_value (pos)
             if self.highlight_activated_toggle.get_active():
                 self.desactivate_annotation (annotation)
-        return gtk.TRUE
+        return True
             
     def register_callback (self, controller=None):
         """Add the activate handler for annotations."""
@@ -268,14 +269,14 @@ class TimeLine:
         # This method can be overriden by the Timeline parent in order
         # to give more precise control
         self.toggle_annotation (ann)
-        return gtk.TRUE
+        return True
         try:
             pop = advene.gui.edit.elements.get_edit_popup (ann)
         except TypeError, e:
             print _("Error: unable to find an edit popup for %s:\n%s") % (ann, str(e))
         else:
             pop.edit (callback=self.update_annotation)
-        return gtk.TRUE
+        return True
 
     def dump_adjustment (self):
         a = self.adjustment
@@ -289,7 +290,7 @@ class TimeLine:
             selection.set(selection.target, 8, widget.annotation.uri)
         else:
             print "Unknown target type for drag: %d" % targetType
-        return gtk.TRUE
+        return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
@@ -316,7 +317,7 @@ class TimeLine:
             #     rel=self.package.createRelation(chosen_relation, members=(source, dest))
         else:
             print "Unknown target type for drop: %d" % targetType
-        return gtk.TRUE
+        return True
 
     def create_relation_popup(self, source, dest):
         """Display a popup to create a binary relation between source and dest.
@@ -330,7 +331,7 @@ class TimeLine:
             dialog.set_position(gtk.WIN_POS_MOUSE)
             dialog.run()
             dialog.destroy()
-            return gtk.TRUE
+            return True
         
         w=gtk.Window(gtk.WINDOW_POPUP)
         w.set_title(_("Create a relation"))
@@ -496,11 +497,11 @@ class TimeLine:
     def key_pressed_cb (self, win, event):
         if event.keyval >= 49 and event.keyval <= 57:
             self.display_fraction_event (widget=win, fraction=1.0/pow(2, event.keyval-49))
-            return gtk.TRUE
+            return True
         if event.keyval == gtk.keysyms.Return:
             self.display_fraction_event (widget=win, fraction=1.0)
-            return gtk.TRUE
-        return gtk.FALSE
+            return True
+        return False
 
     def context_cb (self, timel=None, position=None):
         print _("Time: %s") % timel.format_time (position)
@@ -520,23 +521,23 @@ class TimeLine:
         a.pos = 5
         self.widget.put (a, x, a.pos)
         a.show ()
-        return gtk.TRUE
+        return True
 
     def remove_selection_marker (self):
         try:
             self.widget.remove(self.selection_marker)
         except AttributeError:
             pass
-        return gtk.TRUE
+        return True
     
     def mouse_pressed_cb(self, widget=None, event=None):
-        retval = gtk.FALSE
+        retval = False
         button = event.button
         x = event.x
         y = event.y
         if button == 3:
             self.context_cb (timel=self, position=self.pixel2unit(x))
-            retval = gtk.TRUE
+            retval = True
         return retval
 
     def remove_widget(self, widget=None, data=None):
@@ -572,7 +573,7 @@ class TimeLine:
         self.ratio_adjustment.set_value(v)
         self.ratio_adjustment.changed ()
         self.ratio_event (widget)
-        return gtk.TRUE
+        return True
 
     def scroll_event(self, widget=None, event=None):
         if event.state & gtk.gdk.CONTROL_MASK:
@@ -589,7 +590,7 @@ class TimeLine:
             if val != a.value:
                 a.value = val
                 a.value_changed ()
-            return gtk.TRUE
+            return True
         elif event.direction == gtk.gdk.SCROLL_UP:
             val = a.value - incr
             if val < a.lower:
@@ -597,15 +598,15 @@ class TimeLine:
             if val != a.value:
                 a.value = val
                 a.value_changed ()
-            return gtk.TRUE
+            return True
         
-        return gtk.FALSE
+        return False
 
     def ratio_event (self, widget=None, data=None):
         self.update_adjustment ()
         self.update_layout ()
         self.redraw_event ()
-        return gtk.TRUE
+        return True
 
     def move_widget (self, widget=None):
         """Update the annotation widget position"""
@@ -616,7 +617,7 @@ class TimeLine:
             self.widget.move (widget,
                               u2p(widget.annotation.fragment.begin),
                               self.layer_position[widget.annotation.type])
-        return gtk.TRUE
+        return True
 
     
     def redraw_event(self, widget=None, data=None):
@@ -631,8 +632,8 @@ class TimeLine:
             self.draw_marks ()
             # Redraw current mark
             self.draw_current_mark ()
-            return gtk.TRUE
-        return gtk.FALSE
+            return True
+        return False
 
     def get_legend_widget (self):
         """Return a Layout containing the legend widget."""
@@ -671,7 +672,7 @@ class TimeLine:
         #hgrade = stripchart.HGradeZoom()
         #hgrade.adjustment = self.adjustment
         #hgrade.set_size_request(400, 30)
-        #vbox.pack_start (hgrade.widget, expand=gtk.FALSE)
+        #vbox.pack_start (hgrade.widget, expand=False)
 
         return vbox
 
@@ -690,8 +691,8 @@ if __name__ == "__main__":
             # The Control-key is held. Special actions :
             if event.keyval == gtk.keysyms.q:
                 gtk.main_quit ()
-                return gtk.TRUE
-        return gtk.FALSE
+                return True
+        return False
             
 
     def validate_cb (win, package):
@@ -712,7 +713,7 @@ if __name__ == "__main__":
     vbox.add (timeline.get_packed_widget())
 
     hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=gtk.FALSE)
+    vbox.pack_start (hbox, expand=False)
 
     b = gtk.Button (stock=gtk.STOCK_SAVE)
     b.connect ("clicked", validate_cb, package)
@@ -726,7 +727,7 @@ if __name__ == "__main__":
     b.connect ("clicked", lambda w: window.destroy ())
     hbox.add (b)
 
-    vbox.set_homogeneous (gtk.FALSE)
+    vbox.set_homogeneous (False)
     height=max(timeline.layer_position.values() or (1,)) + 3 * timeline.button_height
     window.set_default_size (640, height)
 
