@@ -5,6 +5,7 @@ import sys
 import StringIO
 import traceback
 import gtk
+import sre
 
 from gettext import gettext as _
 
@@ -77,6 +78,8 @@ class Window:
         Control-l: clear the expression buffer
         Control-w: close the window
         Control-u: update the interface views
+        Control-d: display completion possibilities
+        Tab: perform autocompletion
         """)
         return True
 
@@ -96,6 +99,76 @@ class Window:
             f.close()
         return True
 
+    def commonprefix(self, m):
+        "Given a list of strings, returns the longest common leading component"
+        if not m: return ''
+        a, b = min(m), max(m)
+        lo, hi = 0, min(len(a), len(b))
+        while lo < hi:
+            mid = (lo+hi)//2 + 1
+            if a[lo:mid] == b[lo:mid]:
+                lo = mid
+            else:
+                hi = mid - 1
+        return a[:hi]
+    
+    def display_completion(self, completeprefix=True):
+        b=self.source.get_buffer()
+        begin,end=b.get_bounds()
+        cursor=b.get_iter_at_mark(b.get_insert())
+        expr=b.get_text(begin, cursor)
+        if " " in expr:
+            expr=expr[expr.rindex(" "):]
+        if expr.endswith('.'):
+            expr=expr[:-1]
+
+        completion=None
+
+        attr=None
+        try:
+            res=eval(expr, self.globals_, self.locals_)
+            completion=dir(res)
+        except Exception, e:
+            # Maybe we have the beginning of an attribute.
+            m=sre.match('^(.+?)\.(\w+)$', expr)
+            if m:
+                expr=m.group(1)
+                attr=m.group(2)
+                try:
+                    res=eval(expr, self.globals_, self.locals_)
+                    completion=[ a
+                                 for a in dir(res)
+                                 if a.startswith(attr) ]
+                except Exception, e:
+                    pass
+
+        self.clear_output()
+        if completion is None:
+            f=StringIO.StringIO()
+            traceback.print_exc(file=f)
+            self.log(f.getvalue())
+            f.close()
+        else:
+            element=""
+            if len(completion) == 1:
+                element = completion[0]
+            elif completeprefix:
+                element = self.commonprefix(completion)
+
+            if element != "":
+                # Got one completion. We can complete the buffer.
+                if attr is not None:
+                    element=element.replace(attr, "")
+                else:
+                    if not expr.endswith('.'):
+                        element='.'+element
+                b.insert_at_cursor(element)
+
+            if len(completion) > 1:
+                self.log("\n".join(completion))
+        
+        return True
+
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.set_size_request (640, 400)
@@ -105,6 +178,9 @@ class Window:
             if event.keyval == gtk.keysyms.F1:
                 self.help()
                 return True
+            if event.keyval == gtk.keysyms.Tab:
+                item=self.display_completion()                
+                return True
 
             if event.state & gtk.gdk.CONTROL_MASK:
                 if event.keyval == gtk.keysyms.w:
@@ -112,6 +188,9 @@ class Window:
                     return True
                 elif event.keyval == gtk.keysyms.l:
                     self.clear_expression()
+                    return True
+                elif event.keyval == gtk.keysyms.d:
+                    item=self.display_completion(completeprefix=False)
                     return True
                 elif event.keyval == gtk.keysyms.Return:
                     self.evaluate_expression()
