@@ -1497,6 +1497,7 @@ class AdveneGUI (Connect):
                                               button=gtk.STOCK_OPEN)
         if not filename:
             return True
+        filename_utf=unicode(filename, 'iso-8859-1').encode('utf-8')
         i=advene.util.importer.get_importer(filename, controller=self.controller)
         if i is None:
             dialog = gtk.MessageDialog(
@@ -1512,7 +1513,7 @@ class AdveneGUI (Connect):
                 None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                 gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
                 _("Do you confirm the import of data from\n%s\nby the %s filter?") % (
-                filename, i.name))
+                filename_utf, i.name))
             response=dialog.run()
             dialog.destroy()
             if response != gtk.RESPONSE_YES:
@@ -1521,7 +1522,7 @@ class AdveneGUI (Connect):
             i.process_file(filename)
             self.controller.modified=True
             self.controller.notify("PackageLoad", package=i.package)
-            self.log(_('Converted from file %s :') % filename)
+            self.log(_('Converted from file %s :') % filename_utf)
             self.log(i.statistics_formatted())
         return True
 
