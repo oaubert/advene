@@ -1,0 +1,26 @@
+# The format of this file was inspired by the Linux kernel CREDITS file.
+# Authors are listed alphabetically.
+# 
+# The fields are: name (N), email (E), web-address (W), CVS account login (C),
+# PGP key ID and fingerprint (P), description (D), and snail-mail address (S).
+
+N: Olivier Aubert
+C: oaubert
+E: oaubert at liris dot cnrs dot fr
+D: Design
+D: Main application
+D: Debian packaging
+S: France
+
+N: Pierre-Antoine Champin
+C: champin
+E: chapin at liris dot cnrs dot fr
+D: Design
+D: Advene model implementation
+S: France
+
+N: Yannick Prié
+C: yprie
+E: yprie at liris dot cnrs dot fr
+D: Design
+S: France

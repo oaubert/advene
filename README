@@ -1,0 +1,32 @@
+Advene prototype
+
+* Requirements:
+
+The only supported player for the moment is VLC through a CORBA
+module. You have to install CORBA support for VLC (see
+http://liris.cnrs.fr/advene/download/) to access movies.
+
+You will need the following python packages :
+
+python-gtk2 (>=2.0)
+python-glade2 (>=2.0)
+python-pyorbit (>=2.0)
+python-xml (>=0.8.0)
+python-simpletal (>=3.6)
+python-imaging
+
+* Testing
+
+You can run the script bin/advene directly from the source
+directory. It will adapt its paths to its location.
+
+* Installing
+
+To install the application, run the setup.py script with appropriate
+options. For a standard installation, run
+
+python setup.py install
+
+* Documentation
+
+An incomplete user guide is in doc/user.txt
