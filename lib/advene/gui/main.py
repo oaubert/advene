@@ -970,7 +970,8 @@ class DVDControl (Connect):
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         window.add (sw)
         tree = advene.gui.views.tree.TreeWidget(self.controller.package,
-                                                annotation_cb=annotation_cb)
+                                                annotation_cb=annotation_cb,
+                                                controller=self.controller)
         sw.add (tree.get_widget())
 
         window.connect ("destroy", self.close_view_cb, window, tree)
