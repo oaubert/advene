@@ -653,6 +653,9 @@ class EditContentForm(EditForm):
         if self.element.mimetype == 'application/x-advene-ruleset':
             self.contentform = EditRuleSetForm (self.element, 'model',
                                                 controller=self.controller)
+        elif self.element.mimetype == 'application/x-advene-simplequery':
+            self.contentform = EditQueryForm (self.element, 'model',
+                                              controller=self.controller)
         else:
             self.contentform = EditTextForm (self.element, 'data',
                                              controller=self.controller)
