@@ -91,8 +91,7 @@ class AdveneController:
         self.active_annotations = []
         self.future_begins = None
         self.future_ends = None
-        self.last_position = 0
-        self.last_slow_position = 0
+        self.last_position = -1
         
         self.package = None
 
@@ -460,7 +459,8 @@ class AdveneController:
         self.player.update_status (status, position)
         if self.status2eventname.has_key (status):
             self.event_handler.notify (self.status2eventname[status], position=position)
-
+        return
+    
     def position_update (self):
         """Updates the current_position_value.
 
@@ -468,6 +468,9 @@ class AdveneController:
         a communication failure.
 
         It updates the slider range if necessary.
+
+        @return: the current position in ms
+        @rtype: a long
         """
         try:
             self.player.position_update ()
@@ -491,7 +494,7 @@ class AdveneController:
         taken with the code used here.
         """
         pos=self.position_update ()
-
+        #print "--------------------- %d / %d" % (pos, self.player.stream_duration)
         if pos < self.last_position:
             # We did a seek compared to the last time, so we 
             # invalidate the future_begins and future_ends lists
@@ -500,6 +503,8 @@ class AdveneController:
             self.future_ends = None
             self.active_annotations = []
 
+        self.last_position = pos
+        
         if self.future_begins is None or self.future_ends is None:
             self.future_begins, self.future_ends = self.generate_sorted_lists (pos)
 
@@ -520,6 +525,7 @@ class AdveneController:
         if self.future_ends:
             a, b, e = self.future_ends[0]
             while e <= pos:
+                #print "Comparing %d < %d for %s" % (e, pos, a.content.data)
                 try:
                     self.active_annotations.remove(a)
                 except ValueError:
