@@ -22,9 +22,10 @@ class ECAEngine:
     """ECAEngine class.
 
     Event-Condition-Action engine. It features three ruleset classes:
-    - internal: for internal rules never exposed to the user
-    - default: for default rules loaded from a configuration file
-    - user: for user rules, defined in packages
+    
+      - internal: for internal rules never exposed to the user
+      - default: for default rules loaded from a configuration file
+      - user: for user rules, defined in packages
 
     Internally, it stores the data in the L{self.rulesets} dictionary,
     indexed by class name ('internal', 'default', 'user'). Upon every
@@ -289,10 +290,10 @@ class ECAEngine:
         
         @param event_name: the event name
         @type event_name: string
-        @param *param: additionnal anonymous parameters
-        @type *param: misc
-        @param **kw: additionnal named parameters
-        @type **kw: depending on the context
+        @param param: additionnal anonymous parameters
+        @type param: misc
+        @param kw: additionnal named parameters
+        @type kw: depending on the context
 
         A special named parameter is delay, which will be given in ms.
         It contains the delay to apply to the rule execution.
@@ -320,5 +321,9 @@ class ECAEngine:
         actions=[ rule.action
                   for rule in a
                   if rule.condition.match(context) ]
+
+        context.pushLocals()
         for action in actions:
+            context.setLocal('rule', rule.name)
             self.schedule(action, context, delay=delay)
+        context.popLocals()
