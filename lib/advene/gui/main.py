@@ -361,6 +361,18 @@ class AdveneGUI (Connect):
                         'position': _("New position")}
             ))
 
+        self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
+            name="PopupGoto2",
+            method=self.action_popup_goto2,
+            description=_("Display a popup with 2 options"),
+            parameters={'description': _("General description"),
+                        'message1': _("First option description"),
+                        'position1': _("First position"),
+                        'message2': _("Second option description"),
+                        'position2': _("Second position"),
+                        }
+            ))
+
         # We add a Treeview in the main app window
         tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                 controller=self.controller)
@@ -666,6 +678,41 @@ class AdveneGUI (Connect):
             message)
         dialog.connect("response", handle_response, position, dialog)
         dialog.show()
+        return True
+
+    def action_popup_goto2 (self, context, parameters):
+        """Display a popup with 2 choices."""
+        for k in ('description',
+                  'message1', 'position1',
+                  'message2', 'position2'):
+            if not parameters.has_key(k):
+                raise Exception(_("Invalid invocation of DisplayPopup2: missing %s") % k)
+                return True
+
+        description=context.evaluateValue(parameters['description'])
+        message1=context.evaluateValue(parameters['message1'])
+        position1=context.evaluateValue(parameters['position1'])
+        message2=context.evaluateValue(parameters['message2'])
+        position2=context.evaluateValue(parameters['position2'])
+
+        def handle_response(widget, response, dialog):
+            if response == 1:
+                self.controller.update_status("set", long(position1))
+            elif response == 2:
+                self.controller.update_status("set", long(position2))
+            dialog.destroy()
+            return True
+        
+        dialog = gtk.Dialog(title=_("Make a choice"),
+                            parent=None,
+                            flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                            buttons=( message1.encode('utf8'), 1,
+                                      message2.encode('utf8'), 2,
+                                      gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
+        l=gtk.Label(description)
+        dialog.vbox.add(l)
+        dialog.connect("response", handle_response, dialog)
+        dialog.show_all()
         return True
 
     def file_selector (self, callback=None, label="Select a file",
