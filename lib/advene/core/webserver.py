@@ -135,7 +135,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         @param head_section: additional HTML code to add in the <head></head> section
         @type head_section: string
         @param body_attributes: attributes added to the body tag
-        @param body_attributes: string
+        @type body_attributes: string
 
         @param mode: presentation mode (navigation, raw). Default: navigation
         @type mode: string
@@ -1298,6 +1298,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write (unicode(e.args[0]).encode('utf-8'))
             return
 
+        # FIXME:
+        # Principe: si l'objet est un viewable, on appelle la
+        # methode view pour en obtenir une vue par defaut.
+        #if isinstance(objet, advene.model.viewable.Viewable):
+        #    # It is a viewable, so display it using the default view
+        #    objet.view(context=context)
+            
         displaymode = self.server.displaymode
         # Hack to automatically switch to an image view for image objects.
         # FIXME: we should find a clean solution (for instance a new object
@@ -1543,12 +1550,10 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         loading and player interaction. When running standalone, the
         server will its own controller.
 
-        @param player: a mediaplayer instance
-        @type player: advene.core.MediaControl
-        @param port: the port number the server should bind to
-        @type port: int
         @param controller: the controller
         @type controller: any, should provide some methods (C{load_package}, C{update_status}, ...)
+        @param port: the port number the server should bind to
+        @type port: int
         """
         self.packages = {}     # Key: alias,  value: package
         self.aliases = {}      # Key: package, value: alias
