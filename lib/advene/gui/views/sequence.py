@@ -165,11 +165,12 @@ class SequenceEditor:
         """Return the TreeView widget."""
         return self.widget
 
-    def get_selected_node (self, tree_view):
+    def get_selected_node (self):
         """Return the currently selected node.
 
         None if no node is selected.
         """
+        tree_view = self.get_widget()
         selection = tree_view.get_selection ()
         if not selection:
             return None
@@ -356,9 +357,9 @@ if __name__ == "__main__":
                 return True
         elif event.keyval == gtk.keysyms.Return:
             # Open popup to edit current element
-            node=tree.get_selected_node(tree.view())
+            node=seq.get_selected_node()
             pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                           controller=self.controller)
+                                                           controller=controller)
             if pop is not None:
                 pop.display ()
             else:
