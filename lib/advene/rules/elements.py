@@ -870,7 +870,7 @@ class ECACatalog:
         'ViewActivation':         _("Start of the dynamic view"),
         'ApplicationStart':       _("Start of the application"),
         'ApplicationEnd':         _("End of the application"),
-        'RuleExecute':            _("Execution of a rule (pseudo event)"),
+        'UserEvent':              _("User-defined event"),
         }
 
     # Events that set the controller.modified state
@@ -902,7 +902,7 @@ class ECACatalog:
     # Basic events are exposed to the user when defining new STBV
     basic_events=('AnnotationBegin', 'AnnotationEnd', 'PlayerStart', 'PlayerPause',
                   'PlayerResume', 'PlayerStop', 'ApplicationStart', 'ViewActivation',
-                  'RuleExecute')
+                  'UserEvent')
 
     def __init__(self):
         # Dict of registered actions, indexed by name
