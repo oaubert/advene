@@ -184,6 +184,8 @@ def get_valid_members (el):
              in the TALES meaning.
     @rtype: list
     """
+    # FIXME: try to sort items in a meaningful way
+    
     # FIXME: return only simple items if not in expert mode
     l = []
     try:
@@ -193,12 +195,17 @@ def get_valid_members (el):
             l.extend(el.keys())
         except AttributeError:
             pass
+    if l:
+        l.insert(0, _('---- Elements ----'))
 
-    c = type(el)
-    l.extend([e[0]
-              for e in inspect.getmembers(c)
-              if isinstance(e[1], property) and e[1].fget is not None])
+    pl=[e[0]
+        for e in inspect.getmembers(type(el))
+        if isinstance(e[1], property) and e[1].fget is not None]
+    if pl:
+        l.append(_('---- Attributes ----'))
+        l.extend(pl)
 
+    l.append(_('---- Methods ----'))
     # Global methods
     l.extend (advene.model.tal.context.AdveneContext.defaultMethods ())
 
