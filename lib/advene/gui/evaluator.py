@@ -85,6 +85,14 @@ class Window:
         if expr == '':
             self.help()
             return True
+        p=expr.rfind('(')
+        if p > expr.rfind(')'):
+            # We are in a non-closed open brace, so we start from there
+            expr=expr[p+1:]
+        for c in ('+', '-', '*', '/'):
+            p=expr.rfind(c)
+            if p >= 0:
+                expr=expr[p+1:]
         for c in ('.', '(', ' '):
             while expr.endswith(c):
                 expr=expr[:-1]
@@ -164,9 +172,14 @@ class Window:
         expr=b.get_text(begin, cursor)
         if expr.endswith('.'):
             expr=expr[:-1]
-        for c in (' ', '(', ',', '\n'):
-            if c in expr:
-                expr=expr[expr.rindex(c)+1:]
+        p=expr.rfind('(')
+        if p > expr.rfind(')'):
+            # We are in a non-closed open brace, so we start from there
+            expr=expr[p+1:]
+        for c in ('+', '-', '*', '/', ' ', ',', '\n'):
+            p=expr.rfind(c)
+            if p >= 0:
+                expr=expr[p+1:]
         m=sre.match('(\w+)=(.+)', expr)
         if m is not None:
             expr=m.group(2)
