@@ -10,12 +10,14 @@ class __ContextFactory(dict):
     
        Context classes are registered with the 'register' method.
        They are retrieved with the dict [] operator.
+       
        Context classes must verify the following:
-       - have a getNamespaceUrl() static or class method
-       - have a getLocalName() static or class method
-       - have a getAttributes() method returning a dict
-       - they should be unmutable: the right way of changing the context of
-         an annotation is to re-set it rather than modifying the existing one
+       
+         - have a getNamespaceUrl() static or class method
+         - have a getLocalName() static or class method
+         - have a getAttributes() method returning a dict
+         - they should be unmutable: the right way of changing the context of
+           an annotation is to re-set it rather than modifying the existing one
     """
 
     def __init__(self):
