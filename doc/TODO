@@ -38,14 +38,9 @@
 
 * The view method should return a Content object, so that we can get its mimetype
 
-* The content object should provide a "dom tree" access method -> DONE (content.getModel) 
-  but not cleanly
-
 * The package/annotationTypes should have an 'ids' method, to be able to retrieve ids as keys (all bundles in fact).
 
 * Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
-
-* Adveneserver: use logging.Logger to log HTTP accesses
 
 * Style setting:
 sendmail_styles="""
@@ -64,10 +59,7 @@ widget "sendmail.*.mail" style "blue_text"
 """
 gtk.rc_parse_string(sendmail_styles)
 
-* Add /usr/share/doc/... for all debian packages (and
-  examples/client.py for vlc-plugin-corba)
-
-* Create a ContextualizedBundle which understands to namespaces
+* Create a ContextualizedBundle which understands namespaces
 
 * Find a meaningful way to concisely display relations and annotations.
 
@@ -119,7 +111,7 @@ use it as the template.xml file
 able to define content/replace (just replace with <span/> will be
 simpler) and snapshot integration.
 
-* Ruleset edit : add the possibility to organize the order of rules
+* Ruleset edit : add the possibility to order the rules
 
 * Global methods :
   * isa : make more robust (work on non-advene elements ? at least, not throw
@@ -130,13 +122,9 @@ simpler) and snapshot integration.
 
 * Implement an image-based timestamp chooser (with all_snapshots()) -> almost DONE
 
-* Implement an ApproximateImageCache with a ic.epsilon value
-
 * Make some attributes inherited (esp. author for annotations, media for fragments)
 
 * Use popup-menu signal (cf http://cvs.gnome.org/bonsai/cvsblame.cgi?file=gtk%2B%2Fdocs%2Freference%2Fgtk/migrating-checklist.sgml&rev=HEAD&root=/cvs/gnome)
-
-* debian package: fix web/web not in the right directory, default_rules.xml
 
 * Windows: start application
 http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
@@ -147,10 +135,11 @@ http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
 
 * Timeline: add the possibility to add new annotations by clicking on the type
 
+* Timeline : usability improvements. Select the displayed types and their order.
+
 * Add a "Edit" button next to the STBV optionmenu
 
 * Create a Sequential editor (to accomodate existing work)
-
 
 ------------- Archive ---------------
 * Write the correct VLC/Python module -> DONE
@@ -267,4 +256,16 @@ subset (according to rule.origin) -> DONE (filter parameter)
 * Metadata : cache the stream duration (for GUI purposes) -> DONE
 
 * Debian package: add python-xml python-simpletal dependencies -> DONE
+
+* Implement an ApproximateImageCache with a ic.epsilon value -> DONE
+
+* The content object should provide a "dom tree" access method -> DONE (content.getModel) 
+  but not cleanly
+
+* Adveneserver: use logging.Logger to log HTTP accesses -> DONE
+
+* Add /usr/share/doc/... for all debian packages (and
+  examples/client.py for vlc-plugin-corba) -> DONE
+
+* debian package: fix web/web not in the right directory, default_rules.xml -> DONE
 
