@@ -209,7 +209,8 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
 def get_filename(title=_("Open a file"),
                  action=gtk.FILE_CHOOSER_ACTION_OPEN,
                  button=gtk.STOCK_OPEN,
-                 default_dir=None):
+                 default_dir=None,
+                 default_file=None):
     
     preview=gtk.Button(_("N/C"))
     
@@ -269,6 +270,8 @@ Description:
     fs.connect("selection_changed", update_preview)
     if default_dir:
         fs.set_current_folder(default_dir)
+    if default_file:
+        fs.set_filename(default_file)
         
     res=fs.run()
     filename=None
