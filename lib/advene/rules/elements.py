@@ -248,11 +248,13 @@ class Action:
     """The Action class.
 
     The associated method should have the following signature:
-    def method (context, parameters)
+    
+    ``def method (context, parameters)``
+    
     where:
-        context is a advene.tal.AdveneContext holding various information
-        parameters is a dictionary with named parameters, whose values are
-                   coded in TALES syntax (and should be evaluated through context).
+      - context is a advene.tal.AdveneContext holding various information
+      - parameters is a dictionary with named parameters, whose values are
+        coded in TALES syntax (and should be evaluated through context).
 
     @ivar name: the action name
     @ivar parameters: the action's parameters
@@ -867,7 +869,8 @@ class Query:
                 return s
             else:
                 r=[]
-                context.addLocals( [ ('element', None) ] )
+                #context.addLocals( [ ('element', None) ] )
+                context.pushLocals()
                 for e in s:
                     context.setLocal('element', e)
                     r.append(context.evaluateValue(self.rvalue))
@@ -879,7 +882,8 @@ class Query:
             # (for isinstance(someBundle, list) == False !
             # FIXME: should we use a Bundle ?
             r=[]
-            context.addLocals( [ ('element', None) ] )
+            #context.addLocals( [ ('element', None) ] )
+            context.pushLocals()
             for e in s:
                 context.setLocal('element', e)
                 if self.condition.match(context):
@@ -902,7 +906,7 @@ class RegisteredAction:
     @ivar description: the action description
     @ivar parameters: the action parameters
     @type parameters: dict
-    @param immediate: if True, the action is immediately executed, else scheduled
+    @ivar immediate: if True, the action is immediately executed, else scheduled
     @type immediate: boolean
     """
     def __init__(self,
