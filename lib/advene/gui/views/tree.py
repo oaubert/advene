@@ -396,7 +396,7 @@ class TreeWidget:
 
         # Drag and drop for annotations
         tree_view.enable_model_drag_source(gtk.gdk.BUTTON1_MASK,
-                                           config.data.annotation_drag_type,
+                                           config.data.drag_type['annotation'],
                                            gtk.gdk.ACTION_LINK)
         tree_view.connect("drag_data_get", self.drag_data_get_cb)
         
@@ -409,7 +409,7 @@ class TreeWidget:
         annotation = model.get_value(iter, AdveneTreeModel.COLUMN_ELEMENT)
         print "Got drag for %s" % str(annotation)
         
-        if targetType == config.data.TARGET_TYPE_ANNOTATION:
+        if targetType == config.data.target_type['annotation']:
             selection.set(selection.target, 8, annotation.uri)
         else:
             print "Unknown target type for drag: %d" % targetType
@@ -538,7 +538,7 @@ class TreeWidget:
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
-        if targetType == config.data.TARGET_TYPE_ANNOTATION:
+        if targetType == config.data.target_type['annotation']:
             selection.set(selection.target, 8, widget.annotation.uri)
         else:
             print "Unknown target type for drag: %d" % targetType
@@ -546,7 +546,7 @@ class TreeWidget:
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
-        if targetType == config.data.TARGET_TYPE_ANNOTATION:
+        if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
             print "Creating new relation (%s, %s)" % (source_uri, widget.annotation.uri)
             source=self.controller.package.annotations.get(source_uri)

@@ -147,15 +147,20 @@ class Config(object):
         # Reaction time offset (in ms) used when setting annotations
         self.reaction_time=200
 
-        # DragNDrop data
-        self.TARGET_TYPE_ANNOTATION=42
-        self.annotation_drag_type=[ ( "application/x-advene-annotation-id",
-                                      0,
-                                      self.TARGET_TYPE_ANNOTATION ) ]
-        self.TARGET_TYPE_RULE=43
-        self.rule_drag_type=[ ( "application/x-advene-rule",
-                                      0,
-                                      self.TARGET_TYPE_RULE ) ]
+        self.target_type = {
+            'annotation' : 42,
+            'rule' : 43,
+            'view': 44,
+            'schema': 45,
+            'annotation-type': 46,
+            'relation-type': 47,
+            'relation': 48,
+            }
+        self.drag_type={}
+        for t in self.target_type:
+            self.drag_type[t] = [ ( "application/x-advene-%s-uri" % t,
+                                    0,
+                                    self.target_type[t] ) ]
 
     def get_homedir(self):
         if os.environ.has_key('HOME'):

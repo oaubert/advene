@@ -67,7 +67,7 @@ class EditRuleSet(EditGeneric):
         b=gtk.Button(stock=gtk.STOCK_COPY)
         b.connect("drag_data_get", self.drag_sent)
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.rule_drag_type, gtk.gdk.ACTION_COPY)
+                          config.data.drag_type['rule'], gtk.gdk.ACTION_COPY)
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_ADD)
@@ -123,7 +123,7 @@ class EditRuleSet(EditGeneric):
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
-        if targetType == config.data.TARGET_TYPE_RULE:
+        if targetType == config.data.target_type['rule']:
             # Get the current rule's content
 
             current=self.widget.get_current_page()
@@ -145,7 +145,7 @@ class EditRuleSet(EditGeneric):
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
-        if targetType == config.data.TARGET_TYPE_RULE:
+        if targetType == config.data.target_type['rule']:
             xml=selection.data
             #print "Should create the rule: %s" % xml
             rule=Rule()
@@ -167,7 +167,7 @@ class EditRuleSet(EditGeneric):
         notebook.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                gtk.DEST_DEFAULT_HIGHLIGHT |
                                gtk.DEST_DEFAULT_ALL,
-                               config.data.rule_drag_type,
+                               config.data.drag_type['rule'],
                                gtk.gdk.ACTION_COPY)
 
         for rule in self.model:
@@ -326,7 +326,7 @@ class EditRule(EditGeneric):
         self.namelabel=l
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
-        if targetType == config.data.TARGET_TYPE_RULE:
+        if targetType == config.data.target_type['rule']:
             selection.set(selection.target, 8, self.model.xml_repr())
         else:
             print "Unknown target type for drag: %d" % targetType
@@ -449,7 +449,7 @@ class EditRule(EditGeneric):
         b=gtk.Button(stock=gtk.STOCK_COPY)
         b.connect("drag_data_get", self.drag_sent)
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.rule_drag_type, gtk.gdk.ACTION_COPY)
+                          config.data.drag_type['rule'], gtk.gdk.ACTION_COPY)
         hbox.pack_start(b, expand=False)
 
         hbox.show_all()

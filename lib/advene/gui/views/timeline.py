@@ -301,7 +301,7 @@ class TimeLine:
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
-        if targetType == config.data.TARGET_TYPE_ANNOTATION:
+        if targetType == config.data.target_type['annotation']:
             selection.set(selection.target, 8, widget.annotation.uri)
         else:
             print "Unknown target type for drag: %d" % targetType
@@ -309,7 +309,7 @@ class TimeLine:
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
-        if targetType == config.data.TARGET_TYPE_ANNOTATION:
+        if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
             print "Creating new relation (%s, %s)" % (source_uri, widget.annotation.uri)
             source=self.controller.package.annotations.get(source_uri)
@@ -423,13 +423,13 @@ class TimeLine:
         # The button can generate drags
         b.connect("drag_data_get", self.drag_sent)
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.annotation_drag_type, gtk.gdk.ACTION_LINK)
+                          config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
         # The button can receive drops (to create relations)
         b.connect("drag_data_received", self.drag_received)
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
-                        config.data.annotation_drag_type, gtk.gdk.ACTION_LINK)
+                        config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
         b.show()
         return b
     
