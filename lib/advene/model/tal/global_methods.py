@@ -434,6 +434,9 @@ def sorted (target, context):
         def compare(a, b):
             return cmp(a.fragment.begin, b.fragment.begin)
         l.sort(compare)
+    elif (isinstance(target, list) and len(target) > 0 and hasattr(target[0], '__cmp__')):
+        l=list(target[:])
+        l.sort()
     else:
         l=target
     return l
