@@ -38,10 +38,6 @@ to implement a "Return to last position")
   http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
   http://www.daa.com.au/pipermail/pygtk/2004-February/006960.html
 
-* Create a GUI to be able to select and preview the right
-  chapter/title for a DVD (in order to correctly initialize the
-  package.media property)
-
 * gui.main should catch the information about a new view being defined and update the
   interface accordingly (for instance, a new annotation type or a new
   dynamic view created) -> DONE for views
@@ -115,9 +111,6 @@ http://pywork.sourceforge.net/doc/node9.html
 http://marc.free.net.ph/mindex/zope-zpt@20031122.114501.00000000.html
 
 * Reference on zpt: http://www.advogato.org/article/350.html
-
-* Remove gtk dependency from vlclib (so that we can start adveneserver
-without DISPLAY)
 
 * EPOZ: strip http:... prefix from drag and drop results.
 * Create TALContext object: -> DONE
@@ -296,4 +289,11 @@ subset (according to rule.origin) -> DONE (filter parameter)
   examples/client.py for vlc-plugin-corba) -> DONE
 
 * debian package: fix web/web not in the right directory, default_rules.xml -> DONE
+
+* Remove gtk dependency from vlclib (so that we can start adveneserver
+without DISPLAY) -> DONE
+
+* Create a GUI to be able to select and preview the right
+  chapter/title for a DVD (in order to correctly initialize the
+  package.media property) -> DONE
 
