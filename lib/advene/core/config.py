@@ -152,6 +152,10 @@ class Config(object):
         self.annotation_drag_type=[ ( "application/x-advene-annotation-id",
                                       0,
                                       self.TARGET_TYPE_ANNOTATION ) ]
+        self.TARGET_TYPE_RULE=43
+        self.rule_drag_type=[ ( "application/x-advene-rule",
+                                      0,
+                                      self.TARGET_TYPE_RULE ) ]
 
     def get_homedir(self):
         if os.environ.has_key('HOME'):
