@@ -209,7 +209,7 @@ class View(modeled.Importable, content.WithContent,
                 # FIXME: cf thread
                 # Weird use of hash() -- will this work?
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = "i" + str(id(self)) + str(time.clock())
+                ident = u"v" + unicode(id(self)) + unicode(time.clock()).replace('.','')
             self.setId(ident)
 
             if title is not None: self.setTitle(date)
