@@ -343,7 +343,7 @@ class AdveneGUI (Connect):
 
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
-        self.logwindow=advene.gui.views.logwindow.LogWindow()
+        self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
         self.register_view(self.logwindow)
 
         # Update the Message action (GUI version)
@@ -467,18 +467,6 @@ class AdveneGUI (Connect):
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
-    def format_time (self, val=0):
-        """Formats a value (in milliseconds) into a time string.
-
-        @param val: the value
-        @type val: int
-        @return: the formatted string
-        @rtype: string
-        """
-        (s, ms) = divmod(long(val), 1000)
-        # Format: HH:MM:SS.mmm
-        return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
-
     def format_slider_value (self, slider=None, val=0):
         """Formats a value (in milliseconds) into a time string.
 
@@ -488,7 +476,7 @@ class AdveneGUI (Connect):
         @return: the formatted string
         @rtype: string
         """
-        return self.format_time (val)
+        return vlclib.format_time (val)
 
     def init_window_size(self, window, name):
         s=config.data.preferences['windowsize'].setdefault(name, (640,480))
