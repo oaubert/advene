@@ -130,7 +130,7 @@ class EditElementPopup (object):
         elif hasattr (self.element, 'id') and self.element.id is not None:
             name=self.element.id
         else:
-            name=str(self)
+            name=str(self.element)
         return "%s %s" % (c, name)
 
     def framed (self, widget, label=""):
