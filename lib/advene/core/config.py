@@ -73,7 +73,7 @@ class Config(object):
                 # Advene data files default path
                 'data': self.get_homedir(),
                 # Imagecache save directory
-                'imagecache': '/tmp/advene',
+                'imagecache': '/tmp',
                 # Web data files
                 'web': '/usr/share/advene/web',
                 # Movie files search path. _ is the
@@ -158,8 +158,8 @@ class Config(object):
             # Whether to launch the HTTP server in the gtk interface
             # 0 for no, 1 for gtk_input, 2 for threading
             'mode': 1,
-            # 'default' or 'raw'
-            'displaymode': 'default',
+            # 'admin' or 'raw'
+            'displaymode': 'raw',
             }
         # Threading does not work correctly on Win32. Use gtk_input
         # method.
