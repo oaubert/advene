@@ -294,7 +294,7 @@ class AdveneController:
         url = self.server.get_url_for_alias('advene')
         if not url:
             return None
-        defaultview=self.package_to_load.getMetaData(config.data.namespace, 'default_utbv')
+        defaultview=self.package.getMetaData(config.data.namespace, 'default_utbv')
         if defaultview:
             url="%s/view/%s" % (url, defaultview)
         return url
