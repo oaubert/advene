@@ -515,6 +515,18 @@ class AdveneController:
             self.server.register_package (alias='advene',
                                           package=self.package,
                                           imagecache=self.imagecache)
+
+        # Activate the default STBV
+        default_stbv = self.package.getMetaData (config.data.namespace, "default_stbv")
+        if default_stbv:
+            view=None
+            try:
+                view=self.package.views['#'.join( (self.package.uri,
+                                                   default_stbv) )]
+            except Keyerror:
+                pass
+            self.activate_stbv(view)
+        
         return True
 
     def get_stbv_list(self):
@@ -530,6 +542,8 @@ class AdveneController:
 
         If view is None, then reset the user STBV.
         """
+        if view == self.current_stbv:
+            return
         self.current_stbv=view
         if view is None:
             self.event_handler.clear_ruleset(type_='user')
