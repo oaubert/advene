@@ -76,6 +76,9 @@ class Config(object):
                 'imagecache': '/tmp/advene',
                 # Web data files
                 'web': '/usr/share/advene/web',
+                # Movie files search path. _ is the
+                # current package path
+                'moviepath': '_',
                 }
         else:
             self.path = {
@@ -92,7 +95,10 @@ class Config(object):
                 # Imagecache save directory
                 'imagecache': os.getenv('TEMP') or 'c:\\',
                 # Web data files
-                'web': 'c:\\Program Files\\Advene\\share\\web'
+                'web': 'c:\\Program Files\\Advene\\share\\web',
+                # Movie files search path. _ is the
+                # current package path
+                'moviepath': '_',
                 }
             
         # Web-related preferences
