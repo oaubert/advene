@@ -18,7 +18,7 @@ Embedding AdveneServer
   the GUI C{advenetool}).
 
   To embed the server in another application, it must be instanciated
-  with the following parameters : C{player} and C{master}. See the
+  with the following parameters : C{controller}. See the
   L{AdveneWebServer.__init__} documentation for more details.
 
 Running AdveneServer standalone
@@ -216,11 +216,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         will generate the appropriate headers). It displays the current
         status of the media player.
         """
-        if self.server.player == None:
+        if self.server.controller.player == None:
             self.wfile.write (_("""<h1>No available mediaplayer</h1>"""))
         else:
-            l = self.server.player.playlist_get_list ()
-            s = self.server.player.update_status ()
+            l = self.server.controller.player.playlist_get_list ()
+            s = self.server.controller.player.update_status ()
             self.wfile.write (_("""
             <h1>Player status</h1>
             <table border="1">
@@ -230,9 +230,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             <td>Player status</td><td>%s</td>
             </tr>
             </table>
-            """) % (self.server.player.current_position_value,
-                   self.server.player.stream_duration,
-                   repr(self.server.player.status)))
+            """) % (self.server.controller.player.current_position_value,
+                   self.server.controller.player.stream_duration,
+                   repr(self.server.controller.player.status)))
                 
             if len(l) == 0:
                 self.wfile.write (_("""<h1>No playlist</h1>"""))
@@ -345,7 +345,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if name == 'dvd':
                         name = "dvd:///dev/dvd"
                     try:
-                        self.server.player.playlist_add_item (name)
+                        self.server.controller.player.playlist_add_item (name)
                         self.start_html (_("File added"))
                         self.wfile.write (_("""<p><strong>%s has been added to the playlist</strong></p>""") % name)
                         self.display_media_status ()
@@ -401,26 +401,26 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write (i[bc])
             elif command == 'play':
                 if query.has_key ('filename'):
-                    self.server.player.playlist_add_item (query['filename'])
+                    self.server.controller.player.playlist_add_item (query['filename'])
                 if not query.has_key ('bc'):
                     self.send_redirect ("/media")
                 pos = VLC.Position ()
                 pos.key = VLC.MediaTime
                 pos.origin = VLC.AbsolutePosition
                 pos.value = long(query['bc'])
-                self.server.player.update_status ("start", pos)
+                self.server.controller.update_status ("start", pos)
             elif command == 'pause':
                 pos = VLC.Position ()
                 pos.key = VLC.MediaTime
                 pos.origin = VLC.AbsolutePosition
                 pos.value = 0
-                self.server.player.update_status ("pause")
+                self.server.controller.update_status ("pause")
             elif command == 'stop':
                 pos = VLC.Position ()
                 pos.key = VLC.MediaTime
                 pos.origin = VLC.AbsolutePosition
                 pos.value = 0
-                self.server.player.update_status ("stop")
+                self.server.controller.update_status ("stop")
             else:
                 self.send_error (404, _('Malformed request'))
                     
@@ -1041,7 +1041,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_error (501,
                                  _("""You should specify an uri"""))
             try:
-                self.master.load_package (uri=uri, alias=alias)
+                self.controller.load_package (uri=uri, alias=alias)
                 self.start_html (_("Package %s loaded") % alias, duplicate=True)
                 self.display_loaded_packages (embedded=True)                
             except:
@@ -1494,20 +1494,20 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
     @ivar authorized_hosts: the list of authorized hosts
     @type authorized_hosts: dict    
     """
-    def __init__(self, player=None, port=1234, master=None):
+    def __init__(self, controller=None, port=1234):
         """HTTP Server initialization.
 
         When running embedded, the server should be provided a
-        C{master} parameter, responsible for handling package
-        loading. When running standalone, the server will its own
-        master.
+        C{controller} parameter, responsible for handling package
+        loading and player interaction. When running standalone, the
+        server will its own controller.
 
         @param player: a mediaplayer instance
         @type player: advene.core.MediaControl
         @param port: the port number the server should bind to
         @type port: int
-        @param master: the parent of the server, in the case it is embedded
-        @type master: any, should provide a C{load_package} method
+        @param controller: the controller
+        @type controller: any, should provide some methods (C{load_package}, C{update_status}, ...)
         """
         self.packages = {}     # Key: alias,  value: package
         self.aliases = {}      # Key: package, value: alias
@@ -1522,19 +1522,19 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         # set the level to logging.DEBUG to get more messages
         self.logger.setLevel(logging.INFO)
         
-        self.player = player
-        if master is None:
-            # If "master" is not specified, adveneserver will handle
+        if controller is None:
+            # If "controller" is not specified, adveneserver will handle
             # itself package loading
-            master = self
+            controller = self
+
+        self.controller=controller
         self.urlbase = "http://localhost:%d/" % port
         self.displaymode = 'default' # could be 'raw'            
-        self.authorized_hosts = {'127.0.0.1':'localhost',
-                                 '134.214.90.94':'lisipc8.univ-lyon1.fr'}
+        self.authorized_hosts = {'127.0.0.1':'localhost'}
 
+        # Compile EPOZ template file
         fname=os.sep.join((config.data.path['web'], 'epoz', 'epozmacros.html'))
         templateFile = open (fname, 'r')
-        #print "Compiling %s" % fname
         self.epozmacros = simpletal.simpleTAL.compileHTMLTemplate (templateFile)
         templateFile.close()
         
@@ -1546,12 +1546,13 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
             return urllib.basejoin(self.urlbase, "/packages/" + alias)
         else:
             return None
-        
+
+    # Controller methods
     def load_package (self, uri=None, alias="advene"):
         """Loads a package.
 
         This method is provided in order to make the server able to
-        run standalone, and be its own master.
+        run standalone, and be its own controller.
 
         @param uri: the URI of the package. Create a new package if it is I{None} or C{""}
         @type uri: string
@@ -1575,6 +1576,13 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
                                package=p,
                                imagecache=imagecache.ImageCache (id))
 
+    def update_status(self, status, position):
+        if self.player is not None:
+            self.player.update_status(status, position)
+        return True
+
+    # End of controller methods
+    
     def register_package (self, alias, package, imagecache):
         """Register a package in the server loaded packages lists.
 
@@ -1588,11 +1596,11 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.packages[alias] = package
         self.aliases[package] = alias
         self.imagecaches[alias] = imagecache
-        if self.player is not None and self.player.is_active():
+        if self.controller.player is not None and self.controller.player.is_active():
             mediafile = package.getMetaData (config.data.namespace, "mediafile")
             if (mediafile is not None and mediafile != "" and
-                mediafile not in self.player.playlist_get_list()):
-                self.player.playlist_add_item (mediafile)
+                mediafile not in self.controller.player.playlist_get_list()):
+                self.controller.player.playlist_add_item (mediafile)
 
     def unregister_package (self, alias):
         """Remove a package from the loaded packages lists.
@@ -1638,8 +1646,8 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
     def stop_player (self):
         """Stop the media player."""
         try:
-            if self.player.is_active ():
-                self.player.stop ()
+            if self.controller.player.is_active ():
+                self.controller.player.stop ()
         except:
             pass
         
@@ -1657,7 +1665,9 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
 if __name__ == "__main__":
     import atexit
 
-    server = AdveneWebServer(player=mediacontrol.Player ())
+    
+    server = AdveneWebServer(controller=None)
+    server.player=mediacontrol.Player ()
     atexit.register (server.stop_player)
 
     if len(sys.argv) > 1:
