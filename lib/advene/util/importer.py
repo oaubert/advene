@@ -79,7 +79,6 @@ class GenericImporter(object):
         self.author=author
         self.controller=controller
         self.timestamp=time.strftime("%F")
-        self.time_regexp=sre.compile('(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d+)[.,]?(?P<ms>\d+)?')
         self.defaulttype=defaulttype
         # Default offset in ms
         self.offset=0
@@ -178,30 +177,6 @@ class GenericImporter(object):
         
         return p, at
 
-    def convert_time(self, s):
-        """Convert a time string as long.
-
-        If the parameter is a number, it is considered as a ms value.
-        Else we try to parse a hh:mm:ss.xxx value
-        """
-        try:
-            val=long(s)
-        except ValueError:
-            # It was not a number. Try to determine its format.
-            m=self.time_regexp.match(s)
-            if m:
-                t=m.groupdict()
-                for k in t:
-                    if t[k] is None:
-                        t[k]=0
-                    t[k] = long(t[k])
-                if 'ms' not in t:
-                    t['ms'] = 0
-                val= t['ms'] + t['s'] * 1000 + t['m'] * 60000 + t['h'] * 3600000
-            else:
-                raise Exception("Unknown time format for %s" % s)
-        return val
-
     def convert(self, source):
         """Converts the source elements to annotations.
 
@@ -219,13 +194,13 @@ class GenericImporter(object):
             self.package, self.defaulttype=self.init_package()
         for d in source:
             try:
-                begin=self.convert_time(d['begin'])
+                begin=vlclib.convert_time(d['begin'])
             except KeyError:
                 raise Exception("Begin is mandatory")
             if 'end' in d:
-                end=self.convert_time(d['end'])
+                end=vlclib.convert_time(d['end'])
             elif 'duration' in d:
-                end=begin+self.convert_time(d['duration'])
+                end=begin+vlclib.convert_time(d['duration'])
             else:
                 raise Exception("end or duration is missing")
             try:
@@ -332,7 +307,7 @@ class LsDVDImporter(GenericImporter):
             m=reg.search(l)
             if m is not None:
                 d=m.groupdict()
-                duration=self.convert_time(d['duration'])
+                duration=vlclib.convert_time(d['duration'])
                 res={'content': "Chapter %s" % d['chapter'],
                      'begin': begin,
                      'duration': duration}
@@ -376,7 +351,7 @@ class ChaplinImporter(GenericImporter):
             m=reg.search(l)
             if m is not None:
                 d=m.groupdict()
-                end=self.convert_time(d['begin'])
+                end=vlclib.convert_time(d['begin'])
                 if chapter is not None:
                     res={ 'content': "Chapter %s" % chapter,
                           'begin': begin,
