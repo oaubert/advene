@@ -6,6 +6,7 @@
 import advene.core.config as config
 
 import gtk
+import re
 
 from gettext import gettext as _
 
@@ -13,13 +14,26 @@ class DVDSelect:
     """DVDSelect class.
 
     FIXME: we could access the DVD and request its structure.
+
+    FIXME: we should not base on URI but the package metadata should be more structured
+    
     """
-    def __init__(self, controller=None):
+    def __init__(self, controller=None, current=None):
         self.controller=controller
         self.chapterwidget=None
         self.titlewidget=None
         self.widget=self.make_widget()
+        if current is not None:
+            self.init(current)
 
+    def init(self, current):
+        m = re.match("dvd\w*:.+@(\d+),(\d+)", current)
+        if m is not None:
+            (title, chapter) = m.groups()
+            self.titlewidget.set_value(long(title))
+            self.chapterwidget.set_value(long(chapter))
+        return True
+    
     def get_chapter(self):
         return self.chapterwidget.get_value()
 
