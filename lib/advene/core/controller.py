@@ -180,6 +180,7 @@ class AdveneController:
         """
         if not self.imagecache.is_initialized (position):
             # FIXME: only 0-relative position for the moment
+            print "Update snapshot for %d" % position
             try:
                 i = self.player.snapshot (self.player.relative_position)
             except VLC.InternalException, e:
@@ -231,45 +232,101 @@ class AdveneController:
         if mediafile is not None and mediafile != "":
             self.player.playlist_add_item (mediafile)
 
-    def goto_next_snapshot (self, annotation=None, **kw):
-        """Event handler called after having made a snapshot.
+    def start_update_snapshots(self, progress_callback=None, stop_callback=None):
+        """Automatic snapshot update.
 
-        It will go just before the next position for which we need to
-        take a snapshot.
+        The progress_callback method will be called with.
         """
-        # FIXME: this is completely out of date wrt. ECA framework
-        missing = self.imagecache.missing_snapshots ()
-        missing.sort ()
-        #print "Goto next snapshot : %s" % missing
-        bar = self.gui.get_widget ("snapshots-progressbar")
-        bar.set_fraction (1 - (len(missing) + .0) / len(self.imagecache))
-        if not missing:
-            # No more missing snapshots : we can stop
-            self.log(_("All snapshots are up-to-date."))
-            self.on_update_snapshots_stop_clicked()
-            # Return False to desactivate the callback
-            return False
+        if not config.data.player['snapshot']:
+            self.log (_("Error: the player is not run with the snapshot functionality. Configure it and try again."))
+            return True
         
-        if self.player.status != VLC.PlayingStatus:
-            # End of stream
-            self.log(_("End of stream (%s). Quitting")
-                     % repr(self.player.status))
-            self.on_update_snapshots_stop_clicked()
-            return False
+        def take_snapshot(context, parameters):
+            if not config.data.player['snapshot']:
+                return False
+            print "Take snapshot %d" % self.player.current_position_value
+            self.update_snapshot(position=self.player.current_position_value)
+            return True
 
-        # offset is the offset to next point : missing position minus
-        # current position
-        next = missing[0]
-        #print "Next Offset: %d" % (next - self.player.current_position_value)
-        if (next - self.player.current_position_value > 1000
-            or next < self.player.current_position_value):
-            # We move only if the next position if further than 1 second,
-            # or negative
-            pos = next - 1000
-            if pos < 0:
-                pos = 0
-            #print "Set position %d" % pos
-            self.move_position(pos, relative=False)
+        # We define goto_next_snapshot local to start_update_snapshots, so
+        # that we have access to progress_callback
+        def goto_next_snapshot (context, parameters):
+            """Event handler called after having made a snapshot.
+
+            It will go just before the next position for which we need to
+            take a snapshot.
+            """
+            print "Goto next"
+            missing = self.imagecache.missing_snapshots ()
+            missing.sort ()
+
+            if progress_callback:
+                progress_callback(1 - (len(missing) + .0) / len(self.imagecache))
+
+            if not missing:
+                # No more missing snapshots : we can stop
+                self.log(_("All snapshots are up-to-date."))
+                self.stop_update_snapshots()
+                # Return False to desactivate the callback
+                return False
+
+            if self.player.status != VLC.PlayingStatus:
+                # End of stream
+                self.log(_("End of stream (%s). Quitting")
+                         % repr(self.player.status))
+                self.stop_update_snapshots()
+                return False
+
+            # offset is the offset to next point : missing position minus
+            # current position
+            next = missing[0]
+            print "%d / %s" % (self.player.current_position_value, str(missing))
+            if (next - self.player.current_position_value > 2000
+                or next < self.player.current_position_value):
+                # We move only if the next position if further than 2 seconds,
+                # or negative
+                pos = next - 2000
+                if pos < 0:
+                    pos = 0
+                print "Set position %d" % pos
+                self.move_position(pos, relative=False)
+            return True
+
+        self.oldstate = self.event_handler.get_state ()
+        self.event_handler.clear_state ()
+        self.event_handler.internal_rule (event="AnnotationBegin", method=take_snapshot)
+        self.event_handler.internal_rule (event="AnnotationEnd", method=take_snapshot)
+        self.event_handler.internal_rule (event="AnnotationEnd", method=goto_next_snapshot)
+        if stop_callback:
+            self.event_handler.internal_rule(event="PlayerStop", method=stop_callback)
+                                             
+        # Populate the imagecache keys
+        for a in self.package.annotations:
+            self.imagecache.init_value (a.fragment.begin)
+            self.imagecache.init_value (a.fragment.end)
+
+        if progress_callback:
+            missing = self.imagecache.missing_snapshots ()
+            progress_callback(1 - (len(missing) + .0) / len(self.imagecache))
+            
+        # Start the player (without event notification)
+        self.player.update_status ("start")
+
+        # FIXME: we should wait for the PlayingStatus instead
+        time.sleep (2)
+        self.position_update()
+        # Goto the first unavailable annotation
+        goto_next_snapshot (None, None)
+        
+        return True
+    
+    def stop_update_snapshots(self):
+        if hasattr (self, 'oldstate'):
+            #self.gui.get_widget ("update-snapshots-stop").set_sensitive (False)
+            #self.gui.get_widget ("update-snapshots-execute").set_sensitive (True)
+            self.update_status ("stop")
+            self.event_handler.set_state (self.oldstate)
+            del (self.oldstate)
         return True
 
     def load_package (self, uri=None, alias="advene"):
