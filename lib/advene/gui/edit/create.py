@@ -301,7 +301,7 @@ class CreateElementPopup(object):
         if modal:
             flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL
         else:
-            gtk.DIALOG_DESTROY_WITH_PARENT
+            flags=gtk.DIALOG_DESTROY_WITH_PARENT
         d = gtk.Dialog(title=_("Creation: %s") % element_label[self.type_],
                        parent=None,
                        flags=flags,
