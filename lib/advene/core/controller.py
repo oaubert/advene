@@ -700,6 +700,7 @@ class AdveneController:
         future_begins.sort(lambda a, b: cmp(a[1], b[1]))
         future_ends.sort(lambda a, b: cmp(a[2], b[2]))
 
+        #print "Position: %d" % position
         #print "Begins: %s\nEnds: %s" % (future_begins, future_ends)
         return future_begins, future_ends
 
@@ -735,6 +736,8 @@ class AdveneController:
             e, v, tb = sys.exc_info()
             code.traceback.print_exception (e, v, tb)
         else:
+            if status == 'set' or status == 'start':
+                self.reset_annotation_lists()
             if self.status2eventname.has_key (status) and notify:
                 self.event_handler.notify (self.status2eventname[status],
                                            position=position,
@@ -779,9 +782,7 @@ class AdveneController:
             # We did a seek compared to the last time, so we 
             # invalidate the future_begins and future_ends lists
             # as well as the active_annotations
-            self.future_begins = None
-            self.future_ends = None
-            self.active_annotations = []
+            self.reset_annotation_lists()
 
         self.last_position = pos
         
