@@ -239,7 +239,7 @@ class EditQuery(EditGeneric):
         self.valueentry=gtk.Entry()
         v=self.model.rvalue
         if v is None:
-            v='here'
+            v='element'
         self.valueentry.set_text(v)
         vf.add(self.valueentry)
         vf.show_all()
