@@ -2,7 +2,7 @@
 
 SCRIPTDIR=`dirname $0`
 ADVENEHOME=`dirname $SCRIPTDIR`
-output=${ADVENEHOME}/doc/user.html
+output=${ADVENEHOME}/shared/web/user.html
 
 if [ ! -d "${ADVENEHOME}/doc" ]
 then
