@@ -295,7 +295,7 @@ class Player(object):
         @param position: the position
         @type position: VLC.Position
         """
-        if status == "start":
+        if status == "start" or status == "set":
             if position is None:
                 position=self.create_position(value=0,
                                               origin=VLC.AbsolutePosition,
@@ -306,7 +306,11 @@ class Player(object):
                                               origin=VLC.AbsolutePosition,
                                               key=VLC.MediaTime)
             self.check_player ()
-            self.mc.start (position)
+            self.position_update()
+            if self.status in (VLC.EndStatus, VLC.UndefinedStatus):
+                self.mc.start (position)
+            else:
+                self.mc.set_media_position (position)
         else:
             if position is None:
                 position = self.relative_position
@@ -328,13 +332,6 @@ class Player(object):
             elif status == "stop":
                 self.check_player()
                 self.mc.stop (position)
-            elif status == "set":
-                self.check_player()
-                self.position_update()
-                if self.status in (VLC.EndStatus, VLC.UndefinedStatus):
-                    self.mc.start (position)
-                else:
-                    self.mc.set_media_position (position)
             elif status == "" or status == None:
                 pass
             else:
