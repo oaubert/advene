@@ -633,10 +633,8 @@ class AdveneGUI (Connect):
         self.log (_("Package %s loaded. %d annotations.") % (self.controller.package.uri,
                                                              len(self.controller.package.annotations)))
         self.update_gui()
-        
-        # Update the main window title
-        self.gui.get_widget ("win").set_title(" - ".join((_("Advene"),
-                                                          self.controller.package.title or "No title")))
+
+        self.update_window_title()
         for v in self.annotation_views:
             try:
                 v.update_model(self.controller.package)
@@ -645,6 +643,11 @@ class AdveneGUI (Connect):
 
         return True
 
+    def update_window_title(self):
+        # Update the main window title
+        self.gui.get_widget ("win").set_title(" - ".join((_("Advene"),
+                                                          self.controller.package.title or _("No title"))))
+        
     def handle_http_request (self, source, condition):
         """Handle a HTTP request.
 
@@ -1510,7 +1513,7 @@ class AdveneGUI (Connect):
         #self.controller.imagecache.save (id_)
 
         self.controller.package.title = self.gui.get_widget ("prop_title").get_text ()
-
+        self.update_window_title()
         self.gui.get_widget ("properties").hide ()
         return True
 
