@@ -198,7 +198,8 @@ class CreateElementPopup(object):
                 # Create a basic query
                 q=advene.rules.elements.Query(source="here")
                 el.content.data=q.xml_repr()
-            self.parent.views.append(el)
+                el.content.mimetype=t.id
+            self.parent.queries.append(el)
             self.controller.notify('QueryCreate', query=el)
         elif self.type_ == View:
             el=self.parent.createView(
