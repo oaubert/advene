@@ -424,7 +424,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.start_html (_("Available snapshots for %s") % alias, duplicate_title=True)
                     self.wfile.write ("<ul>")
                     if (query.has_key('mode') and query['mode'] == 'inline'):
-                        template="""<li><a href="/media/snapshot/%(alias)s/%(position)d"><img src="/media/snapshot/%(alias)s?position=%(position)d" /></a></li>"""
+                        template="""<li><a href="/media/snapshot/%(alias)s/%(position)d"><img src="/media/snapshot/%(alias)s/%(position)d" /></a></li>"""
                         self.wfile.write ("""<p><a href="/media/snapshot/%s">Display with no inline images</a></p>""" % alias)
                     else:
                         template="""<li><a href="/media/snapshot/%(alias)s/%(position)d">%(position)d</a> (%(status)s)</li>"""                        
