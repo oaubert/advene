@@ -106,11 +106,10 @@ class TranscriptionEdit:
         if it is None:
             print "Error in get_iter_at_location"
             return False
-        
-        if (self.controller.player.status == self.controller.player.PlayingStatus
-            or
-            self.controller.player.status == self.controller.player.PlayingStatus):
-            self.create_timestamp_mark(self.controller.player.current_position_value,
+
+        c=self.controller.player
+        if (p.status == p.PlayingStatus or p.status == p.PlayingStatus):
+            self.create_timestamp_mark(p.current_position_value - config.data.reaction_time,
                                        it)
         return False
 
@@ -129,11 +128,12 @@ class TranscriptionEdit:
             self.set_color(button, self.ignore_color)
         return
     
-    def mark_button_press_cb(self, button, event, timestamp):
+    def mark_button_press_cb(self, button, event):
         """Handler for right-button click on timestamp mark.
         """
         if event.button != 3:
             return False
+        timestamp=button.timestamp
         # Create a popup menu for timestamp
         menu = gtk.Menu()
 
@@ -199,7 +199,7 @@ class TranscriptionEdit:
         # Create the mark representation
         child=gtk.Button("")
         child.connect("clicked", self.remove_anchor, anchor, b)
-        child.connect("button-press-event", self.mark_button_press_cb, timestamp)
+        child.connect("button-press-event", self.mark_button_press_cb)
         self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
         child.timestamp=timestamp
         child.ignore=False
