@@ -222,7 +222,12 @@ class Browser:
     def update_view(self, path, element):
         self.pathlabel.set_text("/"+"/".join(path))
         self.typelabel.set_text(unicode(type(element)))
-        self.valuelabel.set_text(unicode(element))
+        val=unicode(element)
+        if '\n' in val:
+            val=val[:val.index('\n')]+'...'
+        if len(val) > 80:
+            val=val[:77]+'...'
+        self.valuelabel.set_text(val)
         return
 
     def scroll_event(self, widget=None, event=None):
