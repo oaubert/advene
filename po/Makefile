@@ -4,9 +4,10 @@ MO_DIR = ../locale
 PO_DIR = po
 DOMAIN = advene
 
-POTFILES:
+POTFILES: FORCE
 	echo ../share/advene.glade > POTFILES
 	grep -r --include=\*.py -l '\b_(' ../lib >> POTFILES
+FORCE:
 
 pot: POTFILES
 	xgettext -d $(DOMAIN) -o $(DOMAIN).pot -f POTFILES
@@ -29,6 +30,8 @@ mo:
 		install -d $(MO_DIR)/$$lingua/LC_MESSAGES/ ; \
 		msgfmt -o $(MO_DIR)/$$lingua/LC_MESSAGES/$(DOMAIN).mo $$po ;\
 	done
+
+update: POTFILES pot update-po
 
 clean:
 	-$(RM) POTFILES
