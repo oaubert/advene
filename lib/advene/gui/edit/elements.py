@@ -7,14 +7,13 @@ View, Package).
 """
 
 import advene.core.config as config
+import gettext
+gettext.install('advene', unicode=True)
 
-from gettext import gettext as _
-
-import pygtk
-#pygtk.require ('2.0')
 import gtk
 import gobject
 import pango
+import sre
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
@@ -134,24 +133,6 @@ class EditElementPopup (object):
         else:
             return False
 
-    def metadata_get_method(self, element, data, namespaceid='advenetool'):
-        namespace = config.data.namespace_prefix[namespaceid]
-        def get_method():
-            expr=element.getMetaData(namespace, data)
-            if expr is None:
-                expr=""
-            return expr
-        return get_method
-
-    def metadata_set_method(self, element, data, namespaceid='advenetool'):
-        namespace = config.data.namespace_prefix[namespaceid]
-        def set_method(value):
-            if value is None or value == "":
-                value=""
-            element.setMetaData(namespace, data, unicode(value))
-            return True
-        return set_method
-        
     def get_title (self):
         """Return the element title."""
         c = self.element.viewableClass
@@ -680,6 +661,9 @@ class EditForm(object):
             expr=element.getMetaData(namespace, data)
             if expr is None:
                 expr=""
+            if sre.match('^\s+', expr):
+                print "Messed up metadata for %s" % element.id
+                expr=""
             return expr
         return get_method
 
@@ -687,6 +671,9 @@ class EditForm(object):
         namespace = config.data.namespace_prefix[namespaceid]
         def set_method(value):
             if value is None or value == "":
+                value=""
+            if sre.match('^\s+', value):
+                print "Messed up value for %s" % element.id
                 value=""
             element.setMetaData(namespace, data, unicode(value))
             return True
