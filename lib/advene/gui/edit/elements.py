@@ -26,6 +26,8 @@ from advene.model.view import View
 
 import advene.gui.edit.rules
 import advene.rules.actions
+import xml.dom
+import StringIO
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display
 
@@ -464,11 +466,19 @@ class EditRuleSetForm (EditForm):
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
-        pass
-        buf = self.view.get_buffer()
-        start_iter, end_iter = buf.get_bounds ()
-        text = buf.get_text (start_iter, end_iter)
-        setattr (self.element, self.field, text)
+        self.edit.update_value()
+
+        # FIXME: this is not very clean (to many manipulations)
+        # We should generate the XML tree directly
+        di = xml.dom.DOMImplementation.DOMImplementation()
+        # FIXME: hardcoded NS URI should move to config
+        rulesetdom = di.createDocument("http://liris.cnrs.fr/advene/ruleset", "ruleset", None)
+        self.edit.model.to_dom(rulesetdom)
+
+        stream=StringIO.StringIO()
+        xml.dom.ext.PrettyPrint(rulesetdom, stream)
+        setattr(self.element, 'data', stream.getvalue())
+        stream.close()
 
     def get_view (self):
         """Generate a view widget to edit the ruleset."""
@@ -486,7 +496,7 @@ class EditRuleSetForm (EditForm):
 
         self.edit=advene.gui.edit.rules.EditRuleSet(rs, catalog=catalog)
 
-        self.view = self.edit.get_widget()
+        self.view = self.edit.get_packed_widget()
 
         scroll_win = gtk.ScrolledWindow ()
         scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
