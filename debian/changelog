@@ -39,7 +39,7 @@ advene (0.10) unstable; urgency=low
   * Parameters values are now remembered when editing the action name (so that 
     scrolling the action name list by mistake does not erase all the values)
   
- -- 
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu,  2 Sep 2004 12:13:10 +0200
 
 advene (0.9) unstable; urgency=low
 
