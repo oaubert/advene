@@ -252,7 +252,11 @@ class AdveneController:
         return self.player.create_position(value=value, key=key, origin=origin)
     
     def notify (self, event_name, *param, **kw):
-        self.queue_action(self.event_handler.notify, event_name, *param, **kw)
+        if kw.has_key('immediate'):
+            del kw['immediate']
+            self.event_handler.notify(event_name, *param, **kw)
+        else:
+            self.queue_action(self.event_handler.notify, event_name, *param, **kw)
         return
 
     def update_snapshot (self, position):
@@ -276,7 +280,39 @@ class AdveneController:
         return True    
 
     def open_url(self, url):
-        webbrowser.get().open(url)
+        if config.data.os == 'win32':
+            # webbrowser is not broken on win32
+            webbrowser.get().open(url)
+            return True
+        # webbrowser is broken on UNIX/Linux : if the browser
+        # does not exist, it does not always launch it in the
+        # backgroup, so it can freeze the GUI
+        web_browser = os.getenv("BROWSER", None)
+        if web_browser == None:
+            term_command = os.getenv("TERMCMD", "xterm")
+            browser_list = ("firefox", "firebird", "epiphany", "galeon", "mozilla", "opera", "konqueror", "netscape", "dillo", ("links", "%s -e links" % term_command), ("w3m", "%s -e w3m" % term_command), ("lynx", "%s -e lynx" % term_command), "amaya", "gnome-open")
+            breaked = 0
+            for browser in browser_list:
+                if type(browser) == str:
+                    browser_file = browser_cmd = browser
+                elif type(browser) == tuple and len(browser) == 2:
+                    browser_file = browser[0]
+                    browser_cmd = browser[1]
+                else:
+                    continue
+
+                for directory in os.getenv("PATH", "").split(os.path.pathsep):
+                    if os.path.isdir(directory):
+                        browser_path = os.path.join(directory, browser_file)
+                        if os.path.isfile(browser_path) and os.access(browser_path, os.X_OK):
+                            web_browser = browser_cmd
+                            breaked = 1
+                            break
+                if breaked:
+                    break
+        if web_browser != None:
+            os.system("%s \"%s\" &" % (web_browser, url))
+
         return True
     
     def parse_command_line (self, args):
