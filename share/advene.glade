@@ -12,8 +12,14 @@
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
   <property name="icon">pixmaps/dvd.png</property>
+  <property name="decorated">True</property>
+  <property name="skip_taskbar_hint">False</property>
+  <property name="skip_pager_hint">False</property>
+  <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+  <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <signal name="delete_event" handler="on_exit" object="win" last_modification_time="Mon, 27 Jan 2003 14:07:29 GMT"/>
   <signal name="key_press_event" handler="on_win_key_press_event" last_modification_time="Mon, 17 Feb 2003 16:23:35 GMT"/>
+  <signal name="destroy_event" handler="on_exit" object="win" last_modification_time="Wed, 30 Jun 2004 16:34:06 GMT"/>
 
   <child>
     <widget class="GtkVBox" id="vbox1">
@@ -372,6 +378,7 @@
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_b_rewind_clicked" last_modification_time="Mon, 27 Jan 2003 14:19:30 GMT"/>
 
 	      <child>
@@ -394,6 +401,7 @@
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_b_play_clicked" last_modification_time="Mon, 27 Jan 2003 14:19:50 GMT"/>
 
 	      <child>
@@ -416,6 +424,7 @@
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_b_pause_clicked" last_modification_time="Mon, 27 Jan 2003 14:19:56 GMT"/>
 
 	      <child>
@@ -438,6 +447,7 @@
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_b_stop_clicked" last_modification_time="Mon, 27 Jan 2003 14:20:03 GMT"/>
 
 	      <child>
@@ -460,6 +470,7 @@
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_b_forward_clicked" last_modification_time="Mon, 27 Jan 2003 14:20:10 GMT"/>
 
 	      <child>
@@ -482,6 +493,7 @@
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_b_addfile_clicked" last_modification_time="Mon, 27 Jan 2003 14:20:15 GMT"/>
 
 	      <child>
@@ -504,6 +516,7 @@
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_b_selectdvd_clicked" last_modification_time="Mon, 27 Jan 2003 14:20:15 GMT"/>
 
 	      <child>
@@ -526,6 +539,7 @@
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_b_exit_clicked" last_modification_time="Mon, 27 Jan 2003 14:20:26 GMT"/>
 
 	      <child>
@@ -819,6 +833,7 @@
 		  <property name="visible">True</property>
 		  <property name="can_focus">True</property>
 		  <property name="relief">GTK_RELIEF_NORMAL</property>
+		  <property name="focus_on_click">True</property>
 		  <signal name="clicked" handler="on_edit_current_stbv_clicked" last_modification_time="Sun, 02 May 2004 18:55:27 GMT"/>
 
 		  <child>
@@ -828,6 +843,10 @@
 		      <property name="yalign">0.5</property>
 		      <property name="xscale">0</property>
 		      <property name="yscale">0</property>
+		      <property name="top_padding">0</property>
+		      <property name="bottom_padding">0</property>
+		      <property name="left_padding">0</property>
+		      <property name="right_padding">0</property>
 
 		      <child>
 			<widget class="GtkHBox" id="hbox8">
@@ -941,6 +960,8 @@
 		  <property name="visible">True</property>
 		  <property name="can_focus">True</property>
 		  <property name="editable">False</property>
+		  <property name="overwrite">False</property>
+		  <property name="accepts_tab">True</property>
 		  <property name="justification">GTK_JUSTIFY_LEFT</property>
 		  <property name="wrap_mode">GTK_WRAP_CHAR</property>
 		  <property name="cursor_visible">False</property>
@@ -977,6 +998,11 @@
   <property name="modal">False</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
+  <property name="decorated">True</property>
+  <property name="skip_taskbar_hint">False</property>
+  <property name="skip_pager_hint">False</property>
+  <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+  <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
 
   <child>
     <widget class="GtkFrame" id="frame2">
@@ -999,6 +1025,7 @@
 	      <property name="label" translatable="yes">Advene</property>
 	      <property name="use_underline">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_about_web_button_clicked" last_modification_time="Sat, 19 Jun 2004 10:24:50 GMT"/>
 	    </widget>
 	    <packing>
@@ -1064,6 +1091,7 @@ Exchange on the NEt !</property>
 	      <property name="label">gtk-ok</property>
 	      <property name="use_stock">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="about_hide" object="about" last_modification_time="Wed, 29 Jan 2003 12:52:15 GMT"/>
 	      <accelerator key="Escape" modifiers="0" signal="clicked"/>
 	      <accelerator key="Return" modifiers="0" signal="clicked"/>
@@ -1087,6 +1115,11 @@ Exchange on the NEt !</property>
   <property name="modal">False</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
+  <property name="decorated">True</property>
+  <property name="skip_taskbar_hint">False</property>
+  <property name="skip_pager_hint">False</property>
+  <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+  <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
 
   <child>
     <widget class="GtkFrame" id="frame3">
@@ -1111,6 +1144,7 @@ Exchange on the NEt !</property>
 	      <property name="label">gtk-cancel</property>
 	      <property name="use_stock">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_preferences_cancel_clicked" last_modification_time="Tue, 15 Apr 2003 10:52:04 GMT"/>
 	    </widget>
 	    <packing>
@@ -1130,6 +1164,7 @@ Exchange on the NEt !</property>
 	      <property name="label">gtk-ok</property>
 	      <property name="use_stock">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_preferences_ok_clicked" last_modification_time="Tue, 15 Apr 2003 09:13:19 GMT"/>
 	    </widget>
 	    <packing>
@@ -1173,6 +1208,7 @@ Exchange on the NEt !</property>
 	      <property name="label" translatable="yes"></property>
 	      <property name="use_underline">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <property name="active">True</property>
 	      <property name="inconsistent">False</property>
 	      <property name="draw_indicator">True</property>
@@ -1218,6 +1254,11 @@ Exchange on the NEt !</property>
   <property name="modal">False</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
+  <property name="decorated">True</property>
+  <property name="skip_taskbar_hint">False</property>
+  <property name="skip_pager_hint">False</property>
+  <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+  <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
 
   <child>
     <widget class="GtkTable" id="table3">
@@ -1415,6 +1456,7 @@ Exchange on the NEt !</property>
 	  <property name="label">gtk-ok</property>
 	  <property name="use_stock">True</property>
 	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <property name="focus_on_click">True</property>
 	  <signal name="clicked" handler="on_prop_ok_clicked" last_modification_time="Tue, 15 Apr 2003 09:18:40 GMT"/>
 	</widget>
 	<packing>
@@ -1434,6 +1476,7 @@ Exchange on the NEt !</property>
 	  <property name="label">gtk-cancel</property>
 	  <property name="use_stock">True</property>
 	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <property name="focus_on_click">True</property>
 	  <signal name="clicked" handler="on_prop_cancel_clicked" last_modification_time="Tue, 15 Apr 2003 09:18:34 GMT"/>
 	</widget>
 	<packing>
@@ -1456,6 +1499,11 @@ Exchange on the NEt !</property>
   <property name="modal">False</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
+  <property name="decorated">True</property>
+  <property name="skip_taskbar_hint">False</property>
+  <property name="skip_pager_hint">False</property>
+  <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+  <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
 
   <child>
     <widget class="GtkFrame" id="frame4">
@@ -1477,6 +1525,7 @@ Exchange on the NEt !</property>
 	      <property name="label" translatable="yes">Display annotations as subtitles</property>
 	      <property name="use_underline">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <property name="active">False</property>
 	      <property name="inconsistent">False</property>
 	      <property name="draw_indicator">True</property>
@@ -1548,6 +1597,7 @@ Exchange on the NEt !</property>
 	      <property name="label" translatable="yes">Take snapshots while playing</property>
 	      <property name="use_underline">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <property name="active">False</property>
 	      <property name="inconsistent">False</property>
 	      <property name="draw_indicator">True</property>
@@ -1638,6 +1688,7 @@ Exchange on the NEt !</property>
 	      <property name="label" translatable="yes">Display VLC player debug messages</property>
 	      <property name="use_underline">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <property name="active">False</property>
 	      <property name="inconsistent">False</property>
 	      <property name="draw_indicator">True</property>
@@ -1715,6 +1766,7 @@ Exchange on the NEt !</property>
 		  <property name="label">gtk-ok</property>
 		  <property name="use_stock">True</property>
 		  <property name="relief">GTK_RELIEF_NORMAL</property>
+		  <property name="focus_on_click">True</property>
 		  <signal name="clicked" handler="on_player_properties_ok_clicked" last_modification_time="Thu, 15 May 2003 12:13:00 GMT"/>
 		</widget>
 		<packing>
@@ -1731,6 +1783,7 @@ Exchange on the NEt !</property>
 		  <property name="label">gtk-apply</property>
 		  <property name="use_stock">True</property>
 		  <property name="relief">GTK_RELIEF_NORMAL</property>
+		  <property name="focus_on_click">True</property>
 		  <signal name="clicked" handler="on_player_properties_apply_clicked" last_modification_time="Thu, 15 May 2003 13:16:51 GMT"/>
 		</widget>
 		<packing>
@@ -1747,6 +1800,7 @@ Exchange on the NEt !</property>
 		  <property name="label">gtk-cancel</property>
 		  <property name="use_stock">True</property>
 		  <property name="relief">GTK_RELIEF_NORMAL</property>
+		  <property name="focus_on_click">True</property>
 		  <signal name="clicked" handler="on_player_properties_cancel_clicked" last_modification_time="Thu, 15 May 2003 12:13:16 GMT"/>
 		  <accelerator key="Escape" modifiers="0" signal="clicked"/>
 		</widget>
@@ -1796,6 +1850,11 @@ Exchange on the NEt !</property>
   <property name="modal">True</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
+  <property name="decorated">True</property>
+  <property name="skip_taskbar_hint">False</property>
+  <property name="skip_pager_hint">False</property>
+  <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+  <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
 
   <child>
     <widget class="GtkVBox" id="vbox4">
@@ -1851,6 +1910,7 @@ Exchange on the NEt !</property>
 	      <property name="label">gtk-execute</property>
 	      <property name="use_stock">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_update_snapshots_execute_clicked" last_modification_time="Wed, 21 May 2003 12:17:18 GMT"/>
 	    </widget>
 	    <packing>
@@ -1868,6 +1928,7 @@ Exchange on the NEt !</property>
 	      <property name="label">gtk-stop</property>
 	      <property name="use_stock">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_update_snapshots_stop_clicked" last_modification_time="Wed, 21 May 2003 12:17:29 GMT"/>
 	    </widget>
 	    <packing>
@@ -1884,6 +1945,7 @@ Exchange on the NEt !</property>
 	      <property name="label">gtk-ok</property>
 	      <property name="use_stock">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_update_snapshots_ok_clicked" last_modification_time="Wed, 21 May 2003 12:17:37 GMT"/>
 	    </widget>
 	    <packing>
