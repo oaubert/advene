@@ -8,6 +8,7 @@ notifications and actions triggering.
 
 import sys, time
 import os
+import socket
 
 import advene.core.config as config
 
@@ -98,8 +99,9 @@ class AdveneController:
         self.modified = False
         
         self.preferences = config.data.preferences
-        
-        self.player = advene.core.mediacontrol.Player ()
+
+        playerfactory=advene.core.mediacontrol.PlayerFactory()
+        self.player = playerfactory.get_player()
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
         
@@ -134,10 +136,11 @@ class AdveneController:
                                           method=self.manage_package_load)
         
         if config.data.launch_http_server:
-            self.server = advene.core.webserver.AdveneWebServer(controller=self)
-            # FIXME: we should check that no error is reported. If there is one,
-            # we should display a informative text ("there may be an existing application
-            # using the %d port"
+            try:
+                self.server = advene.core.webserver.AdveneWebServer(controller=self)
+            except socket.error:
+                print _("Cannot start the webserver.\nAnother application is using the port.\nCheck that no VLC player is still running in the background.")
+                sys.exit(0)
             
             # If == 1, it is the responbility of the Gtk app to set the input loop
             if config.data.launch_http_server == 2:
