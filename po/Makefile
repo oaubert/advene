@@ -6,7 +6,7 @@ DOMAIN = advene
 
 POTFILES:
 	echo ../share/advene.glade > POTFILES
-	grep -r --exclude=\*.svn-base -l '\b_(' ../lib >> POTFILES
+	grep -r --include=\*.py -l '\b_(' ../lib >> POTFILES
 
 pot: POTFILES
 	xgettext -d $(DOMAIN) -o $(DOMAIN).pot -f POTFILES
