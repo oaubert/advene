@@ -111,7 +111,7 @@ class CreateElementPopup(object):
                     type_list = self.parent.relationTypes
             elif self.type_ == View:
                 type_list = [ ViewType('text/html', _("HTML template")),
-                              ViewType('application/x-advene-ruleset', _("Ruleset")) ]
+                              ViewType('application/x-advene-ruleset', _("Dynamic view")) ]
             else:
                 print _("Error in advene.gui.edit.create.build_widget: invalid type %s") % self.type_
                 return None
