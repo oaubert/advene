@@ -7,6 +7,7 @@ import time
 import Image
 import StringIO
 import inspect
+import md5
 
 from gettext import gettext as _
 
@@ -77,7 +78,8 @@ def mediafile2id (mediafile):
     @return: an id
     @rtype: string
     """
-    return mediafile.replace ('/', '%2F')
+    m=md5.new(mediafile)
+    return md5.hexdigest()
 
 def package2id (p):
     """Return the id of the package's mediafile.
