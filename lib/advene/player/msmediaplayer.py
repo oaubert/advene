@@ -2,6 +2,7 @@
 """
 
 import win32com
+import win32com.client
 
 class StreamInformation:
     def __init__(self):
