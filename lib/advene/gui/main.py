@@ -419,16 +419,35 @@ class AdveneGUI (Connect):
             category='gui',
             ))
 
+        # We add a Treeview in the main app window
+        #tree = advene.gui.views.tree.TreeWidget(self.controller.package,
+        #controller=self.controller)
+        #self.gui.get_widget("html_scrollwindow").add (tree.get_widget())
+        #tree.get_widget().show_all()
+        #self.register_view (tree)
+        self.drawable=gtk.DrawingArea()
+        self.drawable.set_size_request(320,200)
+        self.gui.get_widget("vpaned").set_position(200)
+        self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
+        self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
+
+        self.displayhbox=gtk.HBox()
+        self.displayhbox.pack_start(self.drawable, expand=True)
+
+        self.displayhbox.show_all()
+
+        hbox=gtk.HBox()
+        self.displayhbox.pack_start(hbox, expand=False)
+        
         # Create the SingletonPopup instance
         self.singletonpopup=advene.gui.views.singletonpopup.SingletonPopup(controller=self.controller,
-                                            autohide=False)
+                                                                           autohide=False,
+                                                                           container=hbox)
 
-        # We add a Treeview in the main app window
-        tree = advene.gui.views.tree.TreeWidget(self.controller.package,
-                                                controller=self.controller)
-        self.gui.get_widget("html_scrollwindow").add (tree.get_widget())
-        tree.get_widget().show_all()
-        self.register_view (tree)
+
+        
+        self.gui.get_widget("displayvbox").add(self.displayhbox)
+        
 
         self.controller.event_handler.internal_rule (event="PackageLoad",
                                                      method=self.manage_package_load)
@@ -472,6 +491,16 @@ class AdveneGUI (Connect):
 
         self.controller.init(args)
 
+        # The player is initialized. We can register the drawable id
+        try:
+            if config.data.os == 'win32':
+                visual_id=self.drawable.window.handle
+            else:
+                visual_id=self.drawable.window.xid
+            self.controller.player.set_visual(visual_id)
+        except Exception, e:
+            print "Cannot set visual: %s" % str(e)
+            pass
         if config.data.webserver['mode'] == 1:
             self.log(_("Using Mainloop input handling for webserver..."))
             gtk.input_add (self.controller.server,
@@ -491,6 +520,13 @@ class AdveneGUI (Connect):
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
+    def debug_cb(self, window, event, *p):
+        print "Got event %s (%d, %d) in window %s" % (str(event),
+                                                      event.x,
+                                                      event.y,
+                                                      str(window))
+        return False
+    
     def format_slider_value (self, slider=None, val=0):
         """Formats a value (in milliseconds) into a time string.
 

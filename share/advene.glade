@@ -1207,32 +1207,30 @@
       </child>
 
       <child>
-	<widget class="GtkVPaned" id="vpaned1">
+	<widget class="GtkVPaned" id="vpaned">
 	  <property name="visible">True</property>
 	  <property name="can_focus">True</property>
 	  <property name="position">1</property>
 
 	  <child>
-	    <widget class="GtkScrolledWindow" id="html_scrollwindow">
+	    <widget class="GtkVBox" id="displayvbox">
 	      <property name="visible">True</property>
-	      <property name="can_focus">True</property>
-	      <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-	      <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-	      <property name="shadow_type">GTK_SHADOW_IN</property>
-	      <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
+	      <property name="homogeneous">False</property>
+	      <property name="spacing">0</property>
 
 	      <child>
 		<placeholder/>
 	      </child>
 	    </widget>
 	    <packing>
-	      <property name="shrink">False</property>
+	      <property name="shrink">True</property>
 	      <property name="resize">True</property>
 	    </packing>
 	  </child>
 
 	  <child>
 	    <widget class="GtkScrolledWindow" id="scrolledwindow1">
+	      <property name="height_request">58</property>
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
@@ -1263,7 +1261,7 @@
 	    </widget>
 	    <packing>
 	      <property name="shrink">True</property>
-	      <property name="resize">False</property>
+	      <property name="resize">True</property>
 	    </packing>
 	  </child>
 	</widget>

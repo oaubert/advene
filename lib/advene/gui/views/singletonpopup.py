@@ -19,11 +19,12 @@ import advene.gui.popup
 class SingletonPopup:
     """View displaying a unique popup.
     """
-    def __init__ (self, controller=None, autohide=False):
+    def __init__ (self, controller=None, autohide=False, container=None):
         self.controller=controller
         # Hide the popup if there is no widget
         self.autohide = autohide
         self.widget=None
+        self.container=container
         # When should the widget be destroyed ?
         self.hidetime=None
         self.window=self.build_widget()
@@ -73,12 +74,11 @@ class SingletonPopup:
         return True
     
     def build_widget(self):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-
-        #if self.controller.gui:
-        #    self.controller.gui.init_window_size(window, 'singletonpopup')
-
-        window.set_title (_("Navigation popup"))
+        if self.container:
+            window=self.container
+        else:
+            window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+            window.set_title (_("Navigation popup"))
 
         mainbox=gtk.VBox()
         window.add(mainbox)
