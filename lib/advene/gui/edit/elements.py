@@ -197,7 +197,9 @@ class EditElementPopup (object):
             self.window.set_title (_("Edit %s") % self.get_title())
         else:
             self.window.set_title (_("View %s (read-only)") % self.get_title())
-            
+
+        if self.controller.gui:
+            self.controller.gui.init_window_size(self.window, 'editpopup')
         self.window.show_all ()
 
     def display (self):
@@ -216,6 +218,8 @@ class EditElementPopup (object):
         self.vbox.pack_start (hbox, expand=False)
 
         self.window.set_title (_("Display %s") % self.get_title())
+        if self.controller.gui:
+            self.controller.gui.init_window_size(self.window, 'editpopup')
         self.window.show_all ()
 
     def make_registered_form (self,
@@ -1073,7 +1077,7 @@ if __name__ == "__main__":
             self.parent = "toto"
 
     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    window.set_size_request (320, 200)
+    window.set_default_size (320, 200)
 
     def key_pressed_cb (win, event):
         if event.state & gtk.gdk.CONTROL_MASK:
