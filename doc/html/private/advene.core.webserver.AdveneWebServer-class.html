@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>advene.core.webserver.AdveneWebServer</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="advene-module.html">Package&nbsp;advene</a> ::
+        <a href="advene.core-module.html">Package&nbsp;core</a> ::
+        <a href="advene.core.webserver-module.html">Module&nbsp;webserver</a> ::
+        Class&nbsp;AdveneWebServer
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[show&nbsp;private&nbsp;|&nbsp;<a href="../public/advene.core.webserver.AdveneWebServer-class.html">hide&nbsp;private</a>]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="advene.core.webserver.AdveneWebServer-class.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Class AdveneWebServer</h2>
+
+<pre class="base-tree">
+<a href="../private/SocketServer.BaseServer-class.html"><code>BaseServer</code></a> --+        
+             |        
+     <a href="SocketServer.TCPServer-class.html"><code>TCPServer</code></a> --+    
+                 |    
+        <a href="BaseHTTPServer.HTTPServer-class.html"><code>HTTPServer</code></a> --+
+                     |
+    <a href="SocketServer.ThreadingMixIn-class.html"><code>ThreadingMixIn</code></a> --+
+                     |
+                    <b>AdveneWebServer</b>
+</pre><br />
+
+<hr/>
+
+<p>Specialized HTTP server for the Advene framework.</p>
+This is a specialized HTTP Server dedicated to serving Advene packages 
+content, and interacting with a media player.
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.core.webserver.AdveneWebServer-class.html#__init__" class="summary-sig-name"><code>__init__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>controller</span>,
+          <span class=summary-sig-arg>port</span>)</span></code>
+<br />
+HTTP Server initialization.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="activate_stbv"></a><span class="summary-sig"><span class="summary-sig-name">activate_stbv</span>(<span class=summary-sig-arg>self</span>,
+          <span class="summary-sig-vararg">*args</span>,
+          <span class="summary-sig-kwarg">**kw</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="get_url_for_alias"></a><span class="summary-sig"><span class="summary-sig-name">get_url_for_alias</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>alias</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.core.webserver.AdveneWebServer-class.html#load_package" class="summary-sig-name"><code>load_package</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>uri</span>,
+          <span class=summary-sig-arg>alias</span>)</span></code>
+<br />
+Loads a package.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.core.webserver.AdveneWebServer-class.html#register_package" class="summary-sig-name"><code>register_package</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>alias</span>,
+          <span class=summary-sig-arg>package</span>,
+          <span class=summary-sig-arg>imagecache</span>)</span></code>
+<br />
+Register a package in the server loaded packages lists.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.core.webserver.AdveneWebServer-class.html#serve_forawhile" class="summary-sig-name"><code>serve_forawhile</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Handle one request at a time until <code>shouldrun</code> is 
+False.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.core.webserver.AdveneWebServer-class.html#stop_player" class="summary-sig-name"><code>stop_player</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Stop the media player.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.core.webserver.AdveneWebServer-class.html#stop_serving" class="summary-sig-name"><code>stop_serving</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Stop the web server.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.core.webserver.AdveneWebServer-class.html#unregister_package" class="summary-sig-name"><code>unregister_package</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>alias</span>)</span></code>
+<br />
+Remove a package from the loaded packages lists.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="update_status"></a><span class="summary-sig"><span class="summary-sig-name">update_status</span>(<span class=summary-sig-arg>self</span>,
+          <span class="summary-sig-vararg">*args</span>,
+          <span class="summary-sig-kwarg">**kw</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        boolean
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.core.webserver.AdveneWebServer-class.html#verify_request" class="summary-sig-name"><code>verify_request</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>request</span>,
+          <span class=summary-sig-arg>client_address</span>)</span></code>
+<br />
+Access control method.</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from ThreadingMixIn</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="SocketServer.ThreadingMixIn-class.html#process_request" class="summary-sig-name"><code>process_request</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>request</span>,
+          <span class=summary-sig-arg>client_address</span>)</span></code>
+<br />
+Start a new thread to process the request.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="SocketServer.ThreadingMixIn-class.html#process_request_thread" class="summary-sig-name"><code>process_request_thread</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>request</span>,
+          <span class=summary-sig-arg>client_address</span>)</span></code>
+<br />
+Same as in BaseServer but as a thread.</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from HTTPServer</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="BaseHTTPServer.HTTPServer-class.html#server_bind" class="summary-sig-name"><code>server_bind</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Override server_bind to store the server name.</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from TCPServer</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="SocketServer.TCPServer-class.html#close_request" class="summary-sig-name"><code>close_request</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>request</span>)</span></code>
+<br />
+Called to clean up an individual request.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="SocketServer.TCPServer-class.html#fileno" class="summary-sig-name"><code>fileno</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return socket file number.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="SocketServer.TCPServer-class.html#get_request" class="summary-sig-name"><code>get_request</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Get the request and client address from the socket.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="SocketServer.TCPServer-class.html#server_activate" class="summary-sig-name"><code>server_activate</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Called by constructor to activate the server.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="SocketServer.TCPServer-class.html#server_close" class="summary-sig-name"><code>server_close</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Called to clean-up the server.</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from BaseServer</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/SocketServer.BaseServer-class.html#finish_request" class="summary-sig-name"><code>finish_request</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>request</span>,
+          <span class=summary-sig-arg>client_address</span>)</span></code>
+<br />
+Finish one request by instantiating RequestHandlerClass.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/SocketServer.BaseServer-class.html#handle_error" class="summary-sig-name"><code>handle_error</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>request</span>,
+          <span class=summary-sig-arg>client_address</span>)</span></code>
+<br />
+Handle an error gracefully.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/SocketServer.BaseServer-class.html#handle_request" class="summary-sig-name"><code>handle_request</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Handle one request, possibly blocking.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/SocketServer.BaseServer-class.html#serve_forever" class="summary-sig-name"><code>serve_forever</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Handle one request at a time until doomsday.</td></tr>
+</table><br />
+
+
+<!-- =========== START OF INSTANCE VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Instance Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">dict</font></td>
+<td><b><a href="advene.core.webserver.AdveneWebServer-class.html#aliases"><code>aliases</code></a></b>: a dictionary of (package, alias)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">dict</font></td>
+<td><b><a href="advene.core.webserver.AdveneWebServer-class.html#authorized_hosts"><code>authorized_hosts</code></a></b>: the list of authorized hosts</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">string</font></td>
+<td><b><a href="advene.core.webserver.AdveneWebServer-class.html#displaymode"><code>displaymode</code></a></b>: the default display-mode</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">dict</font></td>
+<td><b><a href="advene.core.webserver.AdveneWebServer-class.html#imagecaches"><code>imagecaches</code></a></b>: a dictionary of (alias, imagecache)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">dict</font></td>
+<td><b><a href="advene.core.webserver.AdveneWebServer-class.html#packages"><code>packages</code></a></b>: a dictionary of (alias, package)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">boolean</font></td>
+<td><b><a href="advene.core.webserver.AdveneWebServer-class.html#shouldrun"><code>shouldrun</code></a></b>: indicates whether the server should stop listening</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">string</font></td>
+<td><b><a href="advene.core.webserver.AdveneWebServer-class.html#urlbase"><code>urlbase</code></a></b>: the base URL for this server</td></tr>
+</table><br />
+
+
+<!-- =========== START OF CLASS VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Class Variable Summary</th></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from ThreadingMixIn</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>bool</code></font></td>
+<td><b><a href="SocketServer.ThreadingMixIn-class.html#daemon_threads"><code>daemon_threads</code></a></b> = <span title="False"><code>False                                   </code>
+</span></td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from HTTPServer</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>int</code></font></td>
+<td><b><a href="BaseHTTPServer.HTTPServer-class.html#allow_reuse_address"><code>allow_reuse_address</code></a></b> = <span title="1">1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from TCPServer</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>int</code></font></td>
+<td><b><a href="SocketServer.TCPServer-class.html#address_family"><code>address_family</code></a></b> = <span title="2">2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>int</code></font></td>
+<td><b><a href="SocketServer.TCPServer-class.html#request_queue_size"><code>request_queue_size</code></a></b> = <span title="5">5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>int</code></font></td>
+<td><b><a href="SocketServer.TCPServer-class.html#socket_type"><code>socket_type</code></a></b> = <span title="1">1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+</table><br />
+
+
+<!-- =========== START OF METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Method Details</th></tr>
+</table>
+
+<a name="__init__"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>controller</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>port</span>=<span class=sig-default>1234</span>)</span>
+    <br /><i>(Constructor)</i>
+  </h3>
+  <p>HTTP Server initialization.</p>
+  When running embedded, the server should be provided a 
+  <code>controller</code> parameter, responsible for handling package 
+  loading and player interaction. When running standalone, the server 
+  will its own controller.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>controller</b></code> -
+         the controller
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=any, should provide some methods 
+              (<code>load_package</code>, <code>update_status</code>, 
+              ...))</i>
+      <dd><code><b>port</b></code> -
+         the port number the server should bind to
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=int)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Overrides:</b></dt>
+      <dd><a href="SocketServer.TCPServer-class.html#__init__"><code>SocketServer.TCPServer.__init__</code></a></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="load_package"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">load_package</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>uri</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>alias</span>=<span class=sig-default>'advene'</span>)</span>
+  </h3>
+  <p>Loads a package.</p>
+  This method is provided in order to make the server able to run 
+  standalone, and be its own controller.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>uri</b></code> -
+         the URI of the package. Create a new package if it is 
+        <i>None</i> or <code>&quot;&quot;</code>
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      <dd><code><b>alias</b></code> -
+         the alias of the loaded package
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="register_package"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">register_package</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>alias</span>,
+          <span class=sig-arg>package</span>,
+          <span class=sig-arg>imagecache</span>)</span>
+  </h3>
+  Register a package in the server loaded packages lists.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>alias</b></code> -
+         the package's alias
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      <dd><code><b>package</b></code> -
+         the package itself
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=advene.model.Package)</i>
+      <dd><code><b>imagecache</b></code> -
+         the imagecache associated to the package
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=advene.core.ImageCache)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="serve_forawhile"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">serve_forawhile</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>Handle one request at a time until <code>shouldrun</code> is 
+  False.</p>
+  Loop waiting for events on the input socket, with timeout handling 
+  and quitting variable.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="stop_player"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">stop_player</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  Stop the media player.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="stop_serving"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">stop_serving</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>Stop the web server.</p>
+  This method should be called to indicate that the web server should 
+  stop waiting for connections.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="unregister_package"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">unregister_package</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>alias</span>)</span>
+  </h3>
+  Remove a package from the loaded packages lists.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>alias</b></code> -
+         the package alias
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="verify_request"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">verify_request</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>request</span>,
+          <span class=sig-arg>client_address</span>)</span>
+  </h3>
+  <p>Access control method.</p>
+  This method returns <code>True</code> if the client is allowed to 
+  send this request. We use the <a 
+  href="advene.core.webserver.AdveneWebServer-class.html#authorized_hosts" 
+  class="link"><code>authorized_hosts</code></a> list to check.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>request</b></code> -
+         the incoming request
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=Request)</i>
+      <dd><code><b>client_address</b></code> -
+         the client address as a tuple (host, port)
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=tuple)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        a boolean indicating whether the client is authorized or 
+        not
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=boolean)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Overrides:</b></dt>
+      <dd><a href="../private/SocketServer.BaseServer-class.html#verify_request"><code>SocketServer.BaseServer.verify_request</code></a></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF INSTANCE VARIABLE DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Instance Variable Details</th></tr>
+</table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="aliases"></a>
+<h3>aliases</h3>
+a dictionary of (package, alias)
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          dict
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="authorized_hosts"></a>
+<h3>authorized_hosts</h3>
+the list of authorized hosts
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          dict
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="displaymode"></a>
+<h3>displaymode</h3>
+the default display-mode
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          string
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="imagecaches"></a>
+<h3>imagecaches</h3>
+a dictionary of (alias, imagecache)
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          dict
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="packages"></a>
+<h3>packages</h3>
+a dictionary of (alias, package)
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          dict
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="shouldrun"></a>
+<h3>shouldrun</h3>
+indicates whether the server should stop listening
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          boolean
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="urlbase"></a>
+<h3>urlbase</h3>
+the base URL for this server
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          string
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Sat Mar 12 15:31:53 2005</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>

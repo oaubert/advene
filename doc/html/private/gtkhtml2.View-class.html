@@ -1,0 +1,808 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>gtkhtml2.View</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="gtkhtml2-module.html">Module&nbsp;gtkhtml2</a> ::
+        Class&nbsp;View
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[show&nbsp;private&nbsp;|&nbsp;<a href="../public/gtkhtml2.View-class.html">hide&nbsp;private</a>]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="gtkhtml2.View-class.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Type View</h2>
+
+<pre class="base-tree">
+<a href="__builtin__.object-class.html"><code>object</code></a> --+                    
+         |                    
+   <a href="gobject.GObject-class.html"><code>GObject</code></a> --+                
+             |                
+        <a href="gtk.Object-class.html"><code>Object</code></a> --+            
+                 |            
+            <a href="gtk.Widget-class.html"><code>Widget</code></a> --+        
+                     |        
+             <a href="gtk.Container-class.html"><code>Container</code></a> --+    
+                         |    
+                    <a href="gtk.Layout-class.html"><code>Layout</code></a> --+
+                             |
+                            <b>View</b>
+</pre><br />
+
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="set_document"></a><span class="summary-sig"><span class="summary-sig-name">set_document</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>doc</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Layout</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#__init__" class="summary-sig-name"><code>__init__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__init__(...) initializes x; see x.__class__.__doc__ for 
+signature</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#freeze" class="summary-sig-name"><code>freeze</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#get_hadjustment" class="summary-sig-name"><code>get_hadjustment</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#get_size" class="summary-sig-name"><code>get_size</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#get_vadjustment" class="summary-sig-name"><code>get_vadjustment</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#move" class="summary-sig-name"><code>move</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#put" class="summary-sig-name"><code>put</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#set_hadjustment" class="summary-sig-name"><code>set_hadjustment</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#set_size" class="summary-sig-name"><code>set_size</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#set_vadjustment" class="summary-sig-name"><code>set_vadjustment</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Layout-class.html#thaw" class="summary-sig-name"><code>thaw</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Container</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#add" class="summary-sig-name"><code>add</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#add_with_properties" class="summary-sig-name"><code>add_with_properties</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#check_resize" class="summary-sig-name"><code>check_resize</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#child_get" class="summary-sig-name"><code>child_get</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#child_get_property" class="summary-sig-name"><code>child_get_property</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#child_set" class="summary-sig-name"><code>child_set</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#child_set_property" class="summary-sig-name"><code>child_set_property</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#child_type" class="summary-sig-name"><code>child_type</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#children" class="summary-sig-name"><code>children</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#forall" class="summary-sig-name"><code>forall</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#foreach" class="summary-sig-name"><code>foreach</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#get_border_width" class="summary-sig-name"><code>get_border_width</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#get_children" class="summary-sig-name"><code>get_children</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#get_focus_chain" class="summary-sig-name"><code>get_focus_chain</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#get_focus_hadjustment" class="summary-sig-name"><code>get_focus_hadjustment</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#get_focus_vadjustment" class="summary-sig-name"><code>get_focus_vadjustment</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#get_resize_mode" class="summary-sig-name"><code>get_resize_mode</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#propagate_expose" class="summary-sig-name"><code>propagate_expose</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#remove" class="summary-sig-name"><code>remove</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#resize_children" class="summary-sig-name"><code>resize_children</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#set_border_width" class="summary-sig-name"><code>set_border_width</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#set_focus_chain" class="summary-sig-name"><code>set_focus_chain</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#set_focus_child" class="summary-sig-name"><code>set_focus_child</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#set_focus_hadjustment" class="summary-sig-name"><code>set_focus_hadjustment</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#set_focus_vadjustment" class="summary-sig-name"><code>set_focus_vadjustment</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#set_reallocate_redraws" class="summary-sig-name"><code>set_reallocate_redraws</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#set_resize_mode" class="summary-sig-name"><code>set_resize_mode</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Container-class.html#unset_focus_chain" class="summary-sig-name"><code>unset_focus_chain</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Widget</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#activate" class="summary-sig-name"><code>activate</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#add_accelerator" class="summary-sig-name"><code>add_accelerator</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#add_events" class="summary-sig-name"><code>add_events</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#add_mnemonic_label" class="summary-sig-name"><code>add_mnemonic_label</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#can_activate_accel" class="summary-sig-name"><code>can_activate_accel</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#child_focus" class="summary-sig-name"><code>child_focus</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#child_notify" class="summary-sig-name"><code>child_notify</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#class_path" class="summary-sig-name"><code>class_path</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#create_pango_context" class="summary-sig-name"><code>create_pango_context</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#create_pango_layout" class="summary-sig-name"><code>create_pango_layout</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#destroy" class="summary-sig-name"><code>destroy</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_begin" class="summary-sig-name"><code>drag_begin</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_check_threshold" class="summary-sig-name"><code>drag_check_threshold</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_dest_find_target" class="summary-sig-name"><code>drag_dest_find_target</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_dest_get_target_list" class="summary-sig-name"><code>drag_dest_get_target_list</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_dest_set" class="summary-sig-name"><code>drag_dest_set</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_dest_set_proxy" class="summary-sig-name"><code>drag_dest_set_proxy</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_dest_set_target_list" class="summary-sig-name"><code>drag_dest_set_target_list</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_dest_unset" class="summary-sig-name"><code>drag_dest_unset</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_get_data" class="summary-sig-name"><code>drag_get_data</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_highlight" class="summary-sig-name"><code>drag_highlight</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_source_set" class="summary-sig-name"><code>drag_source_set</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_source_set_icon" class="summary-sig-name"><code>drag_source_set_icon</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_source_set_icon_pixbuf" class="summary-sig-name"><code>drag_source_set_icon_pixbuf</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_source_set_icon_stock" class="summary-sig-name"><code>drag_source_set_icon_stock</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_source_unset" class="summary-sig-name"><code>drag_source_unset</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#drag_unhighlight" class="summary-sig-name"><code>drag_unhighlight</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#draw" class="summary-sig-name"><code>draw</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#ensure_style" class="summary-sig-name"><code>ensure_style</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#event" class="summary-sig-name"><code>event</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#freeze_child_notify" class="summary-sig-name"><code>freeze_child_notify</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_accessible" class="summary-sig-name"><code>get_accessible</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_allocation" class="summary-sig-name"><code>get_allocation</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_ancestor" class="summary-sig-name"><code>get_ancestor</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_child_requisition" class="summary-sig-name"><code>get_child_requisition</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_child_visible" class="summary-sig-name"><code>get_child_visible</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_clipboard" class="summary-sig-name"><code>get_clipboard</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_colormap" class="summary-sig-name"><code>get_colormap</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_composite_name" class="summary-sig-name"><code>get_composite_name</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_direction" class="summary-sig-name"><code>get_direction</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_display" class="summary-sig-name"><code>get_display</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_events" class="summary-sig-name"><code>get_events</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_extension_events" class="summary-sig-name"><code>get_extension_events</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_modifier_style" class="summary-sig-name"><code>get_modifier_style</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_name" class="summary-sig-name"><code>get_name</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_no_show_all" class="summary-sig-name"><code>get_no_show_all</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_pango_context" class="summary-sig-name"><code>get_pango_context</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_parent" class="summary-sig-name"><code>get_parent</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_parent_window" class="summary-sig-name"><code>get_parent_window</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_pointer" class="summary-sig-name"><code>get_pointer</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_root_window" class="summary-sig-name"><code>get_root_window</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_screen" class="summary-sig-name"><code>get_screen</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_settings" class="summary-sig-name"><code>get_settings</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_size_request" class="summary-sig-name"><code>get_size_request</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_style" class="summary-sig-name"><code>get_style</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_toplevel" class="summary-sig-name"><code>get_toplevel</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#get_visual" class="summary-sig-name"><code>get_visual</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#grab_add" class="summary-sig-name"><code>grab_add</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#grab_default" class="summary-sig-name"><code>grab_default</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#grab_focus" class="summary-sig-name"><code>grab_focus</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#grab_remove" class="summary-sig-name"><code>grab_remove</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#has_screen" class="summary-sig-name"><code>has_screen</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#hide" class="summary-sig-name"><code>hide</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#hide_all" class="summary-sig-name"><code>hide_all</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#hide_on_delete" class="summary-sig-name"><code>hide_on_delete</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#intersect" class="summary-sig-name"><code>intersect</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#is_ancestor" class="summary-sig-name"><code>is_ancestor</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#is_focus" class="summary-sig-name"><code>is_focus</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#list_mnemonic_labels" class="summary-sig-name"><code>list_mnemonic_labels</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#map" class="summary-sig-name"><code>map</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#mnemonic_activate" class="summary-sig-name"><code>mnemonic_activate</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#modify_base" class="summary-sig-name"><code>modify_base</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#modify_bg" class="summary-sig-name"><code>modify_bg</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#modify_fg" class="summary-sig-name"><code>modify_fg</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#modify_font" class="summary-sig-name"><code>modify_font</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#modify_style" class="summary-sig-name"><code>modify_style</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#modify_text" class="summary-sig-name"><code>modify_text</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#path" class="summary-sig-name"><code>path</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#queue_clear" class="summary-sig-name"><code>queue_clear</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#queue_clear_area" class="summary-sig-name"><code>queue_clear_area</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#queue_draw" class="summary-sig-name"><code>queue_draw</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#queue_draw_area" class="summary-sig-name"><code>queue_draw_area</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#queue_resize" class="summary-sig-name"><code>queue_resize</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#queue_resize_no_redraw" class="summary-sig-name"><code>queue_resize_no_redraw</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#rc_get_style" class="summary-sig-name"><code>rc_get_style</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#realize" class="summary-sig-name"><code>realize</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#remove_accelerator" class="summary-sig-name"><code>remove_accelerator</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#remove_mnemonic_label" class="summary-sig-name"><code>remove_mnemonic_label</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#render_icon" class="summary-sig-name"><code>render_icon</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#reparent" class="summary-sig-name"><code>reparent</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#reset_rc_styles" class="summary-sig-name"><code>reset_rc_styles</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#reset_shapes" class="summary-sig-name"><code>reset_shapes</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#selection_add_target" class="summary-sig-name"><code>selection_add_target</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#selection_add_targets" class="summary-sig-name"><code>selection_add_targets</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#selection_clear_targets" class="summary-sig-name"><code>selection_clear_targets</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#selection_convert" class="summary-sig-name"><code>selection_convert</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#selection_owner_set" class="summary-sig-name"><code>selection_owner_set</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#selection_remove_all" class="summary-sig-name"><code>selection_remove_all</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#send_expose" class="summary-sig-name"><code>send_expose</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_accel_path" class="summary-sig-name"><code>set_accel_path</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_app_paintable" class="summary-sig-name"><code>set_app_paintable</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_child_visible" class="summary-sig-name"><code>set_child_visible</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_colormap" class="summary-sig-name"><code>set_colormap</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_composite_name" class="summary-sig-name"><code>set_composite_name</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_direction" class="summary-sig-name"><code>set_direction</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_double_buffered" class="summary-sig-name"><code>set_double_buffered</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_events" class="summary-sig-name"><code>set_events</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_extension_events" class="summary-sig-name"><code>set_extension_events</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_name" class="summary-sig-name"><code>set_name</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_no_show_all" class="summary-sig-name"><code>set_no_show_all</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_parent" class="summary-sig-name"><code>set_parent</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_parent_window" class="summary-sig-name"><code>set_parent_window</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_redraw_on_allocate" class="summary-sig-name"><code>set_redraw_on_allocate</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_scroll_adjustments" class="summary-sig-name"><code>set_scroll_adjustments</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_sensitive" class="summary-sig-name"><code>set_sensitive</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_size_request" class="summary-sig-name"><code>set_size_request</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_state" class="summary-sig-name"><code>set_state</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_style" class="summary-sig-name"><code>set_style</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_uposition" class="summary-sig-name"><code>set_uposition</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#set_usize" class="summary-sig-name"><code>set_usize</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#shape_combine_mask" class="summary-sig-name"><code>shape_combine_mask</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#show" class="summary-sig-name"><code>show</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#show_all" class="summary-sig-name"><code>show_all</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#show_now" class="summary-sig-name"><code>show_now</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#size_allocate" class="summary-sig-name"><code>size_allocate</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#size_request" class="summary-sig-name"><code>size_request</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#style_get_property" class="summary-sig-name"><code>style_get_property</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#thaw_child_notify" class="summary-sig-name"><code>thaw_child_notify</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#translate_coordinates" class="summary-sig-name"><code>translate_coordinates</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#unmap" class="summary-sig-name"><code>unmap</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#unparent" class="summary-sig-name"><code>unparent</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Widget-class.html#unrealize" class="summary-sig-name"><code>unrealize</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Object</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Object-class.html#flags" class="summary-sig-name"><code>flags</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Object-class.html#set_flags" class="summary-sig-name"><code>set_flags</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gtk.Object-class.html#unset_flags" class="summary-sig-name"><code>unset_flags</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from GObject</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#__cmp__" class="summary-sig-name"><code>__cmp__</code></a>(<span class=summary-sig-arg>x</span>,
+          <span class=summary-sig-arg>y</span>)</span></code>
+<br />
+x.__cmp__(y) &lt;==&gt; cmp(x,y)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#__gobject_init__" class="summary-sig-name"><code>__gobject_init__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#__hash__" class="summary-sig-name"><code>__hash__</code></a>(<span class=summary-sig-arg>x</span>)</span></code>
+<br />
+x.__hash__() &lt;==&gt; hash(x)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#__new__" class="summary-sig-name"><code>__new__</code></a>(<span class=summary-sig-arg>T</span>,
+          <span class=summary-sig-arg>S</span>,
+          <span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+T.__new__(S, ...) -&gt; a new object with type S, a subtype of T</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#__repr__" class="summary-sig-name"><code>__repr__</code></a>(<span class=summary-sig-arg>x</span>)</span></code>
+<br />
+x.__repr__() &lt;==&gt; repr(x)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#chain" class="summary-sig-name"><code>chain</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#connect" class="summary-sig-name"><code>connect</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#connect_after" class="summary-sig-name"><code>connect_after</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#connect_object" class="summary-sig-name"><code>connect_object</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#connect_object_after" class="summary-sig-name"><code>connect_object_after</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#disconnect" class="summary-sig-name"><code>disconnect</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#emit" class="summary-sig-name"><code>emit</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#emit_stop_by_name" class="summary-sig-name"><code>emit_stop_by_name</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#freeze_notify" class="summary-sig-name"><code>freeze_notify</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#get_data" class="summary-sig-name"><code>get_data</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#get_property" class="summary-sig-name"><code>get_property</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#handler_block" class="summary-sig-name"><code>handler_block</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#handler_disconnect" class="summary-sig-name"><code>handler_disconnect</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#handler_is_connected" class="summary-sig-name"><code>handler_is_connected</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#handler_unblock" class="summary-sig-name"><code>handler_unblock</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#notify" class="summary-sig-name"><code>notify</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#set_data" class="summary-sig-name"><code>set_data</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#set_property" class="summary-sig-name"><code>set_property</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#stop_emission" class="summary-sig-name"><code>stop_emission</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="gobject.GObject-class.html#thaw_notify" class="summary-sig-name"><code>thaw_notify</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from object</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__delattr__" class="summary-sig-name"><code>__delattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__delattr__('name') &lt;==&gt; del x.name</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__getattribute__" class="summary-sig-name"><code>__getattribute__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__getattribute__('name') &lt;==&gt; x.name</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce__" class="summary-sig-name"><code>__reduce__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce_ex__" class="summary-sig-name"><code>__reduce_ex__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__setattr__" class="summary-sig-name"><code>__setattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__setattr__('name', value) &lt;==&gt; x.name = value</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__str__" class="summary-sig-name"><code>__str__</code></a>(<span class=summary-sig-arg>x</span>)</span></code>
+<br />
+x.__str__() &lt;==&gt; str(x)</td></tr>
+</table><br />
+
+
+<!-- =========== START OF CLASS VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Class Variable Summary</th></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Layout</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>GType</code></font></td>
+<td><b><a href="gtk.Layout-class.html#__gtype__"><code>__gtype__</code></a></b> = <span title="&lt;GType GtkLayout (137062480)&gt;"><code>&lt;GType&nbsp;GtkLayout&nbsp;(137062480)&gt;                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Layout-class.html#bin_window"><code>bin_window</code></a></b> = <span title="&lt;attribute 'bin_window' of 'gtk.Layout' objects&gt;"><code>&lt;attribute&nbsp;'bin_window'&nbsp;of&nbsp;'gtk.Layout'&nbsp;obj<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Container</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Container-class.html#border_width"><code>border_width</code></a></b> = <span title="&lt;attribute 'border_width' of 'gtk.Container' objects&gt;"><code>&lt;attribute&nbsp;'border_width'&nbsp;of&nbsp;'gtk.Contain<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Container-class.html#focus_child"><code>focus_child</code></a></b> = <span title="&lt;attribute 'focus_child' of 'gtk.Container' objects&gt;"><code>&lt;attribute&nbsp;'focus_child'&nbsp;of&nbsp;'gtk.Container<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Container-class.html#has_focus_chain"><code>has_focus_chain</code></a></b> = <span title="&lt;attribute 'has_focus_chain' of 'gtk.Container' objects&gt;"><code>&lt;attribute&nbsp;'has_focus_chain'&nbsp;of&nbsp;'gtk.C<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Container-class.html#need_resize"><code>need_resize</code></a></b> = <span title="&lt;attribute 'need_resize' of 'gtk.Container' objects&gt;"><code>&lt;attribute&nbsp;'need_resize'&nbsp;of&nbsp;'gtk.Container<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Container-class.html#reallocate_redraws"><code>reallocate_redraws</code></a></b> = <span title="&lt;attribute 'reallocate_redraws' of 'gtk.Container' objects&gt;"><code>&lt;attribute&nbsp;'reallocate_redraws'&nbsp;of&nbsp;<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Container-class.html#resize_mode"><code>resize_mode</code></a></b> = <span title="&lt;attribute 'resize_mode' of 'gtk.Container' objects&gt;"><code>&lt;attribute&nbsp;'resize_mode'&nbsp;of&nbsp;'gtk.Container<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Widget</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Widget-class.html#allocation"><code>allocation</code></a></b> = <span title="&lt;attribute 'allocation' of 'gtk.Widget' objects&gt;"><code>&lt;attribute&nbsp;'allocation'&nbsp;of&nbsp;'gtk.Widget'&nbsp;obj<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Widget-class.html#name"><code>name</code></a></b> = <span title="&lt;attribute 'name' of 'gtk.Widget' objects&gt;"><code>&lt;attribute&nbsp;'name'&nbsp;of&nbsp;'gtk.Widget'&nbsp;objects&gt;        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Widget-class.html#parent"><code>parent</code></a></b> = <span title="&lt;attribute 'parent' of 'gtk.Widget' objects&gt;"><code>&lt;attribute&nbsp;'parent'&nbsp;of&nbsp;'gtk.Widget'&nbsp;objects&gt;    </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Widget-class.html#saved_state"><code>saved_state</code></a></b> = <span title="&lt;attribute 'saved_state' of 'gtk.Widget' objects&gt;"><code>&lt;attribute&nbsp;'saved_state'&nbsp;of&nbsp;'gtk.Widget'&nbsp;o<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Widget-class.html#state"><code>state</code></a></b> = <span title="&lt;attribute 'state' of 'gtk.Widget' objects&gt;"><code>&lt;attribute&nbsp;'state'&nbsp;of&nbsp;'gtk.Widget'&nbsp;objects&gt;      </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Widget-class.html#style"><code>style</code></a></b> = <span title="&lt;attribute 'style' of 'gtk.Widget' objects&gt;"><code>&lt;attribute&nbsp;'style'&nbsp;of&nbsp;'gtk.Widget'&nbsp;objects&gt;      </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gtk.Widget-class.html#window"><code>window</code></a></b> = <span title="&lt;attribute 'window' of 'gtk.Widget' objects&gt;"><code>&lt;attribute&nbsp;'window'&nbsp;of&nbsp;'gtk.Widget'&nbsp;objects&gt;    </code>
+</span></td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from GObject</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="gobject.GObject-class.html#__gdoc__"><code>__gdoc__</code></a></b> = <span title="'Object GObject\n\nSignals from GObject:\n  notify (GParam)\n\n'"><code><span class="variable-quote">'</span>Object&nbsp;GObject\n\nSignals&nbsp;from&nbsp;GObject:\n&nbsp;&nbsp;n<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>getset_descriptor</code></font></td>
+<td><b><a href="gobject.GObject-class.html#__grefcount__"><code>__grefcount__</code></a></b> = <span title="&lt;attribute '__grefcount__' of 'gobject.GObject' objects&gt;"><code>&lt;attribute&nbsp;'__grefcount__'&nbsp;of&nbsp;'gobject.G<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+</table><br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Sat Mar 12 15:31:52 2005</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>advene.util.vlclib</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="advene-module.html">Package&nbsp;advene</a> ::
+        <a href="advene.util-module.html">Package&nbsp;util</a> ::
+        Module&nbsp;vlclib
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[<a href="../private/advene.util.vlclib-module.html">show&nbsp;private</a>&nbsp;|&nbsp;hide&nbsp;private]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="advene.util.vlclib-module.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF MODULE DESCRIPTION =========== -->
+<h2 class="module">Module advene.util.vlclib</h2>
+
+VLC library functions.
+<hr/>
+
+<!-- =========== START OF CLASSES =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Classes</th></tr>
+<tr><td width="15%">
+  <b><a href="advene.util.vlclib.TitledElement-class.html"><code>TitledElement</code></a></b></td>
+  <td>Dummy element, to accomodate the get_title method.</td></tr>
+<tr><td width="15%">
+  <b><a href="advene.util.vlclib.TypedString-class.html"><code>TypedString</code></a></b></td>
+  <td>String with a mimetype attribute.</td></tr>
+</table><br />
+
+
+<!-- =========== START OF FUNCTION SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Function Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.util.vlclib-module.html#convert_time" class="summary-sig-name"><code>convert_time</code></a>(<span class=summary-sig-arg>s</span>)</span></code>
+<br />
+Convert a time string as long.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.util.vlclib-module.html#format_element_name" class="summary-sig-name"><code>format_element_name</code></a>(<span class=summary-sig-arg>name</span>,
+          <span class=summary-sig-arg>count</span>)</span></code>
+<br />
+Formats an element name (from the model) according to count.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        string
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.util.vlclib-module.html#format_time" class="summary-sig-name"><code>format_time</code></a>(<span class=summary-sig-arg>val</span>)</span></code>
+<br />
+Formats a value (in milliseconds) into a time string.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        string
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.util.vlclib-module.html#fourcc2rawcode" class="summary-sig-name"><code>fourcc2rawcode</code></a>(<span class=summary-sig-arg>code</span>)</span></code>
+<br />
+VideoLan to PIL code conversion.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.util.vlclib-module.html#get_id" class="summary-sig-name"><code>get_id</code></a>(<span class=summary-sig-arg>source</span>,
+          <span class=summary-sig-arg>id_</span>)</span></code>
+<br />
+Return the element whose id is id_ in source.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="get_title"></a><span class="summary-sig"><span class="summary-sig-name">get_title</span>(<span class=summary-sig-arg>controller</span>,
+          <span class=summary-sig-arg>element</span>,
+          <span class=summary-sig-arg>representation</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        list
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.util.vlclib-module.html#get_valid_members" class="summary-sig-name"><code>get_valid_members</code></a>(<span class=summary-sig-arg>el</span>)</span></code>
+<br />
+Return a list of strings, valid members for the object el in 
+TALES.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="import_element"></a><span class="summary-sig"><span class="summary-sig-name">import_element</span>(<span class=summary-sig-arg>package</span>,
+          <span class=summary-sig-arg>element</span>,
+          <span class=summary-sig-arg>controller</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.util.vlclib-module.html#matching_relationtypes" class="summary-sig-name"><code>matching_relationtypes</code></a>(<span class=summary-sig-arg>package</span>,
+          <span class=summary-sig-arg>ann1</span>,
+          <span class=summary-sig-arg>ann2</span>)</span></code>
+<br />
+Return a list of relationtypes that can be used to link ann1 and 
+ann2.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        string
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.util.vlclib-module.html#mediafile2id" class="summary-sig-name"><code>mediafile2id</code></a>(<span class=summary-sig-arg>mediafile</span>)</span></code>
+<br />
+Returns an id (with encoded /) corresponding to the mediafile.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        string
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.util.vlclib-module.html#package2id" class="summary-sig-name"><code>package2id</code></a>(<span class=summary-sig-arg>p</span>)</span></code>
+<br />
+Return the id of the package's mediafile.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        string
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.util.vlclib-module.html#snapshot2png" class="summary-sig-name"><code>snapshot2png</code></a>(<span class=summary-sig-arg>image</span>,
+          <span class=summary-sig-arg>output</span>)</span></code>
+<br />
+Convert a VLC RGBPicture to PNG.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="unimport_element"></a><span class="summary-sig"><span class="summary-sig-name">unimport_element</span>(<span class=summary-sig-arg>package</span>,
+          <span class=summary-sig-arg>element</span>,
+          <span class=summary-sig-arg>controller</span>)</span></code>
+</td></tr>
+</table><br />
+
+
+<!-- =========== START OF VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>dict</code></font></td>
+<td><b><a href="advene.util.vlclib-module.html#element_declinations"><code>element_declinations</code></a></b> = <span title="{'package': ('package', 'packages'), 'view': ('view', 'views'), 'relation_type': ('relation type', 'relation types'), 'relation': ('relation', 'relations'), 'annotation_type': ('annotation type', 'annotation types'), 'query': ('query', 'queries'), 'schema': ('schema', 'schemas'), 'relation-type': ('relation type', 'relation types'), 'annotation': ('annotation', 'annotations'), 'annotation-type': ('annotation type', 'annotation types')}"><code>{'package':&nbsp;('package',&nbsp;'packages<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>SRE_Pattern</code></font></td>
+<td><b><a href="advene.util.vlclib-module.html#time_regexp"><code>time_regexp</code></a></b> = <span title="&lt;_sre.SRE_Pattern object at 0x830c828&gt;"><code><span class="re"><span class="re-group">(</span><span class="re-char">\d</span><span class="re-char">\d</span><span class="re-group">)</span>:<span class="re-group">(</span><span class="re-char">\d</span><span class="re-char">\d</span><span class="re-group">)</span>:<span class="re-group">(</span><span class="re-char">\d</span><span class="re-op">+</span><span class="re-group">)</span><span class="re-group">[</span><span class="re-char">\.</span>,<span class="re-group">]</span><span class="re-op">?</span><span class="re-group">(</span><span class="re-char">\d</span><span class="re-op">+</span><span class="re-group">)</span><span class="re-op">?</span></span>            </code>
+</span></td></tr>
+</table><br />
+
+
+<!-- =========== START OF FUNCTION DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Function Details</th></tr>
+</table>
+
+<a name="convert_time"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">convert_time</span>(<span class=sig-arg>s</span>)</span>
+  </h3>
+  <p>Convert a time string as long.</p>
+  If the parameter is a number, it is considered as a ms value. Else 
+  we try to parse a hh:mm:ss.xxx value
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="format_element_name"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">format_element_name</span>(<span class=sig-arg>name</span>,
+          <span class=sig-arg>count</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Formats an element name (from the model) according to count.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="format_time"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">format_time</span>(<span class=sig-arg>val</span>=<span class=sig-default>0</span>)</span>
+  </h3>
+  Formats a value (in milliseconds) into a time string.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>val</b></code> -
+         the value
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=int)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        the formatted string
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="fourcc2rawcode"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">fourcc2rawcode</span>(<span class=sig-arg>code</span>)</span>
+  </h3>
+  <p>VideoLan to PIL code conversion.</p>
+  Converts the FOURCC used by VideoLan into the corresponding rawcode 
+  specification used by the python Image module.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>code</b></code> -
+         the FOURCC code from VideoLan
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        the corresponding PIL code
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_id"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_id</span>(<span class=sig-arg>source</span>,
+          <span class=sig-arg>id_</span>)</span>
+  </h3>
+  Return the element whose id is id_ in source.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_valid_members"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_valid_members</span>(<span class=sig-arg>el</span>)</span>
+  </h3>
+  <p>Return a list of strings, valid members for the object el in 
+  TALES.</p>
+  This method is used to generate the contextual completion menu in 
+  the web interface and the browser view.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>el</b></code> -
+         the object to examine (often an Advene object)
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=any)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        the list of elements which are members of the object, in the 
+        TALES meaning.
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=list)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="matching_relationtypes"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">matching_relationtypes</span>(<span class=sig-arg>package</span>,
+          <span class=sig-arg>ann1</span>,
+          <span class=sig-arg>ann2</span>)</span>
+  </h3>
+  Return a list of relationtypes that can be used to link ann1 and 
+  ann2. We use the id (i.e. the fragment part from the URI) to match
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="mediafile2id"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">mediafile2id</span>(<span class=sig-arg>mediafile</span>)</span>
+  </h3>
+  Returns an id (with encoded /) corresponding to the mediafile.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>mediafile</b></code> -
+         the name of the mediafile
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        an id
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="package2id"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">package2id</span>(<span class=sig-arg>p</span>)</span>
+  </h3>
+  <p>Return the id of the package's mediafile.</p>
+  Return the id (with encoded /) corresponding to the mediafile 
+  defined in the package. Returns &quot;undefined&quot; if no mediafile 
+  is defined.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>p</b></code> -
+         the package
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=advene.Package)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        the corresponding id
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="snapshot2png"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">snapshot2png</span>(<span class=sig-arg>image</span>,
+          <span class=sig-arg>output</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  <p>Convert a VLC RGBPicture to PNG.</p>
+  output is either a filename or a stream. If not given, the image 
+  will be returned as a buffer.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>image</b></code> -
+         a VLC.RGBPicture
+      <dd><code><b>output</b></code> -
+         the output stream or filename (optional)
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=filename or stream)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        an image buffer (optional)
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF VARIABLE DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Variable Details</th></tr>
+</table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="element_declinations"></a>
+<h3>element_declinations</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>dict</code>
+
+      </dd>
+<span title="{'package': ('package', 'packages'), 'view': ('view', 'views'), 'relation_type': ('relation type', 'relation types'), 'relation': ('relation', 'relations'), 'annotation_type': ('annotation type', 'annotation types'), 'query': ('query', 'queries'), 'schema': ('schema', 'schemas'), 'relation-type': ('relation type', 'relation types'), 'annotation': ('annotation', 'annotations'), 'annotation-type': ('annotation type', 'annotation types')}">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+{'annotation': ('annotation', 'annotations'),
+ 'annotation-type': ('annotation type', 'annotation types'),
+ 'annotation_type': ('annotation type', 'annotation types'),
+ 'package': ('package', 'packages'),
+ 'query': ('query', 'queries'),
+ 'relation': ('relation', 'relations'),
+ 'relation-type': ('relation type', 'relation types'),
+ 'relation_type': ('relation type', 'relation types'),
+<span class="variable-ellipsis">...</span>                                                                    </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="time_regexp"></a>
+<h3>time_regexp</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>SRE_Pattern</code>
+
+      </dd>
+<span title="&lt;_sre.SRE_Pattern object at 0x830c828&gt;">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="re"><span class="re-group">(</span><span class="re-char">\d</span><span class="re-char">\d</span><span class="re-group">)</span>:<span class="re-group">(</span><span class="re-char">\d</span><span class="re-char">\d</span><span class="re-group">)</span>:<span class="re-group">(</span><span class="re-char">\d</span><span class="re-op">+</span><span class="re-group">)</span><span class="re-group">[</span><span class="re-char">\.</span>,<span class="re-group">]</span><span class="re-op">?</span><span class="re-group">(</span><span class="re-char">\d</span><span class="re-op">+</span><span class="re-group">)</span><span class="re-op">?</span></span>                                        </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Sat Mar 12 15:31:52 2005</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>

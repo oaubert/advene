@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>advene.rules.elements.ECACatalog</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="advene-module.html">Package&nbsp;advene</a> ::
+        <a href="advene.rules-module.html">Package&nbsp;rules</a> ::
+        <a href="advene.rules.elements-module.html">Module&nbsp;elements</a> ::
+        Class&nbsp;ECACatalog
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[<a href="../private/advene.rules.elements.ECACatalog-class.html">show&nbsp;private</a>&nbsp;|&nbsp;hide&nbsp;private]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="advene.rules.elements.ECACatalog-class.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Class ECACatalog</h2>
+
+<hr/>
+
+Class holding information about available elements (events, 
+conditions, actions).
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="__init__"></a><span class="summary-sig"><span class="summary-sig-name">__init__</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.ECACatalog-class.html#describe_action" class="summary-sig-name"><code>describe_action</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>name</span>)</span></code>
+<br />
+Return the description of the action.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.ECACatalog-class.html#describe_event" class="summary-sig-name"><code>describe_event</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>name</span>)</span></code>
+<br />
+Return the description of the event.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        RegisteredAction
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.ECACatalog-class.html#get_action" class="summary-sig-name"><code>get_action</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>name</span>)</span></code>
+<br />
+Return the action matching name.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.ECACatalog-class.html#get_actions" class="summary-sig-name"><code>get_actions</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>expert</span>)</span></code>
+<br />
+Return the list of defined actions.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        dict
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.ECACatalog-class.html#get_described_actions" class="summary-sig-name"><code>get_described_actions</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>expert</span>)</span></code>
+<br />
+Return a dict holding all the actions with their description.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        dict
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.ECACatalog-class.html#get_described_events" class="summary-sig-name"><code>get_described_events</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>expert</span>)</span></code>
+<br />
+Return a dict holding all the events with their description.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        list
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.ECACatalog-class.html#get_events" class="summary-sig-name"><code>get_events</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>expert</span>)</span></code>
+<br />
+Return the list of defined event names.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        boolean
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.ECACatalog-class.html#is_action" class="summary-sig-name"><code>is_action</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>name</span>)</span></code>
+<br />
+Check if name is a valid registered action name.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        boolean
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.ECACatalog-class.html#is_event" class="summary-sig-name"><code>is_event</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>name</span>)</span></code>
+<br />
+Check if name is a valid event name.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.ECACatalog-class.html#register_action" class="summary-sig-name"><code>register_action</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>registered_action</span>)</span></code>
+<br />
+Register a RegisteredAction instance.</td></tr>
+</table><br />
+
+
+<!-- =========== START OF INSTANCE VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Instance Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">dict</font></td>
+<td><b><a href="advene.rules.elements.ECACatalog-class.html#actions"><code>actions</code></a></b>: the list of registered actions indexed by name</td></tr>
+</table><br />
+
+
+<!-- =========== START OF CLASS VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Class Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>dict</code></font></td>
+<td><b><a href="advene.rules.elements.ECACatalog-class.html#action_categories"><code>action_categories</code></a></b> = <span title="{'generic': 'Generic actions', 'player': 'Basic player control', 'gui': 'GUI actions', 'advanced': 'Advanced player control'}"><code>{'generic':&nbsp;'Generic&nbsp;actions',&nbsp;'play<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="advene.rules.elements.ECACatalog-class.html#basic_events"><code>basic_events</code></a></b> = <span title="('AnnotationBegin', 'AnnotationEnd', 'PlayerStart', 'PlayerPause', 'PlayerResume', 'PlayerStop', 'ApplicationStart', 'ViewActivation', 'UserEvent')"><code>('AnnotationBegin',&nbsp;'AnnotationEnd',&nbsp;'Pla<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>dict</code></font></td>
+<td><b><a href="advene.rules.elements.ECACatalog-class.html#event_names"><code>event_names</code></a></b> = <span title="{'ViewCreate': 'Creation of a new view', 'AnnotationTypeCreate': 'Creation of a new annotation type', 'SchemaCreate': 'Creation of a new schema', 'RelationActivate': 'Activation of a relation', 'PackageEditEnd': 'Ending editing of a package', 'AnnotationTypeDelete': 'Suppression of an annotation type', 'AnnotationEnd': 'End of an annotation', 'ViewDelete': 'Suppression of a view', 'AnnotationTypeEditEnd': 'Ending editing an annotation type', 'AnnotationActivate': 'Activation of an annotation', 'AnnotationBegin': 'Beginning of an annotation', 'PlayerSet': 'Going to a given position', 'Relati..."><code>{'ViewCreate':&nbsp;'Creation&nbsp;of&nbsp;a&nbsp;new&nbsp;view',&nbsp;'<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>Set</code></font></td>
+<td><b><a href="advene.rules.elements.ECACatalog-class.html#modifying_events"><code>modifying_events</code></a></b> = <span title="Set(['ViewCreate', 'AnnotationTypeCreate', 'SchemaCreate', 'PackageEditEnd', 'AnnotationTypeDelete', 'ViewDelete', 'AnnotationTypeEditEnd', 'RelationTypeCreate', 'SchemaDelete', 'RelationEditEnd', 'QueryEditEnd', 'SchemaEditEnd', 'AnnotationEditEnd', 'QueryCreate', 'RelationTypeEditEnd', 'RelationCreate', 'AnnotationDelete', 'RelationTypeDelete', 'ViewEditEnd', 'RelationDelete', 'QueryDelete', 'AnnotationCreate'])"><code>Set(['ViewCreate',&nbsp;'AnnotationTypeCre<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+</table><br />
+
+
+<!-- =========== START OF METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Method Details</th></tr>
+</table>
+
+<a name="describe_action"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">describe_action</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>name</span>)</span>
+  </h3>
+  Return the description of the action.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="describe_event"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">describe_event</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>name</span>)</span>
+  </h3>
+  Return the description of the event.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_action"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_action</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>name</span>)</span>
+  </h3>
+  Return the action matching name.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>name</b></code> -
+         the checked name
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        the matching registered action
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=RegisteredAction)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_actions"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_actions</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>expert</span>=<span class=sig-default>False</span>)</span>
+  </h3>
+  Return the list of defined actions.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_described_actions"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_described_actions</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>expert</span>=<span class=sig-default>False</span>)</span>
+  </h3>
+  Return a dict holding all the actions with their description.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>expert</b></code> -
+         expert mode
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=boolean)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        a dictionary of descriptions indexed by name.
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=dict)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_described_events"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_described_events</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>expert</span>=<span class=sig-default>False</span>)</span>
+  </h3>
+  Return a dict holding all the events with their description.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>expert</b></code> -
+         expert mode
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=boolean)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        a dictionary of descriptions indexed by name.
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=dict)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_events"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_events</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>expert</span>=<span class=sig-default>False</span>)</span>
+  </h3>
+  Return the list of defined event names.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>expert</b></code> -
+         expert mode
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=boolean)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        the list of defined event names
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=list)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="is_action"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">is_action</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>name</span>)</span>
+  </h3>
+  Check if name is a valid registered action name.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>name</b></code> -
+         the checked name
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        True if name is a valid action name
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=boolean)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="is_event"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">is_event</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>name</span>)</span>
+  </h3>
+  Check if name is a valid event name.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>name</b></code> -
+         the checked name
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        True if name is a valid event name
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=boolean)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="register_action"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">register_action</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>registered_action</span>)</span>
+  </h3>
+  Register a RegisteredAction instance.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF INSTANCE VARIABLE DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Instance Variable Details</th></tr>
+</table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="actions"></a>
+<h3>actions</h3>
+the list of registered actions indexed by name
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          dict
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<br />
+
+
+<!-- =========== START OF CLASS VARIABLE DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Class Variable Details</th></tr>
+</table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="action_categories"></a>
+<h3>action_categories</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>dict</code>
+
+      </dd>
+<span title="{'generic': 'Generic actions', 'player': 'Basic player control', 'gui': 'GUI actions', 'advanced': 'Advanced player control'}">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+{'advanced': 'Advanced player control',
+ 'generic': 'Generic actions',
+ 'gui': 'GUI actions',
+ 'player': 'Basic player control'}                                     </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="basic_events"></a>
+<h3>basic_events</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('AnnotationBegin', 'AnnotationEnd', 'PlayerStart', 'PlayerPause', 'PlayerResume', 'PlayerStop', 'ApplicationStart', 'ViewActivation', 'UserEvent')">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('AnnotationBegin',
+ 'AnnotationEnd',
+ 'PlayerStart',
+ 'PlayerPause',
+ 'PlayerResume',
+ 'PlayerStop',
+ 'ApplicationStart',
+ 'ViewActivation',
+<span class="variable-ellipsis">...</span>                                                                    </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="event_names"></a>
+<h3>event_names</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>dict</code>
+
+      </dd>
+<span title="{'ViewCreate': 'Creation of a new view', 'AnnotationTypeCreate': 'Creation of a new annotation type', 'SchemaCreate': 'Creation of a new schema', 'RelationActivate': 'Activation of a relation', 'PackageEditEnd': 'Ending editing of a package', 'AnnotationTypeDelete': 'Suppression of an annotation type', 'AnnotationEnd': 'End of an annotation', 'ViewDelete': 'Suppression of a view', 'AnnotationTypeEditEnd': 'Ending editing an annotation type', 'AnnotationActivate': 'Activation of an annotation', 'AnnotationBegin': 'Beginning of an annotation', 'PlayerSet': 'Going to a given position', 'Relati...">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+{'AnnotationActivate': 'Activation of an annotation',
+ 'AnnotationBegin': 'Beginning of an annotation',
+ 'AnnotationCreate': 'Creation of a new annotation',
+ 'AnnotationDeactivate': 'Deactivation of an annotation',
+ 'AnnotationDelete': 'Suppression of an annotation',
+ 'AnnotationEditEnd': 'Ending editing of an annotation',
+ 'AnnotationEnd': 'End of an annotation',
+ 'AnnotationTypeCreate': 'Creation of a new annotation type',
+<span class="variable-ellipsis">...</span>                                                                    </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="modifying_events"></a>
+<h3>modifying_events</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>Set</code>
+
+      </dd>
+<span title="Set(['ViewCreate', 'AnnotationTypeCreate', 'SchemaCreate', 'PackageEditEnd', 'AnnotationTypeDelete', 'ViewDelete', 'AnnotationTypeEditEnd', 'RelationTypeCreate', 'SchemaDelete', 'RelationEditEnd', 'QueryEditEnd', 'SchemaEditEnd', 'AnnotationEditEnd', 'QueryCreate', 'RelationTypeEditEnd', 'RelationCreate', 'AnnotationDelete', 'RelationTypeDelete', 'ViewEditEnd', 'RelationDelete', 'QueryDelete', 'AnnotationCreate'])">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+Set(['ViewCreate', 'AnnotationTypeCreate', 'SchemaCreate', 'PackageEdi<span class="variable-linewrap">\</span>
+tEnd', 'AnnotationTypeDelete', 'ViewDelete', 'AnnotationTypeEditEnd', <span class="variable-linewrap">\</span>
+'RelationTypeCreate', 'SchemaDelete', 'RelationEditEnd', 'QueryEditEnd<span class="variable-linewrap">\</span>
+', 'SchemaEditEnd', 'AnnotationEditEnd', 'QueryCreate', 'RelationTypeE<span class="variable-linewrap">\</span>
+ditEnd', 'RelationCreate', 'AnnotationDelete', 'RelationTypeDelete', '<span class="variable-linewrap">\</span>
+ViewEditEnd', 'RelationDelete', 'QueryDelete', 'AnnotationCreate'])    </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Sat Mar 12 15:31:52 2005</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>advene.rules.elements.Rule</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="advene-module.html">Package&nbsp;advene</a> ::
+        <a href="advene.rules-module.html">Package&nbsp;rules</a> ::
+        <a href="advene.rules.elements-module.html">Module&nbsp;elements</a> ::
+        Class&nbsp;Rule
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[<a href="../private/advene.rules.elements.Rule-class.html">show&nbsp;private</a>&nbsp;|&nbsp;hide&nbsp;private]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="advene.rules.elements.Rule-class.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Class Rule</h2>
+
+<hr/>
+
+Advene Rule, consisting in an Event, a Condition and an Action.
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="__init__"></a><span class="summary-sig"><span class="summary-sig-name">__init__</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>name</span>,
+          <span class=summary-sig-arg>event</span>,
+          <span class=summary-sig-arg>condition</span>,
+          <span class=summary-sig-arg>action</span>,
+          <span class=summary-sig-arg>origin</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="__str__"></a><span class="summary-sig"><span class="summary-sig-name">__str__</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.Rule-class.html#add_action" class="summary-sig-name"><code>add_action</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>action</span>)</span></code>
+<br />
+Add a new action to the rule.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.Rule-class.html#add_condition" class="summary-sig-name"><code>add_condition</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>condition</span>)</span></code>
+<br />
+Add a new condition</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.Rule-class.html#from_dom" class="summary-sig-name"><code>from_dom</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>catalog</span>,
+          <span class=summary-sig-arg>domelement</span>,
+          <span class=summary-sig-arg>origin</span>)</span></code>
+<br />
+Read the rule from a DOM element.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.Rule-class.html#from_xml_string" class="summary-sig-name"><code>from_xml_string</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>xmlstring</span>,
+          <span class=summary-sig-arg>catalog</span>)</span></code>
+<br />
+Read the rule from a XML string</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.Rule-class.html#to_dom" class="summary-sig-name"><code>to_dom</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>dom</span>)</span></code>
+<br />
+Save the ruleset in the given DOM element.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.Rule-class.html#to_xml" class="summary-sig-name"><code>to_xml</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>uri</span>,
+          <span class=summary-sig-arg>stream</span>)</span></code>
+<br />
+Save the ruleset to the given URI or stream.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.rules.elements.Rule-class.html#xml_repr" class="summary-sig-name"><code>xml_repr</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return the XML representation of the rule.</td></tr>
+</table><br />
+
+
+<!-- =========== START OF INSTANCE VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Instance Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">ActionList</font></td>
+<td><b><a href="advene.rules.elements.Rule-class.html#action"><code>action</code></a></b>: the action</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">Condition or ConditionList</font></td>
+<td><b><a href="advene.rules.elements.Rule-class.html#condition"><code>condition</code></a></b>: the condition</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">string</font></td>
+<td><b><a href="advene.rules.elements.Rule-class.html#event"><code>event</code></a></b>: the event name</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">string</font></td>
+<td><b><a href="advene.rules.elements.Rule-class.html#name"><code>name</code></a></b>: the rulename</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">URL</font></td>
+<td><b><a href="advene.rules.elements.Rule-class.html#origin"><code>origin</code></a></b>: the rule origin</td></tr>
+</table><br />
+
+
+<!-- =========== START OF CLASS VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Class Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><a href="advene.rules.elements.Condition-class.html" 
+          class="link"><code>Condition</code></a></font></td>
+<td><b><a href="advene.rules.elements.Rule-class.html#default_condition"><code>default_condition</code></a></b> = <span title="&lt;advene.rules.elements.Condition instance at 0xb6f0f0cc&gt;"><code>&lt;advene.rules.elements.Condition&nbsp;ins<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+</table><br />
+
+
+<!-- =========== START OF METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Method Details</th></tr>
+</table>
+
+<a name="add_action"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">add_action</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>action</span>)</span>
+  </h3>
+  Add a new action to the rule.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="add_condition"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">add_condition</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>condition</span>)</span>
+  </h3>
+  Add a new condition
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>condition</b></code> -
+         the new condition
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=Condition)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="from_dom"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">from_dom</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>catalog</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>domelement</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>origin</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Read the rule from a DOM element.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>catalog</b></code> -
+         the ECAEngine catalog
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=ECACatalog)</i>
+      <dd><code><b>domelement</b></code> -
+         the DOM element
+      <dd><code><b>origin</b></code> -
+         the source URI
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=URI)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="from_xml_string"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">from_xml_string</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>xmlstring</span>,
+          <span class=sig-arg>catalog</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Read the rule from a XML string
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="to_dom"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">to_dom</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>dom</span>)</span>
+  </h3>
+  Save the ruleset in the given DOM element.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="to_xml"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">to_xml</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>uri</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>stream</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Save the ruleset to the given URI or stream.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="xml_repr"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">xml_repr</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  Return the XML representation of the rule.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF INSTANCE VARIABLE DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Instance Variable Details</th></tr>
+</table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="action"></a>
+<h3>action</h3>
+the action
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          ActionList
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="condition"></a>
+<h3>condition</h3>
+the condition
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          Condition or ConditionList
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="event"></a>
+<h3>event</h3>
+the event name
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          string
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="name"></a>
+<h3>name</h3>
+the rulename
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          string
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="origin"></a>
+<h3>origin</h3>
+the rule origin
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          URL
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<br />
+
+
+<!-- =========== START OF CLASS VARIABLE DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Class Variable Details</th></tr>
+</table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="default_condition"></a>
+<h3>default_condition</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <a href="advene.rules.elements.Condition-class.html" 
+          class="link"><code>Condition</code></a>
+
+      </dd>
+<span title="&lt;advene.rules.elements.Condition instance at 0xb6f0f0cc&gt;">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+&lt;advene.rules.elements.Condition instance at 0xb6f0f0cc&gt;               </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Sat Mar 12 15:31:54 2005</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>

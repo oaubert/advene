@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>advene.model.bundle.StandardXmlBundle</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="advene-module.html">Package&nbsp;advene</a> ::
+        <a href="advene.model-module.html">Package&nbsp;model</a> ::
+        <a href="advene.model.bundle-module.html">Module&nbsp;bundle</a> ::
+        Class&nbsp;StandardXmlBundle
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[show&nbsp;private&nbsp;|&nbsp;<a href="../public/advene.model.bundle.StandardXmlBundle-class.html">hide&nbsp;private</a>]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="advene.model.bundle.StandardXmlBundle-class.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Type StandardXmlBundle</h2>
+
+<pre class="base-tree">
+        <a href="__builtin__.object-class.html"><code>object</code></a> --+        
+                 |        
+           <a href="advene.model.modeled.Modeled-class.html"><code>Modeled</code></a> --+    
+                     |    
+    <a href="__builtin__.object-class.html"><code>object</code></a> --+       |    
+             |       |    
+      <a href="advene.model.viewable.Viewable-class.html"><code>Viewable</code></a> --+   |    
+                 |   |    
+ <a href="advene.model.viewable.ViewableWithClass-class.html"><code>ViewableWithClass</code></a> --+    
+                     |    
+    <a href="__builtin__.object-class.html"><code>object</code></a> --+       |    
+             |       |    
+<a href="advene.model.bundle.AbstractBundle-class.html"><code>AbstractBundle</code></a> --+   |    
+                 |   |    
+    <a href="advene.model.bundle.WritableBundle-class.html"><code>WritableBundle</code></a> --+    
+                     |    
+     <a href="advene.model.bundle.AbstractXmlBundle-class.html"><code>AbstractXmlBundle</code></a> --+
+                         |
+                        <b>StandardXmlBundle</b>
+</pre><br />
+
+<dl><dt><b>Known Subclasses:</b></dt>
+<dd>
+    <a href="advene.model.bundle.ImportBundle-class.html"><code>ImportBundle</code></a>,
+    <a href="advene.model.bundle.InverseDictBundle-class.html"><code>InverseDictBundle</code></a></dd></dl>
+
+<hr/>
+
+<p>This class implements a bundle wraping XML elements.</p>
+The constructor takes a parent package, an element containing the 
+list, and a class to be used to construct items. Furthermore, this class 
+must have staticmethods getNamespaceUri and getLocalName to indicate 
+which elements to look for, and a _getModel instance method returning a 
+DOM element. Note that this bundle is writable, and that write operations 
+are commited on the underlying XML structure.
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.StandardXmlBundle-class.html#__init__" class="summary-sig-name"><code>__init__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>parent</span>,
+          <span class=summary-sig-arg>element</span>,
+          <span class=summary-sig-arg>cls</span>)</span></code>
+<br />
+FIXME</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.bundle.StandardXmlBundle-class.html#_assert_add_item" class="summary-sig-name"><code>_assert_add_item</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>item</span>)</span></code>
+<br />
+This method is check before any item addition.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="_get_element"></a><span class="summary-sig"><span class="summary-sig-name">_get_element</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>item</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="_get_local_name"></a><span class="summary-sig"><span class="summary-sig-name">_get_local_name</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="_get_namespace_uri"></a><span class="summary-sig"><span class="summary-sig-name">_get_namespace_uri</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="_getViewableType"></a><span class="summary-sig"><span class="summary-sig-name">_getViewableType</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="_make_item"></a><span class="summary-sig"><span class="summary-sig-name">_make_item</span>(<span class=summary-sig-arg>self</span>,
+          <span class="summary-sig-vararg">*args</span>,
+          <span class="summary-sig-kwarg">**kw</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from AbstractXmlBundle</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractXmlBundle-class.html#__delitem__" class="summary-sig-name"><code>__delitem__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>index</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractXmlBundle-class.html#__str__" class="summary-sig-name"><code>__str__</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractXmlBundle-class.html#getViewableTypeGetterName" class="summary-sig-name"><code>getViewableTypeGetterName</code></a>()</span></code>
+<br />
+Override the name of the method to get ViewableType    <i>(Static method)</i>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractXmlBundle-class.html#insert" class="summary-sig-name"><code>insert</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>index</span>,
+          <span class=summary-sig-arg>item</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.bundle.AbstractXmlBundle-class.html#_update" class="summary-sig-name"><code>_update</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+FIXME</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from WritableBundle</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.WritableBundle-class.html#__delslice__" class="summary-sig-name"><code>__delslice__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>begin</span>,
+          <span class=summary-sig-arg>end</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.WritableBundle-class.html#append" class="summary-sig-name"><code>append</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>item</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.WritableBundle-class.html#clear" class="summary-sig-name"><code>clear</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.WritableBundle-class.html#pop" class="summary-sig-name"><code>pop</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>index</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.WritableBundle-class.html#popitem" class="summary-sig-name"><code>popitem</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Pops the first element of this bundle, and returns both its URI and 
+the item itself.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.WritableBundle-class.html#remove" class="summary-sig-name"><code>remove</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>item</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from AbstractBundle</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#__add__" class="summary-sig-name"><code>__add__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>other</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#__contains__" class="summary-sig-name"><code>__contains__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>v</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#__getitem__" class="summary-sig-name"><code>__getitem__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>index</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#__getslice__" class="summary-sig-name"><code>__getslice__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>begin</span>,
+          <span class=summary-sig-arg>end</span>)</span></code>
+<br />
+b.__getslice__(i, j) &lt;==&gt; b[i:j] Note that the slice is a copy 
+of this bundle.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#__iter__" class="summary-sig-name"><code>__iter__</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#__len__" class="summary-sig-name"><code>__len__</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#get" class="summary-sig-name"><code>get</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>id</span>,
+          <span class=summary-sig-arg>default</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#getQName" class="summary-sig-name"><code>getQName</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>key</span>,
+          <span class=summary-sig-arg>namespaces</span>,
+          <span class=summary-sig-arg>default</span>)</span></code>
+<br />
+Resolve the given key as a QName with regard to the given 
+namespaces.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#has_key" class="summary-sig-name"><code>has_key</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>key</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#ids" class="summary-sig-name"><code>ids</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#index" class="summary-sig-name"><code>index</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>element</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#items" class="summary-sig-name"><code>items</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#iteritems" class="summary-sig-name"><code>iteritems</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#iterkeys" class="summary-sig-name"><code>iterkeys</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#itervalues" class="summary-sig-name"><code>itervalues</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#keys" class="summary-sig-name"><code>keys</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return the keys of this bundle.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#uris" class="summary-sig-name"><code>uris</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return the uris of the objects in the bundle.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.bundle.AbstractBundle-class.html#values" class="summary-sig-name"><code>values</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Modeled</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.modeled.Modeled-class.html#getAccessPath" class="summary-sig-name"><code>getAccessPath</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Modeled which are not Importable rely on their parent for the access 
+path.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.modeled.Modeled-class.html#getOwnerPackage" class="summary-sig-name"><code>getOwnerPackage</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.modeled.Modeled-class.html#getRootPackage" class="summary-sig-name"><code>getRootPackage</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Modeled which are not Importable rely on their parent for the access 
+path.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.Modeled-class.html#_getChild" class="summary-sig-name"><code>_getChild</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>match</span>,
+          <span class=summary-sig-arg>before</span>,
+          <span class=summary-sig-arg>after</span>)</span></code>
+<br />
+Looks for the first Element child matching the parameters.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.Modeled-class.html#_getDocument" class="summary-sig-name"><code>_getDocument</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return this object's model owner document.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.Modeled-class.html#_getModel" class="summary-sig-name"><code>_getModel</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return this objects's model (a DOM element).</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.Modeled-class.html#_getModelChildren" class="summary-sig-name"><code>_getModelChildren</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return a DOM NodeList of the element children of this object's 
+model.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.Modeled-class.html#_getParent" class="summary-sig-name"><code>_getParent</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return this objects's parent (a Modeled instance, or None).</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from ViewableWithClass</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.ViewableWithClass-class.html#getViewableClass" class="summary-sig-name"><code>getViewableClass</code></a>()</span></code>
+<br />
+    <i>(Static method)</i>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.ViewableWithClass-class.html#getViewableType" class="summary-sig-name"><code>getViewableType</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.viewable.ViewableWithClass-class.html#_get_viewable_class" class="summary-sig-name"><code>_get_viewable_class</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Viewable</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#delDefaultView" class="summary-sig-name"><code>delDefaultView</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#findDefaultView" class="summary-sig-name"><code>findDefaultView</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#getAllClasses" class="summary-sig-name"><code>getAllClasses</code></a>()</span></code>
+<br />
+Return all the declared viewable classes    <i>(Static method)</i>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#getDefaultView" class="summary-sig-name"><code>getDefaultView</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#getValidViews" class="summary-sig-name"><code>getValidViews</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Returns the ids of views from the root package which are valid for 
+this object.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#setDefaultView" class="summary-sig-name"><code>setDefaultView</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>value</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#view" class="summary-sig-name"><code>view</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>view_id</span>,
+          <span class=summary-sig-arg>context</span>)</span></code>
+<br />
+Apply the specified view (or the best appliable view, cf 
+findDefaultView) on the object, with optional parameters given in 
+dico.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#withClass" class="summary-sig-name"><code>withClass</code></a>(<span class=summary-sig-arg>viewable_class</span>,
+          <span class=summary-sig-arg>viewable_type_getter_name</span>)</span></code>
+<br />
+Make or retrieve (if already created) a subclass of Viewable with the 
+corresponding viewable_class    <i>(Static method)</i>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.viewable.Viewable-class.html#_find_named_view" class="summary-sig-name"><code>_find_named_view</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>view_id</span>,
+          <span class=summary-sig-arg>context</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from object</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__delattr__" class="summary-sig-name"><code>__delattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__delattr__('name') &lt;==&gt; del x.name</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__getattribute__" class="summary-sig-name"><code>__getattribute__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__getattribute__('name') &lt;==&gt; x.name</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__hash__" class="summary-sig-name"><code>__hash__</code></a>(<span class=summary-sig-arg>x</span>)</span></code>
+<br />
+x.__hash__() &lt;==&gt; hash(x)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__new__" class="summary-sig-name"><code>__new__</code></a>(<span class=summary-sig-arg>T</span>,
+          <span class=summary-sig-arg>S</span>,
+          <span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+T.__new__(S, ...) -&gt; a new object with type S, a subtype of T</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce__" class="summary-sig-name"><code>__reduce__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce_ex__" class="summary-sig-name"><code>__reduce_ex__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__repr__" class="summary-sig-name"><code>__repr__</code></a>(<span class=summary-sig-arg>x</span>)</span></code>
+<br />
+x.__repr__() &lt;==&gt; repr(x)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__setattr__" class="summary-sig-name"><code>__setattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__setattr__('name', value) &lt;==&gt; x.name = value</td></tr>
+</table><br />
+
+
+<!-- =========== START OF PROPERTY SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Property Summary</th></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Modeled</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.modeled.Modeled-class.html#accessPath"><code>accessPath</code></a></b></td></tr><tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.modeled.Modeled-class.html#ownerPackage"><code>ownerPackage</code></a></b></td></tr><tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.modeled.Modeled-class.html#rootPackage"><code>rootPackage</code></a></b></td></tr><tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from ViewableWithClass</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.viewable.ViewableWithClass-class.html#viewableClass"><code>viewableClass</code></a></b></td></tr><tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.viewable.ViewableWithClass-class.html#viewableType"><code>viewableType</code></a></b></td></tr><tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Viewable</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.viewable.Viewable-class.html#defaultView"><code>defaultView</code></a></b></td></tr><tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.viewable.Viewable-class.html#validViews"><code>validViews</code></a></b></td></tr></table><br />
+
+
+<!-- =========== START OF CLASS VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Class Variable Summary</th></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Viewable</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>dict</code></font></td>
+<td><b><a href="../private/advene.model.viewable.Viewable-class.html#__subclasses"><code>_Viewable__subclasses</code></a></b> = <span title="{'package': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'fragment': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'view': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'list': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'content': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'relation': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'query': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'schema': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'relation-type': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'annotation': &lt;class 'advene.model.view..."><code>{'package':&nbsp;&lt;class&nbsp;'advene.model<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+</table><br />
+
+
+<!-- =========== START OF INSTANCE METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Instance Method Details</th></tr>
+</table>
+
+<a name="__init__"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>parent</span>,
+          <span class=sig-arg>element</span>,
+          <span class=sig-arg>cls</span>)</span>
+    <br /><i>(Constructor)</i>
+  </h3>
+  FIXME
+  <dl><dt></dt><dd>
+    <dl><dt><b>Overrides:</b></dt>
+      <dd><a href="advene.model.bundle.AbstractXmlBundle-class.html#__init__"><code>advene.model.bundle.AbstractXmlBundle.__init__</code></a></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="_assert_add_item"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">_assert_add_item</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>item</span>)</span>
+  </h3>
+  <p>This method is check before any item addition.</p>
+  It returns True so that it can be asserted itself (so that outside 
+  debug mode, it is not even called), but it also asserts every clause so 
+  that the stacktrace is more explicit.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Overrides:</b></dt>
+      <dd><a href="../private/advene.model.bundle.AbstractXmlBundle-class.html#_assert_add_item"><code>advene.model.bundle.AbstractXmlBundle._assert_add_item</code></a> <i>(inherited documentation)</i>
+</dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Sat Mar 12 15:31:54 2005</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>

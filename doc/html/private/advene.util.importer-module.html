@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>advene.util.importer</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="advene-module.html">Package&nbsp;advene</a> ::
+        <a href="advene.util-module.html">Package&nbsp;util</a> ::
+        Module&nbsp;importer
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[show&nbsp;private&nbsp;|&nbsp;<a href="../public/advene.util.importer-module.html">hide&nbsp;private</a>]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="advene.util.importer-module.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF MODULE DESCRIPTION =========== -->
+<h2 class="module">Module advene.util.importer</h2>
+
+<h1 class="heading">Import external data.</h1>
+  <p>Provides a generic framework to import/convert external data.</p>
+  The general idea is:
+  <ul>
+    <li>
+      Create an instance of Importer, called im. If the destination 
+      package already exists, call the constructor with package and 
+      defaultype named parameters.
+    </li>
+    <li>
+      Initialisation:
+      <ul>
+        <li>
+          If the destination package already exists, set the 
+          ``im.package`` and ``im.defaultype`` to appropriate values
+        </li>
+        <li>
+          If you want to create a new package with specific type and 
+          schema id, use ``im.init_package(schemaid=..., 
+          annotationtypeid=...)``
+        </li>
+        <li>
+          If nothing is given, a default package will be created, with 
+          a default schema and annotationtype
+        </li>
+      </ul>
+    </li>
+    <li>
+      Conversion: Call ``im.process_file(filename)`` which will return 
+      the package containing the converted annotations
+    </li>
+  </ul>
+  im.statistics hold a dictionary containing the creation 
+  statistics.
+<hr/>
+
+<!-- =========== START OF CLASSES =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Classes</th></tr>
+<tr><td width="15%">
+  <b><a href="advene.util.importer.ChaplinImporter-class.html"><code>ChaplinImporter</code></a></b></td>
+  <td>Chaplin importer.</td></tr>
+<tr><td width="15%">
+  <b><a href="advene.util.importer.ElanImporter-class.html"><code>ElanImporter</code></a></b></td>
+  <td>Elan importer.</td></tr>
+<tr><td width="15%">
+  <b><a href="advene.util.importer.GenericImporter-class.html"><code>GenericImporter</code></a></b></td>
+  <td>Generic importer class</td></tr>
+<tr><td width="15%">
+  <b><a href="advene.util.importer.LsDVDImporter-class.html"><code>LsDVDImporter</code></a></b></td>
+  <td>lsdvd importer.</td></tr>
+<tr><td width="15%">
+  <b><a href="advene.util.importer.PraatImporter-class.html"><code>PraatImporter</code></a></b></td>
+  <td>PRAAT importer.</td></tr>
+<tr><td width="15%">
+  <b><a href="advene.util.importer.SubtitleImporter-class.html"><code>SubtitleImporter</code></a></b></td>
+  <td>Subtitle importer.</td></tr>
+<tr><td width="15%">
+  <b><a href="advene.util.importer.TextImporter-class.html"><code>TextImporter</code></a></b></td>
+  <td>Text importer.</td></tr>
+<tr><td width="15%">
+  <b><a href="advene.util.importer.XiImporter-class.html"><code>XiImporter</code></a></b></td>
+  <td>Xi importer.</td></tr>
+</table><br />
+
+
+<!-- =========== START OF FUNCTION SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Function Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="get_importer"></a><span class="summary-sig"><span class="summary-sig-name">get_importer</span>(<span class=summary-sig-arg>fname</span>,
+          <span class="summary-sig-kwarg">**kw</span>)</span></code>
+</td></tr>
+</table><br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Sat Mar 12 15:31:54 2005</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>

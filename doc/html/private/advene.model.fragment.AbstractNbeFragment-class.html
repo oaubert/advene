@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>advene.model.fragment.AbstractNbeFragment</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="advene-module.html">Package&nbsp;advene</a> ::
+        <a href="advene.model-module.html">Package&nbsp;model</a> ::
+        <a href="advene.model.fragment-module.html">Module&nbsp;fragment</a> ::
+        Class&nbsp;AbstractNbeFragment
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[show&nbsp;private&nbsp;|&nbsp;<a href="../public/advene.model.fragment.AbstractNbeFragment-class.html">hide&nbsp;private</a>]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="advene.model.fragment.AbstractNbeFragment-class.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Type AbstractNbeFragment</h2>
+
+<pre class="base-tree">
+   <a href="__builtin__.object-class.html"><code>object</code></a> --+            
+            |            
+     <a href="advene.model.viewable.Viewable-class.html"><code>Viewable</code></a> --+        
+                |        
+<a href="advene.model.viewable.ViewableWithClass-class.html"><code>ViewableWithClass</code></a> --+    
+                    |    
+     <a href="advene.model.fragment.AbstractFragment-class.html"><code>AbstractFragment</code></a> --+
+                        |
+           <a href="__builtin__.object-class.html"><code>object</code></a> --+   |
+                    |   |
+              <a href="advene.model.modeled.Modeled-class.html"><code>Modeled</code></a> --+
+                        |
+                       <b>AbstractNbeFragment</b>
+</pre><br />
+
+<dl><dt><b>Known Subclasses:</b></dt>
+<dd>
+    <a href="advene.model.fragment.ByteCountFragment-class.html"><code>ByteCountFragment</code></a>,
+    <a href="advene.model.fragment.MillisecondFragment-class.html"><code>MillisecondFragment</code></a></dd></dl>
+
+<hr/>
+
+<p>Abstract Numerical Begin-End fragment class.</p>
+Implements operators '==' and 'in' (for other ByteCountFragments and 
+numbers).
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.fragment.AbstractNbeFragment-class.html#__init__" class="summary-sig-name"><code>__init__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>element</span>,
+          <span class=summary-sig-arg>parent</span>,
+          <span class=summary-sig-arg>begin</span>,
+          <span class=summary-sig-arg>end</span>,
+          <span class=summary-sig-arg>duration</span>)</span></code>
+<br />
+Create a new ByteCount fragment, with a required begin value and 
+facultative end or duration values</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="__contains__"></a><span class="summary-sig"><span class="summary-sig-name">__contains__</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>other</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="__eq__"></a><span class="summary-sig"><span class="summary-sig-name">__eq__</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>other</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.fragment.AbstractNbeFragment-class.html#__repr__" class="summary-sig-name"><code>__repr__</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return a string representation of the object.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.fragment.AbstractNbeFragment-class.html#__str__" class="summary-sig-name"><code>__str__</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return a string representation of the NBE fragment</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.fragment.AbstractNbeFragment-class.html#clone" class="summary-sig-name"><code>clone</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Clone this fragment into a new unbounded fragment.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="getBegin"></a><span class="summary-sig"><span class="summary-sig-name">getBegin</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="getDuration"></a><span class="summary-sig"><span class="summary-sig-name">getDuration</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="getEnd"></a><span class="summary-sig"><span class="summary-sig-name">getEnd</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.fragment.AbstractNbeFragment-class.html#isBounded" class="summary-sig-name"><code>isBounded</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return whether this fragment is bounded, i.e.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="setBegin"></a><span class="summary-sig"><span class="summary-sig-name">setBegin</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>value</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="setEnd"></a><span class="summary-sig"><span class="summary-sig-name">setEnd</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>value</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.fragment.AbstractNbeFragment-class.html#_bound" class="summary-sig-name"><code>_bound</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>element</span>)</span></code>
+<br />
+Bound this fragment to the document owning the given element.</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from AbstractFragment</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.fragment.AbstractFragment-class.html#filter" class="summary-sig-name"><code>filter</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+Return an iterator over all the _annotations_ having a fragment from 
+this class.    <i>(Class method)</i>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from ViewableWithClass</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.ViewableWithClass-class.html#getViewableClass" class="summary-sig-name"><code>getViewableClass</code></a>()</span></code>
+<br />
+    <i>(Static method)</i>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.ViewableWithClass-class.html#getViewableType" class="summary-sig-name"><code>getViewableType</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.ViewableWithClass-class.html#getViewableTypeGetterName" class="summary-sig-name"><code>getViewableTypeGetterName</code></a>()</span></code>
+<br />
+    <i>(Static method)</i>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.viewable.ViewableWithClass-class.html#_get_viewable_class" class="summary-sig-name"><code>_get_viewable_class</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Viewable</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#delDefaultView" class="summary-sig-name"><code>delDefaultView</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#findDefaultView" class="summary-sig-name"><code>findDefaultView</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#getAllClasses" class="summary-sig-name"><code>getAllClasses</code></a>()</span></code>
+<br />
+Return all the declared viewable classes    <i>(Static method)</i>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#getDefaultView" class="summary-sig-name"><code>getDefaultView</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#getValidViews" class="summary-sig-name"><code>getValidViews</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Returns the ids of views from the root package which are valid for 
+this object.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#setDefaultView" class="summary-sig-name"><code>setDefaultView</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>value</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#view" class="summary-sig-name"><code>view</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>view_id</span>,
+          <span class=summary-sig-arg>context</span>)</span></code>
+<br />
+Apply the specified view (or the best appliable view, cf 
+findDefaultView) on the object, with optional parameters given in 
+dico.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.viewable.Viewable-class.html#withClass" class="summary-sig-name"><code>withClass</code></a>(<span class=summary-sig-arg>viewable_class</span>,
+          <span class=summary-sig-arg>viewable_type_getter_name</span>)</span></code>
+<br />
+Make or retrieve (if already created) a subclass of Viewable with the 
+corresponding viewable_class    <i>(Static method)</i>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.viewable.Viewable-class.html#_find_named_view" class="summary-sig-name"><code>_find_named_view</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>view_id</span>,
+          <span class=summary-sig-arg>context</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Modeled</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.modeled.Modeled-class.html#getAccessPath" class="summary-sig-name"><code>getAccessPath</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Modeled which are not Importable rely on their parent for the access 
+path.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.modeled.Modeled-class.html#getOwnerPackage" class="summary-sig-name"><code>getOwnerPackage</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.model.modeled.Modeled-class.html#getRootPackage" class="summary-sig-name"><code>getRootPackage</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Modeled which are not Importable rely on their parent for the access 
+path.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.Modeled-class.html#_getChild" class="summary-sig-name"><code>_getChild</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>match</span>,
+          <span class=summary-sig-arg>before</span>,
+          <span class=summary-sig-arg>after</span>)</span></code>
+<br />
+Looks for the first Element child matching the parameters.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.Modeled-class.html#_getDocument" class="summary-sig-name"><code>_getDocument</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return this object's model owner document.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.Modeled-class.html#_getModel" class="summary-sig-name"><code>_getModel</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return this objects's model (a DOM element).</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.Modeled-class.html#_getModelChildren" class="summary-sig-name"><code>_getModelChildren</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return a DOM NodeList of the element children of this object's 
+model.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.Modeled-class.html#_getParent" class="summary-sig-name"><code>_getParent</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return this objects's parent (a Modeled instance, or None).</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from object</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__delattr__" class="summary-sig-name"><code>__delattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__delattr__('name') &lt;==&gt; del x.name</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__getattribute__" class="summary-sig-name"><code>__getattribute__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__getattribute__('name') &lt;==&gt; x.name</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__hash__" class="summary-sig-name"><code>__hash__</code></a>(<span class=summary-sig-arg>x</span>)</span></code>
+<br />
+x.__hash__() &lt;==&gt; hash(x)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__new__" class="summary-sig-name"><code>__new__</code></a>(<span class=summary-sig-arg>T</span>,
+          <span class=summary-sig-arg>S</span>,
+          <span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+T.__new__(S, ...) -&gt; a new object with type S, a subtype of T</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce__" class="summary-sig-name"><code>__reduce__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce_ex__" class="summary-sig-name"><code>__reduce_ex__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__setattr__" class="summary-sig-name"><code>__setattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__setattr__('name', value) &lt;==&gt; x.name = value</td></tr>
+</table><br />
+
+
+<!-- =========== START OF PROPERTY SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Property Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.fragment.AbstractNbeFragment-class.html#begin"><code>begin</code></a></b></td></tr><tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.fragment.AbstractNbeFragment-class.html#duration"><code>duration</code></a></b></td></tr><tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.fragment.AbstractNbeFragment-class.html#end"><code>end</code></a></b></td></tr><tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from ViewableWithClass</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.viewable.ViewableWithClass-class.html#viewableClass"><code>viewableClass</code></a></b></td></tr><tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.viewable.ViewableWithClass-class.html#viewableType"><code>viewableType</code></a></b></td></tr><tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Viewable</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.viewable.Viewable-class.html#defaultView"><code>defaultView</code></a></b></td></tr><tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.viewable.Viewable-class.html#validViews"><code>validViews</code></a></b></td></tr><tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Modeled</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.modeled.Modeled-class.html#accessPath"><code>accessPath</code></a></b></td></tr><tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.modeled.Modeled-class.html#ownerPackage"><code>ownerPackage</code></a></b></td></tr><tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><b><a href="advene.model.modeled.Modeled-class.html#rootPackage"><code>rootPackage</code></a></b></td></tr></table><br />
+
+
+<!-- =========== START OF CLASS VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Class Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>type</code></font></td>
+  <td><a name="__metaclass__"></a><b><code>__metaclass__</code></b> = <a href="advene.model.util.auto_properties.auto_properties-class.html"><code>advene.model.util.auto_properties.auto_properties</code></a></td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Viewable</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>dict</code></font></td>
+<td><b><a href="../private/advene.model.viewable.Viewable-class.html#__subclasses"><code>_Viewable__subclasses</code></a></b> = <span title="{'package': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'fragment': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'view': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'list': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'content': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'relation': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'query': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'schema': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'relation-type': &lt;class 'advene.model.viewable.ViewableWithClass'&gt;, 'annotation': &lt;class 'advene.model.view..."><code>{'package':&nbsp;&lt;class&nbsp;'advene.model<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+</table><br />
+
+
+<!-- =========== START OF INSTANCE METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Instance Method Details</th></tr>
+</table>
+
+<a name="__init__"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>element</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>parent</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>begin</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>end</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>duration</span>=<span class=sig-default>None</span>)</span>
+    <br /><i>(Constructor)</i>
+  </h3>
+  Create a new ByteCount fragment, with a required begin value and 
+  facultative end or duration values
+  <dl><dt></dt><dd>
+    <dl><dt><b>Overrides:</b></dt>
+      <dd><a href="advene.model.fragment.AbstractFragment-class.html#__init__"><code>advene.model.fragment.AbstractFragment.__init__</code></a></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="__repr__"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">__repr__</span>(<span class=sig-arg>self</span>)</span>
+    <br /><i>(Representation operator)</i>
+  </h3>
+  Return a string representation of the object.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Overrides:</b></dt>
+      <dd><a href="__builtin__.object-class.html#__repr__"><code>__builtin__.object.__repr__</code></a></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="__str__"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">__str__</span>(<span class=sig-arg>self</span>)</span>
+    <br /><i>(Informal representation operator)</i>
+  </h3>
+  Return a string representation of the NBE fragment
+  <dl><dt></dt><dd>
+    <dl><dt><b>Overrides:</b></dt>
+      <dd><a href="__builtin__.object-class.html#__str__"><code>__builtin__.object.__str__</code></a></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="clone"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">clone</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  Clone this fragment into a new unbounded fragment.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="isBounded"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">isBounded</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  Return whether this fragment is bounded, i.e. represents a document 
+  element. A bounded fragment can not be unbounded, but can be cloned 
+  into a new unbounded fragment (see x.clone()). An unbounded fragment 
+  can be bounded to a DOM document (see x._bound).
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="_bound"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">_bound</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>element</span>)</span>
+  </h3>
+  Bound this fragment to the document owning the given element. Note 
+  that the given element will be replaced by the fragment element. You 
+  probably do not want to use this method directly, but rather set an 
+  annotation fragment (see advene.annotation.Annotation)
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF PROPERTY DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Property Details</th></tr>
+</table>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+
+<a name="begin"></a>
+<h3>begin</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Get Method:</b></dt>
+      <dd><span class="summary-sig"><a href="advene.model.fragment.AbstractNbeFragment-class.html#getBegin" class="summary-sig-name"><code>getBegin</code></a>(<span class=summary-sig-arg>self</span>)</span>
+      </dd>
+      <dt><b>Set Method:</b></dt>
+      <dd><span class="summary-sig"><a href="advene.model.fragment.AbstractNbeFragment-class.html#setBegin" class="summary-sig-name"><code>setBegin</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>value</span>)</span>
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table><table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+
+<a name="duration"></a>
+<h3>duration</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Get Method:</b></dt>
+      <dd><span class="summary-sig"><a href="advene.model.fragment.AbstractNbeFragment-class.html#getDuration" class="summary-sig-name"><code>getDuration</code></a>(<span class=summary-sig-arg>self</span>)</span>
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table><table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+
+<a name="end"></a>
+<h3>end</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Get Method:</b></dt>
+      <dd><span class="summary-sig"><a href="advene.model.fragment.AbstractNbeFragment-class.html#getEnd" class="summary-sig-name"><code>getEnd</code></a>(<span class=summary-sig-arg>self</span>)</span>
+      </dd>
+      <dt><b>Set Method:</b></dt>
+      <dd><span class="summary-sig"><a href="advene.model.fragment.AbstractNbeFragment-class.html#setEnd" class="summary-sig-name"><code>setEnd</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>value</span>)</span>
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table><br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Sat Mar 12 15:31:54 2005</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>
