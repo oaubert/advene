@@ -299,7 +299,10 @@ def first (target, context):
         t=target()
     else:
         t=target
-    return t[0]
+    if t:
+        return t[0]
+    else:
+        return None
 
 def last (target, context):
     """
@@ -310,7 +313,10 @@ def last (target, context):
         t=target()
     else:
         t=target
-    return t[-1]
+    if t:
+        return t[-1]
+    else:
+        return None
 
 def rest (target, context):
     """
