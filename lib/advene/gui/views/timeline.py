@@ -171,6 +171,8 @@ class TimeLine:
         return bs
 
     def scroll_to_annotation(self, annotation):
+        """Scroll the view to put the annotation in the middle.
+        """
         (w, h) = self.widget.window.get_size ()
         pos = self.unit2pixel (annotation.fragment.begin) - w/2
         a = self.adjustment
@@ -201,7 +203,8 @@ class TimeLine:
         return True
             
     def register_callback (self, controller=None):
-        """Add the activate handler for annotations."""
+        """Add the activate handler for annotations.
+        """
         self.beginrule=controller.event_handler.internal_rule (event="AnnotationBegin",
                                                 method=self.activate_annotation_handler)
         self.endrule=controller.event_handler.internal_rule (event="AnnotationEnd",
@@ -243,9 +246,6 @@ class TimeLine:
             else:
                 self.activate_annotation (annotation, buttons=buttons)
         
-    def update (self, widget=None, data=None):
-        print "Update"
-        
     def unit2pixel (self, v):
         return (long(v / self.ratio_adjustment.value)) or 1
 
@@ -257,6 +257,8 @@ class TimeLine:
         return self.widget
 
     def update_button (self, b):
+        """Update the representation for button b.
+        """
         a = b.annotation
         l = b.label
         u2p = self.unit2pixel
@@ -276,6 +278,8 @@ class TimeLine:
         return True
 
     def update_model(self, package):
+        """Update the whole model.
+        """
         self.list=package.annotations
         self.layer_position.clear()
         self.minimum = 0
@@ -327,16 +331,29 @@ class TimeLine:
         return True
     
     def annotation_cb (self, widget, ann):
+        """Display the popup menu when clicking on annotation.
+        """
         menu=advene.gui.popup.Menu(ann, controller=self.controller)
         menu.add_menuitem(menu.menu, _("Select for resize"), self.select_for_resize, ann)
         menu.menu.show_all()
         menu.popup()
         return True
 
-    def annotation_type_cb (self, widget, anntype):
-        menu=advene.gui.popup.Menu(anntype, controller=self.controller)
+    def annotation_type_cb (self, widget):
+        """Display the popup menu when clicking on annotation type.
+        """
+        menu=advene.gui.popup.Menu(widget.annotationtype,
+                                   controller=self.controller)
         menu.popup()
         return True
+
+    def annotation_type_pressed_cb(self, widget, event):
+        """Display the popup menu when right-clicking on annotation type.
+        """
+        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            self.annotation_type_cb(widget)
+            return True
+        return False
 
     def dump_adjustment (self):
         a = self.adjustment
@@ -636,7 +653,18 @@ class TimeLine:
             return True
         return False
 
+    def mouse_pressed_cb(self, widget=None, event=None):
+        """Handle right-mouse click in timeline window.
+        """
+        retval = False
+        if event.button == 3 or event.button == 1:
+            self.context_cb (timel=self, position=self.pixel2unit(event.x))
+            retval = True
+        return retval
+
     def context_cb (self, timel=None, position=None):
+        """Display the context menu for a right-click in the timeline window.
+        """
         # This callback is called on a right-mouse-button press
         # in the timeline display. It is called with the
         # current position (in ms)
@@ -688,6 +716,8 @@ class TimeLine:
         return True
             
     def set_selection_marker (self, position):
+        """Display the marker representing the position.
+        """
         x=self.unit2pixel(position)
         if self.selection_marker is None:
             # Draw a marker
@@ -711,13 +741,6 @@ class TimeLine:
             pass
         return True
     
-    def mouse_pressed_cb(self, widget=None, event=None):
-        retval = False
-        if event.button == 3 or event.button == 1:
-            self.context_cb (timel=self, position=self.pixel2unit(event.x))
-            retval = True
-        return retval
-
     def remove_widget(self, widget=None, layout=None):
         layout.remove(widget)
         return True
@@ -725,9 +748,11 @@ class TimeLine:
     def update_layout (self):
         (w, h) = self.widget.get_size ()
         self.widget.set_size (self.unit2pixel(self.maximum - self.minimum), h)
-        
+        return True
+    
     def update_adjustment (self):
-        """Update the adjustment values depending on the current aspect ratio."""
+        """Update the adjustment values depending on the current aspect ratio.
+        """
         u2p = self.unit2pixel
         a = self.adjustment
         width = self.maximum - self.minimum
@@ -764,6 +789,8 @@ class TimeLine:
         return True
 
     def scroll_event(self, widget=None, event=None):
+        """Handle mouse scrollwheel events.
+        """
         if event.state & gtk.gdk.CONTROL_MASK:
             a = self.ratio_adjustment
             incr = a.page_size / 2
@@ -793,7 +820,8 @@ class TimeLine:
         return False
 
     def move_widget (self, widget=None):
-        """Update the annotation widget position"""
+        """Update the annotation widget position.
+        """
         if hasattr (widget, 'annotation'):
             u2p = self.unit2pixel
             widget.set_size_request(u2p(widget.annotation.fragment.duration),
@@ -805,6 +833,8 @@ class TimeLine:
 
     
     def redraw_event(self, widget=None, data=None):
+        """Redraw the layout according to the new ratio value.
+        """
         if self.old_ratio_value != self.ratio_adjustment.value:
             self.ratio = self.ratio_adjustment.value
             self.old_ratio_value = self.ratio
@@ -831,7 +861,8 @@ class TimeLine:
             layout.put (b, 0, self.layer_position[t])
             b.annotationtype=t
             b.show()
-            b.connect("clicked", self.annotation_type_cb, t)
+            b.connect("clicked", self.annotation_type_cb)
+            b.connect("button-press-event", self.annotation_type_pressed_cb)
             # The button can receive drops (to transmute annotations)
             b.connect("drag_data_received", self.type_drag_received)
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -901,14 +932,17 @@ class TimeLine:
              gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-begin"),
 
             (_("BeginEnd"), _("Align the begin time to the selected end time"),
-             gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-end"),
+             gtk.STOCK_JUSTIFY_CENTER, self.set_drag_mode, "begin-end"),
 
 
             (_("EndEnd"), _("Align the end time to the selected end time"),
              gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-end"),
 
             (_("EndBegin"), _("Align the end time to the selected begin time"),
-             gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-begin"),
+             gtk.STOCK_JUSTIFY_CENTER, self.set_drag_mode, "end-begin"),
+
+            (_("Align"), _("Align the boundaries"),
+             gtk.STOCK_JUSTIFY_FILL, self.set_drag_mode, "align"),
 
             )
 
