@@ -8,6 +8,7 @@ import sys, time
 import os
 import socket
 import sre
+import webbrowser
 
 import advene.core.config as config
 
@@ -253,7 +254,11 @@ class AdveneController:
             # FIXME: do something useful (warning) ?                
             pass
         return True    
-        
+
+    def open_url(self, url):
+        webbrowser.get().open(url)
+        return True
+    
     def parse_command_line (self, args):
         """Parse command line options.
 
