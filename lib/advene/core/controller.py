@@ -169,6 +169,9 @@ class AdveneController:
         p.value = value
         return p
 
+    def notify (self, event_name, *param, **kw):
+        return self.event_handler.notify(event_name, *param, **kw)
+
     def update_snapshot (self, position):
         """Event handler used to take a snapshot for the given position (current).
 
