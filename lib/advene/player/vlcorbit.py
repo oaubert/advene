@@ -146,8 +146,11 @@ class PlayerLauncher:
         if self.mc is not None:
             try:
                 self.mc.exit ()
-            except:
-                pass
+            except Exception, e:
+                print _("Got exception %s when stopping launcher.") % str(e)
+                import code
+                e, v, tb = sys.exc_info()
+                code.traceback.print_exception (e, v, tb)
         self.mc=None
         self.ior=None
 
@@ -228,8 +231,6 @@ class Player(object):
 
     def stop_player(self):
         """Stop the player."""
-        if self.mc is not None:
-            self.mc.exit()
         self.launcher.stop()
 
     def restart_player (self):
