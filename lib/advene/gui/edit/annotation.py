@@ -34,7 +34,7 @@ class AnnotationEdit:
         return self.widget
 
     def get_plugin_for_annotation(self, annotation):
-        """Determines the best widget to use to edit the annotation."""
+        """Determines the best widget to use to edit the annotation content."""
         # FIXME: Implement this
 #        plugins={'text/*': EditTextPlugin,
 #                 'text/plain': EditTextPlugin,
