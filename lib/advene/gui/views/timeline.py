@@ -252,9 +252,9 @@ class TimeLine:
         else:
             b,e=self.bounds()
             self.maximum = e
-        self.ratio_adjustment.value=3600.0
         self.widget.foreach(self.remove_widget, self.widget)
         self.populate()
+        self.ratio_event()
         self.legend.foreach(self.remove_widget, self.legend)
         self.update_legend_widget(self.legend)
         self.legend.show_all()
@@ -695,7 +695,6 @@ class TimeLine:
 
         hpaned = gtk.HPaned ()
 
-        # FIXME: connect scrolladjustments for legend and layout
         self.legend = self.build_legend_widget ()
 
         sw1 = gtk.ScrolledWindow ()
