@@ -104,30 +104,10 @@ class Menu:
         return True
     
     def popup_get_offset(self):
-        d = gtk.Dialog(title='Enter an offset',
-                       parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-                                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
-        l=gtk.Label(_("Give the offset to use\non specified element.\nIt is in ms and can be\neither positive or negative."))
-        l.show()
-        d.vbox.add(l)
-        
-        e=gtk.Entry()
-        e.show()
-        d.vbox.add(e)
-
-        res=d.run()
-        if res == gtk.RESPONSE_ACCEPT:
-            try:
-                retval=long(e.get_text())
-            except ValueError:
-                retval=None
-        else:
-            retval=None
-
-        d.destroy()
-        return retval
+        offset=advene.gui.util.entry_dialog(title='Enter an offset',
+                                            text=_("Give the offset to use\non specified element.\nIt is in ms and can be\neither positive or negative."),
+                                            default="0")
+        return long(offset)
     
     def offset_element (self, widget, el):
         offset = self.popup_get_offset()
@@ -302,7 +282,7 @@ class Menu:
         item.connect("activate", self.goto_annotation, element)
         menu.append(item)
 
-        add_item(element.content.data)
+        add_item(element.content.data[:40])
         add_item(_("Begin: %s")
                  % advene.util.vlclib.format_time (element.fragment.begin))
         add_item(_("End: %s") % advene.util.vlclib.format_time (element.fragment.end))
