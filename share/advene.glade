@@ -77,7 +77,23 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkMenuItem" id="separatormenuitem1">
+		    <widget class="GtkSeparatorMenuItem" id="separatormenuitem1">
+		      <property name="visible">True</property>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="import_file1">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Import data from an external source</property>
+		      <property name="label" translatable="yes">_Import File</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkSeparatorMenuItem" id="separator4">
 		      <property name="visible">True</property>
 		    </widget>
 		  </child>
@@ -141,8 +157,18 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkMenuItem" id="separator1">
+		    <widget class="GtkSeparatorMenuItem" id="separator1">
 		      <property name="visible">True</property>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="package_imports1">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Edit imported element from other packages</property>
+		      <property name="label" translatable="yes">Package _Imports</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_package_imports1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:06 GMT"/>
 		    </widget>
 		  </child>
 
@@ -228,7 +254,7 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkMenuItem" id="separator3">
+		    <widget class="GtkSeparatorMenuItem" id="separator3">
 		      <property name="visible">True</property>
 		    </widget>
 		  </child>
