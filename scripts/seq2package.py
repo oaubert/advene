@@ -24,6 +24,7 @@ The text file has the following format :
 
 
 import re
+import sys
 
 def ts2ms(ts):
     (m,s) = ts.split(":")
@@ -31,7 +32,9 @@ def ts2ms(ts):
     s = long(s)
     return (60*m + s) * 1000
 
-f=open("seq.txt", 'r')
+filename=sys.argv[0]
+
+f=open(filename, 'r')
 regexp=re.compile('(\d+:\d+)\s(\d+:\d+)\s(.*)')
 
 for l in f:
