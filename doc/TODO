@@ -1,5 +1,3 @@
-* Debian package: add python-xml python-simpletal dependencies
-
 * Advenelib: implement AnnotationType and RelationType creation methods.
 
 * Create a unique logger in controller and use exclusively this one in all modules.
@@ -149,8 +147,6 @@ http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
 
 * Timeline: add the possibility to add new annotations by clicking on the type
 
-* Metadata : cache the stream duration (for GUI purposes)
-
 * Add a "Edit" button next to the STBV optionmenu
 
 * Create a Sequential editor (to accomodate existing work)
@@ -267,4 +263,8 @@ subset (according to rule.origin) -> DONE (filter parameter)
 * Rules: define independant rulesets in packages -> DONE
 
 * Rule: add an "ViewActivation" event, to define actions to be taken on STBV activation -> DONE
+
+* Metadata : cache the stream duration (for GUI purposes) -> DONE
+
+* Debian package: add python-xml python-simpletal dependencies -> DONE
 
