@@ -158,6 +158,43 @@ def entry_dialog(title=None,
     d.destroy()
     return ret
 
+def build_optionmenu(elements, current, on_change_element, editable=True):
+    """Build an OptionMenu.
+
+    elements is a dict holding (key, values) where the values will be used as labels
+    current is the current activated element (i.e. one of the keys)
+    on_change_element is the method which will be called upon option modification.
+
+    Its signature is:
+
+    ``def on_change_element([self,] element):``
+    """
+    def change_cb(optionmenu, elements):
+        self.on_change_element(elements[optionmenu.get_history()])
+        return True
+
+    # List of elements, with the same index as the menus
+    optionmenu = gtk.OptionMenu()
+
+    items=[]
+    cnt=0
+    index=0
+    menu=gtk.Menu()
+    for k, v in elements.iteritems():
+        item = gtk.MenuItem(v)
+        item.show()
+        menu.append(item)
+        items.append(k)
+        if (k == current): index = cnt
+        cnt += 1
+
+    optionmenu.set_menu(menu)
+    optionmenu.set_history(index)
+    optionmenu.connect("changed", change_cb, items)
+    optionmenu.set_sensitive(editable)
+    optionmenu.show()
+    return optionmenu
+
 class CategorizedSelector:
     """Widget displaying items sorted along categories.
 
