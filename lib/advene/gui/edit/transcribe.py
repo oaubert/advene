@@ -68,14 +68,7 @@ class TranscriptionEdit:
 
     def build_widget(self):
         vbox = gtk.VBox()
-
-        hb=gtk.HBox()
-        vbox.pack_start(hb, expand=False)
         
-        if self.controller.gui:
-            toolbar=self.controller.gui.get_player_control_toolbar()
-            hb.add(toolbar)
-
         self.textview = gtk.TextView()
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
@@ -334,6 +327,7 @@ class TranscriptionEdit:
             return True
 
         ti=TranscriptionImporter(package=self.controller.package,
+                                 controller=self.controller,
                                  defaulttype=at,
                                  transcription_edit=self)
         ti.process_file('transcription')
@@ -366,6 +360,12 @@ class TranscriptionEdit:
 
         vbox = gtk.VBox()
 
+        hb=gtk.HBox()
+        vbox.pack_start(hb, expand=False)
+        if self.controller.gui:
+            toolbar=self.controller.gui.get_player_control_toolbar()
+            hb.add(toolbar)
+
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         vbox.add (sw)
@@ -375,6 +375,7 @@ class TranscriptionEdit:
             window.connect ("destroy", self.controller.gui.close_view_cb,
                             window, self)
 
+        # FIXME: convert buttons to toolbar
         hb=gtk.HButtonBox()
         hb.set_homogeneous(False)
 
