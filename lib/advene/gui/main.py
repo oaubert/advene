@@ -551,28 +551,15 @@ class AdveneGUI (Connect):
             pop.edit ()
         return True
 
-    def generate_list_model(self, elements, active_element):
-        """Update a TreeModel matching the elements list.
-
-        Element 0 is the label.
-        Element 1 is the element (stbv).
-        """
-        store=gtk.ListStore(str, object)
-        active_iter=None
-        for e in elements:
-            i=store.append( ( vlclib.get_title(self.controller, e), e ) )
-            if e == active_element:
-                active_iter=i
-        return store, active_iter
-                
     def update_stbv_list (self):
         """Update the STBV list.
         """
         stbv_combo = self.gui.get_widget("stbv_combo")
         l=[ None ]
         l.extend(self.controller.get_stbv_list())
-        st, i = self.generate_list_model(l,
-                                         self.controller.current_stbv)
+        st, i = advene.gui.util.generate_list_model(l,
+                                                    controller=self.controller,
+                                                    active_element=self.controller.current_stbv)
         stbv_combo.set_model(st)
         if i is None:
             i=st.get_iter_first()
@@ -593,8 +580,9 @@ class AdveneGUI (Connect):
             l=[ None ]
         if self.current_type is None and l:
             self.current_type=l[0]
-        st, i = self.generate_list_model(l,
-                                         self.current_type)
+        st, i = advene.gui.util.generate_list_model(l,
+                                                    controller=self.controller,
+                                                    active_element=self.current_type)
         type_combo.set_model(st)
         if i is None:
             i=st.get_iter_first()
@@ -1618,6 +1606,18 @@ class AdveneGUI (Connect):
         if os.access(help, os.R_OK):
             self.webbrowser.open (help)
         # FIXME: display a warning if not found
+        return True
+
+    def on_toolbar_style1_activate (self, button=None, data=None):
+        st={ 'Icons only': gtk.TOOLBAR_ICONS,
+             'Text only': gtk.TOOLBAR_TEXT,
+             'Both': gtk.TOOLBAR_BOTH }
+        s=advene.gui.util.list_selector(title=_("Choose the toolbar style"),
+                                         text=_("Choose the toolbar style."),
+                                         members=st,
+                                         controller=self.controller)
+        if s is not None:
+            self.gui.get_widget("toolbar_control").set_style(st[s])
         return True
 
     def on_about_web_button_clicked(self, button=None, data=None):
