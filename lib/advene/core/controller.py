@@ -83,9 +83,14 @@ class AdveneController:
 
     """
     
-    def __init__ (self):
+    def __init__ (self, args=None):
         """Initializes player and other attributes.
         """
+        if args is None:
+            args = []
+
+        self.file_to_play, self.package_to_load=self.parse_command_line(args)
+
         # Image Cache
         self.imagecache = ImageCache ()
 
@@ -209,14 +214,15 @@ class AdveneController:
                 self.serverthread = threading.Thread (target=self.server.serve_forawhile)
                 self.serverthread.start ()
 
-        file_to_play=self.parse_command_line (args)
-
+        if self.package_to_load is not None:
+            self.load_package(uri=self.package_to_load)
+            
         # If no package is defined yet, load the template
         if self.package is None:
             self.load_package ()
 
-        if file_to_play:
-            self.set_default_media(file_to_play)
+        if self.file_to_play is not None:
+            self.set_default_media(self.file_to_play)
 
         self.player.check_player()
         
@@ -258,10 +264,11 @@ class AdveneController:
 
         @param args: the argument list
         @type args: list
-        @return: the file to add add to playlist if one was specified
-        @rtype: string
+        @return: the file to add add to playlist if one was specified and the package to load
+        @rtype: (string, string)
         """
         file_to_play = None
+        package_to_load = None
         for s in args:
             if s.startswith('-p'):
                 config.data.player['plugin']=s[2:]
@@ -271,11 +278,10 @@ class AdveneController:
                 if s == "dvd":
                     file_to_play = "dvdsimple:///dev/dvd"
                 elif os.path.splitext(s)[1] in ('.xml', '.advene', '.adv'):
-                    # It should be an annotation file. Load it.
-                    self.load_package (uri=s)
+                    package_to_load=s
                 else:
                     file_to_play = s
-        return file_to_play
+        return file_to_play, package_to_load
 
     def get_default_media (self):
         mediafile = self.package.getMetaData (config.data.namespace,

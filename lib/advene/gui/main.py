@@ -127,10 +127,10 @@ class AdveneGUI (Connect):
 
     """
 
-    def __init__ (self):
+    def __init__ (self, args):
         """Initializes the GUI and other attributes.
         """
-        self.controller = advene.core.controller.AdveneController()
+        self.controller = advene.core.controller.AdveneController(args)
         self.controller.register_gui(self)
         
         gladefile=config.data.advenefile (config.data.gladefilename)
@@ -489,8 +489,8 @@ class AdveneGUI (Connect):
         self.controller.event_handler.internal_rule (event="ViewActivation",
                                                      method=self.on_view_activation)
 
-        self.controller.init(args)
-
+        self.controller.init()
+        
         # The player is initialized. We can register the drawable id
         try:
             if config.data.os == 'win32':
@@ -500,7 +500,21 @@ class AdveneGUI (Connect):
             self.controller.player.set_visual(visual_id)
         except Exception, e:
             print "Cannot set visual: %s" % str(e)
-            pass
+            # Use available space to display a treeview (should be configurable ?)
+            self.displayhbox.destroy()
+            self.singletonpopup.reparent(container=None)
+
+            tree = advene.gui.views.tree.TreeWidget(self.controller.package,
+                                                    controller=self.controller)
+            tree.get_widget().show_all()
+            self.register_view (tree)
+            sw = gtk.ScrolledWindow ()
+            sw.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+            
+            sw.add (tree.get_widget())
+            self.gui.get_widget("displayvbox").add(sw)
+            sw.show_all()
+
         if config.data.webserver['mode'] == 1:
             self.log(_("Using Mainloop input handling for webserver..."))
             gtk.input_add (self.controller.server,
