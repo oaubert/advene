@@ -428,6 +428,10 @@ class AdveneGUI (Connect):
                            gtk.gdk.INPUT_READ,
                            self.handle_http_request)
 
+        # Resize the main window
+        window=self.gui.get_widget('win')
+        self.init_window_size(window, 'main')
+        
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
         gtk.timeout_add (100, self.update_display)
@@ -457,6 +461,12 @@ class AdveneGUI (Connect):
         """
         return self.format_time (val)
 
+    def init_window_size(self, window, name):
+        s=config.data.preferences['windowsize'][name]
+        window.set_default_size (s[0], s[1])
+        window.connect ("size_allocate", self.resize_cb, name)
+        return True
+    
     def resize_cb (self, widget, allocation, name):
         """Memorize the new dimensions of the widget."""
         config.data.preferences['windowsize'][name] = (allocation.width,
