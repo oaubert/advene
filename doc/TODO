@@ -224,3 +224,8 @@ http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
 * Propagate AnnotationEditEnd and RelationEditEnd events in active views
 
 * Timeline: add the possibility to add new annotations by clicking on the type
+
+* Metadata : cache the stream duration (for GUI purposes)
+
+* Add a "Edit" button next to the STBV optionmenu
+
