@@ -142,6 +142,8 @@ class AdveneTreeModel(gtk.GenericTreeModel):
             title = _("Schema %s") % (node.title or node.id)
         elif isinstance (node, View):
             title = _("View %s") % (node.title or node.id)
+            if node.content.mimetype == 'application/x-advene-ruleset':
+                title += ' [STBV]'
         elif isinstance (node, Query):
             title = _("Query %s") % (node.title or node.id)
         elif isinstance (node, Package):
@@ -267,7 +269,7 @@ class DetailedTreeModel(AdveneTreeModel):
     def nodeHasChildren (self, node):
         children = self.nodeChildren(node)
         return (children is not None and children)
-        
+
 class FlatTreeModel(AdveneTreeModel):
     """Flat Tree Model.
 
