@@ -9,6 +9,8 @@
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_NONE</property>
   <property name="modal">False</property>
+  <property name="default_width">800</property>
+  <property name="default_height">600</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
   <property name="icon">pixmaps/dvd.png</property>
@@ -961,7 +963,7 @@
 	      <property name="max_length">0</property>
 	      <property name="text" translatable="yes"></property>
 	      <property name="has_frame">True</property>
-	      <property name="invisible_char" translatable="yes">*</property>
+	      <property name="invisible_char">*</property>
 	      <property name="activates_default">False</property>
 	    </widget>
 	    <packing>
@@ -1648,7 +1650,7 @@ Exchange on the NEt !</property>
 	  <property name="max_length">0</property>
 	  <property name="text" translatable="yes"></property>
 	  <property name="has_frame">True</property>
-	  <property name="invisible_char" translatable="yes">*</property>
+	  <property name="invisible_char">*</property>
 	  <property name="activates_default">False</property>
 	</widget>
 	<packing>
@@ -1669,7 +1671,7 @@ Exchange on the NEt !</property>
 	  <property name="max_length">0</property>
 	  <property name="text" translatable="yes"></property>
 	  <property name="has_frame">True</property>
-	  <property name="invisible_char" translatable="yes">*</property>
+	  <property name="invisible_char">*</property>
 	  <property name="activates_default">False</property>
 	</widget>
 	<packing>
@@ -1690,7 +1692,7 @@ Exchange on the NEt !</property>
 	  <property name="max_length">0</property>
 	  <property name="text" translatable="yes"></property>
 	  <property name="has_frame">True</property>
-	  <property name="invisible_char" translatable="yes">*</property>
+	  <property name="invisible_char">*</property>
 	  <property name="activates_default">False</property>
 	</widget>
 	<packing>
@@ -1711,7 +1713,7 @@ Exchange on the NEt !</property>
 	  <property name="max_length">0</property>
 	  <property name="text" translatable="yes"></property>
 	  <property name="has_frame">True</property>
-	  <property name="invisible_char" translatable="yes">*</property>
+	  <property name="invisible_char">*</property>
 	  <property name="activates_default">False</property>
 	</widget>
 	<packing>
@@ -1826,7 +1828,7 @@ Exchange on the NEt !</property>
 		  <property name="max_length">0</property>
 		  <property name="text" translatable="yes"></property>
 		  <property name="has_frame">True</property>
-		  <property name="invisible_char" translatable="yes">*</property>
+		  <property name="invisible_char">*</property>
 		  <property name="activates_default">False</property>
 		</widget>
 		<packing>
@@ -2162,7 +2164,7 @@ Exchange on the NEt !</property>
 	  <property name="visible">True</property>
 	  <property name="orientation">GTK_PROGRESS_LEFT_TO_RIGHT</property>
 	  <property name="fraction">0</property>
-	  <property name="pulse_step">0.1</property>
+	  <property name="pulse_step">0.10000000149</property>
 	</widget>
 	<packing>
 	  <property name="padding">0</property>
