@@ -579,10 +579,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def default_options(self, alias):
         return {
-            'package_url': "/packages/%s" % alias,
-            'snapshot': self.server.imagecaches[alias],
-            'namespace_prefix': config.data.namespace_prefix,
-            'config': config.data.web,
+            u'package_url': u"/packages/%s" % alias,
+            u'snapshot': self.server.imagecaches[alias],
+            u'namespace_prefix': config.data.namespace_prefix,
+            u'config': config.data.web,
             }
         
     def do_PUT(self):
@@ -1237,9 +1237,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         context = advene.model.tal.context.AdveneContext (here=p, options=query)
         # FIXME: the following line is a hack for having qname-keys work
         #        It is a hack because obviously, p is not a "view"
-        context.addGlobal ('view', p)
+        context.addGlobal (u'view', p)
         if 'epoz' in tales:
-            context.addGlobal ("epozmacros", self.server.epoz_macros)
+            context.addGlobal (u"epozmacros", self.server.epoz_macros)
         
         try:
             objet = context.evaluateValue (expr)
