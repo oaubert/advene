@@ -16,6 +16,7 @@ import advene.core.version
 import gettext
 gettext.install('advene', unicode=True)
 gettext.textdomain('advene')
+from gettext import gettext as _
 
 # For gtk/glade
 import pygtk
@@ -25,6 +26,7 @@ import gtk.glade
 gtk.glade.bindtextdomain('advene')
 
 import webbrowser
+import textwrap
 
 import advene.core.controller
 
@@ -370,7 +372,8 @@ class AdveneGUI (Connect):
             name="PopupGoto",
             method=self.action_popup_goto,
             description=_("Display a popup to go to another position"),
-            parameters={'message': _("String to display."),
+            parameters={'description': _("General description"),
+                        'message': _("String to display."),
                         'position': _("New position"),
                         'duration': _("Display duration in ms. Ignored if empty.")},
             category='gui',
@@ -689,6 +692,7 @@ class AdveneGUI (Connect):
     def action_popup (self, context, parameters):
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
         message=message.replace('\\n', '\n')
+        message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         duration=self.parse_parameter(context, parameters, 'duration', None)
         if duration == "" or duration == 0:
@@ -703,8 +707,13 @@ class AdveneGUI (Connect):
             self.singletonpopup.undisplay()
             return True
 
+        description=self.parse_parameter(context, parameters, 'description', _("Make a choice"))
+        description=description.replace('\\n', '\n')
+        description=textwrap.fill(description, config.data.preferences['gui']['popup-textwidth'])
+        
         message=self.parse_parameter(context, parameters, 'message', _("Click to go to another position"))
         message=message.replace('\\n', '\n')
+        message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
         position=self.parse_parameter(context, parameters, 'position', 0)
         duration=self.parse_parameter(context, parameters, 'duration', None)
@@ -712,7 +721,14 @@ class AdveneGUI (Connect):
             duration = None
         b=gtk.Button(message)
         b.connect("clicked", handle_response, position)
-        self.singletonpopup.display(widget=b, timeout=duration)
+
+        vbox=gtk.VBox()
+        l=gtk.Label(description)
+        vbox.pack_start(l, expand=False)
+        vbox.pack_start(b, expand=False)
+        vbox.show_all()
+        
+        self.singletonpopup.display(widget=vbox, timeout=duration)
         return True
 
     def generate_action_popup_goton(self, size):
@@ -725,14 +741,19 @@ class AdveneGUI (Connect):
 
             vbox=gtk.VBox()
 
-            description=self.parse_parameter(context, parameters, 'description', _("Make a choice"))
+            description=self.parse_parameter(context,
+                                             parameters, 'description', _("Make a choice"))
             description=description.replace('\\n', '\n')
+            description=textwrap.fill(description,
+                                      config.data.preferences['gui']['popup-textwidth'])
             vbox.add(gtk.Label(description))
 
             for i in range(1, size+1):
                 message=self.parse_parameter(context, parameters,
                                              'message%d' % i, _("Choice %d") % i)
                 message=message.replace('\\n', '\n')
+                message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
+
                 position=self.parse_parameter(context, parameters, 'position%d' % i, 0)
                 b=gtk.Button(message)
                 b.connect("clicked", handle_response, position)
