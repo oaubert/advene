@@ -1,6 +1,6 @@
 """Advene controller.
 
-The L{AdveneEventHandler} is used by the application to handle events
+The X{AdveneEventHandler} is used by the application to handle events
 notifications and actions triggering.
 """
 
