@@ -9,6 +9,7 @@ from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
+from advene.model.query import Query
 from advene.model.view import View
 
 from gettext import gettext as _
@@ -16,6 +17,8 @@ from gettext import gettext as _
 import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.popup
+
+import advene.util.vlclib as vlclib
 
 import pygtk
 pygtk.require ('2.0')
@@ -139,6 +142,8 @@ class AdveneTreeModel(gtk.GenericTreeModel):
             title = _("Schema %s") % (node.title or node.id)
         elif isinstance (node, View):
             title = _("View %s") % (node.title or node.id)
+        elif isinstance (node, Query):
+            title = _("Query %s") % (node.title or node.id)
         elif isinstance (node, Package):
             title = _("Package %s") % (node.title or _("No Title"))
         else:
@@ -217,6 +222,8 @@ class DetailedTreeModel(AdveneTreeModel):
             parent = node.rootPackage.schemas
         elif isinstance (node, View):
             parent = node.rootPackage.views
+        elif isinstance (node, Query):
+            parent = node.rootPackage.queries
         elif isinstance (node, Package):
             parent = None
         elif isinstance (node, AbstractBundle):
@@ -245,9 +252,11 @@ class DetailedTreeModel(AdveneTreeModel):
             children = self.childrencache[node]
         elif isinstance (node, View):
             children = None
+        elif isinstance (node, Query):
+            children = None
         elif isinstance (node, Package):
             if not self.childrencache.has_key (node):
-                self.childrencache[node] = [node.schemas, node.views]
+                self.childrencache[node] = [node.schemas, node.views, node.queries ]
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
@@ -278,6 +287,8 @@ class FlatTreeModel(AdveneTreeModel):
             parent = node.rootPackage.schemas
         elif isinstance (node, View):
             parent = node.rootPackage.views
+        elif isinstance (node, Query):
+            parent = node.rootPackage.queries
         elif isinstance (node, Package):
             parent = None
         elif isinstance (node, AbstractBundle):
@@ -305,10 +316,13 @@ class FlatTreeModel(AdveneTreeModel):
             children = None
         elif isinstance (node, View):
             children = None
+        elif isinstance (node, Query):
+            children = None
         elif isinstance (node, Package):
             if not self.childrencache.has_key (node):
-                self.childrencache[node] = (node.schemas, node.views, node.annotations,
-                                            node.relationTypes, node.annotationTypes)
+                self.childrencache[node] = [ node.schemas, node.views, node.annotations,
+                                             node.relationTypes, node.annotationTypes,
+                                             node.queries ]
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
