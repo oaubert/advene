@@ -29,8 +29,9 @@ from advene.core.imagecache import ImageCache
 
 import advene.util.vlclib as vlclib
 
-if config.data.launch_http_server:
+if config.data.webserver['mode']:
     import advene.core.webserver
+    
 import threading
 
 class AdveneController:
@@ -122,6 +123,23 @@ class AdveneController:
             parameters={'message': _("String to display.")}
             ))
 
+    def busy_port_info(self):
+        """Display the processes using the webserver port.
+        """
+        processes=[]
+        pat=':%d' % config.data.webserver['port']
+        f=os.popen('netstat -atlnp 2> /dev/null', 'r')
+        for l in f.readlines():
+            if pat not in l:
+                continue
+            pid=l.rstrip().split()[-1]
+            processes.append(pid)
+        f.close()
+        print "+-------------------------------------------------------"
+        print "|The following processes seem to use the %s port:" % pat
+        print "| %s |" % processes
+        print "+-------------------------------------------------------"        
+    
     def init(self, args=None):
         """Mainloop : CORBA initalization
         """
@@ -135,15 +153,18 @@ class AdveneController:
         self.event_handler.internal_rule (event="PackageLoad",
                                           method=self.manage_package_load)
         
-        if config.data.launch_http_server:
+        if config.data.webserver['mode']:
             try:
-                self.server = advene.core.webserver.AdveneWebServer(controller=self)
+                self.server = advene.core.webserver.AdveneWebServer(controller=self,
+                                                                    port=config.data.webserver['port'])
             except socket.error:
                 print _("Cannot start the webserver.\nAnother application is using the port.\nCheck that no VLC player is still running in the background.")
+                if config.data.os != 'win32':
+                    self.busy_port_info()
                 sys.exit(0)
             
             # If == 1, it is the responbility of the Gtk app to set the input loop
-            if config.data.launch_http_server == 2:
+            if config.data.webserver['mode'] == 2:
                 self.serverthread = threading.Thread (target=self.server.serve_forawhile)
                 self.serverthread.start ()
 
@@ -412,7 +433,7 @@ class AdveneController:
                 self.imagecache.init_value (a.fragment.end)
                 
         # Update the webserver
-        if config.data.launch_http_server:
+        if config.data.webserver['mode']:
             self.server.register_package (alias='advene',
                                           package=self.package,
                                           imagecache=self.imagecache)
@@ -445,7 +466,7 @@ class AdveneController:
     def handle_http_request (self, source, condition):
         """Handle a HTTP request.
 
-        This method is used if config.data.launch_http_server == 1.  
+        This method is used if config.data.webserver['mode'] == 1.  
         """
         source.handle_request ()
         return True
