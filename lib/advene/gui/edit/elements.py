@@ -1178,8 +1178,9 @@ class EditElementListForm(EditForm):
 
     def update_element(self):
         if self.editable:
-            # FIXME: rebuild model.field from the self.store contents
-            print "Not implemented yet."
+            # Rebuild list from self.store
+            elements=[ e[self.COLUMN_ELEMENT] for e in self.store ]
+            setattr(self.model, self.field, elements)
         return True    
 
 if __name__ == "__main__":
