@@ -1168,7 +1168,7 @@ class EditElementListForm(EditForm):
         b.connect("clicked", self.insert_new, treeview)
         hbox.add(b)
 
-        b=gtk.Button(stock=gtk.STOCK_DELETE)
+        b=gtk.Button(stock=gtk.STOCK_REMOVE)
         b.connect("clicked", self.delete_current, treeview)
         hbox.add(b)
 
