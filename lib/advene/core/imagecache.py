@@ -100,16 +100,16 @@ class ImageCache(dict):
         @param name: the name
         @type name: string
         """
-        dir=config.data.path['imagecache']
+        directory=config.data.path['imagecache']
         print "Request to save %s" % name
-        if not os.path.isdir (dir):
-            if os.path.exists (dir):
+        if not os.path.isdir (directory):
+            if os.path.exists (directory):
                 # File exists, but is not a directory.
-                raise "Fatal error: %s should be a directory" % dir
+                raise "Fatal error: %s should be a directory" % directory
             else:
-                os.mkdir (dir)
+                os.mkdir (directory)
 
-        d = os.sep.join ([dir, name])
+        d = os.sep.join ([directory, name])
         
         if not os.path.isdir (d):
             if os.path.exists (d):
