@@ -9,7 +9,7 @@ import advene.rules.elements
 from advene.rules.elements import Event, Condition, ConditionList, Action, ActionList
 from advene.rules.elements import Rule, RuleSet
 import advene.core.config as config
-from advene.gui.util import CategorizedSelector
+from advene.gui.util import CategorizedSelector, build_optionmenu
 
 from gettext import gettext as _
 
@@ -26,43 +26,6 @@ class EditGeneric:
         After that, the element can be access throught get_model().
         """
         pass
-
-    def build_option(self, elements, current, on_change_element, editable=True):
-        """Build an OptionMenu.
-
-        elements is a dict holding (key, values) where the values will be used as labels
-        current is the current activated element (i.e. one of the keys)
-        on_change_element is the method which will be called upon option modification.
-
-        Its signature is:
-        
-        ``def on_change_element([self,] optionmenu, elements):``
-
-        elements will be a list of keys with the same index as the optionmenu, i.e. :
-            
-        ``chosen_key=elements[optionmenu.get_history()]``
-        """
-        # List of elements, with the same index as the menus
-        optionmenu = gtk.OptionMenu()
-
-        items=[]
-        cnt=0
-        index=0
-        menu=gtk.Menu()
-        for k, v in elements.iteritems():
-            item = gtk.MenuItem(v)
-            item.show()
-            menu.append(item)
-            items.append(k)
-            if (k == current): index = cnt
-            cnt += 1
-
-        optionmenu.set_menu(menu)
-        optionmenu.set_history(index)
-        optionmenu.connect("changed", on_change_element, items)
-        optionmenu.set_sensitive(editable)
-        optionmenu.show()
-        return optionmenu
 
 class EditRuleSet(EditGeneric):
     """Edit form for RuleSets"""
@@ -420,12 +383,7 @@ class EditRule(EditGeneric):
         hb=gtk.HBox()
         conditionsbox.add(hb)
 
-        try:
-            w=EditCondition(cond, editable=self.editable)
-        except Exception, e:
-            print str(e)
-            print "for rule %s" % self.model.name
-            w = gtk.Label("Error in rule %s" % self.model.name)
+        w=EditCondition(cond, editable=self.editable)
 
         self.editconditionlist.append(w)
 
@@ -499,7 +457,7 @@ class EditRule(EditGeneric):
 
         # Event
         ef=gtk.Frame(_("Event"))
-        self.editevent=EditEvent(self.model.event, self.catalog,
+        self.editevent=EditEvent(self.model.event, catalog=self.catalog,
                                  editable=self.editable)
         ef.add(self.editevent.get_widget())
         ef.show_all()
@@ -555,7 +513,7 @@ class EditRule(EditGeneric):
         return frame
 
 class EditEvent(EditGeneric):
-    def __init__(self, event, catalog, expert=False, editable=True):
+    def __init__(self, event, catalog=None, expert=False, editable=True):
         self.model=event
         self.current_event=event
         self.catalog=catalog
@@ -568,10 +526,9 @@ class EditEvent(EditGeneric):
         # fetch the current_event value.
         pass
 
-    def on_change_event(self, widget, eventlist):
+    def on_change_event(self, event):
         if self.editable:
-            self.current_event=eventlist[widget.get_history()]
-        return True
+            self.current_event=event
 
     def build_widget(self):
         hbox=gtk.HBox()
@@ -586,8 +543,8 @@ class EditEvent(EditGeneric):
             # it is an expert-mode event. Add it manually.
             eventlist[self.current_event]=self.catalog.describe_event(self.current_event)
 
-        eventname=self.build_option(eventlist, self.current_event, self.on_change_event,
-                                    editable=self.editable)
+        eventname=build_optionmenu(eventlist, self.current_event, self.on_change_event,
+                                   editable=self.editable)
         hbox.add(eventname)
 
         label=gtk.Label(_(" occurs,"))
@@ -606,7 +563,7 @@ class EditCondition(EditGeneric):
         # Widgets:
         self.lhs=None # Entry
         self.rhs=None # Entry
-        self.operator=None # Combo list
+        self.operator=None # Selector
 
         self.widget=self.build_widget()
 
@@ -635,8 +592,8 @@ class EditCondition(EditGeneric):
             raise Exception("Undefined operator: %s" % operator)
         return True
 
-    def on_change_operator(self, widget, operators):
-        self.current_operator=operators[widget.get_history()]
+    def on_change_operator(self, operator):
+        self.current_operator=operator
         self.update_widget()
         return True
 
@@ -653,18 +610,25 @@ class EditCondition(EditGeneric):
         self.rhs.set_sensitive(self.editable)
         self.rhs.hide()
 
-        self.operator = gtk.OptionMenu()
-        self.operator.set_sensitive(self.editable)
-        self.operator.show()
-
         operators={}
         operators.update(Condition.binary_operators)
         operators.update(Condition.unary_operators)
 
-        self.operator=self.build_option(operators,
-                                        self.current_operator,
-                                        self.on_change_operator,
-                                        editable=self.editable)
+        def description_getter(element):
+            if element in Condition.condition_categories:
+                return Condition.condition_categories[element]
+            else:
+                return operators[element][0]
+            
+        self.selector=CategorizedSelector(title=_("Select a condition"),
+                                          elements=operators.keys(),
+                                          categories=Condition.condition_categories.keys(),
+                                          current=self.current_operator,
+                                          description_getter=description_getter,
+                                          category_getter=lambda e: operators[e][1],
+                                          callback=self.on_change_operator,
+                                          editable=self.editable)
+        self.operator=self.selector.get_button()
 
         hbox.add(self.lhs)
         hbox.add(self.operator)
