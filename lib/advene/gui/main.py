@@ -453,7 +453,7 @@ class AdveneGUI (Connect):
 
         stbv_menu.set_active(0)
         stbv_menu.reposition()
-        stbv_menu.show()
+        stbv_menu.show_all()
         return True
 
     def update_gui (self):
@@ -831,7 +831,7 @@ class AdveneGUI (Connect):
 
     def on_new1_activate (self, button=None, data=None):
         """New package. Erase the current one."""
-        self.load_package ()
+        self.controller.load_package ()
 	return True
 
     def on_open1_activate (self, button=None, data=None):
