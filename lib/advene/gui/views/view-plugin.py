@@ -75,6 +75,16 @@ class ViewPlugin:
         @type annotation: advene.model.annotation.Annotation
         """
         pass
+
+    def update_model (self, package):
+        """Update the model of the view.
+
+        This should be called when a new package has been loaded.
+
+        @param package: the new package
+        @type package: advene.model.package.Package
+        """
+        pass
     
     def update_annotation (self, annotation):
         """Update the representation of the given annotation.
