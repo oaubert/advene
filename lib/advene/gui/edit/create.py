@@ -165,7 +165,7 @@ class CreateElementPopup(object):
                                              duration=self.controller.player.stream_duration))
             el.title=id_
             parent.annotations.append(el)
-            self.controller.notify('AnnotationEditEnd', annotation=el)
+            self.controller.notify('AnnotationCreate', annotation=el)
         elif self.type_ == Relation:
             # Unused code: relations can not be created without annotations
             if isinstance(self.parent, RelationType):
@@ -180,7 +180,7 @@ class CreateElementPopup(object):
                 members=())
             el.title=id_
             parent.relations.append(el)
-            self.controller.notify('RelationEditEnd', relation=el)
+            self.controller.notify('RelationCreate', relation=el)
         elif self.type_ == View:
             el=self.parent.createView(
                 ident=id_,
@@ -195,15 +195,15 @@ class CreateElementPopup(object):
                 r=RuleSet()
                 el.content.data=r.xml_repr()
             self.parent.views.append(el)
-            self.controller.notify('ViewEditEnd', view=el)
+            self.controller.notify('ViewCreate', view=el)
         elif self.type_ == Schema:
             el=self.parent.createSchema(
-                ident=id_,
-                author=config.data.userid,
-                date=self.get_date())
+                ident=id_)
+            el.author=config.data.userid
+            el.date=self.get_date()
             el.title=id_
             self.parent.schemas.append(el)
-            self.controller.notify('SchemaEditEnd', schema=el)
+            self.controller.notify('SchemaCreate', schema=el)
         elif self.type_ == AnnotationType:
             if not isinstance(self.parent, Schema):
                 print _("Error: bad invocation of CreateElementPopup")
@@ -215,7 +215,7 @@ class CreateElementPopup(object):
                 el.date=self.get_date()
                 el.title=id_
             self.parent.annotationTypes.append(el)
-            self.controller.notify('AnnotationTypeEditEnd', annotationtype=el)
+            self.controller.notify('AnnotationTypeCreate', annotationtype=el)
         elif self.type_ == RelationType:
             if not isinstance(self.parent, Schema):
                 print _("Error: bad invocation of CreateElementPopup")
@@ -227,7 +227,7 @@ class CreateElementPopup(object):
                 el.date=self.get_date()
                 el.title=id_
             self.parent.relationTypes.append(el)
-            self.controller.notify('RelationTypeEditEnd', relationtype=el)
+            self.controller.notify('RelationTypeCreate', relationtype=el)
         else:
             el=None
             print "Not implemented yet."
