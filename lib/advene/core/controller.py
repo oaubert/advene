@@ -50,6 +50,7 @@ class AdveneController:
 
     Some entry points in the methods:
       - L{__init__} : controller initialization
+      - L{update} : regularly called method used to update information about the current stream
       - L{update_status} : use this method to interact with the player
       
     @ivar imagecache: the current imagecache
@@ -133,8 +134,7 @@ class AdveneController:
                                           method=self.manage_package_load)
         
         if config.data.launch_http_server:
-            self.server = advene.core.webserver.AdveneWebServer(player=self.player,
-                                                                master=self)
+            self.server = advene.core.webserver.AdveneWebServer(controller=self)
             # If == 1, it is the responbility of the Gtk app to set the input loop
             if config.data.launch_http_server == 2:
                 self.serverthread = threading.Thread (target=self.server.serve_forawhile)
