@@ -378,6 +378,12 @@ class TimeLine:
         self.controller.package.relations.append(relation)
         print "Relation %s created." % relation
 
+    def button_press_handler(self, widget, event, annotation):
+        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            self.annotation_cb(widget, annotation)
+            return True
+        return False
+    
     def create_annotation_widget(self, annotation):
         u2p = self.unit2pixel
         b = gtk.Button(annotation.content.data)
@@ -385,6 +391,7 @@ class TimeLine:
         b.annotation = annotation
         b.active = False
         b.connect("clicked", self.annotation_cb, annotation)
+        b.connect("button-press-event", self.button_press_handler, annotation)
         b.set_size_request(u2p(annotation.fragment.duration),
                            self.button_height)
         # Get the default height for the annotation type. If not defined,
