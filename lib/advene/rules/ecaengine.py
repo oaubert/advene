@@ -325,5 +325,27 @@ class ECAEngine:
         context.pushLocals()
         for action in actions:
             context.setLocal('rule', rule.name)
+            # The 'view' is used in context.traversePathPreHook
+            # to determine the context of interpretation of symbols
+
+            # This is a kind of a mess. We should clarify all that
+            # (first, we should not have used the same name for different
+            # things).
+            
+            # It could already be set  (for instance, ViewCreate view=...)
+            try:
+                v=context.locals['view']
+            except KeyError:
+                try:
+                    v = context.globals['view']
+                except KeyError:
+                    v=None
+            try:
+                v=self.controller.package.views[rule.origin]
+            except KeyError:
+                # rule.origin is not a view from the package. It may be
+                # default_rule.xml for instance
+                pass
+            context.setLocal('view', v)
             self.schedule(action, context, delay=delay)
         context.popLocals()
