@@ -109,7 +109,7 @@ class AdveneController:
         self.gui=None
         # Useful for debug in the evaluator window
         self.config=config.data
-        self.idgen=advene.core.idgenerator.Generator()
+        self.idgenerator=advene.core.idgenerator.Generator()
         
         # STBV
         self.current_stbv = None
@@ -493,6 +493,9 @@ class AdveneController:
             self.log (", ".join(l))
             return True
 
+        # Reset the id generator
+        self.idgenerator.init(self.package)
+        
         self.modified=False
         # Get the cached duration
         duration = self.package.getMetaData (config.data.namespace, "duration")
