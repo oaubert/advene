@@ -1,3 +1,20 @@
+* Developping the advene code
+
+To setup the Advene environment in a non-standard directory (typically
+a checkouted SVN tree), you need to modify $SVNTREE/bin/advene and
+$HOME/.advenerc.
+
+In $SVNTREE/bin/advene, update the value of PYTHONPATH to reflect the
+location of the SVN tree (lib/ subdirectory).
+
+In $HOME/.advenerc, put the following lines (in this example, the SVN
+tree is in /usr/local/src/advene-project) :
+
+config.data.path['resources']='/usr/local/src/advene-project/share'
+config.data.path['data']='/usr/local/src/examples/'
+config.data.path['web']='/usr/local/src/advene-project/share/web'
+
+
 * Where to start reading the Advene code ?
 
 The Advene model (lib/advene/model) is independant of the rest of the
