@@ -1140,6 +1140,31 @@ class AdveneGUI (Connect):
                             label=_("Save the current package"))
 	return True
 
+    def on_import_dvd_chapters1_activate (self, button=None, data=None):
+        # FIXME: loosy test
+        if 'dvd' in self.controller.get_default_media():
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
+                _("Do you confirm the creation of annotations matching the DVD chapters?"))
+            response=dialog.run()
+            dialog.destroy()
+            if response != gtk.RESPONSE_YES:
+                return True
+            i=advene.util.importer.get_importer('chaplin')
+            i.package=self.controller.package
+            i.process_file('chaplin')
+            self.controller.notify('PackageLoad')
+        else:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("The associated media is not a DVD."))
+            response=dialog.run()
+            dialog.destroy()
+            
+        return True
+        
     def on_import_file1_activate (self, button=None, data=None):
         self.file_selector (callback=self.data_import_cb,
                             label=_("Choose the file to import"))
