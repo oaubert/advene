@@ -7,6 +7,7 @@ import os
 import time
 import advene.core.config as config
 import advene.util.vlclib as vlclib
+import advene.core.mediacontrol
 import atexit
 import signal
 
@@ -82,7 +83,7 @@ def init ():
 	global svg
 	
 	print "Initialisation de l'ORB"
-	player=vlclib.VLCPlayer(config.data)
+	player=advene.core.mediacontrol.PlayerLauncher(config.data)
 	orb,mc=player.init()
 
 	print "Objet mc %s" % mc

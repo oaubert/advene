@@ -43,12 +43,12 @@ class AdveneController:
       - L{package} : the currently loaded package
       - L{imagecache} : the associated imagecache
       - L{active_annotations} : the currently active annotations
-      - L{player} : the player (X{vlclib.VLCPlayer} instance)
+      - L{player} : the player (X{advene.core.mediacontrol.Player} instance)
       - L{event_handler} : the event handler
       - L{server} : the embedded web server
 
     Some entry points in the methods:
-      - L{__init__} and L{main} : GUI initialization
+      - L{__init__} : controller initialization
       - L{update_status} : use this method to interact with the player
       
     @ivar imagecache: the current imagecache
@@ -71,7 +71,7 @@ class AdveneController:
     @type preferences: dict
 
     @ivar player: a reference to the player
-    @type player: vlclib.VLCPlayer
+    @type player: advene.core.mediacontrol.Player
 
     @ivar event_handler: the event handler instance
     @type event_handler: AdveneEventHandler
@@ -472,7 +472,7 @@ class AdveneController:
         Wrapper for the player.update_status method, used to notify the
         AdveneEventHandler.
 
-        @param status: the status (cf vlclib.VLCPlayer)
+        @param status: the status (cf advene.core.mediacontrol.Player)
         @type status: string
         @param position: an optional position
         @type position: VLC.Position
