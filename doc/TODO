@@ -1,13 +1,25 @@
+* Move gui.edit.annotation into gui.edit.element.EditAnnotationPopup
+
+* Conditions: implement regexp match
+
+* Envoyer package et infos à Denis pour portage windows
+
+* New action: GotoPopup (display a message and propose to go to another position) and InfoPopup (display information)
+              
+* Query MPEG7: http://www.idealliance.org/papers/extreme03/html/2001/Liu01/EML2001Liu01.html
+
+* In AnnotationTypes edit popup, give access to the "display" meta attribute
+
 * To embed windows in gtk, use widget.window.xid (in X11) and
   widget.window.handle (in Win32)
 
-* Write document on TALES syntax and base elements
+* Write document on TALES syntax and root elements
 
 * STBV action: display an activable link
 
 * Check id validity (no spaces) when creating elements (views)
 
-* actions: convert messages from unicode to str. DONE: report bug
+* actions: convert messages from unicode to str. DONE: report CORBA bug
 
 * Try to remove the dependency on PIL by using pixbuf loader to convert snapshots to PNG.
 
@@ -19,7 +31,7 @@ the DOM and do not restore it before saving, so it gets lost.
 
 * Create a CellRenderer for time values (with time adjustment integrated)
 
-* Create a TALES evaluator widget
+* Create a TALES evaluator/editor widget (from browser?)
 
 * Create a Sequential editor (to accomodate existing work)
 
@@ -60,21 +72,16 @@ to implement a "Return to last position")
   http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
   http://www.daa.com.au/pipermail/pygtk/2004-February/006960.html
 
-* Clean-up the player interface (which is now spread across
-  advene.util.vlclib.VLCPlayer and advene.core.mediacontrol.MediaControl) -> half DONE
-  (everything is in mediacontrol now, but we should unify this and provide a clean API
-   to ease portability across different players). Idea: provide a
-   PlayerFactory which returns a Player instance (more flexible).
-
-* Add a notebook view in the place of the defunct HTML widget
-
 * Fix for SVG module :
  - find a way to trigger the svg module rather than the freetype module
  - write an example subtitle file with SVG contents
 
-* The view method should return a Content object, so that we can get its mimetype
+* The view method should return a Content object, so that we can get
+ its mimetype. *or* return a specialized class derived from (str,
+ object) that adds a mimetype property
 
-* The package/annotationTypes should have an 'ids' method, to be able to retrieve ids as keys (all bundles in fact).
+* The package/annotationTypes should have an 'ids' method, to be able
+to retrieve ids as keys (all bundles in fact).
 
 * Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
 
@@ -322,4 +329,12 @@ events) -> DONE
   rules framework (conditions) -> DONE
 
 * Implement query in global_methods -> DONE
+
+* Clean-up the player interface (which is now spread across
+  advene.util.vlclib.VLCPlayer and advene.core.mediacontrol.MediaControl) -> half DONE
+  (everything is in mediacontrol now, but we should unify this and provide a clean API
+   to ease portability across different players). Idea: provide a
+   PlayerFactory which returns a Player instance (more flexible).
+
+* Add a notebook view in the place of the defunct HTML widget -> treeview
 
