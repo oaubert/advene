@@ -729,11 +729,15 @@ class AdveneGUI (Connect):
         
     def popup_evaluator(self, *p, **kw):
         p=self.controller.package
+        try:
+            a=p.annotations[-1]
+        except IndexError:
+            a=None
         ev=advene.gui.evaluator.Window(controller=self.controller,
                                        globals_={},
                                        locals_={'package': p,
                                                 'p': p,
-                                                'a': p.annotations[-1]})
+                                                'a': a})
         ev.popup()
         return True
     
@@ -965,7 +969,8 @@ class AdveneGUI (Connect):
 
     def on_save1_activate (self, button=None, data=None):
         """Save the current package."""
-        if self.controller.package.uri == "":
+        if (self.controller.package.uri == ""
+            or self.controller.package.uri.endswith('new_pkg')):
             self.on_save_as1_activate (button, data)
         else:
             self.controller.save_package ()
