@@ -7,7 +7,7 @@ advene (0.10) unstable; urgency=low
   * Implemented Allen's relations in conditions
 
   * Implemented TranscriptionView (accessible from popup menu on
-    AnnotationType).
+    AnnotationType, or from the Views menu).
   
   * Implemented read-only edit popup for imported elements
 
@@ -15,8 +15,8 @@ advene (0.10) unstable; urgency=low
 
   * Autocompletion facility in evaluator window
   
-  * All imports (view, schema, ...) work. A GUI is accessible to view them from
-    the Edit menu, but it does not yet update the package contents.
+  * All imports (view, schema, ...) work. A GUI is accessible to edit them from
+    the Edit menu
   
   * New actions: ActivateSTBV, DisplayPopup2, DisplayPopup3, SendUserEvent
   
@@ -32,6 +32,12 @@ advene (0.10) unstable; urgency=low
   
   * Added members edition GUI for RelationTypes (but the model does not
     support updating them yet)
+
+  * Implemented DnD of rules in RuleSet editing popups (through the "Copy" button
+    in the lower right hand corner)
+  
+  * Parameters values are now remembered when editing the action name (so that 
+    scrolling the action name list by mistake does not erase all the values)
   
  -- 
 
