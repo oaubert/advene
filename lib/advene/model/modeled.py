@@ -74,22 +74,22 @@ class Modeled(object):
                      or the element to be found just afterwards
            If no element is found matching, None is returned.
         """
-        list = self._getModelChildren()
-        length = len(list)
+        list_ = self._getModelChildren()
+        length = len(list_)
         
         for index in range(length):
             if match:
-                if not self.__match(list[index], match):
+                if not self.__match(list_[index], match):
                     continue
             if after:
                 if index == 0 \
-                       or not self.__match(list[index - 1], after):
+                       or not self.__match(list_[index - 1], after):
                     continue
             if before:
                 if index == length - 1 \
-                       or not self.__match(list[index + 1], before):
+                       or not self.__match(list_[index + 1], before):
                     continue
-            return list[index]
+            return list_[index]
         return None
 
     def __match(element, matcher):
