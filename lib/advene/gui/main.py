@@ -1101,31 +1101,10 @@ class AdveneGUI (Connect):
 
     def on_timeline1_activate (self, button=None, data=None):
         """Timeline View of loaded defined annotations."""
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-
-        def key_pressed_cb (win, event):
-            if event.state & gtk.gdk.CONTROL_MASK:
-                # The Control-key is held. Special actions :
-                if event.keyval == gtk.keysyms.q:
-                    win.emit('destroy')
-                return True
-            if event.keyval == gtk.keysyms.Escape:
-                win.emit('destroy')
-                return True
-            return False
-
-        window.connect ("key-press-event", key_pressed_cb)
-
-        window.set_title (self.controller.package.title or "???")
-
-        vbox = gtk.VBox()
-
-        window.add (vbox)
-
         duration = self.controller.cached_duration
         if duration <= 0:
             if self.controller.package.annotations:
-                duration = max([a.fragment.end for a in self.controller.package.annotations ])
+                duration = max([a.fragment.end for a in self.controller.package.annotations])
             else:
                 duration = 0
 
@@ -1133,53 +1112,7 @@ class AdveneGUI (Connect):
                                                 minimum=0,
                                                 maximum=duration,
                                                 controller=self.controller)
-        window.timeline = t
-        timeline_widget = t.get_packed_widget()
-        vbox.add (timeline_widget)
-
-        hbox = gtk.HButtonBox()
-        vbox.pack_start (hbox, expand=False)
-
-        fraction_adj = gtk.Adjustment (value=0.1,
-                                       lower=0.01,
-                                       upper=1.0,
-                                       step_incr=.01,
-                                       page_incr=.02)
-
-        def zoom_event (win=None, timel=None, adj=None):
-            timel.display_fraction_event (widget=win, fraction=adj.value)
-            return True
-
-        s = gtk.HScale (fraction_adj)
-        s.set_digits(2)
-        s.connect ("value-changed", zoom_event, t, fraction_adj)
-        hbox.add (s)
-
-        hbox.add (t.highlight_activated_toggle)
-        hbox.add (t.scroll_to_activated_toggle)
-
-        b = gtk.Button (stock=gtk.STOCK_OK)
-        b.connect ("clicked", self.close_view_cb, window, t)
-        hbox.add (b)
-
-        vbox.set_homogeneous (False)
-
-        window.connect ("destroy", self.close_view_cb, window, t)
-
-        self.register_view (t)
-
-        height=max(window.timeline.layer_position.values() or (1,)) + 3 * window.timeline.button_height
-
-        s=config.data.preferences['windowsize']['timelineview']
-        window.set_default_size (s[0], height)
-        window.connect ("size_allocate", self.resize_cb, 'timelineview')
-        window.show_all()
-
-        # Make sure that the timeline display is in sync with the
-        # fraction widget value
-        t.display_fraction_event (window,
-                                  fraction=fraction_adj.value)
-
+        window=t.popup()
         return True
 
     def on_edit_ruleset1_activate (self, button=None, data=None):
