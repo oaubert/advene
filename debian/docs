@@ -2,6 +2,7 @@ doc/README
 doc/TODO
 doc/copyright
 doc/developper.txt
-doc/user.txt
+doc/user.html
+doc/advene.css
 doc/mimetypes.txt
 doc/mediacontrol.txt
