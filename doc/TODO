@@ -1,4 +1,8 @@
-* Import elements GUI: implement "Add/Remove package" -> ready, but need the corresponding method in the model
+* Merge gui.edit.timechooser and gui.views.history
+
+* Renamed advene.util.vlclib to something more meaningful (misc?)
+
+* Import elements GUI: implement "Add/Remove package" -> ready, but need the corresponding method in the model to remove
 
 * Model: Pb in imported packages:
   [ s.title for s in p.imports[1].package.schemas ] works but
@@ -17,10 +21,6 @@ AnnotationTypes rather than their ids)
 * sound_[sg]et_volume: normalize volume in [0..100]
 
 * player: implement vlchttp
-
-* Transcription: access to options: display timestamps, edit
-annotations, select separator, display marks, apply expression (for
-structured content)
 
 * Transcription: complete annotation edition
 
@@ -268,8 +268,6 @@ simpler) and snapshot integration.
   * formatted : make more robust
   * first, last, rest, meta, snapshot_url, view : idem
   * authorUrl on package ???
-
-* Implement an image-based timestamp chooser (with all_snapshots()) -> almost DONE
 
 * Use popup-menu signal (cf http://cvs.gnome.org/bonsai/cvsblame.cgi?file=gtk%2B%2Fdocs%2Freference%2Fgtk/migrating-checklist.sgml&rev=HEAD&root=/cvs/gnome)
 
@@ -580,3 +578,8 @@ members of relationtypes. Parameters: field, membertypes or memberids -> DONE
 
 * ECA: implement a position heap memorizing jump positions (in order
 to implement a "Return to last position") -> DONE (navigation history)
+
+* Transcription: access to options: display timestamps, select
+separator, display marks, apply expression (for structured content) -> DONE
+
+* Implement an image-based timestamp chooser (with all_snapshots()) -> DONE
