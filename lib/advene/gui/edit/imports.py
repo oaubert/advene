@@ -24,10 +24,15 @@ class TreeViewImporter:
     COLUMN_IMPORTED=3
     COLUMN_URI=4
     
-    types_mapping={'view': 'views',
-                   'schema': 'schemas',
-                   'annotation-type': 'annotationTypes',
-                   'relation-type': 'relationTypes'}
+    types_mapping={
+        'view': 'views',
+        'schema': 'schemas',
+        'annotation-type': 'annotationTypes',
+        'relation-type': 'relationTypes',
+        'annotation': 'annotations',
+        'relation': 'relations',
+        'query': 'queries',
+        }
     
     def __init__(self, controller=None):
         self.controller=controller
@@ -102,12 +107,22 @@ class TreeViewImporter:
                                    self.is_imported(s),
                                    s.uri])
             for at in s.annotationTypes:
-                store.append(parent=srow,
-                             row=[at,
-                                  at.title or at.id,
-                                  "FIXME:at.id",
-                                  self.is_imported(at),
-                                  at.uri])
+                atrow=store.append(parent=srow,
+                                   row=[at,
+                                        at.title or at.id,
+                                        "FIXME:at.id",
+                                        self.is_imported(at),
+                                        at.uri])
+                # Does not work because the model does not
+                # grasp at.annotations for an importer package.
+                # for a in at.annotations:
+                #     print a.id
+                #     store.append(parent=atrow,
+                #                    row=[a,
+                #                         self.controller.get_title(a),
+                #                         a.id,
+                #                         self.is_imported(a),
+                #                         a.uri])
             for rt in s.relationTypes:
                 store.append(parent=srow,
                              row=[rt,
@@ -115,6 +130,49 @@ class TreeViewImporter:
                                   "FIXME:rt.id",
                                   self.is_imported(rt),
                                   rt.uri])
+
+        annotationsrow=store.append(parent=packagerow,
+                                    row=[p.annotations,
+                                         _('Annotations'),
+                                   _('Annotations'),
+                                   False,
+                                   'list'])
+        for a in p.annotations:
+            store.append(parent=annotationsrow,
+                         row=[a,
+                              self.controller.get_title(a),
+                              a.id,
+                              self.is_imported(a),
+                              a.uri]) 
+
+        relationsrow=store.append(parent=packagerow,
+                                  row=[p.relations,
+                                     _('Relations'),
+                                     _('Relations'),
+                                   False,
+                                   'list'])
+        for r in p.relations:
+            store.append(parent=relationsrow,
+                         row=[r,
+                              self.controller.get_title(r),
+                              r.id,
+                              self.is_imported(r),
+                              r.uri])
+                
+        queriesrow=store.append(parent=packagerow,
+                                row=[p.queries,
+                                     _('Queries'),
+                                     _('Queries'),
+                                   False,
+                                   'list'])
+        for q in p.queries:
+            store.append(parent=queriesrow,
+                         row=[q,
+                              self.controller.get_title(q),
+                              q.id,
+                              self.is_imported(q),
+                              q.uri])
+                
         return
         
     def build_liststore(self):
@@ -135,7 +193,7 @@ class TreeViewImporter:
     def toggled_cb(self, renderer, path, model, column):
         # Update the display
         model[path][column] = not model[path][column]
-        
+
         element=model[path][self.COLUMN_ELEMENT]
         if model[path][column]:
            # If True, it means that it was previously False and that
