@@ -363,6 +363,13 @@ class AdveneController:
             self.package.setMetaData (config.data.namespace,
                                       "duration",
                                       unicode(self.cached_duration))
+        # Set if necessary the mediafile metadata
+        if self.get_default_media() is None:
+            pl = self.player.playlist_get_list()
+            if pl:
+                mediafile = self.package.setMetaData (config.data.namespace,
+                                                      "mediafile",
+                                                      pl[0])
         self.package.save(as=as)
         self.event_handler.notify ("PackageSave")
     
