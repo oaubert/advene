@@ -24,10 +24,13 @@ import gobject
 import advene.rules.elements
 
 class LogWindow:
-    def __init__ (self, controller=None, container=None):
+    def __init__ (self, controller=None, container=None, embedded=False):
         self.controller=controller
         self.container=container
         self.tooltips=gtk.Tooltips()
+        if container is not None:
+            embedded=True
+        self.embedded=embedded
         # Timeout for messages in ms
         self.timeout=5000
         # Data is a tuple list: (timestamp, position, message, url, widget)
@@ -53,7 +56,7 @@ class LogWindow:
         b.connect("clicked", lambda b: self.clear_data())
         hb.pack_start(b, expand=False)
 
-        if self.container is None:
+        if not self.embedded:
             b=gtk.Button(stock=gtk.STOCK_CLOSE)
             b.connect("clicked", self.hide)
             hb.pack_start(b, expand=False)
