@@ -51,6 +51,8 @@ import advene.gui.edit.dvdselect
 import advene.gui.edit.elements
 import advene.gui.edit.create
 
+import advene.gui.evaluator
+
 from advene.gui.edit.annotation import AnnotationEdit
 from advene.gui.edit.timeadjustment import TimeAdjustment
 
@@ -709,6 +711,16 @@ class AdveneGUI (Connect):
         self.unregister_view (view)
         widget.destroy ()
         
+    def popup_evaluator(self, *p, **kw):
+        p=self.controller.package
+        ev=advene.gui.evaluator.Window(controller=self.controller,
+                                       globals_={},
+                                       locals_={'package': p,
+                                                'p': p,
+                                                'a': p.annotations[-1]})
+        ev.popup()
+        return True
+    
     def update_display (self):
         """Update the interface.
 
@@ -814,9 +826,9 @@ class AdveneGUI (Connect):
             elif event.keyval == gtk.keysyms.o:
                 # Open an annotation file
                 self.on_open1_activate (win, None)
-            elif event.keyval == gtk.keysyms.m:
-                # Open a video file
-                self.on_b_addfile_clicked (win, None)
+            elif event.keyval == gtk.keysyms.e:
+                # Popup the evaluator window
+                self.popup_evaluator()
             elif event.keyval == gtk.keysyms.s:
                 # Save the current annotation file
                 self.on_save1_activate (win, None)
