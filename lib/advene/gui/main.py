@@ -351,7 +351,8 @@ class AdveneGUI (Connect):
             name="Popup",
             method=self.action_popup,
             description=_("Display a popup"),
-            parameters={'message': _("String to display.")}
+            parameters={'message': _("String to display."),
+                        'duration': _("Display duration in ms. Ignored if empty.")}
             ))
 
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
@@ -359,7 +360,8 @@ class AdveneGUI (Connect):
             method=self.action_popup_goto,
             description=_("Display a popup to go to another position"),
             parameters={'message': _("String to display."),
-                        'position': _("New position")}
+                        'position': _("New position"),
+                        'duration': _("Display duration in ms. Ignored if empty.")}
             ))
 
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
@@ -371,6 +373,7 @@ class AdveneGUI (Connect):
                         'position1': _("First position"),
                         'message2': _("Second option description"),
                         'position2': _("Second position"),
+                        'duration': _("Display duration in ms. Ignored if empty.")
                         }
             ))
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
@@ -384,6 +387,7 @@ class AdveneGUI (Connect):
                         'position2': _("Second position"),
                         'message3': _("Third option description"),
                         'position3': _("Third position"),
+                        'duration': _("Display duration in ms. Ignored if empty.")
                         }
             ))
 
@@ -684,8 +688,11 @@ class AdveneGUI (Connect):
             message=context.evaluateValue(parameters['message']).replace('\\n', '\n')
         else:
             message=_("No message...")
+        duration=context.evaluateValue(parameters['duration'])
+        if duration == "" or duration == 0:
+            duration = None
         l = gtk.Label(message)
-        self.singletonpopup.display(l)
+        self.singletonpopup.display(widget=l, timeout=duration)
         return True
 
     def action_popup_goto (self, context, parameters):
@@ -697,14 +704,17 @@ class AdveneGUI (Connect):
         if parameters.has_key('message'):
             message=context.evaluateValue(parameters['message']).replace('\\n', '\n')
         else:
-            message=_("Click OK to go to another position")
+            message=_("Click to go to another position")
         if parameters.has_key('position'):
             position=long(context.evaluateValue(parameters['position']))
         else:
             position=0
+        duration=context.evaluateValue(parameters['duration'])
+        if duration == "" or duration == 0:
+            duration = None
         b=gtk.Button(message)
         b.connect("clicked", handle_response, position)
-        self.singletonpopup.display(b)
+        self.singletonpopup.display(widget=b, timeout=duration)
         return True
 
     def generate_action_popup_goton(self, size):
@@ -727,7 +737,10 @@ class AdveneGUI (Connect):
                 b.connect("clicked", handle_response, position)
                 vbox.add(b)
 
-            self.singletonpopup.display(vbox)
+            duration=context.evaluateValue(parameters['duration'])
+            if duration == "" or duration == 0:
+                duration = None
+            self.singletonpopup.display(widget=vbox, timeout=duration)
             return True
         return generate
 
