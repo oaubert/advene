@@ -6,6 +6,7 @@ from gettext import gettext as _
 import advene.util.vlclib as vlclib
 
 from advene.rules.elements import RegisteredAction, Action, Condition
+from advene.model.tal.context import AdveneTalesException
 
 import cStringIO
 
@@ -15,7 +16,12 @@ class DefaultActionsRepository:
 
     def parse_parameter(self, context, parameters, name, default_value):
         if parameters.has_key(name):
-            result=context.evaluateValue(parameters[name])
+            try:
+                result=context.evaluateValue(parameters[name])
+            except AdveneTalesException, e:
+                self.controller.log(_("Error in the evaluation of the parameter %s:" % name))
+                self.controller.log(str(e))
+                result=default_value
         else:
             result=default_value
         return result
@@ -29,27 +35,31 @@ class DefaultActionsRepository:
             name="Message",
             method=self.Message,
             description=_("Display a message"),
-            parameters={'message': _("Message to display")}
+            parameters={'message': _("Message to display")},
+            category='gui',
             )
                  )
         l.append(RegisteredAction(
             name="PlayerStart",
             method=self.PlayerStart,
             description=_("Start the player"),
-            parameters={'position': _("Start position (in ms)")}
+            parameters={'position': _("Start position (in ms)")},
+            category='player',
             )
                  )
         l.append(RegisteredAction(
             name="PlayerGoto",
             method=self.PlayerGoto,
             description=_("Go to the given position"),
-            parameters={'position': _("Goto position (in ms)")}
+            parameters={'position': _("Goto position (in ms)")},
+            category='player',
             )
                  )
         l.append(RegisteredAction(
             name="PlayerStop",
             method=self.PlayerStop,
             description=_("Stop the player"),
+            category='player',
 #            parameters={'position': _("Stop position (in ms)")}
             )
                  )
@@ -58,6 +68,7 @@ class DefaultActionsRepository:
             method=self.PlayerPause,
             description=_("Pause the player"),
 #            parameters={'position': _("Pause position (in ms)")}
+            category='player',
             )
                  )
         l.append(RegisteredAction(
@@ -65,6 +76,7 @@ class DefaultActionsRepository:
             method=self.PlayerResume,
             description=_("Resume the player"),
 #            parameters={'position': _("Resume position (in ms)")}
+            category='player',
             )
                  )
         l.append(RegisteredAction(
@@ -72,6 +84,7 @@ class DefaultActionsRepository:
             method=self.Snapshot,
             description=_("Take a snapshot"),
 #            parameters={'position': _("Snapshot position (in ms)")}
+            category='advanced',
             )
                  )
         l.append(RegisteredAction(
@@ -79,14 +92,16 @@ class DefaultActionsRepository:
             method=self.Caption,
             description=_("Display a caption"),
             parameters={'message': _("Message to display"),
-                        'duration': _("Duration of the caption")}
+                        'duration': _("Duration of the caption")},
+            category='advanced',
             )
                  )
         l.append(RegisteredAction(
             name="AnnotationCaption",
             method=self.AnnotationCaption,
             description=_("Caption the annotation"),
-            parameters={'message': _("Message to display")}
+            parameters={'message': _("Message to display")},
+            category='advanced',
             )
                  )
         l.append(RegisteredAction(
@@ -98,25 +113,29 @@ class DefaultActionsRepository:
                         'x': _("x-position (percentage of screen)"),
                         'y': _("y-position (percentage of screen)"),
                         'size': _("Size (arbitrary units)"),
-                        'duration': _("Duration of the display in ms")}
+                        'duration': _("Duration of the display in ms")},
+            category='advanced',
             )
                  )
         l.append(RegisteredAction(
             name="AnnotationMute",
             method=self.AnnotationMute,
             description=_("Zero the volume during the annotation"),
+            category='player',
             )
                  )
         l.append(RegisteredAction(
             name="SoundOff",
             method=self.SoundOff,
             description=_("Zero the volume"),
+            category='player',
             )
                  )
         l.append(RegisteredAction(
             name="SoundOn",
             method=self.SoundOn,
             description=_("Restore the volume"),
+            category='player',
             )
                  )
 
@@ -124,7 +143,8 @@ class DefaultActionsRepository:
             name="ActivateSTBV",
             method=self.ActivateSTBV,
             description=_("Activate a STBV"),
-            parameters={'viewid': _("STBV id")}
+            parameters={'viewid': _("STBV id")},
+            category='gui',
             )
                  )
 
@@ -133,7 +153,8 @@ class DefaultActionsRepository:
             method=self.SendUserEvent,
             description=_("Send a user event"),
             parameters={'identifier': _("Identifier"),
-                        'delay': _("Delay in ms before sending the event.")}
+                        'delay': _("Delay in ms before sending the event.")},
+            category='generic',
             )
                  )
 
@@ -282,12 +303,14 @@ class DefaultActionsRepository:
         annotation=context.evaluateValue('annotation')
 
         if annotation is not None:
-            begin = self.controller.player.relative_position
-            duration=annotation.fragment.end - self.controller.player.current_position_value
             c=self.controller
-            end = c.create_position (value=duration,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.RelativePosition)
+            #begin = self.controller.player.relative_position
+            #duration=annotation.fragment.end - self.controller.player.current_position_value
+            #end = c.create_position (value=duration,
+            #                         key=c.player.MediaTime,
+            #                         origin=c.player.RelativePosition)
+            begin = c.create_position (value=annotation.fragment.begin)
+            end = c.create_position (value=annotation.fragment.end)
             c.player.display_text (message.encode('utf8'), begin, end)
         return True
 
