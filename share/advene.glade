@@ -814,6 +814,23 @@
 	      </child>
 
 	      <child>
+		<widget class="GtkToolButton" id="toolbutton23">
+		  <property name="visible">True</property>
+		  <property name="label" translatable="yes">File history</property>
+		  <property name="use_underline">True</property>
+		  <property name="icon">pixmaps/filehistory.xpm</property>
+		  <property name="visible_horizontal">True</property>
+		  <property name="visible_vertical">True</property>
+		  <property name="is_important">False</property>
+		  <signal name="clicked" handler="on_filehistory_clicked" last_modification_time="Sat, 26 Feb 2005 23:59:35 GMT"/>
+		</widget>
+		<packing>
+		  <property name="expand">False</property>
+		  <property name="homogeneous">False</property>
+		</packing>
+	      </child>
+
+	      <child>
 		<widget class="GtkToolButton" id="toolbutton18">
 		  <property name="visible">True</property>
 		  <property name="stock_id">gtk-save</property>
