@@ -244,7 +244,7 @@ class Player(object):
             self.orb, self.mc = self.launcher.init ()
             m = self.get_default_media()
             if m is not None and m != "":
-                self.mc.playlist_add_item (str(m))
+                self.mc.playlist_add_item (unicode(m,'utf8').encode('utf8'))
 
     def get_default_media (self):
         """Return the default media path (used when starting the player).
