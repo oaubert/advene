@@ -88,6 +88,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         types=(gobject.TYPE_STRING, gobject.TYPE_PYOBJECT)
         return types[index]
 
+    # FIXME: maybe we could use TALES expressions as path
     def on_get_path(self, node): # FIXME
         # print "on_get_path()"
         # print "node: " + str(node)
@@ -105,7 +106,6 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
             idx.append (i)
             child = parent
             parent = self.nodeParent(parent)
-
         idx.append(0)
         idx.reverse()
         return tuple(idx)
@@ -180,8 +180,11 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
     def on_iter_children(self, node):
         """Return the first child of this node"""
         children = self.nodeChildren(node)
-        assert len(children), _("No children in on_iter_children()!")
-        return children[0]
+        if children is None:
+            return children
+        else:
+            assert len(children), _("No children in on_iter_children()!")
+            return children[0]
     
     def on_iter_has_child(self, node):
         """returns true if this node has children"""
@@ -194,10 +197,9 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
     def on_iter_nth_child(self, node, n):
         """Returns the nth child of this node"""
         child = None
-        if node is not None:
-            children = self.nodeChildren(node)
-            assert len(children), _("No children in on_iter_nth_child()")
-            child = children[n]
+        children = self.nodeChildren(node)
+        assert len(children), _("No children in on_iter_nth_child()")
+        child = children[n]
         return child
 
     def on_iter_parent(self, node):
@@ -239,6 +241,7 @@ class DetailedTreeModel(AdveneTreeModel):
        - Views depend on their package list of views
     """
     def nodeParent (self, node):
+        #print "nodeparent %s" % node
         if isinstance (node, Annotation):
             parent = node.type
         elif isinstance (node, Relation):
@@ -262,6 +265,7 @@ class DetailedTreeModel(AdveneTreeModel):
         return parent
 
     def nodeChildren (self, node):
+        #print "nodechildren %s" % node
         if isinstance (node, Annotation):
             children = None
         elif isinstance (node, Relation):
@@ -289,6 +293,8 @@ class DetailedTreeModel(AdveneTreeModel):
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
+        elif node is None:
+            children = [ self.get_package() ]
         else:
             children = None
         return children
@@ -355,6 +361,8 @@ class FlatTreeModel(AdveneTreeModel):
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
+        elif node is None:
+            children = [ self.__package ]
         else:
             children = None
         return children
@@ -440,6 +448,8 @@ class TreeWidget:
         # On double-click, edit element
         if event.type == gtk.gdk._2BUTTON_PRESS:
             node = self.get_selected_node (widget)
+            # FIXME: if it is a list of schemas, views or list,
+            # propose to create a new one
             if node is not None:
                 try:
                     pop = advene.gui.edit.elements.get_edit_popup (node,
@@ -451,20 +461,24 @@ class TreeWidget:
                 retval=True
             else:
                 retval=False
-        elif button == 3:
+        elif button == 3 or button == 2:
             if event.window is widget.get_bin_window():
                 model = self.model
                 t = widget.get_path_at_pos(x, y)
                 if t is not None:
                     path, col, cx, cy = t
-                    iter = model.get_iter(path)
-                    node = model.get_value(iter,
+                    it = model.get_iter(path)
+                    node = model.get_value(it,
                                            AdveneTreeModel.COLUMN_ELEMENT)
                     widget.get_selection().select_path (path)
                     if button == 3:
                         menu = advene.gui.popup.Menu(node, controller=self.controller)
                         menu.popup()
                         retval = True
+                    elif button == 2:
+                        # Expand all children
+                        widget.expand_row(path, True)
+                        retval=True
         return retval
 
     def update_element(self, element=None, event=None):
