@@ -420,6 +420,10 @@ class EditPackagePopup (EditElementPopup):
         return isinstance (el, Package)
     can_edit = staticmethod (can_edit)
         
+    def notify(self, element):
+        self.controller.notify("PackageEditEnd", package=element)
+        return True
+    
     def make_widget (self, editable=False):
         # Package data
         # Annotation data
