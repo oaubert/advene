@@ -222,6 +222,7 @@ class Window:
                 b.insert_at_cursor(element)
 
             if len(completion) > 1:
+                completion.sort()
                 self.log("\n".join(completion))
         
         return True
@@ -316,20 +317,26 @@ class Window:
 
         hb=gtk.HButtonBox()
 
-        b=gtk.Button(_("Clear output"))
+        b=gtk.Button(_("_Save output"))
+        b.connect("clicked", self.save_output_cb)
+        hb.add(b)
+
+        b=gtk.Button(_("Clear _output"))
         b.connect("clicked", self.clear_output)
         hb.add(b)
 
-        b=gtk.Button(_("Clear expression"))
+        b=gtk.Button(_("Clear _expression"))
         b.connect("clicked", self.clear_expression)
         hb.add(b)
 
-        b=gtk.Button(_("Evaluate expression"))
+        b=gtk.Button(_("E_valuate expression"))
         b.connect("clicked", self.evaluate_expression)
         hb.add(b)
 
-        vbox.pack_start(hb, expand=False)
+        # So that applications can defined their own buttons
+        self.hbox=hb
 
+        vbox.pack_start(hb, expand=False)
         vbox.show_all()
 
         return vbox
@@ -339,4 +346,9 @@ if __name__ == "__main__":
 
     window=ev.popup()
 
+    b=gtk.Button(stock=gtk.STOCK_QUIT)
+    b.connect("clicked", gtk.main_quit)
+    ev.hbox.add(b)
+    b.show()
+    
     gtk.main ()
