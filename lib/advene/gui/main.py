@@ -381,6 +381,15 @@ class AdveneGUI (Connect):
             ))
 
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
+            name="OpenView",
+            method=self.action_open_view,
+            description=_("Open a GUI view"),
+            parameters={'guiview': _("View name (timeline or tree)"),
+                        },
+            category='gui',
+            ))
+
+        self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
             name="PopupGoto2",
             method=self.generate_action_popup_goton(2),
             description=_("Display a popup with 2 options"),
@@ -695,6 +704,24 @@ class AdveneGUI (Connect):
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
         message=message.replace('\\n', '\n')
         self.log (message)
+        return True
+
+    def action_open_view (self, context, parameters):
+        """Event Handler for the OpenView action.
+
+        The parameters should have a 'guiview' key.
+        """
+        view=self.parse_parameter(context, parameters, 'guiview', None)
+        if view is None:
+            return True
+        match={
+            'timeline': self.on_timeline1_activate,
+            'tree': self.on_view_annotations_activate,
+            }
+        if match.has_key(view):
+            match[view]()
+        else:
+            self.log(_("Error: undefined GUI view %s") % view)
         return True
 
     def action_popup (self, context, parameters):
@@ -1479,8 +1506,8 @@ class AdveneGUI (Connect):
 
         mediafile = self.gui.get_widget ("prop_media").get_text ()
         self.controller.set_default_media(mediafile)
-        id_ = vlclib.mediafile2id (mediafile)
-        self.controller.imagecache.save (id_)
+        #id_ = vlclib.mediafile2id (mediafile)
+        #self.controller.imagecache.save (id_)
 
         self.controller.package.title = self.gui.get_widget ("prop_title").get_text ()
 
