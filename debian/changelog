@@ -1,3 +1,19 @@
+advene (project) unstable; urgency=low
+
+  * Check that no relation use the annotation on annotation delete
+  
+  * Update to pygtk 2.4
+  
+  * Added three toolbars: player control, file operations, views access
+  
+  * The package explorer now displays categories for elements (members, attributes, methods)
+  
+  * Use the new FileChooser from gtk 2.4
+  
+  * Added a "display preview" button in the file selector
+  
+ --
+
 advene (0.12) unstable; urgency=low
 
   * Action and Condition selection is now categorized
