@@ -23,7 +23,7 @@ Running AdveneServer standalone
 ===============================
 
   The AdveneServer can be run indepently. In this case, it can maintain
-  and give access to a number of different packages.  
+  and give access to a number of different packages.
 """
 
 import advene.core.config as config
@@ -66,7 +66,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     URL syntax
     ==========
-    
+
     The virtual tree served by this server has the following entry points :
 
       - C{/admin} : the administration folder
@@ -86,7 +86,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       - L{do_GET_admin} : handles requests for the C{/admin} folder.
       - L{do_GET_element} : handles requests for the C{/packages} folder.
     """
-    
+
     def location_bar (self):
         """Returns a string representing the active location bar.
 
@@ -110,7 +110,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         self.server.logger.info("%s %s" % (self.address_string(), format % args))
-        
+
     def no_cache (self):
         """Write the cache-control headers in the response.
 
@@ -188,9 +188,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             <hr>
             """) % { 'locationbar': self.location_bar (),
                      'path': self.path})
-            
+
         if duplicate_title and mode == 'navigation':
-            self.wfile.write("<h1>%s</h1>\n" % title)        
+            self.wfile.write("<h1>%s</h1>\n" % title)
 
     def send_no_content(self):
         """Sends a No Content (204) response.
@@ -224,7 +224,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def query2dict (self, q):
         """Converts a query string to a dictionary.
-        
+
         This method converts a query string (C{attr1=val1&attr2=val2...}) into
         a dictionary with keys and values unquoted.
 
@@ -240,7 +240,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             k,v = t.split("=", 1)
             res[urllib.unquote_plus(k)] = urllib.unquote_plus(v)
         return res
-    
+
     def display_media_status (self):
         """Display current media status.
 
@@ -269,7 +269,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 vlclib.format_time(self.server.controller.player.current_position_value),
                 vlclib.format_time(self.server.controller.player.stream_duration),
                 repr(self.server.controller.player.status)))
-                
+
             if len(l) == 0:
                 self.wfile.write (_("""<h1>No playlist</h1>"""))
             else:
@@ -301,13 +301,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             stbv=stbvlist[0]
         self.server.activate_stbv(view=stbv)
         return
-        
+
     def handle_media (self, l, query):
         """Handles X{/media} access requests.
 
         Tree organization
         =================
-        
+
         The C{/media} folder gives the ability to acces the mediaplayer.
 
         The elements available in this folder are :
@@ -320,7 +320,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           - C{/media/stbv}
 
         Accessing the folder itself will display the media status.
-        
+
         The X{/media/load} element
         --------------------------
 
@@ -410,7 +410,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         if isinstance(name, unicode):
                             name=name.encode('utf8')
                         self.server.controller.player.playlist_add_item (name)
-                        
+
                         self.start_html (_("File added"))
                         self.wfile.write (_("""<p><strong>%s has been added to the playlist</strong></p>""") % name)
                         self.display_media_status ()
@@ -440,7 +440,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         template="""<li><a href="/media/snapshot/%(alias)s/%(position)d"><img src="/media/snapshot/%(alias)s/%(position)d" /></a></li>"""
                         self.wfile.write ("""<p><a href="/media/snapshot/%s">Display with no inline images</a></p>""" % alias)
                     else:
-                        template="""<li><a href="/media/snapshot/%(alias)s/%(position)d">%(position)d</a> (%(status)s)</li>"""                        
+                        template="""<li><a href="/media/snapshot/%(alias)s/%(position)d">%(position)d</a> (%(status)s)</li>"""
                         self.wfile.write (_("""<p><a href="/media/snapshot/%s?mode=inline">Display with inline images</a></p>""") % alias)
 
                     k = i.keys ()
@@ -476,7 +476,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.activate_stbvid(query['stbv'])
                 if len(param) != 0:
                     # First parameter is the position
-                    position = param[0]                    
+                    position = param[0]
                 elif query.has_key ('position'):
                     position = query['position']
                 else:
@@ -500,9 +500,112 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_error (404, _('Malformed request'))
                     return
                 self.activate_stbvid(stbvid)
-                #self.server.update_status("play", 0)                
+                #self.server.update_status("play", 0)
                 self.send_no_content()
-                    
+
+    def handle_application (self, l, query):
+        """Handles X{/application} access requests.
+
+        Tree organization
+        =================
+
+        The C{/application} folder gives the ability to acces the application (GUI).
+
+        The elements available in this folder are :
+
+          - C{/application/stbv}
+          - C{/application/adhoc}
+
+        Accessing the folder itself will display the application status.
+
+        The X{/application/stbv} element
+        --------------------------
+
+          C{/application/stbv} activates the given STBV. It takes the STBV id as
+          next element in the path, or as C{id=...} parameter. Note that it only
+          activates the STBV. To activate the STBV and start the player, use the
+          C{/application/play?stbv=...} URI.
+
+        The X{/application/adhoc} element
+        --------------------------
+
+          C{/application/adhoc} opens the given ad-hoc view. It takes
+          the view name as next element in the path. Accessible views
+          are: C{tree}, C{timeline}, C{transcription}.
+
+          The transcription view can take an optional C{type}
+          parameter, either as next element in the URI or as a
+          C{type=...} parameter. To open the transcription view on the
+          annotation-type simple_text, you can simply use:
+          C{/application/adhoc/transcription/simple_text}
+        """
+        def current_adhoc():
+            if not c.gui:
+                self.wfile.write(_("""<p>No GUI is available."""))
+            else:
+                self.wfile.write(_("""<p>Current adhoc views: %s</p>""") % ", ".join([ v.view_name for v in c.gui.annotation_views]))
+                self.wfile.write(_("""<p>You can open a new <a href="/application/adhoc/tree">tree view</a>, a new <a href="/application/adhoc/timeline">timeline</a> or a new <a href="/application/adhoc/transcription">transcription</a></p>"""))
+
+        def current_stbv():
+            self.wfile.write(_("""<p>Current stbv: %s</p>""") % c.get_title(c.current_stbv))
+            self.wfile.write(_("""<p>You can activate the following STBV:</p><ul>%s</ul>""")
+                             % "\n".join( [ """<li><a href="/application/stbv/%s">%s</a> (<a href="/media/play/0?stbv=%s">Activate and play</a>)</li>""" %
+                                            (s.id, c.get_title(s), s.id)
+                                            for s in c.get_stbv_list() ] ) )
+
+        c=self.server.controller
+        if len(l) == 0:
+            # Display media information
+            self.start_html (_('Application information'))
+            current_stbv()
+            current_adhoc()
+            return
+        else:
+            command = l[0]
+            param = l[1:]
+            if command == 'stbv':
+                if len(param) != 0:
+                    stbvid=param[0]
+                elif query.has_key ('id'):
+                    stbvid=query['id']
+                else:
+                    self.start_html (_('Application information'))
+                    current_stbv()
+                    return
+                self.activate_stbvid(stbvid)
+                #self.server.update_status("play", 0)
+                self.send_redirect("/application/stbv")
+            elif command == 'adhoc':
+                view=None
+                if len(param) != 0:
+                    view=param[0]
+                if view is None or c.gui is None:
+                    current_adhoc()
+                    return
+                if view == 'tree':
+                    c.queue_action(c.gui.on_view_annotations_activate)
+                    self.send_no_content()
+                elif view == 'timeline':
+                    c.queue_action(c.gui.on_timeline1_activate)
+                    self.send_no_content()
+                elif view == 'transcription':
+                    atid=None
+                    if len(param) > 1:
+                        atid=param[1]
+                    elif query.has_key('type'):
+                        atid=query['type']
+
+                    if atid is not None:
+                        atid=vlclib.get_id(self.server.controller.package.annotationTypes,
+                                           atid)
+
+                    c.queue_action(c.gui.on_transcription1_activate, None, atid)
+                    self.send_no_content()
+                else:
+                    self.start_html (_('Error'))
+                    self.wfile.write(_("""<p>The GUI view %s does not exist.</p>""") % view)
+        return
+
     def handle_access (self, l, query):
         """Displays the access control menu.
 
@@ -524,7 +627,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         If no options are given, the current access control list is
         displayed.
-        
+
         @param l: the access path as a list of elements,
                   with the initial one (C{access}) omitted
         @type l: list
@@ -547,9 +650,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     # Remove the hostname
                     if ip in self.server.authorized_hosts:
                         del self.server.authorized_hosts[ip]
-                        self.wfile.write (_("""<p>Removed %s from authorized hosts list.</p>""") % query['hostname'])                        
+                        self.wfile.write (_("""<p>Removed %s from authorized hosts list.</p>""") % query['hostname'])
                     else:
-                        self.wfile.write (_("""<p>Cannot remove %s from authorized hosts list.</p>""") % query['hostname'])                        
+                        self.wfile.write (_("""<p>Cannot remove %s from authorized hosts list.</p>""") % query['hostname'])
                 else:
                     # Add it to the ACL
                     self.server.authorized_hosts[ip] = query['hostname']
@@ -568,13 +671,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """) % "\n".join(["""<tr><td>%s</td><td>%s</td><td><a href="/admin/access?hostname=%s&action=del">Remove</a></td></tr>""" % (ip, name, name)
                          for (name, ip) in self.server.authorized_hosts.items()]))
         return
-    
+
     def display_summary (self):
         """Display the main administration page.
 
         This method displays the root document of the server, which
         should link to all functionalities."""
-        
+
         self.start_html (_("Server Administration"), duplicate_title=True)
         self.wfile.write(_("""
         <p><a href="/admin/status">Display the server status</a></p>
@@ -582,7 +685,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         <p><a href="/admin/reset">Reset the server</a></p>
         <p><a href="/media">Media control</a></p>
         <p><a href="/admin/list">List available files</a></p>
-        <p><a href="/packages">List loaded packages</a> (%s)</p> 
+        <p><a href="/packages">List loaded packages</a> (%s)</p>
         <form action="/admin/display" method="POST">
         <p>Display mode: <select name="mode">
         <option value="default" selected>Default (with navigation interface)</option>
@@ -628,11 +731,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         @param embedded: Specify wether the list is embedded in
                          another document or not. In the latter case,
                          the headers will be generated.
-        @type embedded: boolean        
+        @type embedded: boolean
         """
         if not embedded:
             self.start_html (_("Loaded package(s)"))
-            
+
         self.wfile.write (_("""
         <h1>Loaded package(s)</h1>
         <table border="1" width="50%">
@@ -663,7 +766,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             u'namespace_prefix': config.data.namespace_prefix,
             u'config': config.data.web,
             }
-        
+
     def do_PUT(self):
         """Handle PUT requests (update or create).
 
@@ -696,20 +799,20 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
          params,
          stringquery,
          fragment) = urlparse.urlparse (self.path)
-        
+
         stringpath = stringpath.replace ('%3A', ':')
         query = self.query2dict (stringquery)
 
         print "Handling PUT request for %s" % stringpath
-        
+
         # A trailing / would give an empty last value in the path
         path = stringpath.split('/')[1:]
-        
+
         if path[-1] == '':
             del (path[-1])
 
         if len(path) < 2:
-            self.send_error(501, _("<h1>Error</h1>") + 
+            self.send_error(501, _("<h1>Error</h1>") +
                             _("<p>Cannot set the value : invalid path</p>"))
             return
         elif path[0] == 'packages':
@@ -721,12 +824,12 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 expr = "here"
             else:
                 expr = "here/%s" % tales
-                
+
             context = advene.model.tal.context.AdveneContext (here=self.server.packages[alias],
                                                               options=self.default_options(alias))
             context.pushLocals()
-            context.setLocal('request', query)        
-            
+            context.setLocal('request', query)
+
             try:
                 objet = context.evaluateValue (expr)
             except AdveneException, e:
@@ -747,7 +850,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_response(501, _("Unable to update this value."))
             self.end_headers()
             return
-        
+
     def do_POST(self):
         """Handles POST requests (update or create).
 
@@ -757,7 +860,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         Setting the X{display mode}
         ===========================
-        
+
         Accessing the C{/admin/display} element updates the server
         display mode. The data should be available as a parameter
         named C{mode}, which is either C{default} or C{raw}
@@ -805,7 +908,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           - C{id} : the identifier of the view. Should not be already used.
           - C{class} : the class that this view should apply on.
           - C{data} : the content data of the view (the TAL template).
-        
+
         """
 
         self.start_html (_("Setting value"))
@@ -816,13 +919,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
          params,
          stringquery,
          fragment) = urlparse.urlparse (self.path)
-        
+
         stringpath = stringpath.replace ('%3A', ':')
         pathquery = self.query2dict (stringquery)
 
         # A trailing / would give an empty last value in the path
         path = stringpath.split('/')[1:]
-        
+
         if path[-1] == '':
             del (path[-1])
 
@@ -851,7 +954,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 expr = "here"
             else:
                 expr = "here/%s" % tales
-                
+
             context = advene.model.tal.context.AdveneContext (here=self.server.packages[alias],
                                                               options=self.default_options(alias))
             try:
@@ -865,7 +968,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.start_html (_("Error"), duplicate_title=True)
                 self.wfile.write (_("<p>Invalid request</p>."))
                 return
-            
+
             # Different actions : update, create, delete
             if query['action'] == 'update':
                 if hasattr(objet, query['key']):
@@ -926,7 +1029,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                          </pre>
                          """ % (unicode(e)))
                          return
-                     
+
                      self.wfile.write (_("""
                      <h1>View <em>%s</em> created</h1>
                      <p>The view <a href="%s">%s</a> was successfully created.</p>
@@ -955,7 +1058,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write (_("<p>Cannot perform the action <em>%s</em> on <code>%s</code></p>")
                                   % (query['action'], cgi.escape(unicode(objet))))
 
-                
+
     def do_GET(self):
         """Handle GET requests.
 
@@ -1020,7 +1123,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_redirect (query['view'])
             except:
                 pass
-                
+
         if query.has_key('path'):
             stringpath = stringpath + "/" + query['path']
             if query['path'].find ('..') != -1:
@@ -1038,7 +1141,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if not path:
             self.display_server_root()
             return
-        
+
         command = path[0]
         parameters = path[1:]
 
@@ -1050,6 +1153,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.do_GET_admin (parameters, query)
         elif command == 'media':
             self.handle_media (parameters, query)
+        elif command == 'application':
+            self.handle_application (parameters, query)
         elif command == 'data':
             self.do_GET_data(parameters, query)
         elif command == 'debug':
@@ -1095,7 +1200,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             %s
             %s
             %s</pre>""") % (t, pkgid, unicode(t), unicode(v), "\n".join(code.traceback.format_tb (tr))))
-                
+
     def do_GET_admin (self, l, query):
         """Handles the X{/admin}  requests.
 
@@ -1145,7 +1250,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             try:
                 self.server.controller.load_package (uri=uri, alias=alias)
                 self.start_html (_("Package %s loaded") % alias, duplicate_title=True)
-                self.display_loaded_packages (embedded=True)                
+                self.display_loaded_packages (embedded=True)
             except:
                 self.send_error(501,
                                 _("""<p>Cannot load package %s</p>""")
@@ -1199,7 +1304,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(f.read())
         f.close()
         return True
-    
+
     def do_GET_data (self, parameters, query):
         datadir=config.data.path['web']
         if '..' in parameters:
@@ -1215,7 +1320,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if (os.path.isdir(file_)):
             parameters.append('index.html')
             file_=os.sep.join((datadir, os.sep.join(parameters)))
-            
+
         (mimetype, encoding) = mimetypes.guess_type(file_)
         if mimetype is None:
             mimetype = "text/plain"
@@ -1223,7 +1328,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             encoding = ""
         else:
             encoding = "; charset=%s" % encoding
-            
+
         try:
             f=open(file_, 'rb')
         except IOError:
@@ -1243,7 +1348,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.start_html (_("Advene webserver"), duplicate_title=True)
         self.wfile.write(_("""<p>Welcome on the <a href="http://liris.cnrs.fr/advene/">Advene</a> webserver run by %s on %s:%d.</p>""") %
                          (config.data.userid, self.server.server_name, self.server.server_port))
-        
+
         if len(self.server.aliases) == 0:
             self.wfile.write(_(""" <p>No package is loaded. You can access the <a href="/admin">server administration page</a>.<p>"""))
         else:
@@ -1258,10 +1363,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 mes=_("""the <a href="/packages">loaded packages' data</a>""")
             self.wfile.write(_(""" <p>You can either access %s or the <a href="/admin">server administration page</a>.<p>""") % mes)
-        
+
         self.wfile.write(_("""<hr><p align="right"><em>Document generated by <a href="http://liris.cnrs.fr/advene/">Advene</a> v. %s.</em></p>""") % (advene.core.version.version))
         return
-    
+
     def image_type (self, o):
         """Return the image type (mime) of the object.
 
@@ -1309,7 +1414,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         All other other parameters given on the URL path are kepts in
         the C{query} dictionary, which is available in TALES
         expressions through the C{request/} root element.
-        
+
         @param p: the package in which the expression should be evaluated
         @type p: advene.model.Package
         @param tales: a TALES expression
@@ -1333,7 +1438,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         context = advene.model.tal.context.AdveneContext (here=p,
                                                           options=self.default_options(alias))
         context.pushLocals()
-        context.setLocal('request', query)        
+        context.setLocal('request', query)
         # FIXME: the following line is a hack for having qname-keys work
         #        It is a hack because obviously, p is not a "view"
         context.setLocal (u'view', p)
@@ -1394,23 +1499,23 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.no_cache ()
                 self.end_headers ()
                 self.wfile.write (objet)
-                return                
+                return
             else:
                 self.send_error (404, _("Content mode not available on non-content data"))
                 return
-            
+
         # Last case: default or raw
-        
+
         # FIXME: epoz support is kind of a hack for now.
         # Should test the result of view(). If it starts with <html>,
         # consider it a complete file and do not generate headers.
         # *or* use a specific mimetype (text/x-full-html)
-        
+
         # FIXME: we should return a meaningful title
 
         if displaymode != "raw":
             displaymode = "navigation"
-            
+
         if 'epoz' in tales:
             self.start_html(title=_("TALES evaluation - %s") % tales,
                             head_section=self.server.epoz_head,
@@ -1422,11 +1527,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         # Display content
         if hasattr (objet, 'view') and callable (objet.view):
-            
+
             context = advene.model.tal.context.AdveneContext (here=objet,
                                                               options=self.default_options(alias))
             context.pushLocals()
-            context.setLocal('request', query)        
+            context.setLocal('request', query)
             context.setLocal(u'view', objet)
             try:
                 self.wfile.write (objet.view (context=context).encode('utf-8'))
@@ -1453,7 +1558,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 <p>Tag name: <strong>%s</strong></p>
                 <p>Error message: <em>%s</em></p>""" % (cgi.escape(e.location),
                                                         e.errorDescription)))
-        
+
         # Generating navigation footer
         if displaymode != "raw":
             levelup = self.path[:self.path.rindex("/")]
@@ -1496,7 +1601,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                  for c in auto_views]))
 
             self.wfile.write ("""
-            </select> 
+            </select>
             <input type="submit" value="go">
             </form>
             <form name="entry" method="GET">
@@ -1505,7 +1610,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             """)
             self.wfile.write (_("""<hr>
             <p>Evaluating expression "<strong>%s</strong>" on package %s returns %s</p>
-            """) % (tales , p.uri, cgi.escape(str(type(objet)))))            
+            """) % (tales , p.uri, cgi.escape(str(type(objet)))))
         return
 
     def do_eval (self, q):
@@ -1554,7 +1659,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                cgi.escape (q),
                cgi.escape(pprint.pformat(r)),
                cgi.escape (q, True)))
-        
+
     def do_GET_debug (self):
         """Debug method.
 
@@ -1583,7 +1688,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         The PROPFIND method seems to be more and more used by modern
         navigators.
-        
+
         This method is here only to satisfy them, but does not return
         any sensible information for the moment.
         """
@@ -1593,7 +1698,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 class AdveneWebServer(SocketServer.ThreadingMixIn,
                        BaseHTTPServer.HTTPServer):
     """Specialized HTTP server for the Advene framework.
-    
+
     This is a specialized HTTP Server dedicated to serving Advene
     packages content, and interacting with a media player.
 
@@ -1610,7 +1715,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
     @ivar displaymode: the default display-mode
     @type displaymode: string
     @ivar authorized_hosts: the list of authorized hosts
-    @type authorized_hosts: dict    
+    @type authorized_hosts: dict
     """
     def __init__(self, controller=None, port=1234):
         """HTTP Server initialization.
@@ -1637,7 +1742,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.logger.addHandler(handler)
         # set the level to logging.DEBUG to get more messages
         self.logger.setLevel(logging.INFO)
-        
+
         if controller is None:
             # If "controller" is not specified, adveneserver will handle
             # itself package loading
@@ -1651,7 +1756,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         # Compile EPOZ template file
         fname=os.sep.join((config.data.path['web'], 'epoz', 'epozmacros.html'))
         templateFile = open (fname, 'r')
-        self.epoz_macros = simpletal.simpleTAL.compileHTMLTemplate (templateFile)        
+        self.epoz_macros = simpletal.simpleTAL.compileHTMLTemplate (templateFile)
         templateFile.close()
         self.epoz_head = """<script src="/data/epoz/dom2_events.js" type="text/javascript"></script>
         <script src="/data/epoz/sarissa.js" type="text/javascript"></script>
@@ -1660,8 +1765,8 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         <link href="/data/epoz/epozcustom.css" type="text/css" rel="stylesheet">
         """
         self.epoz_body_attributes="""onload="epoz = initEpoz(document.getElementById('epoz-editor')); epozui = epoz.getTool('ui');" """
-        
-        
+
+
         BaseHTTPServer.HTTPServer.__init__(self, ('', port),
                                            AdveneRequestHandler)
 
@@ -1690,12 +1795,12 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
             p.author = config.data.userid
         else:
             p = Package (uri=uri)
-            
+
         mediafile = p.getMetaData (config.data.namespace,
                                    "mediafile")
         if mediafile is not None and mediafile != "":
             id_ = vlclib.mediafile2id (mediafile)
-            
+
         self.register_package (alias=alias,
                                package=p,
                                imagecache=imagecache.ImageCache (id_))
@@ -1704,14 +1809,14 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.controller.queue_action(self.controller.update_status,
                                      *args, **kw)
         return True
-    
+
     def activate_stbv  (self, *args, **kw):
         self.controller.queue_action(self.controller.activate_stbv,
                                      *args, **kw)
         return True
-    
+
     # End of controller methods
-    
+
     def register_package (self, alias, package, imagecache):
         """Register a package in the server loaded packages lists.
 
@@ -1747,13 +1852,13 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         del (self.aliases[p])
         del (self.packages[alias])
         del (self.imagecaches[alias])
-        
+
     def verify_request (self, request, client_address):
         """Access control method.
 
         This method returns C{True} if the client is allowed to send
         this request. We use the L{authorized_hosts} list to check.
-        
+
         @param request: the incoming request
         @type request: Request
         @param client_address: the client address as a tuple (host, port)
@@ -1787,10 +1892,10 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
                 self.controller.player.stop ()
         except:
             pass
-        
+
     def serve_forawhile (self):
         """Handle one request at a time until C{shouldrun} is False.
-        
+
         Loop waiting for events on the input socket, with timeout handling
         and quitting variable.
         """
@@ -1802,7 +1907,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
 if __name__ == "__main__":
     import atexit
     import advene.core.mediacontrol as mediacontrol
-    
+
     server = AdveneWebServer(controller=None)
     f=mediacontrol.PlayerFactory()
     server.player=f.get_player()
@@ -1814,3 +1919,4 @@ if __name__ == "__main__":
             server.load_package (uri=uri, alias=alias)
     print _("Server ready to serve requests.")
     server.serve_forever ()
+
