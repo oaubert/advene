@@ -61,8 +61,8 @@ class TranscriptionEdit:
         self.tooltips.set_tip(self.discontinuous_toggle,
                               _("Do not generate annotations for empty text"))
                     
-        self.ignore_color = gtk.gdk.color_parse ('red')
-        self.default_color = gtk.Button().get_style().bg[0]
+        self.default_color = gtk.gdk.color_parse ('lightblue')
+        self.ignore_color = gtk.gdk.color_parse ('tomato')
 
         self.widget=self.build_widget()
 
@@ -203,6 +203,7 @@ class TranscriptionEdit:
         self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
         child.timestamp=timestamp
         child.ignore=False
+        self.set_color(child, self.default_color)
         child.show()
         self.textview.add_child_at_anchor(child, anchor)
         return
