@@ -761,7 +761,7 @@ class AdveneController:
         @type position: Position
         """
         position_before=self.player.current_position_value
-        print "update status: %s" % status
+        #print "update status: %s" % status
         try:
             # if hasattr(position, 'value'):
             #     print "update_status %s %i" % (status, position.value)
