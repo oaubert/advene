@@ -1,3 +1,9 @@
+* Le modele devrait verifier la validité des données (pas d'id en double)
+
+* Add access to package duration from TALES
+
+* Bug in queries (rest not empty even if applied to 1-element lists)
+
 * Generic for views: add a .popup() method opening a window
 
 * mediainformation: bugfix (player never active?)
