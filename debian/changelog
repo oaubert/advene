@@ -30,6 +30,9 @@ advene (0.10) unstable; urgency=low
   
   * DVD chapter import is accessible in the File menu (it needs the chaplin program)
   
+  * Added members edition GUI for RelationTypes (but the model does not
+    support updating them yet)
+  
  -- 
 
 advene (0.9) unstable; urgency=low
