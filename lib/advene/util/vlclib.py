@@ -13,7 +13,7 @@ import sre
 from gettext import gettext as _
 
 from advene.model.annotation import Annotation, Relation
-import advene.model.tal.context
+from advene.model.tal.context import AdveneContext, AdveneTalesException
 
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
@@ -177,7 +177,10 @@ def get_title(controller, element, representation=None):
             return element.content.data
         elif controller is not None:
             c=controller.event_handler.build_context(event='Display', here=element)
-            return c.evaluateValue(expr)
+            try:
+                r=c.evaluateValue(expr)
+            except AdveneTalesException:
+                r=element.content.data
     if hasattr(element, 'title'):
         return unicode(element.title)
     if hasattr(element, 'id'):
@@ -220,7 +223,7 @@ def get_valid_members (el):
 
     l.append(_('---- Methods ----'))
     # Global methods
-    l.extend (advene.model.tal.context.AdveneContext.defaultMethods ())
+    l.extend (AdveneContext.defaultMethods ())
 
     return l
 
