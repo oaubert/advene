@@ -24,6 +24,7 @@ except ImportError:
     config.data.path['locale']=os.path.sep.join( (maindir, 'locale') )
     config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
     config.data.path['advene']=maindir
+    config.data.path['plugins']=os.path.sep.join( (maindir, 'lib') )
   else:
     print """Cannot guess a valid directory.
     Please check your installation or set the PYTHONPATH environment variable."""
