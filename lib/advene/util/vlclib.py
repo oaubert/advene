@@ -69,6 +69,7 @@ def snapshot2png (image, output=None):
         i.save(ostream, 'png')
         v=TypedString(ostream.getvalue())
         v.contenttype='image/png'
+        return v
 
 def mediafile2id (mediafile):
     """Returns an id (with encoded /) corresponding to the mediafile.
@@ -107,7 +108,9 @@ def format_time (val=0):
     @type val: int
     @return: the formatted string
     @rtype: string
-    """ 
+    """
+    if val < 0:
+        val = 0
     (s, ms) = divmod(long(val), 1000)
     # Format: HH:MM:SS.mmm
     return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
