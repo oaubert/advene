@@ -1157,6 +1157,7 @@ class AdveneGUI (Connect):
             i=advene.util.importer.get_importer('lsdvd')
             i.package=self.controller.package
             i.process_file('lsdvd')
+            self.controller.modified=True
             self.controller.notify('PackageLoad')
         else:
             dialog = gtk.MessageDialog(
@@ -1196,6 +1197,7 @@ class AdveneGUI (Connect):
                 return True
             i.package=self.controller.package
             i.process_file(filename)
+            self.controller.modified=True
             self.controller.notify("PackageLoad", package=i.package)
             self.log('Converted from file %s :' % filename)
             kl=i.statistics.keys()
@@ -1256,7 +1258,8 @@ class AdveneGUI (Connect):
 
         rs = self.controller.event_handler.get_ruleset('default')
         edit=advene.gui.edit.rules.EditRuleSet(rs,
-                                               catalog=self.controller.event_handler.catalog)
+                                               catalog=self.controller.event_handler.catalog,
+                                               controller=self.controller)
         vbox.add(edit.get_widget())
         edit.get_widget().show()
 
