@@ -15,6 +15,7 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
 from advene.model.query import Query
+from advene.model.bundle import StandardXmlBundle
 
 import advene.gui.util
 import advene.util.vlclib
@@ -29,7 +30,7 @@ class Menu:
     def popup(self):
         self.menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
-    
+
     def get_title (self, element):
         """Return the element title."""
         c = element.viewableClass
@@ -52,13 +53,13 @@ class Menu:
     def activate_annotation (self, widget, ann):
         self.controller.notify("AnnotationActivation", annotation=ann)
         return True
-    
+
     def activate_stbv (self, view):
         self.controller.activate_stbv(view)
         return True
 
     def create_element(self, widget, elementtype=None, parent=None):
-        print "Creating a %s in %s" % (elementtype, parent)
+        #print "Creating a %s in %s" % (elementtype, parent)
         cr = advene.gui.edit.create.CreateElementPopup(type_=elementtype,
                                                        parent=parent,
                                                        controller=self.controller)
@@ -145,11 +146,16 @@ class Menu:
 
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
-            
+
         add_item(self.get_title(element))
         add_item("")
-        
-        # Common to all elements:
+
+        if isinstance(element, StandardXmlBundle):
+            self.make_bundle_menu(element, menu)
+            menu.show_all()
+            return menu
+
+        # Common to all other elements:
         add_item(_("Edit"), self.edit_element, element)
 
         # Common to deletable elements
@@ -172,6 +178,7 @@ class Menu:
             b=specific_builder[type(element)]
             b(element, menu)
         except KeyError:
+            print "No menu for %s" % str(type(element))
             pass
 
         menu.show_all()
@@ -180,19 +187,19 @@ class Menu:
     def make_annotation_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
-            
+
         add_item(_("Go to..."), self.goto_annotation, element)
         add_item(_("Activate..."), self.activate_annotation, element)
-        
+
         add_item("")
-        
+
         item = gtk.MenuItem()
         i = gtk.Image()
         i.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.imagecache[element.fragment.begin]))
         item.add (i)
         item.connect("activate", self.goto_annotation, element)
         menu.append(item)
-        
+
         add_item(element.content.data)
         add_item(_("Begin: %s")
                  % advene.util.vlclib.format_time (element.fragment.begin))
@@ -207,7 +214,7 @@ class Menu:
         for a in element.members:
             add_item(self.get_title(a), self.goto_annotation, a)
         return
-    
+
     def make_package_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
@@ -217,7 +224,7 @@ class Menu:
         add_item(_("Create a new schema..."), self.create_element, Schema, element)
         add_item(_("Create a new query..."), self.create_element, Query, element)
         return
-    
+
     def make_schema_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
@@ -232,7 +239,7 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
         return
-    
+
     def make_relationtype_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
@@ -249,5 +256,16 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         if element.content.mimetype == 'application/x-advene-ruleset':
             add_item(_("Activate view"), self.activate_stbv, element)
+        return
+
+    def make_bundle_menu(self, element, menu):
+        def add_item(*p, **kw):
+            self.add_menuitem(menu, *p, **kw)
+        if element.viewableType == 'query-list':
+            add_item(_("Create a new query..."), self.create_element, Query, element.rootPackage)
+        elif element.viewableType == 'view-list':
+            add_item(_("Create a new view..."), self.create_element, View, element.rootPackage)
+        elif element.viewableType == 'schema-list':
+            add_item(_("Create a new schema..."), self.create_element, Schema, element.rootPackage)
         return
 
