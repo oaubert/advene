@@ -526,12 +526,16 @@ class AdveneController:
         
         # Terminate the VLC server
         try:
+            print "Exiting vlc player"
             self.player.exit()
-        except:
-            pass
-        
+            print "done"
+        except Exception, e:
+            print _("Got exception %s when stopping player.") % str(e)
+            import code
+            e, v, tb = sys.exc_info()
+            code.traceback.print_exception (e, v, tb)
         return True
-
+    
     def move_position (self, value, relative=True):
         """Helper method : fast forward or rewind by value milliseconds.
 
