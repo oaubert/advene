@@ -14,6 +14,7 @@ from advene.model.view import View
 from gettext import gettext as _
 
 import advene.gui.edit.elements
+import advene.gui.edit.create
 
 import pygtk
 pygtk.require ('2.0')
@@ -430,6 +431,9 @@ class TreeWidget:
 
     def create_element_cb(self, widget, elementtype=None, parent=None):
         print "Creating a %s in %s" % (elementtype, parent)
+        cr = advene.gui.edit.create.CreateElementPopup(type_=elementtype,
+                                                       parent=parent)
+        cr.popup()
         return True
     
     def make_popup_menu(self, node=None, path=None):
