@@ -200,7 +200,7 @@ class DefaultActionsRepository:
         if duration is not None:
             duration=long(duration)
         else:
-            duration=config.data.preferences['default_caption_duration']
+            duration=config.data.player_preferences['default_caption_duration']
 
         c=self.controller
         end = c.create_position (value=duration,
@@ -251,7 +251,7 @@ class DefaultActionsRepository:
         if duration is not None:
             duration=long(duration)
         else:
-            duration=config.data.preferences['default_caption_duration']
+            duration=config.data.player_preferences['default_caption_duration']
         end = c.create_position (value=duration,
                                  key=c.player.MediaTime,
                                  origin=c.player.RelativePosition)
