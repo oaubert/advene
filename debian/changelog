@@ -1,4 +1,4 @@
-advene (project) unstable; urgency=low
+advene (0.6) unstable; urgency=low
 
   * A treeview is available in the main application window
   * Implemented history navigation
@@ -7,7 +7,7 @@ advene (project) unstable; urgency=low
   * Added a button to quickly edit the current STBV
   * Numerous bug fixes
 
- --
+ -- Olivier Aubert <oaubert@salt>  Wed,  5 May 2004 13:19:30 +0200
 
 advene (0.5) unstable; urgency=low
 
