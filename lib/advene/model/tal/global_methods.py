@@ -422,3 +422,15 @@ def query(target, context):
             return self.ids()
 
     return QueryWrapper(target, context)
+
+def sorted (target, context):
+    """Returns a sorted list of annotations"""
+    if hasattr(target, 'viewableType') and target.viewableType == 'annotation-list' or (
+        isinstance(target, list) and len(target) > 0 and hasattr(target[0], 'fragment')):
+        l=target[:]
+        def compare(a, b):
+            return cmp(a.fragment.begin, b.fragment.begin)
+        l.sort(compare)
+    else:
+        l=target
+    return l
