@@ -96,18 +96,30 @@ class LogWindow:
         return True
 
     def add_data(self, message, position, url=None):
-        
+        # Check for identical data already pushed
+        l=[ t
+            for t in self.data
+            if t[2] == message and t[3] == url ]
+        if l:
+            return True
+            
         hb=gtk.HBox()
 
-        b=gtk.Button(vlclib.format_time(position))
-        b.connect("clicked", self.goto_position, position)
-        self.tooltips.set_tip(b, _("Go to the given position"))
-        hb.pack_start(b, expand=False)
-
-        b=gtk.Button(message)
+        b=gtk.Button()
+        l=gtk.Label(message)
+        l.set_justify(gtk.JUSTIFY_LEFT)
+        b.add(l)
         b.connect("clicked", self.goto_url, url)
         self.tooltips.set_tip(b, _("Go to %s") % url)
         hb.add(b)
+
+        b=gtk.Button()
+        l=gtk.Label(vlclib.format_time(position))
+        l.set_justify(gtk.JUSTIFY_LEFT)
+        b.add(l)
+        b.connect("clicked", self.goto_position, position)
+        self.tooltips.set_tip(b, _("Go to the given position"))
+        hb.pack_start(b, expand=False)
 
         hb.show_all()
         
