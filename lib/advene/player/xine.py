@@ -3,6 +3,11 @@
 
 import socket
 import sre
+import os
+import time
+
+import advene.util.spawn as spawn
+import Image
 
 class StreamInformation:
     def __init__(self):
@@ -10,9 +15,46 @@ class StreamInformation:
         self.url=""
         self.position=0
         self.length=0
+
+class RGBPicture:
+    def __init__ (self):
+        self.width=0
+        self.height=0
+        self.type=0
+        self.data=""
+        self.date=0
         
 class XineException(Exception):
     pass
+
+class PlayerLauncher:
+    """Launcher class.
+    """
+    def __init__ (self):
+        """Initialize the player."""
+        self.launcher = spawn.ProcessLauncher (name='xine',
+                                               args=['-n'])
+
+    def is_active (self):
+        """Check if a Xine player is active.
+
+        @return: True if the player if active.
+        """
+        if self.launcher and not self.launcher.is_running():
+            return False
+        return True
+
+    def _start (self):
+        """Run the Xine player
+        """
+        if not self.launcher.start ():
+            raise Exception(_("Cannot start the player"))
+        return
+    
+    def init (self):
+        """Initialize the player.
+        """
+        self._start ()
 
 class Player:
     # Class attributes
@@ -53,7 +95,15 @@ class Player:
         self.relative_position=self.create_position(value=0,
                                                     origin=self.RelativePosition)
         self.socket=socket.socket()
-        self.socket.connect(('localhost', 6789))
+        try:
+            self.socket.connect(('localhost', 6789))
+        except socket.error, e:
+            if e[0] == 111:
+                # Connection refused. Try to launch the player.
+                launcher=PlayerLauncher()
+                launcher.init()
+                time.sleep(1)
+                self.socket.connect(('localhost', 6789))
         self.fsocket=self.socket.makefile()
         l=self.fsocket.readline()
         if not "Nice to meet" in l:
@@ -139,6 +189,7 @@ class Player:
         self.current_position_value = s.position
     
     def send_command(self, command):
+        #print "sending command %s" % command
         self.socket.send(command+"\n")
         return None
     
@@ -189,7 +240,8 @@ class Player:
     
     def playlist_add_item(self, item):
         # FIXME: convert from dvd://dev/dvd to dvd:/
-        self.send_command('mrl add %s' % item)
+        i=item.replace(' ', '%20')
+        self.send_command('mrl add %s' % i)
 
     def playlist_clear(self):
         self.send_command('playlist delete all')
@@ -210,16 +262,25 @@ class Player:
         if m is not None:
             sfile=m.group(1)
             print "Snapshot is in file %s" % sfile
-            # FIXME: read file and resize it
-            return None
+            p=RGBPicture()
+            # Dummy values, are not used except to test
+            # that their are non-zero 
+            p.width=42
+            p.heigh=42
+            p.type="PNG"
+            p.date=self.current_position_value
+            f=open(sfile,'r')
+            p.data=f.read()
+            f.close()
+            os.unlink(sfile)            
+            return p
         return None
 
     def all_snapshots(self):
         return [ self.snapshot(None) ]
     
     def display_text (self, message, begin, end):
-        # FIXME
-        print "Not implemented yet"
+        print "Should caption %s" % message
         pass
 
     def get_stream_information(self):
