@@ -840,6 +840,8 @@ class AdveneGUI (Connect):
         # will not execute update_display.
         try:
             source.handle_request ()
+        except socket.error, e:
+            print _("Network exception: %s") % str(e)
         except Exception, e:
             print _("Got exception %s in web server") % str(e)
             import code
