@@ -24,16 +24,22 @@ class AccumulatorPopup:
         # Hide the window if there is no widget
         self.autohide = autohide
 
-        # List of tuples (widget, hidetime)
+        # List of tuples (widget, hidetime, frame)
         self.widgets=[]
         
         self.window=self.build_widget()
 
-    def display(self, widget=None, timeout=None):
+    def undisplay_cb(self, button=None, widget=None):
+        self.undisplay(widget)
+        return True
+    
+    def display(self, widget=None, timeout=None, title=None):
         """Display the given widget.
 
         timeout is in ms.
         """
+        if title is None:
+            title=""
         if len(self.widgets) >= self.size:
             # Remove the last one
             self.undisplay(self.widgets[0][0])
@@ -41,16 +47,36 @@ class AccumulatorPopup:
             hidetime=time.time() + (long(timeout) / 1000.0)
         else:
             hidetime=None
-            
-        self.widgets.append( (widget, hidetime) )
+
+        # Build a titled frame around the widget
+        f=gtk.Frame()
+        b=gtk.Button(title)
+        b.connect("clicked", self.undisplay_cb, widget)
+        f.set_label_widget(b)
+        f.add(widget)
+
+        # FIXME: handle same size (cf gtk.SizeGroup)
+        
+        self.widgets.append( (widget, hidetime, f) )
         self.widgets.sort(lambda a,b: cmp(a[1],b[1]))
-        self.hbox.add(widget)
+        self.hbox.add(f)
+
+        f.show_all()
         self.show()
         return True
 
     def undisplay(self, widget=None):
+        # Find the associated frame
+        frames=[ t for t in self.widgets if t[0] == widget ]
+        if not frames:
+            return True
+        
+        # We found at least one (and hopefully only one) matching record
         widget.hide()
         widget.destroy()
+        t[2].destroy()
+
+        # Regenerate the widgets list
         self.widgets = [ t for t in self.widgets if t[0] != widget ]        
         if not self.widgets and self.autohide:
             self.window.hide()
