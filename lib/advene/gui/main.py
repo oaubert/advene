@@ -915,7 +915,6 @@ class AdveneGUI (Connect):
         # Synopsis:
         # Ask the controller to update its status
         # If we are moving the slider, don't update the display
-
         try:
             pos=self.controller.update()
         except self.controller.player.InternalException:
@@ -955,6 +954,8 @@ class AdveneGUI (Connect):
                 self.gui.current_annotation.set_text (self.annotation.content.data)
 
             # Update the position mark in the registered views
+            # Note: beware when implementing update_position in views:
+            # it is a critical execution path
             if (abs(self.last_slow_position - pos) > config.data.slow_update_delay
                 or pos < self.last_slow_position):
                 self.last_slow_position = pos
