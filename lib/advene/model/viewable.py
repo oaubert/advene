@@ -125,7 +125,7 @@ class Viewable(object):
         context.setLocal('view', view)
         context.interpret(view_source, mimetype, result)
         context.popLocals ()
-        s=TypedString(result.getvalue().decode('utf-8'))
+        s=TypedUnicode(result.getvalue())
         s.contenttype=view.getContent().getMimetype()
         return s
 
