@@ -241,7 +241,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write (_("""<h1>No available mediaplayer</h1>"""))
         else:
             l = self.server.controller.player.playlist_get_list ()
-            s = self.server.controller.player.update_status ()
+            self.server.controller.player.update_status ()
             self.wfile.write (_("""
             <h1>Player status</h1>
             <table border="1">
@@ -1055,7 +1055,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_error (501,
                                  _("""You should specify an uri"""))
             try:
-                self.controller.load_package (uri=uri, alias=alias)
+                self.server.controller.load_package (uri=uri, alias=alias)
                 self.start_html (_("Package %s loaded") % alias, duplicate_title=True)
                 self.display_loaded_packages (embedded=True)                
             except:
@@ -1106,13 +1106,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                             _("""<p>Invalid data request %s</p>""")
                             % "/".join(parameters))
             return
-        file=os.sep.join((datadir, os.sep.join(parameters)))
+        file_=os.sep.join((datadir, os.sep.join(parameters)))
 
-        if (os.path.isdir(file)):
+        if (os.path.isdir(file_)):
             parameters.append('index.html')
-            file=os.sep.join((datadir, os.sep.join(parameters)))
+            file_=os.sep.join((datadir, os.sep.join(parameters)))
             
-        (mimetype, encoding) = mimetypes.guess_type(file)
+        (mimetype, encoding) = mimetypes.guess_type(file_)
         if mimetype is None:
             mimetype = "text/plain"
         if encoding is None:
@@ -1121,7 +1121,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             encoding = "; charset=%s" % encoding
             
         try:
-            f=open(file, 'rb')
+            f=open(file_, 'rb')
         except IOError:
             self.send_error(404,
                             _("""<p>%s not found.</p>""") % "/".join(parameters))
@@ -1569,15 +1569,15 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         mediafile = p.getMetaData (config.data.namespace,
                                    "mediafile")
         if mediafile is not None and mediafile != "":
-            id = vlclib.mediafile2id (mediafile)
+            id_ = vlclib.mediafile2id (mediafile)
             
         self.register_package (alias=alias,
                                package=p,
-                               imagecache=imagecache.ImageCache (id))
+                               imagecache=imagecache.ImageCache (id_))
 
     def update_status(self, status, position):
-        if self.player is not None:
-            self.player.update_status(status, position)
+        if self.controller.player is not None:
+            self.controller.player.update_status(status, position)
         return True
 
     # End of controller methods
