@@ -299,6 +299,9 @@ class AdveneController:
             url="%s/view/%s" % (url, defaultview)
         return url
 
+    def get_title(self, element, representation=None):
+        return vlclib.get_title(self, element, representation)
+
     def get_default_media (self):
         mediafile = self.package.getMetaData (config.data.namespace,
                                               "mediafile")
