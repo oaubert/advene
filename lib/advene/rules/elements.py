@@ -558,7 +558,7 @@ class Query:
             # (for isinstance(someBundle, list) == False !
             r=[]
             for e in s:
-                c.addGlobal('here' e)
+                c.addGlobal('here', e)
                 if self.condition.match(c):
                     r.append(e)
         else:
