@@ -339,6 +339,14 @@ class AdveneGUI (Connect):
             parameters={'message': _("String to display.")}
             ))
 
+        self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
+            name="PopupGoto",
+            method=self.action_popup_goto,
+            description=_("Display a popup to go to another position"),
+            parameters={'message': _("String to display."),
+                        'position': _("New position")}
+            ))
+
         # We add a Treeview in the main app window
         tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                 controller=self.controller)
@@ -591,6 +599,29 @@ class AdveneGUI (Connect):
             message)
         dialog.connect("response", lambda w,e: dialog.destroy())
         response=dialog.show()
+        return True
+
+    def action_popup_goto (self, context, parameters):
+        def handle_response(widget, response, position, dialog):
+            if response == gtk.RESPONSE_OK:
+                self.controller.update_status("set", position)
+            dialog.destroy()
+            return True
+        
+        if parameters.has_key('message'):
+            message=context.evaluateValue(parameters['message'])
+        else:
+            message=_("Click OK to go to another position")
+        if parameters.has_key('position'):
+            position=long(context.evaluateValue(parameters['position']))
+        else:
+            position=0
+        dialog = gtk.MessageDialog(
+            None, gtk.DIALOG_DESTROY_WITH_PARENT,
+            gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL,
+            message)
+        dialog.connect("response", handle_response, position, dialog)
+        dialog.show()
         return True
 
     def file_selector (self, callback=None, label="Select a file",
