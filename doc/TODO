@@ -1,8 +1,8 @@
-* Transcription: set timestamps along mouse clicks in the text
+* player: implement vlchttp
+
+* Transcription: display timestamps in the text
 
 * Annotation chanson: paroles / refrain /couplet + UTBV/STBV (transcription)
-
-* timeline: implement a popup method that creates the toplevel window
 
 * Create a 'shapes' package which will define various SVG shapes
   (moon, sun, triangle, etc) as views
@@ -14,10 +14,6 @@
 * Implement completion in TALES fields ?
 
 * Upgrade simpletal support to 3.9
-
-* Action: DisplayPopup2, DisplayPopup3, DisplayPopup4 with additional
-parameters (general message + message1,position1 + message2,position2,
-...)
 
 * GUI for advene.util.importer
 
@@ -545,3 +541,13 @@ to retrieve ids as keys (all bundles in fact) -> HACKED in bundles
 gui.size_cache dict, indexed with window names ("edit", "timeline",
 "tree", ...) and containing sizes). It should be saved upon quitting
 -> create a .advene_prefs file with a pickle of a prefs dictionary -> DONE
+
+* timeline: implement a popup method that creates the toplevel window -> DONE
+
+* Action: DisplayPopup2, DisplayPopup3, DisplayPopup4 with additional
+parameters (general message + message1,position1 + message2,position2,
+...) -> DONE
+
+* Define a gui.SingletonPopup with timeout  -> DONE
+
+* Define a generic popup method in view-plugin -> DONE
