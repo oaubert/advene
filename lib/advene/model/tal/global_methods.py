@@ -337,12 +337,12 @@ def parsed (target, context):
         for l in content.data.splitlines():
             if len(l) == 0:
                 # Ignore empty lines
-                pass
+                continue
             if '=' in l:
                 (k, v) = l.split('=', 1)
                 d[k] = urllib.unquote(v)
             else:
-                print "Syntax error in content: %d"
+                print "Syntax error in content: >%s<" % l
         return d
     #FIXME: we parse x-advene-ruleset as xml for the moment
     elif content.mimetype == 'text/xml' or content.mimetype == 'application/x-advene-ruleset':
