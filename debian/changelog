@@ -1,3 +1,9 @@
+advene (0.15) unstable; urgency=low
+
+  * New Win32 related fixes:
+
+ -- 
+
 advene (0.14) unstable; urgency=low
 
   * Misc Win32 related fixes:
