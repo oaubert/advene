@@ -1,6 +1,7 @@
 class ViewPlugin:
-    """Abstract class defining the interface of ViewPlugins.
-=======================================================
+    """
+    Abstract class defining the interface of ViewPlugins.
+    =====================================================
 
     The generic way of dealing with a ViewPlugin is to create an
     instance of it, then call the get_widget () method to get the
