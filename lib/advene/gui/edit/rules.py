@@ -155,6 +155,104 @@ class EditRuleSet(EditGeneric):
         #vbox.add(b)
         return notebook
     
+class EditQuery(EditGeneric):
+    """Edit form for Query"""
+    def __init__(self, query):
+        self.model=query
+        self.sourceentry=None
+        self.editconditionlist=[]
+        self.widget=self.build_widget()
+        
+    def update_value(self):
+        self.model.source=self.sourceentry.get_text()
+        
+        for w in self.editconditionlist:
+            w.update_value()
+
+        if self.editconditionlist:
+            self.model.condition=ConditionList([ e.model for e in self.editconditionlist ])
+        else:
+            self.model.condition=None
+        return
+
+    def remove_condition(self, widget, conditionwidget, hbox):
+        self.editconditionlist.remove(conditionwidget)
+        hbox.destroy()
+        return True
+
+    def add_condition(self, widget, conditionsbox):
+        cond=Condition(lhs="annotation/type/title",
+                       operator="equals",
+                       rhs="string: ???")
+        self.add_condition_widget(cond, conditionsbox)
+        return True
+    
+    def add_condition_widget(self, cond, conditionsbox):
+        hb=gtk.HBox()
+        conditionsbox.add(hb)
+
+        try:
+            w=EditCondition(cond)
+        except Exception, e:
+            print str(e)
+            print "for a query"
+            w = gtk.Label("Error in query")
+            
+        self.editconditionlist.append(w)
+        
+        hb.add(w.get_widget())
+        w.get_widget().show()
+        
+        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b.connect("clicked", self.remove_condition, w, hb)
+        b.show()
+        hb.pack_start(b, expand=False)
+
+        hb.show()
+        
+        return True
+
+    def build_widget(self):
+        frame=gtk.Frame()
+        
+        vbox=gtk.VBox()
+        frame.add(vbox)
+        vbox.show()
+        
+        # Event
+        ef=gtk.Frame(_("Return elements from "))
+        self.sourceentry=gtk.Entry()
+        self.sourceentry.set_text(self.model.source)
+        ef.add(self.sourceentry)
+        ef.show_all()
+        vbox.pack_start(ef, expand=gtk.FALSE)
+
+        # Conditions
+        cf=gtk.Frame(_("If they match "))
+        conditionsbox=gtk.VBox()
+        cf.add(conditionsbox)
+
+        # "Add condition" button
+        hb=gtk.HBox()
+        b=gtk.Button(stock=gtk.STOCK_ADD)
+        b.connect("clicked", self.add_condition, conditionsbox)
+        hb.pack_start(b, expand=gtk.FALSE)
+        hb.set_homogeneous(gtk.FALSE)
+        conditionsbox.pack_start(hb, expand=gtk.FALSE, fill=gtk.FALSE)
+
+        cf.show_all()
+        
+        if isinstance(self.model.condition, advene.rules.elements.ConditionList):
+            for c in self.model.condition:
+                self.add_condition_widget(c, conditionsbox)
+                
+        vbox.pack_start(cf, expand=gtk.FALSE)
+
+        frame.show()
+
+        return frame
+
+    
 class EditRule(EditGeneric):
     def __init__(self, rule, catalog=None):
         # Original rule
@@ -186,7 +284,7 @@ class EditRule(EditGeneric):
         if self.editconditionlist:
             self.model.condition=ConditionList([ e.model for e in self.editconditionlist ])
         else:
-            self.model.conditionlist=self.model.default_condition
+            self.model.condition=self.model.default_condition
 
         # Rebuild actionlist from editactionlist
         self.model.action=ActionList([ e.model for e in self.editactionlist ])
@@ -311,7 +409,8 @@ class EditRule(EditGeneric):
         if isinstance(self.model.condition, advene.rules.elements.ConditionList):
             for c in self.model.condition:
                 self.add_condition_widget(c, conditionsbox)
-                
+        #FIXME: else?
+        
         vbox.pack_start(cf, expand=gtk.FALSE)
 
         # Actions
