@@ -340,10 +340,11 @@ class AdveneGUI (Connect):
         """
         if args is None:
             args=[]
-        try:
-            gtk.threads_init ()
-        except RuntimeError:
-            print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
+        if config.data.os != 'win32':
+            try:
+                gtk.threads_init ()
+            except RuntimeError:
+                print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
 
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
