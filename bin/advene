@@ -19,10 +19,11 @@ except ImportError:
     # We override any modification that could have been made in
     # .advenerc. Rationale: if the .advenerc was really correct, it
     # would have set the correct package path in the first place.
-    print "Overriding 'resources' and 'web' config paths"
+    print "Overriding 'resources', 'locale', 'advene' and 'web' config paths"
     config.data.path['resources']=os.path.sep.join((maindir, 'share'))
     config.data.path['locale']=os.path.sep.join( (maindir, 'locale') )
     config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
+    config.data.path['advene']=maindir
   else:
     print """Cannot guess a valid directory.
     Please check your installation or set the PYTHONPATH environment variable."""

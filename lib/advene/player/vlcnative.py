@@ -116,7 +116,7 @@ class Player(object):
         """
         # FIXME: pass options
 #        self.mc = VLC.MediaControl( [ '--filter', 'clone', '--clone-vout-list', 'snapshot,x11' ])
-        self.mc = VLC.MediaControl( "--filter clone".split() )
+        self.mc = VLC.MediaControl( [ "--filter", "clone", "--plugin-path", config.data.path['advene'] ] )
 
         # 0 relative position
         pos = VLC.Position ()
