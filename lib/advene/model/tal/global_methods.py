@@ -324,17 +324,17 @@ def parsed (target, context):
     
     content=target
     if not isinstance(target, advene.model.content.Content):
-        return {}
+        return target
+    
     if content.mimetype is None or content.mimetype == 'text/plain':
-        # If nothing is specified, assume text/plain and return a unique
-        # dict with the key 'value'
-        return { 'value': content.data }
+        # If nothing is specified, assume text/plain and return the content data
+        return content.data
+
     if content.mimetype == 'application/x-advene-structured':
         import urllib
         
         d={}
-        # FIXME: check portability of \n in win32
-        for l in content.data.split("\n"):
+        for l in content.data.splitlines():
             if len(l) == 0:
                 # Ignore empty lines
                 pass
@@ -344,6 +344,15 @@ def parsed (target, context):
             else:
                 print "Syntax error in content: %d"
         return d
-    # FIXME: implement XML parsing
+    #FIXME: we parse x-advene-ruleset as xml for the moment
+    elif content.mimetype == 'text/xml' or content.mimetype == 'application/x-advene-ruleset':
+        import advene.util.handyxml
+        h=advene.util.handyxml.xml(content.stream)
+        # FIXME: use a cache of DOM trees in order to avoid to
+        # repeatdly parse the same data in the case of repetitive
+        # access to the same element.
+
+        return h
+    
     # Last fallback:
-    return { 'value': content.data }
+    return content.data
