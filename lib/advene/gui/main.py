@@ -1201,7 +1201,9 @@ class AdveneGUI (Connect):
                     return True
                 f = MillisecondFragment (begin=c.player.current_position_value-config.data.reaction_time,
                                          duration=30000)
+                ident=self.controller.idgenerator.get_id(Annotation)
                 self.annotation = c.package.createAnnotation(type = self.current_type,
+                                                             ident=ident,
                                                              fragment=f)
                 self.log (_("Defining a new annotation..."))
                 self.controller.notify ("AnnotationCreate", annotation=self.annotation)
@@ -1223,7 +1225,9 @@ class AdveneGUI (Connect):
                         return True
                     f = MillisecondFragment (begin=c.player.current_position_value-config.data.reaction_time,
                                              duration=30000)
+                    ident=self.controller.idgenerator.get_id(Annotation)                
                     self.annotation = c.package.createAnnotation(type = self.current_type,
+                                                                 ident=ident,
                                                                  fragment=f)
                     self.log (_("Defining a new annotation..."))
                     self.controller.notify ("AnnotationCreate", annotation=self.annotation)
@@ -1239,7 +1243,9 @@ class AdveneGUI (Connect):
                 self.controller.position_update ()
                 if self.current_type is None:
                     return True
+                ident=self.controller.idgenerator.get_id(Annotation)
                 self.annotation = self.controller.package.createAnnotation (type = self.current_type,
+                                                                            ident=ident,
                                                                             fragment = MillisecondFragment (begin=self.controller.player.current_position_value, duration=30000))
                 self.controller.notify ("AnnotationCreate", annotation=self.annotation)
                 self.log (_("Defining a new annotation (Tab to resume the play)"))
