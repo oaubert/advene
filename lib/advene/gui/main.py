@@ -126,6 +126,7 @@ class AdveneGUI (Connect):
         @type gladefile: string
         """
         self.controller = advene.core.controller.AdveneController()
+        self.controller.register_gui(self)
         gladefile=config.data.advenefile (config.data.gladefilename)
         # Glade init.
         gtk.glade.bindtextdomain(gettext.textdomain())
