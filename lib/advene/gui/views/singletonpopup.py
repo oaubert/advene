@@ -66,7 +66,8 @@ class SingletonPopup:
         return True
 
     def update_position(self, pos):
-        # This method is regularly called. We use it as a side-effect.
+        # This method is regularly called. We use it as a side-effect to
+        # remove the widget when the timeout expires.
         if self.hidetime is not None and time.time() >= self.hidetime:
             self.undisplay()
         return True
