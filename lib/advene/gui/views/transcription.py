@@ -144,8 +144,23 @@ class TranscriptionView:
         return True
 
     def button_press_event_cb(self, textview, event):
+        if event.button != 1:
+            return False
+        textwin=textview.get_window(gtk.TEXT_WINDOW_TEXT)
+        if event.window != textwin:
+            return False
+
+        (x, y) = textview.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
+                                                  int(event.x),
+                                                  int(event.y))
+        it=textview.get_iter_at_location(x, y)
+        if it is None:
+            print "Error in get_iter_at_location"
+            return False
+        textview.get_buffer().move_mark_by_name('insert', it)
+        textview.get_buffer().move_mark_by_name('selection_bound', it)
         self.update_current_annotation()
-        return False
+        return True
 
     def move_cursor_cb(self, textview, step_size, count, extend_selection):
         self.update_current_annotation()
@@ -172,7 +187,7 @@ class TranscriptionView:
             annotationid=None
         else:
             # Look backwards for the first mark that we find
-            while not i.is_start():
+            while i.backward_char():
                 marknames = [ m.get_name()
                               for m in i.get_marks() ]
                 beginmarks= [ n
@@ -185,7 +200,6 @@ class TranscriptionView:
                     break
                 if endmarks:
                     break
-                i.backward_char()
 
             if beginmarks:
                 annotationid=beginmarks[0].replace('b_', '')
