@@ -1,6 +1,17 @@
+* VLC idea:
+r8623 | zorglub | 2004-09-01 22:02:17 +0200 (Wed, 01 Sep 2004) | 2 lines
+Changed paths:
+   M /trunk/modules/control/rc.c
+Added "is_playing", "get_title", "get_time" and "get_length" to get
+computer-readable output (forthird-party programs)
+
+* In Context (or the GUI), catch AdveneTalesException that happens
+when there is a syntax error in a TALES expression (missing string or
+badly written symbol) and display a meaningful message
+
 * Merge gui.edit.timechooser and gui.views.history
 
-* Renamed advene.util.vlclib to something more meaningful (misc?)
+* Rename advene.util.vlclib to something more meaningful (misc?)
 
 * Import elements GUI: implement "Add/Remove package" -> ready, but need the corresponding method in the model to remove
 
@@ -58,7 +69,7 @@ AnnotationTypes rather than their ids)
 
 * UTBV: implement Undo in textview (cf gtksourceview)
 
-* Implement copy/rename of id for all elements (model related)
+* Model: Implement copy/rename of id for all elements
 
 * Model related:
 
