@@ -5,8 +5,8 @@ import ORBit, CORBA
 import Image
 import os
 import time
-import config
-import vlclib
+import advene.core.config as config
+import advene.util.vlclib as vlclib
 import atexit
 import signal
 
