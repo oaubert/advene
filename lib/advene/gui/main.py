@@ -26,7 +26,6 @@ import gtk
 import gtk.glade
 gtk.glade.bindtextdomain('advene')
 
-import webbrowser
 import textwrap
 
 import advene.core.controller
@@ -123,10 +122,6 @@ class AdveneGUI (Connect):
 
     @ivar preferences: the current preferences
     @type preferences: dict
-
-    @ivar webbrowser: the web browser
-    @type webbrowser: webbrowser
-
     """
 
     def __init__ (self, args):
@@ -187,8 +182,6 @@ class AdveneGUI (Connect):
             }
         self.gui.player_status = self.gui.get_widget ("player_status")
         self.oldstatus = "NotStarted"
-
-        self.webbrowser = webbrowser.get ()
 
         # Current Annotation (when defining a new one)
         self.annotation = None
@@ -1659,7 +1652,7 @@ class AdveneGUI (Connect):
         """Open a browser on current package's root."""
         url = self.controller.get_default_url()
         if url is not None:
-            self.webbrowser.open (url)
+            self.controller.open_url (url)
         else:
             self.log (("No current package"))
         return True
@@ -1896,7 +1889,7 @@ class AdveneGUI (Connect):
     def on_help1_activate (self, button=None, data=None):
         helpfile=os.sep.join( (config.data.path['web'], 'user.html') )
         if os.access(helpfile, os.R_OK):
-            self.webbrowser.open (helpfile)
+            self.controller.open_url (helpfile)
         else:
             self.log(_("Unable to find the help file at %s") % helpfile)
         return True
