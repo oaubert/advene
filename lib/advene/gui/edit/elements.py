@@ -438,6 +438,8 @@ class EditSchemaPopup (EditElementPopup):
         return True
     
     def make_widget (self, editable=False):
+        vbox=gtk.VBox()
+        
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'title',
                                                'author', 'date'),
@@ -449,7 +451,16 @@ class EditSchemaPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        return f.get_view ()
+        vbox.add(f.get_view())
+        
+        f = EditMetaForm(title=_("Description"),
+                         element=self.element, name='description',
+                         namespaceid='dc', controller=self.controller)
+        self.register_form(f)
+        
+        vbox.add(f.get_view())
+        
+        return vbox
 
 class EditAnnotationTypePopup (EditElementPopup):
     def can_edit (el):
@@ -503,6 +514,8 @@ class EditRelationTypePopup (EditElementPopup):
         return True
     
     def make_widget (self, editable=False):
+        vbox=gtk.VBox()
+        
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'title',
                                                'author', 'date', 'mimetype'),
@@ -516,7 +529,17 @@ class EditRelationTypePopup (EditElementPopup):
                                                'date':   _('Date'),
                                                'mimetype': _('MIME Type')}
                                        )
-        return f.get_view ()
+        vbox.add(f.get_view ())
+
+        f = EditMetaForm(title=_("Description"),
+                         element=self.element, name='description',
+                         namespaceid='dc', controller=self.controller)
+        self.register_form(f)
+        
+        vbox.add(f.get_view())
+        
+        return vbox
+
 
 class EditForm(object):
     """Generic EditForm class.
