@@ -366,6 +366,7 @@ class FlatTreeModel(AdveneTreeModel):
 
 class TreeWidget:
     def __init__(self, package, modelclass=DetailedTreeModel, controller=None):
+        self.view_name = _("Tree view")
         self.package = package
         self.controller=controller
         self.modelclass=modelclass
@@ -441,8 +442,6 @@ class TreeWidget:
         # On double-click, edit element
         if event.type == gtk.gdk._2BUTTON_PRESS:
             node = self.get_selected_node (widget)
-            # FIXME: if it is a list of schemas, views or list,
-            # propose to create a new one
             if node is not None:
                 try:
                     pop = advene.gui.edit.elements.get_edit_popup (node,

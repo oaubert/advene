@@ -25,6 +25,7 @@ import advene.rules.elements
 
 class LogWindow:
     def __init__ (self, controller=None, container=None, embedded=False):
+        self.view_name = _("URL stack")
         self.controller=controller
         self.container=container
         self.tooltips=gtk.Tooltips()

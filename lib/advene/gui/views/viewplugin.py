@@ -10,8 +10,13 @@ class ViewPlugin:
     In the advenetool framework, the view should be registered via
     calls to register_view () so that it gets notified of the
     element's changes.
-    """
 
+    @ivar view_name: the name of the view
+    @type view_name: string
+    """
+    def __init__(self, controller=None):
+        self.view_name = _("Generic view plugin")
+        
     def register_callback (self, controller=None):
         """Method invoked on view creation.
 

@@ -20,6 +20,7 @@ import gobject
 
 class BrowserColumn:
     def __init__(self, element=None, name="", callback=None, parent=None):
+        self.view_name = _("Package browser")
         self.model=element
         self.name=name
         self.callback=callback

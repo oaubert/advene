@@ -56,6 +56,7 @@ class RelationsBox:
     Representation of a list of relations
     """
     def __init__ (self, package=None, controller=None):
+        self.view_name = _("Relations view")
         self.package=package
         self.controller=controller
         self.relationviews=[]

@@ -33,6 +33,8 @@ class AccumulatorPopup:
     """View displaying a limited number of popups.
     """
     def __init__ (self, size=3, controller=None, autohide=False, container=None):
+        self.view_name = _("PopupAccumulator")
+        
         self.size=size
         self.controller=controller
         self.container=container

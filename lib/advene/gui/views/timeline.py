@@ -30,6 +30,8 @@ class TimeLine:
                   maximum=None,
                   adjustment=None,
                   controller=None):
+
+        self.view_name = _("Timeline")
         
         self.list = l
         self.controller=controller

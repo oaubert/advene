@@ -64,7 +64,7 @@ class InteractiveQuery:
         # Get the query
         l=self.eq.invalid_items()
         if l:
-            self.controller.log(_("Invalid query. The following fields have an invalid value:\s%s")
+            self.controller.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
                      % ", ".join(l))
             return True
         self.eq.update_value()

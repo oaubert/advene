@@ -26,6 +26,7 @@ import advene.gui.popup
 
 class TranscriptionView:
     def __init__ (self, controller=None, annotationtype=None, separator="  "):
+        self.view_name = _("Transcription")
         self.controller=controller
         self.package=controller.package
         self.model = annotationtype
@@ -39,6 +40,8 @@ class TranscriptionView:
         # transcripted annotation. Useful with structured annotations
         self.representation=None
 
+        self.modified=False
+        
         # Various option toggles
         self.display_bounds_toggle=gtk.CheckButton(_("Display annotation bounds"))
         self.display_bounds_toggle.set_active(False)
@@ -133,7 +136,7 @@ class TranscriptionView:
     def insert_at_cursor_cb(self, textview, s):
         if self.currentannotation is None:
             return False
-
+        self.modified=True
         b=self.textview.get_buffer()
         b.insert_at_cursor(s)
         # Update the annotation's content
