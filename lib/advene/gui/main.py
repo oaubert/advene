@@ -16,6 +16,7 @@ import advene.core.version
 import pygtk
 import gtk
 import gtk.glade
+import gobject
 
 import gettext
 
@@ -494,15 +495,15 @@ class AdveneGUI (Connect):
 
         if config.data.webserver['mode'] == 1:
             self.log(_("Using Mainloop input handling for webserver..."))
-            gtk.input_add (self.controller.server,
-                           gtk.gdk.INPUT_READ,
-                           self.handle_http_request)
+            gobject.io_add_watch (self.controller.server,
+                                  gobject.IO_IN,
+                                  self.handle_http_request)
             if config.data.os == 'win32':
                 # Win32 workaround for the reactivity problem
                 def sleeper():
                     time.sleep(.001)
                     return True
-                gtk.timeout_add(400, sleeper)
+                gobject.timeout_add(400, sleeper)
 
         # Populate the file history menu
         for filename in config.data.preferences['history']:
@@ -510,7 +511,7 @@ class AdveneGUI (Connect):
 
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
-        gtk.timeout_add (100, self.update_display)
+        gobject.timeout_add (100, self.update_display)
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
@@ -531,7 +532,7 @@ class AdveneGUI (Connect):
         #tree.get_widget().show_all()
         #self.register_view (tree)
         
-        self.drawable=gtk.DrawingArea()
+        self.drawable=gtk.Socket()
         self.drawable.set_size_request(320,200)
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
         self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
