@@ -684,3 +684,5 @@ annotation of the same type, or global -> DONE
 
 * player: implement vlchttp -> DONE (too slow)
 
+* Improve path settings on Windows -> Done
+
