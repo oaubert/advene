@@ -2,6 +2,8 @@
 Documentation utilisateur pour Advene
 =====================================
 
+Note: cette documentation est au format _reST: http://docutils.sourceforge.net/docs/rst/quickref.html
+
 Création d'un recueil
 *********************
 
@@ -110,9 +112,8 @@ naviguer à l'intérieur du recueil.
 Syntaxe TALES 
 *************
 
-La syntaxe TALES (TAL Expression Syntax) est utilisée pour adresser
-des éléments du modèle Advene. Elle est utilisée dans plusieurs
-composants d'Advene :
+La syntaxe TALES (TAL Expression Syntax) est utilisée dans plusieurs
+composants d'Advene pour adresser des éléments du modèle Advene :
 
 - dans le serveur web (construction des adresses)
 - dans les vues dynamiques (définition des conditions et paramètres
@@ -120,8 +121,9 @@ composants d'Advene :
 - dans les vues statiques (motifs de remplacement)
 - dans les requètes simples (définition des conditions)
 
-Il est donc important de comprendre cette syntaxe pour pouvoir
-profiter au mieux des possibilités offertes par Advene.
+Il est donc important de comprendre cette syntaxe, et le modèle
+sous-jacent, pour pouvoir profiter au mieux des possibilités offertes
+par Advene.
 
 Le modèle Advene
 ----------------
@@ -135,8 +137,8 @@ correspondra alors à un chemin d'accès dans ce système de fichiers.
 
 Une particularité d'Advene est que des éléments peuvent être accédés
 par plusieurs chemins. Ainsi, une annotation se trouvera dans le
-"répertoire" /annotations et dans le "répertoire"
-/annotationTypes/simple-text/annotations"
+"répertoire" ``package/annotations`` et dans le "répertoire"
+``package/annotationTypes/simple-text/annotations``.
 
 Utilisation dans le serveur web
 -------------------------------
@@ -147,20 +149,25 @@ de données pour explorer son contenu.
 
 Le point de départ des expressions TALES est l'URL
 http://localhost:1234/packages/advene
+
 Ce qui suit sera évalué comme une expression TALES.
 
 Ainsi, 
 http://localhost:1234/packages/advene/annotationTypes/simple-text/annotations/i810
 renverra l'annotation i810 contenue dans les annotations de type
-simple-text
+*simple-text*
 
 Utilisation dans les vues statiques
 -----------------------------------
 
-Les éléments de base sont:
+Les vues statiques (UTBV) permettent de spécifier un mode de rendu
+pour un élément quelconque du modèle. Elles consistent en des modèles
+de documents (*templates*) utilisant la syntaxe TAL. TAL utilise TALES
+pour spécifier quel contenu doit être inséré aux endroits précisés.
+
+Les éléments de base des expressions TALES sont:
 
 - ``here`` : l'élément courant
-
 - ``options`` : un ensemble d'éléments optionnels accessibles :
   - ``options/package_url`` : l'URL du recueil courant
   - ``options/snapshot``    : un accès aux snapshots mémorisés
@@ -170,8 +177,10 @@ Utilisation dans les vues dynamiques
 ------------------------------------
 
 Des éléments semblables sont disponibles dans les vues dynamiques,
-mais plus d'éléments "basiques" sont définis, dont certains sont
-ne sont définis que lors d'événements particuliers :
+afin de spécifier à la fois les conditions devant être remplies et les
+paramètres des actions à effectuer. Par contre, plus d'éléments "de
+base" sont accessibles, dont certains ne sont définis que lors
+d'événements particuliers :
 
 - ``package`` : le recueil courant
 - ``annotation`` : l'annotation ayant déclenché l'événement
@@ -179,4 +188,32 @@ ne sont définis que lors d'événements particuliers :
 - ``activeAnnotations`` : la liste des annotations actives
 - ``player`` : le lecteur vidéo
 - ``event`` : le nom de l'événement
+
+Utilisation dans les requêtes
+-----------------------------
+
+Les requêtes utilisent également une syntaxe TALES permettant de
+spécifier
+
+1. l'ensemble sur lequel on va appliquer un filtre
+2. les conditions de prise en compte d'un élément
+3. la valeur de retour
+
+Pour les deux derniers paramètres, un élément de base supplémentaire
+est défini. Il a pour nom ``element`` et prend la valeur de l'élément
+testé.
+
+Ainsi, pour filtrer l'ensemble des annotations d'un recueil dont le
+contenu contient le mot ``test``, et en retourner l'identificateur, on
+utilise la syntaxe suivante :
+
+- Ensemble d'origine: ``here/annotations``
+- Condition:  ``element/content/data`` contains ``string:test``
+- Valeur de retour: ``element/id``
+
+et appliquer la requête sur le recueil: de cette façon, l'élément de
+base ``here`` correspondra au recueil source. On peut également
+décider de l'appliquer à un type d'annotation, qui comprend également
+un attribut ``annotations``.
+
 
