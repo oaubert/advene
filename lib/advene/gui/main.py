@@ -814,6 +814,7 @@ class AdveneGUI (Connect):
             dialog.destroy()
         else:
             # FIXME: build a dialog to enter optional parameters
+            # FIXME: handle the multiple possibilities case (for XML esp.)
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                 gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
@@ -825,7 +826,7 @@ class AdveneGUI (Connect):
                 return True
             i.package=self.controller.package
             i.process_file(file_)
-            self.controller.notify("PackageLoad")
+            self.controller.notify("PackageLoad", package=i.package)
             self.log('Converted from file %s :' % file_)
             kl=i.statistics.keys()
             kl.sort()
@@ -1314,7 +1315,8 @@ class AdveneGUI (Connect):
         return True
     
     def on_browser1_activate (self, button=None, data=None):
-        browser = advene.gui.views.browser.Browser(self.controller.package)
+        browser = advene.gui.views.browser.Browser(element=self.controller.package,
+                                                   controller=self.controller)
         popup=browser.popup()
         return True
 
