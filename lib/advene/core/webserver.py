@@ -471,7 +471,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     position = query['position']
                 else:
                     position = 0
-                    
+
+                if self.server.controller.player.status != self.server.controller.player.PlayingStatus:
+                    self.server.update_status ("start", long(position))
                 self.server.update_status ("set", long(position))
                 self.send_no_content()
             elif command == 'pause':
@@ -597,6 +599,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if query.has_key('url'):
                         url=query['url']
                     c.queue_action(c.gui.on_import_transcription1_activate, None, url)
+                    self.send_no_content()
+                elif view == 'browser':
+                    c.queue_action(c.gui.on_browser1_activate, None, None)
                     self.send_no_content()
                 else:
                     self.start_html (_('Error'))
