@@ -15,7 +15,7 @@ The general idea is:
     to appropriate values
 
   * If you want to create a new package with specific type and schema id, use
-    im.create_package(schemaid=..., annotationtypeid=...)
+    im.init_package(schemaid=..., annotationtypeid=...)
 
   * If nothing is given, a default package will be created, with a
     default schema and annotationtype
@@ -106,14 +106,17 @@ class GenericImporter(object):
         a.content.data = data
         self.package.annotations.append(a)
 
-    def create_package(self,
-                       filename=None,
-                       annotationtypeid='imported-type',
-                       schemaid='imported-schema'):
-        """Create a package with the given schema and  annotation type.
+    def init_package(self,
+                     filename=None,
+                     annotationtypeid='imported-type',
+                     schemaid='imported-schema'):
+        """Create (if necessary) a package with the given schema and  annotation type.
         Returns a tuple (package, annotationtype)
         """
-        p=Package(uri=filename, source=None)
+        if self.package is None:
+            p=Package(uri=filename, source=None)
+        else:
+            p=self.package
 
         s=p.createSchema(ident=schemaid)
         s.author=self.author
@@ -165,7 +168,7 @@ class GenericImporter(object):
         - type (which must be a *type*, not a type-id)
         """
         if self.package is None:
-            self.package, self.defaulttype=self.create_package()
+            self.package, self.defaulttype=self.init_package()
         for d in source:
             try:
                 begin=self.convert_time(d['begin'])
@@ -256,7 +259,7 @@ class TextImporter(GenericImporter):
     def process_file(self, filename):
         f=open(filename, 'r')
         if self.package is None:
-            self.create_package()
+            self.init_package()
         self.convert(self.iterator(f))
         return self.package
 
@@ -291,13 +294,14 @@ class LsDVDImporter(GenericImporter):
         if filename != 'lsdvd':
             pass
         f=os.popen(self.command, "r")
+        p, at=self.init_package(schemaid='dvd',
+                                  annotationtypeid='chapter')
         if self.package is None:
-            p, at=self.create_package(schemaid='dvd',
-                                      annotationtypeid='chapter')
-            self.package=p
-            self.defaulttype=at
+            # We created a new package. Set the mediafile
             # FIXME: should specify title
             p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
+            self.package=p
+        self.defaulttype=at
         self.convert(self.iterator(f))
         return self.package
 
@@ -338,15 +342,13 @@ class ChaplinImporter(GenericImporter):
         if filename != 'chaplin':
             pass
         f=os.popen(self.command, "r")
-
+        p, at=self.init_package(schemaid='dvd',
+                                  annotationtypeid='chapter')
         if self.package is None:
-            p, at=self.create_package(schemaid='dvd',
-                                      annotationtypeid='chapter')
             self.package=p
-            self.defaulttype=at
             # FIXME: should specify title
             p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")
-
+        self.defaulttype=at
         self.convert(self.iterator(f))
         return self.package
 
@@ -380,11 +382,11 @@ class XiImporter(GenericImporter):
     def process_file(self, filename):
         xi=handyxml.xml(filename)
 
+        p, at=self.init_package(schemaid='xi-schema',
+                                  annotationtypeid='xi-verbal')
         if self.package is None:
-            p, at=self.create_package(schemaid='xi-schema',
-                                      annotationtypeid='xi-verbal')
             self.package=p
-            self.defaulttype=at
+        self.defaulttype=at
 
         # self.signals init
         for s in xi.Signals[0].Signal:
@@ -572,9 +574,12 @@ class SubtitleImporter(GenericImporter):
 
     def process_file(self, filename):
         f=open(filename, 'r')
+
+        p,at=self.init_package(schemaid='subtitle-schema',
+                               annotationtypeid='subtitle')
         if self.package is None:
-            self.package, self.defaulttype=self.create_package(schemaid='subtitle-schema',
-                                                               annotationtypeid='subtitle')
+            self.package=p
+        self.defaulttype=at
         # FIXME: implement subtitle type detection
         self.convert(self.srt_iterator(f))
         return self.package
