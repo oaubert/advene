@@ -71,6 +71,12 @@ class Player:
         # MediaPlayer9: 
         self.player=win32com.client.Dispatch('{6BF52A52-394A-11d3-B153-00C04F79FAA6}')
 
+        self.player.uimode='none'
+        #self.player.switchToPlayerApplication()
+        self.player.switchToControl()
+        self.player.settings.autostart=False
+        
+
         # MediaPlayer Core:
         #w=win32com.client.Dispatch('{09428D37-E0B9-11D2-B147-00C04F79FAA6}')
         #w.launchURL('c:\\windows\\a3dspls.wav')
@@ -137,14 +143,18 @@ class Player:
 
     def get_stream_information(self):
         s=StreamInformation()
-        s.url=self.player.url
-        s.length=self.player.media.duration
-        s.position=self.player.controls.currentposition
-        # For status list:
-        # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmplay/mmp_sdk/playercurrentplaylist.asp
-        s.streamstatus=statusmapping[self.player.playstate]
-        # FIXME
-        pass
+        if self.player.currentMedia is None:
+            s.url=''
+            s.length=0
+            s.position=0
+            s.streamstatus=Player.UndefinedStatus
+        else:
+            s.url=self.player.url
+            s.length=self.player.media.duration
+            s.position=self.player.controls.currentposition
+            # For status list:
+            # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmplay/mmp_sdk/playercurrentplaylist.asp
+            s.streamstatus=statusmapping[self.player.playstate]
         
     def sound_get_volume(self):
         # FIXME: Normalize volume to be in [0..255]
