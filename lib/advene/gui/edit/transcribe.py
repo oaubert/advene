@@ -342,6 +342,11 @@ class TranscriptionEdit:
                     'content': text,
                     'ignored': False }
         
+    def save_as_cb(self, button=None):
+        self.sourcefile=None
+        self.save_transcription_cb()
+        return True
+
     def save_transcription_cb(self, button=None):
         if self.sourcefile:
             fname=self.sourcefile
@@ -463,6 +468,7 @@ class TranscriptionEdit:
         tb_list = (
             (_("Open"), _("Open"), gtk.STOCK_OPEN, self.load_transcription_cb),
             (_("Save"), _("Save"), gtk.STOCK_SAVE, self.save_transcription_cb),
+            (_("Save As"), _("Save As"), gtk.STOCK_SAVE_AS, self.save_as_cb),
             (_("Convert"), _("Convert"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
             (_("Close"), _("Close"), gtk.STOCK_CLOSE, lambda w: window.destroy()),
             )
