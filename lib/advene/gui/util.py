@@ -157,3 +157,152 @@ def entry_dialog(title=None,
 
     d.destroy()
     return ret
+
+class CategorizedSelector:
+    """Widget displaying items sorted along categories.
+
+    We use a treeview to display elements.
+
+    FIXME: we could also return a gtk.Button with a label that changes
+    according to the selected value, to save time for the calling application
+
+
+    @ivar elements: list of  elements
+    @type elements: list
+    @ivar categories: list of categories
+    @type categories: list
+    @ivar current: current element
+    @type current: object
+    @ivar description_getter: method to get the description of the element or the category
+    @type description_getter: method
+    @ivar category_getter: method to get the category of the element
+    @type category_getter: method
+    @ivar callback: method to be called upon modification
+    @type callback: method
+    @ivar editable: indicates if the data is editable
+    @type editable: boolean
+    """
+    COLUMN_ELEMENT=0
+    COLUMN_LABEL=1
+    COLUMN_MODE=2
+    def __init__(self, title=_("Select an element"),
+                 elements=None, categories=None, current=None,
+                 description_getter=None, category_getter=None, callback=None,
+                 editable=True):
+        self.title=title
+        self.elements=elements
+        self.categories=categories
+        self.current=current
+        self.description_getter=description_getter
+        self.category_getter=category_getter
+        self.callback=callback
+        self.editable=editable
+        self.store=None
+        # A button representing the current element
+        self.button=None
+        # The popup window
+        self.popup=None
+        self.widget=self.build_widget()
+
+    def build_liststore(self):
+        # We store the object itself and its representation
+        store=gtk.TreeStore(
+            gobject.TYPE_PYOBJECT,
+            gobject.TYPE_STRING,
+            gobject.TYPE_INT,
+            )
+
+        catrow={}
+        for i in self.categories:
+            catrow[i]=store.append(parent=None,
+                                   row=[i,
+                                        self.description_getter(i),
+                                        gtk.CELL_RENDERER_MODE_INERT])
+        currentrow=None
+        for e in self.elements:
+            row=store.append(parent=catrow[self.category_getter(e)],
+                             row=[e,
+                                  self.description_getter(e),
+                                  gtk.CELL_RENDERER_MODE_ACTIVATABLE])
+            if e == self.current:
+                currentrow=row
+        return store, currentrow
+
+    def row_activated_cb(self, treeview, path, column):
+        element=treeview.get_model()[path][self.COLUMN_ELEMENT]
+        if not element in self.elements:
+            # It is a category
+            return False
+        self.update_element(element)
+        # Hide the selection
+        self.popup_hide()
+        return True
+        
+    def build_widget(self):
+        vbox=gtk.VBox()
+
+        self.store, currentrow=self.build_liststore()
+
+        treeview=gtk.TreeView(model=self.store)
+        #treeview.connect("button_press_event", self.tree_view_button_cb)
+        treeview.connect("row_activated", self.row_activated_cb)
+        path=self.store.get_path(currentrow)
+        treeview.expand_to_path(path)
+        treeview.scroll_to_cell(path)
+        treeview.set_cursor_on_cell(path)
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn(_('Name'), renderer,
+                                    text=self.COLUMN_LABEL,
+                                    mode=self.COLUMN_MODE)
+        column.set_resizable(True)
+        treeview.append_column(column)
+        
+        vbox.add(treeview)
+
+        hbox=gtk.HButtonBox()
+
+        b=gtk.Button(stock=gtk.STOCK_OK)
+        b.connect("clicked", lambda w: treeview.row_activated(*treeview.get_cursor()))
+        hbox.add(b)
+        b=gtk.Button(stock=gtk.STOCK_CANCEL)
+        b.connect("clicked", lambda w: self.popup_hide())
+        hbox.add(b)
+        vbox.add(hbox)
+        
+        vbox.show_all()
+        
+        return vbox
+
+    def get_button(self):
+        """Return a button with the current element description as label.
+        """
+        if self.button is not None:
+            return self.button
+        b=gtk.Button(self.description_getter(self.current))
+        b.connect("clicked", lambda w: self.popup_show())
+        b.show()
+        self.button=b
+        return b
+
+    def update_element(self, element=None):
+        self.current=element
+        if self.button is not None:
+            self.button.set_label(self.description_getter(element))
+        if self.callback is not None:
+            self.callback(element)
+        return True
+
+    def popup_show(self):
+        if self.popup is None:
+            w=gtk.Window()
+            w.set_title(self.title)
+            w.add(self.widget)
+            self.popup=w
+        self.popup.show_all()
+        return True
+
+    def popup_hide(self):
+        if self.popup is not None:
+            self.popup.hide()
+        return True
+
