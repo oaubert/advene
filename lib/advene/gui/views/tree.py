@@ -25,7 +25,7 @@ pygtk.require ('2.0')
 import gtk
 import gobject
 
-class AdveneTreeModel(gtk.GenericTreeModel):
+class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource):
     COLUMN_TITLE=0
     COLUMN_ELEMENT=1
     
@@ -40,7 +40,6 @@ class AdveneTreeModel(gtk.GenericTreeModel):
         
     def __init__(self, package):
         gtk.GenericTreeModel.__init__(self)
-
         self.clear_cache ()
         self.__package = package
 
@@ -206,6 +205,31 @@ class AdveneTreeModel(gtk.GenericTreeModel):
         """Returns the parent of this node"""
         return self.nodeParent(node)
 
+    def row_draggable(self, path):
+        print "row draggable %s" % str(path)
+        return True
+#         node = self.on_get_iter(path)
+#         if isinstance(node, Annotation):
+#             return True
+#         else:
+#             return False
+     
+    def drag_data_delete(self, path):
+        print "drag delete %s" % str(path)
+        return False
+
+    def drag_data_received (self, *p, **kw):
+        print "drag data received: %s %s" % (str(p), str(kw))
+        return True
+    
+    def drag_data_get(self, path, selection):
+        print "drag data get %s %s" % (str(path), str(selection))
+        node = self.on_get_iter(path)
+        print "Got selection:\ntype=%s\ntarget=%s" % (str(selection.type),
+                                                      str(selection.target))
+        selection.set(selection.target, 8, node.uri)
+        return True
+
 class DetailedTreeModel(AdveneTreeModel):
     """Detailed Tree Model.
 
@@ -354,17 +378,36 @@ class TreeWidget:
         select = tree_view.get_selection()
         select.set_mode(gtk.SELECTION_SINGLE)
         
-        tree_view.connect("button-press-event", self.tree_select_cb)
+        tree_view.connect("button_press_event", self.tree_view_button_cb)
+        
         #tree_view.connect("select-cursor-row", self.debug_cb)
         #select.connect ("changed", self.debug_cb)
-        
+
         cell = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_("Package View"), cell, text=0)
         tree_view.append_column(column)
 
-        tree_view.connect("button_press_event", self.tree_view_button_cb)
-
+        # Drag and drop for annotations
+        tree_view.enable_model_drag_source(gtk.gdk.BUTTON1_MASK,
+                                           config.data.annotation_drag_type,
+                                           gtk.gdk.ACTION_LINK)
+        tree_view.connect("drag_data_get", self.drag_data_get_cb)
         
+
+    def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
+        print "Drag data received"
+        treeselection = treeview.get_selection()
+        model, iter = treeselection.get_selected()
+        
+        annotation = model.get_value(iter, AdveneTreeModel.COLUMN_ELEMENT)
+        print "Got drag for %s" % str(annotation)
+        
+        if targetType == config.data.TARGET_TYPE_ANNOTATION:
+            selection.set(selection.target, 8, annotation.uri)
+        else:
+            print "Unknown target type for drag: %d" % targetType
+        return True
+
     def get_widget (self):
         """Return the TreeView widget."""
         return self.tree_view
@@ -384,21 +427,6 @@ class TreeWidget:
                                                     AdveneTreeModel.COLUMN_ELEMENT)
         return node
     
-    def tree_select_cb(self, tree_view, event):
-        # On double-click, edit element
-        if event.type == gtk.gdk._2BUTTON_PRESS:
-            node = self.get_selected_node (tree_view)
-            if node is not None:
-                try:
-                    pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                                   controller=self.controller)
-                except TypeError, e:
-                    print _("Error: unable to find an edit popup for %s:\n%s") % (node, str(e))
-                else:
-                    pop.edit ()
-                return True
-        return False
-        
     def debug_cb (self, *p, **kw):
         print "Debug cb:\n"
         print "Parameters: %s" % str(p)
@@ -409,19 +437,35 @@ class TreeWidget:
         button = event.button
         x = int(event.x)
         y = int(event.y)
-        if event.window is widget.get_bin_window():
-            model = self.model
-            t = widget.get_path_at_pos(x, y)
-            if t is not None:
-                path, col, cx, cy = t
-                iter = model.get_iter(path)
-                node = model.get_value(iter,
-                                       AdveneTreeModel.COLUMN_ELEMENT)
-                widget.get_selection().select_path (path)
-                if button == 3:
-                    menu = advene.gui.popup.Menu(node, controller=self.controller)
-                    menu.popup()
-                    retval = True
+        
+        # On double-click, edit element
+        if event.type == gtk.gdk._2BUTTON_PRESS:
+            node = self.get_selected_node (widget)
+            if node is not None:
+                try:
+                    pop = advene.gui.edit.elements.get_edit_popup (node,
+                                                                   controller=self.controller)
+                except TypeError, e:
+                    print _("Error: unable to find an edit popup for %s:\n%s") % (node, str(e))
+                else:
+                    pop.edit ()
+                retval=True
+            else:
+                retval=False
+        elif button == 3:
+            if event.window is widget.get_bin_window():
+                model = self.model
+                t = widget.get_path_at_pos(x, y)
+                if t is not None:
+                    path, col, cx, cy = t
+                    iter = model.get_iter(path)
+                    node = model.get_value(iter,
+                                           AdveneTreeModel.COLUMN_ELEMENT)
+                    widget.get_selection().select_path (path)
+                    if button == 3:
+                        menu = advene.gui.popup.Menu(node, controller=self.controller)
+                        menu.popup()
+                        retval = True
         return retval
 
     def update_element(self, element=None, event=None):
@@ -478,52 +522,88 @@ class TreeWidget:
         self.model = self.modelclass(package)
         self.tree_view.set_model(self.model)
         return
-    
+
+    def drag_sent(self, widget, context, selection, targetType, eventTime):
+        #print "drag_sent event from %s" % widget.annotation.content.data
+        if targetType == config.data.TARGET_TYPE_ANNOTATION:
+            selection.set(selection.target, 8, widget.annotation.uri)
+        else:
+            print "Unknown target type for drag: %d" % targetType
+        return True
+
+    def drag_received(self, widget, context, x, y, selection, targetType, time):
+        #print "drag_received event for %s" % widget.annotation.content.data
+        if targetType == config.data.TARGET_TYPE_ANNOTATION:
+            source_uri=selection.data
+            print "Creating new relation (%s, %s)" % (source_uri, widget.annotation.uri)
+            source=self.controller.package.annotations.get(source_uri)
+            dest=widget.annotation
+            self.create_relation_popup(source, dest)
+        else:
+            print "Unknown target type for drop: %d" % targetType
+        return True
+
+    def popup(self):
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window.set_title (_("Package %s") % (self.controller.package.title or _("No title")))
+
+        vbox = gtk.VBox()
+        window.add (vbox)
+        
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        
+        vbox.add (sw)
+        sw.add (self.get_widget())
+        if self.controller.gui:
+            self.controller.gui.register_view (tree)
+            window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
+
+        s=config.data.preferences['windowsize']['treeview']
+        window.set_default_size (s[0], s[1])
+        if self.controller.gui:
+            window.connect ("size_allocate", self.controller.gui.resize_cb, 'treeview')
+
+        self.buttonbox = gtk.HButtonBox()
+
+        b = gtk.Button(stock=gtk.STOCK_CLOSE)
+        b.connect("clicked", lambda w: window.destroy ())
+        self.buttonbox.add (b)
+
+        vbox.pack_start(self.buttonbox, expand=False)
+        
+        window.show_all()
+        
+        return window
     
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Should provide a package name"
         sys.exit(1)
 
-    package = Package (uri=sys.argv[1])
-    
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    window.set_size_request (640, 480)
+    class DummyController:
+        pass
 
-    window.set_border_width(10)
-    window.set_title (package.title)
-    vbox = gtk.VBox()
+    controller=DummyController()
     
-    window.add (vbox)
+    controller.package = Package (uri=sys.argv[1])
+    controller.gui=None
     
-    sw = gtk.ScrolledWindow()
-    sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-    vbox.add (sw)
-        
-    #tree = TreeWidget(package, modelclass=FlatTreeModel)
-    tree = TreeWidget(package, modelclass=DetailedTreeModel)
-    
-    sw.add (tree.get_widget())
+    tree = TreeWidget(controller.package, modelclass=DetailedTreeModel,
+                      controller=controller)
 
-    hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=False)
-
+    window=tree.popup()
+    
     def validate_cb (win, package):
         filename="/tmp/package.xml"
         package.save (as=filename)
         print "Package saved as %s" % filename
-        gtk.main_quit ()
-        
+        gtk.main_quit ()    
 
     b = gtk.Button (stock=gtk.STOCK_SAVE)
-    b.connect ("clicked", validate_cb, package)
-    hbox.add (b)
-
-    b = gtk.Button (stock=gtk.STOCK_CANCEL)
-    b.connect ("clicked", lambda w: window.destroy ())
-    hbox.add (b)
-
-    vbox.set_homogeneous (False)
+    b.connect ("clicked", validate_cb, controller.package)
+    b.show()
+    tree.buttonbox.add (b)
 
     def key_pressed_cb (win, event):
         if event.state & gtk.gdk.CONTROL_MASK:
@@ -535,7 +615,7 @@ if __name__ == "__main__":
             # Open popup to edit current element
             node=tree.get_selected_node(tree.get_widget())
             pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                           controller=self.controller)
+                                                           controller=controller)
             if pop is not None:
                 pop.display ()
             else:
@@ -545,6 +625,5 @@ if __name__ == "__main__":
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())
 
-    window.show_all()
     gtk.main ()
 
