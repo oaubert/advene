@@ -1,14 +1,28 @@
+* Make a UTBV view using CSS displaying annotations and screenshots on a timeline
+
+* Idea: make a snapshot everytime a new position is given, so that we
+can build a history of navigation.
+
+* Create a CellRenderer for time values (with time adjustment integrated)
+
+* Create a TALES evaluator widget
+
 * Create a Sequential editor (to accomodate existing work)
 
-* Fix the simpletal problem: all string values should be unicode
+* Fix the UpdateElement problem in tree view when creating a new
+element (maybe we should have AnnotationCreate and AnnotationEdit
+events)
+
+* Fix the simpletal problem: all string values should be unicode ->
+seems to work OK. To check...
 
 * Make the annotation edit entry a multiline entry.
 
 * In ECA elements, TALES expression could be prefixed by string: by
 default, using the ${} syntax to evaluate expressions ???
 
-* Content: how to represent structured data ? Cf MPEG7 DS ? (grep
-  source for x-advene/structured)
+* Content: how to represent structured data ? Cf MPEG7 DS ? (half
+  DONE, grep source for x-advene/structured)
 
 * Assistants:
   - shot detection
@@ -104,16 +118,6 @@ gtk.rc_parse_string(sendmail_styles)
    annotations/i.../snapshot_url (Annotation for snapshot)
    annotations/i.../content/data (Content of annotation)
    annotations/i.../fragment/formatted/begin (Start time of the annotation)
-
-* TALES vs XPath: cf http://zope.org/Wikis/zope-xml/XPath (Pt_Xpath)
-   Search TALES in http://lambda.weblogs.com/discuss/msgReader$4575
-http://lists.webarch.co.uk/pipermail/petal/2002-July/000022.html
-http://pywork.sourceforge.net/doc/node9.html
-
-* Mailing-list TAL:
-http://marc.free.net.ph/mindex/zope-zpt@20031122.114501.00000000.html
-
-* Reference on zpt: http://www.advogato.org/article/350.html
 
 * EPOZ: strip http:... prefix from drag and drop results.
 * Create TALContext object: -> DONE
