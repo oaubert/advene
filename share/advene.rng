@@ -225,7 +225,7 @@
     <ref name="id.attr"/>
     <ref name="meta.content"/>
     <optional>
-      <ref name="content-type.element"/>
+      <ref name="content-schema.element"/>
     </optional>
   </define>
 
@@ -240,19 +240,41 @@
       </oneOrMore>
     </element>
     <optional>
-      <ref name="content-type.element"/>
+      <ref name="content-schema.element"/>
     </optional>
   </define>
 
+  <define name="content-schema.element">
+    <element name="content">
+      <attribute name="mime-type">
+         <ref name="mime-type.type"/>
+      </attribute>
+      <choice>
+        <ref name="href.attr"/>
+        <text/>
+        <element>
+          <anyName>
+            <except>
+              <nsName/>
+              <nsName ns=""/>
+            </except>
+          </anyName>
+          <ref name="any.content"/>
+        </element>
+      </choice>
+    </element>
+  </define>
+
+  <!-- deprecated
   <define name="content-type.element">
     <element name="content-type">
       <attribute name="mime-type">
         <ref name="mime-type.type"/>
       </attribute>
       <optional>
-        <element name="schema">
-          <attribute name="language">
-            <ref name="content-schema-language.type"/>
+        <element name="content-schema">
+          <attribute name="mime-type">
+            <ref name="mime-type.type"/>
           </attribute>
           <choice>
             <ref name="href.attr"/>
@@ -270,14 +292,7 @@
       </optional>
     </element>
   </define>
-
-  <define name="content-schema-language.type">
-    <choice>
-      <value>dtd</value>
-      <value>relaxng</value>
-      <value>xml-schema</value>
-    </choice>
-  </define>
+  -->
 
   <!-- views -->
 
