@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import sys
-import ORBit, CORBA
 import Image
 import os
 import time
@@ -12,6 +11,7 @@ import atexit
 import signal
 
 print "Chargement de l'IDL"
+import ORBit, CORBA
 ORBit.load_typelib (config.data.typelib)
 import VLC
 
@@ -68,7 +68,7 @@ def quit ():
 	return True
 
 def test (file="/tmp/k.mpg"):
-	mc.playlist_add_item (file)
+	mc.playlist_add_item (unicode(file,'utf8').encode('utf8'))
 	print "%s added..." % file
 
 def save (data, file="/tmp/data.raw"):
@@ -83,8 +83,10 @@ def init ():
 	global svg
 	
 	print "Initialisation de l'ORB"
-	player=advene.core.mediacontrol.PlayerLauncher(config.data)
-	orb,mc=player.init()
+	player=advene.core.mediacontrol.PlayerFactory().get_player()
+	#orb,mc=player.launcherinit()
+	player.check_player()
+	(orb,mc)=(player.orb,player.mc)
 
 	print "Objet mc %s" % mc
 	pos = create_position (value=0,
