@@ -19,9 +19,9 @@ class PlayerFactory:
             import advene.player.vlcnative as playermodule
         else:
             #import advene.player.xine as playermodule
-            #import advene.player.vlcorbit as playermodule
             import advene.player.vlcnative as playermodule
             #import advene.player.dummy as playermodule
+            #import advene.player.vlcorbit as playermodule
             
         return playermodule.Player()
 

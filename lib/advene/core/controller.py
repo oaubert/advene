@@ -24,6 +24,7 @@ import advene.model.tal.context
 import advene.core.mediacontrol
 
 from advene.core.imagecache import ImageCache
+import advene.core.idgenerator
 
 import advene.util.vlclib as vlclib
 
@@ -98,6 +99,7 @@ class AdveneController:
         self.gui=None
         # Useful for debug in the evaluator window
         self.config=config.data
+        self.idgen=advene.core.idgenerator.Generator()
         
         # STBV
         self.current_stbv = None
