@@ -1,0 +1,22 @@
+#! /bin/sh
+
+SCRIPTDIR=`dirname $0`
+ADVENEHOME=`dirname $SCRIPTDIR`
+output=${ADVENEHOME}/doc/user.html
+
+if [ ! -d "${ADVENEHOME}/doc" ]
+then
+  echo "Unable to find the Advene directory"
+  exit 1
+fi
+
+wget --quiet 'http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneUserGuide' -O $output
+if [ $? == 0 ]
+then
+	perl -pi -e 's/.+wiki(header|footer|pagelink).+//;' -e 's!/advene/advene.css!advene.css!;' -e 's!.+(Last\sedited.+?)<a.+?>(.+?)</a>.+!$1 $2!;' -e 's!"wiki\.pl\?AdveneUserGuide!"!g;' -e 's/http:\#/\#/g;' -e 's!<a href.+?>\?</a>!!g' $output
+	echo "User documentation updated in $output"
+else
+	echo "Wget error. $output is now corrupted."
+fi
+
+
