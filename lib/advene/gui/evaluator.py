@@ -166,6 +166,10 @@ class Window:
         try:
             res=eval(expr, self.globals_, self.locals_)
             completion=dir(res)
+            # Do not display private elements by default.
+            # Display them when completion is invoked
+            # on element._ type string.
+            completion=[ a for a in completion if not a.startswith('_') ]
         except Exception, e:
             if not '.' in expr:
                 # Beginning of an element name (in global() or locals() or builtins)
@@ -189,7 +193,11 @@ class Window:
                                      if a.startswith(attr) ]
                     except Exception, e:
                         pass
-
+                    if attr == '':
+                        # Do not display private elements by default.
+                        # Display them when completion is invoked
+                        # on element._ type string.
+                        completion=[ a for a in completion if not a.startswith('_') ]
 
         self.clear_output()
         if completion is None:
