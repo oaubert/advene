@@ -11,7 +11,6 @@ import sre
 import webbrowser
 import urlparse
 import urllib
-import Queue
 
 import advene.core.config as config
 
@@ -136,7 +135,7 @@ class AdveneController:
 
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
-        self.event_queue = Queue.Queue()
+        self.event_queue = []
         
         # Used in update_status to emit appropriate notifications
         self.status2eventname = {
@@ -155,8 +154,7 @@ class AdveneController:
             ))
 
     def queue_action(self, method, *args, **kw):
-        #print "Queue action: %s" % str(method)
-        self.event_queue.put( (method, args, kw) )
+        self.event_queue.append( (method, args, kw) )
         return True
 
     def process_queue(self):
@@ -167,13 +165,8 @@ class AdveneController:
         events can generate new notification.
         """
         # Dump the pending events into a local queue
-        ev=[]
-        try:
-            while True:
-                e=self.event_queue.get_nowait()
-                ev.append(e) 
-        except Queue.Empty:
-            pass
+        ev=self.event_queue[:]
+        self.event_queue=[]
         
         # Now we can process the events
         for (method, args, kw) in ev:
