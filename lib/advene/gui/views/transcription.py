@@ -66,8 +66,8 @@ class TranscriptionView:
 
         activated_tag = b.create_tag("activated")
         #activated_tag.set_property("weight", pango.WEIGHT_BOLD)
-        activated_tag.set_property("background", "black")
-        activated_tag.set_property("foreground", "white")
+        activated_tag.set_property("background", "skyblue")
+        # activated_tag.set_property("foreground", "white")
 
         currenttag = b.create_tag("current")
         currenttag.set_property("background", "lightblue")
@@ -365,6 +365,10 @@ class TranscriptionView:
 
         vbox = gtk.VBox()
 
+        if self.controller.gui:
+            toolbar=self.controller.gui.get_player_control_toolbar()
+            vbox.pack_start(toolbar, expand=False)
+            
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         vbox.add (sw)
