@@ -98,7 +98,7 @@ class DefaultActionsRepository:
                         'x': _("x-position (percentage of screen)"),
                         'y': _("y-position (percentage of screen)"),
                         'size': _("Size (arbitrary units)"),
-                        'duration': _("Duration of the caption in ms")}
+                        'duration': _("Duration of the display in ms")}
             )
                  )
         l.append(RegisteredAction(
