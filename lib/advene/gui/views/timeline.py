@@ -33,6 +33,7 @@ class TimeLine:
         
         self.list = l
         self.controller=controller
+        self.tooltips = gtk.Tooltips ()
         
         if minimum is None or maximum is None:
             b, e = self.bounds ()
@@ -44,11 +45,15 @@ class TimeLine:
         self.maximum = maximum
 
         # Highlight activated annotations 
-        self.highlight_activated_toggle=gtk.CheckButton(_("Highlight active annotations"))
+        self.highlight_activated_toggle=gtk.CheckButton(_("Active"))
+        self.tooltips.set_tip(self.highlight_activated_toggle,
+                              _("Highlight active annotations"))
         self.highlight_activated_toggle.set_active (True)
         
         # Scroll the window to display the activated annotations 
-        self.scroll_to_activated_toggle=gtk.CheckButton(_("Scroll to active annotation"))
+        self.scroll_to_activated_toggle=gtk.CheckButton(_("AutoScroll"))
+        self.tooltips.set_tip(self.scroll_to_activated_toggle,
+                              _("Scroll to active annotation"))
         self.scroll_to_activated_toggle.set_active (True)
                     
         # FIXME: Hardcoded values are bad...
@@ -83,7 +88,6 @@ class TimeLine:
         self.widget.connect("key_press_event", self.key_pressed_cb)
         self.widget.connect('button_press_event', self.mouse_pressed_cb)
         
-        self.tooltips = gtk.Tooltips ()
         self.rapport = 1
         self.old_ratio_value = self.ratio_adjustment.value
 
@@ -922,6 +926,7 @@ class TimeLine:
         vbox.add (self.get_packed_widget())
 
         hbox = gtk.HButtonBox()
+        hbox.set_homogeneous (False)
         vbox.pack_start (hbox, expand=False)
 
         s = gtk.HScale (self.fraction_adj)
@@ -929,15 +934,15 @@ class TimeLine:
         s.connect ("value-changed", self.fraction_event)
         hbox.add (s)
 
-        hbox.add (self.highlight_activated_toggle)
-        hbox.add (self.scroll_to_activated_toggle)
+        hbox.pack_start (self.highlight_activated_toggle, expand=False)
+        hbox.pack_start (self.scroll_to_activated_toggle, expand=False)
 
         b = gtk.Button (stock=gtk.STOCK_CLOSE)
         if self.controller.gui:
             b.connect ("clicked", self.controller.gui.close_view_cb, window, self)
         else:
             b.connect ("clicked", lambda w: window.destroy())
-        hbox.add (b)
+        hbox.pack_start (b, expand=False)
 
         vbox.set_homogeneous (False)
 
