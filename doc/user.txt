@@ -109,6 +109,19 @@ http://localhost:1234/packages/advene/
 Des vues définies par défaut dans le recueil modèle permettent de
 naviguer à l'intérieur du recueil.
 
+Vue transcription
++++++++++++++++++
+
+Cette vue permet d'afficher l'ensemble des annotations d'un même type
+concaténées de manière à produire un texte. Sa principale utilité est
+de présenter un ensemble d'annotation transcrivant un dialogue de
+manière à localiser une annotation dans l'ensemble du texte.
+
+On accède à cette vue de deux manières : soit en cliquant avec le
+bouton droit sur un type d'annotation dans une vue arborescente, et en
+choisissant l'item "Transcription", soit à partir du menu "Vues" de
+l'application principale.
+
 Syntaxe TALES 
 *************
 
@@ -203,12 +216,12 @@ Pour les deux derniers paramètres, un élément de base supplémentaire
 est défini. Il a pour nom ``element`` et prend la valeur de l'élément
 testé.
 
-Ainsi, pour obtenir les annoations de même type précédent l'annotation
-sur laquelle on applique la requête, et en retourner l'identificateur, on
-utilise la syntaxe suivante :
+Ainsi, pour obtenir les annotations de même type précédant
+l'annotation sur laquelle on applique la requête, et en retourner les
+identificateurs, on utilise la syntaxe suivante :
 
 - Ensemble d'origine: ``here/type/annotations``
-- Condition:  ``element/fragment/begin`` is lower than ``here/fragment/begin``
+- Condition:  ``element`` is before (Allen) ``here``
 - Valeur de retour: ``element/id``
 
 et appliquer la requête sur l'annotation désirée par le biais d'une

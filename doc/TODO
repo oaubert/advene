@@ -1,8 +1,20 @@
-* sound_[sg]et_volume: normalize volume in [0..100]
+* Import elements GUI: implement "Add/Remove package" -> ready, but need the corresponding method in the model
 
-* gui.edit.element: Implement EditElementListForm, based on ListStore?
-or ButtonBox?, to allow the edition of members of relations and
-members of relationtypes. Parameters: field, membertypes or memberids
+* Model: Pb in imported packages:
+  [ s.title for s in p.imports[1].package.schemas ] works but
+  [ s.id for s in p.imports[1].package.schemas ] does not:
+
+ File "advene/model/modeled.py", line 185, in getId
+  File "/usr/local/src/advene-project/lib/advene/model/package.py", line 258, in getQnamePrefix
+    raise AdveneException ("item %s has no QName prefix in %s" %
+AdveneException: item Package (english_teacher.xml) has no QName prefix in Package (../examples/unicode.xml
+
+* Model: Implement importElement methods (or at least, document the existing ones and add an importPackage() to be able to specify the package's alias)
+
+* Model: implement relationtype.members R/W (and make that a list of
+AnnotationTypes rather than their ids)
+
+* sound_[sg]et_volume: normalize volume in [0..100]
 
 * player: implement vlchttp
 
@@ -25,10 +37,6 @@ structured content)
 
 * Upgrade simpletal support to 3.9
 
-* GUI for advene.util.importer
-
-* Interface to edit imports
-
 * Edit element popup: check that the data was not modified before closing
 
 * Should snapshots be done with annotations drawn or without ??
@@ -39,26 +47,18 @@ structured content)
   be linked through a "snapshot-relation" relation with the
   corresponding annotations.
 
-* RelationTypeEditPopup: allow to specify the annotation types.
-
 * RelationType: impossible to delete from popup
 
-* Create 2 Popup widgets: a singleton one (that is always visible and
-  is reused across different invocations) and an accumulator one (with
-  a size limit and a timeout)
-
-* Implement copy/paste for rules/rulesets
+* Implement copy/paste for rules/rulesets -> implemented DnD
 
 * Make the absolute time specification work for display_text (rather
   than relative positions)
 
 * Organize event names and conditions along categories
 
-* STBV: implement at least one level undo on action parameters
-
 * UTBV: implement Undo in textview (cf gtksourceview)
 
-* Implement copy/rename of id for all elements
+* Implement copy/rename of id for all elements (model related)
 
 * Model related:
 
@@ -104,8 +104,6 @@ the DOM and do not restore it before saving, so it gets lost.
 
 * Bug in queries (rest not empty even if applied to 1-element lists)
 
-* Generic for views: add a .popup() method opening a window
-
 * mediainformation: bugfix (player never active?)
 
 * EditAnnotationPopup: implement Next and Previous
@@ -116,8 +114,6 @@ annotation, of the same type or not.
 * Register all editing popup windows to close them upon package reload
 
 * Treeview: add the elements attributes as annotation/relation children.
-
-* Element editing: add description field and edit content-type attribute
 
 * Implement Xine Advene player
 
@@ -142,9 +138,7 @@ and install it into /usr/lib/orbit-2.0
 (for instance, snapshot_url and media_control for annotations) in
 order to avoid using too many global methods.
 
-* Implement action "Delay" 
-
-* Window to confirm quitting: use "Save package? Yes No Cancel"
+* Implement action "Delay"
 
 * Watch Europython:
 http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
@@ -152,8 +146,6 @@ http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
 * UID generator: http://www.alcyone.com/software/uid/
 
 * http://weblex.ens-lsh.fr/projects/xitools/format_xi/
-
-* View: display transcription with highlighting of active fragments
 
 * Make the request object accessible in AdveneContext
 
@@ -174,8 +166,6 @@ http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
 
 * Create a Sequential editor (to accomodate existing work)
 
-* Make the annotation edit entry a multiline entry.
-
 * In ECA elements, TALES expression could be prefixed by string: by
 default, using the ${} syntax to evaluate expressions ???
 
@@ -193,9 +183,6 @@ http://www.rexx.com/~dkuhlman/generateDS.html (XML-Schema) Or SOAPy
   - concurrent annotation representation
   - annotation alignment (=~ arrange/align in Impress)
   - ability to specify line order and which types to display
-
-* ECA: implement a position heap memorizing jump positions (in order
-to implement a "Return to last position")
 
 * Make the annotation interface as On-Screen Display over the video window
 
@@ -241,7 +228,7 @@ gtk.rc_parse_string(sendmail_styles)
 
 * Find a meaningful way to concisely display relations and annotations.
 
-* Reorganize adveneserver code
+* Reorganize webserver code
 
 * EPOZ: implement data templates according to the edited element,
   by hacking around LinkTool
@@ -563,3 +550,33 @@ parameters (general message + message1,position1 + message2,position2,
 * Define a gui.SingletonPopup with timeout  -> DONE
 
 * Define a generic popup method in view-plugin -> DONE
+
+* GUI for advene.util.importer -> DONE
+
+* Interface to edit imports -> DONE
+
+* RelationTypeEditPopup: allow to specify the annotation types -> DONE
+(but support missing in model)
+
+* gui.edit.element: Implement EditElementListForm, based on ListStore?
+or ButtonBox?, to allow the edition of members of relations and
+members of relationtypes. Parameters: field, membertypes or memberids -> DONE
+
+* Element editing: add description field and edit content-type attribute -> DONE
+
+* Generic for views: add a .popup() method opening a window -> DONE
+
+* STBV: implement at least one level undo on action parameters -> DONE (action parameters are cached when changing action name)
+
+* Create 2 Popup widgets: a singleton one (that is always visible and
+  is reused across different invocations) and an accumulator one (with
+  a size limit and a timeout) -> DONE
+
+* Window to confirm quitting: use "Save package? Yes No Cancel" -> DONE
+
+* View: display transcription with highlighting of active fragments -> DONE
+
+* Make the annotation edit entry a multiline entry. -> DONE
+
+* ECA: implement a position heap memorizing jump positions (in order
+to implement a "Return to last position") -> DONE (navigation history)

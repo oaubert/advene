@@ -1,18 +1,25 @@
+# Note:
+# perl -lne 'print $1 if /(application\/x-advene-.+?)\b/' lib/advene/**/*py | sort -u
+
 Advene uses internally mimetypes to identify specific elements.
 
 * application/x-advene-ruleset
 
-  Mime-type for dynamic views.
+  Dynamic views (rulesets).
+
+* application/x-advene-rule
+
+  A single rule.
 
 * application/x-advene-annotation-id 
 
-  Mime-type used to implement drag-n-drop of annotations.
+  An annotation-id. Used to implement drag-n-drop of annotations.
 
 * application/x-advene-structured
 
-  Mime-type for structured content stored in a simple way
-  (keyword=content...). Annotations of this type can be parser by
-  the global method 'parsed'.
+  Structured content stored in a simple way
+  (keyword=content...). Annotations of this type can be parsed by the
+  global method 'parsed'.
  
 * application/x-advene-simplequery
 

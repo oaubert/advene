@@ -16,13 +16,17 @@ advene.core.controller class. This class holds a reference to
    * the ECA engine (controller.event_handler, instance of advene.rules.ecaengine)
    * the loaded package (controller.package, instance of advene.model.package)
    * the webserver (controller.server, instance of advene.core.webserver)
+   * the GUI (controller.gui, may be None)
 
 It also maintains important state information such as
 controller.active_annotations
 
 The controller should centralize all interaction (esp. interaction
 with the player through the controller.update_status method) in order
-to take advantage of the event notification system. 
+to take advantage of the event notification system. Modules that
+update the state of the application or the data should invoke the
+controller.notify() method with the right parameters. The list of
+events is defined in advene.rules.elements.ECACatalog
 
 The update of the information implies that the controller.update
 method is called regularly. This is done by the GUI mainloop for the
@@ -32,14 +36,12 @@ The GUI starts in advene.gui.main.
 
 * View plugin infrastructure
 
-The views and edit plugins are based (sort of) on the MVC Model. The
-edited data is the model, the View or Edit plugin is the controller,
-which holds a reference to a view (accessible throught .get_widget()
-method).
+The views and edit plugins are based on the MVC Model. The edited data
+is the model, the View or Edit plugin is the controller, which holds a
+reference to a view (accessible throught .get_widget() method).
 
 A common API is defined for the views in
-lib/advene/gui/views/view-plugin.py
-
+lib/advene/gui/views/viewplugin.py
 
 * Structure of the Advene code
 

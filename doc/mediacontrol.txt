@@ -1,10 +1,12 @@
 Interface proposed by the mediacontrol module:
 
-The mediacontrol module holds 2 classes:
+The mediacontrol module holds the PlayerFactory class, which will
+create a new player instance.
 
-PlayerFactory, which will create a new player instance.
-
-Player, which defines the API available for players.
+In the lib/advene/player directory are located multiple modules
+player-dependent, that each define a Player class. The PlayerFactory
+is responsible for importing the right module and instanciating a
+Player() from it.
 
 * PlayerFactory
 
