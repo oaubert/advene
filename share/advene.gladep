@@ -6,6 +6,5 @@
   <program_name>advene</program_name>
   <gnome_support>FALSE</gnome_support>
   <use_widget_names>TRUE</use_widget_names>
-  <output_translatable_strings>FALSE</output_translatable_strings>
   <translatable_strings_file>advene.gladestrings</translatable_strings_file>
 </glade-project>

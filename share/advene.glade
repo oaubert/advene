@@ -194,12 +194,12 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkMenuItem" id="edit_ruleset1">
+		    <widget class="GtkMenuItem" id="browser1">
 		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Edit the current ruleset</property>
-		      <property name="label" translatable="yes">_Edit Ruleset</property>
+		      <property name="tooltip" translatable="yes">Browse the package's data</property>
+		      <property name="label" translatable="yes">_Browser</property>
 		      <property name="use_underline">True</property>
-		      <signal name="activate" handler="on_edit_ruleset1_activate" last_modification_time="Wed, 14 Jan 2004 01:04:45 GMT"/>
+		      <signal name="activate" handler="on_browser1_activate" last_modification_time="Wed, 21 Apr 2004 13:43:37 GMT"/>
 		    </widget>
 		  </child>
 
@@ -209,6 +209,22 @@
 		      <property name="label" translatable="yes">_LogWindow</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_view_logwindow_activate" last_modification_time="Mon, 15 Dec 2003 21:33:56 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="separator2">
+		      <property name="visible">True</property>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="edit_ruleset1">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Edit the default ruleset</property>
+		      <property name="label" translatable="yes">_Edit Ruleset</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_edit_ruleset1_activate" last_modification_time="Wed, 14 Jan 2004 01:04:45 GMT"/>
 		    </widget>
 		  </child>
 
