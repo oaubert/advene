@@ -821,7 +821,7 @@ class DVDControl (Connect):
 
     def on_edit_ruleset1_activate (self, button=None, data=None):
         w=gtk.Window(gtk.WINDOW_TOPLEVEL)
-        w.set_title(_("User RuleSet"))
+        w.set_title(_("Default RuleSet"))
         w.connect ("destroy", lambda e: w.destroy())
 
         vbox=gtk.VBox()
@@ -829,7 +829,7 @@ class DVDControl (Connect):
         w.add(vbox)
 
         # FIXME: edit only user ruleset or default ruleset
-        rs = self.controller.event_handler.get_ruleset('user')
+        rs = self.controller.event_handler.get_ruleset('default')
         edit=advene.gui.edit.rules.EditRuleSet(rs,
                                                catalog=self.controller.event_handler.catalog)
         vbox.add(edit.get_widget())
@@ -853,7 +853,7 @@ class DVDControl (Connect):
             return True
 
         b=gtk.Button(stock=gtk.STOCK_OK)
-        b.connect("clicked", save_ruleset, 'user')
+        b.connect("clicked", save_ruleset, 'default')
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_CANCEL)
@@ -938,7 +938,9 @@ class DVDControl (Connect):
 	return True
 
     def on_b_play_clicked (self, button=None, data=None):
-        if self.controller.player.status != VLC.PlayingStatus:
+        if self.controller.player.status == VLC.PauseStatus:
+            self.controller.update_status ("resume")
+        elif self.controller.player.status != VLC.PlayingStatus:
             self.controller.update_status ("start")
         return True
 
