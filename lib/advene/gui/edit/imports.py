@@ -15,7 +15,8 @@ class TreeViewImporter:
     COLUMN_LABEL=1
     COLUMN_ID=2
     COLUMN_IMPORTED=3
-
+    COLUMN_URI=4
+    
     types_mapping={'view': 'views',
                    'schema': 'schemas',
                    'annotation-type': 'annotationTypes',
@@ -59,10 +60,13 @@ class TreeViewImporter:
     def build_liststore(self):
         # Store reference to the element, string representation (title and id)
         # and boolean indicating wether it is imported or not
-        store=gtk.TreeStore(gobject.TYPE_PYOBJECT,
-                            gobject.TYPE_STRING,
-                            gobject.TYPE_STRING,
-                            gobject.TYPE_BOOLEAN)
+        store=gtk.TreeStore(
+            gobject.TYPE_PYOBJECT,
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+            gobject.TYPE_BOOLEAN,
+            gobject.TYPE_STRING,
+            )
         
         for i in self.controller.package.imports:
             p=i.package
@@ -70,57 +74,56 @@ class TreeViewImporter:
                                     row=[p,
                                          p.title,
                                          i.getAs(),
-                                         True])
+                                         True,
+                                         p.uri])
             viewsrow=store.append(parent=packagerow,
                                   row=[p.views,
                                        _('Views'),
-                                       '',
-                                       False])
+                                       _('Views'),
+                                       False,
+                                       ''])
             for v in p.views:
                 store.append(parent=viewsrow,
                              row=[v,
                                   v.title or v.id,
                                   v.id,
-                                  self.is_imported(v)]) 
+                                  self.is_imported(v),
+                                  v.uri]) 
 
             schemasrow=store.append(parent=packagerow,
                                     row=[p.schemas,
                                          _('Schemas'),
-                                         '',
-                                         False])
+                                         _('Schemas'),
+                                         False,
+                                         ''])
             for s in p.schemas:
                 srow=store.append(parent=schemasrow,
                                   row=[s,
-                                       #FIXME
-                                       #s.title or s.id,
-                                       #s.id,
-                                       s.title,
-                                       s.uri,
-                                       self.is_imported(s)])
+                                       s.title or s.id,
+                                       'FIXME:id',
+                                       self.is_imported(s),
+                                       s.uri])
                 for at in s.annotationTypes:
                     store.append(parent=srow,
                                  row=[at,
-                                      #FIXME
-                                      #at.title or at.id,
-                                      #at.id,
-                                      at.title,
-                                      at.uri,
-                                      self.is_imported(at)])
+                                      at.title or at.id,
+                                      "FIXME:at.id",
+                                      self.is_imported(at),
+                                      at.uri])
                 for rt in s.relationTypes:
                     store.append(parent=srow,
                                  row=[rt,
-                                      #FIXME
-                                      #rt.title or rt.id,
-                                      #rt.id,
-                                      rt.title,
-                                      rt.uri,
-                                      self.is_imported(rt)])
+                                      rt.title or rt.id,
+                                      "FIXME:rt.id",
+                                      self.is_imported(rt),
+                                      rt.uri])
         return store
 
     def toggled_cb(self, renderer, path, model, column):
         model[path][column] = not model[path][column]
         # FIXME: should update the self.controller.package accordingly
         # But we need the corresponding methods in the model first
+        
         print "Toggled %s" % model[path][self.COLUMN_LABEL]
         return False
 
@@ -145,12 +148,21 @@ class TreeViewImporter:
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_('Id'), renderer,
                                     text=self.COLUMN_ID)
+        column.set_resizable(True)
         treeview.append_column(column)        
 
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_('Title'), renderer,
                                     text=self.COLUMN_LABEL)
+        column.set_resizable(True)
         treeview.append_column(column)
+        
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn(_('URI'), renderer,
+                                    text=self.COLUMN_URI)
+        column.set_resizable(True)
+        treeview.append_column(column)
+
         
         vbox.add(treeview)
         vbox.show_all()
