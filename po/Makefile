@@ -1,6 +1,6 @@
 all:
 
-MO_DIR = ../mo
+MO_DIR = ../locale
 PO_DIR = po
 DOMAIN = advene
 
