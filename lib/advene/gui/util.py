@@ -6,7 +6,9 @@ import gtk
 import gobject
 import StringIO
 
+import advene.core.config as config
 import advene.util.vlclib as vlclib
+import advene.model.package
 
 def png_to_pixbuf (png_data):
     """Load PNG data into a pixbuf
@@ -189,6 +191,52 @@ def get_filename(title="Open a file",
                  action=gtk.FILE_CHOOSER_ACTION_OPEN,
                  button=gtk.STOCK_OPEN,
                  default_dir=None):
+    
+    preview=gtk.Button(_("N/C"))
+    
+    def update_preview(chooser):
+        filename=chooser.get_preview_filename()
+        setattr(preview, '_filename', filename)
+        if filename and filename.endswith('.xml'):
+            preview.set_label(_("Press to\ndisplay\ninformation"))
+            chooser.set_preview_widget_active(True)
+        else:
+            preview.set_label(_("N/C"))
+            chooser.set_preview_widget_active(False)
+        return True
+
+    def do_preview(button):
+        if hasattr(button, '_filename') and button._filename:
+            # FIXME: replace with meaningful info
+            try:
+                p=advene.model.package.Package(uri=button._filename)
+            except Exception, e:
+                m="Error:\n%s" % str(e)
+            else:
+                m=_("""Package %s:
+%d schemas
+%d annotation(s) in %d type(s)
+%d relation(s) in %d type(s)
+%d querie(s)
+%d view(s)
+
+Description:
+%s
+""") % (p.title,
+        len(p.schemas),
+        len(p.annotations), len(p.annotationTypes),
+        len(p.relations), len(p.relationTypes),
+        len(p.queries),
+        len(p.views),
+        p.getMetaData(config.data.namespace_prefix['dc'],
+                      'description'))
+        
+            button.set_label(m)
+            button._filename=None
+        return True
+    
+    preview.connect("clicked", do_preview)
+
     fs=gtk.FileChooserDialog(title=title,
                              parent=None,
                              action=action,
@@ -196,8 +244,11 @@ def get_filename(title="Open a file",
                                        gtk.RESPONSE_OK,
                                        gtk.STOCK_CANCEL,
                                        gtk.RESPONSE_CANCEL ))
+    fs.set_preview_widget(preview)
+    fs.connect("selection_changed", update_preview)
     if default_dir:
         fs.set_current_folder(default_dir)
+        
     res=fs.run()
     filename=None
     if res == gtk.RESPONSE_OK:
