@@ -116,7 +116,7 @@ class Condition:
                 except ValueError:
                     rv=right
                     lv=left
-                return lv >= rv
+                return lv > rv
             elif self.operator == 'lower':
                 # If it is possible to convert the values to
                 # floats, then do it. Else, compare string values
@@ -126,7 +126,7 @@ class Condition:
                 except ValueError:
                     rv=right
                     lv=left
-                return lv <= rv
+                return lv < rv
             elif self.operator == 'matches':
                 return sre.search(rv, lv)
             else:
