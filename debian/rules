@@ -35,7 +35,6 @@ build-stamp:
 
 clean:
 	dh_testdir
-	dh_testroot
 	rm -f build-stamp
 	$(setup) clean
 	find . -name "*.pyc" | xargs rm -f
