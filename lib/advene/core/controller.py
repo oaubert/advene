@@ -657,7 +657,7 @@ class AdveneController:
         self.future_ends = None
         self.active_annotations = []
 
-    def update_status (self, status=None, position=None):
+    def update_status (self, status=None, position=None, notify=True):
         """Update the player status.
 
         Wrapper for the player.update_status method, used to notify the
@@ -683,7 +683,7 @@ class AdveneController:
             e, v, tb = sys.exc_info()
             code.traceback.print_exception (e, v, tb)
         else:
-            if self.status2eventname.has_key (status):
+            if self.status2eventname.has_key (status) and notify:
                 self.event_handler.notify (self.status2eventname[status],
                                            position=position,
                                            position_before=position_before)
