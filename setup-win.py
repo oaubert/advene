@@ -99,7 +99,7 @@ myemail = "olivier.aubert@liris.cnrs.fr"
 
 opts = {
      "py2exe": {
-         "includes": "pango,atk,gobject,xml.sax.drivers2.drv_pyexpat",
+         "includes": "pango,atk,gtk,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp1252,encodings.utf_16_be,PngImagePlugin",
          "excludes": [ "Tkconstants","Tkinter","tcl" ],
          "dll_excludes": ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
                           "libgdk_pixbuf-2.0-0.dll","libgdk-win32-2.0-0.dll",
