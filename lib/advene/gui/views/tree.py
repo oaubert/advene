@@ -36,10 +36,11 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
     def nodeHasChildren (self, node):
         raise Exception("This has to be implemented in subclasses.")
         
-    def __init__(self, package):
+    def __init__(self, controller):
         gtk.GenericTreeModel.__init__(self)
         self.clear_cache ()
-        self.__package = package
+        self.controller=controller
+        self.__package=controller.package
 
     def get_package(self):
         return self.__package
@@ -124,34 +125,25 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         return self.on_get_path(node)
 
     def title (self, node):
-        # FIXME: should use vlclib.get_title
-        title = "???"
-        if isinstance (node, Annotation):
-            title = _("Annotation %s (%s, %s)") % (node.id,
-                                                   vlclib.format_time(node.fragment.begin),
-                                                   vlclib.format_time(node.fragment.end))
-        elif isinstance (node, Relation):
-            title = _("Relation %s") % (node.id)
-        elif isinstance (node, AnnotationType):
-            title = _("Annotation Type %s") % (node.title or node.id)
-        elif isinstance (node, RelationType):
-            title = _("Relation Type %s") % (node.title or node.id)
-        elif isinstance (node, Schema):
-            title = _("Schema %s") % (node.title or node.id)
-        elif isinstance (node, View):
-            title = _("View %s") % (node.title or node.id)
-            if node.content.mimetype == 'application/x-advene-ruleset':
-                title += ' [STBV]'
-        elif isinstance (node, Query):
-            title = _("Query %s") % (node.title or node.id)
-        elif isinstance (node, Package):
-            title = _("Package %s") % (node.title or _("No Title"))
-        else:
-            title = str(node)
+        title=self.controller.get_title(node)
+        if not title:
+            title = "???"
+            try:
+                title=node.id
+            except AttributeError:
+                pass
+        # FIXME: bad hardcoded value
+        if len(title) > 60:
+            title=title[60:]
+        if isinstance(node, Annotation):
+            title="%s (%s, %s)" % (title,
+                                   vlclib.format_time(node.fragment.begin),
+                                   vlclib.format_time(node.fragment.end))
+        if isinstance (node, View) and node.content.mimetype == 'application/x-advene-ruleset':
+            title += ' [STBV]'
         if ((hasattr(node, 'isImported') and node.isImported())
             or (hasattr(node, 'schema') and node.schema.isImported())):
             title += " (*)"
-
         return title
     
     def on_get_value(self, node, column):
@@ -377,7 +369,7 @@ class TreeWidget:
         self.controller=controller
         self.modelclass=modelclass
 
-        self.model = modelclass(package)
+        self.model = modelclass(controller)
 
         tree_view = gtk.TreeView(self.model)
         self.tree_view = tree_view
