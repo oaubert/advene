@@ -27,6 +27,9 @@ from advene.model.query import Query
 
 from advene.gui.edit.timeadjustment import TimeAdjustment
 
+import advene.util.vlclib as vlclib
+import advene.gui.util
+
 import advene.gui.edit.rules
 import advene.rules.actions
 import xml.dom
@@ -558,6 +561,15 @@ class EditRelationTypePopup (EditElementPopup):
                                        )
         vbox.add(f.get_view ())
 
+        f = EditElementListForm(
+            title=_("Members"),
+            element=self.element, field='hackedMemberTypes',
+            members=[ '#'+at.id for at in self.controller.package.annotationTypes ],
+            controller=self.controller,
+            editable=editable)
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+        
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
@@ -1071,6 +1083,106 @@ class EditAttributesForm (EditForm):
         treeview.set_border_width (1)
         self.view = treeview
         return treeview
+
+class EditElementListForm(EditForm):
+    COLUMN_ELEMENT=0
+    COLUMN_LABEL=1
+    
+    def __init__(self, title=None, element=None, field=None,
+                 members=None, controller=None, editable=True):
+        """Edit an element list.
+
+        The field attribute of element contains a list of elements.
+        Valid elements are specified in members.
+        """
+        self.title=title
+        self.model=element
+        self.field=field
+        self.members=members
+        self.controller=controller
+        self.editable=editable
+        self.view=None
+
+    def tree_view_button_cb(self, widget=None, event=None):
+        retval = False
+        button = event.button
+        x = int(event.x)
+        y = int(event.y)
+        
+        if button == 3:
+            if event.window is widget.get_bin_window():
+                model = widget.get_model()
+                t = widget.get_path_at_pos(x, y)
+                if t is not None:
+                    path, col, cx, cy = t
+                    node=model[path][self.COLUMN_ELEMENT]
+                    widget.get_selection().select_path (path)
+                    menu = advene.gui.popup.Menu(node, controller=self.controller)
+                    menu.popup()
+                    retval = True
+        return retval
+
+    def create_store(self):
+        store=gtk.ListStore(
+            gobject.TYPE_PYOBJECT,
+            gobject.TYPE_STRING
+            )
+        for el in getattr(self.model, self.field):
+            store.append( [el,
+                           vlclib.get_title(self.controller, el)] )
+        return store
+
+    def insert_new(self, button=None, treeview=None):
+        element=advene.gui.util.list_selector(title=_("Insert an element"),
+                                              text=_("Choose the element to insert."),
+                                              members=self.members,
+                                              controller=self.controller)
+        if element is not None:
+            treeview.get_model().append( [element,
+                                          vlclib.get_title(self.controller, element)] )
+        return True
+
+    def delete_current(self, button=None, treeview=None):
+        model, iter=treeview.get_selection().get_selected()
+        if iter is not None:
+            model.remove(iter)
+        return True
+    
+    def get_view(self):
+        vbox=gtk.VBox()
+        self.store=self.create_store()
+
+        treeview=gtk.TreeView(model=self.store)
+        treeview.set_reorderable(True)
+        treeview.connect("button_press_event", self.tree_view_button_cb)
+
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn(self.title, renderer,
+                                    text=self.COLUMN_LABEL)
+        treeview.append_column(column)
+
+        vbox.add(treeview)
+
+        hbox=gtk.HButtonBox()
+        b=gtk.Button(stock=gtk.STOCK_ADD)
+        b.connect("clicked", self.insert_new, treeview)
+        hbox.add(b)
+
+        b=gtk.Button(stock=gtk.STOCK_DELETE)
+        b.connect("clicked", self.delete_current, treeview)
+        hbox.add(b)
+
+        vbox.add(hbox)
+        
+        vbox.show_all()
+        
+        return vbox
+
+    def update_element(self):
+        if self.editable:
+            # FIXME: rebuild model.field from the self.store contents
+            print "Not implemented yet."
+        return True    
 
 if __name__ == "__main__":
     class Foo:
