@@ -1,28 +1,29 @@
-* PopupMenu: add access to browser on current element
+* Generic for views: add a .popup() method opening a window
+
+* mediainformation: bugfix (player never active?)
+
+* Model: proper handling of exceptions (for instance, a view is
+imported and its id changes in the imported package -> KeyError
+exception)
 
 * EditAnnotationPopup: implement Next and Previous
 
 * Register all editing popup windows to close them upon package reload
 
-* Timeadjustment: bouton "Play from here" to visualize current time
-  Bouton "Use current time" on begin/end to set to the current time
-  Bouton "Update snapshot"
-
-* Control-Return: validate annotation and begin editing a new one
+* Timeadjustment: 
+  Button "Play from here" to visualize current time
+  Button "Use current time" on begin/end to set to the current time
+  Button "Update snapshot"
 
 * Popup menu for annotations: add a subtree to access relations and
-related annotations
-
-* Italic/Bold face for annotations with relations
+  related annotations
 
 * Treeview: ajouter les attributs des éléments en fils d'annotation (relation, etc)
 
 * Implementer en standard la notion de annotation precedente/suivante
 de meme type ou pas
 
-* Help: display user.txt
-
-* Modele: les annotations devraient etre triees selon fragment.begin
+* Modele: les annotations devraient etre triees selon fragment.begin (dur)
 
 * En attendant, implementer un hook a LoadPackage et a
 AnnotationEditEnd qui trie les annotations suivant fragment et autres
@@ -436,3 +437,14 @@ events) -> DONE
 
 * New action: DisplayMarker (shape, color, position, duration) -> DONE
 
+* PopupMenu: add access to browser on current element -> DONE
+
+* Control-Return: validate annotation and begin editing a new one -> DONE
+
+* Italic/Bold face for annotations with relations -> DONE
+
+* Help: display user.txt -> DONE (user.html)
+
+* setup.py: build share/web/user.html from doc/user.txt -> DONE
+
+* webserver: implement /media/stbv -> DONE
