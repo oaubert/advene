@@ -240,3 +240,29 @@ def unimport_element(package, element, controller):
     else:
         print "%s Not supported yet." % element.viewableClass
 
+
+element_declinations={
+    'schema': (_('schema'), _('schemas')),
+    'annotation': (_('annotation'), _('annotations')),
+    'annotation_type': (_('annotation type'), _('annotation types')),
+    'relation': (_('relation'), _('relations')),
+    'relation_type': (_('relation type'), _('relation types')),
+    'query': (_('query'), _('queries')),
+    'view': (_('view'), _('views')),
+    'package': (_('package'), _('packages')),
+    }
+
+def format_element_name(name, count=None):
+    """Formats an element name (from the model) according to count."""
+    if not name in element_declinations:
+        return name
+
+    if count is None:
+        return element_declinations[name][0]
+
+    if count == 0:
+        return _("No %s") % element_declinations[name][0]
+    elif count == 1:
+        return _("1 %s") % element_declinations[name][0]
+    else:
+        return _("%d %s") % (count, element_declinations[name][1])
