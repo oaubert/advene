@@ -831,6 +831,7 @@ class ECACatalog:
 
     # FIXME: Maybe this should be put in an external resource file
     event_names={
+        'PackageEditEnd':         _("Ending editing of a package"),
         'AnnotationBegin':        _("Beginning of an annotation"),
         'AnnotationEnd':          _("End of an annotation"),
         'AnnotationCreate':       _("Creation of a new annotation"),
@@ -872,6 +873,7 @@ class ECACatalog:
         }
 
     modifying_events=sets.Set((
+        'PackageEditEnd',
         'AnnotationEditEnd',
         'AnnotationDelete',
         'RelationEditEnd',
