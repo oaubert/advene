@@ -196,7 +196,7 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         add_item(_("Create a new view..."), self.create_element, View, element)
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
-        add_item(_("Create a new relation..."), self.create_element, Relation, element)
+        #add_item(_("Create a new relation..."), self.create_element, Relation, element)
         add_item(_("Create a new schema..."), self.create_element, Schema, element)
         return
     
@@ -218,7 +218,7 @@ class Menu:
     def make_relationtype_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
-        add_item(_("Create a new relation..."), self.create_element, Relation, element)
+        #add_item(_("Create a new relation..."), self.create_element, Relation, element)
         return
 
     def make_view_menu(self, element, menu):
