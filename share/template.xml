@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns='http://experience.univ-lyon1.fr/advene/ns' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:dc='http://purl.org/dc/elements/1.1/' xmlns:tst='http://experience.univ-lyon1.fr/advene/ns/test' id='test' dc:creator='oaubert' dc:date='2004-01-20'>
+
+<package xmlns='http://experience.univ-lyon1.fr/advene/ns' xmlns:dc='http://purl.org/dc/elements/1.1/' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:tst='http://experience.univ-lyon1.fr/advene/ns/test' id='test' dc:creator='oaubert' dc:date='2004-01-20'>
   <meta>
     <title xmlns='http://purl.org/dc/elements/1.1/'>Template package</title>
   </meta>
@@ -16,15 +16,18 @@
         <dc:subject>Schéma élémentaire pour l'annotation avec du simple texte</dc:subject>
       </meta>
       <annotation-types>
-        <annotation-type id='annotation'>
+        <annotation-type dc:creator='Advene team' id='annotation'>
           <meta>
+            <representation xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'></representation>
+            <description xmlns='http://purl.org/dc/elements/1.1/'>Simple text annotation</description>
             <dc:title>Annotation texte</dc:title>
             <dc:subject>Une simple annotation textuelle</dc:subject>
           </meta>
+          <content-type mime-type='text/plain'/>
         </annotation-type>
       </annotation-types>
       <relation-types>
-        <relation-type id='basic-relation'>
+        <relation-type dc:creator='Advene team' id='basic-relation'>
           <meta>
             <dc:title>Relation élémentaire</dc:title>
             <dc:description>Simple mise en relation de deux annotations.</dc:description>
@@ -37,86 +40,60 @@
             <schema>...</schema>
           </content-type>
           -->
+          <member-types>
+            <member-type xlink:href='#annotation'/>
+            <member-type xlink:href='#annotation'/>
+          </member-types>
         </relation-type>
       </relation-types>
     </schema>
   </schemas>
   <views>
-    <view viewable-class='annotation' id='annotation-view'>
-      <content mime-type='text/html'>&lt;a tal:attributes="href here/absolute_url">Annotation &lt;em tal:content="here/id">Id&lt;/em>&lt;/a> (&lt;span tal:replace="python:here.content.data[:50]">Contenu&lt;/span>)</content>
-    </view>
-    <view viewable-class='annotation' id='table-row'>
-      <content mime-type='text/html'>&lt;tr tal:attributes="bgcolor bgcolor">
-&lt;td>&lt;a tal:attributes="href here/absolute_url; title here/type/title" tal:content="here/id">Id&lt;/a>&lt;/td>
-&lt;td tal:content="here/type/id">Type&lt;/td>
-&lt;td tal:content="here/fragment/formatted/begin">Begin&lt;/td>
-&lt;td tal:content="here/fragment/formatted/end">End&lt;/td>
-&lt;td tal:content="here/content/data">Contenu&lt;/td>
-&lt;/tr></content>
-    </view>
-    <view viewable-class='*' id='print-default-views'>
-      <content mime-type='text/html'>&lt;?xml version="1.0" encoding="utf-8"?>
-&lt;h1>Liste des vues appliquées par défaut&lt;/h1>
-
-&lt;table border="1" tal:define="p here/ownerPackage">
-&lt;tr>&lt;th>Élément&lt;/th>&lt;th>Vue&lt;/th>&lt;/tr>
-&lt;tr tal:define="e p">
-&lt;td tal:content="e/viewableClass">Class&lt;/td>
-&lt;td tal:content="structure e/findDefaultView/view/item-view | string:Aucune">Vue&lt;/td>
-&lt;/tr>
-
-&lt;tr tal:define="e p/annotations">
-&lt;td tal:content="e/viewableClass">Classe&lt;/td>
-&lt;td tal:content="structure e/findDefaultView/view/item-view | string:Aucune">Vue&lt;/td>
-&lt;/tr>
-
-&lt;tr tal:define="e p/schemas">
-&lt;td tal:content="e/viewableClass">Classe&lt;/td>
-&lt;td tal:content="structure e/findDefaultView/view/item-view | string:Aucune">Vue&lt;/td>
-&lt;/tr>
-
-
-&lt;span tal:define="e python:p.annotations[0]">
-&lt;tr>
-&lt;td tal:content="e/viewableClass">Classe&lt;/td>
-&lt;td tal:content="structure e/findDefaultView/view/item-view | string:Aucune">Vue&lt;/td>
-&lt;/tr>
-&lt;/span>
-
-&lt;span tal:define="v python:p.views[0]">
-&lt;tr>
-&lt;td tal:content="v/viewableClass">Classe&lt;/td>
-&lt;td tal:content="structure v/findDefaultView/view/item-view | string:Aucune">Vue&lt;/td>
-&lt;/tr>
-&lt;/span>
-
-&lt;span tal:define="t python:p.annotationTypes[0]">
-&lt;tr>
-&lt;td tal:content="t/viewableClass">Class&lt;/td>
-&lt;td tal:content="structure t/findDefaultView/view/item-view | string:Aucune">Vue&lt;/td>
-&lt;/tr>
-&lt;/span>
-
-
-&lt;/table>
+    <view viewable-class='annotation' dc:creator='' id='annotation-view'>
+      <content mime-type='text/html'>&lt;a tal:attributes="href here/absolute_url">annotation &lt;em tal:content="here/id">Id&lt;/em>&lt;/a> (&lt;a tal:attributes="href string: /media/play/${here/fragment/begin}">Jouer le fragment&lt;/a> | &lt;a href="/media/pause">Pause&lt;/a> | &lt;a href="/media/stop">Stop&lt;/a> )
 </content>
     </view>
-    <view viewable-class='package' id='package-view'>
+    <view viewable-class='package' dc:creator='oaubert' id='package-view'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>Vue par défaut du recueil</title>
+      </meta>
       <content mime-type='text/html'>&lt;h1>Contenu du recueil &lt;em tal:content="here/title">Titre&lt;/em> créé par &lt;address tal:content="here/author">Auteur&lt;/address>&lt;/h1>
 
-&lt;h2>&lt;a tal:attributes="href string:${here/absolute_url}/annotations">Annotations&lt;/a>&lt;/h2>
-&lt;table width="100%" border="1">
-  &lt;tr tal:repeat="a here/annotations">
-   &lt;td tal:replace="structure a/view/table-row">Annotation&lt;/td>
-  &lt;/tr>
+&lt;h2>&lt;a tal:attributes="href here/annotations/absolute_url">Annotations (&lt;em tal:content="python:len(here.annotations)">Number&lt;/em>)&lt;/a>&lt;/h2>
+
+&lt;table border="1">
+&lt;tr>
+&lt;th>Type d'annotation&lt;/th>
+&lt;th>Type MIME&lt;/th>
+&lt;th>Nombre d'annotations&lt;/th>
+&lt;/tr>
+
+&lt;tr tal:repeat="at here/annotationTypes">
+   &lt;td>&lt;a tal:attributes="href at/absolute_url"
+                 tal:content="at/title | at/id">Annotation Type&lt;/a>&lt;/td>
+   &lt;td tal:content="at/mimetype">Mime-Type&lt;/td>
+   &lt;td>&lt;span tal:replace="python:len(at.annotations)">Number&lt;/span>
+           (&lt;a tal:attributes="href string:${at/absolute_url}/view/annotation_list_view">visualiser&lt;/a>)&lt;/td>
+&lt;/tr>
 &lt;/table>
 
-&lt;h2>&lt;a tal:attributes="href string:${here/absolute_url}/relations">Relations&lt;/a>&lt;/h2>
-&lt;ul>
-  &lt;li tal:repeat="r here/relations">
-   &lt;a tal:attributes="href string:${r/absolute_url}; title r/type/title" tal:content="structure r/view/item-view">Relation&lt;/a>
-  &lt;/li>
-&lt;/ul>
+&lt;h2>&lt;a tal:attributes="href here/relations/absolute_url">Relations (&lt;em tal:content="python:len(here.relations)">Number&lt;/em>)&lt;/a>&lt;/h2>
+
+&lt;table border="1">
+&lt;tr>
+&lt;th>Type de relation&lt;/th>
+&lt;th>Type MIME&lt;/th>
+&lt;th>Nombre de relations&lt;/th>
+&lt;/tr>
+
+&lt;tr tal:repeat="rt here/relationTypes">
+   &lt;td>&lt;a tal:attributes="href rt/absolute_url"
+                 tal:content="rt/title | rt/id">Relation Type&lt;/a>&lt;/td>
+   &lt;td tal:content="rt/mimetype">Mime-Type&lt;/td>
+   &lt;td>&lt;span tal:replace="python:len(rt.relations)">Number&lt;/span>
+           (&lt;a tal:attributes="href string:${rt/absolute_url}/view/relation_list_view">visualiser&lt;/a>)&lt;/td>
+&lt;/tr>
+&lt;/table>
 
 &lt;h2>&lt;a tal:attributes="href string:${here/absolute_url}/views/view/views-view">Vues&lt;/a>&lt;/h2>
 
@@ -143,7 +120,7 @@
       <content mime-type='text/html'>&lt;h1>Liste des schémas&lt;/h1>
 
 &lt;ul tal:repeat="item here/ids">
-   &lt;a tal:attributes="href item/absolute_url" tal:content="structure item/view">Item&lt;/a>
+   &lt;a tal:attributes="href item/absolute_url" tal:content="structure item/view/item-view">Item&lt;/a>
 &lt;/ul></content>
     </view>
     <view viewable-class='view' id='view-view'>
@@ -153,24 +130,26 @@ Contenu
 &lt;/pre></content>
     </view>
     <view viewable-class='annotation-type' id='annotation-type-view'>
-      <content mime-type='text/html'>&lt;p>Type &lt;em tal:content="here/id">id&lt;/em> : &lt;span tal:replace="here/title">Titre&lt;/span>&lt;/p>
-&lt;p>&lt;a here="annotations" tal:attributes="href here/annotations/absolute_url" tal:content="python: '%d annotations' % len(here.annotations)">Nombre d'annotations&lt;/a> definies.&lt;/p></content>
+      <content mime-type='text/html'>&lt;p>Type &lt;a tal:attributes="href here/absolute_url">&lt;em tal:content="here/id">id&lt;/em> : &lt;span tal:replace="here/title">Titre&lt;/span>&lt;/a>&lt;br />
+&lt;span tal:condition="here/meta/dc/description">
+Description : &lt;em tal:content="here/meta/dc/description">description&lt;/em>&lt;br />
+&lt;/span>
+&lt;a tal:attributes="href here/annotations/absolute_url" tal:content="python: '%d annotation(s)' % len(here.annotations)">Nombre d'annotations&lt;/a>&lt;/p></content>
     </view>
     <view viewable-class='*' id='edit-content'>
       <content mime-type='text/html'>&lt;span tal:condition="python: hasattr(here, 'content')">
 &lt;form method="POST" tal:attributes="action here/absolute_url">
-&lt;input type="submit" value="Submit" />
 &lt;textarea tal:attributes="cols options/config/edit-width | 60; rows options/config/edit-height | 20" tal:content="here/content/data" rows="20" cols="60" name="data">
 Contenu
 &lt;/textarea>&lt;br />
 &lt;input type="hidden" name="key" value="contentData">
 &lt;input type="hidden" name="action" value="update">
-&lt;input type="submit" value="Submit" />
+&lt;input type="submit" value="Valider" />
 &lt;/form>
 &lt;/span>
 
 &lt;span tal:condition="python: not hasattr(here, 'content')">
-&lt;p>This view cannot be applied on an element which does not have a &lt;em>content&lt;/em>.&lt;/p>
+&lt;p>Cette vue ne s'applique que sur les éléments possédant un contenu.&lt;/p>
 &lt;/span>
 </content>
     </view>
@@ -187,13 +166,15 @@ Contenu
 </content>
     </view>
     <view viewable-class='schema' id='schema-view'>
-      <content mime-type='text/html'>&lt;p>Schema &lt;strong tal:content="here/id">Id&lt;/strong>&lt;/p>
+      <content mime-type='text/html'>&lt;h2>Schema &lt;strong tal:content="here/title | here/id">Title&lt;/strong> (&lt;em tal:content="here/id">Id&lt;/em>)&lt;/h2>
+
+&lt;p>Description : &lt;em tal:content="here/meta/dc/description | string:Non fournie.">Description&lt;/em>&lt;/p>
 
 &lt;p>Types d'annotation définis :&lt;/p>
 
 &lt;ul>
   &lt;li tal:repeat="t here/annotationTypes">
-   &lt;a tal:attributes="href t/absolute_url" tal:content="structure t/view/type-view">Type&lt;/a>
+   &lt;span tal:replace="structure t/view/annotation-type-view">Type&lt;/span>
 &lt;/li>
 &lt;/ul>
 
@@ -201,7 +182,7 @@ Contenu
 
 &lt;ul>
   &lt;li tal:repeat="t here/relationTypes">
-   &lt;a tal:attributes="href t/absolute_url" tal:content="structure t/view/relation-type-view">Type&lt;/a>
+   &lt;span tal:replace="structure t/view/relation-type-view">Type&lt;/span>
 &lt;/li>
 &lt;/ul>
 </content>
@@ -242,7 +223,7 @@ Content :&lt;br />
 
 &lt;p>Fin: &lt;span tal:replace="here/fragment/end">End&lt;/span>&lt;/p>
 &lt;p>Type: &lt;span tal:replace="here/type">Type&lt;/span>&lt;/p>
-&lt;p>Type du contenu: &lt;span tal:replace="here/content/type">Content-type&lt;/span>&lt;/p>
+&lt;p>Type du contenu: &lt;span tal:replace="here/content/mimetype">Content-type&lt;/span>&lt;/p>
 &lt;p>&lt;a tal:attributes="href string:${here/content/absolute_url}/data">Content&lt;/a>&lt;/p>
 </content>
     </view>
@@ -262,25 +243,30 @@ Content :&lt;br />
     <view viewable-class='list' id='views-view'>
       <content mime-type='text/html'>&lt;table border="1">
   &lt;tr>
-  &lt;th>View id&lt;/th>
-  &lt;th colspan="2">Filter&lt;/th>
+  &lt;th>Identificateur&lt;/th>
+  &lt;th colspan="2">Filtre&lt;/th>
   &lt;th>Actions&lt;/th>
   &lt;/tr>
 
-  &lt;tr tal:repeat="v here">
+ &lt;tr tal:repeat="v here">
     &lt;td>
      &lt;a tal:attributes="href v/absolute_url" tal:content="structure v/id">View Id&lt;/a>
     &lt;/td>
     &lt;td tal:content="v/matchFilter/class">Class&lt;/td>
     &lt;td tal:content='structure v/matchFilter/type | string::'>Type&lt;/td>
     &lt;td>
-&lt;a title="Edit view" tal:attributes="href string:${v/absolute_url}/view/edit-content">Edit&lt;/a>
+&lt;a title="Editer la vue" tal:attributes="href string:${v/absolute_url}/view/edit-content">Editer&lt;/a>
 &lt;span tal:condition='python: v.match(v.rootPackage)'>
-| &lt;a title="Rich-edit view" tal:attributes="href string:${v/absolute_url}/view/epoz">Epoz&lt;/a>
-| &lt;a title="Apply view on ownerPackage" tal:attributes="href string:${v/rootPackage/absolute_url}/view/${v/id}">Apply&lt;/a> &lt;/span>
+&lt;span  tal:condition='python:not "ruleset" in v.content.mimetype'>
+| &lt;a title="Édition graphique de la vue" tal:attributes="href string:${v/absolute_url}/view/epoz">Epoz&lt;/a>
+| &lt;a title="Appliquer la vue sur ownerPackage" tal:attributes="href string:${v/rootPackage/absolute_url}/view/${v/id}">Appliquer&lt;/a> &lt;/span>
+&lt;/span>
+&lt;span  tal:condition='python:"ruleset" in v.content.mimetype'>
+| &lt;a title="Activer la vue dynamique" tal:attributes="href string:/media/stbv?id=${v/id}">Activer&lt;/a> 
+&lt;/span>
   &lt;/td>
   &lt;/tr>
-
+ 
 &lt;/table>
 </content>
     </view>
@@ -293,8 +279,63 @@ Content :&lt;br />
 </content>
     </view>
     <view viewable-class='relation-type' id='relation-type-view'>
-      <content mime-type='text/html'>&lt;p>Type de relation &lt;em tal:content="here/id">id&lt;/em> : &lt;span tal:replace="here/title">Titre&lt;/span>&lt;/p>
-&lt;p>&lt;a here="relations" tal:attributes="href here/relations/absolute_url" tal:content="python: '%d relations' % len(here.relations)">Nombre de relations&lt;/a> definies.&lt;/p></content>
+      <content mime-type='text/html'>&lt;p>Type &lt;a tal:attributes="href here/absolute_url">&lt;em tal:content="here/id">id&lt;/em> : &lt;span tal:replace="here/title">Titre&lt;/span>&lt;/a>&lt;br />
+&lt;span tal:condition="here/meta/dc/description">
+Description : &lt;em tal:content="here/meta/dc/description">description&lt;/em>&lt;br />
+&lt;/span>
+&lt;a tal:attributes="href here/relations/absolute_url" tal:content="python: '%d relation(s)' % len(here.relations)">Nombre de relations&lt;/a>&lt;/p></content>
+    </view>
+    <view viewable-class='package' dc:date='2004-06-08' dc:creator='oaubert' id='text-caption'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>Affichage des annotations textuelles sur la vidéo</title>
+      </meta>
+      <content mime-type='application/x-advene-ruleset'>&lt;?xml version='1.0' encoding='UTF-8'?>
+&lt;ruleset xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>
+  &lt;rule name='Affichage des annotations textuelles'>
+    &lt;event name='AnnotationBegin'/>
+    &lt;condition operator='equals' rhs='string:text/plain' lhs='annotation/content/mimetype'/>
+    &lt;action name='AnnotationCaption'>
+      &lt;param name='message' value='annotation/content/data'/>
+    &lt;/action>
+  &lt;/rule>
+&lt;/ruleset>
+</content>
+    </view>
+    <view viewable-class='*' dc:date='2004-06-30' dc:creator='oaubert' id='annotation_list_view'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>annotation_list_view</title>
+      </meta>
+      <content mime-type='text/html'>&lt;h2>&lt;a tal:attributes="href here/annotations/absolute_url">Annotations de &lt;span tal:replace="here/title | here/id">element&lt;/span> (&lt;em tal:content="python:len(here.annotations)">Number&lt;/em>)&lt;/a>&lt;/h2>
+
+&lt;table width="100%" border="1">
+
+&lt;tr>
+&lt;th>Id&lt;/th>
+&lt;th>Début&lt;/th>
+&lt;th>Fin&lt;/th>
+&lt;th>Contenu&lt;/th>
+&lt;/tr>
+
+&lt;tr tal:repeat="a here/annotations">
+
+&lt;td>
+&lt;a tal:attributes="href a/absolute_url; title a/type/title | a/type/id" tal:content="a/id">Id&lt;/a>
+&lt;/td>
+
+&lt;td>
+&lt;a tal:attributes="href string:/media/play/${a/fragment/begin}; title string:Lancer le lecteur" tal:content="a/fragment/formatted/begin">Begin&lt;/a>
+&lt;/td>
+
+&lt;td>
+&lt;a tal:attributes="href string:/media/play/${a/fragment/end}; title string:Lancer le lecteur" tal:content="a/fragment/formatted/end">End&lt;/a>
+&lt;/td>
+
+&lt;td tal:content="a/content/data">Contenu&lt;/td>
+
+&lt;/tr>
+
+&lt;/table>
+</content>
     </view>
   </views>
 </package>
