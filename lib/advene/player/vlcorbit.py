@@ -80,7 +80,9 @@ class PlayerLauncher:
         """
         if not self.launcher:
             return "Dummy IOR (for the moment)"
-        if not self.launcher.start (self.config.player_args):
+        args=[ '--intf', 'corba' ]
+        args.extend(config.player_args)
+        if not self.launcher.start (args)
             raise Exception(_("Cannot start the player"))
         ior=""
         iorfile=self.config.iorfile
