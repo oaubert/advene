@@ -53,7 +53,7 @@ import advene.gui.views.tree
 import advene.gui.views.timeline
 import advene.gui.views.logwindow
 import advene.gui.views.browser
-import advene.gui.views.history
+from advene.gui.views.history import HistoryNavigation
 import advene.gui.edit.rules
 import advene.gui.edit.dvdselect
 import advene.gui.edit.elements
@@ -63,7 +63,7 @@ from advene.gui.views.singletonpopup import SingletonPopup
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
 from advene.gui.views.transcription import TranscriptionView
-import advene.gui.edit.transcribe
+from advene.gui.edit.transcribe import TranscriptionEdit
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -189,8 +189,6 @@ class AdveneGUI (Connect):
 
         # Current Annotation (when defining a new one)
         self.annotation = None
-
-        self.navigation_history=[]
 
         self.last_slow_position = 0
 
@@ -348,11 +346,6 @@ class AdveneGUI (Connect):
             except RuntimeError:
                 print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
 
-        # FIXME: We have to register LogWindow actions before we load the ruleset
-        # but we should have an introspection method to do this automatically
-        self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
-        self.register_view(self.logwindow)
-
         # Update the Message action (GUI version)
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
             name="Message",
@@ -420,6 +413,11 @@ class AdveneGUI (Connect):
             category='gui',
             ))
 
+        # FIXME: We have to register LogWindow actions before we load the ruleset
+        # but we should have an introspection method to do this automatically
+        self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
+        self.register_view(self.logwindow)
+
         # We add a Treeview in the main app window
         #tree = advene.gui.views.tree.TreeWidget(self.controller.package,
         #controller=self.controller)
@@ -433,11 +431,17 @@ class AdveneGUI (Connect):
         self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
 
         self.displayhbox=gtk.HBox()
+
+        self.navigation_history=HistoryNavigation(controller=self.controller,
+                                                  container=self.displayhbox)
+        self.navigation_history.popup()
+        
         self.displayhbox.pack_start(self.drawable, expand=True)
 
         self.displayhbox.show_all()
 
         self.displayhbox.pack_end(self.logwindow.widget, expand=False)
+                                  
         
         self.gui.get_widget("displayvbox").add(self.displayhbox)
         
@@ -1293,7 +1297,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_import_transcription1_activate (self, button=None, data=None):
-        te=advene.gui.edit.transcribe.TranscriptionEdit(controller=self.controller)
+        te=TranscriptionEdit(controller=self.controller)
         window = te.popup()
         window.connect ("destroy", lambda w: w.destroy())
         return True
