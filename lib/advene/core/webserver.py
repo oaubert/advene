@@ -52,6 +52,7 @@ import socket
 import select
 import inspect
 import mimetypes
+import logging
 
 import imghdr
 
@@ -114,10 +115,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             )
 
     def log_message(self, format, *args):
-        sys.stderr.write("%s - - [%s] %s\n" %
-                         (self.address_string(),
-                          self.log_date_time_string(),
-                          format%args))
+        self.server.logger.info("%s %s" % (self.address_string(), format % args))
         
     def no_cache (self):
         """Write the cache-control headers in the response.
@@ -1516,6 +1514,13 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.imagecaches = {}  # Key: alias, value: imagecache
         self.shouldrun = True  # Set to False to indicate the end of the
                                # server_forawhile method
+
+        self.logger = logging.getLogger('webserver')
+        handler=logging.StreamHandler()
+        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+        self.logger.addHandler(handler)
+        self.logger.setLevel(10)
+        
         self.player = player
         if master is None:
             # If "master" is not specified, adveneserver will handle
