@@ -315,8 +315,9 @@ class FlatTreeModel(AdveneTreeModel):
 
 class TreeWidget:
     def __init__(self, package, modelclass=DetailedTreeModel,
-                 annotation_cb=None):
+                 annotation_cb=None, controller=None):
         self.package = package
+        self.controller=controller
 
         if annotation_cb is not None:
             self.annotation_cb = annotation_cb
@@ -365,7 +366,8 @@ class TreeWidget:
             node = self.get_selected_node (tree_view)
             if node is not None:
                 try:
-                    pop = advene.gui.edit.elements.get_edit_popup (node)
+                    pop = advene.gui.edit.elements.get_edit_popup (node,
+                                                                   controller=self.controller)
                 except TypeError, e:
                     print _("Error: unable to find an edit popup for %s:\n%s") % (node, str(e))
                 else:
@@ -400,7 +402,8 @@ class TreeWidget:
 
     def popup_edit (self, button=None, node=None, path=None):
         try:
-            pop = advene.gui.edit.elements.get_edit_popup (node)
+            pop = advene.gui.edit.elements.get_edit_popup (node,
+                                                           controller=self.controller)
         except TypeError, e:
             print _("Error: unable to find an edit popup for %s:\n%s") % (node, str(e))
         else:
@@ -419,7 +422,8 @@ class TreeWidget:
         return True
     
     def popup_display (self, button=None, node=None, path=None):
-        pop = advene.gui.edit.elements.get_edit_popup (node)
+        pop = advene.gui.edit.elements.get_edit_popup (node,
+                                                       controller=self.controller)
         if pop is not None:
             pop.display ()
         else:
@@ -529,7 +533,8 @@ if __name__ == "__main__":
         elif event.keyval == gtk.keysyms.Return:
             # Open popup to edit current element
             node=tree.get_selected_node(tree.view())
-            pop = advene.gui.edit.elements.get_edit_popup (node)
+            pop = advene.gui.edit.elements.get_edit_popup (node,
+                                                           controller=self.controller)
             if pop is not None:
                 pop.display ()
             else:
