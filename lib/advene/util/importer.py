@@ -1,4 +1,30 @@
-"""Import external data."""
+"""Import external data.
+
+Provides a generic framework to import/convert external data.
+
+The general idea is:
+* Create an instance of Importer, called im.
+  If the destination package already exists, call the constructor with
+  package and defaultype named parameters.
+
+* Initialisation:
+  * If the destination package already exists, set the
+    im.package
+    and
+    im.defaultype
+    to appropriate values
+  
+  * If you want to create a new package with specific type and schema id, use
+    im.create_package(schemaid=..., annotationtypeid=...)
+  
+  * If nothing is given, a default package will be created, with a
+    default schema and annotationtype
+
+* Conversion:
+Call the
+im.process_file(filename)
+which will return the package containing the converted annotations
+"""
 
 import sys
 import time
@@ -11,7 +37,7 @@ from advene.model.fragment import MillisecondFragment
 import advene.util.handyxml as handyxml
 
 class GenericImporter(object):
-    def __init__(self, package=None, author='importer', defaulttype=None):
+    def __init__(self, author='importer', package=None, defaulttype=None):
         self.package=package
         self.author=author
         self.timestamp=time.strftime("%F")
@@ -42,7 +68,7 @@ class GenericImporter(object):
         a.title=title
         a.content.data = data
         self.package.annotations.append(a)
-        
+
     def create_package(self,
                        filename=None,
                        annotationtypeid='imported-type',
@@ -133,6 +159,17 @@ class GenericImporter(object):
 
 
 class TextImporter(GenericImporter):
+    """Text importer.
+
+    In addition to the parameters of GenericImporter, you can specify
+
+    regexp: a regexp with named matching parentheses (coded
+            as "(?P<name>\d+)" for instance, see sre doc) returning
+            the parameters needed by GenericImporter.convert
+            
+    encoding: the default encoding for the textfile
+    """
+    
     def __init__(self, regexp=None, encoding=None, **kw):
         super(TextImporter, self).__init__(**kw)
         if regexp is None:
@@ -161,6 +198,8 @@ class TextImporter(GenericImporter):
         return self.package
 
 class XiImporter(GenericImporter):
+    """Xi importer.
+    """
     def __init__(self, **kw):
         super(XiImporter, self).__init__(**kw)
         self.factors = {'s': 1000,
