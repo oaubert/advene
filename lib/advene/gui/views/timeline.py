@@ -280,9 +280,8 @@ class TimeLine:
             self.desactivate_annotation(annotation)
             return True
         if event == 'AnnotationCreate':
-            # If it does not exist yet, we should create it if it is now in self.list
-            if annotation in self.list:
-                self.create_annotation_widget(annotation)
+            b=self.create_annotation_widget(annotation)
+            self.widget.show_all()
             return True
 
         bs = self.get_widget_for_annotation (annotation)
