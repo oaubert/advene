@@ -86,10 +86,20 @@ def generate_data_dir(dir_, prefix="", postfix=""):
 
 def generate_data_files():
     build_doc()
-    r=generate_data_dir("share", postfix=os.path.sep+"advene")
-    r.extend(generate_data_dir("doc", prefix="share"+os.path.sep, postfix=os.path.sep+"advene"))
+    # On Win32, we will install data files in
+    # \Program Files\Advene\share\...
+    # On Unix, it will be
+    # /usr/share/advene/...
+    if sys.platform == 'win32':
+        prefix=''
+        postfix=''
+    else:
+        prefix="share"+os.path.sep
+        postfix=os.path.sep+"advene"
+    r=generate_data_dir("share", postfix=postfix)
+    r.extend(generate_data_dir("doc", prefix=prefix, postfix=postfix))
     if os.path.isdir("locale"):
-        r.extend(generate_data_dir("locale", prefix="share"+os.path.sep))
+        r.extend(generate_data_dir("locale", prefix=prefix))
     else:
         print """**WARNING** You should generate the locales with "cd po; make mo"."""
     return r
@@ -107,6 +117,7 @@ opts = {
                           "libgobject-2.0-0.dll","libgthread-2.0-0.dll",
                           "libgtk-win32-2.0-0.dll","libpango-1.0-0.dll",
                           "libpangowin32-1.0-0.dll"],
+
          }
      }
 
