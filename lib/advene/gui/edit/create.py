@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """Dialogs for the creation of new elements."""
 
 import advene.core.config as config
