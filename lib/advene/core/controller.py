@@ -106,7 +106,10 @@ class AdveneController:
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
         # FIXME: should be removed (CORBA dependent)
-        os.unlink(config.data.iorfile)
+        try:
+            os.unlink(config.data.iorfile)
+        except OSError:
+            pass
         
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
