@@ -1,9 +1,18 @@
 import gtk
 import sre
 
-import advene.gui.views.browser
+from advene.gui.views.browser import Browser
 
 class TALESEntry:
+    """TALES expression entry widget.
+
+    @ivar default: the default text
+    @type default: string
+    @ivar context: the context ('here' object)
+    @type context: object
+    @ivar controller: the controller
+    @type controller: advene.core.controller
+    """
     # Root elements
     root_elements = ('here', 'nothing', 'default', 'options', 'repeat', 'request',
                      # Root elements available in STBVs
@@ -20,7 +29,7 @@ class TALESEntry:
     path_tales_re = sre.compile('^(exists|not|nocall):(.+)')
 
     def __init__(self, default="", context=None, controller=None):
-        self.default=""
+        self.default=default
         self.editable=True
         self.controller=controller
         if context is None and controller is not None:
@@ -56,6 +65,9 @@ class TALESEntry:
 
     def is_valid(self, expr=None):
         """Return True if the expression looks like a valid TALES expression
+
+        @param expr: the expression to check. If None, will use the current entry value.
+        @type expr: string
         """
         if expr is None:
             expr=self.entry.get_text()
@@ -79,7 +91,9 @@ class TALESEntry:
         return hbox
         
     def browse_expression(self, b):
-        browser = advene.gui.views.browser.Browser(self.context, controller=self.controller)
+        """Launch the Browser.
+        """
+        browser = Browser(self.context, controller=self.controller)
         
         # FIXME: display initial value in browser        
         def callback(e):
