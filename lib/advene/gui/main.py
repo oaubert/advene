@@ -45,6 +45,7 @@ import advene.gui.views.timeline
 import advene.gui.views.logwindow
 import advene.gui.views.browser
 import advene.gui.edit.rules
+import advene.gui.edit.dvdselect
 
 from advene.gui.edit.annotation import AnnotationEdit
 from advene.gui.edit.timeadjustment import TimeAdjustment
@@ -1122,8 +1123,48 @@ class AdveneGUI (Connect):
 
     def on_b_selectdvd_clicked (self, button=None, data=None):
         """Play a DVD."""
-        self.controller.player.playlist_add_item (config.data.player['dvd-device'])
-        self.controller.update_status ("start")
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window.set_title(_("Title/Chapter selection"))
+        
+        window.connect ("destroy", lambda e: window.destroy())
+
+        vbox=gtk.VBox()
+        
+        sel=advene.gui.edit.dvdselect.DVDSelect(controller=self.controller,
+                                                current=self.controller.get_default_media())
+        vbox.add(sel.get_widget())
+
+        hbox=gtk.HButtonBox()
+
+        def validate(button=None, sel=None, window=None):
+            self.controller.update_status("stop")
+            url=sel.get_url()
+            self.controller.set_default_media(url)
+            sel.get_widget().destroy()
+            self.controller.player.playlist_clear()
+            self.controller.player.playlist_add_item (url)
+            self.controller.update_status ("start")
+            window.destroy()
+            return True
+
+        def cancel(button=None, window=None):
+            self.controller.update_status("stop")
+            sel.get_widget().destroy()
+            window.destroy()
+            return True
+            
+        b=gtk.Button(stock=gtk.STOCK_OK)
+        b.connect("clicked", validate, sel, window)
+        hbox.add(b)
+
+        b=gtk.Button(stock=gtk.STOCK_CANCEL)
+        b.connect("clicked", cancel, window)
+        hbox.add(b)
+
+        vbox.add(hbox)
+        window.add(vbox)
+        window.show_all()
+
         return True
     
     def on_b_exit_clicked (self, button=None, data=None):
