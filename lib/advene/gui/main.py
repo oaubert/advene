@@ -1652,7 +1652,10 @@ class AdveneGUI (Connect):
 
     def on_transcription1_activate (self, button=None, data=None):
         """Open transcription view."""
-        at=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."), create=False)
+        if data is not None:
+            at=data
+        else:
+            at=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."), create=False)
         if at is not None:
             transcription = TranscriptionView(controller=self.controller,
                                               annotationtype=at)
