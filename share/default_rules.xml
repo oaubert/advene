@@ -12,40 +12,10 @@
       <param name='position' value='annotation/fragment/end'/>
     </action>
   </rule>
-  <rule name='Log Message'>
-    <event name='AnnotationBegin'/>
-    <action name='Message'>
-      <param name='message' value='annotation/content/data'/>
-    </action>
-  </rule>
-  <rule name='Display activated links'>
-    <event name='LinkActivation'/>
-    <action name='Message'>
-      <param name='message' value=''/>
-    </action>
-  </rule>
-  <rule name='Greetings'>
-    <event name='ApplicationStart'/>
-    <action name='Message'>
-      <param name='message' value='string: Hello World'/>
-    </action>
-  </rule>
   <rule name='Package load warning'>
     <event name='PackageLoad'/>
     <action name='Message'>
       <param name='message' value='string:Loaded package ${package/title}'/>
-    </action>
-  </rule>
-  <rule name='Mute the annotations'>
-    <event name='AnnotationBegin'/>
-    <action name='AnnotationMute'/>
-  </rule>
-  <rule name='Navigation diegetique'>
-    <event name='AnnotationEnd'/>
-    <condition operator='value' lhs='annotation/relations'/>
-    <condition operator='equals' rhs='annotation' lhs='annotation/relations/first/members/first'/>
-    <action name='PlayerStart'>
-      <param name='position' value='annotation/relations/first/members/last/fragment/begin'/>
     </action>
   </rule>
 </ruleset>
