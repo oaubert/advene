@@ -255,10 +255,12 @@ class AdveneContext(_advene_context):
             
         if mimetype is None or mimetype == 'text/html':
             compiler = simpleTAL.HTMLTemplateCompiler ()
+	    compiler.log = self.log
+	    compiler.parseTemplate (view_source, 'utf-8')
         else:
             compiler = simpleTAL.XMLTemplateCompiler ()
-        compiler.log = self.log
-        compiler.parseTemplate (view_source, 'utf-8')
+	    compiler.log = self.log
+	    compiler.parseTemplate (view_source)
         compiler.getTemplate ().expand (context=self, outputFile=stream, outputEncoding='utf-8')
 
         return stream
