@@ -1616,7 +1616,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
 
         self.controller=controller
         self.urlbase = "http://localhost:%d/" % port
-        self.displaymode = 'default' # could be 'raw'            
+        self.displaymode = config.data.webserver['displaymode']
         self.authorized_hosts = {'127.0.0.1':'localhost'}
 
         # Compile EPOZ template file
