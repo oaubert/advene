@@ -182,34 +182,16 @@ class DVDControl (Connect):
         self.controller.activate_stbv(view)
         return True
 
-    def update_stbv_menu (self):
-        stbv_menu = self.gui.get_widget("stbv_combo").get_menu()
-
-        for c in stbv_menu.get_children():
-            stbv_menu.remove(c)
-        
-        default_item = gtk.MenuItem(_("None"))
-        default_item.connect("activate", self.update_stbv, None)
-        default_item.show()
-        stbv_menu.append(default_item)
-
-        for v in self.controller.get_stbv_list():
-            i = gtk.MenuItem(v.title or v.id)
-            i.connect("activate", self.update_stbv, v)
-            i.show()
-            stbv_menu.append(i)
-
-        stbv_menu.set_active(0)
-        stbv_menu.reposition()
-        return True
-
     def updated_annotation_cb(self, context, parameters):
         """Method used to update the active views.
 
         It will propagate the event."""
         annotation=context.evaluateValue('annotation')
         for v in self.annotation_views:
-            v.update_annotation(annotation)
+            try:
+                v.update_annotation(annotation)
+            except AttributeError:
+                pass
         return True
     
     def updated_relation_cb(self, context, parameters):
@@ -328,16 +310,36 @@ class DVDControl (Connect):
         self.current_type = t
         type_combo=self.gui.get_widget ("current_type_combo")
         type_combo.entry.set_text (t.title)
-        
-    def manage_package_load (self, context, parameters):
-        """Event Handler executed after loading a package.
-        
-        self.controller.package should be defined.
 
-        @return: a boolean (~desactivation)
-        """
-        self.log (_("Package %s loaded. %d annotations.") % (self.controller.package.uri,
-                                                             len(self.controller.package.annotations)))
+    def update_stbv_menu (self):
+        """Update the STBV menu."""
+        stbv_menu = self.gui.get_widget("stbv_combo").get_menu()
+
+        for c in stbv_menu.get_children():
+            stbv_menu.remove(c)
+        
+        default_item = gtk.MenuItem(_("None"))
+        default_item.connect("activate", self.update_stbv, None)
+        default_item.show()
+        stbv_menu.append(default_item)
+
+        for v in self.controller.get_stbv_list():
+            i = gtk.MenuItem(v.title or v.id)
+            i.connect("activate", self.update_stbv, v)
+            i.show()
+            stbv_menu.append(i)
+
+        stbv_menu.set_active(0)
+        stbv_menu.reposition()
+        return True
+
+    def update_gui (self):
+        """Update the GUI.
+
+        This method should be called upon package loading, or when a
+        new view or type is created, or when an existing one is
+        modified, in order to reflect changes."""
+        
         # Update the available types list
         available_types = self.controller.package.annotationTypes
         # Update the combo box
@@ -362,6 +364,18 @@ class DVDControl (Connect):
 
         self.update_stbv_menu()
         
+        pass
+        
+    def manage_package_load (self, context, parameters):
+        """Event Handler executed after loading a package.
+        
+        self.controller.package should be defined.
+
+        @return: a boolean (~desactivation)
+        """
+        self.log (_("Package %s loaded. %d annotations.") % (self.controller.package.uri,
+                                                             len(self.controller.package.annotations)))
+        self.update_gui()
         # Update the main window title
         self.gui.get_widget ("win").set_title(" - ".join((_("AdveneTool"),
                                                           self.controller.package.title or "No title")))
