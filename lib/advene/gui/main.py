@@ -454,6 +454,7 @@ class AdveneGUI (Connect):
         stbv_menu.set_active(0)
         stbv_menu.reposition()
         stbv_menu.show_all()
+        self.gui.get_widget("stbv_combo").show_all()
         return True
 
     def update_gui (self):
@@ -831,6 +832,15 @@ class AdveneGUI (Connect):
 
     def on_new1_activate (self, button=None, data=None):
         """New package. Erase the current one."""
+        if self.controller.modified:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
+                _("Your package has been modified but not saved.\nCreate a new one anyway?"))
+            response=dialog.run()
+            dialog.destroy()
+            if response != gtk.RESPONSE_YES:
+                return True
         self.controller.load_package ()
 	return True
 
