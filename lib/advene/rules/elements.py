@@ -214,7 +214,7 @@ class RuleSet(list):
         
     def from_dom(self, catalog=None, domelement=None, origin=None):
         if catalog is None:
-            catalog=event.ECACatalog()
+            catalog=ECACatalog()
         ruleset=domelement
         for rulenode in ruleset.getElementsByTagName('rule'):
             rulename=rulenode.getAttribute('name')
@@ -258,7 +258,7 @@ class RuleSet(list):
                 else:
                     # FIXME: we should just display warnings if the action
                     # is not defined ?
-                    raise Exception("Undefined action in %s: %s" % (uri, name))
+                    raise Exception("Undefined action in %s: %s" % (origin, name))
                 for paramnode in actionnode.getElementsByTagName('param'):
                     p_name=paramnode.getAttribute('name')
                     p_value=paramnode.getAttribute('value')
@@ -474,6 +474,7 @@ class RegisteredAction:
 class ECACatalog:
     """Class holding information about available elements (events, conditions, actions).
     """
+    # FIXME: Maybe this should be put in an external resource file
     event_names={
         'AnnotationBegin': _("Beginning of an annotation"),
         'AnnotationEnd': _("End of an annotation"),
@@ -491,12 +492,13 @@ class ECACatalog:
         'PlayerSet': _("Going to a given position"),
         'PackageLoad': _("Loading a new package"),
         'PackageSave': _("Saving the package"),
+        'ViewActivation': _("Start of a dynamic view"),
         'ApplicationStart': _("Start of the application"),
         'ApplicationEnd': _("End of the application")
         }
 
     basic_events=('AnnotationBegin', 'AnnotationEnd', 'PlayerStart', 'PlayerPause',
-                  'PlayerResume', 'PlayerStop', 'ApplicationStart')
+                  'PlayerResume', 'PlayerStop', 'ApplicationStart', 'ViewActivation')
     
     def __init__(self):
         # Dict of registered actions, indexed by name
