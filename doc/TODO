@@ -1,3 +1,13 @@
+* Write document on TALES syntax and base elements
+
+* STBV action: display an activable link
+
+* Check id validity (no spaces) when creating elements (views)
+
+* actions: convert messages from unicode to str. DONE: report bug
+
+* Try to remove the dependency on PIL by using pixbuf loader to convert snapshots to PNG.
+
 * Timeline: add the possibility to add new annotations by clicking on the type
 
 * Fix package generation: upon loading, we discard the initial
@@ -10,17 +20,13 @@ the DOM and do not restore it before saving, so it gets lost.
 
 * Create a Sequential editor (to accomodate existing work)
 
-* Fix the UpdateElement problem in tree view when creating a new
-element (maybe we should have AnnotationCreate and AnnotationEdit
-events)
-
 * Make the annotation edit entry a multiline entry.
 
 * In ECA elements, TALES expression could be prefixed by string: by
 default, using the ${} syntax to evaluate expressions ???
 
-* Content: how to represent structured data ? Cf MPEG7 DS ? (half
-  DONE, grep source for x-advene/structured)
+* Content: how to represent structured data ? Cf MPEG7 DS ? (hackingly
+  half DONE, grep source for application/x-advene-structured)
 
 * Assistants:
   - shot detection
@@ -50,13 +56,6 @@ to implement a "Return to last position")
 * Windows/gtk has a problem with threads. Solve using the recipe given in:
   http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
   http://www.daa.com.au/pipermail/pygtk/2004-February/006960.html
-
-* gui.main should catch the information about a new view being defined and update the
-  interface accordingly (for instance, a new annotation type or a new
-  dynamic view created) -> DONE for views
-
-* More quickly : STBV Optionmenu should only have a reference to the STBV id, so that
-  the new version is taken into account when edited.
 
 * Query language: either python-based (very generic) or reusing the
   rules framework (conditions)
@@ -303,4 +302,15 @@ seems to work OK. To check... -> DONE
 * Propagate AnnotationEditEnd and RelationEditEnd events in active views -> DONE
 
 * Add a "Edit" button next to the STBV optionmenu -> DONE
+
+* Fix the UpdateElement problem in tree view when creating a new
+element (maybe we should have AnnotationCreate and AnnotationEdit
+events) -> DONE
+
+* gui.main should catch the information about a new view being defined and update the
+  interface accordingly (for instance, a new annotation type or a new
+  dynamic view created) -> DONE 
+
+* More quickly : STBV Optionmenu should only have a reference to the STBV id, so that
+  the new version is taken into account when edited. -> useless
 
