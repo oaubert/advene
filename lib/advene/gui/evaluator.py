@@ -111,7 +111,11 @@ class Window:
         
     def evaluate_expression(self, *p, **kw):
         b=self.source.get_buffer()
-        begin,end=b.get_bounds()
+        if b.get_selection_bounds():
+            begin, end = b.get_selection_bounds()
+            b.place_cursor(end)
+        else:
+            begin,end=b.get_bounds()
         expr=b.get_text(begin, end)
         symbol=None
         m=sre.match('(\w+)=(.+)', expr)
@@ -151,12 +155,18 @@ class Window:
     
     def display_completion(self, completeprefix=True):
         b=self.source.get_buffer()
-        begin,end=b.get_bounds()
-        cursor=b.get_iter_at_mark(b.get_insert())
+        if b.get_selection_bounds():
+            begin, end = b.get_selection_bounds()
+            cursor=end
+            b.place_cursor(end)
+        else:
+            begin,end=b.get_bounds()
+            begin,end=b.get_bounds()
+            cursor=b.get_iter_at_mark(b.get_insert())
         expr=b.get_text(begin, cursor)
         if expr.endswith('.'):
             expr=expr[:-1]
-        for c in (' ', '(', ','):
+        for c in (' ', '(', ',', '\n'):
             if c in expr:
                 expr=expr[expr.rindex(c)+1:]
         m=sre.match('(\w+)=(.+)', expr)
@@ -243,8 +253,13 @@ class Window:
 
             if event.keyval == gtk.keysyms.question:
                 b=self.source.get_buffer()
-                begin,end=b.get_bounds()
-                cursor=b.get_iter_at_mark(b.get_insert())
+                if b.get_selection_bounds():
+                    begin, end = b.get_selection_bounds()
+                    cursor=end
+                    b.place_cursor(end)
+                else:
+                    begin,end=b.get_bounds()
+                    cursor=b.get_iter_at_mark(b.get_insert())
                 expr=b.get_text(begin, cursor)
                 self.display_doc(expr)
                 return True
