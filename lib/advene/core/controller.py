@@ -789,7 +789,7 @@ class AdveneController:
         if self.future_begins is None or self.future_ends is None:
             self.future_begins, self.future_ends = self.generate_sorted_lists (pos)
 
-        if self.future_begins:
+        if self.future_begins and self.player.status == self.player.PlayingStatus:
             a, b, e = self.future_begins[0]
             while b <= pos:
                 # Ignore if we were after the annotation end
@@ -803,7 +803,7 @@ class AdveneController:
                 else:
                     break
                     
-        if self.future_ends:
+        if self.future_ends and self.player.status == self.player.PlayingStatus:
             a, b, e = self.future_ends[0]
             while e <= pos:
                 #print "Comparing %d < %d for %s" % (e, pos, a.content.data)
