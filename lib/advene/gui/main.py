@@ -1112,8 +1112,7 @@ class AdveneGUI (Connect):
     def on_import_file1_activate (self, button=None, data=None):
         filename=advene.gui.util.get_filename(title=_("Choose the file to import"),
                                               action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                              button=gtk.STOCK_OPEN,
-                                              default_dir=d)
+                                              button=gtk.STOCK_OPEN)
         if not filename:
             return True
         i=advene.util.importer.get_importer(filename)
