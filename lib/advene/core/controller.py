@@ -260,9 +260,11 @@ class AdveneController:
         return self.player.create_position(value=value, key=key, origin=origin)
     
     def notify (self, event_name, *param, **kw):
-        #print "Notify %s (%s): %s" % (event_name,
-        #                              vlclib.format_time(self.player.current_position_value),
-        #                              str(kw))
+        if False:
+            print "Notify %s (%s): %s" % (
+                event_name,
+                vlclib.format_time(self.player.current_position_value),
+                str(kw))
         if kw.has_key('immediate'):
             del kw['immediate']
             self.event_handler.notify(event_name, *param, **kw)
@@ -385,10 +387,12 @@ class AdveneController:
         if m:
             title,chapter=m.group(1, 2)
             mediafile=self.player.dvd_uri(title, chapter)
-        elif not os.path.exists(mediafile) and not mediafile.startswith('http:'):
+        elif mediafile.startswith('http:'):
+            # FIXME: check for the existence of the file
+            pass
+        elif not os.path.exists(mediafile):
             # It is a file. It should exist. Else check for a similar
-            # one in MEDIAPATH
-
+            # one in moviepath
             # UNIX/Windows interoperability: convert pathnames
             n=mediafile.replace('\\', os.sep).replace('/', os.sep)
             name=os.path.basename(n)
@@ -399,8 +403,10 @@ class AdveneController:
                     # And convert it to a pathname (for Windows)
                     d=urllib.url2pathname(d)
                     if d.startswith('file:'):
-                        d.replace('file:', '')
+                        d=d.replace('file://', '')
+                    d=os.path.dirname(d)
                 n=os.sep.join((d, name))
+                # FIXME: if d is a URL, use appropriate method (urllib.??)
                 if os.path.exists(n):
                     mediafile=n
                     self.log(_("Found matching video file in moviepath: %s") % n)
