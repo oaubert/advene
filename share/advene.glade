@@ -91,7 +91,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image11">
+			<widget class="GtkImage" id="image13">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -113,7 +113,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image12">
+			<widget class="GtkImage" id="image14">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -207,6 +207,16 @@
 		  </child>
 
 		  <child>
+		    <widget class="GtkMenuItem" id="edit_ruleset1">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Edit the default ruleset</property>
+		      <property name="label" translatable="yes">_Default Ruleset</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_edit_ruleset1_activate" last_modification_time="Wed, 14 Jan 2004 01:04:45 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
 		    <widget class="GtkMenuItem" id="package_properties1">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Edit package properties</property>
@@ -253,7 +263,7 @@
 		    <widget class="GtkMenuItem" id="timeline1">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Display annotations on a timeline</property>
-		      <property name="label" translatable="yes">_Timeline</property>
+		      <property name="label" translatable="yes">T_imeline</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_timeline1_activate" last_modification_time="Mon, 23 Jun 2003 15:29:22 GMT"/>
 		    </widget>
@@ -265,6 +275,16 @@
 		      <property name="label" translatable="yes">_LogWindow</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_view_logwindow_activate" last_modification_time="Mon, 15 Dec 2003 21:33:56 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="transcription1">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Affiche les annotations sous forme de transcription</property>
+		      <property name="label" translatable="yes">T_ranscription</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_transcription1_activate" last_modification_time="Thu, 26 Aug 2004 14:43:01 GMT"/>
 		    </widget>
 		  </child>
 
@@ -310,16 +330,6 @@
 		      <property name="label" translatable="yes">Navigation _History</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_navigationhistory1_activate" last_modification_time="Sun, 02 May 2004 15:46:45 GMT"/>
-		    </widget>
-		  </child>
-
-		  <child>
-		    <widget class="GtkMenuItem" id="edit_ruleset1">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Edit the default ruleset</property>
-		      <property name="label" translatable="yes">_Edit Default Ruleset</property>
-		      <property name="use_underline">True</property>
-		      <signal name="activate" handler="on_edit_ruleset1_activate" last_modification_time="Wed, 14 Jan 2004 01:04:45 GMT"/>
 		    </widget>
 		  </child>
 
