@@ -145,11 +145,7 @@ class AdveneGUI (Connect):
         type_combo.list.connect ("selection-changed", self.on_current_type_changed)
 
         # Populate default STBV menu
-        stbv_menu = gtk.Menu()
-        default_item = gtk.MenuItem(_("None"))
-        default_item.connect("activate", self.update_stbv, None)
-        stbv_menu.append(default_item)
-        self.gui.get_widget("stbv_combo").set_menu(stbv_menu)
+        self.update_stbv_menu()
         
         # Declaration of the fileselector
         self.gui.fs = gtk.FileSelection ("Select a file")
@@ -373,6 +369,10 @@ class AdveneGUI (Connect):
     def update_stbv_menu (self):
         """Update the STBV menu."""
         stbv_menu = self.gui.get_widget("stbv_combo").get_menu()
+        if stbv_menu is None:
+            # Application initialization
+            stbv_menu = gtk.Menu()
+            self.gui.get_widget("stbv_combo").set_menu(stbv_menu)
 
         for c in stbv_menu.get_children():
             stbv_menu.remove(c)
@@ -392,6 +392,7 @@ class AdveneGUI (Connect):
 
         stbv_menu.set_active(0)
         stbv_menu.reposition()
+        stbv_menu.show()
         return True
 
     def update_gui (self):
@@ -425,8 +426,7 @@ class AdveneGUI (Connect):
         self.set_current_type (available_types[0])
 
         self.update_stbv_menu()
-        
-        pass
+        return
         
     def manage_package_load (self, context, parameters):
         """Event Handler executed after loading a package.
