@@ -290,6 +290,13 @@ class AdveneController:
                     file_to_play = s
         return file_to_play, package_to_load
 
+    def get_default_url(self):
+        url = self.server.get_url_for_alias('advene')
+        defaultview=self.package_to_load.getMetaData(config.data.namespace, 'default_utbv')
+        if defaultview:
+            url="%s/view/%s" % (url, defaultview)
+        return url
+
     def get_default_media (self):
         mediafile = self.package.getMetaData (config.data.namespace,
                                               "mediafile")
