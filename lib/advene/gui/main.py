@@ -202,7 +202,25 @@ class DVDControl (Connect):
         stbv_menu.set_active(0)
         stbv_menu.reposition()
         return True
-        
+
+    def updated_annotation_cb(self, context, parameters):
+        """Method used to update the active views.
+
+        It will propagate the event."""
+        annotation=context.evaluateValue('annotation')
+        for v in self.annotation_views:
+            v.update_annotation(annotation)
+        return True
+    
+    def updated_relation_cb(self, context, parameters):
+        """Method used to update the active views.
+
+        It will propagate the event."""
+        annotation=context.evaluateValue('relation')
+        for v in self.annotation_views:
+            v.update_relation(relation)
+        return True
+    
     def main (self, args=None):
         """Mainloop : Gtk mainloop setup.
 
@@ -232,6 +250,10 @@ class DVDControl (Connect):
                                                      method=self.on_annotation_edit_end)
         self.controller.event_handler.internal_rule (event="PackageLoad",
                                                      method=self.manage_package_load)
+        self.controller.event_handler.internal_rule (event="AnnotationEditEnd",
+                                                     method=self.updated_annotation_cb)
+        self.controller.event_handler.internal_rule (event="RelationEditEnd",
+                                                     method=self.updated_relation_cb)
 
         self.controller.init(args)
         
@@ -801,10 +823,15 @@ class DVDControl (Connect):
         
         window.add (vbox)
 
+        duration = self.controller.player.stream_duration
+        if duration <= 0:
+            print "Computing duration on max bound"
+            duration = max([a.fragment.end for a in self.controller.package.annotations ])
+            
         t = advene.gui.views.timeline.TimeLine (self.controller.package.annotations,
                                                 package=self.controller.package,
                                                 minimum=0,
-                                                maximum=self.controller.player.stream_duration,
+                                                maximum=duration,
                                                 annotation_cb=annotation_cb,
                                                 context_cb=context_cb)
         window.timeline = t
@@ -862,7 +889,6 @@ class DVDControl (Connect):
         vbox.set_homogeneous (False)    
         w.add(vbox)
 
-        # FIXME: edit only user ruleset or default ruleset
         rs = self.controller.event_handler.get_ruleset('default')
         edit=advene.gui.edit.rules.EditRuleSet(rs,
                                                catalog=self.controller.event_handler.catalog)
