@@ -243,6 +243,8 @@ class RelationType(AbstractType,
         So bundle.py should be improved, with a basic Bundle class behaving only like a list, and an advanced Bundle, behaving like both a list and a dict.
         """
         e = self._getChild((adveneNS, "member-types"))
+        if e is None:
+            return []
         l = []
         for i in e._get_childNodes ():
             try:
@@ -252,6 +254,28 @@ class RelationType(AbstractType,
                 pass
         return tuple (l)
 
+    def setHackedMemberTypes (self, membertypes):
+        """Update the membertypes of a relationtype.
+        
+        membertypes is a list of URIs
+        """
+        e = self._getChild((adveneNS, "member-types"))
+        if e is None:
+            # we have to create it
+            e = self._getDocument ().createElementNS (adveneNS, "member-types")
+            self._getModel ().appendChild (e)
+        else:
+            # we have to empty it
+            while e._get_childNodes ():
+                c=e._get_firstChild()
+                e.removeChild(c)
+        # Create the children nodes
+        for m in membertypes:
+            print "Adding %s" % m
+            c = self._getDocument ().createElementNS (adveneNS, "member-type")
+            c.setAttributeNS (xlinkNS, 'xlink:href', unicode(m))
+            e.appendChild (c)
+        return True
 
 # simple way to do it,
 # AnnotationTypeFactory = modeled.Factory.of (AnnotationType)
