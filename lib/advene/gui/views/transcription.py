@@ -12,8 +12,6 @@ import gobject
 import pango
 
 # Advene part
-import advene.core.config as config
-
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
@@ -134,11 +132,8 @@ class TranscriptionView:
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
-        s=config.data.preferences['windowsize']['transcriptionview']
-        window.set_default_size (s[0], s[1])
         if self.controller.gui:
-            window.connect ("size_allocate",
-                            self.controller.gui.resize_cb, 'transcriptionview')
+            self.controller.gui.init_window_size(window, 'transcriptionview')
 
         window.set_title (_("Transcription for %s") % (self.model.title
                                                        or self.model.id))
