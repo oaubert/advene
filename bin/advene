@@ -21,6 +21,7 @@ except ImportError:
     # would have set the correct package path in the first place.
     print "Overriding 'resources' and 'web' config paths"
     config.data.path['resources']=os.path.sep.join((maindir, 'share'))
+    config.data.path['locale']=os.path.sep.join( (maindir, 'locale') )
     config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
   else:
     print """Cannot guess a valid directory.
@@ -48,6 +49,9 @@ if config.data.os == 'win32':
 
   try:
     import pygtk
+    pygtk.require('2.0')
+    import gtk
+    import gtk.glade
   except ImportError:
     # Gtk DLLs are not in the PATH. Try to get their directory
     # from the registry
@@ -55,6 +59,7 @@ if config.data.os == 'win32':
     if path is None:
       raise ImportError("Couldn't find GTK DLLs.")
     os.environ['PATH'] += ';'+path.encode('utf8')
+    os.environ['PATH'] += ';'+os.sep.join(path, 'bin').encode('utf8')
     print "Found GTK DLLs at %s" % path
 
 import advene.gui.main
