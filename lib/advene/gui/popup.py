@@ -17,6 +17,7 @@ from advene.model.view import View
 from advene.model.query import Query
 from advene.model.bundle import StandardXmlBundle
 
+from advene.gui.views.interactivequery import InteractiveQuery
 from advene.gui.views.transcription import TranscriptionView
 import advene.gui.util
 import advene.util.vlclib as vlclib
@@ -138,6 +139,11 @@ class Menu:
         browser.popup()
         return True
 
+    def query_element (self, widget, el):
+        iq = InteractiveQuery(here=el, controller=self.controller)
+        iq.popup()
+        return True
+
     def delete_element (self, widget, el):
         p=el.ownerPackage
         if isinstance(el, Annotation):
@@ -239,6 +245,7 @@ class Menu:
         # Common to all other elements:
         add_item(_("Edit"), self.edit_element, element)
         add_item(_("Browse"), self.browse_element, element)
+        add_item(_("Query"), self.query_element, element)
 
         # Common to deletable elements
         if type(element) in (Annotation, Relation, View, Query,
