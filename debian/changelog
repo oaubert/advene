@@ -1,3 +1,18 @@
+advene (0.10) unstable; urgency=low
+
+  * Added ELAN conversion capability
+
+  * Added "Offset" method in popup menu
+  
+  * Implemented Allen's relations in conditions
+
+  * Implemented TranscriptionView (accessible from popup menu on
+    AnnotationType)
+  
+  * Implemented read-only edit popup for imported elements
+
+ --
+
 advene (0.9) unstable; urgency=low
 
   * New action: DisplayMarker
