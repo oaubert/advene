@@ -223,7 +223,7 @@ class AdveneController:
         self.player.restart_player ()
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
-            self.player.playlist_add_item (mediafile)
+            self.player.playlist_add_item (unicode(mediafile, 'utf8').encode('utf8'))
 
     def start_update_snapshots(self, progress_callback=None, stop_callback=None):
         """Automatic snapshot update.
@@ -396,8 +396,8 @@ class AdveneController:
             if self.player.is_active():
                 if mediafile not in self.player.playlist_get_list ():
                     # Update the player playlist
-                    self.player.playlist_add_item (mediafile)
-                    
+                    self.player.playlist_add_item (unicode(mediafile, 'utf8').encode('utf8'))
+                     
             # Load the imagecache
             id_ = vlclib.mediafile2id (mediafile)
             self.imagecache.clear ()
