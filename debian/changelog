@@ -1,3 +1,12 @@
+advene (0.14) unstable; urgency=low
+
+  * Misc Win32 related fixes:
+     * advene.iss file for InnoSetup
+     * get misc parameters from registry
+     * creation of setup-win.py for py2exe support
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 27 Jan 2005 17:47:38 +0100
+
 advene (0.13) unstable; urgency=low
 
   * Check that no relation use the annotation on annotation delete
@@ -13,8 +22,8 @@ advene (0.13) unstable; urgency=low
   * Added a "display preview" button in the file selector
 
   * Added a description parameter to the PopupGoto action
-  
- --
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 27 Jan 2005 17:46:24 +0100
 
 advene (0.12) unstable; urgency=low
 
