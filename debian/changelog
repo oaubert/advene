@@ -17,7 +17,7 @@ advene (0.10) unstable; urgency=low
   
   * All imports (view, schema, ...) work
   
-  * New action: ActivateSTBV
+  * New action: ActivateSTBV, DisplayPopup2, DisplayPopup3
   
   * Window sizes are memorized from one session to another
 
