@@ -10,5 +10,9 @@ class PlayerFactory:
         pass
 
     def get_player(self):
-        import advene.player.vlcplayer
-        return advene.player.vlcplayer.Player()
+        if config.data.os == 'win32':
+            import advene.player.wmp
+            return advene.player.wmp.Player()
+        else:
+            import advene.player.vlcorbit
+            return advene.player.vlcorbit.Player()
