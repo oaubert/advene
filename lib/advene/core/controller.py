@@ -7,6 +7,7 @@ notifications and actions triggering.
 import sys, time
 import os
 import socket
+import sre
 
 import advene.core.config as config
 
@@ -83,10 +84,13 @@ class AdveneController:
     """
     
     def __init__ (self):
-        """Initializes CORBA and other attributes.
+        """Initializes player and other attributes.
         """
         # Image Cache
         self.imagecache = ImageCache ()
+
+        # Regexp to recognize DVD URIs
+        self.dvd_regexp = sre.compile("^dvd.*@(\d+):(\d+)")
         
         # List of active annotations
         self.active_annotations = []
@@ -276,9 +280,17 @@ class AdveneController:
     def get_default_media (self):
         mediafile = self.package.getMetaData (config.data.namespace,
                                               "mediafile")
+        m=self.dvd_regexp(mediafile)
+        if m:
+            title,chapter=m.group(1, 2)
+            mediafile=self.player.dvd_uri(title, chapter)
         return mediafile
 
     def set_default_media (self, uri):
+        m=self.dvd_regexp(uri)
+        if m:
+            title,chapter=m.group(1,2)
+            uri="dvd@%s:%s"
         if isinstance(uri, unicode):
             uri=uri.encode('utf8')
         self.package.setMetaData (config.data.namespace, "mediafile", uri)
