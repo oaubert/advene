@@ -457,6 +457,12 @@ class AdveneGUI (Connect):
         """
         return self.format_time (val)
 
+    def resize_cb (self, widget, allocation, name):
+        """Memorize the new dimensions of the widget."""
+        config.data.preferences['windowsize'][name] = (allocation.width,
+                                                       allocation.height)
+        return False
+    
     def set_current_type (self, t):
         """Set the current annotation type.
 
@@ -1163,7 +1169,10 @@ class AdveneGUI (Connect):
         self.register_view (t)
 
         height=max(window.timeline.layer_position.values() or (1,)) + 3 * window.timeline.button_height
-        window.set_default_size (640, height)
+
+        s=config.data.preferences['windowsize']['timelineview']
+        window.set_default_size (s[0], height)
+        window.connect ("size_allocate", self.resize_cb, 'timelineview')
         window.show_all()
 
         # Make sure that the timeline display is in sync with the
@@ -1236,20 +1245,9 @@ class AdveneGUI (Connect):
 
     def on_view_annotations_activate (self, button=None, data=None):
         """Open treeview view plugin."""
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_size_request (640, 480)
-
-        window.set_title (_("Package %s") % (self.controller.package.title or _("No title")))
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        window.add (sw)
         tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                 controller=self.controller)
-        sw.add (tree.get_widget())
-        self.register_view (tree)
-
-        window.connect ("destroy", self.close_view_cb, window, tree)
-        window.show_all()
+        tree.popup()
         return True
 
     def on_browser1_activate (self, button=None, data=None):
