@@ -493,8 +493,8 @@ if __name__ == "__main__":
 
     def validate_cb (win, package):
         filename="/tmp/package.xml"
-        #package.save (as=filename)
-        print "Package NOT saved as %s" % filename
+        package.save (as=filename)
+        print "Package saved as %s" % filename
         gtk.main_quit ()
         
 
