@@ -827,7 +827,10 @@ class AdveneGUI (Connect):
         if duration == "" or duration == 0:
             duration = None
         l = gtk.Label(message)
-        self.popupwidget.display(widget=l, timeout=duration)
+        f=gtk.Frame()
+        f.set_label(_("Information popup"))
+        f.add(l)
+        self.popupwidget.display(widget=f, timeout=duration)
         return True
 
     def action_popup_goto (self, context, parameters):
@@ -855,8 +858,13 @@ class AdveneGUI (Connect):
         vbox.pack_start(b, expand=False)
         vbox.show_all()
         
-        b.connect("clicked", handle_response, position, vbox)
-        self.popupwidget.display(widget=vbox, timeout=duration)
+        f=gtk.Frame()
+        f.set_label(_("Navigation popup"))
+        f.add(vbox)
+
+        b.connect("clicked", handle_response, position, f)
+        
+        self.popupwidget.display(widget=f, timeout=duration)
         return True
 
     def generate_action_popup_goton(self, size):
@@ -868,6 +876,9 @@ class AdveneGUI (Connect):
                 return True
 
             vbox=gtk.VBox()
+            f=gtk.Frame()
+            f.set_label(_("Navigation popup"))
+            f.add(vbox)
 
             description=self.parse_parameter(context,
                                              parameters, 'description', _("Make a choice"))
@@ -884,13 +895,14 @@ class AdveneGUI (Connect):
 
                 position=self.parse_parameter(context, parameters, 'position%d' % i, 0)
                 b=gtk.Button(message)
-                b.connect("clicked", handle_response, position, vbox)
+                b.connect("clicked", handle_response, position, f)
                 vbox.add(b)
 
             duration=self.parse_parameter(context, parameters, 'duration', None)
             if duration == "" or duration == 0:
                 duration = None
-            self.popupwidget.display(widget=vbox, timeout=duration)
+
+            self.popupwidget.display(widget=f, timeout=duration)
             return True
         return generate
 
@@ -1214,6 +1226,7 @@ class AdveneGUI (Connect):
                 if f.end < f.begin:
                     f.begin, f.end = f.end, f.begin
                 self.annotation.setAuthor(config.data.userid)
+                self.annotation.setDate(time.strftime("%F"))
                 c.package.annotations.append (self.annotation)
                 self.log (_("New annotation: %s") % self.annotation)
                 self.gui.current_annotation.set_text ('['+_('None')+']')
@@ -1831,7 +1844,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_about_web_button_clicked(self, button=None, data=None):
-        self.webbrowser.open('http://liris.cnrs.fr/advene/')
+        self.controller.open_url('http://liris.cnrs.fr/advene/')
         return True
 
 if __name__ == '__main__':
