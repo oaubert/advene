@@ -337,6 +337,7 @@ class AdveneController:
         self.package.annotations.append(an)
         an.author=config.data.userid
         an.content.data=annotation.content.data
+        an.setDate(time.strftime("%F"))
         # FIXME: check if the types are compatible
         self.notify("AnnotationCreate", annotation=an)
 
@@ -560,7 +561,7 @@ class AdveneController:
             try:
                 view=self.package.views['#'.join( (self.package.uri,
                                                    default_stbv) )]
-            except Keyerror:
+            except KeyError:
                 pass
             self.activate_stbv(view)
         
