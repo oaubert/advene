@@ -113,7 +113,7 @@ class AdveneController:
         self.player_restarted = 0
 
         # FIXME: should be removed (CORBA dependent)
-        if config.os != 'win32':
+        if hasattr(self.player, 'orb') and config.os != 'win32':
             try:
                 # Kill spurious vlc player
                 os.system("/usr/bin/killall -9 vlc")
@@ -198,7 +198,8 @@ class AdveneController:
                     self.busy_port_info()
                 sys.exit(0)
             
-            # If == 1, it is the responbility of the Gtk app to set the input loop
+            # If == 1, it is the responsibility of the Gtk app
+            # to set the input loop
             if config.data.webserver['mode'] == 2:
                 self.serverthread = threading.Thread (target=self.server.serve_forawhile)
                 self.serverthread.start ()
@@ -212,7 +213,6 @@ class AdveneController:
         if file_to_play:
             self.set_default_media(file_to_play)
 
-        
         self.player.check_player()
         
         return True
