@@ -308,6 +308,11 @@ class Browser:
         hbox = gtk.HButtonBox()
         vbox.pack_start (hbox, expand=False)
 
+        self.view_button = gtk.Button (stock=gtk.STOCK_FIND)
+        self.view_button.connect ("clicked", self.display_timeline)
+        self.view_button.set_sensitive(False)
+        hbox.add (self.view_button)
+
         b = gtk.Button (_("Insert path"))
         b.connect ("clicked", validate_path)
         hbox.add (b)
