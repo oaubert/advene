@@ -1,5 +1,3 @@
-#! /usr/bin/python
-
 """Advene http server.
 
 This module is composed of two classes : L{AdveneWebServer} is the
