@@ -3,16 +3,14 @@
 import sys
 
 # Advene part
-import config
-from advene.package import Package
-from advene.annotation import Annotation, Relation
-from advene.schema import Schema, AnnotationType, RelationType
-from advene.bundle import AbstractBundle
-from advene.view import View
+import advene.core.config
+from advene.model.package import Package
+from advene.model.annotation import Annotation, Relation
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.bundle import AbstractBundle
+from advene.model.view import View
 
 from gettext import gettext as _
-
-import gui
 
 import pygtk
 pygtk.require ('2.0')
@@ -41,6 +39,8 @@ class RelationView:
                       self.relation.members[1].id))
         b=gtk.Button()
         b.add(l)
+
+        
         return b
 
     def get_widget(self):
@@ -54,6 +54,8 @@ class RelationsBox:
         self.package=package
         self.controller=controller
         self.relationviews=[]
+        self.active_color = gtk.gdk.color_parse ('red')
+        self.inactive_color = gtk.Button().get_style().bg[0]
         self.widget = self.build_widget()
 
     def build_widget(self):
@@ -61,7 +63,7 @@ class RelationsBox:
         for r in self.package.relations:
             v=RelationView(relation=r, controller=self.controller)
             self.relationviews.append(v)
-            vbox.pack_start(v.get_widget())
+            vbox.pack_start(v.get_widget(), expand=False)
         vbox.show_all()
         return vbox
     
@@ -69,7 +71,7 @@ class RelationsBox:
         print "Debug event."
         if data is not None:
             print "Data: %s" % data
-        return gtk.TRUE
+        return True
     
     def get_widget_for_relation (self, relation):
         bs = [ b
@@ -80,16 +82,14 @@ class RelationsBox:
     def activate_relation_handler (self, context, parameters):
         relation=context.evaluateValue('relation')
         if relation is not None:
-            # FIXME
-            pass
-        return gtk.TRUE
+            self.activate_relation(relation)
+        return True
             
     def desactivate_relation_handler (self, context, parameters):
         relation=context.evaluateValue('relation')
         if relation is not None:
-            # FIXME
-            pass
-        return gtk.TRUE
+            self.desactivate_relation(relation)
+        return True
             
     def register_callback (self, controller=None):
         """Add the activate handler for annotations."""
@@ -106,12 +106,24 @@ class RelationsBox:
     
     def activate_relation (self, relation):
         """Activate the representation of the given relation."""
-        # FIXME
+        bs = self.get_widget_for_relation (relation)
+        for b in bs:
+            b.active = True
+            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                          gtk.STATE_PRELIGHT):
+                b.modify_bg (style, self.active_color)
         return True
 
     def desactivate_relation (self, relation):
         """Desactivate the representation of the given relation."""
-        # FIXME
+        bs = self.get_widget_for_relation (relation)
+        for b in bs:
+            b.active = True
+            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                          gtk.STATE_PRELIGHT):
+                b.modify_bg (style, self.inactive_color)
         return True
     
     def get_widget (self):
@@ -130,7 +142,7 @@ class RelationsBox:
             selection.set(selection.target, 8, widget.annotation.uri)
         else:
             print "Unknown target type for drag: %d" % targetType
-        return gtk.TRUE
+        return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
@@ -157,7 +169,7 @@ class RelationsBox:
             #     rel=self.package.createRelation(chosen_relation, members=(source, dest))
         else:
             print "Unknown target type for drop: %d" % targetType
-        return gtk.TRUE
+        return True
 
 
 if __name__ == "__main__":
@@ -175,8 +187,8 @@ if __name__ == "__main__":
             # The Control-key is held. Special actions :
             if event.keyval == gtk.keysyms.q:
                 gtk.main_quit ()
-                return gtk.TRUE
-        return gtk.FALSE
+                return True
+        return False
             
 
     def validate_cb (win, package):
@@ -196,13 +208,13 @@ if __name__ == "__main__":
     vbox.add (relbox.get_widget())
 
     hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=gtk.FALSE)
+    vbox.pack_start (hbox, expand=False)
 
     b = gtk.Button (stock=gtk.STOCK_QUIT)
     b.connect ("clicked", lambda w: window.destroy ())
     hbox.add (b)
 
-    vbox.set_homogeneous (gtk.FALSE)
+    vbox.set_homogeneous (False)
 
     window.show_all()
     gtk.main ()
