@@ -37,7 +37,8 @@ def generate_list_model(elements, controller=None, active_element=None):
 def list_selector(title=None,
                   text=None,
                   members=None,
-                  controller=None):
+                  controller=None,
+                  preselect=None):
     """Pick an element from a list.
 
     vlclib.get_title is invoked to get a textual representation of
@@ -45,7 +46,9 @@ def list_selector(title=None,
 
     Return None if the action is cancelled.
     """
-    store, i=generate_list_model(members, controller=controller)
+    store, i=generate_list_model(members,
+                                 controller=controller,
+                                 active_element=preselect)
 
     combobox=gtk.ComboBox(store)
     cell = gtk.CellRendererText()
