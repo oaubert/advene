@@ -207,6 +207,10 @@ class AdveneController:
                                               "mediafile")
         return mediafile
 
+    def set_default_media (self, uri):
+        mediafile = self.package.setMetaData (config.data.namespace,
+                                              "mediafile", uri)
+
     def restart_player (self):
         """Restart the media player."""
         self.player.restart_player ()
