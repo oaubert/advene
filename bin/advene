@@ -22,6 +22,11 @@ except ImportError:
     print "Overriding 'resources' and 'web' config paths"
     config.data.path['resources']=os.path.sep.join((maindir, 'share'))
     config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
+
+    if config.data.os == 'win32':
+        # Windows environment.
+        sys.path.insert(0, os.sep.join((libpath, 'advene', 'win32')))
+        print "New syspath: %s" % sys.path
   else:
     print """Cannot guess a valid directory.
     Please check your installation or set the PYTHONPATH environment variable."""
