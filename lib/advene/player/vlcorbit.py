@@ -256,14 +256,13 @@ class Player(object):
         #self.orb, self.mc = self.launcher.init ()
 
         # 0 relative position
-        pos = VLC.Position ()
-        pos.origin = VLC.RelativePosition
-        pos.key = VLC.MediaTime
-        pos.value = 0
+        pos = self.create_position(value=0,
+                                   key=VLC.MediaTime,
+                                   origin=VLC.RelativePosition)
         self.relative_position = pos
 
-        # Current position value (updated by self.position_update ())
         self.status = VLC.UndefinedStatus
+        # Current position value (updated by self.position_update ())
         self.current_position_value = 0
         self.stream_duration = 0
 
@@ -290,16 +289,14 @@ class Player(object):
         """
         if status == "start":
             if position is None:
-                position = VLC.Position ()
-                position.origin = VLC.AbsolutePosition
-                position.key = VLC.MediaTime
-                position.value = 0
+                position=self.create_position(value=0,
+                                              origin=VLC.AbsolutePosition,
+                                              key=VLC.MediaTime)
             elif not isinstance(position, VLC.Position):
                 p=long(position)
-                position = VLC.Position ()
-                position.origin = VLC.AbsolutePosition
-                position.key = VLC.MediaTime
-                position.value = p
+                position=self.create_position(value=p,
+                                              origin=VLC.AbsolutePosition,
+                                              key=VLC.MediaTime)
             self.check_player ()
             self.mc.start (position)
         else:
@@ -307,12 +304,12 @@ class Player(object):
                 position = self.relative_position
             elif not isinstance(position, VLC.Position):
                 p=long(position)
-                position = VLC.Position ()
-                position.origin = VLC.RelativePosition
-                position.key = VLC.MediaTime
-                position.value = p
+                position=self.create_position(value=p,
+                                              origin=VLC.RelativePosition,
+                                              key=VLC.MediaTime)
             if status == "pause":
                 self.check_player ()
+                self.position_update()
                 if self.status == VLC.PlayingStatus:
                     self.mc.pause (position)
                 elif self.status == VLC.PauseStatus:
@@ -325,6 +322,7 @@ class Player(object):
                 self.mc.stop (position)
             elif status == "set":
                 self.check_player()
+                self.position_update()
                 if self.status in (VLC.EndStatus, VLC.UndefinedStatus):
                     self.mc.start (position)
                 else:
