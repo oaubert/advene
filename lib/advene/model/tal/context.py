@@ -259,7 +259,7 @@ class AdveneContext(_advene_context):
             compiler = simpleTAL.XMLTemplateCompiler ()
         compiler.log = self.log
         compiler.parseTemplate (view_source, 'utf-8')
-        compiler.getTemplate ().expand (self, stream, 'utf-8')
+        compiler.getTemplate ().expand (context=self, outputFile=stream, outputEncoding='utf-8')
 
         return stream
 
