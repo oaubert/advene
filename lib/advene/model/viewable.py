@@ -103,8 +103,8 @@ class Viewable(object):
         mimetype = view.getContent().getMimetype()
 
         result = cStringIO.StringIO()
-        result.write((u"<!-- view %s applied to %s -->\n"
-                      % (unicode(view), unicode(self))).encode('utf-8'))
+        #result.write((u"<!-- view %s applied to %s -->\n"
+        #              % (unicode(view), unicode(self))).encode('utf-8'))
         context.addLocals( (('here', self), ('view', view)) )
         context.interpret(view_source, mimetype, result)
         context.popLocals ()
