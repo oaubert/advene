@@ -276,7 +276,8 @@ class Import(modeled.Modeled, _impl.Ased):
         if element is None:
             if uri is None:
                 raise TypeError("parameter 'uri' required")
-            doc = self._getParent()._getDocument()
+            # doc = self._getParent()._getDocument()
+            doc = parent._getDocument()
             element = doc.createElementNS(adveneNS, 'import')
             element.setAttributeNS(xlinkNS, 'xlink:href', uri)
         else:
