@@ -1,9 +1,25 @@
+* sound_[sg]et_volume: normalize volume in [0..100]
+
+* TranscriptionEdit: handle drag'n drop on marks to relocate them. At
+least, implement a -1/+1 character.
+
+* GUI views: convert action buttons to toolbars
+
+* transcription: handle annotation content modification (on window close)
+
+* navigation history: put 2 snapshots (origin, destination) to contextualize
+
+* transcribe: add a small timeline on the top that displays the
+position of current marks in the video (with small lines)
+
+* transcribe: ability to mark some text as "ignored"
+
 * Popups: white on black background
 
 * popups : add context (timecode + snapshot) + title frame
 
 * Implement a generic VisualisationWidget that can be either embedded
-in the main Advene, either in its own window (video + views).
+in the main Advene, either in its own window (video + views) -> cf gui.visualisationwidget
 
 * fix bug (segmentation fault) when an annotation.begin == 0 (cf event handler)
 
@@ -11,10 +27,8 @@ in the main Advene, either in its own window (video + views).
 future_leaving to implement a -2 seconds before / +2 seconds after
 annotation event.
 
-* main: implement a get_control_toolbar() method
-
-* TranscriptionEdit: add a player control toolbar (in fact, the player
-control toolbar should be available in all views)
+* TranscriptionEdit: when saving and loading, handle [[xx:xx:xx]]
+timestamps marks -> DONE for saving
 
 * Windows: package libsnapshot_plugin.dll (with MediaControl ?)
 
@@ -30,32 +44,26 @@ files (use DTD)
 
 * Morphix image : use Ubuntu as a base (pygtk included). Manque vlc + python-vlc
 
-* Dig into freevo to find out how they control mplayer with python
-
 * Rewrite webserver using Twisted (and maybe use it also for ECAEngine)
 
 * Correct bug when no type is present (cf export_views.xml)
 
-* timeline: directly create annotations
+* timeline: directly create annotations from timeline
 
-* DND on annotations in timeline : offer menu: Align annotations/Create relation. If same type, only offer "Extend to reach this annotation" ?
-
-Other possibility: add a buttonbox on the side with functionalities (create links, align begin, align end, etc)
-
-* Annotation resize in timeline
+* Annotation resize in timeline -> Hack (right button). Should
+reimplement a native widget for annotations
 
 * Génération régulière d'annotations (toutes les XX secondes), pour
 alignement plus facile par la suite (couplé avec les fonctions
 d'alignement dans la timeline).
 
-* Edit metadata: fix empty metadata pb (UTF8 newline)
+* Edit metadata: fix empty metadata pb (UTF8 newline) -> hacked
+  related to: GUI: do not put newline in representation field when editing annotation types
 
 * browser: select base element (annotation, package, ...)
 
-* Fix STBV activation from webserer (implement an action queue in
+* Fix STBV activation from webserver (implement an action queue in
 controller and register actions in it, which are run in idle gtk loop)
-
-* Toolbar/boutons pour definir debut/fin annotation
 
 * Importer: add "Converted from ..." in generated package description
 
@@ -63,9 +71,7 @@ controller and register actions in it, which are run in idle gtk loop)
 
 * Check the encoding of get_default_media (seems to be incorrect wrt utf8)
 
-* GUI: do not put newline in representation field when editing annotation types
-
-* GUI: implement Recent Files functionality (using the freedesktop.org convention)
+* GUI: implement Recent Files functionality (using the freedesktop.org convention?)
 
 * model: rewrite the model with a new format (.zip) using
 http://effbot.org/zone/celementtree.htm ?
@@ -85,11 +91,6 @@ python-vlc, vlc-plugin-svg
 python-xml (>=0.8.0)
 python-simpletal (>=3.9)
 python-imaging
-
-* Element id generation: use an incremented index and check that it is
-not already used (will create more friendly ids). Will be best
-implemented by a singleton IdGenerator that caches the last index for
-each type. -> cf advene.core.idgenerator
 
 * Implement a action-history widget, that displays all events taking
 place with the previous and next states, so that we can know what took place
@@ -148,8 +149,6 @@ AdveneException: item Package (english_teacher.xml) has no QName prefix in Packa
 * Model: implement relationtype.members R/W (and make that a list of
 AnnotationTypes rather than their ids) -> DONE for R/W.
 
-* sound_[sg]et_volume: normalize volume in [0..100]
-
 * Transcription: complete annotation edition
 
 * Annotation chanson: paroles / refrain /couplet + UTBV/STBV (transcription)
@@ -159,7 +158,7 @@ AnnotationTypes rather than their ids) -> DONE for R/W.
 
 * Complete the bootstrap package
 
-* corba: Add the 'repeat' property on all items in the playlist
+* corba: Add the 'repeat' property on all items in the playlist -> cf repeat config in vlcrc
 
 * Implement completion in TALES fields ?
 
@@ -174,8 +173,6 @@ AnnotationTypes rather than their ids) -> DONE for R/W.
   corresponding annotations.
 
 * RelationType: impossible to delete from popup
-
-* Implement copy/paste for rules/rulesets -> implemented DnD
 
 * Make the absolute time specification work for display_text (rather
   than relative positions)
@@ -224,11 +221,11 @@ resources/ directory
 processing instruction (<?xml version="1.0" encoding="UTF-8"?>) from
 the DOM and do not restore it before saving, so it gets lost.
 
-* Add access to media duration from TALES
+** Find a way to override standard advene elements with new methods
+(for instance, snapshot_url and media_control for annotations) in
+order to avoid using too many global methods.
 
 * Bug in queries (rest not empty even if applied to 1-element lists)
-
-* mediainformation: bugfix (player never active?)
 
 * EditAnnotationPopup: implement Next and Previous
 
@@ -253,16 +250,10 @@ annotation, of the same type or not.
 * vlc-plugin-corba: rename MediaControl.so to MediaControl_module.so
 and install it into /usr/lib/orbit-2.0
 
-* Find a way to override standard advene elements with new methods
-(for instance, snapshot_url and media_control for annotations) in
-order to avoid using too many global methods.
-
 * Implement action "Delay"
 
 * Watch Europython:
 http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
-
-* UID generator: http://www.alcyone.com/software/uid/
 
 * http://weblex.ens-lsh.fr/projects/xitools/format_xi/
 
@@ -270,16 +261,11 @@ http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
 
 * Query MPEG7: http://www.idealliance.org/papers/extreme03/html/2001/Liu01/EML2001Liu01.html
 
-* To embed windows in gtk, use widget.window.xid (in X11) and
-  widget.window.handle (in Win32)
-
 * STBV action: display an activable link
 
 * Try to remove the dependency on PIL by using pixbuf loader to convert snapshots to PNG.
 
 * Timeline: add the possibility to add new annotations by clicking on the type
-
-* Create a CellRenderer for time values (with time adjustment integrated)
 
 * Create a TALES evaluator/editor widget (from browser?)
 
@@ -306,8 +292,6 @@ http://www.rexx.com/~dkuhlman/generateDS.html (XML-Schema) Or SOAPy
 * Make the annotation interface as On-Screen Display over the video window
 
 * Video player: investigate pyxine and gst-python. Also win32com (http://www.boddie.org.uk/python/COM.html)
-
-* Create a unique logger in controller and use exclusively this one in all modules.
 
 * vlc-dev: use the new start-time and stop-time functionality in core VLC to correctly
   handle positions in start and stop.
@@ -370,14 +354,14 @@ gtk.rc_parse_string(sendmail_styles)
      get_content(): get the content
      set_content(string): set the content
 
+* EPOZ: derive LinkTool into TALContentTool and TALImageTool, to be
+able to define content/replace (just replace with <span/> will be
+simpler) and snapshot integration.
+
 * bootstrap.xml : how to use properly ? Can a package exist with no view ?
 
 * Once bootstrap.xml works correctly, put it somewhere pertinent and
 use it as the template.xml file
-
-* EPOZ: derive LinkTool into TALContentTool and TALImageTool, to be
-able to define content/replace (just replace with <span/> will be
-simpler) and snapshot integration.
 
 * Ruleset edit : add the possibility to order the rules
 
@@ -758,4 +742,35 @@ valid DVD uri for the given player -> DONE
 * EditTranscription: view for editing a transcription and putting timestamps (live) in it, in order to generate annotations. -> DONE
 
 * timeline (362): remove deprecated OptionMenu -> DONE
+
+* main: implement a get_control_toolbar() method -> DONE
+
+* Dig into freevo to find out how they control mplayer with python -> DONE (cf player/mplayer.py)
+
+* DND on annotations in timeline : offer menu: Align annotations/Create relation. If same type, only offer "Extend to reach this annotation" ? -> DONE
+
+Other possibility: add a buttonbox on the side with functionalities (create links, align begin, align end, etc)
+
+* gui.edit.elements: add "modal" parameter to edit() -> DONE
+
+* implement default_stbv that gets activated on package load. -> DONE
+
+* TranscriptionEdit: add a player control toolbar (in fact, the player
+control toolbar should be available in all views) -> DONE
+
+* Element id generation: use an incremented index and check that it is
+not already used (will create more friendly ids). Will be best
+implemented by a singleton IdGenerator that caches the last index for
+each type. -> cf advene.core.idgenerator
+
+* Implement copy/paste for rules/rulesets -> implemented DnD
+
+* Add access to media duration from TALES -> player/cached_duration
+
+* To embed windows in gtk, use widget.window.xid (in X11) and
+  widget.window.handle (in Win32) -> DONE
+
+* Create a CellRenderer for time values (with time adjustment integrated) -> DONE
+
+* Create a unique logger in controller and use exclusively this one in all modules -> DONE
 
