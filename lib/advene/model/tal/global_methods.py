@@ -478,3 +478,8 @@ def sorted (target, context):
     else:
         l=target
     return l
+
+def length(target, context):
+    """Returns the length of the target."""
+    return len(target)
+
