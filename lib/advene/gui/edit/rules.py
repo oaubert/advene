@@ -595,6 +595,15 @@ class EditAction(EditGeneric):
                 self.model.add_parameter(n, v)
         return
 
+    def sorted(self, l):
+        """Return a sorted version of the list."""
+        if isinstance(l, dict):
+            res=l.keys()
+        else:
+            res=l[:]
+        res.sort()
+        return res
+        
     def on_change_name(self, widget, names):
         if names[widget.get_history()] == self.current_name:
             return True
@@ -605,7 +614,7 @@ class EditAction(EditGeneric):
         
         ra=self.catalog.get_action(self.current_name)
         self.current_parameters=dict(ra.parameters)
-        for name in ra.parameters:
+        for name in self.sorted(ra.parameters):
             p=self.build_parameter_widget(name,
                                           "",
                                           ra.describe_parameter(name))
@@ -645,7 +654,7 @@ class EditAction(EditGeneric):
             # Action is derived from a RegisteredAction
             # we have information about its parameters
             ra=self.model.registeredaction
-            for name in ra.parameters:
+            for name in self.sorted(ra.parameters):
                 p=self.build_parameter_widget(name,
                                               self.model.parameters.setdefault(name,""),
                                               ra.describe_parameter(name))
@@ -653,7 +662,7 @@ class EditAction(EditGeneric):
                 vbox.add(p)
         else:
             # We display existing parameters
-            for name in self.model.parameters:
+            for name in self.sorted(self.model.parameters):
                 p=self.build_parameter_widget(name, self.model.parameters[name], "")
                 self.paramlist[name]=p
                 vbox.add(p)
