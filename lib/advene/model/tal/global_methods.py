@@ -287,3 +287,63 @@ def rest (target, context):
     list-like, sliceable object.
     """
     return target[1:]
+
+def parsed (target, context):
+    """Parse the content being passed as target.
+
+    This method parses the data of the content according to its
+    mime-type. The most common parser is an XML parser (FIXME: not
+    implemented yet). It applies on a content object:
+
+    a.content.parsed.key1
+
+    Simple structured data
+    ======================
+    
+    This is a simple-minded format for structured information (waiting
+    for a better solution based on XML):
+
+    The structure of the data consists in 1 line per information:
+    
+    key1=value1
+    key2=value2
+
+    The values are on 1 line only. URL-style escape conventions are
+    used (mostly to represent the linefeed as %0a).
+
+    It returns a dict with key/values.
+
+    XML data
+    ========
+
+    Not implemented yet.
+
+    @return: a data structure
+    """
+    import advene.model.content
+    
+    content=target
+    if not isinstance(target, advene.model.content.Content):
+        return {}
+    if content.mimetype is None or content.mimetype == 'text/plain':
+        # If nothing is specified, assume text/plain and return a unique
+        # dict with the key 'value'
+        return { 'value': content.data }
+    if content.mimetype == 'x-advene/structured':
+        import urllib
+        
+        d={}
+        # FIXME: check portability of \n in win32
+        for l in content.data.split("\n"):
+            if len(l) == 0:
+                # Ignore empty lines
+                pass
+            if '=' in l:
+                (k, v) = l.split('=', 1)
+                d[k] = urllib.unquote(v)
+            else:
+                print "Syntax error in content: %d"
+        return d
+    # FIXME: implement XML parsing
+    # Last fallback:
+    return { 'value': content.data }
