@@ -125,7 +125,6 @@ class GenericImporter(object):
         """        
         begin += self.offset
         end += self.offset
-        print "Create annotation %s. id: %s" % (data, str(ident))
         if ident is None and self.controller is not None:
             ident=self.controller.idgenerator.get_id(Annotation)
             
