@@ -476,29 +476,34 @@ class ECACatalog:
     """
     # FIXME: Maybe this should be put in an external resource file
     event_names={
-        'AnnotationBegin': _("Beginning of an annotation"),
-        'AnnotationEnd': _("End of an annotation"),
-        'AnnotationEditBegin': _("Starting editing of an annotation"),
-        'AnnotationEditEnd': _("Ending editing of an annotation"),
-        'AnnotationActivation': _("Activation of an annotation"),
+        'AnnotationBegin':        _("Beginning of an annotation"),
+        'AnnotationEnd':          _("End of an annotation"),
+        'AnnotationEditBegin':    _("Starting editing of an annotation"),
+        'AnnotationEditEnd':      _("Ending editing of an annotation"),
+        'AnnotationActivation':   _("Activation of an annotation"),
         'AnnotationDeactivation': _("Deactivation of an annotation"),
-        'RelationActivation': _("Activation of a relation"),
-        'RelationDeactivation': _("Deactivation of a relation"),
-        'RelationEditBegin': _("Starting editing of a relation"),
-        'RelationEditEnd': _("Ending editing of a relation"),
-        'LinkActivation': _("Activating a link"),
-        'PlayerStart': _("Player start"),
-        'PlayerStop': _("Player stop"),
-        'PlayerPause': _("Player pause"),
-        'PlayerResume': _("Player resume"),
-        'PlayerSet': _("Going to a given position"),
-        'PackageLoad': _("Loading a new package"),
-        'PackageSave': _("Saving the package"),
-        'ViewActivation': _("Start of the dynamic view"),
-        'ApplicationStart': _("Start of the application"),
-        'ApplicationEnd': _("End of the application")
+        'RelationActivation':     _("Activation of a relation"),
+        'RelationDeactivation':   _("Deactivation of a relation"),
+        'RelationEditBegin':      _("Starting editing of a relation"),
+        'RelationEditEnd':        _("Ending editing of a relation"),
+        'ViewEditBegin':          _("Starting editing of a view"),
+        'ViewEditEnd':            _("Ending editing of a view"),
+        'SchemaEditBegin':        _("Starting editing of a schema"),
+        'SchemaEditEnd':          _("Ending editing of a schema"),
+        'LinkActivation':         _("Activating a link"),
+        'PlayerStart':            _("Player start"),
+        'PlayerStop':             _("Player stop"),
+        'PlayerPause':            _("Player pause"),
+        'PlayerResume':           _("Player resume"),
+        'PlayerSet':              _("Going to a given position"),
+        'PackageLoad':            _("Loading a new package"),
+        'PackageSave':            _("Saving the package"),
+        'ViewActivation':         _("Start of the dynamic view"),
+        'ApplicationStart':       _("Start of the application"),
+        'ApplicationEnd':         _("End of the application")
         }
 
+    # Basic events are exposed to the user when defining new STBV
     basic_events=('AnnotationBegin', 'AnnotationEnd', 'PlayerStart', 'PlayerPause',
                   'PlayerResume', 'PlayerStop', 'ApplicationStart', 'ViewActivation')
     
