@@ -22,13 +22,6 @@ except ImportError:
     print "Overriding 'resources' and 'web' config paths"
     config.data.path['resources']=os.path.sep.join((maindir, 'share'))
     config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
-
-    # Check for MediaControl.so
-    if not os.path.exists(config.data.typelib):
-      print """Error: cannot find the typelib file (%s) to control the player.
-      Check that the vlc-plugin-corba is correctly installed.
-      Aborting.""" % config.data.typelib
-      sys.exit(1)
   else:
     print """Cannot guess a valid directory.
     Please check your installation or set the PYTHONPATH environment variable."""
@@ -37,6 +30,16 @@ except ImportError:
 import advene.gui.main
 
 if __name__ == '__main__':
+
+  # Check for directories
+  for d in ('resources', 'web'):
+    if not os.path.exists(config.data.path[d]):
+      print """Error: the %s directory does not exist.
+      Advene seems to be either badly installed or badly configured
+      (maybe both).
+      Aborting.""" % config.data.typelib
+      sys.exit(1)
+      
   # FIXME: remove once the win32 support is correct
   if config.data.os != "win32" and not os.path.exists(config.data.typelib):
     print """The %s file does not exist.
