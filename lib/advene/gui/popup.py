@@ -151,7 +151,7 @@ class Menu:
         return True
     
     def browse_element (self, widget, el):
-        browser = advene.gui.views.browser.Browser(el)
+        browser = advene.gui.views.browser.Browser(el, controller=self.controller)
         browser.popup()
         return True
 
