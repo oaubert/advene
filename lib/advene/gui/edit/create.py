@@ -21,6 +21,7 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
+from advene.rules.elements import RuleSet
 
 import advene.gui.edit.rules
 import advene.gui.edit.elements
@@ -99,9 +100,15 @@ class CreateElementPopup(object):
             hbox.pack_start(l)
 
             if self.type_ == Annotation:
-                type_list = self.parent.annotationTypes
+                if isinstance(self.parent, AnnotationType):
+                    type_list = [ self.parent ]
+                else:
+                    type_list = self.parent.annotationTypes
             elif self.type_ == Relation:
-                type_list = self.parent.relationTypes
+                if isinstance(self.parent, RelationType):
+                    type_list = [ self.parent ]
+                else:
+                    type_list = self.parent.relationTypes
             elif self.type_ == View:
                 type_list = [ ViewType('text/html', _("HTML template")),
                               ViewType('application/x-advene-ruleset', _("Ruleset")) ]
@@ -118,7 +125,7 @@ class CreateElementPopup(object):
                 dialog.run()
                 dialog.destroy()
                 return None
-            
+
             self.chosen_type = type_list[0]
             
             menu = gtk.Menu()
@@ -145,7 +152,11 @@ class CreateElementPopup(object):
         t = self.chosen_type
 
         if self.type_ == Annotation:
-            el=self.parent.createAnnotation(
+            if isinstance(self.parent, AnnotationType):
+                parent=self.parent.rootPackage
+            else:
+                parent=self.parent
+            el=parent.createAnnotation(
                 ident=id_,
                 type=t,
                 author=config.data.userid,
@@ -153,17 +164,22 @@ class CreateElementPopup(object):
                 fragment=MillisecondFragment(begin=0,
                                              duration=self.controller.player.stream_duration))
             el.title=id_
-            self.parent.annotations.append(el)
+            parent.annotations.append(el)
             self.controller.notify('AnnotationEditEnd', annotation=el)
         elif self.type_ == Relation:
-            el=self.parent.createRelation(
+            # Unused code: relations can not be created without annotations
+            if isinstance(self.parent, RelationType):
+                parent=self.parent.rootPackage
+            else:
+                parent=self.parent
+            el=parent.createRelation(
                 ident=id_,
                 type=t,
                 author=config.data.userid,
                 date=self.get_date(),
                 members=())
             el.title=id_
-            self.parent.relations.append(el)
+            parent.relations.append(el)
             self.controller.notify('RelationEditEnd', relation=el)
         elif self.type_ == View:
             el=self.parent.createView(
@@ -176,10 +192,11 @@ class CreateElementPopup(object):
             el.title=id_
             if t.id == 'application/x-advene-ruleset':
                 # Create an empty ruleset to begin with
-                el.content.data="<ruleset xmlns='http://liris.cnrs.fr/advene/ruleset'></ruleset>"
+                r=RuleSet()
+                el.content.data=r.xml_repr()
             self.parent.views.append(el)
             self.controller.notify('ViewEditEnd', view=el)
-        elif self.type == Schema:
+        elif self.type_ == Schema:
             el=self.parent.createSchema(
                 ident=id_,
                 author=config.data.userid,
@@ -187,18 +204,30 @@ class CreateElementPopup(object):
             el.title=id_
             self.parent.schemas.append(el)
             self.controller.notify('SchemaEditEnd', schema=el)
-        elif self.type == AnnotationType:
+        elif self.type_ == AnnotationType:
             if not isinstance(self.parent, Schema):
                 print _("Error: bad invocation of CreateElementPopup")
                 el=None
             else:
                 el=self.parent.createAnnotationType(
-                    ident=id_,
-                    author=config.data.userid,
-                    date=self.get_date())
+                    ident=id_)
+                el.author=config.data.userid
+                el.date=self.get_date()
                 el.title=id_
+            self.parent.annotationTypes.append(el)
             self.controller.notify('AnnotationTypeEditEnd', annotationtype=el)
-            #FIXME: complete
+        elif self.type_ == RelationType:
+            if not isinstance(self.parent, Schema):
+                print _("Error: bad invocation of CreateElementPopup")
+                el=None
+            else:
+                el=self.parent.createRelationType(
+                    ident=id_)
+                el.author=config.data.userid
+                el.date=self.get_date()
+                el.title=id_
+            self.parent.relationTypes.append(el)
+            self.controller.notify('RelationTypeEditEnd', relationtype=el)
         else:
             el=None
             print "Not implemented yet."
@@ -253,11 +282,9 @@ if __name__ == "__main__":
     window.add (vbox)
 
     def create_element_cb(button, t):
-        # FIXME: parent can be different from package (for AnnotationType and RelationType)
         cr = CreateElementPopup(type_=t, parent=package)
         cr.popup()
         return True
-    
         
     for (t, l) in element_label.iteritems():
         b = gtk.Button(l)
