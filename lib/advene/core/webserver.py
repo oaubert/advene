@@ -1309,12 +1309,15 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # with a content-type method : if it is HTML, we return it normally ;
         # if it is some other thing, we return it with the correct content-type
         # header).
-        if isinstance(objet, str) and self.image_type (objet) is not None:
-            displaymode = 'image'
         if query.has_key('mode'):
             displaymode = query['mode']
             del (query['mode'])
-        
+        if isinstance(objet, str) and self.image_type (objet) is not None:
+            displaymode = 'image'
+        if hasattr(objet, 'contenttype') and objet.contenttype not in ('text/plain',
+                                                                       'text/html'):
+            displaymode = 'content'
+
         if displaymode == 'image':
             # Return an image, so build the correct headers
             self.send_response (200)
@@ -1331,6 +1334,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.end_headers ()
                 self.wfile.write (objet.data)
                 return
+            elif hasattr(objet, 'contenttype'):
+                self.send_response (200)
+                self.send_header ('Content-type', objet.contenttype)
+                self.no_cache ()
+                self.end_headers ()
+                self.wfile.write (objet)
+                return                
             else:
                 self.send_error (404, _("Content mode not available on non-content data"))
                 return
