@@ -233,8 +233,6 @@ class AdveneController:
 
         @return: a boolean (~desactivation)
         """
-        if self.player.status != self.player.PlayingStatus:
-            return True
         if not self.imagecache.is_initialized (position):
             # FIXME: only 0-relative position for the moment
             print "Update snapshot for %d" % position
