@@ -127,6 +127,7 @@ class AdveneGUI (Connect):
         """
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
+        
         gladefile=config.data.advenefile (config.data.gladefilename)
         # Glade init.
         gtk.glade.bindtextdomain(gettext.textdomain())
@@ -983,7 +984,7 @@ class AdveneGUI (Connect):
                 if self.current_type is None:
                     # FIXME: should display a warning
                     return True
-                f = MillisecondFragment (begin=c.player.current_position_value--config.data.reaction_time,
+                f = MillisecondFragment (begin=c.player.current_position_value-config.data.reaction_time,
                                          duration=30000)
                 self.annotation = c.package.createAnnotation(type = self.current_type,
                                                              fragment=f)
