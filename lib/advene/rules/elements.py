@@ -115,7 +115,7 @@ class Condition:
                 except ValueError:
                     rv=right
                     lv=left
-                return rv >= lv
+                return lv >= rv
             elif self.operator == 'lower':
                 # If it is possible to convert the values to
                 # floats, then do it. Else, compare string values
@@ -125,7 +125,7 @@ class Condition:
                 except ValueError:
                     rv=right
                     lv=left
-                return rv <= lv
+                return lv <= rv
             else:
                 raise Exception("Unknown operator: %s" % self.operator)
         elif self.operator in self.unary_operators:
@@ -571,38 +571,25 @@ class Query:
     This query component returns a set of data matching a condition
     from a given source. If the source is not a list, it will return a
     boolean.
+
+    The 'condition' and 'return value' TALES expression will be
+    evaluated in a context where the loop value is stored in the
+    'element' global. In other words, use 'element' as the root of
+    condition and return value expressions.
     
     @ivar source: the source of the data
     @type source: a TALES expression
     @ivar condition: the matching condition
     @type condition: a Condition
+    @ivar rvalue: the return value (specified as a TALES expression)
+    @type rvalue: a TALES expression
     @ivar controller: the controller
     """
-    def __init__(self, source=None, condition=None, controller=None):
+    def __init__(self, source=None, condition=None, controller=None, rvalue=None):
         self.source=source
         self.condition=condition
         self.controller=controller
-
-    def build_context(self, here=None, **kw):
-        """Build an AdveneContext.
-
-        @param kw: additional parameters
-        @type kw: dict
-        @return: the built context
-        @rtype: AdveneContext
-        """
-        options = {
-            'package_url': u"/packages/advene",
-            'namespace_prefix': advene.core.config.data.namespace_prefix
-            }
-        globals={
-            }
-        context = advene.model.tal.context.AdveneContext (here=here,
-                                                          options=options)
-        globals.update(kw)
-        for k in globals:
-            context.addGlobal(k, globals[k])
-        return context
+        self.rvalue=rvalue
     
     def add_condition(self, condition):
         """Add a new condition
@@ -665,6 +652,14 @@ class Query:
         for condnode in domelement.getElementsByTagName('condition'):
             self.add_condition(Condition().from_dom(condnode))
 
+        rnodes=domelement.getElementsByTagName('return')
+        if len(rnodes) == 1:
+            self.rvalue=rnodes[0].getAttribute('value')
+        elif len(rnodes) == 0:
+            self.rvalue=None
+        else:
+            raise Exception("Multiple return values are associated to query")
+
         return self
 
     def to_dom(self, dom):
@@ -684,6 +679,11 @@ class Query:
                     continue
                 qnode.appendChild(cond.to_dom(dom))
 
+        if self.rvalue is not None:
+            rnode=dom.createElement('return')
+            qnode.appendChild(rnode)
+            rnode.setAttribute('value', self.rvalue)
+
     def execute(self, context):
         """Execute the query.
 
@@ -692,24 +692,35 @@ class Query:
         s=context.evaluateValue(self.source)
 
         if self.condition is None:
-            return s
-        
-        # Temporary evaluation context
-        c=self.build_context(here=None)
+            if self.rvalue is None or self.rvalue == 'element':
+                return s
+            else:
+                r=[]
+                context.addLocals( [ ('element', None) ] )
+                for e in s:
+                    context.setLocal('element', e)
+                    r.append(context.evaluateValue(self.rvalue))
+                context.popLocals()
+                return r
+
         if hasattr(s, '__getitem__'):
             # It is either a real list or a Bundle
             # (for isinstance(someBundle, list) == False !
             # FIXME: should we use a Bundle ?
             r=[]
+            context.addLocals( [ ('element', None) ] )
             for e in s:
-                c.addGlobal('here', e)
-                if self.condition.match(c):
-                    r.append(e)
+                context.setLocal('element', e)
+                if self.condition.match(context):
+                    if self.rvalue is None or self.rvalue == 'element':
+                        r.append(e)
+                    else:
+                        r.append(context.evaluateValue(self.rvalue))
+            context.popLocals()
             return r
         else:
-            # What do we do in this case ?
-            c.addGlobal('here', s)
-            return self.condition.match(c)
+            # Not a list. What do we do in this case ?
+            return s
 
 class RegisteredAction:
     """Registered action.
