@@ -328,11 +328,13 @@ class AdveneController:
         """Transmute an annotation to a new type.
         """
         if annotation.type == annotationType:
+            # Do not duplicate the annotation
             return annotation
         ident=self.idgenerator.get_id(Annotation)
         an = self.package.createAnnotation(type = annotationType,
                                            ident=ident,
                                            fragment=annotation.fragment.clone())
+        self.package.annotations.append(an)
         an.author=config.data.userid
         an.content.data=annotation.content.data
         # FIXME: check if the types are compatible
