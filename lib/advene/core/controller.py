@@ -9,6 +9,7 @@ import os
 import socket
 import sre
 import webbrowser
+import urlparse
 
 import advene.core.config as config
 
@@ -311,6 +312,25 @@ class AdveneController:
         if m:
             title,chapter=m.group(1, 2)
             mediafile=self.player.dvd_uri(title, chapter)
+        elif not os.path.exists(mediafile) and not mediafile.startswith('http:'):
+            # It is a file. It should exist. Else check for a similar
+            # one in MEDIAPATH
+
+            # UNIX/Windows interoperability: convert pathnames
+            n=mediafile.replace('\\', os.sep).replace('/', os.sep)
+            name=os.path.basename(n)
+            for d in config.data.path['moviepath'].split(os.path.pathsep):
+                if d == '_':
+                    # Get package dirname
+                    d=self.package.uri
+                elif not d.endswith('/'):
+                    # To please urlparse.urljoin
+                    d += '/'
+                n=urlparse.urljoin(d, name)
+                if os.path.exists(n):
+                    mediafile=n
+                    self.log(_("Found matching video file in moviepath: %s" % n))
+                    break
         return mediafile
 
     def set_default_media (self, uri):
