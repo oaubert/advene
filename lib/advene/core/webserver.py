@@ -485,11 +485,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_no_content()
             elif command == 'pause':
                 self.server.update_status ("pause")
-                ref=self.headers.get('Referer', "/media")
                 self.send_no_content()
             elif command == 'stop':
                 self.server.update_status ("stop")
-                ref=self.headers.get('Referer', "/media")
                 self.send_no_content()
             elif command == 'stbv':
                 if len(param) != 0:
@@ -679,6 +677,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         should link to all functionalities."""
 
         self.start_html (_("Server Administration"), duplicate_title=True)
+        if self.server.displaymode == 'raw':
+            switch='navigation'
+        else:
+            switch='raw'
+        mode_sw="""%s (<a href="/admin/display/%s">switch to %s</a>)""" % (
+            self.server.displaymode, switch, switch)
+        
         self.wfile.write(_("""
         <p><a href="/admin/status">Display the server status</a></p>
         <p><a href="/admin/access">Update the access list</a></p>
@@ -686,12 +691,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         <p><a href="/media">Media control</a></p>
         <p><a href="/admin/list">List available files</a></p>
         <p><a href="/packages">List loaded packages</a> (%s)</p>
-        <form action="/admin/display" method="POST">
-        <p>Display mode: <select name="mode">
-        <option value="default" selected>Default (with navigation interface)</option>
-        <option value="raw">Raw (only the views)</option>
-        </select>
-        <input type="submit" value="Set">
+        <p>Display mode : %s</p>
         <hr>
         <p>Load a package :
         <form action="/admin/load" method="GET">
@@ -700,8 +700,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         <input type="submit" value="Load" />
         </form>
         </body></html>
-        """) % " | ".join( ['<a href="/packages/%s">%s</a>' % (alias, alias)
-                            for alias in self.server.packages.keys() ] ))
+        """) % (" | ".join( ['<a href="/packages/%s">%s</a>' % (alias, alias)
+                             for alias in self.server.packages.keys() ] ),
+                mode_sw))
 
     def display_packages_list (self):
         """Display available Advene files.
@@ -858,13 +859,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         a package. Only a limited set of elements are accessible in
         this way.
 
-        Setting the X{display mode}
-        ===========================
-
-        Accessing the C{/admin/display} element updates the server
-        display mode. The data should be available as a parameter
-        named C{mode}, which is either C{default} or C{raw}
-
         Manipulating package data
         -------------------------
 
@@ -934,19 +928,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write(_("<p>Cannot set the value : invalid path</p>"))
             return
 
-        if path[0] == 'admin':
-            if path[1] == 'display':
-                query = self.query2dict(self.rfile.read (long(self.headers['content-length'])))
-                if not query.has_key('mode'):
-                    self.server.displaymode = 'default'
-                else:
-                    self.server.displaymode = query['mode']
-                self.wfile.write (_("""
-                <h1>Display mode</h1>
-                <p>Display mode is now <code>%s</code></p>
-                """) % self.server.displaymode)
-                return
-        elif path[0] == 'packages':
+        if path[0] == 'packages':
             alias = path[1]
             query = self.query2dict(self.rfile.read (long(self.headers['content-length'])))
             tales = "/".join (path[2:])
@@ -1213,6 +1195,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           - C{/admin/delete} : remove a loaded package
           - C{/admin/access} : display access control list
           - C{/admin/status} : display current status
+          - C{/admin/display} : display or set the default webserver display mode
 
         Accessing the C{/admin} folder itself displays the summary
         (equivalent to the root document).
@@ -1220,6 +1203,15 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         Loading, saving or deleting packages is done by specifying the
         C{alias} parameter. In the case of the C{/admin/load} action,
         the C{uri} parameter must provide the appropriate URI.
+
+        Setting the X{display mode}
+        ===========================
+
+        Accessing the C{/admin/display} element updates the server
+        display mode. The data should be available as a parameter
+        named C{mode}, which is either C{default} or C{raw}, or as
+        last element in the URI, for instance
+        C{/admin/display/navigation}        
 
         @param l: the access path as a list of elements,
                   with the initial one (C{access}) omitted
@@ -1232,6 +1224,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
 
         command = l[0]
+        del l[0]
 
         if command == 'list':
             self.display_packages_list ()
@@ -1285,6 +1278,18 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write (_("<p>No package loaded</p>"))
         elif command == 'access':
             self.handle_access (l, query)
+        elif command == 'display':
+            if l:
+                # Set default display mode
+                if l[0] in ('raw', 'navigation'):
+                    self.server.displaymode=l[0]
+                    ref=self.headers.get('Referer', "/")
+                    self.send_redirect(ref)
+                return
+            else:
+                # Display status
+                self.start_html(_("Default display mode"))
+                self.wfile.write(self.server.displaymode)
         else:
             self.start_html (_('Error'), duplicate_title=True)
             self.wfile.write (_("""<p>Unknown admin command</p><pre>Command: %s</pre>""") % command)
