@@ -257,12 +257,18 @@ class EditAnnotationPopup (EditElementPopup):
         self.register_form (f)
         vbox.pack_start (f.get_view (), expand=False)
 
-        # Annotation content
-        f = EditTextForm (self.element.content, 'data', controller=self.controller)
-        f.set_editable (editable)
-        t = f.get_view ()
-        self.register_form (f)
+        f = EditContentForm(self.element.content, controller=self.controller,
+                            mimetypeeditable=False)
+        f.set_editable(editable)
+        t = f.get_view()
+        self.register_form(f)
         vbox.pack_start(self.framed(t, _("Content")), expand=True)
+        
+##         # Annotation content
+##         f = EditTextForm (self.element.content, 'data', controller=self.controller)
+##         f.set_editable (editable)
+##         t = f.get_view ()
+##         self.register_form (f)
 
         return vbox
 
@@ -320,10 +326,11 @@ class EditRelationPopup (EditElementPopup):
         vbox.pack_start(self.framed(hb, _("Members")), expand=True)
 
         # Relation content
-        f = EditTextForm (self.element.content, 'data', controller=self.controller)
-        f.set_editable (editable)
-        t = f.get_view ()
-        self.register_form (f)
+        f = EditContentForm(self.element.content, controller=self.controller,
+                            mimetypeeditable=False)
+        f.set_editable(editable)
+        t = f.get_view()
+        self.register_form(f)
         vbox.pack_start(self.framed(t, _("Content")), expand=True)
 
         return vbox
@@ -364,12 +371,13 @@ class EditViewPopup (EditElementPopup):
                          expand=False)
 
         # View content
-        # FIXME: we should use a generic mimetype plugin detection
-        if self.element.content.mimetype == 'application/x-advene-ruleset':
-            f = EditRuleSetForm (self.element.content, 'model', controller=self.controller)
-        else:
-            f = EditTextForm (self.element.content, 'data', controller=self.controller)
 
+        # Allow the edition of mimetype for text/xml type views
+        # but not for the special case of Ruleset
+        mtedit = (editable
+                  and not (self.element.content.mimetype == 'application/x-advene-ruleset'))
+        f = EditContentForm (self.element.content, controller=self.controller,
+                             mimetypeeditable=mtedit)
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
@@ -401,13 +409,12 @@ class EditQueryPopup (EditElementPopup):
                                        )
         vbox.pack_start (f.get_view (), expand=False)
 
-        # View content
-        # FIXME: we should use a generic mimetype plugin detection
-        if self.element.content.mimetype == 'application/x-advene-simplequery':
-            f = EditQueryForm (self.element.content, 'model', controller=self.controller)
-        else:
-            f = EditTextForm (self.element.content, 'data', controller=self.controller)
-
+        # Allow the edition of mimetype for text/xml type views
+        # but not for the special case of Ruleset
+        mtedit = (editable
+                  and not (self.element.content.mimetype == 'application/x-advene-ruleset'))
+        f = EditContentForm (self.element.content, controller=self.controller,
+                             mimetypeeditable=mtedit)
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
@@ -593,6 +600,54 @@ class EditForm(object):
             return True
         return set_method
 
+class EditContentForm(EditForm):
+    """Create an edit form for the given content."""
+    def __init__ (self, element, controller=None, mimetypeeditable=True):
+        # self.element is a Content object
+        self.element = element
+        self.controller=controller
+        self.editable = True
+        # self.contentform will be an appropriate EditForm
+        # (EditTextForm,EditRuleSetForm,...)
+        self.contentform = None
+        # self.mimetype is a gtk.Entry
+        self.mimetype = None
+        self.mimetypeeditable = mimetypeeditable
+
+    def set_editable (self, bool):
+        self.editable = bool
+
+    def update_element (self):
+        """Update the element fields according to the values in the view."""
+        if self.mimetypeeditable:
+            self.element.mimetype = self.mimetype.get_text()
+        self.contentform.update_element()
+        return True
+
+    def get_view (self):
+        """Generate a view widget for editing content."""
+        vbox = gtk.VBox()
+
+        hbox = gtk.HBox()
+        l=gtk.Label(_("MIME Type"))
+        hbox.pack_start(l, expand=False)
+        
+        self.mimetype=gtk.Entry()
+        self.mimetype.set_text(self.element.mimetype)
+        self.mimetype.set_editable(self.mimetypeeditable)
+        hbox.pack_start(self.mimetype)
+        vbox.pack_start(hbox, expand=False)
+        
+        if self.element.mimetype == 'application/x-advene-ruleset':
+            self.contentform = EditRuleSetForm (self.element, 'model',
+                                                controller=self.controller)
+        else:
+            self.contentform = EditTextForm (self.element, 'data',
+                                             controller=self.controller)
+
+        vbox.add(self.contentform.get_view())
+        return vbox
+    
 class EditTextForm (EditForm):
     """Create a textview edit form for the given element."""
     def __init__ (self, element, field, controller=None):
@@ -760,7 +815,10 @@ class EditGenericForm(EditForm):
         hbox.pack_start(l, expand=False)
 
         self.entry=gtk.Entry()
-        self.entry.set_text(self.getter())
+        v=self.getter()
+        if v is None:
+            v=""
+        self.entry.set_text(v)
         hbox.pack_start(self.entry)
 
         hbox.show_all()
