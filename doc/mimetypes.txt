@@ -1,0 +1,19 @@
+Advene uses internally mimetypes to identify specific elements.
+
+* application/x-advene-ruleset
+
+  Mime-type for dynamic views.
+
+* application/x-advene-annotation-id 
+
+  Mime-type used to implement drag-n-drop of annotations.
+
+* application/x-advene-structured
+
+  Mime-type for structured content stored in a simple way
+  (keyword=content...). Annotations of this type can be parser by
+  the global method 'parsed'.
+ 
+* application/x-advene-simplequery
+
+  Simple query language based on ECA conditions.
