@@ -98,10 +98,9 @@ def format_time (val=0):
     @return: the formatted string
     @rtype: string
     """ 
-    t = long(val)
+    (s, ms) = divmod(long(val), 1000)
     # Format: HH:MM:SS.mmm
-    return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)),
-                       t % 1000)
+    return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
 
 def matching_relationtypes(package, ann1, ann2):
     """Return a list of relationtypes that can be used
@@ -142,10 +141,13 @@ def matching_relationtypes(package, ann1, ann2):
     #print "Matching: %s" % r
     return r
 
-def get_title(controller, element):
+def get_title(controller, element, representation=None):
     if isinstance(element, unicode) or isinstance(element, str):
         return element
     if isinstance(element, Annotation) or isinstance(element, Relation):
+        if representation is not None and representation != "":
+            c=controller.event_handler.build_context(event='Display', here=element)
+            return c.evaluateValue(representation)
         expr=element.type.getMetaData(config.data.namespace, "representation")
         if expr is None or expr == '':
             return element.content.data
@@ -171,6 +173,7 @@ def get_valid_members (el):
              in the TALES meaning.
     @rtype: list
     """
+    # FIXME: return only simple items if not in expert mode
     l = []
     try:
         l.extend(el.ids())
@@ -189,4 +192,28 @@ def get_valid_members (el):
     l.extend (advene.model.tal.context.AdveneContext.defaultMethods ())
 
     return l
+
+def import_element(package, element, controller):
+    p=package
+    if element.viewableClass == 'view':
+        v=p.importView(element)
+        p.views.append(v)
+        controller.notify("ViewCreate", view=v)
+    elif element.viewableClass == 'schema':
+        s=p.importSchema(element)
+        p.schemas.append(s)
+        controller.notify("SchemaCreate", schema=s)
+    else:
+        print "%s Not supported yet." % element.viewableClass
+
+def unimport_element(package, element, controller):
+    p=package
+    if element.viewableClass == 'view':
+        p.views.remove(element)
+        controller.notify("ViewDelete", view=v)
+    elif element.viewableClass == 'schema':
+        p.schemas.remove(s)
+        controller.notify("SchemaDelete", schema=s)
+    else:
+        print "%s Not supported yet." % element.viewableClass
 
