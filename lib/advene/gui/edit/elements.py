@@ -143,7 +143,7 @@ class EditElementPopup (object):
         def set_method(value):
             if value is None or value == "":
                 value=""
-            self.element.setMetaData(namespace, data, unicode(value))
+            element.setMetaData(namespace, data, unicode(value))
             return True
         return set_method
         
@@ -478,20 +478,16 @@ class EditAnnotationTypePopup (EditElementPopup):
                                        )
         vbox.add(f.get_view())
 
-        # FIXME: should be in a hidable frame 
-        f = EditGenericForm(title=_("Description"),
-                            getter=self.metadata_get_method(self.element,
-                                                            'description', namespaceid='dc'),
-                            setter=self.metadata_set_method(self.element, 'description',
-                                                            namespaceid='dc'),
-                            controller=self.controller)
+        # FIXME: should be in a hidable frame
+        f = EditMetaForm(title=_("Description"),
+                         element=self.element, name='description',
+                         namespaceid='dc', controller=self.controller)
         self.register_form(f)
         vbox.add(f.get_view())
 
-        f = EditGenericForm(title=_("Representation"),
-                            getter=self.metadata_get_method(self.element, 'representation'),
-                            setter=self.metadata_set_method(self.element, 'representation'),
-                            controller=self.controller)
+        f = EditMetaForm(title=_("Representation"),
+                         element=self.element, name='representation',
+                         controller=self.controller)
         self.register_form(f)
         vbox.add(f.get_view())
         
@@ -522,7 +518,7 @@ class EditRelationTypePopup (EditElementPopup):
                                        )
         return f.get_view ()
 
-class EditForm:
+class EditForm(object):
     """Generic EditForm class.
 
     This class defines the method that an EditForm is expected to
@@ -544,6 +540,24 @@ class EditForm:
         """Return the view (gtk Widget) for this form.
         """
         raise Exception ("This method should be implemented in subclasses.")
+
+    def metadata_get_method(self, element, data, namespaceid='advenetool'):
+        namespace = config.data.namespace_prefix[namespaceid]
+        def get_method():
+            expr=element.getMetaData(namespace, data)
+            if expr is None:
+                expr=""
+            return expr
+        return get_method
+
+    def metadata_set_method(self, element, data, namespaceid='advenetool'):
+        namespace = config.data.namespace_prefix[namespaceid]
+        def set_method(value):
+            if value is None or value == "":
+                value=""
+            element.setMetaData(namespace, data, unicode(value))
+            return True
+        return set_method
 
 class EditTextForm (EditForm):
     """Create a textview edit form for the given element."""
@@ -709,7 +723,7 @@ class EditGenericForm(EditForm):
         hbox = gtk.HBox()
 
         l=gtk.Label(self.title)
-        hbox.pack_start(l)
+        hbox.pack_start(l, expand=False)
 
         self.entry=gtk.Entry()
         self.entry.set_text(self.getter())
@@ -722,6 +736,16 @@ class EditGenericForm(EditForm):
         v=self.entry.get_text()
         self.setter(v)
         return True
+    
+class EditMetaForm(EditGenericForm):
+    def __init__(self, title=None, element=None, name=None,
+                 namespaceid='advenetool', controller=None):
+        getter=self.metadata_get_method(element, name, namespaceid)
+        setter=self.metadata_set_method(element, name, namespaceid)
+        super(EditMetaForm, self).__init__(title=title,
+                                           getter=getter,
+                                           setter=setter,
+                                           controller=controller)
     
 class EditAttributesForm (EditForm):
     """Creates an edit form for the given element."""
