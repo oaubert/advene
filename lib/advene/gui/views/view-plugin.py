@@ -86,14 +86,16 @@ class ViewPlugin:
         """
         pass
     
-    def update_annotation (self, annotation):
+    def update_annotation (self, annotation=None, event=None):
         """Update the representation of the given annotation.
 
         This should be called when the annotation data or metadata has
         been modified.
 
         @param annotation: the activated annotation
-        @type annotation: advene.model.annotation.Annotation        
+        @type annotation: advene.model.annotation.Annotation
+        @param event: the precise event (AnnotationCreate, AnnotationEditEnd, AnnotationDelete)
+        @type event: advene.rules.elements.Event
         """
         pass
 
@@ -113,13 +115,17 @@ class ViewPlugin:
         """
         pass
 
-    def update_relation (self, relation):
+    # Note: similar methods exist for annotationtype, relationtype, schema, view
+    def update_relation (self, relation=None, event=None):
         """Update the representation of the given relation.
 
         This should be called when the relation data or metadata has
         been modified.
 
         @param relation: the activated relation
-        @type relation: advene.model.annotation.Relation
+        @type relation: advene.model.relation.Relation
+        @param event: the precise event (RelationCreate, RelationEditEnd, RelationDelete)
+        @type event: advene.rules.elements.Event
         """
         pass
+    
