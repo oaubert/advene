@@ -127,7 +127,9 @@ class Config(object):
                             'treeview': (800, 600),
                             'browserview': (800, 600),
                             },
-            'gui': { 'popup-textwidth': 40 }
+            'gui': { 'popup-textwidth': 40 },
+            # File history
+            'history': [],
             }
 
         # Player options
