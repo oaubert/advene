@@ -53,6 +53,7 @@ import advene.gui.edit.dvdselect
 import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.evaluator
+import advene.gui.views.singletonpopup
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -386,6 +387,10 @@ class AdveneGUI (Connect):
                         }
             ))
 
+        # Create the SingletonPopup instance
+        self.singletonpopup=advene.gui.views.singletonpopup.SingletonPopup(controller=self.controller,
+                                            autohide=False)
+
         # We add a Treeview in the main app window
         tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                 controller=self.controller)
@@ -678,19 +683,14 @@ class AdveneGUI (Connect):
             message=context.evaluateValue(parameters['message'])
         else:
             message=_("No message...")
-        dialog = gtk.MessageDialog(
-            None, gtk.DIALOG_DESTROY_WITH_PARENT,
-            gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
-            message)
-        dialog.connect("response", lambda w,e: dialog.destroy())
-        response=dialog.show()
+        l = gtk.Label(message)
+        self.singletonpopup.display(l)
         return True
 
     def action_popup_goto (self, context, parameters):
-        def handle_response(widget, response, position, dialog):
-            if response == gtk.RESPONSE_OK:
-                self.controller.update_status("set", position)
-            dialog.destroy()
+        def handle_response(button, position):
+            self.controller.update_status("set", position)
+            self.singletonpopup.undisplay()
             return True
 
         if parameters.has_key('message'):
@@ -701,43 +701,32 @@ class AdveneGUI (Connect):
             position=long(context.evaluateValue(parameters['position']))
         else:
             position=0
-        dialog = gtk.MessageDialog(
-            None, gtk.DIALOG_DESTROY_WITH_PARENT,
-            gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL,
-            message)
-        dialog.connect("response", handle_response, position, dialog)
-        dialog.show()
+        b=gtk.Button(message)
+        b.connect("clicked", handle_response, position)
+        self.singletonpopup.display(b)
         return True
 
     def generate_action_popup_goton(self, size):
         def generate (context, parameters):
             """Display a popup with 'size' choices."""
-            description=context.evaluateValue(parameters['description'])
-            message=range(size+1)
-            position=range(size+1)
-            for i in range(1, size+1):
-                message[i]=context.evaluateValue(parameters['message%d' % i])
-                position[i]=context.evaluateValue(parameters['position%d' % i])
-
-            def handle_response(widget, response, dialog):
-                if response > 0:
-                    self.controller.update_status("set", long(position[response]))
-                dialog.destroy()
+            def handle_response(button, position):
+                self.controller.update_status("set", long(position))
+                self.singletonpopup.undisplay()
                 return True
 
-            buttons=[]
+            vbox=gtk.VBox()
+
+            description=context.evaluateValue(parameters['description'])
+            vbox.add(gtk.Label(description))
+
             for i in range(1, size+1):
-                buttons.extend( (message[i].encode('utf8'), i) )
-            buttons.extend( (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ) )
-            
-            dialog = gtk.Dialog(title=_("Make a choice"),
-                                parent=None,
-                                flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                                buttons=tuple(buttons))
-            l=gtk.Label(description)
-            dialog.vbox.add(l)
-            dialog.connect("response", handle_response, dialog)
-            dialog.show_all()
+                message=context.evaluateValue(parameters['message%d' % i])
+                position=context.evaluateValue(parameters['position%d' % i])
+                b=gtk.Button(message)
+                b.connect("clicked", handle_response, position)
+                vbox.add(b)
+
+            self.singletonpopup.display(vbox)
             return True
         return generate
 
