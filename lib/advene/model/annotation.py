@@ -160,7 +160,7 @@ class Annotation(modeled.Importable, content.WithContent,
             raise TypeError("can not set fragment to unknownFragment")
         if fragment.isBounded():
             raise TypeError("can not affect bounded fragment "+\
-                            "(you propbably want to clone it before)")
+                            "(you probably want to clone it before)")
         old = self.__getFragmentElement()
         fragment._bound(old)
 
