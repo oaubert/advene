@@ -150,6 +150,12 @@ class EditRuleSet(EditGeneric):
             #print "Should create the rule: %s" % xml
             rule=Rule()
             rule.from_xml_string(xml, catalog=self.catalog)
+            name=rule.name
+            l = [ r for r in self.model if r.name == name ]
+            while l:
+                name = "%s1" % name
+                l = [ r for r in self.model if r.name == name ]
+            rule.name = name
             self.add_rule(rule)
         else:
             print "Unknown target type for drop: %d" % targetType
