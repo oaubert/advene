@@ -672,15 +672,16 @@ class AdveneGUI (Connect):
         @type message: string
         """
         if parameters.has_key('message'):
-            message=context.evaluateValue(parameters['message'])
+            message=context.evaluateValue(parameters['message']).replace('\\n', '\n')
         else:
             message=_("No message...")
+        
         self.log (message)
         return True
 
     def action_popup (self, context, parameters):
         if parameters.has_key('message'):
-            message=context.evaluateValue(parameters['message'])
+            message=context.evaluateValue(parameters['message']).replace('\\n', '\n')
         else:
             message=_("No message...")
         l = gtk.Label(message)
@@ -694,7 +695,7 @@ class AdveneGUI (Connect):
             return True
 
         if parameters.has_key('message'):
-            message=context.evaluateValue(parameters['message'])
+            message=context.evaluateValue(parameters['message']).replace('\\n', '\n')
         else:
             message=_("Click OK to go to another position")
         if parameters.has_key('position'):
@@ -716,11 +717,11 @@ class AdveneGUI (Connect):
 
             vbox=gtk.VBox()
 
-            description=context.evaluateValue(parameters['description'])
+            description=context.evaluateValue(parameters['description']).replace('\\n', '\n')
             vbox.add(gtk.Label(description))
 
             for i in range(1, size+1):
-                message=context.evaluateValue(parameters['message%d' % i])
+                message=context.evaluateValue(parameters['message%d' % i]).replace('\\n', '\n')
                 position=context.evaluateValue(parameters['position%d' % i])
                 b=gtk.Button(message)
                 b.connect("clicked", handle_response, position)
