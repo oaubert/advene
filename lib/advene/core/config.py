@@ -90,7 +90,7 @@ class Config(object):
                 # Advene data files default path
                 'data': self.get_homedir(),
                 # Imagecache save directory
-                'imagecache': os.getenv('TEMP'),
+                'imagecache': os.getenv('TEMP') or 'c:\\',
                 # Web data files
                 'web': 'c:\\Program Files\\Advene\\share\\web'
                 }
