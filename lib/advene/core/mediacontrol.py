@@ -33,7 +33,10 @@ class PlayerFactory:
 
     def nativevlc_win32_import(self):
         # Try to determine wether VLC is installed or not
-        vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','Path')
+        vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','InstallDir')
+        if vlcpath is None:
+            # Try the Path key
+            vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','Path')
 
         # FIXME: Hack: for local versions of VLC (development tree)
         # You should define the correct path in advene.ini
