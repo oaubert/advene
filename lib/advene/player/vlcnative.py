@@ -100,8 +100,9 @@ class Player(object):
     def __init__ (self):
         """Wrapper initialization.
         """
-        # FIMXE: pass options
-        self.mc = VLC.MediaControl() # config.data.player_args)
+        # FIXME: pass options
+#        self.mc = VLC.MediaControl( [ '--filter', 'clone', '--clone-vout-list', 'snapshot,x11' ])
+        self.mc = VLC.MediaControl( [ '--vout', 'x11' ] )
 
         # 0 relative position
         pos = VLC.Position ()
@@ -208,8 +209,8 @@ class Player(object):
             self.current_position_value = 0
             self.url=''
 
-    def dvd_uri(self, chapter=None, title=None):
-        return "dvdsimple:///dev/dvd@%s:%s" % (str(chapter), str(title))
+    def dvd_uri(self, title=None, chapter=None):
+        return "dvdsimple:///dev/dvd@%s:%s" % (str(title), str(chapter))
 
     def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
