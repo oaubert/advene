@@ -11,6 +11,7 @@ import cStringIO
 import os
 
 import advene.core.config as config
+import advene.core.version
 
 import gettext
 gettext.install('advene', unicode=True)
@@ -30,7 +31,7 @@ import advene.core.controller
 import advene.rules.elements
 import advene.rules.ecaengine
 
-from advene.model.package import Package 
+from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.fragment import MillisecondFragment
@@ -58,13 +59,13 @@ class Connect:
 
     Abstract class defining helper functions to interconnect
     glade XML files and methods of a python class.
-    """    
+    """
     def create_dictionary (self):
         """Create a (name, function) dictionary for the current class."""
         d = {}
         self.create_dictionary_for_class (self.__class__, d)
         return d
-    
+
     def create_dictionary_for_class (self, a_class, dict):
         """Create a (name, function) dictionary for the specified class."""
         bases = a_class.__bases__
@@ -81,7 +82,7 @@ class Connect:
         """Generic hide() method."""
         widget.hide ()
         return True
-        
+
 class AdveneGUI (Connect):
     """Main GUI class.
 
@@ -89,7 +90,7 @@ class AdveneGUI (Connect):
       - L{__init__} and L{main} : GUI initialization
       - L{update_display} : method regularly called to refresh the display
       - L{on_win_key_press_event} : key press handling
-      
+
     @ivar current_type: the edited annotations will be created with this type
     @type current_type: advene.model.AnnotationType
     @ivar gui: the GUI model from libglade
@@ -98,7 +99,7 @@ class AdveneGUI (Connect):
     @ivar gui.fs: the fileselector widget
     @ivar gui.current_annotation: the current annotation text widget
     @ivar gui.player_status: the player_status widget
-    
+
     @ivar oldstatus: a status cache to check whether a GUI update is necessary
     @ivar imagecache: the current imagecache
     @type imagecache: imagecache.ImageCache
@@ -108,7 +109,7 @@ class AdveneGUI (Connect):
 
     @ivar last_slow_position: a cache to check whether a GUI update is necessary
     @type last_slow_position: int
-    
+
     @ivar preferences: the current preferences
     @type preferences: dict
 
@@ -116,7 +117,7 @@ class AdveneGUI (Connect):
     @type webbrowser: webbrowser
 
     """
-    
+
     def __init__ (self):
         """Initializes the GUI and other attributes.
 
@@ -130,7 +131,7 @@ class AdveneGUI (Connect):
         gtk.glade.textdomain(gettext.textdomain())
         self.gui = gtk.glade.XML(gladefile, domain=gettext.textdomain())
         self.connect (self.gui)
-        
+
         # Frequently used GUI widgets
         self.gui.logmessages = self.gui.get_widget("logmessages")
         self.gui.slider = self.gui.get_widget ("slider")
@@ -139,13 +140,17 @@ class AdveneGUI (Connect):
         # but we display it in ms
         self.gui.slider.connect ("format-value", self.format_slider_value)
 
+        # About box
+        self.gui.get_widget('about_web_button').set_label("Advene %s"
+                                                          % advene.core.version.version)
+        
         # Combo box
         type_combo=self.gui.get_widget ("current_type_combo")
         type_combo.list.connect ("selection-changed", self.on_current_type_changed)
 
         # Populate default STBV menu
         self.update_stbv_menu()
-        
+
         # Declaration of the fileselector
         self.gui.fs = gtk.FileSelection ("Select a file")
         self.gui.fs.ok_button.connect_after ("clicked", lambda win: self.gui.fs.hide ())
@@ -167,14 +172,14 @@ class AdveneGUI (Connect):
         self.oldstatus = "NotStarted"
 
         self.webbrowser = webbrowser.get ()
-        
+
         # Current Annotation (when defining a new one)
         self.annotation = None
 
         self.navigation_history=[]
-        
+
         self.last_slow_position = 0
-        
+
         # List of active annotation views (timeline, tree, ...)
         self.annotation_views = []
 
@@ -188,7 +193,7 @@ class AdveneGUI (Connect):
         """
         self.controller.activate_stbv(view)
         return True
-       
+
     def annotation_lifecycle(self, context, parameters):
         """Method used to update the active views.
 
@@ -234,9 +239,9 @@ class AdveneGUI (Connect):
             # Not ideal (we could edit the non-activated view) but it is
             # better for the general case (use of the Edit button)
             self.controller.activate_stbv(view)
-            
+
         return True
-    
+
     def query_lifecycle(self, context, parameters):
         """Method used to update the active views.
 
@@ -250,7 +255,7 @@ class AdveneGUI (Connect):
             except AttributeError:
                 pass
         return True
-    
+
     def schema_lifecycle(self, context, parameters):
         """Method used to update the active views.
 
@@ -265,7 +270,7 @@ class AdveneGUI (Connect):
                 pass
 
         return True
-    
+
     def annotationtype_lifecycle(self, context, parameters):
         """Method used to update the active views.
 
@@ -281,7 +286,7 @@ class AdveneGUI (Connect):
         # Update the current type menu
         self.update_gui()
         return True
-    
+
     def relationtype_lifecycle(self, context, parameters):
         """Method used to update the active views.
 
@@ -299,7 +304,7 @@ class AdveneGUI (Connect):
     def on_view_activation(self, context, parameters):
         self.update_stbv_menu()
         return True
-    
+
     def updated_position_cb (self, context, parameters):
         position_before=context.evaluateValue('position_before')
         # Note: it works for the moment only because we take an
@@ -312,7 +317,7 @@ class AdveneGUI (Connect):
         self.navigation_history.append(position_before)
         print "New navigation history: %s" % self.navigation_history
         return True
-    
+
     def main (self, args=None):
         """Mainloop : Gtk mainloop setup.
 
@@ -399,9 +404,9 @@ class AdveneGUI (Connect):
 
         self.controller.event_handler.internal_rule (event="ViewActivation",
                                                      method=self.on_view_activation)
-        
+
         self.controller.init(args)
-        
+
         if config.data.webserver['mode'] == 1:
             self.log(_("Using Mainloop input handling for webserver..."))
             gtk.input_add (self.controller.server,
@@ -421,11 +426,11 @@ class AdveneGUI (Connect):
         @type val: int
         @return: the formatted string
         @rtype: string
-        """ 
+        """
         (s, ms) = divmod(long(val), 1000)
         # Format: HH:MM:SS.mmm
         return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
-       
+
     def format_slider_value (self, slider=None, val=0):
         """Formats a value (in milliseconds) into a time string.
 
@@ -450,7 +455,7 @@ class AdveneGUI (Connect):
         else:
             self.current_type = None
             self.gui.get_widget ("current_type_combo").entry.set_text (_("None"))
-            
+
     def on_edit_current_stbv_clicked(self, button):
         widget = self.gui.get_widget("stbv_combo").get_menu().get_active()
         stbv=widget.get_data("stbv")
@@ -475,7 +480,7 @@ class AdveneGUI (Connect):
         else:
             pop.edit ()
         return True
-    
+
     def update_stbv_menu (self):
         """Update the STBV menu."""
         stbv_menu = self.gui.get_widget("stbv_combo").get_menu()
@@ -488,7 +493,7 @@ class AdveneGUI (Connect):
 
 
         current_stbv_index=0
-        
+
         default_item = gtk.MenuItem(_("None"))
         default_item.set_data("stbv", None)
         default_item.connect("activate", self.update_stbv, None)
@@ -519,7 +524,7 @@ class AdveneGUI (Connect):
         new view or type is created, or when an existing one is
         modified, in order to reflect changes.
         """
-        
+
         # Update the available types list
         available_types = self.controller.package.annotationTypes
         # Update the combo box
@@ -547,10 +552,10 @@ class AdveneGUI (Connect):
 
         self.update_stbv_menu()
         return
-        
+
     def manage_package_load (self, context, parameters):
         """Event Handler executed after loading a package.
-        
+
         self.controller.package should be defined.
 
         @return: a boolean (~desactivation)
@@ -566,13 +571,13 @@ class AdveneGUI (Connect):
                 v.update_model(self.controller.package)
             except AttributeError:
                 pass
-        
+
         return True
-    
+
     def handle_http_request (self, source, condition):
         """Handle a HTTP request.
 
-        This method is used if config.data.webserver['mode'] == 1.  
+        This method is used if config.data.webserver['mode'] == 1.
         """
         # Make sure that all exceptions are catched, else the gtk mainloop
         # will not execute update_display.
@@ -584,7 +589,7 @@ class AdveneGUI (Connect):
             e, v, tb = sys.exc_info()
             code.traceback.print_exception (e, v, tb)
         return True
-        
+
     def log (self, msg):
         """Add a new log message to the logmessage window.
 
@@ -632,7 +637,7 @@ class AdveneGUI (Connect):
                 self.controller.update_status("set", position)
             dialog.destroy()
             return True
-        
+
         if parameters.has_key('message'):
             message=context.evaluateValue(parameters['message'])
         else:
@@ -730,7 +735,7 @@ class AdveneGUI (Connect):
         """
         self.unregister_view (view)
         widget.destroy ()
-        
+
     def popup_evaluator(self, *p, **kw):
         p=self.controller.package
         try:
@@ -745,7 +750,7 @@ class AdveneGUI (Connect):
                                                 'c': self.controller })
         ev.popup()
         return True
-    
+
     def update_display (self):
         """Update the interface.
 
@@ -773,7 +778,7 @@ class AdveneGUI (Connect):
             e, v, tb = sys.exc_info()
             code.traceback.print_exception (e, v, tb)
             return True
-        
+
         if self.slider_move:
             # FIXME: we could have a cache of key images (i.e. 50 equidistant
             # snapshots, and display them to make the navigation in the
@@ -788,7 +793,7 @@ class AdveneGUI (Connect):
 
             if self.gui.slider.get_value() != pos:
                 self.gui.slider.set_value(pos)
-                        
+
             if self.controller.player.status != self.oldstatus:
                 self.oldstatus = self.controller.player.status
                 self.gui.player_status.set_text (repr(self.controller.player.status)[:-6])
@@ -796,7 +801,7 @@ class AdveneGUI (Connect):
             if (self.annotation is not None
                 and self.annotation.content.data != self.gui.current_annotation.get_text()):
                 self.gui.current_annotation.set_text (self.annotation.content.data)
-                
+
             # Update the position mark in the registered views
             if (abs(self.last_slow_position - pos) > config.data.slow_update_delay
                 or pos < self.last_slow_position):
@@ -806,7 +811,7 @@ class AdveneGUI (Connect):
                         v.update_position (pos)
                     except AttributeError:
                         pass
-                
+
         else:
             self.gui.slider.set_value (0)
             if self.controller.player.status != self.oldstatus:
@@ -840,13 +845,13 @@ class AdveneGUI (Connect):
             dialog.destroy()
             if response != gtk.RESPONSE_YES:
                 return False
-            
+
         self.controller.on_exit()
         gtk.main_quit()
         return True
 
     # Callbacks function. Skeletons can be generated by glade2py
-    
+
     def on_win_key_press_event (self, win=None, event=None):
         """Keypress handling."""
         # Control-shortcuts
@@ -870,7 +875,7 @@ class AdveneGUI (Connect):
                 pass
             else:
                 return False
-            
+
         if event.keyval == gtk.keysyms.Return:
             # Non-pausing annotation mode
             c=self.controller
@@ -883,7 +888,7 @@ class AdveneGUI (Connect):
                 f = MillisecondFragment (begin=c.player.current_position_value--config.data.reaction_time,
                                          duration=30000)
                 self.annotation = c.package.createAnnotation(type = self.current_type,
-                                                             fragment=f)                
+                                                             fragment=f)
                 self.log (_("Defining a new annotation..."))
                 self.controller.notify ("AnnotationCreate", annotation=self.annotation)
             else:
@@ -905,7 +910,7 @@ class AdveneGUI (Connect):
                     f = MillisecondFragment (begin=c.player.current_position_value-config.data.reaction_time,
                                              duration=30000)
                     self.annotation = c.package.createAnnotation(type = self.current_type,
-                                                                 fragment=f)                
+                                                                 fragment=f)
                     self.log (_("Defining a new annotation..."))
                     self.controller.notify ("AnnotationCreate", annotation=self.annotation)
                 if c.player.status == c.player.PauseStatus:
@@ -946,7 +951,7 @@ class AdveneGUI (Connect):
         elif event.keyval == gtk.keysyms.Left:
             self.controller.move_position (-config.data.preferences['time_increment'])
             return True
-        elif event.keyval == gtk.keysyms.Home:            
+        elif event.keyval == gtk.keysyms.Home:
             self.controller.update_status ("set", self.controller.create_position (0))
             return True
         elif event.keyval == gtk.keysyms.End:
@@ -1046,7 +1051,7 @@ class AdveneGUI (Connect):
         window.set_title (self.controller.package.title or "???")
 
         vbox = gtk.VBox()
-        
+
         window.add (vbox)
 
         duration = self.controller.cached_duration
@@ -1055,7 +1060,7 @@ class AdveneGUI (Connect):
                 duration = max([a.fragment.end for a in self.controller.package.annotations ])
             else:
                 duration = 0
-            
+
         t = advene.gui.views.timeline.TimeLine (self.controller.package.annotations,
                                                 minimum=0,
                                                 maximum=duration,
@@ -1084,13 +1089,13 @@ class AdveneGUI (Connect):
 
         hbox.add (t.highlight_activated_toggle)
         hbox.add (t.scroll_to_activated_toggle)
-        
+
         b = gtk.Button (stock=gtk.STOCK_OK)
         b.connect ("clicked", self.close_view_cb, window, t)
         hbox.add (b)
-        
+
         vbox.set_homogeneous (False)
-        
+
         window.connect ("destroy", self.close_view_cb, window, t)
 
         self.register_view (t)
@@ -1103,7 +1108,7 @@ class AdveneGUI (Connect):
         # fraction widget value
         t.display_fraction_event (window,
                                   fraction=fraction_adj.value)
-                
+
         return True
 
     def on_edit_ruleset1_activate (self, button=None, data=None):
@@ -1113,7 +1118,7 @@ class AdveneGUI (Connect):
         w.connect ("destroy", lambda e: w.destroy())
 
         vbox=gtk.VBox()
-        vbox.set_homogeneous (False)    
+        vbox.set_homogeneous (False)
         w.add(vbox)
 
         rs = self.controller.event_handler.get_ruleset('default')
@@ -1166,7 +1171,7 @@ class AdveneGUI (Connect):
         window.connect ("destroy", self.close_view_cb, window, self.logwindow)
         window.show_all()
         return True
-        
+
     def on_view_annotations_activate (self, button=None, data=None):
         """Open treeview view plugin."""
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -1221,7 +1226,7 @@ class AdveneGUI (Connect):
         else:
             self.log (("No current package"))
         return True
-    
+
     def on_about1_activate (self, button=None, data=None):
         """Activate the About window."""
         self.gui.get_widget("about").show ()
@@ -1231,7 +1236,7 @@ class AdveneGUI (Connect):
         """Hide the About window."""
         self.gui.get_widget("about").hide ()
 	return True
-        
+
     def on_b_rewind_clicked (self, button=None, data=None):
         if self.controller.player.status == self.controller.player.PlayingStatus:
             self.controller.move_position (-config.data.preferences['time_increment'])
@@ -1266,11 +1271,11 @@ class AdveneGUI (Connect):
         """Play a DVD."""
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.set_title(_("Title/Chapter selection"))
-        
+
         window.connect ("destroy", lambda e: window.destroy())
 
         vbox=gtk.VBox()
-        
+
         sel=advene.gui.edit.dvdselect.DVDSelect(controller=self.controller,
                                                 current=self.controller.get_default_media())
         vbox.add(sel.get_widget())
@@ -1291,7 +1296,7 @@ class AdveneGUI (Connect):
             sel.get_widget().destroy()
             window.destroy()
             return True
-            
+
         b=gtk.Button(stock=gtk.STOCK_OK)
         b.connect("clicked", validate, sel, window)
         hbox.add(b)
@@ -1305,14 +1310,14 @@ class AdveneGUI (Connect):
         window.show_all()
 
         return True
-    
+
     def on_b_exit_clicked (self, button=None, data=None):
         self.on_exit (button, data)
 	return True
 
     def on_package_properties1_activate (self, button=None, data=None):
         self.gui.get_widget ("prop_author_id").set_text (self.controller.package.author)
-        self.gui.get_widget ("prop_date").set_text (self.controller.package.date)        
+        self.gui.get_widget ("prop_date").set_text (self.controller.package.date)
         self.gui.get_widget ("prop_media").set_text (self.controller.get_default_media() or "")
         self.gui.get_widget ("prop_title").set_text (self.controller.package.title or "")
 
@@ -1381,7 +1386,7 @@ class AdveneGUI (Connect):
             config.data.player['verbose'] = None
         self.restart_player ()
         return True
-    
+
     def on_player_properties_ok_clicked (self, button=None, data=None):
         self.on_player_properties_apply_clicked ()
         self.gui.get_widget ("playerproperties").hide ()
@@ -1432,11 +1437,11 @@ class AdveneGUI (Connect):
         self.controller.start_update_snapshots(progress_callback=update_progress_callback,
                                                stop_callback=stop_callback)
         return True
-    
+
     def on_update_snapshots_stop_clicked (self, button=None, data=None):
         self.controller.stop_update_snapshots()
         return True
-    
+
     def on_update_snapshots_ok_clicked (self, button=None, data=None):
         self.controller.stop_update_snapshots()
         self.gui.get_widget ("update-snapshots").hide ()
@@ -1449,7 +1454,11 @@ class AdveneGUI (Connect):
             self.webbrowser.open (help)
         # FIXME: display a warning if not found
         return True
-    
+
+    def on_about_web_button_clicked(self, button=None, data=None):
+        self.webbrowser.open('http://liris.cnrs.fr/advene/')
+        return True
+
 if __name__ == '__main__':
     v = AdveneGUI ()
     try:
