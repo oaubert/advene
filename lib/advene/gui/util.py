@@ -209,14 +209,6 @@ def get_filename(title="Open a file",
         return True
 
     def do_preview(button):
-        def format_item(name, plural, length):
-            if length == 0:
-                return _("No %s") % name
-            elif length == 1:
-                return _("1 %s") % name
-            else:
-                return _("%d %s") % (length, plural)
-            
         if hasattr(button, '_filename') and button._filename:
             button.set_label(_("Wait..."))
             try:
@@ -234,13 +226,13 @@ def get_filename(title="Open a file",
 Description:
 %s
 """) % (p.title,
-        format_item(_('schema'), _('schemas'), len(p.schemas)),
-        format_item(_('annotation'), _('annotations'), len(p.annotations)),
-        format_item(_('annotation type'), _('annotation types'), len(p.annotationTypes)),
-        format_item(_('relation'), _('relations'), len(p.relations)),
-        format_item(_('relation type'), _('relation types'), len(p.relationTypes)),
-        format_item(_('query'), _('queries'), len(p.queries)),
-        format_item(_('view'), _('views'), len(p.views)),
+        vlclib.format_element_name('schema', len(p.schemas)),
+        vlclib.format_element_name('annotation', len(p.annotations)),
+        vlclib.format_element_name('annotation_type', len(p.annotationTypes)),
+        vlclib.format_element_name('relation', len(p.relations)),
+        vlclib.format_element_name('relation_type', len(p.relationTypes)),
+        vlclib.format_element_name('query', len(p.queries)),
+        vlclib.format_element_name('view', len(p.views)),
         p.getMetaData(config.data.namespace_prefix['dc'],
                       'description'))
         
