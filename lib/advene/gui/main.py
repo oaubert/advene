@@ -809,7 +809,7 @@ class AdveneGUI (Connect):
 
         f=self.controller.package.uri
         h=config.data.preferences['history']
-        if not f in h:
+        if not f in h and not f.endswith('new_pkg'):
             h.append(f)
             self.append_file_history_menu(f)
             # Keep the 5 last elements
