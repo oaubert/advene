@@ -174,13 +174,17 @@ class ECAEngine:
         """
         if isinstance(action, advene.rules.elements.ActionList):
             for a in action:
-                self.schedule(a, context)
+                self.schedule(a, context, delay)
             return
         
         if action.immediate:
             action.execute(context)
         else:
-            self.scheduler.enter(delay, 0, action.execute, (context,))
+            #print "Scheduling %s with delay %f" % (action.name, delay)
+            if delay:
+                self.scheduler.enterabs(time.time()+delay, 0, action.execute, (context,))
+            else:
+                self.scheduler.enter(delay, 0, action.execute, (context,))
             if not self.schedulerthread.isAlive():
                 self.schedulerthread.run()
 
@@ -289,6 +293,9 @@ class ECAEngine:
         @type *param: misc
         @param **kw: additionnal named parameters
         @type **kw: depending on the context
+
+        A special named parameter is delay, which will be given in ms.
+        It contains the delay to apply to the rule execution.
         """
         #print "notify %s for %s" % (event_name, str(kw))
 
@@ -297,6 +304,12 @@ class ECAEngine:
         # maybe more effective way to implement it
         if event_name in self.modifying_events:
             self.controller.modified=True
+
+        delay=0
+        if kw.has_key('delay'):
+            delay=long(kw['delay']) / 1000.0
+            del kw['delay']
+            print "Delay specified: %f" % delay
             
         context=self.build_context(event_name, **kw)
         try:
@@ -308,4 +321,4 @@ class ECAEngine:
                   for rule in a
                   if rule.condition.match(context) ]
         for action in actions:
-            self.schedule(action, context)
+            self.schedule(action, context, delay=delay)
