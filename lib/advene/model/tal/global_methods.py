@@ -3,6 +3,8 @@ This module contains all the global methods to be automatically added to a new
 AdveneContext.
 Note that those method must import every module they need _inside_ their body in
 order to prevent cyclic references.
+
+If called on an invalid target, the method should return None.
 """
 
 def absolute_url(target, context):
@@ -42,13 +44,15 @@ def absolute_url(target, context):
     if path is None:
         if context is None:
             return None
-        resolved_stack = context.locals['__resolved_stack'].value()
+        #resolved_stack = context.locals['__resolved_stack'].value()
+        resolved_stack = context.locals['__resolved_stack']
         if resolved_stack is None or len (resolved_stack) == 0:
             return None
         suffix = [resolved_stack[0][0]]
         for i in resolved_stack[1:]:
             name, obj = i
-            path = _abs_url (obj.value())
+            #path = _abs_url (obj.value())
+            path = _abs_url (obj)
             if path is not None:
                 path = "%s/%s" % (path, "/".join (suffix))
                 break
@@ -56,7 +60,8 @@ def absolute_url(target, context):
                 suffix.insert (0, name)
        
     if path is not None and context is not None:
-        options = context.globals['options'].value()
+        #options = context.globals['options'].value()
+        options = context.globals['options']
         if options.has_key('package_url'):
             path = '%s%s' % (options['package_url'], path)
     return path
@@ -150,7 +155,8 @@ def meta(target, context):
     class MetaNSWrapper(object):
         def __init__(self, target, context):
             self.__target = target
-            options = context.globals['options'].value()
+            #options = context.globals['options'].value()
+            options = context.globals['options']
             self.__ns_dict = options.get('namespace_prefix', {})
     
         def has_key(self, key):
@@ -197,13 +203,16 @@ def view(target, context):
             self._context = context
 
         def __call__ (self):
+            print "Calling ViewWrapper on %s" % self._target
             return self._target.view (context=self._context)
     
         def has_key (self, key):
+            print "Calling has_key(%s) on %s" % (key, self._target)
             v = self._target._find_named_view (key, self._context)
             return v is not None
 
         def __getitem__ (self, key):
+            print "Calling getitem(%s) on %s" % (key, self._target)
             #print "getitem %s" % key
             def render ():
                 return self._target.view (view_id=key, context=self._context)
@@ -245,7 +254,8 @@ def snapshot_url (target, context):
     else:
         return None
     
-    options = context.globals['options'].value()
+    #options = context.globals['options'].value()
+    options = context.globals['options']
     return "%s/options/snapshot/%s" % (options['package_url'],
                                        str(begin))
 
@@ -414,7 +424,9 @@ def query(target, context):
                 if q.content.mimetype == 'application/x-advene-simplequery':
                     qexpr=advene.rules.elements.Query()
                     qexpr.from_dom(q.content.model)
-                    self._context.addLocals( [ ('here', self._target) ] )
+                    #self._context.addLocals( [ ('here', self._target) ] )
+                    self._context.pushLocals()
+                    self._context.setLocal('here', self._target)
                     res=qexpr.execute(context=self._context)
                     self._context.popLocals()
                     return res
