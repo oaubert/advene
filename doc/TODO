@@ -1,3 +1,5 @@
+* GUI for advene.util.importer
+
 * Le modele devrait verifier la validité des données (pas d'id en double)
 
 * Add access to package duration from TALES
@@ -15,14 +17,6 @@ exception)
 * EditAnnotationPopup: implement Next and Previous
 
 * Register all editing popup windows to close them upon package reload
-
-* Timeadjustment: 
-  Button "Play from here" to visualize current time
-  Button "Use current time" on begin/end to set to the current time
-  Button "Update snapshot"
-
-* Popup menu for annotations: add a subtree to access relations and
-  related annotations
 
 * Treeview: ajouter les attributs des éléments en fils d'annotation (relation, etc)
 
@@ -44,23 +38,16 @@ elements suivant id
 * player: implemented dvd_uri(chapter, title) that returns a valid DVD
 uri for the given player
 
-* Fix bug in queries: the context is not inherited by the query method, so
-  here gets reset to another value
-
 * MediaControl.idl: get_capabilities() returning a list of
   capabilities ("snapshot", "caption", "svg")
 
 * Clean the mediafile handling. It should be stored in fragments, or
-at least all fragments should be scan upon package loading to
+at least all fragments should be scanned upon package loading to
 determine the available stream(s) and propose them to the user.
-
-* Fix slider update (movie duration) 
 
 * Interface with http://www.archive.org/movies/ (XML files)
 
 * VLC: zoom functionality (crop?)
-
-* Architecture generique d'import d'annotations externes (annotations, schemas)
 
 * Convertisseur ELAN (http://www.mpi.nl/tools/elan.html) , Anvil
 
@@ -454,3 +441,19 @@ events) -> DONE
 * setup.py: build share/web/user.html from doc/user.txt -> DONE
 
 * webserver: implement /media/stbv -> DONE
+
+* Fix bug in queries: the context is not inherited by the query method, so
+  here gets reset to another value -> DONE
+
+* Fix slider update (movie duration)  -> DONE
+
+* Popup menu for annotations: add a subtree to access relations and
+  related annotations -> DONE
+
+* Timeadjustment: 
+  Button "Play from here" to visualize current time
+  Button "Use current time" on begin/end to set to the current time
+  Button "Update snapshot" -> DONE
+
+* Architecture generique d'import d'annotations externes (annotations, schemas) -> DONE
+
