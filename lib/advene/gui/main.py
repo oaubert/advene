@@ -187,6 +187,19 @@ class AdveneGUI (Connect):
         self.controller.activate_stbv(view)
         return True
 
+    def deleted_annotation_cb(self, context, parameters): 
+        """Method used to update the active views.
+
+        It will propagate the event.
+        """
+        annotation=context.evaluateValue('annotation')
+        for v in self.annotation_views:
+            try:
+                v.delete_annotation(annotation)
+            except AttributeError:
+                pass
+        return True
+       
     def updated_annotation_cb(self, context, parameters):
         """Method used to update the active views.
 
@@ -249,6 +262,8 @@ class AdveneGUI (Connect):
                                                      method=self.manage_package_load)
         self.controller.event_handler.internal_rule (event="AnnotationEditEnd",
                                                      method=self.updated_annotation_cb)
+        self.controller.event_handler.internal_rule (event="AnnotationDelete",
+                                                     method=self.deleted_annotation_cb)
         self.controller.event_handler.internal_rule (event="RelationEditEnd",
                                                      method=self.updated_relation_cb)
         self.controller.event_handler.internal_rule (event="ViewEditEnd",
@@ -533,11 +548,19 @@ class AdveneGUI (Connect):
             #    pop.edit ()
             #return True
 
-        def popup_goto (win, ann, controller):
-            pos = controller.create_position (value=ann.fragment.begin,
-                                              key=controller.player.MediaTime,
-                                              origin=controller.player.AbsolutePosition)
-            controller.update_status (status="set", position=pos)
+        def popup_goto (win, ann):
+            c=self.controller
+            pos = c.create_position (value=ann.fragment.begin,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)
+            return True
+
+        def popup_delete(win, ann):
+            p=ann.ownerPackage
+            p.annotations.remove(ann)
+            self.controller.notify('AnnotationDelete', annotation=ann)
+            return True
             
         item = gtk.MenuItem(_("Annotation %s") % ann.id)
         menu.append(item)
@@ -549,8 +572,12 @@ class AdveneGUI (Connect):
         item.connect("activate", popup_edit, ann)
         menu.append(item)
             
+        item = gtk.MenuItem(_("Delete"))
+        item.connect("activate", popup_delete, ann)
+        menu.append(item)
+            
         item = gtk.MenuItem(_("Go to..."))
-        item.connect("activate", popup_goto, ann, self.controller)
+        item.connect("activate", popup_goto, ann)
         menu.append(item)
 
         item = gtk.MenuItem()
@@ -996,6 +1023,7 @@ class AdveneGUI (Connect):
                                                 annotation_cb=annotation_cb,
                                                 controller=self.controller)
         sw.add (tree.get_widget())
+        self.register_view (tree)
 
         window.connect ("destroy", self.close_view_cb, window, tree)
         window.show_all()
