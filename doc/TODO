@@ -1,6 +1,6 @@
 * Create a GUI to be able to select and preview the right
-chapter/title for a DVD (in order to correctly initialize the
-package.media property)
+  chapter/title for a DVD (in order to correctly initialize the
+  package.media property)
 
 * gui.main should catch the information about a new view being defined and update the
   interface accordingly (for instance, a new annotation type or a new dynamic view created)
@@ -24,7 +24,8 @@ package.media property)
 
 * The view method should return a Content object, so that we can get its mimetype
 
-* The content object should provide a "dom tree" access method
+* The content object should provide a "dom tree" access method -> DONE (content.getModel) 
+  but not cleanly
 
 * The package/annotationTypes should have an 'ids' method, to be able to retrieve ids as keys (all bundles in fact).
 
