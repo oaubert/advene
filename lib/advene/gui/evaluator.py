@@ -78,6 +78,7 @@ class Window:
         Control-l: clear the expression buffer
         Control-w: close the window
         Control-u: update the interface views
+        Control-PageUp/PageDown: Scroll the result window
         Control-d: display completion possibilities
         Tab: perform autocompletion
         """)
@@ -201,6 +202,19 @@ class Window:
                 elif event.keyval == gtk.keysyms.s:
                     self.save_output_cb()
                     return True
+                elif event.keyval == gtk.keysyms.Page_Down:
+                    a=self.resultscroll.get_vadjustment()
+                    if a.value + a.page_increment < a.upper:
+                        a.value += a.page_increment
+                    a.value_changed ()
+                    return True
+                elif event.keyval == gtk.keysyms.Page_Up:
+                    a=self.resultscroll.get_vadjustment()
+                    if a.value - a.page_increment >= a.lower:
+                        a.value -= a.page_increment
+                    a.value_changed ()
+                    return True
+                
             return False
 
         window.connect ("key-press-event", key_pressed_cb)
@@ -230,10 +244,10 @@ class Window:
         self.output.set_wrap_mode (gtk.WRAP_CHAR)
 
         f=gtk.Frame(_("Result"))
-        s=gtk.ScrolledWindow()
-        s.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        s.add(self.output)
-        f.add(s)
+        self.resultscroll=gtk.ScrolledWindow()
+        self.resultscroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.resultscroll.add(self.output)
+        f.add(self.resultscroll)
         vbox.add(f)
 
         hb=gtk.HButtonBox()
