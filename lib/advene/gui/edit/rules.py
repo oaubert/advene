@@ -36,10 +36,12 @@ class EditGeneric:
         on_change_element is the method which will be called upon option modification.
 
         Its signature is:
-            def on_change_element([self,] optionmenu, elements):
+        
+        ``def on_change_element([self,] optionmenu, elements):``
 
         elements will be a list of keys with the same index as the optionmenu, i.e. :
-            chosen_key=elements[optionmenu.get_history()]
+            
+        ``chosen_key=elements[optionmenu.get_history()]``
         """
         # List of elements, with the same index as the menus
         optionmenu = gtk.OptionMenu()
