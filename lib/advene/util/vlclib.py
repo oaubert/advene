@@ -129,10 +129,10 @@ def matching_relationtypes(package, ann1, ann2):
         t1=get_id(ann1.type.uri)
         t2=get_id(ann2.type.uri)
         
-        print "Testing (%s, %s) matching %s" % (t1, t2, lat)
+        #print "Testing (%s, %s) matching %s" % (t1, t2, lat)
         if t1 == lat[0] and t2 == lat[1]:
             r.append(rt)
-    print "Matching: %s" % r
+    #print "Matching: %s" % r
     return r
 
 def get_title(controller, element):
