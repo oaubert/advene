@@ -1,3 +1,14 @@
+* vlc-plugin-corba: rename MediaControl.so to MediaControl_module.so
+and install it into /usr/lib/orbit-2.0
+
+* Find a way to override standard advene elements with new methods
+(for instance, snapshot_url and media_control for annotations) in
+order to avoid using too many global methods.
+
+* Implement action "Delay" 
+
+* Window to confirm quitting: use "Save package? Yes No Cancel"
+
 * Surveiller Europython:
 http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
 
@@ -9,28 +20,16 @@ http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
 
 * Make the request object accessible in AdveneContext
 
-* Move gui.edit.annotation into gui.edit.element.EditAnnotationPopup
-
 * Conditions: implement Allen's relations ?
 
-* Envoyer package et infos à Denis pour portage windows
-
-* New action: GotoPopup (display a message and propose to go to another position) and InfoPopup (display information)
-              
 * Query MPEG7: http://www.idealliance.org/papers/extreme03/html/2001/Liu01/EML2001Liu01.html
-
-* In AnnotationTypes edit popup, give access to the "display" meta attribute
 
 * To embed windows in gtk, use widget.window.xid (in X11) and
   widget.window.handle (in Win32)
 
-* Write document on TALES syntax and root elements
-
 * STBV action: display an activable link
 
 * Check id validity (no spaces) when creating elements (views)
-
-* actions: convert messages from unicode to str. DONE: report CORBA bug
 
 * Try to remove the dependency on PIL by using pixbuf loader to convert snapshots to PNG.
 
@@ -350,5 +349,21 @@ events) -> DONE
 
 * Add a notebook view in the place of the defunct HTML widget -> treeview
 
-
 * Conditions: implement regexp match -> DONE
+
+* webserver: /media/play?position=... : return the referer page -> DONE
+
+* Envoyer package et infos à Denis pour portage windows -> DONE
+
+* Write document on TALES syntax and root elements -> DONE (doc/user.txt)
+
+* actions: convert messages from unicode to str. DONE: report CORBA bug
+
+* Offer a python command-line to access/modify the package -> DONE (C-e)
+
+* Move gui.edit.annotation into gui.edit.element.EditAnnotationPopup -> DONE
+
+* New actions: GotoPopup (display a message and propose to go to another position) and InfoPopup (display information) -> DONE
+              
+* In AnnotationTypes edit popup, give access to the "display" meta attribute -> DONE
+
