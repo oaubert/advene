@@ -42,6 +42,7 @@ import advene.util.vlclib as vlclib
 import advene.gui.views.tree
 import advene.gui.views.timeline
 import advene.gui.views.logwindow
+import advene.gui.views.browser
 import advene.gui.edit.rules
 
 from advene.gui.edit.annotation import AnnotationEdit
@@ -998,6 +999,33 @@ class AdveneGUI (Connect):
 
         window.connect ("destroy", self.close_view_cb, window, tree)
         window.show_all()
+        return True
+
+    def on_browser1_activate (self, button=None, data=None):
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window.set_size_request (320, 200)
+
+        window.connect ("destroy", lambda e: window.destroy())
+        window.set_title (self.controller.package.title or _("No package title"))
+
+        vbox = gtk.VBox()
+
+        window.add (vbox)
+
+        browser = advene.gui.views.browser.Browser(self.controller.package)
+        vbox.add (browser.get_widget())
+
+        hbox = gtk.HButtonBox()
+        vbox.pack_start (hbox, expand=False)
+
+        b = gtk.Button (stock=gtk.STOCK_CLOSE)
+        b.connect ("clicked", lambda w: window.destroy ())
+        hbox.add (b)
+
+        vbox.set_homogeneous (gtk.FALSE)
+
+        window.show_all()
+        
         return True
 
     def on_view_mediainformation_activate (self, button=None, data=None):
