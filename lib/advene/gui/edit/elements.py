@@ -23,6 +23,7 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
+from advene.model.query import Query
 
 import advene.gui.edit.rules
 import advene.rules.actions
@@ -353,6 +354,44 @@ class EditViewPopup (EditElementPopup):
 
         return vbox
 
+class EditQueryPopup (EditElementPopup):
+    def can_edit (el):
+        return isinstance (el, Query)
+    can_edit = staticmethod (can_edit)
+        
+    def notify(self, element):
+        self.controller.notify("QueryEditEnd", view=element)
+        return True
+    
+    def make_widget (self, editable=False):
+        vbox = gtk.VBox ()
+
+        f = self.make_registered_form (element=self.element,
+                                       fields=('id', 'uri', 'title',
+                                               'author', 'date'),
+                                       editable=editable,
+                                       editables=('title', 'author', 'date'),
+                                       labels={'id':     _('Id'),
+                                               'uri':    _('URI'),
+                                               'author': _('Author'),
+                                               'date':   _('Date')}
+                                       )
+        vbox.pack_start (f.get_view (), expand=False)
+
+        # View content
+        # FIXME: we should use a generic mimetype plugin detection
+        if self.element.content.mimetype == 'application/x-advene-simplequery':
+            f = EditQueryForm (self.element.content, 'model', controller=self.controller)
+        else:
+            f = EditTextForm (self.element.content, 'data', controller=self.controller)
+
+        f.set_editable (editable)
+        t = f.get_view ()
+        self.register_form (f)
+        vbox.pack_start (self.framed(t, _("Content")), expand=True)
+
+        return vbox
+
 class EditPackagePopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, Package)
@@ -527,6 +566,41 @@ class EditRuleSetForm (EditForm):
                                                     catalog=self.controller.event_handler.catalog)
 
         self.view = self.edit.get_packed_widget()
+
+        scroll_win = gtk.ScrolledWindow ()
+        scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll_win.add_with_viewport(self.view)
+
+        return scroll_win
+
+class EditQueryForm (EditForm):
+    """Create a Query edit form for the given element (a view, presumably)."""
+    def __init__ (self, element, field, controller=None):
+        # Element is a view.content, field should be "data" or "model" ?
+        self.element = element
+        self.field = field
+        self.controller=controller
+        self.editable = False
+        self.view = None
+
+    def set_editable (self, boo):
+        self.editable = boo
+
+    def update_element (self):
+        """Update the element fields according to the values in the view."""
+        self.edit.update_value()
+        # FIXME: we ignore on purpose the self.field attribute
+        setattr(self.element, 'data', self.edit.model.xml_repr())
+        return True
+
+    def get_view (self):
+        """Generate a view widget to edit the ruleset."""
+        q=advene.rules.elements.Query()
+        q.from_dom(domelement=getattr(self.element, self.field))
+                   
+
+        self.edit=advene.gui.edit.rules.EditQuery(q)
+        self.view = self.edit.get_widget()
 
         scroll_win = gtk.ScrolledWindow ()
         scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
