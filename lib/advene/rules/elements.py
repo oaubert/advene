@@ -333,7 +333,8 @@ class Rule:
     default_condition=Condition()
     default_condition.match=default_condition.truematch
 
-    def __init__ (self, name="N/C", event=None, condition=None, action=None, origin=None):
+    def __init__ (self, name="N/C", event=None,
+                  condition=None, action=None, origin=None):
         self.name=name
         self.event=event
         self.condition=condition
@@ -365,6 +366,114 @@ class Rule:
             self.condition=ConditionList()
         self.condition.append(condition)
 
+    def from_xml_string(self, xmlstring, catalog=None):
+        """Read the rule from a XML string
+        """
+        reader=xml.dom.ext.reader.PyExpat.Reader()
+        s=StringIO.StringIO(xmlstring)
+        di=reader.fromStream(s)
+        rulenode=di._get_documentElement()
+        self.from_dom(catalog=catalog, domelement=rulenode)
+        s.close()
+            
+    def from_dom(self, catalog=None, domelement=None, origin=None):
+        """Read the rule from a DOM element.
+
+        @param catalog: the ECAEngine catalog
+        @type catalog: ECACatalog
+        @param domelement: the DOM element
+        @param origin: the source URI
+        @type origin: URI
+        """
+        self.origin=origin
+        if catalog is None:
+            catalog=ECACatalog()
+        rulenode=domelement
+        # FIXME: check the the rulenode tagname is 'rule'
+        self.name=rulenode.getAttribute('name')
+        # Event
+        eventnodes=rulenode.getElementsByTagName('event')
+        if len(eventnodes) == 1:
+            name=eventnodes[0].getAttribute('name')
+            if catalog.is_event(name):
+                self.event=Event(name)
+            else:
+                raise Exception("Undefined Event name: %s" % name)
+        elif len(eventnodes) == 0:
+            raise Exception("No event associated to rule %s" % self.name)
+        else:
+            raise Exception("Multiple events are associated to rule %s" % self.name)
+
+        # Conditions
+        for condnode in rulenode.getElementsByTagName('condition'):
+            self.add_condition(Condition().from_dom(condnode))
+
+        # Actions
+        for actionnode in rulenode.getElementsByTagName('action'):
+            name=actionnode.getAttribute('name')
+            if catalog.is_action(name):
+                action=Action(registeredaction=catalog.get_action(name), catalog=catalog)
+            else:
+                # FIXME: we should just display warnings if the action
+                # is not defined ? Or maybe accept it in the case it is defined
+                # in a module loaded later at runtime
+                raise Exception("Undefined action in %s: %s" % (origin, name))
+            for paramnode in actionnode.getElementsByTagName('param'):
+                p_name=paramnode.getAttribute('name')
+                p_value=paramnode.getAttribute('value')
+                action.add_parameter(p_name, p_value)
+            self.add_action(action)
+        return self
+
+    def to_xml(self, uri=None, stream=None):
+        """Save the ruleset to the given URI or stream."""
+        di = xml.dom.DOMImplementation.DOMImplementation()
+        ruledom = di.createDocument(advene.core.config.data.namespace, "rule", None)
+        self.to_dom(ruledom)
+        if stream is None:
+            stream=open(uri, 'w')
+            xml.dom.ext.PrettyPrint(ruledom, stream)
+            stream.close()
+        else:
+            xml.dom.ext.PrettyPrint(ruledom, stream)
+
+    def xml_repr(self):
+        """Return the XML representation of the rule."""
+        s=StringIO.StringIO()
+        self.to_xml(stream=s)
+        buf=s.getvalue()
+        s.close()
+        return buf
+
+    def to_dom(self, dom):
+        """Save the ruleset in the given DOM element."""
+        rulenode=dom._get_documentElement()
+        #rulenode=dom.createElement('rule')
+
+        rulenode.setAttribute('name', self.name)
+        eventnode=dom.createElement('event')
+        rulenode.appendChild(eventnode)
+        eventnode.setAttribute('name', self.event[:])
+        if self.condition != self.default_condition:
+            for cond in self.condition:
+                if cond == self.default_condition:
+                    continue
+                rulenode.appendChild(cond.to_dom(dom))
+        if isinstance(self.action, ActionList):
+            l=self.action
+        else:
+            l=[self.action]
+        for action in l:
+            actionnode=dom.createElement('action')
+            rulenode.appendChild(actionnode)
+            actionnode.setAttribute('name', action.name)
+            for pname, pvalue in action.parameters.iteritems():
+                paramnode=dom.createElement('param')
+                actionnode.appendChild(paramnode)
+                paramnode.setAttribute('name', pname)
+                paramnode.setAttribute('value', pvalue)
+
+
 class RuleSet(list):
     """Set of Rules.
     """
@@ -376,6 +485,8 @@ class RuleSet(list):
         """Add a new rule."""
         self.append(rule)
 
+    #### FIXME FIXME FIXME
+    #### FIXME: should use the from_dom/to_dom methods now defined in Rule
     def from_xml(self, catalog=None, uri=None):
         """Read the ruleset from a URI.
 
