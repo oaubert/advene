@@ -83,6 +83,8 @@ class Player(object):
 
     def restart_player (self):
         """Restart (cleanly) the player."""
+        del self.mc
+        self.mc = VLC.MediaControl()
         return True
 
     def exit (self):
