@@ -1,7 +1,8 @@
-* Make a UTBV view using CSS displaying annotations and screenshots on a timeline
+* Timeline: add the possibility to add new annotations by clicking on the type
 
-* Idea: make a snapshot everytime a new position is given, so that we
-can build a history of navigation.
+* Fix package generation: upon loading, we discard the initial
+processing instruction (<?xml version="1.0" encoding="UTF-8"?>) from
+the DOM and do not restore it before saving, so it gets lost.
 
 * Create a CellRenderer for time values (with time adjustment integrated)
 
@@ -12,9 +13,6 @@ can build a history of navigation.
 * Fix the UpdateElement problem in tree view when creating a new
 element (maybe we should have AnnotationCreate and AnnotationEdit
 events)
-
-* Fix the simpletal problem: all string values should be unicode ->
-seems to work OK. To check...
 
 * Make the annotation edit entry a multiline entry.
 
@@ -41,8 +39,6 @@ to implement a "Return to last position")
 * Make the annotation interface as On-Screen Display over the video window
 
 * Video player: investigate pyxine and gst-python. Also win32com (http://www.boddie.org.uk/python/COM.html)
-
-* Advenelib: implement AnnotationType and RelationType creation methods.
 
 * Create a unique logger in controller and use exclusively this one in all modules.
 
@@ -104,9 +100,6 @@ gtk.rc_parse_string(sendmail_styles)
 
 * Find a meaningful way to concisely display relations and annotations.
 
-* ! Handle unicode correctly and everywhere (GUI, adveneserver, XML,
-  ...) -> half DONE (needs a patch to SimpleTAL)
-
 * Reorganize adveneserver code
 
 * EPOZ: implement data templates according to the edited element,
@@ -157,13 +150,7 @@ simpler) and snapshot integration.
 * Windows: start application
 http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
 
-* Tree view : implement "Add/Remove" option in popup menus (Add new view, Add new type, ...)
-
-* Propagate AnnotationEditEnd and RelationEditEnd events in active views -> DONE
-
-* Add a "Edit" button next to the STBV optionmenu
-
-------------- Archive ---------------
+------------------------------------ Archive ------------------------------------------
 * Write the correct VLC/Python module -> DONE
 
 * Use gettext to internationalize the application (cf http://listas.aditel.org/archivos/python-es/2003-February/003642.html for glade) -> DONE
@@ -298,5 +285,22 @@ without DISPLAY) -> DONE
   chapter/title for a DVD (in order to correctly initialize the
   package.media property) -> DONE
 
-* Timeline: add the possibility to add new annotations by clicking on the type
+* Make a UTBV view using CSS displaying annotations and screenshots on a timeline -> DONE
+
+* Idea: make a snapshot everytime a new position is given, so that we
+can build a history of navigation -> DONE
+
+* Fix the simpletal problem: all string values should be unicode ->
+seems to work OK. To check... -> DONE
+
+* Advenelib: implement AnnotationType and RelationType creation methods. -> DONE
+
+* ! Handle unicode correctly and everywhere (GUI, adveneserver, XML,
+  ...) -> DONE
+
+* Tree view : implement "Add/Remove" option in popup menus (Add new view, Add new type, ...) -> DONE
+
+* Propagate AnnotationEditEnd and RelationEditEnd events in active views -> DONE
+
+* Add a "Edit" button next to the STBV optionmenu -> DONE
 
