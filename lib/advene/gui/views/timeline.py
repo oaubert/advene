@@ -472,7 +472,8 @@ class TimeLine:
 
     def update_position (self, pos):
         self.update_current_mark (pos)
-        
+        return True
+    
     def draw_marks (self):
         """Draw marks for stream positioning"""
         u2p = self.unit2pixel
