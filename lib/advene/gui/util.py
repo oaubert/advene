@@ -32,6 +32,9 @@ def list_selector(title=None,
                   controller=None):
     """Pick an element from a list.
 
+    vlclib.get_title is invoked to get a textual representation of
+    the elements of members.
+    
     Return None if the action is canceled.
     """
     store=gtk.ListStore(
@@ -68,5 +71,26 @@ def list_selector(title=None,
         model, iter=treeview.get_selection().get_selected()
         if iter is not None:
             retval=model.get_value(iter, 0)
+    d.destroy()
+    return retval
+
+def yes_no_cancel_popup(title=None,
+                        text=None):
+    """Build a Yes-No-Cancel popup window.
+
+    Return codes will be in (gtk.RESPONSE_YES, gtk.RESPONSE_NO, gtk.RESPONSE_CANCEL)
+    """
+    d = gtk.Dialog(title=title,
+                   parent=None,
+                   flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                   buttons=( gtk.STOCK_YES, gtk.RESPONSE_YES,
+                             gtk.STOCK_NO, gtk.RESPONSE_NO,
+                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+
+    if text is not None:
+        l=gtk.Label(text)
+        l.show()
+        d.vbox.add(l)        
+    retval=d.run()
     d.destroy()
     return retval
