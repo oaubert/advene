@@ -260,7 +260,7 @@ class DVDControl (Connect):
         """ 
         (s, ms) = divmod(long(val), 1000)
         # Format: HH:MM:SS.mmm
-        return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s), ms)
+        return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
        
     def format_slider_value (self, slider=None, val=0):
         """Formats a value (in milliseconds) into a time string.
