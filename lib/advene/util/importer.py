@@ -510,6 +510,9 @@ class ElanImporter(GenericImporter):
                 rtype.title="Relation between %s and %s" % (source.type.id,
                                                             dest.type.id)
                 rtype.mimetype='text/plain'
+                # FIXME: Update membertypes (missing API)
+                rtype.setHackedMemberTypes( ('#'+source.type.id,
+                                             '#'+dest.type.id) )
                 self.schema.relationTypes.append(rtype)
                 self.update_statistics('relation-type')
 
