@@ -342,15 +342,18 @@ class TranscriptionEdit:
                     'content': text,
                     'ignored': False }
         
-    def save_transcription(self, button=None):
-        fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
-                                           action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                           button=gtk.STOCK_SAVE)
+    def save_transcription_cb(self, button=None):
+        if self.sourcefile:
+            fname=self.sourcefile
+        else:
+            fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
+                                               action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                               button=gtk.STOCK_SAVE)
         if fname is not None:
-            self.save_output(filename=fname)
+            self.save_transcription(filename=fname)
         return True
 
-    def save_output(self, filename=None):
+    def save_transcription(self, filename=None):
         f=open(filename, "w")
         last=None
         for d in self.parse_transcription(show_ignored=True):
@@ -369,6 +372,7 @@ class TranscriptionEdit:
             last=d['end']
         f.close()
         self.controller.log(_("Transcription saved to %s") % filename)
+        self.sourcefile=filename
         return True
     
     def load_transcription_cb(self, button=None):
@@ -417,7 +421,6 @@ class TranscriptionEdit:
         return
 
     def convert_transcription_cb(self, button=None):
-        print "convert transcription"
         if not self.controller.gui:
             self.controller.log(_("Cannot convert the data : no associated package"))
             return True
@@ -459,7 +462,7 @@ class TranscriptionEdit:
 
         tb_list = (
             (_("Open"), _("Open"), gtk.STOCK_OPEN, self.load_transcription_cb),
-            (_("Save"), _("Save"), gtk.STOCK_SAVE, self.save_transcription),
+            (_("Save"), _("Save"), gtk.STOCK_SAVE, self.save_transcription_cb),
             (_("Convert"), _("Convert"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
             (_("Close"), _("Close"), gtk.STOCK_CLOSE, lambda w: window.destroy()),
             )
@@ -476,6 +479,13 @@ class TranscriptionEdit:
             
         tb.show_all()
         return tb
+
+    def key_pressed_cb (self, win, event):
+        if event.state & gtk.gdk.CONTROL_MASK:
+            if event.keyval == gtk.keysyms.s:
+                # Save file
+                self.save_transcription_cb()
+            return True
     
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -484,6 +494,7 @@ class TranscriptionEdit:
             self.controller.gui.init_window_size(window, 'transcribeview')
 
         window.set_title (_("Transcription alignment"))
+        window.connect ("key-press-event", self.key_pressed_cb)
 
         vbox = gtk.VBox()
 
