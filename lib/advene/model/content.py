@@ -1,14 +1,14 @@
 from cStringIO import StringIO
 
-import modeled
-import viewable
+import advene.model.modeled as modeled
+import advene.model.viewable as viewable
 
 import xml.dom.ext.reader.PyExpat
 
-from constants import *
+from advene.model.constants import *
 
-import util.dom
-import util.uri
+import advene.model.util.dom
+import advene.model.util.uri
 
 from advene.model.util.auto_properties import auto_properties
 from advene.model.util.mimetype import MimeType
@@ -35,8 +35,9 @@ class Content(modeled.Modeled,
     def getData(self):
         """Return the data associated to the Content"""
         data = StringIO()
-        util.dom.printElementText(self._getModel(), data)
-        return data.getvalue()
+        advene.model.util.dom.printElementText(self._getModel(), data)
+        d=data.getvalue()
+        return d
 
     def setData(self, data):
         """Set the content's data"""
@@ -75,7 +76,7 @@ class Content(modeled.Modeled,
             r = self._getModel().getAttributeNS(xlinkNS, 'href')
             if absolute:
                 url_base =self._getParent().getOwnerPackage().getUri (absolute) 
-                return util.uri.urljoin(url_base, r)
+                return advene.model.util.uri.urljoin(url_base, r)
             else:
                 return r
         else:
@@ -101,8 +102,8 @@ class Content(modeled.Modeled,
         uri = self.getUri(absolute=True)
         if not uri:
             # TODO: maybe find a better way to get a stream from the DOM
-            return StringIO(str(self.getData()))
-        return util.uri.open(uri)
+            return StringIO(self.getData())
+        return advene.model.util.uri.open(uri)
 
     def getMimetype(self):
         """Return the content's mime-type"""
