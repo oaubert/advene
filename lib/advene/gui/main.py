@@ -348,7 +348,8 @@ class AdveneGUI (Connect):
             name="Message",
             method=self.action_message_log,
             description=_("Display a message"),
-            parameters={'message': _("String to display.")}
+            parameters={'message': _("String to display.")},
+            category='gui',
             ))
 
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
@@ -356,7 +357,8 @@ class AdveneGUI (Connect):
             method=self.action_popup,
             description=_("Display a popup"),
             parameters={'message': _("String to display."),
-                        'duration': _("Display duration in ms. Ignored if empty.")}
+                        'duration': _("Display duration in ms. Ignored if empty.")},
+            category='gui',            
             ))
 
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
@@ -365,7 +367,8 @@ class AdveneGUI (Connect):
             description=_("Display a popup to go to another position"),
             parameters={'message': _("String to display."),
                         'position': _("New position"),
-                        'duration': _("Display duration in ms. Ignored if empty.")}
+                        'duration': _("Display duration in ms. Ignored if empty.")},
+            category='gui',
             ))
 
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
@@ -378,7 +381,8 @@ class AdveneGUI (Connect):
                         'message2': _("Second option description"),
                         'position2': _("Second position"),
                         'duration': _("Display duration in ms. Ignored if empty.")
-                        }
+                        },
+            category='gui',
             ))
         self.controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
             name="PopupGoto3",
@@ -392,7 +396,8 @@ class AdveneGUI (Connect):
                         'message3': _("Third option description"),
                         'position3': _("Third position"),
                         'duration': _("Display duration in ms. Ignored if empty.")
-                        }
+                        },
+            category='gui',
             ))
 
         # Create the SingletonPopup instance
