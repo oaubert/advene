@@ -59,6 +59,7 @@ class Menu:
         return True
 
     def activate_related (self, widget, ann):
+        self.activate_annotation(widget, ann)
         for r in ann.relations:
             for a in r.members:
                 if a != ann:
@@ -66,6 +67,7 @@ class Menu:
         return True
 
     def desactivate_related (self, widget, ann):
+        self.desactivate_annotation(widget, ann)
         for r in ann.relations:
             for a in r.members:
                 if a != ann:
@@ -93,6 +95,53 @@ class Menu:
             pop.edit ()
         return True
 
+    def popup_get_offset(self):
+        d = gtk.Dialog(title='Enter an offset',
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
+        l=gtk.Label(_("Give the offset to use\non specified element.\nIt is in ms and can be\neither positive or negative."))
+        l.show()
+        d.vbox.add(l)
+        
+        e=gtk.Entry()
+        e.show()
+        d.vbox.add(e)
+
+        res=d.run()
+        if res == gtk.RESPONSE_ACCEPT:
+            try:
+                retval=long(e.get_text())
+            except ValueError:
+                retval=None
+        else:
+            retval=None
+
+        d.destroy()
+        return retval
+    
+    def offset_element (self, widget, el):
+        offset = self.popup_get_offset()
+        if offset is None:
+            return True
+        if isinstance(el, Annotation):
+            el.fragment.begin += offset
+            el.fragment.end += offset
+            self.controller.notify('AnnotationEditEnd', annotation=el)
+        elif isinstance(el, AnnotationType) or isinstance(el, Package):
+            for a in el.annotations: 
+                a.fragment.begin += offset
+                a.fragment.end += offset 
+                self.controller.notify('AnnotationEditEnd', annotation=a)
+        elif isinstance(el, Schema):
+            for at in el.annotationTypes:
+                for a in at.annotations: 
+                    a.fragment.begin += offset
+                    a.fragment.end += offset
+                    self.controller.notify('AnnotationEditEnd', annotation=a)
+        return True
+    
     def browse_element (self, widget, el):
         browser = advene.gui.views.browser.Browser(el)
         browser.popup()
@@ -186,6 +235,10 @@ class Menu:
         if type(element) in (Annotation, Relation, View, Query,
                              Schema, AnnotationType, RelationType):
             add_item(_("Delete"), self.delete_element, element)
+
+        # Common to offsetable elements
+        if type(element) in (Annotation, Schema, AnnotationType, Package):
+            add_item(_("Offset"), self.offset_element, element)
 
         specific_builder={
             Annotation: self.make_annotation_menu,
