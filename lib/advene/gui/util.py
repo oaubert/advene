@@ -190,7 +190,7 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
     optionmenu.show_all()
     return optionmenu
 
-def get_filename(title="Open a file",
+def get_filename(title=_("Open a file"),
                  action=gtk.FILE_CHOOSER_ACTION_OPEN,
                  button=gtk.STOCK_OPEN,
                  default_dir=None):
@@ -214,7 +214,7 @@ def get_filename(title="Open a file",
             try:
                 p=advene.model.package.Package(uri=button._filename)
             except Exception, e:
-                m="Error:\n%s" % str(e)
+                m=_("Error:\n%s") % str(e)
             else:
                 m=_("""Package %s:
 %s
