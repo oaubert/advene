@@ -106,7 +106,7 @@ class DefaultActionsRepository:
     def Message(self, context, parameters):
         """Display a message."""
         message=self.parse_parameter(context, parameters, 'message', "An event occurred.")
-        print _("** Message ** ") + message
+        print _("** Message ** ") + message.encode('utf8')
         return True
 
     def PlayerStart (self, context, parameters):
@@ -175,7 +175,7 @@ class DefaultActionsRepository:
         end = c.create_position (value=duration,
                                  key=c.player.MediaTime,
                                  origin=c.player.RelativePosition)
-        c.player.display_text (message, begin, end)
+        c.player.display_text (message.encode('utf8'), begin, end)
         return True
 
     def AnnotationCaption (self, context, parameters):
@@ -191,7 +191,7 @@ class DefaultActionsRepository:
             end = c.create_position (value=duration,
                                      key=c.player.MediaTime,
                                      origin=c.player.RelativePosition)
-            c.player.display_text (message, begin, end)
+            c.player.display_text (message.encode('utf8'), begin, end)
         return True
 
     def SoundOff (self, context, parameters):
