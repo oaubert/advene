@@ -706,6 +706,9 @@ class EditContentForm(EditForm):
     def set_editable (self, bool):
         self.editable = bool
 
+    def check_validity(self):
+        return self.contentform.check_validity()
+    
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if self.mimetypeeditable:
@@ -788,10 +791,27 @@ class EditRuleSetForm (EditForm):
     def set_editable (self, boolean):
         self.editable = boolean
 
+    def check_validity(self):
+        iv=self.edit.invalid_items()
+        if iv:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
+                "\n".join(iv)
+                )
+            response=dialog.run()
+            dialog.destroy()
+            return False
+        else:
+            return True
+        
+        
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if self.editable:
-            self.edit.update_value()
+            if not self.edit.update_value():
+                return False
             setattr(self.element, 'data', self.edit.model.xml_repr())
         return True
 
@@ -875,6 +895,21 @@ class EditQueryForm (EditForm):
         self.editable = editable
         self.view = None
 
+    def check_validity(self):
+        iv=self.edit.invalid_items()
+        if iv:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
+                "\n".join(iv)
+                )
+            response=dialog.run()
+            dialog.destroy()
+            return False
+        else:
+            return True
+        
     def set_editable (self, boo):
         self.editable = boo
 
@@ -882,7 +917,8 @@ class EditQueryForm (EditForm):
         """Update the element fields according to the values in the view."""
         if not self.editable:
             return True
-        self.edit.update_value()
+        if not self.edit.update_value():
+            return False
         # FIXME: we ignore on purpose the self.field attribute
         setattr(self.element, 'data', self.edit.model.xml_repr())
         setattr(self.element, 'mimetype', 'application/x-advene-simplequery')

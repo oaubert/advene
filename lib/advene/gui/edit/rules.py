@@ -25,9 +25,14 @@ class EditGeneric:
     def update_value(self):
         """Updates the value of the represented element.
 
-        After that, the element can be access throught get_model().
+        After that, the element can be accessed through get_model().
         """
         pass
+
+    def invalid_items(self):
+        """Returns the names of invalid items.
+        """
+        return []
 
 class EditRuleSet(EditGeneric):
     """Edit form for RuleSets"""
@@ -116,13 +121,27 @@ class EditRuleSet(EditGeneric):
         self.widget.set_current_page(-1)
         return True
 
+    def invalid_items(self):
+        i=[]
+        for e in self.editlist:
+            i.extend(e.invalid_items())
+        return i
+    
     def update_value(self):
         if self.editable:
+            iv=self.invalid_items()
+            if iv:
+                dialog = gtk.MessageDialog(
+                    None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                    _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
+                    "\n".join(iv)
+                    )
+                response=dialog.run()
+                dialog.destroy()
+                return False
             for e in self.editlist:
                 e.update_value()
-        #print "update_value for %d rules" % len(self.model)
-        # Clear the list (we need to keep the same reference as before)
-        # del self.model[:]
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
@@ -204,6 +223,18 @@ class EditQuery(EditGeneric):
         self.editconditionlist=[]
         self.editable=editable
         self.widget=self.build_widget()
+
+    def invalid_items(self):
+        iv=[]
+        if not self.sourceentry.is_valid():
+            iv.append(_("Source expression"))
+        if not self.valueentry.is_valid():
+            iv.append(_("Return expression"))
+
+        for ec in self.editconditionlist:
+            iv.extend(ec.invalid_items())
+            
+        return iv
 
     def update_value(self):
         if not self.editable:
@@ -348,6 +379,14 @@ class EditRule(EditGeneric):
             print "Unknown target type for drag: %d" % targetType
         return True
 
+    def invalid_items(self):
+        iv=[]
+        for e in self.editactionlist:
+            iv.extend(e.invalid_items())
+        for e in self.editconditionlist:
+            iv.extend(e.invalid_items())
+        return iv
+    
     def update_value(self):
         if not self.editable:
             return True
@@ -586,6 +625,15 @@ class EditCondition(EditGeneric):
 
         self.widget=self.build_widget()
 
+    def invalid_items(self):
+        iv=[]
+        if not self.lhs.is_valid():
+            iv.append(_("Condition expression: %s") % self.lhs.get_text())
+        if (self.current_operator in Condition.binary_operators
+            and not self.rhs.is_valid()):
+            iv.append(_("Condition expression: %s") % self.lhs.get_text())
+        return iv
+    
     def update_value(self):
         if self.editable:
             c=self.model
@@ -674,13 +722,19 @@ class EditAction(EditGeneric):
         self.cached_parameters={}
 
         # Dict of parameter widgets (modified when the action name changes)
-        # indexed by parameter name
+        # indexed by parameter name. 
         self.paramlist={}
 
         self.catalog=catalog
         self.tooltips=gtk.Tooltips()
         self.widget=self.build_widget()
 
+    def invalid_items(self):
+        iv=[ _("Parameter %s") % n
+             for n in self.paramlist
+             if not self.paramlist[n].entry.is_valid() ]
+        return iv
+    
     def update_value(self):
         if not self.editable:
             return
@@ -746,6 +800,9 @@ class EditAction(EditGeneric):
         entry.entry.connect("changed", self.on_change_parameter, name)
 
         self.tooltips.set_tip(entry.widget, description)
+
+        hbox.entry=entry
+        
         hbox.pack_start(entry.widget)
         return hbox
 

@@ -1,8 +1,24 @@
 import gtk
+import sre
 
 import advene.gui.views.browser
 
 class TALESEntry:
+    # Root elements
+    root_elements = ('here', 'nothing', 'default', 'options', 'repeat', 'request',
+                     # Root elements available in STBVs
+                     'package', 'annotation', 'relation', 'activeAnnotations',
+                     'player', 'event',
+                     # Root elements available in queries
+                     'element',
+                     )
+
+    # Path elements followed by any syntax
+    path_any_re = sre.compile('^(string|python):')
+
+    # Path elements followed by a TALES expression
+    path_tales_re = sre.compile('^(exists|not|nocall):(.+)')
+
     def __init__(self, default="", context=None, controller=None):
         self.default=""
         self.editable=True
@@ -10,6 +26,10 @@ class TALESEntry:
         if context is None and controller is not None:
             context=controller.package
         self.context=context
+
+        self.re_id = sre.compile('^([A-Za-z0-9_%]+/?)+$')
+        self.re_number = sre.compile('^\d+$')
+        
         self.widget=self.build_widget()
 
     def set_context(self, el):
@@ -33,7 +53,21 @@ class TALESEntry:
     def hide(self):
         self.widget.hide()
         return True
-        
+
+    def is_valid(self, expr=None):
+        """Return True if the expression looks like a valid TALES expression
+        """
+        if expr is None:
+            expr=self.entry.get_text()
+        if TALESEntry.path_any_re.match(expr):
+            return True
+        m=TALESEntry.path_tales_re.match(expr)
+        if m:
+            return self.is_valid(expr=m.group(2))
+        # Check that the first element is a valid TALES root element
+        root=expr.split('/', 1)[0]
+        return root in TALESEntry.root_elements
+    
     def build_widget(self):
         hbox=gtk.HBox()
         self.entry=gtk.Entry()
@@ -47,8 +81,7 @@ class TALESEntry:
     def browse_expression(self, b):
         browser = advene.gui.views.browser.Browser(self.context, controller=self.controller)
         
-        # FIXME: display initial value in browser
-        
+        # FIXME: display initial value in browser        
         def callback(e):
             if e is not None:
                 self.entry.set_text(e)
