@@ -1,4 +1,4 @@
-advene (project) unstable; urgency=low
+advene (0.12) unstable; urgency=low
 
   * Action and Condition selection is now categorized
   
@@ -6,7 +6,7 @@ advene (project) unstable; urgency=low
 
   * Implemented update of relationtype.membertypes
 
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 12 Oct 2004 19:49:47 +0200
 
 advene (0.11) unstable; urgency=low
 
