@@ -39,7 +39,7 @@ if config.data.os == 'win32':
       subkey = 'Software/GTK/2.0/'.replace('/','\\')
       path = None
       for hkey in _winreg.HKEY_LOCAL_MACHINE, _winreg.HKEY_CURRENT_USER:
-          reg = _winreg.OpenKey(HKEY_LOCAL_MACHINE, subkey)
+          reg = _winreg.OpenKey(hkey, subkey)
           try:
               try:
                   path, value = _winreg.QueryValueEx(reg, "DllPath")
