@@ -1,3 +1,9 @@
+* Query language: either python-based (very generic) or reusing the
+  rules framework (conditions)
+
+* Clean-up the player interface (which is now spread across
+  advene.util.vlclib.VLCPlayer and advene.core.mediacontrol.MediaControl)
+
 * Add a notebook view in the place of the defunct HTML widget
 
 * Fix for SVG module :
@@ -10,7 +16,7 @@
 
 * The package/annotationTypes should have an 'ids' method, to be able to retrieve ids as keys (all bundles in fact).
 
-*** Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
+* Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
 
 * Adveneserver: use logging.Logger to log HTTP accesses
 
