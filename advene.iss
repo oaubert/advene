@@ -3,6 +3,7 @@ Source: dist\library.zip; DestDir: {app}
 Source: dist\*.dll; DestDir: {app}
 Source: dist\*.pyd; DestDir: {app}
 Source: dist\advene.exe; DestDir: {app}
+Source: lib\libsnapshot_plugin.dll; DestDir: {app}\lib
 Source: dist\w9xpopen.exe; DestDir: {app}
 Source: dist\share\*; DestDir: {app}\share; Flags: recursesubdirs
 Source: dist\doc\*; DestDir: {app}\doc; Flags: recursesubdirs

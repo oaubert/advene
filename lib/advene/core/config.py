@@ -64,7 +64,7 @@ class Config(object):
             self.path = {
                 # VLC binary path
                 'vlc': '/usr/bin',
-                # VLC plugins path
+                # VLC additional plugins path
                 'plugins': '/usr/lib/vlc',
                 # Advene modules path
                 'advene': '/usr/lib/advene',
@@ -84,8 +84,8 @@ class Config(object):
             self.path = {
                 # VLC binary path
                 'vlc': 'c:\\Program Files\\VideoLAN\\VLC',
-                # VLC plugins path
-                'plugins': 'c:\\Program Files\\VideoLAN\\VLC',
+                # VLC additional plugins path
+                'plugins': 'c:\\Program Files\\Advene\\lib',
                 # Advene modules path
                 'advene': 'c:\\Program Files\\Advene',
                 # Advene resources (.glade, template, ...) path

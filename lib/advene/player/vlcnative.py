@@ -114,9 +114,7 @@ class Player(object):
     def __init__ (self):
         """Wrapper initialization.
         """
-        # FIXME: pass options
-#        self.mc = VLC.MediaControl( [ '--filter', 'clone', '--clone-vout-list', 'snapshot,x11' ])
-        self.mc = VLC.MediaControl( [ "--filter", "clone", "--plugin-path", config.data.path['advene'] ] )
+        self.mc = VLC.MediaControl( [ "--filter", "clone", "--plugin-path", config.data.path['plugins'] ] )
 
         # 0 relative position
         pos = VLC.Position ()
