@@ -42,6 +42,8 @@ class LogWindow:
         self.window=None
 
     def build_widget(self):
+        f=gtk.Frame()
+        f.set_label(self.view_name)
         w=gtk.VBox()
 
         sw = gtk.ScrolledWindow()
@@ -64,8 +66,9 @@ class LogWindow:
 
         w.pack_start(hb, expand=False)
 
-        w.show_all()
-        return w
+        f.add(w)
+        f.show_all()
+        return f
 
     def clear_data(self):
         """Clear the logwindow."""
