@@ -143,6 +143,8 @@ def matching_relationtypes(package, ann1, ann2):
     return r
 
 def get_title(controller, element):
+    if isinstance(element, unicode) or isinstance(element, str):
+        return element
     if isinstance(element, Annotation) or isinstance(element, Relation):
         expr=element.type.getMetaData(config.data.namespace, "representation")
         if expr is None or expr == '':
@@ -150,8 +152,11 @@ def get_title(controller, element):
         elif controller is not None:
             c=controller.event_handler.build_context(event='Display', here=element)
             return c.evaluateValue(expr)
-    # FIXME: handle the other elements if necessary
-    return str(element)
+    if hasattr(element, 'title'):
+        return unicode(element.title)
+    if hasattr(element, 'id'):
+        return unicode(element.id)
+    return unicode(element)
 
 def get_valid_members (el):
     """Return a list of strings, valid members for the object el in TALES.
