@@ -64,15 +64,18 @@ class Modeled(object):
 
     def _getChild(self, match=None, before=None, after=None):
         """Looks for the first Element child matching the parameters.
-           The meaning of each parameter follows (note that qname must be
-           represented by a pair (ns_uri, local_name)).
+        
+        The meaning of each parameter follows (note that qname must be
+        represented by a pair (ns_uri, local_name)).
+        
            - match: the qname of the searched element
                      or the element itself
            - before: the qname of the element to be found just afterwards
                      or the element to be found just beforehand
            - after : the qname of the element to be found just 
                      or the element to be found just afterwards
-           If no element is found matching, None is returned.
+                     
+        If no element is found matching, None is returned.
         """
         list_ = self._getModelChildren()
         length = len(list_)
