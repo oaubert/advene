@@ -58,11 +58,11 @@ class CreateElementPopup(object):
             Package: "p",
             Annotation: "a",
             Relation: "r",
-            Schema: "schema-",
-            AnnotationType: "at-",
-            RelationType: "rt-",
-            View: "view-",
-            Query: "query-",
+            Schema: "schema_",
+            AnnotationType: "at_",
+            RelationType: "rt_",
+            View: "view_",
+            Query: "query_",
             }
         self.chosen_type = None
         self.widget=self.build_widget()
