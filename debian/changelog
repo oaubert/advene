@@ -7,7 +7,7 @@ advene (0.6) unstable; urgency=low
   * Added a button to quickly edit the current STBV
   * Numerous bug fixes
 
- -- Olivier Aubert <oaubert@salt>  Wed,  5 May 2004 13:19:30 +0200
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed,  5 May 2004 13:19:30 +0200
 
 advene (0.5) unstable; urgency=low
 
@@ -17,7 +17,7 @@ advene (0.5) unstable; urgency=low
     or annotation-/relation-type) and delete elements from the tree view
     and timeline.
 
- -- Olivier Aubert <oaubert@salt>  Fri, 23 Apr 2004 15:28:41 +0200
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Fri, 23 Apr 2004 15:28:41 +0200
 
 advene (0.4-1) unstable; urgency=low
 
