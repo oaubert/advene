@@ -1,0 +1,66 @@
+Interface proposed by the mediacontrol module:
+
+The mediacontrol module holds 2 classes:
+
+PlayerFactory, which will create a new player instance.
+
+Player, which defines the API available for players.
+
+* PlayerFactory
+
+It defines a 
+create_player()
+method which returns a Player instance.
+
+* Player
+
+It implements the various methods of the MediaControl IDL.
+
+It defines the following methods:
+- is_active(): Checks whether the player is active.
+- stop_player(): Stops the player instance
+- restart_player(): Restarts the player
+- check_player(mediafile): Checks that the player is active. If not,
+                           starts it and load mediafile in the
+			   playlist
+- update_status(status, position): Updates the status of the player.
+  This is the upper level method, which takes care of status caching
+  and parameter conversion (long to VLC.Position)
+
+- position_update(): Updates the current status information.
+  After its call, the following attributes will be updated:
+  - status : player status
+  - stream_duration : duration of the stream (in ms)
+  - current_position_value : current position (in ms)
+
+* Used MediaControl IDL methods
+
+player.display_text
+player.exit
+player.get_default_media
+player.playlist_add_item
+player.playlist_get_list
+player.snapshot
+player.sound_get_volume
+player.sound_set_volume
+player.stop
+
+* Used player methods
+
+player.init
+player.is_active
+player.position_update
+player.restart_player
+player.update_status
+
+* Used player attributes
+
+player.status
+player.current_position_value
+player.stream_duration
+player.relative_position
+
+The IDL constants (PositionOrigin and PositionKey) should be available
+as attributes of the Player class so that advene modules can use them
+without having to import other modules (such as VLC from
+MediaControl.so).
