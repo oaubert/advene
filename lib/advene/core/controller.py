@@ -410,7 +410,7 @@ class AdveneController:
                 n=os.sep.join((d, name))
                 if os.path.exists(n):
                     mediafile=n
-                    self.log(_("Found matching video file in moviepath: %s" % n))
+                    self.log(_("Found matching video file in moviepath: %s") % n)
                     break
         return mediafile
 
