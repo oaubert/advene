@@ -70,7 +70,7 @@ class EditRuleSet(EditGeneric):
         self.editlist=[]
         self.catalog=catalog
         self.widget=self.build_widget()
-    
+
     def remove_rule(self, button):
         """Remove the currently activated rule."""
         current=self.widget.get_current_page()
@@ -86,7 +86,27 @@ class EditRuleSet(EditGeneric):
         elif len(l) > 1:
             print "Error in remove_rule"
         return True
-    
+
+    def get_packed_widget(self):
+        """Return an enriched widget (with rules add and remove buttons)."""
+        vbox=gtk.VBox()
+        vbox.set_homogeneous (False)
+
+        vbox.add(self.get_widget())
+
+        hb=gtk.HButtonBox()
+
+        b=gtk.Button(stock=gtk.STOCK_ADD)
+        b.connect("clicked", self.add_rule)
+        hb.pack_start(b, expand=False)
+
+        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b.connect("clicked", self.remove_rule)
+        hb.pack_start(b, expand=False)
+        vbox.add(hb)
+        
+        return vbox
+
     def add_rule(self, button):
         event=Event("ApplicationStart")
         ra=self.catalog.get_action("Message")
@@ -575,11 +595,11 @@ if __name__ == "__main__":
     
     b=gtk.Button(stock=gtk.STOCK_ADD)
     b.connect("clicked", edit.add_rule)
-    hb.pack_start(b, expand=gtk.FALSE)
+    hb.pack_start(b, expand=False)
 
     b=gtk.Button(stock=gtk.STOCK_REMOVE)
     b.connect("clicked", edit.remove_rule)
-    hb.pack_start(b, expand=gtk.FALSE)
+    hb.pack_start(b, expand=False)
 
     def save_ruleset(button):
         f='test.xml'
@@ -596,11 +616,11 @@ if __name__ == "__main__":
     
     b=gtk.Button(stock=gtk.STOCK_SAVE)
     b.connect("clicked", save_ruleset)
-    hb.pack_start(b, expand=gtk.FALSE)
+    hb.pack_start(b, expand=False)
 
     b=gtk.Button(stock=gtk.STOCK_QUIT)
     b.connect("clicked", lambda e: gtk.main_quit())
-    hb.pack_end(b, expand=gtk.FALSE)
+    hb.pack_end(b, expand=False)
 
     hb.show_all()
 
