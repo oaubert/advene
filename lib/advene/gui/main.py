@@ -825,15 +825,17 @@ class DVDControl (Connect):
 
         duration = self.controller.player.stream_duration
         if duration <= 0:
-            print "Computing duration on max bound"
-            duration = max([a.fragment.end for a in self.controller.package.annotations ])
+            if self.controller.package.annotations:
+                duration = max([a.fragment.end for a in self.controller.package.annotations ])
+            else:
+                duration = 0
             
         t = advene.gui.views.timeline.TimeLine (self.controller.package.annotations,
-                                                package=self.controller.package,
                                                 minimum=0,
                                                 maximum=duration,
                                                 annotation_cb=annotation_cb,
-                                                context_cb=context_cb)
+                                                context_cb=context_cb,
+                                                controller=self.controller)
         window.timeline = t
         timeline_widget = t.get_packed_widget()
         vbox.add (timeline_widget)
