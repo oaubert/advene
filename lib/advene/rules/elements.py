@@ -16,6 +16,9 @@ import xml.dom.ext.reader.PyExpat
 
 import advene.core.config
 
+from advene.model.annotation import Annotation
+from advene.model.fragment import MillisecondFragment
+
 from gettext import gettext as _
 
 class Event(str):
@@ -45,7 +48,7 @@ class ConditionList(list):
     def is_true(self):
         """The ConditionList is never True by default."""
         return False
-    
+
     def match(self, context):
         """Test is the context matches the ConditionList.
         """
@@ -59,7 +62,7 @@ class ConditionList(list):
                 if condition.match(context):
                     return True
             return False
-    
+
 class Condition:
     """The Condition class.
 
@@ -70,7 +73,7 @@ class Condition:
     @ivar operator: condition operator
     @type operator: string
     """
-    
+
     binary_operators={
         'equals': _("is equal to"),
         'different': _("is different from"),
@@ -78,6 +81,13 @@ class Condition:
         'greater': _("is greater than"),
         'lower': _("is lower than"),
         'matches': _("matches the regexp"),
+        'before': _("is before (Allen)"),
+        'meets': _("meets (Allen)"),
+        'overlaps': _("overlaps (Allen)"),
+        'during': _("during (Allen)"),
+        'starts': _("starts (Allen)"),
+        'finishes': _("finishes (Allen)")
+        # 'equals': missing (cf before)
         }
     # Unary operators apply on the LHS
     unary_operators={
@@ -95,6 +105,21 @@ class Condition:
         """
         return self.match == self.truematch
 
+    def convert_value(self, element, mode='begin'):
+        """Converts a value (Annotation, Fragment or number) into a number.
+        Mode is used for Annotation and Fragment and tells wether to consider
+        begin or end."""
+        if isinstance(element, Annotation):
+            rv=getattr(element.fragment, mode)
+        elif isinstance(element, MillisecondFragment):
+            rv=getattr(element, mode)
+        else:
+            try:
+                rv=float(element)
+            except ValueError:
+                rv=element
+        return rv
+        
     def match(self, context):
         """Test if the condition matches the context."""
         if self.operator in self.binary_operators:
@@ -110,25 +135,57 @@ class Condition:
             elif self.operator == 'greater':
                 # If it is possible to convert the values to
                 # floats, then do it. Else, compare string values
-                try:
-                    rv=float(right)
-                    lv=float(left)
-                except ValueError:
-                    rv=right
-                    lv=left
+                lv=self.convert_value(left, 'end')
+                rv=self.convert_value(right, 'begin')
                 return lv > rv
-            elif self.operator == 'lower':
+            elif self.operator == 'lower' or self.operator == 'before':
                 # If it is possible to convert the values to
                 # floats, then do it. Else, compare string values
-                try:
-                    rv=float(right)
-                    lv=float(left)
-                except ValueError:
-                    rv=right
-                    lv=left
+                lv=self.convert_value(left, 'end')
+                rv=self.convert_value(right, 'begin')
                 return lv < rv
             elif self.operator == 'matches':
                 return sre.search(rv, lv)
+            elif self.operator == 'meets':
+                lv=self.convert_value(left, 'end')
+                rv=self.convert_value(right, 'begin')
+                return lv == rv
+            elif self.operator == 'overlaps':
+                if isinstance(left, Annotation):
+                    lv=left.fragment
+                elif isinstance(left, MillisecondFragment):
+                    lv=left
+                else:
+                    raise Exception(_("Unknown type for overlaps comparison"))
+                if isinstance(right, Annotation):
+                    rv=right.fragment
+                elif isinstance(right, MillisecondFragment):
+                    rv=right
+                else:
+                    raise Exception(_("Unknown type for overlaps comparison"))
+                return (lv.begin in rv or rv.begin in lv)
+            elif self.operator == 'during':
+                if isinstance(left, Annotation):
+                    lv=left.fragment
+                elif isinstance(left, MillisecondFragment):
+                    lv=left
+                else:
+                    raise Exception(_("Unknown type for during comparison"))
+                if isinstance(right, Annotation):
+                    rv=right.fragment
+                elif isinstance(right, MillisecondFragment):
+                    rv=right
+                else:
+                    raise Exception(_("Unknown type for during comparison"))
+                return lv in rv
+            elif self.operator == 'starts':
+                lv=self.convert_value(left, 'begin')
+                rv=self.convert_value(right, 'begin')
+                return lv == rv
+            elif self.operator == 'finishes':
+                lv=self.convert_value(left, 'end')
+                rv=self.convert_value(right, 'end')
+                return lv == rv
             else:
                 raise Exception("Unknown operator: %s" % self.operator)
         elif self.operator in self.unary_operators:
@@ -182,11 +239,11 @@ class ActionList(list):
 
     It just forwards the L{execute} call to all its elements.
     """
-    
+
     def execute(self, context):
         for action in self:
-            action.execute(context)        
-            
+            action.execute(context)
+
 class Action:
     """The Action class.
 
@@ -226,10 +283,10 @@ class Action:
             self.immediate=False
         else:
             raise Exception("Error in Action constructor.")
-        
+
     def __str__(self):
         return "Action %s" % self.name
-    
+
     def bind(self, method):
         """Bind a given method to the action.
 
@@ -246,7 +303,7 @@ class Action:
         @type value: a TALES expression
         """
         self.parameters[name]=value
-        
+
     def execute(self, context):
         """Execute the action in the given TALES context.
 
@@ -272,10 +329,10 @@ class Rule:
     @ivar origin: the rule origin
     @type origin: URL
     """
-    
+
     default_condition=Condition()
     default_condition.match=default_condition.truematch
-    
+
     def __init__ (self, name="N/C", event=None, condition=None, action=None, origin=None):
         self.name=name
         self.event=event
@@ -289,7 +346,7 @@ class Rule:
             if action is not None:
                 self.add_action(action)
         self.origin=origin
-            
+
     def __str__(self):
         return "Rule '%s'" % self.name
 
@@ -307,7 +364,7 @@ class Rule:
         if self.condition == self.default_condition:
             self.condition=ConditionList()
         self.condition.append(condition)
-        
+
 class RuleSet(list):
     """Set of Rules.
     """
@@ -318,19 +375,19 @@ class RuleSet(list):
     def add_rule(self, rule):
         """Add a new rule."""
         self.append(rule)
-        
+
     def from_xml(self, catalog=None, uri=None):
         """Read the ruleset from a URI.
 
         @param catalog: the ECAEngine catalog
         @type catalog: ECACatalog
-        @param uri: the source URI        
+        @param uri: the source URI
         """
         reader=xml.dom.ext.reader.PyExpat.Reader()
         di=reader.fromStream(open(uri, 'r'))
         rulesetnode=di._get_documentElement()
         self.from_dom(catalog=catalog, domelement=rulesetnode, origin=uri)
-        
+
     def from_dom(self, catalog=None, domelement=None, origin=None):
         """Read the ruleset from a DOM element.
 
@@ -359,11 +416,11 @@ class RuleSet(list):
                 raise Exception("No event associated to rule %s" % rulename)
             else:
                 raise Exception("Multiple events are associated to rule %s" % rulename)
-            
+
             # Conditions
             for condnode in rulenode.getElementsByTagName('condition'):
                 rule.add_condition(Condition().from_dom(condnode))
-                
+
             # Actions
             for actionnode in rulenode.getElementsByTagName('action'):
                 name=actionnode.getAttribute('name')
@@ -393,7 +450,7 @@ class RuleSet(list):
             stream.close()
         else:
             xml.dom.ext.PrettyPrint(rulesetdom, stream)
-        
+
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
         s=StringIO.StringIO()
@@ -463,12 +520,12 @@ class RuleSet(list):
         if filename != '-':
             fd.close()
         return
-        
+
     def from_file(self, catalog=None, filename=None):
         """Deprecated. Read from a flat text file.
 
         Syntax of the file:
-        
+
         Rule rulename
           event: AnnotationBegin
           condition: annotation/type equals package/annotationTypes/teacher:narrative
@@ -477,7 +534,7 @@ class RuleSet(list):
 
         The available operators are Condition.binary_operators and Condition.unary_operators
         If the action has several parameters, they should be separated by ;
-        
+
         """
         if catalog is None:
             catalog=event.ECACatalog()
@@ -579,7 +636,7 @@ class Query:
     evaluated in a context where the loop value is stored in the
     'element' global. In other words, use 'element' as the root of
     condition and return value expressions.
-    
+
     @ivar source: the source of the data
     @type source: a TALES expression
     @ivar condition: the matching condition
@@ -593,7 +650,7 @@ class Query:
         self.condition=condition
         self.controller=controller
         self.rvalue=rvalue
-    
+
     def add_condition(self, condition):
         """Add a new condition
 
@@ -603,17 +660,17 @@ class Query:
         if self.condition is None:
             self.condition=ConditionList()
         self.condition.append(condition)
-        
+
     def from_xml(self, uri=None):
         """Read the query from a URI.
 
-        @param uri: the source URI        
+        @param uri: the source URI
         """
         reader=xml.dom.ext.reader.PyExpat.Reader()
         di=reader.fromStream(open(uri, 'r'))
         querynode=di._get_documentElement()
-        self.from_dom(domelement=querynode) 
-       
+        self.from_dom(domelement=querynode)
+
     def to_xml(self, uri=None, stream=None):
         """Save the query to the given URI or stream."""
         di = xml.dom.DOMImplementation.DOMImplementation()
@@ -626,7 +683,7 @@ class Query:
             stream.close()
         else:
             xml.dom.ext.PrettyPrint(querydom, stream)
-        
+
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
         s=StringIO.StringIO()
@@ -650,7 +707,7 @@ class Query:
             raise Exception("No source associated to query")
         else:
             raise Exception("Multiple sources are associated to query")
-        
+
         # Conditions
         for condnode in domelement.getElementsByTagName('condition'):
             self.add_condition(Condition().from_dom(condnode))
@@ -764,14 +821,14 @@ class RegisteredAction:
     def describe_parameter(self, name):
         """Describe the parameter."""
         return self.parameters[name]
-    
+
 class ECACatalog:
     """Class holding information about available elements (events, conditions, actions).
 
     @ivar actions: the list of registered actions indexed by name
     @type actions: dict
     """
-    
+
     # FIXME: Maybe this should be put in an external resource file
     event_names={
         'AnnotationBegin':        _("Beginning of an annotation"),
@@ -831,7 +888,7 @@ class ECACatalog:
     # Basic events are exposed to the user when defining new STBV
     basic_events=('AnnotationBegin', 'AnnotationEnd', 'PlayerStart', 'PlayerPause',
                   'PlayerResume', 'PlayerStop', 'ApplicationStart', 'ViewActivation')
-    
+
     def __init__(self):
         # Dict of registered actions, indexed by name
         self.actions={}
@@ -855,7 +912,7 @@ class ECACatalog:
         @rtype: boolean
         """
         return self.actions.has_key(name)
-    
+
     def get_action(self, name):
         """Return the action matching name.
 
@@ -865,7 +922,7 @@ class ECACatalog:
         @rtype: RegisteredAction
         """
         return self.actions[name]
-    
+
     def register_action(self, registered_action):
         """Register a RegisteredAction instance.
         """
@@ -922,7 +979,7 @@ class ECACatalog:
         for a in self.actions:
             d[a]=self.describe_action(a)
         return d
-    
+
     def get_actions(self, expert=False):
         """Return the list of defined actions.
         """
