@@ -56,10 +56,6 @@ import logging
 
 import imghdr
 
-import ORBit, CORBA
-ORBit.load_typelib (config.data.typelib)
-import VLC
-
 import advene.util.vlclib as vlclib
 import advene.core.imagecache as imagecache
 import advene.core.mediacontrol as mediacontrol
@@ -241,7 +237,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 <ul>%s</ul>""") % ("\n<li>".join (l)))
                 self.wfile.write (_("""
                 <form action="/media/play" method="GET">
-                Starting pos: <input type="text" name="bc" value="0">
+                Starting pos: <input type="text" name="position" value="0">
                 <input type="submit" value="Play">
                 </form>
                 <a href="/media/stop">Stop</a> | <a href="/media/pause">Pause</a><br>
@@ -301,12 +297,12 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
           Accessing a specific snapshot can be done in two ways:
             - Suffixing the URL with the snapshot index
-            - Providing the snapshot index as the option C{bc}
+            - Providing the snapshot index as the option C{position}
 
           The following paths are thus equivalent::
 
             /media/snapshot/package_alias/12321
-            /media/snapshot/package_alias?bc=12321
+            /media/snapshot/package_alias?position=12321
 
 
         The X{/media/play} element
@@ -317,7 +313,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             - C{filename=...} : if specified, the media player will load the
               given file before starting the player.
-            - C{bc=...} : if specified, the player will start at the
+            - C{position=...} : if specified, the player will start at the
               given position (in ms). Else, it will start
               at the beginning.
 
@@ -355,7 +351,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.display_media_status ()
             elif command == 'snapshot':
                 # snapshot syntax:
-                # /media/snapshot/package_alias?bc=#
+                # /media/snapshot/package_alias?position=#
                 # or
                 # /media/snapshot/package_alias/#
                 if len(param) == 0:
@@ -368,59 +364,52 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 alias = param[0]
                 i = self.server.imagecaches[alias]
 
-                if not query.has_key ('bc') and len(param) < 2:
+                if not query.has_key ('position') and len(param) < 2:
                     self.start_html (_("Available snapshots for %s") % alias, duplicate=True)
                     self.wfile.write ("<ul>")
                     if (query.has_key('mode') and query['mode'] == 'inline'):
-                        template="""<li><a href="/media/snapshot/%(alias)s/%(bc)d"><img src="/media/snapshot/%(alias)s?bc=%(bc)d" /></a></li>"""
+                        template="""<li><a href="/media/snapshot/%(alias)s/%(position)d"><img src="/media/snapshot/%(alias)s?position=%(position)d" /></a></li>"""
                         self.wfile.write ("""<p><a href="/media/snapshot/%s">Display with no inline images</a></p>""" % alias)
                     else:
-                        template="""<li><a href="/media/snapshot/%(alias)s/%(bc)d">%(bc)d</a> (%(status)s)</li>"""                        
+                        template="""<li><a href="/media/snapshot/%(alias)s/%(position)d">%(position)d</a> (%(status)s)</li>"""                        
                         self.wfile.write (_("""<p><a href="/media/snapshot/%s?mode=inline">Display with inline images</a></p>""") % alias)
 
                     k = i.keys ()
                     k.sort ()
-                    for bc in k:
-                        if i.is_initialized (bc):
+                    for position in k:
+                        if i.is_initialized (position):
                             m = _("Done")
                         else:
                             m = _("Pending")
-                        self.wfile.write (template % { 'alias': alias, 'bc': bc, 'status': m })
+                        self.wfile.write (template % { 'alias': alias,
+                                                       'position': position,
+                                                       'status': m })
                     self.wfile.write ("</ul>")
                     return
                 else:
-                    if query.has_key ('bc'):
-                        bc = long(query['bc'])
+                    if query.has_key ('position'):
+                        position = long(query['position'])
                     else:
-                        bc = long(param[1])
+                        position = long(param[1])
                 self.send_response (200)
-                if not i.is_initialized (bc):
+                if not i.is_initialized (position):
                     self.no_cache ()
                 self.send_header ('Content-type', 'image/png')
                 self.end_headers ()
-                self.wfile.write (i[bc])
+                self.wfile.write (i[position])
             elif command == 'play':
                 if query.has_key ('filename'):
                     self.server.controller.player.playlist_add_item (query['filename'])
-                if not query.has_key ('bc'):
+                if not query.has_key ('position'):
                     self.send_redirect ("/media")
-                pos = VLC.Position ()
-                pos.key = VLC.MediaTime
-                pos.origin = VLC.AbsolutePosition
-                pos.value = long(query['bc'])
-                self.server.controller.update_status ("start", pos)
+                self.server.controller.update_status ("start", long(query['position']))
+                self.send_redirect("/media")
             elif command == 'pause':
-                pos = VLC.Position ()
-                pos.key = VLC.MediaTime
-                pos.origin = VLC.AbsolutePosition
-                pos.value = 0
                 self.server.controller.update_status ("pause")
+                self.send_redirect("/media")
             elif command == 'stop':
-                pos = VLC.Position ()
-                pos.key = VLC.MediaTime
-                pos.origin = VLC.AbsolutePosition
-                pos.value = 0
                 self.server.controller.update_status ("stop")
+                self.send_redirect("/media")
             else:
                 self.send_error (404, _('Malformed request'))
                     
