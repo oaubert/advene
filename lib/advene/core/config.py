@@ -46,15 +46,9 @@ class Config(object):
     @ivar namespace_prefix: the list of default namespace prefixes (with alias)
     @type namespace_prefix: dict
 
-    @ivar launch_http_server: launch the HTTP server in the interface ?
-        0 is no.
-        1 uses gtk_input method (unstable)
-        2 uses threading (stable)
-    @type launch_http_server: int
-
-    @ivar corba_server: should the GUI behave as a CORBA server ?
-    @type corba_server: boolean
-
+    @ivar webserver: webserver options (port number and running mode)
+    @type webserver: dict
+    
     @ivar orb_max_tries: maximum number of tries for VLC launcher
     @type orb_max_tries: int
     """
@@ -113,6 +107,12 @@ class Config(object):
             'dvd-device': 'dvd:///dev/dvd',
             }
 
+        self.webserver = {
+            'port': 1234,
+            # Whether to launch the HTTP server in the gtk interface
+            # 0 for no, 1 for gtk_input, 2 for threading
+            'mode': 2
+            }
         # Global context options
         self.namespace_prefix = {'advenetool': self.namespace,
                                  'dc': 'http://purl.org/dc/elements/1.1/'}
@@ -122,10 +122,7 @@ class Config(object):
         # Used to memorize the volume level
         self.sound_volume=0
         
-        # Whether to launch the HTTP server in the gtk interface
-        self.launch_http_server = 2 # 0 for no, 1 for gtk_input, 2 for threading
-        # Should we behave as a CORBA server ?
-        self.corba_server = False
+
         # How many times do we try to read the iorfile before quitting ?
         self.orb_max_tries=7
         # Update delay for position marker in views (in ms)
