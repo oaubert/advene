@@ -467,6 +467,12 @@ class AdveneGUI (Connect):
             gtk.input_add (self.controller.server,
                            gtk.gdk.INPUT_READ,
                            self.handle_http_request)
+            if config.data.os == 'win32':
+                # Win32 workaround for the reactivity problem
+                def sleeper():
+                    time.sleep(.001)
+                    return True
+                gtk.timeout_add(400, sleeper)
 
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
