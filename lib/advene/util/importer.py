@@ -24,6 +24,8 @@ The general idea is:
 Call the
 im.process_file(filename)
 which will return the package containing the converted annotations
+
+im.statistics hold a dictionary containing the creation statistics.
 """
 
 import sys
@@ -60,6 +62,12 @@ def get_importer(fname):
     return i
     
 class GenericImporter(object):
+    """Generic importer class
+    
+    @ivar statistics: Dictionary holding the creation statistics
+    @type statistics: dict
+    FIXME...
+    """
     def __init__(self, author='importer', package=None, defaulttype=None):
         self.package=package
         self.author=author
@@ -68,6 +76,8 @@ class GenericImporter(object):
         self.defaulttype=defaulttype
         # Default offset in ms
         self.offset=0
+        # Dictionary holding the number of created elements
+        self.statistics={}
         self.name = _("Generic importer")
 
         self.optionparser = optparse.OptionParser(usage="Usage: %prog [options] source-file destination-file")
@@ -86,11 +96,14 @@ class GenericImporter(object):
         """
         pass
 
+    def update_statistics(self, elementtype):
+        self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
+        
     def create_annotation (self, type_=None, begin=None, end=None,
                            data=None, ident=None, author=None,
                            timestamp=None, title=None):
         """Create an annotation in the package
-        """
+        """        
         begin += self.offset
         end += self.offset
         if ident is None:
@@ -105,6 +118,7 @@ class GenericImporter(object):
         a.title=title
         a.content.data = data
         self.package.annotations.append(a)
+        self.update_statistics('annotation')
 
     def init_package(self,
                      filename=None,
@@ -115,6 +129,7 @@ class GenericImporter(object):
         """
         if self.package is None:
             p=Package(uri=filename, source=None)
+            self.update_statistics('package')
         else:
             p=self.package
 
@@ -123,6 +138,7 @@ class GenericImporter(object):
         s.date=self.timestamp
         s.title=s.id
         p.schemas.append(s)
+        self.update_statistics('schema')
 
         at=s.createAnnotationType(ident=annotationtypeid)
         at.author=self.author
@@ -130,7 +146,8 @@ class GenericImporter(object):
         at.title=at.id
         at.mimetype='text/plain'
         s.annotationTypes.append(at)
-
+        self.update_statistics('annotation-type')
+        
         return p, at
 
     def convert_time(self, s):
@@ -487,6 +504,7 @@ class ElanImporter(GenericImporter):
                                                             dest.type.id)
                 rtype.mimetype='text/plain'
                 self.schema.relationTypes.append(rtype)
+                self.update_statistics('relation-type')
 
             r=self.package.createRelation(
                 ident='_'.join( ('r', source_id, dest_id) ),
@@ -496,6 +514,7 @@ class ElanImporter(GenericImporter):
                 members=(source, dest))
             r.title="Relation between %s and %s" % (source_id, dest_id)
             self.package.relations.append(r)
+            self.update_statistics('relation')
 
     def process_file(self, filename):
         elan=handyxml.xml(filename)
@@ -528,6 +547,7 @@ class ElanImporter(GenericImporter):
             at.title=at.id
             at.mimetype='text/plain'
             schema.annotationTypes.append(at)
+            self.update_statistics('annotation-type')
             self.atypes[at.id]=at
 
         self.convert(self.iterator(elan))
