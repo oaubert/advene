@@ -115,19 +115,29 @@ class TimeAdjustment:
         t=self.entry.get_text()
         v=self.numericTime(t)
         if v is not None and v != self.value:
-            self.value = v
+            self.value = self.check_bound_value(v)
             if self.sync_video:
                 self.controller.move_position(self.value, relative=False)            
             self.update_display()
         return True
-            
+
+    def check_bound_value(self, value):
+        if value < 0:
+            value = 0
+        elif (self.controller.cached_duration > 0
+              and value > self.controller.cached_duration):
+            value = self.controller.cached_duration
+        return value
+
     def update_display(self):
         """Updates the value displayed in the entry according to the current value."""
         self.entry.set_text(advene.util.vlclib.format_time(self.value))
         # Update the image
-        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.imagecache[self.value]))        
+        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.imagecache[self.value]))
+        
     def update_value_cb(self, widget, increment):
         self.value=self.value + increment
+        value=self.check_bound_value(value)
         if self.sync_video:
             self.controller.move_position(self.value, relative=False)            
         self.update_display()
