@@ -96,6 +96,9 @@ class AdveneController:
         self.last_position = -1
         self.cached_duration = 0
 
+        # GUI (optional)
+        self.gui=None
+        
         # STBV
         self.current_stbv = None
         
@@ -110,6 +113,8 @@ class AdveneController:
         self.player_restarted = 0
         # FIXME: should be removed (CORBA dependent)
         try:
+            # Kill spurious vlc player
+            os.system("/usr/bin/killall -9 vlc")
             os.unlink(config.data.iorfile)
         except OSError:
             pass
@@ -131,6 +136,9 @@ class AdveneController:
             parameters={'message': _("String to display.")}
             ))
 
+    def register_gui(self, gui):
+        self.gui=gui
+        
     def busy_port_info(self):
         """Display the processes using the webserver port.
         """
@@ -163,6 +171,7 @@ class AdveneController:
                                           method=self.manage_package_load)
         
         if config.data.webserver['mode']:
+            self.server=None
             try:
                 self.server = advene.core.webserver.AdveneWebServer(controller=self,
                                                                     port=config.data.webserver['port'])
