@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-03-12 16:56+0100\n"
-"PO-Revision-Date: 2005-03-12 16:58+0100\n"
+"PO-Revision-Date: 2005-03-12 18:27+0100\n"
 "Last-Translator: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
 "MIME-Version: 1.0\n"
@@ -441,7 +441,7 @@ msgstr "Mettre a jour les copies d'ecran"
 
 #: ../share/advene.glade:2126
 msgid "Snapshots update"
-msgstr "MaJ copies d'écran"
+msgstr "MaJ copies d'ecran"
 
 #: ../lib/advene/model/bundle.py:265
 #, python-format
