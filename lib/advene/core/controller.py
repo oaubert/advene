@@ -13,11 +13,6 @@ import advene.core.config as config
 
 from gettext import gettext as _
 
-# For CORBA
-import ORBit, CORBA
-ORBit.load_typelib (config.data.typelib)
-import VLC
-
 import advene.rules.elements
 import advene.rules.ecaengine
 
@@ -145,7 +140,8 @@ class AdveneController:
                 self.serverthread = threading.Thread (target=self.server.serve_forawhile)
                 self.serverthread.start ()
 
-        # FIXME: check the return value (media file to play)
+        # FIXME: check the return value (media file to play) or better,
+        # rewrite parse_command_line
         self.parse_command_line (args)
 
         # If no package is defined yet, load the template
@@ -153,28 +149,9 @@ class AdveneController:
             self.load_package ()
         return True
     
-    def create_position (self, value=0, key=VLC.MediaTime,
-                         origin=VLC.AbsolutePosition):
-        """Create a VLC Position.
-        
-        Returns a VLC.Position object initialized to the right value, by
-        default using a MediaTime in AbsolutePosition.
-
-        @param value: the value
-        @type value: int
-        @param key: the Position key
-        @type key: VLC.Key
-        @param origin: the Position origin
-        @type origin: VLC.Origin
-        @return: a position
-        @rtype: VLC.Position
-        """
-        p = VLC.Position ()
-        p.origin = origin
-        p.key = key
-        p.value = value
-        return p
-
+    def create_position (self, value=0, key=None, origin=None):
+        return self.player.create_position(value=value, key=key, origin=origin)
+    
     def notify (self, event_name, *param, **kw):
         return self.event_handler.notify(event_name, *param, **kw)
 
@@ -188,7 +165,7 @@ class AdveneController:
             print "Update snapshot for %d" % position
             try:
                 i = self.player.snapshot (self.player.relative_position)
-            except VLC.InternalException, e:
+            except self.player.InternalException, e:
                 print "Exception in snapshot: %s" % e.message
                 return False
             if i.height != 0:
@@ -274,7 +251,7 @@ class AdveneController:
                 # Return False to desactivate the callback
                 return False
 
-            if self.player.status != VLC.PlayingStatus:
+            if self.player.status != self.player.PlayingStatus:
                 # End of stream
                 self.log(_("End of stream (%s). Quitting")
                          % repr(self.player.status))
@@ -501,12 +478,12 @@ class AdveneController:
         """
         if relative:
             self.update_status ("set", self.create_position (value=value,
-                                                             key=VLC.MediaTime,
-                                                             origin=VLC.RelativePosition))
+                                                             key=self.player.MediaTime,
+                                                             origin=self.player.RelativePosition))
         else:
             self.update_status ("set", self.create_position (value=value,
-                                                             key=VLC.MediaTime,
-                                                             origin=VLC.AbsolutePosition))
+                                                             key=self.player.MediaTime,
+                                                             origin=self.player.AbsolutePosition))
 
     def generate_sorted_lists (self, position):        
         """Return two sorted lists valid for a given position.
@@ -554,7 +531,7 @@ class AdveneController:
         @param status: the status (cf advene.core.mediacontrol.Player)
         @type status: string
         @param position: an optional position
-        @type position: VLC.Position
+        @type position: Position
         """
         try:
             self.player.update_status (status, position)
@@ -580,7 +557,7 @@ class AdveneController:
         """
         try:
             self.player.position_update ()
-        except CORBA.COMM_FAILURE:
+        except self.player.InternalException:
             # The server is down. Restart it.
             print _("Restarting player...")
             self.player_restarted += 1
