@@ -94,6 +94,10 @@ class EditElementPopup (object):
     def apply_cb (self, button=None, event=None, callback=None):
         """Method called when applying a form."""
         for f in self.forms:
+            if not f.check_validity():
+                return False
+
+        for f in self.forms:
             f.update_element ()
 
         # The children classes can define a notify method, which will
@@ -110,8 +114,8 @@ class EditElementPopup (object):
         
     def validate_cb (self, button=None, event=None, callback=None):
         """Method called when validating a form."""
-        self.apply_cb(button, event, callback)
-        self.window.destroy ()
+        if self.apply_cb(button, event, callback):
+            self.window.destroy ()
         return True
 
     def close_cb (self, button=None, data=None):
@@ -508,6 +512,10 @@ class EditForm:
     This class defines the method that an EditForm is expected to
     implement.
     """
+    def check_validity(self):
+        """Checks the validity of the data."""
+        return True
+    
     def update_element (self):
         """Update the element from the values in the form.
 
@@ -597,14 +605,20 @@ class EditFragmentForm(EditForm):
         self.element = element
         self.controller = controller
 
-    def update_element(self):
+    def check_validity(self):
         if self.begin.value >= self.end.value:
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                 gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
                 _("Begin time is greater than end time"))
-            dialog.connect("response", lambda w, e: dialog.destroy())
-            dialog.show()
+            dialog.run()
+            dialog.destroy()
+            return False
+        else:
+            return True
+        
+    def update_element(self):
+        if not self.check_validity():
             return False
 
         self.element.begin=self.begin.value
@@ -780,6 +794,35 @@ class EditAttributesForm (EditForm):
  
         model.set_value(iter, column, self.value_to_repr (at, val))
 
+    def check_validity(self):
+        invalid=[]
+        model = self.view.get_model ()
+        iter = model.get_iter_first ()
+        while iter is not None:
+            at = model.get_value (iter, EditAttributesForm.COLUMN_NAME)
+            #print "Updating value of %s.%s" % (str(self.element), at)
+            if at in self.editable:
+                text = model.get_value (iter, EditAttributesForm.COLUMN_VALUE)
+                v = None
+                try:
+                    v = self.repr_to_value (at, text)
+                except ValueError, e:
+                    v = None
+                    invalid.append((at, e))
+            iter = model.iter_next(iter)
+        # Display list of invalid attributes
+        if invalid:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("The following attributes cannot be updated:\n\n%s")
+                % "\n".join ([ "%s: %s" % (at, str(e)) for (at, e) in invalid ]))
+            dialog.run()
+            dialog.destroy()
+            return False
+        else:
+            return True
+    
     def update_element (self):
         """Update the element fields according to the values in the view."""
         invalid=[]
