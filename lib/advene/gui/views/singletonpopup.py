@@ -59,7 +59,7 @@ class SingletonPopup:
     def hide(self, *p, **kw):
         self.undisplay()
         self.window.hide()
-        return False
+        return True
 
     def show(self, *p, **kw):
         self.window.show_all()
@@ -90,7 +90,7 @@ class SingletonPopup:
         
         if self.controller.gui:
             self.controller.gui.register_view (self)
-            window.connect ("destroy", self.hide)
+        window.connect ("destroy", lambda w: True)
 
         hb=gtk.HButtonBox()
 
