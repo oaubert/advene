@@ -109,6 +109,9 @@ class TimeLine:
 
         # Default drag mode : create a relation
         self.drag_mode = "relation"
+        # Default mode for over-buttons events
+        # May be: "incoming", "outgoing"
+        self.over_mode = None
         
         # Adjustment corresponding to the Virtual display
         # The page_size is the really displayed area
@@ -442,6 +445,26 @@ class TimeLine:
             self.annotation_cb(widget, annotation)
             return True
         return False
+
+    def rel_activate(self, button):
+        if self.over_mode is not None:
+            if self.over_mode == 'incoming':
+                i=0
+            else:
+                i=1
+            for r in getattr(button.annotation, "%sRelations" % self.over_mode):
+                    self.activate_annotation(r.members[i])
+        return True
+
+    def rel_deactivate(self, button):
+        if self.over_mode is not None:
+            if self.over_mode == 'incoming':
+                i=0
+            else:
+                i=1
+            for r in getattr(button.annotation, "%sRelations" % self.over_mode):
+                self.desactivate_annotation(r.members[i])
+        return True
     
     def create_annotation_widget(self, annotation):
         u2p = self.unit2pixel
@@ -458,6 +481,10 @@ class TimeLine:
         b.active = False
         #b.connect("clicked", self.annotation_cb, annotation)
         b.connect("button-press-event", self.button_press_handler, annotation)
+        
+        b.connect("enter", self.rel_activate)
+        b.connect("leave", self.rel_deactivate)
+        
         b.set_size_request(u2p(annotation.fragment.duration),
                            self.button_height)
         # Get the default height for the annotation type. If not defined,
@@ -867,22 +894,46 @@ class TimeLine:
         radiogroup_ref=None
         
         tb_list = (
-            (_("_Relations"), _("Create relations"),
+            (_("Relations"), _("Create relations"),
              gtk.STOCK_CONVERT, self.set_drag_mode, "relation"),
             
-            (_("_BeginBegin"), _("Set the same begin time as the selected annotation"),
+            (_("BeginBegin"), _("Set the same begin time as the selected annotation"),
              gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-begin"),
 
-            (_("_BeginEnd"), _("Align the begin time to the selected end time"),
+            (_("BeginEnd"), _("Align the begin time to the selected end time"),
              gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-end"),
 
 
-            (_("_EndEnd"), _("Align the end time to the selected end time"),
+            (_("EndEnd"), _("Align the end time to the selected end time"),
              gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-end"),
 
-            (_("_EndBegin"), _("Align the end time to the selected begin time"),
+            (_("EndBegin"), _("Align the end time to the selected begin time"),
              gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-begin"),
 
+            )
+
+        for text, tooltip, icon, callback, arg in tb_list:
+            b=gtk.RadioToolButton(group=radiogroup_ref,
+                                  stock_id=icon)
+            b.set_tooltip(self.tooltips, tooltip)
+            b.connect("clicked", callback, arg)
+            tb.insert(b, -1)
+            
+            if radiogroup_ref is None:
+                radiogroup_ref=b
+
+        def set_over_mode(button, value):
+            self.over_mode=value
+            return True
+
+        radiogroup_ref=None
+        tb_list = (
+            (_("No Display"), _("Do not display relations"),
+             gtk.STOCK_REMOVE, set_over_mode, None),
+            (_("Outgoing"), _("Display outgoing relations"),
+             gtk.STOCK_REDO, set_over_mode, "outgoing"),
+            (_("Incoming"), _("Display incoming relations"),
+             gtk.STOCK_UNDO, set_over_mode, "incoming"),
             )
 
         for text, tooltip, icon, callback, arg in tb_list:
