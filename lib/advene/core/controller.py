@@ -280,14 +280,14 @@ class AdveneController:
     def get_default_media (self):
         mediafile = self.package.getMetaData (config.data.namespace,
                                               "mediafile")
-        m=self.dvd_regexp(mediafile)
+        m=self.dvd_regexp.match(mediafile)
         if m:
             title,chapter=m.group(1, 2)
             mediafile=self.player.dvd_uri(title, chapter)
         return mediafile
 
     def set_default_media (self, uri):
-        m=self.dvd_regexp(uri)
+        m=self.dvd_regexp.match(uri)
         if m:
             title,chapter=m.group(1,2)
             uri="dvd@%s:%s"
