@@ -387,12 +387,15 @@ def parsed (target, context):
                 print "Syntax error in content: >%s<" % l
         return d
     #FIXME: we parse x-advene-ruleset as xml for the moment
-    elif content.mimetype == 'text/xml' or content.mimetype == 'application/x-advene-ruleset':
+    elif content.mimetype in ('text/xml',
+                              'application/x-advene-ruleset',
+                              'application/x-advene-simplequery'):
         import advene.util.handyxml
         h=advene.util.handyxml.xml(content.stream)
         # FIXME: use a cache of DOM trees in order to avoid to
         # repeatdly parse the same data in the case of repetitive
         # access to the same element.
+        # FIXME: use ElementTree.iterparse
 
         return h
     
