@@ -368,9 +368,16 @@ class Config(object):
     def advenefile(self, filename, category='resources'):
         """Return an absolute pathname for the given file.
 
+        @param filename: a filename or a path to a file (tuple)
+        @type filename: string or tuple
+        @param category: the category of the file
+        @type category: string
+        
         @return: an absolute pathname
         @rtype: string
         """
+        if isinstance(filename, list) or isinstance(filename, tuple):
+            filename=os.sep.join(filename)
         return os.sep.join ( ( self.path[category], filename ) )
 
     userid = property (fget=get_userid,
