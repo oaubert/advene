@@ -60,23 +60,41 @@ class Config(object):
         else:
             self.os='linux'
 
-        self.path = {
-            # VLC binary path
-            'vlc': '/usr/bin',
-            # VLC plugins path
-            'plugins': '/usr/lib/vlc',
-            # Advene modules path
-            'advene': '/usr/lib/advene',
-            # Advene resources (.glade, template, ...) path
-            'resources': '/usr/share/advene',
-            # Advene data files default path
-            'data': self.get_homedir(),
-            # Imagecache save directory
-            'imagecache': '/tmp/advene',
-            # Web data files
-            'web': '/usr/share/advene/web',
-            }
-
+        if self.os != 'win32':
+            self.path = {
+                # VLC binary path
+                'vlc': '/usr/bin',
+                # VLC plugins path
+                'plugins': '/usr/lib/vlc',
+                # Advene modules path
+                'advene': '/usr/lib/advene',
+                # Advene resources (.glade, template, ...) path
+                'resources': '/usr/share/advene',
+                # Advene data files default path
+                'data': self.get_homedir(),
+                # Imagecache save directory
+                'imagecache': '/tmp/advene',
+                # Web data files
+                'web': '/usr/share/advene/web',
+                }
+        else:
+            self.path = {
+                # VLC binary path
+                'vlc': 'c:\\Program Files\\VideoLAN\\VLC',
+                # VLC plugins path
+                'plugins': 'c:\\Program Files\\VideoLAN\\VLC',
+                # Advene modules path
+                'advene': 'c:\\Program Files\\Advene',
+                # Advene resources (.glade, template, ...) path
+                'resources': 'c:\\Program Files\\Advene\\share',
+                # Advene data files default path
+                'data': self.get_homedir(),
+                # Imagecache save directory
+                'imagecache': os.getenv('TEMP'),
+                # Web data files
+                'web': 'c:\\Program Files\\Advene\\share\\web'
+                }
+            
         # Web-related preferences
         self.web = {
             'edit-width': 80,
@@ -168,13 +186,45 @@ class Config(object):
                                     0,
                                     self.target_type[t] ) ]
 
+        if self.os == 'win32':
+            self.win32_specific_config()
+
+    def win32_specific_config(self):
+        if self.os != 'win32':
+            return
+        advenehome=self.get_registry_value('software\\advene','path')
+        if advenehome is None:
+            print "Cannot determine the Advene location"
+            return
+        print "Setting Advene paths for %s" % advenehome
+        self.path['advene'] = advenehome
+        self.path['resources'] = os.path.sep.join( (advenehome, 'share') )
+        self.path['web'] = os.path.sep.join( (advenehome, 'share', 'web') )
+
+    def get_registry_value (self, subkey, name):
+        if self.os != 'win32':
+            return None
+        try:
+            a=_winreg.HKEY_LOCAL_MACHINE
+        except NameError:
+            import _winreg
+        value = None
+        for hkey in _winreg.HKEY_LOCAL_MACHINE, _winreg.HKEY_CURRENT_USER:
+            try:
+                reg = _winreg.OpenKey(hkey, subkey)
+                value, type_id = _winreg.QueryValueEx(reg, name)
+                _winreg.CloseKey(reg)
+            except _winreg.error:
+                pass
+        return value
+        
     def get_homedir(self):
         if os.environ.has_key('HOME'):
             return os.environ['HOME']
         elif os.environ.has_key('HOMEPATH'):
             # Windows
             return os.sep.join((os.environ['HOMEDRIVE'],
-                                os.environ['HOMEPATH']))
+                                     os.environ['HOMEPATH']))
         else:
             raise Exception ('Unable to find homedir')
 
@@ -230,6 +280,7 @@ class Config(object):
             self.config_file=''
             return False
 
+        print "Reading configuration from %s" % conffile
         config=sys.modules['advene.core.config']
         for li in file:
             if li.startswith ("#"):
