@@ -33,15 +33,17 @@ class DVDSelect:
         return True
     
     def get_chapter(self):
-        return self.chapterwidget.get_value()
+        return int(self.chapterwidget.get_value())
 
     def get_title(self):
-        return self.titlewidget.get_value()
+        return int(self.titlewidget.get_value())
 
     def get_url(self):
+        return self.controller.player.dvd_uri(self.get_title(),
+                                              self.get_chapter())
         # FIXME: should ask the DVD module for the right MRL syntax
-        return "dvdsimple:///dev/dvd@%d:%d" % (self.get_title(),
-                                               self.get_chapter())
+        #return "dvdsimple:///dev/dvd@%d:%d" % (self.get_title(),
+        #                                       self.get_chapter())
 
     def preview(self, button=None):
         if not hasattr(self, 'oldplaylist'):
