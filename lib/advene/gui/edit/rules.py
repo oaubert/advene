@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """Display and edit a Rule."""
 
 import gtk
@@ -11,6 +9,7 @@ import advene.rules.elements
 from advene.rules.elements import Event, Condition, ConditionList, Action, ActionList
 from advene.rules.elements import Rule, RuleSet
 import advene.core.config as config
+from advene.gui.util import CategorizedSelector
 
 from gettext import gettext as _
 
@@ -719,13 +718,13 @@ class EditAction(EditGeneric):
         res.sort()
         return res
 
-    def on_change_name(self, widget, names):
-        if names[widget.get_history()] == self.current_name:
+    def on_change_name(self, element):
+        if element.name == self.current_name:
             return True
         # Cache the old parameters values
         self.cached_parameters[self.current_name]=self.current_parameters.copy()
 
-        self.current_name=names[widget.get_history()]
+        self.current_name=element.name
         for w in self.paramlist.values():
             w.destroy()
         self.paramlist={}
@@ -769,9 +768,24 @@ class EditAction(EditGeneric):
         vbox=gtk.VBox()
 
         vbox.add(gtk.HSeparator())
-        actions=self.catalog.get_described_actions()
-        self.name=self.build_option(actions, self.current_name, self.on_change_name,
-                                    editable=self.editable)
+
+        def description_getter(element):
+            if hasattr(element, 'description'):
+                return element.description
+            else:
+                # it is a category
+                return self.catalog.action_categories[element]
+        
+        c=self.catalog
+        self.selector=CategorizedSelector(title=_("Select an action"),
+                                          elements=c.actions.values(),
+                                          categories=c.action_categories.keys(),
+                                          current=c.actions[self.current_name],
+                                          description_getter=description_getter,
+                                          category_getter=lambda e: e.category,
+                                          callback=self.on_change_name,
+                                          editable=self.editable)
+        self.name=self.selector.get_button()
         vbox.add(self.name)
 
         if self.model.registeredaction:
