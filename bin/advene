@@ -51,7 +51,7 @@ if __name__ == '__main__':
     Check your .advenerc file.""" % gladefile
     sys.exit(1)
 
-  v = advene.gui.main.DVDControl ()
+  v = advene.gui.main.AdveneGUI ()
   try:
     v.main (sys.argv[1:])
   except Exception, e:
