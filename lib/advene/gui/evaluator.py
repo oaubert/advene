@@ -375,7 +375,7 @@ if __name__ == "__main__":
     window=ev.popup()
 
     b=gtk.Button(stock=gtk.STOCK_QUIT)
-    b.connect("clicked", gtk.main_quit)
+    b.connect("clicked", lambda e: gtk.main_quit())
     ev.hbox.add(b)
     b.show()
     
