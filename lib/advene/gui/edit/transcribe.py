@@ -8,6 +8,8 @@ import pygtk
 import gtk
 import gobject
 
+import urllib
+
 import advene.core.config as config
 
 # Advene part
@@ -43,7 +45,7 @@ class TranscriptionImporter(advene.util.importer.GenericImporter):
         return self.package
 
 class TranscriptionEdit:
-    def __init__ (self, controller=None):
+    def __init__ (self, controller=None, filename=None):
         self.controller=controller
         self.package=controller.package
         self.tooltips=gtk.Tooltips()
@@ -78,6 +80,8 @@ class TranscriptionEdit:
         self.marks = []
         
         self.widget=self.build_widget()
+        if filename is not None:
+            self.load_transcription(filename)
 
     def build_widget(self):
         vbox = gtk.VBox()
@@ -196,11 +200,12 @@ class TranscriptionEdit:
         item.connect("activate", popup_ignore, button)
         menu.append(item)
 
-        item = gtk.MenuItem(_("Offset"))
+        item = gtk.MenuItem(_("Reaction-time offset"))
         item.connect("activate", popup_modify, button, self.delay.value)
         menu.append(item)
-            
+
         menu.show_all()
+        
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
     
@@ -356,7 +361,16 @@ class TranscriptionEdit:
         return True
 
     def save_transcription(self, filename=None):
-        f=open(filename, "w")
+        try:
+            f=open(filename, "w")
+        except IOError, e:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                _("Cannot save the file: %s") % unicode(e))
+            response=dialog.run()
+            dialog.destroy()
+            return True
         last=None
         for d in self.parse_transcription(show_ignored=True,
                                           strip_blank=False):
@@ -386,9 +400,9 @@ class TranscriptionEdit:
 
     def load_transcription(self, filename=None):
         try:
-            f=open(filename, 'r')
-        except Exception, e:
-            self.controller.log(_("Cannot read %s: %s") % (filename, str(e)))
+            f=urllib.urlopen(filename)
+        except IOError, e:
+            self.controller.log(_("Cannot open %s: %s") % (filename, str(e)))
             return
         data=unicode("".join(f.readlines()))
 
@@ -467,11 +481,11 @@ class TranscriptionEdit:
         radiogroup_ref=None
 
         tb_list = (
-            (_("Open"), _("Open"), gtk.STOCK_OPEN, self.load_transcription_cb),
-            (_("Save"), _("Save"), gtk.STOCK_SAVE, self.save_transcription_cb),
+            (_("Open"),    _("Open"), gtk.STOCK_OPEN, self.load_transcription_cb),
+            (_("Save"),    _("Save"), gtk.STOCK_SAVE, self.save_transcription_cb),
             (_("Save As"), _("Save As"), gtk.STOCK_SAVE_AS, self.save_as_cb),
             (_("Convert"), _("Convert"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
-            (_("Close"), _("Close"), gtk.STOCK_CLOSE, lambda w: window.destroy()),
+            (_("Close"),   _("Close"), gtk.STOCK_CLOSE, lambda w: window.destroy()),
             )
 
         for text, tooltip, icon, callback in tb_list:
