@@ -49,6 +49,7 @@ class AccumulatorPopup:
         return True
 
     def undisplay(self, widget=None):
+        widget.hide()
         widget.destroy()
         self.widgets = [ t for t in self.widgets if t[0] != widget ]        
         if not self.widgets and self.autohide:
@@ -72,7 +73,7 @@ class AccumulatorPopup:
         if self.widgets:
             t=self.widgets[0][1]
             if t is not None and time.time() >= t:
-                self.undisplay(self.widgets[0])
+                self.undisplay(self.widgets[0][0])
         return True
     
     def build_widget(self):
