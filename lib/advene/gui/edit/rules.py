@@ -365,7 +365,7 @@ class EditRule(EditGeneric):
     def update_name(self, entry):
         if self.namelabel:
             self.namelabel.set_label(entry.get_text())
-        self.framelabel.set_markup("Rule <b>%s</b>" % entry.get_text())
+        self.framelabel.set_markup(_("Rule <b>%s</b>") % entry.get_text())
         return True
 
     def remove_condition(self, widget, conditionwidget, hbox):
@@ -434,7 +434,7 @@ class EditRule(EditGeneric):
     def build_widget(self):
         frame=gtk.Frame()
         self.framelabel=gtk.Label()
-        self.framelabel.set_markup("Rule <b>%s</b>" % self.model.name)
+        self.framelabel.set_markup(_("Rule <b>%s</b>") % self.model.name)
         self.framelabel.show()
         frame.set_label_widget(self.framelabel)
 
