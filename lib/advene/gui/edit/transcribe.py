@@ -103,6 +103,36 @@ class TranscriptionEdit:
                                        it)
         return False
 
+    def mark_button_press_cb(self, button, event, timestamp):
+        """Handler for right-button click on timestamp mark.
+        """
+        if event.button != 3:
+            return False
+        # Create a popup menu for timestamp
+        menu = gtk.Menu()
+
+        def popup_goto (win, position):
+            c=self.controller
+            pos = c.create_position (value=position,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)
+            return True
+
+        item = gtk.MenuItem(_("Position %s") % vlclib.format_time(timestamp))
+        menu.append(item)
+
+        item = gtk.SeparatorMenuItem()
+        menu.append(item)
+
+        item = gtk.MenuItem(_("Go to..."))
+        item.connect("activate", popup_goto, timestamp)
+        menu.append(item)
+            
+        menu.show_all()
+        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        return True
+    
     def create_timestamp_mark(self, timestamp, it):
         b=self.textview.get_buffer()
         anchor=b.create_child_anchor(it)
@@ -111,6 +141,7 @@ class TranscriptionEdit:
         child.connect("clicked", self.remove_anchor, anchor, b)
         # FIXME: handle right-click button to display a menu
         # with Goto action
+        child.connect("button-press-event", self.mark_button_press_cb, timestamp)
         self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
         child.timestamp=timestamp
         child.show()
