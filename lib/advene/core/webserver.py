@@ -125,44 +125,69 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header ('Pragma', 'no-cache')
         self.send_header ('Cache-Control', 'max-age=0')
 
-    def start_html (self, title="", duplicate=False, epoz=False):
+    def start_html (self, title="", headers=None, head_section=None, body_attributes="",
+                    mode="navigation", duplicate_title=False, cache=False):
         """Starts writing a HTML response (header + common body start).
 
         @param title: Title of the HTML document (default : "")
         @type title: string
+        @param headers: additional headers to add
+        @type headers: a list of tuples (keyword, value)
+        @param head_section: additional HTML code to add in the <head></head> section
+        @type head_section: string
+        @param body_attributes: attributes added to the body tag
+        @param body_attributes: string
+
+        @param mode: presentation mode (navigation, raw). Default: navigation
+        @type mode: string
+        @param duplicate_title: duplicate title as HTML header (h1)
+        @type duplicate_title: boolean
+        @param cache: make the document cacheable. Default: False
+        @type cache: boolean
         @return: nothing
         """
         self.send_response (200)
         self.send_header ('Content-type', 'text/html; charset=utf-8')
-        self.no_cache ()
+        if headers is not None:
+            for h in headers:
+                self.send_header(h[0], h[1])
+        if not cache:
+            self.no_cache ()
         self.end_headers ()
+        
         self.wfile.write("<html><head><title>%s</title>" % title)
-        if epoz:
-            self.wfile.write(
-                """<script src="/data/epoz/dom2_events.js" type="text/javascript"></script>
-                <script src="/data/epoz/sarissa.js" type="text/javascript"></script>
-                <script src="/data/epoz/epozeditor.js" type="text/javascript"></script>
-                <link href="/data/epoz/epozstyles.css" type="text/css" rel="stylesheet">
-                <link href="/data/epoz/epozcustom.css" type="text/css" rel="stylesheet">
-                </head>
-                <body onload="epoz = initEpoz(document.getElementById('epoz-editor'));
-                epozui = epoz.getTool('ui');">
-                """)
-        else:
-            self.wfile.write("</head><body>")
+        if head_section is not None:
+            self.wfile.write(head_section)
 
-        self.wfile.write (_("""
-        <p>
-        <a href="/admin">Server administration</a> |
-        <a href="/admin/status">Server status</a> |
-        <a href="/media">Media control</a> |
-        <a href="%(path)s?mode=raw">Raw view</a>
-        </p>
-        Location: %(locationbar)s
-        <hr>
-        """) % { 'locationbar': self.location_bar (),
-                 'path': self.path})
-        if duplicate:
+        self.wfile.write("</head><body %s>" % body_attributes)
+#         if epoz:
+#             self.wfile.write(
+#                 """<script src="/data/epoz/dom2_events.js" type="text/javascript"></script>
+#                 <script src="/data/epoz/sarissa.js" type="text/javascript"></script>
+#                 <script src="/data/epoz/epozeditor.js" type="text/javascript"></script>
+#                 <link href="/data/epoz/epozstyles.css" type="text/css" rel="stylesheet">
+#                 <link href="/data/epoz/epozcustom.css" type="text/css" rel="stylesheet">
+#                 </head>
+#                 <body onload="epoz = initEpoz(document.getElementById('epoz-editor'));
+#                 epozui = epoz.getTool('ui');">
+#                 """)
+#         else:
+#             self.wfile.write("</head><body>")
+
+        if mode == "navigation":
+            self.wfile.write (_("""
+            <p>
+            <a href="/admin">Server administration</a> |
+            <a href="/admin/status">Server status</a> |
+            <a href="/media">Media control</a> |
+            <a href="%(path)s?mode=raw">Raw view</a>
+            </p>
+            Location: %(locationbar)s
+            <hr>
+            """) % { 'locationbar': self.location_bar (),
+                     'path': self.path})
+            
+        if duplicate_title:
             self.wfile.write("<h1>%s</h1>\n" % title)        
 
     def send_redirect (self, location):
@@ -355,7 +380,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 # or
                 # /media/snapshot/package_alias/#
                 if len(param) == 0:
-                    self.start_html (_("Access to packages snapshots"), duplicate=True)
+                    self.start_html (_("Access to packages snapshots"), duplicate_title=True)
                     self.wfile.write ("<ul>")
                     for alias in self.server.packages.keys ():
                         self.wfile.write ("""<li><a href="/media/snapshot/%s">%s</a></li>""" % (alias, alias))
@@ -365,7 +390,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 i = self.server.imagecaches[alias]
 
                 if not query.has_key ('position') and len(param) < 2:
-                    self.start_html (_("Available snapshots for %s") % alias, duplicate=True)
+                    self.start_html (_("Available snapshots for %s") % alias, duplicate_title=True)
                     self.wfile.write ("<ul>")
                     if (query.has_key('mode') and query['mode'] == 'inline'):
                         template="""<li><a href="/media/snapshot/%(alias)s/%(position)d"><img src="/media/snapshot/%(alias)s?position=%(position)d" /></a></li>"""
@@ -441,7 +466,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         @param query: the options given in the URL
         @type query: dict
         """
-        self.start_html (_('Access control'), duplicate=True)
+        self.start_html (_('Access control'), duplicate_title=True)
 
         # FIXME: add "action" support for adding and deleting hosts.
         if query.has_key('hostname'):
@@ -472,7 +497,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         This method displays the root document of the server, which
         should link to all functionalities."""
         
-        self.start_html (_("Server Administration"), duplicate=True)
+        self.start_html (_("Server Administration"), duplicate_title=True)
         self.wfile.write(_("""
         <p><a href="/admin/status">Display the server status</a></p>
         <p><a href="/admin/access">Sets the access list</a></p>
@@ -502,7 +527,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         This method displays the data files in the data directory.
         Maybe it should be removed when the server runs embedded.
         """
-        self.start_html (_("Available files"), duplicate=True)
+        self.start_html (_("Available files"), duplicate_title=True)
         self.wfile.write ("<ul>")
         import glob
         for i in glob.glob (os.sep.join ((config.data.path['data'], '*.xml'))):
@@ -748,12 +773,12 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             try:
                 objet = context.evaluateValue (expr)
             except AdveneException, e:
-                self.start_html (_("Error"), duplicate=True)
+                self.start_html (_("Error"), duplicate_title=True)
                 self.wfile.write (unicode(e))
                 return
 
             if not query.has_key('action') or not query.has_key('data'):
-                self.start_html (_("Error"), duplicate=True)
+                self.start_html (_("Error"), duplicate_title=True)
                 self.wfile.write (_("<p>Invalid request</p>."))
                 return
             
@@ -1031,7 +1056,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                  _("""You should specify an uri"""))
             try:
                 self.controller.load_package (uri=uri, alias=alias)
-                self.start_html (_("Package %s loaded") % alias, duplicate=True)
+                self.start_html (_("Package %s loaded") % alias, duplicate_title=True)
                 self.display_loaded_packages (embedded=True)                
             except:
                 self.send_error(501,
@@ -1041,23 +1066,23 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif command == 'delete':
             alias = query['alias']
             self.server.unregister_package (alias)
-            self.start_html (_("Package %s deleted") % alias, duplicate=True)
+            self.start_html (_("Package %s deleted") % alias, duplicate_title=True)
             self.display_loaded_packages (embedded=True)
         elif command == 'save':
             alias = query['alias']
             p = self.server.packages[alias]
             p.save (as=p.uri)
-            self.start_html (_("Package %s saved") % alias, duplicate=True)
+            self.start_html (_("Package %s saved") % alias, duplicate_title=True)
             self.display_loaded_packages (embedded=True)
         elif command == 'reset':
             # Reset packages list
             self.server.packages = {}
             self.server.aliases = {}
             self.server.imagecaches = {}
-            self.start_html (_('Server reset'), duplicate=True)
+            self.start_html (_('Server reset'), duplicate_title=True)
             self.display_loaded_packages (embedded=True)
         elif command == 'status':
-            self.start_html (_('Server status'), duplicate=True)
+            self.start_html (_('Server status'), duplicate_title=True)
             self.wfile.write (_("""
             <p>%d packages loaded.</p>
             """) % len(self.server.packages))
@@ -1068,7 +1093,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif command == 'access':
             self.handle_access (l, query)
         else:
-            self.start_html (_('Error'), duplicate=True)
+            self.start_html (_('Error'), duplicate_title=True)
             self.wfile.write (_("""<p>Unknown admin command</p><pre>Command: %s</pre>""") % command)
 
     def do_GET_data (self, parameters, query):
@@ -1213,12 +1238,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # FIXME: the following line is a hack for having qname-keys work
         #        It is a hack because obviously, p is not a "view"
         context.addGlobal ('view', p)
-        context.addGlobal ("epozmacros", self.server.epozmacros)
+        if 'epoz' in tales:
+            context.addGlobal ("epozmacros", self.server.epoz_macros)
         
         try:
             objet = context.evaluateValue (expr)
         except AdveneException, e:
-            self.start_html (_("Error"), duplicate=True)
+            self.start_html (_("Error"), duplicate_title=True)
             self.wfile.write (_("""The TALES expression is not valid."""))
             self.wfile.write (unicode(e))
             return
@@ -1243,41 +1269,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.end_headers ()
             self.wfile.write (str(objet))
             return
-        elif displaymode == 'raw':
-            # 'raw' mode : return only the generated document
-            self.send_response (200)            
-            self.send_header ('Content-type', 'text/html; charset=utf-8')
-            #FIXME: handle epoz
-            self.no_cache ()
-            self.end_headers ()
-
-            self.wfile.write("<html><head><title></title>")
-            if 'epoz' in tales:
-                self.wfile.write(
-                    """<script src="/data/epoz/dom2_events.js" type="text/javascript"></script>
-                    <script src="/data/epoz/sarissa.js" type="text/javascript"></script>
-                    <script src="/data/epoz/epozeditor.js" type="text/javascript"></script>
-                    <link href="/data/epoz/epozstyles.css" type="text/css" rel="stylesheet">
-                    <link href="/data/epoz/epozcustom.css" type="text/css" rel="stylesheet">
-                    </head>
-                    <body onload="epoz = initEpoz(document.getElementById('epoz-editor'));
-                    epozui = epoz.getTool('ui');">
-                    """)
-            else:
-                self.wfile.write("</head></body>")
-            
-            if hasattr (objet, 'view') and callable (objet.view):
-                context = advene.model.tal.context.AdveneContext (here=objet, options=query)
-                try:
-                    self.wfile.write (objet.view (context=context))
-                except AdveneException, e:
-                    self.wfile.write (_("""
-                    <h1>Error</h1>
-                    %s
-                    """) % str(e))
-            else:
-                self.wfile.write (str(objet))
-            return
         elif displaymode == 'content':
             if isinstance (objet, Content):
                 self.send_response (200)
@@ -1290,21 +1281,27 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_error (404, _("Content mode not available on non-content data"))
                 return
             
-        # Last case: default
-        # FIXME: epoz support is kind of a hack for now
-        self.start_html (_("TALES evaluation - %s") % tales, epoz=('epoz' in tales))
+        # Last case: default or raw
+        # FIXME: epoz support is kind of a hack for now. 
+        # FIXME: we should return a meaningful title
 
-        self.wfile.write (_("""
-        <p>Evaluating expression "<strong>%s</strong>" on package %s</p>
-        <hr>
-        """) % (tales , p.uri))
+        if displaymode != "raw":
+            displaymode = "navigation"
+        if 'epoz' in tales:
+            self.start_html(title=_("TALES evaluation - %s") % tales,
+                            head_section=self.server.epoz_head,
+                            body_attributes=self.server.epoz_body_attributes,
+                            mode=displaymode)
+        else:
+            self.start_html(title=_("TALES evaluation - %s") % tales,
+                            mode=displaymode)
 
-        self.wfile.write (_("<p>Type %s :</p>") % cgi.escape(str(type(objet))))
-
+        # Display content
         if hasattr (objet, 'view') and callable (objet.view):
             
             context = advene.model.tal.context.AdveneContext (here=objet,
-                                                        options=query)
+                                                              options=query)
+            # FIXME: maybe add more elements to context (view, ?)
             #context.log = advene.model.tal.context.DebugLogger ()
             try:
                 self.wfile.write (objet.view (context=context))
@@ -1333,51 +1330,56 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                                         e.errorDescription)))
         
         # Generating navigation footer
-        levelup = self.path[:self.path.rindex("/")]
-        auto_components = self.get_valid_members (objet)
-        auto_components.sort()
-        try:
-            auto_views = objet.validViews
-            auto_views.sort()
-        except:
-            auto_views = []
-        
-        self.wfile.write (_("""
-        <hr>
-        <p>
-        Location: %s<br>
-        <form name="navigation" method="GET">
-        <a href="%s">Up one level</a> |
-        Next level :
-        <select name="path" onchange="submit()">
-        """) % (self.location_bar (),
-               levelup))
+        if displaymode != "raw":
+            levelup = self.path[:self.path.rindex("/")]
+            auto_components = self.get_valid_members (objet)
+            auto_components.sort()
+            try:
+                auto_views = objet.validViews
+                auto_views.sort()
+            except:
+                auto_views = []
 
-        if hasattr (objet, 'view'):
-            self.wfile.write ("<option selected>view</option>")
+            self.wfile.write (_("""
+            <hr>
+            <p>
+            Location: %s<br>
+            <form name="navigation" method="GET">
+            <a href="%s">Up one level</a> |
+            Next level :
+            <select name="path" onchange="submit()">
+            """) % (self.location_bar (),
+                   levelup))
 
-        self.wfile.write ("\n".join(
-            ["""<option>%s</option>""" % c for c in auto_components]))
+            if hasattr (objet, 'view'):
+                self.wfile.write ("<option selected>view</option>")
 
-        alias = self.path.split("/")[2]
-        self.wfile.write (_("""
-        </select> View: <select name="view" onchange="submit()">
-        <option selected></option>
-        """))
-        
-        self.wfile.write ("\n".join(
-            ["""<option value="%s">%s</option>""" %
-             ("/".join((self.path, "view", c)), c)
-             for c in auto_views]))
+            self.wfile.write ("\n".join(
+                ["""<option>%s</option>""" % c for c in auto_components]))
 
-        self.wfile.write ("""
-        </select> 
-        <input type="submit" value="go">
-        </form>
-        <form name="entry" method="GET"><input size="50" type="text" name="path" accesskey="p">
-        <input type="submit" value="go"></form>
-        """
-                          )
+            alias = self.path.split("/")[2]
+            self.wfile.write (_("""
+            </select> View: <select name="view" onchange="submit()">
+            <option selected></option>
+            """))
+
+            self.wfile.write ("\n".join(
+                ["""<option value="%s">%s</option>""" %
+                 ("/".join((self.path, "view", c)), c)
+                 for c in auto_views]))
+
+            self.wfile.write ("""
+            </select> 
+            <input type="submit" value="go">
+            </form>
+            <form name="entry" method="GET">
+            <input size="50" type="text" name="path" accesskey="p">
+            <input type="submit" value="go"></form>
+            """)
+            self.wfile.write (_("""<hr>
+            <p>Evaluating expression "<strong>%s</strong>" on package %s returns %s</p>
+            """) % (tales , p.uri, cgi.escape(str(type(objet)))))            
+        return
 
     def do_eval (self, q):
         """Evaluates a python expression.
@@ -1524,8 +1526,16 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         # Compile EPOZ template file
         fname=os.sep.join((config.data.path['web'], 'epoz', 'epozmacros.html'))
         templateFile = open (fname, 'r')
-        self.epozmacros = simpletal.simpleTAL.compileHTMLTemplate (templateFile)
+        self.epoz_macros = simpletal.simpleTAL.compileHTMLTemplate (templateFile)        
         templateFile.close()
+        self.epoz_head = """<script src="/data/epoz/dom2_events.js" type="text/javascript"></script>
+        <script src="/data/epoz/sarissa.js" type="text/javascript"></script>
+        <script src="/data/epoz/epozeditor.js" type="text/javascript"></script>
+        <link href="/data/epoz/epozstyles.css" type="text/css" rel="stylesheet">
+        <link href="/data/epoz/epozcustom.css" type="text/css" rel="stylesheet">
+        """
+        self.epoz_body_attributes="""onload="epoz = initEpoz(document.getElementById('epoz-editor')); epozui = epoz.getTool('ui');" """
+        
         
         BaseHTTPServer.HTTPServer.__init__(self, ('', port),
                                            AdveneRequestHandler)
