@@ -1,8 +1,10 @@
-from constants import *
-import modeled
-import viewable
+import time
 
-from util.auto_properties import auto_properties
+from advene.model.constants import *
+import advene.model.modeled as modeled
+import advene.model.viewable as viewable
+
+from advene.model.util.auto_properties import auto_properties
 
 class AbstractFragment(viewable.Viewable.withClass('fragment')):
     """Common superclass for every fragment class.
@@ -206,9 +208,16 @@ class MillisecondFragment(AbstractNbeFragment):
     # Instance methods
     #
 
+    def format_time(self, val):
+        t = long(val)
+        # Format: HH:MM:SS.mmm
+        return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)),
+                            t % 1000)
+        
     def __str__(self):
         """Return a string representation of the Millisecond fragment"""
-        return "Milliseconds (%d,%d)" % (self.getBegin(), self.getEnd())
+        return "Milliseconds (%s,%s)" % (self.format_time(self.getBegin()),
+                                         self.format_time(self.getEnd()))
 
 class __UnknownFragment(AbstractFragment):
     """ An unkonw fragment is returned each time the fragment element is not
