@@ -124,6 +124,12 @@ class TranscriptionEdit:
             c.update_status (status="set", position=pos)
             return True
 
+        def popup_modify(win, child, t):
+            timestamp=child.timestamp + t
+            self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
+            child.timestamp=timestamp
+            return True
+        
         item = gtk.MenuItem(_("Position %s") % vlclib.format_time(timestamp))
         menu.append(item)
 
@@ -132,6 +138,26 @@ class TranscriptionEdit:
 
         item = gtk.MenuItem(_("Go to..."))
         item.connect("activate", popup_goto, timestamp)
+        menu.append(item)
+            
+        item = gtk.MenuItem(_("-1 sec"))
+        item.connect("activate", popup_modify, button, -1000)
+        menu.append(item)
+        item = gtk.MenuItem(_("-0.5 sec"))
+        item.connect("activate", popup_modify, button, -500)
+        menu.append(item)
+        item = gtk.MenuItem(_("-0.1 sec"))
+        item.connect("activate", popup_modify, button, -100)
+        menu.append(item)
+            
+        item = gtk.MenuItem(_("+1 sec"))
+        item.connect("activate", popup_modify, button, 1000)
+        menu.append(item)
+        item = gtk.MenuItem(_("-0.5 sec"))
+        item.connect("activate", popup_modify, button, 500)
+        menu.append(item)
+        item = gtk.MenuItem(_("+0.1 sec"))
+        item.connect("activate", popup_modify, button, 100)
         menu.append(item)
             
         menu.show_all()
