@@ -24,7 +24,13 @@ class Event(str):
 #        return "Event %s" % self[:]
 
 class ConditionList(list):
-    """A list of conditions"""
+    """A list of conditions.
+
+    It inherits from list, and adds a L{match} method.
+
+    @ivar composition: the composition mode (and/or)
+    @type composition: string
+    """
     def __init__(self, val=None):
         self.composition="and"
         if val is not None:
@@ -33,9 +39,12 @@ class ConditionList(list):
             list.__init__(self)
 
     def is_true(self):
+        """The ConditionList is never True by default."""
         return False
     
     def match(self, context):
+        """Test is the context matches the ConditionList.
+        """
         if self.composition == "and":
             for condition in self:
                 if not condition.match(context):
@@ -49,7 +58,15 @@ class ConditionList(list):
     
 class Condition:
     """The Condition class.
+
+    @ivar lhs: Left-Hand side expression
+    @type lhs: TALES expression
+    @ivar rhs: Right-Hand side expression
+    @type rhs: TALES expression
+    @ivar operator: condition operator
+    @type operator: string
     """
+    
     binary_operators={
         'equals': _("is equal to"),
         'different': _("is different from"),
@@ -69,10 +86,12 @@ class Condition:
         self.operator=operator
 
     def is_true(self):
+        """Test if the Condition is true by default.
+        """
         return self.match == self.truematch
     
     def match(self, context):
-        """Return True if the condition matches the context."""
+        """Test if the condition matches the context."""
         if self.operator in self.binary_operators:
             # Binary operator
             left=context.evaluateValue(self.lhs)
@@ -110,6 +129,11 @@ class Condition:
         return True
 
 class ActionList(list):
+    """List of actions.
+
+    It just forwards the L{execute} call to all its elements.
+    """
+    
     def execute(self, context):
         for action in self:
             action.execute(context)        
@@ -123,6 +147,16 @@ class Action:
         context is a advene.tal.AdveneContext holding various information
         parameters is a dictionary with named parameters, whose values are
                    coded in TALES syntax (and should be evaluated through context).
+
+    @ivar name: the action name
+    @ivar parameters: the action's parameters
+    @type parameters: dict
+    @ivar catalog: the associated catalog
+    @type catalog: ECACatalog
+    @ivar doc: the action documentation
+    @ivar registeredaction: the corresponding registeredaction
+    @ivar immediate: indicates that the action should be executed at once and not scheduled
+    @type immediate: boolean
     """
     def __init__ (self, registeredaction=None, method=None, catalog=None, doc=""):
         self.parameters={}
@@ -148,12 +182,19 @@ class Action:
         return "Action %s" % self.name
     
     def bind(self, method):
+        """Bind a given method to the action.
+
+        @param method: the method
+        """
         self.method=method
 
     def add_parameter(self, name, value):
         """Declare a new parameter for the action.
 
-        Value is a TALES expression.
+        @param name: the parameter name
+        @type name: string
+        @param value: the parameter value
+        @type value: a TALES expression
         """
         self.parameters[name]=value
         
@@ -169,7 +210,19 @@ class Action:
             return self.method(context, self.parameters)
 
 class Rule:
-    """Advene Rule, consisting in an Event, a Condition and an Action"""
+    """Advene Rule, consisting in an Event, a Condition and an Action.
+
+    @ivar name: the rulename
+    @type name: string
+    @ivar event: the event name
+    @type event: string
+    @ivar condition: the condition
+    @type condition: Condition or ConditionList
+    @ivar action: the action
+    @type action: ActionList
+    @ivar origin: the rule origin
+    @type origin: URL
+    """
     
     default_condition=Condition()
     default_condition.match=default_condition.truematch
@@ -180,39 +233,64 @@ class Rule:
         self.condition=condition
         if self.condition is None:
             self.condition=self.default_condition
-        self.action=ActionList()
-        if action is not None:
-            self.add_action(action)
+        if isinstance(action, ActionList):
+            self.action=action
+        else:
+            self.action=ActionList()
+            if action is not None:
+                self.add_action(action)
+        self.origin=origin
             
     def __str__(self):
         return "Rule '%s'" % self.name
 
     def add_action(self, action):
+        """Add a new action to the rule.
+        """
         self.action.append(action)
 
     def add_condition(self, condition):
+        """Add a new condition
+
+        @param condition: the new condition
+        @type condition: Condition
+        """
         if self.condition == self.default_condition:
             self.condition=ConditionList()
         self.condition.append(condition)
         
 class RuleSet(list):
     """Set of Rules.
-
     """
     def __init__(self, uri=None, catalog=None):
         if uri is not None and catalog is not None:
             self.from_xml(catalog=catalog, uri=uri)
 
     def add_rule(self, rule):
+        """Add a new rule."""
         self.append(rule)
         
     def from_xml(self, catalog=None, uri=None):
+        """Read the ruleset from a URI.
+
+        @param catalog: the ECAEngine catalog
+        @type catalog: ECACatalog
+        @param uri: the source URI        
+        """
         reader=xml.dom.ext.reader.PyExpat.Reader()
         di=reader.fromStream(open(uri, 'r'))
         rulesetnode=di._get_documentElement()
         self.from_dom(catalog=catalog, domelement=rulesetnode, origin=uri)
         
     def from_dom(self, catalog=None, domelement=None, origin=None):
+        """Read the ruleset from a DOM element.
+
+        @param catalog: the ECAEngine catalog
+        @type catalog: ECACatalog
+        @param domelement: the DOM element
+        @param origin: the source URI
+        @type origin: URI
+        """
         if catalog is None:
             catalog=ECACatalog()
         ruleset=domelement
@@ -267,6 +345,7 @@ class RuleSet(list):
             self.append(rule)
 
     def to_xml(self, uri=None):
+        """Save the ruleset to the given URI."""
         di = xml.dom.DOMImplementation.DOMImplementation()
         # FIXME: hardcoded NS URI
         rulesetdom = di.createDocument("http://liris.cnrs.fr/advene/ruleset", "ruleset", None)
@@ -276,6 +355,7 @@ class RuleSet(list):
         stream.close()
         
     def to_dom(self, dom):
+        """Save the ruleset in the given DOM element."""
         #rulesetnode=domtree.createElement('ruleset')
         rulesetnode=dom._get_documentElement()
         for rule in self:
@@ -310,6 +390,10 @@ class RuleSet(list):
                     paramnode.setAttribute('value', pvalue)
 
     def to_file(self, catalog=None, filename=None):
+        """Deprecated.
+
+        Save the ruleset to a simple text file.
+        """
         if catalog is None:
             catalog=event.ECACatalog()
         if filename == '-':
@@ -339,10 +423,8 @@ class RuleSet(list):
         return
         
     def from_file(self, catalog=None, filename=None):
-        """Read from a flat text file.
+        """Deprecated. Read from a flat text file.
 
-        Proof of concept. We should move to an XML structured file.
-        
         Syntax of the file:
         
         Rule rulename
@@ -445,6 +527,17 @@ class RuleSet(list):
         f.close()
 
 class RegisteredAction:
+    """Registered action.
+
+    @ivar name: the action name
+    @type name: string
+    @ivar method: the action method (ignored)
+    @ivar description: the action description
+    @ivar parameters: the action parameters
+    @type parameters: dict
+    @param immediate: if True, the action is immediately executed, else scheduled
+    @type immediate: boolean
+    """
     def __init__(self,
                  name=None,
                  method=None,
@@ -466,30 +559,44 @@ class RegisteredAction:
         self.immediate=immediate
 
     def add_parameter(self, name, description):
+        """Add a new parameter to the action."""
         self.parameters[name]=description
 
     def describe_parameter(self, name):
+        """Describe the parameter."""
         return self.parameters[name]
     
 class ECACatalog:
     """Class holding information about available elements (events, conditions, actions).
+
+    @ivar actions: the list of registered actions indexed by name
+    @type actions: dict
     """
+    
     # FIXME: Maybe this should be put in an external resource file
     event_names={
         'AnnotationBegin':        _("Beginning of an annotation"),
         'AnnotationEnd':          _("End of an annotation"),
         'AnnotationEditBegin':    _("Starting editing of an annotation"),
         'AnnotationEditEnd':      _("Ending editing of an annotation"),
+        'AnnotationDelete':       _("Suppression of an annotation"),
         'AnnotationActivation':   _("Activation of an annotation"),
         'AnnotationDeactivation': _("Deactivation of an annotation"),
         'RelationActivation':     _("Activation of a relation"),
         'RelationDeactivation':   _("Deactivation of a relation"),
         'RelationEditBegin':      _("Starting editing of a relation"),
         'RelationEditEnd':        _("Ending editing of a relation"),
+        'RelationDelete':         _("Suppression of a relation"),
         'ViewEditBegin':          _("Starting editing of a view"),
         'ViewEditEnd':            _("Ending editing of a view"),
+        'ViewDelete':             _("Suppression of a view"),
         'SchemaEditBegin':        _("Starting editing of a schema"),
         'SchemaEditEnd':          _("Ending editing of a schema"),
+        'SchemaDelete':           _("Suppression of a schema"),
+        'AnnotationTypeEditEnd':  _("Ending editing an annotation type"),
+        'RelationTypeEditEnd':    _("Ending editing a relation type"),
+        'AnnotationTypeDelete':   _("Suppression of an annotation type"),
+        'RelationTypeDelete':     _("Suppression of a relation type"),
         'LinkActivation':         _("Activating a link"),
         'PlayerStart':            _("Player start"),
         'PlayerStop':             _("Player stop"),
@@ -512,32 +619,71 @@ class ECACatalog:
         self.actions={}
 
     def is_event(self, name):
+        """Check if name is a valid event name.
+
+        @param name: the checked name
+        @type name: string
+        @return: True if name is a valid event name
+        @rtype: boolean
+        """
         return name in ECACatalog.event_names
 
     def is_action(self, name):
+        """Check if name is a valid registered action name.
+
+        @param name: the checked name
+        @type name: string
+        @return: True if name is a valid action name
+        @rtype: boolean
+        """
         return self.actions.has_key(name)
     
     def get_action(self, name):
+        """Return the action matching name.
+
+        @param name: the checked name
+        @type name: string
+        @return: the matching registered action
+        @rtype: RegisteredAction
+        """
         return self.actions[name]
     
     def register_action(self, registered_action):
-        """Register a RegisteredAction instance."""
+        """Register a RegisteredAction instance.
+        """
         self.actions[registered_action.name]=registered_action
 
     def describe_action(self, name):
+        """Return the description of the action.
+        """
         return self.actions[name].description
 
     def describe_event(self, name):
+        """Return the description of the event.
+        """
         return self.event_names[name]
 
     def get_events(self, expert=False):
+        """Return the list of defined event names.
+
+        @param expert: expert mode
+        @type expert: boolean
+        @return: the list of defined event names
+        @rtype: list
+        """
         if expert:
             return self.event_names.keys()
         else:
             return self.basic_events
 
     def get_described_events(self, expert=False):
-        """Return a dict holding all the events with their description."""
+        """Return a dict holding all the events with their description.
+
+        @param expert: expert mode
+        @type expert: boolean
+        @return: a dictionary of descriptions indexed by name.
+        @rtype: dict
+        """
         if expert:
             return dict(self.event_names)
         else:
@@ -547,13 +693,21 @@ class ECACatalog:
             return d
 
     def get_described_actions(self, expert=False):
-        """Return a dict holding all the actions with their description."""
+        """Return a dict holding all the actions with their description.
+
+        @param expert: expert mode
+        @type expert: boolean
+        @return: a dictionary of descriptions indexed by name.
+        @rtype: dict
+        """
         d={}
         for a in self.actions:
             d[a]=self.describe_action(a)
         return d
     
     def get_actions(self, expert=False):
+        """Return the list of defined actions.
+        """
         if expert:
             return self.actions.keys()
         else:
