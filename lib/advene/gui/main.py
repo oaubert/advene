@@ -719,6 +719,38 @@ class AdveneGUI (Connect):
         menu.show_all()
         return menu
 
+    def build_utbv_menu(self):
+        def open_utbv(button, u):
+            self.controller.open_url (u)
+            return True
+
+        c=self.controller
+
+        url=c.get_default_url(root=True)
+        
+        menu=gtk.Menu()
+
+        if not self.controller.package:
+            return menu
+
+        # Add defaultview first if it exists
+        defaultview=c.package.getMetaData(config.data.namespace,
+                                          'default_utbv')
+        if defaultview:
+            i=gtk.MenuItem(label=_("Default view"))
+            i.connect('activate', open_utbv, c.get_default_url())
+            menu.append(i)
+        
+        for utbv in c.package.views:
+            if (utbv.matchFilter['class'] in ('*', 'package')
+                and utbv.content.mimetype == 'text/html'):
+                i=gtk.MenuItem(label=c.get_title(utbv))
+                i.connect('activate', open_utbv, "%s/view/%s" % (url,
+                                                                 utbv.id))
+                menu.append(i)
+        menu.show_all()
+        return menu
+
     def on_filehistory_clicked(self, button=None):
         m=self.build_file_history_menu()
         m.attach_to_widget(button, None)
@@ -1651,9 +1683,10 @@ class AdveneGUI (Connect):
 
     def on_start_web_browser_activate (self, button=None, data=None):
         """Open a browser on current package's root."""
-        url = self.controller.get_default_url()
-        if url is not None:
-            self.controller.open_url (url)
+        if self.controller.package is not None:
+            m=self.build_utbv_menu()
+            m.attach_to_widget(button, None)
+            m.popup(None, button, None, 0, gtk.get_current_event_time())
         else:
             self.log (("No current package"))
         return True
