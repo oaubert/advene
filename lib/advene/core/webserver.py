@@ -435,14 +435,17 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.server.controller.player.playlist_add_item (f)
                 if not query.has_key ('position'):
                     self.send_redirect ("/media")
-                self.server.controller.update_status ("start", long(query['position']))
-                self.send_redirect("/media")
+                self.server.controller.update_status ("set", long(query['position']))
+                ref=self.headers.get('Referer', "/media")
+                self.send_redirect(ref)
             elif command == 'pause':
                 self.server.controller.update_status ("pause")
-                self.send_redirect("/media")
+                ref=self.headers.get('Referer', "/media")
+                self.send_redirect(ref)
             elif command == 'stop':
                 self.server.controller.update_status ("stop")
-                self.send_redirect("/media")
+                ref=self.headers.get('Referer', "/media")
+                self.send_redirect(ref)
             else:
                 self.send_error (404, _('Malformed request'))
                     
