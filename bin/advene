@@ -30,7 +30,7 @@ except ImportError:
 
 if config.data.os == 'win32':
   import _winreg
-
+  
   # Encoding stuff, to please py2exe
   import sys
   if hasattr(sys, 'setdefaultencoding'):
@@ -39,22 +39,6 @@ if config.data.os == 'win32':
     if loc[1]:
       encoding = loc[1]
       sys.setdefaultencoding(encoding)
-
-  def getGtkPath():
-      subkey = 'Software/GTK/2.0'.replace('/','\\')
-      path = None
-      for hkey in _winreg.HKEY_LOCAL_MACHINE, _winreg.HKEY_CURRENT_USER:
-          try:
-            reg = _winreg.OpenKey(hkey, subkey)
-            try:
-              path, value = _winreg.QueryValueEx(reg, "Path")
-            except _winreg.error:
-              pass
-            else:
-              return path
-          finally:
-            _winreg.CloseKey(reg)
-
 
   #win32 platform, add the "lib" folder to the system path
   os.environ['PATH'] += ";lib;"
@@ -65,12 +49,15 @@ if config.data.os == 'win32':
   except ImportError:
     # Gtk DLLs are not in the PATH. Try to get their directory
     # from the registry
-    path = getGtkPath()
+    path=get_registry_value('Software\\GTK\\2.0', 'Path')
     if path is None:
       raise ImportError("Couldn't find GTK DLLs.")
     os.environ['PATH'] += ';'+path.encode('utf8')
     os.environ['PATH'] += ';'+os.sep.join( (path, 'bin') ).encode('utf8')
-    print "Found GTK DLLs at %s" % path
+    print "Using GTK DLLs at %s" % path
+    import pygtk
+    import gtk
+    import gtk.glade
 
 import advene.gui.main
 
@@ -85,13 +72,6 @@ if __name__ == '__main__':
       Aborting.""" % config.data.path[d]
       sys.exit(1)
       
-  # FIXME: remove once the win32 support is correct
-  #if config.data.os != "win32" and not os.path.exists(config.data.typelib):
-  #  print """The %s file does not exist.
-  #  Either the VLC plugin is not installed or it is badly configured.
-  #  Check your .advenerc file.""" % config.data.typelib
-  #  sys.exit(1)
-    
   gladefile=config.data.advenefile (config.data.gladefilename)
   if not os.path.exists(gladefile):
     print """The %s file does not exist.
@@ -109,4 +89,3 @@ if __name__ == '__main__':
     import code
     e, v, tb = sys.exc_info()
     code.traceback.print_exception (e, v, tb)
-    
