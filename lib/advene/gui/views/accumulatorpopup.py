@@ -81,10 +81,10 @@ class AccumulatorPopup:
             window=self.container
         else:
             window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-            window.set_title (_("Navigation popup"))
+            window.set_title (_("Popups"))
 
         f=gtk.Frame()
-        f.set_label(_("Navigation popup"))
+        f.set_label(_("Popups"))
         window.add(f)
         
         mainbox=gtk.VBox()
