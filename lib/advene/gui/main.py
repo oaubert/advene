@@ -1082,24 +1082,24 @@ class AdveneGUI (Connect):
         # Synopsis:
         # Ask the controller to update its status
         # If we are moving the slider, don't update the display
-        gtk.threads_enter()
+        #gtk.threads_enter()
         try:
             pos=self.controller.update()
         except self.controller.player.InternalException:
             # FIXME: something sensible to do here ?
             print _("Internal error on video player")
-            gtk.threads_leave()
+            #gtk.threads_leave()
             return True
         except Exception, e:
             # Catch-all exception, in order to keep the mainloop
             # runnning
-            gtk.threads_leave()
+            #gtk.threads_leave()
             print _("Got exception %s. Trying to continue.") % str(e)
             import code
             e, v, tb = sys.exc_info()
             code.traceback.print_exception (e, v, tb)
             return True
-        gtk.threads_leave()
+        #gtk.threads_leave()
 
         if self.slider_move:
             # FIXME: we could have a cache of key images (i.e. 50 equidistant
