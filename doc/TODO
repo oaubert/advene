@@ -1,3 +1,42 @@
+* Edit element popup: check that the data was not modified before closing
+
+* Specify mimetype in view editing window
+
+* Should snapshots be done with annotations drawn or without ??
+
+* More fine-grained snapshot specification. Idea: specify a percentage
+  of the annotation time. Can be implemented with an internal
+  "snapshot-schema" defining "snapshot" annotation types, that would
+  be linked through a "snapshot-relation" relation with the
+  corresponding annotations.
+
+* Return a "301 Not modified" in webserver upon /media/play... actions
+  instead of a redirect
+
+* RelationTypeEditPopup: allow to specify the annotation types.
+
+* RelationType: impossible to delete from popup
+
+* Create 2 Popup widgets: a singleton one (that is always visible and
+  is reused across different invocations) and an accumulator one (with
+  a size limit and a timeout)
+
+* Implement copy/paste for rules/rulesets
+
+* Make the absolute time specification work for display_text (rather
+  than relative positions)
+
+* Create a 'shapes' package which will define various SVG shapes
+  (moon, sun, triangle, etc) as views
+
+* Organize event names and conditions along categories
+
+* STBV: implement at least one level undo on action parameters
+
+* UTBV: implement Undo in textview (cf gtksourceview)
+
+* Implement copy/rename of id for all elements
+
 * gui.popup should have a reference to the main gui, so that it can call
   register_view and close_view_cb
 
@@ -485,4 +524,7 @@ events) -> DONE
 * Add numbers in valid identifiers -> DONE
 
 * Conditions: implement Allen's relations -> DONE
+
+* Segmentation fault upon quitting with window manager button -> DONE
+
 
