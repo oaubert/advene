@@ -17,6 +17,21 @@ def png_to_pixbuf (png_data):
     loader.close ()
     return pixbuf
 
+def generate_list_model(elements, controller=None, active_element=None):
+    """Update a TreeModel matching the elements list.
+
+    Element 0 is the label.
+    Element 1 is the element (stbv).
+    """
+    store=gtk.ListStore(str, object)
+    active_iter=None
+    for e in elements:
+        i=store.append( ( vlclib.get_title(controller, e), e ) )
+        if e == active_element:
+            active_iter=i
+    return store, active_iter
+                
+
 def list_selector(title=None,
                   text=None,
                   members=None,
@@ -26,50 +41,37 @@ def list_selector(title=None,
     vlclib.get_title is invoked to get a textual representation of
     the elements of members.
 
-    Return None if the action is canceled.
+    Return None if the action is cancelled.
     """
-    store=gtk.ListStore(
-        gobject.TYPE_PYOBJECT,
-        gobject.TYPE_STRING
-        )
-    for el in members:
-        store.append( [el,
-                       vlclib.get_title(controller, el)] )
-    treeview=gtk.TreeView(store)
-    treeview.set_headers_visible(False)
+    store, i=generate_list_model(members, controller=controller)
 
-    renderer = gtk.CellRendererText()
-    column = gtk.TreeViewColumn(None, renderer, text=1)
-    treeview.append_column(column)
-
+    combobox=gtk.ComboBox(store)
+    cell = gtk.CellRendererText()
+    combobox.pack_start(cell, True)
+    combobox.add_attribute(cell, 'text', 0)
+    combobox.set_active(-1)
+    if i is None:
+        i = store.get_iter_first()
+    combobox.set_active_iter(i)
+    
     d = gtk.Dialog(title=title,
                    parent=None,
                    flags=gtk.DIALOG_DESTROY_WITH_PARENT,
                    buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
                              gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
 
-    def button_cb(widget=None, event=None):
-        if event.type == gtk.gdk._2BUTTON_PRESS:
-            # Validate the activated entry on double click.
-            d.response(gtk.RESPONSE_ACCEPT)
-            return True
-        return False
-    treeview.connect("button_press_event", button_cb)
-
     if text is not None:
         l=gtk.Label(text)
         l.show()
         d.vbox.add(l)
 
-    d.vbox.add(treeview)
-    treeview.show()
+    d.vbox.add(combobox)
+    combobox.show_all()
 
     res=d.run()
     retval=None
     if res == gtk.RESPONSE_ACCEPT:
-        model, iter=treeview.get_selection().get_selected()
-        if iter is not None:
-            retval=model.get_value(iter, 0)
+        retval=combobox.get_model().get_value(combobox.get_active_iter(), 1)
     d.destroy()
     return retval
 
