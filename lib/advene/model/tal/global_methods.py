@@ -272,21 +272,33 @@ def first (target, context):
     Return the first element of =target=, which must obviously be a list-like
     object.
     """
-    return target[0]
+    if callable(target):
+        t=target()
+    else:
+        t=target
+    return t[0]
 
 def last (target, context):
     """
     Return the last element of =target=, which must obviously be a list-like
     object.
     """
-    return target[-1]
+    if callable(target):
+        t=target()
+    else:
+        t=target
+    return t[-1]
 
 def rest (target, context):
     """
     Return all elements of target but the first. =target= must obvioulsly be a
     list-like, sliceable object.
     """
-    return target[1:]
+    if callable(target):
+        t=target()
+    else:
+        t=target
+    return t[:1]
 
 def parsed (target, context):
     """Parse the content being passed as target.
