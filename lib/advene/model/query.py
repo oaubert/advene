@@ -20,6 +20,7 @@ class Query(modeled.Importable, viewable.Viewable.withClass('query'),
         if element is not None:
             modeled.Importable.__init__(self, element, parent,
                                         parent.getViews.im_func)
+            _impl.Uried.__init__(self, parent=self.getOwnerPackage())
         else:
             doc = parent._getDocument()
             element = doc.createElementNS(self.getNamespaceUri(),

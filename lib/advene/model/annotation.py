@@ -74,6 +74,7 @@ class Annotation(modeled.Importable, content.WithContent,
 
             # mode 1 initialization
             modeled.Importable.__init__(self, element, parent)
+            _impl.Uried.__init__(self, parent=self.getOwnerPackage())
 
         else:
             # should be mode 2, checking parameter consistency
@@ -289,6 +290,7 @@ class Relation(modeled.Importable, content.WithContent,
 
             # mode 1 initialization
             modeled.Importable.__init__(self, element, parent)
+            _impl.Uried.__init__(self, parent=self.getOwnerPackage())
             for a in self.getMembers ():
                 a._relations.append (self)
 

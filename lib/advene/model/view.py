@@ -183,6 +183,8 @@ class View(modeled.Importable, content.WithContent,
             modeled.Importable.__init__(self, element, parent,
                                         parent.getViews.im_func)
 
+            _impl.Uried.__init__(self, parent=self._getParent())
+
         else:
             if clazz is None:
                 raise TypeError("parameter 'clazz' required")
