@@ -128,6 +128,15 @@ class DefaultActionsRepository:
             )
                  )
 
+        l.append(RegisteredAction(
+            name="SendUserEvent",
+            method=self.SendUserEvent,
+            description=_("Send a user event"),
+            parameters={'identifier': _("Identifier"),
+                        'delay': _("Delay in ms before sending the event.")}
+            )
+                 )
+
         return l
 
     def Message(self, context, parameters):
@@ -296,14 +305,31 @@ class DefaultActionsRepository:
             self.controller.player.sound_set_volume(config.data.volume)
         return True
 
-    def ActivateSTBV (self, content, parameters):
+    def ActivateSTBV (self, context, parameters):
         """Activate the given STBV."""
-        stbvid=context.evaluateValue('viewid')
+        stbvid=self.parse_parameter(context, parameters, 'viewid', None)
         if stbvid is None:
             return True
         stbv=context.evaluateValue('package/views/%s' % stbvid)
         if stbv is not None and stbv.content.data == 'application/x-advene-ruleset':
             self.controller.activate_stbv(stbv)
+        return True
+
+    def SendUserEvent(self, context, parameters):
+        """Send a user event.
+
+        The user must provide an identifier, that will be checked in the
+        correponding rule (that match UserEvent)
+        """
+        identifier=self.parse_parameter(context, parameters, 'identifier', None)
+        if identifier is None:
+            return True
+        delay=self.parse_parameter(context, parameters, 'delay', None)
+        if delay is None:
+            delay=0
+        delay=long(delay)
+
+        self.controller.notify('UserEvent', identifier=identifier, delay=delay)
         return True
     
     def AnnotationMute(self, context, parameters):
