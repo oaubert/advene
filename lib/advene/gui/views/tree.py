@@ -460,7 +460,7 @@ class TreeWidget:
         self.update_element(annotationtype, event)
         return
     
-    def update_relation(self, relationtype=None, event=None):
+    def update_relationtype(self, relationtype=None, event=None):
         """Update the relationtype
         """
         self.update_element(relationtype, event)
