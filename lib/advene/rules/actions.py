@@ -170,7 +170,10 @@ class DefaultActionsRepository:
         return l
 
     def Message(self, context, parameters):
-        """Display a message."""
+        """Display a message.
+
+        This method is overriden in the GUI by self.log
+        """
         message=self.parse_parameter(context, parameters, 'message', "An event occurred.")
         print _("** Message ** ") + message.encode('utf8')
         return True
@@ -180,19 +183,22 @@ class DefaultActionsRepository:
         position=self.parse_parameter(context, parameters, 'position', None)
         if position is not None:
             position=long(position)
-        self.controller.player.update_status ("start", position)
+        self.controller.update_status ("start", position)
         return True
 
     def PlayerGoto (self, context, parameters):
         """Goto the given position."""
         position=self.parse_parameter(context, parameters, 'position', None)
+
+        #print "Goto from %s to %s" % (vlclib.format_time(self.controller.player.current_position_value),
+        #                              vlclib.format_time(position))
         if position is not None:
             position=long(position)
         c=self.controller
         pos = c.create_position (value=position,
                                  key=c.player.MediaTime,
                                  origin=c.player.AbsolutePosition)
-        self.controller.player.update_status ("set", pos)
+        self.controller.update_status ("set", pos)
         return True
 
     def PlayerStop (self, context, parameters):
@@ -200,7 +206,7 @@ class DefaultActionsRepository:
         position=self.parse_parameter(context, parameters, 'position', None)
         if position is not None:
             position=long(position)
-        self.controller.player.update_status ("stop", position)
+        self.controller.update_status ("stop", position)
         return True
         
     def PlayerPause (self, context, parameters):
@@ -208,7 +214,7 @@ class DefaultActionsRepository:
         position=self.parse_parameter(context, parameters, 'position', None)
         if position is not None:
             position=long(position)        
-        self.controller.player.update_status ("pause", position)
+        self.controller.update_status ("pause", position)
         return True
         
     def PlayerResume (self, context, parameters):
@@ -216,7 +222,7 @@ class DefaultActionsRepository:
         position=self.parse_parameter(context, parameters, 'position', None)
         if position is not None:
             position=long(position)        
-        self.controller.player.update_status ("resume", position)
+        self.controller.update_status ("resume", position)
         return True
 
     def Snapshot (self, context, parameters):
