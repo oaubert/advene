@@ -60,6 +60,7 @@ class Player:
 
     # Reference of the MediaPlayer Object Model:
     # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmplay/mmp_sdk/controlreference.asp
+    # In COMBrowser (cf win32com.client module), select "Windows Media Player"
     def __init__(self):
         # Old version
         #self.player=win32com.client.Dispatch("MediaPlayer.MediaPlayer.1")
@@ -84,7 +85,7 @@ class Player:
         # // Seek to a frame using SMPTE time code.
         # Player.controls.currentPositionTimecode = "[00000]01:00:30.05";
         # current position is in s
-        self.player.currentposition=position / 1000.0
+        self.player.controls.currentposition=position / 1000.0
         return
     
     def start(self, position):
@@ -136,9 +137,9 @@ class Player:
 
     def get_stream_information(self):
         s=StreamInformation()
-        s.url=self.player.FileName
-        s.length=self.player.duration
-        s.position=self.player.currentposition
+        s.url=self.player.url
+        s.length=self.player.media.duration
+        s.position=self.player.controls.currentposition
         # For status list:
         # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmplay/mmp_sdk/playercurrentplaylist.asp
         s.streamstatus=statusmapping[self.player.playstate]
@@ -147,11 +148,11 @@ class Player:
         
     def sound_get_volume(self):
         # FIXME: Normalize volume to be in [0..255]
-        return self.player.volume
+        return self.player.settings.volume
 
     def sound_set_volume(self, v):
         # FIXME: Normalize volume to be in [0..255]
-        self.player.volume=v
+        self.player.settings.volume=v
 
         
         
