@@ -117,6 +117,7 @@ class Config(object):
                             'sequenceview': (640, 480),
                             'timelineview': (800, 400),
                             'transcriptionview': (640, 480),
+                            'transcribeview': (640, 480),
                             'treeview': (800, 600),
                             'browserview': (800, 600),
                             },
@@ -132,6 +133,7 @@ class Config(object):
 
         # Player options
         self.player = {
+            'plugin': 'vlcnative',
             'name': 'vlc',
             'osdfont': '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
             'verbose': None, # None, 0, 1, 2
@@ -146,7 +148,7 @@ class Config(object):
             'port': 1234,
             # Whether to launch the HTTP server in the gtk interface
             # 0 for no, 1 for gtk_input, 2 for threading
-            'mode': 2
+            'mode': 1
             }
         # Threading does not work correctly on Win32. Use gtk_input
         # method.
@@ -306,7 +308,7 @@ class Config(object):
         filters=[]
         if self.player['snapshot']:
             filters.append("clone")
-            args.extend (['--clone-vout-list', 'snapshot,x11',
+            args.extend (['--clone-vout-list', 'snapshot,default',
                           '--snapshot-width',
                           self.player['snapshot-dimensions'][0],
                           '--snapshot-height',
