@@ -105,6 +105,8 @@ class AdveneController:
         self.player = playerfactory.get_player()
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
+        # FIXME: should be removed (CORBA dependent)
+        os.unlink(config.data.iorfile)
         
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
@@ -178,6 +180,9 @@ class AdveneController:
 
         if file_to_play:
             self.set_default_media(file_to_play)
+
+        self.player.check_player()
+        
         return True
     
     def create_position (self, value=0, key=None, origin=None):
