@@ -10,15 +10,31 @@ import advene.core.config as config
 import advene.util.vlclib as vlclib
 import advene.model.package
 
-def png_to_pixbuf (png_data):
+def png_to_pixbuf (png_data, width=None, height=None):
     """Load PNG data into a pixbuf
     """
     loader = gtk.gdk.PixbufLoader ('png')
     loader.write (png_data, len (png_data))
     pixbuf = loader.get_pixbuf ()
     loader.close ()
-    return pixbuf
+    if width and not height:
+        height = width * pixbuf.get_height() / pixbuf.get_width()
+    if height and not width:
+        width = height * pixbuf.get_width() / pixbuf.get_height()
+    if width and height:
+        p=pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+        return p
+    else:
+        return pixbuf
 
+def image_from_position(controller, position=None, width=None, height=None):
+    i=gtk.Image()
+    if position is None:
+        position=controller.player.current_position_value
+    i.set_from_pixbuf(png_to_pixbuf (controller.imagecache[position],
+                                     width=width, height=height))
+    return i
+    
 def generate_list_model(elements, controller=None, active_element=None):
     """Update a TreeModel matching the elements list.
 
