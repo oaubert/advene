@@ -299,7 +299,7 @@ class DVDControl (Connect):
 
     def on_annotation_edit_end (self, context, parameters):
         """Event handler used to reset the current annotation field."""
-        self.gui.current_annotation.set_text ('[None]')
+        self.gui.current_annotation.set_text ('['+_('None')+']')
         
     def set_current_type (self, t):
         """Set the current annotation type.
