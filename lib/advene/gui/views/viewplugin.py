@@ -61,6 +61,9 @@ class ViewPlugin:
     #def update_position (self, pos):
     #    """If defined, this method will be invoked regularly with the current
     #       position.
+    #       Note: beware when implementing update_position in views:
+    #       it is a critical execution path, see gui.main.update_display
+    #
     #    @param pos: the position
     #    @type pos: long
     #    """
