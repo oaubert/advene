@@ -13,7 +13,7 @@
   <property name="default_height">600</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
-  <property name="icon">dvd.png</property>
+  <property name="icon">pixmaps/dvd.png</property>
   <property name="decorated">True</property>
   <property name="skip_taskbar_hint">False</property>
   <property name="skip_pager_hint">False</property>
@@ -484,7 +484,7 @@
 		      <property name="tooltip" translatable="yes">Rewind</property>
 		      <property name="label" translatable="yes">Rewind</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">rw.xpm</property>
+		      <property name="icon">pixmaps/rw.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -502,7 +502,7 @@
 		      <property name="tooltip" translatable="yes">Play</property>
 		      <property name="label" translatable="yes">Play</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">play.xpm</property>
+		      <property name="icon">pixmaps/play.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -520,7 +520,7 @@
 		      <property name="tooltip" translatable="yes">Pause</property>
 		      <property name="label" translatable="yes">Pause</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">pause.xpm</property>
+		      <property name="icon">pixmaps/pause.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -538,7 +538,7 @@
 		      <property name="tooltip" translatable="yes">Stop</property>
 		      <property name="label" translatable="yes">Stop</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">stop.xpm</property>
+		      <property name="icon">pixmaps/stop.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -556,7 +556,7 @@
 		      <property name="tooltip" translatable="yes">Forward</property>
 		      <property name="label" translatable="yes">Forward</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">ff.xpm</property>
+		      <property name="icon">pixmaps/ff.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -574,7 +574,7 @@
 		      <property name="tooltip" translatable="yes">Select movie file...</property>
 		      <property name="label" translatable="yes">Add file...</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">add.xpm</property>
+		      <property name="icon">pixmaps/add.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -592,7 +592,7 @@
 		      <property name="tooltip" translatable="yes">Select DVD</property>
 		      <property name="label" translatable="yes">Select DVD</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">dvd_small.png</property>
+		      <property name="icon">pixmaps/dvd_small.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -650,7 +650,7 @@
 		      <property name="tooltip" translatable="yes">Open a tree view</property>
 		      <property name="label" translatable="yes">TreeView</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">tree.xpm</property>
+		      <property name="icon">pixmaps/tree.xpm</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -668,7 +668,7 @@
 		      <property name="tooltip" translatable="yes">Open a timeline view</property>
 		      <property name="label" translatable="yes">Timeline</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">timeline.png</property>
+		      <property name="icon">pixmaps/timeline.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -686,7 +686,7 @@
 		      <property name="tooltip" translatable="yes">Open a transcription view</property>
 		      <property name="label" translatable="yes">Transcription</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">transcription.png</property>
+		      <property name="icon">pixmaps/transcription.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -704,7 +704,7 @@
 		      <property name="tooltip" translatable="yes">Open a package browser view</property>
 		      <property name="label" translatable="yes">Explorer</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">browser.png</property>
+		      <property name="icon">pixmaps/browser.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -722,7 +722,7 @@
 		      <property name="tooltip" translatable="yes">Open the URL stack view</property>
 		      <property name="label" translatable="yes">URL Stack</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">url.png</property>
+		      <property name="icon">pixmaps/url.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -740,7 +740,7 @@
 		      <property name="tooltip" translatable="yes">Open the webbrowser</property>
 		      <property name="label" translatable="yes">WebBrowser</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">web.png</property>
+		      <property name="icon">pixmaps/web.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -821,7 +821,7 @@
 		  <property name="tooltip" translatable="yes">Package history</property>
 		  <property name="label" translatable="yes">File history</property>
 		  <property name="use_underline">True</property>
-		  <property name="icon">filehistory.xpm</property>
+		  <property name="icon">pixmaps/filehistory.xpm</property>
 		  <property name="visible_horizontal">True</property>
 		  <property name="visible_vertical">True</property>
 		  <property name="is_important">False</property>
@@ -1372,7 +1372,7 @@ Exchange on the NEt !</property>
 	      <property name="width_request">173</property>
 	      <property name="height_request">133</property>
 	      <property name="visible">True</property>
-	      <property name="pixbuf">dvd.png</property>
+	      <property name="pixbuf">pixmaps/dvd.png</property>
 	      <property name="xalign">0.5</property>
 	      <property name="yalign">0.5</property>
 	      <property name="xpad">0</property>
