@@ -292,21 +292,28 @@ class EditRelationPopup (EditElementPopup):
                                        )
         vbox.pack_start (f.get_view (), expand=False)
 
-        def edit_popup(button, element):
-            try:
-                pop = get_edit_popup (element, self.controller)
-            except TypeError, e:
-                print _("Error: unable to find an edit popup for %s:\n%s") % (element, str(e))
-            else:
-                pop.edit ()
-            return True
+        def button_press_handler(widget, event, annotation):
+            if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+                menu=advene.gui.popup.Menu(annotation, controller=self.controller)
+                menu.popup()
+                return True
+            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+                try:
+                    pop = advene.gui.edit.elements.get_edit_popup (annotation, self.controller)
+                except TypeError, e:
+                    print _("Error: unable to find an edit popup for %s:\n%s") % (el,
+                                                                                  unicode(e))
+                else:
+                    pop.edit ()
+                return True
+            return False
 
         # FIXME: make it possible to edit the members list (drag and drop ?)
         hb = gtk.HButtonBox()
         hb.set_layout(gtk.BUTTONBOX_START)
         for a in self.element.members:
             b = gtk.Button(a.id)
-            b.connect("clicked", edit_popup, a)
+            b.connect("button_press_event", button_press_handler, a)
             b.show()
             hb.add(b)
             
