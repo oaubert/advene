@@ -218,3 +218,7 @@ simpler) and snapshot integration.
 
 * Windows: start application
 http://groups.google.com/groups?selm=100p81q3kshsuca%40corp.supernews.com
+
+* Tree view : implement "Add/Remove" option in popup menus (Add new view, Add new type, ...)
+
+* Propagate AnnotationEditEnd and RelationEditEnd events in active views
