@@ -53,11 +53,11 @@ import advene.gui.util
 import advene.gui.views.tree
 import advene.gui.views.timeline
 import advene.gui.views.logwindow
-import advene.gui.views.browser
+from advene.gui.views.browser import Browser
 from advene.gui.views.history import HistoryNavigation
-import advene.gui.edit.rules
-import advene.gui.edit.dvdselect
-import advene.gui.edit.elements
+from advene.gui.edit.rules import EditRuleSet
+from advene.gui.edit.dvdselect import DVDSelect
+from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
 import advene.gui.evaluator
 from advene.gui.views.singletonpopup import SingletonPopup
@@ -312,6 +312,8 @@ class AdveneGUI (Connect):
         return True
 
     def on_view_activation(self, context, parameters):
+        """Handler used to update the STBV GUI.
+        """
         combo = self.gui.get_widget("stbv_combo")
         store = combo.get_model()
         i = store.get_iter_first()
@@ -514,6 +516,10 @@ class AdveneGUI (Connect):
         self.controller.notify ("ApplicationEnd")
 
     def get_visualisation_widget(self):
+        """Return the main visualisation widget.
+
+        It consists in the embedded video window plus the various views.
+        """
         vis=gtk.VBox()
 
         tb=self.get_player_control_toolbar()
@@ -556,6 +562,8 @@ class AdveneGUI (Connect):
         return vis
 
     def get_player_control_toolbar(self):
+        """Return a player control toolbar
+        """
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS) 
         radiogroup_ref=None
@@ -597,13 +605,16 @@ class AdveneGUI (Connect):
         return vlclib.format_time (val)
 
     def init_window_size(self, window, name):
+        """Initialize window size according to stored values.
+        """
         s=config.data.preferences['windowsize'].setdefault(name, (640,480))
         window.set_default_size (*s)
         window.connect ("size_allocate", self.resize_cb, name)
         return True
     
     def resize_cb (self, widget, allocation, name):
-        """Memorize the new dimensions of the widget."""
+        """Memorize the new dimensions of the widget.
+        """
         config.data.preferences['windowsize'][name] = (allocation.width,
                                                        allocation.height)
         #print "New size for %s: %s" %  (name, config.data.preferences['windowsize'][name])
@@ -648,7 +659,7 @@ class AdveneGUI (Connect):
             cr.popup()
             return True
         try:
-            pop = advene.gui.edit.elements.get_edit_popup (stbv, self.controller)
+            pop = get_edit_popup (stbv, self.controller)
         except TypeError, e:
             print _("Error: unable to find an edit popup for %s:\n%s") % (stbv, unicode(e))
         else:
@@ -697,6 +708,28 @@ class AdveneGUI (Connect):
         type_combo.show_all()
         return True
 
+    def build_file_history_menu(self):
+        def open_history_file(button, fname):
+            try:
+                self.controller.load_package (uri=fname)
+            except OSError, e:
+                self.log(_("Cannot load package %s:\n%s") % (fname, unicode(e)))
+            return True
+        
+        menu=gtk.Menu()
+        for fname in config.data.preferences['history']:
+            i=gtk.MenuItem(label=os.path.basename(fname))
+            i.connect('activate', open_history_file, fname)
+            menu.append(i)
+        menu.show_all()
+        return menu
+
+    def on_filehistory_clicked(self, button=None):
+        m=self.build_file_history_menu()
+        m.attach_to_widget(button, None)
+        m.popup(None, button, None, 0, gtk.get_current_event_time())
+        return True
+    
     def update_gui (self):
         """Update the GUI.
 
@@ -753,7 +786,8 @@ class AdveneGUI (Connect):
         # Update the main window title
         self.gui.get_widget ("win").set_title(" - ".join((_("Advene"),
                                                           self.controller.package.title or _("No title"))))
-        
+        return True
+    
     def handle_http_request (self, source, condition):
         """Handle a HTTP request.
 
@@ -787,6 +821,8 @@ class AdveneGUI (Connect):
         return
 
     def parse_parameter(self, context, parameters, name, default_value):
+        """Helper method used in actions.
+        """
         if parameters.has_key(name):
             try:
                 result=context.evaluateValue(parameters[name])
@@ -802,7 +838,16 @@ class AdveneGUI (Connect):
             result=default_value
         return result
 
-
+    def get_illustrated_text(self, text, position=None):
+        """Return a HBox with the given text and a snapshot corresponding to position.
+        """
+        hbox=gtk.HBox()
+        hbox.add(advene.gui.util.image_from_position(self.controller,
+                                                     position=position,
+                                                     height=40))
+        hbox.add(gtk.Label(text))
+        return hbox
+        
     def action_message_log (self, context, parameters):
         """Event Handler for the message action.
 
@@ -834,6 +879,10 @@ class AdveneGUI (Connect):
         return True
 
     def action_popup (self, context, parameters):
+        """Popup action.
+
+        Displays a popup with an informational message.
+        """
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
         message=message.replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
@@ -841,17 +890,17 @@ class AdveneGUI (Connect):
         duration=self.parse_parameter(context, parameters, 'duration', None)
         if duration == "" or duration == 0:
             duration = None
-
-        hbox=gtk.HBox()
-        hbox.add(advene.gui.util.image_from_position(self.controller,
-                                                     height=40))
-        hbox.add(gtk.Label(message))
-        vbox.pack_start(hbox, expand=False)
+        
+        vbox.pack_start(self.get_illustrated_text(message))
 
         self.popupwidget.display(widget=l, timeout=duration, title=_("Information popup"))
         return True
 
     def action_popup_goto (self, context, parameters):
+        """PopupGoto action.
+
+        Displays a popup with a message and a new possible position.
+        """
         def handle_response(button, position, widget):
             self.controller.update_status("set", position)
             self.popupwidget.undisplay(widget)
@@ -872,22 +921,10 @@ class AdveneGUI (Connect):
 
         vbox=gtk.VBox()
 
-        hbox=gtk.HBox()
-        hbox.add(advene.gui.util.image_from_position(self.controller,
-                                                     height=40))
-        hbox.add(gtk.Label(description))
-        vbox.pack_start(hbox, expand=False)
-
+        vbox.pack_start(self.get_illustrated_text(description), expand=False)
 
         b=gtk.Button()
-        
-        hbox=gtk.HBox()
-        hbox.add(advene.gui.util.image_from_position(self.controller,
-                                                     position,
-                                                     height=40))
-        hbox.add(gtk.Label(message))            
-        b.add(hbox)
-        
+        b.add(self.get_illustrated_text(message, position))    
         vbox.pack_start(b, expand=False)
         
         b.connect("clicked", handle_response, position, vbox)
@@ -911,11 +948,7 @@ class AdveneGUI (Connect):
             description=textwrap.fill(description,
                                       config.data.preferences['gui']['popup-textwidth'])
 
-            hbox=gtk.HBox()
-            hbox.add(advene.gui.util.image_from_position(self.controller,
-                                                         height=40))
-            hbox.add(gtk.Label(description))            
-            vbox.add(hbox)
+            vbox.add(self.get_illustrated_text(description))
 
             for i in range(1, size+1):
                 message=self.parse_parameter(context, parameters,
@@ -924,15 +957,9 @@ class AdveneGUI (Connect):
                 message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
                 position=self.parse_parameter(context, parameters, 'position%d' % i, 0)
-                b=gtk.Button()
-
-                hbox=gtk.HBox()
-                hbox.add(advene.gui.util.image_from_position(self.controller,
-                                                             position,
-                                                             height=40))
-                hbox.add(gtk.Label(message))            
-                b.add(hbox)
                 
+                b=gtk.Button()
+                b.add(self.get_illustrated_text(message, position))                
                 b.connect("clicked", handle_response, position, vbox)
                 vbox.add(b)
 
@@ -985,7 +1012,8 @@ class AdveneGUI (Connect):
                                        locals_={'package': p,
                                                 'p': p,
                                                 'a': a,
-                                                'c': self.controller })
+                                                'c': self.controller,
+                                                'self': self })
         w=ev.popup()
         b=gtk.Button(stock=gtk.STOCK_CLOSE)
         b.connect("clicked", lambda b: w.destroy())
@@ -1120,7 +1148,7 @@ class AdveneGUI (Connect):
             at=cr.popup(modal=True)
             if at:
                 try:
-                    pop = advene.gui.edit.elements.get_edit_popup (at, self.controller)
+                    pop = get_edit_popup (at, self.controller)
                 except TypeError, e:
                     print _("Error: unable to find an edit popup for %s:\n%s") % (at, unicode(e))
                 else:
@@ -1170,8 +1198,8 @@ class AdveneGUI (Connect):
             schema=cr.popup(modal=True)
             if schema:
                 try:
-                    pop = advene.gui.edit.elements.get_edit_popup (schema,
-                                                                   self.controller)
+                    pop = get_edit_popup (schema,
+                                          self.controller)
                 except TypeError, e:
                     print _("Error: unable to find an edit popup for %s:\n%s") % (schema,
                                                                                   unicode(e))
@@ -1378,6 +1406,11 @@ class AdveneGUI (Connect):
                                               default_dir=d)
         if filename:
             self.controller.load_package (uri=filename)
+            h=config.data.preferences['history']
+            if not filename in h:
+                h.append(filename)
+            # Keep the 5 last elements
+            h=h[-5:]
 	return True
 
     def on_save1_activate (self, button=None, data=None):
@@ -1460,7 +1493,7 @@ class AdveneGUI (Connect):
             i.process_file(filename)
             self.controller.modified=True
             self.controller.notify("PackageLoad", package=i.package)
-            self.log('Converted from file %s :' % filename)
+            self.log(_('Converted from file %s :') % filename)
             self.log(i.statistics_formatted())
         return True
 
@@ -1517,9 +1550,9 @@ class AdveneGUI (Connect):
         w.add(vbox)
 
         rs = self.controller.event_handler.get_ruleset('default')
-        edit=advene.gui.edit.rules.EditRuleSet(rs,
-                                               catalog=self.controller.event_handler.catalog,
-                                               controller=self.controller)
+        edit=EditRuleSet(rs,
+                         catalog=self.controller.event_handler.catalog,
+                         controller=self.controller)
         vbox.add(edit.get_widget())
         edit.get_widget().show()
 
@@ -1592,8 +1625,8 @@ class AdveneGUI (Connect):
         return True
     
     def on_browser1_activate (self, button=None, data=None):
-        browser = advene.gui.views.browser.Browser(element=self.controller.package,
-                                                   controller=self.controller)
+        browser = Browser(element=self.controller.package,
+                          controller=self.controller)
         popup=browser.popup()
         return True
 
@@ -1682,8 +1715,8 @@ class AdveneGUI (Connect):
 
         vbox=gtk.VBox()
 
-        sel=advene.gui.edit.dvdselect.DVDSelect(controller=self.controller,
-                                                current=self.controller.get_default_media())
+        sel=DVDSelect(controller=self.controller,
+                      current=self.controller.get_default_media())
         vbox.add(sel.get_widget())
 
         hbox=gtk.HButtonBox()
