@@ -42,6 +42,7 @@ class GenericImporter(object):
         self.author=author
         self.timestamp=time.strftime("%F")
         self.defaulttype=defaulttype
+        # FIXME: implement self.offset (in ms)
 
     def process_file(self, filename):
         """Abstract method.
@@ -243,6 +244,56 @@ class XiImporter(GenericImporter):
         self.convert(self.iterator(xi))
         return self.package
 
+class SubtitleImporter(GenericImporter):
+    """Subtitle importer.
+
+    srt importer
+    """    
+    def __init__(self, encoding=None, **kw):
+        super(SubtitleImporter, self).__init__(**kw)
+        if encoding is None:
+            encoding='latin1'
+        self.encoding=encoding
+
+    def srt_iterator(self, f):
+        base='(\d\d):(\d\d):(\d+),(\d+)'
+        pattern=sre.compile(base + '.+' + base)
+        for l in f:
+            tc=None
+            content=[]
+            for line in f:
+                line=line.rstrip()
+                match=pattern.search(line)
+                if match is not None:
+                    l=[ long(i) for i in  match.groups()]
+                    (h,m,s,ms) = l[:4]
+                    b=ms+s*1000+m*60000+h*3600000
+                    (h,m,s,ms) = l[4:]
+                    e=ms+s*1000+m*60000+h*3600000
+                    tc=(b,e)
+                elif len(line) == 0:
+                    # Empty line: end of subtitle
+                    # Convert if and reset the data
+                    d={'begin': tc[0],
+                       'end': tc[1],
+                       'content': "\n".join(content)}
+                    tc=None
+                    content=[]
+                    yield d
+                else:
+                    if tc is not None:
+                        content.append(unicode(line, self.encoding).encode('utf-8'))
+                    # else We could check line =~ /^\d+$/
+                        
+    def process_file(self, filename):
+        f=open(filename, 'r')
+        if self.package is None:
+            self.package, self.defaulttype=self.create_package(schemaid='subtitle-schema',
+                                                               annotationtypeid='subtitle')
+        # FIXME: implement subtitle type detection
+        self.convert(self.srt_iterator(f))
+        return self.package
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print "Should provide a file name and a package name"
@@ -253,6 +304,8 @@ if __name__ == "__main__":
 
     if fname.endswith('.txt'):
         i=TextImporter(author='textimporter')
+    elif fname.endswith('.srt'):
+        i=SubtitleImporter(author='subtitle-importer')
     elif fname.endswith('.xml'):
         # FIXME: we should check the XML content
         i=XiImporter(author='xiimporter')
@@ -265,6 +318,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # FIXME: i.process_options()
+    # (for .sub conversion for instance)
     print "Converting %s to %s" % (fname, pname)
     p=i.process_file(fname)
     p.save(pname)
