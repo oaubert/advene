@@ -1,4 +1,12 @@
-"""Helper GUI classes and methods"""
+#! /usr/bin/env python
+
+"""Helper GUI classes and methods.
+
+This module provides generic edit forms for the various Advene
+elements (Annotation, Relation, AnnotationType, RelationType, Schema,
+View, Package).
+
+"""
 
 import advene.core.config as config
 
@@ -11,10 +19,12 @@ import gobject
 import pango
 
 from advene.model.package import Package
-from advene.model.annotation import Annotation
-from advene.model.schema import Schema, AnnotationType
+from advene.model.annotation import Annotation, Relation
+from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
+
+import advene.gui.edit.rules
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display
 
@@ -211,6 +221,57 @@ class EditAnnotationPopup (EditElementPopup):
 
         return vbox
 
+class EditRelationPopup (EditElementPopup):
+    def can_edit (el):
+        return isinstance (el, Relation)
+    can_edit = staticmethod (can_edit)
+        
+    def make_widget (self, editable=False):
+        vbox = gtk.VBox ()
+
+        # Annotation data
+        f = self.make_registered_form (element=self.element,
+                                       fields=('id', 'uri', 'type',
+                                               'author', 'date'),
+                                       editable=editable,
+                                       editables=('author', 'date'),
+                                       labels={'id':     _('Id'),
+                                               'type':   _('Type'),
+                                               'uri':    _('URI'),
+                                               'author': _('Author'),
+                                               'date':   _('Date')}
+                                       )
+        vbox.pack_start (f.get_view (), expand=gtk.FALSE)
+
+        def edit_popup(button, element):
+            try:
+                pop = get_edit_popup (element)
+            except TypeError, e:
+                print _("Error: unable to find an edit popup for %s:\n%s") % (element, str(e))
+            else:
+                pop.edit ()
+            return True
+
+        # FIXME: make it possible to edit the members list (drag and drop ?)
+        hb = gtk.HButtonBox()
+        hb.set_layout(gtk.BUTTONBOX_START)
+        for a in self.element.members:
+            b = gtk.Button(a.id)
+            b.connect("clicked", edit_popup, a)
+            b.show()
+            hb.add(b)
+            
+        vbox.pack_start(self.framed(hb, _("Members")), expand=True)
+
+        # Relation content
+        f = EditTextForm (self.element.content, 'data')
+        f.set_editable (editable)
+        t = f.get_view ()
+        self.register_form (f)
+        vbox.pack_start(self.framed(t, _("Content")), expand=gtk.TRUE)
+
+        return vbox
+
 class EditViewPopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, View)
@@ -293,6 +354,27 @@ class EditSchemaPopup (EditElementPopup):
 class EditAnnotationTypePopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, AnnotationType)
+    can_edit = staticmethod (can_edit)
+        
+    def make_widget (self, editable=False):
+        f = self.make_registered_form (element=self.element,
+                                       fields=('id', 'uri', 'title',
+                                               'author', 'date', 'mimetype'),
+                                       editable=editable,
+                                       editables=('author', 'date', 'title',
+                                                  'mimetype'),
+                                       labels={'id':     _('Id'),
+                                               'uri':    _('URI'),
+                                               'title':  _('Title'),
+                                               'author': _('Author'),
+                                               'date':   _('Date'),
+                                               'mimetype': _('MIME Type')}
+                                       )
+        return f.get_view ()
+
+class EditRelationTypePopup (EditElementPopup):
+    def can_edit (el):
+        return isinstance (el, RelationType)
     can_edit = staticmethod (can_edit)
         
     def make_widget (self, editable=False):
