@@ -207,7 +207,7 @@ class TranscriptionEdit:
         child.show()
         self.textview.add_child_at_anchor(child, anchor)
         return
-    
+        
     def populate(self, annotations):
         """Populate the buffer with data taken from the given annotations.
         """
@@ -247,6 +247,7 @@ class TranscriptionEdit:
                 child=a.get_widgets()[0]
                 timestamp=child.timestamp
                 text=b.get_text(begin, end, include_hidden_chars=False)
+                text=text.rstrip().lstrip()
                 if (self.discontinuous_toggle.get_active() and
                     self.empty_re.match(text)):
                     pass
