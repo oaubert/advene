@@ -1,0 +1,7 @@
+advene for Debian
+-----------------
+
+First attempt at using debhelper to create a correct debian package. Please
+notify any mistake.
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>, Sun,  7 Mar 2004 16:11:17 +0100

@@ -1,0 +1,2 @@
+?package(advene):needs=X11 section=Apps/Viewers\
+  title="Advene - DVD Annotation" command="/usr/bin/advene"
