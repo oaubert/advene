@@ -209,10 +209,16 @@ class MillisecondFragment(AbstractNbeFragment):
     #
 
     def format_time(self, val):
-        t = long(val)
+        """Formats a value (in milliseconds) into a time string.
+        
+        @param val: the value
+        @type val: int
+        @return: the formatted string
+        @rtype: string
+        """ 
+        (s, ms) = divmod(long(val), 1000)
         # Format: HH:MM:SS.mmm
-        return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)),
-                            t % 1000)
+        return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
         
     def __str__(self):
         """Return a string representation of the Millisecond fragment"""
