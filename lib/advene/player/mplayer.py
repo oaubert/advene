@@ -28,6 +28,9 @@ class Playlist(list):
             self.current_index = 0
         else:
             self.current_index += 1
+
+        if self.current_index > len(self)-1:
+            self.current_index=0
         try:
             n=self[self.current_index]
         except IndexError:
@@ -119,7 +122,8 @@ class Player:
     
     def start(self, position):
         self.log("start %s" % str(position))
-        self.mplayer.play(self.pymp.playlist[0])
+        if len(self.pymp.playlist) > 0:
+            self.mplayer.play(self.pymp.playlist[0])
         return
         
     def pause(self, position): 
@@ -264,6 +268,10 @@ class Player:
         self.stream_duration = s.length
         self.current_position_value = s.position
 
+    def set_visual(self, xid):        
+        self.mplayer.wid=xid
+        return
+
 # Copy/paster from pymp/mplayer.py
 
 #
@@ -271,10 +279,6 @@ class Player:
 #
 class Mplayer:
 	
-	pymp, mplayerIn, mplayerOut = None, None, None
-	eofHandler, statusQuery = 0, 0
-	paused = False
-	totalTime = 0
 	
 	#
 	#  Initializes this Mplayer with the specified Pymp.
@@ -282,21 +286,35 @@ class Mplayer:
 	def __init__(self, pymp):
 		
 		self.pymp = pymp
-                self.re_time=sre.compile("(A|V):\s+(\d+\.\d+)")
+                self.re_time=sre.compile("(A|V):\s*(\d+\.\d+)")
+                self.re_length=sre.compile("ANS_LENGTH=(\d+)")
+                self.mplayerIn = None
+                self.mplayerOut = None
+                self.eofHandler = 0
+                self.statusQuery = 0
+                self.paused=False
+                self.totalTime=0
+                self.wid=None
 		
 	#
 	#   Plays the specified target.
 	#
 	def play(self, target):
-		
-		mpc = "mplayer -slave \"" + target + "\" 2>/dev/null"
-		
-		self.mplayerIn, self.mplayerOut = os.popen2(mpc)  #open pipe
-		fcntl.fcntl(self.mplayerOut, fcntl.F_SETFL, os.O_NONBLOCK)
-		
-		self.cmd("get_time_length") #grab the length of the file
-		self.startEofHandler()
-		self.startStatusQuery()
+            args=["mplayer", "-slave"]
+            if self.wid is not None:
+                args.append("-wid")
+                args.append(str(self.wid))
+
+            args.append('"%s"' % target)
+            args.append("2>/dev/null")
+
+            mpc=" ".join(args)
+                
+            self.mplayerIn, self.mplayerOut = os.popen2(mpc)  #open pipe
+            fcntl.fcntl(self.mplayerOut, fcntl.F_SETFL, os.O_NONBLOCK)
+            
+            self.startEofHandler()
+            self.startStatusQuery()
 			
 	#
 	#  Issues command to mplayer.
@@ -371,23 +389,34 @@ class Mplayer:
 	#
 	#  Queries mplayer's playback status and upates the progress bar.
 	#
-	def queryStatus(self):
-						
-		curTime, line = None, None
-		
-		while True:
-			try:  #attempt to fetch last line of output
-				line = self.mplayerOut.read()
-				if line.find("ANS_LENGTH=") != -1:
-					 line = line[line.find("ANS_LENGTH=")+11:] #strip out everything before this
-					 self.totalTime = int(line[:line.find("\n")])
-                                m=self.re_time.match(line)
-                                if m:
-                                    curTime = float(m.group(2))
-			except StandardError:
-				break
+	def queryStatus(self):						
+            curTime, line = None, None
+            
+            while True:
+                try:  #attempt to fetch last line of output
+                    line = self.mplayerOut.read()
+
+                    # If totalTime is not yet known, look for it
+                    if self.totalTime == 0:
+                        m=self.re_length.search(line)
+                        if m:
+                            self.totalTime = long(m.group(1))
+                            print "Got length: %d" % self.totalTime
+                    
+                    m=self.re_time.match(line)
+                    if m:
+                        curTime = float(m.group(2))
+                    else:
+                        print line
+                except StandardError:
+                    break
 									
-		if curTime: self.pymp.control.setProgress(curTime) #update progressbar				
+                if curTime:
+                    self.pymp.control.setProgress(curTime) #update progressbar
+                    if self.totalTime == 0:
+                        #print "Getting time length"
+                        self.cmd("get_time_length") #grab the length of the file
+
 		return True
 		
 	#
