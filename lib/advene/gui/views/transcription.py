@@ -35,7 +35,25 @@ class TranscriptionView:
         self.displaytime=False
         # Annotation where the cursor is set
         self.currentannotation=None
+
+        # If representation is not None, it is used as a TALES
+        # expression to generate the representation of the
+        # transcripted annotation. Useful with structured annotations
+        self.representation=None
+
+        # Various option toggles
+        self.display_bounds_toggle=gtk.CheckButton(_("Display annotation bounds"))
+        self.display_bounds_toggle.set_active(False)
+        self.display_bounds_toggle.connect("toggled", self.display_toggle)
+        self.display_time_toggle=gtk.CheckButton(_("Display times"))
+        self.display_time_toggle.set_active(False)
+        self.display_time_toggle.connect("toggled", self.display_toggle)
+
         self.widget=self.build_widget()
+
+    def display_toggle(self, button):
+        self.generate_buffer_content()
+        return True
 
     def build_widget(self):
         vbox = gtk.VBox()
@@ -43,9 +61,6 @@ class TranscriptionView:
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
         self.textview.set_wrap_mode (gtk.WRAP_CHAR)
-
-        self.generate_buffer_content()
-
         b=self.textview.get_buffer()
 
         activated_tag = b.create_tag("activated")
@@ -53,6 +68,9 @@ class TranscriptionView:
 
         currenttag = b.create_tag("current")
         currenttag.set_property("background", "lightblue")
+
+
+        self.generate_buffer_content()
 
         self.textview.connect("button-press-event", self.button_press_event_cb)
         self.textview.connect_after("move-cursor", self.move_cursor_cb)
@@ -69,21 +87,32 @@ class TranscriptionView:
         # Clear the buffer
         begin,end=b.get_bounds()
         b.delete(begin, end)
+        t_toggle=self.display_time_toggle.get_active()
+        m_toggle=self.display_bounds_toggle.get_active()
 
         for a in self.model.annotations:
+            if t_toggle:
+                b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.begin))
+
             mark = b.create_mark("b_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
                                  left_gravity=True)
-            mark.set_visible(True)
-            if self.displaytime:
-                b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.begin))
-            b.insert_at_cursor(a.content.data)
-            if self.displaytime:
-                b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.end))
+            mark.set_visible(m_toggle)
+
+            if self.representation:
+                rep=vlclib.get_title(self.controller, a, representation=self.representation)
+            else:
+                rep=a.content.data
+
+            b.insert_at_cursor(unicode(rep))
             mark = b.create_mark("e_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
                                  left_gravity=True)
-            mark.set_visible(True)
+            mark.set_visible(m_toggle)
+
+            if t_toggle:
+                b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.end))
+
             #print "inserted from %d to %d" % (b_a, e_a)
             b.insert_at_cursor(self.separator)
         return
@@ -139,11 +168,11 @@ class TranscriptionView:
                     if n and n.startswith('e_') ]
         if beginmarks or endmarks:
             # Do not activate on annotation boundary
-            # (it causes problem when editing)
+            # (it causes problems when editing)
             annotationid=None
         else:
             # Look backwards for the first mark that we find
-            while True:
+            while not i.is_start():
                 marknames = [ m.get_name()
                               for m in i.get_marks() ]
                 beginmarks= [ n
@@ -244,6 +273,42 @@ class TranscriptionView:
             self.desactivate_annotation (annotation)
         return True
 
+    def select_separator(self, button=None):
+        """Select a new separator."""
+        sep=advene.gui.util.entry_dialog(title=_('Enter the new separator'),
+                                         text=_("Specify the separator that will be inserted\nbetween the annotations."),
+                                         default=self.separator)
+        if sep is None:
+            # The user canceled the action
+            return True
+
+        # Process special characters
+        sep=sep.replace('\\n', '\n')
+        sep=sep.replace('\\t', '\t')
+
+        self.separator=sep
+        self.generate_buffer_content()
+
+        return True
+
+    def select_representation(self, button=None):
+        """Select a new representation."""
+        rep=advene.gui.util.entry_dialog(title=_('Enter a TALES expression'),
+                                         text=_("Specify the TALES expression that will be used\nto format the annotations."),
+                                         default=self.representation)
+        if rep is None:
+            # The user canceled the action
+            return True
+
+        # Process special characters
+        rep=rep.replace('\\n', '\n')
+        rep=rep.replace('\\t', '\t')
+
+        self.representation=rep
+        self.generate_buffer_content()
+
+        return True
+        
     def get_widget (self):
         """Return the TreeView widget."""
         return self.widget
@@ -269,6 +334,18 @@ class TranscriptionView:
                             window, self)
 
         hb=gtk.HButtonBox()
+
+        hb.add(self.display_time_toggle)
+        hb.add(self.display_bounds_toggle)
+
+        b=gtk.Button(_("Separator"))
+        b.connect("clicked", self.select_separator)
+        hb.add(b)
+
+        b=gtk.Button(_("Representation"))
+        b.connect("clicked", self.select_representation)
+        hb.add(b)
+
         b=gtk.Button(stock=gtk.STOCK_CLOSE)
         b.connect ("clicked", lambda w: window.destroy ())
         hb.add(b)
