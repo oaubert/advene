@@ -285,6 +285,7 @@ class AdveneGUI (Connect):
         # position update and the player reaction.
         # If it is corrected, it should always work because of the
         # snapshot cache in the player. To be tested...
+        # FIXME: notify the History view
         self.controller.update_snapshot(long(position_before))
         self.navigation_history.append(position_before)
         print "New navigation history: %s" % self.navigation_history
@@ -356,11 +357,11 @@ class AdveneGUI (Connect):
 
         self.controller.init(args)
         
-        if config.data.launch_http_server == 1:
-                self.log(_("Using Mainloop input handling for webserver..."))
-                gtk.input_add (self.controller.server,
-                               gtk.gdk.INPUT_READ,
-                               self.handle_http_request)
+        if config.data.webserver['mode'] == 1:
+            self.log(_("Using Mainloop input handling for webserver..."))
+            gtk.input_add (self.controller.server,
+                           gtk.gdk.INPUT_READ,
+                           self.handle_http_request)
 
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
@@ -512,7 +513,7 @@ class AdveneGUI (Connect):
     def handle_http_request (self, source, condition):
         """Handle a HTTP request.
 
-        This method is used if config.data.launch_http_server == 1.  
+        This method is used if config.data.webserver['mode'] == 1.  
         """
         # Make sure that all exceptions are catched, else the gtk mainloop
         # will not execute update_display.
