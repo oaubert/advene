@@ -206,6 +206,8 @@ class Annotation(modeled.Importable, content.WithContent,
                   if r.getMembers ()[rank] is self
                   and len (r.getMembers ()) == order
                 ]
+        # Cannot happen
+        return []
 
     def getRelationsWith (self, other, rank=None, order=None):
         """
