@@ -114,8 +114,17 @@ class TranscriptionEdit:
 
         p=self.controller.player
         if (p.status == p.PlayingStatus or p.status == p.PlayingStatus):
-            self.create_timestamp_mark(p.current_position_value - config.data.reaction_time,
-                                       it)
+            # Check that preceding mark.timestamp is lower
+            t=p.current_position_value - config.data.reaction_time
+            m, i=self.find_preceding_mark(it)
+            if m is not None and m.timestamp >= t:
+                self.controller.log(_("Invalid timestamp mark"))
+                return False
+            m, i=self.find_following_mark(it)
+            if m is not None and m.timestamp <= t:
+                self.controller.log(_("Invalid timestamp mark"))
+                return False
+            self.create_timestamp_mark(t, it)
         return False
 
     def set_color(self, button, color):
@@ -224,14 +233,49 @@ class TranscriptionEdit:
         l=[ (a.fragment.begin, a.fragment.end, a)
             for a in annotations ]
         l.sort(lambda a,b: cmp(a[0], b[0]))
-        for (b, e, a) in l:
+        last_end=-1
+        for (begin, end, a) in l:
+            if begin < last_end or end < last_end:
+                self.controller.log(_("Invalid timestamp"))
+                pass
             it=b.get_iter_at_mark(b.get_insert())
-            self.create_timestamp_mark(b, it)
+            self.create_timestamp_mark(begin, it)
             b.insert_at_cursor(unicode(a.content.data))
             it=b.get_iter_at_mark(b.get_insert())
-            self.create_timestamp_mark(e, it)
+            self.create_timestamp_mark(end, it)
+            last_end=end
         return            
-        
+
+    def find_preceding_mark(self, i):
+        """Find the mark preceding the iterator.
+
+        Return mark, it if found
+        Returns None, None if no mark exists.
+        """
+        it=i.copy()
+        b=self.textview.get_buffer()
+        while it.backward_char():
+            a=it.get_child_anchor()
+            if a and a.get_widgets():
+                # Found a TextAnchor
+                return a.get_widgets()[0], it.copy()
+        return None, None
+    
+    def find_following_mark(self, i):
+        """Find the mark following the iterator.
+
+        Return mark, it if found
+        Returns None, None if no mark exists.
+        """
+        it=i.copy()
+        b=self.textview.get_buffer()
+        while it.forward_char():
+            a=it.get_child_anchor()
+            if a and a.get_widgets():
+                # Found a TextAnchor
+                return a.get_widgets()[0], it.copy()
+        return None, None
+
     def parse_transcription(self):
         """Parse the transcription text.
 
