@@ -242,9 +242,6 @@ class TimeLine:
         return True
 
     def update_model(self, package):
-        # FIXME: todo
-        # - clear layer_position and reinit
-        # - reset layout dimensions
         self.list=package.annotations
         self.layer_position.clear()
         self.minimum = 0
@@ -271,14 +268,13 @@ class TimeLine:
             return True
 
         bs = self.get_widget_for_annotation (annotation)
-        if bs:
-            for b in bs:
-                if event == 'AnnotationEditEnd':
-                    self.update_button (b)
-                elif event == 'AnnotationDelete':
-                    b.destroy()
-                else:
-                    print "Unknown event %s" % event
+        for b in bs:
+            if event == 'AnnotationEditEnd':
+                self.update_button (b)
+            elif event == 'AnnotationDelete':
+                b.destroy()
+            else:
+                print "Unknown event %s" % event
         return True
         
     def annotation_cb (self, widget, ann):
@@ -699,11 +695,17 @@ class TimeLine:
 
         # FIXME: connect scrolladjustments for legend and layout
         self.legend = self.build_legend_widget ()
-        hpaned.add1 (self.legend)
+
+        sw1 = gtk.ScrolledWindow ()
+        sw1.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
+        sw1.set_placement(gtk.CORNER_TOP_RIGHT)
+        sw1.add (self.legend)
+        hpaned.add1 (sw1)
         
         sw = gtk.ScrolledWindow ()
         sw.set_policy (gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
         sw.set_hadjustment (self.adjustment)
+        sw.set_vadjustment (sw1.get_vadjustment())
         sw.add (self.get_widget())
         hpaned.add2 (sw)
 
