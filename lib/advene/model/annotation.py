@@ -99,7 +99,7 @@ class Annotation(modeled.Importable, content.WithContent,
                 # FIXME: cf thread
                 # Weird use of hash() -- will this work?
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = "i" + str(id(self)) + str(time.clock()).replace('.','')
+                ident = u"a" + unicode(id(self)) + unicode(time.clock()).replace('.','')
             self.setId(ident)
 
             if date is not None: self.setDate(date)
@@ -112,7 +112,7 @@ class Annotation(modeled.Importable, content.WithContent,
     def __str__(self):
         """Return a nice string representation of the object."""
         return "Annotation %s:\"%s\"" % (self.getFragment(),
-                                         self.getContent().getData())
+                                          self.getContent().getData())
 
     def __getFragmentElement(self):
         """Return the fragment element linked to this annotation"""
@@ -322,7 +322,7 @@ class Relation(modeled.Importable, content.WithContent,
                 # FIXME: cf thread
                 # Weird use of hash() -- will this work?
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = "i" + str(id(self)) + str(time.clock()).replace('.','')
+                ident = u"r" + unicode(id(self)) + unicode(time.clock()).replace('.','')
             self.setId(ident)
 
             if date is not None: self.setDate(date)
