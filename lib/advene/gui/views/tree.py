@@ -474,6 +474,10 @@ class TreeWidget:
             add_menuitem(menu, _("Create a new relation..."), self.create_element_cb, Relation, node)
             add_menuitem(menu, _("Create a new schema..."), self.create_element_cb, Schema, node)
 
+        if isinstance(node, Schema):
+            add_menuitem(menu, _("Create a new annotation type..."), self.create_element_cb, AnnotationType, node)
+            add_menuitem(menu, _("Create a new relation type..."), self.create_element_cb, RelationType, node)
+
         add_menuitem(menu, _("Display"), self.popup_display, node, path)
 
         menu.show_all()
