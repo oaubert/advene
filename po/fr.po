@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-01-27 17:53+0100\n"
-"PO-Revision-Date: 2005-01-24 17:50+0100\n"
+"POT-Creation-Date: 2005-01-27 17:54+0100\n"
+"PO-Revision-Date: 2005-01-27 18:00+0100\n"
 "Last-Translator: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
 "MIME-Version: 1.0\n"
@@ -286,7 +286,8 @@ msgstr "Type courant"
 msgid "Player Status"
 msgstr "Statut du lecteur"
 
-#: ../share/advene.glade:1029
+#: ../share/advene.glade:1029 ../lib/advene/gui/util.py:198
+#: ../lib/advene/gui/util.py:207
 msgid "N/C"
 msgstr "N/C"
 
@@ -364,6 +365,7 @@ msgstr "Média associé"
 #: ../lib/advene/gui/edit/elements.py:486
 #: ../lib/advene/gui/edit/elements.py:522
 #: ../lib/advene/gui/edit/elements.py:566
+#: ../lib/advene/gui/edit/imports.py:208
 #: ../lib/advene/gui/edit/dvdselect.py:79
 msgid "Title"
 msgstr "Titre"
@@ -445,6 +447,7 @@ msgstr "Afficher %s"
 #: ../lib/advene/gui/edit/elements.py:484
 #: ../lib/advene/gui/edit/elements.py:520
 #: ../lib/advene/gui/edit/elements.py:564
+#: ../lib/advene/gui/edit/imports.py:202
 msgid "Id"
 msgstr "Id"
 
@@ -464,6 +467,7 @@ msgstr "Type"
 #: ../lib/advene/gui/edit/elements.py:485
 #: ../lib/advene/gui/edit/elements.py:521
 #: ../lib/advene/gui/edit/elements.py:565
+#: ../lib/advene/gui/edit/imports.py:214
 msgid "URI"
 msgstr "URI"
 
@@ -675,6 +679,44 @@ msgstr "Mettre à jour la copie d'écran"
 msgid "Snapshots"
 msgstr "Copies d'écran"
 
+#: ../lib/advene/gui/edit/imports.py:79 ../lib/advene/gui/edit/imports.py:80
+msgid "Views"
+msgstr "Vues"
+
+#: ../lib/advene/gui/edit/imports.py:93 ../lib/advene/gui/edit/imports.py:94
+msgid "Schemas"
+msgstr "Schémas"
+
+#: ../lib/advene/gui/edit/imports.py:197
+msgid "Imported?"
+msgstr "Importé ?"
+
+#: ../lib/advene/gui/edit/imports.py:236
+msgid "Choose the package to import"
+msgstr "Choisissez le recueil à importer"
+
+#: ../lib/advene/gui/edit/imports.py:247
+msgid "Enter the package alias"
+msgstr "Entrez l'alias du recueil"
+
+#: ../lib/advene/gui/edit/imports.py:248
+msgid ""
+"Specify the alias which will be used\n"
+"as prefix for the package's elements."
+msgstr ""
+"Précisez le nom qui sera utilisé\n"
+"comme préfixe pour les éléments du recueil."
+
+#: ../lib/advene/gui/edit/imports.py:292 ../lib/advene/gui/views/tree.py:148
+#: ../lib/advene/gui/views/tree.py:561
+#, python-format
+msgid "Package %s"
+msgstr "Recueil %s"
+
+#: ../lib/advene/gui/edit/imports.py:292 ../lib/advene/gui/views/tree.py:561
+msgid "No title"
+msgstr "Pas de titre"
+
 #: ../lib/advene/gui/edit/dvdselect.py:66
 #: ../lib/advene/gui/edit/dvdselect.py:96
 msgid "Preview"
@@ -836,11 +878,6 @@ msgstr "Vue %s"
 msgid "Query %s"
 msgstr "Requête %s"
 
-#: ../lib/advene/gui/views/tree.py:148 ../lib/advene/gui/views/tree.py:561
-#, python-format
-msgid "Package %s"
-msgstr "Recueil %s"
-
 #: ../lib/advene/gui/views/tree.py:148
 msgid "No Title"
 msgstr "Pas de titre"
@@ -856,10 +893,6 @@ msgstr "Pas de fils dans on_iter_nth_child"
 #: ../lib/advene/gui/views/tree.py:394
 msgid "Package View"
 msgstr "Vue du recueil"
-
-#: ../lib/advene/gui/views/tree.py:561
-msgid "No title"
-msgstr "Pas de titre"
 
 #: ../lib/advene/gui/views/tree.py:633 ../lib/advene/gui/views/sequence.py:310
 #, python-format
@@ -995,10 +1028,13 @@ msgstr "Séparateur"
 
 #: ../lib/advene/gui/views/singletonpopup.py:81
 #: ../lib/advene/gui/views/singletonpopup.py:89
+#: ../lib/advene/gui/views/accumulatorpopup.py:88
+#: ../lib/advene/gui/views/accumulatorpopup.py:96
 msgid "Navigation popup"
 msgstr "Fenêtre de navigation"
 
 #: ../lib/advene/gui/main.py:168 ../lib/advene/gui/main.py:1007
+#: ../lib/advene/util/vlclib.py:154
 msgid "None"
 msgstr "Aucun"
 
@@ -1320,6 +1356,122 @@ msgstr "Reçu l'exception %s. Arrêt des services."
 msgid "*** Exception ***"
 msgstr "*** Exception ***"
 
+#: ../lib/advene/gui/util.py:204
+msgid ""
+"Press to\n"
+"display\n"
+"information"
+msgstr ""
+"Cliquez pour\n"
+"afficher\n"
+"des informations"
+
+#: ../lib/advene/gui/util.py:214
+#, python-format
+msgid "No %s"
+msgstr "Pas de %s"
+
+#: ../lib/advene/gui/util.py:216
+#, python-format
+msgid "1 %s"
+msgstr "1 %s"
+
+#: ../lib/advene/gui/util.py:218
+#, python-format
+msgid "%d %s"
+msgstr "%d %s"
+
+#: ../lib/advene/gui/util.py:221
+msgid "Wait..."
+msgstr "Patientez..."
+
+#: ../lib/advene/gui/util.py:227
+#, python-format
+msgid ""
+"Package %s:\n"
+"%s\n"
+"%s in %s\n"
+"%s in %s\n"
+"%s\n"
+"%s\n"
+"\n"
+"Description:\n"
+"%s\n"
+msgstr ""
+"Recueil %s:\n"
+"%s\n"
+"%s dans %s\n"
+"%s dans %s\n"
+"%s\n"
+"%s\n"
+"\n"
+"Description:\n"
+"%s\n"
+
+#: ../lib/advene/gui/util.py:237
+msgid "schema"
+msgstr "schéma"
+
+#: ../lib/advene/gui/util.py:237
+msgid "schemas"
+msgstr "schémas"
+
+#: ../lib/advene/gui/util.py:238
+msgid "annotation"
+msgstr "annotation"
+
+#: ../lib/advene/gui/util.py:238
+msgid "annotations"
+msgstr "annotations"
+
+#: ../lib/advene/gui/util.py:239
+msgid "annotation type"
+msgstr "type d'annotation"
+
+#: ../lib/advene/gui/util.py:239
+msgid "annotation types"
+msgstr "types d'annotation"
+
+#: ../lib/advene/gui/util.py:240
+msgid "relation"
+msgstr "relation"
+
+#: ../lib/advene/gui/util.py:240
+msgid "relations"
+msgstr "relations"
+
+#: ../lib/advene/gui/util.py:241
+msgid "relation type"
+msgstr "type de relation"
+
+#: ../lib/advene/gui/util.py:241
+msgid "relation types"
+msgstr "types de relation"
+
+#: ../lib/advene/gui/util.py:242
+msgid "query"
+msgstr "requête"
+
+#: ../lib/advene/gui/util.py:242
+msgid "queries"
+msgstr "requêtes"
+
+#: ../lib/advene/gui/util.py:243
+msgid "view"
+msgstr "vue"
+
+#: ../lib/advene/gui/util.py:243
+msgid "views"
+msgstr "vues"
+
+#: ../lib/advene/gui/util.py:298
+msgid "Select an element"
+msgstr "Choisissez un élément"
+
+#: ../lib/advene/gui/util.py:364
+msgid "Name"
+msgstr "Nom"
+
 #: ../lib/advene/gui/popup.py:108
 msgid ""
 "Give the offset to use\n"
@@ -1448,6 +1600,14 @@ msgstr "Afficher en transcription"
 #: ../lib/advene/gui/popup.py:355
 msgid "Activate view"
 msgstr "Activation d'une vue"
+
+#: ../lib/advene/core/mediacontrol.py:27
+msgid "VLC does not seem to be installed. Using dummy player."
+msgstr "VLC ne semble pas installé. On utilisera un pseudo-lecteur."
+
+#: ../lib/advene/core/mediacontrol.py:30
+msgid "Using VLC player module"
+msgstr "On utilise le module VLC"
 
 #: ../lib/advene/core/webserver.py:179
 #, python-format
@@ -2220,6 +2380,18 @@ msgstr "Exception dans update_status: %s"
 msgid "Unable to start the player."
 msgstr "Impossible de lancer le lecteur."
 
+#: ../lib/advene/util/vlclib.py:199
+msgid "---- Elements ----"
+msgstr "---- Éléments ----"
+
+#: ../lib/advene/util/vlclib.py:205
+msgid "---- Attributes ----"
+msgstr "---- Attributs ----"
+
+#: ../lib/advene/util/vlclib.py:208
+msgid "---- Methods ----"
+msgstr "---- Méthodes ----"
+
 #: ../lib/advene/util/importer.py:84
 msgid "Generic importer"
 msgstr "Importateur générique"
@@ -2636,7 +2808,7 @@ msgstr "** Message ** "
 msgid "Video"
 msgstr "Video"
 
-#: ../lib/advene/player/vlcorbit.py:86
+#: ../lib/advene/player/xine.py:51 ../lib/advene/player/vlcorbit.py:86
 msgid "Cannot start the player"
 msgstr "Impossible de lancer le lecteur"
 
