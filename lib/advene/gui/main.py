@@ -1558,7 +1558,7 @@ class AdveneGUI (Connect):
 
     def on_start_web_browser_activate (self, button=None, data=None):
         """Open a browser on current package's root."""
-        url = self.get_default_url()
+        url = self.controller.get_default_url()
         if url is not None:
             self.webbrowser.open (url)
         else:
