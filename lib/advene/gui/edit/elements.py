@@ -11,7 +11,7 @@ import advene.core.config as config
 from gettext import gettext as _
 
 import pygtk
-pygtk.require ('2.0')
+#pygtk.require ('2.0')
 import gtk
 import gobject
 import pango

@@ -13,7 +13,7 @@ from gettext import gettext as _
 import advene.gui.popup
 
 import pygtk
-pygtk.require ('2.0')
+#pygtk.require ('2.0')
 import gtk
 import gobject
 

@@ -1,7 +1,7 @@
 """Dummy gtkhtml2 package"""
 
 import pygtk
-pygtk.require('2.0')
+#pygtk.require('2.0')
 import gtk
 
 class View(gtk.Layout):

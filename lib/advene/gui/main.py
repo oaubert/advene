@@ -21,7 +21,7 @@ from gettext import gettext as _
 
 # For gtk/glade
 import pygtk
-pygtk.require ('2.0')
+#pygtk.require ('2.0')
 import gtk
 import gtk.glade
 gtk.glade.bindtextdomain('advene')
