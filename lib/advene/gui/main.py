@@ -1009,17 +1009,17 @@ class AdveneGUI (Connect):
             self.controller.update_status ("pause")
             return True
         elif event.keyval == gtk.keysyms.Right:
-            self.controller.move_position (config.data.preferences['time_increment'])
+            self.controller.move_position (config.data.player_preferences['time_increment'])
             return True
         elif event.keyval == gtk.keysyms.Left:
-            self.controller.move_position (-config.data.preferences['time_increment'])
+            self.controller.move_position (-config.data.player_preferences['time_increment'])
             return True
         elif event.keyval == gtk.keysyms.Home:
             self.controller.update_status ("set", self.controller.create_position (0))
             return True
         elif event.keyval == gtk.keysyms.End:
             c=self.controller
-            pos = c.create_position (value = -config.data.preferences['time_increment'],
+            pos = c.create_position (value = -config.data.player_preferences['time_increment'],
                                      key = c.player.MediaTime,
                                      origin = c.player.ModuloPosition)
             self.controller.update_status ("set", pos)
@@ -1301,7 +1301,7 @@ class AdveneGUI (Connect):
 
     def on_b_rewind_clicked (self, button=None, data=None):
         if self.controller.player.status == self.controller.player.PlayingStatus:
-            self.controller.move_position (-config.data.preferences['time_increment'])
+            self.controller.move_position (-config.data.player_preferences['time_increment'])
 	return True
 
     def on_b_play_clicked (self, button=None, data=None):
@@ -1321,7 +1321,7 @@ class AdveneGUI (Connect):
 
     def on_b_forward_clicked (self, button=None, data=None):
         if self.controller.player.status == self.controller.player.PlayingStatus:
-            self.controller.move_position (config.data.preferences['time_increment'])
+            self.controller.move_position (config.data.player_preferences['time_increment'])
 	return True
 
     def on_b_addfile_clicked (self, button=None, data=None):
@@ -1386,12 +1386,12 @@ class AdveneGUI (Connect):
         return True
 
     def on_preferences1_activate (self, button=None, data=None):
-        self.gui.get_widget ("osdtext_toggle").set_active (self.preferences['osdtext'])
+        self.gui.get_widget ("osdtext_toggle").set_active (config.data.player_preferences['osdtext'])
         self.gui.get_widget ("preferences").show ()
         return True
 
     def on_preferences_ok_clicked (self, button=None, data=None):
-        self.preferences['osdtext'] = self.gui.get_widget ("osdtext_toggle").get_active ()
+        config.data.player_preferences['osdtext'] = self.gui.get_widget ("osdtext_toggle").get_active ()
         self.gui.get_widget ("preferences").hide ()
         self.update_view ()
         return True
