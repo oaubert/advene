@@ -465,7 +465,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 elif query.has_key ('position'):
                     position = query['position']
                 else:
-                    self.send_redirect ("/media")
+                    position = 0
                 self.server.update_status ("set", long(position))
                 self.send_no_content()
             elif command == 'pause':
