@@ -585,10 +585,11 @@ class DVDControl (Connect):
         elif self.controller.player.status in (VLC.PlayingStatus, VLC.PauseStatus,
                                                VLC.ForwardStatus, VLC.BackwardStatus):
 
-            s = self.controller.player.stream_duration
-            if s != 0 and s != self.gui.slider.get_adjustment ().upper:
-                self.gui.slider.set_range (0, s)
-                self.gui.slider.set_increments (s / 100, s / 10)
+            # Update the display
+            d = self.controller.cached_duration
+            if d > 0 and d != self.gui.slider.get_adjustment ().upper:
+                self.gui.slider.set_range (0, d)
+                self.gui.slider.set_increments (d / 100, d / 10)
 
             if self.gui.slider.get_value() != pos:
                 self.gui.slider.set_value(pos)
@@ -837,7 +838,7 @@ class DVDControl (Connect):
         
         window.add (vbox)
 
-        duration = self.controller.player.stream_duration
+        duration = self.controller.cached_duration
         if duration <= 0:
             if self.controller.package.annotations:
                 duration = max([a.fragment.end for a in self.controller.package.annotations ])
@@ -982,10 +983,11 @@ class DVDControl (Connect):
         """View mediainformation."""
         self.controller.position_update ()
         self.log (_("**** Media information ****"))
+        self.log (_("Cached duration   : %d") % self.controller.cached_duration)
         if self.controller.player.is_active():
             self.log (_("Current playlist : %s") % str(self.controller.player.playlist_get_list ()))
             self.log (_("Current position : %d") % self.controller.player.current_position_value)
-            self.log (_("Input size       : %d") % self.controller.player.stream_duration)
+            self.log (_("Duration         : %d") % self.controller.player.stream_duration)
             self.log (_("Status           : %s") % repr(self.controller.player.status))
         else:
             self.log (_("Player not active."))
