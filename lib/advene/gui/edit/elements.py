@@ -483,7 +483,7 @@ class EditSchemaPopup (EditElementPopup):
                          editable=editable)
         self.register_form(f)
         
-        vbox.add(f.get_view())
+        vbox.pack_start(f.get_view(), expand=False)
         
         return vbox
 
@@ -520,7 +520,7 @@ class EditAnnotationTypePopup (EditElementPopup):
                          namespaceid='dc', controller=self.controller,
                          editable=editable)
         self.register_form(f)
-        vbox.add(f.get_view())
+        vbox.pack_start(f.get_view(), expand=False)
 
         f = EditMetaForm(title=_("Representation"),
                          element=self.element, name='representation',
