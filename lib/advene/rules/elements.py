@@ -76,7 +76,8 @@ class Condition:
         'different': _("is different from"),
         'contains': _("contains"),
         'greater': _("is greater than"),
-        'lower': _("is lower than")
+        'lower': _("is lower than"),
+        'matches': _("matches the regexp"),
         }
     # Unary operators apply on the LHS
     unary_operators={
@@ -126,6 +127,8 @@ class Condition:
                     rv=right
                     lv=left
                 return lv <= rv
+            elif self.operator == 'matches':
+                return sre.search(rv, lv)
             else:
                 raise Exception("Unknown operator: %s" % self.operator)
         elif self.operator in self.unary_operators:
