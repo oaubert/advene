@@ -57,6 +57,7 @@ class ProcessLauncher:
     def _start_program (self):
         """Private method used to launch the program."""
         args = (self.program_name, )+ tuple([str(i) for i in self.args])
+        # FIXME: we should close all existing sockets
         #print "Launching %s with %s" % (self.program_path, args)
         self.pid = os.spawnv (os.P_NOWAIT, self.program_path, tuple(args))
         try:
