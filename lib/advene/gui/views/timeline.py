@@ -146,27 +146,27 @@ class TimeLine:
                if hasattr (b, 'annotation') and b.annotation == annotation ]
         return bs
 
+    def scroll_to_annotation(self, annotation):
+        pos = self.unit2pixel (annotation.fragment.begin)
+        a = self.adjustment
+        if pos < a.value or pos > (a.value + a.page_size):
+            a.set_value (pos)
+        self.update_position (None)
+        return True
+    
     def activate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
         if annotation is not None:
             if self.scroll_to_activated_toggle.get_active():
-                pos = self.unit2pixel (annotation.fragment.begin)
-                a = self.adjustment
-                if pos < a.value or pos > (a.value + a.page_size):
-                    a.set_value (pos)
-            self.update_position (annotation.fragment.begin)
+                self.scroll_to_annotation(annotation)
             if self.highlight_activated_toggle.get_active():
                 self.activate_annotation (annotation)
+            self.update_position (None)                
         return True
             
     def desactivate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
         if annotation is not None:
-            if self.scroll_to_activated_toggle.get_active():
-                pos = self.unit2pixel (annotation.fragment.begin)
-                a = self.adjustment
-                if pos < a.value or pos > (a.value + a.page_size):
-                    a.set_value (pos)
             if self.highlight_activated_toggle.get_active():
                 self.desactivate_annotation (annotation)
         return True
@@ -266,6 +266,14 @@ class TimeLine:
     
     def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
+        if event == 'AnnotationActivate':
+            self.activate_annotation(annotation)
+            if self.scroll_to_activated_toggle.get_active():
+                self.scroll_to_annotation(annotation)
+            return True
+        if event == 'AnnotationDeactivate':
+            self.desactivate_annotation(annotation)
+            return True
         if event == 'AnnotationCreate':
             # If it does not exist yet, we should create it if it is now in self.list
             if annotation in self.list:
