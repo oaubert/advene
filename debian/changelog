@@ -1,10 +1,16 @@
-advene (project) unstable; urgency=low
+advene (0.16) unstable; urgency=low
 
   * Normalize DVD naming scheme: dvd@title:chapter
   * Implemented TALESEntry (use browser to get TALES expressions)
   * Implemented TranscriptionEdit
+  * Fixed template file (missing mimetype for simpletext annotation type)
+  * Added OpenView action (open a GUI view)
+  * ELANImporter: generate annotation types based on LINGUISTIC_TYPE_REF + TIER_ID
+  * Added '-p' command-line option to select a player ('dummy', 'vlcnative', 'vlcorbit')
+  * New global method: length
+  * Annotations can be resized from the timeline view
 
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 13 Feb 2005 15:16:40 +0100
 
 advene (0.15) unstable; urgency=low
 
