@@ -44,6 +44,7 @@ import advene.gui.views.tree
 import advene.gui.views.timeline
 import advene.gui.views.logwindow
 import advene.gui.views.browser
+import advene.gui.views.history
 import advene.gui.edit.rules
 import advene.gui.edit.dvdselect
 
@@ -169,6 +170,8 @@ class AdveneGUI (Connect):
         # Current Annotation (when defining a new one)
         self.annotation = None
 
+        self.navigation_history=[]
+        
         self.last_slow_position = 0
         
         # List of active annotation views (timeline, tree, ...)
@@ -226,6 +229,18 @@ class AdveneGUI (Connect):
         for v in self.annotation_views:
             v.update_relation(relation)
         return True
+
+    def updated_position_cb (self, context, parameters):
+        position_before=context.evaluateValue('position_before')
+        # Note: it works for the moment only because we take an
+        # immediate snapshot but there is some delay between the
+        # position update and the player reaction.
+        # If it is corrected, it should always work because of the
+        # snapshot cache in the player. To be tested...
+        self.controller.update_snapshot(long(position_before))
+        self.navigation_history.append(position_before)
+        print "New navigation history: %s" % self.navigation_history
+        return True
     
     def main (self, args=None):
         """Mainloop : Gtk mainloop setup.
@@ -274,6 +289,8 @@ class AdveneGUI (Connect):
                                                      method=self.updated_relation_cb)
         self.controller.event_handler.internal_rule (event="ViewEditEnd",
                                                      method=self.updated_view_cb)
+        self.controller.event_handler.internal_rule (event="PlayerSet",
+                                                     method=self.updated_position_cb)
 
         self.controller.init(args)
         
@@ -1074,6 +1091,11 @@ class AdveneGUI (Connect):
 
         window.show_all()
         
+        return True
+
+    def on_navigationhistory1_activate (self, button=None, data=None):
+        h=advene.gui.views.history.HistoryNavigation(self.controller, self.navigation_history)
+        h.popup()
         return True
 
     def on_view_mediainformation_activate (self, button=None, data=None):
