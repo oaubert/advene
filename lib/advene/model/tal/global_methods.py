@@ -327,7 +327,7 @@ def rest (target, context):
         t=target()
     else:
         t=target
-    return t[:1]
+    return t[1:]
 
 def parsed (target, context):
     """Parse the content being passed as target.
