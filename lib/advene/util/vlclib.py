@@ -79,7 +79,7 @@ def mediafile2id (mediafile):
     @rtype: string
     """
     m=md5.new(mediafile)
-    return md5.hexdigest()
+    return m.hexdigest()
 
 def package2id (p):
     """Return the id of the package's mediafile.
