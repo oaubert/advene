@@ -54,6 +54,7 @@ import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.evaluator
 import advene.gui.views.singletonpopup
+import advene.gui.edit.imports
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -485,7 +486,7 @@ class AdveneGUI (Connect):
         return self.format_time (val)
 
     def init_window_size(self, window, name):
-        s=config.data.preferences['windowsize'][name]
+        s=config.data.preferences['windowsize'].setdefault(name, (640,480))
         window.set_default_size (s[0], s[1])
         window.connect ("size_allocate", self.resize_cb, name)
         return True
@@ -1109,6 +1110,11 @@ class AdveneGUI (Connect):
                             label=_("Save the current package"))
 	return True
 
+    def on_import_file1_activate (self, button=None, data=None):
+        # FIXME
+        print "on_import_file1_activate activated (%s, %s, %s)" % (self, button, data)
+        return gtk.TRUE
+
     def on_quit1_activate (self, button=None, data=None):
         """Gtk callback to quit."""
         return self.on_exit (button, data)
@@ -1336,6 +1342,12 @@ class AdveneGUI (Connect):
 
     def on_b_exit_clicked (self, button=None, data=None):
         return self.on_exit (button, data)
+
+    def on_package_imports1_activate (self, button=None, data=None):
+        """Edit imported elements from other packages."""
+        imp=advene.gui.edit.imports.Importer(controller=self.controller)
+        imp.popup()
+        return True
 
     def on_package_properties1_activate (self, button=None, data=None):
         self.gui.get_widget ("prop_author_id").set_text (self.controller.package.author)
