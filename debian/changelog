@@ -1,8 +1,8 @@
 advene (0.15) unstable; urgency=low
 
-  * New Win32 related fixes:
+  * New Win32 related fixes (mostly build-related)
 
- -- 
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 31 Jan 2005 12:09:19 +0100
 
 advene (0.14) unstable; urgency=low
 
