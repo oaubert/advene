@@ -139,13 +139,13 @@ class Condition:
                 # floats, then do it. Else, compare string values
                 lv=self.convert_value(left, 'end')
                 rv=self.convert_value(right, 'begin')
-                return lv > rv
+                return lv >= rv
             elif self.operator == 'lower' or self.operator == 'before':
                 # If it is possible to convert the values to
                 # floats, then do it. Else, compare string values
                 lv=self.convert_value(left, 'end')
                 rv=self.convert_value(right, 'begin')
-                return lv < rv
+                return lv <= rv
             elif self.operator == 'matches':
                 return sre.search(rv, lv)
             elif self.operator == 'meets':
