@@ -146,9 +146,16 @@ class DVDControl (Connect):
         self.gui.slider.connect ("format-value", self.format_slider_value)
 
         # Combo box
-        combo=self.gui.get_widget ("current_type_combo")
-        combo.list.connect ("selection-changed", self.on_current_type_changed)
+        type_combo=self.gui.get_widget ("current_type_combo")
+        type_combo.list.connect ("selection-changed", self.on_current_type_changed)
 
+        # Populate default STBV menu
+        stbv_menu = gtk.Menu()
+        default_item = gtk.MenuItem(_("None"))
+        default_item.connect("activate", self.update_stbv, None)
+        stbv_menu.append(default_item)
+        self.gui.get_widget("stbv_combo").set_menu(stbv_menu)
+        
         # Declaration of the fileselector
         self.gui.fs = gtk.FileSelection ("Select a file")
         self.gui.fs.ok_button.connect_after ("clicked", lambda win: self.gui.fs.hide ())
@@ -170,6 +177,31 @@ class DVDControl (Connect):
         
         # List of active annotation views (timeline, tree, ...)
         self.annotation_views = []
+
+    def update_stbv (self, widget, view):
+        self.controller.activate_stbv(view)
+        return True
+
+    def update_stbv_menu (self):
+        stbv_menu = self.gui.get_widget("stbv_combo").get_menu()
+
+        for c in stbv_menu.get_children():
+            stbv_menu.remove(c)
+        
+        default_item = gtk.MenuItem(_("None"))
+        default_item.connect("activate", self.update_stbv, None)
+        default_item.show()
+        stbv_menu.append(default_item)
+
+        for v in self.controller.get_stbv_list():
+            i = gtk.MenuItem(v.title or v.id)
+            i.connect("activate", self.update_stbv, v)
+            i.show()
+            stbv_menu.append(i)
+
+        stbv_menu.set_active(0)
+        stbv_menu.reposition()
+        return True
         
     def main (self, args=None):
         """Mainloop : Gtk mainloop setup.
@@ -272,8 +304,8 @@ class DVDControl (Connect):
         @type name: string
         """
         self.current_type = t
-        combo=self.gui.get_widget ("current_type_combo")
-        combo.entry.set_text (t.title)
+        type_combo=self.gui.get_widget ("current_type_combo")
+        type_combo.entry.set_text (t.title)
         
     def manage_package_load (self, context, parameters):
         """Event Handler executed after loading a package.
@@ -287,8 +319,8 @@ class DVDControl (Connect):
         # Update the available types list
         available_types = self.controller.package.annotationTypes
         # Update the combo box
-        combo=self.gui.get_widget ("current_type_combo")
-        combo.list.clear_items(0, -1)
+        type_combo=self.gui.get_widget ("current_type_combo")
+        type_combo.list.clear_items(0, -1)
         labels=[]
         for t in available_types:
             i = gtk.ListItem()
@@ -296,16 +328,18 @@ class DVDControl (Connect):
             l.set_alignment (0, 0)
             i.add (l)
             i.set_data ('type', t)
-            combo.set_item_string(i, t.title)
+            type_combo.set_item_string(i, t.title)
             labels.append(i)
         # This sort is suboptimal (many calls to get_data()) but it is
         # not critical , so we do not try to optimize it
         labels.sort(lambda a,b: cmp(a.get_data('type').title,
                                     b.get_data('type').title))
-        combo.list.append_items(labels)
-        combo.list.show_all()
+        type_combo.list.append_items(labels)
+        type_combo.list.show_all()
         self.set_current_type (available_types[0])
 
+        self.update_stbv_menu()
+        
         # Update the main window title
         self.gui.get_widget ("win").set_title(" - ".join((_("AdveneTool"),
                                                           self.controller.package.title or "No title")))
