@@ -99,34 +99,8 @@ class Menu:
     def display_transcription(self, widget, annotationtype):
         transcription = TranscriptionView(controller=self.controller,
                                           annotationtype=annotationtype)
-        
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_size_request (640, 480)
 
-        window.set_title (_("Transcription for %s") % (annotationtype.title
-                                                       or annotationtype.id))
-
-        vbox = gtk.VBox()
-        
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        vbox.add (sw)
-        sw.add_with_viewport (transcription.get_widget())
-        if self.controller.gui:
-            self.controller.gui.register_view (transcription)
-            window.connect ("destroy", self.controller.gui.close_view_cb,
-                            window, transcription)
-
-        hb=gtk.HButtonBox()
-        b=gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect ("clicked", lambda w: window.destroy ())
-        hb.add(b)
-
-        vbox.pack_start(hb, expand=False)
-        
-        window.add(vbox)
-        
-        window.show_all()
+        transcription.popup()
         return True
     
     def popup_get_offset(self):
