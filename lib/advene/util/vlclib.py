@@ -154,7 +154,8 @@ def get_title(controller, element, representation=None):
         return _("None")
     if isinstance(element, unicode) or isinstance(element, str):
         return element
-    if isinstance(element, Annotation) or isinstance(element, Relation):
+    if (isinstance(element, Annotation) or isinstance(element, Relation)
+        and controller is not None):
         if representation is not None and representation != "":
             c=controller.event_handler.build_context(event='Display', here=element)
             return c.evaluateValue(representation)
