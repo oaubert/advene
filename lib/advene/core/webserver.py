@@ -124,7 +124,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header ('Cache-Control', 'max-age=0')
 
     def start_html (self, title="", headers=None, head_section=None, body_attributes="",
-                    mode="navigation", duplicate_title=False, cache=False):
+                    mode="navigation", mimetype=None, duplicate_title=False, cache=False):
         """Starts writing a HTML response (header + common body start).
 
         @param title: Title of the HTML document (default : "")
@@ -145,7 +145,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         @return: nothing
         """
         self.send_response (200)
-        self.send_header ('Content-type', 'text/html; charset=utf-8')
+        if mode == 'navigation':
+            mimetype='text/html'
+        if mimetype is None or mimetype == 'text/html':
+            mimetype='text/html; charset=utf-8'
+        self.send_header ('Content-type', mimetype)
         if headers is not None:
             for h in headers:
                 self.send_header(h[0], h[1])
@@ -448,7 +452,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         Access Control
         ==============
 
-        Access control is available in the AdveneServer throught the
+        Access control is available in the AdveneServer through the
         path X{/admin/access}. By default, only the localhost (IP
         address 127.0.0.1) is allowed to access the server. The user
         can add or delete hosts from the access list, but the
@@ -1138,41 +1142,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         f.close()
         return
     
-    def get_valid_members (self, el):
-        """Return a list of strings, valid members of the object in TALES.
-
-        This method is used to generate the contextual completion menu
-        in the web interface.
-        
-        @param el: the object to examine (often an Advene object)
-        @type el: any
-
-        @return: the list of elements which are members of the object,
-                 in the TALES meaning.
-        @rtype: list
-        """
-        l = []
-        try:
-            l.extend(el.ids())
-        except:
-            try:
-                l.extend(el.keys())
-            except:
-                pass
-        
-        try:
-            c = type(el)
-            l.extend([e[0]
-                      for e in inspect.getmembers(c)
-                      if isinstance(e[1], property) and e[1].fget is not None])
-        except:
-            pass
-
-        # Global methods
-        l.extend (advene.model.tal.context.AdveneContext.defaultMethods ())
-        
-        return l
-
     def image_type (self, o):
         """Return the image type (mime) of the object.
 
@@ -1293,6 +1262,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         if displaymode != "raw":
             displaymode = "navigation"
+            
         if 'epoz' in tales:
             self.start_html(title=_("TALES evaluation - %s") % tales,
                             head_section=self.server.epoz_head,
@@ -1338,7 +1308,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # Generating navigation footer
         if displaymode != "raw":
             levelup = self.path[:self.path.rindex("/")]
-            auto_components = self.get_valid_members (objet)
+            auto_components = vlclib.get_valid_members (objet)
             auto_components.sort()
             try:
                 auto_views = objet.validViews

@@ -10,6 +10,7 @@ from advene.model.package import Package
 from advene.model.exception import AdveneException
 
 import advene.model.tal.context
+import advene.util.vlclib as vlclib
 import inspect
 
 from gettext import gettext as _
@@ -29,51 +30,17 @@ class BrowserColumn:
     def get_widget(self):
         return self.widget
 
-    def get_valid_members (self, el):
-        """Return a list of strings, valid members of the object in TALES.
-
-        This method is used to generate the contextual completion menu
-        in the web interface.
-        
-        @param el: the object to examine (often an Advene object)
-        @type el: any
-
-        @return: the list of elements which are members of the object,
-                 in the TALES meaning.
-        @rtype: list
-        """
-        # FIXME: copy/pasted from adveneserver. We should share it (or better,
-        # it should be provided by advenelib)
-        l = []
-        try:
-            l.extend(el.ids())
-        except AttributeError:
-            try:
-                l.extend(el.keys())
-            except AttributeError:
-                pass
-
-        c = type(el)
-        l.extend([e[0]
-                  for e in inspect.getmembers(c)
-                  if isinstance(e[1], property) and e[1].fget is not None])
-    
-        # Global methods
-        l.extend (advene.model.tal.context.AdveneContext.defaultMethods ())
-        
-        return l
-
     def get_liststore(self):
         ls=gtk.ListStore(str)
         if self.model is None:
             return ls
-        for att in self.get_valid_members(self.model):
+        for att in vlclib.get_valid_members(self.model):
             ls.append([att])
         return ls
 
     def update(self, element=None, name=""):
         self.liststore.clear()
-        for att in self.get_valid_members(element):
+        for att in vlclib.get_valid_members(element):
             self.liststore.append([att])
         self.model=element
         self.name=name

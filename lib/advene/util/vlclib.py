@@ -6,10 +6,12 @@ import sys
 import time
 import Image
 import StringIO
+import inspect
 
 from gettext import gettext as _
 
 from advene.model.annotation import Annotation, Relation
+import advene.model.tal.context
 
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
@@ -145,3 +147,36 @@ def get_title(controller, element):
             return c.evaluateValue(expr)
     # FIXME: handle the other elements
     return str(element)
+
+def get_valid_members (el):
+    """Return a list of strings, valid members for the object el in TALES.
+
+    This method is used to generate the contextual completion menu
+    in the web interface and the browser view.
+
+    @param el: the object to examine (often an Advene object)
+    @type el: any
+
+    @return: the list of elements which are members of the object,
+             in the TALES meaning.
+    @rtype: list
+    """
+    l = []
+    try:
+        l.extend(el.ids())
+    except AttributeError:
+        try:
+            l.extend(el.keys())
+        except AttributeError:
+            pass
+
+    c = type(el)
+    l.extend([e[0]
+              for e in inspect.getmembers(c)
+              if isinstance(e[1], property) and e[1].fget is not None])
+
+    # Global methods
+    l.extend (advene.model.tal.context.AdveneContext.defaultMethods ())
+
+    return l
+
