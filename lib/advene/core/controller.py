@@ -545,15 +545,21 @@ class AdveneController:
         @param position: an optional position
         @type position: Position
         """
+        position_before=self.player.current_position_value
         try:
             self.player.update_status (status, position)
         except Exception, e:
             # FIXME: we should catch more specific exceptions and
             # devise a better feedback than a simple print
             print _("Raised exception in update_status: %s") % str(e)
+            import code
+            e, v, tb = sys.exc_info()
+            code.traceback.print_exception (e, v, tb)
         else:
             if self.status2eventname.has_key (status):
-                self.event_handler.notify (self.status2eventname[status], position=position)
+                self.event_handler.notify (self.status2eventname[status],
+                                           position=position,
+                                           position_before=position_before)
         return
     
     def position_update (self):
