@@ -172,8 +172,7 @@ class Window:
 
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_size_request (640, 400)
-
+        
         def key_pressed_cb (win, event):
 
             if event.keyval == gtk.keysyms.F1:
@@ -220,6 +219,9 @@ class Window:
         window.connect ("key-press-event", key_pressed_cb)
         window.connect ("destroy", lambda e: window.destroy())
         window.set_title (_("Python evaluation"))
+
+        if self.controller.gui:
+            self.controller.gui.init_window_size(window, 'evaluator')
 
         window.add (self.get_widget())
         window.show_all()
@@ -284,6 +286,7 @@ if __name__ == "__main__":
 
     controller=DummyController()
     controller.notify = notify
+    controller.gui=None
     controller.package=None
 
     ev=Window(controller=controller, globals_=globals())
