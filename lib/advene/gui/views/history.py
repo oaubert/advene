@@ -39,11 +39,10 @@ class HistoryNavigation:
         return True
         
     def append_repr(self, t):
-        snap=self.controller.imagecache[t]
-
         vbox=gtk.VBox()
-        i=gtk.Image()
-        i.set_from_pixbuf(advene.gui.util.png_to_pixbuf(snap))
+        i=advene.gui.util.image_from_position(self.controller,
+                                              t,
+                                              width=100)
         e=gtk.EventBox()
         e.connect("button-release-event", self.activate, t)
         e.add(i)
