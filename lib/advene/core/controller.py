@@ -303,7 +303,7 @@ class AdveneController:
         """Restart the media player."""
         self.player.restart_player ()
         mediafile = self.get_default_media()
-        if mediafile is not None and mediafile != "":
+        if mediafile != "":
             if isinstance(mediafile, unicode):
                 mediafile=mediafile.encode('utf8')
             self.player.playlist_add_item (mediafile)
@@ -439,7 +439,7 @@ class AdveneController:
                                       "duration",
                                       unicode(self.cached_duration))
         # Set if necessary the mediafile metadata
-        if self.get_default_media() is None:
+        if self.get_default_media() == "":
             pl = self.player.playlist_get_list()
             if pl:
                 self.package.set_default_media(pl[0])
