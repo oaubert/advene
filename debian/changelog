@@ -6,7 +6,7 @@ advene (0.5) unstable; urgency=low
     or annotation-/relation-type) and delete elements from the tree view
     and timeline.
 
- --
+ -- Olivier Aubert <oaubert@salt>  Fri, 23 Apr 2004 15:28:41 +0200
 
 advene (0.4-1) unstable; urgency=low
 
