@@ -25,12 +25,14 @@ from advene.model.bundle import AbstractBundle
 from advene.model.view import View
 from advene.model.query import Query
 
+from advene.gui.edit.timeadjustment import TimeAdjustment
+
 import advene.gui.edit.rules
 import advene.rules.actions
 import xml.dom
 import StringIO
 
-# FIXME: handle 'time' type, with hh:mm:ss.mmm display
+# FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
 
 _edit_popup_list = []
 
@@ -229,16 +231,8 @@ class EditAnnotationPopup (EditElementPopup):
                                        )
         vbox.pack_start (f.get_view (), expand=False)
 
-        # FIXME: maybe we should use here a specific plugin (from timeadjustment)
-        # Fragment data
-        f = self.make_registered_form (element=self.element.fragment,
-                                       fields=('begin', 'end'),
-                                       editable=editable,
-                                       editables=('begin', 'end'),
-                                       types={'begin':'int', 'end':'int'},
-                                       labels={'begin': _('Begin'),
-                                               'end': _('End')}
-                                       )
+        f = EditFragmentForm(element=self.element.fragment, controller=self.controller)        
+        self.register_form (f)
         vbox.pack_start (f.get_view (), expand=False)
 
         # Annotation content
@@ -458,6 +452,8 @@ class EditAnnotationTypePopup (EditElementPopup):
                                                'date':   _('Date'),
                                                'mimetype': _('MIME Type')}
                                        )
+
+        # FIXME: add access to meta "representation" element
         return f.get_view ()
 
 class EditRelationTypePopup (EditElementPopup):
@@ -573,6 +569,46 @@ class EditRuleSetForm (EditForm):
 
         return scroll_win
 
+class EditFragmentForm(EditForm):
+    def __init__(self, element=None, controller=None):
+        self.begin=None
+        self.end=None
+        self.element = element
+        self.controller = controller
+
+    def update_element(self):
+        if self.begin.value >= self.end.value:
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_WARNING, gtk.BUTTONS_CLOSE,
+                _("Begin time is greater than end time"))
+            dialog.connect("response", lambda w, e: dialog.destroy())
+            dialog.show()
+            return False
+
+        self.element.begin=self.begin.value
+        self.element.end=self.end.value
+        return True
+
+    def get_view(self):
+        hbox=gtk.HBox()
+
+        self.begin=TimeAdjustment(value=self.element.begin,
+                                  controller=self.controller)
+        f=gtk.Frame()
+        f.set_label(_("Begin"))
+        f.add(self.begin.get_widget())
+        hbox.add(f)
+        
+        self.end=TimeAdjustment(value=self.element.end, controller=self.controller)
+        f=gtk.Frame()
+        f.set_label(_("End"))
+        f.add(self.end.get_widget())
+        hbox.add(f)
+
+        return hbox
+
+    
 class EditQueryForm (EditForm):
     """Create a Query edit form for the given element (a view, presumably)."""
     def __init__ (self, element, field, controller=None):

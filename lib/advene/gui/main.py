@@ -50,11 +50,7 @@ import advene.gui.edit.rules
 import advene.gui.edit.dvdselect
 import advene.gui.edit.elements
 import advene.gui.edit.create
-
 import advene.gui.evaluator
-
-from advene.gui.edit.annotation import AnnotationEdit
-from advene.gui.edit.timeadjustment import TimeAdjustment
 
 class Connect:
     """Glade XML interconnection with python class.
