@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """Sequence view/editor.
 
 This interface is used to easily edit a list of annotations in the
