@@ -103,6 +103,17 @@ class Menu:
                 return True
             p.relationTypes.remove(el)
             self.controller.notify('RelationTypeDelete', relationtype=el)
+        elif isinstance(el, Schema):
+            if len(el.annotationTypes) > 0 or len(el.relationTypes) > 0:
+                dialog = gtk.MessageDialog(
+                    None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
+                    _("Cannot delete the schema %s:\nthere are still types in it.") % (el.title or el.id))
+                dialog.run()
+                dialog.destroy()
+                return True
+            p.schemas.remove(el)
+            self.controller.notify('SchemaDelete', schema=el)
         elif isinstance(el, View):
             p.views.remove(el)
             self.controller.notify('ViewDelete', view=el)
@@ -138,7 +149,7 @@ class Menu:
         add_item(_("Edit"), self.edit_element, element)
 
         # Common to deletable elements
-        if type(element) in (Annotation, Relation, View, AnnotationType, RelationType):
+        if type(element) in (Annotation, Relation, View, Schema, AnnotationType, RelationType):
             add_item(_("Delete"), self.delete_element, element)
 
         specific_builder={
