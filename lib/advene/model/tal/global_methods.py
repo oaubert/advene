@@ -372,7 +372,8 @@ def parsed (target, context):
         # If nothing is specified, assume text/plain and return the content data
         return content.data
 
-    if content.mimetype == 'application/x-advene-structured':
+    if (content.mimetype == 'application/x-advene-structured'
+        or content.mimetype == 'text/x-advene-structured'):
         import urllib
         
         d={}
