@@ -11,6 +11,8 @@ advene (0.13) unstable; urgency=low
   * Use the new FileChooser from gtk 2.4
   
   * Added a "display preview" button in the file selector
+
+  * Added a description parameter to the PopupGoto action
   
  --
 
