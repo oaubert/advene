@@ -267,6 +267,13 @@ class TimeLine:
                 self.create_annotation_widget(element)
         return True
         
+    def delete_annotation (self, element=None):
+        """Delete an annotation's representation."""
+        bs = self.get_widget_for_annotation (element)
+        for b in bs:
+            b.destroy()
+        return True
+        
     def annotation_cb (self, widget, ann):
         # This method can be overriden by the Timeline parent in order
         # to give more precise control
