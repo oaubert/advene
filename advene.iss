@@ -1,46 +1,33 @@
 [Files]
 Source: dist\library.zip; DestDir: {app}
+Source: dist\*.dll; DestDir: {app}
+Source: dist\*.pyd; DestDir: {app}
 Source: dist\advene.exe; DestDir: {app}
-Source: dist\_ctypes.pyd; DestDir: {app}
-Source: dist\_gtk.pyd; DestDir: {app}
-Source: dist\_imaging.pyd; DestDir: {app}
-Source: dist\_imagingtk.pyd; DestDir: {app}
-Source: dist\_socket.pyd; DestDir: {app}
-Source: dist\_sre.pyd; DestDir: {app}
-Source: dist\_ssl.pyd; DestDir: {app}
-Source: dist\_tkinter.pyd; DestDir: {app}
-Source: dist\_winreg.pyd; DestDir: {app}
-Source: dist\atk.pyd; DestDir: {app}
-Source: dist\boolean.pyd; DestDir: {app}
-Source: dist\cygwin1.dll; DestDir: {app}
-Source: dist\datetime.pyd; DestDir: {app}
-Source: dist\glade.pyd; DestDir: {app}
-Source: dist\gobject.pyd; DestDir: {app}
-Source: dist\libglade-2.0-0.dll; DestDir: {app}
-Source: dist\libxml2.dll; DestDir: {app}
-Source: dist\mmap.pyd; DestDir: {app}
-Source: dist\pango.pyd; DestDir: {app}
-Source: dist\pyexpat.pyd; DestDir: {app}
-Source: dist\select.pyd; DestDir: {app}
-Source: dist\sgmlop.pyd; DestDir: {app}
-Source: dist\tcl84.dll; DestDir: {app}
-Source: dist\tk84.dll; DestDir: {app}
-Source: dist\vlc.pyd; DestDir: {app}
 Source: dist\w9xpopen.exe; DestDir: {app}
-Source: dist\zlib1.dll; DestDir: {app}
-Source: dist\python23.dll; DestDir: {app}
-Source: share\*; DestDir: {app}\share; Flags: recursesubdirs
-Source: locale\*; DestDir: {app}\locale; Flags: recursesubdirs
+Source: dist\share\*; DestDir: {app}\share; Flags: recursesubdirs
+Source: dist\doc\*; DestDir: {app}\doc; Flags: recursesubdirs
+Source: dist\locale\*; DestDir: {app}\locale; Flags: recursesubdirs
+Source: share\pixmaps\dvd_small.png; DestDir: {app}; DestName: advene.png
+Source: \devel\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs
+Source: \devel\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs
+Source: \devel\gtk\lib\locale\fr\*; DestDir: {app}\lib\locale\fr; Flags: recursesubdirs
+Source: \devel\gtk\lib\pango\*; DestDir: {app}\lib\pango; Flags: recursesubdirs
+Source: \devel\gtk\share\themes\*; DestDir: {app}\share\themes; Flags: recursesubdirs
+Source: \devel\gtk\bin\libpng12.dll; DestDir: {app}
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.14
+AppVerName=Advene 0.15
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.13
+VersionInfoVersion=0.15
 VersionInfoCompany=LIRIS
 PrivilegesRequired=poweruser
 LicenseFile=debian\copyright
-DisableFinishedPage=true
+DisableFinishedPage=false
+DefaultGroupName=Advene
+VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 [Registry]
 Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
+[Icons]
+Name: {group}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.png
