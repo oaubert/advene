@@ -75,7 +75,7 @@ class GenericImporter(object):
         self.package=package
         self.author=author
         self.timestamp=time.strftime("%F")
-        self.time_regexp=sre.compile('(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d+)[.,](?P<ms>\d+)?')
+        self.time_regexp=sre.compile('(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d+)[.,]?(?P<ms>\d+)?')
         self.defaulttype=defaulttype
         # Default offset in ms
         self.offset=0
@@ -167,6 +167,8 @@ class GenericImporter(object):
             if m:
                 t=m.groupdict()
                 for k in t:
+                    if t[k] is None:
+                        t[k]=0
                     t[k] = long(t[k])
                 if 'ms' not in t:
                     t['ms'] = 0
@@ -291,6 +293,7 @@ class LsDVDImporter(GenericImporter):
         super(LsDVDImporter, self).__init__(**kw)
         self.name = _("lsdvd importer")
         self.command="/usr/bin/lsdvd -c"
+        # FIXME: handle Title- lines
         #Chapter: 01, Length: 00:01:16, Start Cell: 01
         self.regexp="^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<duration>[0-9:]+)"
         self.encoding='latin1'
