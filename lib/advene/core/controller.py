@@ -7,6 +7,7 @@ notifications and actions triggering.
 """
 
 import sys, time
+import os
 
 import advene.core.config as config
 
@@ -111,18 +112,18 @@ class AdveneController:
             'stop':   'PlayerStop',
             'set':    'PlayerSet',
             }
-
-    def init(self, args=None):
-        """Mainloop : CORBA initalization
-        """
-        if args is None:
-            args=[]
         self.event_handler.register_action(advene.rules.elements.RegisteredAction(
             name="Message",
             method=self.message_log,
             description=_("Display a message"),
             parameters={'message': _("String to display.")}
             ))
+
+    def init(self, args=None):
+        """Mainloop : CORBA initalization
+        """
+        if args is None:
+            args=[]
 
         # Read the default rules
         self.event_handler.read_ruleset_from_file(config.data.advenefile('default_rules.xml'),
@@ -211,7 +212,7 @@ class AdveneController:
             else:
                 if s == "dvd":
                     file_to_play = "dvd:///dev/dvd"
-                elif s.endswith('.xml'):
+                elif os.path.splitext(s)[1] in ('.xml', '.advene', '.adv'):
                     # It should be an annotation file. Load it.
                     self.load_package (uri=s)
                 elif s.endswith('.mpg') or s.endswith('.avi'):
@@ -268,7 +269,7 @@ class AdveneController:
             if pos < 0:
                 pos = 0
             #print "Set position %d" % pos
-            self.player.update_status ("set", self.create_position (pos))
+            self.move_position(pos, relative=False)
         return True
 
     def load_package (self, uri=None, alias="advene"):
