@@ -601,7 +601,7 @@ class EditFragmentForm(EditForm):
         if self.begin.value >= self.end.value:
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_WARNING, gtk.BUTTONS_CLOSE,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
                 _("Begin time is greater than end time"))
             dialog.connect("response", lambda w, e: dialog.destroy())
             dialog.show()
