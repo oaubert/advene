@@ -8,11 +8,7 @@ import Image
 
 from gettext import gettext as _
 
-import gtk
-
 import StringIO
-
-import ORBit, CORBA
 
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
@@ -31,25 +27,6 @@ def fourcc2rawcode (code):
                            code >> 16 & 0xff,
                            code >> 24)
     return conv[fourcc]
-
-def image_to_pixbuf (image):
-    file = StringIO.StringIO ()
-    image.save (file, 'ppm')
-    contents = file.getvalue()
-    file.close ()
-    loader = gtk.gdk.PixbufLoader ('pnm')
-    loader.write (contents, len (contents))
-    pixbuf = loader.get_pixbuf ()
-    loader.close ()
-    return pixbuf
-
-
-def png_to_pixbuf (png_data):
-    loader = gtk.gdk.PixbufLoader ('png')
-    loader.write (png_data, len (png_data))
-    pixbuf = loader.get_pixbuf ()
-    loader.close ()
-    return pixbuf
 
 def snapshot2png (image, output=None):
     """Convert a VLC RGBPicture to PNG.
