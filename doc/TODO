@@ -1,8 +1,20 @@
+* Create a GUI to be able to select and preview the right
+chapter/title for a DVD (in order to correctly initialize the
+package.media property)
+
+* gui.main should catch the information about a new view being defined and update the
+  interface accordingly (for instance, a new annotation type or a new dynamic view created)
+
+* More quickly : STBV Optionmenu should only have a reference to the STBV id, so that
+  the new version is taken into account when edited.
+
 * Query language: either python-based (very generic) or reusing the
   rules framework (conditions)
 
 * Clean-up the player interface (which is now spread across
-  advene.util.vlclib.VLCPlayer and advene.core.mediacontrol.MediaControl)
+  advene.util.vlclib.VLCPlayer and advene.core.mediacontrol.MediaControl) -> half DONE
+  (everything is in mediacontrol now, but we should unify this and provide a clean API
+   to ease portability across different players)
 
 * Add a notebook view in the place of the defunct HTML widget
 
