@@ -55,6 +55,10 @@ class Player:
         self.position_update()
         pass
 
+    def dvd_uri(self, title=None, chapter=None):
+        return "dvd@%s:%s" % (str(title),
+                              str(chapter))
+
     def log(self, *p):
         print "Dummy player: %s" % p
         
