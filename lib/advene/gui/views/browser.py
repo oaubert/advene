@@ -243,7 +243,61 @@ class Browser:
 
         window.show_all()
         return window
+
+    def popup_value(self, callback=None):
+        """Modal version of popup.
+
+        It returns the selected path.
+        """
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+
+        def cancel(e):
+            window.destroy()
+            callback(None)
+            return True
+
+        def validate_path(e):
+            window.destroy()
+            callback(self.pathlabel.get_text())
+            return True
         
+        def validate_value(e):
+            window.destroy()
+            callback("string:%s" % self.valuelabel.get_text())
+            return True
+        
+        window.connect ("destroy", cancel)
+        
+        window.set_title (vlclib.get_title(self.controller, self.element))
+        
+        vbox = gtk.VBox()
+
+        window.add (vbox)
+        vbox.add (self.widget)
+
+        hbox = gtk.HButtonBox()
+        vbox.pack_start (hbox, expand=False)
+
+        b = gtk.Button (_("Insert path"))
+        b.connect ("clicked", validate_path)
+        hbox.add (b)
+
+        b = gtk.Button (_("Insert value"))
+        b.connect ("clicked", validate_value)
+        hbox.add (b)
+
+        b = gtk.Button (stock=gtk.STOCK_CANCEL)
+        b.connect ("clicked", cancel)
+        hbox.add (b)
+
+        vbox.set_homogeneous (gtk.FALSE)
+
+        if self.controller and self.controller.gui:
+            self.controller.gui.init_window_size(window, 'browserview')
+
+        window.show_all()
+        return window
+
     def scroll_event(self, widget=None, event=None):
         if event.state & gtk.gdk.CONTROL_MASK:
             a=widget.get_hadjustment()
