@@ -8,6 +8,7 @@ import Image
 import StringIO
 import inspect
 import md5
+import sre
 
 from gettext import gettext as _
 
@@ -165,7 +166,8 @@ def get_title(controller, element, representation=None):
             c=controller.event_handler.build_context(event='Display', here=element)
             return c.evaluateValue(representation)
         expr=element.type.getMetaData(config.data.namespace, "representation")
-        if expr is None or expr == '':
+        print "representation: %s (%d)" % (expr, len(expr))
+        if expr is None or expr == '' or sre.match('^\s+', expr):
             return element.content.data
         elif controller is not None:
             c=controller.event_handler.build_context(event='Display', here=element)
