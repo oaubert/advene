@@ -25,6 +25,7 @@ from advene.model.bundle import AbstractBundle
 from advene.model.view import View
 
 import advene.gui.edit.rules
+import advene.rules.actions
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display
 
@@ -304,7 +305,12 @@ class EditViewPopup (EditElementPopup):
                          expand=gtk.FALSE)
 
         # View content
-        f = EditTextForm (self.element.content, 'data')
+        # FIXME: we should use a generic mimetype plugin detection
+        if self.element.content.mimetype == 'application/x-advene-ruleset':
+            f = EditRuleSetForm (self.element.content, 'model')
+        else:
+            f = EditTextForm (self.element.content, 'data')
+
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
@@ -443,6 +449,51 @@ class EditTextForm (EditForm):
         scroll_win.add(textview)
 
         return scroll_win
+
+class EditRuleSetForm (EditForm):
+    """Create a RuleSet edit form for the given element (a view, presumably)."""
+    def __init__ (self, element, field):
+        # Element is a view.content, field should be "data" or "model" ?
+        self.element = element
+        self.field = field
+        self.editable = False
+        self.view = None
+
+    def set_editable (self, boo):
+        self.editable = boo
+
+    def update_element (self):
+        """Update the element fields according to the values in the view."""
+        pass
+        buf = self.view.get_buffer()
+        start_iter, end_iter = buf.get_bounds ()
+        text = buf.get_text (start_iter, end_iter)
+        setattr (self.element, self.field, text)
+
+    def get_view (self):
+        """Generate a view widget to edit the ruleset."""
+
+        # FIXME: we generate a dummy catalog, but we should get the
+        # controller.event_handler one instead. Maybe we should store
+        # it in the config module.
+        catalog=advene.rules.elements.ECACatalog()
+        for a in advene.rules.actions.DefaultActionsRepository(controller=None).get_default_actions():
+            catalog.register_action(a)
+
+        rs=advene.rules.elements.RuleSet()
+        rs.from_dom(catalog=catalog,
+                    domelement=getattr(self.element, self.field))
+
+        self.edit=advene.gui.edit.rules.EditRuleSet(rs, catalog=catalog)
+
+        self.view = self.edit.get_widget()
+
+        scroll_win = gtk.ScrolledWindow ()
+        scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll_win.add_with_viewport(self.view)
+
+        return scroll_win
+
 
 class EditAttributesForm (EditForm):
     """Creates an edit form for the given element."""
