@@ -1,3 +1,15 @@
+advene (0.6-1) unstable; urgency=low
+
+  * Unicode-related bug fixes 
+  * Added a "display" meta-attribute to AnnotationTypes and
+    RelationTypes. When present, it defines a TALES expression returning
+    the representation of the annotation in the timeline view. It is
+    useful for structured content for instance.
+  * The timeline legend is now vertically synchronized with the elements
+  * We can now parse XML content data (using the 'parsed' global method)
+
+ --
+
 advene (0.6) unstable; urgency=low
 
   * A treeview is available in the main application window
