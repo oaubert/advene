@@ -91,9 +91,12 @@ class TimeLine:
         self.rapport = 1
         self.old_ratio_value = self.ratio_adjustment.value
 
-        self.active_color = gtk.gdk.color_parse ('red')
-        self.inactive_color = gtk.Button().get_style().bg[0]
-        
+        self.colors = {
+            'active': gtk.gdk.color_parse ('red'),
+            'inactive': gtk.Button().get_style().bg[0],
+            'incoming': gtk.gdk.color_parse ('green'),
+            'outgoing': gtk.gdk.color_parse ('yellow'),
+            }
         # Current position in units
         self.current_position = minimum
 
@@ -109,9 +112,8 @@ class TimeLine:
 
         # Default drag mode : create a relation
         self.drag_mode = "relation"
-        # Default mode for over-buttons events
-        # May be: "incoming", "outgoing"
-        self.over_mode = None
+        # Default mode for over-buttons events (boolean)
+        self.over_mode = True
         
         # Adjustment corresponding to the Virtual display
         # The page_size is the really displayed area
@@ -214,16 +216,18 @@ class TimeLine:
         controller.event_handler.remove_rule(self.beginrule, type_="internal")
         controller.event_handler.remove_rule(self.endrule, type_="internal")
     
-    def activate_annotation (self, annotation, buttons=None):
+    def activate_annotation (self, annotation, buttons=None, color=None):
         """Activate the representation of the given annotation."""
         if buttons is None:
             buttons = self.get_widget_for_annotation (annotation)
+        if color is None:
+            color=self.colors['active']
         for b in buttons:
             b.active = True
             for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
                           gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
                           gtk.STATE_PRELIGHT):
-                b.modify_bg (style, self.active_color)
+                b.modify_bg (style, color)
         return True
 
     def desactivate_annotation (self, annotation, buttons=None):
@@ -235,7 +239,7 @@ class TimeLine:
             for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
                           gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
                           gtk.STATE_PRELIGHT):
-                b.modify_bg (style, self.inactive_color)
+                b.modify_bg (style, self.colors['inactive'])
         return True
     
     def toggle_annotation (self, annotation):
@@ -464,23 +468,25 @@ class TimeLine:
         return False
 
     def rel_activate(self, button):
-        if self.over_mode is not None:
-            if self.over_mode == 'incoming':
-                i=0
-            else:
-                i=1
-            for r in getattr(button.annotation, "%sRelations" % self.over_mode):
-                    self.activate_annotation(r.members[i])
+        if self.over_mode:
+            a=button.annotation
+            for r in button.annotation.relations:
+                if r.members[0] != a:
+                    self.activate_annotation(r.members[0],
+                                             color=self.colors['outgoing'])
+                if r.members[1] != a:
+                    self.activate_annotation(r.members[1],
+                                             color=self.colors['incoming'])
         return True
 
     def rel_deactivate(self, button):
-        if self.over_mode is not None:
-            if self.over_mode == 'incoming':
-                i=0
-            else:
-                i=1
-            for r in getattr(button.annotation, "%sRelations" % self.over_mode):
-                self.desactivate_annotation(r.members[i])
+        if self.over_mode:
+            a=button.annotation
+            for r in button.annotation.relations:
+                if r.members[0] != a:
+                    self.desactivate_annotation(r.members[0])
+                if r.members[1] != a:
+                    self.desactivate_annotation(r.members[1])
         return True
     
     def create_annotation_widget(self, annotation):
@@ -725,7 +731,7 @@ class TimeLine:
             a.set_size_request (2, max(self.layer_position.values() or (0,))
                                 + self.button_height)
             self.selection_marker = a
-            a.modify_bg(gtk.STATE_NORMAL, self.active_color)
+            a.modify_bg(gtk.STATE_NORMAL, self.colors['active'])
         else:
             a = self.selection_marker
         a.mark = position
@@ -963,11 +969,9 @@ class TimeLine:
         radiogroup_ref=None
         tb_list = (
             (_("No Display"), _("Do not display relations"),
-             gtk.STOCK_REMOVE, set_over_mode, None),
-            (_("Outgoing"), _("Display outgoing relations"),
-             gtk.STOCK_REDO, set_over_mode, "outgoing"),
-            (_("Incoming"), _("Display incoming relations"),
-             gtk.STOCK_UNDO, set_over_mode, "incoming"),
+             gtk.STOCK_REMOVE, set_over_mode, False),
+            (_("Relations"), _("Display relations"),
+             gtk.STOCK_REDO, set_over_mode, True),
             )
 
         for text, tooltip, icon, callback, arg in tb_list:
