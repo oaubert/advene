@@ -872,20 +872,31 @@ class ECACatalog:
         'ApplicationEnd':         _("End of the application")
         }
 
+    # Events that set the controller.modified state
     modifying_events=sets.Set((
         'PackageEditEnd',
+        'AnnotationCreate',
         'AnnotationEditEnd',
         'AnnotationDelete',
+        'RelationCreate',
         'RelationEditEnd',
         'RelationDelete',
+        'ViewCreate',
         'ViewEditEnd',
         'ViewDelete',
+        'SchemaCreate',
         'SchemaEditEnd',
         'SchemaDelete',
+        'AnnotationTypeCreate',
         'AnnotationTypeEditEnd',
-        'RelationTypeEditEnd',
         'AnnotationTypeDelete',
-        'RelationTypeDelete'))
+        'RelationTypeCreate',
+        'RelationTypeEditEnd',
+        'RelationTypeDelete',
+        'QueryCreate',
+        'QueryEditEnd',
+        'QueryDelete',
+        ))
 
     # Basic events are exposed to the user when defining new STBV
     basic_events=('AnnotationBegin', 'AnnotationEnd', 'PlayerStart', 'PlayerPause',
