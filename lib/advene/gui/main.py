@@ -239,11 +239,10 @@ class AdveneGUI (Connect):
         if view.content.mimetype == 'application/x-advene-ruleset':
             # Update the combo box
             self.update_stbv_list()
-            # Not ideal (we could edit the non-activated view) but it is
-            # better for the general case (use of the Edit button)
-            if event in ('ViewCreate', 'ViewEditEnd'):
+            if event == 'ViewEditEnd' and self.controller.current_stbv == view:
+                # We were editing the current STBV: take the changes
+                # into account
                 self.controller.activate_stbv(view)
-
         return True
 
     def query_lifecycle(self, context, parameters):
