@@ -11,6 +11,8 @@ import gobject
 from gettext import gettext as _
 
 import advene.gui.popup
+import advene.gui.util
+import advene.util.vlclib as vlclib
 
 class TreeViewImporter:
     COLUMN_ELEMENT=0
@@ -58,7 +60,60 @@ class TreeViewImporter:
             return False
         l=[ e.uri for e in source if e.isImported() ]
         return (el.uri in l)
-    
+
+    def add_package(self, store, package=None, as=None):
+        """Add a package to the liststore.
+        """
+        p=package
+        packagerow=store.append(parent=None,
+                                row=[p,
+                                     p.title,
+                                     as,
+                                     True,
+                                     p.uri])
+        viewsrow=store.append(parent=packagerow,
+                              row=[p.views,
+                                   _('Views'),
+                                   _('Views'),
+                                   False,
+                                   'list'])
+        for v in p.views:
+            store.append(parent=viewsrow,
+                         row=[v,
+                              v.title or v.id,
+                              v.id,
+                              self.is_imported(v),
+                              v.uri]) 
+
+        schemasrow=store.append(parent=packagerow,
+                                row=[p.schemas,
+                                     _('Schemas'),
+                                     _('Schemas'),
+                                     False,
+                                     'list'])
+        for s in p.schemas:
+            srow=store.append(parent=schemasrow,
+                              row=[s,
+                                   s.title or s.id,
+                                   'FIXME:id',
+                                   self.is_imported(s),
+                                   s.uri])
+            for at in s.annotationTypes:
+                store.append(parent=srow,
+                             row=[at,
+                                  at.title or at.id,
+                                  "FIXME:at.id",
+                                  self.is_imported(at),
+                                  at.uri])
+            for rt in s.relationTypes:
+                store.append(parent=srow,
+                             row=[rt,
+                                  rt.title or rt.id,
+                                  "FIXME:rt.id",
+                                  self.is_imported(rt),
+                                  rt.uri])
+        return
+        
     def build_liststore(self):
         # Store reference to the element, string representation (title and id)
         # and boolean indicating wether it is imported or not
@@ -71,69 +126,62 @@ class TreeViewImporter:
             )
         
         for i in self.controller.package.imports:
-            p=i.package
-            packagerow=store.append(parent=None,
-                                    row=[p,
-                                         p.title,
-                                         i.getAs(),
-                                         True,
-                                         p.uri])
-            viewsrow=store.append(parent=packagerow,
-                                  row=[p.views,
-                                       _('Views'),
-                                       _('Views'),
-                                       False,
-                                       ''])
-            for v in p.views:
-                store.append(parent=viewsrow,
-                             row=[v,
-                                  v.title or v.id,
-                                  v.id,
-                                  self.is_imported(v),
-                                  v.uri]) 
-
-            schemasrow=store.append(parent=packagerow,
-                                    row=[p.schemas,
-                                         _('Schemas'),
-                                         _('Schemas'),
-                                         False,
-                                         ''])
-            for s in p.schemas:
-                srow=store.append(parent=schemasrow,
-                                  row=[s,
-                                       s.title or s.id,
-                                       'FIXME:id',
-                                       self.is_imported(s),
-                                       s.uri])
-                for at in s.annotationTypes:
-                    store.append(parent=srow,
-                                 row=[at,
-                                      at.title or at.id,
-                                      "FIXME:at.id",
-                                      self.is_imported(at),
-                                      at.uri])
-                for rt in s.relationTypes:
-                    store.append(parent=srow,
-                                 row=[rt,
-                                      rt.title or rt.id,
-                                      "FIXME:rt.id",
-                                      self.is_imported(rt),
-                                      rt.uri])
+            self.add_package(store, package=i.package, as=i.getAs())
         return store
 
     def toggled_cb(self, renderer, path, model, column):
+        # Update the display
         model[path][column] = not model[path][column]
-        # FIXME: should update the self.controller.package accordingly
-        # But we need the corresponding methods in the model first
         
-        print "Toggled %s" % model[path][self.COLUMN_LABEL]
+        element=model[path][self.COLUMN_ELEMENT]
+        if model[path][column]:
+           # If True, it means that it was previously False and that
+           # we want to import the element
+           print "Importing %s" % model[path][self.COLUMN_LABEL]
+           # Depends on the type
+           if hasattr(element, 'viewableClass'):
+               if element.viewableClass == 'list':
+                   # The user selected a whole category.
+                   for e in element:
+                       if not self.is_imported(e):
+                           vlclib.import_element(self.controller.package,
+                                                 e,
+                                                 self.controller)
+                   for c in model[path].iterchildren():
+                       c[self.COLUMN_IMPORTED] = True
+               else:
+                   vlclib.import_element(self.controller.package,
+                                         element,
+                                         self.controller)
+           else:
+               # Unimport the element
+               # FIXME: does not seem to work yet
+               if self.is_imported(element):
+                   # It was previously imported. Unimport it
+                   print "Removing %s" % model[path][self.COLUMN_LABEL]
+                   vlclib.unimport_element(self.controller.package,
+                                           element,
+                                           self.controller)
+               elif element.viewableClass == 'list':
+                   # The user selected a whole category.
+                   for e in element:
+                       if self.is_imported(e):
+                           vlclib.unimport_element(self.controller.package,
+                                                   e,
+                                                   self.controller)
+                   for c in model[path].iterchildren():
+                       c[self.COLUMN_IMPORTED] = False
+               else:
+                   # Package
+                   print "FIXME"
+                   pass
+
         return False
 
     def build_widget(self):
         vbox=gtk.VBox()
 
         # FIXME: implement package removal from the list
-        # FIXME: implement "import all elements" actions (popup menu?)
         self.store=self.build_liststore()
 
         treeview=gtk.TreeView(model=self.store)
@@ -184,40 +232,23 @@ class Importer:
         # Determine a default alias for the filename
         alias=os.path.splitext( os.path.basename(file_) )[0]
         alias=alias.lower()
-        
-        d = gtk.Dialog(title='Enter the package alias',
-                       parent=None,
-                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-                                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
-        l=gtk.Label(_("Specify the alias which will be used\nas prefix for the package's elements."))
-        l.show()
-        d.vbox.add(l)
-        
-        e=gtk.Entry()
-        e.show()
-        e.set_text(alias)
-        d.vbox.add(e)
 
-        res=d.run()
-        if res == gtk.RESPONSE_ACCEPT:
-            try:
-                retval=e.get_text()
-            except ValueError:
-                retval=None
-        else:
-            retval=None
-
-        d.destroy()
-        if retval is None:
+        alias=advene.gui.util.entry_dialog(title=_('Enter the package alias'),
+                                           text=_("Specify the alias which will be used\nas prefix for the package's elements."),
+                                           default=alias)
+        if alias is None:
             # The user canceled the action
             return True
 
-        alias=retval
+        # p = advene.model.package.Package(uri=file_, importer=self.controller.package)
+        i = advene.model.package.Import(parent=self.controller.package,
+                                        uri=file_)
+        i.as=alias
+        self.controller.package.imports.append(i)
+        
+        # Update the ListStore
+        self.ti.add_package(self.ti.store, package=i.package, as=alias)
 
-        # FIXME: to be implemented in the model
-        #self.controller.package.importPackage(uri=file_, alias=alias)
-        print "Will be implemented soon."
         return True
         
     def add_package(self, button=None):
@@ -237,8 +268,8 @@ class Importer:
         scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         vbox.add(scroll_win)
         
-        ti=TreeViewImporter(controller=self.controller)
-        scroll_win.add_with_viewport(ti.widget)
+        self.ti=TreeViewImporter(controller=self.controller)
+        scroll_win.add_with_viewport(self.ti.widget)
 
         hb=gtk.HButtonBox()
 
