@@ -1,3 +1,16 @@
+* Transcription: set timestamps along mouse clicks in the text
+
+* Annotation chanson: paroles / refrain /couplet + UTBV/STBV (transcription)
+
+* timeline: implement a popup method that creates the toplevel window
+
+* Create a 'shapes' package which will define various SVG shapes
+  (moon, sun, triangle, etc) as views
+
+* Complete the bootstrap package
+
+* corba: Add the 'repeat' property on all items in the playlist
+
 * Implement completion in TALES fields ?
 
 * Upgrade simpletal support to 3.9
@@ -33,9 +46,6 @@ parameters (general message + message1,position1 + message2,position2,
 * Make the absolute time specification work for display_text (rather
   than relative positions)
 
-* Create a 'shapes' package which will define various SVG shapes
-  (moon, sun, triangle, etc) as views
-
 * Organize event names and conditions along categories
 
 * STBV: implement at least one level undo on action parameters
@@ -43,8 +53,6 @@ parameters (general message + message1,position1 + message2,position2,
 * UTBV: implement Undo in textview (cf gtksourceview)
 
 * Implement copy/rename of id for all elements
-
-* Views should memorize their position/size
 
 * Model related:
 
@@ -531,3 +539,9 @@ events) -> DONE
 ** The package/annotationTypes should have an 'ids' method, to be able
 to retrieve ids as keys (all bundles in fact) -> HACKED in bundles
 
+* Action: ActivateSTBV -> DONE
+
+* Views should memorize their position/size (idea: have a
+gui.size_cache dict, indexed with window names ("edit", "timeline",
+"tree", ...) and containing sizes). It should be saved upon quitting
+-> create a .advene_prefs file with a pickle of a prefs dictionary -> DONE
