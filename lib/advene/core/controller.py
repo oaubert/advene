@@ -324,6 +324,26 @@ class AdveneController:
         self.player.playlist_clear()
         self.player.playlist_add_item (uri)
 
+    def transmute_annotation(self, annotation, annotationType, delete=False):
+        """Transmute an annotation to a new type.
+        """
+        if annotation.type == annotationType:
+            return annotation
+        ident=self.idgenerator.get_id(Annotation)
+        an = self.package.createAnnotation(type = annotationType,
+                                           ident=ident,
+                                           fragment=annotation.fragment.clone())
+        an.author=config.data.userid
+        an.content.data=annotation.content.data
+        # FIXME: check if the types are compatible
+        self.notify("AnnotationCreate", annotation=an)
+
+        if delete and not annotation.relations:
+            self.package.annotations.remove(annotation)
+            self.notify('AnnotationDelete', annotation=annotation)
+            
+        return an
+    
     def restart_player (self):
         """Restart the media player."""
         self.player.restart_player ()
