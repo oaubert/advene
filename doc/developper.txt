@@ -14,7 +14,6 @@ config.data.path['resources']='/usr/local/src/advene-project/share'
 config.data.path['data']='/usr/local/src/examples/'
 config.data.path['web']='/usr/local/src/advene-project/share/web'
 
-
 * Where to start reading the Advene code ?
 
 The Advene model (lib/advene/model) is independant of the rest of the
@@ -45,6 +44,17 @@ GUI version.
 
 The GUI starts in advene.gui.main.
 
+* View plugin infrastructure
+
+The views and edit plugins are based (sort of) on the MVC Model. The
+edited data is the model, the View or Edit plugin is the controller,
+which holds a reference to a view (accessible throught .get_widget()
+method).
+
+A common API is defined for the views in
+lib/advene/gui/views/view-plugin.py
+
+
 * Structure of the Advene code
 
 ** Advene model
@@ -52,3 +62,4 @@ The GUI starts in advene.gui.main.
 - the Advene model is implemented in lib/advene/model. It offers
   access to the data, supports saving/loading data from xml packages,
   and deals with TAL/TALES issues.
+
