@@ -60,7 +60,10 @@ class TranscriptionEdit:
         self.discontinuous_toggle.set_active (True)
         self.tooltips.set_tip(self.discontinuous_toggle,
                               _("Do not generate annotations for empty text"))
-        
+                    
+        self.ignore_color = gtk.gdk.color_parse ('red')
+        self.default_color = gtk.Button().get_style().bg[0]
+
         self.widget=self.build_widget()
 
     def build_widget(self):
@@ -118,6 +121,21 @@ class TranscriptionEdit:
                                        it)
         return False
 
+    def set_color(self, button, color):
+        for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                      gtk.STATE_PRELIGHT):
+            button.modify_bg (style, color)
+
+    def toggle_ignore(self, button):
+        if button.ignore:
+            button.ignore=False
+            self.set_color(button, self.default_color)
+        else:
+            button.ignore=True
+            self.set_color(button, self.ignore_color)
+        return
+    
     def mark_button_press_cb(self, button, event, timestamp):
         """Handler for right-button click on timestamp mark.
         """
@@ -139,6 +157,10 @@ class TranscriptionEdit:
             self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
             child.timestamp=timestamp
             return True
+
+        def popup_ignore(win, button):
+            self.toggle_ignore(button)
+            return True
         
         item = gtk.MenuItem(_("Position %s") % vlclib.format_time(timestamp))
         menu.append(item)
@@ -149,7 +171,11 @@ class TranscriptionEdit:
         item = gtk.MenuItem(_("Go to..."))
         item.connect("activate", popup_goto, timestamp)
         menu.append(item)
-            
+
+        item = gtk.MenuItem(_("Ignore the following text (toggle)"))
+        item.connect("activate", popup_ignore, button)
+        menu.append(item)
+        
         item = gtk.MenuItem(_("-1 sec"))
         item.connect("activate", popup_modify, button, -1000)
         menu.append(item)
@@ -183,6 +209,7 @@ class TranscriptionEdit:
         child.connect("button-press-event", self.mark_button_press_cb, timestamp)
         self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
         child.timestamp=timestamp
+        child.ignore=False
         child.show()
         self.textview.add_child_at_anchor(child, anchor)
         return
@@ -218,19 +245,24 @@ class TranscriptionEdit:
         b=self.textview.get_buffer()
         begin=b.get_start_iter()
         end=begin.copy()
+        ignore_next=False
         while end.forward_char():
             a=end.get_child_anchor()
             if a and a.get_widgets():
                 # Found a TextAnchor
-                timestamp=a.get_widgets()[0].timestamp
+                child=a.get_widgets()[0]
+                timestamp=child.timestamp
                 text=b.get_text(begin, end, include_hidden_chars=False)
                 if (self.discontinuous_toggle.get_active() and
                     self.empty_re.match(text)):
+                    pass
+                elif ignore_next:
                     pass
                 else:
                     yield { 'begin': t,
                             'end':   timestamp,
                             'content': text }
+                ignore_next=child.ignore                    
                 t=timestamp
                 begin=end.copy()
         # End of buffer. Create the last annotation
@@ -238,6 +270,8 @@ class TranscriptionEdit:
         text=b.get_text(begin, end, include_hidden_chars=False)
         if (self.discontinuous_toggle.get_active() and
             self.empty_re.match(text)):
+            pass
+        elif ignore_next:
             pass
         else:
             yield { 'begin': t,
