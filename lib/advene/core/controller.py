@@ -10,6 +10,7 @@ import socket
 import sre
 import webbrowser
 import urlparse
+import urllib
 import Queue
 
 import advene.core.config as config
@@ -374,14 +375,15 @@ class AdveneController:
             # UNIX/Windows interoperability: convert pathnames
             n=mediafile.replace('\\', os.sep).replace('/', os.sep)
             name=os.path.basename(n)
-            for d in config.data.path['moviepath'].split(os.path.pathsep):
+            for d in config.data.path['moviepath'].split(os.pathsep):
                 if d == '_':
                     # Get package dirname
                     d=self.package.uri
-                elif not d.endswith('/'):
-                    # To please urlparse.urljoin
-                    d += '/'
-                n=urlparse.urljoin(d, name)
+                    # And convert it to a pathname (for Windows)
+                    d=urllib.url2pathname(d)
+                    if d.startswith('file:'):
+                        d.replace('file:', '')
+                n=os.sep.join((d, name))
                 if os.path.exists(n):
                     mediafile=n
                     self.log(_("Found matching video file in moviepath: %s" % n))
