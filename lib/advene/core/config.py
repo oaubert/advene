@@ -232,14 +232,19 @@ class Config(object):
         return value
         
     def get_homedir(self):
-        if os.environ.has_key('HOME'):
-            return os.environ['HOME']
-        elif os.environ.has_key('HOMEPATH'):
-            # Windows
-            return os.sep.join((os.environ['HOMEDRIVE'],
-                                     os.environ['HOMEPATH']))
-        else:
-            raise Exception ('Unable to find homedir')
+        h=None
+        try:
+            h=os.path.expanduser('~')
+        except:
+            if os.environ.has_key('HOME'):
+                h=os.environ['HOME']
+            elif os.environ.has_key('HOMEPATH'):
+                # Windows
+                h=os.sep.join((os.environ['HOMEDRIVE'],
+                               os.environ['HOMEPATH']))
+            else:
+                raise Exception ('Unable to find homedir')
+        return h
 
     def read_preferences(self):
         homedir=self.get_homedir()
