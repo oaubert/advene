@@ -94,6 +94,7 @@ class AdveneController:
         self.future_begins = None
         self.future_ends = None
         self.last_position = -1
+        self.cached_duration = 0
         
         self.package = None
 
@@ -256,7 +257,6 @@ class AdveneController:
             It will go just before the next position for which we need to
             take a snapshot.
             """
-            print "Goto next"
             missing = self.imagecache.missing_snapshots ()
             missing.sort ()
 
@@ -357,6 +357,12 @@ class AdveneController:
         """
         if as is None:
             as=self.package.uri
+        # Check if we know the stream duration. If so, save it as
+        # package metadata
+        if self.cached_duration > 0:
+            self.package.setMetaData (config.data.namespace,
+                                      "duration",
+                                      unicode(self.cached_duration))
         self.package.save(as=as)
         self.event_handler.notify ("PackageSave")
     
@@ -376,6 +382,13 @@ class AdveneController:
             self.log (_("Cannot load package: the following annotations do not have Millisecond fragments:"))
             self.log (", ".join(l))
             return True
+
+        # Get the cached duration
+        duration = self.package.getMetaData (config.data.namespace, "duration")
+        if duration is not None:
+            self.cached_duration = long(duration)
+        else:
+            self.cached_duration = 0
             
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
@@ -619,7 +632,12 @@ class AdveneController:
                     a, b, e = self.future_ends[0]
                 else:
                     break
-                
+
+        # Update the cached duration if necessary
+        if self.cached_duration <= 0:
+            if self.player.stream_duration > 0:
+                self.cached_duration = self.player.stream_duration
+
         return pos
     
 if __name__ == '__main__':
