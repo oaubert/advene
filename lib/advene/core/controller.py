@@ -10,6 +10,7 @@ import socket
 import sre
 import webbrowser
 import urlparse
+import Queue
 
 import advene.core.config as config
 
@@ -82,7 +83,6 @@ class AdveneController:
 
     @ivar server: the embedded web server
     @type server: webserver.AdveneWebServer
-
     """
     
     def __init__ (self, args=None):
@@ -135,6 +135,8 @@ class AdveneController:
 
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
+        self.event_queue = Queue.Queue()
+        
         # Used in update_status to emit appropriate notifications
         self.status2eventname = {
             'pause':  'PlayerPause',
@@ -151,6 +153,22 @@ class AdveneController:
             category='gui',
             ))
 
+    def queue_action(self, method, *args, **kw):
+        #print "Queue action: %s" % str(method)
+        self.event_queue.put( (method, args, kw) )
+        return True
+
+    def process_queue(self):
+        try:
+            (method, args, kw) = self.event_queue.get_nowait()
+            #print "Process action: %s" % str(method)
+            method(*args, **kw)
+        except Queue.Empty:
+            pass
+        except Exception, e:
+            self.queue_action(self.log, _("Exception :") + str(e))
+        return True
+    
     def register_gui(self, gui):
         self.gui=gui
 
@@ -234,7 +252,8 @@ class AdveneController:
         return self.player.create_position(value=value, key=key, origin=origin)
     
     def notify (self, event_name, *param, **kw):
-        return self.event_handler.notify(event_name, *param, **kw)
+        self.queue_action(self.event_handler.notify, event_name, *param, **kw)
+        return
 
     def update_snapshot (self, position):
         """Event handler used to take a snapshot for the given position (current).
@@ -742,6 +761,7 @@ class AdveneController:
         @type position: Position
         """
         position_before=self.player.current_position_value
+        print "update status: %s" % status
         try:
             # if hasattr(position, 'value'):
             #     print "update_status %s %i" % (status, position.value)
@@ -796,6 +816,8 @@ class AdveneController:
         Hence, it is a critical execution path and care should be
         taken with the code used here.
         """
+        self.process_queue()
+        
         pos=self.position_update ()
         #print "--------------------- %d / %d" % (pos, self.player.stream_duration)
         if pos < self.last_position:
