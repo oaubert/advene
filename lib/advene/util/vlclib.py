@@ -5,10 +5,11 @@ import os
 import sys
 import time
 import Image
+import StringIO
 
 from gettext import gettext as _
 
-import StringIO
+from advene.model.annotation import Annotation, Relation
 
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
@@ -133,3 +134,14 @@ def matching_relationtypes(package, ann1, ann2):
             r.append(rt)
     print "Matching: %s" % r
     return r
+
+def get_title(controller, element):
+    if isinstance(element, Annotation) or isinstance(element, Relation):
+        expr=element.type.getMetaData(config.data.namespace, "display")
+        if expr is None or expr == '':
+            return element.content.data
+        else:
+            c=controller.event_handler.build_context(event='Display', here=element)
+            return c.evaluateValue(expr)
+    # FIXME: handle the other elements
+    return str(element)
