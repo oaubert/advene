@@ -101,7 +101,8 @@ class Config(object):
                             'transcriptionview': (640, 480),
                             'treeview': (800, 600),
                             'browserview': (800, 600),
-                            }
+                            },
+            'gui': { 'popup-textwidth': 40 }
             }
 
         # Player options
@@ -187,7 +188,7 @@ class Config(object):
             prefs=cPickle.load(f)
         except:
             return False
-        self.preferences = prefs
+        self.preferences.update(prefs)
         return True
 
     def save_preferences(self):
