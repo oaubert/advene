@@ -102,6 +102,8 @@ gtk.rc_parse_string(sendmail_styles)
 
 * Rules: add a "internal" flag to indicate whether to save/edit or not
   the rule (internal=True by default) -> DONE (rule.origin)
+  But we do not use it : instead, the ecaengine uses multiple rulesets
+  ('default', 'internal' and 'user' by default)
 
 * Add /usr/share/doc/... for all debian packages (and
   examples/client.py for vlc-plugin-corba)
@@ -136,8 +138,6 @@ gtk.rc_parse_string(sendmail_styles)
   * Add self.editlist everywhere, to register edit plugins inside
     the self edit plugin.  update_value will be called upon these.
 
-* Ref sur zpt: http://www.advogato.org/article/350.html
-
 * Adveneserver: implement PUT (to please epoz) -> DONE
 
 * EPOZ: implement data templates according to the edited element,
@@ -160,6 +160,8 @@ http://pywork.sourceforge.net/doc/node9.html
 * Mailing-list TAL:
 http://marc.free.net.ph/mindex/zope-zpt@20031122.114501.00000000.html
 
+* Reference on zpt: http://www.advogato.org/article/350.html
+
 * Remove gtk dependency from vlclib (so that we can start adveneserver
 without DISPLAY)
 
@@ -176,11 +178,12 @@ without DISPLAY)
 
 * Ruleset editing (eventgui.py) : give the possibility to edit only a
 subset (according to rule.origin) -> DONE (filter parameter)
+  Re-DONE : cf note on ecaengine before
 
-* bootstrap.xml : how to use properly ? Can a package exist with no view.
+* bootstrap.xml : how to use properly ? Can a package exist with no view ?
 
 * Once bootstrap.xml works correctly, put it somewhere pertinent and
-use it in the template.xml file
+use it as the template.xml file
 
 * EPOZ: derive LinkTool into TALContentTool and TALImageTool, to be
 able to define content/replace (just replace with <span/> will be
@@ -200,6 +203,8 @@ simpler) and snapshot integration.
   * authorUrl on package ???
 
 * Implement an image-based timestamp chooser (with all_snapshots()) -> almost DONE
+
+* Implement an ApproximateImageCache with a ic.epsilon value
 
 * Make some attributes inherited (esp. author for annotations, media for fragments)
 
