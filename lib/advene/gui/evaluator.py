@@ -90,6 +90,9 @@ class Window:
         for c in ('.', '(', ' '):
             while expr.endswith(c):
                 expr=expr[:-1]
+        m=sre.match('(\w+)=(.+)', expr)
+        if m is not None:
+            expr=m.group(2)                
         try:
             res=eval(expr, self.globals_, self.locals_)
             d=res.__doc__
@@ -154,7 +157,9 @@ class Window:
             if c in expr:
                 expr=expr[expr.rindex(c)+1:]
                 print "using %s from %s" % (expr, c)
-
+        m=sre.match('(\w+)=(.+)', expr)
+        if m is not None:
+            expr=m.group(2)
         completion=None
 
         attr=None
