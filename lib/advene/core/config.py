@@ -279,14 +279,22 @@ class Config(object):
     def read_config_file (self):
         """Read the configuration file ~/.advenerc.
         """
-        # FIXME: The conffile name/path could be a command-line option
-        homedir=self.get_homedir()
-        if self.os == 'win32':
-            filename='advene.ini'
+        c=[ a for a in sys.argv if a.startswith('-c') ]
+        if c:
+            if len(c) > 1:
+                print "Error: multiple config files are given on the command line"
+                sys.exit(1)
+            sys.argv.remove(c[0])
+            conffile=c[0][2:]
         else:
-            filename='.advenerc'
+            homedir=self.get_homedir()
+            if self.os == 'win32':
+                filename='advene.ini'
+            else:
+                filename='.advenerc'
 
-        conffile=os.sep.join((homedir, filename))
+            conffile=os.sep.join((homedir, filename))
+            
         try:
             file = open(conffile, "r")
         except IOError:
