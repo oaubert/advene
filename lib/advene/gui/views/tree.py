@@ -412,6 +412,8 @@ class TreeWidget:
     
     def popup_delete (self, button=None, node=None, path=None):
         print "Popup delete %s %s" % (node, path)
+        # FIXME: implement delete for other elements: Relation, Relation/AnnotationType
+        # Schema, View
         assert isinstance (node, Annotation)
         # Remove the element from the data
         a = node.rootPackage.annotations
@@ -436,7 +438,8 @@ class TreeWidget:
     def create_element_cb(self, widget, elementtype=None, parent=None):
         print "Creating a %s in %s" % (elementtype, parent)
         cr = advene.gui.edit.create.CreateElementPopup(type_=elementtype,
-                                                       parent=parent)
+                                                       parent=parent,
+                                                       controller=self.controller)
         cr.popup()
         return True
     
