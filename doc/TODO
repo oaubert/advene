@@ -1,3 +1,5 @@
+* Implement query in global_methods
+
 * Write document on TALES syntax and base elements
 
 * STBV action: display an activable link
@@ -314,3 +316,6 @@ events) -> DONE
 * More quickly : STBV Optionmenu should only have a reference to the STBV id, so that
   the new version is taken into account when edited. -> useless
 
+* Implement a representation meta-attribute that gives a TALES
+  expression whose evaluation will return the representation string of
+  the element (useful for parsed elements for instance) -> DONE (meta 'display')
