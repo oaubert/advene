@@ -164,7 +164,7 @@ def matching_relationtypes(package, ann1, ann2):
 
 def get_title(controller, element, representation=None):
     if element is None:
-        return _("None")
+        r=_("None")
     if isinstance(element, unicode) or isinstance(element, str):
         return element
     if (isinstance(element, Annotation) or isinstance(element, Relation)
@@ -196,9 +196,9 @@ def get_title(controller, element, representation=None):
             if not r:
                 r=element.id                
             return r
-    if hasattr(element, 'title'):
+    if hasattr(element, 'title') and element.title:
         return unicode(element.title)
-    if hasattr(element, 'id'):
+    if hasattr(element, 'id') and element.id:
         return unicode(element.id)
     return unicode(element)
 
