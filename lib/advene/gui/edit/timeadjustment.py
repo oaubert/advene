@@ -142,7 +142,7 @@ if __name__ == "__main__":
     # Unit test
     import advene.core.imagecache
     
-    class DummyDVDControl:
+    class DummyController:
         def __init__(self):
             self.imagecache=advene.core.imagecache.ImageCache()
 
@@ -161,8 +161,8 @@ if __name__ == "__main__":
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())
     
-    dvd=DummyDVDControl()
-    ta=TimeAdjustment(value=6000, controller=dvd)
+    con=DummyController()
+    ta=TimeAdjustment(value=6000, controller=con)
     window.add(ta.get_widget())
     window.show_all()
     gtk.main()
