@@ -1,12 +1,12 @@
-import util.uri
+import advene.model.util.uri
 
-import _impl
-import modeled
-import viewable
+import advene.model._impl as _impl
+import advene.model.modeled as modeled
+import advene.model.viewable as viewable
 
-from constants import *
+from advene.model.constants import *
 
-from util.auto_properties import auto_properties
+from advene.model.util.auto_properties import auto_properties
 
 class Query(modeled.Importable, viewable.Viewable.withClass('query'),
             _impl.Uried, _impl.Authored, _impl.Dated, _impl.Titled):
