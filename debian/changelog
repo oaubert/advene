@@ -1,6 +1,6 @@
 advene (0.4-1) unstable; urgency=low
 
-  * Initial Release.
+  * The Debian package is now generated through debhelper.
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun,  7 Mar 2004 16:11:17 +0100
 

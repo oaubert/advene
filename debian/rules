@@ -12,6 +12,7 @@ binary-indep: build install
 	dh_installchangelogs
 	dh_installdocs
 	dh_installman
+	dh_installmenu
 	dh_installexamples
 	dh_install --sourcedir $(install_dir)
 	dh_fixperms
@@ -25,15 +26,11 @@ install: build
 	dh_testdir
 	dh_testroot 
 	$(setup) install --no-compile --prefix=/usr --root=$(install_dir)
-	#dh_installdirs 
-	#mkdir -p $(install_dir)/bin
-	#cp -f debian/wrapper $(install_dir)/bin/pychecker
 
 build: build-stamp
 build-stamp: 
 	dh_testdir
 	$(setup) build --build-base $(build_dir)
-	#sh debian/regression.sh
 	touch build-stamp
 
 clean:
