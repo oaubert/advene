@@ -1,3 +1,16 @@
+advene (project) unstable; urgency=low
+
+  * TranscriptionEdit:
+    * New keybindings: 
+      Tab: player play/pause
+      Control-Return: insert a timestamp mark with the current position value
+      Control-left/right: forward/backward in video
+      Control-home: go to beginning of the video
+  * Textual annotation/view editing: 
+      handle open/save to a file, with corresponding 
+      keyboard shortcuts (control-o, control-s), and reload (control-r)
+ --
+
 advene (0.17) unstable; urgency=low
 
   * Main GUI :
