@@ -170,7 +170,7 @@ class EditElementPopup (object):
         self.key_cb[gtk.keysyms.Return] = self.validate_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
 
-        if self.element.isImported():
+        if hasattr(self.element, 'isImported') and self.element.isImported():
             self.editable=False
         elif hasattr(self.element, 'schema') and self.element.schema.isImported():
             self.editable=False
