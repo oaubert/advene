@@ -68,6 +68,15 @@ class TimeLine:
                                                 page_incr=1000)
         self.ratio_adjustment.connect ("changed", self.ratio_event)
         
+        # The same value in relative form
+        self.fraction_adj = gtk.Adjustment (value=1.0,
+                                            lower=0.01,
+                                            upper=1.0,
+                                            step_incr=.01,
+                                            page_incr=.02)
+        self.ratio_adjustment.connect ("changed", self.ratio_event)
+
+        
         self.widget = gtk.Layout ()
 
         self.widget.connect('scroll_event', self.scroll_event)
@@ -100,9 +109,8 @@ class TimeLine:
         # Adjustment corresponding to the Virtual display
         # The page_size is the really displayed area
         if adjustment is None:
-            self.adjustment = gtk.Adjustment ()
-        else:
-            self.adjustment = adjustment
+            adjustment = gtk.Adjustment ()
+        self.adjustment = adjustment
         self.update_adjustment ()
         self.adjustment.set_value (u2p(minimum))
 
@@ -156,8 +164,13 @@ class TimeLine:
         return bs
 
     def scroll_to_annotation(self, annotation):
-        pos = self.unit2pixel (annotation.fragment.begin)
+        (w, h) = self.widget.window.get_size ()
+        pos = self.unit2pixel (annotation.fragment.begin) - w/2
         a = self.adjustment
+        if pos < a.lower:
+            pos = a.lower
+        elif pos > a.upper:
+            pos = a.upper
         if pos < a.value or pos > (a.value + a.page_size):
             a.set_value (pos)
         self.update_position (None)
@@ -504,6 +517,33 @@ class TimeLine:
     def update_position (self, pos):
         self.update_current_mark (pos)
         return True
+
+    def mark_press_cb(self, eventbox, event, t):
+        f=self.fraction_adj.value
+        if event.button == 1:
+            f=f/2.0
+        elif event.button == 3:
+            f=min(f*2.0, 1.0)
+        else:
+            return False
+        if f > 1.0:
+            f = 1.0
+        self.fraction_adj.value=f
+        self.fraction_event(widget=None)
+        
+        # Center the view around the selected mark
+        (w, h) = self.widget.window.get_size ()
+        pos = self.unit2pixel (t) - w/2
+        a = self.adjustment
+        if pos < a.lower:
+            pos = a.lower
+        elif pos > a.upper:
+            pos = a.upper
+        a.set_value (pos)
+        self.update_position (None)
+        return True
+        
+        return True
     
     def draw_marks (self):
         """Draw marks for stream positioning"""
@@ -518,8 +558,12 @@ class TimeLine:
             self.widget.put (a, u2p(t), a.pos)
             l = gtk.Label (vlclib.format_time (t))
             l.mark = t
-            l.pos = 10
-            self.widget.put (l, u2p(t), l.pos)
+            l.pos = 10            
+            e=gtk.EventBox()
+            e.connect("button-press-event", self.mark_press_cb, t)
+            e.add(l)
+            
+            self.widget.put (e, u2p(t), l.pos)
             t += step
         self.widget.show_all ()
         
@@ -548,10 +592,12 @@ class TimeLine:
             win.emit('destroy')
             return True        
         if event.keyval >= 49 and event.keyval <= 57:
-            self.display_fraction_event (widget=win, fraction=1.0/pow(2, event.keyval-49))
+            self.fraction_adj.value=1.0/pow(2, event.keyval-49)
+            self.fraction_event (widget=win)
             return True
         if event.keyval == gtk.keysyms.Return:
-            self.display_fraction_event (widget=win, fraction=1.0)
+            self.fraction_adj.value=1.0
+            self.fraction_event (widget=win)
             return True
         return False
 
@@ -660,17 +706,26 @@ class TimeLine:
         #print "Update: from %.2f to %.2f" % (a.lower, a.upper)
         a.changed ()
 
-    def display_fraction_event (self, widget=None, fraction=1.0):
+    def ratio_event (self, widget=None, data=None):
+        self.update_adjustment ()
+        self.update_layout ()
+        self.redraw_event ()
+        return True
+
+    def fraction_event (self, widget=None):
         """Set the zoom factor to display the given fraction of the movie.
 
         fraction is > 0 and <= 1.
         """
+        fraction=self.fraction_adj.value
+        
         parent = self.widget.window
         (w, h) = parent.get_size ()
         v = (self.maximum - self.minimum) / float(w) * fraction
+        
         self.ratio_adjustment.set_value(v)
         self.ratio_adjustment.changed ()
-        self.ratio_event (widget)
+        #self.ratio_event (widget)
         return True
 
     def scroll_event(self, widget=None, event=None):
@@ -687,7 +742,8 @@ class TimeLine:
                 val = a.upper - a.page_size
             if val != a.value:
                 a.value = val
-                a.value_changed ()
+                a.changed()
+                #a.value_changed ()
             return True
         elif event.direction == gtk.gdk.SCROLL_UP:
             val = a.value - incr
@@ -695,16 +751,11 @@ class TimeLine:
                 val = a.lower
             if val != a.value:
                 a.value = val
-                a.value_changed ()
+                a.changed()
+                #a.value_changed ()
             return True
         
         return False
-
-    def ratio_event (self, widget=None, data=None):
-        self.update_adjustment ()
-        self.update_layout ()
-        self.redraw_event ()
-        return True
 
     def move_widget (self, widget=None):
         """Update the annotation widget position"""
@@ -869,19 +920,9 @@ class TimeLine:
         hbox = gtk.HButtonBox()
         vbox.pack_start (hbox, expand=False)
 
-        fraction_adj = gtk.Adjustment (value=1.0,
-                                       lower=0.01,
-                                       upper=1.0,
-                                       step_incr=.01,
-                                       page_incr=.02)
-
-        def zoom_event (win=None, timel=None, adj=None):
-            timel.display_fraction_event (widget=win, fraction=adj.value)
-            return True
-
-        s = gtk.HScale (fraction_adj)
+        s = gtk.HScale (self.fraction_adj)
         s.set_digits(2)
-        s.connect ("value-changed", zoom_event, self, fraction_adj)
+        s.connect ("value-changed", self.fraction_event)
         hbox.add (s)
 
         hbox.add (self.highlight_activated_toggle)
@@ -909,8 +950,7 @@ class TimeLine:
 
         # Make sure that the timeline display is in sync with the
         # fraction widget value
-        self.display_fraction_event (window,
-                                  fraction=fraction_adj.value)
+        self.fraction_event (window)
 
         return window
     
