@@ -120,9 +120,9 @@ class EditRuleSet(EditGeneric):
         l=gtk.Label(rule.name)
         edit.set_update_label(l)
         self.editlist.append(edit)
-        print "Model: %d rules" % len(self.model)
+        #print "Model: %d rules" % len(self.model)
         self.model.add_rule(rule)
-        print "-> Model: %d rules" % len(self.model)
+        #print "-> Model: %d rules" % len(self.model)
         self.widget.append_page(edit.get_widget(), l)
         self.widget.set_current_page(-1)
         return True
@@ -130,7 +130,7 @@ class EditRuleSet(EditGeneric):
     def update_value(self):
         for e in self.editlist:
             e.update_value()
-        print "update_value for %d rules" % len(self.model)
+        #print "update_value for %d rules" % len(self.model)
         
         # Clear the list (we need to keep the same reference as before)
         # del self.model[:]        
