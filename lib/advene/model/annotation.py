@@ -99,7 +99,7 @@ class Annotation(modeled.Importable, content.WithContent,
                 # FIXME: cf thread
                 # Weird use of hash() -- will this work?
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = "i" + str(id(self)) + str(time.clock())
+                ident = "i" + str(id(self)) + str(time.clock()).replace('.','')
             self.setId(ident)
 
             if date is not None: self.setDate(date)
@@ -322,7 +322,7 @@ class Relation(modeled.Importable, content.WithContent,
                 # FIXME: cf thread
                 # Weird use of hash() -- will this work?
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
-                ident = "i" + str(id(self)) + str(time.clock())
+                ident = "i" + str(id(self)) + str(time.clock()).replace('.','')
             self.setId(ident)
 
             if date is not None: self.setDate(date)
