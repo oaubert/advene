@@ -111,6 +111,9 @@ class Player(object):
         pos.value = 0
         self.relative_position = pos
 
+        o=VLC.Object(0)
+        self.dvd_device = o.config_get("dvd")
+
         # Current position value (updated by self.position_update ())
         self.status = VLC.UndefinedStatus
         self.current_position_value = 0
@@ -210,7 +213,10 @@ class Player(object):
             self.url=''
 
     def dvd_uri(self, title=None, chapter=None):
-        return "dvdsimple:///dev/dvd@%s:%s" % (str(title), str(chapter))
+        if self.dvd_device is None:
+            return ""
+        else:
+            return "dvdsimple://%s@%s:%s" % (str(title), str(chapter))
 
     def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
