@@ -3,6 +3,7 @@
 # Advene part
 import advene.core.config as config
 import advene.util.vlclib
+import advene.gui.util
 
 from gettext import gettext as _
 
@@ -24,7 +25,7 @@ class TimeChooser:
             vbox=gtk.VBox()
             # FIXME: make Images clickable to select time            
             i=gtk.Image()
-            i.set_from_pixbuf(advene.util.vlclib.png_to_pixbuf(advene.util.vlclib.snapshot2png(snap)))
+            i.set_from_pixbuf(advene.gui.util.png_to_pixbuf(advene.util.vlclib.snapshot2png(snap)))
             # Does not work:
             i.connect("button-release-event", self.activate, snap)
             vbox.add(i)

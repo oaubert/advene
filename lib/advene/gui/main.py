@@ -39,6 +39,7 @@ import advene.core.mediacontrol
 
 from advene.core.imagecache import ImageCache
 import advene.util.vlclib as vlclib
+import advene.gui.util
 import advene.gui.views.tree
 import advene.gui.views.timeline
 import advene.gui.views.logwindow
@@ -582,7 +583,7 @@ class AdveneGUI (Connect):
 
         item = gtk.MenuItem()
         i = gtk.Image()
-        i.set_from_pixbuf(vlclib.png_to_pixbuf (self.controller.imagecache[ann.fragment.begin]))
+        i.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.imagecache[ann.fragment.begin]))
         item.add (i)
         item.connect("activate", popup_goto, ann, self.controller)
         menu.append(item)

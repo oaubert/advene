@@ -10,6 +10,7 @@ import advene.core.config as config
 import re
 import gtk
 import advene.util.vlclib
+import advene.gui.util
 
 from gettext import gettext as _
 
@@ -36,7 +37,7 @@ class TimeAdjustment:
         vbox=gtk.VBox()
         
         self.image = gtk.Image()
-        self.image.set_from_pixbuf(advene.util.vlclib.png_to_pixbuf (self.controller.imagecache[self.value]))
+        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.imagecache[self.value]))
         vbox.add(self.image)
 
         hbox=gtk.HBox()
@@ -124,7 +125,7 @@ class TimeAdjustment:
         """Updates the value displayed in the entry according to the current value."""
         self.entry.set_text(advene.util.vlclib.format_time(self.value))
         # Update the image
-        self.image.set_from_pixbuf(advene.util.vlclib.png_to_pixbuf (self.controller.imagecache[self.value]))        
+        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.imagecache[self.value]))        
     def update_value_cb(self, widget, increment):
         self.value=self.value + increment
         if self.sync_video:
