@@ -362,7 +362,8 @@ class AdveneGUI (Connect):
         self.controller.event_handler.internal_rule (event="PackageLoad",
                                                      method=self.manage_package_load)
         # Annotation lifecycle
-        for e in ('AnnotationCreate', 'AnnotationEditEnd', 'AnnotationDelete'):
+        for e in ('AnnotationCreate', 'AnnotationEditEnd', 'AnnotationDelete',
+                  'AnnotationActivate', 'AnnotationDeactivate'):
             self.controller.event_handler.internal_rule (event=e,
                                                          method=self.annotation_lifecycle)
         # Relation lifecycle
