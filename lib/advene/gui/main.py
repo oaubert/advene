@@ -1889,7 +1889,14 @@ class AdveneGUI (Connect):
         self.slider_move = False
 
     def on_update_snapshots1_activate (self, button=None, data=None):
-        self.gui.get_widget ("update-snapshots").show ()
+        dialog = gtk.MessageDialog(
+            None, gtk.DIALOG_DESTROY_WITH_PARENT,
+            gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
+            _("This functionality is currently disabled."))
+        dialog.set_position(gtk.WIN_POS_MOUSE)
+        dialog.run()
+        dialog.destroy()
+        # self.gui.get_widget ("update-snapshots").show ()
         return True
 
     def on_update_snapshots_execute_clicked (self, button=None, data=None):
