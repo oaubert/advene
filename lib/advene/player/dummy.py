@@ -50,6 +50,7 @@ class Player:
 
     def __init__(self):
         self.playlist=[]
+        self.relative_position=0
         self.status=Player.UndefinedStatus
         self.position_update()
         pass
