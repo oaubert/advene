@@ -1,3 +1,11 @@
+advene (0.11) unstable; urgency=low
+
+  * It is possible to save the output of the transcription view
+  
+  * Update to match the API changes in simpletal 3.9
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 16 Sep 2004 13:05:50 +0200
+
 advene (0.10) unstable; urgency=low
 
   * Added ELAN conversion capability
