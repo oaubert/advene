@@ -48,9 +48,12 @@ class AdveneTreeModel(gtk.GenericTreeModel):
 
         Currently implemented only for Annotations.
         """
-        assert isinstance (e, Annotation)
-        # FIXME: remove annotation from its parent list
-        del (self.childrencache[self.nodeParent(e)])
+        parent=self.nodeParent(e)
+        path=self.on_get_path(e)
+        if path is not None:
+            self.row_deleted(path)
+            #self.clear_cache()
+            del (self.childrencache[parent])
         
     def on_get_flags(self):
         return 0
@@ -71,14 +74,19 @@ class AdveneTreeModel(gtk.GenericTreeModel):
         idx = []
         while parent is not None:
             children = self.nodeChildren(parent)
-            i = children.index (child)
+            try:
+                i = children.index (child)
+            except ValueError:
+                # The element is not in the list
+                return None
             idx.append (i)
             child = parent
             parent = self.nodeParent(parent)
+
         idx.append(0)
         idx.reverse()
         return tuple(idx)
-            
+
     def on_get_iter(self, path):
         """Return the node corresponding to the given path.
         """
@@ -216,7 +224,7 @@ class DetailedTreeModel(AdveneTreeModel):
             children = None
         elif isinstance (node, Package):
             if not self.childrencache.has_key (node):
-                self.childrencache[node] = (node.schemas, node.views)
+                self.childrencache[node] = [node.schemas, node.views]
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
@@ -225,32 +233,8 @@ class DetailedTreeModel(AdveneTreeModel):
         return children
 
     def nodeHasChildren (self, node):
-        if isinstance (node, Annotation):
-            return False
-        elif isinstance (node, Relation):
-            return False
-        elif isinstance (node, AnnotationType):
-            if not self.childrencache.has_key (node):
-                self.childrencache[node] = node.annotations
-            return len (self.childrencache[node])
-        elif isinstance (node, RelationType):
-            if not self.childrencache.has_key (node):
-                self.childrencache[node] = node.relations
-            return len (self.childrencache[node])
-        elif isinstance (node, Schema):
-            if not self.childrencache.has_key (node):
-                self.childrencache[node] = list(node.annotationTypes)
-                self.childrencache[node].extend(node.relationTypes)
-            return len (self.childrencache[node])
-        elif isinstance (node, Package):
-            if not self.childrencache.has_key (node):
-                self.childrencache[node] = (node.schemas, node.views)
-            return len(self.childrencache[node]) > 0
-        elif isinstance (node, AbstractBundle):
-            return len(node)
-        else:
-            return False
-        return False
+        children = self.nodeChildren(node)
+        return (children is not None and children)
         
 class FlatTreeModel(AdveneTreeModel):
     """Flat Tree Model.
@@ -416,11 +400,7 @@ class TreeWidget:
         # Schema, View
         assert isinstance (node, Annotation)
         # Remove the element from the data
-        a = node.rootPackage.annotations
-        i = a.index (node)
-        del (a[i])
-        # Invalidate the model cache
-        self.model.remove_element (node)
+        self.controller.delete_annotation(node)
         return True
     
     def popup_display (self, button=None, node=None, path=None):
@@ -432,6 +412,13 @@ class TreeWidget:
             print _("Error: unable to find an edit popup for %s") % node
         return True
 
+    def delete_annotation(self, annotation):
+        """Delete the view of annotation from the display"""
+        # Invalidate the model cache
+        print "Delete annotation %s" % annotation.id
+        self.model.remove_element (annotation)
+        return
+    
     def annotation_cb (self, widget=None, node=None):
         return True
 
@@ -441,6 +428,16 @@ class TreeWidget:
                                                        parent=parent,
                                                        controller=self.controller)
         cr.popup()
+        return True
+
+    def delete_element_cb(self, widget, element):
+        p=element.ownerPackage
+        if isinstance(element, Annotation):
+            p.annotations.remove(element)
+            self.controller.notify('AnnotationDelete', annotation=element)
+        elif isinstance(element, Relation):
+            p.relations.remove(element)
+            self.controller.notify('RelationDelete', relation=element)
         return True
     
     def make_popup_menu(self, node=None, path=None):
@@ -470,6 +467,10 @@ class TreeWidget:
 
         if isinstance (node, Annotation):
             add_menuitem(menu, _("Picture..."), self.annotation_cb, node)
+            add_menuitem(menu, _("Delete annotation"), self.delete_element_cb, node)
+
+        if isinstance(node, Relation):
+            add_menuitem(menu, _("Delete relation"), self.delete_element_cb, node)
 
         if isinstance(node, Package):
             add_menuitem(menu, _("Create a new view..."), self.create_element_cb, View, node)
