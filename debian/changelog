@@ -8,6 +8,10 @@ advene (project) unstable; urgency=low
     * Popups now use the AccumulatorPopup
     * Screenshots are now displayed in popups
     * File history is available (next to the open button)
+    * Added -c<configfile> command line option
+    * remove all elements from a given annotationtype or relationtype from
+      the contextual menu
+    * The webbrowser icon now displays a UTBV menu
 
   * New action: OpenURL
 
@@ -16,6 +20,9 @@ advene (project) unstable; urgency=low
   * New config variables: 
      * config.data.webserver['displaymode'] : default display mode (default or raw)
      * config.data.path['moviepath'] : movie files search path
+  
+  * Webserver:
+     * query parameters are available through the 'request' root element
   
   * Timeline : 
      * implemented annotation alignment (by drag'n drop)
@@ -38,10 +45,13 @@ advene (project) unstable; urgency=low
      * added player control toolbar
      * C-s shortcut to save transcription
   
+  * Importer
+    * implemented PRAAT import
+    * use the userid as author for imported elements
+
   * Internal
     * Identifiers are now generated through the IDGenerator 
       module (more readable ids)
-    * Importer: use the userid as author for imported elements
     * Evaluator: implemented dict key completion
     * Use an event queue for notify events, so that the GUI 
       does not freeze when receiving input from webserver 
