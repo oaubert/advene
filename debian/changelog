@@ -70,7 +70,7 @@ advene (0.17) unstable; urgency=low
     * Re-generated API documentation in doc/html
     * Added an example bin/sample_player
   
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 13 Mar 2005 22:03:50 +0100
 
 advene (0.16) unstable; urgency=low
 
