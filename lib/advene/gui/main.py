@@ -838,10 +838,8 @@ class AdveneGUI (Connect):
         if duration == "" or duration == 0:
             duration = None
         l = gtk.Label(message)
-        f=gtk.Frame()
-        f.set_label(_("Information popup"))
-        f.add(l)
-        self.popupwidget.display(widget=f, timeout=duration)
+
+        self.popupwidget.display(widget=l, timeout=duration, title=_("Information popup"))
         return True
 
     def action_popup_goto (self, context, parameters):
@@ -867,15 +865,10 @@ class AdveneGUI (Connect):
         l=gtk.Label(description)
         vbox.pack_start(l, expand=False)
         vbox.pack_start(b, expand=False)
-        vbox.show_all()
         
-        f=gtk.Frame()
-        f.set_label(_("Navigation popup"))
-        f.add(vbox)
-
-        b.connect("clicked", handle_response, position, f)
+        b.connect("clicked", handle_response, position, vbox)
         
-        self.popupwidget.display(widget=f, timeout=duration)
+        self.popupwidget.display(widget=vbox, timeout=duration, title=_("Navigation popup"))
         return True
 
     def generate_action_popup_goton(self, size):
@@ -887,9 +880,6 @@ class AdveneGUI (Connect):
                 return True
 
             vbox=gtk.VBox()
-            f=gtk.Frame()
-            f.set_label(_("Navigation popup"))
-            f.add(vbox)
 
             description=self.parse_parameter(context,
                                              parameters, 'description', _("Make a choice"))
@@ -906,14 +896,14 @@ class AdveneGUI (Connect):
 
                 position=self.parse_parameter(context, parameters, 'position%d' % i, 0)
                 b=gtk.Button(message)
-                b.connect("clicked", handle_response, position, f)
+                b.connect("clicked", handle_response, position, vbox)
                 vbox.add(b)
 
             duration=self.parse_parameter(context, parameters, 'duration', None)
             if duration == "" or duration == 0:
                 duration = None
 
-            self.popupwidget.display(widget=f, timeout=duration)
+            self.popupwidget.display(widget=vbox, timeout=duration, title=_("Navigation popup"))
             return True
         return generate
 
