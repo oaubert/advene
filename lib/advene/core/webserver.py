@@ -192,6 +192,15 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if duplicate_title and mode == 'navigation':
             self.wfile.write("<h1>%s</h1>\n" % title)        
 
+    def send_no_content(self):
+        """Sends a No Content (204) response.
+
+        Mainly used in /media handling.
+        """
+        self.send_response (204)
+        self.no_cache ()
+        self.end_headers ()
+
     def send_redirect (self, location):
         """Sends a redirect response.
 
@@ -458,16 +467,15 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     self.send_redirect ("/media")
                 self.server.controller.update_status ("set", long(position))
-                ref=self.headers.get('Referer', "/media")
-                self.send_redirect(ref)
+                self.send_no_content()
             elif command == 'pause':
                 self.server.controller.update_status ("pause")
                 ref=self.headers.get('Referer', "/media")
-                self.send_redirect(ref)
+                self.send_no_content()
             elif command == 'stop':
                 self.server.controller.update_status ("stop")
                 ref=self.headers.get('Referer', "/media")
-                self.send_redirect(ref)
+                self.send_no_content()
             elif command == 'stbv':
                 if query.has_key ('id'):
                     stbvid=query['id']
@@ -482,8 +490,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     stbv=None
                 self.server.controller.activate_stbv(view=stbv)
-                ref=self.headers.get('Referer', "/media")
-                self.send_redirect(ref)
+                self.send_no_content()
             else:
                 self.send_error (404, _('Malformed request'))
                     
