@@ -1519,7 +1519,8 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         handler=logging.StreamHandler()
         handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
         self.logger.addHandler(handler)
-        self.logger.setLevel(10)
+        # set the level to logging.DEBUG to get more messages
+        self.logger.setLevel(logging.INFO)
         
         self.player = player
         if master is None:
