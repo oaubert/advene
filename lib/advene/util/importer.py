@@ -46,7 +46,8 @@ class GenericImporter(object):
         self.author=author
         self.timestamp=time.strftime("%F")
         self.defaulttype=defaulttype
-        # FIXME: implement self.offset (in ms)
+        # Default offset in ms
+        self.offset=0
 
     def process_file(self, filename):
         """Abstract method.
@@ -61,6 +62,8 @@ class GenericImporter(object):
                            timestamp=None, title=None):
         """Create an annotation in the package
         """
+        begin += self.offset
+        end += self.offset
         if ident is None:
             a=self.package.createAnnotation(type=type_,
                                             fragment=MillisecondFragment(begin=begin, end=end))
@@ -461,9 +464,9 @@ class SubtitleImporter(GenericImporter):
                 if match is not None:
                     l=[ long(i) for i in  match.groups()]
                     (h,m,s,ms) = l[:4]
-                    b=ms+s*1000+m*60000+h*3600000
+                    b = ms + s * 1000 + m * 60000 + h * 3600000
                     (h,m,s,ms) = l[4:]
-                    e=ms+s*1000+m*60000+h*3600000
+                    e = ms + s * 1000 + m * 60000 + h * 3600000
                     tc=(b,e)
                 elif len(line) == 0:
                     # Empty line: end of subtitle
@@ -497,7 +500,7 @@ if __name__ == "__main__":
     pname=sys.argv[2]
 
     if fname == 'chaplin':
-        i=ChaplinImporter()
+        i=ChaplinImporter(author='chaplin-importer')
         p, at=i.create_package(schemaid='dvd',
                                annotationtypeid='chapter')
         i.package=p
@@ -505,7 +508,7 @@ if __name__ == "__main__":
         # FIXME: should specify title
         p.setMetaData (config.data.namespace, "mediafile", "dvdsimple:///dev/dvd@1,1")        
     elif fname == 'lsdvd':
-        i=LsDVDImporter()
+        i=LsDVDImporter(author='lsdvd-importer')
         p, at=i.create_package(schemaid='dvd',
                                annotationtypeid='chapter')
         i.package=p
