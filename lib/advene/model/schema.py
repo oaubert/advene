@@ -271,7 +271,6 @@ class RelationType(AbstractType,
                 e.removeChild(c)
         # Create the children nodes
         for m in membertypes:
-            print "Adding %s" % m
             c = self._getDocument ().createElementNS (adveneNS, "member-type")
             c.setAttributeNS (xlinkNS, 'xlink:href', unicode(m))
             e.appendChild (c)
