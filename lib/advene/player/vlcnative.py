@@ -65,8 +65,9 @@ class Player(object):
         """
         try:
             return object.__getattribute__ (self, name)
-        except AttributeError:
-            raise InternalException
+        except AttributeError, e:
+            return self.mc.__getattribute__ (name)
+            raise self.InternalException(e)
 
     def is_active (self):
         """Checks whether the player is active.
@@ -98,7 +99,7 @@ class Player(object):
         """Wrapper initialization.
         """
         # FIMXE: pass options
-        self.mc = VLC.MediaControl()
+        self.mc = VLC.MediaControl() # config.data.player_args)
 
         # 0 relative position
         pos = VLC.Position ()
@@ -185,12 +186,13 @@ class Player(object):
         """Updates the current status information."""
         if self.mc is not None:
             try:
-                s = self.mc.get_stream_information ()
+                s = self.mc.get_stream_information (VLC.MediaTime)
             except:
-                raise self.InternalException(e)
-            self.status = s.streamstatus
-            self.stream_duration = s.length
-            self.current_position_value = s.position
+                raise self.InternalException()
+            self.status = s['status']
+            self.stream_duration = s['length']
+            self.current_position_value = s['position']
+            self.url=s['url']
             # FIXME: the returned values are wrong just after a player start
             # (pressing Play button)
             # Workaround for now:
@@ -202,6 +204,10 @@ class Player(object):
             self.status = VLC.UndefinedStatus
             self.stream_duration = 0
             self.current_position_value = 0
+            self.url=''
+
+    def dvd_uri(self, chapter=None, title=None):
+        return "dvdsimple:///dev/dvd@%s:%s" % (str(chapter), str(title))
 
     def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
@@ -225,5 +231,10 @@ class Player(object):
         p = VLC.Position ()
         p.origin = origin
         p.key = key
-        p.value = value
+        p.value=long(value)
         return p
+
+    def check_player(self):
+        # FIXME: correctly implement this
+        print "check player"
+        return True
