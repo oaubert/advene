@@ -200,6 +200,7 @@ class Window:
         completion=None
 
         attr=None
+
         try:
             res=eval(expr, self.globals_, self.locals_)
             completion=dir(res)
@@ -207,7 +208,7 @@ class Window:
             # Display them when completion is invoked
             # on element._ type string.
             completion=[ a for a in completion if not a.startswith('_') ]
-        except Exception, e:
+        except (Exception, SyntaxError), e:
             if not '.' in expr:
                 # Beginning of an element name (in global() or locals() or builtins)
                 v=dict(self.globals_)
@@ -235,7 +236,19 @@ class Window:
                         # Display them when completion is invoked
                         # on element._ type string.
                         completion=[ a for a in completion if not a.startswith('_') ]
-
+                else:
+                    # Dict completion
+                    m=sre.match('^(.+)\[[\'"]([^\]]*)', expr)
+                    if m is not None:
+                        obj, key=m.group(1, 2)
+                        attr=key
+                        try:
+                            o=eval(obj, self.globals_, self.locals_)
+                            completion=[ k
+                                         for k in o.keys()
+                                         if k.startswith(key) ]
+                        except Exception, e:
+                            pass
         self.clear_output()
         if completion is None:
             f=StringIO.StringIO()
