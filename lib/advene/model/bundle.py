@@ -577,8 +577,8 @@ class InverseDictBundle (StandardXmlBundle):
         super (InverseDictBundle, self).__delitem__ (index)
         del self.__inverse_dict[self.__inverse_key (item)]        
 
-    def insert (self, item, index):
-        super (InverseDictBundle, self).insert (self, item, index=index)
+    def insert (self, index, item):
+        super (InverseDictBundle, self).insert (index, item)
         self.__inverse_dict[self.__inverse_key (item)] = item.getUri (
                                                                   absolute=True)
 
