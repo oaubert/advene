@@ -1,30 +1,49 @@
-* Item File->properties : nombre d'elements (ann, rel, etc)
+* GUI: implement Recent Files functionality (using the freedesktop.org convention)
+
+* model: rewrite the model with a new format (.zip) using
+http://effbot.org/zone/celementtree.htm ?
+
+* model: implement a data PATH variable to look for packages. Insert the current package's pwd first as default.
+
+* GUI: use icons and graphic files from openclipart, to alleviate any
+copyright problems
+
+* mediacontrol-core: fix bug where a timing (0,10) from pyvlc module
+in display text does not work. Only (0,0) works.
+
+* Morphix image:
+Need to add :
+python-gtk2 (>=2.0)
+python-glade2 (>=2.0)
+vlc (>= 0.7.2) and depedencies
+python-vlc, vlc-plugin-svg
+python-xml (>=0.8.0)
+python-simpletal (>=3.9)
+python-imaging
+
+* Element id generation: use an incremented index and check that it is
+not already used (will create more friendly ids). Will be best
+implemented by a singleton IdGenerator that caches the last index for
+each type. -> cf advene.core.idgenerator
+
+* Implement a action-history widget, that displays all events taking
+place with the previous and next states, so that we can know what took place
+
+* Implement Xine Advene player (through pyxine package)
+
+* Remove vlc references in advene.core.config
+
+* Item File->statistics : nombre d'elements (ann, rel, etc)
 
 * subtitles.xml -> clean up
 
-* export.xml -> export_views.xml
+* Implement "Search" on annotations. Could be done as a pre-filled
+filter that is displayed in a treeview -> should modify TreeWidget to
+accomodate a FilteredDataModel
 
-* edit DC description for packages and display it on import
-
-* bootstrap: supprimer stbv pause adter annotation
-
-* Test if relations exist when deleting annotations
-
-* Implementer Search on annotations
-
-* Fix fileselector bug
-
-* tree.py: fix on_get_iter (cf tutorial)
+* Implement "copy/paste" on elements
 
 * A creuser: http://veejay.sourceforge.net/
-
-* Upgrade to gtk2.4 (fix DeprecationWarnings)
-
-* Make the main buttonbox of the main window a toolbar
-
-* Add a file operations toolbar (new/open/save, import, etc)
-
-* views should return a TypedString(unicode) with a contenttype or mimetype attribute -> DONE
 
 * player: implement dvd_uri(chapter, title, uri?) that returns a
 valid DVD uri for the given player
@@ -51,7 +70,7 @@ badly written symbol) and display a meaningful message
 
 * Merge gui.edit.timechooser and gui.views.history
 
-* Rename advene.util.vlclib to something more meaningful (helper)
+* Rename advene.util.vlclib to something more meaningful (advene.util.helper)
 
 * Import elements GUI: implement "Add/Remove package" -> ready, but need the corresponding method in the model to remove
 
@@ -71,8 +90,6 @@ AnnotationTypes rather than their ids) -> DONE for R/W.
 
 * sound_[sg]et_volume: normalize volume in [0..100]
 
-* player: implement vlchttp
-
 * Transcription: complete annotation edition
 
 * Annotation chanson: paroles / refrain /couplet + UTBV/STBV (transcription)
@@ -85,8 +102,6 @@ AnnotationTypes rather than their ids) -> DONE for R/W.
 * corba: Add the 'repeat' property on all items in the playlist
 
 * Implement completion in TALES fields ?
-
-* Upgrade simpletal support to 3.9
 
 * Edit element popup: check that the data was not modified before closing
 
@@ -163,8 +178,6 @@ annotation, of the same type or not.
 * Register all editing popup windows to close them upon package reload
 
 * Treeview: add the elements attributes as annotation/relation children.
-
-* Implement Xine Advene player
 
 * MediaControl.idl: get_capabilities() returning a list of
   capabilities ("snapshot", "caption", "svg")
@@ -638,3 +651,36 @@ separator, display marks, apply expression (for structured content) -> DONE
 annotation of the same type, or global -> DONE
 
 * Organize action names and conditions along categories -> DONE
+
+* export.xml -> export_views.xml -> DONE
+
+* edit DC description for packages -> DONE
+
+* bootstrap: supprimer stbv pause after annotation -> DONE
+
+* views should return a TypedString(unicode) with a contenttype or mimetype attribute -> DONE
+
+* Test if relations exist when deleting annotations
+
+* Make the main buttonbox of the main window a toolbar -> DONE
+
+* Logwindow: add a close button  -> DONE
+
+* Logwindow: catch the destroy event and hide the window -> DONE
+
+* Add a file operations toolbar (new/open/save, import, etc) -> DONE
+
+* tree.py: fix on_get_iter (cf tutorial) -> DONE
+
+* Fix fileselector bug -> DONE (use FileChooser)
+
+* Preview in fileselector to open package: display description and number of elements -> DONE
+
+* display DC description for packages on import -> DONE
+
+* Upgrade to gtk2.4 (fix DeprecationWarnings) -> DONE
+
+* Upgrade simpletal support to 3.9 -> DONE
+
+* player: implement vlchttp -> DONE (too slow)
+
