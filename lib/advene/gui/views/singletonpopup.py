@@ -42,8 +42,8 @@ class SingletonPopup:
             self.autohide=True
         self.widget=widget
         self.vbox.add(widget)
-        if timeout is not None:
-            self.hidetime=time.time() + (timeout / 1000.0)
+        if timeout is not None and timeout != 0:
+            self.hidetime=time.time() + (long(timeout) / 1000.0)
         self.show()
         return True
 
