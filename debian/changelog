@@ -1,3 +1,12 @@
+advene (project) unstable; urgency=low
+
+  * Video output is now embedded
+  * Added a --no-embedded option
+  * Timeline : implemented annotation alignment (by drag'n drop)
+  * Added some views (history, urlstack, popups) around the video window
+  
+ --
+
 advene (0.16) unstable; urgency=low
 
   * Normalize DVD naming scheme: dvd@title:chapter
