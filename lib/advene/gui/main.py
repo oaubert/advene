@@ -919,9 +919,9 @@ class AdveneGUI (Connect):
         if duration == "" or duration == 0:
             duration = None
         
-        vbox.pack_start(self.get_illustrated_text(message))
+        w=self.get_illustrated_text(message)
 
-        self.popupwidget.display(widget=l, timeout=duration, title=_("Information popup"))
+        self.popupwidget.display(widget=w, timeout=duration, title=_("Information popup"))
         return True
 
     def action_popup_goto (self, context, parameters):
