@@ -48,6 +48,7 @@ import advene.model.viewable as viewable
 from advene.model.constants import *
 from advene.model.exception import AdveneException
 
+from gettext import gettext as _
 
 class AbstractBundle (object):
     """
@@ -261,7 +262,7 @@ class WritableBundle (AbstractBundle):
         if check is item:
             del self[uri]
             return
-        raise ValueError, '%s not in bundle' % item
+        raise ValueError, _('%s not in bundle') % item
 
     def pop(self, index=0):
         r = self[index]
@@ -327,12 +328,12 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
     def __str__ (self):
         t = self.viewableType
         if t is None:
-            return "List of non-typed elements"
+            return _("List of non-typed elements")
         else:
             # Viewable-type should be of the form type-list
             if t.endswith("-list"):
-                t = t[:-5] + "s"
-            return "List of %s" % t
+                t = t[:-5]
+            return _("List of elements of type %s") % t
         
     def _update (self):
         """
