@@ -52,17 +52,6 @@ class CreateElementPopup(object):
         self.type_=type_
         self.parent=parent
         self.controller=controller
-        # FIXME: This would be better in a central place
-        self.prefix = {
-            Package: "p",
-            Annotation: "a",
-            Relation: "r",
-            Schema: "schema_",
-            AnnotationType: "at_",
-            RelationType: "rt_",
-            View: "view_",
-            Query: "query_",
-            }
         self.chosen_type = None
         self.widget=self.build_widget()
         
@@ -73,7 +62,7 @@ class CreateElementPopup(object):
         pass
 
     def generate_id(self):
-        return self.prefix[self.type_] + str(id(self)) + str(time.clock()).replace('.','')
+        return self.controller.idgenerator.get_id(self.type_)
 
     def update_type(self, combo):
         self.chosen_type = combo.get_model().get_value(combo.get_active_iter(), 1)
