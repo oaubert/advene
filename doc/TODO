@@ -1,3 +1,23 @@
+* Content: how to represent structured data ? Cf MPEG7 DS ?
+
+* Assistants:
+  - shot detection
+  - voice recognition
+  - relation creation (based on criteria like "shot in sequence" -> isPartOf)
+
+* Timeline:
+  - copy/paste paradigm
+  - concurrent annotation representation
+  - annotation alignment (=~ arrange/align in Impress)
+  - ability to specify line order and which types to display
+
+* ECA: implement a position heap memorizing jump positions (in order
+to implement a "Return to last position")
+
+* Make the annotation interface as On-Screen Display over the video window
+
+* Video player: investigate pyxine and gst-python. Also win32com (http://www.boddie.org.uk/python/COM.html)
+
 * Advenelib: implement AnnotationType and RelationType creation methods.
 
 * Create a unique logger in controller and use exclusively this one in all modules.
@@ -5,7 +25,7 @@
 * vlc-dev: use the new start-time and stop-time functionality in core VLC to correctly
   handle positions in start and stop.
 
-* Update EPOZ code to 1.0.2
+* Update EPOZ code to 1.0.2 / kupu
 
 * Windows/gtk has a problem with threads. Solve using the recipe given in:
   http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
@@ -16,7 +36,8 @@
   package.media property)
 
 * gui.main should catch the information about a new view being defined and update the
-  interface accordingly (for instance, a new annotation type or a new dynamic view created)
+  interface accordingly (for instance, a new annotation type or a new
+  dynamic view created) -> DONE for views
 
 * More quickly : STBV Optionmenu should only have a reference to the STBV id, so that
   the new version is taken into account when edited.
