@@ -48,14 +48,14 @@ class DVDSelect:
         if not hasattr(self, 'oldplaylist'):
             self.oldplaylist=self.controller.player.playlist_get_list()
             self.controller.player.playlist_clear()
-            self.controller.player.playlist_add_item(self.get_url())
+            self.controller.player.playlist_add_item(unicode(self.get_url(), 'utf8').encode('utf8'))
             self.controller.player.update_status("start")
             button.set_label(_("Stop"))
         else:
             self.controller.player.update_status("stop")
             self.controller.player.playlist_clear()
             for i in self.oldplaylist:
-                self.controller.player.playlist_add_item(i)
+                self.controller.player.playlist_add_item(unicode(i,'utf8').encode('utf8'))
             del self.oldplaylist
             button.set_label(_("Preview"))
         return True
