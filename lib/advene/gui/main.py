@@ -60,6 +60,7 @@ import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.evaluator
 from advene.gui.views.singletonpopup import SingletonPopup
+from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
 from advene.gui.views.transcription import TranscriptionView
 import advene.gui.edit.transcribe
@@ -443,9 +444,12 @@ class AdveneGUI (Connect):
 
         hbox=gtk.HBox()
         # Create the SingletonPopup instance
-        self.singletonpopup=SingletonPopup(controller=self.controller,
-                                           autohide=False,
-                                           container=hbox)
+        #self.popupwidget=SingletonPopup(controller=self.controller,
+        #                                   autohide=False,
+        #                                   container=hbox)
+        self.popupwidget=AccumulatorPopup(controller=self.controller,
+                                             autohide=False,
+                                             container=hbox)
         self.gui.get_widget("displayvbox").add(hbox)
 
         self.controller.event_handler.internal_rule (event="PackageLoad",
@@ -503,7 +507,7 @@ class AdveneGUI (Connect):
             print "Cannot set visual: %s" % str(e)
             # Use available space to display a treeview (should be configurable ?)
             self.displayhbox.destroy()
-            self.singletonpopup.reparent(container=None)
+            self.popupwidget.reparent(container=None)
 
             tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
@@ -789,13 +793,13 @@ class AdveneGUI (Connect):
         if duration == "" or duration == 0:
             duration = None
         l = gtk.Label(message)
-        self.singletonpopup.display(widget=l, timeout=duration)
+        self.popupwidget.display(widget=l, timeout=duration)
         return True
 
     def action_popup_goto (self, context, parameters):
-        def handle_response(button, position):
+        def handle_response(button, position, widget):
             self.controller.update_status("set", position)
-            self.singletonpopup.undisplay()
+            self.popupwidget.undisplay(widget)
             return True
 
         description=self.parse_parameter(context, parameters, 'description', _("Make a choice"))
@@ -811,23 +815,22 @@ class AdveneGUI (Connect):
         if duration == "" or duration == 0:
             duration = None
         b=gtk.Button(message)
-        b.connect("clicked", handle_response, position)
-
         vbox=gtk.VBox()
         l=gtk.Label(description)
         vbox.pack_start(l, expand=False)
         vbox.pack_start(b, expand=False)
         vbox.show_all()
         
-        self.singletonpopup.display(widget=vbox, timeout=duration)
+        b.connect("clicked", handle_response, position, vbox)
+        self.popupwidget.display(widget=vbox, timeout=duration)
         return True
 
     def generate_action_popup_goton(self, size):
         def generate (context, parameters):
             """Display a popup with 'size' choices."""
-            def handle_response(button, position):
+            def handle_response(button, position, widget):
                 self.controller.update_status("set", long(position))
-                self.singletonpopup.undisplay()
+                self.popupwidget.undisplay(widget)
                 return True
 
             vbox=gtk.VBox()
@@ -847,13 +850,13 @@ class AdveneGUI (Connect):
 
                 position=self.parse_parameter(context, parameters, 'position%d' % i, 0)
                 b=gtk.Button(message)
-                b.connect("clicked", handle_response, position)
+                b.connect("clicked", handle_response, position, vbox)
                 vbox.add(b)
 
             duration=self.parse_parameter(context, parameters, 'duration', None)
             if duration == "" or duration == 0:
                 duration = None
-            self.singletonpopup.display(widget=vbox, timeout=duration)
+            self.popupwidget.display(widget=vbox, timeout=duration)
             return True
         return generate
 
