@@ -93,7 +93,7 @@ class DefaultActionsRepository:
             name="DisplayMarker",
             method=self.DisplayMarker,
             description=_("Display a marker"),
-            parameters={'shape': _("Marker shape (rectangle, circle, triangle)"),
+            parameters={'shape': _("Marker shape (square, circle, triangle)"),
                         'color': _("Marker color"),
                         'x': _("x-position (percentage of screen)"),
                         'y': _("y-position (percentage of screen)"),
@@ -214,19 +214,19 @@ class DefaultActionsRepository:
 
         If the 'duration' parameter is not defined, a default duration will be used.
         Parameters:
-        Shape: rectangle, circle.
+        Shape: square, circle, triangle.
         Color: named color.
         Position: x, y in percentage of the screen. (0,0) is on top-left.
         Duration: in ms
         """
-        shape=self.parse_parameter(context, parameters, 'shape', 'rectangle')
+        shape=self.parse_parameter(context, parameters, 'shape', 'square')
         color=self.parse_parameter(context, parameters, 'color', 'white')
         x=self.parse_parameter(context, parameters, 'x', '95')
         y=self.parse_parameter(context, parameters, 'y', '95')
         size=self.parse_parameter(context, parameters, 'size', '4')
         duration=self.parse_parameter(context, parameters, 'duration', None)
 
-        if shape == 'rectangle':
+        if shape == 'square':
             code='<rect x="%s%%" y="%s%%" width="%sem" height="%sem" fill="%s" />' % (x, y, size, size, color)
         elif shape == 'circle':
             code='<circle cx="%s%%" cy="%s%%" r="%sem" fill="%s" />' % (x, y, size, color)
@@ -240,7 +240,9 @@ class DefaultActionsRepository:
                                                                        x+s, y+s,
                                                                        x, y-s)
         else:
-            code='<text x="%s%%" y="%s%%" color="%s">TODO</text>' % (x, y, color)
+            code='<text x="%s%%" y="%s%%" font-size="%s0" color="%s">TODO</text>' % (x, y,
+                                                                                     size,
+                                                                                     color)
 
         message="""<svg version='1' preserveAspectRatio='xMinYMin meet' viewBox='0 0 800 600'>%s</svg>""" % code
         
