@@ -267,3 +267,9 @@ class Player(object):
     def snapshot(self, position):
         d=self.mc.snapshot(position)
         return Snapshot(d)
+
+    def set_visual(self, xid):        
+        o=VLC.Object(0)
+        o.set('drawable', xid)
+        return
+    
