@@ -229,9 +229,13 @@ class TimeLine:
 
     def update_button (self, b):
         a = b.annotation
+        l = b.label
         u2p = self.unit2pixel
         title=vlclib.get_title(self.controller, a)
-        b.set_label (title)
+        if a.relations:
+            l.set_markup('<b>%s</b>' % title)
+        else:
+            l.set_text(title)
         b.set_size_request(u2p(a.fragment.duration),
                            self.button_height)
         
@@ -336,7 +340,7 @@ class TimeLine:
         f.add(vbox)
 
         l=gtk.Label()
-        l.set_markup(_("Choose the type of relation you want to set between\n%s\nand\n%s")
+        l.set_markup(_("Choose the type of relation\n you want to set between\n%s\nand\n%s")
                      % (source.id, dest.id))
         vbox.add(l)
 
@@ -386,8 +390,14 @@ class TimeLine:
     def create_annotation_widget(self, annotation):
         u2p = self.unit2pixel
         title=vlclib.get_title(self.controller, annotation)
-        b = gtk.Button(title)
-        
+        b = gtk.Button()
+        l = gtk.Label()
+        if annotation.relations:
+            l.set_markup('<b>%s</b>' % title)
+        else:
+            l.set_text(title)
+        b.label=l
+        b.add(l)
         b.annotation = annotation
         b.active = False
         b.connect("clicked", self.annotation_cb, annotation)
