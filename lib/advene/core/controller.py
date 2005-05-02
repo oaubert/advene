@@ -417,10 +417,12 @@ class AdveneController:
         m=self.dvd_regexp.match(uri)
         if m:
             title,chapter=m.group(1,2)
-            uri="dvd@%s:%s"
+            uri="dvd@%s:%s" % (title, chapter)
         if isinstance(uri, unicode):
             uri=uri.encode('utf8')
         self.package.setMetaData (config.data.namespace, "mediafile", uri)
+        if m:
+            uri=self.player.dvd_uri(title, chapter)
         self.player.playlist_clear()
         self.player.playlist_add_item (uri)
 
@@ -454,6 +456,7 @@ class AdveneController:
         if mediafile != "":
             if isinstance(mediafile, unicode):
                 mediafile=mediafile.encode('utf8')
+            self.player.playlist_clear()
             self.player.playlist_add_item (mediafile)
 
     def start_update_snapshots(self, progress_callback=None, stop_callback=None):
@@ -637,6 +640,7 @@ class AdveneController:
                     # Update the player playlist
                     if isinstance(mediafile, unicode):
                         mediafile=mediafile.encode('utf8')
+                    self.player.playlist_clear()
                     self.player.playlist_add_item (mediafile)
                      
             # Load the imagecache
