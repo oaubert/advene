@@ -4,6 +4,8 @@ This module defines the GUI classes. The main one is L{AdveneGUI},
 which is instantiated with a GLADE XML file. It defines the important
 methods and the various GUI callbacks (generally all methods with the
 C{on_} prefix).
+
+It also defines GUI-specific actions (DisplayPopup, etc).
 """
 
 import sys, time
@@ -1788,7 +1790,7 @@ class AdveneGUI (Connect):
             url=sel.get_url()
             sel.get_widget().destroy()
             self.controller.set_default_media(url)
-            self.controller.update_status ("start")
+            #self.controller.update_status ("start")
             window.destroy()
             return True
 
@@ -1838,7 +1840,6 @@ class AdveneGUI (Connect):
     def on_preferences_ok_clicked (self, button=None, data=None):
         config.data.player_preferences['osdtext'] = self.gui.get_widget ("osdtext_toggle").get_active ()
         self.gui.get_widget ("preferences").hide ()
-        self.update_view ()
         return True
 
     def on_preferences_cancel_clicked (self, button=None, data=None):
