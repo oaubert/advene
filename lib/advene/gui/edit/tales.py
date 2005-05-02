@@ -71,6 +71,9 @@ class TALESEntry:
         """
         if expr is None:
             expr=self.entry.get_text()
+        # Empty expressions are considered valid
+        if expr == "":
+            return True
         if TALESEntry.path_any_re.match(expr):
             return True
         m=TALESEntry.path_tales_re.match(expr)
