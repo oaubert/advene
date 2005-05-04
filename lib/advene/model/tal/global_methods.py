@@ -6,6 +6,7 @@ order to prevent cyclic references.
 
 If called on an invalid target, the method should return None.
 """
+import random
 
 def absolute_url(target, context):
 
@@ -493,3 +494,11 @@ def length(target, context):
     """Returns the length of the target."""
     return len(target)
 
+def randompick(target, context):
+    """Return a random element from the target."""
+    try:
+       e=random.choice(target)
+    except IndexError:
+       # If list is empty, or target is not a list
+       e=None
+    return e
