@@ -73,11 +73,16 @@ class TranscriptionEdit:
                                   upper=5000,
                                   step_incr=10,
                                   page_incr=100)
-                    
-        self.default_color = gtk.gdk.color_parse ('lightblue')
-        self.ignore_color = gtk.gdk.color_parse ('tomato')
+
+        self.colors = {
+            'default': gtk.gdk.color_parse ('lightblue'),
+            'ignore':  gtk.gdk.color_parse ('tomato'),
+            'current': gtk.gdk.color_parse ('green'),
+            }
 
         self.marks = []
+
+        self.current_mark = None
         
         self.widget=self.build_widget()
         if filename is not None:
@@ -92,7 +97,8 @@ class TranscriptionEdit:
         self.textview.set_wrap_mode (gtk.WRAP_CHAR)
 
         # 0-mark at the beginning
-        self.create_timestamp_mark(0, self.textview.get_buffer().get_start_iter())
+        zero=self.create_timestamp_mark(0, self.textview.get_buffer().get_start_iter())
+        self.current_mark=zero
 
         self.textview.connect("button-press-event", self.button_press_event_cb)
 
@@ -111,6 +117,8 @@ class TranscriptionEdit:
         return True
     
     def button_press_event_cb(self, textview, event):
+        if event.state & gtk.gdk.CONTROL_MASK:
+            return False
         if event.button != 1:
             return False
         if not self.timestamp_mode_toggle.get_active():
@@ -151,14 +159,17 @@ class TranscriptionEdit:
             button.modify_bg (style, color)
 
     def toggle_ignore(self, button):
+        button.ignore = not button.ignore
+        self.update_mark(button)
+        return button
+
+    def update_mark(self, button):
         if button.ignore:
-            button.ignore=False
-            self.set_color(button, self.default_color)
+            self.set_color(button, self.colors['default'])
         else:
-            button.ignore=True
-            self.set_color(button, self.ignore_color)
+            self.set_color(button, self.colors['ignore'])
         return
-    
+        
     def mark_button_press_cb(self, button, event):
         """Handler for right-button click on timestamp mark.
         """
@@ -238,7 +249,7 @@ class TranscriptionEdit:
         self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
         child.timestamp=timestamp
         child.ignore=False
-        self.set_color(child, self.default_color)
+        self.update_mark(child)
         child.show()
         self.textview.add_child_at_anchor(child, anchor)
         
@@ -300,6 +311,22 @@ class TranscriptionEdit:
                 return a.get_widgets()[0], it.copy()
         return None, None
 
+    def update_position(self, pos):
+        l=[ m for m in self.marks if m.timestamp <= pos ]
+        if l:
+            cm=l[-1]
+            if cm != self.current_mark:
+                # Restore the properties of the previous current mark
+                if self.current_mark is not None:
+                    self.update_mark(self.current_mark)
+                self.set_color(cm, self.colors['current'])
+                self.current_mark = cm
+        else:
+            if self.current_mark is not None:
+                    self.update_mark(self.current_mark)                
+            self.current_mark=None
+        return True
+    
     def parse_transcription(self, show_ignored=False, strip_blank=True):
         """Parse the transcription text.
 
@@ -452,7 +479,7 @@ class TranscriptionEdit:
                     mark=self.create_timestamp_mark(t, it)
                     if ignore:
                         mark.ignore=True
-                        self.set_color(mark, self.ignore_color)
+                        self.update_mark(mark)
                     last_time = t
                 b.insert_at_cursor(text)
         else:
@@ -494,7 +521,7 @@ class TranscriptionEdit:
         """Return the TreeView widget."""
         return self.widget
 
-    def get_toolbar(self, window):
+    def get_toolbar(self, close_cb=None):
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS) 
         radiogroup_ref=None
@@ -504,7 +531,7 @@ class TranscriptionEdit:
             (_("Save"),    _("Save"), gtk.STOCK_SAVE, self.save_transcription_cb),
             (_("Save As"), _("Save As"), gtk.STOCK_SAVE_AS, self.save_as_cb),
             (_("Convert"), _("Convert"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
-            (_("Close"),   _("Close"), gtk.STOCK_CLOSE, lambda w: window.destroy()),
+            (_("Close"),   _("Close"), gtk.STOCK_CLOSE, close_cb)
             )
 
         for text, tooltip, icon, callback in tb_list:
@@ -534,6 +561,7 @@ class TranscriptionEdit:
             if event.keyval == gtk.keysyms.s:
                 # Save file
                 self.save_transcription_cb()
+                return True
             elif event.keyval == gtk.keysyms.Return:
                 # Insert current timestamp mark
                 if p.status == p.PlayingStatus or p.status == p.PauseStatus:
@@ -541,6 +569,7 @@ class TranscriptionEdit:
                     it=b.get_iter_at_mark(b.get_insert())
                     self.create_timestamp_mark(p.current_position_value,
                                                it)
+                return True
             elif event.keyval == gtk.keysyms.Right:
                 c.move_position (config.data.player_preferences['time_increment'])
                 return True
@@ -550,17 +579,10 @@ class TranscriptionEdit:
             elif event.keyval == gtk.keysyms.Home:
                 c.update_status ("set", self.controller.create_position (0))
                 return True
-            return True
-    
-    def popup(self):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        return False
 
-        if self.controller.gui:
-            self.controller.gui.init_window_size(window, 'transcribeview')
 
-        window.set_title (_("Transcription alignment"))
-        window.connect ("key-press-event", self.key_pressed_cb)
-
+    def get_packed_widget(self, close_cb=None):
         vbox = gtk.VBox()
 
         hb=gtk.HBox()
@@ -568,7 +590,7 @@ class TranscriptionEdit:
         if self.controller.gui:
             toolbar=self.controller.gui.get_player_control_toolbar()
             hb.add(toolbar)
-        hb.add(self.get_toolbar(window))
+        hb.add(self.get_toolbar(close_cb))
 
         # Spinbutton for reaction time
         l=gtk.Label(_("Reaction time"))
@@ -580,12 +602,25 @@ class TranscriptionEdit:
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         vbox.add (sw)
         sw.add_with_viewport (self.get_widget())
+        return vbox
+    
+    def popup(self):
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+
+        if self.controller.gui:
+            self.controller.gui.init_window_size(window, 'transcribeview')
+
+        window.set_title (_("Transcription alignment"))
+        window.connect ("key-press-event", self.key_pressed_cb)
+
+        vbox = self.get_packed_widget(close_cb=lambda w: window.destroy())
+        window.add(vbox)
+
         if self.controller.gui:
             self.controller.gui.register_view (self)
             window.connect ("destroy", self.controller.gui.close_view_cb,
                             window, self)
 
-        window.add(vbox)
 
         window.show_all()
         return window
