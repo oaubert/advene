@@ -165,9 +165,9 @@ class TranscriptionEdit:
 
     def update_mark(self, button):
         if button.ignore:
-            self.set_color(button, self.colors['default'])
-        else:
             self.set_color(button, self.colors['ignore'])
+        else:
+            self.set_color(button, self.colors['default'])
         return
         
     def mark_button_press_cb(self, button, event):
@@ -311,6 +311,40 @@ class TranscriptionEdit:
                 return a.get_widgets()[0], it.copy()
         return None, None
 
+    def goto_previous_mark(self):
+        c=self.controller
+        if self.current_mark is None:
+            if self.marks:
+                pos = c.create_position (value=self.marks[0].timestamp,
+                                         key=c.player.MediaTime,
+                                         origin=c.player.AbsolutePosition)
+                c.update_status (status="set", position=pos)
+        else:
+            i=self.marks.index(self.current_mark) - 1
+            m=self.marks[i]
+            pos = c.create_position (value=m.timestamp,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)
+        return True
+
+    def goto_next_mark(self):
+        c=self.controller
+        if self.current_mark is None:
+            if self.marks:
+                pos = c.create_position (value=self.marks[-1].timestamp,
+                                         key=c.player.MediaTime,
+                                         origin=c.player.AbsolutePosition)
+                c.update_status (status="set", position=pos)
+        else:
+            i=(self.marks.index(self.current_mark) + 1) % len(self.marks)
+            m=self.marks[i]
+            pos = c.create_position (value=m.timestamp,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)
+        return True
+    
     def update_position(self, pos):
         l=[ m for m in self.marks if m.timestamp <= pos ]
         if l:
@@ -579,8 +613,14 @@ class TranscriptionEdit:
             elif event.keyval == gtk.keysyms.Home:
                 c.update_status ("set", self.controller.create_position (0))
                 return True
+            elif event.keyval == gtk.keysyms.Page_Down:
+                self.goto_next_mark()
+                return True
+            elif event.keyval == gtk.keysyms.Page_Up:
+                self.goto_previous_mark()
+                return True
+            
         return False
-
 
     def get_packed_widget(self, close_cb=None):
         vbox = gtk.VBox()
