@@ -93,7 +93,9 @@ class TranscriptionView:
         t_toggle=self.display_time_toggle.get_active()
         m_toggle=self.display_bounds_toggle.get_active()
 
-        for a in self.model.annotations:
+        l=self.model.annotations[:]
+        l.sort(lambda a,b: cmp(a.fragment.begin, b.fragment.begin))
+        for a in l:
             if t_toggle:
                 b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.begin))
 
