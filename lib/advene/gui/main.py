@@ -107,12 +107,9 @@ class AdveneGUI (Connect):
       - L{update_display} : method regularly called to refresh the display
       - L{on_win_key_press_event} : key press handling
 
-    @ivar current_type: the edited annotations will be created with this type
-    @type current_type: advene.model.AnnotationType
     @ivar gui: the GUI model from libglade
     @ivar gui.logmessages: the logmessages window
     @ivar gui.slider: the slider widget
-    @ivar gui.current_annotation: the current annotation text widget
     @ivar gui.player_status: the player_status widget
 
     @ivar oldstatus: a status cache to check whether a GUI update is necessary
@@ -161,17 +158,16 @@ class AdveneGUI (Connect):
                                                           % advene.core.version.version)
 
         # Define combobox cell renderers
-        for n in ("stbv_combo", "current_type_combo"):
+        for n in ("stbv_combo", ):
             combobox=self.gui.get_widget(n)
             cell = gtk.CellRendererText()
             combobox.pack_start(cell, True)
             combobox.add_attribute(cell, 'text', 0)
             
-        self.current_type=None
-
-        self.gui.current_annotation = self.gui.get_widget ("current_annotation")
-        self.gui.current_annotation.set_text ('['+_('None')+']')
-
+        # TranscriptionEdit widget
+        self.transcription_edit=None
+        self.tewidget=None
+        
         # Player status
         p=self.controller.player
         self.active_player_status=(p.PlayingStatus, p.PauseStatus,
@@ -187,9 +183,6 @@ class AdveneGUI (Connect):
             }
         self.gui.player_status = self.gui.get_widget ("player_status")
         self.oldstatus = "NotStarted"
-
-        # Current Annotation (when defining a new one)
-        self.annotation = None
 
         self.last_slow_position = 0
 
@@ -622,26 +615,6 @@ class AdveneGUI (Connect):
         #print "New size for %s: %s" %  (name, config.data.preferences['windowsize'][name])
         return False
     
-    def set_current_type (self, t):
-        """Set the current annotation type.
-
-        t can be None.
-        
-        @param t: annotation type
-        @type t: AnnotationType
-        """
-        self.current_type = t
-        type_combo=self.gui.get_widget ("current_type_combo")
-        store = self.gui.get_widget("current_type_combo").get_model()
-        i=store.get_iter_first()
-        while i is not None:
-            if store.get_value(i, 1) == t:
-                type_combo.set_active_iter(i)
-                return True
-            i=store.iter_next(i)
-        print "Strange bug in set_current_type: %s" % str(t)
-        return True
-    
     def on_edit_current_stbv_clicked(self, button):
         combo=self.gui.get_widget("stbv_combo")
         i=combo.get_active_iter()
@@ -684,30 +657,6 @@ class AdveneGUI (Connect):
         stbv_combo.set_active(-1)
         stbv_combo.set_active_iter(i)
         stbv_combo.show_all()
-        return True
-
-    def update_type_list (self):
-        """Update the annotation type list.
-        """
-        type_combo=self.gui.get_widget ("current_type_combo")
-        if self.controller.package:
-            l=list(self.controller.package.annotationTypes)
-            l.sort(lambda a,b: cmp(a.title, b.title))
-        else:
-            l=[ None ]
-        if self.current_type is None and l:
-            self.current_type=l[0]
-        st, i = advene.gui.util.generate_list_model(l,
-                                                    controller=self.controller,
-                                                    active_element=self.current_type)
-        type_combo.set_model(st)
-        if i is None:
-            i=st.get_iter_first()
-        # To ensure that the display is updated
-        type_combo.set_active(-1)
-        if i is not None:
-            type_combo.set_active_iter(i)
-        type_combo.show_all()
         return True
 
     def append_file_history_menu(self, filename):
@@ -775,7 +724,6 @@ class AdveneGUI (Connect):
         new view or type is created, or when an existing one is
         modified, in order to reflect changes.
         """
-        self.update_type_list()
         self.update_stbv_list()
         return
 
@@ -1123,10 +1071,6 @@ class AdveneGUI (Connect):
                 self.oldstatus = self.controller.player.status
                 self.gui.player_status.set_text (self.statustext[self.controller.player.status])
 
-            if (self.annotation is not None
-                and self.annotation.content.data != self.gui.current_annotation.get_text()):
-                self.gui.current_annotation.set_text (self.annotation.content.data)
-
             # Update the position mark in the registered views
             # Note: beware when implementing update_position in views:
             # it is a critical execution path
@@ -1257,17 +1201,6 @@ class AdveneGUI (Connect):
             
         return schema
         
-    def on_current_type_combo_changed (self, combo=None):
-        """Callback used to select the current type of the edited annotation.
-        """
-        i=combo.get_active_iter()
-        if i is None:
-            return False
-        t=combo.get_model().get_value(i, 1)
-        self.set_current_type(t)
-        #print "Current type changed to " + str(t)
-        return True
-
     def on_stbv_combo_changed (self, combo=None):
         """Callback used to select the current stbv.
         """
@@ -1301,6 +1234,14 @@ class AdveneGUI (Connect):
 
     def on_win_key_press_event (self, win=None, event=None):
         """Keypress handling."""
+        # It the transcription_edit window is active,
+        # it grabs the keyboard interaction
+        if (self.transcription_edit):
+            # FIXME: we should return True only if the event was
+            # processed by the transcription_edit, but we do not
+            # know if the textarea has processed the event (can we?)
+            return self.transcription_edit.key_pressed_cb(win, event)
+            
         # Control-shortcuts
         if event.state & gtk.gdk.CONTROL_MASK:
             # The Control-key is held. Special actions :
@@ -1326,83 +1267,7 @@ class AdveneGUI (Connect):
             else:
                 return False
 
-        if event.keyval == gtk.keysyms.Return:
-            # Non-pausing annotation mode
-            c=self.controller
-            c.position_update ()
-            if self.annotation is None:
-                # Start a new annotation
-                if self.current_type is None:
-                    # FIXME: should display a warning
-                    return True
-                f = MillisecondFragment (begin=max(c.player.current_position_value-config.data.reaction_time, 0),
-                                         duration=30000)
-                ident=self.controller.idgenerator.get_id(Annotation)
-                self.annotation = c.package.createAnnotation(type = self.current_type,
-                                                             ident=ident,
-                                                             fragment=f)
-                self.annotation.content.data=""
-                #c.package.annotations.append(self.annotation)
-                self.log (_("Defining a new annotation..."))
-                self.controller.notify ("AnnotationCreate", annotation=self.annotation)
-                return True
-            else:
-                # End the annotation. Store it in the annotation list
-                self.annotation.fragment.end = max(c.player.current_position_value-config.data.reaction_time, 0)
-                f=self.annotation.fragment
-                if f.end < f.begin:
-                    f.begin, f.end = f.end, f.begin
-                self.annotation.setAuthor(config.data.userid)
-                self.annotation.setDate(time.strftime("%Y-%m-%d"))
-                c.package.annotations.append (self.annotation)
-                self.log (_("New annotation: %s") % self.annotation)
-                self.gui.current_annotation.set_text ('['+_('None')+']')
-                c.notify ("AnnotationEditEnd", annotation=self.annotation)
-                self.annotation = None
-                if event.state & gtk.gdk.CONTROL_MASK:
-                    # Continuous editing mode: we immediately start a new annotation
-                    if self.current_type is None:
-                        return True
-                    f = MillisecondFragment (begin=max(c.player.current_position_value-config.data.reaction_time, 0),
-                                             duration=30000)
-                    ident=self.controller.idgenerator.get_id(Annotation)                
-                    self.annotation = c.package.createAnnotation(type = self.current_type,
-                                                                 ident=ident,
-                                                                 fragment=f)
-                    self.log (_("Defining a new annotation..."))
-                    self.controller.notify ("AnnotationCreate", annotation=self.annotation)
-                if c.player.status == c.player.PauseStatus:
-                    c.update_status ("resume")
-                return True
-        elif event.keyval == gtk.keysyms.space:
-            # Pausing annotation mode
-            if self.annotation is None:
-                # Not defining any annotation yet. Pause the stream
-                if self.controller.player.status != self.controller.player.PauseStatus:
-                    self.controller.update_status ("pause")
-                self.controller.position_update ()
-                if self.current_type is None:
-                    return True
-                ident=self.controller.idgenerator.get_id(Annotation)
-                self.annotation = self.controller.package.createAnnotation (type = self.current_type,
-                                                                            ident=ident,
-                                                                            fragment = MillisecondFragment (begin=self.controller.player.current_position_value, duration=30000))
-                self.controller.notify ("AnnotationCreate", annotation=self.annotation)
-                self.log (_("Defining a new annotation (Tab to resume the play)"))
-            else:
-                self.annotation.content.data += " "
-            #self.update_display ()
-            return True
-        elif event.keyval == gtk.keysyms.BackSpace:
-            if self.annotation != None:
-                self.annotation.content.data = self.annotation.content.data[:-1]
-                # Cf below
-                #self.update_display ()
-                return True
-            else:
-                return False
-        # Navigation keys
-        elif event.keyval == gtk.keysyms.Tab:
+        if event.keyval == gtk.keysyms.Tab:
             self.controller.update_status ("pause")
             return True
         elif event.keyval == gtk.keysyms.Right:
@@ -1427,14 +1292,6 @@ class AdveneGUI (Connect):
         elif event.keyval == gtk.keysyms.Page_Up:
             # FIXME: Previous chapter
             return True
-        elif event.keyval > 32 and event.keyval < 256:
-            k = chr(event.keyval)
-            if self.annotation is not None:
-                self.annotation.content.data += k
-                # Calling update_display freezes the GUI (which
-                # uses gtk.threads_enter/leave. Do not do it.
-                #self.update_display ()
-                return True
         return True
 
     def on_new1_activate (self, button=None, data=None):
@@ -1552,9 +1409,28 @@ class AdveneGUI (Connect):
         return True
 
     def on_import_transcription1_activate (self, button=None, data=None):
-        te=TranscriptionEdit(controller=self.controller, filename=data)
-        window = te.popup()
-        window.connect ("destroy", lambda w: w.destroy())
+        if self.transcription_edit is not None:
+            self.log(_("A transcription edit view is already open."))
+            return True
+        
+        self.transcription_edit=TranscriptionEdit(controller=self.controller, filename=data)
+        self.register_view(self.transcription_edit)
+        
+        def close_cb(w):
+            if self.transcription_edit is not None:
+                self.transcription_edit.packed_widget.destroy() 
+                self.unregister_view(self.transcription_edit)
+                self.transcription_edit=None
+                self.popupwidget.show()
+            return True
+        
+        self.popupwidget.hide()
+        self.transcription_edit.packed_widget=self.transcription_edit.get_packed_widget(close_cb)
+        self.transcription_edit.packed_widget.show_all()
+        self.transcription_edit.packed_widget.grab_focus()
+
+        self.visualisationwidget.add(self.transcription_edit.packed_widget)
+
         return True
 
     def on_quit1_activate (self, button=None, data=None):
