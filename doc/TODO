@@ -1,8 +1,43 @@
+* Transcribe: add an option "Cursor follows time" to set the cursor according to movie time
+
+* On-the-fly annotation: display as caption the edited content (for 1s)
+
+* Sound recording in python: http://www.johnnypops.demon.co.uk/python/ See also http://divmod.org/projects/shtoom/
+
+* Sound assistant: use cont_fileseg from sphinx2-bin to segment audio, or http://www.cmis.csiro.au/maaate/ or http://aubio.piem.org/news/
+
+* Investigate crash on exit :
+Exiting vlc player
+done
+
+Program received signal SIGSEGV, Segmentation fault.
+[Switching to Thread -1208052992 (LWP 17216)]
+0x4108bb3e in mallopt () from /lib/tls/libc.so.6
+(gdb) bt
+#0  0x4108bb3e in mallopt () from /lib/tls/libc.so.6
+#1  0x4108aa4b in free () from /lib/tls/libc.so.6
+#2  0x08080373 in PyString_Fini ()
+#3  0x080b69c0 in PyCode_Addr2Line ()
+#4  0x080fd6ef in PyStaticMethod_New ()
+#5  0x08076bf9 in PyDict_SetItem ()
+#6  0x080fe6c6 in _PyModule_Clear ()
+#7  0x080cbc11 in PyImport_Cleanup ()
+#8  0x080d8076 in Py_Finalize ()
+#9  0x08054e2e in Py_Main ()
+#10 0x080549eb in main ()
+
+* Move GUI-actions from main to gui.actions
+
+* webserver: log access/error log to either a file or a window
+
+* Main GUI: tooltips on STBVs (must use an EventBox)
+
 * STBV: add include facility, to include basic STBVs
 
-* webserver: implement a wiki-like syntax in views that dynamically generates links to Advene elements/TALES expressions (define a application/x-advene-wiki that will get converted into a 
+* webserver: implement a wiki-like syntax in views that dynamically generates links to Advene elements/TALES expressions (define a application/x-advene-wiki that will get converted into a TAL template)
 
-* timeline: add init parameter "whole package" (or None: if self.list is None, use self.controller.package.annotations)
+* handle wiki syntax in transcriptionedit, so that we can do simple
+notetaking with some markup easily.
 
 * Implement zeroconf support: http://www.amk.ca/python/zeroconf
 
@@ -10,15 +45,10 @@
 precise their parameters (usable from actions and webserver
 invocation).
 
-* transcribe: note taking facility (enter text, when clicking on
-ctrl-enter insert a timestamp mark)
-
 * make navigation history accessible from TALES (/options/history ?)
 
-* keep a viewed_segments structure to propose a view "Shot not yet
-viewed sequences"
-
-* EditContent: add button "External editor"
+* keep a viewed_segments structure to propose a view "Not yet viewed
+sequences"
 
 * Remove show_all() calls in EditElement popups
 
@@ -28,8 +58,6 @@ viewed sequences"
 player at the end of the fragment
 
 * Advene tutorial in advene, with a video capture of an interaction session
-
-* pyvlc: find the bug triggered when no option is given to MediaControl (stack corruption?)
 
 * vlc: use picture+mosaic to implement video embedded inside video (to
 quickly preview a fragment)
@@ -43,7 +71,7 @@ maybe replay the hypervideo. Need to determine the context structure.
 
 * New action: display a fragment of a video then continue from the
 position where the link was activated. Parameters: fragment to play,
-return position
+return position, or display in a new video window
 
 * webserver: handle full html documents (with headings) either by
 using a specific mimetype (text/x-full-html) or if
@@ -63,7 +91,7 @@ common mime-types -> wait for gtk2.6 with CellRendererCombo
   * implement get_api_version()
   * implement get/set_rate
 
-* GUI views: convert action buttons to toolbars
+* All GUI views: convert action buttons to toolbars
 
 * transcription: handle annotation content modification (on window close)
 
@@ -81,8 +109,6 @@ in the main Advene, either in its own window (video + views) -> cf gui.visualisa
 future_leaving to implement a -2 seconds before / +2 seconds after
 annotation event.
 
-* Windows: package libsnapshot_plugin.dll (with MediaControl ?)
-
 * Importer: fix automatic filter selection (get_importer) esp. for XML
 files (use DTD)
 
@@ -92,20 +118,20 @@ files (use DTD)
   debian/changelog
   lib/advene/core/version.py (+ date)
   advene.iss
-+ wget Twiki:AdveneUserGuide to doc/user.html
+ + wget Twiki:AdveneUserGuide to doc/user.html (cf scripts/update_doc)
 
 * Add parameters to TimeLine view (displayed annotation types, zoom)
 
 * Morphix image : use Ubuntu as a base (pygtk included). Missing: vlc + python-vlc
 
-* Rewrite webserver using Twisted (and maybe use it also for ECAEngine)
+* Rewrite webserver using Twisted (and maybe use it also for ECAEngine) ?
 
 * Correct bug when no type is present (cf export_views.xml)
 
 * timeline: directly create annotations from timeline
 
 * Annotation resize in timeline -> Hack (right button). Should
-reimplement a native widget for annotations
+reimplement a native widget for annotations or use DiaCanvas
 
 * Génération régulière d'annotations (toutes les XX secondes), pour
 alignement plus facile par la suite (couplé avec les fonctions
@@ -144,16 +170,9 @@ place with the previous and next states, so that we can know what took place
 
 * subtitles.xml -> clean up
 
-* Implement "Search" on annotations. Could be done as a pre-filled
-filter that is displayed in a treeview -> should modify TreeWidget to
-accomodate a FilteredDataModel
-
 * Implement "copy/paste" on elements
 
 * A creuser: http://veejay.sourceforge.net/
-
-* To build vlcmodule: 
-gcc -pthread -shared build/temp.linux-i686-2.3/vlcmodule.o build/temp.linux-i686-2.3/mediacontrol-init.o build/temp.linux-i686-2.3/mediacontrol-core.o /usr/lib/libtheora.a /usr/local/lib/libx264.a -L/usr/lib/vlc -L/usr/lib -lvlc -lrt -ldl -lpthread -lm -li420_rgb_mmx -li420_yuy2_mmx -li420_ymga_mmx -li422_yuy2_mmx -lfaad -lavcodec -lavformat -lhal -ldbus-1 -ltheora -lx264 -lfaad -lffmpeg -lpostproc -lmemcpymmx -lmemcpymmxext -lmemcpy3dn /usr/local/lib/libfaad.a /usr/lib/libtheora.a /usr/local/lib/libx264.a -lavcodec -o build/lib.linux-i686-2.3/vlc.so -fpic -fPIC
 
 * Fonctionnalité de sauvegarde automatique reguliere en cas de plantage
 
@@ -162,13 +181,10 @@ transcode -H 10 -z -k -o snapshot -y jpg,null -i /dev/dvd -x dvd,null -T 21,1 -c
 
 * Put an example package on the web site and a video of an example interaction
 
-* web site: list current features (import, etc)
-
 * Save ad-hoc view parameters as another view
 
 * In Context (or the GUI), catch AdveneTalesException that happens
-when there is a syntax error in a TALES expression (missing string or
-badly written symbol) and display a meaningful message
+when there is a syntax error in a TALES expression (missing string orbadly written symbol) and display a meaningful message
 
 * Rename advene.util.vlclib to something more meaningful (advene.util.helper)
 
@@ -180,8 +196,6 @@ badly written symbol) and display a meaningful message
   (moon, sun, triangle, etc) as views
 
 * Complete the bootstrap package
-
-* corba: Add the 'repeat' property on all items in the playlist -> cf repeat config in vlcrc
 
 * Edit element popup: check that the data was not modified before closing
 
@@ -200,9 +214,9 @@ badly written symbol) and display a meaningful message
 
 * UTBV: implement Undo in textview (cf gtksourceview)
 
-* Model: Implement copy/rename of id for all elements
-
 * Model related:
+
+** Model: Implement copy/rename of id for all elements
 
 ** Allow to specify preferred package (bootstrap) for default views
 
@@ -246,9 +260,9 @@ the DOM and do not restore it before saving, so it gets lost.
 (for instance, snapshot_url and media_control for annotations) in
 order to avoid using too many global methods.
 
-* Import elements GUI: implement "Add/Remove package" -> ready, but need the corresponding method in the model to remove
+** Import elements GUI: implement "Add/Remove package" -> ready, but need the corresponding method in the model to remove
 
-* Model: Pb in imported packages:
+** Model: Pb in imported packages:
   [ s.title for s in p.imports[1].package.schemas ] works but
   [ s.id for s in p.imports[1].package.schemas ] does not:
 
@@ -257,18 +271,16 @@ order to avoid using too many global methods.
     raise AdveneException ("item %s has no QName prefix in %s" %
 AdveneException: item Package (english_teacher.xml) has no QName prefix in Package (../examples/unicode.xml
 
-* Model: Implement importElement methods (or at least, document the existing ones and add an importPackage() to be able to specify the package's alias)
+** Model: Implement importElement methods (or at least, document the existing ones and add an importPackage() to be able to specify the package's alias)
 
-* Model: implement relationtype.members R/W (and make that a list of
+** Model: implement relationtype.members R/W (and make that a list of
 AnnotationTypes rather than their ids) -> DONE for R/W.
 
-* model: rewrite the model with a new format (.zip) using
+** model: rewrite the model with a new format (.zip) using
 http://effbot.org/zone/celementtree.htm ?
 
-* model: implement a data PATH variable to look for packages. Insert
+** model: implement a data PATH variable to look for packages. Insert
 the current package's pwd first as default.
-
-* Bug in queries (rest not empty even if applied to 1-element lists)
 
 * EditAnnotationPopup: implement Next and Previous
 
@@ -299,8 +311,6 @@ and install it into /usr/lib/orbit-2.0
 http://www.europython.org/conferences/epc2004/info/talks/refereed/kaladan01
 
 * Query MPEG7: http://www.idealliance.org/papers/extreme03/html/2001/Liu01/EML2001Liu01.html
-
-* STBV action: display an activable link
 
 * Try to remove the dependency on PIL by using pixbuf loader to convert snapshots to PNG.
 
@@ -335,6 +345,8 @@ http://www.rexx.com/~dkuhlman/generateDS.html (XML-Schema) Or SOAPy
 http://article.gmane.org/gmane.comp.web.kupu.devel/10
 Transmit python data to javascript:
 http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/285099
+Cf basic tutorial
+http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Windows/gtk has a problem with threads. Solve using the recipe given in:
   http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
@@ -881,3 +893,38 @@ displays "-offset / +offset" -> DONE
 
 * export-views: excel-export view (CSV) -> DONE
 
+* Main GUI: crash when creating annotations on the fly ?? -> DONE
+
+* pyvlc: find the bug triggered when no option is given to MediaControl (stack corruption?) -> DONE
+
+* Windows: package libsnapshot_plugin.dll (with MediaControl ?) -> DONE
+
+* To build vlcmodule:  cf Makefile
+gcc -pthread -shared build/temp.linux-i686-2.3/vlcmodule.o build/temp.linux-i686-2.3/mediacontrol-init.o build/temp.linux-i686-2.3/mediacontrol-core.o /usr/lib/libtheora.a /usr/local/lib/libx264.a -L/usr/lib/vlc -L/usr/lib -lvlc -lrt -ldl -lpthread -lm -li420_rgb_mmx -li420_yuy2_mmx -li420_ymga_mmx -li422_yuy2_mmx -lfaad -lavcodec -lavformat -lhal -ldbus-1 -ltheora -lx264 -lfaad -lmux_ts -ldvbpsi -lpostproc -lmemcpymmx -lmemcpymmxext -lmemcpy3dn /usr/local/lib/libfaad.a /usr/lib/libtheora.a /usr/local/lib/libx264.a -lavcodec -o build/lib.linux-i686-2.3/vlc.so -fpic -fPIC
+
+* transcribe: note taking facility (enter text, when clicking on
+ctrl-enter insert a timestamp mark) -> DONE
+
+* Fix moviepath (_ does not seem to work) -> DONE
+
+* timeline: add init parameter "whole package" (or None: if self.list is None, use self.controller.package.annotations) -> DONE
+
+* EditContent: add button "External editor" -> Implemented Open/Save/Reload
+
+* Implement "Search" on annotations. Could be done as a pre-filled
+filter that is displayed in a treeview -> should modify TreeWidget to
+accomodate a FilteredDataModel
+
+* web site: list current features (import, etc) -> DONE
+
+* corba: Add the 'repeat' property on all items in the playlist -> cf repeat config in vlcrc -> DONE
+
+* Bug in queries (rest not empty even if applied to 1-element lists) -> DONE
+
+* STBV action: display an activable link -> DONE
+
+* The transcribe view would be better in the place of the popups widget -> DONE
+
+* Transcribe: add Ctrl-PageUp/Down to jump from 1 timestamp to the other. -> DONE
+
+* Rename "Import a transcription" into "Take notes on the fly" -> DONE
