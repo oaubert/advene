@@ -1699,6 +1699,16 @@ class AdveneGUI (Connect):
         imp.popup()
         return True
 
+    def on_prop_media_browse_clicked(self, button=None, data=None):
+        d=self.controller.get_default_media()
+        f=advene.gui.util.get_filename(title=_("Associate a movie file"),
+                                       default_file=d)
+        if f is not None:
+            self.controller.set_default_media(f)
+            self.gui.get_widget ("prop_media").set_text (self.controller.get_default_media() or "")
+
+        return True
+    
     def on_package_properties1_activate (self, button=None, data=None):
         self.gui.get_widget ("prop_author_id").set_text (self.controller.package.author)
         self.gui.get_widget ("prop_date").set_text (self.controller.package.date)

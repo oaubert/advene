@@ -13,6 +13,8 @@ advene (project) unstable; urgency=low
   * Textual annotation/view editing: 
       handle open/save to a file, with corresponding 
       keyboard shortcuts (control-o, control-s), and reload (control-r)
+  * Package properties :
+    * Add a Open button to select associated video file
   
  --
 
