@@ -1,4 +1,4 @@
-advene (project) unstable; urgency=low
+advene (0.18) unstable; urgency=low
 
   * TranscriptionEdit:
     * It is now embedded into the main GUI
@@ -16,7 +16,7 @@ advene (project) unstable; urgency=low
   * Package properties :
     * Add a Open button to select associated video file
   
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 29 May 2005 18:39:30 +0200
 
 advene (0.17) unstable; urgency=low
 
