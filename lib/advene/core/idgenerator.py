@@ -2,15 +2,11 @@
 
 import sre
 
-import advene.core.config as config
-
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.bundle import AbstractBundle
 from advene.model.view import View
 from advene.model.query import Query
-from advene.rules.elements import RuleSet, Rule, Event, Action
 
 class Generator:
     prefix = {
