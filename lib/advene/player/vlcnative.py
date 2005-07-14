@@ -292,8 +292,12 @@ class Player(object):
         d=self.mc.snapshot(position)
         return Snapshot(d)
 
-    def set_visual(self, xid):        
-        o=VLC.Object(0)
-        o.set('drawable', xid)
+    def set_visual(self, xid):
+        try:
+            self.mc.set_visual(xid)
+        except AttributeError:
+            # Old vlc API. Use the old way            
+            o=VLC.Object(0)
+            o.set('drawable', xid)
         return
     
