@@ -9,7 +9,6 @@ import os
 import socket
 import sre
 import webbrowser
-import urlparse
 import urllib
 
 import advene.core.config as config
