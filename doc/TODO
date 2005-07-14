@@ -1,3 +1,33 @@
+* Read http://www.ling.uni-potsdam.de/~stede/Downloads/xbrac04.pdf
+(survey of annotation tools)
+
+* Store the navigation history as a package with viewed sequences and
+occurring events (but base timeline is then application time instead
+of movie time)
+
+* Project hosting: http://www.gna.org/
+
+* Player API: check gst-python
+(http://gstreamer.freedesktop.org/releases/gst-python/0.8.2.html) and
+https://gna.org/projects/seamless/ (DVD player using gst-python)
+
+* timeline: find a hackish way to render overlapping buttons
+
+* transcribe: add screenshots to marks context menu
+
+* SMIL examples: http://webmonkey.wired.com/webmonkey/00/41/index4a_page3.html?tw=authoring
+
+* exports.xml: define a CMML export view (cf www.annodex.net)
+
+* TTS on Win32: http://www.cs.unc.edu/~parente/tech/tr02.shtml
+
+* Menu: add a File/Associate video file item
+
+* Data toolbar: with creation buttons (schema, annotation/relation
+type, view, query)
+
+* Timeline: select a region to fit to window
+
 * Transcribe: add an option "Cursor follows time" to set the cursor according to movie time
 
 * On-the-fly annotation: display as caption the edited content (for 1s)
@@ -5,6 +35,9 @@
 * Sound recording in python: http://www.johnnypops.demon.co.uk/python/ See also http://divmod.org/projects/shtoom/
 
 * Sound assistant: use cont_fileseg from sphinx2-bin to segment audio, or http://www.cmis.csiro.au/maaate/ or http://aubio.piem.org/news/
+
+* assistant: speech decomposition (only extracts timestamps). Use speech-tools ? http://www.cstr.ed.ac.uk/projects/speech_tools/manual-1.2.0/x737.htm
+
 
 * Investigate crash on exit :
 Exiting vlc player
@@ -76,8 +109,6 @@ return position, or display in a new video window
 * webserver: handle full html documents (with headings) either by
 using a specific mimetype (text/x-full-html) or if
 res.startswith('<html>') [useful for Kupu]
-
-* assistant: speech decomposition (only extracts timestamps). Use speech-tools ? http://www.cstr.ed.ac.uk/projects/speech_tools/manual-1.2.0/x737.htm
 
 * Model: maintain creation date + modification date for elements
 
@@ -928,3 +959,6 @@ accomodate a FilteredDataModel
 * Transcribe: add Ctrl-PageUp/Down to jump from 1 timestamp to the other. -> DONE
 
 * Rename "Import a transcription" into "Take notes on the fly" -> DONE
+
+* Package properties: add file browser for associated media
+
