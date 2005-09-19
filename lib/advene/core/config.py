@@ -214,6 +214,8 @@ class Config(object):
             return
         print "Setting Advene paths for %s" % advenehome
         self.path['advene'] = advenehome
+        self.path['locale'] = os.path.sep.join( (advenehome, 'locale') )
+        self.path['plugins'] = os.path.sep.join( (advenehome, 'lib') )
         self.path['resources'] = os.path.sep.join( (advenehome, 'share') )
         self.path['web'] = os.path.sep.join( (advenehome, 'share', 'web') )
 
