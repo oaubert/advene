@@ -1,3 +1,14 @@
+* Check windows registry paths for 'vlc', 'plugins', 'locale' that are
+bad in Italian (Programmi)
+
+* Bug in webserver.py for files with accents in their fullpath (encoding pb). Should check all encodings everywhere and make sure everything is utf8 internally.
+
+* Demo movie maker : cf http://www.debugmode.com/wink/
+
+* plugins Implementation : cf
+http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/436873 for a
+start
+
 * Read http://www.ling.uni-potsdam.de/~stede/Downloads/xbrac04.pdf
 (survey of annotation tools)
 
