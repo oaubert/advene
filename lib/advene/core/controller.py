@@ -186,6 +186,7 @@ class AdveneController:
             u'snapshot': self.imagecache,
             u'namespace_prefix': config.data.namespace_prefix,
             u'config': config.data.web,
+            u'package': self.package,
             })
         
     def busy_port_info(self):
