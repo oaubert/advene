@@ -32,9 +32,6 @@ import advene.core.version
 from gettext import gettext as _
 
 from advene.model.package import Package
-from advene.model.view import View
-from advene.model.annotation import Annotation
-from advene.model.fragment import MillisecondFragment
 from advene.model.exception import AdveneException
 from advene.model.content import Content
 
@@ -50,7 +47,6 @@ import urllib
 import cgi
 import socket
 import select
-import inspect
 import mimetypes
 import logging
 
@@ -1555,7 +1551,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>An invalid character is in the Context:</p>
                 <p>Error message: <em>%s</em></p><pre>%s</pre>""")
-                                 % (e.errorDescription, unicode(c).encode(utf-8)))
+                                 % (e.errorDescription, unicode(e.args[0]).encode('utf-8')))
             except AdveneException, e:
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>There was an error in the TALES expression.</p>
