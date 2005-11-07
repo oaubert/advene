@@ -1,7 +1,0 @@
-#! /bin/sh
-
-# This script is intended to be copied into /usr/bin/advene
-dir=/usr/lib/advene
-PYTHONPATH=${dir}
-export PYTHONPATH
-exec ${dir}/advenetool $@
