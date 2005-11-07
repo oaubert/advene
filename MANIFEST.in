@@ -1,0 +1,6 @@
+recursive-include doc/ *
+include debian/changelog
+include advene.iss AUTHORS COPYING Makefile MANIFEST.in
+recursive-include scripts/ *
+include setup.cfg setup.py setup-win.py
+recursive-include share/ *
