@@ -9,8 +9,8 @@ It also defines GUI-specific actions (DisplayPopup, etc).
 """
 
 import sys, time
-import cStringIO
 import os
+import socket
 
 import advene.core.config as config
 import advene.core.version
@@ -37,16 +37,12 @@ import advene.core.controller
 import advene.rules.elements
 import advene.rules.ecaengine
 
-from advene.model.package import Package
-from advene.model.annotation import Annotation, Relation
-from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.schema import Schema, AnnotationType
 from advene.model.view import View
-from advene.model.fragment import MillisecondFragment
 import advene.model.constants
 import advene.model.tal.context
 
 import advene.core.mediacontrol
-from advene.core.imagecache import ImageCache
 import advene.util.vlclib as vlclib
 
 import advene.util.importer
@@ -63,7 +59,6 @@ from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
 import advene.gui.evaluator
-from advene.gui.views.singletonpopup import SingletonPopup
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
 from advene.gui.views.transcription import TranscriptionView
@@ -1385,7 +1380,7 @@ class AdveneGUI (Connect):
             dialog = gtk.MessageDialog(
                 None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                 gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                _("The format of the file\n%s\nis not recognized.") % file_)
+                _("The format of the file\n%s\nis not recognized.") % filename_utf)
             response=dialog.run()
             dialog.destroy()
         else:
