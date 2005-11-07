@@ -11,6 +11,7 @@ from advene.gui.edit.rules import EditQuery
 from advene.model.bundle import AbstractBundle
 from advene.rules.elements import Query, Condition
 from advene.model.annotation import Annotation
+from advene.model.tal.context import AdveneTalesException
 
 import advene.gui.views.timeline
 
@@ -74,7 +75,18 @@ class InteractiveQuery:
         self.window.destroy()
         
         c=self.controller.build_context(here=self.here)
-        res=c.evaluateValue("here/query/_interactive")
+        try:
+            res=c.evaluateValue("here/query/_interactive")
+        except AdveneTalesException, e:
+            # Display a dialog with the value
+            dialog = gtk.MessageDialog(
+                None, gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
+                _("TALES error in interactive expression."))
+            dialog.set_position(gtk.WIN_POS_MOUSE)
+            dialog.run()
+            dialog.destroy()
+            return True
 
         if (isinstance(res, list) or isinstance(res, tuple)
             or isinstance(res, AbstractBundle)):
