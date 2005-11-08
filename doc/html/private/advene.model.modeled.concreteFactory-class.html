@@ -12,7 +12,6 @@
 <!-- =========== START OF NAVBAR =========== -->
 <table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="center">
-    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
@@ -52,7 +51,7 @@
 
 <dl><dt><b>Known Subclasses:</b></dt>
 <dd>
-    <a href="advene.model.annotation.AnnotationFactory-class.html"><code>AnnotationFactory</code></a></dd></dl>
+    <a href="advene.model.query.QueryFactory-class.html"><code>QueryFactory</code></a></dd></dl>
 
 <hr/>
 
@@ -62,19 +61,18 @@
 <tr bgcolor="#70b0f0" class="summary">
   <th colspan="2">Method Summary</th></tr>
 <tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
-  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.concreteFactory-class.html#_copy" class="summary-sig-name"><code>copyAnnotation</code></a>(<span class=summary-sig-arg>self</span>,
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.concreteFactory-class.html#_copy" class="summary-sig-name"><code>copyQuery</code></a>(<span class=summary-sig-arg>self</span>,
           <span class=summary-sig-arg>instance</span>,
           <span class=summary-sig-arg>id</span>)</span></code>
 <br />
 FIXME</td></tr>
 <tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
-  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.concreteFactory-class.html#_create" class="summary-sig-name"><code>createAnnotation</code></a>(<span class=summary-sig-arg>self</span>,
+  <td><code><a name="_create"></a><span class="summary-sig"><span class="summary-sig-name">createQuery</span>(<span class=summary-sig-arg>self</span>,
           <span class="summary-sig-vararg">*args</span>,
           <span class="summary-sig-kwarg">**kw</span>)</span></code>
-<br />
-The constructor has two modes of calling</td></tr>
+</td></tr>
 <tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
-  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.concreteFactory-class.html#_import" class="summary-sig-name"><code>importAnnotation</code></a>(<span class=summary-sig-arg>self</span>,
+  <td><code><span class="summary-sig"><a href="../private/advene.model.modeled.concreteFactory-class.html#_import" class="summary-sig-name"><code>importQuery</code></a>(<span class=summary-sig-arg>self</span>,
           <span class=summary-sig-arg>instance</span>)</span></code>
 <br />
 FIXME</td></tr>
@@ -106,7 +104,7 @@ Make the XML element importing _modeled_.</td></tr>
 
 <a name="_copy"></a>
 <table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
-  <h3><span class="sig"><span class="sig-name">copyAnnotation</span>(<span class=sig-arg>self</span>,
+  <h3><span class="sig"><span class="sig-name">copyQuery</span>(<span class=sig-arg>self</span>,
           <span class=sig-arg>instance</span>,
           <span class=sig-arg>id</span>)</span>
   </h3>
@@ -115,30 +113,9 @@ Make the XML element importing _modeled_.</td></tr>
   </dd></dl>
 </td></tr></table>
 
-<a name="_create"></a>
-<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
-  <h3><span class="sig"><span class="sig-name">createAnnotation</span>(<span class=sig-arg>self</span>,
-          <span class="sig-vararg">*args</span>,
-          <span class="sig-kwarg">**kw</span>)</span>
-  </h3>
-  The constructor has two modes of calling
-  <ul>
-    <li>
-      giving it a DOM element (constructing from XML)
-    </li>
-    <li>
-      giving it type,fragment,[ident],[date],[author],[authorUrl], 
-      [context],[content_data|content_stream] (constructing from 
-      scratch)
-    </li>
-  </ul>
-  <dl><dt></dt><dd>
-  </dd></dl>
-</td></tr></table>
-
 <a name="_import"></a>
 <table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
-  <h3><span class="sig"><span class="sig-name">importAnnotation</span>(<span class=sig-arg>self</span>,
+  <h3><span class="sig"><span class="sig-name">importQuery</span>(<span class=sig-arg>self</span>,
           <span class=sig-arg>instance</span>)</span>
   </h3>
   FIXME
@@ -151,7 +128,6 @@ Make the XML element importing _modeled_.</td></tr>
 <!-- =========== START OF NAVBAR =========== -->
 <table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="center">
-    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
@@ -167,7 +143,7 @@ Make the XML element importing _modeled_.</td></tr>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
   <tr>
-    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Sat Mar 12 15:31:53 2005</font></td>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Tue Nov  8 13:24:15 2005</font></td>
     <td align="right"><a href="http://epydoc.sourceforge.net"
                       ><font size="-2">http://epydoc.sf.net</font></a></td>
   </tr>

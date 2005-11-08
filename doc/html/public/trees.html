@@ -12,7 +12,6 @@
 <!-- =========== START OF NAVBAR =========== -->
 <table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="center">
-    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
     <th bgcolor="#70b0f0" class="navselect">&nbsp;&nbsp;&nbsp;Trees&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
@@ -67,13 +66,13 @@
             <li> <b><a href="advene.gui.edit.transcribe-module.html"><code>transcribe</code></a></b>: <i>Transcription view.</i>
           </ul>
         <li> <b><a href="advene.gui.evaluator-module.html"><code>evaluator</code></a></b>: <i>Python expressions evaluator.</i>
+        <li> <b><a href="advene.gui.main-module.html"><code>main</code></a></b>: <i>Advene GUI.</i>
         <li> <b><a href="advene.gui.popup-module.html"><code>popup</code></a></b>: <i>Popup menu for Advene elements.</i>
         <li> <b><a href="advene.gui.util-module.html"><code>util</code></a></b>: <i>GUI-related helper methods</i>
         <li> <b><a href="advene.gui.views-module.html"><code>views</code></a></b>
           <ul>
             <li> <b><a href="advene.gui.views.accumulatorpopup-module.html"><code>accumulatorpopup</code></a></b>: <i>Accumulator popup.</i>
             <li> <b><a href="advene.gui.views.browser-module.html"><code>browser</code></a></b>
-            <li> <b><a href="advene.gui.views.graph-module.html"><code>graph</code></a></b>: <i>Display the package's content as a graph.</i>
             <li> <b><a href="advene.gui.views.history-module.html"><code>history</code></a></b>: <i>Module displaying navigation history.</i>
             <li> <b><a href="advene.gui.views.interactivequery-module.html"><code>interactivequery</code></a></b>: <i>Interactive query.</i>
             <li> <b><a href="advene.gui.views.logwindow-module.html"><code>logwindow</code></a></b>: <i>LogWindow plugin for Advene.</i>
@@ -124,7 +123,6 @@ to a new AdveneContext.</i>
         <li> <b><a href="advene.player.dummy-module.html"><code>dummy</code></a></b>: <i>Dummy player interface</i>
         <li> <b><a href="advene.player.mplayer-module.html"><code>mplayer</code></a></b>: <i>mplayer control class.</i>
         <li> <b><a href="advene.player.vlchttp-module.html"><code>vlchttp</code></a></b>: <i>VLC http interface</i>
-        <li> <b><a href="advene.player.vlcnative-module.html"><code>vlcnative</code></a></b>: <i>VLC access using the native python module.</i>
         <li> <b><a href="advene.player.vlcorbit-module.html"><code>vlcorbit</code></a></b>: <i>VLC player control through CORBA.</i>
         <li> <b><a href="advene.player.xine-module.html"><code>xine</code></a></b>: <i>Xine interface</i>
       </ul>
@@ -143,6 +141,33 @@ to a new AdveneContext.</i>
       </ul>
   </ul>
 <li> <b><a href="gtkhtml2-module.html"><code>gtkhtml2</code></a></b>: <i>Dummy gtkhtml2 package</i>
+<li> <b><a href="simpletal-module.html"><code>simpletal</code></a></b>
+  <ul>
+    <li> <b><a href="simpletal.DummyLogger-module.html"><code>DummyLogger</code></a></b>: <i>simpleTALES Implementation
+
+Copyright (c) 2004 Colin Stewart (http://www.owlfish.com/)
+All rights reserved.</i>
+    <li> <b><a href="simpletal.sgmlentitynames-module.html"><code>sgmlentitynames</code></a></b>: <i>simpleTAL Implementation
+
+Copyright (c) 2004 Colin Stewart (http://www.owlfish.com/)
+All rights reserved.</i>
+    <li> <b><a href="simpletal.simpleElementTree-module.html"><code>simpleElementTree</code></a></b>: <i>ElementTree integration for SimpleTAL 
+
+Copyright (c) 2004 Colin Stewart (http://www.owlfish.com/)
+All rights reserved.</i>
+    <li> <b><a href="simpletal.simpleTAL-module.html"><code>simpleTAL</code></a></b>: <i>simpleTAL Interpreter
+
+Copyright (c) 2004 Colin Stewart (http://www.owlfish.com/)
+All rights reserved.</i>
+    <li> <b><a href="simpletal.simpleTALES-module.html"><code>simpleTALES</code></a></b>: <i>simpleTALES Implementation
+
+Copyright (c) 2004 Colin Stewart (http://www.owlfish.com/)
+All rights reserved.</i>
+    <li> <b><a href="simpletal.simpleTALUtils-module.html"><code>simpleTALUtils</code></a></b>: <i>simpleTALUtils
+
+Copyright (c) 2004 Colin Stewart (http://www.owlfish.com/)
+All rights reserved.</i>
+  </ul>
 </ul>
 
 <!-- =========== START OF CLASS HIERARCHY =========== -->
@@ -227,6 +252,8 @@ String with a mimetype attribute.</i>
 unicode(string [, encoding[, errors]]) -&gt; object</i>
     <ul>
   <li> <b><a href="advene.model.viewable.TypedUnicode-class.html"><code>advene.model.viewable.TypedUnicode</code></a></b>: <i>
+Unicode string with a mimetype attribute.</i>
+  <li> <b><a href="advene.util.vlclib.TypedUnicode-class.html"><code>advene.util.vlclib.TypedUnicode</code></a></b>: <i>
 Unicode string with a mimetype attribute.</i>
     </ul>
     </ul>
@@ -741,8 +768,6 @@ FIXME</i>
 A package is the container of all the elements of an annotation 
 (schemas, types, annotations, relations, views, queries).</i>
     </ul>
-  <li> <b><a href="advene.player.vlcnative.Player-class.html"><code>advene.player.vlcnative.Player</code></a></b>: <i>
-Wrapper class for a native vlc.MediaControl object.</i>
   <li> <b><a href="advene.player.vlcorbit.Player-class.html"><code>advene.player.vlcorbit.Player</code></a></b>: <i>
 Wrapper class for a VLC.MediaControl object.</i>
   <li> <b><a href="__builtin__.type-class.html"><code>__builtin__.type</code></a></b>: <i>
@@ -857,6 +882,12 @@ An advene View.</i>
     <ul>
     </ul>
     </ul>
+    <ul>
+    </ul>
+    <ul>
+    </ul>
+    <ul>
+    </ul>
   <li> <b><a href="advene.core.controller.AdveneController-class.html"><code>advene.core.controller.AdveneController</code></a></b>: <i>
 AdveneController class.</i>
   <li> <b><a href="advene.core.idgenerator.Generator-class.html"><code>advene.core.idgenerator.Generator</code></a></b>
@@ -883,6 +914,12 @@ TALES expression entry widget.</i>
 TimeAdjustment widget.</i>
   <li> <b><a href="advene.gui.edit.transcribe.TranscriptionEdit-class.html"><code>advene.gui.edit.transcribe.TranscriptionEdit</code></a></b>
   <li> <b><a href="advene.gui.evaluator.Window-class.html"><code>advene.gui.evaluator.Window</code></a></b>
+  <li> <b><a href="advene.gui.main.Connect-class.html"><code>advene.gui.main.Connect</code></a></b>: <i>
+Glade XML interconnection with python class.</i>
+    <ul>
+  <li> <b><a href="advene.gui.main.AdveneGUI-class.html"><code>advene.gui.main.AdveneGUI</code></a></b>: <i>
+Main GUI class.</i>
+    </ul>
   <li> <b><a href="advene.gui.popup.Menu-class.html"><code>advene.gui.popup.Menu</code></a></b>
   <li> <b><a href="advene.gui.util.CategorizedSelector-class.html"><code>advene.gui.util.CategorizedSelector</code></a></b>: <i>
 Widget displaying items sorted along categories.</i>
@@ -891,7 +928,6 @@ View displaying a limited number of popups.</i>
   <li> <b><a href="advene.gui.views.accumulatorpopup.DummyLock-class.html"><code>advene.gui.views.accumulatorpopup.DummyLock</code></a></b>
   <li> <b><a href="advene.gui.views.browser.Browser-class.html"><code>advene.gui.views.browser.Browser</code></a></b>
   <li> <b><a href="advene.gui.views.browser.BrowserColumn-class.html"><code>advene.gui.views.browser.BrowserColumn</code></a></b>
-  <li> <b><a href="advene.gui.views.graph.AdveneGraph-class.html"><code>advene.gui.views.graph.AdveneGraph</code></a></b>
   <li> <b><a href="advene.gui.views.history.HistoryNavigation-class.html"><code>advene.gui.views.history.HistoryNavigation</code></a></b>
   <li> <b><a href="advene.gui.views.interactivequery.InteractiveQuery-class.html"><code>advene.gui.views.interactivequery.InteractiveQuery</code></a></b>
   <li> <b><a href="advene.gui.views.logwindow.LogWindow-class.html"><code>advene.gui.views.logwindow.LogWindow</code></a></b>
@@ -992,7 +1028,6 @@ A Schema defines Annotation types and Relation types.</i>
   <li> <b><a href="advene.player.mplayer.StreamInformation-class.html"><code>advene.player.mplayer.StreamInformation</code></a></b>
   <li> <b><a href="advene.player.vlchttp.Player-class.html"><code>advene.player.vlchttp.Player</code></a></b>
   <li> <b><a href="advene.player.vlchttp.StreamInformation-class.html"><code>advene.player.vlchttp.StreamInformation</code></a></b>
-  <li> <b><a href="advene.player.vlcnative.Snapshot-class.html"><code>advene.player.vlcnative.Snapshot</code></a></b>
   <li> <b><a href="advene.player.vlcorbit.PlayerLauncher-class.html"><code>advene.player.vlcorbit.PlayerLauncher</code></a></b>: <i>
 Launcher class.</i>
   <li> <b><a href="advene.player.xine.Player-class.html"><code>advene.player.xine.Player</code></a></b>
@@ -1020,6 +1055,8 @@ Advene Rule, consisting in an Event, a Condition and an Action.</i>
 Process launcher class.</i>
   <li> <b><a href="advene.util.vlclib.TitledElement-class.html"><code>advene.util.vlclib.TitledElement</code></a></b>: <i>
 Dummy element, to accomodate the get_title method.</i>
+    <ul>
+    </ul>
   <li> <b><a href="exceptions.Exception-class.html"><code>exceptions.Exception</code></a></b>: <i>
 Common base class for all exceptions.</i>
     <ul>
@@ -1034,27 +1071,26 @@ Advene-specific exception.</i>
 Advene-specific value error.</i>
     </ul>
   <li> <b><a href="CORBA.COMM_FAILURE-class.html"><code>CORBA.COMM_FAILURE</code></a></b>
+  <li> <b><a href="simpletal.simpleTALES.ContextContentException-class.html"><code>simpletal.simpleTALES.ContextContentException</code></a></b>: <i>
+This is raised when invalid content has been placed into the Context 
+object.</i>
   <li> <b><a href="VLC.InternalException-class.html"><code>VLC.InternalException</code></a></b>
   <li> <b><a href="advene.player.dummy.InternalException-class.html"><code>advene.player.dummy.InternalException</code></a></b>
   <li> <b><a href="advene.player.mplayer.InternalException-class.html"><code>advene.player.mplayer.InternalException</code></a></b>
-  <li> <b><a href="vlc.InternalException-class.html"><code>vlc.InternalException</code></a></b>
   <li> <b><a href="VLC.InvalidPosition-class.html"><code>VLC.InvalidPosition</code></a></b>
   <li> <b><a href="advene.player.dummy.InvalidPosition-class.html"><code>advene.player.dummy.InvalidPosition</code></a></b>
   <li> <b><a href="advene.player.mplayer.InvalidPosition-class.html"><code>advene.player.mplayer.InvalidPosition</code></a></b>
-  <li> <b><a href="vlc.InvalidPosition-class.html"><code>vlc.InvalidPosition</code></a></b>
-  <li> <b><a href="vlc.InvalidPosition-class.html"><code>vlc.InvalidPosition</code></a></b>
   <li> <b><a href="advene.model.util.mimetype.MimeTypeException-class.html"><code>advene.model.util.mimetype.MimeTypeException</code></a></b>
     <ul>
   <li> <b><a href="advene.model.util.mimetype.MimeTypeValueError-class.html"><code>advene.model.util.mimetype.MimeTypeValueError</code></a></b>
     </ul>
+  <li> <b><a href="simpletal.simpleTALES.PathNotFoundException-class.html"><code>simpletal.simpleTALES.PathNotFoundException</code></a></b>
   <li> <b><a href="VLC.PlaylistException-class.html"><code>VLC.PlaylistException</code></a></b>
   <li> <b><a href="advene.player.dummy.PlaylistException-class.html"><code>advene.player.dummy.PlaylistException</code></a></b>
   <li> <b><a href="advene.player.mplayer.PlaylistException-class.html"><code>advene.player.mplayer.PlaylistException</code></a></b>
-  <li> <b><a href="vlc.PlaylistException-class.html"><code>vlc.PlaylistException</code></a></b>
   <li> <b><a href="VLC.PositionKeyNotSupported-class.html"><code>VLC.PositionKeyNotSupported</code></a></b>
   <li> <b><a href="advene.player.dummy.PositionKeyNotSupported-class.html"><code>advene.player.dummy.PositionKeyNotSupported</code></a></b>
   <li> <b><a href="advene.player.mplayer.PositionKeyNotSupported-class.html"><code>advene.player.mplayer.PositionKeyNotSupported</code></a></b>
-  <li> <b><a href="vlc.PositionKeyNotSupported-class.html"><code>vlc.PositionKeyNotSupported</code></a></b>
   <li> <b><a href="advene.player.dummy.PositionOrigin-class.html"><code>advene.player.dummy.PositionOrigin</code></a></b>
   <li> <b><a href="advene.player.mplayer.PositionOrigin-class.html"><code>advene.player.mplayer.PositionOrigin</code></a></b>
   <li> <b><a href="VLC.PositionOriginNotSupported-class.html"><code>VLC.PositionOriginNotSupported</code></a></b>
@@ -1069,10 +1105,24 @@ Advene-specific value error.</i>
   <li> <b><a href="advene.model.util.mimetype.MimeTypeValueError-class.html"><code>advene.model.util.mimetype.MimeTypeValueError</code></a></b>
     </ul>
     </ul>
+  <li> <b><a href="simpletal.simpleTAL.TemplateParseException-class.html"><code>simpletal.simpleTAL.TemplateParseException</code></a></b>
   <li> <b><a href="advene.player.vlchttp.VLCException-class.html"><code>advene.player.vlchttp.VLCException</code></a></b>
   <li> <b><a href="advene.player.xine.XineException-class.html"><code>advene.player.xine.XineException</code></a></b>
     </ul>
   <li> <b><a href="gtkhtml2.Document-class.html"><code>gtkhtml2.Document</code></a></b>
+  <li> <b><a href="markupbase.ParserBase-class.html"><code>markupbase.ParserBase</code></a></b>: <i>
+Parser base class which provides some common support methods used by 
+the SGML/HTML and XHTML parsers.</i>
+    <ul>
+  <li> <b><a href="sgmllib.SGMLParser-class.html"><code>sgmllib.SGMLParser</code></a></b>
+    <ul>
+  <li> <b><a href="simpletal.simpleTALUtils.HTMLStructureCleaner-class.html"><code>simpletal.simpleTALUtils.HTMLStructureCleaner</code></a></b>: <i>
+A helper class that takes HTML content and parses it, so converting 
+any stray '&amp;', '&lt;', or '&gt;' symbols into their respective entity 
+references.</i>
+  <li> <b><a href="simpletal.simpleTAL.HTMLTemplateCompiler-class.html"><code>simpletal.simpleTAL.HTMLTemplateCompiler</code></a></b>
+    </ul>
+    </ul>
   <li> <b><a href="rfc822.Message-class.html"><code>rfc822.Message</code></a></b>: <i>
 Represents a single RFC 2822-compliant message.</i>
     <ul>
@@ -1080,20 +1130,50 @@ Represents a single RFC 2822-compliant message.</i>
 A derived class of rfc822.Message that knows about MIME headers and 
 contains some hooks for decoding encoded and multipart messages.</i>
     </ul>
+  <li> <b><a href="simpletal.DummyLogger.DummyLogger-class.html"><code>simpletal.DummyLogger.DummyLogger</code></a></b>
+  <li> <b><a href="simpletal.simpleTAL.Template-class.html"><code>simpletal.simpleTAL.Template</code></a></b>
+    <ul>
+  <li> <b><a href="simpletal.simpleTAL.HTMLTemplate-class.html"><code>simpletal.simpleTAL.HTMLTemplate</code></a></b>: <i>
+A specialised form of a template that knows how to output HTML</i>
+  <li> <b><a href="simpletal.simpleTAL.SubTemplate-class.html"><code>simpletal.simpleTAL.SubTemplate</code></a></b>: <i>
+A SubTemplate is part of another template, and is used for the METAL implementation.</i>
+  <li> <b><a href="simpletal.simpleTAL.XMLTemplate-class.html"><code>simpletal.simpleTAL.XMLTemplate</code></a></b>: <i>
+A specialised form of a template that knows how to output XML</i>
+    </ul>
+  <li> <b><a href="simpletal.simpleTAL.TemplateCompiler-class.html"><code>simpletal.simpleTAL.TemplateCompiler</code></a></b>
+    <ul>
+  <li> <b><a href="simpletal.simpleTAL.HTMLTemplateCompiler-class.html"><code>simpletal.simpleTAL.HTMLTemplateCompiler</code></a></b>
+  <li> <b><a href="simpletal.simpleTAL.XMLTemplateCompiler-class.html"><code>simpletal.simpleTAL.XMLTemplateCompiler</code></a></b>
+    </ul>
+  <li> <b><a href="simpletal.simpleTAL.TemplateInterpreter-class.html"><code>simpletal.simpleTAL.TemplateInterpreter</code></a></b>
+    <ul>
+  <li> <b><a href="simpletal.simpleTALUtils.MacroExpansionInterpreter-class.html"><code>simpletal.simpleTALUtils.MacroExpansionInterpreter</code></a></b>
+    </ul>
   <li> <b><a href="simpletal.simpleTALES.Context-class.html"><code>simpletal.simpleTALES.Context</code></a></b>
     <ul>
     </ul>
   <li> <b><a href="simpletal.simpleTALES.ContextVariable-class.html"><code>simpletal.simpleTALES.ContextVariable</code></a></b>
     <ul>
+  <li> <b><a href="simpletal.simpleTALES.CachedFuncResult-class.html"><code>simpletal.simpleTALES.CachedFuncResult</code></a></b>
   <li> <b><a href="advene.model.tal.context.NoCallVariable-class.html"><code>advene.model.tal.context.NoCallVariable</code></a></b>: <i>
 Not callable variable.</i>
+  <li> <b><a href="simpletal.simpleTALES.PathFunctionVariable-class.html"><code>simpletal.simpleTALES.PathFunctionVariable</code></a></b>
+  <li> <b><a href="simpletal.simpleTALES.RepeatVariable-class.html"><code>simpletal.simpleTALES.RepeatVariable</code></a></b>: <i>
+To be written</i>
+  <li> <b><a href="simpletal.simpleElementTree.SimpleElementTreeVar-class.html"><code>simpletal.simpleElementTree.SimpleElementTreeVar</code></a></b>
     </ul>
+  <li> <b><a href="simpletal.simpleTALES.PythonPathFunctions-class.html"><code>simpletal.simpleTALES.PythonPathFunctions</code></a></b>
+  <li> <b><a href="simpletal.simpleTALUtils.FastStringOutput-class.html"><code>simpletal.simpleTALUtils.FastStringOutput</code></a></b>: <i>
+A very simple StringIO replacement that only provides write() and 
+getvalue() and is around 6% faster than StringIO.</i>
+  <li> <b><a href="simpletal.simpleTALUtils.TemplateCache-class.html"><code>simpletal.simpleTALUtils.TemplateCache</code></a></b>: <i>
+A TemplateCache is a multi-thread safe object that caches compiled 
+templates.</i>
 </ul>
 
 <!-- =========== START OF NAVBAR =========== -->
 <table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="center">
-    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="advene-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
     <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
@@ -1109,7 +1189,7 @@ Not callable variable.</i>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
   <tr>
-    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Sat Mar 12 15:31:56 2005</font></td>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Tue Nov  8 13:24:16 2005</font></td>
     <td align="right"><a href="http://epydoc.sourceforge.net"
                       ><font size="-2">http://epydoc.sf.net</font></a></td>
   </tr>
