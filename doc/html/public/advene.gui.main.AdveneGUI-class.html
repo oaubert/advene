@@ -1,0 +1,1467 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>advene.gui.main.AdveneGUI</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="advene-module.html">Package&nbsp;advene</a> ::
+        <a href="advene.gui-module.html">Package&nbsp;gui</a> ::
+        <a href="advene.gui.main-module.html">Module&nbsp;main</a> ::
+        Class&nbsp;AdveneGUI
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[<a href="../private/advene.gui.main.AdveneGUI-class.html">show&nbsp;private</a>&nbsp;|&nbsp;hide&nbsp;private]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="advene.gui.main.AdveneGUI-class.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Class AdveneGUI</h2>
+
+<pre class="base-tree">
+<a href="advene.gui.main.Connect-class.html"><code>Connect</code></a> --+
+          |
+         <b>AdveneGUI</b>
+</pre><br />
+
+<hr/>
+
+<p>Main GUI class.</p>
+Some entry points in the methods:
+<ul>
+  <li>
+    <a href="advene.gui.main.AdveneGUI-class.html#__init__" 
+    class="link"><code>__init__</code></a> and <a 
+    href="advene.gui.main.AdveneGUI-class.html#main" 
+    class="link"><code>main</code></a> : GUI initialization
+  </li>
+  <li>
+    <a href="advene.gui.main.AdveneGUI-class.html#update_display" 
+    class="link"><code>update_display</code></a> : method regularly 
+    called to refresh the display
+  </li>
+  <li>
+    <a 
+    href="advene.gui.main.AdveneGUI-class.html#on_win_key_press_event" 
+    class="link"><code>on_win_key_press_event</code></a> : key press 
+    handling
+  </li>
+</ul>
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#__init__" class="summary-sig-name"><code>__init__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>args</span>)</span></code>
+<br />
+Initializes the GUI and other attributes.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#about_hide" class="summary-sig-name"><code>about_hide</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Hide the About window.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#action_message_log" class="summary-sig-name"><code>action_message_log</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Event Handler for the message action.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#action_open_view" class="summary-sig-name"><code>action_open_view</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Event Handler for the OpenView action.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#action_popup" class="summary-sig-name"><code>action_popup</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Popup action.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#action_popup_goto" class="summary-sig-name"><code>action_popup_goto</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+PopupGoto action.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#annotation_lifecycle" class="summary-sig-name"><code>annotation_lifecycle</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Method used to update the active views.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#annotationtype_lifecycle" class="summary-sig-name"><code>annotationtype_lifecycle</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Method used to update the active views.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#append_file_history_menu" class="summary-sig-name"><code>append_file_history_menu</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>filename</span>)</span></code>
+<br />
+Add the filename at the end of the filemenu Glade widget.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#ask_for_annotation_type" class="summary-sig-name"><code>ask_for_annotation_type</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>text</span>,
+          <span class=summary-sig-arg>create</span>)</span></code>
+<br />
+Display a popup asking to choose an annotation type.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#ask_for_schema" class="summary-sig-name"><code>ask_for_schema</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>text</span>,
+          <span class=summary-sig-arg>create</span>)</span></code>
+<br />
+Display a popup asking to choose a schema.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="build_utbv_menu"></a><span class="summary-sig"><span class="summary-sig-name">build_utbv_menu</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#close_view_cb" class="summary-sig-name"><code>close_view_cb</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>win</span>,
+          <span class=summary-sig-arg>widget</span>,
+          <span class=summary-sig-arg>view</span>)</span></code>
+<br />
+Generic handler called when a view is closed.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="debug_cb"></a><span class="summary-sig"><span class="summary-sig-name">debug_cb</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>window</span>,
+          <span class=summary-sig-arg>event</span>,
+          <span class="summary-sig-vararg">*p</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">        string
+</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#format_slider_value" class="summary-sig-name"><code>format_slider_value</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>slider</span>,
+          <span class=summary-sig-arg>val</span>)</span></code>
+<br />
+Formats a value (in milliseconds) into a time string.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="generate_action_popup_goton"></a><span class="summary-sig"><span class="summary-sig-name">generate_action_popup_goton</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>size</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#get_illustrated_text" class="summary-sig-name"><code>get_illustrated_text</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>text</span>,
+          <span class=summary-sig-arg>position</span>)</span></code>
+<br />
+Return a HBox with the given text and a snapshot corresponding to 
+position.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#get_player_control_toolbar" class="summary-sig-name"><code>get_player_control_toolbar</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return a player control toolbar</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#get_visualisation_widget" class="summary-sig-name"><code>get_visualisation_widget</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Return the main visualisation widget.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#handle_http_request" class="summary-sig-name"><code>handle_http_request</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>source</span>,
+          <span class=summary-sig-arg>condition</span>)</span></code>
+<br />
+Handle a HTTP request.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#init_window_size" class="summary-sig-name"><code>init_window_size</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>window</span>,
+          <span class=summary-sig-arg>name</span>)</span></code>
+<br />
+Initialize window size according to stored values.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#log" class="summary-sig-name"><code>log</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>msg</span>,
+          <span class=summary-sig-arg>level</span>)</span></code>
+<br />
+Add a new log message to the logmessage window.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#main" class="summary-sig-name"><code>main</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>args</span>)</span></code>
+<br />
+Mainloop : Gtk mainloop setup.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#manage_package_load" class="summary-sig-name"><code>manage_package_load</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Event Handler executed after loading a package.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#manage_package_save" class="summary-sig-name"><code>manage_package_save</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Event Handler executed after saving a package.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_about1_activate" class="summary-sig-name"><code>on_about1_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Activate the About window.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_about_web_button_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_about_web_button_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_b_addfile_clicked" class="summary-sig-name"><code>on_b_addfile_clicked</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Open a movie file</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_b_exit_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_b_exit_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_b_forward_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_b_forward_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_b_pause_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_b_pause_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_b_play_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_b_play_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_b_rewind_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_b_rewind_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_b_selectdvd_clicked" class="summary-sig-name"><code>on_b_selectdvd_clicked</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Play a DVD.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_b_stop_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_b_stop_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_browser1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_browser1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_configure_player1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_configure_player1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_copy1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_copy1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_cut1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_cut1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_delete1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_delete1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_edit_current_stbv_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_edit_current_stbv_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_edit_ruleset1_activate" class="summary-sig-name"><code>on_edit_ruleset1_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Default ruleset editing.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_evaluator2_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_evaluator2_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_exit" class="summary-sig-name"><code>on_exit</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>source</span>,
+          <span class=summary-sig-arg>event</span>)</span></code>
+<br />
+Generic exit callback.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_filehistory_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_filehistory_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_find1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_find1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_help1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_help1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_import_dvd_chapters1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_import_dvd_chapters1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_import_file1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_import_file1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_import_transcription1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_import_transcription1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_navigationhistory1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_navigationhistory1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_new1_activate" class="summary-sig-name"><code>on_new1_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+New package.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_open1_activate" class="summary-sig-name"><code>on_open1_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Open a file selector to load a package.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_package_imports1_activate" class="summary-sig-name"><code>on_package_imports1_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Edit imported elements from other packages.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_package_properties1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_package_properties1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_paste1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_paste1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_player_properties_apply_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_player_properties_apply_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_player_properties_cancel_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_player_properties_cancel_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_player_properties_ok_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_player_properties_ok_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_preferences1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_preferences1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_preferences_cancel_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_preferences_cancel_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_preferences_ok_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_preferences_ok_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_prop_cancel_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_prop_cancel_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_prop_media_browse_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_prop_media_browse_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_prop_ok_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_prop_ok_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_quit1_activate" class="summary-sig-name"><code>on_quit1_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Gtk callback to quit.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_restart_player1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_restart_player1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_save1_activate" class="summary-sig-name"><code>on_save1_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Save the current package.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_save_as1_activate" class="summary-sig-name"><code>on_save_as1_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Save the package with a new name.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_save_imagecache1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_save_imagecache1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_slider_button_press_event"></a><span class="summary-sig"><span class="summary-sig-name">on_slider_button_press_event</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_slider_button_release_event"></a><span class="summary-sig"><span class="summary-sig-name">on_slider_button_release_event</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_start_web_browser_activate" class="summary-sig-name"><code>on_start_web_browser_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Open a browser on current package's root.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_stbv_combo_changed" class="summary-sig-name"><code>on_stbv_combo_changed</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>combo</span>)</span></code>
+<br />
+Callback used to select the current stbv.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_timeline1_activate" class="summary-sig-name"><code>on_timeline1_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Timeline View of loaded defined annotations.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_toolbar_style1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_toolbar_style1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_transcription1_activate" class="summary-sig-name"><code>on_transcription1_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Open transcription view.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_update_snapshots1_activate"></a><span class="summary-sig"><span class="summary-sig-name">on_update_snapshots1_activate</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_update_snapshots_execute_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_update_snapshots_execute_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_update_snapshots_ok_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_update_snapshots_ok_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="on_update_snapshots_stop_clicked"></a><span class="summary-sig"><span class="summary-sig-name">on_update_snapshots_stop_clicked</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_view_activation" class="summary-sig-name"><code>on_view_activation</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Handler used to update the STBV GUI.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_view_annotations_activate" class="summary-sig-name"><code>on_view_annotations_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Open treeview view plugin.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_view_logwindow_activate" class="summary-sig-name"><code>on_view_logwindow_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+Open logwindow view plugin.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_view_mediainformation_activate" class="summary-sig-name"><code>on_view_mediainformation_activate</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>button</span>,
+          <span class=summary-sig-arg>data</span>)</span></code>
+<br />
+View mediainformation.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#on_win_key_press_event" class="summary-sig-name"><code>on_win_key_press_event</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>win</span>,
+          <span class=summary-sig-arg>event</span>)</span></code>
+<br />
+Keypress handling.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#parse_parameter" class="summary-sig-name"><code>parse_parameter</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>,
+          <span class=summary-sig-arg>name</span>,
+          <span class=summary-sig-arg>default_value</span>)</span></code>
+<br />
+Helper method used in actions.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="popup_evaluator"></a><span class="summary-sig"><span class="summary-sig-name">popup_evaluator</span>(<span class=summary-sig-arg>self</span>,
+          <span class="summary-sig-vararg">*p</span>,
+          <span class="summary-sig-kwarg">**kw</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#query_lifecycle" class="summary-sig-name"><code>query_lifecycle</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Method used to update the active views.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#register_view" class="summary-sig-name"><code>register_view</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>view</span>)</span></code>
+<br />
+Register a view plugin.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#relation_lifecycle" class="summary-sig-name"><code>relation_lifecycle</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Method used to update the active views.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#relationtype_lifecycle" class="summary-sig-name"><code>relationtype_lifecycle</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Method used to update the active views.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#resize_cb" class="summary-sig-name"><code>resize_cb</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>widget</span>,
+          <span class=summary-sig-arg>allocation</span>,
+          <span class=summary-sig-arg>name</span>)</span></code>
+<br />
+Memorize the new dimensions of the widget.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#schema_lifecycle" class="summary-sig-name"><code>schema_lifecycle</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Method used to update the active views.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#unregister_view" class="summary-sig-name"><code>unregister_view</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>view</span>)</span></code>
+<br />
+Unregister a view plugin</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#update_display" class="summary-sig-name"><code>update_display</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Update the interface.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#update_gui" class="summary-sig-name"><code>update_gui</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Update the GUI.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#update_stbv_list" class="summary-sig-name"><code>update_stbv_list</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Update the STBV list.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="update_window_title"></a><span class="summary-sig"><span class="summary-sig-name">update_window_title</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="updated_position_cb"></a><span class="summary-sig"><span class="summary-sig-name">updated_position_cb</span>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.AdveneGUI-class.html#view_lifecycle" class="summary-sig-name"><code>view_lifecycle</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>context</span>,
+          <span class=summary-sig-arg>parameters</span>)</span></code>
+<br />
+Method used to update the active views.</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from Connect</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.Connect-class.html#connect" class="summary-sig-name"><code>connect</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>gui</span>)</span></code>
+<br />
+Connect the class methods with the UI.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.Connect-class.html#create_dictionary" class="summary-sig-name"><code>create_dictionary</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Create a (name, function) dictionary for the current class.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.Connect-class.html#create_dictionary_for_class" class="summary-sig-name"><code>create_dictionary_for_class</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>a_class</span>,
+          <span class=summary-sig-arg>dict</span>)</span></code>
+<br />
+Create a (name, function) dictionary for the specified class.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="advene.gui.main.Connect-class.html#gtk_widget_hide" class="summary-sig-name"><code>gtk_widget_hide</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>widget</span>)</span></code>
+<br />
+Generic hide() method.</td></tr>
+</table><br />
+
+
+<!-- =========== START OF INSTANCE VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Instance Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">advene.model.Annotation</font></td>
+<td><b><a href="advene.gui.main.AdveneGUI-class.html#annotation"><code>annotation</code></a></b>: the currently edited annotation (or <i>None</i>)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+<td><b><a href="advene.gui.main.AdveneGUI-class.html#gui"><code>gui</code></a></b>: the GUI model from libglade</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+<td><b><a href="advene.gui.main.AdveneGUI-class.html#gui.logmessages"><code>gui.logmessages</code></a></b>: the logmessages window</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+<td><b><a href="advene.gui.main.AdveneGUI-class.html#gui.player_status"><code>gui.player_status</code></a></b>: the player_status widget</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+<td><b><a href="advene.gui.main.AdveneGUI-class.html#gui.slider"><code>gui.slider</code></a></b>: the slider widget</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">imagecache.ImageCache</font></td>
+<td><b><a href="advene.gui.main.AdveneGUI-class.html#imagecache"><code>imagecache</code></a></b>: the current imagecache</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">int</font></td>
+<td><b><a href="advene.gui.main.AdveneGUI-class.html#last_slow_position"><code>last_slow_position</code></a></b>: a cache to check whether a GUI update is necessary</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+<td><b><a href="advene.gui.main.AdveneGUI-class.html#oldstatus"><code>oldstatus</code></a></b>: a status cache to check whether a GUI update is necessary</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">dict</font></td>
+<td><b><a href="advene.gui.main.AdveneGUI-class.html#preferences"><code>preferences</code></a></b>: the current preferences</td></tr>
+</table><br />
+
+
+<!-- =========== START OF METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Method Details</th></tr>
+</table>
+
+<a name="__init__"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>args</span>)</span>
+    <br /><i>(Constructor)</i>
+  </h3>
+  Initializes the GUI and other attributes.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="about_hide"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">about_hide</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Hide the About window.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="action_message_log"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">action_message_log</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Event Handler for the message action.</p>
+  <p>Essentialy a wrapper for the <a name="index-log"></a><i 
+  class="indexterm">log</i> method.</p>
+  The parameters should have a 'message' key.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="action_open_view"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">action_open_view</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Event Handler for the OpenView action.</p>
+  The parameters should have a 'guiview' key.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="action_popup"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">action_popup</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Popup action.</p>
+  Displays a popup with an informational message.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="action_popup_goto"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">action_popup_goto</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>PopupGoto action.</p>
+  Displays a popup with a message and a new possible position.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="annotation_lifecycle"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">annotation_lifecycle</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Method used to update the active views.</p>
+  It will propagate the event.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="annotationtype_lifecycle"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">annotationtype_lifecycle</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Method used to update the active views.</p>
+  It will propagate the event.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="append_file_history_menu"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">append_file_history_menu</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>filename</span>)</span>
+  </h3>
+  Add the filename at the end of the filemenu Glade widget.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="ask_for_annotation_type"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">ask_for_annotation_type</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>text</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>create</span>=<span class=sig-default>False</span>)</span>
+  </h3>
+  <p>Display a popup asking to choose an annotation type.</p>
+  <p>If create then offer the possibility to create a new one.</p>
+  Return: the AnnotationType, or None if the action was cancelled.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="ask_for_schema"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">ask_for_schema</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>text</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>create</span>=<span class=sig-default>False</span>)</span>
+  </h3>
+  <p>Display a popup asking to choose a schema.</p>
+  <p>If create then offer the possibility to create a new one.</p>
+  Return: the Schema, or None if the action was cancelled.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="close_view_cb"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">close_view_cb</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>win</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>widget</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>view</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Generic handler called when a view is closed.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="format_slider_value"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">format_slider_value</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>slider</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>val</span>=<span class=sig-default>0</span>)</span>
+  </h3>
+  Formats a value (in milliseconds) into a time string.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>slider</b></code> -
+         a slider widget
+      <dd><code><b>val</b></code> -
+         the value
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=int)</i>
+      </dd>
+    </dl>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        the formatted string
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_illustrated_text"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_illustrated_text</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>text</span>,
+          <span class=sig-arg>position</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Return a HBox with the given text and a snapshot corresponding to 
+  position.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_player_control_toolbar"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_player_control_toolbar</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  Return a player control toolbar
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_visualisation_widget"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_visualisation_widget</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>Return the main visualisation widget.</p>
+  It consists in the embedded video window plus the various views.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="handle_http_request"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">handle_http_request</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>source</span>,
+          <span class=sig-arg>condition</span>)</span>
+  </h3>
+  <p>Handle a HTTP request.</p>
+  This method is used if config.data.webserver['mode'] == 1.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="init_window_size"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">init_window_size</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>window</span>,
+          <span class=sig-arg>name</span>)</span>
+  </h3>
+  Initialize window size according to stored values.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="log"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">log</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>msg</span>,
+          <span class=sig-arg>level</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Add a new log message to the logmessage window.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>msg</b></code> -
+         the message
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=string)</i>
+      <dd><code><b>level</b></code> -
+         the error level
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=int)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="main"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">main</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>args</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Mainloop : Gtk mainloop setup.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>args</b></code> -
+         list of arguments
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=list)</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="manage_package_load"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">manage_package_load</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Event Handler executed after loading a package.</p>
+  self.controller.package should be defined.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        a boolean (~desactivation)
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="manage_package_save"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">manage_package_save</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Event Handler executed after saving a package.</p>
+  self.controller.package should be defined.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Returns:</b></dt>
+      <dd>
+        a boolean (~desactivation)
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_about1_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_about1_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Activate the About window.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_b_addfile_clicked"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_b_addfile_clicked</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Open a movie file
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_b_selectdvd_clicked"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_b_selectdvd_clicked</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Play a DVD.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_edit_ruleset1_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_edit_ruleset1_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Default ruleset editing.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_exit"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_exit</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>source</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>event</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Generic exit callback.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_new1_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_new1_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  New package. Erase the current one.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_open1_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_open1_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Open a file selector to load a package.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_package_imports1_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_package_imports1_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Edit imported elements from other packages.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_quit1_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_quit1_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Gtk callback to quit.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_save1_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_save1_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Save the current package.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_save_as1_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_save_as1_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Save the package with a new name.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_start_web_browser_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_start_web_browser_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Open a browser on current package's root.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_stbv_combo_changed"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_stbv_combo_changed</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>combo</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Callback used to select the current stbv.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_timeline1_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_timeline1_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Timeline View of loaded defined annotations.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_transcription1_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_transcription1_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Open transcription view.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_view_activation"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_view_activation</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  Handler used to update the STBV GUI.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_view_annotations_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_view_annotations_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Open treeview view plugin.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_view_logwindow_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_view_logwindow_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Open logwindow view plugin.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_view_mediainformation_activate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_view_mediainformation_activate</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>button</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>data</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  View mediainformation.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="on_win_key_press_event"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">on_win_key_press_event</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>win</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>event</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Keypress handling.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="parse_parameter"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">parse_parameter</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>,
+          <span class=sig-arg>name</span>,
+          <span class=sig-arg>default_value</span>)</span>
+  </h3>
+  Helper method used in actions.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="query_lifecycle"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">query_lifecycle</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Method used to update the active views.</p>
+  It will propagate the event.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="register_view"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">register_view</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>view</span>)</span>
+  </h3>
+  Register a view plugin.
+  <dl><dt></dt><dd>
+    <dl><dt><b>Parameters:</b></dt>
+      <dd><code><b>view</b></code> -
+         the view to register
+        <br /><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (type=a view plugin (cf advene.gui.views))</i>
+      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="relation_lifecycle"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">relation_lifecycle</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Method used to update the active views.</p>
+  It will propagate the event.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="relationtype_lifecycle"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">relationtype_lifecycle</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Method used to update the active views.</p>
+  It will propagate the event.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="resize_cb"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">resize_cb</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>widget</span>,
+          <span class=sig-arg>allocation</span>,
+          <span class=sig-arg>name</span>)</span>
+  </h3>
+  Memorize the new dimensions of the widget.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="schema_lifecycle"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">schema_lifecycle</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Method used to update the active views.</p>
+  It will propagate the event.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="unregister_view"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">unregister_view</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>view</span>)</span>
+  </h3>
+  Unregister a view plugin
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="update_display"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">update_display</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>Update the interface.</p>
+  <p>This method is regularly called by the Gtk mainloop, and continually 
+  checks whether the interface should be updated.</p>
+  Hence, it is a critical execution path and care should be taken with 
+  the code used here.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="update_gui"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">update_gui</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>Update the GUI.</p>
+  This method should be called upon package loading, or when a new 
+  view or type is created, or when an existing one is modified, in order 
+  to reflect changes.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="update_stbv_list"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">update_stbv_list</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  Update the STBV list.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="view_lifecycle"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">view_lifecycle</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>context</span>,
+          <span class=sig-arg>parameters</span>)</span>
+  </h3>
+  <p>Method used to update the active views.</p>
+  It will propagate the event.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF INSTANCE VARIABLE DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Instance Variable Details</th></tr>
+</table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="annotation"></a>
+<h3>annotation</h3>
+the currently edited annotation (or <i>None</i>)
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          advene.model.Annotation
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="gui"></a>
+<h3>gui</h3>
+the GUI model from libglade
+</td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="gui.logmessages"></a>
+<h3>gui.logmessages</h3>
+the logmessages window
+</td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="gui.player_status"></a>
+<h3>gui.player_status</h3>
+the player_status widget
+</td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="gui.slider"></a>
+<h3>gui.slider</h3>
+the slider widget
+</td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="imagecache"></a>
+<h3>imagecache</h3>
+the current imagecache
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          imagecache.ImageCache
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="last_slow_position"></a>
+<h3>last_slow_position</h3>
+a cache to check whether a GUI update is necessary
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          int
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="oldstatus"></a>
+<h3>oldstatus</h3>
+a status cache to check whether a GUI update is necessary
+</td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="preferences"></a>
+<h3>preferences</h3>
+the current preferences
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          dict
+
+      </dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" align="right" width="100%">
+      <table border="0" cellpadding="0" cellspacing="0">
+      <tr><th class="navbar" align="center">
+        <p class="nomargin">
+          Advene
+      </p></th></tr></table>
+    </th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Tue Nov  8 13:32:22 2005</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>
