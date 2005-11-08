@@ -15,7 +15,11 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Dummy player interface
+"""Dummy player interface.
+
+This dummy player can be used to test the Advene GUI without any player dependency.
+
+It also presents the API that should be implemented by alternative players.
 """
 
 class StreamInformation:

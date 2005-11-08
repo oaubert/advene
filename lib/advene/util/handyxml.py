@@ -55,8 +55,7 @@ except ImportError:
 #
 
 class HandyXmlWrapper:
-    """This class wraps an XML element to give it convenient
-       attribute access.
+    """This class wraps an XML element to give it convenient attribute access.
        
        <element attr1='foo' attr2='bar'>
            <child attr3='baz' />
