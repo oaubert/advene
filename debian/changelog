@@ -1,3 +1,10 @@
+advene (project) unstable; urgency=low
+
+  * Added spanish translations (courtesy of Emmanuel Ayala)
+  * Bugfix in paths initialization  
+
+ --
+
 advene (0.18) unstable; urgency=low
 
   * TranscriptionEdit:
