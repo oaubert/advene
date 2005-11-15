@@ -132,9 +132,9 @@ class Player(object):
         """Wrapper initialization.
         """
         if config.data.os == 'win32':
-            args=[ "--filter", "clone", "--plugin-path", config.data.path['plugins'] ]
+            args=[ "--vout-filter", "clone", "--plugin-path", config.data.path['plugins'] ]
         else:
-            args=[ "--filter", "clone" ]
+	    args=[ "--vout-filter", "clone" ]
         self.mc = VLC.MediaControl( args )
 
         # 0 relative position
