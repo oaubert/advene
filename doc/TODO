@@ -1,3 +1,5 @@
+* Create python binding to avidemux (for frame-by-frame functionality)
+
 * Rewrite admin templates with AJAX functionalities (cf http://ajaxpatterns.org/Main_Page)
 
 * Linux-installer (one file executable): http://pyinstaller.hpcf.upr.edu/cgi-bin/trac.cgi
