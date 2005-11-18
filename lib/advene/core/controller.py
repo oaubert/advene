@@ -592,14 +592,14 @@ class AdveneController:
             self.package = Package (uri=uri)
         self.notify ("PackageLoad")
     
-    def save_package (self, as=None):
+    def save_package (self, name=None):
         """Save a package.
 
         @param as: the URI of the package
         @type as: string
         """
-        if as is None:
-            as=self.package.uri
+        if name is None:
+            name=self.package.uri
 
         old_uri = self.package.uri
         
@@ -614,13 +614,13 @@ class AdveneController:
             pl = self.player.playlist_get_list()
             if pl:
                 self.package.set_default_media(pl[0])
-        self.package.save(as=as)
+        self.package.save(name=name)
         self.modified=False
         self.notify ("PackageSave")
-        if old_uri != as:
+        if old_uri != name:
             # Reload the package with the new name
             self.log(_("Package URI has changed. Reloading package with new URI."))
-            self.load_package(uri=as)
+            self.load_package(uri=name)
     
     def manage_package_load (self, context, parameters):
         """Event Handler executed after loading a package.

@@ -1355,7 +1355,7 @@ class AdveneGUI (Connect):
                                               button=gtk.STOCK_SAVE,
                                               default_dir=d)
         if filename:
-            self.controller.save_package(as=filename)
+            self.controller.save_package(name=filename)
 	return True
 
     def on_import_dvd_chapters1_activate (self, button=None, data=None):
