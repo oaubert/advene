@@ -1,7 +1,11 @@
 advene (project) unstable; urgency=low
 
+  * New package format (.azp, for Advene Zip Package) allowing to 
+	embed resources (files) in packages. You can save old .xml files
+	into .azp files to get them converted.
+	
   * Added spanish translations (courtesy of Emmanuel Ayala)
-  * Bugfix in paths initialization  
+  * Bugfix in paths initialization
 
  --
 
