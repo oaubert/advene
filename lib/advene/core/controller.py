@@ -412,6 +412,7 @@ class AdveneController:
             # one in moviepath
             # UNIX/Windows interoperability: convert pathnames
             n=mediafile.replace('\\', os.sep).replace('/', os.sep)
+
             name=os.path.basename(n)
             for d in config.data.path['moviepath'].split(os.pathsep):
                 if d == '_':
@@ -422,6 +423,11 @@ class AdveneController:
                     if d.startswith('file:'):
                         d=d.replace('file://', '')
                     d=os.path.dirname(d)
+
+		if '~' in d:
+		    # Expand userdir
+		    d=os.path.expanduser(d)
+
                 n=os.sep.join((d, name))
                 # FIXME: if d is a URL, use appropriate method (urllib.??)
                 if os.path.exists(n):
