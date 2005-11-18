@@ -36,6 +36,7 @@ from advene.model.exception import AdveneException
 from advene.model.resources import Resources, ResourceData
 import util.uri
 import mimetypes
+import warnings
 
 import xml.dom.ext.reader.PyExpat
 
@@ -75,7 +76,7 @@ class ZipPackage:
 		self.file_ = uri
 	    else:
 		u=urllib.urlopen(uri)
-		self.file_ = os.tmpnam()
+		self.file_ = os.tempnam(None, 'adv')
 		print "Making a local copy of %s" % uri
 		self.uri = uri
 		f=open(self.file_, 'w')
@@ -92,7 +93,7 @@ class ZipPackage:
     def new(self):
 	"""Prepare a new AZP expanded package.
 	"""
-	self._tempdir=os.tmpnam()
+	self._tempdir=os.tempnam(None, 'adv')
 	os.mkdir(self._tempdir)
 	self.tempdir_list.append(self._tempdir)
 
@@ -116,7 +117,7 @@ class ZipPackage:
 
 	# The file is an advene zip package. We can extract its contents
 	# to a temporary directory
-	self._tempdir=os.tmpnam()
+	self._tempdir=os.tempnam(None, 'adv')
 	os.mkdir(self._tempdir)
 	self.tempdir_list.append(self._tempdir)
 	
@@ -207,3 +208,5 @@ class ZipPackage:
 
     def getResources(self):
 	return Resources( self, '' )
+
+warnings.filterwarnings('ignore', 'tempnam', RuntimeWarning)
