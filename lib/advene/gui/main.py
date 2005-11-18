@@ -428,46 +428,39 @@ class AdveneGUI (Connect):
         self.visualisationwidget=self.get_visualisation_widget()
         self.gui.get_widget("displayvbox").add(self.visualisationwidget)
         self.gui.get_widget("vpaned").set_position(-1)
-        
-        self.controller.event_handler.internal_rule (event="PackageLoad",
-                                                     method=self.manage_package_load)
-        self.controller.event_handler.internal_rule (event="PackageSave",
-                                                     method=self.manage_package_save)
-        # Annotation lifecycle
-        for e in ('AnnotationCreate', 'AnnotationEditEnd', 'AnnotationDelete',
-                  'AnnotationActivate', 'AnnotationDeactivate'):
-            self.controller.event_handler.internal_rule (event=e,
-                                                         method=self.annotation_lifecycle)
-        # Relation lifecycle
-        for e in ('RelationCreate', 'RelationEditEnd', 'RelationDelete'):
-            self.controller.event_handler.internal_rule (event=e,
-                                                         method=self.relation_lifecycle)
-        # View lifecycle
-        for e in ('ViewCreate', 'ViewEditEnd', 'ViewDelete'):
-            self.controller.event_handler.internal_rule (event=e,
-                                                         method=self.view_lifecycle)
-        # View lifecycle
-        for e in ('QueryCreate', 'QueryEditEnd', 'QueryDelete'):
-            self.controller.event_handler.internal_rule (event=e,
-                                                         method=self.query_lifecycle)
-        # Schema lifecycle
-        for e in ('SchemaCreate', 'SchemaEditEnd', 'SchemaDelete'):
-            self.controller.event_handler.internal_rule (event=e,
-                                                         method=self.schema_lifecycle)
-        # AnnotationType lifecycle
-        for e in ('AnnotationTypeCreate', 'AnnotationTypeEditEnd', 'AnnotationTypeDelete'):
-            self.controller.event_handler.internal_rule (event=e,
-                                                         method=self.annotationtype_lifecycle)
-        # RelationType lifecycle
-        for e in ('RelationTypeCreate', 'RelationTypeEditEnd', 'RelationTypeDelete'):
-            self.controller.event_handler.internal_rule (event=e,
-                                                         method=self.relationtype_lifecycle)
-
-        self.controller.event_handler.internal_rule (event="PlayerSet",
-                                                     method=self.updated_position_cb)
-
-        self.controller.event_handler.internal_rule (event="ViewActivation",
-                                                     method=self.on_view_activation)
+  
+	for events, method in ( 
+	    ("PackageLoad", self.manage_package_load),
+	    ("PackageSave", self.manage_package_save),
+	    ( ('AnnotationCreate', 'AnnotationEditEnd',
+	       'AnnotationDelete', 'AnnotationActivate', 
+	       'AnnotationDeactivate'),
+	      self.annotation_lifecycle ),
+	    ( ('RelationCreate', 'RelationEditEnd', 
+	       'RelationDelete'), 
+	      self.relation_lifecycle ),
+	    ( ('ViewCreate', 'ViewEditEnd', 'ViewDelete'), 
+	      self.view_lifecycle ),
+	    ( ('QueryCreate', 'QueryEditEnd', 'QueryDelete'),
+	      self.query_lifecycle),
+	    ( ('SchemaCreate', 'SchemaEditEnd', 'SchemaDelete'),
+	      self.schema_lifecycle),
+	    ( ('AnnotationTypeCreate', 'AnnotationTypeEditEnd', 
+	       'AnnotationTypeDelete'),
+	      self.annotationtype_lifecycle),
+	    ( ('RelationTypeCreate', 'RelationTypeEditEnd', 
+	       'RelationTypeDelete'),
+	      self.relationtype_lifecycle),
+	    ("PlayerSet", self.updated_position_cb),
+	    ("ViewActivation", self.on_view_activation) 
+	    ):
+	    if isinstance(events, basestring):
+		self.controller.event_handler.internal_rule (event=events,
+							     method=method)
+	    else:
+		for e in events:
+		    self.controller.event_handler.internal_rule (event=e,
+								 method=method)
 
         self.controller.init()
         
