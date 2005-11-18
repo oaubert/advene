@@ -32,6 +32,7 @@ META-INF/manifest.xml : Manifest (package contents)
 import zipfile
 import os
 import shutil
+import urllib
 from advene.model.exception import AdveneException
 from advene.model.resources import Resources, ResourceData
 import util.uri
@@ -39,11 +40,16 @@ import mimetypes
 import warnings
 
 import xml.dom.ext.reader.PyExpat
+import xml.sax
 
 from gettext import gettext as _
     
 class ZipPackage:
+    # Some constants
+    MIMETYPE='application/x-advene-zip-package'
+    MANIFEST_NAMESPACE='urn:oasis:names:tc:opendocument:xmlns:manifest:1.0'
 
+    # Global method for cleaning up
     tempdir_list = []
     
     def cleanup():
@@ -61,8 +67,6 @@ class ZipPackage:
 		shutil.rmtree(d, ignore_errors=True)
 
     cleanup = staticmethod(cleanup)
-
-    MIMETYPE='application/x-advene-zip-package'
 
     def __init__(self, uri=None):
 	self.uri = None
@@ -141,6 +145,12 @@ class ZipPackage:
 	    os.mkdir(resource_dir)
 
 	# FIXME: Check against the MANIFEST file
+	for (name, mimetype) in self.manifest_to_list(os.path.join( self._tempdir, 'META-INF/manifest.xml') ):
+	    if name == u'/':
+		pass
+	    n=name.replace('/', os.path.sep)
+	    if not os.path.exists( os.path.join( self._tempdir, n ) ):
+		print "Warning: missing file : %s" % name
 
 	# FIXME: Make some validity checks (resources/ dir, etc)
 	self.file_ = fname
@@ -173,21 +183,20 @@ class ZipPackage:
 
 	# Generation of the manifest file
 	z.writestr( "META-INF/manifest.xml", 
-		    self.generate_manifest_xml(manifest) )
+		    self.list_to_manifest(manifest) )
 
 	z.close()
 
-    def generate_manifest_xml(self, manifest):
+    def list_to_manifest(self, manifest):
 	"""Generate the XML representation of the manifest.
 
 	"""
 	# FIXME: This is done in a hackish way. It should be rewritten
 	# using a proper XML binding
-	out="""<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE manifest:manifest PUBLIC "-//OpenOffice.org//DTD Manifest 1.0//EN" "Manifest.dtd">
+	out=u"""<?xml version="1.0" encoding="UTF-8"?>
 <manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0">
 """
-	out += """<manifest:file-entry manifest:media-type="%s" manifest:full-path="/"/>\n""" % self.MIMETYPE
+	out += u"""<manifest:file-entry manifest:media-type="%s" manifest:full-path="/"/>\n""" % self.MIMETYPE
 
 	for f in manifest:
 	    if f == 'mimetype' or f == 'META-INF/manifest.xml':
@@ -195,10 +204,18 @@ class ZipPackage:
 	    (mimetype, encoding) = mimetypes.guess_type(f)
 	    if mimetype is None:
 		mimetype = "text/plain"
-	    out += """<manifest:file-entry manifest:media-type="%s" manifest:full-path="%s"/>\n""" % (mimetype, f)
+	    out += u"""<manifest:file-entry manifest:media-type="%s" manifest:full-path="%s"/>\n""" % (unicode(mimetype), unicode(f))
 	out += """</manifest:manifest>"""
 	return out
 
+    def manifest_to_list(self, name):
+	"""Convert the manifest.xml to a list.
+
+	List of tuples : (name, mimetype)
+	"""
+	h=ManifestHandler()
+	return h.parse_file(name)
+	
     def close(self):
 	"""Close the package and remove temporary files.
 	"""
@@ -208,5 +225,24 @@ class ZipPackage:
 
     def getResources(self):
 	return Resources( self, '' )
+
+class ManifestHandler(xml.sax.handler.ContentHandler):
+    """Parse a manifest.xml file.
+    """
+    def __init__(self):
+	self.filelist = []
+ 
+    def startElement(self, name, attributes):
+	if name == "manifest:file-entry":
+	    p=attributes['manifest:full-path']
+	    t=attributes['manifest:media-type']
+	    self.filelist.append( (p, t) )
+    
+    def parse_file(self, name):
+	p=xml.sax.make_parser()
+	p.setFeature(xml.sax.handler.feature_namespaces, False)
+	p.setContentHandler(self)
+	p.parse(name)
+	return self.filelist
 
 warnings.filterwarnings('ignore', 'tempnam', RuntimeWarning)
