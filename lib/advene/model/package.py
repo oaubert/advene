@@ -39,6 +39,7 @@ import advene.model.query as query
 import advene.model.schema as schema
 import advene.model.view as view
 import advene.model.viewable as viewable
+from advene.model.zippackage import ZipPackage
 
 from advene.model.bundle import StandardXmlBundle, ImportBundle, InverseDictBundle, SumBundle
 from advene.model.constants import *
@@ -77,6 +78,8 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             uri=urllib.pathname2url(uri)
         self.__uri = uri
 	self.__importer = importer
+	# Possible container
+	self.__zip = None
         abs_uri = self.getUri (absolute=True)
 
         if importer:
@@ -91,10 +94,20 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         else:
             reader = xml.dom.ext.reader.PyExpat.Reader()
             if source is _get_from_uri:
-                element = reader.fromUri(abs_uri)._get_documentElement()
+		# Determine the package format (plain XML or AZP)
+		# FIXME: should be done by content rather than extension
+		if abs_uri.endswith('.azp') or abs_uri.endswith('.AZP'):
+		    # Advene Zip Package. Do some magic.
+		    self.__zip = ZipPackage(uri)
+		    f=self.__zip.getContentsFile()
+		    print "ZipPackage: reading contents from %s" % f
+		    element = reader.fromUri("file://" + f)._get_documentElement()    
+		else:
+		    element = reader.fromUri(abs_uri)._get_documentElement()
             elif hasattr(source,'read'):
                 element = reader.fromStream(source)._get_documentElement()
             else:
+		# FIXME: to port to zip architecture
                 source_uri = util.uri.urljoin (
                     'file:%s/' % urllib.pathname2url (os.getcwd ()),
                      str(source)
@@ -109,7 +122,6 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         self.__relations = None
         self.__schemas = None
         self.__views = None
-
     
     def __str__(self):
         """Return a nice string representation of the object."""
@@ -245,25 +257,50 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             r += s.getRelationTypes ()
         return r
 
+    def getResources(self):
+	if self.__zip is None:
+	    return None
+	else:
+	    return self.__zip.getResources()
+
     def serialize(self, stream=sys.stdout):
         """Serialize the Package on the specified stream"""
         xml.dom.ext.PrettyPrint(self._getModel(), stream)
     
-    def save(self, as=None):
+    def save(self, name=None):
         """Save the Package in the specified file"""
-        if as is None:
-            as=self.__uri
-        if as.startswith('file:///'):
-            as = as[7:]
+	# FIXME: save zip file if necessary
+        if name is None:
+	    name=self.__uri
+        if name.startswith('file:///'):
+            name = name[7:]
 
-        if sre.match('|/', as):
+        if sre.match('|/', name):
             # Windows drive: notation. Convert it from
             # a more URI-compatible syntax
-            as=urllib.url2pathname(as)
+            name=urllib.url2pathname(name)
 
-        stream = open (as, "w")
-        self.serialize(stream)
-        stream.close ()
+	# handle .azp files.
+	if name.endswith('.azp') or name.endswith('.AZP'):
+	    # AZP format
+	    if self.__zip is None:
+		# Conversion necessary: we are saving to the new format.
+		z=ZipPackage()
+		z.new()
+		self.__zip = z
+
+	    # Save the content.xml 
+	    stream = open (self.__zip.getContentsFile(), "w")
+	    self.serialize(stream)
+	    stream.close ()
+	    
+	    # Save the whole .azp
+	    z.save(name)
+	else:
+	    # Assuming plain XML format
+	    stream = open (name, "w")
+	    self.serialize(stream)
+	    stream.close ()
 
     def _recursive_save (self):
         """Save recursively this packages with all its imported packages"""
