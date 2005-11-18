@@ -31,6 +31,7 @@ META-INF/manifest.xml : Manifest (package contents)
 
 import zipfile
 import os
+import shutil
 from advene.model.exception import AdveneException
 from advene.model.resources import Resources, ResourceData
 import util.uri
@@ -51,12 +52,14 @@ class ZipPackage:
 	method is intended to be used at the end of the application,
 	to clean up the mess.
 	"""
-	for d in tempdir_list:
+	for d in ZipPackage.tempdir_list:
 	    # FIXME: there should be a way to determine wether it
 	    # is still used or not.
 	    print "Cleaning up %s" % d
 	    if os.path.isdir(d):
 		shutil.rmtree(d, ignore_errors=True)
+
+    cleanup = staticmethod(cleanup)
 
     MIMETYPE='application/x-advene-zip-package'
 
