@@ -370,7 +370,7 @@ class AdveneController:
             else:
                 if s == "dvd":
                     file_to_play = "dvdsimple:///dev/dvd"
-                elif os.path.splitext(s)[1] in ('.xml', '.advene', '.adv'):
+                elif os.path.splitext(s)[1] in ('.xml', '.azp'):
                     package_to_load=s
                 else:
                     file_to_play = s
