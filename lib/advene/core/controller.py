@@ -36,6 +36,7 @@ import advene.rules.elements
 import advene.rules.ecaengine
 
 from advene.model.package import Package 
+from advene.model.zippackage import ZipPackage
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 import advene.model.constants
@@ -769,6 +770,10 @@ class AdveneController:
         """General exit callback."""
         # Save preferences
         config.data.save_preferences()
+
+	# Cleanup the ZipPackage directories
+	ZipPackage.cleanup()
+
         # Terminate the web server
         try:
             self.server.stop_serving ()
