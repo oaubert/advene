@@ -100,19 +100,24 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 		    # Advene Zip Package. Do some magic.
 		    self.__zip = ZipPackage(uri)
 		    f=self.__zip.getContentsFile()
-		    print "ZipPackage: reading contents from %s" % f
 		    element = reader.fromUri("file://" + f)._get_documentElement()    
 		else:
 		    element = reader.fromUri(abs_uri)._get_documentElement()
             elif hasattr(source,'read'):
                 element = reader.fromStream(source)._get_documentElement()
             else:
-		# FIXME: to port to zip architecture
                 source_uri = util.uri.urljoin (
                     'file:%s/' % urllib.pathname2url (os.getcwd ()),
                      str(source)
                 )
-                element = reader.fromUri(source_uri)._get_documentElement()
+
+		if source_uri.endswith('.azp') or source_uri.endswith('.AZP'):
+		    # Advene Zip Package. Do some magic.
+		    self.__zip = ZipPackage(source_uri)
+		    f=self.__zip.getContentsFile()
+		    element = reader.fromUri("file://" + f)._get_documentElement()    
+		else:
+		    element = reader.fromUri(source_uri)._get_documentElement()
 
         modeled.Modeled.__init__(self, element, None)
 
@@ -269,7 +274,6 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
     
     def save(self, name=None):
         """Save the Package in the specified file"""
-	# FIXME: save zip file if necessary
         if name is None:
 	    name=self.__uri
         if name.startswith('file:///'):
