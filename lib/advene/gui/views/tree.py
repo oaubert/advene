@@ -24,6 +24,7 @@ from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle, StandardXmlBundle
+from advene.model.resources import Resources, ResourceData
 from advene.model.query import Query
 from advene.model.view import View
 
@@ -249,6 +250,7 @@ class DetailedTreeModel(AdveneTreeModel):
        - Types depend on their schema
        - Schemas depend on their package list of schemas
        - Views depend on their package list of views
+       - Resources depend on the Resource node
     """
     def nodeParent (self, node):
         #print "nodeparent %s" % node
@@ -270,6 +272,10 @@ class DetailedTreeModel(AdveneTreeModel):
             parent = None
         elif isinstance (node, AbstractBundle):
             parent = node.rootPackage
+	elif isinstance (node, Resources):
+	    parent = node.parent
+	elif isinstance (node, ResourceData):
+	    parent = node.parent
         else:
             parent = None
         return parent
@@ -299,10 +305,14 @@ class DetailedTreeModel(AdveneTreeModel):
             children = None
         elif isinstance (node, Package):
             if not self.childrencache.has_key (node):
-                self.childrencache[node] = [node.schemas, node.views, node.queries ]
+                self.childrencache[node] = [node.schemas, node.views, node.queries, node.resources ]
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
+	elif isinstance (node, Resources):
+	    children = node.children()
+	elif isinstance (node, ResourceData):
+	    children = None
         elif node is None:
             children = [ self.get_package() ]
         else:
