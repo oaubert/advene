@@ -605,7 +605,10 @@ class ElanImporter(GenericImporter):
         p=self.package
         schema=p.createSchema(ident='elan')
         schema.author=config.data.userid
-        schema.date=elan.DATE
+	try:
+	    schema.date=elan.DATE
+	except AttributeError:
+	    schema.date = self.timestamp
         schema.title="ELAN converted schema"
         p.schemas.append(schema)
         self.schema = schema
