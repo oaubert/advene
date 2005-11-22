@@ -22,6 +22,7 @@ import sre
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
 
@@ -35,6 +36,8 @@ class Generator:
         RelationType: "rt_",
         View: "view_",
         Query: "query_",
+	Resources: "dir_",
+	ResourceData: "res_",
         }
     
     def __init__(self):
