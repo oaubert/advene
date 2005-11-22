@@ -36,6 +36,7 @@ from advene.model.fragment import MillisecondFragment
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
+from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
 from advene.rules.elements import RuleSet, Rule, Event, Action
@@ -54,6 +55,8 @@ element_label = {
     RelationType: _("Relation Type"),
     View: _("View"),
     Query: _("Query"),
+    Resources: _("Resource Folder"),
+    ResourceData: _("Resource File"),
     }
 
 class ViewType:
@@ -103,7 +106,7 @@ class CreateElementPopup(object):
         vbox.add(hbox)
 
         # Choose a type
-        if self.type_ in (Annotation, Relation, View, Query):
+        if self.type_ in (Annotation, Relation, View, Query, Resources, ResourceData):
             hbox = gtk.HBox()
             l = gtk.Label(_("Type"))
             hbox.pack_start(l)
@@ -123,6 +126,10 @@ class CreateElementPopup(object):
                               ViewType('text/html', _("HTML template")) ]
             elif self.type_ == Query:
                 type_list = [ ViewType('application/x-advene-simplequery', _("Simple query")) ]
+	    elif self.type_ == Resources:
+		type_list = [ ViewType(Resources.DIRECTORY_TYPE, _("Directory")) ]
+	    elif self.type_ == ResourceData:
+		type_list = [ ViewType("file", _("Resource File")) ]
             else:
                 print _("Error in advene.gui.edit.create.build_widget: invalid type %s") % self.type_
                 return None
@@ -162,7 +169,11 @@ class CreateElementPopup(object):
         return time.strftime("%Y-%m-%d")
 
     def is_valid_id(self, i):
-        return sre.match('^[a-zA-Z0-9_]+$', i)
+	if self.type_ == ResourceData:
+	    # Allow filename extensions for ResourceData
+	    return sre.match('^[a-zA-Z0-9_.]+$', i)
+	else:
+	    return sre.match('^[a-zA-Z0-9_]+$', i)
     
     def do_create_element(self):
         """Create the element according to the widget data.
@@ -289,6 +300,18 @@ class CreateElementPopup(object):
                 el.mimetype='text/plain'
             self.parent.relationTypes.append(el)
             self.controller.notify('RelationTypeCreate', relationtype=el)
+	elif self.type_ == Resources:
+	    # Create a new dir.
+	    # Parent should be a Resources
+	    self.parent[id]=Resources.DIRECTORY_TYPE
+	    self.controller.notify('ResourceFolderCreate', 
+				   resource=self.parent[id])
+	elif self.type_ == ResourceData:
+	    # Create a new resource file
+	    self.parent[id]=_("New resource data")
+	    self.controller.notify('ResourceFileCreate', 
+				   resource=self.parent[id])
+	    
         else:
             el=None
             print "Not implemented yet."
