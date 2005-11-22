@@ -12,10 +12,11 @@ import mimetypes
 import xml.dom.ext.reader.PyExpat
 
 from advene.model.util.auto_properties import auto_properties
+import advene.model.viewable as viewable
 
 from gettext import gettext as _
 
-class ResourceData:
+class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
     """Class accessing a resource data (file).
     
     FIXME: should implement advene.model.content.Content API
@@ -23,14 +24,20 @@ class ResourceData:
     """
     __metaclass__ = auto_properties
 
-    def __init__(self, package, resourcepath):
+    def __init__(self, package, resourcepath, parent=None):
 	self.package = package
+	self.rootPackage = package
 	self.resourcepath = resourcepath
+	self.parent = parent
 
 	self.file_ = os.path.join( self.package._tempdir,
 				   'resources',
 				   resourcepath.replace('/', os.path.sep, -1) )
 	self._mimetype = None
+	self.title = str(self)
+
+    def __str__(self):
+	return "Resource %s" % self.resourcepath
 
     def getData(self):
 	return open(self.file_, 'r').read()
@@ -69,8 +76,11 @@ class Resources:
     """
     DIRECTORY_TYPE=object()
 
-    def __init__(self, package, resourcepath):
+    def __init__(self, package, resourcepath, parent=None):
 	self.package = package
+	self.rootPackage = package
+	self.parent = parent
+
 	# Resource path name
 	self.resourcepath = resourcepath
 
@@ -79,14 +89,21 @@ class Resources:
 				  'resources',
 				  resourcepath.replace('/', os.path.sep, -1) )
 	self.filenames=None
+	self.title = str(self)
 
     def init_filenames(self):
 	if self.filenames is None:
 	    self.filenames=os.listdir(self.dir_)
 
     def __str__(self):
-	return "Resources of %s" % self.resourcepath
+	if self.resourcepath == "":
+	    return "Resources root"
+	else:
+	    return "Resources of %s" % self.resourcepath
 
+    def children (self):
+	return [ self[n] for n in self.keys() ]
+	    
     def has_key(self, key):
 	self.init_filenames()
 	return (key in self.filenames)
@@ -107,10 +124,10 @@ class Resources:
 	    p='/'.join( (self.resourcepath, key) )
 
 	if os.path.isdir(fname):
-	    return Resources(self.package, p)
+	    return Resources(self.package, p, parent=self)
 
 	# It is a file. Return its ResourceData
-	return ResourceData(self.package, p)
+	return ResourceData(self.package, p, parent=self)
 
     def __setitem__(self, key, item):
 	"""Create a new item.
