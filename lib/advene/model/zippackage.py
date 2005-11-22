@@ -74,6 +74,8 @@ class ZipPackage:
 	self.file_ = None
 
 	if uri is not None:
+	    if uri.startswith('file://'):
+		uri=uri[5:]
 	    if os.path.exists(uri):
 		# It is a real filename
 		self.uri = 'file://' + os.path.abspath(uri)
@@ -123,6 +125,7 @@ class ZipPackage:
 	# to a temporary directory
 	self._tempdir=os.tempnam(None, 'adv')
 	os.mkdir(self._tempdir)
+	os.mkdir(os.path.join( self._tempdir, 'resources'))
 	self.tempdir_list.append(self._tempdir)
 	
 	# FIXME: check the portability (convert / to os.path.sep ?)
@@ -223,8 +226,8 @@ class ZipPackage:
 	self.tempdir_list.remove(self._tempdir)
 	return True
 
-    def getResources(self):
-	return Resources( self, '' )
+    def getResources(self, package=None):
+	return Resources( self, '', parent=package )
 
 class ManifestHandler(xml.sax.handler.ContentHandler):
     """Parse a manifest.xml file.
