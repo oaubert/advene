@@ -266,7 +266,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 	if self.__zip is None:
 	    return None
 	else:
-	    return self.__zip.getResources()
+	    return self.__zip.getResources(package=self)
 
     def serialize(self, stream=sys.stdout):
         """Serialize the Package on the specified stream"""
@@ -299,7 +299,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 	    stream.close ()
 	    
 	    # Save the whole .azp
-	    z.save(name)
+	    self.__zip.save(name)
 	else:
 	    # Assuming plain XML format
 	    stream = open (name, "w")
