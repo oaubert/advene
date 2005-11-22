@@ -30,6 +30,7 @@ from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
+from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
 from advene.model.bundle import StandardXmlBundle
@@ -52,14 +53,7 @@ class Menu:
 
     def get_title (self, element):
         """Return the element title."""
-        c = element.viewableClass
-        if hasattr (element, 'title') and element.title is not None:
-            name=element.title
-        elif hasattr (element, 'id') and element.id is not None:
-            name=element.id
-        else:
-            name=str(element)
-        return "%s %s" % (c, name)
+	return vlclib.get_title(self.controller, element)
 
     def goto_annotation (self, widget, ann):
         c=self.controller
@@ -282,14 +276,12 @@ class Menu:
             View: self.make_view_menu,
             Package: self.make_package_menu,
             Query: self.make_query_menu,
+	    Resources: self.make_resources_menu,
             }
 
-        try:
-            b=specific_builder[type(element)]
-            b(element, menu)
-        except KeyError:
-            print "No menu for %s" % str(type(element))
-            pass
+	for t, method in specific_builder.iteritems():
+	    if isinstance(element, t):
+		method(element, menu)
 
         menu.show_all()
         return menu
@@ -353,6 +345,13 @@ class Menu:
         #add_item(_("Create a new relation..."), self.create_element, Relation, element)
         add_item(_("Create a new schema..."), self.create_element, Schema, element)
         add_item(_("Create a new query..."), self.create_element, Query, element)
+        return
+
+    def make_resources_menu(self, element, menu):
+        def add_item(*p, **kw):
+            self.add_menuitem(menu, *p, **kw)
+        add_item(_("Create a new folder..."), self.create_element, Resources, element)
+        add_item(_("Create a new resource file..."), self.create_element, ResourceData, element)
         return
 
     def make_schema_menu(self, element, menu):
