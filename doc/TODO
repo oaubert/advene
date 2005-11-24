@@ -13,6 +13,10 @@ bad in Italian (Programmi)
 
 * Demo movie maker : cf http://www.debugmode.com/wink/
 
+vlc --screen-fps=2 screen:// --no-sout-audio --sout '#transcode{vcodec=mp4v,venc=ffmpeg,scale=0.2}:standard{access=file,mux=avi,url=/tmp/foo.avi}'
+
+istanbul
+
 * plugins Implementation : cf
 http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/436873 for a
 start
@@ -24,13 +28,11 @@ start
 occurring events (but base timeline is then application time instead
 of movie time)
 
-* Project hosting: http://www.gna.org/
-
 * Player API: check gst-python
 (http://gstreamer.freedesktop.org/releases/gst-python/0.8.2.html) and
 https://gna.org/projects/seamless/ (DVD player using gst-python)
 
-* timeline: find a hackish way to render overlapping buttons
+* timeline: find a way to render overlapping buttons
 
 * transcribe: add screenshots to marks context menu
 
@@ -980,4 +982,6 @@ accomodate a FilteredDataModel
 * Rename "Import a transcription" into "Take notes on the fly" -> DONE
 
 * Package properties: add file browser for associated media
+
+* Project hosting: http://www.gna.org/ -> DONE
 
