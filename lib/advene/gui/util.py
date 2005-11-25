@@ -234,7 +234,7 @@ def get_filename(title=_("Open a file"),
     def update_preview(chooser):
         filename=chooser.get_preview_filename()
         setattr(preview, '_filename', filename)
-        if filename and filename.endswith('.xml'):
+        if filename and (filename.endswith('.xml') or filename.endswith('.azp')):
             preview.set_label(_("Press to\ndisplay\ninformation"))
             chooser.set_preview_widget_active(True)
         else:
@@ -272,6 +272,7 @@ Description:
         
             button.set_label(m)
             button._filename=None
+	    p.close()
         return True
     
     preview.connect("clicked", do_preview)
