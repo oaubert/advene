@@ -1,11 +1,12 @@
 advene (project) unstable; urgency=low
 
   * New package format (.azp, for Advene Zip Package) allowing to 
-	embed resources (files) in packages. You can save old .xml files
-	into .azp files to get them converted.
-	
+    embed resources (files) in packages. You can save old .xml files
+    into .azp files to get them converted.
   * Added spanish translations (courtesy of Emmanuel Ayala)
   * Bugfix in paths initialization
+  * Importer
+    * implemented CMML import
 
  --
 
@@ -295,4 +296,3 @@ advene (0.4-1) unstable; urgency=low
   * The Debian package is now generated through debhelper.
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun,  7 Mar 2004 16:11:17 +0100
-
