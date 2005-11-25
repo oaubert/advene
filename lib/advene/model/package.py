@@ -127,7 +127,12 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         self.__relations = None
         self.__schemas = None
         self.__views = None
-    
+
+    def close(self):
+	if self.__zip:
+	    self.__zip.close()
+	return
+
     def __str__(self):
         """Return a nice string representation of the object."""
         return "Package (%s)" % self.__uri
