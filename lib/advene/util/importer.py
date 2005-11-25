@@ -81,6 +81,8 @@ def get_importer(fname, **kw):
         i=ElanImporter(**kw)
     elif fname.endswith('.praat') or fname.endswith('.TextGrid'):
         i=PraatImporter(**kw)
+    elif fname.endswith('.cmml'):
+        i=CmmlImporter(**kw)
     elif fname.endswith('.xml'):
         # FIXME: we should check the XML content
         i=XiImporter(**kw)
@@ -131,6 +133,12 @@ class GenericImporter(object):
         self.convert annotations with a dictionary as parameter.
         """
         pass
+
+    def log (self, *p):
+	if self.controller is not None:
+	    self.controller.log(*p)
+	else:
+	    print " ".join(p)
 
     def update_statistics(self, elementtype):
         self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
@@ -475,14 +483,16 @@ class ElanImporter(GenericImporter):
 
     def xml_to_text(self, element):
         l=[]
-        if element._get_nodeType() is xml.dom.Node.TEXT_NODE:
-            # Note: element._get_data() returns a unicode object
+	if isinstance(element, handyxml.HandyXmlWrapper):
+	    element=element.node
+        if element.nodeType is xml.dom.Node.TEXT_NODE:
+            # Note: element.data returns a unicode object
             # that happens to be in the default encoding (iso-8859-1
             # currently on my system). We encode it to utf-8 to
             # be sure to deal only with this encoding afterwards.
-            l.append(element._get_data().encode('utf-8'))
-        elif element._get_nodeType() is xml.dom.Node.ELEMENT_NODE:
-            for e in element._get_childNodes():
+            l.append(element.data.encode('utf-8'))
+        elif element.nodeType is xml.dom.Node.ELEMENT_NODE:
+            for e in element.childNodes:
                 l.append(self.xml_to_text(e))
         return "".join(l)
 
@@ -779,6 +789,219 @@ class PraatImporter(GenericImporter):
         p.schemas.append(schema)
         self.schema = schema
         self.convert(self.iterator(f))
+        return self.package
+
+class CmmlImporter(GenericImporter):
+    """CMML importer.
+
+    Cf http://www.annodex.net/
+    """
+    def __init__(self, **kw):
+        super(CmmlImporter, self).__init__(**kw)
+        self.name = _("CMML importer")
+        self.atypes={}
+        self.schema=None
+
+    def npt2time(self, npt):
+	"""Convert a NPT timespec into a milliseconds time.
+
+	Cf http://www.annodex.net/TR/draft-pfeiffer-temporal-fragments-03.html#anchor5
+	"""
+	if isinstance(npt, long) or isinstance(npt, int):
+	    return npt
+
+	if npt.startswith('npt:'):
+	    npt=npt[4:]
+
+	try:
+	    msec=vlclib.convert_time(npt)
+	except Exception, e:
+	    self.log("Unhandled NPT format: " + npt)
+	    self.log(str(e))
+	    msec=0
+
+	return msec
+
+    def xml_to_text(self, element):
+        l=[]
+	if isinstance(element, handyxml.HandyXmlWrapper):
+	    element=element.node
+        if element.nodeType is xml.dom.Node.TEXT_NODE:
+            # Note: element.data returns a unicode object
+            # that happens to be in the default encoding (iso-8859-1
+            # currently on my system). We encode it to utf-8 to
+            # be sure to deal only with this encoding afterwards.
+            l.append(element.data.encode('utf-8'))
+        elif element.nodeType is xml.dom.Node.ELEMENT_NODE:
+            for e in element.childNodes:
+                l.append(self.xml_to_text(e))
+        return "".join(l)
+
+    def iterator(self, cm):
+	# Parse stream information
+
+	# Delayed is a list of yielded dictionaries,
+	# which may be not complete on the first pass
+	# if the end attribute was not filled.
+	delayed=[]
+
+	for clip in cm.clip:
+	    try:
+		begin=clip.start
+	    except AttributeError, e:
+		print str(e)
+		begin=0
+	    begin=self.npt2time(begin)
+
+	    for d in delayed:
+		# We can now complete the previous annotations
+		d['end']=begin
+		yield d
+	    delayed=[]
+		
+	    try:
+		end=self.npt2time(clip.end)
+	    except AttributeError:
+		end=None
+
+	    # Link attribute
+	    try:
+		l=clip.a[0]
+		d={
+                    'type': self.atypes['link'],
+                    'begin': begin,
+                    'end': end,
+                    'content': "href=%s\ntext=%s" % (l.href,
+						     self.xml_to_text(l).replace("\n", "\\n")),
+                    }
+		if end is None:
+		    delayed.append(d)
+		else:
+		    yield d
+	    except AttributeError, e:
+		#print "Erreur dans link" + str(e)
+		pass
+
+	    # img attribute
+	    try:
+		i=clip.img[0]
+		d={
+		    'type': self.atypes['image'],
+                    'begin': begin,
+                    'end': end,
+		    'content': i.src,
+		    }
+		if end is None:
+		    delayed.append(d)
+		else:
+		    yield d
+	    except AttributeError:
+		pass
+
+	    # desc attribute
+	    try:
+		d=clip.desc[0]
+		d={
+		    'type': self.atypes['description'],
+                    'begin': begin,
+                    'end': end,
+		    'content': self.xml_to_text(d).replace("\n", "\\n"),
+		    }
+		if end is None:
+		    delayed.append(d)
+		else:
+		    yield d
+	    except AttributeError:
+		pass
+		
+	    # Meta attributes (need to create schemas as needed)
+	    try:
+		for meta in clip.meta:
+		    if not self.atypes.has_key(meta.name):
+			self.create_annotation_type(self.schema, meta.name)
+		    d={
+			'type': self.atypes[meta.name],
+			'begin': begin,
+			'end': end,
+			'content': meta.content,
+			}
+		    if end is None:
+			delayed.append(d)
+		    else:
+			yield d
+	    except AttributeError:
+		pass
+
+    def create_annotation_type (self, schema, id_):
+        at=schema.createAnnotationType(ident=id_)
+        #at.author=schema.author
+        at.date=schema.date
+        at.title=at.id
+        at.mimetype='text/plain'
+        schema.annotationTypes.append(at)
+        self.update_statistics('annotation-type')
+        self.atypes[id_]=at
+
+    def process_file(self, filename):
+        cm=handyxml.xml(filename)
+
+	if cm.node.nodeName != 'cmml':
+	    self.log("This does not look like a CMML file.")
+	    return
+
+        if self.package is None:
+            self.package=Package(uri='new_pkg', source=None)
+
+        p=self.package
+        schema=p.createSchema(ident='cmml')	
+        schema.author=config.data.userid
+        schema.date=self.timestamp
+        schema.title="CMML converted schema"
+        p.schemas.append(schema)
+        self.schema = schema
+
+	# Create the 3 default types : link, image, description
+	for n in ('link', 'image', 'description'):
+	    self.create_annotation_type(self.schema, n)
+	self.atypes['link'].mimetype = 'application/x-advene-structured'
+
+	# Handle heading information
+	try:
+	    h=cm.head[0]
+	    try:
+		t=h.title
+		schema.title=self.xml_to_text(t)
+	    except AttributeError:
+		pass
+	    #FIXME: conversion of metadata (meta name=Producer, DC.Author)
+	except AttributeError:
+	    # Not <head> componenent
+	    pass
+	
+	# Handle stream information
+	if len(cm.stream) > 1:
+	    self.log("Multiple streams. Will handle only the first one. Support yet to come...")
+	s=cm.stream[0]
+	try:
+	    t=s.basetime
+	    if t:
+		t=long(t)
+	except AttributeError:
+	    t=0
+	self.basetime=t
+	
+	# Stream src:
+	try:
+	    il=cm.node.xpath('//import')
+	    if il:
+		i=il[0]
+		src=i.getAttributeNS(xml.dom.EMPTY_NAMESPACE, 'src')
+	except AttributeError:
+	    src=""
+	self.package.setMetaData (config.data.namespace, "mediafile", src)
+		    
+        self.convert(self.iterator(cm))
+
         return self.package
 
 
