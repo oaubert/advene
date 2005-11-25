@@ -147,7 +147,8 @@ def format_time (val=0):
     # Format: HH:MM:SS.mmm
     return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
 
-time_regexp=sre.compile('(?P<h>\d\d):(?P<m>\d\d):(?P<s>\d+)[.,]?(?P<ms>\d+)?')
+small_time_regexp=sre.compile('(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
+time_regexp=sre.compile('(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
 def convert_time(s):
     """Convert a time string as long.
 
@@ -158,15 +159,25 @@ def convert_time(s):
         val=long(s)
     except ValueError:
         # It was not a number. Try to determine its format.
+	t=None
         m=time_regexp.match(s)
-        if m:
-            t=m.groupdict()
+	if m:
+	    t=m.groupdict()
+	else:
+	    m=small_time_regexp.match(s)
+	    if m:
+		t=m.groupdict()
+		t['h'] = 0
+	    
+        if t is not None:
+	    if 'ms' in t and t['ms']:
+		t['ms']=(t['ms'] + ("0" * 4))[:3]
+	    else:
+		t['ms']=0
             for k in t:
                 if t[k] is None:
                     t[k]=0
                 t[k] = long(t[k])
-            if 'ms' not in t:
-                t['ms'] = 0
             val= t['ms'] + t['s'] * 1000 + t['m'] * 60000 + t['h'] * 3600000
         else:
             raise Exception("Unknown time format for %s" % s)
