@@ -82,7 +82,10 @@ class ZipPackage:
 		self.file_ = uri
 	    else:
 		u=urllib.urlopen(uri)
-		self.file_ = os.tempnam(None, 'adv')
+
+		# Use the same extension
+		(n, e) = os.path.splitext(uri)
+		self.file_ = os.tempnam(None, 'adv') + e		
 		print "Making a local copy of %s" % uri
 		self.uri = uri
 		f=open(self.file_, 'w')
