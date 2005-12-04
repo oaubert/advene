@@ -310,7 +310,9 @@ class DetailedTreeModel(AdveneTreeModel):
         elif isinstance (node, AbstractBundle):
             children = node
 	elif isinstance (node, Resources):
-	    children = node.children()
+            if not self.childrencache.has_key (node):
+                self.childrencache[node] = node.children()
+            children = self.childrencache[node]
 	elif isinstance (node, ResourceData):
 	    children = None
         elif node is None:
