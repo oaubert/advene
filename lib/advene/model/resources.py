@@ -8,6 +8,7 @@ resources/: associated resources,
 """
 import os
 import mimetypes
+import urllib
 
 import xml.dom.ext.reader.PyExpat
 
@@ -30,6 +31,9 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
 	self.resourcepath = resourcepath
 	self.parent = parent
 
+	self.author=None
+	self.date=None
+
 	self.file_ = os.path.join( self.package._tempdir,
 				   'resources',
 				   resourcepath.replace('/', os.path.sep, -1) )
@@ -38,6 +42,9 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
 
     def __str__(self):
 	return "Resource %s" % self.resourcepath
+
+    def getId(self):
+	return self.resourcepath.split('/')[-1]
 
     def getData(self):
 	return open(self.file_, 'r').read()
