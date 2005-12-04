@@ -656,8 +656,7 @@ class EditResourcePopup (EditElementPopup):
     can_edit = staticmethod (can_edit)
 
     def notify(self, element):
-	# FIXME: todo
-        #self.controller.notify("ResourceEditEnd", annotation=element)
+        self.controller.notify("ResourceEditEnd", resource=element)
         return True
 
     def make_widget (self, editable=True):
