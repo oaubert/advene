@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -80,7 +80,7 @@ class EditElementPopup (object):
     of their respective elements.
     """
     __metaclass__ = EditPopupClass
-    
+
     def __init__ (self, el, controller=None):
         """Create an edit window for the given element."""
         self.element = el
@@ -104,7 +104,7 @@ class EditElementPopup (object):
         staticmethod declaration is handled in the metaclass."""
         return False
     can_edit = staticmethod (can_edit)
-    
+
     def make_widget (self, editable=True):
         """Create the editing widget (and return it)."""
         raise Exception ("This method should be defined in the subclasses.")
@@ -113,7 +113,7 @@ class EditElementPopup (object):
         """Method called when applying a form."""
         if not self.editable:
             return True
-        
+
         for f in self.forms:
             if not f.check_validity():
                 return False
@@ -128,11 +128,11 @@ class EditElementPopup (object):
             self.notify(self.element)
         except AttributeError:
             pass
-        
+
         if callback is not None:
             callback (element=self.element)
         return True
-        
+
     def validate_cb (self, button=None, event=None, callback=None):
         """Method called when validating a form."""
         if self.apply_cb(button, event, callback):
@@ -179,7 +179,7 @@ class EditElementPopup (object):
             self.editable=False
         elif hasattr(self.element, 'schema') and self.element.schema.isImported():
             self.editable=False
-            
+
         self.vbox.add (self.make_widget (editable=self.editable))
 
         if self.editable:
@@ -196,7 +196,7 @@ class EditElementPopup (object):
 
             d.vbox.add(self.vbox)
             d.vbox.show_all()
-            
+
             def keypressed_cb(widget=None, event=None):
                 if event.keyval == gtk.keysyms.Return:
                     d.response(gtk.RESPONSE_ACCEPT)
@@ -218,7 +218,7 @@ class EditElementPopup (object):
                 if retval:
                     d.destroy()
                     break
-                
+
             return self.element
         else:
             # Non-modal case
@@ -297,7 +297,7 @@ class EditAnnotationPopup (EditElementPopup):
     def notify(self, element):
         self.controller.notify("AnnotationEditEnd", annotation=element)
         return True
-    
+
     def make_widget (self, editable=True):
         vbox = gtk.VBox ()
 
@@ -315,7 +315,7 @@ class EditAnnotationPopup (EditElementPopup):
                                        )
         vbox.pack_start (f.get_view (), expand=False)
 
-        f = EditFragmentForm(element=self.element.fragment, controller=self.controller)        
+        f = EditFragmentForm(element=self.element.fragment, controller=self.controller)
         self.register_form (f)
         vbox.pack_start (f.get_view (), expand=False)
 
@@ -325,18 +325,18 @@ class EditAnnotationPopup (EditElementPopup):
         t = f.get_view()
         self.register_form(f)
         vbox.pack_start(self.framed(t, _("Content")), expand=True)
-        
+
         return vbox
 
 class EditRelationPopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, Relation)
     can_edit = staticmethod (can_edit)
-        
+
     def notify(self, element):
         self.controller.notify("RelationEditEnd", relation=element)
         return True
-    
+
     def make_widget (self, editable=True):
         vbox = gtk.VBox ()
 
@@ -378,7 +378,7 @@ class EditRelationPopup (EditElementPopup):
             b.connect("button_press_event", button_press_handler, a)
             b.show()
             hb.add(b)
-            
+
         vbox.pack_start(self.framed(hb, _("Members")), expand=True)
 
         # Relation content
@@ -395,11 +395,11 @@ class EditViewPopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, View)
     can_edit = staticmethod (can_edit)
-        
+
     def notify(self, element):
         self.controller.notify("ViewEditEnd", view=element)
         return True
-    
+
     def make_widget (self, editable=True):
         vbox = gtk.VBox ()
 
@@ -445,11 +445,11 @@ class EditQueryPopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, Query)
     can_edit = staticmethod (can_edit)
-        
+
     def notify(self, element):
         self.controller.notify("QueryEditEnd", query=element)
         return True
-    
+
     def make_widget (self, editable=True):
         vbox = gtk.VBox ()
 
@@ -482,11 +482,11 @@ class EditPackagePopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, Package)
     can_edit = staticmethod (can_edit)
-        
+
     def notify(self, element):
         self.controller.notify("PackageEditEnd", package=element)
         return True
-    
+
     def make_widget (self, editable=False):
         vbox=gtk.VBox()
         f = self.make_registered_form (element=self.element,
@@ -501,7 +501,7 @@ class EditPackagePopup (EditElementPopup):
                                        )
 
         vbox.pack_start(f.get_view(), expand=False)
-        
+
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
@@ -522,21 +522,21 @@ class EditPackagePopup (EditElementPopup):
                          editable=editable)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
-        
-        return vbox    
+
+        return vbox
 
 class EditSchemaPopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, Schema)
     can_edit = staticmethod (can_edit)
-        
+
     def notify(self, element):
         self.controller.notify("SchemaEditEnd", schema=element)
         return True
-    
+
     def make_widget (self, editable=True):
         vbox=gtk.VBox()
-        
+
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'title',
                                                'author', 'date'),
@@ -549,29 +549,29 @@ class EditSchemaPopup (EditElementPopup):
                                                'date':   _('Date')}
                                        )
         vbox.add(f.get_view())
-        
+
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable)
         self.register_form(f)
-        
+
         vbox.pack_start(f.get_view(), expand=False)
-        
+
         return vbox
 
 class EditAnnotationTypePopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, AnnotationType)
     can_edit = staticmethod (can_edit)
-        
+
     def notify(self, element):
         self.controller.notify("AnnotationTypeEditEnd", annotationtype=element)
         return True
 
     def make_widget (self, editable=False):
         vbox = gtk.VBox()
-        
+
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'title',
                                                'author', 'date', 'mimetype'),
@@ -601,21 +601,21 @@ class EditAnnotationTypePopup (EditElementPopup):
                          editable=editable)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
-        
+
         return vbox
 
 class EditRelationTypePopup (EditElementPopup):
     def can_edit (el):
         return isinstance (el, RelationType)
     can_edit = staticmethod (can_edit)
-        
+
     def notify(self, element):
         self.controller.notify("RelationTypeEditEnd", relationtype=element)
         return True
-    
+
     def make_widget (self, editable=False):
         vbox=gtk.VBox()
-        
+
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'title',
                                                'author', 'date', 'mimetype'),
@@ -639,15 +639,15 @@ class EditRelationTypePopup (EditElementPopup):
             editable=editable)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
-        
+
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable)
         self.register_form(f)
-        
+
         vbox.pack_start(f.get_view(), expand=False)
-        
+
         return vbox
 
 class EditResourcePopup (EditElementPopup):
@@ -659,7 +659,7 @@ class EditResourcePopup (EditElementPopup):
 	# FIXME: todo
         #self.controller.notify("ResourceEditEnd", annotation=element)
         return True
-    
+
     def make_widget (self, editable=True):
         vbox = gtk.VBox ()
 
@@ -683,7 +683,7 @@ class EditResourcePopup (EditElementPopup):
         t = f.get_view()
         self.register_form(f)
         vbox.pack_start(self.framed(t, _("Content")), expand=True)
-        
+
         return vbox
 
 class EditForm(object):
@@ -695,7 +695,7 @@ class EditForm(object):
     def check_validity(self):
         """Checks the validity of the data."""
         return True
-    
+
     def update_element (self):
         """Update the element from the values in the form.
 
@@ -762,7 +762,7 @@ class EditContentForm(EditForm):
 
     def check_validity(self):
         return self.contentform.check_validity()
-    
+
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if self.mimetypeeditable:
@@ -777,14 +777,14 @@ class EditContentForm(EditForm):
         hbox = gtk.HBox()
         l=gtk.Label(_("MIME Type"))
         hbox.pack_start(l, expand=False)
-        
+
         self.mimetype=gtk.Entry()
         self.mimetype.set_text(self.element.mimetype)
         self.mimetype.set_editable(self.mimetypeeditable)
         hbox.pack_start(self.mimetype)
 
         vbox.pack_start(hbox, expand=False)
-        
+
         if self.element.mimetype == 'application/x-advene-ruleset':
             self.contentform = EditRuleSetForm (self.element, 'model',
                                                 controller=self.controller)
@@ -798,7 +798,7 @@ class EditContentForm(EditForm):
         self.contentform.set_editable(self.editable)
         vbox.add(self.contentform.get_view())
         return vbox
-    
+
 class EditTextForm (EditForm):
     """Create a textview edit form for the given element."""
     def __init__ (self, element, field, controller=None):
@@ -861,7 +861,7 @@ class EditTextForm (EditForm):
             f.close()
             self.fname=fname
         return True
-    
+
     def content_save(self, b=None, fname=None):
         if fname is None:
             fname=advene.gui.util.get_filename(title=_("Save content to..."),
@@ -887,20 +887,20 @@ class EditTextForm (EditForm):
             f.close()
             self.fname=fname
         return True
-    
+
     def get_view (self):
         """Generate a view widget for editing text attribute."""
         vbox=gtk.VBox()
 
         tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS) 
+        tb.set_style(gtk.TOOLBAR_ICONS)
 
         b=gtk.ToolButton()
         b.set_stock_id(gtk.STOCK_OPEN)
         b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
         b.connect("clicked", self.content_open)
         tb.insert(b, -1)
-        
+
         b=gtk.ToolButton()
         b.set_stock_id(gtk.STOCK_SAVE)
         b.set_tooltip(self.tooltips, _("Save to a file (C-s)"))
@@ -915,7 +915,7 @@ class EditTextForm (EditForm):
 
         tb.show_all()
         vbox.pack_start(tb, expand=False)
-        
+
         textview = gtk.TextView ()
         textview.set_editable (self.editable)
         textview.set_wrap_mode (gtk.WRAP_CHAR)
@@ -957,8 +957,8 @@ class EditRuleSetForm (EditForm):
             return False
         else:
             return True
-        
-        
+
+
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if not self.editable:
@@ -969,7 +969,7 @@ class EditRuleSetForm (EditForm):
         return True
 
     def get_view (self):
-        """Generate a view widget to edit the ruleset."""        
+        """Generate a view widget to edit the ruleset."""
         rs=advene.rules.elements.RuleSet()
         rs.from_dom(catalog=self.controller.event_handler.catalog,
                     domelement=getattr(self.element, self.field))
@@ -1005,7 +1005,7 @@ class EditFragmentForm(EditForm):
             return False
         else:
             return True
-        
+
     def update_element(self):
         if not self.editable:
             return False
@@ -1025,7 +1025,7 @@ class EditFragmentForm(EditForm):
         f.set_label(_("Begin"))
         f.add(self.begin.get_widget())
         hbox.add(f)
-        
+
         self.end=TimeAdjustment(value=self.element.end,
                                 controller=self.controller,
                                 editable=self.editable)
@@ -1036,7 +1036,7 @@ class EditFragmentForm(EditForm):
 
         return hbox
 
-    
+
 class EditQueryForm (EditForm):
     """Create a Query edit form for the given element (a view, presumably)."""
     def __init__ (self, element, field, controller=None, editable=True):
@@ -1061,7 +1061,7 @@ class EditQueryForm (EditForm):
             return False
         else:
             return True
-        
+
     def set_editable (self, boo):
         self.editable = boo
 
@@ -1125,7 +1125,7 @@ class EditGenericForm(EditForm):
         v=self.entry.get_text()
         self.setter(v)
         return True
-    
+
 class EditMetaForm(EditGenericForm):
     def __init__(self, title=None, element=None, name=None,
                  namespaceid='advenetool', controller=None,
@@ -1137,7 +1137,7 @@ class EditMetaForm(EditGenericForm):
                                            setter=setter,
                                            controller=controller,
                                            editable=editable)
-    
+
 class EditAttributesForm (EditForm):
     """Creates an edit form for the given element."""
     COLUMN_LABEL=0
@@ -1145,7 +1145,7 @@ class EditAttributesForm (EditForm):
     COLUMN_NAME=2
     COLUMN_EDITABLE=3
     COLUMN_WEIGHT=4
-    
+
     def __init__ (self, el, controller=None):
         self.element = el
         self.controller=controller
@@ -1219,10 +1219,10 @@ class EditAttributesForm (EditForm):
                 % (at, str(e)))
             dialog.connect("response", lambda w, e: dialog.destroy())
             dialog.show()
-            
+
             # Invalid value -> we take the original value
             val = getattr(self.element, at)
- 
+
         model.set_value(iter, column, self.value_to_repr (at, val))
 
     def check_validity(self):
@@ -1253,7 +1253,7 @@ class EditAttributesForm (EditForm):
             return False
         else:
             return True
-    
+
     def update_element (self):
         """Update the element fields according to the values in the view."""
         invalid=[]
@@ -1318,7 +1318,7 @@ class EditAttributesForm (EditForm):
 
         weight = {False: pango.WEIGHT_BOLD,
                   True:  pango.WEIGHT_NORMAL}
-        
+
         for at in self.attributes:
             editable = at in self.editable
             if self.labels.has_key (at):
@@ -1343,7 +1343,7 @@ class EditAttributesForm (EditForm):
 class EditElementListForm(EditForm):
     COLUMN_ELEMENT=0
     COLUMN_LABEL=1
-    
+
     def __init__(self, title=None, element=None, field=None,
                  members=None, controller=None, editable=True):
         """Edit an element list.
@@ -1364,7 +1364,7 @@ class EditElementListForm(EditForm):
         button = event.button
         x = int(event.x)
         y = int(event.y)
-        
+
         if button == 3:
             if event.window is widget.get_bin_window():
                 model = widget.get_model()
@@ -1403,7 +1403,7 @@ class EditElementListForm(EditForm):
         if iter is not None:
             model.remove(iter)
         return True
-    
+
     def get_view(self):
         vbox=gtk.VBox()
         self.store=self.create_store()
@@ -1429,9 +1429,9 @@ class EditElementListForm(EditForm):
         hbox.add(b)
 
         vbox.add(hbox)
-        
+
         vbox.show_all()
-        
+
         return vbox
 
     def update_element(self):
@@ -1440,7 +1440,7 @@ class EditElementListForm(EditForm):
         # Rebuild list from self.store
         elements=[ e[self.COLUMN_ELEMENT] for e in self.store ]
         setattr(self.model, self.field, elements)
-        return True    
+        return True
 
 if __name__ == "__main__":
     class Foo:
@@ -1463,7 +1463,7 @@ if __name__ == "__main__":
         form.update_element()
         win.get_toplevel().destroy()
         return True
-    
+
     window.connect ("key_press_event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())
     window.set_title ("test")
