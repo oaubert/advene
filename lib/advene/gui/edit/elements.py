@@ -38,6 +38,7 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
+from advene.model.resources import Resources, ResourceData
 from advene.model.query import Query
 
 from advene.gui.edit.timeadjustment import TimeAdjustment
@@ -649,6 +650,41 @@ class EditRelationTypePopup (EditElementPopup):
         
         return vbox
 
+class EditResourcePopup (EditElementPopup):
+    def can_edit (el):
+        return isinstance (el, ResourceData)
+    can_edit = staticmethod (can_edit)
+
+    def notify(self, element):
+	# FIXME: todo
+        #self.controller.notify("ResourceEditEnd", annotation=element)
+        return True
+    
+    def make_widget (self, editable=True):
+        vbox = gtk.VBox ()
+
+        # Resource data
+        f = self.make_registered_form (element=self.element,
+                                       fields=('id', 'uri', 'mimetype'),
+				       #'author', 'date'),
+                                       editable=editable,
+                                       editables=(),
+                                       labels={'id':     _('Id'),
+                                               'mimetype':   _('MIMEType'),
+                                               'uri':    _('URI'),
+                                               'author': _('Author'),
+                                               'date':   _('Date')}
+                                       )
+        vbox.pack_start (f.get_view (), expand=False)
+
+        f = EditContentForm(self.element, controller=self.controller,
+                            mimetypeeditable=False)
+        f.set_editable(editable)
+        t = f.get_view()
+        self.register_form(f)
+        vbox.pack_start(self.framed(t, _("Content")), expand=True)
+        
+        return vbox
 
 class EditForm(object):
     """Generic EditForm class.
