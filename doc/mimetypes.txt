@@ -24,3 +24,7 @@ Advene uses internally mimetypes to identify specific elements.
 * application/x-advene-simplequery
 
   Simple query language based on ECA conditions.
+
+* application/x-advene-zip-package
+
+  An Advene Zip Package (cf advene.model.zippackage)
