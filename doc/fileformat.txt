@@ -1,0 +1,30 @@
+File format
+===========
+
+The native format for storing Advene packages is XML. However, this
+approach does not allow easy embedding of external resources such as
+audio files, presentations, pictures, etc.
+
+To alleviate this, a new format has been designed, inspired by the
+OpenDocument format (cf www.oasis-open.org) : the native XML file,
+along with its resource files, is stored in a ZIP file.
+
+The new file extension, used to distinguish from native XML format, is
+.azp (Advene Zip Package).
+
+General layout
+==============
+
+foo.azp/
+        mimetype
+        content.xml
+        resources/
+	meta.xml (optional)
+	META-INF/manifest.xml
+
+with :
+* mimetype: application/x-advene-zip-package
+* content.xml: the previous package.xml format
+* resources/: associated resources, available through the TALES expression /package/resources/...
+* meta.xml: metadata (cf OpenDocument specification)
+* META-INF/manifest.xml : Manifest (package contents)
