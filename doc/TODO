@@ -42,10 +42,7 @@ https://gna.org/projects/seamless/ (DVD player using gst-python)
 
 * TTS on Win32: http://www.cs.unc.edu/~parente/tech/tr02.shtml
 
-* Menu: add a File/Associate video file item
-
-* Data toolbar: with creation buttons (schema, annotation/relation
-type, view, query)
+* Data toolbar: with creation buttons (schema, annotation/relation type, view, query)
 
 * Timeline: select a region to fit to window
 
@@ -984,4 +981,6 @@ accomodate a FilteredDataModel
 * Package properties: add file browser for associated media
 
 * Project hosting: http://www.gna.org/ -> DONE
+
+* Menu: add a File/Associate video file item
 
