@@ -1,4 +1,4 @@
-advene (project) unstable; urgency=low
+advene (0.19) unstable; urgency=low
 
   * New package format (.azp, for Advene Zip Package) allowing to 
     embed resources (files) in packages. You can save old .xml files
@@ -8,7 +8,7 @@ advene (project) unstable; urgency=low
   * Importer
     * implemented CMML import
 
- --
+ -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Thu,  8 Dec 2005 16:26:18 +0100
 
 advene (0.18) unstable; urgency=low
 
