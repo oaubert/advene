@@ -281,7 +281,8 @@ class AdveneContext(_advene_context):
 
         if isinstance (view_source, str) or isinstance (view_source, unicode):
             view_source = StringIO (unicode(view_source))
-            
+           
+        kw = {}
         if mimetype is None or mimetype == 'text/html':
             compiler = simpleTAL.HTMLTemplateCompiler ()
 	    compiler.log = self.log
@@ -290,7 +291,9 @@ class AdveneContext(_advene_context):
             compiler = simpleTAL.XMLTemplateCompiler ()
 	    compiler.log = self.log
 	    compiler.parseTemplate (view_source)
-        compiler.getTemplate ().expand (context=self, outputFile=stream, outputEncoding='utf-8')
+        if len (self.localStack) > 2: # view is called by another view
+            kw["suppressXMLDeclaration"] = 1
+        compiler.getTemplate ().expand (context=self, outputFile=stream, outputEncoding='utf-8', **kw)
 
         return stream
 
