@@ -34,7 +34,7 @@ from gettext import gettext as _
 
 import advene.gui.edit.elements
 
-import pygtk
+#import pygtk
 import gtk
 import gobject
 

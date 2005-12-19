@@ -21,7 +21,7 @@
 import sys
 import sre
 
-import pygtk
+#import pygtk
 import gtk
 import gobject
 

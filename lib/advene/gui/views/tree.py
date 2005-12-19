@@ -37,7 +37,7 @@ import advene.gui.popup
 
 import advene.util.vlclib as vlclib
 
-import pygtk
+#import pygtk
 #pygtk.require ('2.0')
 import gtk
 import gobject
