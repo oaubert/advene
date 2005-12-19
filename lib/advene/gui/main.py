@@ -32,7 +32,6 @@ import socket
 import advene.core.config as config
 import advene.core.version
 
-import pygtk
 import gtk
 import gtk.glade
 import gobject
@@ -531,8 +530,11 @@ class AdveneGUI (Connect):
         #self.gui.get_widget("html_scrollwindow").add (tree.get_widget())
         #tree.get_widget().show_all()
         #self.register_view (tree)
-        
-        self.drawable=gtk.Socket()
+        if config.data.os == 'win32':
+	    # gtk.Socket is available on win32 only from gtk >= 2.8
+	    self.drawable=gtk.DrawingArea()
+	else:
+	    self.drawable=gtk.Socket()
         self.drawable.set_size_request(320,200)
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
         self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
