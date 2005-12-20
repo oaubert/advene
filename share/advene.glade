@@ -103,7 +103,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image22">
+			<widget class="GtkImage" id="image23">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -125,7 +125,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image23">
+			<widget class="GtkImage" id="image24">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -317,11 +317,11 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkMenuItem" id="logwindow1">
+		    <widget class="GtkMenuItem" id="urlstack1">
 		      <property name="visible">True</property>
-		      <property name="label" translatable="yes">_LogWindow</property>
+		      <property name="label" translatable="yes">_URL stack</property>
 		      <property name="use_underline">True</property>
-		      <signal name="activate" handler="on_view_logwindow_activate" last_modification_time="Mon, 15 Dec 2003 21:33:56 GMT"/>
+		      <signal name="activate" handler="on_view_urlstack_activate" last_modification_time="Tue, 20 Dec 2005 12:31:48 GMT"/>
 		    </widget>
 		  </child>
 
@@ -507,12 +507,10 @@
 		    <widget class="GtkToolButton" id="toolbutton9">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Rewind</property>
-		      <property name="label" translatable="yes">Rewind</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/rw.xpm</property>
+		      <property name="stock_id">gtk-media-rewind</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
+		      <property name="is_important">True</property>
 		      <signal name="clicked" handler="on_b_rewind_clicked" last_modification_time="Wed, 13 Oct 2004 21:20:54 GMT"/>
 		    </widget>
 		    <packing>
@@ -525,9 +523,7 @@
 		    <widget class="GtkToolButton" id="toolbutton2">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Play</property>
-		      <property name="label" translatable="yes">Play</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/play.xpm</property>
+		      <property name="stock_id">gtk-media-play</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">True</property>
@@ -543,9 +539,7 @@
 		    <widget class="GtkToolButton" id="toolbutton3">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Pause</property>
-		      <property name="label" translatable="yes">Pause</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/pause.xpm</property>
+		      <property name="stock_id">gtk-media-pause</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">True</property>
@@ -561,9 +555,7 @@
 		    <widget class="GtkToolButton" id="toolbutton4">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Stop</property>
-		      <property name="label" translatable="yes">Stop</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/stop.xpm</property>
+		      <property name="stock_id">gtk-media-stop</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">True</property>
@@ -579,9 +571,7 @@
 		    <widget class="GtkToolButton" id="toolbutton5">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Forward</property>
-		      <property name="label" translatable="yes">Forward</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/ff.xpm</property>
+		      <property name="stock_id">gtk-media-forward</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -599,10 +589,10 @@
 		      <property name="tooltip" translatable="yes">Select movie file...</property>
 		      <property name="label" translatable="yes">Add file...</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/add.xpm</property>
+		      <property name="icon">pixmaps/eject.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
+		      <property name="is_important">True</property>
 		      <signal name="clicked" handler="on_b_addfile_clicked" last_modification_time="Wed, 13 Oct 2004 21:25:03 GMT"/>
 		    </widget>
 		    <packing>
@@ -615,9 +605,7 @@
 		    <widget class="GtkToolButton" id="toolbutton10">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Select DVD</property>
-		      <property name="label" translatable="yes">Select DVD</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/dvd_small.png</property>
+		      <property name="stock_id">gtk-cdrom</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -675,7 +663,7 @@
 		      <property name="tooltip" translatable="yes">Open a tree view</property>
 		      <property name="label" translatable="yes">TreeView</property>
 		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/tree.xpm</property>
+		      <property name="icon">pixmaps/treeview.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">False</property>
@@ -742,24 +730,6 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkToolButton" id="toolbutton15">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Open the URL stack view</property>
-		      <property name="label" translatable="yes">URL Stack</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/url.png</property>
-		      <property name="visible_horizontal">True</property>
-		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
-		      <signal name="clicked" handler="on_view_logwindow_activate" last_modification_time="Wed, 13 Oct 2004 22:08:29 GMT"/>
-		    </widget>
-		    <packing>
-		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
-		    </packing>
-		  </child>
-
-		  <child>
 		    <widget class="GtkToolButton" id="toolbutton23">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open the webbrowser</property>
@@ -781,10 +751,12 @@
 		    <widget class="GtkToolButton" id="toolbutton24">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Take notes on the fly</property>
-		      <property name="stock_id">gtk-edit</property>
+		      <property name="label" translatable="yes">Edit transcription</property>
+		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/transcribe.png</property>
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
+		      <property name="is_important">True</property>
 		      <signal name="clicked" handler="on_import_transcription1_activate" last_modification_time="Tue, 17 May 2005 20:38:46 GMT"/>
 		    </widget>
 		    <packing>
