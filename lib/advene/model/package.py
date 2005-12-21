@@ -16,8 +16,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 """A package to manipulate elements from the Advene model.
-
-See http://experience.univ-lyon1.fr:81/advene/
 """
 
 import os
