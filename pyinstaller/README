@@ -1,0 +1,7 @@
+Pyinstaller executable generation
+
+Steps:
+- make : build the executable and associated dirs
+- make install : install in a build directory
+- make rpm : build the RPM from the install dir.
+- make tgz : build a TGZ from the install dir

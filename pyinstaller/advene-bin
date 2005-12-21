@@ -1,0 +1,12 @@
+#! /bin/sh
+
+# Wrapper to execute a PyInstaller version of advene installed in a
+# standard directory (/usr/lib/advene-package)
+DIR=/usr/lib/advene-package
+
+if [ ! -d ${DIR} ]
+then
+  echo "Cannot find installer data for Advene in $DIR"
+  exit 1
+fi
+exec ${DIR}/advene.exe $@

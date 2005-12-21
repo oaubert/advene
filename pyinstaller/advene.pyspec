@@ -1,0 +1,37 @@
+# -*- python -*-
+# pyinstaller specfile
+#
+
+advenehome=os.path.dirname(SPECPATH)
+
+a = Analysis(
+    [ 
+	os.path.join(HOMEPATH,'support/_mountzlib.py'), 
+	os.path.join(HOMEPATH,'support/useUnicode.py'), 
+	os.path.join(advenehome, 'bin/advene'),
+	],
+    pathex=[ os.path.join(advenehome, 'lib') ],
+)
+
+pyz = PYZ(a.pure)
+exe = EXE(pyz,
+          a.scripts,
+          exclude_binaries=1,
+          name='advene.exe',
+          debug=0,
+          strip=0,
+          upx=1,
+          console=1 )
+
+share = Tree(os.path.join(advenehome, 'share'), 
+    "share", excludes=[ '.svn', '*bak', '*~' ])
+
+doc = Tree(os.path.join(advenehome, 'doc'),
+    "doc",
+    excludes=[ 'html', '.svn', '*bak', '*~' ])
+
+coll = COLLECT(exe,
+               a.binaries + share + doc,
+               strip=0,
+               upx=0,
+               name='advene-package')
