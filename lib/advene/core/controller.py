@@ -592,8 +592,12 @@ class AdveneController:
         @type alias: string
         """
         if uri is None or uri == "":
-            self.package = Package (uri="new_pkg",
-                                    source=config.data.advenefile(config.data.templatefilename))
+	    try:
+		self.package = Package (uri="new_pkg",
+					source=config.data.advenefile(config.data.templatefilename))
+	    except OSerror:
+		self.log(_("Cannot find the template package."))
+		self.package = Package ()
             self.package.author = config.data.userid
         else:
             self.package = Package (uri=uri)
