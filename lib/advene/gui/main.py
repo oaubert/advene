@@ -544,6 +544,8 @@ class AdveneGUI (Connect):
         self.navigation_history=HistoryNavigation(controller=self.controller,
                                                   container=self.displayhbox)
         self.navigation_history.popup()
+	# Navigation history is embedded. The menu item is useless :
+	self.gui.get_widget('navigationhistory1').set_property('visible', False)
         
         self.displayhbox.pack_start(self.drawable, expand=True)
 
@@ -551,6 +553,8 @@ class AdveneGUI (Connect):
 
         self.displayhbox.pack_end(self.logwindow.widget, expand=True)
         self.logwindow.embedded=True
+	# URL stack is embedded. The menu item is useless :
+	self.gui.get_widget('urlstack1').set_property('visible', False)
 
         vis.add(self.displayhbox)
         
@@ -1545,8 +1549,8 @@ class AdveneGUI (Connect):
         w.show()
         return True
 
-    def on_view_logwindow_activate (self, button=None, data=None):
-        """Open logwindow view plugin."""
+    def on_view_urlstack_activate (self, button=None, data=None):
+        """Open the URL stack view plugin."""
         if not self.logwindow.embedded:
             self.logwindow.popup()
         return True
