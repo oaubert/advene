@@ -1,0 +1,15 @@
+#! /usr/bin/python
+
+"""Return the version number of the current advene tree.
+"""
+import sys
+import os
+
+dir=os.path.abspath( os.path.dirname(os.path.dirname(sys.argv[0]) ) )
+if not os.path.exists(os.path.join( dir, "lib", "advene", "core", "version.py" )):
+    print "N/C"
+    sys.exit(1)
+
+sys.path.insert(0, os.path.join( dir, "lib" ))
+import advene.core.version
+print advene.core.version.version
