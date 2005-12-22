@@ -466,9 +466,11 @@ class EditQueryPopup (EditElementPopup):
         vbox.pack_start (f.get_view (), expand=False)
 
         # Allow the edition of mimetype for text/xml type views
-        # but not for the special case of Ruleset
+        # but not for the special case of Ruleset/Query
         mtedit = (editable
-                  and not (self.element.content.mimetype == 'application/x-advene-ruleset'))
+                  and not (self.element.content.mimetype in 
+			   ('application/x-advene-ruleset',
+			    'application/x-advene-simplequery')))
         f = EditContentForm (self.element.content, controller=self.controller,
                              mimetypeeditable=mtedit)
         f.set_editable (editable)
