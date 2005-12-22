@@ -575,17 +575,20 @@ class AdveneGUI (Connect):
         radiogroup_ref=None
         
         tb_list = (
-            (_("Rewind"), _("Rewind"), 'rw.xpm', self.on_b_rewind_clicked),
-            (_("Play"), _("Play"), 'play.xpm', self.on_b_play_clicked),
-            (_("Pause"), _("Pause"), 'pause.xpm', self.on_b_pause_clicked),
-            (_("Stop"), _("Stop"), 'stop.xpm', self.on_b_stop_clicked),
-            (_("Forward"), _("Forward"), 'ff.xpm', self.on_b_forward_clicked),
+            (_("Rewind"), _("Rewind"), gtk.STOCK_MEDIA_REWIND, 
+	     self.on_b_rewind_clicked),
+            (_("Play"), _("Play"), gtk.STOCK_MEDIA_PLAY,
+	     self.on_b_play_clicked),
+            (_("Pause"), _("Pause"), gtk.STOCK_MEDIA_PAUSE,
+	     self.on_b_pause_clicked),
+            (_("Stop"), _("Stop"), gtk.STOCK_MEDIA_STOP, 
+	     self.on_b_stop_clicked),
+            (_("Forward"), _("Forward"), gtk.STOCK_MEDIA_FORWARD,
+	     self.on_b_forward_clicked),
             )
 
-        for text, tooltip, icon, callback in tb_list:
-            i=gtk.Image()
-            i.set_from_file( config.data.advenefile( ( 'pixmaps', icon ) ) )
-            b=gtk.ToolButton(icon_widget=i, label=text)
+        for text, tooltip, stock, callback in tb_list:
+            b=gtk.ToolButton(stock)
             b.set_tooltip(self.tooltips, tooltip)
             b.connect("clicked", callback)
             tb.insert(b, -1)
