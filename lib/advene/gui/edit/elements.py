@@ -428,12 +428,8 @@ class EditViewPopup (EditElementPopup):
 
         # View content
 
-        # Allow the edition of mimetype for text/xml type views
-        # but not for the special case of Ruleset
-        mtedit = (editable
-                  and not (self.element.content.mimetype == 'application/x-advene-ruleset'))
         f = EditContentForm (self.element.content, controller=self.controller,
-                             mimetypeeditable=mtedit)
+                             mimetypeeditable=editable)
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
@@ -465,14 +461,8 @@ class EditQueryPopup (EditElementPopup):
                                        )
         vbox.pack_start (f.get_view (), expand=False)
 
-        # Allow the edition of mimetype for text/xml type views
-        # but not for the special case of Ruleset/Query
-        mtedit = (editable
-                  and not (self.element.content.mimetype in 
-			   ('application/x-advene-ruleset',
-			    'application/x-advene-simplequery')))
         f = EditContentForm (self.element.content, controller=self.controller,
-                             mimetypeeditable=mtedit)
+                             mimetypeeditable=editable)
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
@@ -749,15 +739,22 @@ class EditContentForm(EditForm):
         # self.element is a Content object
         self.element = element
         self.controller=controller
-        self.editable = True
         # self.contentform will be an appropriate EditForm
         # (EditTextForm,EditRuleSetForm,...)
         self.contentform = None
         # self.mimetype is a gtk.Entry
         self.mimetype = None
-        self.editable=editable
-        self.mimetypeeditable = mimetypeeditable and editable
 
+        # Allow the edition of mimetype for contents
+        # but not for the special case of Ruleset/Query
+        self.editable = editable
+
+        self.mimetypeeditable = (mimetypeeditable 
+				 and editable 
+				 and not (self.element.mimetype in 
+					  ('application/x-advene-ruleset',
+					   'application/x-advene-simplequery')))
+	
     def set_editable (self, bool):
         self.editable = bool
 
