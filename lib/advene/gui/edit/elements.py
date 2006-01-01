@@ -45,7 +45,9 @@ from advene.gui.edit.timeadjustment import TimeAdjustment
 
 import advene.util.vlclib as vlclib
 import advene.gui.util
+from advene.gui.views.shapewidget import ShapeDrawer, Rectangle
 
+import advene.model.tal.global_methods as global_methods
 import advene.gui.edit.rules
 import advene.rules.actions
 import xml.dom
@@ -782,12 +784,16 @@ class EditContentForm(EditForm):
         hbox.pack_start(self.mimetype)
 
         vbox.pack_start(hbox, expand=False)
-
+	
+	# FIXME: handle some kind of registered plugin infrastructure
         if self.element.mimetype == 'application/x-advene-ruleset':
             self.contentform = EditRuleSetForm (self.element, 'model',
                                                 controller=self.controller)
         elif self.element.mimetype == 'application/x-advene-simplequery':
             self.contentform = EditQueryForm (self.element, 'model',
+                                              controller=self.controller)
+        elif self.element.mimetype == 'application/x-advene-zone':
+            self.contentform = EditZoneForm (self.element, 'data',
                                               controller=self.controller)
         else:
             self.contentform = EditTextForm (self.element, 'data',
@@ -795,6 +801,75 @@ class EditContentForm(EditForm):
 
         self.contentform.set_editable(self.editable)
         vbox.add(self.contentform.get_view())
+        return vbox
+
+class EditZoneForm (EditForm):
+    """Create a zone edit form for the given element."""
+    def __init__ (self, element, field, controller=None):
+        self.element = element
+        self.field = field
+        self.controller=controller
+        self.editable = True
+        self.fname=None
+        self.view = None
+	self.shape = None
+        self.tooltips=gtk.Tooltips()
+
+    def set_editable (self, boolean):
+        self.editable = boolean
+
+    def callback(self, l):
+	if self.shape is None:
+	    r = Rectangle()
+	    r.name = "Selection"
+	    r.color = "green"
+	    r.set_bounds(l)
+	    self.view.add_object(r)
+	    self.shape=r
+	else:
+	    self.shape.set_bounds(l)
+	    self.view.plot()
+	return
+	
+    def update_element (self):
+        """Update the element fields according to the values in the view."""
+        if not self.editable:
+            return False
+	if self.shape is None:
+	    return True
+
+	shape=self.shape
+	text="""shape=rect\nname=%s\nx=%d\ny=%d\nwidth=%d\nheight=%d""" % (
+	    shape.name,
+	    shape.x * 100 / self.view.canvaswidth,
+	    shape.y * 100 / self.view.canvasheight,
+	    shape.width * 100 / self.view.canvaswidth,
+	    shape.height * 100 / self.view.canvasheight)
+
+        setattr (self.element, self.field, text)
+        return True
+
+    def get_view (self):
+        """Generate a view widget for editing zone attributes."""
+        vbox=gtk.VBox()
+	
+	# FIXME: use correct position from annotation bound
+	i=advene.gui.util.image_from_position(self.controller, 0)
+	self.view = ShapeDrawer(callback=self.callback, background=i)
+
+	if self.element.data:
+	    d=global_methods.parsed( self.element, None )
+	    if isinstance(d, dict):
+		x = int(d['x']) * self.view.canvaswidth / 100
+		y = int(d['y']) * self.view.canvasheight / 100
+		width = int(d['width']) * self.view.canvaswidth / 100
+		height = int(d['height']) * self.view.canvasheight / 100
+		self.callback( ( (x, y),
+				 (x+width, y+height) ) )
+		self.shape.name = d['name']
+
+        vbox.add(self.view.widget)
+
         return vbox
 
 class EditTextForm (EditForm):
