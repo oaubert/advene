@@ -617,7 +617,7 @@ class HTMLTemplate (Template):
 	"""A specialised form of a template that knows how to output HTML
 	"""
 	
-	def expand (self, context, outputFile, outputEncoding="ISO-8859-1",interpreter=None):
+	def expand (self, context, outputFile, outputEncoding="ISO-8859-1", suppressXMLDeclaration=0, interpreter=None):
 		""" This method will write to the outputFile, using the encoding specified,
 			the expanded version of this template.  The context passed in is used to resolve
 			all expressions with the template.
