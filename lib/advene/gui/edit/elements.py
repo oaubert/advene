@@ -322,7 +322,7 @@ class EditAnnotationPopup (EditElementPopup):
         vbox.pack_start (f.get_view (), expand=False)
 
         f = EditContentForm(self.element.content, controller=self.controller,
-                            mimetypeeditable=False)
+                            mimetypeeditable=False, annotation=self.element)
         f.set_editable(editable)
         t = f.get_view()
         self.register_form(f)
@@ -736,11 +736,14 @@ class EditForm(object):
 
 class EditContentForm(EditForm):
     """Create an edit form for the given content."""
-    def __init__ (self, element, controller=None,
+    def __init__ (self, element, controller=None, annotation=None,
                   editable=True, mimetypeeditable=True):
         # self.element is a Content object
         self.element = element
         self.controller=controller
+
+	# Annotation context, sometimes needed
+	self.annotation=annotation
         # self.contentform will be an appropriate EditForm
         # (EditTextForm,EditRuleSetForm,...)
         self.contentform = None
@@ -794,7 +797,8 @@ class EditContentForm(EditForm):
                                               controller=self.controller)
         elif self.element.mimetype == 'application/x-advene-zone':
             self.contentform = EditZoneForm (self.element, 'data',
-                                              controller=self.controller)
+					     controller=self.controller,
+					     annotation=self.annotation)
         else:
             self.contentform = EditTextForm (self.element, 'data',
                                              controller=self.controller)
@@ -805,10 +809,11 @@ class EditContentForm(EditForm):
 
 class EditZoneForm (EditForm):
     """Create a zone edit form for the given element."""
-    def __init__ (self, element, field, controller=None):
+    def __init__ (self, element, field, controller=None, annotation=None):
         self.element = element
         self.field = field
         self.controller=controller
+	self.annotation=annotation
         self.editable = True
         self.fname=None
         self.view = None
@@ -854,19 +859,24 @@ class EditZoneForm (EditForm):
         vbox=gtk.VBox()
 	
 	# FIXME: use correct position from annotation bound
-	i=advene.gui.util.image_from_position(self.controller, 0)
+	i=advene.gui.util.image_from_position(self.controller, self.annotation.fragment.begin)
 	self.view = ShapeDrawer(callback=self.callback, background=i)
 
 	if self.element.data:
 	    d=global_methods.parsed( self.element, None )
 	    if isinstance(d, dict):
-		x = int(d['x']) * self.view.canvaswidth / 100
-		y = int(d['y']) * self.view.canvasheight / 100
-		width = int(d['width']) * self.view.canvaswidth / 100
-		height = int(d['height']) * self.view.canvasheight / 100
-		self.callback( ( (x, y),
-				 (x+width, y+height) ) )
-		self.shape.name = d['name']
+		try:
+		    x = int(d['x']) * self.view.canvaswidth / 100
+		    y = int(d['y']) * self.view.canvasheight / 100
+		    width = int(d['width']) * self.view.canvaswidth / 100
+		    height = int(d['height']) * self.view.canvasheight / 100
+		    self.callback( ( (x, y),
+				     (x+width, y+height) ) )
+		    self.shape.name = d['name']
+		except KeyError:
+		    self.callback( ( (10, 10),
+				     (90, 90) ) )
+		    self.shape.name = self.element.data
 
         vbox.add(self.view.widget)
 
