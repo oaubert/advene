@@ -251,6 +251,13 @@ class TranscriptionEdit:
         item = gtk.MenuItem(_("+0.1 sec"))
         item.connect("activate", popup_modify, button, 100)
         
+        item = gtk.MenuItem()
+        item.add(advene.gui.util.image_from_position(self.controller,
+                                                     position=timestamp,
+                                                     height=60))
+        item.connect("activate", popup_goto, timestamp)
+        menu.append(item)
+	
         menu.show_all()
         
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
