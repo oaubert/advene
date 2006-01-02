@@ -159,21 +159,21 @@ def convert_time(s):
         val=long(s)
     except ValueError:
         # It was not a number. Try to determine its format.
-	t=None
+        t=None
         m=time_regexp.match(s)
-	if m:
-	    t=m.groupdict()
-	else:
-	    m=small_time_regexp.match(s)
-	    if m:
-		t=m.groupdict()
-		t['h'] = 0
-	    
+        if m:
+            t=m.groupdict()
+        else:
+            m=small_time_regexp.match(s)
+            if m:
+                t=m.groupdict()
+                t['h'] = 0
+            
         if t is not None:
-	    if 'ms' in t and t['ms']:
-		t['ms']=(t['ms'] + ("0" * 4))[:3]
-	    else:
-		t['ms']=0
+            if 'ms' in t and t['ms']:
+                t['ms']=(t['ms'] + ("0" * 4))[:3]
+            else:
+                t['ms']=0
             for k in t:
                 if t[k] is None:
                     t[k]=0

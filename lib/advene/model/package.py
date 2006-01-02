@@ -75,9 +75,9 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             # a more URI-compatible syntax
             uri=urllib.pathname2url(uri)
         self.__uri = uri
-	self.__importer = importer
-	# Possible container
-	self.__zip = None
+        self.__importer = importer
+        # Possible container
+        self.__zip = None
         abs_uri = self.getUri (absolute=True)
 
         if importer:
@@ -92,15 +92,15 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         else:
             reader = xml.dom.ext.reader.PyExpat.Reader()
             if source is _get_from_uri:
-		# Determine the package format (plain XML or AZP)
-		# FIXME: should be done by content rather than extension
-		if abs_uri.endswith('.azp') or abs_uri.endswith('.AZP'):
-		    # Advene Zip Package. Do some magic.
-		    self.__zip = ZipPackage(uri)
-		    f=self.__zip.getContentsFile()
-		    element = reader.fromUri("file://" + f)._get_documentElement()    
-		else:
-		    element = reader.fromUri(abs_uri)._get_documentElement()
+                # Determine the package format (plain XML or AZP)
+                # FIXME: should be done by content rather than extension
+                if abs_uri.endswith('.azp') or abs_uri.endswith('.AZP'):
+                    # Advene Zip Package. Do some magic.
+                    self.__zip = ZipPackage(uri)
+                    f=self.__zip.getContentsFile()
+                    element = reader.fromUri("file://" + f)._get_documentElement()    
+                else:
+                    element = reader.fromUri(abs_uri)._get_documentElement()
             elif hasattr(source,'read'):
                 element = reader.fromStream(source)._get_documentElement()
             else:
@@ -109,13 +109,13 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                      str(source)
                 )
 
-		if source_uri.endswith('.azp') or source_uri.endswith('.AZP'):
-		    # Advene Zip Package. Do some magic.
-		    self.__zip = ZipPackage(source_uri)
-		    f=self.__zip.getContentsFile()
-		    element = reader.fromUri("file://" + f)._get_documentElement()    
-		else:
-		    element = reader.fromUri(source_uri)._get_documentElement()
+                if source_uri.endswith('.azp') or source_uri.endswith('.AZP'):
+                    # Advene Zip Package. Do some magic.
+                    self.__zip = ZipPackage(source_uri)
+                    f=self.__zip.getContentsFile()
+                    element = reader.fromUri("file://" + f)._get_documentElement()    
+                else:
+                    element = reader.fromUri(source_uri)._get_documentElement()
 
         modeled.Modeled.__init__(self, element, None)
 
@@ -127,9 +127,9 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         self.__views = None
 
     def close(self):
-	if self.__zip:
-	    self.__zip.close()
-	return
+        if self.__zip:
+            self.__zip.close()
+        return
 
     def __str__(self):
         """Return a nice string representation of the object."""
@@ -164,18 +164,18 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 
     def getAccessPath(self):
         if self.__importer:
-	    r = list(self.__importer.getAccessPath())
-	    r.append(self)
-	    return tuple(r)
-	else:
-	    return (self,)
+            r = list(self.__importer.getAccessPath())
+            r.append(self)
+            return tuple(r)
+        else:
+            return (self,)
 
     def getRootPackage(self):
         if self.__importer:
-	    return self.__importer.getRootPackage()
-	else:
-	    return self
-	   
+            return self.__importer.getRootPackage()
+        else:
+            return self
+           
     def getUri(self, absolute=True, context=None):
         """
         Return the URI of the package.
@@ -266,10 +266,10 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         return r
 
     def getResources(self):
-	if self.__zip is None:
-	    return None
-	else:
-	    return self.__zip.getResources(package=self)
+        if self.__zip is None:
+            return None
+        else:
+            return self.__zip.getResources(package=self)
 
     def serialize(self, stream=sys.stdout):
         """Serialize the Package on the specified stream"""
@@ -278,7 +278,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
     def save(self, name=None):
         """Save the Package in the specified file"""
         if name is None:
-	    name=self.__uri
+            name=self.__uri
         if name.startswith('file:///'):
             name = name[7:]
 
@@ -287,27 +287,27 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             # a more URI-compatible syntax
             name=urllib.url2pathname(name)
 
-	# handle .azp files.
-	if name.endswith('.azp') or name.endswith('.AZP'):
-	    # AZP format
-	    if self.__zip is None:
-		# Conversion necessary: we are saving to the new format.
-		z=ZipPackage()
-		z.new()
-		self.__zip = z
+        # handle .azp files.
+        if name.endswith('.azp') or name.endswith('.AZP'):
+            # AZP format
+            if self.__zip is None:
+                # Conversion necessary: we are saving to the new format.
+                z=ZipPackage()
+                z.new()
+                self.__zip = z
 
-	    # Save the content.xml 
-	    stream = open (self.__zip.getContentsFile(), "w")
-	    self.serialize(stream)
-	    stream.close ()
-	    
-	    # Save the whole .azp
-	    self.__zip.save(name)
-	else:
-	    # Assuming plain XML format
-	    stream = open (name, "w")
-	    self.serialize(stream)
-	    stream.close ()
+            # Save the content.xml 
+            stream = open (self.__zip.getContentsFile(), "w")
+            self.serialize(stream)
+            stream.close ()
+            
+            # Save the whole .azp
+            self.__zip.save(name)
+        else:
+            # Assuming plain XML format
+            stream = open (name, "w")
+            self.serialize(stream)
+            stream.close ()
 
     def _recursive_save (self):
         """Save recursively this packages with all its imported packages"""

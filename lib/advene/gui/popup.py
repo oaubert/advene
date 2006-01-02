@@ -53,7 +53,7 @@ class Menu:
 
     def get_title (self, element):
         """Return the element title."""
-	return vlclib.get_title(self.controller, element)
+        return vlclib.get_title(self.controller, element)
 
     def goto_annotation (self, widget, ann):
         c=self.controller
@@ -276,12 +276,12 @@ class Menu:
             View: self.make_view_menu,
             Package: self.make_package_menu,
             Query: self.make_query_menu,
-	    Resources: self.make_resources_menu,
+            Resources: self.make_resources_menu,
             }
 
-	for t, method in specific_builder.iteritems():
-	    if isinstance(element, t):
-		method(element, menu)
+        for t, method in specific_builder.iteritems():
+            if isinstance(element, t):
+                method(element, menu)
 
         menu.show_all()
         return menu

@@ -257,7 +257,7 @@ class TranscriptionEdit:
                                                      height=60))
         item.connect("activate", popup_goto, timestamp)
         menu.append(item)
-	
+        
         menu.show_all()
         
         menu.popup(None, None, None, 0, gtk.get_current_event_time())

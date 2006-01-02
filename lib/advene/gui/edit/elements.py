@@ -659,7 +659,7 @@ class EditResourcePopup (EditElementPopup):
         # Resource data
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'mimetype'),
-				       #'author', 'date'),
+                                       #'author', 'date'),
                                        editable=editable,
                                        editables=(),
                                        labels={'id':     _('Id'),
@@ -742,8 +742,8 @@ class EditContentForm(EditForm):
         self.element = element
         self.controller=controller
 
-	# Annotation context, sometimes needed
-	self.annotation=annotation
+        # Annotation context, sometimes needed
+        self.annotation=annotation
         # self.contentform will be an appropriate EditForm
         # (EditTextForm,EditRuleSetForm,...)
         self.contentform = None
@@ -755,11 +755,11 @@ class EditContentForm(EditForm):
         self.editable = editable
 
         self.mimetypeeditable = (mimetypeeditable 
-				 and editable 
-				 and not (self.element.mimetype in 
-					  ('application/x-advene-ruleset',
-					   'application/x-advene-simplequery')))
-	
+                                 and editable 
+                                 and not (self.element.mimetype in 
+                                          ('application/x-advene-ruleset',
+                                           'application/x-advene-simplequery')))
+        
     def set_editable (self, bool):
         self.editable = bool
 
@@ -787,8 +787,8 @@ class EditContentForm(EditForm):
         hbox.pack_start(self.mimetype)
 
         vbox.pack_start(hbox, expand=False)
-	
-	# FIXME: handle some kind of registered plugin infrastructure
+        
+        # FIXME: handle some kind of registered plugin infrastructure
         if self.element.mimetype == 'application/x-advene-ruleset':
             self.contentform = EditRuleSetForm (self.element, 'model',
                                                 controller=self.controller)
@@ -797,8 +797,8 @@ class EditContentForm(EditForm):
                                               controller=self.controller)
         elif self.element.mimetype == 'application/x-advene-zone':
             self.contentform = EditZoneForm (self.element, 'data',
-					     controller=self.controller,
-					     annotation=self.annotation)
+                                             controller=self.controller,
+                                             annotation=self.annotation)
         else:
             self.contentform = EditTextForm (self.element, 'data',
                                              controller=self.controller)
@@ -813,43 +813,43 @@ class EditZoneForm (EditForm):
         self.element = element
         self.field = field
         self.controller=controller
-	self.annotation=annotation
+        self.annotation=annotation
         self.editable = True
         self.fname=None
         self.view = None
-	self.shape = None
+        self.shape = None
         self.tooltips=gtk.Tooltips()
 
     def set_editable (self, boolean):
         self.editable = boolean
 
     def callback(self, l):
-	if self.shape is None:
-	    r = Rectangle()
-	    r.name = "Selection"
-	    r.color = "green"
-	    r.set_bounds(l)
-	    self.view.add_object(r)
-	    self.shape=r
-	else:
-	    self.shape.set_bounds(l)
-	    self.view.plot()
-	return
-	
+        if self.shape is None:
+            r = Rectangle()
+            r.name = "Selection"
+            r.color = "green"
+            r.set_bounds(l)
+            self.view.add_object(r)
+            self.shape=r
+        else:
+            self.shape.set_bounds(l)
+            self.view.plot()
+        return
+        
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if not self.editable:
             return False
-	if self.shape is None:
-	    return True
+        if self.shape is None:
+            return True
 
-	shape=self.shape
-	text="""shape=rect\nname=%s\nx=%d\ny=%d\nwidth=%d\nheight=%d""" % (
-	    shape.name,
-	    shape.x * 100 / self.view.canvaswidth,
-	    shape.y * 100 / self.view.canvasheight,
-	    shape.width * 100 / self.view.canvaswidth,
-	    shape.height * 100 / self.view.canvasheight)
+        shape=self.shape
+        text="""shape=rect\nname=%s\nx=%d\ny=%d\nwidth=%d\nheight=%d""" % (
+            shape.name,
+            shape.x * 100 / self.view.canvaswidth,
+            shape.y * 100 / self.view.canvasheight,
+            shape.width * 100 / self.view.canvaswidth,
+            shape.height * 100 / self.view.canvasheight)
 
         setattr (self.element, self.field, text)
         return True
@@ -857,26 +857,26 @@ class EditZoneForm (EditForm):
     def get_view (self):
         """Generate a view widget for editing zone attributes."""
         vbox=gtk.VBox()
-	
-	# FIXME: use correct position from annotation bound
-	i=advene.gui.util.image_from_position(self.controller, self.annotation.fragment.begin)
-	self.view = ShapeDrawer(callback=self.callback, background=i)
+        
+        # FIXME: use correct position from annotation bound
+        i=advene.gui.util.image_from_position(self.controller, self.annotation.fragment.begin)
+        self.view = ShapeDrawer(callback=self.callback, background=i)
 
-	if self.element.data:
-	    d=global_methods.parsed( self.element, None )
-	    if isinstance(d, dict):
-		try:
-		    x = int(d['x']) * self.view.canvaswidth / 100
-		    y = int(d['y']) * self.view.canvasheight / 100
-		    width = int(d['width']) * self.view.canvaswidth / 100
-		    height = int(d['height']) * self.view.canvasheight / 100
-		    self.callback( ( (x, y),
-				     (x+width, y+height) ) )
-		    self.shape.name = d['name']
-		except KeyError:
-		    self.callback( ( (0, 0),
-				     (99, 99) ) )
-		    self.shape.name = self.element.data
+        if self.element.data:
+            d=global_methods.parsed( self.element, None )
+            if isinstance(d, dict):
+                try:
+                    x = int(d['x']) * self.view.canvaswidth / 100
+                    y = int(d['y']) * self.view.canvasheight / 100
+                    width = int(d['width']) * self.view.canvaswidth / 100
+                    height = int(d['height']) * self.view.canvasheight / 100
+                    self.callback( ( (x, y),
+                                     (x+width, y+height) ) )
+                    self.shape.name = d['name']
+                except KeyError:
+                    self.callback( ( (0, 0),
+                                     (99, 99) ) )
+                    self.shape.name = self.element.data
 
         vbox.add(self.view.widget)
 

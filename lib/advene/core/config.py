@@ -74,11 +74,11 @@ class Config(object):
     def __init__ (self):
         if os.sys.platform in ( 'win32', 'darwin' ):
             self.os=os.sys.platform
-	elif 'linux' in os.sys.platform:
+        elif 'linux' in os.sys.platform:
             self.os='linux'
-	else:
-	    print "Warning: undefined platform: ", os.sys.platform
-	    self.os=os.sys.platform
+        else:
+            print "Warning: undefined platform: ", os.sys.platform
+            self.os=os.sys.platform
 
         if self.os != 'win32':
             self.path = {

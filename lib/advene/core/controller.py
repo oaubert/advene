@@ -425,9 +425,9 @@ class AdveneController:
                         d=d.replace('file://', '')
                     d=os.path.dirname(d)
 
-		if '~' in d:
-		    # Expand userdir
-		    d=os.path.expanduser(d)
+                if '~' in d:
+                    # Expand userdir
+                    d=os.path.expanduser(d)
 
                 n=os.sep.join((d, name))
                 # FIXME: if d is a URL, use appropriate method (urllib.??)
@@ -592,12 +592,12 @@ class AdveneController:
         @type alias: string
         """
         if uri is None or uri == "":
-	    try:
-		self.package = Package (uri="new_pkg",
-					source=config.data.advenefile(config.data.templatefilename))
-	    except OSerror:
-		self.log(_("Cannot find the template package."))
-		self.package = Package ()
+            try:
+                self.package = Package (uri="new_pkg",
+                                        source=config.data.advenefile(config.data.templatefilename))
+            except OSerror:
+                self.log(_("Cannot find the template package."))
+                self.package = Package ()
             self.package.author = config.data.userid
         else:
             self.package = Package (uri=uri)
@@ -775,8 +775,8 @@ class AdveneController:
         # Save preferences
         config.data.save_preferences()
 
-	# Cleanup the ZipPackage directories
-	ZipPackage.cleanup()
+        # Cleanup the ZipPackage directories
+        ZipPackage.cleanup()
 
         # Terminate the web server
         try:

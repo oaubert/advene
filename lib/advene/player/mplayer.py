@@ -295,14 +295,14 @@ class Player:
 #  Provides simple piped I/O to an mplayer process.
 #
 class Mplayer:
-	
-	
-	#
-	#  Initializes this Mplayer with the specified Pymp.
-	#
-	def __init__(self, pymp):
-		
-		self.pymp = pymp
+        
+        
+        #
+        #  Initializes this Mplayer with the specified Pymp.
+        #
+        def __init__(self, pymp):
+                
+                self.pymp = pymp
                 self.re_time=sre.compile("(A|V):\s*(\d+\.\d+)")
                 self.re_length=sre.compile("ANS_LENGTH=(\d+)")
                 self.mplayerIn = None
@@ -312,11 +312,11 @@ class Mplayer:
                 self.paused=False
                 self.totalTime=0
                 self.wid=None
-		
-	#
-	#   Plays the specified target.
-	#
-	def play(self, target):
+                
+        #
+        #   Plays the specified target.
+        #
+        def play(self, target):
             args=["mplayer", "-slave"]
             if self.wid is not None:
                 args.append("-wid")
@@ -332,81 +332,81 @@ class Mplayer:
             
             self.startEofHandler()
             self.startStatusQuery()
-			
-	#
-	#  Issues command to mplayer.
-	#
-	def cmd(self, command):
-		
-		if not self.mplayerIn:
-			return
-		
-		try:
-			self.mplayerIn.write(command + "\n")
-			self.mplayerIn.flush()  #flush pipe
-		except StandardError:
-			return
-			
-	#
-	#  Toggles pausing of the current mplayer job and status query.
-	#
-	def pause(self):
-		
-		if not self.mplayerIn:
-			return
-			
-		if self.paused:  #unpause	
-			self.startStatusQuery()
-			self.paused = False
-			
-		else:  #pause
-			self.stopStatusQuery()
-			self.paused = True
-			
-		self.cmd("pause")
-	
-	#
-	#  Cleanly closes any IPC resources to mplayer.
-	#
-	def close(self):
-		
-		if self.paused:  #untoggle pause to cleanly quit
-			self.pause()
-		
-		self.stopStatusQuery()  #cancel query
-		self.stopEofHandler()  #cancel eof monitor
-		
-		self.cmd("quit")  #ask mplayer to quit
-		
-		try:			
-			self.mplayerIn.close()	 #close pipes
-			self.mplayerOut.close()
-		except StandardError:
-			pass
-			
-		self.mplayerIn, self.mplayerOut = None, None		
-		self.pymp.control.setProgress(-1)  #reset bar
-				
-	#
-	#  Triggered when mplayer's stdout reaches EOF.
-	#
-	def handleEof(self, source, condition):
-		
-		self.stopStatusQuery()  #cancel query
-		
-		self.mplayerIn, self.mplayerOut = None, None
-				
-		if self.pymp.playlist.continuous:  #play next target
-			self.pymp.playlist.next(None, None)
-		else:  #reset progress bar
-			self.pymp.control.setProgress(-1)
-			
-		return False
-		
-	#
-	#  Queries mplayer's playback status and upates the progress bar.
-	#
-	def queryStatus(self):						
+                        
+        #
+        #  Issues command to mplayer.
+        #
+        def cmd(self, command):
+                
+                if not self.mplayerIn:
+                        return
+                
+                try:
+                        self.mplayerIn.write(command + "\n")
+                        self.mplayerIn.flush()  #flush pipe
+                except StandardError:
+                        return
+                        
+        #
+        #  Toggles pausing of the current mplayer job and status query.
+        #
+        def pause(self):
+                
+                if not self.mplayerIn:
+                        return
+                        
+                if self.paused:  #unpause       
+                        self.startStatusQuery()
+                        self.paused = False
+                        
+                else:  #pause
+                        self.stopStatusQuery()
+                        self.paused = True
+                        
+                self.cmd("pause")
+        
+        #
+        #  Cleanly closes any IPC resources to mplayer.
+        #
+        def close(self):
+                
+                if self.paused:  #untoggle pause to cleanly quit
+                        self.pause()
+                
+                self.stopStatusQuery()  #cancel query
+                self.stopEofHandler()  #cancel eof monitor
+                
+                self.cmd("quit")  #ask mplayer to quit
+                
+                try:                    
+                        self.mplayerIn.close()   #close pipes
+                        self.mplayerOut.close()
+                except StandardError:
+                        pass
+                        
+                self.mplayerIn, self.mplayerOut = None, None            
+                self.pymp.control.setProgress(-1)  #reset bar
+                                
+        #
+        #  Triggered when mplayer's stdout reaches EOF.
+        #
+        def handleEof(self, source, condition):
+                
+                self.stopStatusQuery()  #cancel query
+                
+                self.mplayerIn, self.mplayerOut = None, None
+                                
+                if self.pymp.playlist.continuous:  #play next target
+                        self.pymp.playlist.next(None, None)
+                else:  #reset progress bar
+                        self.pymp.control.setProgress(-1)
+                        
+                return False
+                
+        #
+        #  Queries mplayer's playback status and upates the progress bar.
+        #
+        def queryStatus(self):                                          
             curTime, line = None, None
             
             while True:
@@ -427,38 +427,38 @@ class Mplayer:
                         print line
                 except StandardError:
                     break
-									
+                                                                        
                 if curTime:
                     self.pymp.control.setProgress(curTime) #update progressbar
                     if self.totalTime == 0:
                         #print "Getting time length"
                         self.cmd("get_time_length") #grab the length of the file
 
-		return True
-		
-	#
-	#  Inserts the status query monitor.
-	#
-	def startStatusQuery(self):
-		self.statusQuery = gobject.timeout_add(STATUS_TIMEOUT, self.queryStatus)
-		
-	#
-	#  Removes the status query monitor.
-	#
-	def stopStatusQuery(self):
-		gobject.source_remove(self.statusQuery)
-					
-	#
-	#  Inserts the EOF monitor.
-	#
-	def startEofHandler(self):
-		self.eofHandler = gobject.io_add_watch(self.mplayerOut, gobject.IO_HUP, self.handleEof)
-	
-	#
-	#  Removes the EOF monitor.
-	#
-	def stopEofHandler(self):
-		gobject.source_remove(self.eofHandler)
-		
-		
+                return True
+                
+        #
+        #  Inserts the status query monitor.
+        #
+        def startStatusQuery(self):
+                self.statusQuery = gobject.timeout_add(STATUS_TIMEOUT, self.queryStatus)
+                
+        #
+        #  Removes the status query monitor.
+        #
+        def stopStatusQuery(self):
+                gobject.source_remove(self.statusQuery)
+                                        
+        #
+        #  Inserts the EOF monitor.
+        #
+        def startEofHandler(self):
+                self.eofHandler = gobject.io_add_watch(self.mplayerOut, gobject.IO_HUP, self.handleEof)
+        
+        #
+        #  Removes the EOF monitor.
+        #
+        def stopEofHandler(self):
+                gobject.source_remove(self.eofHandler)
+                
+                
 #End of file

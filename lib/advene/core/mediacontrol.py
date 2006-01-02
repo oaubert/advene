@@ -32,23 +32,23 @@ class PlayerFactory:
         print "mediacontrol: using %s" % p
 
         try:
-	    if p == 'vlcnative':
-		# Should do some checks to verify it is present
-		if config.data.os == 'win32':
-		    return self.nativevlc_win32_import()
-		else:
-		    import advene.player.vlcnative as playermodule
-	    elif p == 'dummy':
-		import advene.player.dummy as playermodule
-	    elif p == 'vlcorbit':
-		import advene.player.vlcorbit as playermodule
-	    elif p == 'mplayer':
-		import advene.player.mplayer as playermodule
-	    else:
-		import advene.player.dummy as playermodule
-	except ImportError:
-	    print "Cannot import %s mediaplayer. Using dummy player." % p
-	    import advene.player.dummy as playermodule
+            if p == 'vlcnative':
+                # Should do some checks to verify it is present
+                if config.data.os == 'win32':
+                    return self.nativevlc_win32_import()
+                else:
+                    import advene.player.vlcnative as playermodule
+            elif p == 'dummy':
+                import advene.player.dummy as playermodule
+            elif p == 'vlcorbit':
+                import advene.player.vlcorbit as playermodule
+            elif p == 'mplayer':
+                import advene.player.mplayer as playermodule
+            else:
+                import advene.player.dummy as playermodule
+        except ImportError:
+            print "Cannot import %s mediaplayer. Using dummy player." % p
+            import advene.player.dummy as playermodule
             
         return playermodule.Player()
 

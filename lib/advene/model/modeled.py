@@ -126,13 +126,13 @@ class Modeled(object):
     def getRootPackage(self):
         """
         Modeled which are not Importable rely on their parent for the access path.
-	"""
+        """
         return self._getParent().getRootPackage()
 
     def getAccessPath(self):
         """
         Modeled which are not Importable rely on their parent for the access path.
-	"""
+        """
         return self._getParent().getAccessPath()
 
 

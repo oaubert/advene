@@ -272,7 +272,7 @@ Description:
         
             button.set_label(m)
             button._filename=None
-	    p.close()
+            p.close()
         return True
     
     preview.connect("clicked", do_preview)

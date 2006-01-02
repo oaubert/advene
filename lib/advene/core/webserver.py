@@ -1271,14 +1271,14 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.start_html (_("Package %s deleted") % alias, duplicate_title=True)
             self.display_loaded_packages (embedded=True)
         elif command == 'save':
-	    if self.controller:
-		self.controller.save_package()
-	    else:
-		alias = query['alias']
-		p = self.server.packages[alias]
-		p.save (name=p.uri)
-		self.start_html (_("Package %s saved") % alias, duplicate_title=True)
-		self.display_loaded_packages (embedded=True)
+            if self.controller:
+                self.controller.save_package()
+            else:
+                alias = query['alias']
+                p = self.server.packages[alias]
+                p.save (name=p.uri)
+                self.start_html (_("Package %s saved") % alias, duplicate_title=True)
+                self.display_loaded_packages (embedded=True)
         elif command == 'reset':
             # Reset packages list
             self.server.packages = {}
@@ -1768,7 +1768,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.shouldrun = True  # Set to False to indicate the end of the
                                # server_forawhile method
 
-	self.logstream = StringIO.StringIO()
+        self.logstream = StringIO.StringIO()
         self.logger = logging.getLogger('webserver')
         handler=logging.StreamHandler(self.logstream)
         handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))

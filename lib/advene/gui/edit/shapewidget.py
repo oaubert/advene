@@ -27,8 +27,8 @@ class Shape:
         self.name=name
         self.color=color
         self.linewidth=2
-	self.filled = False
-	# Pixel tolerance for control point selection
+        self.filled = False
+        # Pixel tolerance for control point selection
         self.tolerance = 6
         self.set_bounds( ( (0, 0), (10, 10) ) )
 
@@ -53,15 +53,15 @@ class Shape:
 
         This generic version is fitted for rectangular areas
         """
-	return None
+        return None
 
     def __contains__(self, point):
         return False
 
     def get_svg(self, relative=False, size=None):
-	"""Return a SVG representation of the shape.
-	"""
-	return "<text>Generic shape</text>"
+        """Return a SVG representation of the shape.
+        """
+        return "<text>Generic shape</text>"
 
     def copy_from(self, shape, style=False):
         return
@@ -74,50 +74,50 @@ class Shape:
     def edit_properties_widget(self):
         vbox=gtk.VBox()
 
-	def label_widget(label, widget):
-	    hb=gtk.HBox()
-	    hb.add(gtk.Label(label))
-	    hb.pack_start(widget, expand=False)
-	    return hb
+        def label_widget(label, widget):
+            hb=gtk.HBox()
+            hb.add(gtk.Label(label))
+            hb.pack_start(widget, expand=False)
+            return hb
 
-	# Name
-	namesel = gtk.Entry()
-	namesel.set_text(self.name)
-	vbox.pack_start(label_widget(_("Name"), namesel), expand=False)
+        # Name
+        namesel = gtk.Entry()
+        namesel.set_text(self.name)
+        vbox.pack_start(label_widget(_("Name"), namesel), expand=False)
 
-	# Color
-	colorsel = gtk.combo_box_new_text()
-	for s in COLORS:
-	    colorsel.append_text(s)
-	try:
-	    i=COLORS.index(self.color)
-	except IndexError:
-	    i=0
-	colorsel.set_active(i)
-	vbox.pack_start(label_widget(_("Color"), colorsel), expand=False)
+        # Color
+        colorsel = gtk.combo_box_new_text()
+        for s in COLORS:
+            colorsel.append_text(s)
+        try:
+            i=COLORS.index(self.color)
+        except IndexError:
+            i=0
+        colorsel.set_active(i)
+        vbox.pack_start(label_widget(_("Color"), colorsel), expand=False)
 
-	# Linewidth
-	linewidthsel = gtk.SpinButton()
+        # Linewidth
+        linewidthsel = gtk.SpinButton()
         linewidthsel.set_range(1, 15)
         linewidthsel.set_increments(1,1)
-	linewidthsel.set_value(self.linewidth)
-	vbox.pack_start(label_widget(_("Linewidth"), linewidthsel), expand=False)
+        linewidthsel.set_value(self.linewidth)
+        vbox.pack_start(label_widget(_("Linewidth"), linewidthsel), expand=False)
 
-	# Filled
-	filledsel = gtk.ToggleButton()
-	filledsel.set_active(self.filled)
-	vbox.pack_start(label_widget(_("Filled"), filledsel), expand=False)
+        # Filled
+        filledsel = gtk.ToggleButton()
+        filledsel.set_active(self.filled)
+        vbox.pack_start(label_widget(_("Filled"), filledsel), expand=False)
 
-	vbox.widgets = {
-	    'name': namesel,
-	    'color': colorsel,
-	    'linewidth': linewidthsel,
-	    'filled': filledsel
-	    }
-	return vbox
+        vbox.widgets = {
+            'name': namesel,
+            'color': colorsel,
+            'linewidth': linewidthsel,
+            'filled': filledsel
+            }
+        return vbox
 
     def edit_properties(self):
-	edit=self.edit_properties_widget()
+        edit=self.edit_properties_widget()
 
         d = gtk.Dialog(title=_("Properties of %s") % self.name,
                        parent=None,
@@ -137,19 +137,19 @@ class Shape:
             return False
         d.connect("key_press_event", keypressed_cb)
 
-	edit.show_all()
+        edit.show_all()
         res=d.run()
         d.destroy()
 
         if res == gtk.RESPONSE_ACCEPT:
-	    # Get new values
-	    self.name = edit.widgets['name'].get_text()
-	    self.color = COLORS[edit.widgets['color'].get_active()]
-	    self.linewidth = int(edit.widgets['linewidth'].get_value())
-	    self.filled = edit.widgets['filled'].get_active()
-	    return True
+            # Get new values
+            self.name = edit.widgets['name'].get_text()
+            self.color = COLORS[edit.widgets['color'].get_active()]
+            self.linewidth = int(edit.widgets['linewidth'].get_value())
+            self.filled = edit.widgets['filled'].get_active()
+            return True
 
-	return False
+        return False
 
 class Rectangle(Shape):
     SHAPENAME=_("Rectangle")
@@ -222,28 +222,28 @@ class Rectangle(Shape):
                  and y <= self.y + self.height )
 
     def get_svg(self, relative=False, size=None):
-	"""Return a SVG representation of the shape.
-	"""
-	if relative and size:
-	    size="""x="%d%%" y="%d%%" width="%d%%" height="%d%%" """ % (
-		self.x * 100 / size[0],
-		self.y * 100 / size[1],
-		self.width * 100 / size[0],
-		self.height * 100 / size[1] )
-	else:
-	    size="""x="%d" y="%d" width="%d" height="%d" """ % (
-		self.x,
-		self.y,
-		self.width,
-		self.height )
+        """Return a SVG representation of the shape.
+        """
+        if relative and size:
+            size="""x="%d%%" y="%d%%" width="%d%%" height="%d%%" """ % (
+                self.x * 100 / size[0],
+                self.y * 100 / size[1],
+                self.width * 100 / size[0],
+                self.height * 100 / size[1] )
+        else:
+            size="""x="%d" y="%d" width="%d" height="%d" """ % (
+                self.x,
+                self.y,
+                self.width,
+                self.height )
 
-	if self.filled:
-	    fill=self.color
-	else:
-	    fill='none'
+        if self.filled:
+            fill=self.color
+        else:
+            fill='none'
 
-	return """<rect %s fill="%s" stroke="%s" style="stroke-width:%s" />""" % (
-	    size, fill, self.color, str(self.linewidth) )
+        return """<rect %s fill="%s" stroke="%s" style="stroke-width:%s" />""" % (
+            size, fill, self.color, str(self.linewidth) )
 
 class Text(Rectangle):
     """Experimental Text shape. Non-working for the moment.
@@ -264,13 +264,13 @@ class Text(Rectangle):
         gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
         if invert:
             gc.set_function(gtk.gdk.INVERT)
-	l=pango.Layout(pango.Context())
-	l.set_text(self.name)
-	self.width, self.height = l.get_pixel_size()
+        l=pango.Layout(pango.Context())
+        l.set_text(self.name)
+        self.width, self.height = l.get_pixel_size()
         pixmap.draw_layout(gc,
-			   self.x,
-			   self.y,
-			   l)
+                           self.x,
+                           self.y,
+                           l)
         return
 
     def translate(self, vector):
@@ -318,19 +318,19 @@ class Text(Rectangle):
                  and y <= self.y + self.height )
 
     def get_svg(self, relative=False, size=None):
-	"""Return a SVG representation of the shape.
-	"""
-	if relative and size:
-	    size="""x="%d%%" y="%d%%" """ % (
-		self.x * 100 / size[0],
-		self.y * 100 / size[1] )
-	else:
-	    size="""x="%d" y="%d" """ % (
-		self.x,
-		self.y )
+        """Return a SVG representation of the shape.
+        """
+        if relative and size:
+            size="""x="%d%%" y="%d%%" """ % (
+                self.x * 100 / size[0],
+                self.y * 100 / size[1] )
+        else:
+            size="""x="%d" y="%d" """ % (
+                self.x,
+                self.y )
 
-	return """<text %s stroke="%s" style="stroke-width:%s" />%s</text>""" % (
-	    size, self.color, str(self.linewidth), self.name )
+        return """<text %s stroke="%s" style="stroke-width:%s" />%s</text>""" % (
+            size, self.color, str(self.linewidth), self.name )
 
 class Line(Rectangle):
     SHAPENAME=_("Line")
@@ -376,23 +376,23 @@ class Line(Rectangle):
         return False
 
     def get_svg(self, relative=False, size=None):
-	"""Return a SVG representation of the shape.
-	"""
-	if relative and size:
-	    size="""x1="%d%%" y1="%d%%" x2="%d%%" y2="%d%%" """ % (
-		self.x1 * 100 / size[0],
-		self.y1 * 100 / size[1],
-		self.x2 * 100 / size[0],
-		self.y2 * 100 / size[1] )
-	else:
-	    size="""x1="%d" y1="%d" x2="%d" y2="%d" """ % (
-		self.x1,
-		self.y1,
-		self.x2,
-		self.y2 )
+        """Return a SVG representation of the shape.
+        """
+        if relative and size:
+            size="""x1="%d%%" y1="%d%%" x2="%d%%" y2="%d%%" """ % (
+                self.x1 * 100 / size[0],
+                self.y1 * 100 / size[1],
+                self.x2 * 100 / size[0],
+                self.y2 * 100 / size[1] )
+        else:
+            size="""x1="%d" y1="%d" x2="%d" y2="%d" """ % (
+                self.x1,
+                self.y1,
+                self.x2,
+                self.y2 )
 
-	return """<line %s stroke="%s" style="stroke-width:%s" />""" % (
-	    size, self.color, str(self.linewidth) )
+        return """<line %s stroke="%s" style="stroke-width:%s" />""" % (
+            size, self.color, str(self.linewidth) )
 
 class Circle(Rectangle):
     SHAPENAME=_("Circle")
@@ -425,26 +425,26 @@ class Circle(Rectangle):
         return d <= ( self.radius ** 2 )
 
     def get_svg(self, relative=False, size=None):
-	"""Return a SVG representation of the shape.
-	"""
-	if relative and size:
-	    size="""cx="%d%%" cy="%d%%" r="%d%%" """ % (
-		self.centerx * 100 / size[0],
-		self.centery * 100 / size[1],
-		self.radius * 100 / size[0] )
-	else:
-	    size="""cx="%d" cy="%d" r="%d" """ % (
-		self.centerx,
-		self.centery,
-		self.radius )
+        """Return a SVG representation of the shape.
+        """
+        if relative and size:
+            size="""cx="%d%%" cy="%d%%" r="%d%%" """ % (
+                self.centerx * 100 / size[0],
+                self.centery * 100 / size[1],
+                self.radius * 100 / size[0] )
+        else:
+            size="""cx="%d" cy="%d" r="%d" """ % (
+                self.centerx,
+                self.centery,
+                self.radius )
 
-	if self.filled:
-	    fill=self.color
-	else:
-	    fill='none'
+        if self.filled:
+            fill=self.color
+        else:
+            fill='none'
 
-	return """<circle %s fill="%s" stroke="%s" style="stroke-width:%s" />""" % (
-	    size, fill, self.color, str(self.linewidth) )
+        return """<circle %s fill="%s" stroke="%s" style="stroke-width:%s" />""" % (
+            size, fill, self.color, str(self.linewidth) )
 
 class ShapeDrawer:
     def __init__(self, callback=None, background=None):
@@ -464,7 +464,7 @@ class ShapeDrawer:
         # mode: "create", "resize" or "translate"
         self.mode = "resize"
 
-	self.pixmap = None
+        self.pixmap = None
 
         self.widget = gtk.DrawingArea()
         self.widget.connect("expose_event", self.expose_event)
@@ -478,9 +478,9 @@ class ShapeDrawer:
             p=self.background.get_pixbuf()
             w=p.get_width()
             h=p.get_height()
-	    self.widget.set_size_request(w, h)
-	    self.canvaswidth=w
-	    self.canvasheight=h
+            self.widget.set_size_request(w, h)
+            self.canvaswidth=w
+            self.canvasheight=h
 
     def default_callback(self, rectangle):
         print "Got selection ", str(rectangle)
@@ -552,23 +552,23 @@ class ShapeDrawer:
         def remove(i, o):
             self.remove_object(o)
 
-	def properties(i, o):
-	    if o.edit_properties():
-		self.plot()
-		# Update liststore
-		i = self.find_object(o)
-		if i is not None:
-		    self.objects.set_value(i, 1, o.name)
+        def properties(i, o):
+            if o.edit_properties():
+                self.plot()
+                # Update liststore
+                i = self.find_object(o)
+                if i is not None:
+                    self.objects.set_value(i, 1, o.name)
 
-	def dump_svg(i, o):
-	    print o.get_svg()
-	    return True
+        def dump_svg(i, o):
+            print o.get_svg()
+            return True
 
         add_item(shape.name)
         add_item("")
         add_item(_("Delete"), remove, shape)
-	add_item(_("Properties"), properties, shape)
-	add_item(_("SVG"), dump_svg, shape)
+        add_item(_("Properties"), properties, shape)
+        add_item(_("SVG"), dump_svg, shape)
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -652,8 +652,8 @@ class ShapeDrawer:
 
     def plot(self):
         """Draw in the pixmap."""
-	if self.pixmap is None:
-	    return
+        if self.pixmap is None:
+            return
         self.pixmap.draw_rectangle(self.widget.get_style().white_gc, True, 0, 0, self.canvaswidth, self.canvasheight)
 
         if self.background:
@@ -714,12 +714,12 @@ class ShapeEditor:
         if event.type == gtk.gdk._2BUTTON_PRESS:
             node = self.get_selected_node (widget)
             if node is not None:
-		if node.edit_properties():
-		    self.drawer.plot()
-		    # Update liststore
-		    i = self.drawer.find_object(node)
-		    if i is not None:
-			self.drawer.objects.set_value(i, 1, node.name)
+                if node.edit_properties():
+                    self.drawer.plot()
+                    # Update liststore
+                    i = self.drawer.find_object(node)
+                    if i is not None:
+                        self.drawer.objects.set_value(i, 1, node.name)
                 retval=True
             else:
                 retval=False
@@ -732,8 +732,8 @@ class ShapeEditor:
                     it = model.get_iter(path)
                     node = model.get_value(it, 0)
                     widget.get_selection().select_path (path)
-		    self.drawer.popup_menu(node)
-		    retval = True
+                    self.drawer.popup_menu(node)
+                    retval = True
         return retval
 
     def build_widget(self):
@@ -753,7 +753,7 @@ class ShapeEditor:
         self.treeview.append_column(column)
         self.treeview.connect('row_activated', self.remove_item)
         self.treeview.connect("button_press_event", self.tree_view_button_cb)
-	
+        
         control = gtk.VBox()
 
         # FIXME: toolbar at the top
@@ -766,7 +766,7 @@ class ShapeEditor:
         control.pack_start(shapeselector, expand=False)
 
         def changecolor(combobox):
-	    self.defaultcolor = self.colors[combobox.get_active()]
+            self.defaultcolor = self.colors[combobox.get_active()]
             return True
 
         colorselector = self.build_selector( self.colors,
@@ -775,16 +775,16 @@ class ShapeEditor:
 
         control.pack_start(self.treeview, expand=False)
 
-	def dump_svg(b):
-	    size=(self.drawer.canvaswidth, self.drawer.canvasheight)
-	    print """<svg version='1' preserveAspectRatio="xMinYMin meet" viewBox='0 0 %d %d'>""" % size
-	    for o in self.drawer.objects:
-		print o[0].get_svg(relative=True, size=size)
-	    print """</svg>"""
+        def dump_svg(b):
+            size=(self.drawer.canvaswidth, self.drawer.canvasheight)
+            print """<svg version='1' preserveAspectRatio="xMinYMin meet" viewBox='0 0 %d %d'>""" % size
+            for o in self.drawer.objects:
+                print o[0].get_svg(relative=True, size=size)
+            print """</svg>"""
 
-	b=gtk.Button(_("Dump SVG"))
-	b.connect("clicked", dump_svg)
-	control.pack_start(b, expand=False)
+        b=gtk.Button(_("Dump SVG"))
+        b.connect("clicked", dump_svg)
+        control.pack_start(b, expand=False)
 
         hbox.pack_start(control, expand=False)
         vbox.show_all()
@@ -794,9 +794,9 @@ def main():
     import sys
 
     if len(sys.argv) > 1:
-	bg = sys.argv[1]
+        bg = sys.argv[1]
     else:
-	bg = 'atelier.jpg'
+        bg = 'atelier.jpg'
 
     win = gtk.Window(gtk.WINDOW_TOPLEVEL)
     win.set_title("Shape Editor test")

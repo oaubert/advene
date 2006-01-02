@@ -429,38 +429,38 @@ class AdveneGUI (Connect):
         self.gui.get_widget("displayvbox").add(self.visualisationwidget)
         self.gui.get_widget("vpaned").set_position(-1)
   
-	for events, method in ( 
-	    ("PackageLoad", self.manage_package_load),
-	    ("PackageSave", self.manage_package_save),
-	    ( ('AnnotationCreate', 'AnnotationEditEnd',
-	       'AnnotationDelete', 'AnnotationActivate', 
-	       'AnnotationDeactivate'),
-	      self.annotation_lifecycle ),
-	    ( ('RelationCreate', 'RelationEditEnd', 
-	       'RelationDelete'), 
-	      self.relation_lifecycle ),
-	    ( ('ViewCreate', 'ViewEditEnd', 'ViewDelete'), 
-	      self.view_lifecycle ),
-	    ( ('QueryCreate', 'QueryEditEnd', 'QueryDelete'),
-	      self.query_lifecycle),
-	    ( ('SchemaCreate', 'SchemaEditEnd', 'SchemaDelete'),
-	      self.schema_lifecycle),
-	    ( ('AnnotationTypeCreate', 'AnnotationTypeEditEnd', 
-	       'AnnotationTypeDelete'),
-	      self.annotationtype_lifecycle),
-	    ( ('RelationTypeCreate', 'RelationTypeEditEnd', 
-	       'RelationTypeDelete'),
-	      self.relationtype_lifecycle),
-	    ("PlayerSet", self.updated_position_cb),
-	    ("ViewActivation", self.on_view_activation) 
-	    ):
-	    if isinstance(events, basestring):
-		self.controller.event_handler.internal_rule (event=events,
-							     method=method)
-	    else:
-		for e in events:
-		    self.controller.event_handler.internal_rule (event=e,
-								 method=method)
+        for events, method in ( 
+            ("PackageLoad", self.manage_package_load),
+            ("PackageSave", self.manage_package_save),
+            ( ('AnnotationCreate', 'AnnotationEditEnd',
+               'AnnotationDelete', 'AnnotationActivate', 
+               'AnnotationDeactivate'),
+              self.annotation_lifecycle ),
+            ( ('RelationCreate', 'RelationEditEnd', 
+               'RelationDelete'), 
+              self.relation_lifecycle ),
+            ( ('ViewCreate', 'ViewEditEnd', 'ViewDelete'), 
+              self.view_lifecycle ),
+            ( ('QueryCreate', 'QueryEditEnd', 'QueryDelete'),
+              self.query_lifecycle),
+            ( ('SchemaCreate', 'SchemaEditEnd', 'SchemaDelete'),
+              self.schema_lifecycle),
+            ( ('AnnotationTypeCreate', 'AnnotationTypeEditEnd', 
+               'AnnotationTypeDelete'),
+              self.annotationtype_lifecycle),
+            ( ('RelationTypeCreate', 'RelationTypeEditEnd', 
+               'RelationTypeDelete'),
+              self.relationtype_lifecycle),
+            ("PlayerSet", self.updated_position_cb),
+            ("ViewActivation", self.on_view_activation) 
+            ):
+            if isinstance(events, basestring):
+                self.controller.event_handler.internal_rule (event=events,
+                                                             method=method)
+            else:
+                for e in events:
+                    self.controller.event_handler.internal_rule (event=e,
+                                                                 method=method)
 
         self.controller.init()
         
@@ -532,10 +532,10 @@ class AdveneGUI (Connect):
         #tree.get_widget().show_all()
         #self.register_view (tree)
         if config.data.os == 'win32':
-	    # gtk.Socket is available on win32 only from gtk >= 2.8
-	    self.drawable=gtk.DrawingArea()
-	else:
-	    self.drawable=gtk.Socket()
+            # gtk.Socket is available on win32 only from gtk >= 2.8
+            self.drawable=gtk.DrawingArea()
+        else:
+            self.drawable=gtk.Socket()
         self.drawable.set_size_request(320,200)
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
         self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
@@ -545,8 +545,8 @@ class AdveneGUI (Connect):
         self.navigation_history=HistoryNavigation(controller=self.controller,
                                                   container=self.displayhbox)
         self.navigation_history.popup()
-	# Navigation history is embedded. The menu item is useless :
-	self.gui.get_widget('navigationhistory1').set_property('visible', False)
+        # Navigation history is embedded. The menu item is useless :
+        self.gui.get_widget('navigationhistory1').set_property('visible', False)
         
         self.displayhbox.pack_start(self.drawable, expand=True)
 
@@ -554,8 +554,8 @@ class AdveneGUI (Connect):
 
         self.displayhbox.pack_end(self.logwindow.widget, expand=True)
         self.logwindow.embedded=True
-	# URL stack is embedded. The menu item is useless :
-	self.gui.get_widget('urlstack1').set_property('visible', False)
+        # URL stack is embedded. The menu item is useless :
+        self.gui.get_widget('urlstack1').set_property('visible', False)
 
         vis.add(self.displayhbox)
         
@@ -577,15 +577,15 @@ class AdveneGUI (Connect):
         
         tb_list = (
             (_("Rewind"), _("Rewind"), gtk.STOCK_MEDIA_REWIND, 
-	     self.on_b_rewind_clicked),
+             self.on_b_rewind_clicked),
             (_("Play"), _("Play"), gtk.STOCK_MEDIA_PLAY,
-	     self.on_b_play_clicked),
+             self.on_b_play_clicked),
             (_("Pause"), _("Pause"), gtk.STOCK_MEDIA_PAUSE,
-	     self.on_b_pause_clicked),
+             self.on_b_pause_clicked),
             (_("Stop"), _("Stop"), gtk.STOCK_MEDIA_STOP, 
-	     self.on_b_stop_clicked),
+             self.on_b_stop_clicked),
             (_("Forward"), _("Forward"), gtk.STOCK_MEDIA_FORWARD,
-	     self.on_b_forward_clicked),
+             self.on_b_forward_clicked),
             )
 
         for text, tooltip, stock, callback in tb_list:
@@ -810,9 +810,9 @@ class AdveneGUI (Connect):
             print _("Network exception: %s") % str(e)
         except Exception, e:
             import traceback
-	    s=StringIO.StringIO()
+            s=StringIO.StringIO()
             traceback.print_exc (file = s)
-	    self.log(_("Got exception %s in web server.") % str(e), s.getvalue())
+            self.log(_("Got exception %s in web server.") % str(e), s.getvalue())
         return True
 
     def log (self, msg, level=None):
@@ -1061,9 +1061,9 @@ class AdveneGUI (Connect):
             # runnning
             #gtk.threads_leave()
             import traceback
-	    s=StringIO.StringIO()
+            s=StringIO.StringIO()
             traceback.print_exc (file = s)
-	    self.log(_("Got exception %s. Trying to continue.") % str(e), s.getvalue())
+            self.log(_("Got exception %s. Trying to continue.") % str(e), s.getvalue())
             return True
         #gtk.threads_leave()
 
@@ -1321,7 +1321,7 @@ class AdveneGUI (Connect):
             if response != gtk.RESPONSE_YES:
                 return True
         self.controller.load_package ()
-	return True
+        return True
 
     def on_open1_activate (self, button=None, data=None):
         """Open a file selector to load a package."""
@@ -1336,7 +1336,7 @@ class AdveneGUI (Connect):
                                               default_dir=d)
         if filename:
             self.controller.load_package (uri=filename)
-	return True
+        return True
 
     def on_save1_activate (self, button=None, data=None):
         """Save the current package."""
@@ -1345,7 +1345,7 @@ class AdveneGUI (Connect):
             self.on_save_as1_activate (button, data)
         else:
             self.controller.save_package ()
-	return True
+        return True
 
     def on_save_as1_activate (self, button=None, data=None):
         """Save the package with a new name."""
@@ -1359,7 +1359,7 @@ class AdveneGUI (Connect):
                                               default_dir=d)
         if filename:
             self.controller.save_package(name=filename)
-	return True
+        return True
 
     def on_import_dvd_chapters1_activate (self, button=None, data=None):
         # FIXME: loosy test
@@ -1456,23 +1456,23 @@ class AdveneGUI (Connect):
         iq = InteractiveQuery(here=self.controller.package,
                               controller=self.controller)
         iq.popup()
-	return True
+        return True
 
     def on_cut1_activate (self, button=None, data=None):
         print "Cut: Not implemented yet."
-	return True
+        return True
 
     def on_copy1_activate (self, button=None, data=None):
         print "Copy: Not implemented yet."
-	return True
+        return True
 
     def on_paste1_activate (self, button=None, data=None):
         print "Paste: Not implemented yet."
-	return True
+        return True
 
     def on_delete1_activate (self, button=None, data=None):
         print "Delete: Not implemented yet (cf popup menu)."
-	return True
+        return True
 
     def on_timeline1_activate (self, button=None, data=None):
         """Timeline View of loaded defined annotations."""
@@ -1589,44 +1589,44 @@ class AdveneGUI (Connect):
         return True
 
     def on_webserver_log1_activate (self, button=None, data=None):
-	w=gtk.Window()
+        w=gtk.Window()
 
-	def refresh(b, t):
+        def refresh(b, t):
             b=t.get_buffer()
             begin,end = b.get_bounds ()
             b.delete(begin, end)
             b.set_text(self.controller.server.logstream.getvalue())
-	    return True
+            return True
 
-	def close(b, w):
-	    w.destroy()
-	    return True
+        def close(b, w):
+            w.destroy()
+            return True
 
-	vbox=gtk.VBox()
+        vbox=gtk.VBox()
 
-	t=gtk.TextView()
-	t.set_editable (False)
+        t=gtk.TextView()
+        t.set_editable (False)
         t.set_wrap_mode (gtk.WRAP_CHAR)
-	vbox.add(t)
-	
-	hbox=gtk.HButtonBox()
-	
-	b=gtk.Button(stock=gtk.STOCK_CLOSE)
-	b.connect("clicked", close, w)
-	hbox.pack_start(b, expand=False)
+        vbox.add(t)
+        
+        hbox=gtk.HButtonBox()
+        
+        b=gtk.Button(stock=gtk.STOCK_CLOSE)
+        b.connect("clicked", close, w)
+        hbox.pack_start(b, expand=False)
 
-	b=gtk.Button(stock=gtk.STOCK_REFRESH)
-	b.connect("clicked", refresh, t)
-	hbox.pack_start(b, expand=False)
+        b=gtk.Button(stock=gtk.STOCK_REFRESH)
+        b.connect("clicked", refresh, t)
+        hbox.pack_start(b, expand=False)
 
-	vbox.pack_start(hbox, expand=False)
-	
-	w.add(vbox)
-	refresh(None, t)
+        vbox.pack_start(hbox, expand=False)
+        
+        w.add(vbox)
+        refresh(None, t)
 
-	w.show_all()
+        w.show_all()
 
-	return True
+        return True
 
     def on_navigationhistory1_activate (self, button=None, data=None):
         h=advene.gui.views.history.HistoryNavigation(self.controller, self.navigation_history)
@@ -1660,17 +1660,17 @@ class AdveneGUI (Connect):
     def on_about1_activate (self, button=None, data=None):
         """Activate the About window."""
         self.gui.get_widget("about").show ()
-	return True
+        return True
 
     def about_hide (self, button=None, data=None):
         """Hide the About window."""
         self.gui.get_widget("about").hide ()
-	return True
+        return True
 
     def on_b_rewind_clicked (self, button=None, data=None):
         if self.controller.player.status == self.controller.player.PlayingStatus:
             self.controller.move_position (-config.data.player_preferences['time_increment'])
-	return True
+        return True
 
     def on_b_play_clicked (self, button=None, data=None):
         if self.controller.player.status == self.controller.player.PauseStatus:
@@ -1681,16 +1681,16 @@ class AdveneGUI (Connect):
 
     def on_b_pause_clicked (self, button=None, data=None):
         self.controller.update_status ("pause")
-	return True
+        return True
 
     def on_b_stop_clicked (self, button=None, data=None):
         self.controller.update_status ("stop")
-	return True
+        return True
 
     def on_b_forward_clicked (self, button=None, data=None):
         if self.controller.player.status == self.controller.player.PlayingStatus:
             self.controller.move_position (config.data.player_preferences['time_increment'])
-	return True
+        return True
 
     def on_b_addfile_clicked (self, button=None, data=None):
         """Open a movie file"""
@@ -1699,7 +1699,7 @@ class AdveneGUI (Connect):
                                               button=gtk.STOCK_OPEN)
         if filename:
             self.controller.set_default_media(filename)
-	return True
+        return True
 
     def on_b_selectdvd_clicked (self, button=None, data=None):
         """Play a DVD."""

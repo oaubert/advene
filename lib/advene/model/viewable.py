@@ -125,14 +125,14 @@ class Viewable(object):
         else:
             view = self._find_named_view (view_id, context)
 
-	# FIXME: Hack for resources. Maybe we should better do
-	# if isinstance(self, ResourceData):
-	# but it would break encapsulation
-	if view is None and hasattr(self, 'data'):
-	    s=TypedUnicode(unicode(self.data))
-	    s.contenttype=self.getMimetype()
-	    return s
-	elif view is None:
+        # FIXME: Hack for resources. Maybe we should better do
+        # if isinstance(self, ResourceData):
+        # but it would break encapsulation
+        if view is None and hasattr(self, 'data'):
+            s=TypedUnicode(unicode(self.data))
+            s.contenttype=self.getMimetype()
+            return s
+        elif view is None:
             raise AdveneException('View %s not found' % view_id)
 
         if not view.match (self):

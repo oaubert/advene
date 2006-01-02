@@ -71,25 +71,25 @@ IMPORTERS=[]
 
 def register(imp):    
     if hasattr(imp, 'can_handle'):
-	IMPORTERS.append(imp)
+        IMPORTERS.append(imp)
 
 def get_valid_importers(fname):
     res=[]
     for i in IMPORTERS:
-	if i.can_handle(fname):
-	    res.append(i)
+        if i.can_handle(fname):
+            res.append(i)
     return res
 
 def get_importer(fname, **kw):
     l=get_valid_importers(fname)
     i=None
     if len(l) == 0:
-	print "No valid importer"
+        print "No valid importer"
     else:
-	if len(l) > 1:
-	    print "Multiple importers: ", str(l)
-	    print "Using first one."
-	i=l[0](**kw)
+        if len(l) > 1:
+            print "Multiple importers: ", str(l)
+            print "Using first one."
+        i=l[0](**kw)
     return i
     
 class GenericImporter(object):
@@ -129,7 +129,7 @@ class GenericImporter(object):
                                      help=_("Specify the offset in ms"))
 
     def can_handle(fname):
-	return False
+        return False
     can_handle=staticmethod(can_handle)
 
     def process_options(self, option_list):
@@ -144,10 +144,10 @@ class GenericImporter(object):
         pass
 
     def log (self, *p):
-	if self.controller is not None:
-	    self.controller.log(*p)
-	else:
-	    print " ".join(p)
+        if self.controller is not None:
+            self.controller.log(*p)
+        else:
+            print " ".join(p)
 
     def update_statistics(self, elementtype):
         self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
@@ -311,7 +311,7 @@ class TextImporter(GenericImporter):
                                      help=_("Specify the regexp used to parse data"))
 
     def can_handle(fname):
-	return fname.endswith('.txt')
+        return fname.endswith('.txt')
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
@@ -348,7 +348,7 @@ class LsDVDImporter(GenericImporter):
         self.encoding='latin1'
 
     def can_handle(fname):
-	return 'dvd' in fname
+        return 'dvd' in fname
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
@@ -399,7 +399,7 @@ class ChaplinImporter(GenericImporter):
         self.encoding='latin1'
 
     def can_handle(fname):
-	return 'dvd' in fname
+        return 'dvd' in fname
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
@@ -454,7 +454,7 @@ class XiImporter(GenericImporter):
         self.signals={}
 
     def can_handle(fname):
-	return (fname.endswith('.xi') or fname.endswith('.xml'))
+        return (fname.endswith('.xi') or fname.endswith('.xml'))
     can_handle=staticmethod(can_handle)
 
     def iterator(self, xi):
@@ -519,13 +519,13 @@ class ElanImporter(GenericImporter):
         self.relations=[]
 
     def can_handle(fname):
-	return fname.endswith('.eaf')
+        return fname.endswith('.eaf')
     can_handle=staticmethod(can_handle)
 
     def xml_to_text(self, element):
         l=[]
-	if isinstance(element, handyxml.HandyXmlWrapper):
-	    element=element.node
+        if isinstance(element, handyxml.HandyXmlWrapper):
+            element=element.node
         if element.nodeType is xml.dom.Node.TEXT_NODE:
             # Note: element.data returns a unicode object
             # that happens to be in the default encoding (iso-8859-1
@@ -656,10 +656,10 @@ class ElanImporter(GenericImporter):
         p=self.package
         schema=p.createSchema(ident='elan')
         schema.author=config.data.userid
-	try:
-	    schema.date=elan.DATE
-	except AttributeError:
-	    schema.date = self.timestamp
+        try:
+            schema.date=elan.DATE
+        except AttributeError:
+            schema.date = self.timestamp
         schema.title="ELAN converted schema"
         p.schemas.append(schema)
         self.schema = schema
@@ -703,7 +703,7 @@ class SubtitleImporter(GenericImporter):
         self.encoding=encoding
 
     def can_handle(fname):
-	return fname.endswith('.srt')
+        return fname.endswith('.srt')
     can_handle=staticmethod(can_handle)
 
     def srt_iterator(self, f):
@@ -759,9 +759,9 @@ class PraatImporter(GenericImporter):
         self.schema=None
 
     def can_handle(fname):
-	return (fname.endswith('.praat') or fname.endswith('.TextGrid'))
+        return (fname.endswith('.praat') or fname.endswith('.TextGrid'))
     can_handle=staticmethod(can_handle)
-	
+        
     def iterator(self, f):
         l=f.readline()
         if not 'ooTextFile' in l:
@@ -862,33 +862,33 @@ class CmmlImporter(GenericImporter):
         self.schema=None
 
     def can_handle(fname):
-	return fname.endswith('.cmml')
+        return fname.endswith('.cmml')
     can_handle=staticmethod(can_handle)
 
     def npt2time(self, npt):
-	"""Convert a NPT timespec into a milliseconds time.
+        """Convert a NPT timespec into a milliseconds time.
 
-	Cf http://www.annodex.net/TR/draft-pfeiffer-temporal-fragments-03.html#anchor5
-	"""
-	if isinstance(npt, long) or isinstance(npt, int):
-	    return npt
+        Cf http://www.annodex.net/TR/draft-pfeiffer-temporal-fragments-03.html#anchor5
+        """
+        if isinstance(npt, long) or isinstance(npt, int):
+            return npt
 
-	if npt.startswith('npt:'):
-	    npt=npt[4:]
+        if npt.startswith('npt:'):
+            npt=npt[4:]
 
-	try:
-	    msec=vlclib.convert_time(npt)
-	except Exception, e:
-	    self.log("Unhandled NPT format: " + npt)
-	    self.log(str(e))
-	    msec=0
+        try:
+            msec=vlclib.convert_time(npt)
+        except Exception, e:
+            self.log("Unhandled NPT format: " + npt)
+            self.log(str(e))
+            msec=0
 
-	return msec
+        return msec
 
     def xml_to_text(self, element):
         l=[]
-	if isinstance(element, handyxml.HandyXmlWrapper):
-	    element=element.node
+        if isinstance(element, handyxml.HandyXmlWrapper):
+            element=element.node
         if element.nodeType is xml.dom.Node.TEXT_NODE:
             # Note: element.data returns a unicode object
             # that happens to be in the default encoding (iso-8859-1
@@ -901,99 +901,99 @@ class CmmlImporter(GenericImporter):
         return "".join(l)
 
     def iterator(self, cm):
-	# Parse stream information
+        # Parse stream information
 
-	# Delayed is a list of yielded dictionaries,
-	# which may be not complete on the first pass
-	# if the end attribute was not filled.
-	delayed=[]
+        # Delayed is a list of yielded dictionaries,
+        # which may be not complete on the first pass
+        # if the end attribute was not filled.
+        delayed=[]
 
-	for clip in cm.clip:
-	    try:
-		begin=clip.start
-	    except AttributeError, e:
-		print str(e)
-		begin=0
-	    begin=self.npt2time(begin)
+        for clip in cm.clip:
+            try:
+                begin=clip.start
+            except AttributeError, e:
+                print str(e)
+                begin=0
+            begin=self.npt2time(begin)
 
-	    for d in delayed:
-		# We can now complete the previous annotations
-		d['end']=begin
-		yield d
-	    delayed=[]
-		
-	    try:
-		end=self.npt2time(clip.end)
-	    except AttributeError:
-		end=None
+            for d in delayed:
+                # We can now complete the previous annotations
+                d['end']=begin
+                yield d
+            delayed=[]
+                
+            try:
+                end=self.npt2time(clip.end)
+            except AttributeError:
+                end=None
 
-	    # Link attribute
-	    try:
-		l=clip.a[0]
-		d={
+            # Link attribute
+            try:
+                l=clip.a[0]
+                d={
                     'type': self.atypes['link'],
                     'begin': begin,
                     'end': end,
                     'content': "href=%s\ntext=%s" % (l.href,
-						     self.xml_to_text(l).replace("\n", "\\n")),
+                                                     self.xml_to_text(l).replace("\n", "\\n")),
                     }
-		if end is None:
-		    delayed.append(d)
-		else:
-		    yield d
-	    except AttributeError, e:
-		#print "Erreur dans link" + str(e)
-		pass
+                if end is None:
+                    delayed.append(d)
+                else:
+                    yield d
+            except AttributeError, e:
+                #print "Erreur dans link" + str(e)
+                pass
 
-	    # img attribute
-	    try:
-		i=clip.img[0]
-		d={
-		    'type': self.atypes['image'],
+            # img attribute
+            try:
+                i=clip.img[0]
+                d={
+                    'type': self.atypes['image'],
                     'begin': begin,
                     'end': end,
-		    'content': i.src,
-		    }
-		if end is None:
-		    delayed.append(d)
-		else:
-		    yield d
-	    except AttributeError:
-		pass
+                    'content': i.src,
+                    }
+                if end is None:
+                    delayed.append(d)
+                else:
+                    yield d
+            except AttributeError:
+                pass
 
-	    # desc attribute
-	    try:
-		d=clip.desc[0]
-		d={
-		    'type': self.atypes['description'],
+            # desc attribute
+            try:
+                d=clip.desc[0]
+                d={
+                    'type': self.atypes['description'],
                     'begin': begin,
                     'end': end,
-		    'content': self.xml_to_text(d).replace("\n", "\\n"),
-		    }
-		if end is None:
-		    delayed.append(d)
-		else:
-		    yield d
-	    except AttributeError:
-		pass
-		
-	    # Meta attributes (need to create schemas as needed)
-	    try:
-		for meta in clip.meta:
-		    if not self.atypes.has_key(meta.name):
-			self.create_annotation_type(self.schema, meta.name)
-		    d={
-			'type': self.atypes[meta.name],
-			'begin': begin,
-			'end': end,
-			'content': meta.content,
-			}
-		    if end is None:
-			delayed.append(d)
-		    else:
-			yield d
-	    except AttributeError:
-		pass
+                    'content': self.xml_to_text(d).replace("\n", "\\n"),
+                    }
+                if end is None:
+                    delayed.append(d)
+                else:
+                    yield d
+            except AttributeError:
+                pass
+                
+            # Meta attributes (need to create schemas as needed)
+            try:
+                for meta in clip.meta:
+                    if not self.atypes.has_key(meta.name):
+                        self.create_annotation_type(self.schema, meta.name)
+                    d={
+                        'type': self.atypes[meta.name],
+                        'begin': begin,
+                        'end': end,
+                        'content': meta.content,
+                        }
+                    if end is None:
+                        delayed.append(d)
+                    else:
+                        yield d
+            except AttributeError:
+                pass
 
     def create_annotation_type (self, schema, id_):
         at=schema.createAnnotationType(ident=id_)
@@ -1008,61 +1008,61 @@ class CmmlImporter(GenericImporter):
     def process_file(self, filename):
         cm=handyxml.xml(filename)
 
-	if cm.node.nodeName != 'cmml':
-	    self.log("This does not look like a CMML file.")
-	    return
+        if cm.node.nodeName != 'cmml':
+            self.log("This does not look like a CMML file.")
+            return
 
         if self.package is None:
             self.package=Package(uri='new_pkg', source=None)
 
         p=self.package
-        schema=p.createSchema(ident='cmml')	
+        schema=p.createSchema(ident='cmml')     
         schema.author=config.data.userid
         schema.date=self.timestamp
         schema.title="CMML converted schema"
         p.schemas.append(schema)
         self.schema = schema
 
-	# Create the 3 default types : link, image, description
-	for n in ('link', 'image', 'description'):
-	    self.create_annotation_type(self.schema, n)
-	self.atypes['link'].mimetype = 'application/x-advene-structured'
+        # Create the 3 default types : link, image, description
+        for n in ('link', 'image', 'description'):
+            self.create_annotation_type(self.schema, n)
+        self.atypes['link'].mimetype = 'application/x-advene-structured'
 
-	# Handle heading information
-	try:
-	    h=cm.head[0]
-	    try:
-		t=h.title
-		schema.title=self.xml_to_text(t)
-	    except AttributeError:
-		pass
-	    #FIXME: conversion of metadata (meta name=Producer, DC.Author)
-	except AttributeError:
-	    # Not <head> componenent
-	    pass
-	
-	# Handle stream information
-	if len(cm.stream) > 1:
-	    self.log("Multiple streams. Will handle only the first one. Support yet to come...")
-	s=cm.stream[0]
-	try:
-	    t=s.basetime
-	    if t:
-		t=long(t)
-	except AttributeError:
-	    t=0
-	self.basetime=t
-	
-	# Stream src:
-	try:
-	    il=cm.node.xpath('//import')
-	    if il:
-		i=il[0]
-		src=i.getAttributeNS(xml.dom.EMPTY_NAMESPACE, 'src')
-	except AttributeError:
-	    src=""
-	self.package.setMetaData (config.data.namespace, "mediafile", src)
-		    
+        # Handle heading information
+        try:
+            h=cm.head[0]
+            try:
+                t=h.title
+                schema.title=self.xml_to_text(t)
+            except AttributeError:
+                pass
+            #FIXME: conversion of metadata (meta name=Producer, DC.Author)
+        except AttributeError:
+            # Not <head> componenent
+            pass
+        
+        # Handle stream information
+        if len(cm.stream) > 1:
+            self.log("Multiple streams. Will handle only the first one. Support yet to come...")
+        s=cm.stream[0]
+        try:
+            t=s.basetime
+            if t:
+                t=long(t)
+        except AttributeError:
+            t=0
+        self.basetime=t
+        
+        # Stream src:
+        try:
+            il=cm.node.xpath('//import')
+            if il:
+                i=il[0]
+                src=i.getAttributeNS(xml.dom.EMPTY_NAMESPACE, 'src')
+        except AttributeError:
+            src=""
+        self.package.setMetaData (config.data.namespace, "mediafile", src)
+                    
         self.convert(self.iterator(cm))
 
         return self.package

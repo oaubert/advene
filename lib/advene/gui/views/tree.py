@@ -272,10 +272,10 @@ class DetailedTreeModel(AdveneTreeModel):
             parent = None
         elif isinstance (node, AbstractBundle):
             parent = node.rootPackage
-	elif isinstance (node, Resources):
-	    parent = node.parent
-	elif isinstance (node, ResourceData):
-	    parent = node.parent
+        elif isinstance (node, Resources):
+            parent = node.parent
+        elif isinstance (node, ResourceData):
+            parent = node.parent
         else:
             parent = None
         return parent
@@ -309,12 +309,12 @@ class DetailedTreeModel(AdveneTreeModel):
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
-	elif isinstance (node, Resources):
+        elif isinstance (node, Resources):
             if not self.childrencache.has_key (node):
                 self.childrencache[node] = node.children()
             children = self.childrencache[node]
-	elif isinstance (node, ResourceData):
-	    children = None
+        elif isinstance (node, ResourceData):
+            children = None
         elif node is None:
             children = [ self.get_package() ]
         else:

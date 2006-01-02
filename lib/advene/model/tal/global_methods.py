@@ -391,8 +391,8 @@ def parsed (target, context):
         return content.data
 
     if (content.mimetype in ( 'application/x-advene-structured',
-			      'text/x-advene-structured',
-			      'application/x-advene-zone' ) ):
+                              'text/x-advene-structured',
+                              'application/x-advene-zone' ) ):
         import urllib
         
         d={}

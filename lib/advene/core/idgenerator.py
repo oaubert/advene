@@ -36,8 +36,8 @@ class Generator:
         RelationType: "rt_",
         View: "view_",
         Query: "query_",
-	Resources: "dir_",
-	ResourceData: "res_",
+        Resources: "dir_",
+        ResourceData: "res_",
         }
     
     def __init__(self):
