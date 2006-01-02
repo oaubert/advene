@@ -45,7 +45,7 @@ from advene.gui.edit.timeadjustment import TimeAdjustment
 
 import advene.util.vlclib as vlclib
 import advene.gui.util
-from advene.gui.views.shapewidget import ShapeDrawer, Rectangle
+from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle
 
 import advene.model.tal.global_methods as global_methods
 import advene.gui.edit.rules
