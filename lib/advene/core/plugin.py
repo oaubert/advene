@@ -1,17 +1,37 @@
 #! /usr/bin/python
 
+"""Plugin loader
+"""
+
 import ihooks
 import os
 
 class PluginCollection(list):
-    def from_dir(self, d, prefix=""):
-        for m in os.listdir(d):
+    """A collection of plugins.
+
+    A L{PluginCollection} is a list of L{Plugin} instance. It must be
+    instanciated with the directory name.
+    """
+    def __init__(self, directory, prefix=""):
+        """Loads available plugins from directory.
+        
+        @param directory: the plugins directory
+        @type directory: string (path)
+        """
+        for m in os.listdir(directory):
             name, ext = os.path.splitext(m)
             if ext == '.py' and name.startswith(prefix) and not name.startswith('_'):
                 p = Plugin(d, name)
                 self.append(p)
 
 class Plugin(object):
+    """A loaded Plugin.
+
+    @ivar _plugin: the loaded plugin instance
+    @type _plugin: module
+    @ivar filename: the source filename
+    @type filename: string (path)
+    """
     def __init__(self, directory, name):
         loader = ihooks.BasicModuleLoader()
         info=loader.find_module_in_dir(name, directory)
@@ -38,8 +58,7 @@ class Plugin(object):
         return "Plugin %s" % name
 
 if __name__ == '__main__':
-    l=PluginCollection()
-    l.from_dir('plugins')
+    l=PluginCollection('plugins')
     for p in l:
         print p
 
