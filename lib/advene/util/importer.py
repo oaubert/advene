@@ -67,26 +67,29 @@ import advene.util.vlclib as vlclib
 import advene.util.handyxml as handyxml
 import xml.dom
 
-def get_importer(fname, **kw):
-    i=None
-    if fname == 'chaplin':
-        i=ChaplinImporter(**kw)
-    elif fname == 'lsdvd':
-        i=LsDVDImporter(**kw)
-    elif fname.endswith('.txt'):
-        i=TextImporter(**kw)
-    elif fname.endswith('.srt'):
-        i=SubtitleImporter(**kw)
-    elif fname.endswith('.eaf'):
-        i=ElanImporter(**kw)
-    elif fname.endswith('.praat') or fname.endswith('.TextGrid'):
-        i=PraatImporter(**kw)
-    elif fname.endswith('.cmml'):
-        i=CmmlImporter(**kw)
-    elif fname.endswith('.xml'):
-        # FIXME: we should check the XML content
-        i=XiImporter(**kw)
+IMPORTERS=[]
 
+def register(imp):    
+    if hasattr(imp, 'can_handle'):
+	IMPORTERS.append(imp)
+
+def get_valid_importers(fname):
+    res=[]
+    for i in IMPORTERS:
+	if i.can_handle(fname):
+	    res.append(i)
+    return res
+
+def get_importer(fname, **kw):
+    l=get_valid_importers(fname)
+    i=None
+    if len(l) == 0:
+	print "No valid importer"
+    else:
+	if len(l) > 1:
+	    print "Multiple importers: ", str(l)
+	    print "Using first one."
+	i=l[0](**kw)
     return i
     
 class GenericImporter(object):
@@ -96,6 +99,8 @@ class GenericImporter(object):
     @type statistics: dict
     FIXME...
     """
+    name = _("Generic importer")
+
     def __init__(self, author=None, package=None, defaulttype=None, controller=None):
         self.package=package
         if author is None:
@@ -116,12 +121,16 @@ class GenericImporter(object):
             'view': 0,
             'package': 0,
             }
-        self.name = _("Generic importer")
+
 
         self.optionparser = optparse.OptionParser(usage=_("Usage: %prog [options] source-file destination-file"))
         self.optionparser.add_option("-o", "--offset",
                                      action="store", type="int", dest="offset", default=0,
                                      help=_("Specify the offset in ms"))
+
+    def can_handle(fname):
+	return False
+    can_handle=staticmethod(can_handle)
 
     def process_options(self, option_list):
         (self.options, self.args) = self.optionparser.parse_args(args=option_list)
@@ -276,7 +285,6 @@ class GenericImporter(object):
                                     title=title,
                                     timestamp=timestamp)
 
-
 class TextImporter(GenericImporter):
     """Text importer.
 
@@ -288,10 +296,10 @@ class TextImporter(GenericImporter):
 
     encoding: the default encoding for the textfile
     """
+    name=_("Text importer")
 
     def __init__(self, regexp=None, encoding=None, **kw):
         super(TextImporter, self).__init__(**kw)
-        self.name = _("Text importer")
         if regexp is None:
             regexp="(?P<begin>\d+)\s(?P<end>\d+)\s(?P<content>.+)"
         self.regexp=sre.compile(regexp)
@@ -301,6 +309,10 @@ class TextImporter(GenericImporter):
         self.optionparser.add_option("-r", "--regexp",
                                      action="store", type="string", dest="regexp", default=None,
                                      help=_("Specify the regexp used to parse data"))
+
+    def can_handle(fname):
+	return fname.endswith('.txt')
+    can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
         for l in f:
@@ -320,17 +332,24 @@ class TextImporter(GenericImporter):
         self.convert(self.iterator(f))
         return self.package
 
+register(TextImporter)
+
 class LsDVDImporter(GenericImporter):
     """lsdvd importer.
     """
+    name = _("lsdvd importer")
+
     def __init__(self, regexp=None, encoding=None, **kw):
         super(LsDVDImporter, self).__init__(**kw)
-        self.name = _("lsdvd importer")
         self.command="/usr/bin/lsdvd -c"
         # FIXME: handle Title- lines
         #Chapter: 01, Length: 00:01:16, Start Cell: 01
         self.regexp="^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<duration>[0-9:]+)"
         self.encoding='latin1'
+
+    def can_handle(fname):
+	return 'dvd' in fname
+    can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
         reg=sre.compile(self.regexp)
@@ -364,16 +383,24 @@ class LsDVDImporter(GenericImporter):
         self.convert(self.iterator(f))
         return self.package
 
+register(LsDVDImporter)
+
 class ChaplinImporter(GenericImporter):
     """Chaplin importer.
     """
+    name = _("chaplin importer")
+
     def __init__(self, **kw):
         super(ChaplinImporter, self).__init__(**kw)
-        self.name = _("chaplin importer")
+        
         self.command="/usr/bin/chaplin -c"
         #   chapter 03  begin:    200.200 005005 00:03:20.05
         self.regexp="^\s*chapter\s*(?P<chapter>\d+)\s*begin:\s*.+(?P<begin>[0-9:])\s*$"
         self.encoding='latin1'
+
+    def can_handle(fname):
+	return 'dvd' in fname
+    can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
         reg=sre.compile(self.regexp)
@@ -412,16 +439,23 @@ class ChaplinImporter(GenericImporter):
         self.convert(self.iterator(f))
         return self.package
 
+register(ChaplinImporter)
+
 class XiImporter(GenericImporter):
     """Xi importer.
     """
+    name = _("Xi importer")
+
     def __init__(self, **kw):
         super(XiImporter, self).__init__(**kw)
-        self.name = _("Xi importer")
         self.factors = {'s': 1000,
                         'ms': 1}
         self.anchors={}
         self.signals={}
+
+    def can_handle(fname):
+	return (fname.endswith('.xi') or fname.endswith('.xml'))
+    can_handle=staticmethod(can_handle)
 
     def iterator(self, xi):
         for t in xi.Turn:
@@ -470,16 +504,23 @@ class XiImporter(GenericImporter):
         self.convert(self.iterator(xi))
         return self.package
 
+register(XiImporter)
+
 class ElanImporter(GenericImporter):
     """Elan importer.
     """
+    name=_("ELAN importer")
+
     def __init__(self, **kw):
         super(ElanImporter, self).__init__(**kw)
-        self.name = _("ELAN importer")
         self.anchors={}
         self.atypes={}
         self.schema=None
         self.relations=[]
+
+    def can_handle(fname):
+	return fname.endswith('.eaf')
+    can_handle=staticmethod(can_handle)
 
     def xml_to_text(self, element):
         l=[]
@@ -645,17 +686,25 @@ class ElanImporter(GenericImporter):
         self.create_relations()
         return self.package
 
+register(ElanImporter)
+
 class SubtitleImporter(GenericImporter):
     """Subtitle importer.
 
     srt importer
     """
+    name = _("Subtitle (SRT) importer")
+
     def __init__(self, encoding=None, **kw):
         super(SubtitleImporter, self).__init__(**kw)
-        self.name = _("Subtitle (SRT) importer")
+        
         if encoding is None:
             encoding='latin1'
         self.encoding=encoding
+
+    def can_handle(fname):
+	return fname.endswith('.srt')
+    can_handle=staticmethod(can_handle)
 
     def srt_iterator(self, f):
         base='\d\d:\d\d:\d+[,.]\d+'
@@ -696,16 +745,23 @@ class SubtitleImporter(GenericImporter):
         self.convert(self.srt_iterator(f))
         return self.package
 
+register(SubtitleImporter)
+
 class PraatImporter(GenericImporter):
     """PRAAT importer.
 
     """
+    name = _("PRAAT importer")
+
     def __init__(self, **kw):
         super(PraatImporter, self).__init__(**kw)
-        self.name = _("PRAAT importer")
         self.atypes={}
         self.schema=None
 
+    def can_handle(fname):
+	return (fname.endswith('.praat') or fname.endswith('.TextGrid'))
+    can_handle=staticmethod(can_handle)
+	
     def iterator(self, f):
         l=f.readline()
         if not 'ooTextFile' in l:
@@ -791,16 +847,23 @@ class PraatImporter(GenericImporter):
         self.convert(self.iterator(f))
         return self.package
 
+register(PraatImporter)
+
 class CmmlImporter(GenericImporter):
     """CMML importer.
 
     Cf http://www.annodex.net/
     """
+    name=_("CMML importer")
+
     def __init__(self, **kw):
         super(CmmlImporter, self).__init__(**kw)
-        self.name = _("CMML importer")
         self.atypes={}
         self.schema=None
+
+    def can_handle(fname):
+	return fname.endswith('.cmml')
+    can_handle=staticmethod(can_handle)
 
     def npt2time(self, npt):
 	"""Convert a NPT timespec into a milliseconds time.
@@ -1004,6 +1067,7 @@ class CmmlImporter(GenericImporter):
 
         return self.package
 
+register(CmmlImporter)
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
