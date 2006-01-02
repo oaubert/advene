@@ -68,9 +68,6 @@ class Config(object):
 
     @ivar webserver: webserver options (port number and running mode)
     @type webserver: dict
-
-    @ivar orb_max_tries: maximum number of tries for VLC launcher
-    @type orb_max_tries: int
     """
 
     def __init__ (self):
@@ -202,9 +199,6 @@ class Config(object):
         # Used to memorize the volume level
         self.sound_volume=0
 
-
-        # How many times do we try to read the iorfile before quitting ?
-        self.orb_max_tries=7
         # Update delay for position marker in views (in ms)
         self.slow_update_delay=200
 
@@ -388,36 +382,6 @@ class Config(object):
                 break
         return id
 
-    def get_typelib (self):
-        """Return the name (absolute path) of the typelib file.
-
-        @return: the absolute pathname of the typelib
-        @rtype: string
-        """
-        if sys.platform == 'win32':
-            file='MediaControl.dll'
-        else:
-            file='MediaControl.so'
-        return self.advenefile(file, category='advene')
-
-    def get_iorfile (self):
-        """Return the absolute name of the IOR file.
-
-        @return: the absolute pathname of the IOR file
-        @rtype: string
-        """
-        # FIXME
-        #d=self.get_homedir()
-
-        if sys.platform == 'win32':
-            if os.environ.has_key ('TEMP'):
-                d = os.environ['TEMP']
-            else:
-                d = "\\"
-        else:
-            d="/tmp"
-        return os.path.join (d, 'vlc-ior.ref')
-
     def advenefile(self, filename, category='resources'):
         """Return an absolute pathname for the given file.
 
@@ -435,10 +399,6 @@ class Config(object):
 
     userid = property (fget=get_userid,
                        doc="Login name of the user")
-    typelib = property (fget=get_typelib,
-                        doc="Typelib module library")
-    iorfile = property (fget=get_iorfile,
-                        doc="Location of the IOR file for the VLC corba interface")
     player_args = property (fget=get_player_args,
                             doc="List of arguments for the VLC player")
 
