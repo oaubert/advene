@@ -31,8 +31,13 @@ import advene.core.config as config
 
 from gettext import gettext as _
 
+if sys.platform == 'win32':
+    file='MediaControl.dll'
+else:
+    file='MediaControl.so'
+
 import ORBit, CORBA
-ORBit.load_typelib (config.data.typelib)
+ORBit.load_typelib(config.data.advenefile(file, category='advene'))
 import VLC
 
 import advene.util.spawn as spawn
@@ -47,6 +52,9 @@ class PlayerLauncher:
     @ivar ior: the MediaControl's IOR
     @type ior: string
     """
+    # How many times do we try to read the iorfile before quitting ?
+    orb_max_tries=7
+    
     def __init__ (self, config=None):
         """Initialize the player."""
         if config is None:
@@ -64,6 +72,21 @@ class PlayerLauncher:
         self.orb=None
         self.mc=None
         self.ior=None
+
+    def get_iorfile (self):
+        """Return the absolute name of the IOR file.
+
+        @return: the absolute pathname of the IOR file
+        @rtype: string
+        """
+        if sys.platform == 'win32':
+            if os.environ.has_key ('TEMP'):
+                d = os.environ['TEMP']
+            else:
+                d = "\\"
+        else:
+            d="/tmp"
+        return os.path.join (d, 'vlc-ior.ref')
 
     def is_active (self):
         """Check if a VLC player is active.
@@ -83,7 +106,7 @@ class PlayerLauncher:
 
         # The process is active, but the CORBA plugin may not be
         # active.
-        if os.access (self.config.iorfile, os.R_OK):
+        if os.access (self.get_iorfile(), os.R_OK):
             return True
         return False
 
@@ -91,7 +114,7 @@ class PlayerLauncher:
         """Run the VLC player and wait for the iorfile creation.
 
         @raise Exception: exception raised if the IOR file cannot be read
-                          after config.data.orb_max_tries tries
+                          after orb_max_tries tries
         @return: the IOR of the VLC player
         @rtype: string
         """
@@ -102,9 +125,9 @@ class PlayerLauncher:
         if not self.launcher.start (args):
             raise Exception(_("Cannot start the player"))
         ior=""
-        iorfile=self.config.iorfile
+        iorfile=self.get_iorfile()
         tries=0
-        while tries < self.config.orb_max_tries:
+        while tries < self.orb_max_tries:
             try:
                 ior = open(iorfile).readline()
                 break
@@ -127,7 +150,7 @@ class PlayerLauncher:
         @rtype: tuple
         """
 
-        iorfile=self.config.iorfile
+        iorfile=self.get_iorfile()
 
         if self.orb is None:
             self.orb = CORBA.ORB_init()
