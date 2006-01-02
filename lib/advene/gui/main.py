@@ -28,6 +28,7 @@ It also defines GUI-specific actions (DisplayPopup, etc).
 import sys, time
 import os
 import socket
+import StringIO
 
 import advene.core.config as config
 import advene.core.version
@@ -808,10 +809,10 @@ class AdveneGUI (Connect):
         except socket.error, e:
             print _("Network exception: %s") % str(e)
         except Exception, e:
-            print _("Got exception %s in web server") % str(e)
-            import code
-            e, v, tb = sys.exc_info()
-            code.traceback.print_exception (e, v, tb)
+            import traceback
+	    s=StringIO.StringIO()
+            traceback.print_exc (file = s)
+	    self.log(_("Got exception %s in web server.") % str(e), s.getvalue())
         return True
 
     def log (self, msg, level=None):
@@ -1059,10 +1060,10 @@ class AdveneGUI (Connect):
             # Catch-all exception, in order to keep the mainloop
             # runnning
             #gtk.threads_leave()
-            print _("Got exception %s. Trying to continue.") % str(e)
-            import code
-            e, v, tb = sys.exc_info()
-            code.traceback.print_exception (e, v, tb)
+            import traceback
+	    s=StringIO.StringIO()
+            traceback.print_exc (file = s)
+	    self.log(_("Got exception %s. Trying to continue.") % str(e), s.getvalue())
             return True
         #gtk.threads_leave()
 
@@ -1900,9 +1901,9 @@ if __name__ == '__main__':
     try:
         v.main (sys.argv[1:])
     except Exception, e:
+        e, v, tb = sys.exc_info()
         print _("Got exception %s. Stopping services...") % str(e)
         v.on_exit ()
         print _("*** Exception ***")
         import code
-        e, v, tb = sys.exc_info()
         code.traceback.print_exception (e, v, tb)
