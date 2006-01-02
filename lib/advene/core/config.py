@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -34,10 +34,12 @@ class Config(object):
     """Configuration information, platform specific.
 
     It is possible to override the configuration variables in a config
-    file ($HOME/.advenerc), with a python syntax (I{warning}, it is
-    evaluated so harmful instructions in it can do damage).
+    file ($HOME/.advene/advene.ini on Linux/MacOSX,
+    UserDir/advene/advene.ini on Windows) with a python syntax
+    (I{warning}, it is evaluated so harmful instructions in it can do
+    damage).
 
-    Example .advenerc file::
+    Example advene.ini file::
 
       config.data.path['vlc']='/usr/local/src/vlc-0.5.0'
       config.data.path['plugins']='/usr/local/src/vlc-0.5.0'
@@ -120,9 +122,11 @@ class Config(object):
                 # Movie files search path. _ is the
                 # current package path
                 'moviepath': '_',
-                'locale': 'c:\\Program Files\\Advene\\locale',                
+                'locale': 'c:\\Program Files\\Advene\\locale',
                 }
-            
+
+        self.path['settings'] = self.get_settings_dir()
+
         # Web-related preferences
         self.web = {
             'edit-width': 80,
@@ -186,9 +190,9 @@ class Config(object):
             }
         # Threading does not work correctly on Win32. Use gtk_input
         # method.
-        if self.os == 'win32':            
+        if self.os == 'win32':
             self.webserver['mode'] = 1
-            
+
         # Global context options
         self.namespace_prefix = {'advenetool': self.namespace,
                                  'dc': 'http://purl.org/dc/elements/1.1/'}
@@ -255,7 +259,7 @@ class Config(object):
             except _winreg.error:
                 pass
         return value
-        
+
     def get_homedir(self):
         h=None
         try:
@@ -271,13 +275,18 @@ class Config(object):
                 raise Exception ('Unable to find homedir')
         return h
 
-    def read_preferences(self):
-        homedir=self.get_homedir()
+    def get_settings_dir(self):
+        """Return the directory used to store Advene settings.
+        """
         if self.os == 'win32':
-            filename='advene.prefs'
+            dirname='advene'
         else:
-            filename='.advene_prefs'
-        preffile=os.sep.join((homedir, filename))
+            dirname='.advene'
+
+        return os.path.join( self.get_homedir(), dirname )
+
+    def read_preferences(self):
+        preffile=self.advenefile('advene.prefs', 'settings')
         try:
             f = open(preffile, "r")
         except IOError:
@@ -290,12 +299,14 @@ class Config(object):
         return True
 
     def save_preferences(self):
-        homedir=self.get_homedir()
-        if self.os == 'win32':
-            filename='advene.prefs'
-        else:
-            filename='.advene_prefs'
-        preffile=os.sep.join((homedir, filename))
+        preffile=self.advenefile('advene.prefs', 'settings')
+        d=os.path.dirname(preffile)
+        if not os.path.isdir(d):
+            try:
+                os.mkdir(d)
+            except OSError, e:
+                print "Error: ", str(e)
+                return False
         try:
             f = open(preffile, "w")
         except IOError:
@@ -307,7 +318,7 @@ class Config(object):
         return True
 
     def read_config_file (self):
-        """Read the configuration file ~/.advenerc.
+        """Read the configuration file (advene.ini).
         """
         c=[ a for a in sys.argv if a.startswith('-c') ]
         if c:
@@ -317,14 +328,8 @@ class Config(object):
             sys.argv.remove(c[0])
             conffile=c[0][2:]
         else:
-            homedir=self.get_homedir()
-            if self.os == 'win32':
-                filename='advene.ini'
-            else:
-                filename='.advenerc'
+            conffile=self.advenefile('advene.ini', 'settings')
 
-            conffile=os.sep.join((homedir, filename))
-            
         try:
             file = open(conffile, "r")
         except IOError:
@@ -375,7 +380,7 @@ class Config(object):
         @return: the user id
         @rtype: string
         """
-        # FIXME: allow override via .advenerc
+        # FIXME: allow override via advene.ini
         id = "Undefined id"
         for name in ('USER', 'USERNAME', 'LOGIN'):
             if os.environ.has_key (name):
@@ -420,7 +425,7 @@ class Config(object):
         @type filename: string or tuple
         @param category: the category of the file
         @type category: string
-        
+
         @return: an absolute pathname
         @rtype: string
         """
