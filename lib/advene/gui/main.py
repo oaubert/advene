@@ -1588,6 +1588,46 @@ class AdveneGUI (Connect):
         self.popup_evaluator()
         return True
 
+    def on_webserver_log1_activate (self, button=None, data=None):
+	w=gtk.Window()
+
+	def refresh(b, t):
+            b=t.get_buffer()
+            begin,end = b.get_bounds ()
+            b.delete(begin, end)
+            b.set_text(self.controller.server.logstream.getvalue())
+	    return True
+
+	def close(b, w):
+	    w.destroy()
+	    return True
+
+	vbox=gtk.VBox()
+
+	t=gtk.TextView()
+	t.set_editable (False)
+        t.set_wrap_mode (gtk.WRAP_CHAR)
+	vbox.add(t)
+	
+	hbox=gtk.HButtonBox()
+	
+	b=gtk.Button(stock=gtk.STOCK_CLOSE)
+	b.connect("clicked", close, w)
+	hbox.pack_start(b, expand=False)
+
+	b=gtk.Button(stock=gtk.STOCK_REFRESH)
+	b.connect("clicked", refresh, t)
+	hbox.pack_start(b, expand=False)
+
+	vbox.pack_start(hbox, expand=False)
+	
+	w.add(vbox)
+	refresh(None, t)
+
+	w.show_all()
+
+	return True
+
     def on_navigationhistory1_activate (self, button=None, data=None):
         h=advene.gui.views.history.HistoryNavigation(self.controller, self.navigation_history)
         h.popup()
