@@ -874,8 +874,8 @@ class EditZoneForm (EditForm):
 				     (x+width, y+height) ) )
 		    self.shape.name = d['name']
 		except KeyError:
-		    self.callback( ( (10, 10),
-				     (90, 90) ) )
+		    self.callback( ( (0, 0),
+				     (99, 99) ) )
 		    self.shape.name = self.element.data
 
         vbox.add(self.view.widget)
