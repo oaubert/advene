@@ -56,6 +56,8 @@ import advene.rules.ecaengine
 
 from advene.model.schema import Schema, AnnotationType
 from advene.model.view import View
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.query import Query
 import advene.model.constants
 import advene.model.tal.context
 
@@ -1908,6 +1910,47 @@ class AdveneGUI (Connect):
             self.controller.open_url (helpfile)
         else:
             self.log(_("Unable to find the help file at %s") % helpfile)
+        return True
+
+    def on_create_view_activate (self, button=None, data=None):
+        cr = CreateElementPopup(type_ = View,
+                                parent=self.controller.package,
+                                controller=self.controller)
+        cr.popup()
+        return True
+
+    def on_create_query_activate (self, button=None, data=None):
+        cr = CreateElementPopup(type_ = Query,
+                                parent=self.controller.package,
+                                controller=self.controller)
+        cr.popup()
+        return True
+
+    def on_create_schema_activate (self, button=None, data=None):
+        cr = CreateElementPopup(type_ = Schema,
+                                parent=self.controller.package,
+                                controller=self.controller)
+        sc=cr.popup()
+        return True
+
+    def on_create_annotation_type_activate (self, button=None, data=None):
+        sc=self.ask_for_schema(text=_("Select the schema where you want to\ncreate the new annotation type."), create=True)
+        if sc is None:
+            return None
+        cr=CreateElementPopup(type_=AnnotationType,
+                              parent=sc,
+                              controller=self.controller)
+        cr.popup()
+        return True
+
+    def on_create_relation_type_activate (self, button=None, data=None):
+        sc=self.ask_for_schema(text=_("Select the schema where you want to\ncreate the new relation type."), create=True)
+        if sc is None:
+            return None
+        cr=CreateElementPopup(type_=RelationType,
+                              parent=sc,
+                              controller=self.controller)
+        cr.popup()
         return True
 
     def on_toolbar_style1_activate (self, button=None, data=None):

@@ -917,6 +917,120 @@
 	  </child>
 
 	  <child>
+	    <widget class="GtkHandleBox" id="handlebox4">
+	      <property name="visible">True</property>
+	      <property name="shadow_type">GTK_SHADOW_OUT</property>
+	      <property name="handle_position">GTK_POS_LEFT</property>
+	      <property name="snap_edge">GTK_POS_TOP</property>
+
+	      <child>
+		<widget class="GtkToolbar" id="toolbar2">
+		  <property name="visible">True</property>
+		  <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+		  <property name="toolbar_style">GTK_TOOLBAR_ICONS</property>
+		  <property name="tooltips">True</property>
+		  <property name="show_arrow">True</property>
+
+		  <child>
+		    <widget class="GtkToolButton" id="toolbutton30">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Create a new view</property>
+		      <property name="label" translatable="yes">Create view</property>
+		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/create_view.png</property>
+		      <property name="visible_horizontal">True</property>
+		      <property name="visible_vertical">True</property>
+		      <property name="is_important">False</property>
+		      <signal name="clicked" handler="on_create_view_activate" last_modification_time="Mon, 02 Jan 2006 18:45:07 GMT"/>
+		    </widget>
+		    <packing>
+		      <property name="expand">False</property>
+		      <property name="homogeneous">False</property>
+		    </packing>
+		  </child>
+
+		  <child>
+		    <widget class="GtkToolButton" id="toolbutton31">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Create a new query</property>
+		      <property name="label" translatable="yes">Create query</property>
+		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/create_query.png</property>
+		      <property name="visible_horizontal">True</property>
+		      <property name="visible_vertical">True</property>
+		      <property name="is_important">True</property>
+		      <signal name="clicked" handler="on_create_query_activate" last_modification_time="Mon, 02 Jan 2006 18:45:15 GMT"/>
+		    </widget>
+		    <packing>
+		      <property name="expand">False</property>
+		      <property name="homogeneous">False</property>
+		    </packing>
+		  </child>
+
+		  <child>
+		    <widget class="GtkToolButton" id="toolbutton35">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Create a new schema</property>
+		      <property name="label" translatable="yes">Create schema</property>
+		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/create_schema.png</property>
+		      <property name="visible_horizontal">True</property>
+		      <property name="visible_vertical">True</property>
+		      <property name="is_important">True</property>
+		      <signal name="clicked" handler="on_create_query_activate" last_modification_time="Mon, 02 Jan 2006 18:45:15 GMT"/>
+		    </widget>
+		    <packing>
+		      <property name="expand">False</property>
+		      <property name="homogeneous">True</property>
+		    </packing>
+		  </child>
+
+		  <child>
+		    <widget class="GtkToolButton" id="toolbutton36">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Create a new annotation type</property>
+		      <property name="label" translatable="yes">Create annotation type</property>
+		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/create_at.png</property>
+		      <property name="visible_horizontal">True</property>
+		      <property name="visible_vertical">True</property>
+		      <property name="is_important">True</property>
+		      <signal name="clicked" handler="on_create_annotation_type_activate" last_modification_time="Mon, 02 Jan 2006 18:47:17 GMT"/>
+		    </widget>
+		    <packing>
+		      <property name="expand">False</property>
+		      <property name="homogeneous">True</property>
+		    </packing>
+		  </child>
+
+		  <child>
+		    <widget class="GtkToolButton" id="toolbutton37">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Create a new relation type</property>
+		      <property name="label" translatable="yes">Create relation type</property>
+		      <property name="use_underline">True</property>
+		      <property name="icon">pixmaps/create_rt.png</property>
+		      <property name="visible_horizontal">True</property>
+		      <property name="visible_vertical">True</property>
+		      <property name="is_important">True</property>
+		      <signal name="clicked" handler="on_create_relation_type_activate" last_modification_time="Mon, 02 Jan 2006 18:47:31 GMT"/>
+		    </widget>
+		    <packing>
+		      <property name="expand">False</property>
+		      <property name="homogeneous">True</property>
+		    </packing>
+		  </child>
+		</widget>
+	      </child>
+	    </widget>
+	    <packing>
+	      <property name="padding">0</property>
+	      <property name="expand">True</property>
+	      <property name="fill">True</property>
+	    </packing>
+	  </child>
+
+	  <child>
 	    <widget class="GtkLabel" id="label23">
 	      <property name="visible">True</property>
 	      <property name="label" translatable="yes">Dynamic view </property>
