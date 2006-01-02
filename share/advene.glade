@@ -103,7 +103,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image23">
+			<widget class="GtkImage" id="image24">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -125,7 +125,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image24">
+			<widget class="GtkImage" id="image25">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -367,6 +367,15 @@
 		      <property name="label" translatable="yes">Evaluator</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_evaluator2_activate" last_modification_time="Wed, 16 Jun 2004 20:59:52 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="webserver_log1">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">Webserver log</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_webserver_log1_activate" last_modification_time="Mon, 02 Jan 2006 16:01:20 GMT"/>
 		    </widget>
 		  </child>
 
