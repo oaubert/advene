@@ -66,6 +66,7 @@ import socket
 import select
 import mimetypes
 import logging
+import StringIO
 
 import imghdr
 
@@ -1767,8 +1768,9 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.shouldrun = True  # Set to False to indicate the end of the
                                # server_forawhile method
 
+	self.logstream = StringIO.StringIO()
         self.logger = logging.getLogger('webserver')
-        handler=logging.StreamHandler()
+        handler=logging.StreamHandler(self.logstream)
         handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
         self.logger.addHandler(handler)
         # set the level to logging.DEBUG to get more messages
