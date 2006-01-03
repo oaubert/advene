@@ -7,11 +7,24 @@ Types of plugins
   * content-type handler (editor / viewer)
   * actions
   * importers
+  * global methods
 
 Location of plugins
 ===================
 
-For the builtin features, in lib/advene/plugins
+For the builtin core features: lib/advene/plugins
 
-For user-defined plugins, in $HOME/.advene/plugins
+For the builtin GUI features: lib/advene/gui/plugins
 
+For user-defined plugins: $HOME/.advene/plugins
+
+Implementation
+==============
+
+A plugin is a module. It *must* have :
+  * a name attribute
+  * a register(controller=None) function
+
+The register function is called, with the controller as parameter,
+upon loading. It has to register the plugin's components in the Advene
+infrastructure.
