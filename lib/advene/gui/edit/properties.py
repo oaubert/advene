@@ -260,6 +260,21 @@ class EditWidget(gtk.VBox):
         self.__tooltips.set_tip(btn, help)
         self.__add_line(1, align, hbox)
 
+    def popup(self):
+        d = gtk.Dialog(title=self.get_name(),
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
+        d.vbox.add(self)
+        self.show_all()
+        res=d.run()
+        d.destroy()
+        if res == gtk.RESPONSE_ACCEPT:
+            return True
+        else:
+            return False
+
 def test():
     val = {
         'string': 'String',
@@ -268,7 +283,7 @@ def test():
         }
     def set_config(name, value):
         val[name] = value
-            
+
     def get_config(name):
         return val[name]
 
@@ -282,10 +297,13 @@ def test():
                                                             "Fum": "fum" })
     ew.add_file_selector("File", 'filename', "Select a filename")
 
-    w=gtk.Window()
-    w.add(ew)
-    w.show_all()
+    res=ew.popup()
+    if res:
+        print "Modified: " + str(val)
+    else:
+        print "Cancel"
+
     gtk.main()
-        
+
 if __name__ == '__main__':
     test()
