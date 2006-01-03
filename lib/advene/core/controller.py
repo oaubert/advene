@@ -249,18 +249,7 @@ class AdveneController:
             pid=l.rstrip().split()[-1]
             processes.append(pid)
         f.close()
-        mess="""
-        +------------------------------------------------------+
-        | The following processes seem to use the %s port:     |
-        | %s |
-        +------------------------------------------------------+
-        """ % (pat, processes)
-        mess=mess.lstrip()
-        # FIXME: make that a popup window
-        if self.gui:
-            print mess
-        else:
-            print mess
+        self.log(_("Cannot start the webserver\nThe following processes seem to use the %s port: %s") % (pat, processes))
         
     def init(self, args=None):
         if args is None:
@@ -279,14 +268,13 @@ class AdveneController:
                 self.server = advene.core.webserver.AdveneWebServer(controller=self,
                                                                     port=config.data.webserver['port'])
             except socket.error:
-                print _("Cannot start the webserver.\nAnother application is using the port.\nCheck that no VLC player is still running in the background.")
                 if config.data.os != 'win32':
                     self.busy_port_info()
-                sys.exit(0)
+		self.log(_("Deactivating web server"))
             
             # If == 1, it is the responsibility of the Gtk app
             # to set the input loop
-            if config.data.webserver['mode'] == 2:
+            if config.data.webserver['mode'] == 2 and self.server:
                 self.serverthread = threading.Thread (target=self.server.serve_forawhile)
                 self.serverthread.start ()
 
@@ -413,7 +401,9 @@ class AdveneController:
         If root, then return only the package URL even if it defines
         a default view.
         """
-        url = self.server.get_url_for_alias('advene')
+	url=None
+	if self.server:
+	    url = self.server.get_url_for_alias('advene')
         if not url:
             return None
         if root:
@@ -711,7 +701,7 @@ class AdveneController:
                 self.imagecache.init_value (a.fragment.end)
 
         # Update the webserver
-        if config.data.webserver['mode']:
+        if config.data.webserver['mode'] and self.server:
             self.server.register_package (alias='advene',
                                           package=self.package,
                                           imagecache=self.imagecache)
