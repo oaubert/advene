@@ -21,7 +21,7 @@ class PluginCollection(list):
         for m in os.listdir(directory):
             name, ext = os.path.splitext(m)
             if ext == '.py' and name.startswith(prefix) and not name.startswith('_'):
-                p = Plugin(d, name)
+                p = Plugin(directory, name)
                 self.append(p)
 
 class Plugin(object):
@@ -41,6 +41,7 @@ class Plugin(object):
 
         self._plugin = importer.import_module(name)
         self.filename = info[1]
+	self.name = self._plugin.name
 
     def __getattribute__ (self, name):
         """Use the defined method if available. Else, forward the request to the plugin.
