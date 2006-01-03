@@ -80,6 +80,7 @@ from advene.gui.edit.create import CreateElementPopup
 import advene.gui.evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
+import advene.gui.edit.properties
 from advene.gui.views.transcription import TranscriptionView
 from advene.gui.edit.transcribe import TranscriptionEdit
 from advene.gui.views.interactivequery import InteractiveQuery
@@ -1562,83 +1563,83 @@ class AdveneGUI (Connect):
         return True
     
     def on_package_properties1_activate (self, button=None, data=None):
-        self.gui.get_widget ("prop_author_id").set_text (self.controller.package.author)
-        self.gui.get_widget ("prop_date").set_text (self.controller.package.date)
-        self.gui.get_widget ("prop_media").set_text (self.controller.get_default_media() or "")
-        self.gui.get_widget ("prop_title").set_text (self.controller.package.title or "")
+        cache={
+            'author': self.controller.package.author,
+            'date': self.controller.package.date,
+            'media': self.controller.get_default_media() or "",
+            'title': self.controller.package.title or ""
+            }
+        ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
+        ew.set_name(_("Package properties"))
+        ew.add_entry(_("Author"), "author", _("Author name"))
+        ew.add_entry(_("Date"), "date", _("Package creation date"))
+        ew.add_entry(_("Title"), "title", _("Package title"))
+        ew.add_file_selector(_("Associated media"), 'media', _("Select a movie file"))
 
-        self.gui.get_widget ("properties").show ()
+        res=ew.popup()
+
+        if res:
+            self.controller.package.author = cache['author']
+            self.controller.package.date = cache['date']
+            self.controller.package.title = cache['title']
+            self.update_window_title()
+            self.controller.set_default_media(cache['media'])
         return True
 
     def on_preferences1_activate (self, button=None, data=None):
-        self.gui.get_widget ("osdtext_toggle").set_active (config.data.player_preferences['osdtext'])
-        self.gui.get_widget ("preferences").show ()
+        cache={
+            'osd': config.data.player_preferences['osdtext'],
+            'history-limit': config.data.preferences['history-size-limit'],
+            }
+
+        ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
+        ew.set_name(_("Preferences"))
+        ew.add_checkbox(_("OSD"), "osd", _("Display captions on the video"))
+        ew.add_spin(_("History size"), "history-limit", _("History filelist size limit"),
+                    -1, 20)
+        res=ew.popup()
+        if res:
+            config.data.player_preferences['osdtext']=cache['osd']
+            config.data.preferences['history-size-limit']=cache['history-limit']
         return True
 
-    def on_preferences_ok_clicked (self, button=None, data=None):
-        config.data.player_preferences['osdtext'] = self.gui.get_widget ("osdtext_toggle").get_active ()
-        self.gui.get_widget ("preferences").hide ()
-        return True
+    def on_configure_player1_activate (self, button=None, data=None): 
+        cache={
+            'caption': config.data.player['caption'],
+            'font': config.data.player['osdfont'],
+            'snapshot': config.data.player['snapshot'],
+            'width': config.data.player['snapshot-dimensions'][0],
+            'height': config.data.player['snapshot-dimensions'][1],
+            'level': config.data.player['verbose'] or -1,
+            }
 
-    def on_preferences_cancel_clicked (self, button=None, data=None):
-        self.gui.get_widget ("preferences").hide ()
-        return True
-
-    def on_prop_ok_clicked (self, button=None, data=None):
-        self.controller.package.author = self.gui.get_widget ("prop_author_id").get_text ()
-        self.controller.package.date = self.gui.get_widget ("prop_date").get_text ()
-
-        mediafile = self.gui.get_widget ("prop_media").get_text ()
-        self.controller.set_default_media(mediafile)
-        #id_ = vlclib.mediafile2id (mediafile)
-        #self.controller.imagecache.save (id_)
-
-        self.controller.package.title = self.gui.get_widget ("prop_title").get_text ()
-        self.update_window_title()
-        self.gui.get_widget ("properties").hide ()
-        return True
-
-    def on_prop_cancel_clicked (self, button=None, data=None):
-        self.gui.get_widget ("properties").hide ()
-        return True
-
-    def on_configure_player1_activate (self, button=None, data=None):
-        self.gui.get_widget ("player_caption_button").set_active (config.data.player['caption'])
-        self.gui.get_widget ("player_osd_font").set_text (config.data.player['osdfont'])
-        self.gui.get_widget ("player_snapshot_button").set_active (config.data.player['snapshot'])
-        dim = config.data.player['snapshot-dimensions']
-        self.gui.get_widget ("player_snapshot_width").set_value (dim[0])
-        self.gui.get_widget ("player_snapshot_height").set_value (dim[1])
-
-        if config.data.player['verbose'] is None:
-            self.gui.get_widget ("player_verbose_button").set_active (False)
-        else:
-            self.gui.get_widget ("player_verbose_button").set_active (True)
-            self.gui.get_widget ("player_debut_level").set_value(config.data.player['verbose'])
-        self.gui.get_widget ("playerproperties").show ()
-        return True
-
-    def on_player_properties_apply_clicked (self, button=None, data=None):
-        config.data.player['caption'] = self.gui.get_widget ("player_caption_button").get_active ()
-        config.data.player['osdfont'] = self.gui.get_widget ("player_osd_font").get_text ()
-        config.data.player['snapshot'] = self.gui.get_widget ("player_snapshot_button").get_active ()
-        w = self.gui.get_widget ("player_snapshot_width").get_value_as_int ()
-        h = self.gui.get_widget ("player_snapshot_height").get_value_as_int ()
-        config.data.player['snapshot-dimensions'] = (w, h)
-        if self.gui.get_widget ("player_verbose_button").get_active ():
-            config.data.player['verbose'] = self.gui.get_widget ("player_debug_level").get_value_as_int ()
-        else:
-            config.data.player['verbose'] = None
-        self.controller.restart_player ()
-        return True
-
-    def on_player_properties_ok_clicked (self, button=None, data=None):
-        self.on_player_properties_apply_clicked ()
-        self.gui.get_widget ("playerproperties").hide ()
-        return True
-
-    def on_player_properties_cancel_clicked (self, button=None, data=None):
-        self.gui.get_widget ("playerproperties").hide ()
+        ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
+        ew.set_name(_("Player configuration"))
+        ew.add_title(_("Captions"))
+        ew.add_checkbox(_("Enable"), "caption", _("Enable video captions"))
+        ew.add_file_selector(_("Font"), "font", _("TrueType font for captions"))
+        
+        ew.add_title(_("Snapshots"))
+        ew.add_checkbox(_("Enable"), "snapshot", _("Enable snapshots"))
+        ew.add_spin(_("Width"), "width", _("Snapshot width"), 0, 1280)
+        ew.add_spin(_("Height"), "height", _("Snapshot height"), 0, 1280)
+        
+        ew.add_title(_("Verbosity"))
+        ew.add_spin(_("Level"), "level", _("Verbosity level. -1 for no messages."),
+                    -1, 3)
+        
+        res=ew.popup()
+        if res:
+            config.data.player['caption']                = cache['caption']
+            config.data.player['osdfont']                = cache['font']  
+            config.data.player['snapshot']               = cache['snapshot']
+            config.data.player['snapshot-dimensions'][0] = cache['width'] 
+            config.data.player['snapshot-dimensions'][1] = cache['height']
+            if cache['level'] == -1:
+                config.data.player['verbose'] = None
+            else:
+                config.data.player['verbose'] = cache['level']
+            self.controller.restart_player ()            
         return True
 
     def on_save_imagecache1_activate (self, button=None, data=None):
