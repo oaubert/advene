@@ -1,0 +1,17 @@
+Plugin architecture for Advene
+------------------------------
+
+Types of plugins
+================
+
+  * content-type handler (editor / viewer)
+  * actions
+  * importers
+
+Location of plugins
+===================
+
+For the builtin features, in lib/advene/plugins
+
+For user-defined plugins, in $HOME/.advene/plugins
+
