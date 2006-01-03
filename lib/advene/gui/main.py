@@ -433,16 +433,19 @@ class AdveneGUI (Connect):
             sw.show_all()
 
         if config.data.webserver['mode'] == 1:
-            self.log(_("Using Mainloop input handling for webserver..."))
-            gobject.io_add_watch (self.controller.server,
-                                  gobject.IO_IN,
-                                  self.handle_http_request)
-            if config.data.os == 'win32':
-                # Win32 workaround for the reactivity problem
-                def sleeper():
-                    time.sleep(.001)
-                    return True
-                gobject.timeout_add(400, sleeper)
+	    if self.controller.server:
+		self.log(_("Using Mainloop input handling for webserver..."))
+		gobject.io_add_watch (self.controller.server,
+				      gobject.IO_IN,
+				      self.handle_http_request)
+		if config.data.os == 'win32':
+		    # Win32 workaround for the reactivity problem
+		    def sleeper():
+			time.sleep(.001)
+			return True
+		    gobject.timeout_add(400, sleeper)
+	    else:
+		self.log(_("No available webserver"))
 
         # Populate the file history menu
         for filename in config.data.preferences['history']:
@@ -1393,7 +1396,10 @@ class AdveneGUI (Connect):
             b=t.get_buffer()
             begin,end = b.get_bounds ()
             b.delete(begin, end)
-            b.set_text(self.controller.server.logstream.getvalue())
+	    if self.controller.server:
+		b.set_text(self.controller.server.logstream.getvalue())
+	    else:
+		b.set_text(_("No available webserver"))
             return True
 
         def close(b, w):
