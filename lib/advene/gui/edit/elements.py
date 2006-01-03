@@ -55,6 +55,13 @@ import StringIO
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
 
+# Common content MIME-types
+common_mimetypes = [
+    'text/html',
+    'text/plain',
+    'text/xml+svg',
+    ]
+
 _edit_popup_list = []
 
 def get_edit_popup (el, controller=None):
@@ -769,7 +776,7 @@ class EditContentForm(EditForm):
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if self.mimetypeeditable:
-            self.element.mimetype = self.mimetype.get_text()
+            self.element.mimetype = self.mimetype.child.get_text()
         self.contentform.update_element()
         return True
 
@@ -781,9 +788,13 @@ class EditContentForm(EditForm):
         l=gtk.Label(_("MIME Type"))
         hbox.pack_start(l, expand=False)
 
-        self.mimetype=gtk.Entry()
-        self.mimetype.set_text(self.element.mimetype)
-        self.mimetype.set_editable(self.mimetypeeditable)
+        self.mimetype=gtk.combo_box_entry_new_text()
+	if self.mimetypeeditable:
+	    for c in common_mimetypes:
+		self.mimetype.append_text(c)
+
+        self.mimetype.child.set_text(self.element.mimetype)
+        self.mimetype.child.set_editable(self.mimetypeeditable)
         hbox.pack_start(self.mimetype)
 
         vbox.pack_start(hbox, expand=False)
