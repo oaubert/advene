@@ -4,6 +4,8 @@
 
 * Write a advene-openoffice binding to automate video/presentation sync.
 
+* New action: translate ?
+
 * Create python binding to avidemux (for frame-by-frame functionality)
 
 * Rewrite admin templates with AJAX functionalities (cf http://ajaxpatterns.org/Main_Page)
@@ -25,8 +27,6 @@ occurring events (but base timeline is then application time instead
 of movie time)
 
 * timeline: find a way to render overlapping buttons
-
-* transcribe: add screenshots to marks context menu
 
 * SMIL examples: http://webmonkey.wired.com/webmonkey/00/41/index4a_page3.html?tw=authoring
 
@@ -220,8 +220,6 @@ Also win32com (http://www.boddie.org.uk/python/COM.html)
 
 * Use transcode to extract screenshots (cf dvd:rip). Command line:
 transcode -H 10 -z -k -o snapshot -y jpg,null -i /dev/dvd -x dvd,null -T 21,1 -c 00:00:10.0-00:00:10.5
-
-* Put an example package on the web site and a video of an example interaction
 
 * Save ad-hoc view parameters as another view
 
@@ -974,6 +972,10 @@ accomodate a FilteredDataModel
 * Project hosting: http://www.gna.org/ -> DONE
 
 * Menu: add a File/Associate video file item
+
+* Put an example package on the web site and a video of an example interaction
+
+* transcribe: add screenshots to marks context menu
 
 * GUI: use STOCK_MEDIA_* icons introduced in gtk 2.6 -> DONE
 
