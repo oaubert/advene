@@ -32,6 +32,11 @@ import advene.core.config as config
 
 from gettext import gettext as _
 
+import advene.core.plugin
+import advene.core.mediacontrol
+from advene.core.imagecache import ImageCache
+import advene.core.idgenerator
+
 import advene.rules.elements
 import advene.rules.ecaengine
 
@@ -41,11 +46,6 @@ from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 import advene.model.constants
 import advene.model.tal.context
-
-import advene.core.mediacontrol
-
-from advene.core.imagecache import ImageCache
-import advene.core.idgenerator
 
 import advene.util.vlclib as vlclib
 
@@ -169,6 +169,23 @@ class AdveneController:
             parameters={'message': _("String to display.")},
             category='gui',
             ))
+	try:
+	    self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'))
+	except OSError:
+	    pass
+
+    def load_plugins(self, directory):
+	"""Load the plugins from the given directory.
+	"""
+	#print "Loading plugins from ", directory
+	l=advene.core.plugin.PluginCollection(directory)
+	for p in l:
+	    try:
+		self.log("Registering " + p.name)
+		p.register(controller=self)
+	    except AttributeError:
+		pass
+	return l
 
     def queue_action(self, method, *args, **kw):
         self.event_queue.append( (method, args, kw) )
@@ -196,6 +213,18 @@ class AdveneController:
     
     def register_gui(self, gui):
         self.gui=gui
+
+    def register_view(self, view):
+	if self.gui:
+	    self.gui.register_view(view)
+	else:
+	    self.log(_("No available GUI"))
+
+    def register_action(self, action):
+	if self.event_handler:
+	    self.event_handler.register_action(action)
+	else:
+	    self.log(_("No available event handler"))
 
     def build_context(self, here=None):
         return advene.model.tal.context.AdveneContext(here=here,
