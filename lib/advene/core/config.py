@@ -221,14 +221,6 @@ class Config(object):
                                     0,
                                     self.target_type[t] ) ]
 
-	# Common content MIME-types
-	self.common_mimetypes = [
-	    'text/html',
-	    'text/plain',
-	    'text/xml+svg',
-	    'application/x-advene-structured',
-	    'application/x-advene-zone',
-	    ]
         if self.os == 'win32':
             self.win32_specific_config()
 
