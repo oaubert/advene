@@ -1,10 +1,15 @@
 advene (0.19) unstable; urgency=low
 
-  * New package format (.azp, for Advene Zip Package) allowing to 
-    embed resources (files) in packages. You can save old .xml files
-    into .azp files to get them converted.
+  * New package format (.azp, for Advene Zip Package) allowing to embed
+    resources (files) in packages. You can save old .xml files into .azp
+    files to get them converted. 
+    Access to resources is done through the TALES expression 
+    string:${package/absolute_url}/resources
+  * Moved config and preferences files to ~/.advene directory
+    (UserDir/advene on Windows)
+  * GUI: added an element creation toolbar
   * Added spanish translations (courtesy of Emmanuel Ayala)
-  * Bugfix in paths initialization
+  * Bugfix in path initialization
   * Importer
     * implemented CMML import
 
