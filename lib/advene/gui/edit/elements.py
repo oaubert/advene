@@ -56,11 +56,18 @@ import StringIO
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
 
 # Common content MIME-types
-common_mimetypes = [
+common_content_mimetypes = [
+    'text/plain',
+    'application/x-advene/structured',
+    'application/x-advene-zone',
+    ]
+
+common_view_mimetypes = [
     'text/html',
     'text/plain',
     'text/xml+svg',
     ]
+
 
 _edit_popup_list = []
 
@@ -790,7 +797,7 @@ class EditContentForm(EditForm):
 
         self.mimetype=gtk.combo_box_entry_new_text()
 	if self.mimetypeeditable:
-	    for c in common_mimetypes:
+	    for c in common_view_mimetypes:
 		self.mimetype.append_text(c)
 
         self.mimetype.child.set_text(self.element.mimetype)
