@@ -105,6 +105,7 @@ class AdveneController:
     def __init__ (self, args=None):
         """Initializes player and other attributes.
         """
+	self.cleanup_done=False
         if args is None:
             args = []
 
@@ -801,28 +802,30 @@ class AdveneController:
 
     def on_exit (self, source=None, event=None):
         """General exit callback."""
-        # Save preferences
-        config.data.save_preferences()
+	if not self.cleanup_done:
+	    # Save preferences
+	    config.data.save_preferences()
 
-        # Cleanup the ZipPackage directories
-        ZipPackage.cleanup()
+	    # Cleanup the ZipPackage directories
+	    ZipPackage.cleanup()
 
-        # Terminate the web server
-        try:
-            self.server.stop_serving ()
-        except:
-            pass
-        
-        # Terminate the VLC server
-        try:
-            print "Exiting vlc player"
-            self.player.exit()
-            print "done"
-        except Exception, e:
-            print _("Got exception %s when stopping player.") % str(e)
-            import code
-            e, v, tb = sys.exc_info()
-            code.traceback.print_exception (e, v, tb)
+	    # Terminate the web server
+	    try:
+		self.server.stop_serving ()
+	    except:
+		pass
+
+	    # Terminate the VLC server
+	    try:
+		print "Exiting vlc player"
+		self.player.exit()
+		print "done"
+	    except Exception, e:
+		print _("Got exception %s when stopping player.") % str(e)
+		import code
+		e, v, tb = sys.exc_info()
+		code.traceback.print_exception (e, v, tb)
+	    self.cleanup_done = True
         return True
     
     def move_position (self, value, relative=True):
