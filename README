@@ -10,18 +10,18 @@ to access movies.
 You will need the following python packages (the package names are from
 Debian, they may slightly vary on other distributions) :
 
-python-gtk2 (>=2.4)
-python-glade2 (>=2.4)
+python-gtk2 (>=2.6)
+python-glade2 (>=2.6)
 python-pyorbit (>=2.0)
 python-xml (>=0.8.0)
-python-simpletal (>=3.9)
-python-imaging
+[ python-simpletal (>=3.9) -- included in the Advene distribution ]
+python-imaging [python-pil in some distributions]
 
 * Windows version
 
 You should install in this order (note the version numbers) :
 
-Gtk/win32 v. 2.4 : http://gladewin32.sourceforge.net/
+Gtk/win32 v. 2.6 : http://gladewin32.sourceforge.net/
 
 Python    v. 2.3 : http://www.python.org/ftp/python/2.3.4/Python-2.3.4.exe
 [ From http://python.org/ ]
