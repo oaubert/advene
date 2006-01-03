@@ -22,6 +22,8 @@ This dummy player can be used to test the Advene GUI without any player dependen
 It also presents the API that should be implemented by alternative players.
 """
 
+from time import time
+
 class StreamInformation:
     def __init__(self):
         self.streamstatus=None
@@ -73,8 +75,12 @@ class Player:
         self.playlist=[]
         self.relative_position=0
         self.status=Player.UndefinedStatus
+	self.basetime=None
+	self.pausetime=None
+	self.volume=12
+	# Simulate a 30 minutes movie
+	self.length = 30 * 60000
         self.position_update()
-        pass
 
     def dvd_uri(self, title=None, chapter=None):
         return "dvd@%s:%s" % (str(title),
@@ -85,33 +91,50 @@ class Player:
         
     def get_media_position(self, origin, key):
         self.log("get_media_position")
-        return 0
+	if self.pausetime:
+	    return self.pausetime
+	elif self.basetime is None:
+	    return 0
+	else:
+	    return time() * 1000 - self.basetime
 
     def set_media_position(self, position):
         self.log("set_media_position %s" % str(position))
+	self.basetime = time() * 1000 - position
+	self.pausetime = None
         return
     
     def start(self, position):
         self.log("start %s" % str(position))
         self.status=Player.PlayingStatus
+	self.basetime=time() * 1000
+	self.pausetime=None
 
     def pause(self, position): 
         self.log("pause %s" % str(position))
         if self.status == Player.PlayingStatus:
+	    self.pausetime=time() * 1000 - self.basetime
             self.status=Player.PauseStatus
         else:
             self.status=Player.PlayingStatus
+	    self.basetime=time() * 1000 - self.pausetime
+	    self.pausetime=None
 
     def resume(self, position):
         self.log("resume %s" % str(position))
         if self.status == Player.PlayingStatus:
+	    self.pausetime=time() * 1000 - self.basetime
             self.status=Player.PauseStatus
         else:
             self.status=Player.PlayingStatus
+	    self.basetime=time() * 1000 - self.pausetime
+	    self.pausetime=None
 
     def stop(self, position): 
         self.log("stop %s" % str(position))
         self.status=Player.UndefinedStatus
+	self.basetime=None
+	self.pausetime=None
 
     def exit(self):
         self.log("exit")
@@ -141,16 +164,22 @@ class Player:
         s.url=''
         if self.playlist:
             s.url=self.playlist[0]
-        s.length=0
-        s.position=0
+        s.length=self.length
+	if self.pausetime:
+	    s.position=self.pausetime
+	elif self.basetime:
+	    s.position=time() * 1000 - self.basetime
+	else:
+	    s.position=0
         s.streamstatus=self.status
         return s
 
     def sound_get_volume(self):
-        return 0
+        return self.volume
 
     def sound_set_volume(self, v):
         self.log("sound_set_volume %s" % str(v))
+	self.volume = v
 
     # Helper methods
     def create_position (self, value=0, key=None, origin=None):
@@ -230,4 +259,4 @@ class Player:
 
     def set_visual(self, xid):
         return True
-    
+
