@@ -20,6 +20,17 @@
 import sys
 import os
 
+def fix_paths(path):
+  # We override any modification that could have been made in
+  # .advenerc. Rationale: if the .advenerc was really correct, it
+  # would have set the correct package path in the first place.
+  print "Overriding 'resources', 'locale', 'advene' and 'web' config paths"
+  config.data.path['resources']=os.path.sep.join((maindir, 'share'))
+  config.data.path['locale']=os.path.sep.join( (maindir, 'locale') )
+  config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
+  config.data.path['advene']=maindir
+  config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
+  
 try:
   import advene.core.config as config
 except ImportError:
@@ -33,25 +44,25 @@ except ImportError:
     sys.path.insert (0, libpath)
     
     import advene.core.config as config
-    # We override any modification that could have been made in
-    # .advenerc. Rationale: if the .advenerc was really correct, it
-    # would have set the correct package path in the first place.
-    print "Overriding 'resources', 'locale', 'advene' and 'web' config paths"
-    config.data.path['resources']=os.path.sep.join((maindir, 'share'))
-    config.data.path['locale']=os.path.sep.join( (maindir, 'locale') )
-    config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
-    config.data.path['advene']=maindir
-    config.data.path['plugins']=os.path.sep.join( (maindir, 'lib') )
+    fix_paths(maindir)
   else:
     print """Cannot guess a valid directory.
     Please check your installation or set the PYTHONPATH environment variable."""
     sys.exit(1)    
 
+# Maybe we are running from a pyinstaller version
+if not os.path.exists(config.data.path['resources']):
+  maindir=os.path.abspath(os.path.dirname(sys.executable))
+  if os.path.exists(os.path.join( maindir, 'share' )):
+    # There is a 'share' directory at the same level as the executable
+    # This can mean that we are in a pyinstaller version
+    print "Seemingly running from a pyinstaller version in\n%s" % maindir
+    fix_paths(maindir)
+
 if config.data.os == 'win32':
   import _winreg
   
   # Encoding stuff, to please py2exe
-  import sys
   if hasattr(sys, 'setdefaultencoding'):
     import locale
     loc = locale.getdefaultlocale()
