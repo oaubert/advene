@@ -1,3 +1,5 @@
+* treeview: model synchronisation pb when deleting queries
+
 * schema editor: cf tools http://www.rexx.com/~dkuhlman/
 
 * Write a advene-openoffice binding to automate video/presentation sync.
@@ -8,20 +10,12 @@
 
 * Linux-installer (one file executable): http://pyinstaller.hpcf.upr.edu/cgi-bin/trac.cgi
 
-* Check windows registry paths for 'vlc', 'plugins', 'locale' that are
-bad in Italian (Programmi)
-
 * Bug in webserver.py for files with accents in their fullpath (encoding pb). Should check all encodings everywhere and make sure everything is utf8 internally.
 
-* Demo movie maker : cf http://www.debugmode.com/wink/
-
+* Demo movie maker : http://en.wikipedia.org/wiki/Screencast
+http://www.debugmode.com/wink/
 vlc --screen-fps=2 screen:// --no-sout-audio --sout '#transcode{vcodec=mp4v,venc=ffmpeg,scale=0.2}:standard{access=file,mux=avi,url=/tmp/foo.avi}'
-
 istanbul
-
-* plugins Implementation : cf
-http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/436873 for a
-start
 
 * Read http://www.ling.uni-potsdam.de/~stede/Downloads/xbrac04.pdf
 (survey of annotation tools)
@@ -29,10 +23,6 @@ start
 * Store the navigation history as a package with viewed sequences and
 occurring events (but base timeline is then application time instead
 of movie time)
-
-* Player API: check gst-python
-(http://gstreamer.freedesktop.org/releases/gst-python/0.8.2.html) and
-https://gna.org/projects/seamless/ (DVD player using gst-python)
 
 * timeline: find a way to render overlapping buttons
 
@@ -78,8 +68,6 @@ Program received signal SIGSEGV, Segmentation fault.
 #8  0x080d8076 in Py_Finalize ()
 #9  0x08054e2e in Py_Main ()
 #10 0x080549eb in main ()
-
-* Move GUI-actions from main to gui.actions
 
 * webserver: log access/error log to either a file or a window
 
@@ -213,7 +201,10 @@ python-imaging
 * Implement a action-history widget, that displays all events taking
 place with the previous and next states, so that we can know what took place
 
-* Implement Xine Advene player (through pyxine package)
+* Video player: investigate pyxine and gst-python :
+http://gstreamer.freedesktop.org/releases/gst-python/0.8.2.html
+https://gna.org/projects/seamless/ (DVD player using gst-python)
+Also win32com (http://www.boddie.org.uk/python/COM.html)
 
 * Remove vlc references in advene.core.config
 
@@ -386,8 +377,6 @@ http://www.rexx.com/~dkuhlman/generateDS.html (XML-Schema) Or SOAPy
   - ability to specify line order and which types to display
 
 * Make the annotation interface as On-Screen Display over the video window
-
-* Video player: investigate pyxine and gst-python. Also win32com (http://www.boddie.org.uk/python/COM.html)
 
 * vlc-dev: use the new start-time and stop-time functionality in core VLC to correctly
   handle positions in start and stop.
@@ -986,3 +975,12 @@ accomodate a FilteredDataModel
 
 * Menu: add a File/Associate video file item
 
+* GUI: use STOCK_MEDIA_* icons introduced in gtk 2.6 -> DONE
+
+* Move GUI-actions from main to gui.actions -> DONE (in gui.plugins)
+
+* Check windows registry paths for 'vlc', 'plugins', 'locale' that are bad in Italian (Programmi)
+
+* plugins Implementation : cf
+   http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/436873 for
+   a start -> DONE (cf advene.core.plugin)
