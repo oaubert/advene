@@ -221,17 +221,22 @@ class EditWidget(gtk.VBox):
 
     def add_file_selector(self, label, property, help):
 
-        def open_filedialog(self, on_ok, entry):
-            def fd_hide(src, fselector): fselector.destroy()
-            d = gtk.FileSelection()
-            d.show()
-            d.ok_button.connect("clicked", on_ok, d, entry)
-            d.cancel_button.connect("clicked", fd_hide, d)
-
-        def on_ok(src, fselector, entry):
-            fname = fselector.get_filename()
-            entry.set_text(fname)
-            fselector.destroy()
+        def open_filedialog(self, default_file, entry):
+            fs=gtk.FileChooserDialog(title=_("Choose a file"),
+                                     parent=None,
+                                     action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                     buttons=( gtk.STOCK_OPEN,
+                                               gtk.RESPONSE_OK,
+                                               gtk.STOCK_CANCEL,
+                                               gtk.RESPONSE_CANCEL ))
+            if default_file:
+                fs.set_filename(default_file)
+            res=fs.run()
+            filename=None
+            if res == gtk.RESPONSE_OK:
+                filename=fs.get_filename()
+                entry.set_text(filename)
+            fs.destroy()
 
         lbl = gtk.Label(label)
         lbl.show()
@@ -249,9 +254,10 @@ class EditWidget(gtk.VBox):
         btn.show()
         hbox.pack_end(btn, True, True, 4)
 
-        btn.connect("clicked", open_filedialog, on_ok, entry)
-
         value = self.__get_config(property)
+
+        btn.connect("clicked", open_filedialog, value, entry)
+
         entry.set_text(value)
         entry.connect("changed", self.__on_change, property,
                       self.CHANGE_ENTRY)
