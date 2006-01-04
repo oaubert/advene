@@ -29,6 +29,7 @@ from advene.model.bundle import AbstractBundle
 from advene.rules.elements import Query, Condition
 from advene.model.annotation import Annotation
 from advene.model.tal.context import AdveneTalesException
+import advene.gui.util
 
 import advene.gui.views.timeline
 
@@ -96,13 +97,8 @@ class InteractiveQuery:
             res=c.evaluateValue("here/query/_interactive")
         except AdveneTalesException, e:
             # Display a dialog with the value
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
-                _("TALES error in interactive expression."))
-            dialog.set_position(gtk.WIN_POS_MOUSE)
-            dialog.run()
-            dialog.destroy()
+	    advene.gui.util.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
+		icon=gtk.MESSAGE_ERROR)
             return True
 
         if (isinstance(res, list) or isinstance(res, tuple)
@@ -119,22 +115,10 @@ class InteractiveQuery:
                 window=t.popup()
                 window.set_title(_("Results of _interactive query"))
             else:
-                dialog = gtk.MessageDialog(
-                    None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
-                    _("Empty list result."))
-                dialog.set_position(gtk.WIN_POS_MOUSE)
-                dialog.run()
-                dialog.destroy()
+		advene.gui.util.message_dialog(_("Empty list result."),
+					       icon=gtk.MESSAGE_WARNING)
         else:
-            # Display a dialog with the value
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
-                _("Result:\n%s") % unicode(res))
-            dialog.set_position(gtk.WIN_POS_MOUSE)
-            dialog.run()
-            dialog.destroy()
+	    advene.gui.util.message_dialog(_("Result:\n%s") % unicode(res))
         return True
     
     def cancel(self, button=None):

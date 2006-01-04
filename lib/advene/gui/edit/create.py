@@ -135,13 +135,7 @@ class CreateElementPopup(object):
                 return None
 
             if not type_list:
-                dialog = gtk.MessageDialog(
-                    None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
-                    _("No available type."))
-                dialog.set_position(gtk.WIN_POS_MOUSE)
-                dialog.run()
-                dialog.destroy()
+		advene.gui.util.message_dialog(_("No available type."))
                 return None
 
             self.chosen_type = type_list[0]
@@ -183,13 +177,8 @@ class CreateElementPopup(object):
         id_ = self.id_entry.get_text()
         # Check validity of id.
         if not self.is_valid_id(id_):
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
+	    advene.gui.util.message_dialog(
                 _("The identifier %s is not valid.\nIt must be composed of non-accentuated alphabetic characters\nUnderscore is allowed.") % id_)
-            dialog.set_position(gtk.WIN_POS_MOUSE)
-            dialog.run()
-            dialog.destroy()
             return None
         
         t = self.chosen_type

@@ -26,7 +26,7 @@ import advene.rules.elements
 from advene.rules.elements import Event, Condition, ConditionList, Action, ActionList
 from advene.rules.elements import Rule, RuleSet
 import advene.core.config as config
-from advene.gui.util import CategorizedSelector, build_optionmenu
+from advene.gui.util import CategorizedSelector, build_optionmenu, message_dialog
 
 from advene.gui.edit.tales import TALESEntry
 
@@ -149,14 +149,10 @@ class EditRuleSet(EditGeneric):
             return False
         iv=self.invalid_items()
         if iv:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+	    message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
-                "\n".join(iv)
-                )
-            response=dialog.run()
-            dialog.destroy()
+                "\n".join(iv),
+		icon=gtk.MESSAGE_ERROR)
             return False
         for e in self.editlist:
             e.update_value()
@@ -933,12 +929,7 @@ if __name__ == "__main__":
         edit.update_value()
         print "Saving model with %d rules" % len(edit.model)
         edit.model.to_xml(f)
-        dialog = gtk.MessageDialog(
-            None, gtk.DIALOG_DESTROY_WITH_PARENT,
-            gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
-            "The ruleset has been saved into %s." % f)
-        dialog.run()
-        dialog.destroy()
+	message_dialog("The ruleset has been saved into %s." % f)
         return True
 
     b=gtk.Button(stock=gtk.STOCK_SAVE)

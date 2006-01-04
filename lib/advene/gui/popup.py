@@ -162,12 +162,8 @@ class Menu:
                    for r in el.rootPackage.relations
                    if el in r.members ]
             if rels:
-                dialog = gtk.MessageDialog(
-                    None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
+		advene.gui.util.message_dialog(
                     _("Cannot delete the annotation %s:\nThe following relation(s) use it:\n%s") % (vlclib.get_title(self.controller, el), ", ".join(rels)))
-                dialog.run()
-                dialog.destroy()
                 return True
             p.annotations.remove(el)
             self.controller.notify('AnnotationDelete', annotation=el)
@@ -176,36 +172,24 @@ class Menu:
             self.controller.notify('RelationDelete', relation=el)
         elif isinstance(el, AnnotationType):
             if len(el.annotations) > 0:
-                dialog = gtk.MessageDialog(
-                    None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
+		advene.gui.util.message_dialog(
                     _("Cannot delete the annotation type %s:\nthere are still annotations of this type.") % (el.title or el.id))
-                dialog.run()
-                dialog.destroy()
                 return True
 	    el.schema.remove(el)
             self.controller.notify('AnnotationTypeDelete', annotationtype=el)
         elif isinstance(el, RelationType):
             if len(el.relations) > 0:
-                dialog = gtk.MessageDialog(
-                    None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
+		advene.gui.util.message_dialog(
                     _("Cannot delete the relation type %s:\nthere are still relations of this type.") % (el.title or el.id))
-                dialog.run()
-                dialog.destroy()
                 return True
-            el.schema.remove(el)
+            p.remove(el)
             self.controller.notify('RelationTypeDelete', relationtype=el)
         elif isinstance(el, Schema):
             if len(el.annotationTypes) > 0 or len(el.relationTypes) > 0:
-                dialog = gtk.MessageDialog(
-                    None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
+		advene.gui.util.message_dialog(
                     _("Cannot delete the schema %s:\nthere are still types in it.") % (el.title or el.id))
-                dialog.run()
-                dialog.destroy()
                 return True
-            p.schemas.remove(el)
+            p.remove(el)
             self.controller.notify('SchemaDelete', schema=el)
         elif isinstance(el, View):
             p.views.remove(el)

@@ -26,6 +26,7 @@ from advene.model.package import Package
 from advene.model.exception import AdveneException
 
 import advene.model.tal.context
+import advene.gui.util
 import advene.util.vlclib as vlclib
 import inspect
 
@@ -188,13 +189,8 @@ class Browser:
                 columnbrowser.next=None
                 columnbrowser.listview.get_selection().unselect_all()
             
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
-                _("Exception: %s") % e)
-            dialog.set_position(gtk.WIN_POS_MOUSE)
-            dialog.run()
-            dialog.destroy()
+	    advene.gui.util.message_dialog(_("Exception: %s") % e,
+					   icon=gtk.MESSAGE_WARNING)
             return
         
         self.update_view(path, el)

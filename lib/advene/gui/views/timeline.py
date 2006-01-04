@@ -443,13 +443,8 @@ class TimeLine:
             dest=widget.annotationtype
 
             if self.delete_transmuted_toggle.get_active() and source.relations:
-                dialog = gtk.MessageDialog(
-                    None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
-                    _("Cannot delete the annotation : it has relations."))
-                dialog.set_position(gtk.WIN_POS_MOUSE)
-                dialog.run()
-                dialog.destroy()
+		advene.gui.util.message_dialog(_("Cannot delete the annotation : it has relations."),
+					       icon=gtk.MESSAGE_WARNING)
                 return True
                 
             self.controller.transmute_annotation(source,
@@ -466,13 +461,8 @@ class TimeLine:
                                                     source,
                                                     dest)
         if not relationtypes:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
-                _("No compatible relation types are defined."))
-            dialog.set_position(gtk.WIN_POS_MOUSE)
-            dialog.run()
-            dialog.destroy()
+	    advene.gui.util.message_dialog(_("No compatible relation types are defined."),
+					   icon=gtk.MESSAGE_WARNING)
             return True
 
         rt=advene.gui.util.list_selector(title=_("Create a relation"),

@@ -948,12 +948,9 @@ class EditTextForm (EditForm):
             try:
                 f=open(fname, 'r')
             except IOError, e:
-                dialog = gtk.MessageDialog(
-                    None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
-                    _("Cannot read the data:\n%s") % unicode(e))
-                dialog.run()
-                dialog.destroy()
+		advene.gui.util.message_dialog(
+                    _("Cannot read the data:\n%s") % unicode(e),
+		    icon=gtk.MESSAGE_ERROR)
                 return True
             b=self.view.get_buffer()
             begin,end = b.get_bounds ()
@@ -975,12 +972,9 @@ class EditTextForm (EditForm):
             try:
                 f=open(fname, 'w')
             except IOError, e:
-                dialog = gtk.MessageDialog(
-                    None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
-                    _("Cannot save the data:\n%s") % unicode(e))
-                dialog.run()
-                dialog.destroy()
+		advene.gui.util.message_dialog(
+                    _("Cannot save the data:\n%s") % unicode(e),
+		    icon=gtk.MESSAGE_ERROR)
                 return True
             b=self.view.get_buffer()
             begin,end = b.get_bounds ()
@@ -1047,14 +1041,10 @@ class EditRuleSetForm (EditForm):
     def check_validity(self):
         iv=self.edit.invalid_items()
         if iv:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+	    advene.gui.util.message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
-                "\n".join(iv)
-                )
-            response=dialog.run()
-            dialog.destroy()
+                "\n".join(iv),
+		icon=gtk.MESSAGE_ERROR)
             return False
         else:
             return True
@@ -1097,12 +1087,8 @@ class EditFragmentForm(EditForm):
 
     def check_validity(self):
         if self.begin.value >= self.end.value:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                _("Begin time is greater than end time"))
-            dialog.run()
-            dialog.destroy()
+	    advene.gui.util.message_dialog(_("Begin time is greater than end time"), 
+					   icon=gtk.MESSAGE_ERROR)
             return False
         else:
             return True
@@ -1151,14 +1137,10 @@ class EditQueryForm (EditForm):
     def check_validity(self):
         iv=self.edit.invalid_items()
         if iv:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+	    advene.gui.util.message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
-                "\n".join(iv)
-                )
-            response=dialog.run()
-            dialog.destroy()
+                "\n".join(iv),
+		icon=gtk.MESSAGE_ERROR)
             return False
         else:
             return True
@@ -1313,14 +1295,10 @@ class EditAttributesForm (EditForm):
         try:
             val = self.repr_to_value (at, text)
         except ValueError, e:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_WARNING, gtk.BUTTONS_CLOSE,
+	    advene.gui.util.message_dialog(
                 _("The %s attribute could not be updated:\n\n%s\n\nResetting to the original value.")
-                % (at, str(e)))
-            dialog.connect("response", lambda w, e: dialog.destroy())
-            dialog.show()
-
+                % (at, str(e)),
+		icon=gtk.MESSAGE_WARNING)
             # Invalid value -> we take the original value
             val = getattr(self.element, at)
 
@@ -1344,13 +1322,10 @@ class EditAttributesForm (EditForm):
             iter = model.iter_next(iter)
         # Display list of invalid attributes
         if invalid:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+	    advene.gui.util.message_dialog(
                 _("The following attributes cannot be updated:\n\n%s")
-                % "\n".join ([ "%s: %s" % (at, str(e)) for (at, e) in invalid ]))
-            dialog.run()
-            dialog.destroy()
+                % "\n".join ([ "%s: %s" % (at, str(e)) for (at, e) in invalid ]),
+		icon=gtk.MESSAGE_ERROR)
             return False
         else:
             return True
@@ -1381,13 +1356,10 @@ class EditAttributesForm (EditForm):
             iter = model.iter_next(iter)
         # Display list of invalid attributes
         if invalid:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+	    advene.gui.util.message_dialog(
                 _("The following attributes could not be updated:\n\n%s")
-                % "\n".join ([ "%s: %s" % (at, str(e)) for (at, e) in invalid ]))
-            dialog.connect("response", lambda w, e: dialog.destroy())
-            dialog.show()
+                % "\n".join ([ "%s: %s" % (at, str(e)) for (at, e) in invalid ]),
+		icon=gtk.MESSAGE_ERROR)
         return True
 
     def get_view (self):

@@ -577,13 +577,8 @@ class AdveneGUI (Connect):
         i=combo.get_active_iter()
         stbv=combo.get_model().get_value(i, 1)
         if stbv is None:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
-                _("Do you want to create a new dynamic view?"))
-            response=dialog.run()
-            dialog.destroy()
-            if response != gtk.RESPONSE_YES:
+	    if advene.gui.util.message_dialog(_("Do you want to create a new dynamic view?"),
+					      icon=gtk.MESSAGE_QUESTION):
                 return True
             cr = CreateElementPopup(type_=View,
                                     parent=self.controller.package,
@@ -937,12 +932,8 @@ class AdveneGUI (Connect):
                                              members=ats,
                                              controller=self.controller)
         else:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                _("No annotation type is defined."))
-            response=dialog.run()
-            dialog.destroy()
+	    advene.gui.util.message_dialog(_("No annotation type is defined."),
+					   icon=gtk.MESSAGE_ERROR)
             return None
 
         if create and at == newat:
@@ -992,13 +983,9 @@ class AdveneGUI (Connect):
                                                  members=schemas,
                                                  controller=self.controller)
         else:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                _("No schema is defined."))
-            response=dialog.run()
-            dialog.destroy()
-            return None
+	    advene.gui.util.message_dialog(_("No schema is defined."),
+					   icon=gtk.MESSAGE_ERROR)
+	    return None
 
         if create and schema == newschema:
             cr = CreateElementPopup(type_=Schema,
@@ -1113,13 +1100,9 @@ class AdveneGUI (Connect):
     def on_new1_activate (self, button=None, data=None):
         """New package. Erase the current one."""
         if self.controller.modified:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
-                _("Your package has been modified but not saved.\nCreate a new one anyway?"))
-            response=dialog.run()
-            dialog.destroy()
-            if response != gtk.RESPONSE_YES:
+	    if not advene.gui.util.message_dialog(
+                _("Your package has been modified but not saved.\nCreate a new one anyway?"),
+		icon=gtk.MESSAGE_QUESTION):
                 return True
         self.controller.load_package ()
         return True
@@ -1166,13 +1149,9 @@ class AdveneGUI (Connect):
         # FIXME: loosy test
         if (self.controller.get_default_media() is None
             or 'dvd' in self.controller.get_default_media()):
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
-                _("Do you confirm the creation of annotations matching the DVD chapters?"))
-            response=dialog.run()
-            dialog.destroy()
-            if response != gtk.RESPONSE_YES:
+	    if not advene.gui.util.message_dialog(
+                _("Do you confirm the creation of annotations matching the DVD chapters?"),
+		icon=gtk.MESSAGE_QUESTION):
                 return True
             i=advene.util.importer.get_importer('lsdvd', controller=self.controller)
             i.package=self.controller.package
@@ -1180,13 +1159,8 @@ class AdveneGUI (Connect):
             self.controller.modified=True
             self.controller.notify('PackageLoad')
         else:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                _("The associated media is not a DVD."))
-            response=dialog.run()
-            dialog.destroy()
-            
+	    advene.gui.util.message_dialog(_("The associated media is not a DVD."),
+					   icon=gtk.MESSAGE_ERROR)
         return True
         
     def on_import_file1_activate (self, button=None, data=None):
@@ -1198,23 +1172,15 @@ class AdveneGUI (Connect):
         filename_utf=unicode(filename, 'iso-8859-1').encode('utf-8')
         i=advene.util.importer.get_importer(filename, controller=self.controller)
         if i is None:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                _("The format of the file\n%s\nis not recognized.") % filename_utf)
-            response=dialog.run()
-            dialog.destroy()
+	    advene.gui.util.message_dialog(
+                _("The format of the file\n%s\nis not recognized.") % filename_utf,
+		icon=gtk.MESSAGE_ERROR)
         else:
             # FIXME: build a dialog to enter optional parameters
-            # FIXME: handle the multiple possibilities case (for XML esp.)
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
+            # FIXME: handle the multiple possible importers case (for XML esp.)
+	    if not advene.gui.util.message_dialog(
                 _("Do you confirm the import of data from\n%s\nby the %s filter?") % (
-                filename_utf, i.name))
-            response=dialog.run()
-            dialog.destroy()
-            if response != gtk.RESPONSE_YES:
+		    filename_utf, i.name), icon=gtk.MESSAGE_QUESTION):
                 return True
             i.package=self.controller.package
             i.process_file(filename)
@@ -1667,13 +1633,8 @@ class AdveneGUI (Connect):
         self.slider_move = False
 
     def on_update_snapshots1_activate (self, button=None, data=None):
-        dialog = gtk.MessageDialog(
-            None, gtk.DIALOG_DESTROY_WITH_PARENT,
-            gtk.MESSAGE_WARNING, gtk.BUTTONS_OK,
-            _("This functionality is currently disabled."))
-        dialog.set_position(gtk.WIN_POS_MOUSE)
-        dialog.run()
-        dialog.destroy()
+	advene.gui.util.message_dialog(_("This functionality is currently disabled."),
+				       icon=gtk.MESSAGE_WARNING)
         # self.gui.get_widget ("update-snapshots").show ()
         return True
 

@@ -468,12 +468,9 @@ class TranscriptionEdit:
         try:
             f=open(filename, "w")
         except IOError, e:
-            dialog = gtk.MessageDialog(
-                None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                _("Cannot save the file: %s") % unicode(e))
-            response=dialog.run()
-            dialog.destroy()
+	    advene.gui.util.message_dialog(
+                _("Cannot save the file: %s") % unicode(e),
+		icon=gtk.MESSAGE_ERROR)
             return True
         last=None
         for d in self.parse_transcription(show_ignored=True,
@@ -566,13 +563,8 @@ class TranscriptionEdit:
         self.controller.log(_('Converted from file %s :') % self.sourcefile)
         self.controller.log(ti.statistics_formatted())
         # Feedback
-        dialog = gtk.MessageDialog(
-            None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-            gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+	advene.gui.util.message_dialog(
             _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
-        response=dialog.run()
-        dialog.destroy()
-        
         return True
     
     def get_widget (self):
