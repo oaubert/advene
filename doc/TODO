@@ -34,11 +34,10 @@ of movie time)
 
 * TTS on Win32: http://www.cs.unc.edu/~parente/tech/tr02.shtml
 
-* Data toolbar: with creation buttons (schema, annotation/relation type, view, query)
-
 * Timeline: select a region to fit to window
 
-* Transcribe: add an option "Cursor follows time" to set the cursor according to movie time
+* Transcribe: add an option "Cursor follows time" to set the cursor
+   according to movie time 
 
 * On-the-fly annotation: display as caption the edited content (for 1s)
 
@@ -48,60 +47,34 @@ of movie time)
 
 * assistant: speech decomposition (only extracts timestamps). Use speech-tools ? http://www.cstr.ed.ac.uk/projects/speech_tools/manual-1.2.0/x737.htm
 
-
-* Investigate crash on exit :
-Exiting vlc player
-done
-
-Program received signal SIGSEGV, Segmentation fault.
-[Switching to Thread -1208052992 (LWP 17216)]
-0x4108bb3e in mallopt () from /lib/tls/libc.so.6
-(gdb) bt
-#0  0x4108bb3e in mallopt () from /lib/tls/libc.so.6
-#1  0x4108aa4b in free () from /lib/tls/libc.so.6
-#2  0x08080373 in PyString_Fini ()
-#3  0x080b69c0 in PyCode_Addr2Line ()
-#4  0x080fd6ef in PyStaticMethod_New ()
-#5  0x08076bf9 in PyDict_SetItem ()
-#6  0x080fe6c6 in _PyModule_Clear ()
-#7  0x080cbc11 in PyImport_Cleanup ()
-#8  0x080d8076 in Py_Finalize ()
-#9  0x08054e2e in Py_Main ()
-#10 0x080549eb in main ()
-
-* webserver: log access/error log to either a file or a window
-
 * Main GUI: tooltips on STBVs (must use an EventBox)
 
 * STBV: add include facility, to include basic STBVs
 
 * webserver: implement a wiki-like syntax in views that dynamically generates links to Advene elements/TALES expressions (define a application/x-advene-wiki that will get converted into a TAL template)
 
-* handle wiki syntax in transcriptionedit, so that we can do simple
-notetaking with some markup easily.
+* handle wiki syntax in transcriptionedit, so that we can do simple notetaking with some markup easily.
 
 * Implement zeroconf support: http://www.amk.ca/python/zeroconf
 
 * Views: design a parent class with facilities to register views,
-precise their parameters (usable from actions and webserver
-invocation).
+   precise their parameters (usable from actions and webserver
+   invocation).
 
 * make navigation history accessible from TALES (/options/history ?)
 
-* keep a viewed_segments structure to propose a view "Not yet viewed
-sequences"
+* keep a viewed_segments structure to propose a view "Not yet viewed sequences"
 
 * Remove show_all() calls in EditElement popups
 
 * InteractiveQuery: propose other output modes
 
-* timeadjustment: make Play create an internal rule that pauses the
-player at the end of the fragment
+* timeadjustment: make Play create an internal rule that pauses the player at the end of the fragment
 
 * Advene tutorial in advene, with a video capture of an interaction session
 
 * vlc: use picture+mosaic to implement video embedded inside video (to
-quickly preview a fragment)
+  quickly preview a fragment)
 
 * transcription : catch the AnnotationEditEnd event and update the
   display
@@ -113,10 +86,6 @@ maybe replay the hypervideo. Need to determine the context structure.
 * New action: display a fragment of a video then continue from the
 position where the link was activated. Parameters: fragment to play,
 return position, or display in a new video window
-
-* webserver: handle full html documents (with headings) either by
-using a specific mimetype (text/x-full-html) or if
-res.startswith('<html>') [useful for Kupu]
 
 * Model: maintain creation date + modification date for elements
 
@@ -149,7 +118,7 @@ future_leaving to implement a -2 seconds before / +2 seconds after
 annotation event.
 
 * Importer: fix automatic filter selection (get_importer) esp. for XML
-files (use DTD)
+   files (use DTD)
 
 * Importer GUI : button "Select a specific importer"
 
@@ -986,3 +955,13 @@ accomodate a FilteredDataModel
 * plugins Implementation : cf
    http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/436873 for
    a start -> DONE (cf advene.core.plugin)
+
+* Data toolbar: with creation buttons (schema, annotation/relation
+   type, view, query) -> DONE
+
+* webserver: log access/error log to either a file or a window -> DONE
+
+* webserver: handle full html documents (with headings) either by
+using a specific mimetype (text/x-full-html) or if
+res.startswith('<html>') [useful for Kupu]
+
