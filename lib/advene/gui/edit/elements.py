@@ -45,7 +45,6 @@ from advene.gui.edit.timeadjustment import TimeAdjustment
 
 import advene.util.vlclib as vlclib
 import advene.gui.util
-from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle
 
 import advene.model.tal.global_methods as global_methods
 import advene.gui.edit.rules
@@ -748,10 +747,34 @@ class EditForm(object):
             return True
         return set_method
 
+class ContentHandler(EditForm):
+    """Content Handler form.
+    
+    It is an EditForm with a specialized constructor (see __init__
+    below), and a can_handle static method.
+
+    can_handle returns an integer between 0 and 100. 0 means that it
+    cannot handle the content. 100 means that it must absolutely
+    handle the content.
+    
+    Specialized builtin content handlers generally return 80, which
+    leaves space for user-defined handlers.
+
+    Generic content handlers return 50.
+    """
+    def can_handle(mimetype):
+	return 0
+    can_handle=staticmethod(can_handle)
+
+    def __init__ (self, content, controller=None, **kw):
+	self.element=content
+	self.controller=controller
+
 class EditContentForm(EditForm):
-    """Create an edit form for the given content."""
+    """Create an edit form for the given content.
+    """
     def __init__ (self, element, controller=None, annotation=None,
-                  editable=True, mimetypeeditable=True):
+                  editable=True, mimetypeeditable=True, **kw):
         # self.element is a Content object
         self.element = element
         self.controller=controller
@@ -778,10 +801,15 @@ class EditContentForm(EditForm):
         self.editable = bool
 
     def check_validity(self):
-        return self.contentform.check_validity()
+	if self.contentform is None:
+	    return True
+	else:
+	    return self.contentform.check_validity()
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
+	if self.contentform is None:
+	    return True
         if self.mimetypeeditable:
             self.element.mimetype = self.mimetype.child.get_text()
         self.contentform.update_element()
@@ -805,106 +833,33 @@ class EditContentForm(EditForm):
         hbox.pack_start(self.mimetype)
 
         vbox.pack_start(hbox, expand=False)
-        
-        # FIXME: handle some kind of registered plugin infrastructure
-        if self.element.mimetype == 'application/x-advene-ruleset':
-            self.contentform = EditRuleSetForm (self.element, 'model',
-                                                controller=self.controller)
-        elif self.element.mimetype == 'application/x-advene-simplequery':
-            self.contentform = EditQueryForm (self.element, 'model',
-                                              controller=self.controller)
-        elif self.element.mimetype == 'application/x-advene-zone':
-            self.contentform = EditZoneForm (self.element, 'data',
-                                             controller=self.controller,
-                                             annotation=self.annotation)
-        else:
-            self.contentform = EditTextForm (self.element, 'data',
-                                             controller=self.controller)
+
+        handler = config.data.get_content_handler(self.element.mimetype)
+	if handler is None:
+	    self.contentform=None
+	    vbox.add(gtk.Label(_("Error: cannot find a content handler for %s")
+			       % self.element.mimetype))
+	else:
+	    self.contentform=handler(self.element,
+				     controller=self.controller,
+				     annotation=self.annotation)
 
         self.contentform.set_editable(self.editable)
         vbox.add(self.contentform.get_view())
         return vbox
 
-class EditZoneForm (EditForm):
-    """Create a zone edit form for the given element."""
-    def __init__ (self, element, field, controller=None, annotation=None):
+class TextContentHandler (ContentHandler):
+    """Create a textview edit form for the given element.
+    """
+    def can_handle(mimetype):
+	res=50
+	if mimetype == 'text/plain':
+	    res=80
+	return res
+    can_handle=staticmethod(can_handle)
+
+    def __init__ (self, element, controller=None, **kw):
         self.element = element
-        self.field = field
-        self.controller=controller
-        self.annotation=annotation
-        self.editable = True
-        self.fname=None
-        self.view = None
-        self.shape = None
-        self.tooltips=gtk.Tooltips()
-
-    def set_editable (self, boolean):
-        self.editable = boolean
-
-    def callback(self, l):
-        if self.shape is None:
-            r = Rectangle()
-            r.name = "Selection"
-            r.color = "green"
-            r.set_bounds(l)
-            self.view.add_object(r)
-            self.shape=r
-        else:
-            self.shape.set_bounds(l)
-            self.view.plot()
-        return
-        
-    def update_element (self):
-        """Update the element fields according to the values in the view."""
-        if not self.editable:
-            return False
-        if self.shape is None:
-            return True
-
-        shape=self.shape
-        text="""shape=rect\nname=%s\nx=%d\ny=%d\nwidth=%d\nheight=%d""" % (
-            shape.name,
-            shape.x * 100 / self.view.canvaswidth,
-            shape.y * 100 / self.view.canvasheight,
-            shape.width * 100 / self.view.canvaswidth,
-            shape.height * 100 / self.view.canvasheight)
-
-        setattr (self.element, self.field, text)
-        return True
-
-    def get_view (self):
-        """Generate a view widget for editing zone attributes."""
-        vbox=gtk.VBox()
-        
-        # FIXME: use correct position from annotation bound
-        i=advene.gui.util.image_from_position(self.controller, self.annotation.fragment.begin)
-        self.view = ShapeDrawer(callback=self.callback, background=i)
-
-        if self.element.data:
-            d=global_methods.parsed( self.element, None )
-            if isinstance(d, dict):
-                try:
-                    x = int(d['x']) * self.view.canvaswidth / 100
-                    y = int(d['y']) * self.view.canvasheight / 100
-                    width = int(d['width']) * self.view.canvaswidth / 100
-                    height = int(d['height']) * self.view.canvasheight / 100
-                    self.callback( ( (x, y),
-                                     (x+width, y+height) ) )
-                    self.shape.name = d['name']
-                except KeyError:
-                    self.callback( ( (0, 0),
-                                     (99, 99) ) )
-                    self.shape.name = self.element.data
-
-        vbox.add(self.view.widget)
-
-        return vbox
-
-class EditTextForm (EditForm):
-    """Create a textview edit form for the given element."""
-    def __init__ (self, element, field, controller=None):
-        self.element = element
-        self.field = field
         self.controller=controller
         self.editable = True
         self.fname=None
@@ -921,7 +876,7 @@ class EditTextForm (EditForm):
         buf = self.view.get_buffer()
         start_iter, end_iter = buf.get_bounds ()
         text = buf.get_text (start_iter, end_iter)
-        setattr (self.element, self.field, text)
+	self.element.data = text
         return True
 
     def key_pressed_cb (self, win, event):
@@ -1014,7 +969,7 @@ class EditTextForm (EditForm):
         textview = gtk.TextView ()
         textview.set_editable (self.editable)
         textview.set_wrap_mode (gtk.WRAP_CHAR)
-        textview.get_buffer ().set_text (getattr(self.element, self.field))
+        textview.get_buffer ().set_text (self.element.data)
         textview.connect ("key-press-event", self.key_pressed_cb)
         self.view = textview
 
@@ -1024,58 +979,7 @@ class EditTextForm (EditForm):
 
         vbox.add(scroll_win)
         return vbox
-
-class EditRuleSetForm (EditForm):
-    """Create a RuleSet edit form for the given element (a view, presumably)."""
-    def __init__ (self, element, field, controller=None):
-        # Element is a view.content, field should be "data" or "model" ?
-        self.element = element
-        self.field = field
-        self.controller=controller
-        self.editable = True
-        self.view = None
-
-    def set_editable (self, boolean):
-        self.editable = boolean
-
-    def check_validity(self):
-        iv=self.edit.invalid_items()
-        if iv:
-	    advene.gui.util.message_dialog(
-                _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
-                "\n".join(iv),
-		icon=gtk.MESSAGE_ERROR)
-            return False
-        else:
-            return True
-
-
-    def update_element (self):
-        """Update the element fields according to the values in the view."""
-        if not self.editable:
-            return False
-        if not self.edit.update_value():
-            return False
-        setattr(self.element, 'data', self.edit.model.xml_repr())
-        return True
-
-    def get_view (self):
-        """Generate a view widget to edit the ruleset."""
-        rs=advene.rules.elements.RuleSet()
-        rs.from_dom(catalog=self.controller.event_handler.catalog,
-                    domelement=getattr(self.element, self.field))
-
-        self.edit=advene.gui.edit.rules.EditRuleSet(rs,
-                                                    catalog=self.controller.event_handler.catalog,
-                                                    editable=self.editable,
-                                                    controller=self.controller)
-        self.view = self.edit.get_packed_widget()
-
-        scroll_win = gtk.ScrolledWindow ()
-        scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        scroll_win.add_with_viewport(self.view)
-
-        return scroll_win
+config.data.register_content_handler(TextContentHandler)
 
 class EditFragmentForm(EditForm):
     def __init__(self, element=None, controller=None, editable=True):
@@ -1122,58 +1026,6 @@ class EditFragmentForm(EditForm):
         hbox.add(f)
 
         return hbox
-
-
-class EditQueryForm (EditForm):
-    """Create a Query edit form for the given element (a view, presumably)."""
-    def __init__ (self, element, field, controller=None, editable=True):
-        # Element is a view.content, field should be "data" or "model" ?
-        self.element = element
-        self.field = field
-        self.controller=controller
-        self.editable = editable
-        self.view = None
-
-    def check_validity(self):
-        iv=self.edit.invalid_items()
-        if iv:
-	    advene.gui.util.message_dialog(
-                _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
-                "\n".join(iv),
-		icon=gtk.MESSAGE_ERROR)
-            return False
-        else:
-            return True
-
-    def set_editable (self, boo):
-        self.editable = boo
-
-    def update_element (self):
-        """Update the element fields according to the values in the view."""
-        if not self.editable:
-            return False
-        if not self.edit.update_value():
-            return False
-        # FIXME: we ignore on purpose the self.field attribute
-        setattr(self.element, 'data', self.edit.model.xml_repr())
-        setattr(self.element, 'mimetype', 'application/x-advene-simplequery')
-        return True
-
-    def get_view (self):
-        """Generate a view widget to edit the ruleset."""
-        q=advene.rules.elements.Query()
-        q.from_dom(domelement=getattr(self.element, self.field))
-
-        self.edit=advene.gui.edit.rules.EditQuery(q,
-                                                  controller=self.controller,
-                                                  editable=self.editable)
-        self.view = self.edit.get_widget()
-
-        scroll_win = gtk.ScrolledWindow ()
-        scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        scroll_win.add_with_viewport(self.view)
-
-        return scroll_win
 
 class EditGenericForm(EditForm):
     def __init__(self, title=None, getter=None, setter=None, controller=None, editable=True):
