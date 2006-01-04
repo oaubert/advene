@@ -113,6 +113,15 @@ def list_selector(title=None,
     d.destroy()
     return retval
 
+def message_dialog(label="", icon=gtk.MESSAGE_INFO):
+    dialog = gtk.MessageDialog(
+	None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+	gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
+	label)
+    res=dialog.run()
+    dialog.destroy()
+    return True
+
 def yes_no_cancel_popup(title=None,
                         text=None):
     """Build a Yes-No-Cancel popup window.
@@ -125,7 +134,7 @@ def yes_no_cancel_popup(title=None,
                    buttons=( gtk.STOCK_YES, gtk.RESPONSE_YES,
                              gtk.STOCK_NO, gtk.RESPONSE_NO,
                              gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
-
+    d.set_position(gtk.WIN_POS_CENTER_ALWAYS)
     hb=gtk.HBox()
     hb.show()
     d.vbox.add(hb)
