@@ -28,3 +28,20 @@ A plugin is a module. It *must* have :
 The register function is called, with the controller as parameter,
 upon loading. It has to register the plugin's components in the Advene
 infrastructure.
+
+Example
+=======
+
+Here is a minimal plugin:
+
+  name="Test plugin"
+  
+  def register(controller=None):
+      controller.log("Registered %s" % name)
+  
+  class FooBar:
+      def __init__(self, controller=None):
+      	  self.controller=controller
+
+
+You can find a real example in lib/advene/gui/plugins/actions.py
