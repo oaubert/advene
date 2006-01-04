@@ -114,13 +114,20 @@ def list_selector(title=None,
     return retval
 
 def message_dialog(label="", icon=gtk.MESSAGE_INFO):
+    if icon == gtk.MESSAGE_QUESTION:
+	button=gtk.BUTTONS_YES_NO
+    else:
+	button=gtk.BUTTONS_OK
     dialog = gtk.MessageDialog(
 	None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-	gtk.MESSAGE_INFO, gtk.BUTTONS_OK,
-	label)
+	icon, button, label)
+    dialog.set_position(gtk.WIN_POS_MOUSE)
     res=dialog.run()
     dialog.destroy()
-    return True
+    if icon == gtk.MESSAGE_QUESTION:
+	return (res == gtk.RESPONSE_YES)
+    else:
+	return True
 
 def yes_no_cancel_popup(title=None,
                         text=None):
