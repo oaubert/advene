@@ -183,7 +183,7 @@ class Menu:
                 dialog.run()
                 dialog.destroy()
                 return True
-            p.annotationTypes.remove(el)
+	    el.schema.remove(el)
             self.controller.notify('AnnotationTypeDelete', annotationtype=el)
         elif isinstance(el, RelationType):
             if len(el.relations) > 0:
@@ -194,7 +194,7 @@ class Menu:
                 dialog.run()
                 dialog.destroy()
                 return True
-            p.relationTypes.remove(el)
+            el.schema.remove(el)
             self.controller.notify('RelationTypeDelete', relationtype=el)
         elif isinstance(el, Schema):
             if len(el.annotationTypes) > 0 or len(el.relationTypes) > 0:
