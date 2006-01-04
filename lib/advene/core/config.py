@@ -221,6 +221,9 @@ class Config(object):
                                     0,
                                     self.target_type[t] ) ]
 
+	# Content-handlers
+	self.content_handlers = []
+
         if self.os == 'win32':
             self.win32_specific_config()
 
@@ -254,6 +257,25 @@ class Config(object):
             except _winreg.error:
                 pass
         return value
+
+    def register_content_handler(self, handler):
+	# FIXME: check signature ?
+	if not handler in self.content_handlers:
+	    self.content_handlers.append(handler)
+	return True
+
+    def get_content_handler(self, mimetype):
+	"""Return a valid content handler for the given mimetype.
+	
+	Return None if no content handler is valid (should not happen, as
+	TextContentHandler is builtin).
+	"""
+	l=[ (c, c.can_handle(mimetype)) for c in self.content_handlers ]
+	if not l:
+	    return None
+	else:
+	    l.sort(lambda a, b: cmp(b[1], a[1]))
+	    return l[0][0]
 
     def get_homedir(self):
         h=None
