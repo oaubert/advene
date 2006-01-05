@@ -8,11 +8,16 @@ advene (0.19) unstable; urgency=low
   * Moved config and preferences files to ~/.advene directory
     (UserDir/advene on Windows)
   * GUI: added an element creation toolbar
-  * Added spanish translations (courtesy of Emmanuel Ayala)
-  * Bugfix in path initialization
   * Importer
     * implemented CMML import
   * Implemented plugin architecture
+  * webserver message log is now available from the menu (View->Webserver
+    log), and not displayed on the console
+  * Advene now depends on gtk >= 2.6
+  * Added spanish translations (courtesy of Emmanuel Ayala)
+  * Bugfix in path initialization
+  * Multiple instances can now run simultaneously (only the first instance
+    activates its webserver)
 
  -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Thu,  8 Dec 2005 16:26:18 +0100
 
