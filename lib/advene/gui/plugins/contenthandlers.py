@@ -58,12 +58,12 @@ class ZoneContentHandler (ContentHandler):
             return True
 
         shape=self.shape
-        text="""shape=rect\nname=%s\nx=%d\ny=%d\nwidth=%d\nheight=%d""" % (
+        text="""shape=rect\nname=%s\nx=%02f\ny=%02f\nwidth=%02f\nheight=%02f""" % (
             shape.name,
-            shape.x * 100 / self.view.canvaswidth,
-            shape.y * 100 / self.view.canvasheight,
-            shape.width * 100 / self.view.canvaswidth,
-            shape.height * 100 / self.view.canvasheight)
+            shape.x * 100.0 / self.view.canvaswidth,
+            shape.y * 100.0 / self.view.canvasheight,
+            shape.width * 100.0 / self.view.canvaswidth,
+            shape.height * 100.0 / self.view.canvasheight)
 
 	self.element.data = text
         return True
@@ -72,7 +72,6 @@ class ZoneContentHandler (ContentHandler):
         """Generate a view widget for editing zone attributes."""
         vbox=gtk.VBox()
         
-        # FIXME: use correct position from annotation bound
         i=advene.gui.util.image_from_position(self.controller, self.annotation.fragment.begin)
         self.view = ShapeDrawer(callback=self.callback, background=i)
 
@@ -80,16 +79,16 @@ class ZoneContentHandler (ContentHandler):
             d=global_methods.parsed( self.element, None )
             if isinstance(d, dict):
                 try:
-                    x = int(d['x']) * self.view.canvaswidth / 100
-                    y = int(d['y']) * self.view.canvasheight / 100
-                    width = int(d['width']) * self.view.canvaswidth / 100
-                    height = int(d['height']) * self.view.canvasheight / 100
+                    x = int(float(d['x']) * self.view.canvaswidth / 100)
+                    y = int(float(d['y']) * self.view.canvasheight / 100)
+                    width = int(float(d['width']) * self.view.canvaswidth / 100)
+                    height = int(float(d['height']) * self.view.canvasheight / 100)
                     self.callback( ( (x, y),
                                      (x+width, y+height) ) )
                     self.shape.name = d['name']
                 except KeyError:
-                    self.callback( ( (0, 0),
-                                     (99, 99) ) )
+                    self.callback( ( (0.0, 0.0),
+                                     (10.0, 10.0) ) )
                     self.shape.name = self.element.data
 
         vbox.add(self.view.widget)
