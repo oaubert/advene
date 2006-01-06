@@ -171,15 +171,16 @@ class AdveneController:
             category='gui',
             ))
 	try:
-	    self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'))
+	    self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'),
+						prefix="advene.plugins.user")
 	except OSError:
 	    pass
 
-    def load_plugins(self, directory):
+    def load_plugins(self, directory, prefix="advene.plugins"):
 	"""Load the plugins from the given directory.
 	"""
 	#print "Loading plugins from ", directory
-	l=advene.core.plugin.PluginCollection(directory)
+	l=advene.core.plugin.PluginCollection(directory, prefix)
 	for p in l:
 	    try:
 		self.log("Registering " + p.name)

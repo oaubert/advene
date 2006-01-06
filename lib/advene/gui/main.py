@@ -356,7 +356,8 @@ class AdveneGUI (Connect):
                 print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
 
 	# Register default GUI elements (actions, content_handlers, etc)
-	self.default_plugins=self.controller.load_plugins(os.path.join(os.path.dirname(__file__), 'plugins'))
+	self.default_plugins=self.controller.load_plugins(os.path.join(os.path.dirname(__file__), 'plugins'),
+							  prefix="advene.plugins.gui")
 	
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
