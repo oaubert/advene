@@ -357,7 +357,7 @@ class AdveneGUI (Connect):
 
 	# Register default GUI elements (actions, content_handlers, etc)
 	self.default_plugins=self.controller.load_plugins(os.path.join(os.path.dirname(__file__), 'plugins'),
-							  prefix="advene.plugins.gui")
+							  prefix="advene_plugins_gui")
 	
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically

@@ -172,11 +172,11 @@ class AdveneController:
             ))
 	try:
 	    self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'),
-						prefix="advene.plugins.user")
+						prefix="advene_plugins_user")
 	except OSError:
 	    pass
 
-    def load_plugins(self, directory, prefix="advene.plugins"):
+    def load_plugins(self, directory, prefix="advene_plugins"):
 	"""Load the plugins from the given directory.
 	"""
 	#print "Loading plugins from ", directory

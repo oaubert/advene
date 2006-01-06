@@ -47,7 +47,7 @@ class Plugin(object):
 	    return [ c for c in l if isinstance(c, types.ClassType) or isinstance(c, type) ]
 
 	fullname = os.path.join( directory, name + '.py' )
-	self._plugin = imp.load_source('.'.join( (prefix, name) ), fullname, open(fullname) )
+	self._plugin = imp.load_source('_'.join( (prefix, name) ), fullname, open(fullname) )
         self._filename = fullname
 	self.name = self._plugin.name
 	self._classes = get_classes()
