@@ -469,6 +469,38 @@ def query(target, context):
                     res=qexpr.execute(context=self._context)
                     self._context.popLocals()
                     return res
+                elif q.content.mimetype == 'application/x-advene-sparqlquery':
+                    p = self._target.rootPackage
+                    search = [
+                        p.getAnnotations(),
+                        p.getRelations(),
+                        p.getSchemas(),
+                        p.getAnnotationTypes(),
+                        p.getRelationTypes(),
+                        p.getQueries(),
+                        p.getViews(),
+                    ]
+                    # FIXME: this is alpha code !
+                    import os
+                    r = []
+                    cmd = os.environ.get("ADVENE_PELLET", "/home/pa/exe/advene-pellet")
+                    queryfile = "http://localhost:1234/packages/advene/queries/%s/content/data" % q.id
+                    f = os.popen ("%s -queryFile %s" % (cmd, queryfile), "r", 0)
+                    r = []
+                    t = []
+                    for l in f:
+                        l = l.strip()
+                        if l:
+                            for s in search:
+                                i = s.get(l)
+                                if i is not None:
+                                        l = i
+                                        break
+                            t.append (l)
+                        else:
+                            r.append (tuple(t))
+                            t = []
+                    return r
                 else:
                     raise Exception("Unsupported query type for %s" % q.id)
             return render
