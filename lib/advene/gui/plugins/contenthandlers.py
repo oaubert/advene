@@ -38,6 +38,11 @@ class ZoneContentHandler (ContentHandler):
         self.editable = boolean
 
     def callback(self, l):
+	if l[0][0] is None or l[1][0] is None:
+	    self.shape = None
+	    self.view.plot()
+	    return
+
         if self.shape is None:
             r = Rectangle()
             r.name = "Selection"
@@ -57,7 +62,11 @@ class ZoneContentHandler (ContentHandler):
         if self.shape is None:
             return True
 
+	if not self.shape:
+	    return True
+
         shape=self.shape
+	shape.name=self.nameentry.get_text()
         text="""shape=rect\nname=%s\nx=%02f\ny=%02f\nwidth=%02f\nheight=%02f""" % (
             shape.name,
             shape.x * 100.0 / self.view.canvaswidth,
@@ -90,6 +99,16 @@ class ZoneContentHandler (ContentHandler):
                     self.callback( ( (0.0, 0.0),
                                      (10.0, 10.0) ) )
                     self.shape.name = self.element.data
+
+	# Name edition
+	hb=gtk.HBox()
+	hb.pack_start(gtk.Label(_("Label")), expand=False)
+	self.nameentry=gtk.Entry()
+	if self.shape is not None:
+	    self.nameentry.set_text(self.shape.name)
+	hb.pack_start(self.nameentry)
+
+	vbox.pack_start(hb, expand=False)
 
         vbox.add(self.view.widget)
 
