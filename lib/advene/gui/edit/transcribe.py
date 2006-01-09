@@ -166,6 +166,9 @@ class TranscriptionEdit:
             if m is not None and m.timestamp <= t:
                 self.controller.log(_("Invalid timestamp mark"))
                 return False
+	    # Make a snapshot
+	    self.controller.update_snapshot(t)
+	    # Create the timestamp
             self.create_timestamp_mark(t, it)
         return False
 
