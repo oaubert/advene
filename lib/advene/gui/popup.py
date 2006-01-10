@@ -151,7 +151,7 @@ class Menu:
         return True
 
     def query_element (self, widget, el):
-        iq = InteractiveQuery(here=el, controller=self.controller)
+        iq = InteractiveQuery(here=el, controller=self.controller, source="here")
         iq.popup()
         return True
 
