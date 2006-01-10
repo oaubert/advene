@@ -208,6 +208,19 @@ class Window:
         expr=b.get_text(begin, end)
 	self.history.append(expr)
         symbol=None
+
+	m=sre.match('import\s+(\S+)', expr)
+	if m is not None:
+	    modname=m.group(1)
+	    try:
+		m=__import__(modname)
+		globals()[modname]=m
+	    except ImportError:
+		print "Cannot import module %s" % modname
+	    self.clear_output()
+	    self.log("Successfully imported ", modname)
+	    return True
+
         m=sre.match('(.+?)=(.+)', expr)
         if m is not None:
             symbol=m.group(1)
