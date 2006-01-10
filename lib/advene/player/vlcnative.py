@@ -133,7 +133,10 @@ class Player(object):
         """Wrapper initialization.
         """
         if config.data.os == 'win32':
-            args=[ "--vout-filter", "clone", "--plugin-path", config.data.path['plugins'] ]
+	    # Clone is unstable on win32, makes advene crash
+            args=[ ]
+	    config.data.player['snapshot'] = 0
+	    print "Snapshot support deactivated on win32"
         else:
             args=[ "--vout-filter", "clone", "--plugin-path", config.data.path['plugins'] ]
         self.mc = VLC.MediaControl( args )
