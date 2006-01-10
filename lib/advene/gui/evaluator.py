@@ -16,7 +16,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 """Python expressions evaluator.
-
 """
 import sys
 import StringIO
@@ -34,6 +33,8 @@ class Window:
             locals_ = {}
         self.globals_ = globals_
         self.locals_ = locals_
+	self.history = []
+	self.history_index = None
         self.widget=self.build_widget()
 
     def get_widget(self):
@@ -69,6 +70,20 @@ class Window:
         print "output saved to %s" % filename
         return True
 
+    def get_expression(self):
+        b=self.source.get_buffer()
+	begin,end=b.get_bounds()
+        return b.get_text(begin, end)
+
+    def set_expression(self, e, clear=True):
+	if clear:
+	    self.clear_expression()
+        b=self.source.get_buffer()
+        begin,end=b.get_bounds()
+        b.place_cursor(end)
+	b.insert_at_cursor(e)
+        return True
+
     def clear_expression(self, *p, **kw):
         b=self.source.get_buffer()
         begin,end=b.get_bounds()
@@ -88,15 +103,56 @@ class Window:
         self.log("""Evaluator window help:
 
         F1: display this help
-        Control-Return: evaluate the expression
-        Control-l: clear the expression buffer
         Control-w: close the window
-        Control-PageUp/PageDown: scroll the result window
+
+        Control-Return: evaluate the expression
+
+        Control-l: clear the expression buffer
+	Control-S: save the expression buffer
+	Control-n: next item in history
+	Control-p: previous item in history
+
+        Control-PageUp/PageDown: scroll the output window
+	Control-s: save the output
+
         Control-d: display completion possibilities
         Tab: perform autocompletion
         Control-h:   display docstring for element before cursor
         Control-H:   display source for element before cursor
         """)
+        return True
+
+    def previous_entry(self, *p, **kw):
+	if not self.history:
+	    return True
+        e=self.get_expression()
+        if self.history_index is None:
+            # New search. Save current entry.
+            self.current_entry=e
+            self.history_index = len(self.history) - 1
+        else:
+            self.history_index -= 1
+        # Keep at the beginning
+        if self.history_index < 0:
+            self.history_index = 0
+        self.set_expression(self.history[self.history_index])
+        return True
+    
+    def next_entry(self, *p, **kw):
+	if not self.history:
+	    return True
+        e=self.get_expression()
+        if self.history_index is None:
+            # New search. Save current entry.
+            self.current_entry=e
+            self.history_index=None
+        else:
+            self.history_index += 1
+        if self.history_index is None or self.history_index >= len(self.history):
+            self.history_index=None
+            self.set_expression(self.current_entry)
+        else:
+            self.set_expression(self.history[self.history_index])
         return True
 
     def display_info(self, expr, typ="doc"):
@@ -150,6 +206,7 @@ class Window:
         else:
             begin,end=b.get_bounds()
         expr=b.get_text(begin, end)
+	self.history.append(expr)
         symbol=None
         m=sre.match('(.+?)=(.+)', expr)
         if m is not None:
@@ -362,6 +419,12 @@ class Window:
                     return True
                 elif event.keyval == gtk.keysyms.s:
                     self.save_output_cb()
+                    return True
+                elif event.keyval == gtk.keysyms.n:
+                    self.next_entry()
+                    return True
+                elif event.keyval == gtk.keysyms.p:
+                    self.previous_entry()
                     return True
                 elif event.keyval == gtk.keysyms.Page_Down:
                     a=self.resultscroll.get_vadjustment()
