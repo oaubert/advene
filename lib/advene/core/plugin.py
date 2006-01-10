@@ -6,7 +6,7 @@
 
 import imp
 import os
-import types
+import inspect
 
 class PluginCollection(list):
     """A collection of plugins.
@@ -44,7 +44,7 @@ class Plugin(object):
 	def get_classes():
 	    l=[ getattr(self._plugin, n) 
 		for n in dir(self._plugin) ]
-	    return [ c for c in l if isinstance(c, types.ClassType) or isinstance(c, type) ]
+	    return [ c for c in l if inspect.isclass(c) ]
 
 	fullname = os.path.join( directory, name + '.py' )
 	self._plugin = imp.load_source('_'.join( (prefix, name) ), fullname, open(fullname) )
