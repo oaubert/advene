@@ -115,6 +115,7 @@ class Player(object):
     def restart_player (self):
         """Restart (cleanly) the player."""
         del self.mc
+	# FIXME: missing args
         self.mc = VLC.MediaControl()
         return True
 
@@ -134,7 +135,7 @@ class Player(object):
         if config.data.os == 'win32':
             args=[ "--vout-filter", "clone", "--plugin-path", config.data.path['plugins'] ]
         else:
-            args=[ "--vout-filter", "clone" ]
+            args=[ "--vout-filter", "clone", "--plugin-path", config.data.path['plugins'] ]
         self.mc = VLC.MediaControl( args )
 
         # 0 relative position
@@ -154,9 +155,14 @@ class Player(object):
         if config.data.player['snapshot']:
             o.config_set("clone-vout-list", "default,snapshot")
             w, h = config.data.player['snapshot-dimensions']
-            o.config_set("snapshot-width", w)
-            o.config_set("snapshot-height", h)
-            o.config_set("snapshot-chroma", config.data.player["snapshot-chroma"])
+	    try:
+		o.config_set("snapshot-width", w)
+		o.config_set("snapshot-height", h)
+		o.config_set("snapshot-chroma", config.data.player["snapshot-chroma"])
+	    except StandardError:
+		# The module was not available. 
+		print "The snapshot module is not available"
+		config.data.player['snapshot']=False
                          
         o.config_set("repeat", True)
         o.config_set("loop", True)
