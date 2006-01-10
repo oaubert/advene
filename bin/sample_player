@@ -10,7 +10,7 @@ class VideoPlayer:
             self.mc.playlist_add_item(sys.argv[1])
         self.libvlc=vlc.Object(0)
         self.widget=self.build_widget()
-          
+
     def main(self):
         self.popup()
         gtk.main()
@@ -18,7 +18,7 @@ class VideoPlayer:
     def action(self, button, action):
         action(0)
         return True
-    
+
     def build_widget(self):
         vbox=gtk.VBox()
 
@@ -34,7 +34,7 @@ class VideoPlayer:
             b.connect("clicked", self.action, action)
             hbox.add(b)
 
-        vbox.pack_start(hbox, expand=False)        
+        vbox.pack_start(hbox, expand=False)
         vbox.show_all()
         return vbox
 
@@ -43,7 +43,11 @@ class VideoPlayer:
         w.add(self.widget)
         w.show_all()
         # Now that self.drawable is realized, its xid is available
-        self.libvlc.set("drawable", self.drawable.window.xid)        
+	if sys.platform == 'win32':
+	    xidattr='handle'
+	else:
+	    xidattr='xid'
+        self.libvlc.set("drawable", getattr(self.drawable.window, xidattr))
         w.connect("destroy", gtk.main_quit)
         return w
 
