@@ -36,12 +36,13 @@ import advene.gui.views.timeline
 import advene.util.vlclib as vlclib
 
 class InteractiveQuery:
-    def __init__(self, here=None, controller=None):
+    def __init__(self, here=None, controller=None, source="package/annotations"):
 
         if here is None:
             here=controller.package
 
         self.here=here
+	self.source=source
         self.controller=controller
 
         self.querycontainer, self.query = self.get_interactive_query()
@@ -65,7 +66,7 @@ class InteractiveQuery:
             el.title=_("Interactive query")
 
             # Create a basic query
-            q=Query(source="here/rootPackage/annotations",
+            q=Query(source=self.source,
                     rvalue="element")
             q.add_condition(Condition(lhs="element/content/data",
                                       operator="contains",
