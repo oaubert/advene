@@ -24,6 +24,7 @@ import traceback
 import gtk
 import sre
 import __builtin__
+import inspect
 
 class Window:
     def __init__(self, globals_=None, locals_=None):
@@ -90,15 +91,19 @@ class Window:
         Control-Return: evaluate the expression
         Control-l: clear the expression buffer
         Control-w: close the window
-        Control-u: update the interface views
         Control-PageUp/PageDown: scroll the result window
         Control-d: display completion possibilities
         Tab: perform autocompletion
-        ?:   display docstring for element before cursor
+        Control-h:   display docstring for element before cursor
+        Control-H:   display source for element before cursor
         """)
         return True
 
-    def display_doc(self, expr):
+    def display_info(self, expr, typ="doc"):
+	"""Display information about expr.
+
+	Typ can be "doc" or "source"
+	"""
         if expr == '':
             self.help()
             return True
@@ -118,9 +123,13 @@ class Window:
             expr=m.group(2)                
         try:
             res=eval(expr, self.globals_, self.locals_)
-            d=res.__doc__
+	    if typ == "doc":
+		d=res.__doc__
+	    elif typ == "source":
+		d=inspect.getsource(res)
             self.clear_output()
             if d is not None:
+		self.log("%s for %s:\n\n" % (typ, expr))
                 self.log(unicode(d))
             else:
                 self.log("No available documentation for %s" % expr)
@@ -128,6 +137,7 @@ class Window:
             f=StringIO.StringIO()
             traceback.print_exc(file=f)
             self.clear_output()
+	    self.log("Error in fetching %s for %s:\n\n" % (typ, expr))
             self.log(f.getvalue())
             f.close()
         return True
@@ -145,9 +155,6 @@ class Window:
         if m is not None:
             symbol=m.group(1)
             expr=m.group(2)
-        if expr.endswith('?'):
-            self.display_doc(expr[:-1])
-            return True
         try:
             res=eval(expr, self.globals_, self.locals_)
             self.clear_output()
@@ -308,6 +315,20 @@ class Window:
         
         return True
 
+    def get_selection_or_cursor(self):
+	"""Return either the selection or what is before the cursor.
+	"""
+	b=self.source.get_buffer()
+	if b.get_selection_bounds():
+	    begin, end = b.get_selection_bounds()
+	    cursor=end
+	    b.place_cursor(end)
+	else:
+	    begin,end=b.get_bounds()
+	    cursor=b.get_iter_at_mark(b.get_insert())
+	expr=b.get_text(begin, cursor)
+	return expr
+
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         
@@ -320,19 +341,6 @@ class Window:
                 item=self.display_completion()                
                 return True
 
-            if event.keyval == gtk.keysyms.question:
-                b=self.source.get_buffer()
-                if b.get_selection_bounds():
-                    begin, end = b.get_selection_bounds()
-                    cursor=end
-                    b.place_cursor(end)
-                else:
-                    begin,end=b.get_bounds()
-                    cursor=b.get_iter_at_mark(b.get_insert())
-                expr=b.get_text(begin, cursor)
-                self.display_doc(expr)
-                return True
-
             if event.state & gtk.gdk.CONTROL_MASK:
                 if event.keyval == gtk.keysyms.w:
                     window.destroy()
@@ -343,11 +351,14 @@ class Window:
                 elif event.keyval == gtk.keysyms.d:
                     item=self.display_completion(completeprefix=False)
                     return True
+		elif event.keyval == gtk.keysyms.h:
+		    self.display_info(self.get_selection_or_cursor(), typ="doc")
+		    return True
+		elif event.keyval == gtk.keysyms.H:
+		    self.display_info(self.get_selection_or_cursor(), typ="source")
+		    return True
                 elif event.keyval == gtk.keysyms.Return:
                     self.evaluate_expression()
-                    return True
-                elif event.keyval == gtk.keysyms.u:
-                    self.update_views()
                     return True
                 elif event.keyval == gtk.keysyms.s:
                     self.save_output_cb()
@@ -431,6 +442,8 @@ if __name__ == "__main__":
     ev=Window(globals_=globals(), locals_=locals())
 
     window=ev.popup()
+
+    window.connect ("destroy", lambda e: gtk.main_quit())
 
     b=gtk.Button(stock=gtk.STOCK_QUIT)
     b.connect("clicked", lambda e: gtk.main_quit())
