@@ -503,6 +503,10 @@ class TranscriptionEdit:
         return True
 
     def load_transcription(self, filename=None):
+        if sre.match('[a-zA-Z]:', filename):
+            # Windows drive: notation. Convert it to
+            # a more URI-compatible syntax
+            filename=urllib.pathname2url(filename)
         try:
             f=urllib.urlopen(filename)
         except IOError, e:
