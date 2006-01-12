@@ -403,16 +403,17 @@ class AdveneGUI (Connect):
                                                                  method=method)
 
         self.controller.init()
-        
+
+        self.visual_id = None
         # The player is initialized. We can register the drawable id
         try:
             if not config.data.player['embedded']:
                 raise Exception()
             if config.data.os == 'win32':
-                visual_id=self.drawable.window.handle
+                self.visual_id=self.drawable.window.handle
             else:
-                visual_id=self.drawable.window.xid
-            self.controller.player.set_visual(visual_id)
+                self.visual_id=self.drawable.window.xid
+            self.controller.player.set_visual(self.visual_id)
         except Exception, e:
             print "Cannot set visual: %s" % str(e)
             # Use available space to display a treeview (should be configurable ?)
@@ -1525,16 +1526,6 @@ class AdveneGUI (Connect):
         imp.popup()
         return True
 
-    def on_prop_media_browse_clicked(self, button=None, data=None):
-        d=self.controller.get_default_media()
-        f=advene.gui.util.get_filename(title=_("Associate a movie file"),
-                                       default_file=d)
-        if f is not None:
-            self.controller.set_default_media(f)
-            self.gui.get_widget ("prop_media").set_text (self.controller.get_default_media() or "")
-
-        return True
-    
     def on_package_properties1_activate (self, button=None, data=None):
         cache={
             'author': self.controller.package.author,
@@ -1612,7 +1603,9 @@ class AdveneGUI (Connect):
                 config.data.player['verbose'] = None
             else:
                 config.data.player['verbose'] = cache['level']
-            self.controller.restart_player ()            
+            self.controller.restart_player ()
+            if self.visual_id:
+                self.controller.player.set_visual(self.visual_id)
         return True
 
     def on_save_imagecache1_activate (self, button=None, data=None):
@@ -1623,6 +1616,8 @@ class AdveneGUI (Connect):
     def on_restart_player1_activate (self, button=None, data=None):
         self.log (_("Restarting player..."))
         self.controller.restart_player ()
+        if self.visual_id:
+            self.controller.player.set_visual(self.visual_id)
         return True
 
     def on_slider_button_press_event (self, button=None, data=None):
