@@ -1,17 +1,17 @@
 #! /usr/bin/python
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,25 +30,25 @@ def fix_paths(path):
   config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
   config.data.path['advene']=maindir
   config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
-  
-try:
+
+
+# Try to find if we are in a development tree.
+(maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
+if subdir == 'bin' and  os.path.exists(os.sep.join((maindir, "setup.py"))):
+  # Chances are that we were in a development tree...
+  libpath=os.sep.join((maindir, "lib"))
+  print "You seem to have a development tree at:\n%s." % libpath
+  sys.path.insert (0, libpath)
+
   import advene.core.config as config
-except ImportError:
-  # The package was not installed in a standard place (or PYTHONPATH
-  # is not correctly set). Try to find if we are in a development tree.
-  (maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
-  if subdir == 'bin' and  os.path.exists(os.sep.join((maindir, "setup.py"))):
-    # Chances are that we were in a development tree...
-    libpath=os.sep.join((maindir, "lib"))
-    print "You seem to have a development tree at:\n%s." % libpath
-    sys.path.insert (0, libpath)
-    
+  fix_paths(maindir)
+else:
+  try:
     import advene.core.config as config
-    fix_paths(maindir)
-  else:
+  except ImportError:
     print """Cannot guess a valid directory.
     Please check your installation or set the PYTHONPATH environment variable."""
-    sys.exit(1)    
+    sys.exit(1)
 
 # Maybe we are running from a pyinstaller version
 if not os.path.exists(config.data.path['resources']):
@@ -61,7 +61,7 @@ if not os.path.exists(config.data.path['resources']):
 
 if config.data.os == 'win32':
   import _winreg
-  
+
   # Encoding stuff, to please py2exe
   if hasattr(sys, 'setdefaultencoding'):
     import locale
@@ -101,7 +101,7 @@ if __name__ == '__main__':
       (maybe both).
       Aborting.""" % config.data.path[d]
       sys.exit(1)
-      
+
   gladefile=config.data.advenefile (config.data.gladefilename)
   if not os.path.exists(gladefile):
     print """The %s file does not exist.
