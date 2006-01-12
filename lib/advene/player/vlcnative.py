@@ -115,31 +115,15 @@ class Player(object):
     def restart_player (self):
         """Restart (cleanly) the player."""
         del self.mc
+
 	# FIXME: missing args
-        self.mc = VLC.MediaControl()
-        return True
-
-    def exit (self):
-        self.stop_player()
-
-    def get_default_media (self):
-        """Return the default media path (used when starting the player).
-
-        This method should be overriden by the mediacontrol parent.
-        """
-        return None
-
-    def __init__ (self):
-        """Wrapper initialization.
-        """
         if config.data.os == 'win32':
 	    # Clone is unstable on win32, makes advene crash
-            args=[ ]
-	    config.data.player['snapshot'] = 0
-	    print "Snapshot support deactivated on win32"
+            self.args=[ ]
         else:
-            args=[ "--vout-filter", "clone", "--plugin-path", config.data.path['plugins'] ]
-        self.mc = VLC.MediaControl( args )
+            self.args=[ "--vout-filter", "clone", "--vout", "x11" ]
+            #args=[ "--vout-filter", "clone", "--plugin-path", config.data.path['plugins'] ]
+        self.mc = VLC.MediaControl( self.args )
 
         # 0 relative position
         pos = VLC.Position ()
@@ -178,6 +162,24 @@ class Player(object):
         self.status = VLC.UndefinedStatus
         self.current_position_value = 0
         self.stream_duration = 0
+
+        return True
+
+    def exit (self):
+        self.stop_player()
+
+    def get_default_media (self):
+        """Return the default media path (used when starting the player).
+
+        This method should be overriden by the mediacontrol parent.
+        """
+        return None
+
+    def __init__ (self):
+        """Wrapper initialization.
+        """
+        self.mc=None
+        self.restart_player()
 
     def update_status (self, status=None, position=None):
         """Update the player status.
