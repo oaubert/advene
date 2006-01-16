@@ -358,7 +358,12 @@ class TranscriptionView:
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()
         out=b.get_text(begin, end)
-        f=open(filename, "w")
+	try:
+	    f=open(filename, "w")
+	except Exception, e:
+	    self.controller.log(_("Cannot write to %s: %s:") %
+				  (filename, unicode(e)))
+	    return True
         f.write(out)
         f.close()
         self.controller.log(_("Transcription saved to %s") % filename)
