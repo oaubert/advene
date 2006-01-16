@@ -97,7 +97,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                 if abs_uri.endswith('.azp') or abs_uri.endswith('.AZP'):
                     # Advene Zip Package. Do some magic.
                     self.__zip = ZipPackage(uri)
-                    f=self.__zip.getContentsFile()
+                    f=urllib.pathname2url(self.__zip.getContentsFile())
                     element = reader.fromUri("file://" + f)._get_documentElement()    
                 else:
                     element = reader.fromUri(abs_uri)._get_documentElement()
