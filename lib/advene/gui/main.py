@@ -68,6 +68,8 @@ import advene.util.importer
 
 # GUI elements
 import advene.gui.util
+import advene.gui.plugins.actions
+import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
 import advene.gui.views.timeline
 import advene.gui.views.logwindow
@@ -356,8 +358,10 @@ class AdveneGUI (Connect):
                 print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
 
 	# Register default GUI elements (actions, content_handlers, etc)
-	self.default_plugins=self.controller.load_plugins(os.path.join(os.path.dirname(__file__), 'plugins'),
-							  prefix="advene_plugins_gui")
+	# !! We cannot use controller.load_plugins, because it would make it impossible
+	# to build one-file executables
+	advene.gui.plugins.actions.register(self.controller)
+	advene.gui.plugins.contenthandlers.register(self.controller)
 	
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
