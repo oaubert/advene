@@ -346,17 +346,12 @@ class TranscriptionView:
         return True
 
     def save_transcription(self, button=None):
-        fs = gtk.FileSelection ("Save transcription to...")
-
-        def close_and_save(button, fs):
-            self.save_output(filename=fs.get_filename())
-            fs.destroy()
+	fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
+					   action=gtk.FILE_CHOOSER_ACTION_SAVE,
+					   button=gtk.STOCK_SAVE)
+	if fname is not None:
+	    self.save_output(filename=fname)
             return True
-
-        fs.ok_button.connect_after ("clicked", close_and_save, fs)
-        fs.cancel_button.connect ("clicked", lambda win: fs.destroy ())
-
-        fs.show ()
         return True
 
     def save_output(self, filename=None):
