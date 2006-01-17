@@ -19,6 +19,10 @@
 
 import sys
 import os
+import StringIO
+
+# Magic stuff before the instanciation of Advene : we set the
+# sys.path and the various config.data.path
 
 def fix_paths(path):
   # We override any modification that could have been made in
@@ -114,8 +118,7 @@ if __name__ == '__main__':
     gui.main ()
   except Exception, e:
     print _("Got exception\n\n%s\n\n. Stopping services...") % str(e)
-    print _("*** Exception ***")
-    import code
-    e, v, tb = sys.exc_info()
-    code.traceback.print_exception (e, v, tb)
+    import traceback
+    s=StringIO.StringIO()
+    traceback.print_exc (file = s)
     gui.on_exit ()
