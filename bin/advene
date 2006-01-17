@@ -121,4 +121,6 @@ if __name__ == '__main__':
     import traceback
     s=StringIO.StringIO()
     traceback.print_exc (file = s)
+    print s.getvalue()
+
     gui.on_exit ()
