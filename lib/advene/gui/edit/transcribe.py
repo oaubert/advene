@@ -267,11 +267,19 @@ class TranscriptionEdit:
         return True
     
     def create_timestamp_mark(self, timestamp, it):
+        def popup_goto (b):
+            c=self.controller
+            pos = c.create_position (value=b.timestamp,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)
+            return True
+
         b=self.textview.get_buffer()
         anchor=b.create_child_anchor(it)
         # Create the mark representation
         child=gtk.Button("")
-        child.connect("clicked", self.remove_timestamp_mark, anchor, child)
+        child.connect("clicked", popup_goto)
         child.connect("button-press-event", self.mark_button_press_cb)
         self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
         child.timestamp=timestamp
