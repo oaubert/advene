@@ -190,7 +190,7 @@ class TranscriptionEdit:
             self.set_color(button, self.colors['default'])
         return
         
-    def mark_button_press_cb(self, button, event):
+    def mark_button_press_cb(self, button, event, anchor=None, child=None):
         """Handler for right-button click on timestamp mark.
         """
         if event.button != 3:
@@ -207,7 +207,7 @@ class TranscriptionEdit:
             c.update_status (status="set", position=pos)
             return True
 
-        def popup_modify(win, child, t):
+        def popup_modify(win, t):
             timestamp=child.timestamp + t
             self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
             child.timestamp=timestamp
@@ -217,6 +217,10 @@ class TranscriptionEdit:
             self.toggle_ignore(button)
             return True
         
+	def popup_remove(win):
+	    self.remove_timestamp_mark(button, anchor, child)
+	    return True
+
         item = gtk.MenuItem(_("Position %s") % vlclib.format_time(timestamp))
         menu.append(item)
 
@@ -231,8 +235,12 @@ class TranscriptionEdit:
         item.connect("activate", popup_ignore, button)
         menu.append(item)
 
+        item = gtk.MenuItem(_("Remove mark"))
+        item.connect("activate", popup_remove)
+        menu.append(item)
+
         item = gtk.MenuItem(_("Reaction-time offset"))
-        item.connect("activate", popup_modify, button, self.delay.value)
+        item.connect("activate", popup_modify, self.delay.value)
         menu.append(item)
 
         item = gtk.MenuItem(_("-1 sec"))
@@ -280,7 +288,7 @@ class TranscriptionEdit:
         # Create the mark representation
         child=gtk.Button("")
         child.connect("clicked", popup_goto)
-        child.connect("button-press-event", self.mark_button_press_cb)
+        child.connect("button-press-event", self.mark_button_press_cb, anchor, child)
         self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
         child.timestamp=timestamp
         child.ignore=False
