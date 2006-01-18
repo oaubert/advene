@@ -27,6 +27,7 @@ import socket
 import sre
 import webbrowser
 import urllib
+import StringIO
 
 import advene.core.config as config
 
@@ -815,10 +816,10 @@ class AdveneController:
 		self.player.exit()
 		print "done"
 	    except Exception, e:
-		print _("Got exception %s when stopping player.") % str(e)
-		import code
-		e, v, tb = sys.exc_info()
-		code.traceback.print_exception (e, v, tb)
+		import traceback
+		s=StringIO.StringIO()
+		traceback.print_exc (file = s)
+		self.log(_("Got exception %s when stopping player.") % str(e), s.getvalue())
 	    self.cleanup_done = True
         return True
     
@@ -902,10 +903,10 @@ class AdveneController:
         except Exception, e:
             # FIXME: we should catch more specific exceptions and
             # devise a better feedback than a simple print
-            print _("Raised exception in update_status: %s") % str(e)
-            import code
-            e, v, tb = sys.exc_info()
-            code.traceback.print_exception (e, v, tb)
+            import traceback
+            s=StringIO.StringIO()
+            traceback.print_exc (file = s)
+            self.log(_("Raised exception in update_status: %s") % str(e), s.getvalue())
         else:
             if self.status2eventname.has_key (status) and notify:
                 self.notify (self.status2eventname[status],
