@@ -334,8 +334,8 @@ class AdveneController:
         return True    
 
     def open_url(self, url):
-        if config.data.os == 'win32':
-            # webbrowser is not broken on win32
+        if config.data.os == 'win32' or config.data.os == 'darwin':
+            # webbrowser is not broken on win32 or Mac OS X
             webbrowser.get().open(url)
             return True
         # webbrowser is broken on UNIX/Linux : if the browser
