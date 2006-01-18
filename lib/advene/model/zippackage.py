@@ -31,6 +31,7 @@ META-INF/manifest.xml : Manifest (package contents)
 
 import zipfile
 import os
+import sre
 import shutil
 import urllib
 from advene.model.exception import AdveneException
@@ -81,6 +82,10 @@ class ZipPackage:
                 self.uri = 'file://' + os.path.abspath(uri)
                 self.file_ = uri
             else:
+		if sre.match('[a-zA-Z]:', uri):
+		    # Windows drive: notation. Convert it to
+		    # a more URI-compatible syntax
+		    uri=urllib.pathname2url(uri)
                 u=urllib.urlopen(uri)
 
                 # Use the same extension
