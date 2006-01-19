@@ -81,7 +81,7 @@ class ZoneContentHandler (ContentHandler):
         """Generate a view widget for editing zone attributes."""
         vbox=gtk.VBox()
         
-        i=advene.gui.util.image_from_position(self.controller, self.annotation.fragment.begin)
+        i=advene.gui.util.image_from_position(self.controller, self.annotation.fragment.begin, height=300)
         self.view = ShapeDrawer(callback=self.callback, background=i)
 
         if self.element.data:

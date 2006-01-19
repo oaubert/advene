@@ -50,6 +50,8 @@ class TimeLine:
                   adjustment=None,
                   controller=None):
 
+        print 'timeline start init'
+
         self.view_name = _("Timeline")
         
         self.list = l
@@ -153,6 +155,8 @@ class TimeLine:
         self.draw_marks ()
 
         self.draw_current_mark()
+
+        print "timeline end init"
 
     def selection_handle(self, widget, selection_data, info, time_stamp):
         p = str(self.selected_position)
