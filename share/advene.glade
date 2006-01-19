@@ -977,7 +977,7 @@
 		      <property name="visible_horizontal">True</property>
 		      <property name="visible_vertical">True</property>
 		      <property name="is_important">True</property>
-		      <signal name="clicked" handler="on_create_query_activate" last_modification_time="Mon, 02 Jan 2006 18:45:15 GMT"/>
+		      <signal name="clicked" handler="on_create_schema_activate" last_modification_time="Thu, 19 Jan 2006 09:39:59 GMT"/>
 		    </widget>
 		    <packing>
 		      <property name="expand">False</property>
