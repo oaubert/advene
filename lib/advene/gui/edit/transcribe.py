@@ -623,13 +623,11 @@ class TranscriptionEdit:
     def key_pressed_cb (self, win, event):
         c=self.controller
         p=c.player
-        if event.keyval == gtk.keysyms.Tab:
-            if p.status == p.PlayingStatus or c.update_status("resume"):
-                c.update_status("pause")
-            else:
-                c.update_status("start")
-            return True
-        
+
+	# Process player shortcuts
+	if c.gui and c.gui.process_player_shortcuts(win, event):
+	    return True
+	
         if event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.s:
                 # Save file
@@ -643,14 +641,14 @@ class TranscriptionEdit:
                     self.create_timestamp_mark(p.current_position_value,
                                                it)
                 return True
-            elif event.keyval == gtk.keysyms.Right:
-                c.move_position (config.data.player_preferences['time_increment'])
-                return True
-            elif event.keyval == gtk.keysyms.Left:
-                c.move_position (-config.data.player_preferences['time_increment'])
-                return True
-            elif event.keyval == gtk.keysyms.Home:
-                c.update_status ("set", self.controller.create_position (0))
+            elif event.keyval == gtk.keysyms.Space:
+                # Pause and insert current timestamp mark
+                if p.status == p.PlayingStatus or p.status == p.PauseStatus:
+		    c.update_status("pause")
+                    b=self.textview.get_buffer()
+                    it=b.get_iter_at_mark(b.get_insert())
+                    self.create_timestamp_mark(p.current_position_value,
+                                               it)
                 return True
             elif event.keyval == gtk.keysyms.Page_Down:
                 self.goto_next_mark()
