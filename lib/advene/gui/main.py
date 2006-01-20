@@ -529,7 +529,7 @@ class AdveneGUI (Connect):
             if p.status == p.PlayingStatus:
                 c.update_status("pause")
 	    elif p.status == p.PauseStatus:
-		c.update_status("resume"):
+		c.update_status("resume")
             else:
                 c.update_status("start")
             return True
