@@ -30,7 +30,14 @@ class StreamInformation:
         self.url=""
         self.position=0
         self.length=0
-        
+
+class Position:
+    def __init__(self, value=0):
+	self.value=value
+	# See Player attributes below...
+	self.origin=0
+	self.key=2
+
 class PositionKeyNotSupported(Exception):
     pass
 
@@ -79,9 +86,29 @@ class Player:
 	self.pausetime=None
 	self.volume=12
 	# Simulate a 30 minutes movie
-	self.length = 30 * 60000
+	self.stream_duration = 30 * 60000
         self.position_update()
 
+    def position2value(self, p):
+	v=p.value
+	if isinstance(p, Position):
+	    if p.key != self.MediaTime:
+		print "dummy: unsupported key"
+		return 0
+	    if p.origin == self.AbsolutePosition:
+		v=p.value
+	    else:
+		v=self.current_position() + p.value
+	return v
+
+    def current_position(self):
+	if self.pausetime:
+	    return self.pausetime
+	elif self.basetime is None:
+	    return 0
+	else:
+	    return time() * 1000 - self.basetime
+	
     def dvd_uri(self, title=None, chapter=None):
         return "dvd@%s:%s" % (str(title),
                               str(chapter))
@@ -91,14 +118,10 @@ class Player:
         
     def get_media_position(self, origin, key):
         self.log("get_media_position")
-	if self.pausetime:
-	    return self.pausetime
-	elif self.basetime is None:
-	    return 0
-	else:
-	    return time() * 1000 - self.basetime
+	return self.current_position()
 
     def set_media_position(self, position):
+	position = self.position2value(position)
         self.log("set_media_position %s" % str(position))
 	self.basetime = time() * 1000 - position
 	self.pausetime = None
@@ -164,7 +187,7 @@ class Player:
         s.url=''
         if self.playlist:
             s.url=self.playlist[0]
-        s.length=self.length
+        s.length=self.stream_duration
 	if self.pausetime:
 	    s.position=self.pausetime
 	elif self.basetime:
@@ -182,10 +205,14 @@ class Player:
 	self.volume = v
 
     # Helper methods
-    def create_position (self, value=0, key=None, origin=None):
+    def create_position (self, value=0, key=MediaTime, origin=AbsolutePosition):
         """Create a Position.
         """
-        return value
+	p=Position()
+	p.value = value
+	p.origin = origin
+	p.key = key
+        return p
 
     def update_status (self, status=None, position=None):
         """Update the player status.
@@ -209,23 +236,19 @@ class Player:
         @type position: long
         """
         print "dummy update_status %s" % status
-        
+
+	if position is None:
+	    position=0
+	else:
+	    position=self.position2value(position)
+
         if status == "start" or status == "set":
-            if position is None:
-                position=0
-            else:
-                position=long(position)
             self.position_update()
             if self.status in (self.EndStatus, self.UndefinedStatus):
                 self.start(position)
             else:
                 self.set_media_position(position)
         else:
-            if position is None:
-                position = 0
-            else:
-                position=long(position)
-
             if status == "pause":
                 self.position_update()
                 if self.status == self.PauseStatus:
