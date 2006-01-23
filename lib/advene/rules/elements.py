@@ -344,6 +344,14 @@ class Action:
 class Rule:
     """Advene Rule, consisting in an Event, a Condition and an Action.
 
+    The priority parameter is used to determine the order of execution
+    of rules. The convention is:
+      0 - 100   : user rules
+      100 - 200 : default rules
+      200+      : internal rules
+
+    This will ensure that internal rules are always executed first.
+
     @ivar name: the rulename
     @type name: string
     @ivar event: the event name
@@ -354,15 +362,18 @@ class Rule:
     @type action: ActionList
     @ivar origin: the rule origin
     @type origin: URL
+    @ivar priority: the rule priority
+    @type priority: int
     """
 
     default_condition=Condition()
     default_condition.match=default_condition.truematch
 
     def __init__ (self, name="N/C", event=None,
-                  condition=None, action=None, origin=None):
+                  condition=None, action=None, origin=None, priority=0):
         self.name=name
         self.event=event
+	self.priority=priority
         self.condition=condition
         if self.condition is None:
             self.condition=self.default_condition
@@ -503,7 +514,8 @@ class Rule:
 class RuleSet(list):
     """Set of Rules.
     """
-    def __init__(self, uri=None, catalog=None):
+    def __init__(self, uri=None, catalog=None, priority=0):
+	self.priority=priority
         if uri is not None and catalog is not None:
             self.from_xml(catalog=catalog, uri=uri)
 
@@ -539,7 +551,7 @@ class RuleSet(list):
         ruleset=domelement
         for rulenode in ruleset.getElementsByTagName('rule'):
             rulename=rulenode.getAttribute('name')
-            rule=Rule(name=rulename, origin=origin)
+            rule=Rule(name=rulename, origin=origin, priority=self.priority)
 
             # Event
             eventnodes=rulenode.getElementsByTagName('event')
