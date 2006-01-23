@@ -232,9 +232,9 @@ class Config(object):
             return
         advenehome=self.get_registry_value('software\\advene','path')
         if advenehome is None:
-            print "Cannot determine the Advene location"
+            print "Cannot get the Advene location from registry"
             return
-        print "Setting Advene paths for %s" % advenehome
+        print "Setting Advene paths from %s" % advenehome
         self.path['advene'] = advenehome
         self.path['locale'] = os.path.sep.join( (advenehome, 'locale') )
         self.path['plugins'] = os.path.sep.join( (advenehome, 'lib') )
