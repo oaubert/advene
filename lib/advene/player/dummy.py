@@ -90,15 +90,17 @@ class Player:
         self.position_update()
 
     def position2value(self, p):
-	v=p.value
 	if isinstance(p, Position):
+	    v=p.value
 	    if p.key != self.MediaTime:
-		print "dummy: unsupported key"
+		print "dummy: unsupported key ", p.key
 		return 0
 	    if p.origin == self.AbsolutePosition:
 		v=p.value
 	    else:
 		v=self.current_position() + p.value
+	else:
+	    v=long(p)
 	return v
 
     def current_position(self):
@@ -205,9 +207,14 @@ class Player:
 	self.volume = v
 
     # Helper methods
-    def create_position (self, value=0, key=MediaTime, origin=AbsolutePosition):
+    def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
         """
+	if key is None:
+	    key=self.MediaTime
+	if origin is None:
+	    origin=self.AbsolutePosition
+	
 	p=Position()
 	p.value = value
 	p.origin = origin
