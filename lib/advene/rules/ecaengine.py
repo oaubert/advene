@@ -150,7 +150,7 @@ class ECAEngine:
         self.rulesets[type_] = copy.copy(rs)
         self.update_rulesets()
         
-    def read_ruleset_from_file(self, filename, type_='user'):
+    def read_ruleset_from_file(self, filename, type_='user', priority=0):
         """Read a ruleset from a file.
         
         @param filename: the file from which the rules are read.
@@ -160,7 +160,7 @@ class ECAEngine:
         @return: the new ruleset
         @rtype: RuleSet
         """
-        self.rulesets[type_] = advene.rules.elements.RuleSet(uri=filename, catalog=self.catalog)
+        self.rulesets[type_] = advene.rules.elements.RuleSet(uri=filename, catalog=self.catalog, priority=priority)
         self.update_rulesets()
         return self.rulesets[type_]
 
@@ -224,7 +224,7 @@ class ECAEngine:
         """
         controller=self.controller
         options = {
-            'package_url': u"/packages/advene",
+            'package_url': self.controller.get_default_url(root=True),
             'snapshot': controller.imagecache,
             'namespace_prefix': config.data.namespace_prefix
             }
@@ -270,12 +270,23 @@ class ECAEngine:
         if method is None or event is None:
             return
         rule=advene.rules.elements.Rule(name="internal",
-                         event=event,
-                         condition=condition,
-                         action=advene.rules.elements.Action(method=method))
-        self.rulesets['internal'].append(rule)
-        self.update_rulesets()
+					priority=200,
+					event=event,
+					condition=condition,
+					action=advene.rules.elements.Action(method=method))
+	self.add_rule(rule, 'internal')
         return rule
+
+    def add_rule(self, rule, type_='user'):
+	"""Add a new rule in the ruleset.
+
+        @param rule: the rule to add.
+        @type rule: elements.Rule
+        @param type_: the ruleset's class
+        @type type_: string        
+	"""
+        self.rulesets[type_].append(rule)
+        self.update_rulesets()
 
     def remove_rule(self, rule, type_='user'):
         """Remove a rule from the ruleset.
@@ -335,12 +346,13 @@ class ECAEngine:
         except KeyError:
             return
 
-        actions=[ rule.action
-                  for rule in a
-                  if rule.condition.match(context) ]
+        rules=[ rule
+		for rule in a
+		if rule.condition.match(context) ]
+	rules.sort(lambda a, b: cmp(b.priority, a.priority))
 
         context.pushLocals()
-        for action in actions:
+        for rule in rules:
             context.setLocal('rule', rule.name)
             # The 'view' is used in context.traversePathPreHook
             # to determine the context of interpretation of symbols
@@ -364,5 +376,5 @@ class ECAEngine:
                 # default_rule.xml for instance
                 pass
             context.setLocal('view', v)
-            self.schedule(action, context, delay=delay)
+            self.schedule(rule.action, context, delay=delay)
         context.popLocals()
