@@ -18,6 +18,7 @@
 """Python expressions evaluator.
 """
 import sys
+import os
 import StringIO
 import traceback
 import gtk
@@ -26,16 +27,48 @@ import __builtin__
 import inspect
 
 class Window:
-    def __init__(self, globals_=None, locals_=None):
+    def __init__(self, globals_=None, locals_=None, historyfile=None):
         if globals_ is None:
             globals_ = {}
         if locals_ is None:
             locals_ = {}
         self.globals_ = globals_
         self.locals_ = locals_
+	self.historyfile=historyfile
 	self.history = []
 	self.history_index = None
+	self.load_history ()
         self.widget=self.build_widget()
+
+    def load_history(self, name=None):
+	if name is None:
+	    name=self.historyfile
+	if name is None:
+	    return
+	try:
+	    f=open(name, 'r')
+	except IOError:
+	    return
+	for l in f:
+	    l=l.rstrip().replace('\n', "\n")
+	    self.history.append(l)
+	f.close()
+	return
+
+    def save_history(self, name=None):
+	if name is None:
+	    name=self.historyfile
+	if name is None:
+	    return
+	try:
+	    f=open(name, 'w')
+	except IOError:
+	    return
+	for l in self.history:
+	    l=l.replace("\n", '\n')
+	    f.write(l + "\n")
+	f.close()
+	return
 
     def get_widget(self):
         return self.widget
@@ -206,7 +239,8 @@ class Window:
         else:
             begin,end=b.get_bounds()
         expr=b.get_text(begin, end)
-	self.history.append(expr)
+	if (not self.history) or self.history[-1] != expr:
+	    self.history.append(expr)
         symbol=None
 
 	m=sre.match('import\s+(\S+)', expr)
@@ -515,7 +549,9 @@ class Window:
         return vbox
 
 if __name__ == "__main__":
-    ev=Window(globals_=globals(), locals_=locals())
+    
+    ev=Window(globals_=globals(), locals_=locals(), historyfile=os.path.join(os.getenv('HOME'),
+									     '.pyeval.log'))
 
     window=ev.popup()
 
@@ -527,3 +563,5 @@ if __name__ == "__main__":
     b.show()
     
     gtk.main ()
+    ev.save_history(ev.historyfile)
+
