@@ -235,7 +235,7 @@ class AdveneController:
     def build_context(self, here=None):
         return advene.model.tal.context.AdveneContext(here=here,
                                                       options={
-            u'package_url': u"/packages/advene",
+            u'package_url': self.get_default_url(root=True),
             u'snapshot': self.imagecache,
             u'namespace_prefix': config.data.namespace_prefix,
             u'config': config.data.web,
@@ -412,10 +412,10 @@ class AdveneController:
         if not url:
             return None
         if root:
-            return url
+            return unicode(url)
         defaultview=self.package.getMetaData(config.data.namespace, 'default_utbv')
         if defaultview:
-            url="%s/view/%s" % (url, defaultview)
+            url=u"%s/view/%s" % (url, defaultview)
         return url
 
     def get_title(self, element, representation=None):
