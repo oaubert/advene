@@ -30,7 +30,7 @@ Embedding AdveneServer
 ======================
 
   The server can run standalone or embedded in another application (typically
-  the GUI C{advenetool}).
+  the C{advene} GUI).
 
   To embed the server in another application, it must be instanciated
   with the following parameters : C{controller}. See the
@@ -178,19 +178,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write(head_section)
 
             self.wfile.write("</head><body %s>" % body_attributes)
-#         if epoz:
-#             self.wfile.write(
-#                 """<script src="/data/epoz/dom2_events.js" type="text/javascript"></script>
-#                 <script src="/data/epoz/sarissa.js" type="text/javascript"></script>
-#                 <script src="/data/epoz/epozeditor.js" type="text/javascript"></script>
-#                 <link href="/data/epoz/epozstyles.css" type="text/css" rel="stylesheet">
-#                 <link href="/data/epoz/epozcustom.css" type="text/css" rel="stylesheet">
-#                 </head>
-#                 <body onload="epoz = initEpoz(document.getElementById('epoz-editor'));
-#                 epozui = epoz.getTool('ui');">
-#                 """)
-#         else:
-#             self.wfile.write("</head><body>")
 
             self.wfile.write (_("""
             <p>
@@ -773,7 +760,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def default_options(self, alias):
         return {
-            u'package_url': u"/packages/%s" % alias,
+            u'package_url': self.get_url_for_alias(alias),
             u'snapshot': self.server.imagecaches[alias],
             u'namespace_prefix': config.data.namespace_prefix,
             u'config': config.data.web,
@@ -1782,9 +1769,9 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
             controller = self
 
         self.controller=controller
-        self.urlbase = "http://localhost:%d/" % port
+        self.urlbase = u"http://localhost:%d/" % port
         self.displaymode = config.data.webserver['displaymode']
-        self.authorized_hosts = {'127.0.0.1':'localhost'}
+        self.authorized_hosts = {'127.0.0.1': 'localhost'}
 
         # Compile EPOZ template file
         fname=os.sep.join((config.data.path['web'], 'epoz', 'epozmacros.html'))
