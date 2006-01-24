@@ -37,7 +37,8 @@ class Window:
 	self.historyfile=historyfile
 	self.history = []
 	self.history_index = None
-	self.load_history ()
+	if self.historyfile:
+	    self.load_history ()
         self.widget=self.build_widget()
 
     def load_history(self, name=None):
