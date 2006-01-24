@@ -1,3 +1,15 @@
+* Implement in controller.update a .pause_position which would allow
+   to loop on an annotation (or find an efficient internal rule ?)
+
+* MacOS X: write a qtplayer using the Carbon.Qt functionalities (cf
+   /sw/lib/python2.3/plat-mac/videoreader.py)
+
+* Audio commentaries : add a "Record" button. While pressed, it
+   records. Upon release, it creates an annotation with the correct
+   bounds.
+
+* Model: implement annotation types and relations types removal
+
 * treeview: model synchronisation pb when deleting queries
 
 * schema editor: cf tools http://www.rexx.com/~dkuhlman/
@@ -106,7 +118,8 @@ common mime-types -> wait for gtk2.6 with CellRendererCombo
 * navigation history: put 2 snapshots (origin, destination) to contextualize
 
 * transcribe: add a small timeline on the top that displays the
-position of current marks in the video (with small lines)
+position of current marks in the video (with small lines) [cf linkmap
+   in /usr/lib/meld/filediff.py ]
 
 * Popups: white on black background
 
@@ -286,7 +299,7 @@ AdveneException: item Package (english_teacher.xml) has no QName prefix in Packa
 AnnotationTypes rather than their ids) -> DONE for R/W.
 
 ** model: rewrite the model with a new format (.zip) using
-http://effbot.org/zone/celementtree.htm ?
+http://effbot.org/zone/celementtree.htm ? -> DONE (.azp)
 
 ** model: implement a data PATH variable to look for packages. Insert
 the current package's pwd first as default.
@@ -965,3 +978,12 @@ accomodate a FilteredDataModel
 using a specific mimetype (text/x-full-html) or if
 res.startswith('<html>') [useful for Kupu]
 
+* plugin infrastructure is not compatible with pyinstaller. -> DONE
+
+* AZP: make work on win32 (urllib.pathname2url) -> DONE
+
+* ecaengine: sort actions to execute according to a priority parameter
+   (which would be 200 for internal rules, 100 for default rules, and
+   between 0 and 100 for user rules) -> DONE
+
+* evaluator: implement expression history save -> DONE
