@@ -863,15 +863,24 @@ class AdveneGUI (Connect):
             a=p.annotations[-1]
         except IndexError:
             a=None
+
         ev=advene.gui.evaluator.Window(globals_=globals(),
                                        locals_={'package': p,
                                                 'p': p,
                                                 'a': a,
                                                 'c': self.controller,
-                                                'self': self })
+                                                'self': self },
+				       historyfile=config.data.advenefile('evaluator.log', 'settings')
+				       )
         w=ev.popup()
         b=gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect("clicked", lambda b: w.destroy())
+
+	def close_evaluator(*p):
+	    ev.save_history()
+	    w.destroy()
+	    return True
+
+        b.connect("clicked", close_evaluator)
         b.show()
         ev.hbox.add(b)
 
