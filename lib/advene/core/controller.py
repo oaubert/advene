@@ -262,7 +262,7 @@ class AdveneController:
 
         # Read the default rules
         self.event_handler.read_ruleset_from_file(config.data.advenefile('default_rules.xml'),
-                                                  type_='default')
+                                                  type_='default', priority=100)
 
         self.event_handler.internal_rule (event="PackageLoad",
                                           method=self.manage_package_load)
