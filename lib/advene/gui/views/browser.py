@@ -151,13 +151,6 @@ class Browser:
     def get_widget(self):
         return self.widget
 
-    def default_options(self):
-        return {
-            'package_url': "/packages/advene",
-            'namespace_prefix': config.data.namespace_prefix,
-            'config': config.data.web,
-            }
-
     def clicked_callback(self, columnbrowser, attribute):
         # We could use here=columnbrowser.model, but then the traversal
         # of path is not done and absolute_url does not work
