@@ -17,7 +17,7 @@
 #
 
 # Advene browser, a la NeXT's workspace manager
-
+# FIXME: implement set_path to directly display a given path
 import sys
 
 # Advene part
@@ -161,8 +161,7 @@ class Browser:
     def clicked_callback(self, columnbrowser, attribute):
         # We could use here=columnbrowser.model, but then the traversal
         # of path is not done and absolute_url does not work
-        context = advene.model.tal.context.AdveneContext (here=self.element,
-                                                          options=self.default_options())
+	context = self.controller.build_context(here=self.element)
 
         # Rebuild path
         path=['here']
