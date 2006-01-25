@@ -149,6 +149,7 @@ class Config(object):
                             'transcribeview': (640, 480),
                             'treeview': (800, 600),
                             'browserview': (800, 600),
+			    'weblogview': (800, 600),
                             },
             'gui': { 'popup-textwidth': 40 },
             # File history
