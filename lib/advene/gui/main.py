@@ -1407,7 +1407,12 @@ class AdveneGUI (Connect):
         t=gtk.TextView()
         t.set_editable (False)
         t.set_wrap_mode (gtk.WRAP_CHAR)
-        vbox.add(t)
+
+        scroll_win = gtk.ScrolledWindow ()
+        scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll_win.add(t)
+
+        vbox.add(scroll_win)
         
         hbox=gtk.HButtonBox()
         
@@ -1423,6 +1428,9 @@ class AdveneGUI (Connect):
         
         w.add(vbox)
         refresh(None, t)
+
+        if self.controller.gui:
+            self.controller.gui.init_window_size(w, 'weblogview')
 
         w.show_all()
 
