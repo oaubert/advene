@@ -64,7 +64,7 @@ common_content_mimetypes = [
 common_view_mimetypes = [
     'text/html',
     'text/plain',
-    'text/xml+svg',
+    'image/svg+xml',
     ]
 
 
@@ -594,7 +594,7 @@ class EditAnnotationTypePopup (EditElementPopup):
                                        )
         vbox.add(f.get_view())
 
-        # FIXME: should be in a hidable frame
+        # FIXME: should be in a hidable frame (gtk.Expander)
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
