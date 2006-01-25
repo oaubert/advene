@@ -26,6 +26,7 @@ method is provided to build the adequate Position instances.
 
 import time
 import sys
+import os
 
 import advene.core.config as config
 
@@ -434,3 +435,13 @@ class Player(object):
         p.key = key
         p.value = value
         return p
+
+    def cleanup(self):
+	try:
+	    # Kill spurious vlc player
+	    os.system("/usr/bin/killall -9 vlc")
+	    if os.access(config.data.iorfile, os.R_OK):
+		os.unlink(config.data.iorfile)
+	except OSError:
+	    pass
+
