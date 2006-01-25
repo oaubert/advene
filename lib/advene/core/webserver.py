@@ -760,7 +760,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def default_options(self, alias):
         return {
-            u'package_url': self.get_url_for_alias(alias),
+            u'package_url': self.server.get_url_for_alias(alias),
             u'snapshot': self.server.imagecaches[alias],
             u'namespace_prefix': config.data.namespace_prefix,
             u'config': config.data.web,
