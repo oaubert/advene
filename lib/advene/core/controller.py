@@ -142,15 +142,11 @@ class AdveneController:
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
 
-        # FIXME: should be removed (CORBA dependent)
-        if hasattr(self.player, 'orb') and config.os != 'win32':
-            try:
-                # Kill spurious vlc player
-                os.system("/usr/bin/killall -9 vlc")
-                if os.access(config.data.iorfile, os.R_OK):
-                    os.unlink(config.data.iorfile)
-            except OSError:
-                pass
+        # Some player can define a cleanup() method
+	try:
+	    self.player.cleanup()
+	except AttributeError:
+	    pass
 
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
