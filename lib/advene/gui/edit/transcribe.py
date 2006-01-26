@@ -244,23 +244,23 @@ class TranscriptionEdit:
         menu.append(item)
 
         item = gtk.MenuItem(_("-1 sec"))
-        item.connect("activate", popup_modify, button, -1000)
+        item.connect("activate", popup_modify, -1000)
         menu.append(item)
         item = gtk.MenuItem(_("-0.5 sec"))
-        item.connect("activate", popup_modify, button, -500)
+        item.connect("activate", popup_modify, -500)
         menu.append(item)
         item = gtk.MenuItem(_("-0.1 sec"))
-        item.connect("activate", popup_modify, button, -100)
+        item.connect("activate", popup_modify, -100)
         menu.append(item)
         
         item = gtk.MenuItem(_("+1 sec"))
-        item.connect("activate", popup_modify, button, 1000)
+        item.connect("activate", popup_modify, 1000)
         menu.append(item)
         item = gtk.MenuItem(_("+0.5 sec"))
-        item.connect("activate", popup_modify, button, 500)
+        item.connect("activate", popup_modify, 500)
         menu.append(item)
         item = gtk.MenuItem(_("+0.1 sec"))
-        item.connect("activate", popup_modify, button, 100)
+        item.connect("activate", popup_modify, 100)
         
         item = gtk.MenuItem()
         item.add(advene.gui.util.image_from_position(self.controller,
@@ -641,7 +641,7 @@ class TranscriptionEdit:
                     self.create_timestamp_mark(p.current_position_value,
                                                it)
                 return True
-            elif event.keyval == gtk.keysyms.Space:
+            elif event.keyval == gtk.keysyms.space:
                 # Pause and insert current timestamp mark
                 if p.status == p.PlayingStatus or p.status == p.PauseStatus:
 		    c.update_status("pause")
