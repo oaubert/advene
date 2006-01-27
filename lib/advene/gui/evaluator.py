@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -34,42 +34,42 @@ class Window:
             locals_ = {}
         self.globals_ = globals_
         self.locals_ = locals_
-	self.historyfile=historyfile
-	self.history = []
-	self.history_index = None
-	if self.historyfile:
-	    self.load_history ()
+        self.historyfile=historyfile
+        self.history = []
+        self.history_index = None
+        if self.historyfile:
+            self.load_history ()
         self.widget=self.build_widget()
 
     def load_history(self, name=None):
-	if name is None:
-	    name=self.historyfile
-	if name is None:
-	    return
-	try:
-	    f=open(name, 'r')
-	except IOError:
-	    return
-	for l in f:
-	    l=l.rstrip().replace('\n', "\n")
-	    self.history.append(l)
-	f.close()
-	return
+        if name is None:
+            name=self.historyfile
+        if name is None:
+            return
+        try:
+            f=open(name, 'r')
+        except IOError:
+            return
+        for l in f:
+            l=l.rstrip().replace('\n', "\n")
+            self.history.append(l)
+        f.close()
+        return
 
     def save_history(self, name=None):
-	if name is None:
-	    name=self.historyfile
-	if name is None:
-	    return
-	try:
-	    f=open(name, 'w')
-	except IOError:
-	    return
-	for l in self.history:
-	    l=l.replace("\n", '\n')
-	    f.write(l + "\n")
-	f.close()
-	return
+        if name is None:
+            name=self.historyfile
+        if name is None:
+            return
+        try:
+            f=open(name, 'w')
+        except IOError:
+            return
+        for l in self.history:
+            l=l.replace("\n", '\n')
+            f.write(l + "\n")
+        f.close()
+        return
 
     def get_widget(self):
         return self.widget
@@ -106,16 +106,16 @@ class Window:
 
     def get_expression(self):
         b=self.source.get_buffer()
-	begin,end=b.get_bounds()
+        begin,end=b.get_bounds()
         return b.get_text(begin, end)
 
     def set_expression(self, e, clear=True):
-	if clear:
-	    self.clear_expression()
+        if clear:
+            self.clear_expression()
         b=self.source.get_buffer()
         begin,end=b.get_bounds()
         b.place_cursor(end)
-	b.insert_at_cursor(e)
+        b.insert_at_cursor(e)
         return True
 
     def clear_expression(self, *p, **kw):
@@ -142,12 +142,12 @@ class Window:
         Control-Return: evaluate the expression
 
         Control-l: clear the expression buffer
-	Control-S: save the expression buffer
-	Control-n: next item in history
-	Control-p: previous item in history
+        Control-S: save the expression buffer
+        Control-n: next item in history
+        Control-p: previous item in history
 
         Control-PageUp/PageDown: scroll the output window
-	Control-s: save the output
+        Control-s: save the output
 
         Control-d: display completion possibilities
         Tab: perform autocompletion
@@ -157,8 +157,8 @@ class Window:
         return True
 
     def previous_entry(self, *p, **kw):
-	if not self.history:
-	    return True
+        if not self.history:
+            return True
         e=self.get_expression()
         if self.history_index is None:
             # New search. Save current entry.
@@ -171,10 +171,10 @@ class Window:
             self.history_index = 0
         self.set_expression(self.history[self.history_index])
         return True
-    
+
     def next_entry(self, *p, **kw):
-	if not self.history:
-	    return True
+        if not self.history:
+            return True
         e=self.get_expression()
         if self.history_index is None:
             # New search. Save current entry.
@@ -190,10 +190,10 @@ class Window:
         return True
 
     def display_info(self, expr, typ="doc"):
-	"""Display information about expr.
+        """Display information about expr.
 
-	Typ can be "doc" or "source"
-	"""
+        Typ can be "doc" or "source"
+        """
         if expr == '':
             self.help()
             return True
@@ -210,16 +210,16 @@ class Window:
                 expr=expr[:-1]
         m=sre.match('(\w+)=(.+)', expr)
         if m is not None:
-            expr=m.group(2)                
+            expr=m.group(2)
         try:
             res=eval(expr, self.globals_, self.locals_)
-	    if typ == "doc":
-		d=res.__doc__
-	    elif typ == "source":
-		d=inspect.getsource(res)
+            if typ == "doc":
+                d=res.__doc__
+            elif typ == "source":
+                d=inspect.getsource(res)
             self.clear_output()
             if d is not None:
-		self.log("%s for %s:\n\n" % (typ, expr))
+                self.log("%s for %s:\n\n" % (typ, expr))
                 self.log(unicode(d))
             else:
                 self.log("No available documentation for %s" % expr)
@@ -227,11 +227,11 @@ class Window:
             f=StringIO.StringIO()
             traceback.print_exc(file=f)
             self.clear_output()
-	    self.log("Error in fetching %s for %s:\n\n" % (typ, expr))
+            self.log("Error in fetching %s for %s:\n\n" % (typ, expr))
             self.log(f.getvalue())
             f.close()
         return True
-        
+
     def evaluate_expression(self, *p, **kw):
         b=self.source.get_buffer()
         if b.get_selection_bounds():
@@ -240,21 +240,21 @@ class Window:
         else:
             begin,end=b.get_bounds()
         expr=b.get_text(begin, end)
-	if (not self.history) or self.history[-1] != expr:
-	    self.history.append(expr)
+        if (not self.history) or self.history[-1] != expr:
+            self.history.append(expr)
         symbol=None
 
-	m=sre.match('import\s+(\S+)', expr)
-	if m is not None:
-	    modname=m.group(1)
-	    try:
-		m=__import__(modname)
-		self.globals_[modname]=m
-	    except ImportError:
-		print "Cannot import module %s" % modname
-	    self.clear_output()
-	    self.log("Successfully imported ", modname)
-	    return True
+        m=sre.match('import\s+(\S+)', expr)
+        if m is not None:
+            modname=m.group(1)
+            try:
+                m=__import__(modname)
+                self.globals_[modname]=m
+            except ImportError:
+                print "Cannot import module %s" % modname
+            self.clear_output()
+            self.log("Successfully imported ", modname)
+            return True
 
         m=sre.match('(.+?)=(.+)', expr)
         if m is not None:
@@ -282,7 +282,7 @@ class Window:
                         o[attr]=res
                         self.log('\n\n[Value stored in %s]' % symbol)
                         return True
-                    
+
                     m=sre.match('(.+)\.(\w+)$', symbol)
                     if m:
                         obj, attr = m.group(1, 2)
@@ -294,7 +294,7 @@ class Window:
                             return True
                         setattr(o, attr, res)
                         self.log('\n\n[Value stored in %s]' % symbol)
-                        
+
         except Exception, e:
             f=StringIO.StringIO()
             traceback.print_exc(file=f)
@@ -315,7 +315,7 @@ class Window:
             else:
                 hi = mid - 1
         return a[:hi]
-    
+
     def display_completion(self, completeprefix=True):
         b=self.source.get_buffer()
         if b.get_selection_bounds():
@@ -361,7 +361,7 @@ class Window:
                              for a in v
                              if a.startswith(expr) ]
                 attr=expr
-            else:         
+            else:
                 # Maybe we have the beginning of an attribute.
                 m=sre.match('^(.+?)\.(\w+)$', expr)
                 if m:
@@ -417,33 +417,33 @@ class Window:
             if len(completion) > 1:
                 completion.sort()
                 self.log("\n".join(completion))
-        
+
         return True
 
     def get_selection_or_cursor(self):
-	"""Return either the selection or what is before the cursor.
-	"""
-	b=self.source.get_buffer()
-	if b.get_selection_bounds():
-	    begin, end = b.get_selection_bounds()
-	    cursor=end
-	    b.place_cursor(end)
-	else:
-	    begin,end=b.get_bounds()
-	    cursor=b.get_iter_at_mark(b.get_insert())
-	expr=b.get_text(begin, cursor)
-	return expr
+        """Return either the selection or what is before the cursor.
+        """
+        b=self.source.get_buffer()
+        if b.get_selection_bounds():
+            begin, end = b.get_selection_bounds()
+            cursor=end
+            b.place_cursor(end)
+        else:
+            begin,end=b.get_bounds()
+            cursor=b.get_iter_at_mark(b.get_insert())
+        expr=b.get_text(begin, cursor)
+        return expr
 
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        
+
         def key_pressed_cb (win, event):
 
             if event.keyval == gtk.keysyms.F1:
                 self.help()
                 return True
             if event.keyval == gtk.keysyms.Tab:
-                item=self.display_completion()                
+                item=self.display_completion()
                 return True
 
             if event.state & gtk.gdk.CONTROL_MASK:
@@ -456,12 +456,12 @@ class Window:
                 elif event.keyval == gtk.keysyms.d:
                     item=self.display_completion(completeprefix=False)
                     return True
-		elif event.keyval == gtk.keysyms.h:
-		    self.display_info(self.get_selection_or_cursor(), typ="doc")
-		    return True
-		elif event.keyval == gtk.keysyms.H:
-		    self.display_info(self.get_selection_or_cursor(), typ="source")
-		    return True
+                elif event.keyval == gtk.keysyms.h:
+                    self.display_info(self.get_selection_or_cursor(), typ="doc")
+                    return True
+                elif event.keyval == gtk.keysyms.H:
+                    self.display_info(self.get_selection_or_cursor(), typ="source")
+                    return True
                 elif event.keyval == gtk.keysyms.Return:
                     self.evaluate_expression()
                     return True
@@ -486,7 +486,7 @@ class Window:
                         a.value -= a.page_increment
                     a.value_changed ()
                     return True
-                
+
             return False
 
         window.connect ("key-press-event", key_pressed_cb)
@@ -550,9 +550,9 @@ class Window:
         return vbox
 
 if __name__ == "__main__":
-    
+
     ev=Window(globals_=globals(), locals_=locals(), historyfile=os.path.join(os.getenv('HOME'),
-									     '.pyeval.log'))
+                                                                             '.pyeval.log'))
 
     window=ev.popup()
 
@@ -562,7 +562,7 @@ if __name__ == "__main__":
     b.connect("clicked", lambda e: gtk.main_quit())
     ev.hbox.add(b)
     b.show()
-    
+
     gtk.main ()
     ev.save_history(ev.historyfile)
 
