@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -41,7 +41,7 @@ import advene.core.idgenerator
 import advene.rules.elements
 import advene.rules.ecaengine
 
-from advene.model.package import Package 
+from advene.model.package import Package
 from advene.model.zippackage import ZipPackage
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
@@ -52,7 +52,7 @@ import advene.util.vlclib as vlclib
 
 if config.data.webserver['mode']:
     import advene.core.webserver
-    
+
 import threading
 
 class AdveneController:
@@ -70,7 +70,7 @@ class AdveneController:
       - L{__init__} : controller initialization
       - L{update} : regularly called method used to update information about the current stream
       - L{update_status} : use this method to interact with the player
-      
+
     @ivar imagecache: the current imagecache
     @type imagecache: imagecache.ImageCache
 
@@ -83,13 +83,13 @@ class AdveneController:
 
     @ivar last_position: a cache to check whether an update is necessary
     @type last_position: int
-    
+
     @ivar package: the package currently loaded
     @type package: advene.model.Package
 
     @ivar modified: indicates if the data has been modified
     @type modified: boolean
-    
+
     @ivar preferences: the current preferences
     @type preferences: dict
 
@@ -102,11 +102,11 @@ class AdveneController:
     @ivar server: the embedded web server
     @type server: webserver.AdveneWebServer
     """
-    
+
     def __init__ (self, args=None):
         """Initializes player and other attributes.
         """
-	self.cleanup_done=False
+        self.cleanup_done=False
         if args is None:
             args = []
 
@@ -117,7 +117,7 @@ class AdveneController:
 
         # Regexp to recognize DVD URIs
         self.dvd_regexp = sre.compile("^dvd.*@(\d+):(\d+)")
-        
+
         # List of active annotations
         self.active_annotations = []
         self.future_begins = None
@@ -130,28 +130,28 @@ class AdveneController:
         # Useful for debug in the evaluator window
         self.config=config.data
         self.idgenerator=advene.core.idgenerator.Generator()
-        
+
         # STBV
         self.current_stbv = None
-        
+
         self.package = None
         self.modified = False
-        
+
         playerfactory=advene.core.mediacontrol.PlayerFactory()
         self.player = playerfactory.get_player()
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
 
         # Some player can define a cleanup() method
-	try:
-	    self.player.cleanup()
-	except AttributeError:
-	    pass
+        try:
+            self.player.cleanup()
+        except AttributeError:
+            pass
 
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
         self.event_queue = []
-        
+
         # Used in update_status to emit appropriate notifications
         self.status2eventname = {
             'pause':  'PlayerPause',
@@ -167,24 +167,24 @@ class AdveneController:
             parameters={'message': _("String to display.")},
             category='gui',
             ))
-	try:
-	    self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'),
-						prefix="advene_plugins_user")
-	except OSError:
-	    pass
+        try:
+            self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'),
+                                                prefix="advene_plugins_user")
+        except OSError:
+            pass
 
     def load_plugins(self, directory, prefix="advene_plugins"):
-	"""Load the plugins from the given directory.
-	"""
-	#print "Loading plugins from ", directory
-	l=advene.core.plugin.PluginCollection(directory, prefix)
-	for p in l:
-	    try:
-		self.log("Registering " + p.name)
-		p.register(controller=self)
-	    except AttributeError:
-		pass
-	return l
+        """Load the plugins from the given directory.
+        """
+        #print "Loading plugins from ", directory
+        l=advene.core.plugin.PluginCollection(directory, prefix)
+        for p in l:
+            try:
+                self.log("Registering " + p.name)
+                p.register(controller=self)
+            except AttributeError:
+                pass
+        return l
 
     def queue_action(self, method, *args, **kw):
         self.event_queue.append( (method, args, kw) )
@@ -200,7 +200,7 @@ class AdveneController:
         # Dump the pending events into a local queue
         ev=self.event_queue[:]
         self.event_queue=[]
-        
+
         # Now we can process the events
         for (method, args, kw) in ev:
             #print "Process action: %s" % str(method)
@@ -209,24 +209,24 @@ class AdveneController:
             except Exception, e:
                 self.queue_action(self.log, _("Exception :") + str(e))
         return True
-    
+
     def register_gui(self, gui):
         self.gui=gui
 
     def register_view(self, view):
-	if self.gui:
-	    self.gui.register_view(view)
-	else:
-	    self.log(_("No available GUI"))
+        if self.gui:
+            self.gui.register_view(view)
+        else:
+            self.log(_("No available GUI"))
 
     def register_content_handler(self, handler):
         config.data.register_content_handler(handler)
 
     def register_action(self, action):
-	if self.event_handler:
-	    self.event_handler.register_action(action)
-	else:
-	    self.log(_("No available event handler"))
+        if self.event_handler:
+            self.event_handler.register_action(action)
+        else:
+            self.log(_("No available event handler"))
 
     def build_context(self, here=None):
         return advene.model.tal.context.AdveneContext(here=here,
@@ -237,7 +237,7 @@ class AdveneController:
             u'config': config.data.web,
             u'package': self.package,
             })
-        
+
     def busy_port_info(self):
         """Display the processes using the webserver port.
         """
@@ -251,7 +251,7 @@ class AdveneController:
             processes.append(pid)
         f.close()
         self.log(_("Cannot start the webserver\nThe following processes seem to use the %s port: %s") % (pat, processes))
-        
+
     def init(self, args=None):
         if args is None:
             args=[]
@@ -262,7 +262,7 @@ class AdveneController:
 
         self.event_handler.internal_rule (event="PackageLoad",
                                           method=self.manage_package_load)
-        
+
         if config.data.webserver['mode']:
             self.server=None
             try:
@@ -271,8 +271,8 @@ class AdveneController:
             except socket.error:
                 if config.data.os != 'win32':
                     self.busy_port_info()
-		self.log(_("Deactivating web server"))
-            
+                self.log(_("Deactivating web server"))
+
             # If == 1, it is the responsibility of the Gtk app
             # to set the input loop
             if config.data.webserver['mode'] == 2 and self.server:
@@ -281,7 +281,7 @@ class AdveneController:
 
         if self.package_to_load is not None:
             self.load_package(uri=self.package_to_load)
-            
+
         # If no package is defined yet, load the template
         if self.package is None:
             self.load_package ()
@@ -290,12 +290,12 @@ class AdveneController:
             self.set_default_media(self.file_to_play)
 
         self.player.check_player()
-        
+
         return True
-    
+
     def create_position (self, value=0, key=None, origin=None):
         return self.player.create_position(value=value, key=key, origin=origin)
-    
+
     def notify (self, event_name, *param, **kw):
         if False:
             print "Notify %s (%s): %s" % (
@@ -325,9 +325,9 @@ class AdveneController:
             if i is not None and i.height != 0:
                 self.imagecache[position] = vlclib.snapshot2png (i)
         else:
-            # FIXME: do something useful (warning) ?                
+            # FIXME: do something useful (warning) ?
             pass
-        return True    
+        return True
 
     def open_url(self, url):
         if config.data.os == 'win32' or config.data.os == 'darwin':
@@ -364,7 +364,7 @@ class AdveneController:
             os.system("%s \"%s\" &" % (web_browser, url))
 
         return True
-    
+
     def parse_command_line (self, args):
         """Parse command line options.
 
@@ -372,7 +372,7 @@ class AdveneController:
 
         Any filename that does not end with .xml or .azp is considered
         as a media file. You can use the dvd keyword to specify the current
-	dvd.
+        dvd.
 
         @param args: the argument list
         @type args: list
@@ -403,9 +403,9 @@ class AdveneController:
         If root, then return only the package URL even if it defines
         a default view.
         """
-	url=None
-	if self.server:
-	    url = self.server.get_url_for_alias('advene')
+        url=None
+        if self.server:
+            url = self.server.get_url_for_alias('advene')
         if not url:
             return None
         if root:
@@ -492,9 +492,9 @@ class AdveneController:
         if delete and not annotation.relations:
             self.package.annotations.remove(annotation)
             self.notify('AnnotationDelete', annotation=annotation)
-            
+
         return an
-    
+
     def restart_player (self):
         """Restart the media player."""
         self.player.restart_player ()
@@ -513,7 +513,7 @@ class AdveneController:
         if not config.data.player['snapshot']:
             self.log (_("Error: the player is not run with the snapshot functionality. Configure it and try again."))
             return True
-        
+
         def take_snapshot(context, parameters):
             if not config.data.player['snapshot']:
                 return False
@@ -571,7 +571,7 @@ class AdveneController:
         self.event_handler.internal_rule (event="AnnotationEnd", method=goto_next_snapshot)
         if stop_callback:
             self.event_handler.internal_rule(event="PlayerStop", method=stop_callback)
-                                             
+
         # Populate the imagecache keys
         for a in self.package.annotations:
             self.imagecache.init_value (a.fragment.begin)
@@ -580,7 +580,7 @@ class AdveneController:
         if progress_callback:
             missing = self.imagecache.missing_snapshots ()
             progress_callback(1 - (len(missing) + .0) / len(self.imagecache))
-            
+
         # Start the player (without event notification)
         self.player.update_status ("start")
 
@@ -589,9 +589,9 @@ class AdveneController:
         self.position_update()
         # Goto the first unavailable annotation
         goto_next_snapshot (None, None)
-        
+
         return True
-    
+
     def stop_update_snapshots(self):
         if hasattr (self, 'oldstate'):
             #self.gui.get_widget ("update-snapshots-stop").set_sensitive (False)
@@ -624,7 +624,7 @@ class AdveneController:
         else:
             self.package = Package (uri=uri)
         self.notify ("PackageLoad")
-    
+
     def save_package (self, name=None):
         """Save a package.
 
@@ -635,7 +635,7 @@ class AdveneController:
             name=self.package.uri
 
         old_uri = self.package.uri
-        
+
         # Check if we know the stream duration. If so, save it as
         # package metadata
         if self.cached_duration > 0:
@@ -654,10 +654,10 @@ class AdveneController:
             # Reload the package with the new name
             self.log(_("Package URI has changed. Reloading package with new URI."))
             self.load_package(uri=name)
-    
+
     def manage_package_load (self, context, parameters):
         """Event Handler executed after loading a package.
-        
+
         self.package should be defined.
 
         @return: a boolean (~desactivation)
@@ -674,7 +674,7 @@ class AdveneController:
 
         # Reset the id generator
         self.idgenerator.init(self.package)
-        
+
         self.modified=False
         # Get the cached duration
         duration = self.package.getMetaData (config.data.namespace, "duration")
@@ -682,7 +682,7 @@ class AdveneController:
             self.cached_duration = long(duration)
         else:
             self.cached_duration = 0
-            
+
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
             if self.player.is_active():
@@ -692,7 +692,7 @@ class AdveneController:
                         mediafile=mediafile.encode('utf8')
                     self.player.playlist_clear()
                     self.player.playlist_add_item (mediafile)
-                     
+
             # Load the imagecache
             id_ = vlclib.mediafile2id (mediafile)
             self.imagecache.clear ()
@@ -718,7 +718,7 @@ class AdveneController:
             except KeyError:
                 pass
             self.activate_stbv(view)
-        
+
         return True
 
     def get_stbv_list(self):
@@ -751,15 +751,15 @@ class AdveneController:
         self.event_handler.set_ruleset(rs, type_='user')
         self.notify("ViewActivation", view=view)
         return
-        
+
     def handle_http_request (self, source, condition):
         """Handle a HTTP request.
 
-        This method is used if config.data.webserver['mode'] == 1.  
+        This method is used if config.data.webserver['mode'] == 1.
         """
         source.handle_request ()
         return True
-        
+
     def log (self, msg, level=None):
         """Add a new log message.
 
@@ -794,32 +794,32 @@ class AdveneController:
 
     def on_exit (self, source=None, event=None):
         """General exit callback."""
-	if not self.cleanup_done:
-	    # Save preferences
-	    config.data.save_preferences()
+        if not self.cleanup_done:
+            # Save preferences
+            config.data.save_preferences()
 
-	    # Cleanup the ZipPackage directories
-	    ZipPackage.cleanup()
+            # Cleanup the ZipPackage directories
+            ZipPackage.cleanup()
 
-	    # Terminate the web server
-	    try:
-		self.server.stop_serving ()
-	    except:
-		pass
+            # Terminate the web server
+            try:
+                self.server.stop_serving ()
+            except:
+                pass
 
-	    # Terminate the VLC server
-	    try:
-		print "Exiting vlc player"
-		self.player.exit()
-		print "done"
-	    except Exception, e:
-		import traceback
-		s=StringIO.StringIO()
-		traceback.print_exc (file = s)
-		self.log(_("Got exception %s when stopping player.") % str(e), s.getvalue())
-	    self.cleanup_done = True
+            # Terminate the VLC server
+            try:
+                print "Exiting vlc player"
+                self.player.exit()
+                print "done"
+            except Exception, e:
+                import traceback
+                s=StringIO.StringIO()
+                traceback.print_exc (file = s)
+                self.log(_("Got exception %s when stopping player.") % str(e), s.getvalue())
+            self.cleanup_done = True
         return True
-    
+
     def move_position (self, value, relative=True):
         """Helper method : fast forward or rewind by value milliseconds.
 
@@ -835,15 +835,15 @@ class AdveneController:
                                                              key=self.player.MediaTime,
                                                              origin=self.player.AbsolutePosition))
 
-    def generate_sorted_lists (self, position):        
+    def generate_sorted_lists (self, position):
         """Return two sorted lists valid for a given position.
-        
+
         (i.e. all annotations beginning or ending after the
         position). The lists are sorted according to the begin and end
         position respectively.
 
         The elements of the list are (annotation, begin, end).
-        
+
         The update_display method only has to check the first element
         of each list. If there is a match, it should trigger the
         events and pop the element.
@@ -889,7 +889,7 @@ class AdveneController:
         position_before=self.player.current_position_value
         #print "update status: %s" % status
         if status == 'set' or status == 'start':
-            self.reset_annotation_lists()            
+            self.reset_annotation_lists()
         try:
             # if hasattr(position, 'value'):
             #     print "update_status %s %i" % (status, position.value)
@@ -911,7 +911,7 @@ class AdveneController:
                              position_before=position_before,
                              immediate=True)
         return
-    
+
     def position_update (self):
         """Updates the current_position_value.
 
@@ -946,17 +946,17 @@ class AdveneController:
         """
         # Process the event queue
         self.process_queue()
-        
+
         pos=self.position_update ()
 
         if pos < self.last_position:
-            # We did a seek compared to the last time, so we 
+            # We did a seek compared to the last time, so we
             # invalidate the future_begins and future_ends lists
             # as well as the active_annotations
             self.reset_annotation_lists()
 
         self.last_position = pos
-        
+
         if self.future_begins is None or self.future_ends is None:
             self.future_begins, self.future_ends = self.generate_sorted_lists (pos)
 
@@ -974,7 +974,7 @@ class AdveneController:
                     a, b, e = self.future_begins[0]
                 else:
                     break
-                    
+
         if self.future_ends and self.player.status == self.player.PlayingStatus:
             a, b, e = self.future_ends[0]
             while e <= pos:
@@ -983,7 +983,7 @@ class AdveneController:
                     self.active_annotations.remove(a)
                 except ValueError:
                     pass
-                self.future_ends.pop(0)                
+                self.future_ends.pop(0)
                 self.notify ("AnnotationEnd",
                              annotation=a,
                              immediate=True)
@@ -1004,7 +1004,7 @@ class AdveneController:
         self.package.annotations.remove(annotation)
         self.notify('AnnotationDelete', annotation=annotation)
         return True
-    
+
 if __name__ == '__main__':
     c = AdveneController()
     try:
