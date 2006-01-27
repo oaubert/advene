@@ -368,10 +368,11 @@ class AdveneController:
     def parse_command_line (self, args):
         """Parse command line options.
 
-        We recognize the .mpg and .avi extension, as well as the dvd
-        keyword, to specify the media file.
+        An .xml ou .azp file is considered as an annotation package.
 
-        An .xml file is considered as an annotation package.
+        Any filename that does not end with .xml or .azp is considered
+        as a media file. You can use the dvd keyword to specify the current
+	dvd.
 
         @param args: the argument list
         @type args: list
@@ -390,7 +391,7 @@ class AdveneController:
             else:
                 if s == "dvd":
                     file_to_play = "dvdsimple:///dev/dvd"
-                elif os.path.splitext(s)[1] in ('.xml', '.azp'):
+                elif os.path.splitext(s)[1].lower() in ('.xml', '.azp'):
                     package_to_load=s
                 else:
                     file_to_play = s
