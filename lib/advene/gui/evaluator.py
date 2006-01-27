@@ -249,7 +249,7 @@ class Window:
 	    modname=m.group(1)
 	    try:
 		m=__import__(modname)
-		globals()[modname]=m
+		self.globals_[modname]=m
 	    except ImportError:
 		print "Cannot import module %s" % modname
 	    self.clear_output()
