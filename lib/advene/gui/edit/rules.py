@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -62,7 +62,7 @@ class EditRuleSet(EditGeneric):
         self.controller=controller
         self.widget=self.build_widget()
 
-    def remove_rule_cb(self, button):
+    def remove_rule_cb(self, button=None):
         """Remove the currently activated rule."""
         if not self.editable:
             return True
@@ -108,7 +108,7 @@ class EditRuleSet(EditGeneric):
         vbox.add(hb)
         return vbox
 
-    def add_rule_cb(self, button):
+    def add_rule_cb(self, button=None):
         if not self.editable:
             return True
         # Create a new default Rule
@@ -143,16 +143,16 @@ class EditRuleSet(EditGeneric):
         for e in self.editlist:
             i.extend(e.invalid_items())
         return i
-    
+
     def update_value(self):
         if not self.editable:
             return False
         iv=self.invalid_items()
         if iv:
-	    message_dialog(
+            message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
                 "\n".join(iv),
-		icon=gtk.MESSAGE_ERROR)
+                icon=gtk.MESSAGE_ERROR)
             return False
         for e in self.editlist:
             e.update_value()
@@ -248,7 +248,7 @@ class EditQuery(EditGeneric):
 
         for ec in self.editconditionlist:
             iv.extend(ec.invalid_items())
-            
+
         return iv
 
     def update_value(self):
@@ -376,7 +376,7 @@ class EditRule(EditGeneric):
         self.editable=editable
 
         self.controller=controller
-        
+
         self.namelabel=None
 
         self.editactionlist=[]
@@ -401,7 +401,7 @@ class EditRule(EditGeneric):
         for e in self.editconditionlist:
             iv.extend(e.invalid_items())
         return iv
-    
+
     def update_value(self):
         if not self.editable:
             return False
@@ -648,7 +648,7 @@ class EditCondition(EditGeneric):
             and not self.rhs.is_valid()):
             iv.append(_("Condition expression: %s") % self.lhs.get_text())
         return iv
-    
+
     def update_value(self):
         if not self.editable:
             return False
@@ -702,7 +702,7 @@ class EditCondition(EditGeneric):
                 return Condition.condition_categories[element]
             else:
                 return operators[element][0]
-            
+
         self.selector=CategorizedSelector(title=_("Select a condition"),
                                           elements=operators.keys(),
                                           categories=Condition.condition_categories.keys(),
@@ -731,14 +731,14 @@ class EditAction(EditGeneric):
         self.current_parameters=dict(action.parameters)
 
         self.controller=controller
-        
+
         # Cache the parameters value. Indexed by action name.
         # Used when using the mousewheel on the action name list:
         # it should keep the parameters values
         self.cached_parameters={}
 
         # Dict of parameter widgets (modified when the action name changes)
-        # indexed by parameter name. 
+        # indexed by parameter name.
         self.paramlist={}
 
         self.catalog=catalog
@@ -750,7 +750,7 @@ class EditAction(EditGeneric):
              for n in self.paramlist
              if not self.paramlist[n].entry.is_valid() ]
         return iv
-    
+
     def update_value(self):
         if not self.editable:
             return False
@@ -818,7 +818,7 @@ class EditAction(EditGeneric):
         self.tooltips.set_tip(entry.widget, description)
 
         hbox.entry=entry
-        
+
         hbox.pack_start(entry.widget)
         return hbox
 
@@ -833,7 +833,7 @@ class EditAction(EditGeneric):
             else:
                 # it is a category
                 return self.catalog.action_categories[element]
-        
+
         c=self.catalog
         self.selector=CategorizedSelector(title=_("Select an action"),
                                           elements=c.actions.values(),
@@ -929,7 +929,7 @@ if __name__ == "__main__":
         edit.update_value()
         print "Saving model with %d rules" % len(edit.model)
         edit.model.to_xml(f)
-	message_dialog("The ruleset has been saved into %s." % f)
+        message_dialog("The ruleset has been saved into %s." % f)
         return True
 
     b=gtk.Button(stock=gtk.STOCK_SAVE)
