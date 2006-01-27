@@ -307,15 +307,6 @@ class CreateElementPopup(object):
             print "Not implemented yet."
         return el
 
-    def key_pressed_cb (self, win, event):
-        if event.keyval == gtk.keysyms.Return:
-            self.validate_cb(win, win)
-            return True
-        elif event.keyval == gtk.keysyms.Escape:
-            win.destroy()
-            return True
-        return False
-    
     def popup(self, modal=False):
         if modal:
             flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL
