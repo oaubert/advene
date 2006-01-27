@@ -47,14 +47,11 @@ gtk.glade.bindtextdomain('advene', config.data.path['locale'])
 
 gettext.install('advene', localedir=config.data.path['locale'], unicode=True)
 
-import textwrap
-
 import advene.core.controller
 
 import advene.rules.elements
 import advene.rules.ecaengine
 
-from advene.model.schema import Schema, AnnotationType
 from advene.model.view import View
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.query import Query
@@ -143,7 +140,7 @@ class AdveneGUI (Connect):
     @type preferences: dict
     """
 
-    def __init__ (self, args):
+    def __init__ (self, args=None):
         """Initializes the GUI and other attributes.
         """
         self.controller = advene.core.controller.AdveneController(args)
@@ -562,7 +559,6 @@ class AdveneGUI (Connect):
         """
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS) 
-        radiogroup_ref=None
         
         tb_list = (
             (_("Rewind"), _("Rewind"), gtk.STOCK_MEDIA_REWIND, 
@@ -710,12 +706,6 @@ class AdveneGUI (Connect):
         menu.show_all()
         return menu
 
-    def on_filehistory_clicked(self, button=None):
-        m=self.build_file_history_menu()
-        m.attach_to_widget(button, None)
-        m.popup(None, button, None, 0, gtk.get_current_event_time())
-        return True
-    
     def update_gui (self):
         """Update the GUI.
 
@@ -960,7 +950,7 @@ class AdveneGUI (Connect):
             self.controller.position_update ()
 
         return True
-
+    
     def ask_for_annotation_type(self, text=None, create=False):
         """Display a popup asking to choose an annotation type.
 
