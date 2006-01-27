@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -69,14 +69,14 @@ class TranscriptionEdit:
 
         self.sourcefile=None
         self.empty_re = sre.compile('^\s*$')
-        
+
         self.timestamp_mode_toggle=gtk.ToggleToolButton()
         self.timestamp_mode_toggle.set_label(_("Timestamps"))
         self.timestamp_mode_toggle.set_stock_id(gtk.STOCK_INDEX)
         self.timestamp_mode_toggle.set_active (True)
         self.timestamp_mode_toggle.set_tooltip(self.tooltips,
                                                _("If unchecked, allows to edit text"))
-        
+
         # Discontinuous is True by default
         self.discontinuous_toggle=gtk.ToggleToolButton()
         self.discontinuous_toggle.set_label(_("Discontinuous"))
@@ -100,14 +100,14 @@ class TranscriptionEdit:
         self.marks = []
 
         self.current_mark = None
-        
+
         self.widget=self.build_widget()
         if filename is not None:
             self.load_transcription(filename)
 
     def build_widget(self):
         vbox = gtk.VBox()
-        
+
         self.textview = gtk.TextView()
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
@@ -132,7 +132,7 @@ class TranscriptionEdit:
         b.delete_interactive(begin, end, True)
         button.destroy()
         return True
-    
+
     def button_press_event_cb(self, textview, event):
         if event.state & gtk.gdk.CONTROL_MASK:
             return False
@@ -166,9 +166,9 @@ class TranscriptionEdit:
             if m is not None and m.timestamp <= t:
                 self.controller.log(_("Invalid timestamp mark"))
                 return False
-	    # Make a snapshot
-	    self.controller.update_snapshot(t)
-	    # Create the timestamp
+            # Make a snapshot
+            self.controller.update_snapshot(t)
+            # Create the timestamp
             self.create_timestamp_mark(t, it)
         return False
 
@@ -189,7 +189,7 @@ class TranscriptionEdit:
         else:
             self.set_color(button, self.colors['default'])
         return
-        
+
     def mark_button_press_cb(self, button, event, anchor=None, child=None):
         """Handler for right-button click on timestamp mark.
         """
@@ -216,10 +216,10 @@ class TranscriptionEdit:
         def popup_ignore(win, button):
             self.toggle_ignore(button)
             return True
-        
-	def popup_remove(win):
-	    self.remove_timestamp_mark(button, anchor, child)
-	    return True
+
+        def popup_remove(win):
+            self.remove_timestamp_mark(button, anchor, child)
+            return True
 
         item = gtk.MenuItem(_("Position %s") % vlclib.format_time(timestamp))
         menu.append(item)
@@ -252,7 +252,7 @@ class TranscriptionEdit:
         item = gtk.MenuItem(_("-0.1 sec"))
         item.connect("activate", popup_modify, -100)
         menu.append(item)
-        
+
         item = gtk.MenuItem(_("+1 sec"))
         item.connect("activate", popup_modify, 1000)
         menu.append(item)
@@ -261,19 +261,19 @@ class TranscriptionEdit:
         menu.append(item)
         item = gtk.MenuItem(_("+0.1 sec"))
         item.connect("activate", popup_modify, 100)
-        
+
         item = gtk.MenuItem()
         item.add(advene.gui.util.image_from_position(self.controller,
                                                      position=timestamp,
                                                      height=60))
         item.connect("activate", popup_goto, timestamp)
         menu.append(item)
-        
+
         menu.show_all()
-        
+
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
-    
+
     def create_timestamp_mark(self, timestamp, it):
         def popup_goto (b):
             c=self.controller
@@ -295,11 +295,11 @@ class TranscriptionEdit:
         self.update_mark(child)
         child.show()
         self.textview.add_child_at_anchor(child, anchor)
-        
+
         self.marks.append(child)
         self.marks.sort(lambda a,b: cmp(a.timestamp, b.timestamp))
         return child
-        
+
     def populate(self, annotations):
         """Populate the buffer with data taken from the given annotations.
         """
@@ -322,7 +322,7 @@ class TranscriptionEdit:
             it=b.get_iter_at_mark(b.get_insert())
             self.create_timestamp_mark(end, it)
             last_end=end
-        return            
+        return
 
     def find_preceding_mark(self, i):
         """Find the mark preceding the iterator.
@@ -331,14 +331,13 @@ class TranscriptionEdit:
         Returns None, None if no mark exists.
         """
         it=i.copy()
-        b=self.textview.get_buffer()
         while it.backward_char():
             a=it.get_child_anchor()
             if a and a.get_widgets():
                 # Found a TextAnchor
                 return a.get_widgets()[0], it.copy()
         return None, None
-    
+
     def find_following_mark(self, i):
         """Find the mark following the iterator.
 
@@ -346,7 +345,6 @@ class TranscriptionEdit:
         Returns None, None if no mark exists.
         """
         it=i.copy()
-        b=self.textview.get_buffer()
         while it.forward_char():
             a=it.get_child_anchor()
             if a and a.get_widgets():
@@ -387,7 +385,7 @@ class TranscriptionEdit:
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
         return True
-    
+
     def update_position(self, pos):
         l=[ m for m in self.marks if m.timestamp <= pos ]
         if l:
@@ -400,10 +398,10 @@ class TranscriptionEdit:
                 self.current_mark = cm
         else:
             if self.current_mark is not None:
-                    self.update_mark(self.current_mark)                
+                    self.update_mark(self.current_mark)
             self.current_mark=None
         return True
-    
+
     def parse_transcription(self, show_ignored=False, strip_blank=True):
         """Parse the transcription text.
 
@@ -412,9 +410,9 @@ class TranscriptionEdit:
 
         If strip_blank, then strip leading and trailing whitespace and
         newline for each annotation.
-        
+
         Return : a iterator on a dict with keys
-        'begin', 'end', 'content' 
+        'begin', 'end', 'content'
         (compatible with advene.util.importer)
         """
 
@@ -446,7 +444,7 @@ class TranscriptionEdit:
                             'end':   timestamp,
                             'content': text,
                             'ignored': False }
-                ignore_next=child.ignore                    
+                ignore_next=child.ignore
                 t=timestamp
                 begin=end.copy()
         # End of buffer. Create the last annotation
@@ -466,7 +464,7 @@ class TranscriptionEdit:
                     'end': timestamp,
                     'content': text,
                     'ignored': False }
-        
+
     def save_as_cb(self, button=None):
         self.sourcefile=None
         self.save_transcription_cb()
@@ -487,9 +485,9 @@ class TranscriptionEdit:
         try:
             f=open(filename, "w")
         except IOError, e:
-	    advene.gui.util.message_dialog(
+            advene.gui.util.message_dialog(
                 _("Cannot save the file: %s") % unicode(e),
-		icon=gtk.MESSAGE_ERROR)
+                icon=gtk.MESSAGE_ERROR)
             return True
         last=None
         for d in self.parse_transcription(show_ignored=True,
@@ -498,7 +496,7 @@ class TranscriptionEdit:
                 f.writelines( ( '[I%s]' % vlclib.format_time(d['begin']),
                                 d['content'],
                                 '[%s]' % vlclib.format_time(d['end']) ) )
-            
+
             elif last != d['begin']:
                 f.writelines( ( '[%s]' % vlclib.format_time(d['begin']),
                                 d['content'],
@@ -511,7 +509,7 @@ class TranscriptionEdit:
         self.controller.log(_("Transcription saved to %s") % filename)
         self.sourcefile=filename
         return True
-    
+
     def load_transcription_cb(self, button=None):
         fname=advene.gui.util.get_filename(title=_("Select transcription file to load"))
         if fname is not None:
@@ -533,13 +531,13 @@ class TranscriptionEdit:
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()
         b.delete(begin, end)
-                
+
         mark_re=sre.compile('\[(I?)(\d+:\d+:\d+.?\d*)\]([^\[]*)')
 
         # 0-mark at the beginning
         self.create_timestamp_mark(0, begin)
         last_time=0
-        
+
         m=mark_re.search(data)
         if m:
             # Handle the start case: there may be some text before the
@@ -586,18 +584,17 @@ class TranscriptionEdit:
         self.controller.log(_('Converted from file %s :') % self.sourcefile)
         self.controller.log(ti.statistics_formatted())
         # Feedback
-	advene.gui.util.message_dialog(
+        advene.gui.util.message_dialog(
             _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
         return True
-    
+
     def get_widget (self):
         """Return the TreeView widget."""
         return self.widget
 
     def get_toolbar(self, close_cb=None):
         tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS) 
-        radiogroup_ref=None
+        tb.set_style(gtk.TOOLBAR_ICONS)
 
         tb_list = (
             (_("Open"),    _("Open"), gtk.STOCK_OPEN, self.load_transcription_cb),
@@ -616,7 +613,7 @@ class TranscriptionEdit:
 
         tb.insert(self.timestamp_mode_toggle, -1)
         tb.insert(self.discontinuous_toggle, -1)
-            
+
         tb.show_all()
         return tb
 
@@ -624,10 +621,10 @@ class TranscriptionEdit:
         c=self.controller
         p=c.player
 
-	# Process player shortcuts
-	if c.gui and c.gui.process_player_shortcuts(win, event):
-	    return True
-	
+        # Process player shortcuts
+        if c.gui and c.gui.process_player_shortcuts(win, event):
+            return True
+
         if event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.s:
                 # Save file
@@ -644,7 +641,7 @@ class TranscriptionEdit:
             elif event.keyval == gtk.keysyms.space:
                 # Pause and insert current timestamp mark
                 if p.status == p.PlayingStatus or p.status == p.PauseStatus:
-		    c.update_status("pause")
+                    c.update_status("pause")
                     b=self.textview.get_buffer()
                     it=b.get_iter_at_mark(b.get_insert())
                     self.create_timestamp_mark(p.current_position_value,
@@ -656,7 +653,7 @@ class TranscriptionEdit:
             elif event.keyval == gtk.keysyms.Page_Up:
                 self.goto_previous_mark()
                 return True
-            
+
         return False
 
     def get_packed_widget(self, close_cb=None):
@@ -680,7 +677,7 @@ class TranscriptionEdit:
         vbox.add (sw)
         sw.add_with_viewport (self.get_widget())
         return vbox
-    
+
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
@@ -710,11 +707,11 @@ if __name__ == "__main__":
     class DummyController:
         def log(self, *p):
             print p
-            
+
         def notify(self, *p, **kw):
             print "Notify %s %s" % (p, kw)
 
-            
+
     controller=DummyController()
     controller.gui=None
 
@@ -722,7 +719,7 @@ if __name__ == "__main__":
     player=advene.player.dummy.Player()
     controller.player=player
     controller.player.status=controller.player.PlayingStatus
-    
+
     #controller.package = Package (uri=sys.argv[1])
     config.data.path['resources']='/usr/local/src/advene-project/share'
     controller.package = Package (uri="new_pkg",
