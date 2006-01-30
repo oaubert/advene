@@ -1,3 +1,13 @@
+* Store advene conf files in Application Data on win32
+
+* transcribe: make validity check on bounds only on demand or on export.
+
+* transcribe: offset on marks must be followed by goto
+
+* In on_exit, first stop the event handler
+
+* Convert importers to plugin architecture
+
 * Implement in controller.update a .pause_position which would allow
    to loop on an annotation (or find an efficient internal rule ?)
 
@@ -978,6 +988,10 @@ accomodate a FilteredDataModel
 using a specific mimetype (text/x-full-html) or if
 res.startswith('<html>') [useful for Kupu]
 
+<<<<<<< .mine
+* On player restart, redo set_visual
+
+=======
 * plugin infrastructure is not compatible with pyinstaller. -> DONE
 
 * AZP: make work on win32 (urllib.pathname2url) -> DONE
@@ -987,3 +1001,4 @@ res.startswith('<html>') [useful for Kupu]
    between 0 and 100 for user rules) -> DONE
 
 * evaluator: implement expression history save -> DONE
+>>>>>>> .r1613
