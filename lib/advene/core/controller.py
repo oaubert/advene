@@ -485,7 +485,7 @@ class AdveneController:
         self.package.annotations.append(an)
         an.author=config.data.userid
         an.content.data=annotation.content.data
-        an.setDate(time.strftime("%Y-%m-%d"))
+        an.setDate(self.get_timestamp())
         # FIXME: check if the types are compatible
         self.notify("AnnotationCreate", annotation=an)
 
@@ -601,6 +601,9 @@ class AdveneController:
             del (self.oldstate)
         return True
 
+    def get_timestamp(self):
+	return time.strftime("%Y-%m-%d")
+
     def load_package (self, uri=None, alias="advene"):
         """Load a package.
 
@@ -621,6 +624,7 @@ class AdveneController:
                 self.log(_("Cannot find the template package."))
                 self.package = Package ()
             self.package.author = config.data.userid
+	    self.package.date = self.get_timestamp()
         else:
             self.package = Package (uri=uri)
         self.notify ("PackageLoad")
