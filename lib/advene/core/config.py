@@ -169,6 +169,7 @@ class Config(object):
             'plugin': 'vlcnative',
             'embedded': True,
             'name': 'vlc',
+            'vout': 'default',
             'osdfont': '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
             'verbose': None, # None, 0, 1, 2
             'snapshot': True,
@@ -373,20 +374,17 @@ class Config(object):
 
         @return: the list of arguments
         """
-        args = [ '--plugin-path', self.path['plugins'] ]
+        args=[]
+        filters=[]
+        if os.path.isdir(self.path['plugins']):
+            args.extend([ '--plugin-path', self.path['plugins'] ])
         if self.player['verbose'] is not None:
             args.append ('--verbose')
             args.append (self.player['verbose'])
-        filters=[]
+        if self.player['vout'] != 'default' and self.os == 'linux':
+            args.extend( [ '--vout', self.player['vout'] ] )
         if self.player['snapshot']:
             filters.append("clone")
-            args.extend (['--clone-vout-list', 'snapshot,default',
-                          '--snapshot-width',
-                          self.player['snapshot-dimensions'][0],
-                          '--snapshot-height',
-                          self.player['snapshot-dimensions'][1],
-                          '--snapshot-chroma', self.player['snapshot-chroma']
-                          ])
         if filters != []:
             # Some filters have been defined
             args.extend (['--filter', ":".join(filters)])
