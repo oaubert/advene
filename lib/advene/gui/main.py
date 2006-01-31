@@ -1595,36 +1595,42 @@ class AdveneGUI (Connect):
 
     def on_configure_player1_activate (self, button=None, data=None): 
         cache={
-            'caption': config.data.player['caption'],
-            'font': config.data.player['osdfont'],
-            'snapshot': config.data.player['snapshot'],
             'width': config.data.player['snapshot-dimensions'][0],
             'height': config.data.player['snapshot-dimensions'][1],
             'level': config.data.player['verbose'] or -1,
             }
+        for n in ('caption', 'osdfont', 'snapshot', 'vout'):
+            cache[n] = config.data.player[n]
 
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Player configuration"))
         ew.add_title(_("Captions"))
         ew.add_checkbox(_("Enable"), "caption", _("Enable video captions"))
-        ew.add_file_selector(_("Font"), "font", _("TrueType font for captions"))
+        ew.add_file_selector(_("Font"), "osdfont", _("TrueType font for captions"))
         
         ew.add_title(_("Snapshots"))
         ew.add_checkbox(_("Enable"), "snapshot", _("Enable snapshots"))
         ew.add_spin(_("Width"), "width", _("Snapshot width"), 0, 1280)
         ew.add_spin(_("Height"), "height", _("Snapshot height"), 0, 1280)
         
+        ew.add_title(_("Video"))
+        options={_("Default"): 'default' }
+        if config.data.os == 'win32':
+            options[_("GDI")] = 'gdi'
+        else:
+            options[_("X11")] = 'x11'
+        ew.add_option(_("Output"), "vout", _("Video output module"), options)
+
         ew.add_title(_("Verbosity"))
         ew.add_spin(_("Level"), "level", _("Verbosity level. -1 for no messages."),
                     -1, 3)
         
         res=ew.popup()
         if res:
-            config.data.player['caption']                = cache['caption']
-            config.data.player['osdfont']                = cache['font']  
-            config.data.player['snapshot']               = cache['snapshot']
-            config.data.player['snapshot-dimensions'][0] = cache['width'] 
-            config.data.player['snapshot-dimensions'][1] = cache['height']
+            for n in ('caption', 'osdfont', 'snapshot', 'vout'):
+                config.data.player[n] = cache[n]
+            config.data.player['snapshot-dimensions']    = (cache['width'] , 
+                                                            cache['height'])
             if cache['level'] == -1:
                 config.data.player['verbose'] = None
             else:
