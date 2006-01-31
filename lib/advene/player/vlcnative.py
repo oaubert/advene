@@ -116,13 +116,8 @@ class Player(object):
         """Restart (cleanly) the player."""
         del self.mc
 
-	# FIXME: missing args
-        if config.data.os == 'win32':
-	    # Clone is unstable on win32, makes advene crash
-            self.args=[ ]
-        else:
-            self.args=[ "--vout-filter", "clone", "--vout", "x11" ]
-            #args=[ "--vout-filter", "clone", "--plugin-path", config.data.path['plugins'] ]
+        self.args=config.data.get_player_args()
+
         self.mc = VLC.MediaControl( self.args )
 
         # 0 relative position
@@ -312,8 +307,6 @@ class Player(object):
         return p
 
     def check_player(self):
-        # FIXME: correctly implement this
-        print "Check player"
         return True
 
     def snapshot(self, position):
