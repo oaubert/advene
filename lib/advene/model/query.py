@@ -36,14 +36,14 @@ class Query(modeled.Importable, viewable.Viewable.withClass('query'),
         _impl.Uried.__init__(self, parent=parent)
         if element is not None:
             modeled.Importable.__init__(self, element, parent,
-                                        parent.getViews.im_func)
+                                        parent.getQueries.im_func)
             _impl.Uried.__init__(self, parent=self.getOwnerPackage())
         else:
             doc = parent._getDocument()
             element = doc.createElementNS(self.getNamespaceUri(),
                                           self.getLocalName())
             modeled.Importable.__init__(self, element, parent,
-                                        parent.getViews.im_func)
+                                        parent.getQueries.im_func)
 
             if ident is None:
                 # FIXME: cf thread
