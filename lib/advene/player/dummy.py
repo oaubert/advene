@@ -290,3 +290,6 @@ class Player:
     def set_visual(self, xid):
         return True
 
+    def restart_player(self):
+	print "dummy: restart player"
+	return True
