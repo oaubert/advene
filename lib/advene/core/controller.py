@@ -799,6 +799,11 @@ class AdveneController:
     def on_exit (self, source=None, event=None):
         """General exit callback."""
         if not self.cleanup_done:
+	    # Stop the event handler
+	    self.event_handler.reset_queue()
+	    self.event_handler.clear_state()
+	    self.event_handler.update_rulesets()
+
             # Save preferences
             config.data.save_preferences()
 
