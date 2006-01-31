@@ -650,7 +650,7 @@ class AdveneController:
         if self.get_default_media() == "":
             pl = self.player.playlist_get_list()
             if pl:
-                self.package.set_default_media(pl[0])
+                self.set_default_media(pl[0])
         self.package.save(name=name)
         self.modified=False
         self.notify ("PackageSave")
