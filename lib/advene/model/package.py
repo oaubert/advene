@@ -348,6 +348,12 @@ class Import(modeled.Modeled, _impl.Ased):
         if element is None:
             if uri is None:
                 raise TypeError("parameter 'uri' required")
+
+	    if sre.match('[a-zA-Z]:', uri):
+		# Windows drive: notation. Convert it to
+		# a more URI-compatible syntax
+		uri=urllib.pathname2url(uri)
+
             # doc = self._getParent()._getDocument()
             doc = parent._getDocument()
             element = doc.createElementNS(adveneNS, 'import')
@@ -377,6 +383,10 @@ class Import(modeled.Modeled, _impl.Ased):
 
     def setUri(self, uri):
         """Set the URI of the element"""
+	if sre.match('[a-zA-Z]:', uri):
+	    # Windows drive: notation. Convert it to
+	    # a more URI-compatible syntax
+	    uri=urllib.pathname2url(uri)
         return self._getModel().setAttributeNS(xlinkNS, 'xlink:href', uri)
 
     def getSources(self):
