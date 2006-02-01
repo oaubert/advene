@@ -117,14 +117,14 @@ class TreeViewImporter:
             srow=store.append(parent=schemasrow,
                               row=[s,
                                    s.title or s.id,
-                                   'FIXME:id',
+                                   s.id,
                                    self.is_imported(s),
                                    s.uri])
             for at in s.annotationTypes:
                 atrow=store.append(parent=srow,
                                    row=[at,
                                         at.title or at.id,
-                                        "FIXME:at.id",
+                                        at.id,
                                         self.is_imported(at),
                                         at.uri])
                 # Does not work because the model does not
@@ -141,7 +141,7 @@ class TreeViewImporter:
                 store.append(parent=srow,
                              row=[rt,
                                   rt.title or rt.id,
-                                  "FIXME:rt.id",
+                                  rt.id,
                                   self.is_imported(rt),
                                   rt.uri])
 
