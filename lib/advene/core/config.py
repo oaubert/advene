@@ -387,7 +387,7 @@ class Config(object):
             filters.append("clone")
         if filters != []:
             # Some filters have been defined
-            args.extend (['--filter', ":".join(filters)])
+            args.extend (['--vout-filter', ":".join(filters)])
         return [ str(i) for i in args ]
 
     def get_userid (self):
