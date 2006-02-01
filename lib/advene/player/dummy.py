@@ -273,11 +273,9 @@ class Player:
         self.position_update ()
 
     def is_active(self):
-        # FIXME: correctly implement this
         return True
 
     def check_player(self):
-        # FIXME: correctly implement this
         print "check player"
         return True
 
