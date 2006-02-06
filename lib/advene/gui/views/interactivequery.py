@@ -51,13 +51,11 @@ class InteractiveQuery:
         self.window=None
 
     def get_interactive_query(self):
-        l=[ q
-            for q in self.controller.package.queries
-            if q.id == '_interactive' ]
+	l=vlclib.get_id(self.controller.package.queries, '_interactive')
         if l:
             q=Query()
-            q.from_dom(l[0].content.model)
-            return l[0], q
+            q.from_dom(l.content.model)
+            return l, q
         else:
             # Create the query
             el=self.controller.package.createQuery(ident='_interactive')
