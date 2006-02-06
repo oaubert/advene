@@ -181,7 +181,14 @@ class CreateElementPopup(object):
 	    advene.gui.util.message_dialog(
                 _("The identifier %s is not valid.\nIt must be composed of non-accentuated alphabetic characters\nUnderscore is allowed.") % id_)
             return None
-        
+
+        if self.controller.idgenerator.exists(id_):
+	    advene.gui.util.message_dialog(
+                _("The identifier %s is already defined.") % id_)
+            return None
+	else:
+	    self.controller.idgenerator.add(id_)
+
         t = self.chosen_type
 
         if self.type_ == Annotation:
@@ -330,11 +337,17 @@ class CreateElementPopup(object):
             return False
         d.connect("key_press_event", keypressed_cb)
 
-        res=d.run()
-        retval=None
-        if res == gtk.RESPONSE_ACCEPT:
-            retval=self.do_create_element()
-        d.destroy()
+	while True:
+	    res=d.run()
+	    retval=None
+	    if res == gtk.RESPONSE_ACCEPT:
+		retval=self.do_create_element()
+
+		if retval is not None:
+		    break
+	    else:
+		break
+	d.destroy()
 
         if retval is not None and not modal:
             try:
