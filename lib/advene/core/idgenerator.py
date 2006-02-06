@@ -42,8 +42,15 @@ class Generator:
     
     def __init__(self):
         self.last_used={}
+	self.existing=[]
         for k in self.prefix.keys():
             self.last_used[k]=0
+
+    def exists(self, id_):
+	return id_ in self.existing
+
+    def add(self, id_):
+	self.existing.append(id_)
 
     def init(self, package):
         """Initialize the indexes for the given package."""
@@ -59,6 +66,7 @@ class Generator:
                   package.annotationTypes, package.relationTypes,
                   package.views, package.queries):
             for i in l.ids():
+		self.existing.append(i)
                 m=re_id.match(i)
                 if m:
                     n=long(m.group(2))
@@ -72,5 +80,6 @@ class Generator:
         prefix=self.prefix[elementtype]
         index=self.last_used[prefix] + 1
         self.last_used[prefix]=index
-        return prefix + str(index)
-
+	id_ = prefix + str(index)
+	self.existing.append(id_)
+        return id_
