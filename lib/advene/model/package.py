@@ -319,16 +319,17 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             i.getPackage ()._recursive_save ()
 
     def getQnamePrefix (self, item):
+	if self == item:
+	    return None
         if isinstance (item, Package):
-            for i in self.getImports():
-                if item == i.getPackage():
-                    return i.getAs()
-        elif isinstance (item, schema.Schema):
-            for s in self.getSchemas():
-                if item == s:
-                    return s.getId()
-        raise AdveneException ("item %s has no QName prefix in %s" %
-                               (item, self))
+	    try:
+		i=self.getImports()[item.uri]
+		return i.getAs()
+	    except KeyError:
+		raise AdveneException ("item %s has no QName prefix in %s" %
+				       (item, self))
+	else:
+	    return self.getQnamePrefix(item._getParent())
 
 
 class Import(modeled.Modeled, _impl.Ased):
