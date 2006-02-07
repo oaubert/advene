@@ -85,8 +85,7 @@ class Player:
 	self.basetime=None
 	self.pausetime=None
 	self.volume=12
-	# Simulate a 30 minutes movie
-	self.stream_duration = 30 * 60000
+	self.stream_duration = 0
         self.position_update()
 
     def position2value(self, p):
@@ -166,10 +165,13 @@ class Player:
     
     def playlist_add_item(self, item):
         self.playlist.append(item)
+	# Simulate a 30 minutes movie
+	self.stream_duration = 30 * 60000
 
     def playlist_clear(self):
         del self.playlist[:]
-        
+	self.stream_duration = 0
+
     def playlist_get_list(self):
         return self.playlist[:]
 
@@ -189,7 +191,7 @@ class Player:
         s.url=''
         if self.playlist:
             s.url=self.playlist[0]
-        s.length=self.stream_duration
+	s.length=self.stream_duration
 	if self.pausetime:
 	    s.position=self.pausetime
 	elif self.basetime:
