@@ -202,8 +202,11 @@ class Importable(Modeled, _impl.Ided):
         if not self.isImported ():
             return plain_id
         else:
-            prefix = self.getRootPackage ().getQnamePrefix(self._getParent ()) 
-            return "%s:%s" % (prefix, plain_id)
+            prefix = self.getRootPackage ().getQnamePrefix(self)
+	    if prefix is None:
+		return plain_id
+	    else:
+		return "%s:%s" % (prefix, plain_id)
 
     # pa: 030328
     # This method is not safe, since it does not update self.__importator
