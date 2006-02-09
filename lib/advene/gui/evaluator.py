@@ -56,7 +56,7 @@ class Window:
         for l in f:
             l=l.rstrip().replace('\n', "\n")
             self.history.append(l)
-         f.close()
+	f.close()
         return
 
     def save_history(self, name=None):
