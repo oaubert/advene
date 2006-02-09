@@ -17,6 +17,9 @@
 #
 """Python expressions evaluator.
 """
+
+# FIXME: completion of named parameters: inspect.getargspec
+
 import sys
 import os
 import StringIO
@@ -53,7 +56,7 @@ class Window:
         for l in f:
             l=l.rstrip().replace('\n', "\n")
             self.history.append(l)
-        f.close()
+         f.close()
         return
 
     def save_history(self, name=None):
@@ -216,10 +219,10 @@ class Window:
             if typ == "doc":
                 d=res.__doc__
             elif typ == "source":
-                d=inspect.getsource(res)
+                d="[Code found in " + inspect.getabsfile(res) + "]\n\n" + inspect.getsource(res)
             self.clear_output()
             if d is not None:
-                self.log("%s for %s:\n\n" % (typ, expr))
+                self.log("%s for %s:\n\n" % (typ, repr(expr)))
                 self.log(unicode(d))
             else:
                 self.log("No available documentation for %s" % expr)
@@ -256,7 +259,10 @@ class Window:
             self.log("Successfully imported ", modname)
             return True
 
-        m=sre.match('(.+?)=(.+)', expr)
+        # Handle variable assignment only for restricted forms of
+        # variable names (so that do not mistake named parameters in
+        # function calls)
+        m=sre.match('([\[\]\w\.]+?)=(.+)', expr)
         if m is not None:
             symbol=m.group(1)
             expr=m.group(2)
@@ -329,6 +335,9 @@ class Window:
         expr=b.get_text(begin, cursor)
         if expr.endswith('.'):
             expr=expr[:-1]
+            trailingdot=True
+        else:
+            trailingdot=False
         p=expr.rfind('(')
         if p > expr.rfind(')'):
             # We are in a non-closed open brace, so we start from there
@@ -363,7 +372,7 @@ class Window:
                 attr=expr
             else:
                 # Maybe we have the beginning of an attribute.
-                m=sre.match('^(.+?)\.(\w+)$', expr)
+                m=sre.match('^(.+?)\.(\w*)$', expr)
                 if m:
                     expr=m.group(1)
                     attr=m.group(2)
@@ -410,7 +419,7 @@ class Window:
                 if attr is not None:
                     element=element.replace(attr, "")
                 else:
-                    if not expr.endswith('.'):
+                    if not expr.endswith('.') and not trailingdot:
                         element='.'+element
                 b.insert_at_cursor(element)
 
@@ -520,6 +529,7 @@ class Window:
         self.resultscroll=gtk.ScrolledWindow()
         self.resultscroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.resultscroll.add(self.output)
+        self.resultscroll.set_size_request( -1, 500 )
         f.add(self.resultscroll)
         vbox.add(f)
 
