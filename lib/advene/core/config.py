@@ -26,6 +26,8 @@ It is meant to be used this way::
 
 @var data: an instance of Config (Singleton)
 """
+# FIXME: cf http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/473846
+# for windows-specific paths
 import sys
 import os
 import cPickle
@@ -381,7 +383,7 @@ class Config(object):
         if self.player['verbose'] is not None:
             args.append ('--verbose')
             args.append (self.player['verbose'])
-        if self.player['vout'] != 'default' and self.os == 'linux':
+        if self.player['vout'] != 'default':
             args.extend( [ '--vout', self.player['vout'] ] )
         if self.player['snapshot']:
             filters.append("clone")
