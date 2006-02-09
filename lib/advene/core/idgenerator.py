@@ -81,5 +81,6 @@ class Generator:
         index=self.last_used[prefix] + 1
         self.last_used[prefix]=index
 	id_ = prefix + str(index)
-	self.existing.append(id_)
+	# Do not append yet.
+	#self.existing.append(id_)
         return id_
