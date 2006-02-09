@@ -460,6 +460,7 @@ class AdveneController:
         return mediafile
 
     def set_default_media (self, uri):
+	self.cached_duration = 0
         m=self.dvd_regexp.match(uri)
         if m:
             title,chapter=m.group(1,2)
@@ -470,7 +471,8 @@ class AdveneController:
         if m:
             uri=self.player.dvd_uri(title, chapter)
         self.player.playlist_clear()
-        self.player.playlist_add_item (uri)
+	if uri is not None and uri != "":
+	    self.player.playlist_add_item (uri)
 
     def transmute_annotation(self, annotation, annotationType, delete=False):
         """Transmute an annotation to a new type.
@@ -687,6 +689,7 @@ class AdveneController:
         else:
             self.cached_duration = 0
 
+	self.imagecache.clear ()
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
             if self.player.is_active():
@@ -699,12 +702,13 @@ class AdveneController:
 
             # Load the imagecache
             id_ = vlclib.mediafile2id (mediafile)
-            self.imagecache.clear ()
             self.imagecache.load (id_)
             # Populate the missing keys
             for a in self.package.annotations:
                 self.imagecache.init_value (a.fragment.begin)
                 self.imagecache.init_value (a.fragment.end)
+	else:
+	    self.player.playlist_clear()
 
         # Update the webserver
         if config.data.webserver['mode'] and self.server:
@@ -715,13 +719,9 @@ class AdveneController:
         # Activate the default STBV
         default_stbv = self.package.getMetaData (config.data.namespace, "default_stbv")
         if default_stbv:
-            view=None
-            try:
-                view=self.package.views['#'.join( (self.package.uri,
-                                                   default_stbv) )]
-            except KeyError:
-                pass
-            self.activate_stbv(view)
+	    view=vlclib.get_id( self.package.views, default_stbv )
+	    if view:
+		self.activate_stbv(view)
 
         return True
 
