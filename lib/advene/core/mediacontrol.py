@@ -44,7 +44,10 @@ class PlayerFactory:
                 import advene.player.vlcorbit as playermodule
             elif p == 'mplayer':
                 import advene.player.mplayer as playermodule
+	    elif p == 'gstreamer':
+		import advene.player.gstreamer as playermodule
             else:
+		print "Fallback to dummy module"
                 import advene.player.dummy as playermodule
         except ImportError:
             print "Cannot import %s mediaplayer. Using dummy player." % p
