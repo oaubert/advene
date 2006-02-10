@@ -513,6 +513,18 @@ class AdveneGUI (Connect):
         vis.show_all()
         return vis
 
+    def display_imagecache(self):
+	"""Debug method.
+
+	Not accessible through the GUI, use the Evaluator window:
+	c.gui.display_imagecache()
+	"""
+	hn=HistoryNavigation(controller=self.controller,
+			     history=self.controller.imagecache.keys(),
+			     vertical=True)
+        w=hn.popup()
+	return hn, w
+
     def process_player_shortcuts(self, win, event):
 	"""Generic player control shortcuts.
 
@@ -1557,6 +1569,7 @@ class AdveneGUI (Connect):
             'author': self.controller.package.author,
             'date': self.controller.package.date,
             'media': self.controller.get_default_media() or "",
+	    'duration': str(self.controller.cached_duration),
             'title': self.controller.package.title or ""
             }
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
@@ -1565,6 +1578,7 @@ class AdveneGUI (Connect):
         ew.add_entry(_("Date"), "date", _("Package creation date"))
         ew.add_entry(_("Title"), "title", _("Package title"))
         ew.add_file_selector(_("Associated media"), 'media', _("Select a movie file"))
+        ew.add_entry(_("Duration"), "duration", _("Media duration in ms"))
 
         res=ew.popup()
 
@@ -1574,6 +1588,7 @@ class AdveneGUI (Connect):
             self.controller.package.title = cache['title']
             self.update_window_title()
             self.controller.set_default_media(cache['media'])
+	    self.controller.cached_duration = long(cache['duration'])
         return True
 
     def on_preferences1_activate (self, button=None, data=None):
