@@ -310,6 +310,9 @@ class Player(object):
         return True
 
     def snapshot(self, position):
+	# Do not update the snapshot if we are not playing
+	if self.status != self.PlayingStatus:
+	    return None	
         d=self.mc.snapshot(position)
         return Snapshot(d)
 
