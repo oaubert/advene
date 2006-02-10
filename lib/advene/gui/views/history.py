@@ -37,6 +37,7 @@ class HistoryNavigation:
             self.history=[]
         self.vertical=vertical
         self.widget=self.build_widget()
+	self.fill_widget()
 
     def activate(self, widget=None, data=None, timestamp=None):
         self.controller.update_status("set", timestamp, notify=False)
@@ -75,18 +76,21 @@ class HistoryNavigation:
             else:
                 adj=self.scrollwindow.get_hadjustment()
             adj.set_value(adj.upper)
-        self.widget.add(vbox)
-        
+	self.widget.add(vbox)
+
+    def fill_widget(self):
+        self.widget.foreach(self.remove_widget, self.widget)
+	for t in self.history:
+            self.append_repr(t)
+        self.widget.show_all()
+	return True
+
     def build_widget(self):
         if self.vertical:
             mainbox=gtk.VBox()
         else:
             mainbox=gtk.HBox()
-            
-        for t in self.history:
-            self.append_repr(t)
 
-        mainbox.show_all()
         return mainbox
 
     def popup(self):
@@ -99,6 +103,10 @@ class HistoryNavigation:
         else:
             w = gtk.Window (gtk.WINDOW_TOPLEVEL)
             w.set_title (_("Navigation history"))
+            vb=gtk.VBox()
+            vb.add(w)
+
+	    vb=None
 
         sw=gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -108,9 +116,10 @@ class HistoryNavigation:
         sw.add_with_viewport(self.widget)
         self.scrollwindow=sw
 
-        b=gtk.Button(stock=gtk.STOCK_CLEAR)
-        b.connect("clicked", self.clear)
-        vb.pack_start(b, expand=False)
+	if vb:
+	    b=gtk.Button(stock=gtk.STOCK_CLEAR)
+	    b.connect("clicked", self.clear)
+	    vb.pack_start(b, expand=False)
 
-        vb.show_all()
-        return True
+	w.show_all()
+        return w
