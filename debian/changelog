@@ -12,11 +12,15 @@ advene (0.19) unstable; urgency=low
   * GUI: 
     * added an element creation toolbar
     * generic player control shortcuts are used
+    * Edit/Preferences now allows to modify paths (data, movies, player, imagecache) (from Frank Wagner)
+    * Imagecache saves file with a .png extension
   * The dummy player now returns a running time
   * Importer
     * implemented CMML import
   * TranscriptionEdit: 
     * clicking on a mark now goes to the position. Use the popup menu to remove marks.
+    * control-space now sets a mark and pauses the movie
+  * Snapshot cache now saves files with a .png extension (from Frank Wagner)
   * Implemented plugin architecture (user-defined plugins in ~/.advene/plugins)
   * webserver message log is now available from the menu (View->Webserver
     log), and not displayed on the console
