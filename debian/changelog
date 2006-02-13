@@ -5,30 +5,43 @@ advene (0.19) unstable; urgency=low
     files to get them converted. 
     Access to resources is done through the TALES expression 
     string:${package/absolute_url}/resources
+  
   * ! Moved config and preferences files to ~/.advene directory
     (UserDir/advene on Windows)
+
   * New annotation mimetype (application/x-advene-zone) which allows to
     define rectangular zones.
+
   * GUI: 
     * added an element creation toolbar
     * generic player control shortcuts are used
     * Edit/Preferences now allows to modify paths (data, movies, player, imagecache) (from Frank Wagner)
-    * Imagecache saves file with a .png extension
+    * Imagecache saves files with a .png extension
+
   * The dummy player now returns a running time
+
   * Importer
     * implemented CMML import
+
   * TranscriptionEdit: 
     * clicking on a mark now goes to the position. Use the popup menu to remove marks.
     * control-space now sets a mark and pauses the movie
+
   * Snapshot cache now saves files with a .png extension (from Frank Wagner)
+
   * Implemented plugin architecture (user-defined plugins in ~/.advene/plugins)
+
   * webserver message log is now available from the menu (View->Webserver
     log), and not displayed on the console
+
   * Advene now depends on gtk >= 2.6
+
   * Added spanish translations (courtesy of Emmanuel Ayala)
   * Bugfix in path initialization
+
   * Multiple instances can now run simultaneously (only the first instance
     activates its webserver)
+
   * evaluator: changed some shortcuts (see help), implemented expression history
 
  -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Thu,  8 Dec 2005 16:26:18 +0100
