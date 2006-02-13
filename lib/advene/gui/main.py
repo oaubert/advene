@@ -1657,7 +1657,8 @@ class AdveneGUI (Connect):
 
     def on_save_imagecache1_activate (self, button=None, data=None):
         name = vlclib.package2id (self.controller.package)
-        self.controller.imagecache.save (name)
+        d=self.controller.imagecache.save (name)
+	self.log(_("Imagecache saved to %s") % d)
         return True
 
     def on_restart_player1_activate (self, button=None, data=None):
