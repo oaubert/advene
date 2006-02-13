@@ -168,6 +168,8 @@ class ImageCache(dict):
 
         @param name: the name
         @type name: string
+	@return d: the created directory
+	@rtype: string
         """
         directory=config.data.path['imagecache']
         if not os.path.isdir (directory):
@@ -187,11 +189,11 @@ class ImageCache(dict):
                 os.mkdir (d)
 
         for k in self.keys():
-            f = open(os.sep.join ([d, str(k)]), "w")
+            f = open(os.sep.join ([d, "%010d.png" % k]), "w")
             f.write (dict.__getitem__(self, k))
             f.close ()
 
-        return
+        return d
 
     def load (self, name):
         """Add new images to an ImageCache, from the specified imagecache id.
@@ -205,9 +207,10 @@ class ImageCache(dict):
             # The cache directory does not exist
             return
         else:
-            for n in os.listdir (d):
-                f = open(os.sep.join ([d, n]), "r")
-                dict.__setitem__(self, long(n), f.read ())
+            for name in os.listdir (d):
+                f = open(os.sep.join ([d, name]), "r")
+		(n, ext) = os.path.splitext(name)
+                dict.__setitem__(self, long(n.lstrip('0')), f.read ())
                 f.close ()
 
     def ids (self):
