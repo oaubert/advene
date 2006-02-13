@@ -1196,9 +1196,14 @@ class AdveneGUI (Connect):
         return True
         
     def on_import_file1_activate (self, button=None, data=None):
+        if config.data.path['data']:
+            d=config.data.path['data']
+        else:
+            d=None
         filename=advene.gui.util.get_filename(title=_("Choose the file to import"),
                                               action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                              button=gtk.STOCK_OPEN)
+                                              button=gtk.STOCK_OPEN,
+					      default_dir=d)
         if not filename:
             return True
         filename_utf=unicode(filename, 'iso-8859-1').encode('utf-8')
@@ -1504,9 +1509,15 @@ class AdveneGUI (Connect):
 
     def on_b_addfile_clicked (self, button=None, data=None):
         """Open a movie file"""
+        if config.data.path['data']:
+            d=config.data.path['data']
+        else:
+            d=None
+
         filename=advene.gui.util.get_filename(title=_("Select a movie file"),
                                               action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                              button=gtk.STOCK_OPEN)
+                                              button=gtk.STOCK_OPEN,
+					      default_dir=d)
         if filename:
             self.controller.set_default_media(filename)
         return True
