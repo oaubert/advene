@@ -1606,17 +1606,39 @@ class AdveneGUI (Connect):
         cache={
             'osd': config.data.player_preferences['osdtext'],
             'history-limit': config.data.preferences['history-size-limit'],
+	    'data': config.data.path['data'],
+	    'plugins': config.data.path['plugins'],
+	    'advene': config.data.path['advene'],
+	    'imagecache': config.data.path['imagecache'],
+	    'moviepath': config.data.path['moviepath'],
             }
 
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
+	ew.add_title(_("General"))
         ew.add_checkbox(_("OSD"), "osd", _("Display captions on the video"))
         ew.add_spin(_("History size"), "history-limit", _("History filelist size limit"),
                     -1, 20)
+
+	ew.add_title(_("Paths"))
+
+        ew.add_file_selector(_("Data"), "data", _("Default directory for data files"))
+        ew.add_file_selector(_("Movie path"), "moviepath", _("List of directories (: separated) to search for movie files (_ means package directory)"))
+        ew.add_file_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
+        ew.add_file_selector(_("Player"), "plugins", _("Directory of the video player"))
+
         res=ew.popup()
         if res:
             config.data.player_preferences['osdtext']=cache['osd']
             config.data.preferences['history-size-limit']=cache['history-limit']
+	    for k in ('data', 'moviepath', 'plugins', 'imagecache', 'advene'):
+		if cache[k] != config.data.path[k]:
+		    config.data.path[k]=cache[k]
+		    # Store in auto-saved preferences
+		    config.data.preferences['path'][k]=cache[k]
+		    if k == 'plugins':
+			self.controller.restart_player()
+		    
         return True
 
     def on_configure_player1_activate (self, button=None, data=None): 
