@@ -139,6 +139,8 @@ class Config(object):
         self.gladefilename = "advene.glade"
 
         # Generic options
+	# They are automatically saved across sessions
+	# in ~/.advene/advene.prefs
         self.preferences = {
             # Various sizes of windows.
             'windowsize': { 'main': (800, 600),
@@ -157,6 +159,9 @@ class Config(object):
             # File history
             'history': [],
             'history-size-limit': 5,
+	    # User-defined paths. Will overwrite 
+	    # config.data.path items
+	    'path': {},
             }
 
         # Player options
@@ -317,6 +322,8 @@ class Config(object):
         except:
             return False
         self.preferences.update(prefs)
+	if prefs.has_key('path'):
+	    self.path.update(prefs['path'])
         return True
 
     def save_preferences(self):
