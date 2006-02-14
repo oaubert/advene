@@ -348,11 +348,10 @@ class AdveneGUI (Connect):
         """
         if args is None:
             args=[]
-        if config.data.os != 'win32':
-            try:
-                gtk.threads_init ()
-            except RuntimeError:
-                print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
+	try:
+	    gtk.threads_init ()
+	except RuntimeError:
+	    print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
 
 	# Register default GUI elements (actions, content_handlers, etc)
 	# !! We cannot use controller.load_plugins, because it would make it impossible
