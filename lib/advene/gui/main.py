@@ -1709,41 +1709,6 @@ class AdveneGUI (Connect):
         self.controller.update_status('set', p)
         self.slider_move = False
 
-    def on_update_snapshots1_activate (self, button=None, data=None):
-	advene.gui.util.message_dialog(_("This functionality is currently disabled."),
-				       icon=gtk.MESSAGE_WARNING)
-        # self.gui.get_widget ("update-snapshots").show ()
-        return True
-
-    def on_update_snapshots_execute_clicked (self, button=None, data=None):
-        # Activate the Stop button
-        self.gui.get_widget ("update-snapshots-stop").set_sensitive (True)
-        self.gui.get_widget ("update-snapshots-execute").set_sensitive (False)
-
-        def update_progress_callback(value=0):
-            bar = self.gui.get_widget ("snapshots-progressbar")
-            bar.set_fraction (value)
-            return True
-
-        def stop_callback(context, parameters):
-            print "Stop callback"
-            self.gui.get_widget ("update-snapshots-stop").set_sensitive (False)
-            self.gui.get_widget ("update-snapshots-execute").set_sensitive (True)
-            return True
-
-        self.controller.start_update_snapshots(progress_callback=update_progress_callback,
-                                               stop_callback=stop_callback)
-        return True
-
-    def on_update_snapshots_stop_clicked (self, button=None, data=None):
-        self.controller.stop_update_snapshots()
-        return True
-
-    def on_update_snapshots_ok_clicked (self, button=None, data=None):
-        self.controller.stop_update_snapshots()
-        self.gui.get_widget ("update-snapshots").hide ()
-        return True
-
     def on_help1_activate (self, button=None, data=None):
         helpfile=os.sep.join( (config.data.path['web'], 'user.html') )
         if os.access(helpfile, os.R_OK):
