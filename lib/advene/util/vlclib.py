@@ -48,7 +48,11 @@ def fourcc2rawcode (code):
                            code >> 8 & 0xff,
                            code >> 16 & 0xff,
                            code >> 24)
-    return conv[fourcc]
+    try:
+	ret=conv[fourcc]
+    except KeyError:
+	ret=None
+    return ret
 
 class TitledElement:
     """Dummy element, to accomodate the get_title method.
@@ -91,8 +95,14 @@ def snapshot2png (image, output=None):
         # Image is already PNG
         return image.data
 
-    i = Image.fromstring ("RGB", (image.width, image.height), image.data,
-                          "raw", fourcc2rawcode(image.type))
+    code=fourcc2rawcode(image.type)
+    if code is not None:
+	i = Image.fromstring ("RGB", (image.width, image.height), image.data,
+			      "raw", code)
+    else:
+	print "snapshot: unknown image type " % repr(image.type)
+	i = Image.new ('RGB', (160,100), color=255)
+
     if output is not None:
         i.save (output, 'png')
         return ""
