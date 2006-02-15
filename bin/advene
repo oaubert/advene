@@ -33,7 +33,7 @@ def fix_paths(path):
   config.data.path['locale']=os.path.sep.join( (maindir, 'locale') )
   config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
   config.data.path['advene']=maindir
-  config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
+  #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
 
 
 # Try to find if we are in a development tree.
