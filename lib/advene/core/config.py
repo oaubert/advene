@@ -385,6 +385,9 @@ class Config(object):
         """
         args=[]
         filters=[]
+
+	args.extend( [ '--intf', 'dummy' ] )
+
         if os.path.isdir(self.path['plugins']):
             args.extend([ '--plugin-path', self.path['plugins'] ])
         if self.player['verbose'] is not None:
