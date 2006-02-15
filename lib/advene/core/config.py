@@ -434,6 +434,6 @@ class Config(object):
                             doc="List of arguments for the VLC player")
 
 data = Config ()
-data.read_config_file ()
 data.read_preferences()
-#print "Read config file %s" % data.config_file
+# Config file (advene.ini) may override settings from preferences
+data.read_config_file ()
