@@ -395,8 +395,6 @@ class Config(object):
             args.append (self.player['verbose'])
         if self.player['vout'] != 'default':
             args.extend( [ '--vout', self.player['vout'] ] )
-        if self.player['snapshot']:
-            filters.append("clone")
         if filters != []:
             # Some filters have been defined
             args.extend (['--vout-filter', ":".join(filters)])
