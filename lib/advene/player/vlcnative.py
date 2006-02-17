@@ -130,22 +130,6 @@ class Player(object):
         o=VLC.Object(0)
         self.dvd_device = o.config_get("dvd")
 
-        # Workaround the fact that parameter passing is broken for
-        # the moment in MediaControl (stack corruption): we
-        # set the options via config_set. Anyway, it is cleaner
-        # this way.
-        if config.data.player['snapshot']:
-            o.config_set("clone-vout-list", "default,snapshot")
-            w, h = config.data.player['snapshot-dimensions']
-	    try:
-		o.config_set("snapshot-width", w)
-		o.config_set("snapshot-height", h)
-		o.config_set("snapshot-chroma", config.data.player["snapshot-chroma"])
-	    except StandardError:
-		# The module was not available. 
-		print "The snapshot module is not available"
-		config.data.player['snapshot']=False
-                         
         o.config_set("repeat", True)
         o.config_set("loop", True)
 
