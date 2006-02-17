@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -43,15 +43,16 @@ def fourcc2rawcode (code):
     @return: the corresponding PIL code
     @rtype: string
     """
-    conv = { 'RV32' : 'BGRX' }
+    conv = { 'RV32' : 'BGRX',
+             'png ' : 'PNG' }
     fourcc = "%c%c%c%c" % (code & 0xff,
                            code >> 8 & 0xff,
                            code >> 16 & 0xff,
                            code >> 24)
     try:
-	ret=conv[fourcc]
+        ret=conv[fourcc]
     except KeyError:
-	ret=None
+        ret=None
     return ret
 
 class TitledElement:
@@ -67,7 +68,7 @@ class TypedUnicode(unicode):
     def __init__(self, *p, **kw):
         super(TypedUnicode, self).__init__(*p, **kw)
         self.contenttype='text/plain'
-        
+
 class TypedString(str):
     """String with a mimetype attribute.
     """
@@ -96,12 +97,22 @@ def snapshot2png (image, output=None):
         return image.data
 
     code=fourcc2rawcode(image.type)
-    if code is not None:
-	i = Image.fromstring ("RGB", (image.width, image.height), image.data,
-			      "raw", code)
+    if code is None:
+        print "snapshot: unknown image type " % repr(image.type)
+        i = Image.new ('RGB', (160,100), color=255)
+    elif code == 'PNG':
+        if output is not None:
+            f=open(output, 'w')
+            f.write(image.data)
+            f.close()
+            return ""
+        else:
+            v=TypedString(image.data)
+            v.contenttype='image/png'
+            return v
     else:
-	print "snapshot: unknown image type " % repr(image.type)
-	i = Image.new ('RGB', (160,100), color=255)
+        i = Image.fromstring ("RGB", (image.width, image.height), image.data,
+                              "raw", code)
 
     if output is not None:
         i.save (output, 'png')
@@ -178,7 +189,7 @@ def convert_time(s):
             if m:
                 t=m.groupdict()
                 t['h'] = 0
-            
+
         if t is not None:
             if 'ms' in t and t['ms']:
                 t['ms']=(t['ms'] + ("0" * 4))[:3]
@@ -333,7 +344,7 @@ def import_element(package, element, controller):
     elif element.viewableClass == 'query':
         q=p.importQuery(element)
         p.queries.append(q)
-        controller.notify("QueryCreate", query=q)    
+        controller.notify("QueryCreate", query=q)
     else:
         print "Import element of class %s not supported yet." % element.viewableClass
 
