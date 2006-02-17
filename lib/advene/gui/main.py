@@ -1663,7 +1663,8 @@ class AdveneGUI (Connect):
         ew.add_title(_("Video"))
         options={_("Default"): 'default' }
         if config.data.os == 'win32':
-            options[_("GDI")] = 'gdi'
+            options[_("GDI")] = 'wingdi'
+            options[_("Direct X")] = 'directx'
         else:
             options[_("X11")] = 'x11'
         ew.add_option(_("Output"), "vout", _("Video output module"), options)
