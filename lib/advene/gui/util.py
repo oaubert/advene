@@ -315,6 +315,29 @@ Description:
     
     return filename
 
+def get_dirname(title=_("Choose a directory"),
+                 action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                 button=gtk.STOCK_OK,
+                 default_dir=None):
+
+    fs=gtk.FileChooserDialog(title=title,
+                             parent=None,
+                             action=action,
+                             buttons=( button,
+                                       gtk.RESPONSE_OK,
+                                       gtk.STOCK_CANCEL,
+                                       gtk.RESPONSE_CANCEL ))
+    if default_dir:
+        fs.set_current_folder(default_dir)
+        
+    res=fs.run()
+    dirname=None
+    if res == gtk.RESPONSE_OK:
+        dirname=fs.get_filename()
+    fs.destroy()
+    
+    return dirname
+
 class CategorizedSelector:
     """Widget displaying items sorted along categories.
 
