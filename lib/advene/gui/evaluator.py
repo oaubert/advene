@@ -262,10 +262,11 @@ class Window:
         # Handle variable assignment only for restricted forms of
         # variable names (so that do not mistake named parameters in
         # function calls)
-        m=sre.match('([\[\]\w\.]+?)=(.+)', expr)
+        m=sre.match('([\[\]\'\"\w\.]+?)=(.+)', expr)
         if m is not None:
             symbol=m.group(1)
             expr=m.group(2)
+
         try:
             res=eval(expr, self.globals_, self.locals_)
             self.clear_output()
@@ -346,7 +347,7 @@ class Window:
             p=expr.rfind(c)
             if p >= 0:
                 expr=expr[p+1:]
-        m=sre.match('(\w+)=(.+)', expr)
+        m=sre.match('(.+)=(.+)', expr)
         if m is not None:
             expr=m.group(2)
         completion=None
