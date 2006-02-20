@@ -1624,10 +1624,10 @@ class AdveneGUI (Connect):
 
 	ew.add_title(_("Paths"))
 
-        ew.add_file_selector(_("Data"), "data", _("Default directory for data files"))
-        ew.add_file_selector(_("Movie path"), "moviepath", _("List of directories (: separated) to search for movie files (_ means package directory)"))
-        ew.add_file_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
-        ew.add_file_selector(_("Player"), "plugins", _("Directory of the video player"))
+        ew.add_dir_selector(_("Data"), "data", _("Default directory for data files"))
+        ew.add_dir_selector(_("Movie path"), "moviepath", _("List of directories (: separated) to search for movie files (_ means package directory)"))
+        ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
+        ew.add_dir_selector(_("Player"), "plugins", _("Directory of the video player"))
 
         res=ew.popup()
         if res:
