@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-02-17 18:54+0100\n"
-"PO-Revision-Date: 2006-02-17 19:02+0100\n"
+"PO-Revision-Date: 2006-02-20 16:24+0100\n"
 "Last-Translator: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
 "MIME-Version: 1.0\n"
@@ -27,7 +27,7 @@ msgstr "Choisissez un fichier vidéo"
 
 #: ../share/advene.glade:103
 msgid "Import data from an external source"
-msgstr "Importer des donnees depuis une source externe"
+msgstr "Importer des données depuis une source externe"
 
 #: ../share/advene.glade:104
 msgid "_Import File"
@@ -35,7 +35,7 @@ msgstr "_Importer un fichier"
 
 #: ../share/advene.glade:125
 msgid "Create annotations based on DVD chapters"
-msgstr "Creer des annotations correspondant aux chapitres du DVD"
+msgstr "Créer des annotations correspondant aux chapitres du DVD"
 
 #: ../share/advene.glade:126
 msgid "Import _DVD chapters"
@@ -51,39 +51,39 @@ msgstr "Prendre des notes au vol"
 
 #: ../share/advene.glade:182
 msgid "_Edit"
-msgstr "_Edition"
+msgstr "Édition"
 
 #: ../share/advene.glade:242
 msgid "Edit imported element from other packages"
-msgstr "Editer les elements importes d'autres recueils"
+msgstr "Éditer les éléments importés d'autres recueils"
 
 #: ../share/advene.glade:243
 msgid "Package _Imports"
-msgstr "Elements _Importes"
+msgstr "Éléments _Importés"
 
 #: ../share/advene.glade:252
 msgid "Edit the default ruleset"
-msgstr "Editer les regles par defaut"
+msgstr "Éditer les règles par défaut"
 
 #: ../share/advene.glade:253
 msgid "_Default Ruleset"
-msgstr "Regles par _Defaut"
+msgstr "Règles par _Défaut"
 
 #: ../share/advene.glade:262
 msgid "Edit package properties"
-msgstr "Editer les proprietes du recueil"
+msgstr "Éditer les propriétés du recueil"
 
 #: ../share/advene.glade:263
 msgid "P_ackage properties"
-msgstr "_Proprietes du recueil"
+msgstr "_Propriétés du recueil"
 
 #: ../share/advene.glade:272
 msgid "Interface preferences"
-msgstr "Preferences de l'interface"
+msgstr "Préférences de l'interface"
 
 #: ../share/advene.glade:273
 msgid "P_references"
-msgstr "P_references"
+msgstr "P_références"
 
 #: ../share/advene.glade:282
 msgid "Choose toolbar style"
@@ -127,7 +127,7 @@ msgstr "T_ranscription"
 
 #: ../share/advene.glade:344
 msgid "Browse the package's data"
-msgstr "Naviguer dans les donnees du recueil"
+msgstr "Naviguer dans les données du recueil"
 
 #: ../share/advene.glade:345
 msgid "_Package Browser"
@@ -139,11 +139,11 @@ msgstr "Lancer le navigateur _Web"
 
 #: ../share/advene.glade:369
 msgid "Open python evaluator window"
-msgstr "Ouvrir l'evaluateur python"
+msgstr "Ouvrir l'évaluateur python"
 
 #: ../share/advene.glade:370
 msgid "Evaluator"
-msgstr "Evaluateur"
+msgstr "Évaluateur"
 
 #: ../share/advene.glade:379
 msgid "Webserver log"
@@ -159,11 +159,11 @@ msgstr "Historique de navigation"
 
 #: ../share/advene.glade:398
 msgid "Display information about the media"
-msgstr "Informations sur le media"
+msgstr "Informations sur le média"
 
 #: ../share/advene.glade:399
 msgid "_MediaInformation"
-msgstr "Informations _Media"
+msgstr "Informations _Média"
 
 #: ../share/advene.glade:412
 msgid "_Player"
@@ -179,7 +179,7 @@ msgstr "Sauvegarder le cache"
 
 #: ../share/advene.glade:431
 msgid "_Restart player"
-msgstr "_Redemarrer le lecteur"
+msgstr "_Redémarrer le lecteur"
 
 #: ../share/advene.glade:440
 msgid "_Configure player"
@@ -191,7 +191,7 @@ msgstr "_Aide"
 
 #: ../share/advene.glade:471
 msgid "_About"
-msgstr "A _Propos"
+msgstr "À _Propos"
 
 #: ../share/advene.glade:512 ../lib/advene/gui/main.py:575
 msgid "Rewind"
@@ -219,15 +219,15 @@ msgstr "Avance rapide"
 
 #: ../share/advene.glade:592
 msgid "Select movie file..."
-msgstr "Selectionner un fichier video"
+msgstr "Sélectionner un fichier vidéo"
 
 #: ../share/advene.glade:593
 msgid "Add file..."
-msgstr "Selectionner un fichier video..."
+msgstr "Sélectionner un fichier vidéo..."
 
 #: ../share/advene.glade:610
 msgid "Select DVD"
-msgstr "Selectionner un DVD"
+msgstr "Sélectionner un DVD"
 
 #: ../share/advene.glade:626
 msgid "Exit"
@@ -279,11 +279,11 @@ msgstr "Prendre des notes au vol"
 
 #: ../share/advene.glade:757
 msgid "Edit transcription"
-msgstr "Edition de la T_ranscription"
+msgstr "Édition de la T_ranscription"
 
 #: ../share/advene.glade:811
 msgid "Create a new package"
-msgstr "Creer un nouveau schema"
+msgstr "Créer un nouveau schema"
 
 #: ../share/advene.glade:827
 msgid "Open a package file"
@@ -299,11 +299,11 @@ msgstr "Sauvegarde du recueil sous un nouveau nom"
 
 #: ../share/advene.glade:875
 msgid "Display package properties"
-msgstr "Editer les proprietes du recueil"
+msgstr "Éditer les proprietes du recueil"
 
 #: ../share/advene.glade:891
 msgid "Import external data"
-msgstr "Importer des donnees externes"
+msgstr "Importer des données externes"
 
 #: ../share/advene.glade:931
 msgid "Create a new view"
@@ -351,7 +351,7 @@ msgstr "Vue dynamique"
 
 #: ../share/advene.glade:1075
 msgid "Edit current dynamic view"
-msgstr "Editer la vue dynamique courante"
+msgstr "Éditer la vue dynamique courante"
 
 #: ../share/advene.glade:1150
 msgid "Status "
@@ -368,7 +368,7 @@ msgstr "Position"
 
 #: ../share/advene.glade:1299
 msgid "About"
-msgstr "A propos"
+msgstr "À propos"
 
 #: ../share/advene.glade:1329
 msgid "Go to the web site"
@@ -384,11 +384,11 @@ msgid ""
 "Exchange on the NEt !"
 msgstr ""
 "Annotations de DVd \n"
-"Echangees sur le NEt"
+"Échangées sur le NEt"
 
 #: ../share/advene.glade:1396
 msgid "Close about box"
-msgstr "Fermer la boite a propos"
+msgstr "Fermer la boîte à propos"
 
 #: ../lib/advene/model/bundle.py:282
 #, python-format
