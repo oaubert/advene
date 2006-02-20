@@ -1,8 +1,11 @@
 #!/usr/bin/python 
 
+import sys
 from distutils.core import setup
-from distutils.dist import Distribution
 from distutils.extension import Extension
+
+if sys.platform == 'win32':
+    import py2exe
 
 import os, string, re, sys
 
@@ -72,10 +75,20 @@ def generate_data_dir(dir_, prefix="", postfix=""):
 
 def generate_data_files():
     build_doc()
-    r=generate_data_dir("share", postfix=os.path.sep+"advene")
-    r.extend(generate_data_dir("doc", prefix="share"+os.path.sep, postfix=os.path.sep+"advene"))
+    # On Win32, we will install data files in
+    # \Program Files\Advene\share\...
+    # On Unix, it will be
+    # /usr/share/advene/...
+    if sys.platform == 'win32':
+        prefix=''
+        postfix=''
+    else:
+        prefix="share"+os.path.sep
+        postfix=os.path.sep+"advene"
+    r=generate_data_dir("share", postfix=postfix)
+    r.extend(generate_data_dir("doc", prefix=prefix, postfix=postfix))
     if os.path.isdir("locale"):
-        r.extend(generate_data_dir("locale", prefix="share"+os.path.sep))
+        r.extend(generate_data_dir("locale", prefix=prefix))
     else:
         print """**WARNING** You should generate the locales with "cd po; make mo"."""
     return r
@@ -83,8 +96,26 @@ def generate_data_files():
 myname = "Olivier Aubert"
 myemail = "olivier.aubert@liris.cnrs.fr"
 
+if sys.platform == 'win32':
+    opts = {
+	"py2exe": {
+	    "includes": "pango,atk,gtk,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be,PngImagePlugin",
+	    "excludes": [ "Tkconstants","Tkinter","tcl" ],
+	    #         "dll_excludes": ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
+	    #                          "libgdk_pixbuf-2.0-0.dll","libgdk-win32-2.0-0.dll",
+	    #                          "libglib-2.0-0.dll","libgmodule-2.0-0.dll",
+	    #                          "libgobject-2.0-0.dll","libgthread-2.0-0.dll",
+	    #                          "libgtk-win32-2.0-0.dll","libpango-1.0-0.dll",
+	    #                          "libpangowin32-1.0-0.dll"],
+	    
+         }
+	}
+else:
+    opts = {}
+
 setup (name = "advene",
        version = get_version(),
+       options = opts,
        description = "Annotate DVds, Exchange on the NEt",
        keywords = "dvd,video,annotation",
        author = "Advene project team",
@@ -118,6 +149,8 @@ setup (name = "advene",
 
        scripts = ['bin/advene'],
        
+       console = [ "bin/advene" ],
+
        data_files = generate_data_files(),
 
        classifiers = [
