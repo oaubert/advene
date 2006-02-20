@@ -38,14 +38,18 @@ import gtk.glade
 import gobject
 
 import gettext
+import locale
 
 print "Using localedir %s" % config.data.path['locale']
 
-gettext.bindtextdomain('advene', config.data.path['locale'])
-gettext.textdomain('advene')
-gtk.glade.bindtextdomain('advene', config.data.path['locale'])
-
-gettext.install('advene', localedir=config.data.path['locale'], unicode=True)
+APP='advene'
+# Initialisation de la locale
+locale.setlocale(locale.LC_ALL, '')
+gettext.bindtextdomain(APP, config.data.path['locale'])
+gettext.textdomain(APP)
+gettext.install(APP, localedir=config.data.path['locale'], unicode=True)
+gtk.glade.bindtextdomain(APP, config.data.path['locale'])
+gtk.glade.textdomain(APP)
 
 import advene.core.controller
 
@@ -148,8 +152,6 @@ class AdveneGUI (Connect):
         
         gladefile=config.data.advenefile (config.data.gladefilename)
         # Glade init.
-        gtk.glade.bindtextdomain(gettext.textdomain())
-        gtk.glade.textdomain(gettext.textdomain())
         self.gui = gtk.glade.XML(gladefile, domain=gettext.textdomain())
         self.connect (self.gui)
 
