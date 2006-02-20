@@ -30,7 +30,6 @@ class EditWidget(gtk.VBox):
     CHANGE_OPTION = 1
     CHANGE_SPIN = 2
     CHANGE_CHECKBOX = 3
-    CHANGE_FILE = 4
 
     def __init__(self, set_config, get_config):
 
@@ -86,6 +85,7 @@ class EditWidget(gtk.VBox):
 
         property, mode = args[-2:]
         args = args[:-2]
+	value = None
 
         if (mode == self.CHANGE_ENTRY):
             value = src.get_text()
@@ -99,11 +99,11 @@ class EditWidget(gtk.VBox):
         elif (mode == self.CHANGE_SPIN):
             value = src.get_value_as_int()
 
-        elif (mode == self.CHANGE_FILE):
-            file = src.get_full_path(file_must_exist = True)
-            print "FILE:", file
+	else:
+	    print "Unknown type", str(mode)
 
-        self.__set_config(property, value)
+	if value is not None:
+	    self.__set_config(property, value)
 
     #
     # Sets/returns the name of this configurator. That name will appear in the
@@ -235,7 +235,54 @@ class EditWidget(gtk.VBox):
             filename=None
             if res == gtk.RESPONSE_OK:
                 filename=fs.get_filename()
-                entry.set_text(filename)
+		entry.set_text(filename)
+            fs.destroy()
+
+        lbl = gtk.Label(label)
+        lbl.show()
+        align = gtk.Alignment()
+        align.show()
+        align.add(lbl)
+
+        hbox = gtk.HBox()
+        hbox.show()
+        entry = gtk.Entry()
+        entry.show()
+        hbox.pack_start(entry, True, True, 0)
+
+        btn = gtk.Button(stock = gtk.STOCK_OPEN)
+        btn.show()
+        hbox.pack_end(btn, True, True, 4)
+
+        value = self.__get_config(property)
+
+        btn.connect("clicked", open_filedialog, value, entry)
+
+        entry.set_text(value)
+        entry.connect("changed", self.__on_change, property,
+                      self.CHANGE_ENTRY)
+
+        self.__tooltips.set_tip(entry, help)
+        self.__tooltips.set_tip(btn, help)
+        self.__add_line(1, align, hbox)
+
+    def add_dir_selector(self, label, property, help):
+
+        def open_filedialog(self, default_file, entry):
+            fs=gtk.FileChooserDialog(title=_("Choose a directory"),
+                                     parent=None,
+                                     action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                                     buttons=( gtk.STOCK_OPEN,
+                                               gtk.RESPONSE_OK,
+                                               gtk.STOCK_CANCEL,
+                                               gtk.RESPONSE_CANCEL ))
+            if default_file:
+                fs.set_filename(default_file)
+            res=fs.run()
+            filename=None
+            if res == gtk.RESPONSE_OK:
+                filename=fs.get_filename()
+		entry.set_text(filename)
             fs.destroy()
 
         lbl = gtk.Label(label)
