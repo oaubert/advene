@@ -98,7 +98,7 @@ def snapshot2png (image, output=None):
 
     code=fourcc2rawcode(image.type)
     if code is None:
-        print "snapshot: unknown image type " % repr(image.type)
+        print "snapshot: unknown image type ", repr(image.type)
         i = Image.new ('RGB', (160,100), color=255)
     elif code == 'PNG':
         if output is not None:
