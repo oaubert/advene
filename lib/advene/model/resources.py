@@ -1,9 +1,10 @@
 """Resources access classes
+========================
 
-When using a .azp package file.
+    Resources are available when using a .azp package file::
 
-resources/: associated resources, 
-            available through the TALES expression /package/advene/resources/...
+      resources/: associated resources, 
+	          available through the TALES expression /package/advene/resources/...
 
 """
 import os
@@ -20,8 +21,7 @@ from gettext import gettext as _
 class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
     """Class accessing a resource data (file).
     
-    FIXME: should implement advene.model.content.Content API
-
+    FIXME: should fully implement advene.model.content.Content API
     """
     __metaclass__ = auto_properties
 

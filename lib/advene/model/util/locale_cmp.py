@@ -26,8 +26,7 @@ except ImportError:
 
 
 class Locale (object):
-    """
-    A class for representing and comparing locale settings.
+    """Class for representing and comparing locale settings.
     """
 
     def __init__ (self, a_string):

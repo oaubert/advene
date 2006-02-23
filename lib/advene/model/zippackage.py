@@ -1,33 +1,34 @@
 """OpenDocument style package format.
 ==================================
 
-This format is a transition from the plain xml Advene package format
-to a richer format inspired by OpenDocument (zip file with data + metadata).
+  This format is a transition from the plain xml Advene package format
+  to a richer format inspired by OpenDocument (zip file with data + metadata).
+  
+  It is intented as a temporary measure before the complete rewrite of
+  the Advene package format.
+  
+  File extension: .azp (Advene Zip Package) which will be followed by
+  .aod (Advene OpenDocument)
+  
+  General layout::
+  
+    foo.azp/
+            mimetype
+            content.xml
+            resources/
+            meta.xml (optional)
+            META-INF/manifest.xml
+  
+  Contents::
+  
+    mimetype: application/x-advene-zip-package
+    content.xml: the previous package.xml format
+    resources/: associated resources, 
+                available through the TALES expression /package/resources/...
+    meta.xml: metadata (cf OpenDocument specification)
+    META-INF/manifest.xml : Manifest (package contents)
 
-It is intented as a temporary measure before the complete rewrite of
-the Advene package format.
-
-File extension: .azp (Advene Zip Package) which will be followed by
-.aod (Advene OpenDocument)
-
-General layout:
-
-foo.azp/
-        mimetype
-        content.xml
-        resources/
-        meta.xml (optional)
-        META-INF/manifest.xml
-
-Contents:
-
-mimetype: application/x-advene-zip-package
-content.xml: the previous package.xml format
-resources/: associated resources, 
-            available through the TALES expression /package/resources/...
-meta.xml: metadata (cf OpenDocument specification)
-META-INF/manifest.xml : Manifest (package contents)
-"""
+  """
 
 import zipfile
 import os
@@ -102,6 +103,11 @@ class ZipPackage:
             self.open(self.file_)
 
     def getContentsFile(self):
+	"""Return the path to the real XML file.
+
+	@return: the XML filename
+	@rtype: string
+	"""
         return os.path.join( self._tempdir, 'content.xml' )
 
     def new(self):
@@ -116,6 +122,11 @@ class ZipPackage:
         os.mkdir(os.path.join(self._tempdir, 'resources'))
 
     def open(self, fname=None):
+	"""Open the given AZP file.
+	
+	@param fname: the file name
+	@type fname: string
+	"""
         if fname is None:
             fname=self.file_
 
@@ -167,6 +178,8 @@ class ZipPackage:
         self.file_ = fname
 
     def save(self, fname=None):
+	"""Save the package.
+	"""
         if fname is None:
             fname=self.file_
 
@@ -200,7 +213,11 @@ class ZipPackage:
 
     def list_to_manifest(self, manifest):
         """Generate the XML representation of the manifest.
-
+	
+	@param manifest: the list of files
+	@type manifest: list
+	@return: the XML representation of the manifest
+	@rtype: string
         """
         # FIXME: This is done in a hackish way. It should be rewritten
         # using a proper XML binding
@@ -223,6 +240,10 @@ class ZipPackage:
         """Convert the manifest.xml to a list.
 
         List of tuples : (name, mimetype)
+
+	@param name: the manifest filename
+	@type name: string
+	@return: a list of typles (name, mimetype)
         """
         h=ManifestHandler()
         return h.parse_file(name)
@@ -235,6 +256,11 @@ class ZipPackage:
         return True
 
     def getResources(self, package=None):
+	"""Return the root resources object for the package.
+	
+	@return: the root Resources object
+	@rtype: Resources
+	"""
         return Resources( self, '', parent=package )
 
 class ManifestHandler(xml.sax.handler.ContentHandler):

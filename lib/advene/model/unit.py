@@ -23,7 +23,7 @@ import xml.dom.ext.reader.PyExpat
 from xml.dom.Element import Element
 from xml.dom.Text import Text
 
-from _impl import Modeled
+from modeled import Modeled
 
 class ModeledTestCase(unittest.TestCase):
 
