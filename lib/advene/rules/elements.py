@@ -345,7 +345,8 @@ class Rule:
     """Advene Rule, consisting in an Event, a Condition and an Action.
 
     The priority parameter is used to determine the order of execution
-    of rules. The convention is:
+    of rules. The convention is::
+
       0 - 100   : user rules
       100 - 200 : default rules
       200+      : internal rules
@@ -636,143 +637,6 @@ class RuleSet(list):
                     actionnode.appendChild(paramnode)
                     paramnode.setAttribute('name', pname)
                     paramnode.setAttribute('value', pvalue)
-
-    def to_file(self, catalog=None, filename=None):
-        """Deprecated.
-
-        Save the ruleset to a simple text file.
-        """
-        if catalog is None:
-            catalog=event.ECACatalog()
-        if filename == '-':
-            fd=sys.stderr
-        else:
-            fd=open(filename, 'w')
-        for rule in self:
-            fd.write("Rule %s:\n" % rule.name)
-            fd.write("\tEvent %s\n" % rule.event[:])
-            if rule.condition != rule.default_condition:
-                for cond in rule.condition:
-                    if cond == rule.default_condition:
-                        continue
-                    if cond.operator in cond.binary_operators:
-                        fd.write("\tIf %s %s %s\n" % (cond.lhs, cond.operator, cond.rhs))
-                    else:
-                        fd.write("\tIf %s %s\n" % (cond.lhs, cond.operator))
-            fd.write("\tThen\n")
-            if isinstance(rule.action, ActionList):
-                l=rule.action
-            else:
-                l=[rule.action]
-            for action in l:
-                fd.write("\t%s (%s)\n" % (action.name, str(action.parameters)))
-        if filename != '-':
-            fd.close()
-        return
-
-    def from_file(self, catalog=None, filename=None):
-        """Deprecated. Read from a flat text file.
-
-        Syntax of the file:
-
-        Rule rulename
-          event: AnnotationBegin
-          condition: annotation/type equals package/annotationTypes/teacher:narrative
-          action: DisplayMessage message=string: Narrator: ${annotation/content/data}
-        EndRule
-
-        The available operators are Condition.binary_operators and Condition.unary_operators
-        If the action has several parameters, they should be separated by ;
-
-        """
-        if catalog is None:
-            catalog=event.ECACatalog()
-        f = open(filename, 'r')
-        rule_regexp=sre.compile('^rule\s+(.+)$', sre.I)
-        endrule_regexp=sre.compile('^endrule', sre.I)
-        content_regexp=sre.compile('\s*(event|condition|action):\s+(.+)', sre.I)
-        comment_regexp=sre.compile('^\s*(#.+)?$')
-        rule=None
-        conditionlist=None
-        for l in f:
-            if comment_regexp.match(l):
-                continue
-            if endrule_regexp.match(l):
-                if rule is None:
-                    raise Exception(_("Malformed ruleset file: end without a start."))
-                if conditionlist:
-                    rule.condition=conditionlist
-                self.append(rule)
-                rule=None
-                continue
-            match=rule_regexp.match(l)
-            if match is not None:
-                name=match.group(1)
-                rule=Rule(name=name)
-                conditionlist=ConditionList()
-                continue
-            match=content_regexp.match(l)
-            if match is not None:
-                attr, value=match.group(1, 2)
-                attr=attr.lower()
-                if rule is None:
-                    raise Exception(_("Syntax error in file %s:\n%s") % (filename, l))
-                if attr == 'event':
-                    if catalog.is_event(value):
-                        rule.event=Event(value)
-                    else:
-                        raise Exception(_("Undefined Event name: %s") % value)
-                    continue
-                elif attr == 'condition':
-                    cond=sre.split("\s+", value)
-                    if len(cond) == 3:
-                        lhs=urllib.unquote(cond[0])
-                        operator=urllib.unquote(cond[1])
-                        rhs=urllib.unquote(cond[2])
-                        conditionlist.append(Condition(lhs=lhs,
-                                                       rhs=rhs,
-                                                       operator=operator))
-                    elif len(cond) == 2:
-                        operator=cond[0]
-                        lhs=urllib.unquote(cond[1])
-                        conditionlist.append(Condition(lhs=lhs,
-                                                       rhs=None,
-                                                       operator=operator))
-                    elif len(cond) == 1:
-                        lhs=urllib.unquote(cond[0])
-                        conditionlist.append(Condition(lhs=lhs,
-                                                       rhs=None,
-                                                       operator='value'))
-                    else:
-                        raise Exception("Syntax error in file %s:\n%s" % (filename, l))
-                    continue
-                elif attr == 'action':
-                    if sre.match('^(\w+)$', value):
-                        # Parameterless action
-                        if catalog.is_action(value):
-                            action=Action(registeredaction=catalog.get_action(value),
-                                          catalog=catalog)
-                        else:
-                            raise Exception("Undefined action in %s: %s" % (filename, value))
-                    else:
-                        match=sre.match('^(\w+)\s+(.+)', value)
-                        name=match.group(1)
-                        if catalog.is_action(name):
-                            action=Action(registeredaction=catalog.get_action(name),
-                                          catalog=catalog)
-                        else:
-                            raise Exception("Undefined action in %s: %s" % (filename, name))
-                        parameters=match.group(2)
-                        for pair in sre.split('\s*&\s*', parameters):
-                            (p_name, p_value)=pair.split('=')
-                            action.add_parameter(urllib.unquote(p_name),
-                                                 urllib.unquote(p_value))
-                    rule.add_action(action)
-                    continue
-                else:
-                    raise Exception("Syntax error in file %s:\n%s" % (filename, l))
-            raise Exception("Syntax error in file %s:\n%s" % (filename, l))
-        f.close()
 
 class Query:
     """Simple Query component.
@@ -1179,8 +1043,5 @@ if __name__ == "__main__":
     for a in actions.DefaultActionsRepository(controller=controller).get_default_actions():
             catalog.register_action(a)
     r=RuleSet()
-    if filename.endswith('.xml'):
-        r.from_xml(catalog=catalog, uri=filename)
-    else:
-        r.from_file(catalog=catalog, filename=filename)
+    r.from_xml(catalog=catalog, uri=filename)
     print "Read %d rules." % len(r)
