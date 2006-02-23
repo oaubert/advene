@@ -57,11 +57,13 @@ except ImportError:
 class HandyXmlWrapper:
     """This class wraps an XML element to give it convenient attribute access.
        
-       <element attr1='foo' attr2='bar'>
-           <child attr3='baz' />
-       </element>
-       element.attr1 == 'foo'
-       element.child.attr3 == 'baz'
+       Example::
+
+         <element attr1='foo' attr2='bar'>
+             <child attr3='baz' />
+         </element>
+         element.attr1 == 'foo'
+         element.child.attr3 == 'baz'
     """
     def __init__(self, node):
         self.node = node
