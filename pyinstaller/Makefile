@@ -1,7 +1,9 @@
 NAME=advene-bin
 VERSION := $(shell ../scripts/version)
 FULLNAME=$(NAME)-$(VERSION)
-PYINSTALLER=${HOME}/src/pyinstaller-snapshot
+# Note: on cygwin, it can help to use a relative path:
+# PYINSTALLER=../../src/pyinstaller
+PYINSTALLER=${HOME}/src/pyinstaller
 SPECFILE=advene.pyspec
 DESTDIR=$(shell pwd)/$(FULLNAME)
 PREFIX=/usr
