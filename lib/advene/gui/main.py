@@ -1734,7 +1734,7 @@ class AdveneGUI (Connect):
         self.slider_move = False
 
     def on_help1_activate (self, button=None, data=None):
-        helpfile=os.sep.join( (config.data.path['web'], 'user.html') )
+        helpfile=os.path.join( config.data.path['web'], 'user.html' )
         if os.access(helpfile, os.R_OK):
             self.controller.open_url (helpfile)
         else:

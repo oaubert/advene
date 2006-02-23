@@ -60,6 +60,7 @@ class ImageCache(dict):
         # The content of the not_yet_available_file file
 	f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
         s=TypedString(f.read(10000))
+	f.close()
         s.contenttype='image/png'
         self.not_yet_available_image = s
 
@@ -173,7 +174,7 @@ class ImageCache(dict):
             else:
                 os.mkdir (directory)
 
-        d = os.sep.join ([directory, name])
+        d = os.path.join (directory, name)
         
         if not os.path.isdir (d):
             if os.path.exists (d):
@@ -183,7 +184,7 @@ class ImageCache(dict):
                 os.mkdir (d)
 
         for k in self.keys():
-            f = open(os.sep.join ([d, "%010d.png" % k]), "w")
+            f = open(os.path.join (d, "%010d.png" % k), "w")
             f.write (dict.__getitem__(self, k))
             f.close ()
 
@@ -195,14 +196,14 @@ class ImageCache(dict):
         @param name: the name of the origin imagecache directory.
         @type name: string
         """
-        d = os.sep.join ([config.data.path['imagecache'], name])
+        d = os.path.join (config.data.path['imagecache'], name)
         
         if not os.path.isdir (d):
             # The cache directory does not exist
             return
         else:
             for name in os.listdir (d):
-                f = open(os.sep.join ([d, name]), "r")
+                f = open(os.path.join (d, name), "r")
 		(n, ext) = os.path.splitext(name)
                 dict.__setitem__(self, long(n.lstrip('0')), f.read ())
                 f.close ()

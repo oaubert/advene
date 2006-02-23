@@ -295,8 +295,8 @@ class Config(object):
                 h=os.environ['HOME']
             elif os.environ.has_key('HOMEPATH'):
                 # Windows
-                h=os.sep.join((os.environ['HOMEDRIVE'],
-                               os.environ['HOMEPATH']))
+                h=os.path.join(os.environ['HOMEDRIVE'],
+                               os.environ['HOMEPATH'])
             else:
                 raise Exception ('Unable to find homedir')
         return h
@@ -427,7 +427,7 @@ class Config(object):
         """
         if isinstance(filename, list) or isinstance(filename, tuple):
             filename=os.sep.join(filename)
-        return os.sep.join ( ( self.path[category], filename ) )
+        return os.path.join ( self.path[category], filename )
 
     userid = property (fget=get_userid,
                        doc="Login name of the user")

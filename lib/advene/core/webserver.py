@@ -711,7 +711,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.start_html (_("Available files"), duplicate_title=True)
         self.wfile.write ("<ul>")
         import glob
-        for i in glob.glob (os.sep.join ((config.data.path['data'], '*.xml'))):
+        for i in glob.glob (os.path.join (config.data.path['data'], '*.xml')):
             name = i.replace (".xml", "")
             self.wfile.write ("""
             <li><a href="/admin/load?alias=%(alias)s&uri=%(uri)s">%(uri)s</a></li>
@@ -1326,11 +1326,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                             _("""<p>Invalid data request %s</p>""")
                             % "/".join(parameters))
             return
-        file_=os.sep.join((datadir, os.sep.join(parameters)))
+        file_=os.path.join(datadir, *parameters)
 
         if (os.path.isdir(file_)):
             parameters.append('index.html')
-            file_=os.sep.join((datadir, os.sep.join(parameters)))
+            file_=os.path.join(datadir, *parameters)
 
         (mimetype, encoding) = mimetypes.guess_type(file_)
         if mimetype is None:
@@ -1774,7 +1774,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.authorized_hosts = {'127.0.0.1': 'localhost'}
 
         # Compile EPOZ template file
-        fname=os.sep.join((config.data.path['web'], 'epoz', 'epozmacros.html'))
+        fname=os.path.join(config.data.path['web'], 'epoz', 'epozmacros.html')
         templateFile = open (fname, 'r')
         self.epoz_macros = simpletal.simpleTAL.compileHTMLTemplate (templateFile)
         templateFile.close()

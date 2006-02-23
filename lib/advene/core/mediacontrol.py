@@ -65,8 +65,8 @@ class PlayerFactory:
         # FIXME: Hack: for local versions of VLC (development tree)
         # You should define the correct path in advene.ini
         if (vlcpath is None
-            and os.path.exists(os.sep.join( (config.data.path['vlc'],
-                                             'vlc.exe') ))):
+            and os.path.exists(os.path.join( config.data.path['vlc'],
+                                             'vlc.exe' ))):
             print "Using local version of VLC from %s" % config.data.path['vlc']
             vlcpath = config.data.path['vlc']
 

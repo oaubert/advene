@@ -452,7 +452,7 @@ class AdveneController:
                     # Expand userdir
                     d=os.path.expanduser(d)
 
-                n=os.sep.join((d, name))
+                n=os.path.join(d, name)
                 # FIXME: if d is a URL, use appropriate method (urllib.??)
                 if os.path.exists(n):
                     mediafile=n
