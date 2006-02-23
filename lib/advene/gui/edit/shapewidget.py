@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 
-"""Simple Shape editor widget.
+"""Simple Shape editor widget
+==========================
 
-FIXME
-- implement text shape ?
+  This component provides a simple framework allowing to edit basic
+  shapes, and generate the corresponding XML.
+  
+  This component should not have dependencies on Advene, so that it
+  can be reused in other projects.
+  
+  FIXME
 
-DONE:
-- properties editor
-- get_svg for Shapes and ShapeEditor
-- correctly set default widget size
+     - implement text shape ?
+     - implement SVG import (with constraints)
 """
 
 import gtk
@@ -22,7 +26,24 @@ gettext.install('advene', unicode=True)
 COLORS = [ 'red', 'green', 'blue', 'black', 'white' ]
 
 class Shape:
+    """The generic Shape class.
+
+    @ivar name: the shape instance name
+    @type name: string
+    @ivar color: the shape color
+    @type color: string
+    @ivar linewidth: the line width
+    @type linewidth: int
+    @ivar filled: should the shape be filled ?
+    @type filled: boolean
+    @ivar tolerance: pixel tolerance for control point selection
+    @type tolerance: int
+    @cvar SHAPENAME: the name of the shape class
+    @type SHAPENAME: translated string
+    """
+
     SHAPENAME=_("Generic shape")
+
     def __init__(self, name=SHAPENAME, color="green"):
         self.name=name
         self.color=color
@@ -32,46 +53,100 @@ class Shape:
         self.tolerance = 6
         self.set_bounds( ( (0, 0), (10, 10) ) )
 
-    def render(self, pixmap):
-        print "Cannot render generic shape object"
-        pass
-
     def set_bounds(self, bounds):
+	"""Set the bounds of the shape.
+	
+	The bounds are the coordinates of the rectangular selection
+	used to define the shape.
+
+	@param bounds: a tuple of 2 int couples
+	@type bounds: tuple
+	"""
         pass
 
     def get_bounds(self):
+	"""Return the bounds of the shape.
+
+	@return: a tuple of 2 int couples
+	@rtype: tuple
+	"""
         return ( (0, 0), (10, 10) )
 
     def render(self, pixmap, invert=False):
+	"""Render the shape on the given pixmap.
+	
+	@param pixmap: the destination pixmap
+	@type pixmap: gtk.gdk.Pixmap
+	@param invert: should the rendering inverse the selection ?
+	@type invert: boolean
+	"""
         return
 
     def translate(self, vector):
+	"""Translate the shape.
+
+	@param vector: the translation vector
+	@type vector: a couple of int
+	"""
         pass
 
     def control_point(self, point):
-        """If on a control point, return its coordinates (x, y) and those of the other bound, else None
+        """Test if the given point is a control point.
 
-        This generic version is fitted for rectangular areas
+	If on a control point, return its coordinates (x, y) and those of the
+	other bound, else None
+
+	@param point: the tested point
+	@type point: a couple of int
+	@return: None, or a couple of coordinates
+	@rtype: tuple
         """
         return None
 
     def __contains__(self, point):
+	"""Test if the given point is inside the shape.
+
+	@param point: the tested point
+	@type point: a couple of int
+	@rtype: boolean
+	"""
         return False
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
+
+	@param relative: should dimensions be relative to the container size or absolute?
+	@type relative: boolean
+	@param size: the container size in pixels
+	@type size: a couple of int
+	@return: the SVG representation
+	@rtype: string
         """
-        return "<text>Generic shape</text>"
+        return u"<text>Generic shape</text>"
 
     def copy_from(self, shape, style=False):
+	"""Copy data from another shape.
+	
+	@param shape: the original shape
+	@param style: should the style be copied also?
+	@type style: boolean
+	"""
         return
 
     def clone(self, style=False):
+	"""Clone the shape.
+	
+	@param style: should the style be copied also?
+	@type style: boolean
+	@return: a new shape
+	"""
         s=self.__class__()
         s.copy_from(self, style)
         return s
 
     def edit_properties_widget(self):
+ 	"""Build a widget to edit the shape properties.
+	"""
         vbox=gtk.VBox()
 
         def label_widget(label, widget):
@@ -117,6 +192,8 @@ class Shape:
         return vbox
 
     def edit_properties(self):
+ 	"""Display a widget to edit the shape properties.
+	"""
         edit=self.edit_properties_widget()
 
         d = gtk.Dialog(title=_("Properties of %s") % self.name,
@@ -152,6 +229,11 @@ class Shape:
         return False
 
 class Rectangle(Shape):
+    """Rectangle shape.
+
+    It can be used as a baseclass for other shapes with corresponding
+    behaviour.
+    """
     SHAPENAME=_("Rectangle")
 
     def set_bounds(self, bounds):
@@ -222,16 +304,14 @@ class Rectangle(Shape):
                  and y <= self.y + self.height )
 
     def get_svg(self, relative=False, size=None):
-        """Return a SVG representation of the shape.
-        """
         if relative and size:
-            size="""x="%d%%" y="%d%%" width="%d%%" height="%d%%" """ % (
+            pos="""x="%d%%" y="%d%%" width="%d%%" height="%d%%" """ % (
                 self.x * 100 / size[0],
                 self.y * 100 / size[1],
                 self.width * 100 / size[0],
                 self.height * 100 / size[1] )
         else:
-            size="""x="%d" y="%d" width="%d" height="%d" """ % (
+            pos="""x="%d" y="%d" width="%d" height="%d" """ % (
                 self.x,
                 self.y,
                 self.width,
@@ -243,21 +323,12 @@ class Rectangle(Shape):
             fill='none'
 
         return """<rect %s fill="%s" stroke="%s" style="stroke-width:%s" />""" % (
-            size, fill, self.color, str(self.linewidth) )
+            pos, fill, self.color, str(self.linewidth) )
 
 class Text(Rectangle):
     """Experimental Text shape. Non-working for the moment.
     """
     SHAPENAME=_("Text")
-
-    def set_bounds(self, bounds):
-        self.x = int(min(bounds[0][0], bounds[1][0]))
-        self.y = int(min(bounds[0][1], bounds[1][1]))
-        self.width = int(abs(bounds[0][0] - bounds[1][0]))
-        self.height = int(abs(bounds[0][1] - bounds[1][1]))
-
-    def get_bounds(self):
-        return ( (self.x, self.y), (self.x + self.width, self.y + self.height) )
 
     def render(self, pixmap, invert=False):
         col=pixmap.get_colormap().alloc_color(self.color)
@@ -272,50 +343,6 @@ class Text(Rectangle):
                            self.y,
                            l)
         return
-
-    def translate(self, vector):
-        self.x += int(vector[0])
-        self.y += int(vector[1])
-
-    def copy_from(self, shape, style=False):
-        self.x = shape.x
-        self.y = shape.y
-        self.name = shape.name
-        if style:
-            self.color = shape.color
-            self.linewidth = shape.linewidth
-
-    def control_point(self, point):
-        """If on a control point, return its coordinates (x, y) and those of the other bound, else None
-
-        This version is fitted for rectangular areas
-        """
-        x, y = point[0], point[1]
-        retval = [[None, None], [None, None]]
-        if abs(x - self.x) <= self.tolerance:
-            retval[0][0] = self.x + self.width
-            retval[1][0] = self.x
-        elif abs(x - self.x - self.width) <= self.tolerance:
-            retval[0][0] = self.x
-            retval[1][0] = self.x + self.width
-        else:
-            return None
-        if abs(y - self.y) <= self.tolerance:
-            retval[0][1] = self.y + self.height
-            retval[1][1] = self.y
-        elif abs(y - self.y - self.height) <= self.tolerance:
-            retval[0][1] = self.y
-            retval[1][1] = self.y + self.height
-        else:
-            return None
-        return retval
-
-    def __contains__(self, point):
-        x, y = point
-        return ( x >= self.x
-                 and x <= self.x + self.width
-                 and y >= self.y
-                 and y <= self.y + self.height )
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
@@ -333,6 +360,8 @@ class Text(Rectangle):
             size, self.color, str(self.linewidth), self.name )
 
 class Line(Rectangle):
+    """A simple Line.
+    """
     SHAPENAME=_("Line")
 
     def set_bounds(self, bounds):
@@ -395,6 +424,13 @@ class Line(Rectangle):
             size, self.color, str(self.linewidth) )
 
 class Circle(Rectangle):
+    """A Circle shape.
+
+    @ivar centerx, centery: the coordinates of the center in pixel
+    @type centerx, centery: int
+    @ivar radius: the circle radius in pixel
+    @type radius: int
+    """
     SHAPENAME=_("Circle")
 
     def set_bounds(self, bounds):
@@ -447,7 +483,39 @@ class Circle(Rectangle):
             size, fill, self.color, str(self.linewidth) )
 
 class ShapeDrawer:
+    """Widget allowing to draw and edit shapes.
+
+    @ivar callback: method called when the button is released.
+    @type callback: method taking a rectangle as parameter
+    
+    @ivar background: the canvas background
+    @type background: gtk.Image
+    @ivar objects: the list of defined objects
+    @type objects: gtk.ListStore
+    @ivar selection: the rectangular selection coordinates
+    @type selection: a list of 2 lists
+    @ivar feedback_shape: the currently edited shape, displayed as feedback
+    @type feedback_shape: Shape
+    @ivar shape_class: the default shape class to be created
+    
+    @ivar mode: the current editing mode ("create", "resize" or "translate")
+    @type mode: string
+    
+    @ivar pixmap: the edited pixmap
+    @type pixmap: gtk.gdk.Pixmap
+    @ivar canvaswidth, canvasheight: the canvas dimensions
+    @type canvaswidth, canvasheight: int
+    
+    @ivar widget: the gtk Widget for the component
+    @type widget: gtk.Widget
+    
+    """
     def __init__(self, callback=None, background=None):
+	"""
+	@param callback: the callback method
+	@param background: an optional background image
+	@type background: gtk.Image
+	"""
         self.callback = callback or self.default_callback
 
         # background is a gtk.Image()
@@ -483,14 +551,22 @@ class ShapeDrawer:
             self.canvasheight=h
 
     def default_callback(self, rectangle):
+	"""Default callback.
+	"""
         print "Got selection ", str(rectangle)
 
     def add_object(self, o):
+	"""Add an object (shape) to the object list.
+	"""
         self.objects.append( (o, o.name) )
         self.plot()
 
     def find_object(self, o):
-        """Return the iterator.
+        """Return the iterator for the given object.
+	
+	@param o: the searched object
+	@return: the iterator
+	@rtype: gtk.Iterator
         """
         i = self.objects.get_iter_first()
         while i is not None:
@@ -500,12 +576,19 @@ class ShapeDrawer:
         return None
 
     def remove_object(self, o):
+	"""Remove the given object from the list.
+	"""
         i = self.find_object(o)
         if i is not None:
             self.objects.remove( i )
         self.plot()
 
     def dimensions(self):
+	"""Return the canvas dimensions.
+	
+	@return: the dimensions in pixel
+	@rtype: a couple (width, height)
+	"""
         return (self.canvaswidth, self.canvasheight)
 
     def configure_event(self, widget, event):
@@ -529,6 +612,8 @@ class ShapeDrawer:
         return False
 
     def clicked_shape(self, point):
+	"""Check if point is on a shape.
+	"""
         for o in self.objects:
             if point in o[0]:
                 return o[0]
@@ -646,12 +731,13 @@ class ShapeDrawer:
             self.draw_drawable()
 
     def draw_drawable(self):
-        """Render the pixmap in the drawinarea."""
+        """Render the pixmap in the drawingarea."""
         x, y, w, h = self.widget.get_allocation()
         self.widget.window.draw_drawable(self.widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, 0, 0, 0, 0, w, h)
 
     def plot(self):
-        """Draw in the pixmap."""
+        """Draw in the pixmap.
+	"""
         if self.pixmap is None:
             return
         self.pixmap.draw_rectangle(self.widget.get_style().white_gc, True, 0, 0, self.canvaswidth, self.canvasheight)
@@ -672,6 +758,10 @@ class ShapeDrawer:
         self.draw_drawable()
 
 class ShapeEditor:
+    """Shape Editor component.
+
+    This component provides an example of using ShapeWidget.
+    """
     def __init__(self, background=None):
         self.background=None
         self.drawer=ShapeDrawer(callback=self.callback,
