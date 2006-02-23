@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 #
 # This file is part of Advene.
 #
@@ -38,9 +38,9 @@ def fix_paths(path):
 
 # Try to find if we are in a development tree.
 (maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
-if subdir == 'bin' and  os.path.exists(os.sep.join((maindir, "setup.py"))):
+if subdir == 'bin' and  os.path.exists(os.path.join(maindir, "setup.py")):
   # Chances are that we were in a development tree...
-  libpath=os.sep.join((maindir, "lib"))
+  libpath=os.path.join(maindir, "lib")
   print "You seem to have a development tree at:\n%s." % libpath
   sys.path.insert (0, libpath)
 
@@ -87,7 +87,7 @@ if config.data.os == 'win32':
     if path is None:
       raise ImportError("Couldn't find GTK DLLs.")
     os.environ['PATH'] += ';'+path.encode('utf8')
-    os.environ['PATH'] += ';'+os.sep.join( (path, 'bin') ).encode('utf8')
+    os.environ['PATH'] += ';'+os.path.join( path, 'bin' ).encode('utf8')
     print "Using GTK DLLs at %s" % path
     import pygtk
     import gtk
@@ -115,6 +115,11 @@ if __name__ == '__main__':
 
   gui = advene.gui.main.AdveneGUI (sys.argv[1:])
   try:
+    #import hotshot
+    #filename = "pythongrind.prof"
+    #prof = hotshot.Profile(filename, lineevents=1)
+    #prof.runcall(gui.main)
+    #prof.close()
     gui.main ()
   except Exception, e:
     print _("Got exception\n\n%s\n\n. Stopping services...") % str(e)
