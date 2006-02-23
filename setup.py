@@ -12,9 +12,9 @@ import os, string, re, sys
 def get_version():
     """Get the version number of the package."""
     maindir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    if os.path.exists(os.sep.join((maindir, "setup.py"))):
+    if os.path.exists(os.path.join(maindir, "setup.py")):
         # Chances are that we were in a development tree...
-        libpath=os.sep.join((maindir, "lib"))
+        libpath=os.path.join(maindir, "lib")
         sys.path.insert (0, libpath)
         import advene.core.version
         version=advene.core.version.version
@@ -25,7 +25,7 @@ def get_version():
 
 def check_changelog(maindir, version):
     """Check that the changelog for maindir matches the given version."""
-    f=open(os.sep.join( (maindir, "debian", "changelog") ), 'r')
+    f=open(os.path.join( maindir, "debian", "changelog" ), 'r')
     l=f.readline()
     f.close()
     if not l.startswith('advene (' + version + ')'):
