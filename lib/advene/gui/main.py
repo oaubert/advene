@@ -1176,6 +1176,27 @@ class AdveneGUI (Connect):
                                               button=gtk.STOCK_SAVE,
                                               default_dir=d)
         if filename:
+	    (p, ext) = os.path.splitext(filename)
+	    if ext == '':
+		# Add a pertinent extension
+		if self.controller.package.resources:
+		    # There are resources -> save as an .azp package
+		    ext='.azp'
+		else:
+		    ext='.xml'
+		filename = filename + ext
+
+	    if self.controller.package.resources and ext.lower() != '.azp':
+		ret=advene.gui.util.yes_no_cancel_popup(title=_("Invalid file extension"),
+							text=_("Your package contains resources,\nthe filename (%s) should have a .azp extension.\nShould I put the correct extension?") % filename)
+		if ret == gtk.RESPONSE_YES:
+		    filename = p + '.azp'
+		elif ret == gtk.RESPONSE_NO:
+		    advene.gui.util.message_dialog(_("OK, the resources will be lost."))
+		else:
+		    self.log(_("Aborting package saving"))
+		    return True
+		
             self.controller.save_package(name=filename)
         return True
 
