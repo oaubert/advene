@@ -75,7 +75,7 @@ if config.data.os == 'win32':
       sys.setdefaultencoding(encoding)
 
   #win32 platform, add the "lib" folder to the system path
-  os.environ['PATH'] += ";lib;"
+  os.environ['PATH'] += os.path.pathsep + "lib"
   try:
     import pygtk
     import gtk
@@ -86,8 +86,8 @@ if config.data.os == 'win32':
     path=config.data.get_registry_value('Software\\GTK\\2.0', 'Path')
     if path is None:
       raise ImportError("Couldn't find GTK DLLs.")
-    os.environ['PATH'] += ';'+path.encode('utf8')
-    os.environ['PATH'] += ';'+os.path.join( path, 'bin' ).encode('utf8')
+    os.environ['PATH'] += os.path.pathsep + path.encode('utf8')
+    os.environ['PATH'] += os.path.pathsep + os.path.join( path, 'bin' ).encode('utf8')
     print "Using GTK DLLs at %s" % path
     import pygtk
     import gtk
