@@ -6,9 +6,9 @@ advenehome=os.path.dirname(SPECPATH)
 
 a = Analysis(
     [ 
-	os.path.join(HOMEPATH,'support/_mountzlib.py'), 
-	os.path.join(HOMEPATH,'support/useUnicode.py'), 
-	os.path.join(advenehome, 'bin/advene'),
+	os.path.join(HOMEPATH, 'support', '_mountzlib.py'), 
+	os.path.join(HOMEPATH, 'support', 'useUnicode.py'), 
+	os.path.join(advenehome, 'bin', 'advene'),
 	],
     pathex=[ os.path.join(advenehome, 'lib') ],
 )
