@@ -619,22 +619,6 @@
 		      <property name="homogeneous">False</property>
 		    </packing>
 		  </child>
-
-		  <child>
-		    <widget class="GtkToolButton" id="toolbutton8">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Exit</property>
-		      <property name="stock_id">gtk-quit</property>
-		      <property name="visible_horizontal">True</property>
-		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
-		      <signal name="clicked" handler="on_b_exit_clicked" last_modification_time="Wed, 13 Oct 2004 21:26:18 GMT"/>
-		    </widget>
-		    <packing>
-		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
-		    </packing>
-		  </child>
 		</widget>
 	      </child>
 	    </widget>
