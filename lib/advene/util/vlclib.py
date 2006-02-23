@@ -21,11 +21,15 @@ import advene.core.config as config
 import os
 import sys
 import time
-import Image
 import StringIO
 import inspect
 import md5
 import sre
+
+try:
+    import Image
+except ImportError:
+    print "Cannot load Image module. Image conversion is disabled."
 
 from gettext import gettext as _
 
@@ -43,6 +47,9 @@ def fourcc2rawcode (code):
     @return: the corresponding PIL code
     @rtype: string
     """
+    if code == 'PNG' or code == 'png':
+	return 'PNG'
+
     conv = { 'RV32' : 'BGRX',
              'png ' : 'PNG' }
     fourcc = "%c%c%c%c" % (code & 0xff,
@@ -89,40 +96,41 @@ def snapshot2png (image, output=None):
     @rtype: string
     """
     if image.height == 0:
-        print "Error : %s" % a.data
+        print "Error : 0 sized snapshot"
         return ""
 
-    if image.type == "PNG":
-        # Image is already PNG
-        return image.data
+    png=None
 
     code=fourcc2rawcode(image.type)
-    if code is None:
-        print "snapshot: unknown image type ", repr(image.type)
-        i = Image.new ('RGB', (160,100), color=255)
-    elif code == 'PNG':
-        if output is not None:
-            f=open(output, 'w')
-            f.write(image.data)
-            f.close()
-            return ""
-        else:
-            v=TypedString(image.data)
-            v.contenttype='image/png'
-            return v
+    if code == 'PNG':
+	png=TypedString(image.data)
+        png.contenttype='image/png'
+    elif code is not None:
+	try:
+	    i = Image.fromstring ("RGB", (image.width, image.height), image.data,
+				  "raw", code)
+	    ostream = StringIO.StringIO ()
+	    i.save(ostream, 'png')
+	    png=TypedString(ostream.getvalue())
+	    png.contenttype='image/png'
+	except NameError:
+	    print "snapshot: conversion module not available"
     else:
-        i = Image.fromstring ("RGB", (image.width, image.height), image.data,
-                              "raw", code)
+        print "snapshot: unknown image type ", repr(image.type)
+    
+    if png is None:
+	f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
+	png=TypedString(f.read(10000))
+        png.contenttype='image/png'
+	f.close()
 
     if output is not None:
-        i.save (output, 'png')
+	f=open(output, 'wb')
+	f.write(png)
+	f.close()
         return ""
     else:
-        ostream = StringIO.StringIO ()
-        i.save(ostream, 'png')
-        v=TypedString(ostream.getvalue())
-        v.contenttype='image/png'
-        return v
+        return png
 
 def mediafile2id (mediafile):
     """Returns an id (with encoded /) corresponding to the mediafile.
