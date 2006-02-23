@@ -635,8 +635,8 @@ class AdveneController:
     def save_package (self, name=None):
         """Save a package.
 
-        @param as: the URI of the package
-        @type as: string
+        @param name: the URI of the package
+        @type name: string
         """
         if name is None:
             name=self.package.uri

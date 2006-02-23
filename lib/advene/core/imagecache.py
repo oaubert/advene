@@ -168,7 +168,7 @@ class ImageCache(dict):
 
         @param name: the name
         @type name: string
-	@return d: the created directory
+	@return: the created directory
 	@rtype: string
         """
         directory=config.data.path['imagecache']
