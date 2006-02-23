@@ -1629,6 +1629,7 @@ class AdveneGUI (Connect):
         cache={
             'osd': config.data.player_preferences['osdtext'],
             'history-limit': config.data.preferences['history-size-limit'],
+	    'toolbarstyle': self.gui.get_widget("toolbar_control").get_style(),
 	    'data': config.data.path['data'],
 	    'plugins': config.data.path['plugins'],
 	    'advene': config.data.path['advene'],
@@ -1642,6 +1643,12 @@ class AdveneGUI (Connect):
         ew.add_checkbox(_("OSD"), "osd", _("Display captions on the video"))
         ew.add_spin(_("History size"), "history-limit", _("History filelist size limit"),
                     -1, 20)
+        ew.add_option(_("Toolbar style"), "toolbarstyle", _("Toolbar style"), 
+		      { _('Icons only'): gtk.TOOLBAR_ICONS,
+			_('Text only'): gtk.TOOLBAR_TEXT,
+			_('Both'): gtk.TOOLBAR_BOTH, 
+			}
+		      )
 
 	ew.add_title(_("Paths"))
 
@@ -1654,6 +1661,8 @@ class AdveneGUI (Connect):
         if res:
             config.data.player_preferences['osdtext']=cache['osd']
             config.data.preferences['history-size-limit']=cache['history-limit']
+            for t in ('toolbar_control', 'toolbar_view', 'toolbar_fileop', 'toolbar_create'):
+                self.gui.get_widget(t).set_style(cache['toolbarstyle'])
 	    for k in ('data', 'moviepath', 'plugins', 'imagecache', 'advene'):
 		if cache[k] != config.data.path[k]:
 		    config.data.path[k]=cache[k]
@@ -1780,28 +1789,6 @@ class AdveneGUI (Connect):
                               parent=sc,
                               controller=self.controller)
         cr.popup()
-        return True
-
-    def on_toolbar_style1_activate (self, button=None, data=None):
-        st={ _('Icons only'): gtk.TOOLBAR_ICONS,
-             _('Text only'): gtk.TOOLBAR_TEXT,
-             _('Both'): gtk.TOOLBAR_BOTH }
-
-        style=self.gui.get_widget("toolbar_control").get_style()
-        preselect=None
-        for k, v in st.iteritems():
-            if style == v:
-                preselect=k
-                break
-                
-        s=advene.gui.util.list_selector(title=_("Choose the toolbar style."),
-                                        text=_("Choose the toolbar style."),
-                                        members=st,
-                                        controller=self.controller,
-                                        preselect=preselect)
-        if s is not None:
-            for t in ("toolbar_control", "toolbar_view", "toolbar_fileop"):
-                self.gui.get_widget(t).set_style(st[s])
         return True
 
     def on_about_web_button_clicked(self, button=None, data=None):
