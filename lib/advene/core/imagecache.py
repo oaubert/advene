@@ -24,8 +24,6 @@ import advene.core.config as config
 import os
 import cStringIO
 
-import Image
-
 class TypedString(str):
     """String with a mimetype attribute.
     """
@@ -60,14 +58,10 @@ class ImageCache(dict):
         dict.__init__ (self)
 
         # The content of the not_yet_available_file file
-        # FIXME: we should get it from a resource file in advene share directory
-        i = Image.new ('RGB', (160,100), color=255)
-        ostream = cStringIO.StringIO ()
-        i.save (ostream, 'png')
-        s=TypedString(ostream.getvalue())
+	f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
+        s=TypedString(f.read(10000))
         s.contenttype='image/png'
         self.not_yet_available_image = s
-        ostream.close ()
 
         self.epsilon = epsilon
         if name is not None:
