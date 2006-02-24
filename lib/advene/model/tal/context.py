@@ -143,12 +143,12 @@ class _advene_context (simpleTALES.Context):
                         path = path[1:]
                         if self.locals.has_key(path):
                                 path = self.locals[path]
-                                if (isinstance (path, ContextVariable)): path = path.value()
+                                if (isinstance (path, simpleTALES.ContextVariable)): path = path.value()
                                 elif (callable (path)):path = apply (path, ())
                         
                         elif self.globals.has_key(path):
                                 path = self.globals[path]
-                                if (isinstance (path, ContextVariable)): path = path.value()
+                                if (isinstance (path, simpleTALES.ContextVariable)): path = path.value()
                                 elif (callable (path)):path = apply (path, ())
                                 #self.log.debug ("Dereferenced to %s" % path)
                 if self.locals.has_key(path):
@@ -171,18 +171,18 @@ class _advene_context (simpleTALES.Context):
                                 path = path[1:]
                                 if self.locals.has_key(path):
                                         path = self.locals[path]
-                                        if (isinstance (path, ContextVariable)): path = path.value()
+                                        if (isinstance (path, simpleTALES.ContextVariable)): path = path.value()
                                         elif (callable (path)):path = apply (path, ())
                                 elif self.globals.has_key(path):
                                         path = self.globals[path]
-                                        if (isinstance (path, ContextVariable)): path = path.value()
+                                        if (isinstance (path, simpleTALES.ContextVariable)): path = path.value()
                                         elif (callable (path)):path = apply (path, ())
                                 #self.log.debug ("Dereferenced to %s" % path)
                         try:
-                                if (isinstance (val, ContextVariable)): temp = val.value((index,pathList))
+                                if (isinstance (val, simpleTALES.ContextVariable)): temp = val.value((index,pathList))
                                 elif (callable (val)):temp = apply (val, ())
                                 else: temp = val
-                        except ContextVariable, e:
+                        except simpleTALES.ContextVariable, e:
                                 # Fast path for those functions that return values
                                 self.popLocals()
                                 return e.value()
@@ -212,18 +212,18 @@ class _advene_context (simpleTALES.Context):
                 self.popLocals()
                 if (canCall):
                         try:
-                                if (isinstance (val, ContextVariable)):
+                                if (isinstance (val, simpleTALES.ContextVariable)):
                                         result = val.value((index,pathList))
                                         # Advene hook: introduced by the NoCallVariable
                                         if callable(result):
                                                 result = apply(val.value((index, pathList)),())
                                 elif (callable (val)):result = apply (val, ())
                                 else: result = val
-                        except ContextVariable, e:
+                        except simpleTALES.ContextVariable, e:
                                 # Fast path for those functions that return values
                                 return e.value()
                 else:
-                        if (isinstance (val, ContextVariable)): result = val.realValue
+                        if (isinstance (val, simpleTALES.ContextVariable)): result = val.realValue
                         else: result = val
                 return result
 
