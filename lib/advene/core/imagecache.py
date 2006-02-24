@@ -184,7 +184,7 @@ class ImageCache(dict):
                 os.mkdir (d)
 
         for k in self.keys():
-            f = open(os.path.join (d, "%010d.png" % k), "w")
+            f = open(os.path.join (d, "%010d.png" % k), 'wb')
             f.write (dict.__getitem__(self, k))
             f.close ()
 
@@ -203,7 +203,7 @@ class ImageCache(dict):
             return
         else:
             for name in os.listdir (d):
-                f = open(os.path.join (d, name), "r")
+                f = open(os.path.join (d, name), 'rb')
 		(n, ext) = os.path.splitext(name)
                 dict.__setitem__(self, long(n.lstrip('0')), f.read ())
                 f.close ()
