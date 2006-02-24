@@ -47,10 +47,10 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
         return self.resourcepath.split('/')[-1]
 
     def getData(self):
-        return open(self.file_, 'r').read()
+        return open(self.file_, 'rb').read()
     
     def setData(self, data):
-        f=open(self.file_, 'w')
+        f=open(self.file_, 'wb')
         f.write(data)
         f.close()
 
@@ -148,7 +148,7 @@ class Resources:
             os.mkdir(fname)
         else:
             # Some content
-            f=open(fname, 'w')
+            f=open(fname, 'wb')
             f.write(item)
             f.close()
 
