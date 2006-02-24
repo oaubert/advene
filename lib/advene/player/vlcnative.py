@@ -36,6 +36,11 @@ class Snapshot:
             self.height=d['height']
             self.data=d['data']
             self.type=d['type']
+	    try:
+		# Added to python-vlc module from svn version #
+		self.date=d['date']
+	    except KeyError:
+		self.date=None
 #            code=self.type
 #            t="%c%c%c%c" % (code & 0xff,
 #                          code >> 8 & 0xff,
