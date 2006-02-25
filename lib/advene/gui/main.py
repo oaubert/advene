@@ -483,6 +483,10 @@ class AdveneGUI (Connect):
             self.drawable=gtk.DrawingArea()
         else:
             self.drawable=gtk.Socket()
+            def handle_remove(socket):
+                # Do not kill the widget if the application exits
+                return True
+            self.drawable.connect("plug-removed", handle_remove)
         self.drawable.set_size_request(320,200)
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
         self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
