@@ -309,7 +309,7 @@ class AdveneController:
             self.queue_action(self.event_handler.notify, event_name, *param, **kw)
         return
 
-    def update_snapshot (self, position):
+    def update_snapshot (self, position=None):
         """Event handler used to take a snapshot for the given position (current).
 
         @return: a boolean (~desactivation)
@@ -804,6 +804,9 @@ class AdveneController:
         #print "update status: %s" % status
         if status == 'set' or status == 'start':
             self.reset_annotation_lists()
+            # It was defined in a rule, but this prevented the snapshot
+            # to be taken *before* moving
+            self.update_snapshot(position_before)
         try:
             # if hasattr(position, 'value'):
             #     print "update_status %s %i" % (status, position.value)
