@@ -1,3 +1,14 @@
+* allow i18n of template.xml
+
+* save player preferences
+
+* write unit tests for the model (imports, add, del elements...)
+
+* Pb (QName related) when importing a package importing another one
+   (try importing wrong-trousers):
+p.imports[0].package.views[1]._getParent().uri, p.imports[1].package.uri
+that should return the same URI.
+
 * Implement in controller.current_annotation which would allow
    to loop on an annotation through an internal rule : on
    current_annotation end goto currentannotation.fragment.begin
@@ -7,8 +18,6 @@
 * transcribe: make validity check on bounds only on demand or on export.
 
 * transcribe: offset on marks must be followed by goto
-
-* In on_exit, first stop the event handler
 
 * Convert importers to plugin architecture
 
@@ -22,7 +31,6 @@
    and
    http://tedlab.mit.edu:16080/~dr/SplitIt/
    http://trans.sourceforge.net/en/download.php
-
 
 * Model: implement annotation types and relations types removal
 
@@ -994,10 +1002,8 @@ accomodate a FilteredDataModel
 using a specific mimetype (text/x-full-html) or if
 res.startswith('<html>') [useful for Kupu]
 
-<<<<<<< .mine
 * On player restart, redo set_visual
 
-=======
 * plugin infrastructure is not compatible with pyinstaller. -> DONE
 
 * AZP: make work on win32 (urllib.pathname2url) -> DONE
@@ -1007,4 +1013,15 @@ res.startswith('<html>') [useful for Kupu]
    between 0 and 100 for user rules) -> DONE
 
 * evaluator: implement expression history save -> DONE
->>>>>>> .r1613
+
+* In on_exit, first stop the event handler -> DONE
+
+* put timeline/css from unicode in export_views
+
+* Prevent the reuse of the same id
+
+* allow to edit config.data.paths[] (maybe put them in
+   data.preferences ?)
+
+* add default extension to filenames when saving
+
