@@ -333,12 +333,6 @@ class AdveneGUI (Connect):
 
     def updated_position_cb (self, context, parameters):
         position_before=context.evaluateValue('position_before')
-        # Note: it works for the moment only because we take an
-        # immediate snapshot but there is some delay between the
-        # position update and the player reaction.
-        # If it is corrected, it should always work because of the
-        # snapshot cache in the player. To be tested...
-        self.controller.update_snapshot(long(position_before))
         self.navigation_history.append(position_before)
         return True
 
