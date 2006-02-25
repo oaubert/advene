@@ -481,6 +481,9 @@ class AdveneGUI (Connect):
         if config.data.os == 'win32':
             # gtk.Socket is available on win32 only from gtk >= 2.8
             self.drawable=gtk.DrawingArea()
+            # Ignore the delete event, which is sent when the
+            # embedded vout dies (i.e. on movie stop)
+            self.drawable.connect("delete-event", lambda w, e: True)
         else:
             self.drawable=gtk.Socket()
             def handle_remove(socket):
