@@ -103,10 +103,7 @@ class HistoryNavigation:
         else:
             w = gtk.Window (gtk.WINDOW_TOPLEVEL)
             w.set_title (_("Navigation history"))
-            vb=gtk.VBox()
-            vb.add(w)
-
-	    vb=None
+            vb=None
 
         sw=gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
