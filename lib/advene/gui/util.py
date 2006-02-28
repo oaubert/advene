@@ -52,20 +52,50 @@ def image_from_position(controller, position=None, width=None, height=None):
                                      width=width, height=height))
     return i
     
-def generate_list_model(elements, controller=None, active_element=None):
-    """Update a TreeModel matching the elements list.
+def generate_list_model(elements, active_element=None):
+    """Create a TreeModel matching the elements list.
 
     Element 0 is the label.
     Element 1 is the element (stbv).
+
+    @param elements: a list of couples (element, label)
+    @param active_element: the element that should be preselected
     """
     store=gtk.ListStore(str, object)
     active_iter=None
-    for e in elements:
-        i=store.append( ( vlclib.get_title(controller, e), e ) )
-        if e == active_element:
+    for element, label in elements:
+        i=store.append( ( label, element ) )
+        if element == active_element:
             active_iter=i
     return store, active_iter
                 
+def list_selector_widget(members=None,
+                         preselect=None):
+    """Generate a widget to pick an element from a list.
+
+
+    @param members: list of couples (element, label)
+    @type members: list
+    """
+    store, i=generate_list_model(members,
+                                 active_element=preselect)
+
+    combobox=gtk.ComboBox(store)
+    cell = gtk.CellRendererText()
+    combobox.pack_start(cell, True)
+    combobox.add_attribute(cell, 'text', 0)
+    combobox.set_active(-1)
+    if i is None:
+        i = store.get_iter_first()
+    combobox.set_active_iter(i)
+
+    def get_current_element(combo):
+        return combo.get_model().get_value(combo.get_active_iter(), 1)
+        
+    # Bind the method to the combobox object
+    combobox.get_current_element = get_current_element.__get__(combobox)
+
+    return combobox
 
 def list_selector(title=None,
                   text=None,
@@ -79,18 +109,9 @@ def list_selector(title=None,
 
     Return None if the action is cancelled.
     """
-    store, i=generate_list_model(members,
-                                 controller=controller,
-                                 active_element=preselect)
-
-    combobox=gtk.ComboBox(store)
-    cell = gtk.CellRendererText()
-    combobox.pack_start(cell, True)
-    combobox.add_attribute(cell, 'text', 0)
-    combobox.set_active(-1)
-    if i is None:
-        i = store.get_iter_first()
-    combobox.set_active_iter(i)
+    combobox = list_selector_widget(members=[ (e, vlclib.get_title(controller, e))
+                                              for e in members ],
+                                    preselect=preselect)
     
     d = gtk.Dialog(title=title,
                    parent=None,
@@ -109,7 +130,7 @@ def list_selector(title=None,
     res=d.run()
     retval=None
     if res == gtk.RESPONSE_ACCEPT:
-        retval=combobox.get_model().get_value(combobox.get_active_iter(), 1)
+        retval=combobox.get_current_element()
     d.destroy()
     return retval
 
