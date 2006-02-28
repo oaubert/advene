@@ -413,3 +413,38 @@ def get_id(source, id_):
         return None
     else:
         return l[0]
+
+# Valid TALES expression check
+
+# Root elements
+root_elements = ('here', 'nothing', 'default', 'options', 'repeat', 'request',
+                 # Root elements available in STBVs
+                 'package', 'annotation', 'relation', 'activeAnnotations',
+                 'player', 'event',
+                 # Root elements available in queries
+                 'element',
+                 )
+
+# Path elements followed by any syntax
+path_any_re = sre.compile('^(string|python):')
+
+# Path elements followed by a TALES expression
+path_tales_re = sre.compile('^(exists|not|nocall):(.+)')
+
+def is_valid_tales(expr):
+        """Return True if the expression looks like a valid TALES expression
+
+        @param expr: the expression to check.
+        @type expr: string
+        """
+        # Empty expressions are considered valid
+        if expr == "":
+            return True
+        if path_any_re.match(expr):
+            return True
+        m=path_tales_re.match(expr)
+        if m:
+            return is_valid_tales(expr=m.group(2))
+        # Check that the first element is a valid TALES root element
+        root=expr.split('/', 1)[0]
+        return root in root_elements
