@@ -1625,7 +1625,10 @@ class AdveneGUI (Connect):
             self.controller.package.title = cache['title']
             self.update_window_title()
             self.controller.set_default_media(cache['media'])
-	    self.controller.cached_duration = long(cache['duration'])
+            try:
+                self.controller.cached_duration = long(cache['duration'])
+            except ValueError:
+                pass
         return True
 
     def on_preferences1_activate (self, button=None, data=None):
