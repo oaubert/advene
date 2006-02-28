@@ -72,7 +72,6 @@ class CreateElementPopup(object):
         self.type_=type_
         self.parent=parent
         self.controller=controller
-        self.chosen_type = None
         self.widget=self.build_widget()
         
     def get_widget(self):
@@ -84,10 +83,6 @@ class CreateElementPopup(object):
     def generate_id(self):
         return self.controller.idgenerator.get_id(self.type_)
 
-    def update_type(self, combo):
-        self.chosen_type = combo.get_model().get_value(combo.get_active_iter(), 1)
-        return True
-    
     def build_widget(self):
         vbox = gtk.VBox()
 
@@ -139,21 +134,10 @@ class CreateElementPopup(object):
 		advene.gui.util.message_dialog(_("No available type."))
                 return None
 
-            self.chosen_type = type_list[0]
-
-            store, i=advene.gui.util.generate_list_model(type_list,
-                                                          controller=self.controller,
-                                                          active_element=self.chosen_type)
-
-
-            type_combo = gtk.ComboBox(store)
-            type_combo.set_active(-1)
-            type_combo.set_active_iter(i)
-            cell = gtk.CellRendererText()
-            type_combo.pack_start(cell, True)
-            type_combo.add_attribute(cell, 'text', 0)
-            type_combo.connect("changed", self.update_type)
-            hbox.pack_start(type_combo)
+            self.type_combo = advene.gui.util.list_selector_widget(
+                members=[ (t, self.controller.get_title(t)) for t in type_list  ],
+                preselect=type_list[0])
+            hbox.pack_start(self.type_combo)
             
             vbox.add(hbox)
 
@@ -189,7 +173,7 @@ class CreateElementPopup(object):
 	else:
 	    self.controller.idgenerator.add(id_)
 
-        t = self.chosen_type
+        t = self.type_combo.get_current_element()
 
         if self.type_ == Annotation:
             if isinstance(self.parent, AnnotationType):
