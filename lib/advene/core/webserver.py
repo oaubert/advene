@@ -1051,6 +1051,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
           - L{do_GET_element} for C{/package} elements access
           - L{do_GET_admin} for C{/admin} folder access
+          - L{do_GET_action} for C{/action} folder access
           - L{do_GET_debug} for C{/debug} access
           - L{handle_media} for C{/media} access
 
@@ -1136,6 +1137,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.do_GET_element(parameters, query)
         elif command == 'admin':
             self.do_GET_admin (parameters, query)
+        elif command == 'action':
+            self.do_GET_action (parameters, query)
         elif command == 'media':
             self.handle_media (parameters, query)
         elif command == 'application':
@@ -1258,8 +1261,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.start_html (_("Package %s deleted") % alias, duplicate_title=True)
             self.display_loaded_packages (embedded=True)
         elif command == 'save':
-            if self.controller:
-                self.controller.save_package()
+            if self.server.controller:
+                self.server.controller.save_package()
             else:
                 alias = query['alias']
                 p = self.server.packages[alias]
@@ -1299,6 +1302,75 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             self.start_html (_('Error'), duplicate_title=True)
             self.wfile.write (_("""<p>Unknown admin command</p><pre>Command: %s</pre>""") % command)
+
+    def do_GET_action (self, l, query):
+        """Handles the X{/action}  requests.
+
+        The C{/action} folder allows to invoke the actions defined in
+        the ECA framework (i.e. the same actions as the dynamic rules).
+
+        Accessing the C{/action} folder itself displays the summary of
+        available actions.
+
+        @param l: the access path as a list of elements,
+                  with the initial one (C{access}) omitted
+        @type l: list
+        @param query: the options given in the URL
+        @type query: dict
+        """
+        catalog=self.server.controller.event_handler.catalog
+
+        def display_action_summary():
+            self.start_html(_("Available actions"), duplicate_title=True)
+            self.wfile.write("<ul>")
+            d=dict(catalog.get_described_actions(expert=True).iteritems())
+            k=d.keys()
+            k.sort()
+            for name in k:
+                self.wfile.write("<li>%s: %s<ul>" % (name, d[name]))
+                for param, descr in catalog.get_action(name).parameters.iteritems():
+                    self.wfile.write("<li>%s: %s</li>" % (param, descr))
+                self.wfile.write("</ul></li>\n")
+            self.wfile.write("</ul>")
+
+        if len(l) == 0 or l[0] == '':
+            display_action_summary ()
+            return
+
+        action = l[0]
+        del l[0]
+        
+        try:
+            ra=catalog.get_action(action)
+        except KeyError:
+            self.start_html (_('Error'), duplicate_title=True)
+            self.wfile.write (_("""<p>Unknown action</p><pre>Action: %s</pre>""") % action)
+
+        # Check for missing parameters
+        missing=[]
+        invalid=[]
+        for p in ra.parameters:
+            if not p in query:
+                missing.append(p)
+            elif not vlclib.is_valid_tales(query[p]):
+                invalid.append(p)
+
+        if missing:
+            self.start_html (_('Error'), duplicate_title=True)
+            self.wfile.write (_('Missing parameter(s) :<ul>'))
+            for p in missing:
+                self.wfile.write('<li>%s: %s</li>' % (p, ra.parameters[p]))
+            return
+        if invalid:
+            self.start_html (_('Error'), duplicate_title=True)
+            self.wfile.write (_('<p>Invalid parameter(s), they do not look like TALES expressions:</p><ul>'))
+            for p in invalid:
+                self.wfile.write('<li>%s (%s): %s</li>' % (p, ra.parameters[p], query[p]))
+            return
+
+        self.server.controller.queue_registered_action(ra, query)
+
+        self.send_no_content()
 
     def do_GET_favicon(self):
         ico=config.data.advenefile( ( 'pixmaps', 'dvd.ico' ) )
