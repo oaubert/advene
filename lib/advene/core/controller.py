@@ -189,6 +189,13 @@ class AdveneController:
     def queue_action(self, method, *args, **kw):
         self.event_queue.append( (method, args, kw) )
         return True
+    
+    def queue_registered_action(self, ra, parameters):
+        """Queue a registered action for execution.  
+        """
+        c=self.build_context(here=self.package)
+        self.queue_action(ra.method, c, parameters)
+        return True
 
     def process_queue(self):
         """Batch process pending events.
