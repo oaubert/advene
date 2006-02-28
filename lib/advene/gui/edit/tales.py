@@ -19,6 +19,7 @@ import gtk
 import sre
 
 from advene.gui.views.browser import Browser
+import advene.util.vlclib
 
 class TALESEntry:
     """TALES expression entry widget.
@@ -30,21 +31,6 @@ class TALESEntry:
     @ivar controller: the controller
     @type controller: advene.core.controller
     """
-    # Root elements
-    root_elements = ('here', 'nothing', 'default', 'options', 'repeat', 'request',
-                     # Root elements available in STBVs
-                     'package', 'annotation', 'relation', 'activeAnnotations',
-                     'player', 'event',
-                     # Root elements available in queries
-                     'element',
-                     )
-
-    # Path elements followed by any syntax
-    path_any_re = sre.compile('^(string|python):')
-
-    # Path elements followed by a TALES expression
-    path_tales_re = sre.compile('^(exists|not|nocall):(.+)')
-
     def __init__(self, default="", context=None, controller=None):
         self.default=default
         self.editable=True
@@ -88,17 +74,7 @@ class TALESEntry:
         """
         if expr is None:
             expr=self.entry.get_text()
-        # Empty expressions are considered valid
-        if expr == "":
-            return True
-        if TALESEntry.path_any_re.match(expr):
-            return True
-        m=TALESEntry.path_tales_re.match(expr)
-        if m:
-            return self.is_valid(expr=m.group(2))
-        # Check that the first element is a valid TALES root element
-        root=expr.split('/', 1)[0]
-        return root in TALESEntry.root_elements
+        return advene.util.vlclib.is_valid_tales(expr)
     
     def build_widget(self):
         hbox=gtk.HBox()
