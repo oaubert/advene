@@ -522,8 +522,10 @@ class AdveneGUI (Connect):
 	Not accessible through the GUI, use the Evaluator window:
 	c.gui.display_imagecache()
 	"""
+        k=self.controller.imagecache.keys()
+        k.sort()
 	hn=HistoryNavigation(controller=self.controller,
-			     history=self.controller.imagecache.keys(),
+			     history=k,
 			     vertical=True)
         w=hn.popup()
 	return hn, w
@@ -657,8 +659,8 @@ class AdveneGUI (Connect):
         stbv_combo = self.gui.get_widget("stbv_combo")
         l=[ None ]
         l.extend(self.controller.get_stbv_list())
-        st, i = advene.gui.util.generate_list_model(l,
-                                                    controller=self.controller,
+        st, i = advene.gui.util.generate_list_model([ (i, self.controller.get_title(i)) 
+                                                      for i in l ],
                                                     active_element=self.controller.current_stbv)
         stbv_combo.set_model(st)
         if i is None:
