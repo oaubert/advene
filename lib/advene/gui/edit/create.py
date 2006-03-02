@@ -72,6 +72,7 @@ class CreateElementPopup(object):
         self.type_=type_
         self.parent=parent
         self.controller=controller
+        self.type_combo=None
         self.widget=self.build_widget()
         
     def get_widget(self):
@@ -173,7 +174,8 @@ class CreateElementPopup(object):
 	else:
 	    self.controller.idgenerator.add(id_)
 
-        t = self.type_combo.get_current_element()
+        if self.type_combo:
+            t = self.type_combo.get_current_element()
 
         if self.type_ == Annotation:
             if isinstance(self.parent, AnnotationType):
