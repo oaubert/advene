@@ -42,6 +42,7 @@ from advene.model.resources import Resources, ResourceData
 from advene.model.query import Query
 
 from advene.gui.edit.timeadjustment import TimeAdjustment
+from advene.gui.views.browser import Browser
 
 import advene.util.vlclib as vlclib
 import advene.gui.util
@@ -749,14 +750,14 @@ class EditForm(object):
 
 class ContentHandler(EditForm):
     """Content Handler form.
-    
+
     It is an EditForm with a specialized constructor (see __init__
     below), and a can_handle static method.
 
     can_handle returns an integer between 0 and 100. 0 means that it
     cannot handle the content. 100 means that it must absolutely
     handle the content.
-    
+
     Specialized builtin content handlers generally return 80, which
     leaves space for user-defined handlers.
 
@@ -791,12 +792,12 @@ class EditContentForm(EditForm):
         # but not for the special case of Ruleset/Query
         self.editable = editable
 
-        self.mimetypeeditable = (mimetypeeditable 
-                                 and editable 
-                                 and not (self.element.mimetype in 
+        self.mimetypeeditable = (mimetypeeditable
+                                 and editable
+                                 and not (self.element.mimetype in
                                           ('application/x-advene-ruleset',
                                            'application/x-advene-simplequery')))
-        
+
     def set_editable (self, bool):
         self.editable = bool
 
@@ -890,7 +891,25 @@ class TextContentHandler (ContentHandler):
             elif event.keyval == gtk.keysyms.r:
                 self.content_reload()
                 return True
+            elif event.keyval == gtk.keysyms.i:
+                self.browser_open()
+                return True
         return False
+
+    def browser_open(self, b=None):
+        browser = Browser(element=self.controller.package,
+                          controller=self.controller)
+        def callback(e):
+            if e is not None:
+                if e.startswith('string:'):
+                    e=e.replace('string:', '')
+                b=self.view.get_buffer()
+                b.insert_at_cursor(unicode(e))
+            return True
+        browser.popup_value(callback=callback)
+        return True
+
+        return True
 
     def content_reload(self, b=None):
         self.content_open(fname=self.fname)
@@ -963,6 +982,13 @@ class TextContentHandler (ContentHandler):
         b.connect("clicked", self.content_reload)
         tb.insert(b, -1)
 
+        i=gtk.Image()
+        i.set_from_file(config.data.advenefile( ('pixmaps', 'browser.png') ))
+        b=gtk.ToolButton(icon_widget=i)
+        b.set_tooltip(self.tooltips, _("Insert a value from the browser (C-i)"))
+        b.connect("clicked", self.browser_open)
+        tb.insert(b, -1)
+
         tb.show_all()
         vbox.pack_start(tb, expand=False)
 
@@ -991,7 +1017,7 @@ class EditFragmentForm(EditForm):
 
     def check_validity(self):
         if self.begin.value >= self.end.value:
-	    advene.gui.util.message_dialog(_("Begin time is greater than end time"), 
+	    advene.gui.util.message_dialog(_("Begin time is greater than end time"),
 					   icon=gtk.MESSAGE_ERROR)
             return False
         else:
