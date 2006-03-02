@@ -484,6 +484,18 @@ class TimeLine:
             return True
         return False
 
+    def button_key_handler(self, widget, event, annotation):
+        if event.keyval == gtk.keysyms.e:
+            try:
+                pop = advene.gui.edit.elements.get_edit_popup (annotation, self.controller)
+            except TypeError, e:
+                self.controller.log(_("Error: unable to find an edit popup for %s:\n%s") % (annotation, unicode(e)))
+            else:
+                pop.edit ()
+            return True
+            pass
+        return False
+
     def rel_activate(self, button):
         if self.over_mode:
             a=button.annotation
@@ -521,6 +533,7 @@ class TimeLine:
         b.active = False
         #b.connect("clicked", self.annotation_cb, annotation)
         b.connect("button-press-event", self.button_press_handler, annotation)
+        b.connect("key-press-event", self.button_key_handler, annotation)
         
         b.connect("enter", self.rel_activate)
         b.connect("leave", self.rel_deactivate)
