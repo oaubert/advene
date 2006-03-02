@@ -1,23 +1,30 @@
+* implement support for global_methods defintion in user plugins
+
+* Define a ParameteredQuery which takes a single parameter in the path, e.g.:
+  here/annotations/containedIn/foobar 
+  (use a wrapper similar to the one used for views. Maybe we can
+  generalize this principle).
+
 * Implement a charpicker for transcription
 
-* Implement a new action: Enter information -> fill an attribute of an annotation (pause the stream, enter the answer)
+* Implement a new action: Enter information -> fill an attribute of an
+  annotation (pause the stream, enter the answer)
 
 * Upgrade to simpletal 4.1
 
-* Implement transmission of elements between different applications (esp. transmission of annotations [bounds + content] between 2 timelines) -> new target type
+* Implement transmission of elements between different applications (esp. transmission of annotations [bounds + content] between 2 timelines) -> new target type + element xml repr.
 
 * allow i18n of template.xml
 
 * save player preferences
 
-* write unit tests for the model (imports, add, del elements...)
+* extend unit tests for the model (imports, add, del elements...) in model/test.py
 
 * Pb (QName related) when importing a package importing another one
    (try importing wrong-trousers):
 p.imports[0].package.views[1]._getParent().uri, p.imports[1].package.uri
-that should return the same URI.
+that should return the same URI. The proposed solution is to enforce the importing package to explicitly import the second level imported ones. Pb: namespace clash
 
->>>>>>> .r1716
 * Implement in controller.current_annotation which would allow
    to loop on an annotation through an internal rule : on
    current_annotation end goto currentannotation.fragment.begin
@@ -1036,3 +1043,7 @@ res.startswith('<html>') [useful for Kupu]
    data.preferences ?)
 
 * add default extension to filenames when saving
+
+* In content editor (for TAL views), add a button to invoke the
+  package browser to insert paths or values.
+
