@@ -55,11 +55,13 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
     def nodeHasChildren (self, node):
         raise Exception("This has to be implemented in subclasses.")
         
-    def __init__(self, controller):
+    def __init__(self, controller=None, package=None):
         gtk.GenericTreeModel.__init__(self)
         self.clear_cache ()
         self.controller=controller
-        self.__package=controller.package
+        if package is None and controller is not None:
+            package=controller.package
+        self.__package=package
 
     def get_package(self):
         return self.__package
@@ -144,7 +146,9 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         return self.on_get_path(node)
 
     def title (self, node):
-        title=self.controller.get_title(node)
+        title=None
+        if self.controller:
+            title=self.controller.get_title(node)
         if not title:
             title = "???"
             try:
@@ -400,7 +404,7 @@ class TreeWidget:
         self.controller=controller
         self.modelclass=modelclass
 
-        self.model = modelclass(controller)
+        self.model = modelclass(controller=controller, package=package)
 
         tree_view = gtk.TreeView(self.model)
         self.tree_view = tree_view
@@ -567,8 +571,9 @@ class TreeWidget:
         """Update the model with a new package."""
         print "Treeview: update model %s" % str(package)
         # Get current path
-        oldpath=self.get_cursor()[0]
-        self.model = self.modelclass(package)
+        oldpath=self.tree_view.get_cursor()[0]
+        self.model = self.modelclass(controller=self.controller,
+                                     package=package)
         self.tree_view.set_model(self.model)
         # Return to old path if possible
         if oldpath is not None:
