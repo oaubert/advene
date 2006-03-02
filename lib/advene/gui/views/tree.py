@@ -413,6 +413,7 @@ class TreeWidget:
         select.set_mode(gtk.SELECTION_SINGLE)
         
         tree_view.connect("button_press_event", self.tree_view_button_cb)
+        tree_view.connect("row-activated", self.row_activated_cb)
         
         #tree_view.connect("select-cursor-row", self.debug_cb)
         #select.connect ("changed", self.debug_cb)
@@ -466,40 +467,28 @@ class TreeWidget:
         print "Parameters: %s" % str(p)
         print "KW: %s" % str(kw)
 
+    def row_activated_cb(self, widget, path, view_column):
+        """Edit the element on Return or double click
+        """
+        node = self.get_selected_node (widget)
+        if node is not None:
+            try:
+                pop = advene.gui.edit.elements.get_edit_popup (node,
+                                                               controller=self.controller)
+            except TypeError, e:
+                pass
+            else:
+                pop.edit ()
+            return True
+        return False
+
     def tree_view_button_cb(self, widget=None, event=None):
         retval = False
         button = event.button
         x = int(event.x)
         y = int(event.y)
         
-        # On double-click, edit element
-        if event.type == gtk.gdk._2BUTTON_PRESS:
-            node = self.get_selected_node (widget)
-            if node is not None:
-                try:
-                    pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                                   controller=self.controller)
-                except TypeError, e:
-                    if isinstance(node, StandardXmlBundle):
-                        if node.viewableType == 'query-list':
-                            cr = CreateElementPopup(type_=Query,
-                                                    parent=self.package,
-                                                    controller=self.controller)
-                        elif node.viewableType == 'view-list':
-                            cr = CreateElementPopup(type_=View,
-                                                    parent=self.package,
-                                                    controller=self.controller)
-                        elif node.viewableType == 'schema-list':
-                            cr = CreateElementPopup(type_=Schema,
-                                                    parent=self.package,
-                                                    controller=self.controller)
-                        cr.popup()
-                else:
-                    pop.edit ()
-                retval=True
-            else:
-                retval=False
-        elif button == 3 or button == 2:
+        if button == 3 or button == 2:
             if event.window is widget.get_bin_window():
                 model = self.model
                 t = widget.get_path_at_pos(x, y)
