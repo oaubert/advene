@@ -2,9 +2,14 @@ advene (0.19) unstable; urgency=low
 
   * New package format (.azp, for Advene Zip Package) allowing to embed
     resources (files) in packages. You can save old .xml files into .azp
-    files to get them converted. 
-    Access to resources is done through the TALES expression 
-    string:${package/absolute_url}/resources
+    files to get them converted. For isntance, 
+    access to resources is done through the TALES expression 
+    package/resources/style.css
+    To use this resource in a TAL template, you can then use:
+    <link tal:attributes="href package/resources/style.css/absolute_url" type="text/css" rel="stylesheet" />
+  
+  * A filename extension (.azp or .xml) is automatically appended if not
+    present.
   
   * ! Moved config and preferences files to ~/.advene directory
     (UserDir/advene on Windows)
@@ -17,7 +22,8 @@ advene (0.19) unstable; urgency=low
     * generic player control shortcuts are used
     * Edit/Preferences now allows to modify paths (data, movies, player, imagecache) (from Frank Wagner)
     * Imagecache saves files with a .png extension
-
+    * The not_yet_available image is now loaded from share/pixmaps/notavailable.png
+  
   * The dummy player now returns a running time
 
   * Importer
@@ -34,6 +40,9 @@ advene (0.19) unstable; urgency=low
   * webserver message log is now available from the menu (View->Webserver
     log), and not displayed on the console
 
+  * Advene no longer depends on the Image module. It only uses it if image
+    type conversion is necessary.
+  
   * Advene now depends on gtk >= 2.6
 
   * Added spanish translations (courtesy of Emmanuel Ayala)
