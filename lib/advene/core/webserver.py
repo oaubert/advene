@@ -1202,6 +1202,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           - C{/admin/access} : display access control list
           - C{/admin/status} : display current status
           - C{/admin/display} : display or set the default webserver display mode
+          - C{/admin/halt} : halt the webserver
 
         Accessing the C{/admin} folder itself displays the summary
         (equivalent to the root document).
@@ -1299,6 +1300,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 # Display status
                 self.start_html(_("Default display mode"))
                 self.wfile.write(self.server.displaymode)
+        elif command == 'halt':
+            self.server.stop_serving ()
         else:
             self.start_html (_('Error'), duplicate_title=True)
             self.wfile.write (_("""<p>Unknown admin command</p><pre>Command: %s</pre>""") % command)
@@ -1835,10 +1838,15 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         # set the level to logging.DEBUG to get more messages
         self.logger.setLevel(logging.INFO)
 
+	self.is_embedded = True
+
         if controller is None:
             # If "controller" is not specified, adveneserver will handle
             # itself package loading
             controller = self
+	    self.is_embedded = False
+	    self.current_stbv = None
+	    self.event_queue = []
 
         self.controller=controller
         self.urlbase = u"http://localhost:%d/" % port
@@ -1898,13 +1906,32 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
                                imagecache=imagecache.ImageCache (id_))
 
     def update_status (self, *args, **kw):
-        self.controller.queue_action(self.controller.update_status,
-                                     *args, **kw)
+	if self.is_embedded:
+	    self.controller.queue_action(self.controller.update_status,
+					 *args, **kw)
+	else:
+	    position_before=self.player.current_position_value
+	    try:
+		if self.player.playlist_get_list():
+		    self.player.update_status (status, position)
+	    except Exception, e:
+		# FIXME: we should catch more specific exceptions and
+		# devise a better feedback than a simple print
+		import traceback
+		s=StringIO.StringIO()
+		traceback.print_exc (file = s)
+		self.log(_("Raised exception in update_status: %s") % str(e), s.getvalue())
         return True
 
     def activate_stbv  (self, *args, **kw):
         self.controller.queue_action(self.controller.activate_stbv,
                                      *args, **kw)
+        return True
+
+    def queue_action(self, method, *args, **kw):
+	# In standalone mode, we execute the actions immedialy,
+	# without queueing them
+	method(*args, **kw)
         return True
 
     # End of controller methods
@@ -2010,5 +2037,8 @@ if __name__ == "__main__":
             alias = posixpath.basename(posixpath.splitext(uri)[0])
             server.load_package (uri=uri, alias=alias)
     print _("Server ready to serve requests.")
-    server.serve_forever ()
+    server.serve_forawhile ()
 
+    # Cleanup the ZipPackage directories
+    ZipPackage.cleanup()
+    
