@@ -1,0 +1,110 @@
+#! /usr/bin/env python
+#
+# This file is part of Advene.
+#
+# Advene is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# Advene is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+
+import sys
+import os
+import StringIO
+
+# Magic stuff before the instanciation of Advene : we set the
+# sys.path and the various config.data.path
+
+def fix_paths(path):
+  # We override any modification that could have been made in
+  # .advenerc. Rationale: if the .advenerc was really correct, it
+  # would have set the correct package path in the first place.
+  print "Overriding 'resources', 'locale', 'advene' and 'web' config paths"
+  config.data.path['resources']=os.path.sep.join((maindir, 'share'))
+  config.data.path['locale']=os.path.sep.join( (maindir, 'locale') )
+  config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
+  config.data.path['advene']=maindir
+  #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
+
+
+# Try to find if we are in a development tree.
+(maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
+if subdir == 'bin' and  os.path.exists(os.path.join(maindir, "setup.py")):
+  # Chances are that we were in a development tree...
+  libpath=os.path.join(maindir, "lib")
+  print "You seem to have a development tree at:\n%s." % libpath
+  sys.path.insert (0, libpath)
+
+  import advene.core.config as config
+  fix_paths(maindir)
+else:
+  try:
+    import advene.core.config as config
+  except ImportError:
+    print """Cannot guess a valid directory.
+    Please check your installation or set the PYTHONPATH environment variable."""
+    sys.exit(1)
+
+# Maybe we are running from a pyinstaller version
+if not os.path.exists(config.data.path['resources']):
+  maindir=os.path.abspath(os.path.dirname(sys.executable))
+  if os.path.exists(os.path.join( maindir, 'share' )):
+    # There is a 'share' directory at the same level as the executable
+    # This can mean that we are in a pyinstaller version
+    print "Seemingly running from a pyinstaller version in\n%s" % maindir
+    fix_paths(maindir)
+
+if config.data.os == 'win32':
+  import _winreg
+
+  #win32 platform, add the "lib" folder to the system path
+  os.environ['PATH'] += os.path.pathsep + "lib"
+  try:
+    import pygtk
+    import gtk
+    import gtk.glade
+  except ImportError:
+    # Gtk DLLs are not in the PATH. Try to get their directory
+    # from the registry
+    path=config.data.get_registry_value('Software\\GTK\\2.0', 'Path')
+    if path is None:
+      raise ImportError("Couldn't find GTK DLLs.")
+    os.environ['PATH'] += os.path.pathsep + path.encode('utf8')
+    os.environ['PATH'] += os.path.pathsep + os.path.join( path, 'bin' ).encode('utf8')
+    print "Using GTK DLLs at %s" % path
+    import pygtk
+    import gtk
+    import gtk.glade
+
+import advene.gui.main
+
+if __name__ == '__main__':
+    import atexit
+    import advene.core.mediacontrol as mediacontrol
+    from advene.core.webserver import AdveneWebServer
+    from advene.model.zippackage import ZipPackage
+
+    # Let the server be its own controller
+    server = AdveneWebServer(controller=None)
+    f=mediacontrol.PlayerFactory()
+    server.player=f.get_player()
+    atexit.register (server.stop_player)
+
+    if len(sys.argv) > 1:
+        for uri in sys.argv[1:]:
+            alias = posixpath.basename(posixpath.splitext(uri)[0])
+            server.load_package (uri=uri, alias=alias)
+    print _("Server ready to serve requests.")
+    server.serve_forawhile ()
+
+    # Cleanup the ZipPackage directories
+    ZipPackage.cleanup()
