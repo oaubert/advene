@@ -1,4 +1,4 @@
-advene (0.19) unstable; urgency=low
+advene (0.20) unstable; urgency=low
 
   * New package format (.azp, for Advene Zip Package) allowing to embed
     resources (files) in packages. You can save old .xml files into .azp
@@ -29,6 +29,10 @@ advene (0.19) unstable; urgency=low
   * Importer
     * implemented CMML import
 
+  * Timeline
+    * Add shortcut to edit an annotation: 'e' to edit the selected
+      annotation (selection can be moved with arrow keys)
+  
   * TranscriptionEdit: 
     * clicking on a mark now goes to the position. Use the popup menu to remove marks.
     * control-space now sets a mark and pauses the movie
@@ -37,8 +41,11 @@ advene (0.19) unstable; urgency=low
 
   * Implemented plugin architecture (user-defined plugins in ~/.advene/plugins)
 
-  * webserver message log is now available from the menu (View->Webserver
-    log), and not displayed on the console
+  * webserver:
+    * message log is now available from the menu (View->Webserver log), and
+      not displayed on the console
+    * new path: /action/ActionName?param=TALESexpr to invoke actions defined
+      in the ECA framework
 
   * Advene no longer depends on the Image module. It only uses it if image
     type conversion is necessary.
