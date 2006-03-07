@@ -358,8 +358,7 @@ class AdveneGUI (Connect):
 	
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
-        self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller,
-                                                            embedded=True)
+        self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
         self.register_view(self.logwindow)
 
         self.visualisationwidget=self.get_visualisation_widget()
@@ -490,23 +489,30 @@ class AdveneGUI (Connect):
 
         self.displayhbox=gtk.HBox()
 
-        self.navigation_history=HistoryNavigation(controller=self.controller,
-                                                  container=self.displayhbox)
-        self.navigation_history.popup()
+        self.navigation_history=HistoryNavigation(controller=self.controller)
+
+        self.displayhbox.pack_start(self.navigation_history.widget, )
+
         # Navigation history is embedded. The menu item is useless :
         self.gui.get_widget('navigationhistory1').set_property('visible', False)
         
         self.displayhbox.pack_start(self.drawable, expand=True)
 
-        self.displayhbox.show_all()
-
-        self.displayhbox.pack_end(self.logwindow.widget, expand=True)
-        self.logwindow.embedded=True
-        # URL stack is embedded. The menu item is useless :
-        self.gui.get_widget('urlstack1').set_property('visible', False)
+        if config.data.preferences['embed-logwindow']:
+            self.displayhbox.pack_end(self.logwindow.widget, expand=True, fill=True)
+            self.logwindow.embedded=True
+            # URL stack is embedded. The menu item is useless :
+            self.gui.get_widget('urlstack1').set_property('visible', False)            
+        else:
+            tree = advene.gui.views.tree.TreeWidget(self.controller.package,
+                                                    controller=self.controller)
+            sw = gtk.ScrolledWindow()
+            sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+            sw.add(tree.get_widget())
+            self.displayhbox.pack_end(sw, expand=True, fill=True)
+            self.register_view (tree)            
 
         vis.add(self.displayhbox)
-        
 
         hbox=gtk.HBox()
         self.popupwidget=AccumulatorPopup(controller=self.controller,
@@ -677,7 +683,7 @@ class AdveneGUI (Connect):
         def open_history_file(button, fname):
             try:
                 self.controller.load_package (uri=fname)
-            except OSError, e:
+            except (OSError, IOError), e:
                 self.log(_("Cannot load package %s:\n%s") % (fname, unicode(e)))
             return True
 

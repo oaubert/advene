@@ -33,9 +33,11 @@ class HistoryNavigation:
         self.history=history
         self.container=container
         self.scrollwindow=None
+        self.snapshot_width=100
         if history is None:
             self.history=[]
         self.vertical=vertical
+        self.mainbox=None
         self.widget=self.build_widget()
 	self.fill_widget()
 
@@ -54,14 +56,14 @@ class HistoryNavigation:
     
     def clear(self, *p):
         del self.history[:]
-        self.widget.foreach(self.remove_widget, self.widget)
+        self.mainbox.foreach(self.remove_widget, self.mainbox)
         return True
         
     def append_repr(self, t):
         vbox=gtk.VBox()
         i=advene.gui.util.image_from_position(self.controller,
                                               t,
-                                              width=100)
+                                              width=self.snapshot_width)
         e=gtk.EventBox()
         e.connect("button-release-event", self.activate, t)
         e.add(i)
@@ -76,13 +78,13 @@ class HistoryNavigation:
             else:
                 adj=self.scrollwindow.get_hadjustment()
             adj.set_value(adj.upper)
-	self.widget.add(vbox)
+	self.mainbox.add(vbox)
 
     def fill_widget(self):
-        self.widget.foreach(self.remove_widget, self.widget)
+        self.mainbox.foreach(self.remove_widget, self.mainbox)
 	for t in self.history:
             self.append_repr(t)
-        self.widget.show_all()
+        self.mainbox.show_all()
 	return True
 
     def build_widget(self):
@@ -90,33 +92,33 @@ class HistoryNavigation:
             mainbox=gtk.VBox()
         else:
             mainbox=gtk.HBox()
-
-        return mainbox
-
-    def popup(self):
-        if self.container:
-            w=gtk.Frame()
-            w.set_label(_("Navigation history"))
-            vb=gtk.VBox()
-            vb.add(w)
-            self.container.add(vb)
-        else:
-            w = gtk.Window (gtk.WINDOW_TOPLEVEL)
-            w.set_title (_("Navigation history"))
-            vb=None
+            mainbox.set_size_request(self.snapshot_width, -1)
 
         sw=gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-        w.add(sw)
-        
-        sw.add_with_viewport(self.widget)
+        sw.add_with_viewport(mainbox)
         self.scrollwindow=sw
+        self.mainbox=mainbox
 
-	if vb:
-	    b=gtk.Button(stock=gtk.STOCK_CLEAR)
-	    b.connect("clicked", self.clear)
-	    vb.pack_start(b, expand=False)
+        return sw
 
+    def popup(self):
+        w = gtk.Window (gtk.WINDOW_TOPLEVEL)
+        w.set_title (_("Navigation history"))
+        if self.vertical:
+            w.set_default_size(-1, 500)
+        else:
+            w.set_default_size(600, -1)
+        vb=gtk.VBox()
+        
+        w.add(vb)
+
+        vb.add(self.widget)
+        
+        b=gtk.Button(stock=gtk.STOCK_CLEAR)
+        b.connect("clicked", self.clear)
+        vb.pack_start(b, expand=False)
+        
 	w.show_all()
         return w
