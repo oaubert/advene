@@ -18,6 +18,8 @@ advene (0.20) unstable; urgency=low
     define rectangular zones.
 
   * GUI: 
+    * the treeview is displayed by default on the right of the video
+      window (replacing the less used, for now, URL stack window)
     * added an element creation toolbar
     * generic player control shortcuts are used
     * Edit/Preferences now allows to modify paths (data, movies, player, imagecache) (from Frank Wagner)
