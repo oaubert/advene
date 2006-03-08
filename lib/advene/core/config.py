@@ -235,7 +235,7 @@ class Config(object):
 	self.content_handlers = []
 
 	# Global methods (user-defined)
-	self.global_methods = []
+	self.global_methods = {}
 
         if self.os == 'win32':
             self.win32_specific_config()
@@ -279,8 +279,8 @@ class Config(object):
 
     def register_global_method(self, method):
 	# FIXME: check signature ?
-	if not method in self.global_methods:
-	    self.global_methods.append(method)
+	name=method.func_name
+	self.global_methods[name]=method
 	return True
 
     def get_content_handler(self, mimetype):
