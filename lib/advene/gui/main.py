@@ -455,15 +455,16 @@ class AdveneGUI (Connect):
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
-    def get_visualisation_widget(self):
+    def get_visualisation_widget(self, embedded=True):
         """Return the main visualisation widget.
 
         It consists in the embedded video window plus the various views.
         """
         vis=gtk.VBox()
 
-        tb=self.get_player_control_toolbar()
-        vis.pack_start(tb, expand=False)
+	if not embedded:
+	    tb=self.get_player_control_toolbar()
+	    vis.pack_start(tb, expand=False)
         
         # We add a Treeview in the main app window
         #tree = advene.gui.views.tree.TreeWidget(self.controller.package,
@@ -489,17 +490,19 @@ class AdveneGUI (Connect):
 
         self.displayhbox=gtk.HBox()
 
+	hpane=gtk.HPaned()
+	self.displayhbox.pack_start(hpane)
+
+        self.displayhbox.pack_start(self.drawable, expand=True)
+	
         self.navigation_history=HistoryNavigation(controller=self.controller)
-
-        self.displayhbox.pack_start(self.navigation_history.widget, )
-
         # Navigation history is embedded. The menu item is useless :
         self.gui.get_widget('navigationhistory1').set_property('visible', False)
-        
-        self.displayhbox.pack_start(self.drawable, expand=True)
+
+        hpane.add2(self.navigation_history.widget)
 
         if config.data.preferences['embed-logwindow']:
-            self.displayhbox.pack_end(self.logwindow.widget, expand=True, fill=True)
+            hpane.add1(self.logwindow.widget)
             self.logwindow.embedded=True
             # URL stack is embedded. The menu item is useless :
             self.gui.get_widget('urlstack1').set_property('visible', False)            
@@ -509,8 +512,13 @@ class AdveneGUI (Connect):
             sw = gtk.ScrolledWindow()
             sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
             sw.add(tree.get_widget())
-            self.displayhbox.pack_end(sw, expand=True, fill=True)
+            hpane.add1(sw)
             self.register_view (tree)            
+
+	# We should be able to specify 80%/20% for instance, but the allocation
+	# is not available here. We have to wait for the main GUI window to 
+	# appear
+        hpane.set_position (300)
 
         vis.add(self.displayhbox)
 
@@ -520,6 +528,8 @@ class AdveneGUI (Connect):
                                           container=hbox)
         vis.add(hbox)
         vis.show_all()
+
+
         return vis
 
     def display_imagecache(self):
