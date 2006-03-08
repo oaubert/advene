@@ -10,7 +10,13 @@ advene (0.20) unstable; urgency=low
   
   * A filename extension (.azp or .xml) is automatically appended if not
     present.
-  
+
+  * New global method: related. Returns, for an annotation, its related
+    annotation. It is a shortcut useful for the case of binary relations:
+    annotation/related/id
+    is equivalent to
+    annotation/outgoingRelations/first/members/last/id
+
   * ! Moved config and preferences files to ~/.advene directory
     (UserDir/advene on Windows)
 
