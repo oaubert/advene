@@ -552,3 +552,24 @@ def randompick(target, context):
        # If list is empty, or target is not a list
        e=None
     return e
+
+def related(target, context):
+    """Return the related annotation.
+
+    This is a shortcut for the case where there is only 1 binary
+    relation.
+
+    We search first outgoingRelations. If none exist, we check
+    incomingRelations.
+    """
+    try:
+	r=target.outgoingRelations
+    except AttributeError:
+	# Not an annotation
+	return None
+    if r:
+	return r[0].members[-1]
+    r=target.incomingRelations
+    if r:
+	return r[0].members[0]
+    return None
