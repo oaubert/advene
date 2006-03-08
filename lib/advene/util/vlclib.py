@@ -328,6 +328,8 @@ def get_valid_members (el):
     l.append(_('---- Methods ----'))
     # Global methods
     l.extend (AdveneContext.defaultMethods ())
+    # User-defined global methods
+    l.extend (config.data.global_methods)
 
     return l
 
