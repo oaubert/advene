@@ -229,6 +229,9 @@ class AdveneController:
     def register_content_handler(self, handler):
         config.data.register_content_handler(handler)
 
+    def register_global_method(self, method):
+        config.data.register_global_method(method)
+
     def register_action(self, action):
         if self.event_handler:
             self.event_handler.register_action(action)
