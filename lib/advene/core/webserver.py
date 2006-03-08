@@ -685,6 +685,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(_("""
         <p><a href="/admin/status">Display the server status</a></p>
         <p><a href="/admin/access">Update the access list</a></p>
+        <p><a href="/admin/methods">List available TALES methods</a></p>
         <p><a href="/admin/reset">Reset the server</a></p>
         <p><a href="/media">Media control</a></p>
         <p><a href="/admin/list">List available files</a></p>
@@ -1202,6 +1203,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           - C{/admin/access} : display access control list
           - C{/admin/status} : display current status
           - C{/admin/display} : display or set the default webserver display mode
+	  - C{/admin/methods} : list the available global methods
           - C{/admin/halt} : halt the webserver
 
         Accessing the C{/admin} folder itself displays the summary
@@ -1288,6 +1290,18 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write (_("<p>No package loaded</p>"))
         elif command == 'access':
             self.handle_access (l, query)
+        elif command == 'methods':
+            self.start_html (_('Available TALES methods'), duplicate_title=True)
+	    self.wfile.write('<ul>')
+	    c=self.server.controller.build_context(here=None)
+	    k=c.methods.keys()
+	    k.sort()
+	    for name in k:
+		descr=c.methods[name].__doc__
+		if descr:
+		    descr=descr.split('\n')[0]
+		self.wfile.write("<li><strong>%s</strong>: %s</li>\n" % (name, descr))
+	    self.wfile.write("</ul>")
         elif command == 'display':
             if l:
                 # Set default display mode
