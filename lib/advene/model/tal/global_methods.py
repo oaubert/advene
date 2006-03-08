@@ -26,6 +26,8 @@ If called on an invalid target, the method should return None.
 import random
 
 def absolute_url(target, context):
+    """Return the absolute URL of the element.
+    """
 
     import advene.model.annotation
     import advene.model.content
@@ -83,19 +85,20 @@ def absolute_url(target, context):
     return path
 
 def isa (target, context):
-    """
+    """Check the type of an element.
+
     Return an object such that target/isa/[viewable_class],
     target/isa/[viewable_type] and target/isa/[viewable_class]/[viewble_type]
     are true for the correct values of viewable_class and viewable_type.
     Note that for annotations and relations, viewable_type must be the QName
     for of the type URI.
+
     Note that for contents, viewable_type can be a two part path, corresponding
     to the usual mime-type writing. The star ('*') character, however, is not
     supported. For example, if c1 has type 'text/*' and c2 has type
     'text/plain', the following will evaluate to True: c1/isa/text,
     c2/isa/text, c1/isa/text/html; the following will of course evaluate to 
-    False: c2/isa/text/html.
-    
+    False: c2/isa/text/html.    
     """
     class my_dict (dict):
         def __init__ (self, values={}, default=False):
@@ -143,12 +146,15 @@ def isa (target, context):
     return r
         
 def meta(target, context):
-    """
-    Function to be used as a TALES global method, in order to give acess
+    """Access to meta attributes.
+
+    Function to be used as a TALES global method, in order to give access
     to meta attributes.
+
     This function assumes that the 'options' of the TALES context have a
     dictionnary named 'namespace_prefix', whose keys are prefices and whose
     values are corresponding namespace URIs.
+
     The use of this function is (assuming that here is a Metaed object):
     here/meta/dc/version
     for example (where prefix 'dc' has been mapped to the Dublin Core 
@@ -193,7 +199,9 @@ def meta(target, context):
         return None
 
 def view(target, context):
+    """Apply a view on an element.
 
+    """
     import advene.model.viewable
     import advene.model.exception
 
@@ -253,6 +261,11 @@ def view(target, context):
         return None
 
 def snapshot_url (target, context):
+    """Return the URL of the snapshot for the given annotation or fragment.
+
+    It can be applied to an annotation, a fragment or a millisecond
+    position (integer).
+    """
     import advene.model.annotation
     import advene.model.fragment
     import advene.model.exception
@@ -262,6 +275,8 @@ def snapshot_url (target, context):
         begin = target.fragment.begin
     elif isinstance(target, advene.model.fragment.MillisecondFragment):
         begin = target.begin
+    elif isinstance(target, int) or isinstance(target, long):
+	begin=target
     else:
         return None
     
@@ -271,6 +286,11 @@ def snapshot_url (target, context):
                                        str(begin))
 
 def player_url (target, context):
+    """Return the URL to play the video from the element position.
+
+    The element can be an annotation, a fragment or a millisecond
+    position (integer).
+    """
     import advene.model.annotation
     import advene.model.fragment
     import advene.model.exception
@@ -280,6 +300,8 @@ def player_url (target, context):
         begin = target.fragment.begin
     elif isinstance(target, advene.model.fragment.MillisecondFragment):
         begin = target.begin
+    elif isinstance(target, int) or isinstance(target, long):
+	begin=target
     else:
         return None
     
@@ -287,6 +309,12 @@ def player_url (target, context):
     return "/media/play/%s" % str(begin)
 
 def formatted (target, context):
+    """Return a formatted timestamp as hh:mm:ss.mmmm
+    
+    This method applies to either integers (in this case, it directly
+    returns the formated string), or to fragments. It returns a
+    dictionary with begin, end and duration keys.
+    """
     import advene.model.fragment
     import advene.model.exception
     import time
@@ -309,7 +337,8 @@ def formatted (target, context):
     return res
 
 def first (target, context):
-    """
+    """Return the first item of target.
+
     Return the first element of =target=, which must obviously be a list-like
     object.
     """
@@ -323,7 +352,8 @@ def first (target, context):
         return None
 
 def last (target, context):
-    """
+    """Return the last item of target.
+
     Return the last element of =target=, which must obviously be a list-like
     object.
     """
@@ -337,7 +367,8 @@ def last (target, context):
         return None
 
 def rest (target, context):
-    """
+    """Return all but the first items of target.
+    
     Return all elements of target but the first. =target= must obvioulsly be a
     list-like, sliceable object.
     """
@@ -423,7 +454,9 @@ def parsed (target, context):
     return content.data
 
 def query(target, context):
-
+    """Apply a query on target.
+    
+    """
     import advene.model.exception
         
     class QueryWrapper (object):
@@ -526,7 +559,12 @@ def query(target, context):
     return QueryWrapper(target, context)
 
 def sorted (target, context):
-    """Returns a sorted list of annotations"""
+    """Return a sorted list
+
+    This method applies either to list of annotations, that will be
+    sorted according to their positions, or to any list of comparable
+    items.
+    """
     if hasattr(target, 'viewableType') and target.viewableType == 'annotation-list' or (
         isinstance(target, list) and len(target) > 0 and hasattr(target[0], 'fragment')):
         l=list(target[:])
@@ -541,11 +579,13 @@ def sorted (target, context):
     return l
 
 def length(target, context):
-    """Returns the length of the target."""
+    """Return the length of the target.
+    """
     return len(target)
 
 def randompick(target, context):
-    """Return a random element from the target."""
+    """Return a random element from the target.
+    """
     try:
        e=random.choice(target)
     except IndexError:
