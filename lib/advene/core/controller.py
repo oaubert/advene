@@ -239,14 +239,18 @@ class AdveneController:
             self.log(_("No available event handler"))
 
     def build_context(self, here=None):
-        return advene.model.tal.context.AdveneContext(here=here,
-                                                      options={
-            u'package_url': self.get_default_url(root=True),
-            u'snapshot': self.imagecache,
-            u'namespace_prefix': config.data.namespace_prefix,
-            u'config': config.data.web,
-            u'package': self.package,
-            })
+        c=advene.model.tal.context.AdveneContext(here=here,
+						 options={
+		u'package_url': self.get_default_url(root=True),
+		u'snapshot': self.imagecache,
+		u'namespace_prefix': config.data.namespace_prefix,
+		u'config': config.data.web,
+		u'package': self.package,
+		u'player': self.player,
+		})
+	for m in config.data.global_methods:
+	    c.addMethod(m.im_func.func_name, m)
+	return c
 
     def busy_port_info(self):
         """Display the processes using the webserver port.
