@@ -23,8 +23,6 @@ order to prevent cyclic references.
 
 If called on an invalid target, the method should return None.
 """
-import random
-
 def absolute_url(target, context):
     """Return the absolute URL of the element.
     """
@@ -586,6 +584,7 @@ def length(target, context):
 def randompick(target, context):
     """Return a random element from the target.
     """
+    import random
     try:
        e=random.choice(target)
     except IndexError:
