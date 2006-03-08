@@ -223,22 +223,16 @@ class ECAEngine:
         @rtype: AdveneContext
         """
         controller=self.controller
-        options = {
-            'package_url': self.controller.get_default_url(root=True),
-            'snapshot': controller.imagecache,
-            'namespace_prefix': config.data.namespace_prefix
-            }
+	context=controller.build_context(here=None)
+
+	# Rule-specific root elements
         globals={
-            'package': controller.package,
             'annotation': None,
             'relation': None,
             'activeAnnotations': controller.active_annotations,
-            'player': controller.player,
             'context': None,
             'event': event
             }
-        context = advene.model.tal.context.AdveneContext (here=None,
-                                                          options=options)
         globals.update(kw)
         for k in globals:
             context.addGlobal(k, globals[k])
