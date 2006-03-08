@@ -248,8 +248,8 @@ class AdveneController:
 		u'package': self.package,
 		u'player': self.player,
 		})
-	for m in config.data.global_methods:
-	    c.addMethod(m.im_func.func_name, m)
+	for name, method in config.data.global_methods.iteritems():
+	    c.addMethod(name, method)
 	return c
 
     def busy_port_info(self):
