@@ -203,10 +203,21 @@ class ImageCache(dict):
             return
         else:
             for name in os.listdir (d):
-                f = open(os.path.join (d, name), 'rb')
 		(n, ext) = os.path.splitext(name)
-                dict.__setitem__(self, long(n.lstrip('0')), f.read ())
-                f.close ()
+		# We must do some checks, in case there are non-well
+		# formatted filenames in the directory
+		if ext.lower() == '.png':
+		    try:
+			n=n.lstrip('0')
+			if n == '':
+			    n=0
+			i=long(n)
+		    except ValueError:
+			print "Invalid filename in imagecache: " + name
+			continue
+		    f = open(os.path.join (d, name), 'rb')
+		    dict.__setitem__(self, i, f.read ())
+		    f.close ()
 
     def ids (self):
         return self.keys ()
