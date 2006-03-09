@@ -101,6 +101,9 @@ class AdveneController:
 
     @ivar server: the embedded web server
     @type server: webserver.AdveneWebServer
+
+    @ivar gui: the embedding GUI (may be None)
+    @type gui: AdveneGUI
     """
 
     def __init__ (self, args=None):
