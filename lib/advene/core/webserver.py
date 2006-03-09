@@ -1935,10 +1935,10 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
                                package=p,
                                imagecache=ic)
 
-    def update_status (self, *args, **kw):
+    def update_status (self, status=None, position=None, notify=True):
 	if self.is_embedded:
 	    self.controller.queue_action(self.controller.update_status,
-					 *args, **kw)
+					 status, position, notify)
 	else:
 	    position_before=self.player.current_position_value
 	    try:
