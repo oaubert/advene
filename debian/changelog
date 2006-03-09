@@ -2,7 +2,7 @@ advene (0.20) unstable; urgency=low
 
   * New package format (.azp, for Advene Zip Package) allowing to embed
     resources (files) in packages. You can save old .xml files into .azp
-    files to get them converted. For isntance, 
+    files to get them converted. For instance, 
     access to resources is done through the TALES expression 
     package/resources/style.css
     To use this resource in a TAL template, you can then use:
