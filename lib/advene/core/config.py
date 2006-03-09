@@ -277,9 +277,10 @@ class Config(object):
 	    self.content_handlers.append(handler)
 	return True
 
-    def register_global_method(self, method):
+    def register_global_method(self, method, name=None):
 	# FIXME: check signature ?
-	name=method.func_name
+	if name is None:
+	    name=method.func_name
 	self.global_methods[name]=method
 	return True
 
