@@ -286,14 +286,16 @@ class CreateElementPopup(object):
         elif self.type_ == Resources:
             # Create a new dir.
             # Parent should be a Resources
-            self.parent[id]=Resources.DIRECTORY_TYPE
+            self.parent[id_]=Resources.DIRECTORY_TYPE
+	    el=self.parent[id_]
             self.controller.notify('ResourceCreate', 
-                                   resource=self.parent[id])
+                                   resource=self.parent[id_])
         elif self.type_ == ResourceData:
             # Create a new resource file
-            self.parent[id]=_("New resource data")
+            self.parent[id_]=_("New resource data")
+	    el=self.parent[id_]
             self.controller.notify('ResourceCreate', 
-                                   resource=self.parent[id])
+                                   resource=self.parent[id_])
             
         else:
             el=None
