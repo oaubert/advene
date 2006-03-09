@@ -16,7 +16,7 @@ For the builtin core features: lib/advene/plugins
 
 For the builtin GUI features: lib/advene/gui/plugins
 
-For user-defined plugins: $HOME/.advene/plugins
+For user-defined plugins: $HOME/.advene/plugins ($HOME/advene/plugins on windows)
 
 Implementation
 ==============
@@ -26,22 +26,27 @@ A plugin is a module. It *must* have :
   * a register(controller=None) function
 
 The register function is called, with the controller as parameter,
-upon loading. It has to register the plugin's components in the Advene
-infrastructure.
+upon loading. It has to initialize and register the plugin's
+components in the Advene infrastructure.
+
+For the moment, the following registration methods are available from
+the controller:
+
+register_content_handler(self, handler)
+register_global_method(self, method, name=None)
+register_action(self, action)
 
 Example
 =======
 
-Here is a minimal plugin:
+Here is a minimal plugin to register a new global method (in TALES):
 
   name="Test plugin"
   
   def register(controller=None):
-      controller.log("Registered %s" % name)
-  
-  class FooBar:
-      def __init__(self, controller=None):
-      	  self.controller=controller
-
+      controller.register_global_method(test_global_method, 'test')
+        
+  def test_global_method(target, context):
+      return "TEST"
 
 You can find a real example in lib/advene/gui/plugins/actions.py
