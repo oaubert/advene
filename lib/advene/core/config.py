@@ -162,7 +162,7 @@ class Config(object):
 	    # User-defined paths. Will overwrite 
 	    # config.data.path items
 	    'path': {},
-            'embed-logwindow': False,
+            'embed-treeview': False,
             }
 
         # Player options
