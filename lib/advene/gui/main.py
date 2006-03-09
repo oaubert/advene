@@ -491,9 +491,8 @@ class AdveneGUI (Connect):
         self.displayhbox=gtk.HBox()
 
 	hpane=gtk.HPaned()
-	self.displayhbox.pack_start(hpane)
-
         self.displayhbox.pack_start(self.drawable, expand=True)
+	self.displayhbox.pack_start(hpane)
 	
         self.navigation_history=HistoryNavigation(controller=self.controller)
         # Navigation history is embedded. The menu item is useless :
