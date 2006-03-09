@@ -1920,6 +1920,8 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
                                    "mediafile")
         if mediafile is not None and mediafile != "":
             id_ = vlclib.mediafile2id (mediafile)
+	    self.player.playlist_clear()
+	    self.player.playlist_add_item(mediafile)
 
 	try:
 	    ic=imagecache.ImageCache (id_)
