@@ -1890,7 +1890,10 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         else:
             return None
 
-    # Controller methods
+    # Controller methods: used when the webserver is its own controller
+    def log (self, msg, level=None):
+	print msg
+
     def load_package (self, uri=None, alias="advene"):
         """Loads a package.
 
