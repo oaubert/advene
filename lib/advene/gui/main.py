@@ -499,14 +499,12 @@ class AdveneGUI (Connect):
         # Navigation history is embedded. The menu item is useless :
         self.gui.get_widget('navigationhistory1').set_property('visible', False)
 
-        hpane.add2(self.navigation_history.widget)
+	f=gtk.Frame()
+	f.set_label(_("History"))
+	f.add(self.navigation_history.widget)
+        hpane.add2(f)
 
-        if config.data.preferences['embed-logwindow']:
-            hpane.add1(self.logwindow.widget)
-            self.logwindow.embedded=True
-            # URL stack is embedded. The menu item is useless :
-            self.gui.get_widget('urlstack1').set_property('visible', False)            
-        else:
+        if config.data.preferences['embed-treeview']:
             tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
             sw = gtk.ScrolledWindow()
@@ -514,6 +512,11 @@ class AdveneGUI (Connect):
             sw.add(tree.get_widget())
             hpane.add1(sw)
             self.register_view (tree)            
+	else:
+            hpane.add1(self.logwindow.widget)
+            self.logwindow.embedded=True
+            # URL stack is embedded. The menu item is useless :
+            self.gui.get_widget('urlstack1').set_property('visible', False)            
 
 	# We should be able to specify 80%/20% for instance, but the allocation
 	# is not available here. We have to wait for the main GUI window to 
@@ -1651,6 +1654,7 @@ class AdveneGUI (Connect):
         cache={
             'osd': config.data.player_preferences['osdtext'],
             'history-limit': config.data.preferences['history-size-limit'],
+            'embed-treeview': config.data.preferences['embed-treeview'],
 	    'toolbarstyle': self.gui.get_widget("toolbar_control").get_style(),
 	    'data': config.data.path['data'],
 	    'plugins': config.data.path['plugins'],
@@ -1663,6 +1667,7 @@ class AdveneGUI (Connect):
         ew.set_name(_("Preferences"))
 	ew.add_title(_("General"))
         ew.add_checkbox(_("OSD"), "osd", _("Display captions on the video"))
+        ew.add_checkbox(_("Embed treeview"), "embed-treeview", _("Embed a treeview in the application window\nChange will apply on application restart."))
         ew.add_spin(_("History size"), "history-limit", _("History filelist size limit"),
                     -1, 20)
         ew.add_option(_("Toolbar style"), "toolbarstyle", _("Toolbar style"), 
@@ -1683,6 +1688,7 @@ class AdveneGUI (Connect):
         if res:
             config.data.player_preferences['osdtext']=cache['osd']
             config.data.preferences['history-size-limit']=cache['history-limit']
+            config.data.preferences['embed-treeview']=cache['embed-treeview']
             for t in ('toolbar_control', 'toolbar_view', 'toolbar_fileop', 'toolbar_create'):
                 self.gui.get_widget(t).set_style(cache['toolbarstyle'])
 	    for k in ('data', 'moviepath', 'plugins', 'imagecache', 'advene'):
