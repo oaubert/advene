@@ -1750,8 +1750,8 @@ class AdveneGUI (Connect):
         return True
 
     def on_save_imagecache1_activate (self, button=None, data=None):
-        name = vlclib.package2id (self.controller.package)
-        d=self.controller.imagecache.save (name)
+	id_ = vlclib.mediafile2id (self.controller.get_default_media())
+        d=self.controller.imagecache.save (id_)
 	self.log(_("Imagecache saved to %s") % d)
         return True
 
