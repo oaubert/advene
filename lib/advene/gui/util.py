@@ -48,8 +48,12 @@ def image_from_position(controller, position=None, width=None, height=None):
     i=gtk.Image()
     if position is None:
         position=controller.player.current_position_value
-    i.set_from_pixbuf(png_to_pixbuf (controller.imagecache[position],
-                                     width=width, height=height))
+    try:
+	i.set_from_pixbuf(png_to_pixbuf (controller.imagecache[position],
+					 width=width, height=height))
+    except:
+	# Some png_data corruption have been reported. Handle them here.
+	i.set_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
     return i
     
 def generate_list_model(elements, active_element=None):
