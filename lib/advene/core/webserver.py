@@ -1244,20 +1244,23 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             except:
                 self.send_error (501,
                                  _("""You should specify an alias"""))
+		return
             try:
                 uri = query['uri']
             except:
                 self.send_error (501,
                                  _("""You should specify an uri"""))
+		return
             try:
                 self.server.controller.load_package (uri=uri, alias=alias)
                 self.start_html (_("Package %s loaded") % alias, duplicate_title=True)
                 self.display_loaded_packages (embedded=True)
+		return
             except:
                 self.send_error(501,
                                 _("""<p>Cannot load package %s</p>""")
                                 % uri)
-            self.send_redirect('/packages')
+		return
         elif command == 'delete':
             alias = query['alias']
             self.server.unregister_package (alias)
@@ -1918,9 +1921,19 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         if mediafile is not None and mediafile != "":
             id_ = vlclib.mediafile2id (mediafile)
 
+	try:
+	    ic=imagecache.ImageCache (id_)
+	except Exception, e:
+	    print "Exception in webserver.load_package imagecache"
+	    import traceback
+	    s=StringIO.StringIO()
+	    traceback.print_exc (file = s)
+	    self.log(_("Raised exception in update_status: %s") % str(e), s.getvalue())
+	    ic=imagecache.ImageCache()
+
         self.register_package (alias=alias,
                                package=p,
-                               imagecache=imagecache.ImageCache (id_))
+                               imagecache=ic)
 
     def update_status (self, *args, **kw):
 	if self.is_embedded:
