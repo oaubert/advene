@@ -27,6 +27,7 @@ from advene.model.exception import AdveneException
 
 import advene.model.tal.context
 import advene.gui.util
+from advene.gui.views import AdhocView
 import advene.util.vlclib as vlclib
 import inspect
 
@@ -136,9 +137,11 @@ class BrowserColumn:
         vbox.show_all()
         return vbox
 
-class Browser:
+class Browser(AdhocView):
     def __init__(self, element=None, controller=None):
         self.view_name = _("Package browser")
+	self.view_id = 'browserview'
+
         self.element=element
         self.controller=controller
         self.path=[element]
@@ -147,9 +150,6 @@ class Browser:
         self.rootcolumn=None
         self.current_value=None
         self.widget=self.build_widget()
-
-    def get_widget(self):
-        return self.widget
 
     def clicked_callback(self, columnbrowser, attribute):
         # We could use here=columnbrowser.model, but then the traversal
@@ -249,33 +249,15 @@ class Browser:
         return True
 
     def popup(self):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.connect ("destroy", lambda e: window.destroy())
-        window.set_title (vlclib.get_title(self.controller, self.element))
-
-        vbox = gtk.VBox()
-
-        window.add (vbox)
-        vbox.add (self.widget)
-
-        hbox = gtk.HButtonBox()
-        vbox.pack_start (hbox, expand=False)
+	window = AdhocView.popup(self)
 
         self.view_button = gtk.Button (stock=gtk.STOCK_FIND)
         self.view_button.connect ("clicked", self.display_timeline)
         self.view_button.set_sensitive(False)
-        hbox.add (self.view_button)
+	self.view_button.show()
 
-        b = gtk.Button (stock=gtk.STOCK_CLOSE)
-        b.connect ("clicked", lambda w: window.destroy ())
-        hbox.add (b)
+	window.buttonbox.pack_start(self.view_button, expand=False)
 
-        vbox.set_homogeneous (False)
-
-        if self.controller.gui:
-            self.controller.gui.init_window_size(window, 'browserview')
-
-        window.show_all()
         return window
 
     def popup_value(self, callback=None):
