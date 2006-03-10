@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -37,7 +37,6 @@ import gobject
 
 class BrowserColumn:
     def __init__(self, element=None, name="", callback=None, parent=None):
-        self.view_name = _("Package browser")
         self.model=element
         self.name=name
         self.callback=callback
@@ -79,7 +78,7 @@ class BrowserColumn:
         if self.callback:
             self.callback(self.previous, self.name)
         return True
-    
+
     def on_button_press(self, widget, event):
         att=None
         if event.button == 1:
@@ -89,7 +88,7 @@ class BrowserColumn:
                 if it is not None:
                     att = widget.get_model().get_value (it, 0)
         if att and att.startswith('----'):
-            return True                    
+            return True
         if att and self.callback:
             self.callback(self, att)
             return True
@@ -131,14 +130,15 @@ class BrowserColumn:
         selection.connect('changed', self.on_changed_selection, self.liststore)
         #self.listview.connect("row-activated", self.row_activated)
         #self.listview.connect("button-press-event", self.on_button_press)
-        
+
         sw.add_with_viewport(self.listview)
 
         vbox.show_all()
         return vbox
-        
+
 class Browser:
     def __init__(self, element=None, controller=None):
+        self.view_name = _("Package browser")
         self.element=element
         self.controller=controller
         self.path=[element]
@@ -165,7 +165,7 @@ class Browser:
                 if col is not None:
                     path.append(col.name)
             path.append(attribute)
-            
+
         try:
             el=context.evaluateValue("/".join(path))
         except Exception, e:
@@ -180,11 +180,11 @@ class Browser:
             if columnbrowser is not None:
                 columnbrowser.next=None
                 columnbrowser.listview.get_selection().unselect_all()
-            
+
 	    advene.gui.util.message_dialog(_("Exception: %s") % e,
 					   icon=gtk.MESSAGE_WARNING)
             return
-        
+
         self.update_view(path, el)
 
         if columnbrowser is None:
@@ -247,7 +247,7 @@ class Browser:
                                              controller=self.controller)
         t.popup()
         return True
-    
+
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.connect ("destroy", lambda e: window.destroy())
@@ -294,16 +294,16 @@ class Browser:
             window.destroy()
             callback(self.pathlabel.get_text())
             return True
-        
+
         def validate_value(e):
             window.destroy()
             callback("string:%s" % self.valuelabel.get_text())
             return True
-        
+
         window.connect ("destroy", cancel)
-        
+
         window.set_title (vlclib.get_title(self.controller, self.element))
-        
+
         vbox = gtk.VBox()
 
         window.add (vbox)
@@ -357,16 +357,16 @@ class Browser:
                     a.value_changed ()
                 return True
         return False
-                     
+
     def build_widget(self):
         vbox=gtk.VBox()
-        
+
         self.sw=gtk.ScrolledWindow()
         self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
         self.sw.connect('scroll_event', self.scroll_event)
         vbox.add(self.sw)
-        
+
         self.hbox = gtk.HBox()
 
         self.rootcolumn=BrowserColumn(element=self.element, name='here',
@@ -384,7 +384,7 @@ class Browser:
             hb.pack_start(l, expand=False)
             hb.pack_start(label, expand=False)
             return hb
-        
+
         # Display the type/value of the current element
         self.pathlabel = gtk.Label("here")
         self.pathlabel.set_selectable(True)
@@ -396,7 +396,7 @@ class Browser:
         self.valuelabel = gtk.Label("here")
         self.valuelabel.set_selectable(True)
         vbox.pack_start(name_label(_("Value"), self.valuelabel), expand=False)
-        
+
         vbox.show_all()
         return vbox
 
@@ -407,10 +407,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     package = Package (uri=sys.argv[1])
-    
+
     browser = Browser(element=package)
-    
+
     p=browser.popup()
     p.connect ("destroy", lambda e: gtk.main_quit())
-    
+
     gtk.main ()
