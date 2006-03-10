@@ -63,6 +63,7 @@ class TranscriptionImporter(advene.util.importer.GenericImporter):
 
 class TranscriptionEdit:
     def __init__ (self, controller=None, filename=None):
+	self.view_name = _("Transcription edition")
         self.controller=controller
         self.package=controller.package
         self.tooltips=gtk.Tooltips()
