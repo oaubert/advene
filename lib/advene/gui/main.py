@@ -488,11 +488,11 @@ class AdveneGUI (Connect):
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
         self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
 
-        self.displayhbox=gtk.HBox()
+        self.displayhbox=gtk.HPaned()
 
 	hpane=gtk.HPaned()
-        self.displayhbox.pack_start(self.drawable, expand=True)
-	self.displayhbox.pack_start(hpane)
+        self.displayhbox.pack1(self.drawable, shrink=False)
+	self.displayhbox.add2(hpane)
 	
         self.navigation_history=HistoryNavigation(controller=self.controller)
         # Navigation history is embedded. The menu item is useless :
