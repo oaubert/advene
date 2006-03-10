@@ -223,7 +223,11 @@ class ECAEngine:
         @rtype: AdveneContext
         """
         controller=self.controller
-	context=controller.build_context(here=None)
+	try:
+	    here=kw['here']
+	except KeyError:
+	    here=None
+	context=controller.build_context(here=here)
 
 	# Rule-specific root elements
         globals={
