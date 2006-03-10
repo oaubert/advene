@@ -229,6 +229,7 @@ class AdveneController:
         else:
             self.log(_("No available GUI"))
 
+    # Register methods for user-defined plugins
     def register_content_handler(self, handler):
         config.data.register_content_handler(handler)
 
@@ -248,9 +249,9 @@ class AdveneController:
 		u'snapshot': self.imagecache,
 		u'namespace_prefix': config.data.namespace_prefix,
 		u'config': config.data.web,
-		u'package': self.package,
-		u'player': self.player,
 		})
+	c.addGlobal(u'package', self.package)
+	c.addGlobal(u'player', self.player)
 	for name, method in config.data.global_methods.iteritems():
 	    c.addMethod(name, method)
 	return c
