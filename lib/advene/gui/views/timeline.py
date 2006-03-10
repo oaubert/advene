@@ -55,7 +55,18 @@ class TimeLine:
         self.list = l
         self.controller=controller
         self.tooltips = gtk.Tooltips ()
-        
+
+        if minimum is None and maximum is None and controller is not None:
+	    # No dimension. Get them from the controller.
+	    duration = controller.cached_duration
+	    if duration <= 0:
+		if controller.package.annotations:
+		    duration = max([a.fragment.end for a in controller.package.annotations])
+		else:
+		    duration = 0
+	    minimum=0
+	    maximum=duration
+	    
         if minimum is None or maximum is None:
             b, e = self.bounds ()
             if minimum is None:
