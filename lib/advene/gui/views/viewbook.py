@@ -31,6 +31,8 @@ class ViewBook:
     """
     def __init__ (self, controller=None, views=None):
         self.view_name = _("ViewBook")
+
+	self.controller=controller
 	if views is None:
 	    views = []
 	self.views=[]
@@ -38,6 +40,24 @@ class ViewBook:
 	for v in views:
 	    self.add_view(v, v.view_name)
 
+    def remove_view(self, view):
+	# Find its page number
+	if view.view_id == 'popupaccumulator':
+	    self.controller.log(_("Cannot remove the popup accumulator"))
+	    return True
+	l=[ v
+	    for v in self.widget.children()
+	    if v == view.widget ]
+	if len(l) == 1:
+	    # Only 1 element, ok
+	    page=self.widget.page_num(l[0])
+	    self.widget.remove_page(page)
+	    # Close the view
+	    v.close()
+	elif len(l) > 1:
+	    print "Pb in viewbook: multiple views match"
+	return True
+	    
     def add_view(self, v, name=None):
 	"""Add a new view to the notebook.
 
@@ -48,17 +68,59 @@ class ViewBook:
 		name=v.view_name
 	    except AttributeError:
 		name="FIXME"
+	self.controller.gui.register_view (v)
 	self.views.append(v)
+
+	def close_view(item, view):
+	    self.remove_view(view)
+	    return True
+
+	def popup_menu(button, event, view):
+	    if event.button == 3:
+		menu = gtk.Menu()
+		item = gtk.MenuItem(_("Close"))
+		item.connect("activate", close_view, view)
+		menu.append(item)
+		menu.show_all()
+		menu.popup(None, None, None, 0, gtk.get_current_event_time())
+		return True
+	    return False
+
+	e=gtk.EventBox()
         l=gtk.Label(name)
-        self.widget.append_page(v.widget, l)
+	e.add(l)
+	e.connect("button_press_event", popup_menu, v)
+	e.show_all()
+        self.widget.append_page(v.widget, e)
 	v.widget.show_all()
 	return True
 	
+    def drag_received(self, widget, context, x, y, selection, targetType, time):
+        if targetType == config.data.target_type['adhoc-view']:
+            name=selection.data
+	    if self.controller.gui:
+		view=self.controller.gui.open_adhoc_view(name, popup=False)
+		if view is not None:
+		    self.add_view(view)
+		else:
+		    print "Cannot open", name
+	    return True
+        return True
+
     def build_widget(self):
         notebook=gtk.Notebook()
         notebook.set_tab_pos(gtk.POS_BOTTOM)
         notebook.popup_enable()
         notebook.set_scrollable(True)
+
+        notebook.connect("drag_data_received", self.drag_received)
+        notebook.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                               gtk.DEST_DEFAULT_HIGHLIGHT |
+			       gtk.DEST_DEFAULT_DROP |
+                               gtk.DEST_DEFAULT_ALL,
+                               config.data.drag_type['adhoc-view'],
+                               gtk.gdk.ACTION_COPY)
+
         return notebook
 
     def popup(self):
