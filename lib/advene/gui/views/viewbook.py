@@ -46,14 +46,14 @@ class ViewBook:
 	    self.controller.log(_("Cannot remove the popup accumulator"))
 	    return True
 	l=[ v
-	    for v in self.widget.children()
+	    for v in self.widget.get_children()
 	    if v == view.widget ]
 	if len(l) == 1:
 	    # Only 1 element, ok
 	    page=self.widget.page_num(l[0])
 	    self.widget.remove_page(page)
 	    # Close the view
-	    v.close()
+	    view.close()
 	elif len(l) > 1:
 	    print "Pb in viewbook: multiple views match"
 	return True
