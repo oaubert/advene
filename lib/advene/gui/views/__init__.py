@@ -18,10 +18,18 @@
 import gtk
 
 class AdhocView:
+    """Implementation of the generic parts of AdhocViews.
+
+    For details about the API of adhoc views, see gui.views.viewplugin.
+    """
     def __init__(self, controller=None):
 	self.view_name = "Generic adhoc view"
 	self.view_id = 'generic'
 	self.controller = controller
+	# If self.buttonbox exists, then the widget has already
+	# defined its own buttonbox, and the generic popup method
+	# can but the "Close" button in it:
+	# self.buttonbox = gtk.HButtonBox()
 	self.widget=self.build_widget()
 
     def close(self):
@@ -41,18 +49,25 @@ class AdhocView:
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.set_title (self.view_name)
 
-        vbox = gtk.VBox()
-        window.add (vbox)
+	w=self.get_widget()
 
-
-	vbox.add (self.get_widget())
+	# If the widget defines a buttonbox, we can use it and do not
+	# have to define a enclosing VBox (which also solves a problem
+	# with the timeline view not being embedable inside a VBox()
+	if hasattr(w, 'buttonbox') and w.buttonbox is not None:
+	    window.add(w)
+	    window.buttonbox = w.buttonbox
+	else:
+	    vbox = gtk.VBox()
+	    window.add (vbox)
+	    vbox.add (w)
+	    window.buttonbox = gtk.HButtonBox()
+	    vbox.pack_start(window.buttonbox, expand=False)
 
         if self.controller and self.controller.gui:
             self.controller.gui.register_view (self)
             window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
             self.controller.gui.init_window_size(window, self.view_id)
-
-        window.buttonbox = gtk.HButtonBox()
 
         b = gtk.Button(stock=gtk.STOCK_CLOSE)
 
@@ -61,8 +76,6 @@ class AdhocView:
         else:
             b.connect ("clicked", lambda w: window.destroy())
         window.buttonbox.add (b)
-
-        vbox.pack_start(window.buttonbox, expand=False)
         
         window.show_all()
         
