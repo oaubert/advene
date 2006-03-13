@@ -21,7 +21,6 @@
 import sys
 import sre
 
-#import pygtk
 import gtk
 import gobject
 
@@ -40,6 +39,7 @@ import advene.util.vlclib as vlclib
 
 from gettext import gettext as _
 
+from advene.gui.views import AdhocView
 import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.popup
@@ -61,9 +61,11 @@ class TranscriptionImporter(advene.util.importer.GenericImporter):
         self.convert(self.transcription_edit.parse_transcription())
         return self.package
 
-class TranscriptionEdit:
+class TranscriptionEdit(AdhocView):
     def __init__ (self, controller=None, filename=None):
 	self.view_name = _("Transcription edition")
+	self.view_id = 'transcribeview'
+
         self.controller=controller
         self.package=controller.package
         self.tooltips=gtk.Tooltips()
@@ -109,6 +111,23 @@ class TranscriptionEdit:
     def build_widget(self):
         vbox = gtk.VBox()
 
+        hb=gtk.HBox()
+        vbox.pack_start(hb, expand=False)
+        if self.controller.gui:
+            toolbar=self.controller.gui.get_player_control_toolbar()
+            hb.add(toolbar)
+        hb.add(self.get_toolbar())
+
+        # Spinbutton for reaction time
+        l=gtk.Label(_("Reaction time"))
+        hb.pack_start(l, expand=False)
+        sp=gtk.SpinButton(self.delay)
+        hb.pack_start(sp, expand=False)
+
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        vbox.add (sw)
+
         self.textview = gtk.TextView()
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
@@ -119,9 +138,11 @@ class TranscriptionEdit:
         self.current_mark=zero
 
         self.textview.connect("button-press-event", self.button_press_event_cb)
+        self.textview.connect("key-press-event", self.key_pressed_cb)
 
-        vbox.add(self.textview)
-        vbox.show_all()
+        sw.add_with_viewport (self.textview)
+
+	vbox.show_all()
         return vbox
 
     def remove_timestamp_mark(self, button, anchor, child):
@@ -589,11 +610,7 @@ class TranscriptionEdit:
             _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
         return True
 
-    def get_widget (self):
-        """Return the TreeView widget."""
-        return self.widget
-
-    def get_toolbar(self, close_cb=None):
+    def get_toolbar(self):
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
 
@@ -602,7 +619,6 @@ class TranscriptionEdit:
             (_("Save"),    _("Save"), gtk.STOCK_SAVE, self.save_transcription_cb),
             (_("Save As"), _("Save As"), gtk.STOCK_SAVE_AS, self.save_as_cb),
             (_("Convert"), _("Convert"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
-            (_("Close"),   _("Close"), gtk.STOCK_CLOSE, close_cb)
             )
 
         for text, tooltip, icon, callback in tb_list:
@@ -656,49 +672,6 @@ class TranscriptionEdit:
                 return True
 
         return False
-
-    def get_packed_widget(self, close_cb=None):
-        vbox = gtk.VBox()
-
-        hb=gtk.HBox()
-        vbox.pack_start(hb, expand=False)
-        if self.controller.gui:
-            toolbar=self.controller.gui.get_player_control_toolbar()
-            hb.add(toolbar)
-        hb.add(self.get_toolbar(close_cb))
-
-        # Spinbutton for reaction time
-        l=gtk.Label(_("Reaction time"))
-        hb.pack_start(l, expand=False)
-        sp=gtk.SpinButton(self.delay)
-        hb.pack_start(sp, expand=False)
-
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        vbox.add (sw)
-        sw.add_with_viewport (self.get_widget())
-        return vbox
-
-    def popup(self):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-
-        if self.controller.gui:
-            self.controller.gui.init_window_size(window, 'transcribeview')
-
-        window.set_title (_("Transcription alignment"))
-        window.connect ("key-press-event", self.key_pressed_cb)
-
-        vbox = self.get_packed_widget(close_cb=lambda w: window.destroy())
-        window.add(vbox)
-
-        if self.controller.gui:
-            self.controller.gui.register_view (self)
-            window.connect ("destroy", self.controller.gui.close_view_cb,
-                            window, self)
-
-
-        window.show_all()
-        return window
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
