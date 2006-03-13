@@ -33,7 +33,10 @@ class ViewPlugin:
     """
     def __init__(self, controller=None):
         self.view_name = _("Generic view plugin")
-        
+        self.view_id = 'viewplugin'
+	self.controller=controller
+	self.widget = self.build_widget()
+
     def register_callback (self, controller=None):
         """Method invoked on view creation.
 
