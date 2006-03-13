@@ -43,7 +43,7 @@ import locale
 print "Using localedir %s" % config.data.path['locale']
 
 APP='advene'
-# Initialisation de la locale
+# Locale initialisation
 locale.setlocale(locale.LC_ALL, '')
 gettext.bindtextdomain(APP, config.data.path['locale'])
 gettext.textdomain(APP)
@@ -87,6 +87,7 @@ import advene.gui.edit.properties
 from advene.gui.views.transcription import TranscriptionView
 from advene.gui.edit.transcribe import TranscriptionEdit
 from advene.gui.views.interactivequery import InteractiveQuery
+from advene.gui.views.viewbook import ViewBook
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -179,11 +180,46 @@ class AdveneGUI (Connect):
             cell = gtk.CellRendererText()
             combobox.pack_start(cell, True)
             combobox.add_attribute(cell, 'text', 0)
-            
-        # TranscriptionEdit widget
-        self.transcription_edit=None
-        self.tewidget=None
-        
+
+	# Adhoc view toolbuttons signal handling
+	def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
+	    if targetType == config.data.target_type['adhoc-view']:
+		selection.set(selection.target, 8, name)
+		return True
+	    return False
+
+	def adhoc_view_release(widget, event, name):
+	    widget.set_state(gtk.STATE_NORMAL)
+	    # This is all hackish: we can only catch button-release
+	    # event (because of set_use_drag_window() ) but it gets
+	    # triggered both for a click and for a drag.  So we must
+	    # try to guess if we are inside the toolbar (then click)
+	    # or outside (then drag)
+	    (x, y, m) = widget.window.get_pointer()
+	    alloc=widget.get_parent().get_allocation()
+	    #print x, y, alloc.width, alloc.height
+	    if (x >= 0 and x <= alloc.width
+		and y >= 0 and y <= alloc.height):
+		# Release was done in the toolbar, so emulate a click
+		self.open_adhoc_view(name, popup=True)
+
+	    return True
+
+	def adhoc_view_press(widget, event, name):
+	    widget.set_state(gtk.STATE_PRELIGHT)
+	    return False
+
+	for n in ('tb_treeview', 'tb_timeline', 'tb_transcription', 
+		  'tb_browser', 'tb_webbrowser', 'tb_transcribe'):
+	    b=self.gui.get_widget(n)
+	    name=n.replace('tb_', '')
+	    b.set_use_drag_window(True)
+	    b.connect("drag_data_get", adhoc_view_drag_sent, name)
+	    b.connect("button_release_event", adhoc_view_release, name)
+	    b.connect("button_press_event", adhoc_view_press, name)
+	    b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+			      config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
+
         # Player status
         p=self.controller.player
         self.active_player_status=(p.PlayingStatus, p.PauseStatus,
@@ -412,9 +448,7 @@ class AdveneGUI (Connect):
             self.controller.player.set_visual(self.visual_id)
         except Exception, e:
             print "Cannot set visual: %s" % str(e)
-            # Use available space to display a treeview (should be configurable ?)
             self.displayhbox.destroy()
-            #self.popupwidget.reparent(container=None)
 
             self.logwindow.embedded=False
             self.logwindow.widget=self.logwindow.build_widget()
@@ -455,23 +489,13 @@ class AdveneGUI (Connect):
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
-    def get_visualisation_widget(self, embedded=True):
+    def get_visualisation_widget(self):
         """Return the main visualisation widget.
 
         It consists in the embedded video window plus the various views.
         """
-        vis=gtk.VBox()
+        vis=gtk.VPaned()
 
-	if not embedded:
-	    tb=self.get_player_control_toolbar()
-	    vis.pack_start(tb, expand=False)
-        
-        # We add a Treeview in the main app window
-        #tree = advene.gui.views.tree.TreeWidget(self.controller.package,
-        #controller=self.controller)
-        #self.gui.get_widget("html_scrollwindow").add (tree.get_widget())
-        #tree.get_widget().show_all()
-        #self.register_view (tree)
         if config.data.os == 'win32':
             # gtk.Socket is available on win32 only from gtk >= 2.8
             self.drawable=gtk.DrawingArea()
@@ -506,10 +530,7 @@ class AdveneGUI (Connect):
         if config.data.preferences['embed-treeview']:
             tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
-            sw = gtk.ScrolledWindow()
-            sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-            sw.add(tree.get_widget())
-            hpane.add1(sw)
+            hpane.add1(tree.get_widget())
             self.register_view (tree)            
 	else:
             hpane.add1(self.logwindow.widget)
@@ -522,15 +543,22 @@ class AdveneGUI (Connect):
 	# appear
         hpane.set_position (300)
 
-        vis.add(self.displayhbox)
+        vis.add1(self.displayhbox)
 
-        hbox=gtk.HBox()
+	self.viewbook=ViewBook(controller=self.controller)
+	
+	vis.add2(self.viewbook.widget)
+
         self.popupwidget=AccumulatorPopup(controller=self.controller,
-                                          autohide=False,
-                                          container=hbox)
-        vis.add(hbox)
+                                          autohide=False)
+	
+	self.viewbook.add_view(self.popupwidget, _("Popups"))
+	
         vis.show_all()
 
+	# Information message
+	l=gtk.Label(_("You can drag and drop view icons\n(timeline, treeview, transcription...)\nin this notebook to embed\nvarious views."))
+	self.popupwidget.display(l, timeout=5000, title=_("Information"))
 
         return vis
 
@@ -695,7 +723,7 @@ class AdveneGUI (Connect):
         def open_history_file(button, fname):
             try:
                 self.controller.load_package (uri=fname)
-            except (OSError, IOError), e:
+            except Exception, e:
                 self.log(_("Cannot load package %s:\n%s") % (fname, unicode(e)))
             return True
 
@@ -740,6 +768,44 @@ class AdveneGUI (Connect):
                 menu.append(i)
         menu.show_all()
         return menu
+
+    def open_adhoc_view(self, name, popup=True, **kw):
+	"""Open the given adhoc view.
+	"""
+	view=None
+	if name == 'treeview':
+	    view = advene.gui.views.tree.TreeWidget(self.controller.package,
+						    controller=self.controller)
+	elif name == 'timeline':
+	    view = advene.gui.views.timeline.TimeLine (self.controller.package.annotations,
+						       controller=self.controller)
+	elif name == 'transcription':
+	    try:
+		at=kw['annotation_type_id']
+	    except KeyError:
+		at=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."), 
+						create=False)
+	    if at is not None:
+		view = TranscriptionView(controller=self.controller,
+					 annotationtype=at)
+	elif name == 'browser':
+	    view = Browser(element=self.controller.package,
+			   controller=self.controller)
+	elif name == 'webbrowser':
+	    if self.controller.package is not None:
+		m=self.build_utbv_menu()
+		m.popup(None, None, None, 0, gtk.get_current_event_time())
+	    else:
+		self.log (("No current package"))
+	elif name == 'transcribe':
+	    try:
+		filename=kw['filename']
+	    except KeyError:
+		filename=None
+	    view=TranscriptionEdit(controller=self.controller, filename=filename)
+	if view is not None and popup:
+	    view.popup()
+	return view
 
     def update_gui (self):
         """Update the GUI.
@@ -1119,14 +1185,6 @@ class AdveneGUI (Connect):
     def on_win_key_press_event (self, win=None, event=None):
         """Keypress handling.
 	"""
-        # It the transcription_edit window is active,
-        # it grabs the keyboard interaction
-        if (self.transcription_edit):
-            # FIXME: we should return True only if the event was
-            # processed by the transcription_edit, but we do not
-            # know if the textarea has processed the event (can we?)
-            return self.transcription_edit.key_pressed_cb(win, event)
-            
 	# Player shortcuts
 	if self.process_player_shortcuts(win, event):
 	    return True
@@ -1174,7 +1232,10 @@ class AdveneGUI (Connect):
                                               button=gtk.STOCK_OPEN,
                                               default_dir=d)
         if filename:
-            self.controller.load_package (uri=filename)
+            try:
+                self.controller.load_package (uri=filename)
+            except Exception, e:
+                self.log(_("Cannot load package %s:\n%s") % (fname, unicode(e)))
         return True
 
     def on_save1_activate (self, button=None, data=None):
@@ -1271,31 +1332,6 @@ class AdveneGUI (Connect):
             self.log(i.statistics_formatted())
         return True
 
-    def on_import_transcription1_activate (self, button=None, data=None):
-        if self.transcription_edit is not None:
-            self.log(_("A transcription edit view is already open."))
-            return True
-        
-        self.transcription_edit=TranscriptionEdit(controller=self.controller, filename=data)
-        self.register_view(self.transcription_edit)
-        
-        def close_cb(w):
-            if self.transcription_edit is not None:
-                self.transcription_edit.packed_widget.destroy() 
-                self.unregister_view(self.transcription_edit)
-                self.transcription_edit=None
-                self.popupwidget.show()
-            return True
-        
-        self.popupwidget.hide()
-        self.transcription_edit.packed_widget=self.transcription_edit.get_packed_widget(close_cb)
-        self.transcription_edit.packed_widget.show_all()
-        self.transcription_edit.packed_widget.grab_focus()
-
-        self.visualisationwidget.add(self.transcription_edit.packed_widget)
-
-        return True
-
     def on_quit1_activate (self, button=None, data=None):
         """Gtk callback to quit."""
         return self.on_exit (button, data)
@@ -1320,22 +1356,6 @@ class AdveneGUI (Connect):
 
     def on_delete1_activate (self, button=None, data=None):
         print "Delete: Not implemented yet (cf popup menu)."
-        return True
-
-    def on_timeline1_activate (self, button=None, data=None):
-        """Timeline View of loaded defined annotations."""
-        duration = self.controller.cached_duration
-        if duration <= 0:
-            if self.controller.package.annotations:
-                duration = max([a.fragment.end for a in self.controller.package.annotations])
-            else:
-                duration = 0
-
-        t = advene.gui.views.timeline.TimeLine (self.controller.package.annotations,
-                                                minimum=0,
-                                                maximum=duration,
-                                                controller=self.controller)
-        window=t.popup()
         return True
 
     def on_edit_ruleset1_activate (self, button=None, data=None):
@@ -1405,31 +1425,6 @@ class AdveneGUI (Connect):
         """Open the URL stack view plugin."""
         if not self.logwindow.embedded:
             self.logwindow.popup()
-        return True
-
-    def on_view_annotations_activate (self, button=None, data=None):
-        """Open treeview view plugin."""
-        tree = advene.gui.views.tree.TreeWidget(self.controller.package,
-                                                controller=self.controller)
-        tree.popup()
-        return True
-
-    def on_transcription1_activate (self, button=None, data=None):
-        """Open transcription view."""
-        if data is not None:
-            at=data
-        else:
-            at=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."), create=False)
-        if at is not None:
-            transcription = TranscriptionView(controller=self.controller,
-                                              annotationtype=at)
-            transcription.popup()
-        return True
-    
-    def on_browser1_activate (self, button=None, data=None):
-        browser = Browser(element=self.controller.package,
-                          controller=self.controller)
-        popup=browser.popup()
         return True
 
     def on_evaluator2_activate (self, button=None, data=None):
@@ -1504,16 +1499,6 @@ class AdveneGUI (Connect):
             self.log (_("Status           : %s") % self.statustext[self.controller.player.status])
         else:
             self.log (_("Player not active."))
-        return True
-
-    def on_start_web_browser_activate (self, button=None, data=None):
-        """Open a browser on current package's root."""
-        if self.controller.package is not None:
-            m=self.build_utbv_menu()
-            m.attach_to_widget(button, None)
-            m.popup(None, button, None, 0, gtk.get_current_event_time())
-        else:
-            self.log (("No current package"))
         return True
 
     def on_about1_activate (self, button=None, data=None):
