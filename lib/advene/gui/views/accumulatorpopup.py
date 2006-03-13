@@ -24,13 +24,13 @@ import time
 import gtk
 import gobject
 import pango
-#from threading import Lock
 
 from gettext import gettext as _
 
 import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.popup
+from advene.gui.views import AdhocView
 
 class DummyLock:
     def __init__(self):
@@ -46,15 +46,15 @@ class DummyLock:
         self.count -= 1
         return True
     
-class AccumulatorPopup:
+class AccumulatorPopup(AdhocView):
     """View displaying a limited number of popups.
     """
-    def __init__ (self, size=3, controller=None, autohide=False, container=None):
+    def __init__ (self, size=3, controller=None, autohide=False):
         self.view_name = _("PopupAccumulator")
+	self.view_id = 'popupaccumulator'
         
         self.size=size
         self.controller=controller
-        self.container=container
         # Hide the window if there is no widget
         self.autohide = autohide
 
@@ -66,7 +66,8 @@ class AccumulatorPopup:
         # Lock on self.widgets
         self.lock=DummyLock()
         
-        self.window=self.build_widget()
+	# FIXME: find a way that the AdhocView.close() converts to hide()
+        self.widget=self.build_widget()
 
     def undisplay_cb(self, button=None, widget=None):
         self.undisplay(widget)
@@ -136,15 +137,15 @@ class AccumulatorPopup:
         # We found at least one (and hopefully only one) matching record
         t[2].destroy()
         if not self.widgets and self.autohide:
-            self.window.hide()
+            self.widget.hide()
         return True
     
     def hide(self, *p, **kw):
-        self.window.hide()
+        self.widget.hide()
         return True
 
     def show(self, *p, **kw):
-        self.window.show_all()
+        self.widget.show_all()
         return True
 
     def update_position(self, pos):
@@ -162,42 +163,12 @@ class AccumulatorPopup:
         return True
     
     def build_widget(self):
-        if self.container:
-            window=self.container
-        else:
-            window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-            window.set_title (_("Popups"))
-
-        f=gtk.Frame()
-        f.set_label(_("Popups"))
-        window.add(f)
-        
         mainbox=gtk.VBox()
-        f.add(mainbox)
         
         self.hbox = gtk.HBox()
         mainbox.add(self.hbox)
 
         if self.controller.gui:
             self.controller.gui.register_view (self)
-
-        if self.container is None:
-            window.connect ("destroy", lambda w: True)
-            
-            hb=gtk.HButtonBox()
-            
-            b=gtk.Button(stock=gtk.STOCK_CLOSE)
-            b.connect("clicked", self.hide)
-            hb.add(b)
         
-            mainbox.pack_start(hb, expand=False)
-        
-        return window
-
-    def get_widget (self):
-        """Return the TreeView widget."""
-        return self.window
-
-    def popup(self):
-        window.show_all()
-        return window
+        return mainbox
