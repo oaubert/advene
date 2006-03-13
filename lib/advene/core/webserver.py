@@ -569,11 +569,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 if view is None or c.gui is None:
                     current_adhoc()
                     return
-                if view == 'tree':
-                    c.queue_action(c.gui.on_view_annotations_activate)
-                    self.send_no_content()
-                elif view == 'timeline':
-                    c.queue_action(c.gui.on_timeline1_activate)
+                if view in ('tree', 'timeline', 'browser'):
+                    c.queue_action(c.gui.open_adhoc_view, view)
                     self.send_no_content()
                 elif view == 'transcription':
                     atid=None
@@ -585,17 +582,17 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if atid is not None:
                         atid=vlclib.get_id(self.server.controller.package.annotationTypes,
                                            atid)
+		    else:
+			self.send_error("Should provide an annotation-type id parameter")
+			return
 
-                    c.queue_action(c.gui.on_transcription1_activate, None, atid)
+                    c.queue_action(c.gui.open_adhoc_view, view, annotation_type_id=atid)
                     self.send_no_content()
                 elif view == 'transcribe':
                     url=None
                     if query.has_key('url'):
                         url=query['url']
-                    c.queue_action(c.gui.on_import_transcription1_activate, None, url)
-                    self.send_no_content()
-                elif view == 'browser':
-                    c.queue_action(c.gui.on_browser1_activate, None, None)
+                    c.queue_action(c.gui.open_adhoc_view, view, filename=url)
                     self.send_no_content()
                 else:
                     self.start_html (_('Error'))
