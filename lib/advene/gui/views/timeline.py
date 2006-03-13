@@ -26,6 +26,7 @@ from advene.model.annotation import Annotation
 from advene.model.schema import Schema, AnnotationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
+from advene.gui.views import AdhocView
 
 import advene.util.vlclib as vlclib
 import advene.gui.util
@@ -38,7 +39,7 @@ import advene.gui.edit.elements
 import gtk
 import gobject
 
-class TimeLine:
+class TimeLine(AdhocView):
     """
     Representation of a list of annotations placed on a timeline.
 
@@ -51,6 +52,7 @@ class TimeLine:
                   controller=None):
 
         self.view_name = _("Timeline")
+	self.view_id = 'timeline'
 
         self.list = l
         self.controller=controller
@@ -290,10 +292,6 @@ class TimeLine:
 
     def pixel2unit (self, v):
         return v * self.ratio_adjustment.value
-
-    def get_widget (self):
-        """Return the display widget."""
-        return self.layout
 
     def update_button (self, b):
         """Update the representation for button b.
@@ -988,7 +986,6 @@ class TimeLine:
         hbox.pack_start (self.highlight_activated_toggle, expand=False)
         hbox.pack_start (self.scroll_to_activated_toggle, expand=False)
 
-	setattr(vbox, 'buttonbox', hbox)
 
         vbox.set_homogeneous (False)
 
@@ -997,6 +994,8 @@ class TimeLine:
         # Make sure that the timeline display is in sync with the
         # fraction widget value
         self.fraction_event (vbox)
+
+	setattr(vbox, 'buttonbox', hbox)
 
 	return vbox
 
@@ -1018,7 +1017,7 @@ class TimeLine:
         sw.set_policy (gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
         sw.set_hadjustment (self.adjustment)
         sw.set_vadjustment (sw1.get_vadjustment())
-        sw.add (self.get_widget())
+        sw.add (self.layout)
         hpaned.add2 (sw)
 
         (w, h) = self.legend.get_size ()
@@ -1101,31 +1100,6 @@ class TimeLine:
         tb.insert(self.delete_transmuted_toggle, -1)
         tb.show_all()
         return tb
-
-    def popup(self):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_title (self.controller.get_title(self.controller.package))
-
-	window.add(self.widget)
-
-        b = gtk.Button (stock=gtk.STOCK_CLOSE)
-        if self.controller.gui:
-            b.connect ("clicked", self.controller.gui.close_view_cb, window, self)
-        else:
-            b.connect ("clicked", lambda w: window.destroy())
-        self.widget.buttonbox.pack_start (b, expand=False)
-
-        if self.controller.gui:
-            window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
-        self.controller.gui.register_view (self)
-
-        window.show_all()
-
-	# Not that the widget is realized, we can get its dimensions
-	# and update the display accordingly
-	self.fraction_event(self.widget)
-
-        return window
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
