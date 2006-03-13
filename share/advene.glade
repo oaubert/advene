@@ -635,7 +635,7 @@
 		  <property name="show_arrow">True</property>
 
 		  <child>
-		    <widget class="GtkToolButton" id="toolbutton11">
+		    <widget class="GtkToolButton" id="tb_treeview">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open a tree view</property>
 		      <property name="label" translatable="yes">TreeView</property>
@@ -653,7 +653,7 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkToolButton" id="toolbutton12">
+		    <widget class="GtkToolButton" id="tb_timeline">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open a timeline view</property>
 		      <property name="label" translatable="yes">Timeline</property>
@@ -671,7 +671,7 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkToolButton" id="toolbutton13">
+		    <widget class="GtkToolButton" id="tb_transcription">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open a transcription view</property>
 		      <property name="label" translatable="yes">Transcription</property>
@@ -689,7 +689,7 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkToolButton" id="toolbutton14">
+		    <widget class="GtkToolButton" id="tb_browser">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open a package browser view</property>
 		      <property name="label" translatable="yes">Explorer</property>
@@ -707,7 +707,7 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkToolButton" id="toolbutton23">
+		    <widget class="GtkToolButton" id="tb_webbrowser">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Open the webbrowser</property>
 		      <property name="label" translatable="yes">WebBrowser</property>
@@ -725,7 +725,7 @@
 		  </child>
 
 		  <child>
-		    <widget class="GtkToolButton" id="toolbutton24">
+		    <widget class="GtkToolButton" id="tb_transcribe">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Take notes on the fly</property>
 		      <property name="label" translatable="yes">Edit transcription</property>
