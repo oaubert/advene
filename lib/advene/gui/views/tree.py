@@ -27,7 +27,7 @@ from advene.model.bundle import AbstractBundle, StandardXmlBundle
 from advene.model.resources import Resources, ResourceData
 from advene.model.query import Query
 from advene.model.view import View
-
+from advene.gui.views import AdhocView
 
 from gettext import gettext as _
 
@@ -37,8 +37,6 @@ import advene.gui.popup
 
 import advene.util.vlclib as vlclib
 
-#import pygtk
-#pygtk.require ('2.0')
 import gtk
 import gobject
 
@@ -74,13 +72,37 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
 
         The problem is that we do not know its previous path.
         """
-        #FIXME: find a way to correctly do this.
-        parent=self.nodeParent(e)
-        path=self.on_get_path(e)
-        if path is not None:
+        # FIXME: there is still a bug with ImportBundles (that are
+	# mutable and thus cannot be dict keys
+	print "Removing element ", str(e)
+
+	if isinstance(e, View):
+	    # Remove the element from the list view and refresh list view
+	    parent=self.get_package().views
+	    path=self.on_get_path(parent)
+	    self.row_changed(path, self.get_iter(path))
+	    return
+	
+	parent=None
+	for p in self.childrencache:
+	    if e in self.childrencache[p]:
+		parent=p
+		print "Found parent ", str(parent)
+		break
+	if parent is None:
+	    # Could not find the element in the cache.
+	    # It was not yet displayed
+	    print "Parent not found"
+	else:
+	    # We can determine its path
+	    path=list(self.on_get_path(parent))
+	    path.append(self.childrencache[parent].index(e))
+	    path=tuple(path)
+
+	    print "Path: ", str(path)
             self.row_deleted(path)
-            #self.clear_cache()
             del (self.childrencache[parent])
+	return True
 
     def update_element(self, e, created=False):
         """Update an element.
@@ -299,10 +321,10 @@ class DetailedTreeModel(AdveneTreeModel):
                 self.childrencache[node] = node.relations
             children = self.childrencache[node]
         elif isinstance (node, Schema):
-            if not self.childrencache.has_key (node):
-                self.childrencache[node] = list(node.annotationTypes)
-                self.childrencache[node].extend(node.relationTypes)
-            children = self.childrencache[node]
+	    # Do not cache these elements
+	    l=list(node.annotationTypes)
+	    l.extend(node.relationTypes)
+            children = l
         elif isinstance (node, View):
             children = None
         elif isinstance (node, Query):
@@ -397,17 +419,21 @@ class FlatTreeModel(AdveneTreeModel):
         children = self.nodeChildren(node)
         return (children is not None and children)
 
-class TreeWidget:
+class TreeWidget(AdhocView):
     def __init__(self, package, modelclass=DetailedTreeModel, controller=None):
         self.view_name = _("Tree view")
+	self.view_id = 'treeview'
+
         self.package = package
         self.controller=controller
         self.modelclass=modelclass
 
         self.model = modelclass(controller=controller, package=package)
 
+	self.widget = self.build_widget()
+
+    def build_widget(self):
         tree_view = gtk.TreeView(self.model)
-        self.tree_view = tree_view
 
         select = tree_view.get_selection()
         select.set_mode(gtk.SELECTION_SINGLE)
@@ -427,7 +453,16 @@ class TreeWidget:
                                            config.data.drag_type['annotation'],
                                            gtk.gdk.ACTION_LINK)
         tree_view.connect("drag_data_get", self.drag_data_get_cb)
-        
+
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+	sw.add(tree_view)
+
+	sw.treeview = tree_view
+
+        return sw
+
+
 
     def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
         print "Drag data received"
@@ -442,10 +477,6 @@ class TreeWidget:
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
-
-    def get_widget (self):
-        """Return the TreeView widget."""
-        return self.tree_view
 
     def get_selected_node (self, tree_view):
         """Return the currently selected node.
@@ -509,6 +540,7 @@ class TreeWidget:
         return retval
 
     def update_element(self, element=None, event=None):
+	#print "Update element ", str(element), str(event)
         if event.endswith('Create'):
             self.model.update_element(element, created=True)
         elif event.endswith('EditEnd'):
@@ -516,8 +548,9 @@ class TreeWidget:
         elif event.endswith('Delete'):
             # FIXME: remove_element is incorrect for the moment
             #        so do a global update
-            #self.model.remove_element (element)
-            self.update_model(element.rootPackage)
+	    #print "Remove element"
+            self.model.remove_element (element)
+            #self.update_model(element.rootPackage)
         else:
             return "Unknown event %s" % event
         return
@@ -560,10 +593,10 @@ class TreeWidget:
         """Update the model with a new package."""
         print "Treeview: update model %s" % str(package)
         # Get current path
-        oldpath=self.tree_view.get_cursor()[0]
+        oldpath=self.widget.treeview.get_cursor()[0]
         self.model = self.modelclass(controller=self.controller,
                                      package=package)
-        self.tree_view.set_model(self.model)
+        self.widget.treeview.set_model(self.model)
         # Return to old path if possible
         if oldpath is not None:
             self.expand_to_path(oldpath)
@@ -589,37 +622,6 @@ class TreeWidget:
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
-
-    def popup(self):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_title (_("Package %s") % (self.controller.package.title or _("No title")))
-
-        vbox = gtk.VBox()
-        window.add (vbox)
-        
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        
-        vbox.add (sw)
-        sw.add (self.get_widget())
-        if self.controller.gui:
-            self.controller.gui.register_view (self)
-            window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
-
-        if self.controller.gui:
-            self.controller.gui.init_window_size(window, 'treeview')
-
-        self.buttonbox = gtk.HButtonBox()
-
-        b = gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect("clicked", lambda w: window.destroy ())
-        self.buttonbox.add (b)
-
-        vbox.pack_start(self.buttonbox, expand=False)
-        
-        window.show_all()
-        
-        return window
     
 if __name__ == "__main__":
     if len(sys.argv) < 2:
