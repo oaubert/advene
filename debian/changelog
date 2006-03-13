@@ -17,6 +17,9 @@ advene (0.20) unstable; urgency=low
     is equivalent to
     annotation/outgoingRelations/first/members/last/id
 
+  * global methods can be defined by user plugins (in .advene/plugins
+    directory) through controller.register_global_method
+  
   * ! Moved config and preferences files to ~/.advene directory
     (UserDir/advene on Windows)
 
@@ -24,8 +27,12 @@ advene (0.20) unstable; urgency=low
     define rectangular zones.
 
   * GUI: 
-    * the treeview is displayed by default on the right of the video
-      window (replacing the less used, for now, URL stack window)
+    * the treeview can be displayed by default on the right of the video
+      window (replacing the less used, for now, URL stack window), see the
+      preferences panel
+    * a view notebook holds the popupaccumulator below the video. It allows
+      to embed other views (timeline, treeview, transcription...) simply by
+      drag and drop of the view toolbutton to the notebook
     * added an element creation toolbar
     * generic player control shortcuts are used
     * Edit/Preferences now allows to modify paths (data, movies, player, imagecache) (from Frank Wagner)
@@ -52,6 +59,8 @@ advene (0.20) unstable; urgency=low
   * webserver:
     * message log is now available from the menu (View->Webserver log), and
       not displayed on the console
+    * new action: /admin/halt (useful for the standalone case)
+    * new action: /admin/methods displays the list of available TALES methods  
     * new path: /action/ActionName?param=TALESexpr to invoke actions defined
       in the ECA framework
 
