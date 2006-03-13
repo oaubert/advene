@@ -43,6 +43,7 @@ class BrowserColumn:
         self.callback=callback
         self.next=None
         self.previous=parent
+	self.view_button=None
         self.widget=self.build_widget()
 
     def get_widget(self):
@@ -224,13 +225,14 @@ class Browser(AdhocView):
             val=val[:77]+'...'
         self.valuelabel.set_text(val)
         self.current_value=element
-        if (hasattr(self.current_value, 'viewableType') and
-            self.current_value.viewableType == 'annotation-list'
-            or isinstance(self.current_value, list)):
-            self.view_button.set_sensitive(True)
-        else:
-            self.view_button.set_sensitive(False)
-        return
+	if self.view_button:
+	    if (hasattr(self.current_value, 'viewableType') and
+		self.current_value.viewableType == 'annotation-list'
+		or isinstance(self.current_value, list)):
+		self.view_button.set_sensitive(True)
+	    else:
+		self.view_button.set_sensitive(False)
+	    return
 
     def display_timeline(self, button=None):
         """Display the results as annotations in a timeline.
