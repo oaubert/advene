@@ -20,8 +20,6 @@
 
 import sys
 
-#import pygtk
-#pygtk.require ('2.0')
 import gtk
 import gobject
 import pango
@@ -32,49 +30,73 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
+from advene.gui.edit.properties import EditWidget
 
 import advene.util.vlclib as vlclib
 
 from gettext import gettext as _
 
+from advene.gui.views import AdhocView
 import advene.gui.edit.elements
 import advene.gui.edit.create
 import advene.gui.popup
 
-class TranscriptionView:
+class TranscriptionView(AdhocView):
     def __init__ (self, controller=None, annotationtype=None, separator="  "):
         self.view_name = _("Transcription")
+	self.view_id = 'transcriptionview'
+
         self.controller=controller
         self.package=controller.package
         self.model = annotationtype
-        self.separator = separator
-        self.displaytime=False
         # Annotation where the cursor is set
         self.currentannotation=None
 
-        # If representation is not None, it is used as a TALES
-        # expression to generate the representation of the
-        # transcripted annotation. Useful with structured annotations
-        self.representation=None
-
         self.modified=False
-        
-        # Various option toggles
-        self.display_bounds_toggle=gtk.CheckButton(_("Display annotation bounds"))
-        self.display_bounds_toggle.set_active(False)
-        self.display_bounds_toggle.connect("toggled", self.display_toggle)
-        self.display_time_toggle=gtk.CheckButton(_("Display times"))
-        self.display_time_toggle.set_active(False)
-        self.display_time_toggle.connect("toggled", self.display_toggle)
+
+        self.options = {
+	    'display-bounds': False,
+	    'display-time': False,
+	    'separator': ' ',
+	    # If representation is not None, it is used as a TALES
+	    # expression to generate the representation of the
+	    # transcripted annotation. Useful with structured annotations
+	    'representation': '',
+	    }
 
         self.widget=self.build_widget()
 
-    def display_toggle(self, button):
-        self.generate_buffer_content()
-        return True
+    def edit_options(self, button):
+	cache=dict(self.options)
+
+        ew=EditWidget(cache.__setitem__, cache.get)
+        ew.set_name(_("Transcription options"))
+        ew.add_entry(_("Representation"), "representation", _("If not empty, this TALES expression that will be used to format the annotations."))
+        ew.add_entry(_("Separator"), "separator", _("This separator will be inserted between the annotations."))
+        ew.add_checkbox(_("Display timestamps"), "display-time", _("Insert timestsamp values"))
+        ew.add_checkbox(_("Display annotation bounds"), 'display-bounds', _("Display annotation bounds"))
+        res=ew.popup()
+
+        if res:
+	    # Process special characters
+	    for c in ('representation', 'separator'):
+		self.options[c]=cache[c].replace('\\n', '\n').replace('\\t', '\t')
+	    for c in ('display-time', 'display-bounds'):
+		self.options[c]=cache[c]
+	    self.generate_buffer_content()
+	return True
 
     def build_widget(self):
-        vbox = gtk.VBox()
+        mainbox = gtk.VBox()
+
+        if self.controller.gui:
+            toolbar=self.controller.gui.get_player_control_toolbar()
+            mainbox.pack_start(toolbar, expand=False)
+            
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        mainbox.add (sw)
+
         self.textview = gtk.TextView()
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
@@ -98,31 +120,49 @@ class TranscriptionView:
         self.textview.connect("populate-popup", self.populate_popup_cb)
 
         self.update_current_annotation(self.textview, None)
-        vbox.add(self.textview)
-        vbox.show_all()
-        return vbox
+
+        sw.add_with_viewport (self.textview)
+
+
+        hb=gtk.HButtonBox()
+        hb.set_homogeneous(False)
+
+        b=gtk.Button(stock=gtk.STOCK_PREFERENCES)
+        b.connect("clicked", self.edit_options)
+        hb.pack_start(b, expand=False)
+
+        b=gtk.Button(stock=gtk.STOCK_SAVE)
+        b.connect ("clicked", self.save_transcription)
+        hb.pack_start(b, expand=False)
+
+        mainbox.pack_start(hb, expand=False)
+
+	mainbox.buttonbox = hb
+
+        mainbox.show_all()
+
+        return mainbox
 
     def generate_buffer_content(self):
         b=self.textview.get_buffer()
         # Clear the buffer
         begin,end=b.get_bounds()
         b.delete(begin, end)
-        t_toggle=self.display_time_toggle.get_active()
-        m_toggle=self.display_bounds_toggle.get_active()
 
         l=self.model.annotations[:]
         l.sort(lambda a,b: cmp(a.fragment.begin, b.fragment.begin))
         for a in l:
-            if t_toggle:
+            if self.options['display-time']:
                 b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.begin))
 
             mark = b.create_mark("b_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
                                  left_gravity=True)
-            mark.set_visible(m_toggle)
+            mark.set_visible(self.options['display-bounds'])
 
-            if self.representation:
-                rep=vlclib.get_title(self.controller, a, representation=self.representation)
+            if self.options['representation']:
+                rep=vlclib.get_title(self.controller, a, 
+				     representation=self.options['representation'])
             else:
                 rep=a.content.data
 
@@ -130,13 +170,13 @@ class TranscriptionView:
             mark = b.create_mark("e_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
                                  left_gravity=True)
-            mark.set_visible(m_toggle)
+            mark.set_visible(self.options['display-bounds'])
 
-            if t_toggle:
+            if self.options['display-time']:
                 b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.end))
 
             #print "inserted from %d to %d" % (b_a, e_a)
-            b.insert_at_cursor(self.separator)
+            b.insert_at_cursor(self.options['separator'])
         return
 
     def populate_popup_cb(self, textview, menu):
@@ -309,42 +349,6 @@ class TranscriptionView:
             self.desactivate_annotation (annotation)
         return True
 
-    def select_separator(self, button=None):
-        """Select a new separator."""
-        sep=advene.gui.util.entry_dialog(title=_('Enter the new separator'),
-                                         text=_("Specify the separator that will be inserted\nbetween the annotations."),
-                                         default=self.separator)
-        if sep is None:
-            # The user canceled the action
-            return True
-
-        # Process special characters
-        sep=sep.replace('\\n', '\n')
-        sep=sep.replace('\\t', '\t')
-
-        self.separator=sep
-        self.generate_buffer_content()
-
-        return True
-
-    def select_representation(self, button=None):
-        """Select a new representation."""
-        rep=advene.gui.util.entry_dialog(title=_('Enter a TALES expression'),
-                                         text=_("Specify the TALES expression that will be used\nto format the annotations."),
-                                         default=self.representation)
-        if rep is None:
-            # The user canceled the action
-            return True
-
-        # Process special characters
-        rep=rep.replace('\\n', '\n')
-        rep=rep.replace('\\t', '\t')
-
-        self.representation=rep
-        self.generate_buffer_content()
-
-        return True
-
     def save_transcription(self, button=None):
 	fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
 					   action=gtk.FILE_CHOOSER_ACTION_SAVE,
@@ -368,68 +372,6 @@ class TranscriptionView:
         f.close()
         self.controller.log(_("Transcription saved to %s") % filename)
         return True
-    
-    def get_widget (self):
-        """Return the TreeView widget."""
-        return self.widget
-
-    def popup(self):
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-
-        if self.controller.gui:
-            self.controller.gui.init_window_size(window, 'transcriptionview')
-
-        window.set_title (_("Transcription for %s") % (self.model.title
-                                                       or self.model.id))
-
-        vbox = gtk.VBox()
-
-        if self.controller.gui:
-            toolbar=self.controller.gui.get_player_control_toolbar()
-            vbox.pack_start(toolbar, expand=False)
-            
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        vbox.add (sw)
-        sw.add_with_viewport (self.get_widget())
-        if self.controller.gui:
-            self.controller.gui.register_view (self)
-            window.connect ("destroy", self.controller.gui.close_view_cb,
-                            window, self)
-
-        hb=gtk.HButtonBox()
-        hb.set_homogeneous(False)
-        
-        hb.pack_start(self.display_time_toggle, expand=False)
-        hb.pack_start(self.display_bounds_toggle, expand=False)
-
-        b=gtk.Button(_("Separator"))
-        b.connect("clicked", self.select_separator)
-        hb.pack_start(b, expand=False)
-
-        b=gtk.Button(_("Representation"))
-        b.connect("clicked", self.select_representation)
-        hb.pack_start(b, expand=False)
-
-        vbox.pack_start(hb, expand=False)
-
-        hb=gtk.HButtonBox()
-        hb.set_homogeneous(False)
-
-        b=gtk.Button(stock=gtk.STOCK_SAVE)
-        b.connect ("clicked", self.save_transcription)
-        hb.pack_start(b, expand=False)
-
-        b=gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect ("clicked", lambda w: window.destroy ())
-        hb.pack_start(b, expand=False)
-
-        vbox.pack_start(hb, expand=False)
-
-        window.add(vbox)
-
-        window.show_all()
-        return window
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
