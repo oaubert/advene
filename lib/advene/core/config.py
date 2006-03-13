@@ -215,7 +215,7 @@ class Config(object):
         # Reaction time offset (in ms) used when setting annotations
         self.reaction_time=200
 
-	# Drag and drop parameters
+	# Drag and drop parameters for URIed element
         self.target_type = {
             'annotation' : 42,
             'rule' : 43,
@@ -230,6 +230,12 @@ class Config(object):
             self.drag_type[t] = [ ( "application/x-advene-%s-uri" % t,
                                     0,
                                     self.target_type[t] ) ]
+	# Other DnD types
+        n='adhoc-view'
+	self.target_type[n] = 49
+	self.drag_type[n] =  [ ( "application/x-advene-%s" % n,
+				 0,
+				 self.target_type[n] ) ]
 
 	# Content-handlers
 	self.content_handlers = []
