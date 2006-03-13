@@ -30,6 +30,7 @@ from advene.model.annotation import Annotation
 from advene.model.schema import Schema, AnnotationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
+from advene.gui.views import AdhocView
 
 import advene.util.vlclib as vlclib
 
@@ -40,15 +41,11 @@ import gobject
 
 import advene.rules.elements
 
-class LogWindow:
-    def __init__ (self, controller=None, container=None, embedded=False):
+class LogWindow(AdhocView):
+    def __init__ (self, controller=None):
         self.view_name = _("URL stack")
         self.controller=controller
-        self.container=container
         self.tooltips=gtk.Tooltips()
-        if container is not None:
-            embedded=True
-        self.embedded=embedded
         # Timeout for messages in ms
         self.timeout=5000
         # Data is a tuple list: (timestamp, position, message, url, widget)
@@ -57,6 +54,8 @@ class LogWindow:
         self.data=[]
         self.widget=self.build_widget()        
         self.window=None
+
+    # FIXME: prevent the widget from being destroyed.
 
     def build_widget(self):
         f=gtk.Frame()
@@ -76,10 +75,7 @@ class LogWindow:
         b.connect("clicked", lambda b: self.clear_data())
         hb.pack_start(b, expand=False)
 
-        if not self.embedded:
-            b=gtk.Button(stock=gtk.STOCK_CLOSE)
-            b.connect("clicked", self.hide)
-            hb.pack_start(b, expand=False)
+	f.buttonbox = hb
 
         w.pack_start(hb, expand=False)
 
@@ -159,14 +155,6 @@ class LogWindow:
         # We log the given annotation
         self.add_data(message, position, url)
 
-    def get_view (self):
-        """Return the display widget."""
-        return self.widget
-
-    def get_widget (self):
-        """Return the display widget."""
-        return self.widget
-
     def register_callback (self, controller=None):
         """Add the activate handler for annotations."""
         controller.event_handler.register_action(advene.rules.elements.RegisteredAction(
@@ -177,18 +165,3 @@ class LogWindow:
                         'url': _("URL")},
             category='gui',
             ))
-
-    def hide(self, *p, **kw):
-        if self.window is not None:
-            self.window.hide()
-        return True
-    
-    def popup(self):
-        if self.window is None:
-            self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-            self.window.set_title (_("URL stack"))
-            self.window.add (self.get_widget())
-            self.window.connect ("destroy-event", lambda w, e: True)
-            self.window.connect ("delete-event", lambda w, e: True)
-            self.window.connect ("unrealize", lambda w: True)
-        self.window.show_all()
