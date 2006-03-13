@@ -25,12 +25,14 @@ import gobject
 import pango
 
 from gettext import gettext as _
+from advene.gui.views import AdhocView
 
-class ViewBook:
+class ViewBook(AdhocView):
     """Notebook containing multiple views
     """
     def __init__ (self, controller=None, views=None):
         self.view_name = _("ViewBook")
+	self.view_id = 'viewbook'
 
 	self.controller=controller
 	if views is None:
@@ -92,6 +94,8 @@ class ViewBook:
 	e.connect("button_press_event", popup_menu, v)
 	e.show_all()
         self.widget.append_page(v.widget, e)
+	self.widget.set_current_page(self.widget.page_num(v.widget))
+
 	v.widget.show_all()
 	return True
 	
@@ -122,19 +126,3 @@ class ViewBook:
                                gtk.gdk.ACTION_COPY)
 
         return notebook
-
-    def popup(self):
-	w = gtk.Window(gtk.WINDOW_TOPLEVEL)
-	w.set_title (_("View Book"))
-
-	v=gtk.VBox()
-	
-	v.add(self.widget)
-	b=gtk.Button(stock=gtk.STOCK_CLOSE)
-	b.connect("clicked", lambda b: w.destroy())
-	v.pack_start(b, expand=False)
-	
-	w.add(v)
-        w.show_all()
-
-        return w
