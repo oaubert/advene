@@ -7,13 +7,16 @@ or a CORBA module. You have to install the python-vlc plugin
 or CORBA support for VLC (see http://liris.cnrs.fr/advene/download/)
 to access movies.
 
+* Linux version
+
 You will need the following python packages (the package names are from
 Debian, they may slightly vary on other distributions) :
 
-python-gtk2 (>=2.6)
-python-glade2 (>=2.6)
-python-pyorbit (>=2.0)
+python-gtk2 (>=2.8)
+python-glade2 (>=2.8)
 python-xml (>=0.8.0)
+
+No more required:
 [ python-simpletal (>=3.9) -- included in the Advene distribution ]
 python-imaging [python-pil in some distributions]
 
@@ -21,7 +24,7 @@ python-imaging [python-pil in some distributions]
 
 You should install in this order (note the version numbers) :
 
-Gtk/win32 v. 2.6 : http://gladewin32.sourceforge.net/
+Gtk/win32 v. 2.8 : http://gladewin32.sourceforge.net/ (runtime environment)
 
 Python    v. 2.3 : http://www.python.org/ftp/python/2.3.4/Python-2.3.4.exe
 [ From http://python.org/ ]
@@ -29,13 +32,15 @@ Python    v. 2.3 : http://www.python.org/ftp/python/2.3.4/Python-2.3.4.exe
 PyGtk for python2.3: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/binaries/pygtk-2.4.1.win32-py2.3.exe
 [ From http://www.pygtk.org ]
 
-Python Imaging Library : http://effbot.org/downloads/PIL-1.1.4.win32-py2.3.exe
-[ From http://www.pythonware.com/products/pil/ ]
-
 PyXML 0.8 : http://prdownloads.sourceforge.net/pyxml/PyXML-0.8.4.win32-py2.3.exe?download
 [ From http://pyxml.sourceforge.net/ ]
 
-VLC 0.8.1 [ From http://www.videolan.org/ ] 
+Optionally:
+Python Imaging Library : http://effbot.org/downloads/PIL-1.1.4.win32-py2.3.exe
+[ From http://www.pythonware.com/products/pil/ ]
+
+VLC [ From http://www.videolan.org/ ] + python-vlc mediacontrol
+extension (cf http://download.gna.org/advene/win32/ )
 
 * Testing
 
@@ -55,10 +60,8 @@ python setup.py install
 
 * Documentation
 
-An incomplete user guide is in the public Advene wiki :
+An (incomplete) user guide is in the public Advene wiki, feel free to contribute:
 http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneUserGuide
-
-Feel free to contribute.
 
 The changelog is in debian/changelog
 
