@@ -1,4 +1,24 @@
-* implement support for global_methods defintion in user plugins
+* timeline: allow to specify annotation types (2 lists: available,
+   present + > < buttons)
+
+* timeline: allow to specify  default height
+
+* On timeline.update_model, check package media file duration. If
+   changed, update scale
+
+* edit.elements: focus on content window on open
+
+* resource creation: allow to create non-text  resources (specify the
+   filename/mimetype)
+
+* webserver: use controller.build_context
+
+* webserver: implement a loop to process dynamic events when
+   standalone (in fact, we should use controller and invoke
+   controller.update)
+
+* Make the Advene GUI able to grok multiple packages. Focus (for
+   events) is defined for 1 specific package.
 
 * Define a ParameteredQuery which takes a single parameter in the path, e.g.:
   here/annotations/containedIn/foobar 
@@ -1046,4 +1066,15 @@ res.startswith('<html>') [useful for Kupu]
 
 * In content editor (for TAL views), add a button to invoke the
   package browser to insert paths or values.
+
+* viewbook: on add_view, make the new view as default visible
+
+* implement support for global_methods definiion in user plugins
+
+* view.transcription: replace bottom buttons by preferences panel
+
+* replace the popup widget by a notebook, with timeline +
+   popupaccumulator + transcribe window + gtkmozembed
+
+* create a gtkmozembed view -> DONE
 
