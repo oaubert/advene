@@ -1,0 +1,10 @@
+Protocol for the adhoc views
+============================
+
+The API for adhoc-views is described in
+lib/advene/gui/views/viewplugin.py
+
+Moreover, all views should inherit from AdhocView, defined in
+lib/advene/gui/views/__init__.py
+that provides common methods.
+
