@@ -43,7 +43,6 @@ class BrowserColumn:
         self.callback=callback
         self.next=None
         self.previous=parent
-	self.view_button=None
         self.widget=self.build_widget()
 
     def get_widget(self):
@@ -150,6 +149,7 @@ class Browser(AdhocView):
         self.column_width=160
         self.rootcolumn=None
         self.current_value=None
+	self.view_button=None
         self.widget=self.build_widget()
 
     def clicked_callback(self, columnbrowser, attribute):
