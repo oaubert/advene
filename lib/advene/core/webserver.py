@@ -583,7 +583,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         atid=vlclib.get_id(self.server.controller.package.annotationTypes,
                                            atid)
 		    else:
-			self.send_error("Should provide an annotation-type id parameter")
+			self.send_error(404, _("You should provide an annotation-type id parameter"))
 			return
 
                     c.queue_action(c.gui.open_adhoc_view, view, annotation_type_id=atid)
