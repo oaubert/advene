@@ -859,10 +859,14 @@ class AdveneGUI (Connect):
 
         self.update_window_title()
         for v in self.adhoc_views:
-            try:
-                v.update_model(self.controller.package)
-            except AttributeError:
-                pass
+	    if (not hasattr(v, 'close_on_package_load')
+		or v.close_on_package_load == True):
+		v.close()
+	    else:
+		try:
+		    v.update_model(self.controller.package)
+		except AttributeError:
+		    pass
 
         return True
 
