@@ -89,14 +89,15 @@ class TALESEntry:
     def browse_expression(self, b):
         """Launch the Browser.
         """
-        browser = Browser(self.context, controller=self.controller)
-        
         # FIXME: display initial value in browser        
         def callback(e):
             if e is not None:
                 self.entry.set_text(e)
             return True
-        
-        browser.popup_value(callback=callback)
+
+        browser = Browser(self.context, 
+			  controller=self.controller,
+			  callback=callback)
+        browser.popup()
         return True
 

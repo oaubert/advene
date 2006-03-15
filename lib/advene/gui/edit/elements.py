@@ -897,8 +897,6 @@ class TextContentHandler (ContentHandler):
         return False
 
     def browser_open(self, b=None):
-        browser = Browser(element=self.controller.package,
-                          controller=self.controller)
         def callback(e):
             if e is not None:
                 if e.startswith('string:'):
@@ -906,9 +904,10 @@ class TextContentHandler (ContentHandler):
                 b=self.view.get_buffer()
                 b.insert_at_cursor(unicode(e))
             return True
-        browser.popup_value(callback=callback)
-        return True
-
+        browser = Browser(element=self.controller.package,
+                          controller=self.controller,
+			  callback=callback)
+        browser.popup()
         return True
 
     def content_reload(self, b=None):

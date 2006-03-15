@@ -138,13 +138,15 @@ class BrowserColumn:
         return vbox
 
 class Browser(AdhocView):
-    def __init__(self, element=None, controller=None):
+    def __init__(self, element=None, controller=None, callback=None):
         self.view_name = _("Package browser")
 	self.view_id = 'browserview'
 	self.close_on_package_load = True
 
         self.element=element
         self.controller=controller
+	self.callback = callback
+
         self.path=[element]
         # 640 / 4
         self.column_width=160
@@ -251,77 +253,6 @@ class Browser(AdhocView):
         t.popup()
         return True
 
-    def popup(self):
-	window = AdhocView.popup(self)
-
-        self.view_button = gtk.Button (stock=gtk.STOCK_FIND)
-        self.view_button.connect ("clicked", self.display_timeline)
-        self.view_button.set_sensitive(False)
-	self.view_button.show()
-
-	window.buttonbox.pack_start(self.view_button, expand=False)
-
-        return window
-
-    def popup_value(self, callback=None):
-        """Modal version of popup.
-
-        It returns the selected path.
-        """
-        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-
-        def cancel(e):
-            window.destroy()
-            callback(None)
-            return True
-
-        def validate_path(e):
-            window.destroy()
-            callback(self.pathlabel.get_text())
-            return True
-
-        def validate_value(e):
-            window.destroy()
-            callback("string:%s" % self.valuelabel.get_text())
-            return True
-
-        window.connect ("destroy", cancel)
-
-        window.set_title (vlclib.get_title(self.controller, self.element))
-
-        vbox = gtk.VBox()
-
-        window.add (vbox)
-        vbox.add (self.widget)
-
-        hbox = gtk.HButtonBox()
-        vbox.pack_start (hbox, expand=False)
-
-        self.view_button = gtk.Button (stock=gtk.STOCK_FIND)
-        self.view_button.connect ("clicked", self.display_timeline)
-        self.view_button.set_sensitive(False)
-        hbox.add (self.view_button)
-
-        b = gtk.Button (_("Insert path"))
-        b.connect ("clicked", validate_path)
-        hbox.add (b)
-
-        b = gtk.Button (_("Insert value"))
-        b.connect ("clicked", validate_value)
-        hbox.add (b)
-
-        b = gtk.Button (stock=gtk.STOCK_CANCEL)
-        b.connect ("clicked", cancel)
-        hbox.add (b)
-
-        vbox.set_homogeneous (False)
-
-        if self.controller and self.controller.gui:
-            self.controller.gui.init_window_size(window, 'browserview')
-
-        window.show_all()
-        return window
-
     def scroll_event(self, widget=None, event=None):
         if event.state & gtk.gdk.CONTROL_MASK:
             a=widget.get_hadjustment()
@@ -381,10 +312,43 @@ class Browser(AdhocView):
         self.valuelabel = gtk.Label("here")
         self.valuelabel.set_selectable(True)
         vbox.pack_start(name_label(_("Value"), self.valuelabel), expand=False)
+ 
+	
+	buttonbox = gtk.HButtonBox()
+
+	vbox.pack_start(buttonbox, expand=False)
+
+        self.view_button = gtk.Button (stock=gtk.STOCK_FIND)
+        self.view_button.connect ("clicked", self.display_timeline)
+        self.view_button.set_sensitive(False)
+
+        def validate_path(e):
+	    p=self.pathlabel.get_text()
+            self.close()
+            self.callback(p)
+            return True
+
+        def validate_value(e):
+	    v="string:%s" % self.valuelabel.get_text()
+            self.close()
+            self.callback(v)
+            return True
+
+	if self.callback:
+	    b = gtk.Button (_("Insert path"))
+	    b.connect ("clicked", validate_path)
+	    buttonbox.add (b)
+
+	    b = gtk.Button (_("Insert value"))
+	    b.connect ("clicked", validate_value)
+	    buttonbox.add (b)
+
+	buttonbox.pack_start(self.view_button, expand=False)
+
+	vbox.buttonbox = buttonbox
 
         vbox.show_all()
         return vbox
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
