@@ -684,7 +684,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         <p><a href="/admin/access">Update the access list</a></p>
         <p><a href="/admin/methods">List available TALES methods</a></p>
         <p><a href="/admin/reset">Reset the server</a></p>
+        <p><a href="/admin/halt">Halt the server</a></p>
         <p><a href="/media">Media control</a></p>
+        <p><a href="/application">Display GUI status</a></p>
         <p><a href="/admin/list">List available files</a></p>
         <p><a href="/packages">List loaded packages</a> (%s)</p>
         <p>Display mode : %s</p>
