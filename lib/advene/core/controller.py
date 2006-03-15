@@ -15,7 +15,13 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Advene controller.
+"""
+Advene controller
+=================
+
+This is the core of the Advene framework. It holds the various
+components together (data model, webserver, GUI, event handler...),
+and can be seen as a Facade design pattern for these components.
 
 The X{AdveneEventHandler} is used by the application to handle events
 notifications and actions triggering.
