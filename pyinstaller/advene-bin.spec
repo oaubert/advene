@@ -1,6 +1,6 @@
 Summary: Annotate DVDs, Exchange on the NEt! (binary version)
 Name: advene-bin
-Version: FIXME
+Version: 0.20
 Release: 1
 License: GPL
 Packager: Olivier Aubert <olivier.aubert@liris.cnrs.fr>
