@@ -777,7 +777,7 @@ class AdveneGUI (Connect):
 	    view = advene.gui.views.tree.TreeWidget(self.controller.package,
 						    controller=self.controller)
 	elif name == 'timeline':
-	    view = advene.gui.views.timeline.TimeLine (self.controller.package.annotations,
+	    view = advene.gui.views.timeline.TimeLine (l=None,
 						       controller=self.controller)
 	elif name == 'transcription':
 	    try:
