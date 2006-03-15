@@ -239,7 +239,7 @@ class AdveneGUI (Connect):
         self.last_slow_position = 0
 
         # List of active annotation views (timeline, tree, ...)
-        self.annotation_views = []
+        self.adhoc_views = []
 
         # Populate default STBV and type lists
         self.update_gui()
@@ -251,7 +251,7 @@ class AdveneGUI (Connect):
         """
         annotation=context.evaluateValue('annotation')
         event=context.evaluateValue('event')
-        for v in self.annotation_views:
+        for v in self.adhoc_views:
             try:
                 v.update_annotation(annotation=annotation, event=event)
             except AttributeError:
@@ -265,7 +265,7 @@ class AdveneGUI (Connect):
         """
         relation=context.evaluateValue('relation')
         event=context.evaluateValue('event')
-        for v in self.annotation_views:
+        for v in self.adhoc_views:
             try:
                 v.update_relation(relation=relation, event=event)
             except AttributeError:
@@ -279,7 +279,7 @@ class AdveneGUI (Connect):
         """
         view=context.evaluateValue('view')
         event=context.evaluateValue('event')
-        for v in self.annotation_views:
+        for v in self.adhoc_views:
             try:
                 v.update_view(view=view, event=event)
             except AttributeError:
@@ -301,7 +301,7 @@ class AdveneGUI (Connect):
         """
         query=context.evaluateValue('query')
         event=context.evaluateValue('event')
-        for v in self.annotation_views:
+        for v in self.adhoc_views:
             try:
                 v.update_query(query=query, event=event)
             except AttributeError:
@@ -315,7 +315,7 @@ class AdveneGUI (Connect):
         """
         schema=context.evaluateValue('schema')
         event=context.evaluateValue('event')
-        for v in self.annotation_views:
+        for v in self.adhoc_views:
             try:
                 v.update_schema(schema=schema, event=event)
             except AttributeError:
@@ -330,7 +330,7 @@ class AdveneGUI (Connect):
         """
         at=context.evaluateValue('annotationtype')
         event=context.evaluateValue('event')
-        for v in self.annotation_views:
+        for v in self.adhoc_views:
             try:
                 v.update_annotationtype(annotationtype=at, event=event)
             except AttributeError:
@@ -346,7 +346,7 @@ class AdveneGUI (Connect):
         """
         rt=context.evaluateValue('relationtype')
         event=context.evaluateValue('event')
-        for v in self.annotation_views:
+        for v in self.adhoc_views:
             try:
                 v.update_relationtype(relationtype=rt, event=event)
             except AttributeError:
@@ -858,7 +858,7 @@ class AdveneGUI (Connect):
         self.update_gui()
 
         self.update_window_title()
-        for v in self.annotation_views:
+        for v in self.adhoc_views:
             try:
                 v.update_model(self.controller.package)
             except AttributeError:
@@ -923,8 +923,8 @@ class AdveneGUI (Connect):
         @param view: the view to register
         @type view: a view plugin (cf advene.gui.views)
         """
-        if view not in self.annotation_views:
-            self.annotation_views.append (view)
+        if view not in self.adhoc_views:
+            self.adhoc_views.append (view)
             try:
                 view.register_callback (controller=self.controller)
             except AttributeError:
@@ -934,8 +934,8 @@ class AdveneGUI (Connect):
     def unregister_view (self, view):
         """Unregister a view plugin
         """
-        if view in self.annotation_views:
-            self.annotation_views.remove (view)
+        if view in self.adhoc_views:
+            self.adhoc_views.remove (view)
             try:
                 view.unregister_callback (controller=self.controller)
             except AttributeError:
@@ -1035,7 +1035,7 @@ class AdveneGUI (Connect):
             if (abs(self.last_slow_position - pos) > config.data.slow_update_delay
                 or pos < self.last_slow_position):
                 self.last_slow_position = pos
-                for v in self.annotation_views:
+                for v in self.adhoc_views:
                     try:
                         v.update_position (pos)
                     except AttributeError:

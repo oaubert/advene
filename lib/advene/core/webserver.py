@@ -530,7 +530,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if not c.gui:
                 self.wfile.write(_("""<p>No GUI is available."""))
             else:
-                self.wfile.write(_("""<p>Current adhoc views: %s</p>""") % ", ".join([ v.view_name for v in c.gui.annotation_views]))
+                self.wfile.write(_("""<p>Current adhoc views: %s</p>""") % ", ".join([ v.view_name for v in c.gui.adhoc_views]))
                 self.wfile.write(_("""<p>You can open a new <a href="/application/adhoc/tree">tree view</a>, a new <a href="/application/adhoc/timeline">timeline</a> or a new <a href="/application/adhoc/transcription">transcription</a>.</p>"""))
 
         def current_stbv():
