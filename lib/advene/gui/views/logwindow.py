@@ -44,6 +44,9 @@ import advene.rules.elements
 class LogWindow(AdhocView):
     def __init__ (self, controller=None):
         self.view_name = _("URL stack")
+	self.view_id = 'urlstackview'
+	self.close_on_package_load = False
+
         self.controller=controller
         self.tooltips=gtk.Tooltips()
         # Timeout for messages in ms

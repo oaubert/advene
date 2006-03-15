@@ -28,8 +28,6 @@ The data is presented as follows :
 
 import sys
 
-#import pygtk
-#pygtk.require ('2.0')
 import gtk
 import gobject
 
@@ -41,6 +39,7 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.bundle import AbstractBundle
 from advene.model.view import View
+from advene.gui.views import AdhocView
 
 import advene.util.vlclib as vlclib
 
@@ -144,10 +143,14 @@ class SequenceModel(gtk.GenericTreeModel):
         """Returns the parent of this node"""
         return None
 
-class SequenceEditor:
+class SequenceEditor(AdhocView):
     def __init__ (self, controller=None):
         # FIXME: pass AnnotationType here, and (optionaly) an existing list of
         # annotations
+	self.view_name = _("Sequence Editor")
+	self.view_id = 'sequenceview'
+	self.close_on_package_load = True
+
         self.controller=controller
         self.package=controller.package
         self.model = SequenceModel(self.package.annotations)
@@ -197,10 +200,6 @@ class SequenceEditor:
 
         return tree_view
     
-    def get_widget (self):
-        """Return the TreeView widget."""
-        return self.widget
-
     def get_selected_node (self):
         """Return the currently selected node.
 

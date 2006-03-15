@@ -35,7 +35,6 @@ from gettext import gettext as _
 
 import advene.gui.edit.elements
 
-#import pygtk
 import gtk
 import gobject
 
@@ -53,6 +52,7 @@ class TimeLine(AdhocView):
 
         self.view_name = _("Timeline")
 	self.view_id = 'timeline'
+	self.close_on_package_load = False
 
         self.list = l
         self.controller=controller
@@ -317,7 +317,6 @@ class TimeLine(AdhocView):
     def update_model(self, package):
         """Update the whole model.
         """
-        #self.list=package.annotations
         self.layer_position.clear()
         self.minimum = 0
         duration = package.getMetaData (config.data.namespace, "duration")

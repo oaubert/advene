@@ -45,6 +45,7 @@ class HTMLView(AdhocView):
     def __init__ (self, controller=None, views=None):
         self.view_name = _("HTML Viewer")
 	self.view_id = 'htmlview'
+	self.close_on_package_load = False
 
 	self.controller=controller
         self.widget=self.build_widget()

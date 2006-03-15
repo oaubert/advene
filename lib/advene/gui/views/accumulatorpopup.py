@@ -52,6 +52,7 @@ class AccumulatorPopup(AdhocView):
     def __init__ (self, size=3, controller=None, autohide=False):
         self.view_name = _("PopupAccumulator")
 	self.view_id = 'popupaccumulator'
+	self.close_on_package_load = False
         
         self.size=size
         self.controller=controller

@@ -423,6 +423,7 @@ class TreeWidget(AdhocView):
     def __init__(self, package, modelclass=DetailedTreeModel, controller=None):
         self.view_name = _("Tree view")
 	self.view_id = 'treeview'
+	self.close_on_package_load = False
 
         self.package = package
         self.controller=controller

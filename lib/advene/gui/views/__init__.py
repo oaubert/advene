@@ -25,6 +25,12 @@ class AdhocView:
     def __init__(self, controller=None):
 	self.view_name = "Generic adhoc view"
 	self.view_id = 'generic'
+
+	# If True, the view should be closed when loading a new package.
+	# Else, it can respond to a package load and update
+	# itself accordingly (through the update_model method).
+	self.close_on_package_load = True
+
 	self.controller = controller
 	# If self.buttonbox exists, then the widget has already
 	# defined its own buttonbox, and the generic popup method

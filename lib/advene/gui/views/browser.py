@@ -141,6 +141,7 @@ class Browser(AdhocView):
     def __init__(self, element=None, controller=None):
         self.view_name = _("Package browser")
 	self.view_id = 'browserview'
+	self.close_on_package_load = True
 
         self.element=element
         self.controller=controller

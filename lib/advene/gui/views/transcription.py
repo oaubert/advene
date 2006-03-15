@@ -45,6 +45,7 @@ class TranscriptionView(AdhocView):
     def __init__ (self, controller=None, annotationtype=None, separator="  "):
         self.view_name = _("Transcription")
 	self.view_id = 'transcriptionview'
+	self.close_on_package_load = True
 
         self.controller=controller
         self.package=controller.package
@@ -95,6 +96,7 @@ class TranscriptionView(AdhocView):
             
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+	sw.set_resize_mode(gtk.RESIZE_PARENT)
         mainbox.add (sw)
 
         self.textview = gtk.TextView()
@@ -175,7 +177,6 @@ class TranscriptionView(AdhocView):
             if self.options['display-time']:
                 b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.end))
 
-            #print "inserted from %d to %d" % (b_a, e_a)
             b.insert_at_cursor(self.options['separator'])
         return
 
@@ -227,6 +228,10 @@ class TranscriptionView(AdhocView):
     def move_cursor_cb(self, textview, step_size, count, extend_selection):
         self.update_current_annotation()
         return False
+
+    def update_model(self, package):
+	self.generate_buffer_content()
+	return True
 
     def update_current_annotation(self, *p, **kw):
         b=self.textview.get_buffer()

@@ -29,6 +29,9 @@ import gtk
 class HistoryNavigation:
     def __init__(self, controller=None, history=None, container=None, vertical=True):
         self.view_name = _("Navigation history")
+	self.view_id = 'historyview'
+	self.close_on_package_load = False
+
         self.controller=controller
         self.history=history
         self.container=container
