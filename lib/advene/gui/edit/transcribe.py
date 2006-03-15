@@ -65,6 +65,7 @@ class TranscriptionEdit(AdhocView):
     def __init__ (self, controller=None, filename=None):
 	self.view_name = _("Transcription edition")
 	self.view_id = 'transcribeview'
+	self.close_on_package_load = False
 
         self.controller=controller
         self.package=controller.package
