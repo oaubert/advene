@@ -302,6 +302,11 @@ class Player(object):
 	# Do not update the snapshot if we are not playing
 	if self.status != self.PlayingStatus:
 	    return None	
+	# FIXME: dirty hack to workaround a bug in VLC snapshot
+	# functionality.
+	if config.data.os == 'win32' and position <= 100:
+	    print "Snapshots <=100ms dropped"
+	    return None
         d=self.mc.snapshot(position)
         return Snapshot(d)
 
