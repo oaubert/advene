@@ -57,6 +57,13 @@ class AdhocView:
 
 	w=self.get_widget()
 
+	def close_popup(*p):
+	    window.destroy()
+	    return True
+
+	# Close the popup window when the widget is destroyed
+	w.connect("destroy", close_popup)
+
 	# If the widget defines a buttonbox, we can use it and do not
 	# have to define a enclosing VBox (which also solves a problem
 	# with the timeline view not being embedable inside a VBox()
