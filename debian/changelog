@@ -7,10 +7,12 @@ advene (0.20) unstable; urgency=low
     package/resources/style.css
     To use this resource in a TAL template, you can then use:
     <link tal:attributes="href package/resources/style.css/absolute_url" type="text/css" rel="stylesheet" />
-  
+
   * A filename extension (.azp or .xml) is automatically appended if not
     present.
 
+  * Advene now depends on gtk >= 2.8
+  
   * New global method: related. Returns, for an annotation, its related
     annotation. It is a shortcut useful for the case of binary relations:
     annotation/related/id
@@ -27,17 +29,21 @@ advene (0.20) unstable; urgency=low
     define rectangular zones.
 
   * GUI: 
+    * a view notebook holds the popupaccumulator below the video. It allows
+      to embed other views (timeline, treeview, transcription...) simply by
+      drag and drop of the view toolbutton into the notebook
     * the treeview can be displayed by default on the right of the video
       window (replacing the less used, for now, URL stack window), see the
       preferences panel
-    * a view notebook holds the popupaccumulator below the video. It allows
-      to embed other views (timeline, treeview, transcription...) simply by
-      drag and drop of the view toolbutton to the notebook
     * added an element creation toolbar
-    * generic player control shortcuts are used
+    * generic player control shortcuts are used throughout the program:
+        Tab: play/pause
+        Control-Left, Control-Right: move forward/backwards
+        Home: goto start of the movie
     * Edit/Preferences now allows to modify paths (data, movies, player, imagecache) (from Frank Wagner)
     * Imagecache saves files with a .png extension
     * The not_yet_available image is now loaded from share/pixmaps/notavailable.png
+    * Automatically close non-updateable views on package loading
   
   * The dummy player now returns a running time
 
@@ -67,8 +73,6 @@ advene (0.20) unstable; urgency=low
   * Advene no longer depends on the Image module. It only uses it if image
     type conversion is necessary.
   
-  * Advene now depends on gtk >= 2.6
-
   * Added spanish translations (courtesy of Emmanuel Ayala)
   * Bugfix in path initialization
 
@@ -77,7 +81,7 @@ advene (0.20) unstable; urgency=low
 
   * evaluator: changed some shortcuts (see help), implemented expression history
 
- -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Thu,  8 Dec 2005 16:26:18 +0100
+ -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Wed, 15 Mar 2006 13:04:10 +0100
 
 advene (0.18) unstable; urgency=low
 
