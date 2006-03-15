@@ -773,7 +773,7 @@ class AdveneGUI (Connect):
 	"""Open the given adhoc view.
 	"""
 	view=None
-	if name == 'treeview':
+	if name == 'treeview' or name == 'tree':
 	    view = advene.gui.views.tree.TreeWidget(self.controller.package,
 						    controller=self.controller)
 	elif name == 'timeline':
