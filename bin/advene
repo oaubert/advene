@@ -66,14 +66,6 @@ if not os.path.exists(config.data.path['resources']):
 if config.data.os == 'win32':
   import _winreg
 
-  # Encoding stuff, to please py2exe
-  if hasattr(sys, 'setdefaultencoding'):
-    import locale
-    loc = locale.getdefaultlocale()
-    if loc[1]:
-      encoding = loc[1]
-      sys.setdefaultencoding(encoding)
-
   #win32 platform, add the "lib" folder to the system path
   os.environ['PATH'] += os.path.pathsep + "lib"
   try:
@@ -122,6 +114,7 @@ if __name__ == '__main__':
     #prof.close()
     gui.main ()
   except Exception, e:
+    print config.data.version_string
     print _("Got exception\n\n%s\n\n. Stopping services...") % str(e)
     import traceback
     s=StringIO.StringIO()
