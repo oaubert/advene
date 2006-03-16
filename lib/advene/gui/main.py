@@ -1815,6 +1815,7 @@ if __name__ == '__main__':
         v.main (sys.argv[1:])
     except Exception, e:
         e, v, tb = sys.exc_info()
+	print config.data.version_string
         print _("Got exception %s. Stopping services...") % str(e)
         v.on_exit ()
         print _("*** Exception ***")
