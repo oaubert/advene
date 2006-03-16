@@ -448,10 +448,21 @@ class Config(object):
             filename=os.sep.join(filename)
         return os.path.join ( self.path[category], filename )
 
+    def get_version_string(self):
+	try:
+	    import advene.core.version as version
+	    return "Advene v. %s release %s" % (version.version,
+						version.date)
+	except ImportError:
+	    return "Advene v. ??? (cannot get version number)"
+
     userid = property (fget=get_userid,
                        doc="Login name of the user")
     player_args = property (fget=get_player_args,
                             doc="List of arguments for the VLC player")
+
+    version_string = property(fget=get_version_string,
+			      doc="Version string")
 
 data = Config ()
 data.read_preferences()
