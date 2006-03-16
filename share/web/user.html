@@ -51,6 +51,7 @@ This guide will be included as help file in any Advene release.
 <dt> </dt><dd>4.3. <a href="#TALES_use_in_the_static_views">TALES use in the static views</a></dd>
 <dt> </dt><dd>4.4. <a href="#TALES_use_in_the_dynamic_views">TALES use in the dynamic views</a></dd>
 <dt> </dt><dd>4.5. <a href="#TALES_use_in_the_queries">TALES use in the queries</a></dd>
+<dt> </dt><dd>4.6. <a href="#Access_to_package_specific_resources">Access to package-specific resources</a></dd>
 <dt> </dt><dd></dd></dl>
 
 5. <a href="#Dynamic_views">Dynamic views</a></dd>
@@ -204,7 +205,7 @@ It's important to understand this syntax and the Advene model, to better exploit
 <h3><a name="The_Advene_model"></a>4.1. The Advene model</h3>
 
 <p>
-FIXME Hierarchy (package, schemes, annotationTypes, relationTypes, annotations, relations, views)
+FIXME Hierarchy (package, schemes, annotationTypes, relationTypes, annotations, relations, views, resources)
 <p>
 This hierarchy can be considered as a file system in which there are elements. A TALES expression will then be a path in this file system.
 <p>
@@ -281,7 +282,30 @@ Thus, to obtain the annotations of same type preceding the annotation to which t
 <p>
 and we apply the query to the desired annotation through a TALES expression :
 <p>
-<tt>/package/annotations/last/query/annotations_before</tt>
+<tt>package/annotations/last/query/annotations_before</tt>
+<p>
+<a name="Resources"></a>
+<h3><a name="Access_to_package_specific_resources"></a>4.6. Access to package-specific resources</h3>
+
+<p>
+By using the new <tt>.azp</tt> package format (just save an .xml package with the .azp extension), you can add resources (any kind of file) to the package itself. It is commonly used for stylesheets used by the package's static views.
+<p>
+You can browse and edit (add, delete) resources through the tree view, which will display a new <tt>Resources</tt> item.
+You can access the resources with TALES expressions such as
+<p>
+<tt>package/resources/style.css</tt>
+<p>
+If you want to use the resource, you can choose to either embed its content in the view, or reference it:
+<p>
+<pre>
+&lt;!-- Embedding the resources content --&gt;
+&lt;html&gt;...&lt;style type="text/css" tal:content="package/resources/style.css/content/data"&gt;&lt;/style&gt;...
+</pre>
+<p>
+<pre>
+&lt;!-- Referencing the resource --&gt;
+&lt;html&gt;...&lt;link tal:attributes="href package/resources/style.css/absolute_url" type="text/css" rel="stylesheet" /&gt;
+</pre>
 <p>
 <h2><a name="Dynamic_views"></a>5. Dynamic views</h2>
 
@@ -442,5 +466,5 @@ There is no Advene-specific template user guide yet. The best way to define new 
 </div><hr class=wikilinefooter>
 
 
-Last edited March 2, 2006 4:40 pm by  OlivierAubert
+Last edited March 6, 2006 4:28 pm by pepper.info.enstb.org  (diff)
 </form></div></body></html>
