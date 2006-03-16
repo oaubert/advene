@@ -42,13 +42,18 @@ from gettext import gettext as _
 from advene.gui.views import AdhocView
 
 class HTMLView(AdhocView):
-    def __init__ (self, controller=None, views=None):
+    def __init__ (self, controller=None, url=None):
         self.view_name = _("HTML Viewer")
 	self.view_id = 'htmlview'
 	self.close_on_package_load = False
+	self.component=None
+	self.engine = engine
+	self.history = []
 
 	self.controller=controller
         self.widget=self.build_widget()
+	if url is not None:
+	    self.open_url(url)
 
     def build_widget(self):
 	if engine is None:
@@ -87,11 +92,38 @@ class HTMLView(AdhocView):
 	    self.component=c
 
 	self.component.current_url = None
-        return w
+
+	vbox=gtk.VBox()
+	vbox.add(w)
+	
+	buttonbox=gtk.HButtonBox()
+	
+	b=gtk.Button(stock=gtk.STOCK_GO_BACK)
+	b.connect("clicked", self.history_back)
+	buttonbox.add(b)
+
+	vbox.pack_start(buttonbox, expand=False)
+
+	vbox.buttonbox = buttonbox
+        return vbox
+
+    def history_back(self, *p):
+	if len(self.history) <= 1:
+	    self.controller.log(_("Cannot go back: first item in history"))
+	else:
+	    # Current URL
+	    u=self.history.pop()
+	    # Previous one
+	    self.open_url(self.history[-1])
+	return True
 
     def open_url(self, url):
+	if not self.history:
+	    self.history.append(url)	
+	elif self.history[-1] != url:
+	    self.history.append(url)	
 	if engine is None:
-	    print "Cannot open url ", url
+	    self.component.set_text(_("No engine to render\n%s") % url)
 	elif engine == 'mozembed':
 	    self.component.load_url(url)
 	    self.component.current_url = url
