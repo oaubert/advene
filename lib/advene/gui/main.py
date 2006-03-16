@@ -171,8 +171,9 @@ class AdveneGUI (Connect):
         self.gui.slider.connect ("format-value", self.format_slider_value)
 
         # About box
-        self.gui.get_widget('about_web_button').set_label("Advene %s"
-                                                          % advene.core.version.version)
+        self.gui.get_widget('about_web_button').set_label("Advene %s\nRelease %s"
+                                                          % (advene.core.version.version,
+							     advene.core.version.date))
 
         # Define combobox cell renderers
         for n in ("stbv_combo", ):
