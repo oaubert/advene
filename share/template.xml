@@ -5,9 +5,7 @@
     <default_stbv xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>
     </default_stbv>
     <description xmlns='http://purl.org/dc/elements/1.1/'>Basic admin views</description>
-    <duration xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>32346</duration>
     <title xmlns='http://purl.org/dc/elements/1.1/'>Template package</title>
-    <mediafile xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>/tmp/k.mpg</mediafile>
   </meta>
   <imports>
   </imports>
