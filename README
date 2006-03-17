@@ -24,13 +24,12 @@ python-imaging [python-pil in some distributions]
 
 You should install in this order (note the version numbers) :
 
-Gtk/win32 v. 2.8 : http://gladewin32.sourceforge.net/ (runtime environment)
+Gtk/win32 v. >= 2.8 : http://gladewin32.sourceforge.net/ (runtime environment)
 
 Python    v. 2.3 : http://www.python.org/ftp/python/2.3.4/Python-2.3.4.exe
 [ From http://python.org/ ]
 
-PyGtk for python2.3: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/binaries/pygtk-2.4.1.win32-py2.3.exe
-[ From http://www.pygtk.org ]
+PyGtk for python2.3: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/ [ From http://www.pygtk.org ]
 
 PyXML 0.8 : http://prdownloads.sourceforge.net/pyxml/PyXML-0.8.4.win32-py2.3.exe?download
 [ From http://pyxml.sourceforge.net/ ]
@@ -64,4 +63,3 @@ An (incomplete) user guide is in the public Advene wiki, feel free to contribute
 http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneUserGuide
 
 The changelog is in debian/changelog
-
