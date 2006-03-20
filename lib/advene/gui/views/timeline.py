@@ -92,7 +92,7 @@ class TimeLine(AdhocView):
 
         # FIXME: Hardcoded values are bad...
         # Maybe we should ask pango the height of 'l' plus margins
-        self.button_height = 20
+        self.button_height = 30
 
         # Shortcut
         u2p = self.unit2pixel
