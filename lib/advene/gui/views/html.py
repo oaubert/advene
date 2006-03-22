@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -29,12 +29,12 @@ import urllib
 
 engine=None
 try:
-    import gtkmozembed
-    engine='mozembed'
+    import gtkhtml2
+    engine='gtkhtml2'
 except ImportError:
     try:
-	import gtkhtml2
-	engine='gtkhtml2'
+	import gtkmozembed
+	engine='mozembed'
     except ImportError:
 	pass
 
@@ -61,6 +61,14 @@ class HTMLView(AdhocView):
 	    self.component=w
 	elif engine == 'mozembed':
 	    w=gtkmozembed.MozEmbed()
+
+	    def open_uri(c, uri):
+		# FIXME: uri is a gobject.GPointer...
+		self.u = uri
+		self.update_history(uri)
+		return False
+
+	    w.connect('open-uri', open_uri)
 	    self.component=w
 	elif engine == 'gtkhtml2':
 	    w=gtk.ScrolledWindow()
@@ -74,8 +82,9 @@ class HTMLView(AdhocView):
 		pass
 
 	    def link_clicked(document, link):
-		if self.component.current_url:
-		    url=urllib.basejoin(self.component.current_url, link)
+		u=self.current_url()
+		if u:
+		    url=urllib.basejoin(u, link)
 		else:
 		    url=link
 		self.open_url(url)
@@ -91,21 +100,40 @@ class HTMLView(AdhocView):
 	    w.add(c)
 	    self.component=c
 
-	self.component.current_url = None
-
 	vbox=gtk.VBox()
 	vbox.add(w)
-	
+
 	buttonbox=gtk.HButtonBox()
-	
+
+	def entry_validated(e):
+	    self.open_url(self.current_url())
+	    return True
+
+	self.url_entry=gtk.Entry()
+	self.url_entry.connect("activate", entry_validated)
+	buttonbox.pack_start(self.url_entry, expand=True)
+
 	b=gtk.Button(stock=gtk.STOCK_GO_BACK)
 	b.connect("clicked", self.history_back)
+	buttonbox.add(b)
+
+	def refresh(b):
+	    self.open_url(self.current_url())
+	    return True
+
+	b=gtk.Button(stock=gtk.STOCK_REFRESH)
+	b.connect("clicked", refresh)
 	buttonbox.add(b)
 
 	vbox.pack_start(buttonbox, expand=False)
 
 	vbox.buttonbox = buttonbox
         return vbox
+
+    def current_url(self, url=None):
+	if url is not None:
+	    self.url_entry.set_text(url)
+	return self.url_entry.get_text()
 
     def history_back(self, *p):
 	if len(self.history) <= 1:
@@ -117,16 +145,22 @@ class HTMLView(AdhocView):
 	    self.open_url(self.history[-1])
 	return True
 
-    def open_url(self, url):
+    def update_history(self, url):
 	if not self.history:
-	    self.history.append(url)	
+	    self.history.append(url)
 	elif self.history[-1] != url:
-	    self.history.append(url)	
+	    self.history.append(url)
+	self.current_url(url)
+	return
+	
+    # FIXME: in the gtkmozembed case, we do not use open_url,
+    # so link to the right signal to update the history
+    def open_url(self, url):
+	self.update_history(url)
 	if engine is None:
 	    self.component.set_text(_("No engine to render\n%s") % url)
 	elif engine == 'mozembed':
 	    self.component.load_url(url)
-	    self.component.current_url = url
 	elif engine == 'gtkhtml2':
 	    d=self.component.document
 	    d.clear()
@@ -139,6 +173,5 @@ class HTMLView(AdhocView):
 
 	    u.close()
 	    d.close_stream()
-	    self.component.current_url = url
 
 	return True
