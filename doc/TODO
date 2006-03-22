@@ -1,8 +1,12 @@
+* DnD to/from common apps: cf http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq23.018.htp and http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq23.031.htp
+
+* create a meta-package that gives a list of packages to load (Cf .m3u)
+
 * option parsing: move to core.config, allow standard options (--help,
    --version)
 
 * timeline: allow to specify annotation types (2 lists: available,
-   present + > < buttons)
+   present + > < buttons), or reuse gui.edit.elements.EditElementListForm
 
 * timeline: allow to specify  default height
 
