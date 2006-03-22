@@ -1,10 +1,10 @@
+* option parsing: move to core.config, allow standard options (--help,
+   --version)
+
 * timeline: allow to specify annotation types (2 lists: available,
    present + > < buttons)
 
 * timeline: allow to specify  default height
-
-* On timeline.update_model, check package media file duration. If
-   changed, update scale
 
 * edit.elements: focus on content window on open
 
@@ -1077,4 +1077,7 @@ res.startswith('<html>') [useful for Kupu]
    popupaccumulator + transcribe window + gtkmozembed
 
 * create a gtkmozembed view -> DONE
+
+* On timeline.update_model, check package media file duration. If
+   changed, update scale -> DONE
 
