@@ -1,3 +1,13 @@
+advene (0.21) unstable; urgency=low
+
+  * GUI:
+    * view notebooks are also used for the right-hand side of the video
+  
+  * Actions:
+    * new action: Entry (to allow entry of information through a popup)
+
+ --
+
 advene (0.20) unstable; urgency=low
 
   * New package format (.azp, for Advene Zip Package) allowing to embed
