@@ -94,9 +94,11 @@ class ViewBook(AdhocView):
 	e.connect("button_press_event", popup_menu, v)
 	e.show_all()
         self.widget.append_page(v.widget, e)
-	self.widget.set_current_page(self.widget.page_num(v.widget))
-
 	v.widget.show_all()
+
+	num=self.widget.page_num(v.widget)
+	self.widget.set_current_page(num)
+
 	return True
 	
     def drag_received(self, widget, context, x, y, selection, targetType, time):
