@@ -58,11 +58,10 @@ class LogWindow(AdhocView):
         self.widget=self.build_widget()        
         self.window=None
 
-    # FIXME: prevent the widget from being destroyed.
+    def close(self, *p):
+	return False
 
     def build_widget(self):
-        f=gtk.Frame()
-        f.set_label(self.view_name)
         w=gtk.VBox()
 
         sw = gtk.ScrolledWindow()
@@ -78,13 +77,11 @@ class LogWindow(AdhocView):
         b.connect("clicked", lambda b: self.clear_data())
         hb.pack_start(b, expand=False)
 
-	f.buttonbox = hb
+	w.buttonbox = hb
 
         w.pack_start(hb, expand=False)
 
-        f.add(w)
-        f.show_all()
-        return f
+        return w
 
     def clear_data(self):
         """Clear the logwindow."""
