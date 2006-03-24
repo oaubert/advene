@@ -21,12 +21,13 @@
 import advene.core.config as config
 import advene.util.vlclib as vlclib
 import advene.gui.util
+from advene.gui.views import AdhocView
 
 from gettext import gettext as _
 
 import gtk
 
-class HistoryNavigation:
+class HistoryNavigation(AdhocView):
     def __init__(self, controller=None, history=None, container=None, vertical=True):
         self.view_name = _("Navigation history")
 	self.view_id = 'historyview'
@@ -43,6 +44,9 @@ class HistoryNavigation:
         self.mainbox=None
         self.widget=self.build_widget()
 	self.fill_widget()
+
+    def close(self, *p):
+	return False
 
     def activate(self, widget=None, data=None, timestamp=None):
         self.controller.update_status("set", timestamp, notify=False)
@@ -91,6 +95,8 @@ class HistoryNavigation:
 	return True
 
     def build_widget(self):
+	v=gtk.VBox()
+
         if self.vertical:
             mainbox=gtk.VBox()
         else:
@@ -104,24 +110,14 @@ class HistoryNavigation:
         self.scrollwindow=sw
         self.mainbox=mainbox
 
-        return sw
-
-    def popup(self):
-        w = gtk.Window (gtk.WINDOW_TOPLEVEL)
-        w.set_title (_("Navigation history"))
-        if self.vertical:
-            w.set_default_size(-1, 500)
-        else:
-            w.set_default_size(600, -1)
-        vb=gtk.VBox()
-        
-        w.add(vb)
-
-        vb.add(self.widget)
-        
+	v.add(sw)
+	
+	hb=gtk.HButtonBox()
         b=gtk.Button(stock=gtk.STOCK_CLEAR)
         b.connect("clicked", self.clear)
-        vb.pack_start(b, expand=False)
-        
-	w.show_all()
-        return w
+        hb.pack_start(b, expand=False)
+
+	v.pack_start(hb, expand=False)
+        v.buttonbox = hb
+
+        return v
