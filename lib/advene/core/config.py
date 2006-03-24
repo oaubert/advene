@@ -280,6 +280,9 @@ class Config(object):
                           help="Video player selection")
 
 	(self.options, self.args) = parser.parse_args()
+	if self.options.version:
+	    print self.get_version_string()
+	    sys.exit(0)
 
     def win32_specific_config(self):
         if self.os != 'win32':
