@@ -30,6 +30,16 @@ def register(controller=None):
             ))
 
     controller.register_action(RegisteredAction(
+            name="Entry",
+            method=ac.action_entry,
+            description=_("Popup an entry box"),
+            parameters={'message': _("String to display."),
+			'destination': _("Object where to store the answer (should have a content)"),
+                        'duration': _("Display duration in ms. Ignored if empty.")},
+            category='gui',            
+            ))
+
+    controller.register_action(RegisteredAction(
             name="PopupGoto",
             method=ac.action_popup_goto,
             description=_("Display a popup to go to another position"),
@@ -148,6 +158,50 @@ class DefaultGUIActions:
         w=self.gui.get_illustrated_text(message)
 
         self.gui.popupwidget.display(widget=w, timeout=duration, title=_("Information popup"))
+        return True
+
+    def action_entry (self, context, parameters):
+        """Entry action.
+
+        Displays a popup to ask for a text string.
+        """
+        message=self.parse_parameter(context, parameters, 'message', _("No message..."))
+        message=message.replace('\\n', '\n')
+        message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
+
+	destination=self.parse_parameter(context, parameters, 'destination', None)
+	if destination is None:
+	    self.log(_("Empty destination for entry popup: %s") % parameters['destination'])
+	    return True
+	if not hasattr(destination, 'content'):
+	    self.log(_("Destination does not have a content: %s") % parameters['destination'])	
+	    return True
+
+        duration=self.parse_parameter(context, parameters, 'duration', None)
+        if duration == "" or duration == 0:
+            duration = None
+
+        def handle_response(button, widget, entry, dest):
+	    # Update the destination
+	    dest.content.data = entry.get_text()
+	    # FIXME: notify element modification
+            self.gui.popupwidget.undisplay(widget)
+            return True
+        
+	v=gtk.VBox()
+
+        w=self.gui.get_illustrated_text(message)
+	v.add(w)
+	e=gtk.Entry()
+	e.set_text(destination.content.data)
+	v.add(e)
+	b=gtk.Button(stock=gtk.STOCK_OK)
+	b.connect("clicked", handle_response, v, e, destination)
+	v.add(b)
+
+	v.show_all()
+
+        self.gui.popupwidget.display(widget=v, timeout=duration, title=_("Entry popup"))
         return True
 
     def action_popup_goto (self, context, parameters):
