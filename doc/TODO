@@ -1,9 +1,10 @@
+* fix bug in snapshot when vout == x11
+
+* check http://chardet.feedparser.org/
+
 * DnD to/from common apps: cf http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq23.018.htp and http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq23.031.htp
 
 * create a meta-package that gives a list of packages to load (Cf .m3u)
-
-* option parsing: move to core.config, allow standard options (--help,
-   --version)
 
 * timeline: allow to specify annotation types (2 lists: available,
    present + > < buttons), or reuse gui.edit.elements.EditElementListForm
@@ -1084,4 +1085,14 @@ res.startswith('<html>') [useful for Kupu]
 
 * On timeline.update_model, check package media file duration. If
    changed, update scale -> DONE
+
+* option parsing: move to core.config, allow standard options (--help,
+   --version, --config)
+
+* tooltips are not displayed in action parameters
+
+* use 2 viewbooks on the RHS of the video
+
+* webserver: in /actions, add links and automatically generate forms
+   with action parameters
 
