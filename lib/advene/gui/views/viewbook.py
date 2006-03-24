@@ -38,29 +38,22 @@ class ViewBook(AdhocView):
 	if views is None:
 	    views = []
 	self.views=[]
+
+	# List of widgets that cannot be removed
+	self.permanent_widgets = []
+
         self.widget=self.build_widget()
 	for v in views:
 	    self.add_view(v, v.view_name)
 
     def remove_view(self, view):
-	# Find its page number
-	if view.view_id == 'popupaccumulator':
-	    self.controller.log(_("Cannot remove the popup accumulator"))
-	    return True
-	l=[ v
-	    for v in self.widget.get_children()
-	    if v == view.widget ]
-	if len(l) == 1:
-	    # Only 1 element, ok
-	    page=self.widget.page_num(l[0])
-	    self.widget.remove_page(page)
-	    # Close the view
-	    view.close()
-	elif len(l) > 1:
-	    print "Pb in viewbook: multiple views match"
+	if view in self.permanent_widgets:
+	    self.controller.log(_("Cannot remove this widget, it is essential."))
+	    return False
+	view.close()
 	return True
 	    
-    def add_view(self, v, name=None):
+    def add_view(self, v, name=None, permanent=False):
 	"""Add a new view to the notebook.
 
 	Each view is an Advene view, and must have a .widget attribute
@@ -72,6 +65,8 @@ class ViewBook(AdhocView):
 		name="FIXME"
 	self.controller.gui.register_view (v)
 	self.views.append(v)
+	if permanent:
+	    self.permanent_widgets.append(v)
 
 	def close_view(item, view):
 	    self.remove_view(view)
