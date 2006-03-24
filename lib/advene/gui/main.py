@@ -1714,6 +1714,7 @@ class AdveneGUI (Connect):
             options[_("Direct X")] = 'directx'
         else:
             options[_("X11")] = 'x11'
+	    options[_("XVideo")] = 'xvideo'
         ew.add_option(_("Output"), "vout", _("Video output module"), options)
 
         ew.add_title(_("Verbosity"))
