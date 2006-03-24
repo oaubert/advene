@@ -1348,13 +1348,19 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             k.sort()
             for name in k:
 		a=catalog.get_action(name)
-                self.wfile.write("""<li><a href="%s">%s</a>: %s<ul>"""
-				 % ("/action/form/%s" % name,
-				    name, 
-				    d[name]))
-                for param, descr in a.parameters.iteritems():
-                    self.wfile.write("<li>%s: %s</li>" % (param, descr))
-                self.wfile.write("</ul></li>\n")
+		if a.parameters:
+		    # There are parameters. Display a link to the form.
+		    self.wfile.write(_("""<li>%s: %s""")
+				     % (name, 
+					d[name]))
+		    self.wfile.write(a.as_html("/action/%s" % name))
+	        else:
+		    # No parameter, we can directly link the action
+		    self.wfile.write("""<li><a href="%s">%s</a>: %s"""
+				     % ("/action/%s" % name,
+					name, 
+					d[name]))
+                self.wfile.write("</li>\n")
             self.wfile.write("</ul>")
 
         if len(l) == 0 or l[0] == '':
@@ -1364,13 +1370,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         action = l[0]
         del l[0]
         
-	if action == 'form' and l:
-	    name=l[0]
-	    # Special case. We build the right HTML form.
-	    self.start_html(_("Execute %s") % name, duplicate_title=True)
-	    action=catalog.get_action(name)
-	    self.wfile.write(action.as_html(action_url="/action/%s" % name))
-	    return
         try:
             ra=catalog.get_action(action)
         except KeyError:
