@@ -448,9 +448,6 @@ class AdveneGUI (Connect):
             print "Cannot set visual: %s" % str(e)
             self.displayhbox.destroy()
 
-            self.logwindow.embedded=False
-            self.logwindow.widget=self.logwindow.build_widget()
-            
             tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
             tree.get_widget().show_all()
@@ -510,31 +507,35 @@ class AdveneGUI (Connect):
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
         self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
 
+	# This pane will be used to embed views on the right-side of
+	# the video output
+	hpane=gtk.HPaned()
+
         self.displayhbox=gtk.HPaned()
 
-	hpane=gtk.HPaned()
         self.displayhbox.pack1(self.drawable, shrink=False)
 	self.displayhbox.add2(hpane)
-	
-        self.navigation_history=HistoryNavigation(controller=self.controller)
-        # Navigation history is embedded. The menu item is useless :
-        self.gui.get_widget('navigationhistory1').set_property('visible', False)
 
-	f=gtk.Frame()
-	f.set_label(_("History"))
-	f.add(self.navigation_history.widget)
-        hpane.add2(f)
+	vb1 = ViewBook(controller=self.controller)
+	vb2 = ViewBook(controller=self.controller)
 
+	hpane.add1(vb1.widget)
+	hpane.add2(vb2.widget)
+
+	# First viewbook
+	vb1.add_view(self.logwindow, _("URL stack"), permanent=True)
+	# URL stack is embedded. The menu item is useless :
+	self.gui.get_widget('urlstack1').set_property('visible', False)           
         if config.data.preferences['embed-treeview']:
             tree = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
-            hpane.add1(tree.get_widget())
-            self.register_view (tree)            
-	else:
-            hpane.add1(self.logwindow.widget)
-            self.logwindow.embedded=True
-            # URL stack is embedded. The menu item is useless :
-            self.gui.get_widget('urlstack1').set_property('visible', False)            
+	    vb1.add_view(tree)
+
+	# Second viewbook
+        self.navigation_history=HistoryNavigation(controller=self.controller)
+        # Navigation history is embedded. The menu item is useless :
+        self.gui.get_widget('navigationhistory1').set_property('visible', False)
+	vb2.add_view(self.navigation_history, name=_("History"), permanent=True)
 
 	# We should be able to specify 80%/20% for instance, but the allocation
 	# is not available here. We have to wait for the main GUI window to 
@@ -550,7 +551,7 @@ class AdveneGUI (Connect):
         self.popupwidget=AccumulatorPopup(controller=self.controller,
                                           autohide=False)
 	
-	self.viewbook.add_view(self.popupwidget, _("Popups"))
+	self.viewbook.add_view(self.popupwidget, _("Popups"), permanent=True)
 	
         vis.show_all()
 
@@ -1424,9 +1425,11 @@ class AdveneGUI (Connect):
         return True
 
     def on_view_urlstack_activate (self, button=None, data=None):
-        """Open the URL stack view plugin."""
-        if not self.logwindow.embedded:
-            self.logwindow.popup()
+        """Open the URL stack view plugin.
+	
+	Useless now, the urlstack is always here. This code will be
+	removed sometime...
+	"""
         return True
 
     def on_evaluator2_activate (self, button=None, data=None):
