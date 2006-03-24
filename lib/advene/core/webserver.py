@@ -683,6 +683,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         <p><a href="/admin/status">Display the server status</a></p>
         <p><a href="/admin/access">Update the access list</a></p>
         <p><a href="/admin/methods">List available TALES methods</a></p>
+        <p><a href="/actions">List available actions</a></p>
         <p><a href="/admin/reset">Reset the server</a></p>
         <p><a href="/admin/halt">Halt the server</a></p>
         <p><a href="/media">Media control</a></p>
