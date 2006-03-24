@@ -99,10 +99,14 @@ if __name__ == '__main__':
     server.player=f.get_player()
     atexit.register (server.stop_player)
 
-    if len(sys.argv) > 1:
-        for uri in sys.argv[1:]:
-            alias = posixpath.basename(posixpath.splitext(uri)[0])
-            server.load_package (uri=uri, alias=alias)
+    for uri in config.data.args:
+      alias = os.path.basename(os.path.splitext(uri)[0])
+      try:
+        server.load_package (uri=uri, alias=alias)
+        print "Loaded %s as %s" % (uri, alias)
+      except Exception, e:
+        print "Cannot load package from file %s: %s" % (uri,
+                                                        unicode(e))
     print _("Server ready to serve requests.")
     server.serve_forawhile ()
 

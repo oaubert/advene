@@ -80,12 +80,11 @@ import advene.util.importer
 
 if __name__ == '__main__':
 
-    if len(sys.argv) < 3:
+    if config.data.args != 2:
         print "Should provide a file name and a package name"
         sys.exit(1)
 
-    fname=sys.argv[1]
-    pname=sys.argv[2]
+    fname, pname = config.data.args
 
     i = advene.util.importer.get_importer(fname)
     if i is None:
@@ -93,7 +92,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # FIXME: i.process_options()
-    i.process_options(sys.argv[1:])
+    # i.process_options(sys.argv[1:])
     # (for .sub conversion for instance, --fps, --offset)
     print "Converting %s to %s using %s..." % (fname, pname, i.name)
     p=i.process_file(fname)

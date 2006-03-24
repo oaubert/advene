@@ -31,6 +31,7 @@ It is meant to be used this way::
 import sys
 import os
 import cPickle
+from optparse import OptionParser
 
 class Config(object):
     """Configuration information, platform specific.
@@ -73,6 +74,9 @@ class Config(object):
     """
 
     def __init__ (self):
+
+	self.parse_options()
+
         if os.sys.platform in ( 'win32', 'darwin' ):
             self.os=os.sys.platform
         elif 'linux' in os.sys.platform:
@@ -248,6 +252,35 @@ class Config(object):
         if self.os == 'win32':
             self.win32_specific_config()
 
+    def parse_options(self):
+	parser=OptionParser(usage="""Advene - annotate digital videos, exchange on the Net.
+    %prog [options] [file.azp|file.xml]""")
+
+	parser.add_option("-v", "--version", dest="version", action="store_true",
+			  help="Display version number and exit.")
+
+	parser.add_option("-s", "--settings-dir", dest="settings", action="store",
+			  type="string", default=None, metavar="SETTINGSDIR",
+			  help="Alternate configuration directory (default: ~/.advene).")
+
+	parser.add_option("-u", "--user-id", dest="userid", action="store",
+			  type="string", default=None, metavar="LOGIN-NAME",
+			  help="User name (used to set the author field of elements).")
+
+	parser.add_option("", "--no-embedded", 
+			  dest="embedded", action="store_false", default=True,
+			  help="Do not embed the video player.")
+
+        parser.add_option("-p", "--player",
+                          dest="player",
+                          action="store",
+                          type="choice",
+                          choices=("vlcnative", "dummy", "vlcorbit", "xine", "gstreamer"),
+                          default=None,
+                          help="Video player selection")
+
+	(self.options, self.args) = parser.parse_args()
+
     def win32_specific_config(self):
         if self.os != 'win32':
             return
@@ -323,6 +356,9 @@ class Config(object):
     def get_settings_dir(self):
         """Return the directory used to store Advene settings.
         """
+	if self.options.settings is not None:
+	    return self.options.settings
+
         if self.os == 'win32':
             dirname='advene'
         else:
@@ -367,15 +403,7 @@ class Config(object):
     def read_config_file (self):
         """Read the configuration file (advene.ini).
         """
-        c=[ a for a in sys.argv if a.startswith('-c') ]
-        if c:
-            if len(c) > 1:
-                print "Error: multiple config files are given on the command line"
-                sys.exit(1)
-            sys.argv.remove(c[0])
-            conffile=c[0][2:]
-        else:
-            conffile=self.advenefile('advene.ini', 'settings')
+	conffile=self.advenefile('advene.ini', 'settings')
 
         try:
             file = open(conffile, "r")
@@ -399,6 +427,9 @@ class Config(object):
 
     def get_player_args (self):
         """Build the VLC player argument list.
+
+	FIXME: this is valid for VLC only, so this should belong
+	to player.vlcnative.
 
         @return: the list of arguments
         """
@@ -426,6 +457,9 @@ class Config(object):
         @rtype: string
         """
         # FIXME: allow override via advene.ini
+	if self.options.userid is not None:
+	    return self.options.userid
+
         id = "Undefined id"
         for name in ('USER', 'USERNAME', 'LOGIN'):
             if os.environ.has_key (name):

@@ -105,7 +105,7 @@ if __name__ == '__main__':
     Check your .advenerc file.""" % gladefile
     sys.exit(1)
 
-  gui = advene.gui.main.AdveneGUI (sys.argv[1:])
+  gui = advene.gui.main.AdveneGUI (config.data.args)
   try:
     #import hotshot
     #filename = "pythongrind.prof"

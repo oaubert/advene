@@ -404,22 +404,19 @@ class AdveneController:
         @return: the file to add add to playlist if one was specified and the package to load
         @rtype: (string, string)
         """
+	# Parsing of options is now done in config.data
         file_to_play = None
         package_to_load = None
+	if config.data.options.player is not None:
+	    config.data.player['plugin']=config.data.options.player
+	config.data.player['embedded']=config.data.options.embedded
         for s in args:
-            if s.startswith('-p'):
-                config.data.player['plugin']=s[2:]
-            elif s == '--no-embedded':
-                config.data.player['embedded']=False
-            elif s.startswith ('-'):
-                print _("Unknown option: %s") % s
-            else:
-                if s == "dvd":
-                    file_to_play = "dvdsimple:///dev/dvd"
-                elif os.path.splitext(s)[1].lower() in ('.xml', '.azp'):
-                    package_to_load=s
-                else:
-                    file_to_play = s
+	    if s == "dvd":
+		file_to_play = "dvdsimple:///dev/dvd"
+	    elif os.path.splitext(s)[1].lower() in ('.xml', '.azp'):
+		package_to_load=s
+	    else:
+		file_to_play = s
         return file_to_play, package_to_load
 
     def get_default_url(self, root=False):
@@ -957,4 +954,3 @@ if __name__ == '__main__':
         code.traceback.print_exception (e, v, tb)
         c.on_exit ()
         print _("*** Exception ***")
-        #e, v, tb = sys.exc_info()

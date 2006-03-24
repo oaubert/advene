@@ -1812,7 +1812,7 @@ class AdveneGUI (Connect):
 if __name__ == '__main__':
     v = AdveneGUI ()
     try:
-        v.main (sys.argv[1:])
+        v.main (config.data.args)
     except Exception, e:
         e, v, tb = sys.exc_info()
 	print config.data.version_string
