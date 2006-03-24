@@ -815,7 +815,7 @@ class EditAction(EditGeneric):
         entry.set_editable(self.editable)
         entry.entry.connect("changed", self.on_change_parameter, name)
 
-        self.tooltips.set_tip(entry.widget, description)
+        self.tooltips.set_tip(entry.entry, description)
 
         hbox.entry=entry
 
