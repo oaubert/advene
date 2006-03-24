@@ -1347,8 +1347,12 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             k=d.keys()
             k.sort()
             for name in k:
-                self.wfile.write("<li>%s: %s<ul>" % (name, d[name]))
-                for param, descr in catalog.get_action(name).parameters.iteritems():
+		a=catalog.get_action(name)
+                self.wfile.write("""<li><a href="%s">%s</a>: %s<ul>"""
+				 % ("/action/form/%s" % name,
+				    name, 
+				    d[name]))
+                for param, descr in a.parameters.iteritems():
                     self.wfile.write("<li>%s: %s</li>" % (param, descr))
                 self.wfile.write("</ul></li>\n")
             self.wfile.write("</ul>")
@@ -1360,6 +1364,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         action = l[0]
         del l[0]
         
+	if action == 'form' and l:
+	    name=l[0]
+	    # Special case. We build the right HTML form.
+	    self.start_html(_("Execute %s") % name, duplicate_title=True)
+	    action=catalog.get_action(name)
+	    self.wfile.write(action.as_html(action_url="/action/%s" % name))
+	    return
         try:
             ra=catalog.get_action(action)
         except KeyError:
