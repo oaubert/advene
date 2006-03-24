@@ -842,6 +842,17 @@ class RegisteredAction:
         """Describe the parameter."""
         return self.parameters[name]
 
+    def as_html(self, action_url):
+	r="""<form method="GET" action="%s">""" % action_url
+	l=self.parameters.keys()
+	l.sort()
+	for k in l:
+	    r += """%s: <input name="%s" title="%s"><br />""" % (k,
+								 k,
+								 self.parameters[k])
+	r += """<input type="submit" name="Execute"></form>"""
+	return r
+
 class ECACatalog:
     """Class holding information about available elements (events, conditions, actions).
 
