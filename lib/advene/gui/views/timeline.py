@@ -37,6 +37,7 @@ import advene.gui.edit.elements
 
 import gtk
 import gobject
+import pango
 
 class TimeLine(AdhocView):
     """
@@ -90,9 +91,12 @@ class TimeLine(AdhocView):
                               _("Scroll to active annotation"))
         self.scroll_to_activated_toggle.set_active (True)
 
+        # Create annotation widget style:
+        self.annotation_font = pango.FontDescription("sans 8")
+
         # FIXME: Hardcoded values are bad...
         # Maybe we should ask pango the height of 'l' plus margins
-        self.button_height = 30
+        self.button_height = 20
 
         # Shortcut
         u2p = self.unit2pixel
@@ -538,6 +542,7 @@ class TimeLine(AdhocView):
             l.set_markup('<b>%s</b>' % title)
         else:
             l.set_text(title)
+        l.modify_font(self.annotation_font)
         b.label=l
         b.add(l)
         b.annotation = annotation
@@ -930,7 +935,10 @@ class TimeLine(AdhocView):
         width=0
         height=0
         for t in self.layer_position.keys():
-            b=gtk.Button(self.controller.get_title(t))
+            b=gtk.Button()
+            l=gtk.Label(self.controller.get_title(t))
+            l.modify_font(self.annotation_font)
+            b.add(l)
             layout.put (b, 0, self.layer_position[t])
             b.annotationtype=t
             b.show()
