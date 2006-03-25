@@ -40,11 +40,13 @@ class Generator:
         ResourceData: "res_",
         }
     
-    def __init__(self):
+    def __init__(self, package=None):
         self.last_used={}
 	self.existing=[]
         for k in self.prefix.keys():
             self.last_used[k]=0
+        if package is not None:
+            self.init(package)
 
     def exists(self, id_):
 	return id_ in self.existing
