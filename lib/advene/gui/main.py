@@ -142,10 +142,10 @@ class AdveneGUI (Connect):
     @type preferences: dict
     """
 
-    def __init__ (self, args=None):
+    def __init__ (self):
         """Initializes the GUI and other attributes.
         """
-        self.controller = advene.core.controller.AdveneController(args)
+        self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
         
         gladefile=config.data.advenefile (config.data.gladefilename)
@@ -431,7 +431,7 @@ class AdveneGUI (Connect):
                     self.controller.event_handler.internal_rule (event=e,
                                                                  method=method)
 
-        self.controller.init()
+        self.controller.init(args)
 
         self.visual_id = None
         # The player is initialized. We can register the drawable id
@@ -457,6 +457,12 @@ class AdveneGUI (Connect):
             sw.add (tree.get_widget())
             self.gui.get_widget("displayvbox").add(sw)
             sw.show_all()
+
+        self.webserver_logstream = StringIO.StringIO()
+        if self.controller.server:
+            self.controller.server.set_log_handler(self.webserver_logstream)
+        else:
+            self.webserver_logstream.write(_("There is no active webserver."))
 
         if config.data.webserver['mode'] == 1:
 	    if self.controller.server:
@@ -1504,7 +1510,7 @@ class AdveneGUI (Connect):
             begin,end = b.get_bounds ()
             b.delete(begin, end)
 	    if self.controller.server:
-		b.set_text(self.controller.server.logstream.getvalue())
+		b.set_text(self.webserver_logstream.getvalue())
 	    else:
 		b.set_text(_("No available webserver"))
             return True
