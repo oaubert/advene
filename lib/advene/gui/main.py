@@ -1198,17 +1198,19 @@ class AdveneGUI (Connect):
 
     def on_exit(self, source=None, event=None):
         """Generic exit callback."""
-        # FIXME: check [ p._modified for p in self.controller.packages ]
-        if self.controller.package._modified:
-            response=advene.gui.util.yes_no_cancel_popup(title=_("Package modified"),
-                                                         text=_("Your package has been modified but not saved.\nSave it now?"))
-            if response == gtk.RESPONSE_CANCEL:
-                return True            
-            if response == gtk.RESPONSE_YES:
-                self.on_save1_activate()
-                return False
-            if response == gtk.RESPONSE_NO:
-                self.controller.package._modified=False
+        for a, p in self.controller.packages.iteritems():
+            if a == 'advene':
+                continue
+            if p._modified:
+                t = self.controller.get_title(p)
+                response=advene.gui.util.yes_no_cancel_popup(title=_("Package %s modified") % t,
+                                                             text=_("The package %s has been modified but not saved.\nSave it now?") % t)
+                if response == gtk.RESPONSE_CANCEL:
+                    return True            
+                if response == gtk.RESPONSE_YES:
+                    self.on_save1_activate(package=p)
+                if response == gtk.RESPONSE_NO:
+                    p._modified=False
             
         if self.controller.on_exit():
             gtk.main_quit()
@@ -1293,22 +1295,27 @@ class AdveneGUI (Connect):
                 self.log(_("Cannot load package %s:\n%s") % (fname, unicode(e)))
         return True
 
-    def on_save1_activate (self, button=None, data=None):
+    def on_save1_activate (self, button=None, package=None):
         """Save the current package."""
-        if (self.controller.package.uri == ""
-            or self.controller.package.uri.endswith('new_pkg')):
-            self.on_save_as1_activate (button, data)
+        if package is None:
+            package=self.controller.package
+        if (package.uri == ""
+            or package.uri.endswith('new_pkg')):
+            self.on_save_as1_activate (package=package)
         else:
-            self.controller.save_package ()
+            alias=self.controller.aliases[package]
+            self.controller.save_package (alias=alias)
         return True
 
-    def on_save_as1_activate (self, button=None, data=None):
+    def on_save_as1_activate (self, button=None, package=None):
         """Save the package with a new name."""
+        if package is None:
+            package=self.controller.package
         if config.data.path['data']:
             d=config.data.path['data']
         else:
             d=None
-        filename=advene.gui.util.get_filename(title=_("Save the current package"),
+        filename=advene.gui.util.get_filename(title=_("Save the package %s") % self.controller.get_title(package),
                                               action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                               button=gtk.STOCK_SAVE,
                                               default_dir=d)
@@ -1316,14 +1323,14 @@ class AdveneGUI (Connect):
 	    (p, ext) = os.path.splitext(filename)
 	    if ext == '':
 		# Add a pertinent extension
-		if self.controller.package.resources:
+		if p.resources:
 		    # There are resources -> save as an .azp package
 		    ext='.azp'
 		else:
 		    ext='.xml'
 		filename = filename + ext
 
-	    if self.controller.package.resources and ext.lower() != '.azp':
+	    if p.resources and ext.lower() != '.azp':
 		ret=advene.gui.util.yes_no_cancel_popup(title=_("Invalid file extension"),
 							text=_("Your package contains resources,\nthe filename (%s) should have a .azp extension.\nShould I put the correct extension?") % filename)
 		if ret == gtk.RESPONSE_YES:
@@ -1334,7 +1341,8 @@ class AdveneGUI (Connect):
 		    self.log(_("Aborting package saving"))
 		    return True
 		
-            self.controller.save_package(name=filename)
+            alias=self.controller.aliases[package]
+            self.controller.save_package(name=filename, alias=alias)
         return True
 
     def on_import_dvd_chapters1_activate (self, button=None, data=None):
