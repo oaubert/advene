@@ -105,14 +105,14 @@ if __name__ == '__main__':
     Check your .advenerc file.""" % gladefile
     sys.exit(1)
 
-  gui = advene.gui.main.AdveneGUI (config.data.args)
+  gui = advene.gui.main.AdveneGUI ()
   try:
     #import hotshot
     #filename = "pythongrind.prof"
     #prof = hotshot.Profile(filename, lineevents=1)
-    #prof.runcall(gui.main)
+    #prof.runcall(gui.main, config.data.args)
     #prof.close()
-    gui.main ()
+    gui.main (config.data.args)
   except Exception, e:
     print config.data.version_string
     print _("Got exception\n\n%s\n\n. Stopping services...") % str(e)

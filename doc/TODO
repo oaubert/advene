@@ -1,4 +1,6 @@
-* implement check of packages._modified in on_exit
+* fix cached_duration when switching packages
+
+* timeline: redraw marks on update_model if necessary
 
 * implement .apl (advene package list) file format
 
@@ -1105,4 +1107,8 @@ res.startswith('<html>') [useful for Kupu]
    events) is defined for 1 specific package.
 
 * implement close package
+
+* fix multiple file loading on command line
+
+* implement check of packages._modified in on_exit
 

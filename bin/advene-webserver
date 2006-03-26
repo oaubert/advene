@@ -63,51 +63,19 @@ if not os.path.exists(config.data.path['resources']):
     print "Seemingly running from a pyinstaller version in\n%s" % maindir
     fix_paths(maindir)
 
-if config.data.os == 'win32':
-  import _winreg
-
-  #win32 platform, add the "lib" folder to the system path
-  os.environ['PATH'] += os.path.pathsep + "lib"
-  try:
-    import pygtk
-    import gtk
-    import gtk.glade
-  except ImportError:
-    # Gtk DLLs are not in the PATH. Try to get their directory
-    # from the registry
-    path=config.data.get_registry_value('Software\\GTK\\2.0', 'Path')
-    if path is None:
-      raise ImportError("Couldn't find GTK DLLs.")
-    os.environ['PATH'] += os.path.pathsep + path.encode('utf8')
-    os.environ['PATH'] += os.path.pathsep + os.path.join( path, 'bin' ).encode('utf8')
-    print "Using GTK DLLs at %s" % path
-    import pygtk
-    import gtk
-    import gtk.glade
-
-import advene.gui.main
-
 if __name__ == '__main__':
     import atexit
     import sre
     import advene.core.mediacontrol as mediacontrol
     from advene.core.webserver import AdveneWebServer
+    from advene.core.controller import AdveneController
     from advene.model.zippackage import ZipPackage
 
-    controller=Controller()
-    server = AdveneWebServer(controller)
+    controller=AdveneController()
+    controller.init(config.data.args)
 
-    for uri in config.data.args:
-      alias = os.path.basename(os.path.splitext(uri)[0])
-      alias = sre.sub('[^a-zA-Z0-9_]', '_', alias)
-      try:
-        server.load_package (uri=uri, alias=alias)
-        print "Loaded %s as %s" % (uri, alias)
-      except Exception, e:
-        print "Cannot load package from file %s: %s" % (uri,
-                                                        unicode(e))
-    print _("Server ready to serve requests.")
-    server.serve_forawhile ()
+    print "Server ready to serve requests."
+    controller.server.serve_forawhile ()
 
     # Cleanup the ZipPackage directories
     ZipPackage.cleanup()

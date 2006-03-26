@@ -305,15 +305,27 @@ class AdveneController:
                 self.serverthread = threading.Thread (target=self.server.serve_forawhile)
                 self.serverthread.start ()
 
-        if self.package_to_load is not None:
-            self.load_package(uri=self.package_to_load)
-
+        # Arguments handling
+        for uri in args:
+            name, ext = os.path.splitext(uri)
+            if ext.lower() in ('.xml', '.azp'):
+                alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+                try:
+                    self.load_package (uri=uri, alias=alias)
+                    self.log(_("Loaded %s as %s") % (uri, alias))
+                except Exception, e:
+                    self.log(_("Cannot load package from file %s: %s") % (uri,
+                                                                          unicode(e)))
+            else:
+                # Try to load the file as a video file
+                if ('dvd' in name 
+                    or ext.lower() in ('.avi', '.mpg', '.mov', 
+                                       '.mp4', '.asf', '.rm')):
+                    self.set_default_media(uri)
+            
         # If no package is defined yet, load the template
         if self.package is None:
             self.load_package ()
-
-        if self.file_to_play is not None:
-            self.set_default_media(self.file_to_play)
 
         self.player.check_player()
 
