@@ -196,8 +196,9 @@ class EditElementPopup (object):
         elif hasattr(self.element, 'schema') and self.element.schema.isImported():
             self.editable=False
 
-        self.vbox.add (self.make_widget (editable=self.editable))
-
+        w=self.make_widget (editable=self.editable)
+        self.vbox.add (w)
+        
         if self.editable:
             title=_("Edit %s") % self.get_title()
         else:
