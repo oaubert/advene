@@ -1,4 +1,8 @@
-* Search everywhere for imagecache, idgenerator, modified -> package attributes
+* webserver: use controller.build_context
+
+* webserver: implement a loop to process dynamic events when
+   standalone (in fact, we should use controller and invoke
+   controller.update)
 
 * allow to specify the browser for open_url in preferences
 
@@ -19,15 +23,6 @@
 
 * resource creation: allow to create non-text  resources (specify the
    filename/mimetype)
-
-* webserver: use controller.build_context
-
-* webserver: implement a loop to process dynamic events when
-   standalone (in fact, we should use controller and invoke
-   controller.update)
-
-* Make the Advene GUI able to grok multiple packages. Focus (for
-   events) is defined for 1 specific package.
 
 * Define a ParameteredQuery which takes a single parameter in the path, e.g.:
   here/annotations/containedIn/foobar 
@@ -1100,3 +1095,7 @@ res.startswith('<html>') [useful for Kupu]
 * webserver: in /actions, add links and automatically generate forms
    with action parameters
 
+* Search everywhere for imagecache, idgenerator, modified -> package attributes
+
+* Make the Advene GUI able to grok multiple packages. Focus (for
+   events) is defined for 1 specific package.
