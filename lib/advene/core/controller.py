@@ -588,6 +588,14 @@ class AdveneController:
         self.notify ("PackageLoad")
         self.activate_package(alias)
 
+    def remove_package(self, package=None):
+        if package is None:
+            package=self.package
+        alias=self.aliases[package]
+        self.unregister_package(alias)
+        del(package)
+        return True
+
     def register_package (self, alias, package):
         """Register a package in the server loaded packages lists.
 
@@ -621,7 +629,9 @@ class AdveneController:
             if l:
                 self.activate_package(l[0])
             else:
-                self.activate_package(None)
+                # We removed the last package. Create a new empty one.
+                self.load_package()
+                #self.activate_package(None)
 
     def activate_package(self, alias=None):
         if alias:

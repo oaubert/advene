@@ -1256,6 +1256,25 @@ class AdveneGUI (Connect):
         self.controller.load_package ()
         return True
 
+    def on_close1_activate (self, button=None, data=None):
+        if self.controller.package._modified:
+            response=advene.gui.util.yes_no_cancel_popup(title=_("Package modified"),
+                                                         text=_("Your package has been modified but not saved.\nSave it now?"))
+            if response == gtk.RESPONSE_CANCEL:
+                return True
+            if response == gtk.RESPONSE_YES:
+                self.on_save1_activate()
+                self.controller.remove_package()
+                return True
+            if response == gtk.RESPONSE_NO:
+                self.controller.package._modified=False
+                self.controller.remove_package()
+                return True
+        else:
+            self.controller.remove_package()
+
+        return True
+
     def on_open1_activate (self, button=None, data=None):
         """Open a file selector to load a package."""
         if config.data.path['data']:
