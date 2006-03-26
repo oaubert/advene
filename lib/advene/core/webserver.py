@@ -1855,13 +1855,11 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.shouldrun = True  # Set to False to indicate the end of the
                                # server_forawhile method
 
-        self.logstream = StringIO.StringIO()
         self.logger = logging.getLogger('webserver')
-        handler=logging.StreamHandler(self.logstream)
-        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
-        self.logger.addHandler(handler)
         # set the level to logging.DEBUG to get more messages
         self.logger.setLevel(logging.INFO)
+        # Log messages go to sys.stderr by default.
+        self.set_log_handler(None)
 
 	self.is_embedded = True
 
@@ -1887,6 +1885,14 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         BaseHTTPServer.HTTPServer.__init__(self, ('', port),
                                            AdveneRequestHandler)
 
+    def set_log_handler(self, handler=None):
+        for h in self.logger.handlers:
+            self.logger.removeHandler(h)
+        handler=logging.StreamHandler(handler)
+        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+        self.logger.addHandler(handler)
+        return True
+        
     def verify_request (self, request, client_address):
         """Access control method.
 
