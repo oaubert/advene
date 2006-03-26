@@ -444,6 +444,24 @@ class Window:
         expr=b.get_text(begin, cursor)
         return expr
 
+    def make_window(self, widget=None):
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+	vbox=gtk.VBox()
+	window.add(vbox)
+
+        window.vbox = gtk.VBox()
+	vbox.add(window.vbox)
+	if widget:
+	    window.vbox.add(widget)
+
+	hb=gtk.HButtonBox()
+	b=gtk.Button(stock=gtk.STOCK_CLOSE)
+	b.connect("clicked", lambda b: window.destroy())
+	hb.add(b)
+	vbox.pack_start(hb, expand=False)
+
+	return window
+
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
@@ -562,9 +580,11 @@ class Window:
 
 if __name__ == "__main__":
 
-    ev=Window(globals_=globals(), locals_=locals(), historyfile=os.path.join(os.getenv('HOME'),
-                                                                             '.pyeval.log'))
+    ev=Window(globals_=globals(), locals_=locals(),
+              historyfile=os.path.join(os.getenv('HOME'),
+                                       '.pyeval.log'))
 
+    ev.locals_['self']=ev
     window=ev.popup()
 
     window.connect ("destroy", lambda e: gtk.main_quit())
