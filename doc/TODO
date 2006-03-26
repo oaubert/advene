@@ -1,10 +1,4 @@
-* fix cached_duration when switching packages
-
-* timeline: redraw marks on update_model if necessary
-
 * implement .apl (advene package list) file format
-
-* webserver: use controller.build_context
 
 * webserver: implement a loop to process dynamic events when
    standalone (in fact, we should use controller and invoke
@@ -1111,4 +1105,10 @@ res.startswith('<html>') [useful for Kupu]
 * fix multiple file loading on command line
 
 * implement check of packages._modified in on_exit
+
+* fix cached_duration when switching packages
+
+* timeline: redraw marks on update_model if necessary
+
+* webserver: use controller.build_context
 

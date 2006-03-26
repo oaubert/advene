@@ -250,10 +250,10 @@ class AdveneController:
         else:
             self.log(_("No available event handler"))
 
-    def build_context(self, here=None):
-        c=advene.model.tal.context.AdveneContext(here=here,
+    def build_context(self, here=None, alias=None):
+        c=advene.model.tal.context.AdveneContext(here,
 						 options={
-		u'package_url': self.get_default_url(root=True),
+		u'package_url': self.get_default_url(root=True, alias=alias),
 		u'snapshot': self.package.imagecache,
 		u'namespace_prefix': config.data.namespace_prefix,
 		u'config': config.data.web,

@@ -758,14 +758,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         </ul>
         """)
 
-    def default_options(self, alias):
-        return {
-            u'package_url': self.server.controller.get_url_for_alias(alias),
-            u'snapshot': self.server.controller.packages[alias].imagecache,
-            u'namespace_prefix': config.data.namespace_prefix,
-            u'config': config.data.web,
-            }
-
     def do_PUT(self):
         """Handle PUT requests (update or create).
 
@@ -824,11 +816,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 expr = "here/%s" % tales
 
-            context = advene.model.tal.context.AdveneContext (here=self.server.controller.packages[alias],
-                                                              options=self.default_options(alias))
+            context = self.server.controller.build_context(here=self.server.controller.packages[alias],
+                                                           alias=alias)
             context.pushLocals()
             context.setLocal('request', query)
-            context.setLocal('package', self.server.controller.packages[alias])
 
             try:
                 objet = context.evaluateValue (expr)
@@ -936,11 +927,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 expr = "here/%s" % tales
 
-            context = advene.model.tal.context.AdveneContext (here=self.server.controller.packages[alias],
-                                                              options=self.default_options(alias))
+            context = self.server.controller.build_context(here=self.server.controller.packages[alias],
+                                                           alias=alias)
             context.pushLocals()
             context.setLocal('request', query)
-            context.setLocal('package', self.server.controller.packages[alias])
             
             try:
                 objet = context.evaluateValue (expr)
@@ -1553,14 +1543,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             expr = "here/%s" % tales
 
-        context = advene.model.tal.context.AdveneContext (here=p,
-                                                          options=self.default_options(alias))
+        context = self.server.controller.build_context (here=p, alias=alias)
         context.pushLocals()
         context.setLocal('request', query)
-        context.setLocal (u'package', p)        
         # FIXME: the following line is a hack for having qname-keys work
         #        It is a hack because obviously, p is not a "view"
         context.setLocal (u'view', p)
+
         if 'epoz' in tales:
             context.addGlobal (u"epozmacros", self.server.epoz_macros)
 
@@ -1647,11 +1636,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # Display content
         if hasattr (objet, 'view') and callable (objet.view):
 
-            context = advene.model.tal.context.AdveneContext (here=objet,
-                                                              options=self.default_options(alias))
+            context = self.server.controller.build_context(here=objet, alias=alias)
             context.pushLocals()
             context.setLocal('request', query)
-            context.setLocal('package', p)
             # FIXME: should be default view
             context.setLocal(u'view', objet)
             try:
