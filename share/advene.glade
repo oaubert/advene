@@ -106,7 +106,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image26">
+			<widget class="GtkImage" id="image31">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -128,7 +128,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image27">
+			<widget class="GtkImage" id="image32">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -430,6 +430,28 @@
 		      <property name="label" translatable="yes">_Configure player</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_configure_player1_activate" last_modification_time="Thu, 15 May 2003 11:04:36 GMT"/>
+		    </widget>
+		  </child>
+		</widget>
+	      </child>
+	    </widget>
+	  </child>
+
+	  <child>
+	    <widget class="GtkMenuItem" id="package_list">
+	      <property name="visible">True</property>
+	      <property name="tooltip" translatable="yes">Loaded packages</property>
+	      <property name="label" translatable="yes">Packages</property>
+	      <property name="use_underline">True</property>
+
+	      <child>
+		<widget class="GtkMenu" id="package_list_menu">
+
+		  <child>
+		    <widget class="GtkMenuItem" id="no_package_item">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">No package</property>
+		      <property name="use_underline">True</property>
 		    </widget>
 		  </child>
 		</widget>

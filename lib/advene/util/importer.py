@@ -160,7 +160,7 @@ class GenericImporter(object):
         begin += self.offset
         end += self.offset
         if ident is None and self.controller is not None:
-            ident=self.controller.idgenerator.get_id(Annotation)
+            ident=self.controller.package._idgenerator.get_id(Annotation)
             
         if ident is None:
             a=self.package.createAnnotation(type=type_,

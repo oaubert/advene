@@ -326,11 +326,11 @@ class ECAEngine:
         """
         #print "notify %s for %s" % (event_name, str(kw))
 
-        # Set the controller.modified state
-        # This does not belong here, but it is the more convenient and
+        # Set the controller.package._modified state
+        # This does not really belong here, but it is the more convenient and
         # maybe more effective way to implement it
         if event_name in self.modifying_events:
-            self.controller.modified=True
+            self.controller.package._modified = True
 
         delay=0
         if kw.has_key('delay'):

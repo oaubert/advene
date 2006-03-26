@@ -602,7 +602,7 @@ class TranscriptionEdit(AdhocView):
                                  transcription_edit=self)
         ti.process_file('transcription')
 
-        self.controller.modified=True
+        self.controller.package._modified=True
         self.controller.notify("PackageLoad", package=ti.package)
         self.controller.log(_('Converted from file %s :') % self.sourcefile)
         self.controller.log(ti.statistics_formatted())

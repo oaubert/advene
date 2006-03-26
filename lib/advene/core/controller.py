@@ -65,8 +65,9 @@ class AdveneController:
     """AdveneController class.
 
     The main attributes for this class are:
-      - L{package} : the currently loaded package
-      - L{imagecache} : the associated imagecache
+      - L{package} : the currently active package
+      - L{packages} : a dict of loaded packages, indexed by their alias
+
       - L{active_annotations} : the currently active annotations
       - L{player} : the player (X{advene.core.mediacontrol.Player} instance)
       - L{event_handler} : the event handler
@@ -77,8 +78,10 @@ class AdveneController:
       - L{update} : regularly called method used to update information about the current stream
       - L{update_status} : use this method to interact with the player
 
-    @ivar imagecache: the current imagecache
-    @type imagecache: imagecache.ImageCache
+    On loading, we append the following attributes to package:
+      - L{imagecache} : the associated imagecache
+      - L{_idgenerator} : the associated idgenerator
+      - L{_modified} : boolean
 
     @ivar active_annotations: the currently active annotations.
     @type active_annotations: list
@@ -90,11 +93,8 @@ class AdveneController:
     @ivar last_position: a cache to check whether an update is necessary
     @type last_position: int
 
-    @ivar package: the package currently loaded
+    @ivar package: the package currently loaded and active
     @type package: advene.model.Package
-
-    @ivar modified: indicates if the data has been modified
-    @type modified: boolean
 
     @ivar preferences: the current preferences
     @type preferences: dict
@@ -115,14 +115,18 @@ class AdveneController:
     def __init__ (self, args=None):
         """Initializes player and other attributes.
         """
+
+        # Dictionaries indexed by alias
+        self.packages = {}
+        # Reverse mapping indexed by package
+        self.aliases = {}
+        self.current_alias = None
+
         self.cleanup_done=False
         if args is None:
             args = []
 
         self.file_to_play, self.package_to_load=self.parse_command_line(args)
-
-        # Image Cache
-        self.imagecache = ImageCache ()
 
         # Regexp to recognize DVD URIs
         self.dvd_regexp = sre.compile("^dvd.*@(\d+):(\d+)")
@@ -138,13 +142,11 @@ class AdveneController:
         self.gui=None
         # Useful for debug in the evaluator window
         self.config=config.data
-        self.idgenerator=advene.core.idgenerator.Generator()
 
         # STBV
         self.current_stbv = None
 
         self.package = None
-        self.modified = False
 
         playerfactory=advene.core.mediacontrol.PlayerFactory()
         self.player = playerfactory.get_player()
@@ -252,7 +254,7 @@ class AdveneController:
         c=advene.model.tal.context.AdveneContext(here=here,
 						 options={
 		u'package_url': self.get_default_url(root=True),
-		u'snapshot': self.imagecache,
+		u'snapshot': self.package.imagecache,
 		u'namespace_prefix': config.data.namespace_prefix,
 		u'config': config.data.web,
 		})
@@ -339,7 +341,7 @@ class AdveneController:
         @return: a boolean (~desactivation)
         """
         if (config.data.player['snapshot'] 
-	    and not self.imagecache.is_initialized (position)):
+	    and not self.package.imagecache.is_initialized (position)):
             # FIXME: only 0-relative position for the moment
             # print "Update snapshot for %d" % position
             try:
@@ -348,7 +350,7 @@ class AdveneController:
                 print "Exception in snapshot: %s" % e
                 return False
             if i is not None and i.height != 0:
-                self.imagecache[position] = vlclib.snapshot2png (i)
+                self.package.imagecache[position] = vlclib.snapshot2png (i)
         else:
             # FIXME: do something useful (warning) ?
             pass
@@ -419,15 +421,25 @@ class AdveneController:
 		file_to_play = s
         return file_to_play, package_to_load
 
-    def get_default_url(self, root=False):
+    def get_url_for_alias (self, alias):
+        if self.server:
+            return urllib.basejoin(self.server.urlbase, "/packages/" + alias)
+        else:
+            return "/packages/" + alias
+
+    def get_url_for_package (self, p):
+        a=self.aliases[p]
+        return self.get_url_for_alias(a)
+
+    def get_default_url(self, root=False, alias=None):
         """Return the default package URL.
 
         If root, then return only the package URL even if it defines
         a default view.
         """
-        url=None
-        if self.server:
-            url = self.server.get_url_for_alias('advene')
+        if alias is None:
+            alias=self.aliases[self.package]
+        url = self.get_url_for_alias(alias)
         if not url:
             return None
         if root:
@@ -502,7 +514,7 @@ class AdveneController:
         if annotation.type == annotationType:
             # Do not duplicate the annotation
             return annotation
-        ident=self.idgenerator.get_id(Annotation)
+        ident=self.package._idgenerator.get_id(Annotation)
         an = self.package.createAnnotation(type = annotationType,
                                            ident=ident,
                                            fragment=annotation.fragment.clone())
@@ -532,7 +544,7 @@ class AdveneController:
     def get_timestamp(self):
 	return time.strftime("%Y-%m-%d")
 
-    def load_package (self, uri=None, alias="advene"):
+    def load_package (self, uri=None, alias=None):
         """Load a package.
 
         This method is esp. used as a callback for webserver. If called
@@ -551,41 +563,123 @@ class AdveneController:
             except OSerror:
                 self.log(_("Cannot find the template package."))
                 self.package = Package ()
+                alias='new_pkg'
             self.package.author = config.data.userid
 	    self.package.date = self.get_timestamp()
         else:
             self.package = Package (uri=uri)
-        self.notify ("PackageLoad")
 
-    def save_package (self, name=None):
-        """Save a package.
+        if alias is None:
+            # Autogenerate the alias
+            if uri:
+                alias, ext = os.path.splitext(os.path.basename(uri))
+            else:
+                alias = 'new_pkg'
+
+        # Replace forbidden characters. The GUI is responsible for
+        # letting the user specify a valid alias.
+        alias = sre.sub('[^a-zA-Z0-9_]', '_', alias)
+
+        self.package.imagecache=ImageCache()
+        self.package._idgenerator = advene.core.idgenerator.Generator(self.package)
+        self.package._modified = False
+
+        self.register_package(alias, self.package)
+        self.notify ("PackageLoad")
+        self.activate_package(alias)
+
+    def register_package (self, alias, package):
+        """Register a package in the server loaded packages lists.
+
+        @param alias: the package's alias
+        @type alias: string
+        @param package: the package itself
+        @type package: advene.model.Package
+        @param imagecache: the imagecache associated to the package
+        @type imagecache: advene.core.ImageCache
+        """
+        # If we load a new file and only the template package was present,
+        # then remove the template package
+        if len(self.packages) <= 2 and 'new_pkg' in self.packages.keys():
+            self.unregister_package('new_pkg')
+        self.packages[alias] = package
+        self.aliases[package] = alias
+
+    def unregister_package (self, alias):
+        """Remove a package from the loaded packages lists.
+
+        @param alias: the  package alias
+        @type alias: string
+        """
+        # FIXME: check if the unregistered package was the current one
+        p = self.packages[alias]
+        del (self.aliases[p])
+        del (self.packages[alias])
+        if self.package == p:
+            l=[ a for a in self.packages.keys() if a != 'advene' ]
+            # There should be at least 1 key
+            if l:
+                self.activate_package(l[0])
+            else:
+                self.activate_package(None)
+
+    def activate_package(self, alias=None):
+        if alias:
+            self.package = self.packages[alias]
+            self.current_alias = alias
+        else:
+            self.package = None
+            self.current_alias = None
+        self.packages['advene']=self.package
+        self.notify ("PackageActivate", package = self.package)
+
+    def reset(self):
+        """Reset all packages.
+        """
+        self.log("FIXME: reset not implemented yet")
+        #FIXME: remove all packages from self.packages
+        # and
+        # recreate a template package
+        pass
+
+    def save_package (self, name=None, alias=None):
+        """Save the package (current or specified)
 
         @param name: the URI of the package
         @type name: string
         """
+        if alias is None:
+            p=self.package
+        else:
+            p=self.packages[alias]
+
         if name is None:
-            name=self.package.uri
+            name=p.uri
+        old_uri = p.uri
 
-        old_uri = self.package.uri
+        if alias is None:
+            # Check if we know the stream duration. If so, save it as
+            # package metadata
+            if self.cached_duration > 0:
+                p.setMetaData (config.data.namespace,
+                               "duration",
+                               unicode(self.cached_duration))
+            # Set if necessary the mediafile metadata
+            if self.get_default_media() == "":
+                pl = self.player.playlist_get_list()
+                if pl:
+                    self.set_default_media(pl[0])
 
-        # Check if we know the stream duration. If so, save it as
-        # package metadata
-        if self.cached_duration > 0:
-            self.package.setMetaData (config.data.namespace,
-                                      "duration",
-                                      unicode(self.cached_duration))
-        # Set if necessary the mediafile metadata
-        if self.get_default_media() == "":
-            pl = self.player.playlist_get_list()
-            if pl:
-                self.set_default_media(pl[0])
-        self.package.save(name=name)
-        self.modified=False
-        self.notify ("PackageSave")
+        p.save(name=name)
+        p._modified = False
+
+        self.notify ("PackageSave", package=p)
         if old_uri != name:
             # Reload the package with the new name
             self.log(_("Package URI has changed. Reloading package with new URI."))
             self.load_package(uri=name)
+            # FIXME: we keep here the old and the new package.
+            # Maybe we could autoclose the old package
 
     def manage_package_load (self, context, parameters):
         """Event Handler executed after loading a package.
@@ -604,10 +698,6 @@ class AdveneController:
             self.log (", ".join(l))
             return True
 
-        # Reset the id generator
-        self.idgenerator.init(self.package)
-
-        self.modified=False
         # Get the cached duration
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
@@ -615,7 +705,7 @@ class AdveneController:
         else:
             self.cached_duration = 0
 
-	self.imagecache.clear ()
+	self.package.imagecache.clear ()
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
             if self.player.is_active():
@@ -628,19 +718,13 @@ class AdveneController:
 
             # Load the imagecache
             id_ = vlclib.mediafile2id (mediafile)
-            self.imagecache.load (id_)
+            self.package.imagecache.load (id_)
             # Populate the missing keys
             for a in self.package.annotations:
-                self.imagecache.init_value (a.fragment.begin)
-                self.imagecache.init_value (a.fragment.end)
+                self.package.imagecache.init_value (a.fragment.begin)
+                self.package.imagecache.init_value (a.fragment.end)
 	else:
 	    self.player.playlist_clear()
-
-        # Update the webserver
-        if config.data.webserver['mode'] and self.server:
-            self.server.register_package (alias='advene',
-                                          package=self.package,
-                                          imagecache=self.imagecache)
 
         # Activate the default STBV
         default_stbv = self.package.getMetaData (config.data.namespace, "default_stbv")
@@ -659,16 +743,16 @@ class AdveneController:
         else:
             return []
 
-    def activate_stbv(self, view=None):
+    def activate_stbv(self, view=None, force=False):
         """Activates a given STBV.
 
-        If view is None, then reset the user STBV.
+        If view is None, then reset the user STBV.  The force
+        parameter is used to handle the ViewEditEnd case, where the
+        view may already be active, but must be reloaded anyway since
+        its contents changed.
         """
-        # Do not use the following test: if we modify a single rule
-        # from a ruleset, and click "Apply", the view id does not
-        # change but its contents do, so we must take it into account.
-        #if view == self.current_stbv:
-        #    return
+        if view == self.current_stbv and not force:
+            return
         self.current_stbv=view
         if view is None:
             self.event_handler.clear_ruleset(type_='user')

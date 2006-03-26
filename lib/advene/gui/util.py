@@ -49,7 +49,7 @@ def image_from_position(controller, position=None, width=None, height=None):
     if position is None:
         position=controller.player.current_position_value
     try:
-	i.set_from_pixbuf(png_to_pixbuf (controller.imagecache[position],
+	i.set_from_pixbuf(png_to_pixbuf (controller.package.imagecache[position],
 					 width=width, height=height))
     except:
 	# Some png_data corruption have been reported. Handle them here.

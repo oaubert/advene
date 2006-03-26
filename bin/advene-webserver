@@ -89,18 +89,17 @@ import advene.gui.main
 
 if __name__ == '__main__':
     import atexit
+    import sre
     import advene.core.mediacontrol as mediacontrol
     from advene.core.webserver import AdveneWebServer
     from advene.model.zippackage import ZipPackage
 
-    # Let the server be its own controller
-    server = AdveneWebServer(controller=None)
-    f=mediacontrol.PlayerFactory()
-    server.player=f.get_player()
-    atexit.register (server.stop_player)
+    controller=Controller()
+    server = AdveneWebServer(controller)
 
     for uri in config.data.args:
       alias = os.path.basename(os.path.splitext(uri)[0])
+      alias = sre.sub('[^a-zA-Z0-9_]', '_', alias)
       try:
         server.load_package (uri=uri, alias=alias)
         print "Loaded %s as %s" % (uri, alias)

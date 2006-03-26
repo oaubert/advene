@@ -82,7 +82,7 @@ class CreateElementPopup(object):
         pass
 
     def generate_id(self):
-        return self.controller.idgenerator.get_id(self.type_)
+        return self.controller.package._idgenerator.get_id(self.type_)
 
     def build_widget(self):
         vbox = gtk.VBox()
@@ -167,12 +167,12 @@ class CreateElementPopup(object):
                 _("The identifier %s is not valid.\nIt must be composed of non-accentuated alphabetic characters\nUnderscore is allowed.") % id_)
             return None
 
-        if self.controller.idgenerator.exists(id_):
+        if self.controller.package._idgenerator.exists(id_):
 	    advene.gui.util.message_dialog(
                 _("The identifier %s is already defined.") % id_)
             return None
 	else:
-	    self.controller.idgenerator.add(id_)
+	    self.controller.package._idgenerator.add(id_)
 
         if self.type_combo:
             t = self.type_combo.get_current_element()

@@ -131,8 +131,6 @@ class AdveneGUI (Connect):
     @ivar gui.player_status: the player_status widget
 
     @ivar oldstatus: a status cache to check whether a GUI update is necessary
-    @ivar imagecache: the current imagecache
-    @type imagecache: imagecache.ImageCache
 
     @ivar annotation: the currently edited annotation (or I{None})
     @type annotation: advene.model.Annotation
@@ -289,7 +287,7 @@ class AdveneGUI (Connect):
             if event == 'ViewEditEnd' and self.controller.current_stbv == view:
                 # We were editing the current STBV: take the changes
                 # into account
-                self.controller.activate_stbv(view)
+                self.controller.activate_stbv(view, force=True)
         return True
 
     def query_lifecycle(self, context, parameters):
@@ -401,6 +399,7 @@ class AdveneGUI (Connect):
   
         for events, method in ( 
             ("PackageLoad", self.manage_package_load),
+            ("PackageActivate", self.manage_package_activate),
             ("PackageSave", self.manage_package_save),
             ( ('AnnotationCreate', 'AnnotationEditEnd',
                'AnnotationDelete', 'AnnotationActivate', 
@@ -567,7 +566,7 @@ class AdveneGUI (Connect):
 	Not accessible through the GUI, use the Evaluator window:
 	c.gui.display_imagecache()
 	"""
-        k=self.controller.imagecache.keys()
+        k=self.controller.package.imagecache.keys()
         k.sort()
 	hn=HistoryNavigation(controller=self.controller,
 			     history=k,
@@ -698,6 +697,34 @@ class AdveneGUI (Connect):
             pop.edit ()
         return True
 
+    def update_package_list (self):
+        """Update the list of loaded packages.
+        """
+        menu=self.gui.get_widget('package_list_menu')
+
+        def activate_package(button, alias):
+            self.controller.activate_package (alias)
+            return True
+
+        # Remove all previous menuitems
+        menu.foreach(menu.remove)
+
+        # Rebuild the list
+        for a, p in self.controller.packages.iteritems():
+            if a == 'advene':
+                continue
+            if p == self.controller.package:
+                name = a + ' (*)'
+            else:
+                name = a
+            i=gtk.MenuItem(label=unicode(name), use_underline=False)
+            i.connect('activate', activate_package, a)
+            self.tooltips.set_tip(i, _("Activate %s") % self.controller.get_title(p))
+            menu.append(i)
+
+        menu.show_all()
+        return True
+
     def update_stbv_list (self):
         """Update the STBV list.
         """
@@ -729,7 +756,7 @@ class AdveneGUI (Connect):
         # We cannot set the widget name to something more sensible (like
         # filemenu) because Glade resets names when editing the menu
         menu=self.gui.get_widget('menuitem1_menu')
-        i=gtk.MenuItem(label=unicode(os.path.basename(filename)))
+        i=gtk.MenuItem(label=unicode(os.path.basename(filename)), use_underline=False)
         i.connect('activate', open_history_file, filename)
         self.tooltips.set_tip(i, _("Open %s") % filename)
         
@@ -743,7 +770,7 @@ class AdveneGUI (Connect):
 
         c=self.controller
 
-        url=c.get_default_url(root=True)
+        url=c.get_default_url(root=True, alias='advene')
         
         menu=gtk.Menu()
 
@@ -760,8 +787,8 @@ class AdveneGUI (Connect):
         
         for utbv in c.package.views:
             if (utbv.matchFilter['class'] == 'package'
-                and utbv.content.mimetype == 'text/html'):
-                i=gtk.MenuItem(label=c.get_title(utbv))
+                and utbv.content.mimetype != 'application/x-advene-ruleset'):
+                i=gtk.MenuItem(label=c.get_title(utbv), use_underline=False)
                 i.connect('activate', open_utbv, "%s/view/%s" % (url,
                                                                  utbv.id))
                 menu.append(i)
@@ -814,6 +841,7 @@ class AdveneGUI (Connect):
         modified, in order to reflect changes.
         """
         self.update_stbv_list()
+        self.update_package_list()
         return
 
     def manage_package_save (self, context, parameters):
@@ -831,6 +859,22 @@ class AdveneGUI (Connect):
                                                 len(self.controller.package.relations))
                      ))
         return True
+
+    def manage_package_activate (self, context, parameters):
+        self.log(_("Activating package %s") % self.controller.get_title(self.controller.package))
+        self.update_gui()
+
+        self.update_window_title()
+        for v in self.adhoc_views:
+	    if (not hasattr(v, 'close_on_package_load')
+		or v.close_on_package_load == True):
+		v.close()
+	    else:
+		try:
+		    v.update_model(self.controller.package)
+		except AttributeError:
+		    pass        
+        pass
 
     def manage_package_load (self, context, parameters):
         """Event Handler executed after loading a package.
@@ -854,25 +898,13 @@ class AdveneGUI (Connect):
             self.append_file_history_menu(f)
             # Keep the 5 last elements
             config.data.preferences['history']=h[-config.data.preferences['history-size-limit']:]
-        self.update_gui()
-
-        self.update_window_title()
-        for v in self.adhoc_views:
-	    if (not hasattr(v, 'close_on_package_load')
-		or v.close_on_package_load == True):
-		v.close()
-	    else:
-		try:
-		    v.update_model(self.controller.package)
-		except AttributeError:
-		    pass
 
         return True
 
     def update_window_title(self):
         # Update the main window title
         self.gui.get_widget ("win").set_title(" - ".join((_("Advene"),
-                                                          self.controller.package.title or _("No title"))))
+                                                          self.controller.get_title(self.controller.package))))
         return True
     
     def handle_http_request (self, source, condition):
@@ -1166,7 +1198,8 @@ class AdveneGUI (Connect):
 
     def on_exit(self, source=None, event=None):
         """Generic exit callback."""
-        if self.controller.modified:
+        # FIXME: check [ p._modified for p in self.controller.packages ]
+        if self.controller.package._modified:
             response=advene.gui.util.yes_no_cancel_popup(title=_("Package modified"),
                                                          text=_("Your package has been modified but not saved.\nSave it now?"))
             if response == gtk.RESPONSE_CANCEL:
@@ -1175,7 +1208,7 @@ class AdveneGUI (Connect):
                 self.on_save1_activate()
                 return False
             if response == gtk.RESPONSE_NO:
-                self.controller.modified=False
+                self.controller.package._modified=False
             
         if self.controller.on_exit():
             gtk.main_quit()
@@ -1215,7 +1248,7 @@ class AdveneGUI (Connect):
 
     def on_new1_activate (self, button=None, data=None):
         """New package. Erase the current one."""
-        if self.controller.modified:
+        if self.controller.package._modified:
 	    if not advene.gui.util.message_dialog(
                 _("Your package has been modified but not saved.\nCreate a new one anyway?"),
 		icon=gtk.MESSAGE_QUESTION):
@@ -1296,7 +1329,7 @@ class AdveneGUI (Connect):
             i=advene.util.importer.get_importer('lsdvd', controller=self.controller)
             i.package=self.controller.package
             i.process_file('lsdvd')
-            self.controller.modified=True
+            self.controller.package._modified = True
             self.controller.notify('PackageLoad')
         else:
 	    advene.gui.util.message_dialog(_("The associated media is not a DVD."),
@@ -1329,7 +1362,7 @@ class AdveneGUI (Connect):
                 return True
             i.package=self.controller.package
             i.process_file(filename)
-            self.controller.modified=True
+            self.controller.package._modified = True
             self.controller.notify("PackageLoad", package=i.package)
             self.log(_('Converted from file %s :') % filename_utf)
             self.log(i.statistics_formatted())
@@ -1741,7 +1774,7 @@ class AdveneGUI (Connect):
 
     def on_save_imagecache1_activate (self, button=None, data=None):
 	id_ = vlclib.mediafile2id (self.controller.get_default_media())
-        d=self.controller.imagecache.save (id_)
+        d=self.controller.package.imagecache.save (id_)
 	self.log(_("Imagecache saved to %s") % d)
         return True
 

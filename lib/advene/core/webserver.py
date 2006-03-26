@@ -71,7 +71,6 @@ import StringIO
 import imghdr
 
 import advene.util.vlclib as vlclib
-import advene.core.imagecache as imagecache
 
 import SocketServer
 import BaseHTTPServer
@@ -254,7 +253,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write (_("""<h1>No available mediaplayer</h1>"""))
         else:
             l = self.server.controller.player.playlist_get_list ()
-            self.server.update_status ()
+            self.server.controller.update_status ()
             self.wfile.write (_("""
             <h1>Current STBV: %s</h1>
 
@@ -297,7 +296,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if stbv is None:
             self.send_error(404, _('Unknown STBV identifier: %s') % stbvid)
             return
-        self.server.activate_stbv(view=stbv)
+        self.server.controller.activate_stbv(view=stbv)
         return
 
     def handle_media (self, l, query):
@@ -414,12 +413,12 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 if len(param) == 0:
                     self.start_html (_("Access to packages snapshots"), duplicate_title=True)
                     self.wfile.write ("<ul>")
-                    for alias in self.server.packages.keys ():
+                    for alias in self.server.controller.packages.keys ():
                         self.wfile.write ("""<li><a href="/media/snapshot/%s">%s</a></li>""" % (alias, alias))
                     self.wfile.write("</ul>")
                     return
                 alias = param[0]
-                i = self.server.imagecaches[alias]
+                i = self.server.controller.packages[alias].imagecache
 
                 if not query.has_key ('position') and len(param) < 2:
                     self.start_html (_("Available snapshots for %s") % alias, duplicate_title=True)
@@ -470,11 +469,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     position = 0
 
                 if self.server.controller.player.status != self.server.controller.player.PlayingStatus:
-                    self.server.update_status ("start", long(position))
-                self.server.update_status ("set", long(position))
+                    self.server.controller.update_status ("start", long(position))
+                self.server.controller.update_status ("set", long(position))
                 self.send_no_content()
             elif command in ('pause', 'stop', 'resume'):
-                self.server.update_status (command)
+                self.server.controller.update_status (command)
                 self.send_no_content()
             elif command == 'stbv':
                 if len(param) != 0:
@@ -485,7 +484,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_error (404, _('Malformed request'))
                     return
                 self.activate_stbvid(stbvid)
-                #self.server.update_status("play", 0)
+                #self.server.controller.update_status("play", 0)
                 self.send_no_content()
 
     def handle_application (self, l, query):
@@ -560,7 +559,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     current_stbv()
                     return
                 self.activate_stbvid(stbvid)
-                #self.server.update_status("play", 0)
+                #self.server.controller.update_status("play", 0)
                 self.send_redirect("/application/stbv")
             elif command == 'adhoc':
                 view=None
@@ -700,7 +699,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         </form>
         </body></html>
         """) % (" | ".join( ['<a href="/packages/%s">%s</a>' % (alias, alias)
-                             for alias in self.server.packages.keys() ] ),
+                             for alias in self.server.controller.packages.keys() ] ),
                 mode_sw))
 
     def display_packages_list (self):
@@ -746,8 +745,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         <th>Annotations</th>
         </tr>
         """))
-        for alias in self.server.packages.keys():
-            p = self.server.packages[alias]
+        for alias in self.server.controller.packages.keys():
+            p = self.server.controller.packages[alias]
             self.wfile.write (_("""<tr>
             <td><a href="/packages/%(alias)s">%(alias)s</a></td>
             <td align="center"><a href="/admin/load?alias=%(alias)s&uri=%(uri)s">Reload</a>|<a href="/admin/delete?alias=%(alias)s">Drop</a>|<a href="/admin/save?alias=%(alias)s">Save</a></td>
@@ -761,8 +760,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def default_options(self, alias):
         return {
-            u'package_url': self.server.get_url_for_alias(alias),
-            u'snapshot': self.server.imagecaches[alias],
+            u'package_url': self.server.controller.get_url_for_alias(alias),
+            u'snapshot': self.server.controller.packages[alias].imagecache,
             u'namespace_prefix': config.data.namespace_prefix,
             u'config': config.data.web,
             }
@@ -825,11 +824,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 expr = "here/%s" % tales
 
-            context = advene.model.tal.context.AdveneContext (here=self.server.packages[alias],
+            context = advene.model.tal.context.AdveneContext (here=self.server.controller.packages[alias],
                                                               options=self.default_options(alias))
             context.pushLocals()
             context.setLocal('request', query)
-            context.setLocal('package', self.server.packages[alias])
+            context.setLocal('package', self.server.controller.packages[alias])
 
             try:
                 objet = context.evaluateValue (expr)
@@ -937,11 +936,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 expr = "here/%s" % tales
 
-            context = advene.model.tal.context.AdveneContext (here=self.server.packages[alias],
+            context = advene.model.tal.context.AdveneContext (here=self.server.controller.packages[alias],
                                                               options=self.default_options(alias))
             context.pushLocals()
             context.setLocal('request', query)
-            context.setLocal('package', self.server.packages[alias])
+            context.setLocal('package', self.server.controller.packages[alias])
             
             try:
                 objet = context.evaluateValue (expr)
@@ -1020,7 +1019,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                      <h1>View <em>%s</em> created</h1>
                      <p>The view <a href="%s">%s</a> was successfully created.</p>
                      """) % (v.id,
-                            "/packages/%s/views/%s" % (self.server.aliases[objet],
+                            "/packages/%s/views/%s" % (self.server.controller.aliases[objet],
                                                       v.id),
                             v.id))
                  else:
@@ -1162,7 +1161,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             pkgid = parameters[0]
         try:
-            p = self.server.packages[pkgid]
+            p = self.server.controller.packages[pkgid]
         except:
             self.send_error (501, _("<p>Package <strong>%s</strong> not loaded</p>")
                              % pkgid)
@@ -1263,31 +1262,34 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		return
         elif command == 'delete':
             alias = query['alias']
-            self.server.unregister_package (alias)
+            self.server.controller.sunregister_package (alias)
             self.start_html (_("Package %s deleted") % alias, duplicate_title=True)
             self.display_loaded_packages (embedded=True)
         elif command == 'save':
-            if self.server.controller:
-                self.server.controller.save_package()
-            else:
+            alias=None
+            try:
                 alias = query['alias']
-                p = self.server.packages[alias]
-                p.save (name=p.uri)
-                self.start_html (_("Package %s saved") % alias, duplicate_title=True)
-                self.display_loaded_packages (embedded=True)
+            except:
+                pass
+            if alias is not None:
+                # Save a specific package
+                self.server.controller.save_package(alias=alias)
+            else:
+                self.server.controller.save_package()
+                alias='default'
+            self.start_html (_("Package %s saved") % alias, duplicate_title=True)
+            self.display_loaded_packages (embedded=True)
         elif command == 'reset':
             # Reset packages list
-            self.server.packages = {}
-            self.server.aliases = {}
-            self.server.imagecaches = {}
+            self.server.controller.reset()
             self.start_html (_('Server reset'), duplicate_title=True)
             self.display_loaded_packages (embedded=True)
         elif command == 'status':
             self.start_html (_('Server status'), duplicate_title=True)
             self.wfile.write (_("""
             <p>%d package(s) loaded.</p>
-            """) % len(self.server.packages))
-            if len(self.server.packages) > 0:
+            """) % len(self.server.controller.packages))
+            if len(self.server.controller.packages) > 0:
                 self.display_loaded_packages (embedded=True)
             else:
                 self.wfile.write (_("<p>No package loaded</p>"))
@@ -1462,12 +1464,15 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(_("""<p>Welcome on the <a href="http://liris.cnrs.fr/advene/">Advene</a> webserver run by %s on %s:%d.</p>""") %
                          (config.data.userid, self.server.server_name, self.server.server_port))
 
-        if len(self.server.packages) == 0:
+        if len(self.server.controller.packages) == 0:
             self.wfile.write(_(""" <p>No package is loaded. You can access the <a href="/admin">server administration page</a>.<p>"""))
         else:
-            if len(self.server.packages) == 1:
-                alias=self.server.packages.keys()[0]
-                p=self.server.packages[alias]
+            # It must be 2, since we always have a 'advene' key.  but
+            # there could be some strange case where the advene key is
+            # not present?
+            if len(self.server.controller.packages) <= 2:
+                alias='advene'
+                p=self.server.controller.packages['advene']
                 defaultview=p.getMetaData(config.data.namespace, 'default_utbv')
                 if defaultview:
                     mes=_("""the <a href="/packages/%s/view/%s">loaded package's default view</a>""") % (alias, defaultview)
@@ -1536,7 +1541,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         @type query: dict
         """
 
-        alias = self.server.aliases[p]
+        alias = self.server.controller.aliases[p]
 
         if query is None:
             query={}
@@ -1823,12 +1828,9 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
     This is a specialized HTTP Server dedicated to serving Advene
     packages content, and interacting with a media player.
 
-    @ivar packages: a dictionary of (alias, package)
-    @type packages: dict
-    @ivar aliases: a dictionary of (package, alias)
-    @type aliases: dict
-    @ivar imagecaches: a dictionary of (alias, imagecache)
-    @type imagecaches: dict
+    @ivar controller: the controller
+    @type controller: advene.core.controller.Controller
+
     @ivar shouldrun: indicates whether the server should stop listening
     @type shouldrun: boolean
     @ivar urlbase: the base URL for this server
@@ -1843,17 +1845,13 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
 
         When running embedded, the server should be provided a
         C{controller} parameter, responsible for handling package
-        loading and player interaction. When running standalone, the
-        server will its own controller.
+        loading and player interaction.
 
         @param controller: the controller
-        @type controller: any, should provide some methods (C{load_package}, C{update_status}, ...)
+        @type controller: advene.core.controller.Controller
         @param port: the port number the server should bind to
         @type port: int
         """
-        self.packages = {}     # Key: alias,  value: package
-        self.aliases = {}      # Key: package, value: alias
-        self.imagecaches = {}  # Key: alias, value: imagecache
         self.shouldrun = True  # Set to False to indicate the end of the
                                # server_forawhile method
 
@@ -1866,14 +1864,6 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.logger.setLevel(logging.INFO)
 
 	self.is_embedded = True
-
-        if controller is None:
-            # If "controller" is not specified, adveneserver will handle
-            # itself package loading
-            controller = self
-	    self.is_embedded = False
-	    self.current_stbv = None
-	    self.event_queue = []
 
         self.controller=controller
         self.urlbase = u"http://localhost:%d/" % port
@@ -1896,123 +1886,6 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
 
         BaseHTTPServer.HTTPServer.__init__(self, ('', port),
                                            AdveneRequestHandler)
-
-    def get_url_for_alias (self, alias=None):
-        if alias is not None:
-            return urllib.basejoin(self.urlbase, "/packages/" + alias)
-        else:
-            return None
-
-    # Controller methods: used when the webserver is its own controller
-    def log (self, msg, level=None):
-	print msg
-
-    def load_package (self, uri=None, alias="advene"):
-        """Loads a package.
-
-        This method is provided in order to make the server able to
-        run standalone, and be its own controller.
-
-        @param uri: the URI of the package. Create a new package if it is I{None} or C{""}
-        @type uri: string
-        @param alias: the alias of the loaded package
-        @type alias: string
-        """
-
-        if uri is None or uri == "":
-            p = Package (uri="",
-                         source=config.data.advenefile(config.data.templatefile))
-            p.author = config.data.userid
-        else:
-            p = Package (uri=uri)
-
-        mediafile = p.getMetaData (config.data.namespace,
-                                   "mediafile")
-        if mediafile is not None and mediafile != "":
-            id_ = vlclib.mediafile2id (mediafile)
-	    self.player.playlist_clear()
-	    self.player.playlist_add_item(mediafile)
-
-	try:
-	    ic=imagecache.ImageCache (id_)
-	except Exception, e:
-	    print "Exception in webserver.load_package imagecache"
-	    import traceback
-	    s=StringIO.StringIO()
-	    traceback.print_exc (file = s)
-	    self.log(_("Raised exception in update_status: %s") % str(e), s.getvalue())
-	    ic=imagecache.ImageCache()
-
-        self.register_package (alias=alias,
-                               package=p,
-                               imagecache=ic)
-
-    def update_status (self, status=None, position=None, notify=True):
-	if self.is_embedded:
-	    self.controller.queue_action(self.controller.update_status,
-					 status, position, notify)
-	else:
-	    position_before=self.player.current_position_value
-	    try:
-		if self.player.playlist_get_list():
-		    self.player.update_status (status, position)
-	    except Exception, e:
-		# FIXME: we should catch more specific exceptions and
-		# devise a better feedback than a simple print
-		import traceback
-		s=StringIO.StringIO()
-		traceback.print_exc (file = s)
-		self.log(_("Raised exception in update_status: %s") % str(e), s.getvalue())
-        return True
-
-    def activate_stbv  (self, *args, **kw):
-        self.controller.queue_action(self.controller.activate_stbv,
-                                     *args, **kw)
-        return True
-
-    def queue_action(self, method, *args, **kw):
-	# In standalone mode, we execute the actions immedialy,
-	# without queueing them
-	method(*args, **kw)
-        return True
-
-    # End of controller methods
-
-    def register_package (self, alias, package, imagecache):
-        """Register a package in the server loaded packages lists.
-
-        @param alias: the package's alias
-        @type alias: string
-        @param package: the package itself
-        @type package: advene.model.Package
-        @param imagecache: the imagecache associated to the package
-        @type imagecache: advene.core.ImageCache
-        """
-        self.packages[alias] = package
-        self.aliases[package] = alias
-        self.imagecaches[alias] = imagecache
-        if self.controller.player is not None and self.controller.player.is_active():
-            if self.controller == self:
-                mediafile = package.getMetaData (config.data.namespace,
-                                                 "mediafile")
-            else:
-                mediafile=self.controller.get_default_media()
-            if (mediafile is not None and mediafile != "" and
-                mediafile not in self.controller.player.playlist_get_list()):
-                if isinstance(mediafile, unicode):
-                    mediafile=mediafile.encode('utf8')
-                self.controller.player.playlist_add_item (mediafile)
-
-    def unregister_package (self, alias):
-        """Remove a package from the loaded packages lists.
-
-        @param alias: the  package alias
-        @type alias: string
-        """
-        p = self.packages[alias]
-        del (self.aliases[p])
-        del (self.packages[alias])
-        del (self.imagecaches[alias])
 
     def verify_request (self, request, client_address):
         """Access control method.
@@ -2066,21 +1939,17 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
                 self.handle_request()
 
 if __name__ == "__main__":
-    import atexit
-    import advene.core.mediacontrol as mediacontrol
+    from advene.core.controller  import Controller
 
-    server = AdveneWebServer(controller=None)
-    f=mediacontrol.PlayerFactory()
-    server.player=f.get_player()
-    atexit.register (server.stop_player)
+    controller=Controller()
+    server = AdveneWebServer(controller)
 
-    if len(sys.argv) > 1:
-        for uri in sys.argv[1:]:
-            alias = posixpath.basename(posixpath.splitext(uri)[0])
-            server.load_package (uri=uri, alias=alias)
+    for uri in config.data.args:
+        print "Loading ", uri
+        controller.load_package (uri=uri)
+
     print _("Server ready to serve requests.")
     server.serve_forawhile ()
 
     # Cleanup the ZipPackage directories
     ZipPackage.cleanup()
-    

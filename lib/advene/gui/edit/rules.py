@@ -879,14 +879,7 @@ if __name__ == "__main__":
     else:
         filename=sys.argv[1]
 
-    class Controller:
-        """Dummy controller."""
-        def __init__(self):
-            self.annotation=None
-            self.package=None
-            self.active_annotations=[]
-            self.player=None
-            self.imagecache={}
+    from advene.core.controller import Controller
 
     controller=Controller()
 

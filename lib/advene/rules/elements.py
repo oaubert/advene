@@ -900,6 +900,7 @@ class ECACatalog:
         'PlayerResume':           _("Player resume"),
         'PlayerSet':              _("Going to a given position"),
         'PackageLoad':            _("Loading a new package"),
+        'PackageActivate':        _("Activating a new package"),
         'PackageSave':            _("Saving the package"),
         'ViewActivation':         _("Start of the dynamic view"),
         'ApplicationStart':       _("Start of the application"),

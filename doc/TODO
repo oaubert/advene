@@ -1,3 +1,7 @@
+* Search everywhere for imagecache, idgenerator, modified -> package attributes
+
+* allow to specify the browser for open_url in preferences
+
 * fix bug in snapshot when vout == x11
 
 * check http://chardet.feedparser.org/
