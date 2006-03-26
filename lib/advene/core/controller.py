@@ -464,9 +464,12 @@ class AdveneController:
     def get_title(self, element, representation=None):
         return vlclib.get_title(self, element, representation)
 
-    def get_default_media (self):
-        mediafile = self.package.getMetaData (config.data.namespace,
-                                              "mediafile")
+    def get_default_media (self, package=None):
+        if package is None:
+            package=self.package
+
+        mediafile = package.getMetaData (config.data.namespace,
+                                         "mediafile")
         if mediafile is None or mediafile == "":
             return ""
         m=self.dvd_regexp.match(mediafile)
@@ -505,7 +508,9 @@ class AdveneController:
                     break
         return mediafile
 
-    def set_default_media (self, uri):
+    def set_default_media (self, uri, package=None):
+        if package is None:
+            package=self.package
 	self.cached_duration = 0
         m=self.dvd_regexp.match(uri)
         if m:
@@ -513,7 +518,7 @@ class AdveneController:
             uri="dvd@%s:%s" % (title, chapter)
         if isinstance(uri, unicode):
             uri=uri.encode('utf8')
-        self.package.setMetaData (config.data.namespace, "mediafile", uri)
+        package.setMetaData (config.data.namespace, "mediafile", uri)
         if m:
             uri=self.player.dvd_uri(title, chapter)
         self.player.playlist_clear()
@@ -653,6 +658,26 @@ class AdveneController:
             self.package = None
             self.current_alias = None
         self.packages['advene']=self.package
+
+        # Reset the cached duration
+        duration = self.package.getMetaData (config.data.namespace, "duration")
+        if duration is not None:
+            self.cached_duration = long(duration)
+        else:
+            self.cached_duration = 0
+
+        mediafile = self.get_default_media()
+        if mediafile is not None and mediafile != "":
+            if self.player.is_active():
+                if mediafile not in self.player.playlist_get_list ():
+                    # Update the player playlist
+                    if isinstance(mediafile, unicode):
+                        mediafile=mediafile.encode('utf8')
+                    self.player.playlist_clear()
+                    self.player.playlist_add_item (mediafile)
+	else:
+	    self.player.playlist_clear()
+
         self.notify ("PackageActivate", package = self.package)
 
     def reset(self):
@@ -720,24 +745,9 @@ class AdveneController:
             self.log (", ".join(l))
             return True
 
-        # Get the cached duration
-        duration = self.package.getMetaData (config.data.namespace, "duration")
-        if duration is not None:
-            self.cached_duration = long(duration)
-        else:
-            self.cached_duration = 0
-
 	self.package.imagecache.clear ()
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
-            if self.player.is_active():
-                if mediafile not in self.player.playlist_get_list ():
-                    # Update the player playlist
-                    if isinstance(mediafile, unicode):
-                        mediafile=mediafile.encode('utf8')
-                    self.player.playlist_clear()
-                    self.player.playlist_add_item (mediafile)
-
             # Load the imagecache
             id_ = vlclib.mediafile2id (mediafile)
             self.package.imagecache.load (id_)
@@ -745,8 +755,6 @@ class AdveneController:
             for a in self.package.annotations:
                 self.package.imagecache.init_value (a.fragment.begin)
                 self.package.imagecache.init_value (a.fragment.end)
-	else:
-	    self.player.playlist_clear()
 
         # Activate the default STBV
         default_stbv = self.package.getMetaData (config.data.namespace, "default_stbv")
