@@ -323,14 +323,19 @@ class TimeLine(AdhocView):
         """
         self.layer_position.clear()
         self.minimum = 0
+        oldmax=self.maximum
         duration = package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
             self.maximum = long(duration)
         else:
             b,e=self.bounds()
             self.maximum = e
+        if self.maximum != oldmax:
+            self.update_layout()
         self.layout.foreach(self.remove_widget, self.layout)
         self.populate()
+        if self.maximum != oldmax:
+            self.draw_marks()
         # Add empty annotation types:
         for at in package.annotationTypes:
             self.layer_position.setdefault (at,
