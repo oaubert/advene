@@ -538,6 +538,23 @@ class TimeLine(AdhocView):
                     self.desactivate_annotation(r.members[1])
         return True
 
+    def deactivate_all(self):
+	"""Deactivate all annotations.
+	"""
+	def desactivate(widget):
+	    try:
+		if widget.active:
+		    widget.active = False
+		    for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+				  gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+				  gtk.STATE_PRELIGHT):
+			widget.modify_bg (style, self.colors['inactive'])
+	    except AttributeError:
+		pass
+	    return True
+	self.layout.foreach(desactivate)
+	return True
+
     def create_annotation_widget(self, annotation):
         u2p = self.unit2pixel
         title=vlclib.get_title(self.controller, annotation)
@@ -626,6 +643,11 @@ class TimeLine(AdhocView):
     def update_position (self, pos):
         self.update_current_mark (pos)
         return True
+
+    def position_reset(self):
+	# The position was reset. Deactive active annotations.
+	self.deactivate_all()
+	return True
 
     def mark_press_cb(self, eventbox, event, t):
         # What is the current relative position of the
