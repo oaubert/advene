@@ -283,6 +283,10 @@ class Config(object):
 			  type="int", default=None, metavar="PORT_NUMBER",
 			  help="Webserver port number (default 1234).")
 
+	parser.add_option("-m", "--webserver-mode", dest="mode", action="store",
+			  type="int", default=None, metavar="WEBSERVER_MODE",
+			  help="0: deactivated ; 1: mainloop mode ; 2: threaded mode.")
+
 	(self.options, self.args) = parser.parse_args()
 	if self.options.version:
 	    print self.get_version_string()
@@ -297,6 +301,9 @@ class Config(object):
 	"""
 	if self.options.port is not None:
 	    self.webserver['port'] = self.options.port
+	if self.options.mode is not None:
+	    self.webserver['mode'] = self.options.mode
+
 	if self.options.player is not None:
 	    self.player['plugin']=self.options.player
 	self.player['embedded']=self.options.embedded
@@ -526,4 +533,3 @@ data.read_config_file ()
 # We process options last, so that command-line options can
 # override preferences and .ini file.
 data.process_options()
-
