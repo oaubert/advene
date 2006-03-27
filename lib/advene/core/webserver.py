@@ -26,21 +26,14 @@ URL syntax
 
   The URL syntax is described in L{AdveneRequestHandler}.
 
-Embedding AdveneServer
-======================
+  The server can run standalone or embedded in another application
+  (typically the C{advene} GUI).  In all cases, Webserver depends on
+  AdveneController.
 
-  The server can run standalone or embedded in another application (typically
-  the C{advene} GUI).
-
-  To embed the server in another application, it must be instanciated
-  with the following parameters : C{controller}. See the
-  L{AdveneWebServer.__init__} documentation for more details.
-
-Running AdveneServer standalone
-===============================
-
-  The AdveneServer can be run indepently. In this case, it can maintain
-  and give access to a number of different packages.
+  It is the responsibility of the embedding application to handle
+  incoming requests to server.fileno() (typically through a
+  gobject.io_input_add()). See the L{AdveneWebServer.__init__}
+  documentation for more details.
 """
 
 import advene.core.config as config
