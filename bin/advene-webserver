@@ -64,18 +64,17 @@ if not os.path.exists(config.data.path['resources']):
     fix_paths(maindir)
 
 if __name__ == '__main__':
-    import atexit
-    import sre
-    import advene.core.mediacontrol as mediacontrol
-    from advene.core.webserver import AdveneWebServer
     from advene.core.controller import AdveneController
     from advene.model.zippackage import ZipPackage
+
+    # Enable threaded webserver in controller:
+    config.data.webserver['mode']=2
 
     controller=AdveneController()
     controller.init(config.data.args)
 
     print "Server ready to serve requests."
-    controller.server.serve_forawhile ()
+    controller.serverthread.join()
 
     # Cleanup the ZipPackage directories
     ZipPackage.cleanup()
