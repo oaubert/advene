@@ -61,6 +61,9 @@ class HTMLView(AdhocView):
 	    self.component=w
 	elif engine == 'mozembed':
 	    w=gtkmozembed.MozEmbed()
+	    # A profile must be initialized, cf
+	    # http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq19.018.htp
+	    w.set_profile_path("/tmp", "foobar")
 
 	    def open_uri(c, uri):
 		# FIXME: uri is a gobject.GPointer...
