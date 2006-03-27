@@ -287,6 +287,7 @@ class AdveneController:
 		u'config': config.data.web,
 		})
 	c.addGlobal(u'package', self.package)
+	c.addGlobal(u'packages', self.packages)
 	c.addGlobal(u'player', self.player)
 	for name, method in config.data.global_methods.iteritems():
 	    c.addMethod(name, method)
