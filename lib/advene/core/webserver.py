@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -459,7 +459,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if isinstance(f, unicode):
                         f=f.encode('utf8')
                     self.server.controller.player.playlist_add_item (f)
-                    
+
                 if len(param) != 0:
                     # First parameter is the position
                     position = param[0]
@@ -677,7 +677,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             switch='raw'
         mode_sw="""%s (<a href="/admin/display/%s">switch to %s</a>)""" % (
             self.server.displaymode, switch, switch)
-        
+
         self.wfile.write(_("""
         <p><a href="/admin/status">Display the server status</a></p>
         <p><a href="/admin/access">Update the access list</a></p>
@@ -931,7 +931,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                                            alias=alias)
             context.pushLocals()
             context.setLocal('request', query)
-            
+
             try:
                 objet = context.evaluateValue (expr)
             except AdveneException, e:
@@ -1066,8 +1066,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         element view. Its value is in fact the URL displaying the
         correct view, and the browser is redirected.
         """
-        #self.do_GET_debug ()a
-        #return
         (scheme, netloc, stringpath, params, stringquery, fragment) = urlparse.urlparse (self.path)
         stringpath = stringpath.replace ('%3A', ':')
         # Strip trailing /
@@ -1209,7 +1207,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         display mode. The data should be available as a parameter
         named C{mode}, which is either C{default} or C{raw}, or as
         last element in the URI, for instance
-        C{/admin/display/navigation}        
+        C{/admin/display/navigation}
 
         @param l: the access path as a list of elements,
                   with the initial one (C{access}) omitted
@@ -1343,14 +1341,14 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		if a.parameters:
 		    # There are parameters. Display a link to the form.
 		    self.wfile.write(_("""<li>%s: %s""")
-				     % (name, 
+				     % (name,
 					d[name]))
 		    self.wfile.write(a.as_html("/action/%s" % name))
 	        else:
 		    # No parameter, we can directly link the action
 		    self.wfile.write("""<li><a href="%s">%s</a>: %s"""
 				     % ("/action/%s" % name,
-					name, 
+					name,
 					d[name]))
                 self.wfile.write("</li>\n")
             self.wfile.write("</ul>")
@@ -1361,7 +1359,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         action = l[0]
         del l[0]
-        
+
         try:
             ra=catalog.get_action(action)
         except KeyError:
@@ -1550,16 +1548,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         #        It is a hack because obviously, p is not a "view"
         context.setLocal (u'view', p)
 
-        if 'epoz' in tales:
-            context.addGlobal (u"epozmacros", self.server.epoz_macros)
-
         try:
             objet = context.evaluateValue (expr)
         except AdveneException, e:
             self.start_html (_("Error"), duplicate_title=True)
             self.wfile.write (_("""The TALES expression %s is not valid.""") % tales)
-            #print "Exc %s" % type(repr(e))
-            #print "a %s" % unicode(e.args)
             self.wfile.write (unicode(e.args[0]).encode('utf-8'))
             return
 
@@ -1614,24 +1607,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         # Last case: default or raw
 
-        # FIXME: epoz support is kind of a hack for now.
-        # Should test the result of view(). If it starts with <html>,
-        # consider it a complete file and do not generate headers.
-        # *or* use a specific mimetype (text/x-full-html)
-
         # FIXME: we should return a meaningful title
 
         if displaymode != "raw":
             displaymode = "navigation"
 
-        if 'epoz' in tales:
-            self.start_html(title=_("TALES evaluation - %s") % tales,
-                            head_section=self.server.epoz_head,
-                            body_attributes=self.server.epoz_body_attributes,
-                            mode=displaymode)
-        else:
-            self.start_html(title=_("TALES evaluation - %s") % tales,
-                            mode=displaymode)
+	self.start_html(title=_("TALES evaluation - %s") % tales,
+			mode=displaymode)
 
         # Display content
         if hasattr (objet, 'view') and callable (objet.view):
@@ -1855,20 +1837,6 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         self.displaymode = config.data.webserver['displaymode']
         self.authorized_hosts = {'127.0.0.1': 'localhost'}
 
-        # Compile EPOZ template file
-        fname=os.path.join(config.data.path['web'], 'epoz', 'epozmacros.html')
-        templateFile = open (fname, 'r')
-        self.epoz_macros = simpletal.simpleTAL.compileHTMLTemplate (templateFile)
-        templateFile.close()
-        self.epoz_head = """<script src="/data/epoz/dom2_events.js" type="text/javascript"></script>
-        <script src="/data/epoz/sarissa.js" type="text/javascript"></script>
-        <script src="/data/epoz/epozeditor.js" type="text/javascript"></script>
-        <link href="/data/epoz/epozstyles.css" type="text/css" rel="stylesheet">
-        <link href="/data/epoz/epozcustom.css" type="text/css" rel="stylesheet">
-        """
-        self.epoz_body_attributes="""onload="epoz = initEpoz(document.getElementById('epoz-editor')); epozui = epoz.getTool('ui');" """
-
-
         BaseHTTPServer.HTTPServer.__init__(self, ('', port),
                                            AdveneRequestHandler)
 
@@ -1879,7 +1847,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
         self.logger.addHandler(handler)
         return True
-        
+
     def verify_request (self, request, client_address):
         """Access control method.
 
