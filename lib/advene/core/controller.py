@@ -34,6 +34,7 @@ import sre
 import webbrowser
 import urllib
 import StringIO
+import gobject
 
 import advene.core.config as config
 
@@ -181,6 +182,35 @@ class AdveneController:
                                                 prefix="advene_plugins_user")
         except OSError:
             pass
+
+    def self_loop(self):
+	"""Autonomous gobject loop for controller.
+	"""
+	self.mainloop = gobject.MainLoop()
+        if config.data.webserver['mode'] == 1:
+	    # Run webserver in gobject mainloop
+	    if self.server:
+		self.log(_("Using Mainloop input handling for webserver..."))
+		gobject.io_add_watch (self.server,
+				      gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
+				      self.handle_http_request)
+	    else:
+		self.log(_("No available webserver"))
+
+	def update_wrapper():
+	    """Wrapper for the application update.
+
+	    This is necessary, since update() returns a position, that
+	    may be 0, thus interpreted as False by the loop handler if
+	    we directly invoke it.
+	    """
+	    self.update()
+	    return True
+
+        gobject.timeout_add (100, update_wrapper)
+        self.notify ("ApplicationStart")
+        self.mainloop.run ()
+        self.notify ("ApplicationEnd")
 
     def load_plugins(self, directory, prefix="advene_plugins"):
         """Load the plugins from the given directory.
@@ -770,6 +800,9 @@ class AdveneController:
 
         This method is used if config.data.webserver['mode'] == 1.
         """
+        if condition in (gobject.IO_ERR, gobject.IO_HUP):  
+	    self.log("Aborted connection")
+	    return True
         # Make sure that all exceptions are catched, else the gtk mainloop
         # will not execute update_display.
         try:
