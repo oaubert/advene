@@ -279,10 +279,28 @@ class Config(object):
                           default=None,
                           help="Video player selection")
 
+	parser.add_option("-w", "--webserver-port", dest="port", action="store",
+			  type="int", default=None, metavar="PORT_NUMBER",
+			  help="Webserver port number (default 1234).")
+
 	(self.options, self.args) = parser.parse_args()
 	if self.options.version:
 	    print self.get_version_string()
 	    sys.exit(0)
+
+    def process_options(self):
+	"""Process command-line options.
+
+	This method is called after read_preferences() and
+	read_config_file(), so that we can override from the command
+	line options set in configuration files.
+	"""
+	if self.options.port is not None:
+	    self.webserver['port'] = self.options.port
+	if self.options.player is not None:
+	    self.player['plugin']=self.options.player
+	self.player['embedded']=self.options.embedded
+	return True
 
     def win32_specific_config(self):
         if self.os != 'win32':
@@ -505,3 +523,7 @@ data = Config ()
 data.read_preferences()
 # Config file (advene.ini) may override settings from preferences
 data.read_config_file ()
+# We process options last, so that command-line options can
+# override preferences and .ini file.
+data.process_options()
+
