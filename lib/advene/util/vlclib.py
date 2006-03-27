@@ -421,8 +421,8 @@ def get_id(source, id_):
 # Root elements
 root_elements = ('here', 'nothing', 'default', 'options', 'repeat', 'request',
                  # Root elements available in STBVs
-                 'package', 'annotation', 'relation', 'activeAnnotations',
-                 'player', 'event',
+                 'package', 'packages', 'annotation', 'relation', 
+		 'activeAnnotations', 'player', 'event',
                  # Root elements available in queries
                  'element',
                  )
