@@ -126,8 +126,6 @@ class AdveneController:
         if args is None:
             args = []
 
-        self.file_to_play, self.package_to_load=self.parse_command_line(args)
-
         # Regexp to recognize DVD URIs
         self.dvd_regexp = sre.compile("^dvd.*@(\d+):(\d+)")
 
@@ -403,35 +401,6 @@ class AdveneController:
             os.system("%s \"%s\" &" % (web_browser, url))
 
         return True
-
-    def parse_command_line (self, args):
-        """Parse command line options.
-
-        An .xml ou .azp file is considered as an annotation package.
-
-        Any filename that does not end with .xml or .azp is considered
-        as a media file. You can use the dvd keyword to specify the current
-        dvd.
-
-        @param args: the argument list
-        @type args: list
-        @return: the file to add add to playlist if one was specified and the package to load
-        @rtype: (string, string)
-        """
-	# Parsing of options is now done in config.data
-        file_to_play = None
-        package_to_load = None
-	if config.data.options.player is not None:
-	    config.data.player['plugin']=config.data.options.player
-	config.data.player['embedded']=config.data.options.embedded
-        for s in args:
-	    if s == "dvd":
-		file_to_play = "dvdsimple:///dev/dvd"
-	    elif os.path.splitext(s)[1].lower() in ('.xml', '.azp'):
-		package_to_load=s
-	    else:
-		file_to_play = s
-        return file_to_play, package_to_load
 
     def get_url_for_alias (self, alias):
         if self.server:
@@ -801,7 +770,17 @@ class AdveneController:
 
         This method is used if config.data.webserver['mode'] == 1.
         """
-        source.handle_request ()
+        # Make sure that all exceptions are catched, else the gtk mainloop
+        # will not execute update_display.
+        try:
+            source.handle_request ()
+        except socket.error, e:
+            print _("Network exception: %s") % str(e)
+        except Exception, e:
+            import traceback
+            s=StringIO.StringIO()
+            traceback.print_exc (file = s)
+            self.log(_("Got exception %s in web server.") % str(e), s.getvalue())
         return True
 
     def log (self, msg, level=None):
@@ -995,6 +974,8 @@ class AdveneController:
 
         Hence, it is a critical execution path and care should be
         taken with the code used here.
+
+	@return: the current position value
         """
         # Process the event queue
         self.process_queue()
