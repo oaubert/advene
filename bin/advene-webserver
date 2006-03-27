@@ -67,14 +67,18 @@ if __name__ == '__main__':
     from advene.core.controller import AdveneController
     from advene.model.zippackage import ZipPackage
 
-    # Enable threaded webserver in controller:
-    config.data.webserver['mode']=2
 
     controller=AdveneController()
     controller.init(config.data.args)
 
-    print "Server ready to serve requests."
-    controller.serverthread.join()
+    if config.data.webserver['mode'] == 2:
+      print "Server ready to serve requests (threaded mode)."
+      controller.serverthread.join()
+    elif config.data.webserver['mode'] == 1:
+      print "Server ready to serve requests (mainloop mode)."
+      controller.self_loop()
+    else:
+      print "Web server deactived in configuration."
 
     # Cleanup the ZipPackage directories
     ZipPackage.cleanup()
