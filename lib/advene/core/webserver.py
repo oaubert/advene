@@ -1932,17 +1932,17 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
                 self.handle_request()
 
 if __name__ == "__main__":
-    from advene.core.controller  import Controller
+    from advene.core.controller  import AdveneController
 
-    controller=Controller()
-    server = AdveneWebServer(controller)
+    controller=AdveneController()
+    controller.init(config.data.args)
 
-    for uri in config.data.args:
-        print "Loading ", uri
-        controller.load_package (uri=uri)
-
-    print _("Server ready to serve requests.")
-    server.serve_forawhile ()
+    if config.data.webserver['mode'] == 1:
+	# Warning: in this case, the controller.update() method
+	# will not be called, so dynamic views will not work.
+	# Cf bin/advene-webserver for a correct example.
+	print _("Server ready to serve requests.")
+	controller.server.serve_forawhile ()
 
     # Cleanup the ZipPackage directories
     ZipPackage.cleanup()
