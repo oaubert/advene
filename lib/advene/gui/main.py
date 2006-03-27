@@ -366,6 +366,12 @@ class AdveneGUI (Connect):
     def updated_position_cb (self, context, parameters):
         position_before=context.evaluateValue('position_before')
         self.navigation_history.append(position_before)
+	# Notify views that the position has been reset.
+	for v in self.adhoc_views:
+	    try:
+		v.position_reset ()
+	    except AttributeError:
+		pass
         return True
 
     def main (self, args=None):
