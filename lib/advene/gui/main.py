@@ -469,7 +469,7 @@ class AdveneGUI (Connect):
 		self.log(_("Using Mainloop input handling for webserver..."))
 		gobject.io_add_watch (self.controller.server,
 				      gobject.IO_IN,
-				      self.handle_http_request)
+				      self.controller.handle_http_request)
 		if config.data.os == 'win32':
 		    # Win32 workaround for the reactivity problem
 		    def sleeper():
@@ -913,24 +913,6 @@ class AdveneGUI (Connect):
                                                           self.controller.get_title(self.controller.package))))
         return True
     
-    def handle_http_request (self, source, condition):
-        """Handle a HTTP request.
-
-        This method is used if config.data.webserver['mode'] == 1.
-        """
-        # Make sure that all exceptions are catched, else the gtk mainloop
-        # will not execute update_display.
-        try:
-            source.handle_request ()
-        except socket.error, e:
-            print _("Network exception: %s") % str(e)
-        except Exception, e:
-            import traceback
-            s=StringIO.StringIO()
-            traceback.print_exc (file = s)
-            self.log(_("Got exception %s in web server.") % str(e), s.getvalue())
-        return True
-
     def log (self, msg, level=None):
         """Add a new log message to the logmessage window.
 
