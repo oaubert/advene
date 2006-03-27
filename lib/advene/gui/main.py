@@ -374,6 +374,15 @@ class AdveneGUI (Connect):
 		pass
         return True
 
+    def player_stop_cb (self, context, parameters):
+	# Notify views that the position has been reset.
+	for v in self.adhoc_views:
+	    try:
+		v.position_reset ()
+	    except AttributeError:
+		pass
+        return True
+
     def main (self, args=None):
         """Mainloop : Gtk mainloop setup.
 
@@ -427,6 +436,7 @@ class AdveneGUI (Connect):
                'RelationTypeDelete'),
               self.relationtype_lifecycle),
             ("PlayerSet", self.updated_position_cb),
+            ("PlayerStop", self.player_stop_cb),
             ("ViewActivation", self.on_view_activation) 
             ):
             if isinstance(events, basestring):
