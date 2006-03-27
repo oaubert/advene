@@ -33,8 +33,6 @@ import sre
 import advene.model.tal.context
 import advene.rules.elements
 
-import advene.rules.actions
-
 class ECAEngine:
     """ECAEngine class.
 
@@ -73,8 +71,6 @@ class ECAEngine:
         self.ruledict = {}
         self.controller=controller
         self.catalog=advene.rules.elements.ECACatalog()
-        for a in advene.rules.actions.DefaultActionsRepository(controller=controller).get_default_actions():
-            self.catalog.register_action(a)
         self.modifying_events = self.catalog.modifying_events
         self.scheduler=sched.scheduler(time.time, time.sleep)
         self.schedulerthread=threading.Thread(target=self.scheduler.run)

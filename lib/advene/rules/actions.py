@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -27,6 +27,148 @@ from advene.model.tal.context import AdveneTalesException
 
 import cStringIO
 
+name="Default core actions"
+
+def register(controller=None):
+    ac=DefaultActionsRepository(controller)
+
+    controller.register_action(RegisteredAction(
+            name="Message",
+            method=ac.Message,
+            description=_("Display a message"),
+            parameters={'message': _("Message to display")},
+            category='gui',
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="PlayerStart",
+            method=ac.PlayerStart,
+            description=_("Start the player"),
+            parameters={'position': _("Start position (in ms)")},
+            category='player',
+            )
+			       )
+
+    controller.register_action(RegisteredAction(
+            name="PlayerGoto",
+            method=ac.PlayerGoto,
+            description=_("Go to the given position"),
+            parameters={'position': _("Goto position (in ms)")},
+            category='player',
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="PlayerStop",
+            method=ac.PlayerStop,
+            description=_("Stop the player"),
+            category='player',
+	    #            parameters={'position': _("Stop position (in ms)")}
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="PlayerPause",
+            method=ac.PlayerPause,
+            description=_("Pause the player"),
+	    #            parameters={'position': _("Pause position (in ms)")}
+            category='player',
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="PlayerResume",
+            method=ac.PlayerResume,
+            description=_("Resume the player"),
+	    #            parameters={'position': _("Resume position (in ms)")}
+            category='player',
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="Snapshot",
+            method=ac.Snapshot,
+            description=_("Take a snapshot"),
+	    #            parameters={'position': _("Snapshot position (in ms)")}
+            category='advanced',
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="Caption",
+            method=ac.Caption,
+            description=_("Display a caption"),
+            parameters={'message': _("Message to display"),
+                        'duration': _("Duration of the caption")},
+            category='advanced',
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="AnnotationCaption",
+            method=ac.AnnotationCaption,
+            description=_("Caption the annotation"),
+            parameters={'message': _("Message to display")},
+            category='advanced',
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="DisplayMarker",
+            method=ac.DisplayMarker,
+            description=_("Display a marker"),
+            parameters={'shape': _("Marker shape (square, circle, triangle)"),
+                        'color': _("Marker color"),
+                        'x': _("x-position (percentage of screen)"),
+                        'y': _("y-position (percentage of screen)"),
+                        'size': _("Size (arbitrary units)"),
+                        'duration': _("Duration of the display in ms")},
+            category='advanced',
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="AnnotationMute",
+            method=ac.AnnotationMute,
+            description=_("Zero the volume during the annotation"),
+            category='player',
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="SoundOff",
+            method=ac.SoundOff,
+            description=_("Zero the volume"),
+            category='player',
+            )
+			       )
+    controller.register_action(RegisteredAction(
+            name="SoundOn",
+            method=ac.SoundOn,
+            description=_("Restore the volume"),
+            category='player',
+            )
+			       )
+
+    controller.register_action(RegisteredAction(
+            name="ActivateSTBV",
+            method=ac.ActivateSTBV,
+            description=_("Activate a STBV"),
+            parameters={'viewid': _("STBV id")},
+            category='gui',
+            )
+			       )
+
+    controller.register_action(RegisteredAction(
+            name="SendUserEvent",
+            method=ac.SendUserEvent,
+            description=_("Send a user event"),
+            parameters={'identifier': _("Identifier"),
+                        'delay': _("Delay in ms before sending the event.")},
+            category='generic',
+            )
+			       )
+
+    controller.register_action(RegisteredAction(
+            name="OpenURL",
+            method=ac.OpenURL,
+            description=_("Open a URL in the web browser"),
+            parameters={'url': _("URL")},
+            category='gui',
+            )
+			       )
+
 class DefaultActionsRepository:
     def __init__(self, controller=None):
         self.controller=controller
@@ -42,149 +184,6 @@ class DefaultActionsRepository:
         else:
             result=default_value
         return result
-
-    def snapshot2png(self, image, output=None):
-        return vlclib.snapshot2png(image, output)
-        
-    def get_default_actions(self):
-        l=[]
-        l.append(RegisteredAction(
-            name="Message",
-            method=self.Message,
-            description=_("Display a message"),
-            parameters={'message': _("Message to display")},
-            category='gui',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="PlayerStart",
-            method=self.PlayerStart,
-            description=_("Start the player"),
-            parameters={'position': _("Start position (in ms)")},
-            category='player',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="PlayerGoto",
-            method=self.PlayerGoto,
-            description=_("Go to the given position"),
-            parameters={'position': _("Goto position (in ms)")},
-            category='player',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="PlayerStop",
-            method=self.PlayerStop,
-            description=_("Stop the player"),
-            category='player',
-#            parameters={'position': _("Stop position (in ms)")}
-            )
-                 )
-        l.append(RegisteredAction(
-            name="PlayerPause",
-            method=self.PlayerPause,
-            description=_("Pause the player"),
-#            parameters={'position': _("Pause position (in ms)")}
-            category='player',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="PlayerResume",
-            method=self.PlayerResume,
-            description=_("Resume the player"),
-#            parameters={'position': _("Resume position (in ms)")}
-            category='player',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="Snapshot",
-            method=self.Snapshot,
-            description=_("Take a snapshot"),
-#            parameters={'position': _("Snapshot position (in ms)")}
-            category='advanced',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="Caption",
-            method=self.Caption,
-            description=_("Display a caption"),
-            parameters={'message': _("Message to display"),
-                        'duration': _("Duration of the caption")},
-            category='advanced',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="AnnotationCaption",
-            method=self.AnnotationCaption,
-            description=_("Caption the annotation"),
-            parameters={'message': _("Message to display")},
-            category='advanced',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="DisplayMarker",
-            method=self.DisplayMarker,
-            description=_("Display a marker"),
-            parameters={'shape': _("Marker shape (square, circle, triangle)"),
-                        'color': _("Marker color"),
-                        'x': _("x-position (percentage of screen)"),
-                        'y': _("y-position (percentage of screen)"),
-                        'size': _("Size (arbitrary units)"),
-                        'duration': _("Duration of the display in ms")},
-            category='advanced',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="AnnotationMute",
-            method=self.AnnotationMute,
-            description=_("Zero the volume during the annotation"),
-            category='player',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="SoundOff",
-            method=self.SoundOff,
-            description=_("Zero the volume"),
-            category='player',
-            )
-                 )
-        l.append(RegisteredAction(
-            name="SoundOn",
-            method=self.SoundOn,
-            description=_("Restore the volume"),
-            category='player',
-            )
-                 )
-
-        l.append(RegisteredAction(
-            name="ActivateSTBV",
-            method=self.ActivateSTBV,
-            description=_("Activate a STBV"),
-            parameters={'viewid': _("STBV id")},
-            category='gui',
-            )
-                 )
-
-        l.append(RegisteredAction(
-            name="SendUserEvent",
-            method=self.SendUserEvent,
-            description=_("Send a user event"),
-            parameters={'identifier': _("Identifier"),
-                        'delay': _("Delay in ms before sending the event.")},
-            category='generic',
-            )
-                 )
-
-        l.append(RegisteredAction(
-            name="OpenURL",
-            method=self.OpenURL,
-            description=_("Open a URL in the web browser"),
-            parameters={'url': _("URL")},
-            category='gui',
-            )
-                 )
-
-        return l
 
     def Message(self, context, parameters):
         """Display a message.
@@ -225,20 +224,20 @@ class DefaultActionsRepository:
             position=long(position)
         self.controller.update_status ("stop", position)
         return True
-        
+
     def PlayerPause (self, context, parameters):
         """Pause the player."""
         position=self.parse_parameter(context, parameters, 'position', None)
         if position is not None:
-            position=long(position)        
+            position=long(position)
         self.controller.update_status ("pause", position)
         return True
-        
+
     def PlayerResume (self, context, parameters):
         """Resume the playing."""
         position=self.parse_parameter(context, parameters, 'position', None)
         if position is not None:
-            position=long(position)        
+            position=long(position)
         self.controller.update_status ("resume", position)
         return True
 
@@ -315,7 +314,7 @@ class DefaultActionsRepository:
                                                                                      color)
 
         message="""<svg version='1' preserveAspectRatio='xMinYMin meet' viewBox='0 0 800 600'>%s</svg>""" % code
-        
+
         c=self.controller
         begin = c.player.relative_position
         if duration is not None:
@@ -350,10 +349,10 @@ class DefaultActionsRepository:
         """Zero the video volume."""
         v=self.controller.player.sound_get_volume()
         if v > 0:
-            config.data.volume = v        
+            config.data.volume = v
         self.controller.player.sound_set_volume(0)
         return True
-    
+
     def SoundOn (self, context, parameters):
         """Restore the video volume."""
         if config.data.volume != 0:
@@ -386,7 +385,7 @@ class DefaultActionsRepository:
 
         self.controller.notify('UserEvent', identifier=identifier, delay=delay)
         return True
-    
+
     def AnnotationMute(self, context, parameters):
         """Zero the volume for the duration of the annotation."""
         annotation=context.evaluateValue('annotation')
@@ -410,4 +409,3 @@ class DefaultActionsRepository:
             return True
         self.controller.open_url(url)
         return True
-

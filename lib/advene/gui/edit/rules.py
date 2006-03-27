@@ -886,9 +886,6 @@ if __name__ == "__main__":
     import advene.rules.actions
     catalog=advene.rules.elements.ECACatalog()
 
-    for a in advene.rules.actions.DefaultActionsRepository(controller=controller).get_default_actions():
-            catalog.register_action(a)
-
     ruleset=RuleSet()
     if filename.endswith('.xml'):
         ruleset.from_xml(catalog=catalog, uri=filename)

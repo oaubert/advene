@@ -1052,8 +1052,6 @@ if __name__ == "__main__":
     import actions
     controller=None
     catalog=ECACatalog()
-    for a in actions.DefaultActionsRepository(controller=controller).get_default_actions():
-            catalog.register_action(a)
     r=RuleSet()
     r.from_xml(catalog=catalog, uri=filename)
     print "Read %d rules." % len(r)

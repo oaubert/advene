@@ -47,6 +47,7 @@ import advene.core.idgenerator
 
 import advene.rules.elements
 import advene.rules.ecaengine
+import advene.rules.actions
 
 from advene.model.package import Package
 from advene.model.zippackage import ZipPackage
@@ -161,6 +162,8 @@ class AdveneController:
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
         self.event_queue = []
+	# Load default actions
+	advene.rules.actions.register(self)	
 
         # Used in update_status to emit appropriate notifications
         self.status2eventname = {
