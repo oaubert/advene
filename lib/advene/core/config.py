@@ -221,6 +221,9 @@ class Config(object):
         # Reaction time offset (in ms) used when setting annotations
         self.reaction_time=200
 
+        # MIMEtypes that can be edited by the TextContentHandler
+        self.text_mimetypes = ( 'application/x-advene-structured' )
+
 	# Drag and drop parameters for URIed element
         self.target_type = {
             'annotation' : 42,
