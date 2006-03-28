@@ -304,6 +304,20 @@ class AdveneGUI (Connect):
                 pass
         return True
 
+    def resource_lifecycle(self, context, parameters):
+        """Method used to update the active views.
+
+        It will propagate the event.
+        """
+        resource=context.evaluateValue('resource')
+        event=context.evaluateValue('event')
+        for v in self.adhoc_views:
+            try:
+                v.update_resource(resource=resource, event=event)
+            except AttributeError:
+                pass
+        return True
+
     def schema_lifecycle(self, context, parameters):
         """Method used to update the active views.
 
@@ -427,6 +441,8 @@ class AdveneGUI (Connect):
               self.view_lifecycle ),
             ( ('QueryCreate', 'QueryEditEnd', 'QueryDelete'),
               self.query_lifecycle),
+            ( ('ResourceCreate', 'ResourceEditEnd', 'ResourceDelete'),
+              self.resource_lifecycle),
             ( ('SchemaCreate', 'SchemaEditEnd', 'SchemaDelete'),
               self.schema_lifecycle),
             ( ('AnnotationTypeCreate', 'AnnotationTypeEditEnd', 
