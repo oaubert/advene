@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -46,6 +46,9 @@ class LogWindow(AdhocView):
         self.view_name = _("URL stack")
 	self.view_id = 'urlstackview'
 	self.close_on_package_load = False
+        self.contextual_actions = (
+            (_("Clear"), self.clear_data),
+            )
 
         self.controller=controller
         self.tooltips=gtk.Tooltips()
@@ -55,7 +58,7 @@ class LogWindow(AdhocView):
         # It should be sorted in timestamp order, so that the expiry
         # can be more quickly done
         self.data=[]
-        self.widget=self.build_widget()        
+        self.widget=self.build_widget()
         self.window=None
 
     def close(self, *p):
@@ -71,19 +74,9 @@ class LogWindow(AdhocView):
         self.datawidget=gtk.VBox()
         sw.add_with_viewport(self.datawidget)
 
-        hb=gtk.HButtonBox()
-
-        b=gtk.Button(stock=gtk.STOCK_CLEAR)
-        b.connect("clicked", lambda b: self.clear_data())
-        hb.pack_start(b, expand=False)
-
-	w.buttonbox = hb
-
-        w.pack_start(hb, expand=False)
-
         return w
 
-    def clear_data(self):
+    def clear_data(self, *p):
         """Clear the logwindow."""
         for item in self.data:
             self.datawidget.remove(item[4])
@@ -92,7 +85,7 @@ class LogWindow(AdhocView):
 
     def update_position(self, position):
         """Regenerate the display according to the data.
-        
+
         This method is regularly called by the GUI."""
         while self.data:
             t=time.time()
@@ -119,7 +112,7 @@ class LogWindow(AdhocView):
             if t[2] == message and t[3] == url ]
         if l:
             return True
-            
+
         hb=gtk.HBox()
 
         b=gtk.Button(message)
@@ -136,7 +129,7 @@ class LogWindow(AdhocView):
         hb.pack_start(b, expand=False)
 
         hb.show_all()
-        
+
         self.datawidget.pack_start(hb, expand=False)
         self.data.append( (time.time(), position, message, url, hb) )
         return True
