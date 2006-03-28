@@ -78,6 +78,15 @@ class ViewBook(AdhocView):
 		item = gtk.MenuItem(_("Close"))
 		item.connect("activate", close_view, view)
 		menu.append(item)
+
+                try:
+                    for label, action in view.contextual_actions:
+                        item = gtk.MenuItem(label)
+                        item.connect("activate", action, view)
+                        menu.append(item)
+                except AttributeError:
+                    pass
+
 		menu.show_all()
 		menu.popup(None, None, None, 0, gtk.get_current_event_time())
 		return True
