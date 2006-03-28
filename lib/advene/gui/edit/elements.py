@@ -857,7 +857,7 @@ class TextContentHandler (ContentHandler):
 	res=0
         if 'text' in mimetype:
             res=70
-	if mimetype == 'text/plain':
+	if mimetype == 'text/plain' or mimetype in config.data.text_mimetypes:
 	    res=80
 	return res
     can_handle=staticmethod(can_handle)
