@@ -20,9 +20,9 @@
 Generic popup menu used by the various Advene views.
 """
 
-#import pygtk
-#pygtk.require('2.0')
 import gtk
+import sre
+import os
 
 from gettext import gettext as _
 
@@ -97,6 +97,32 @@ class Menu:
                                                        parent=parent,
                                                        controller=self.controller)
         cr.popup()
+        return True
+
+    def insert_resource_data(self, widget, parent=None):
+        filename=advene.gui.util.get_filename(title=_("Choose the file to insert"))
+        if filename is None:
+            return True
+        basename = os.path.basename(filename)
+        id_=sre.sub('[^a-zA-Z0-9_.]', '_', basename)
+        if id_ != basename:
+            while True:
+                id_ = advene.gui.util.entry_dialog(title=_("Select a valid identifier"),
+                                                   text=_("The filename %s contains invalid characters\nthat have been replaced.\nYou can modify this identifier if necessary:") % filename,
+                                                   default=id_)
+                if id_ is None:
+                    # Edition cancelled
+                    return True
+                elif sre.match('^[a-zA-Z0-9_.]+$', id_):
+                    break
+
+        size=os.stat(filename).st_size
+        f=open(filename, 'r')
+        el=f.read(size + 2)
+        f.close()
+        parent[id_]=el
+        self.controller.notify('ResourceCreate', 
+                               resource=el)
         return True
 
     def edit_element (self, widget, el):
@@ -336,6 +362,7 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         add_item(_("Create a new folder..."), self.create_element, Resources, element)
         add_item(_("Create a new resource file..."), self.create_element, ResourceData, element)
+        add_item(_("Insert a new resource file..."), self.insert_resource_data, element)
         return
 
     def make_schema_menu(self, element, menu):
