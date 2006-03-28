@@ -32,6 +32,9 @@ class HistoryNavigation(AdhocView):
         self.view_name = _("Navigation history")
 	self.view_id = 'historyview'
 	self.close_on_package_load = False
+        self.contextual_actions = (
+            (_("Clear"), self.clear),
+            )
 
         self.controller=controller
         self.history=history
@@ -111,13 +114,5 @@ class HistoryNavigation(AdhocView):
         self.mainbox=mainbox
 
 	v.add(sw)
-	
-	hb=gtk.HButtonBox()
-        b=gtk.Button(stock=gtk.STOCK_CLEAR)
-        b.connect("clicked", self.clear)
-        hb.pack_start(b, expand=False)
-
-	v.pack_start(hb, expand=False)
-        v.buttonbox = hb
 
         return v
