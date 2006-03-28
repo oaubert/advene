@@ -54,6 +54,9 @@ class TimeLine(AdhocView):
         self.view_name = _("Timeline")
 	self.view_id = 'timeline'
 	self.close_on_package_load = False
+        self.contextual_actions = (
+            (_("Refresh"), self.refresh),            
+            )
 
         self.list = l
         self.controller=controller
@@ -173,6 +176,10 @@ class TimeLine(AdhocView):
 
         self.draw_current_mark()
 	self.widget = self.get_full_widget()
+
+    def refresh(self, *p):
+        self.update_model(self.controller.package)
+        return True
 
     def selection_handle(self, widget, selection_data, info, time_stamp):
         p = str(self.selected_position)
