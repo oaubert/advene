@@ -932,6 +932,9 @@ class ECACatalog:
         'QueryCreate',
         'QueryEditEnd',
         'QueryDelete',
+        'ResourceCreate',
+        'ResourceEditEnd',
+        'ResourceDelete',
         ))
 
     # Basic events are exposed to the user when defining new STBV
