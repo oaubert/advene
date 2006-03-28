@@ -608,8 +608,8 @@ class TreeWidget(AdhocView):
         self.widget.treeview.set_model(self.model)
         # Return to old path if possible
         if oldpath is not None:
-            self.expand_to_path(oldpath)
-            self.set_cursor(oldpath)
+            self.widget.treeview.expand_to_path(oldpath)
+            self.widget.treeview.set_cursor(oldpath)
         return
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
