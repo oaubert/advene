@@ -550,8 +550,8 @@ class TreeWidget(AdhocView):
             # FIXME: remove_element is incorrect for the moment
             #        so do a global update
 	    #print "Remove element"
-            self.model.remove_element (element)
-            #self.update_model(element.rootPackage)
+            #self.model.remove_element (element)
+            self.update_model(element.rootPackage)
         else:
             return "Unknown event %s" % event
         return
@@ -590,6 +590,10 @@ class TreeWidget(AdhocView):
         self.update_element(relationtype, event)
         return
 
+    def update_resource(self, resource=None, event=None):
+        self.update_element(resource, event)
+        return
+    
     def update_model(self, package):
         """Update the model with a new package."""
         print "Treeview: update model %s" % str(package)
