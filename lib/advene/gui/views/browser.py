@@ -142,17 +142,36 @@ class Browser(AdhocView):
         self.view_name = _("Package browser")
 	self.view_id = 'browserview'
 	self.close_on_package_load = True
+        self.contextual_actions = [
+                    (_("Display annotations in timeline"), self.display_timeline),
+                    ]
 
         self.element=element
         self.controller=controller
 	self.callback = callback
+
+        if self.callback:
+            def validate_path(*p):
+                if self.callback:
+                    p=self.pathlabel.get_text()
+                    self.close()
+                    self.callback(p)
+                return True
+
+            def validate_value(*p):
+                if self.callback:
+                    v="string:%s" % self.valuelabel.get_text()
+                    self.close()
+                    self.callback(v)
+                return True
+            self.contextual_actions.append( (_("Insert path"), validate_path) )
+            self.contextual_actions.append( (_("Insert value"),  validate_value) )
 
         self.path=[element]
         # 640 / 4
         self.column_width=160
         self.rootcolumn=None
         self.current_value=None
-	self.view_button=None
         self.widget=self.build_widget()
 
     def clicked_callback(self, columnbrowser, attribute):
@@ -228,18 +247,14 @@ class Browser(AdhocView):
             val=val[:77]+'...'
         self.valuelabel.set_text(val)
         self.current_value=element
-	if self.view_button:
-	    if (hasattr(self.current_value, 'viewableType') and
-		self.current_value.viewableType == 'annotation-list'
-		or isinstance(self.current_value, list)):
-		self.view_button.set_sensitive(True)
-	    else:
-		self.view_button.set_sensitive(False)
-	    return
 
-    def display_timeline(self, button=None):
+    def display_timeline(self, *p):
         """Display the results as annotations in a timeline.
         """
+        if not (hasattr(self.current_value, 'viewableType') and
+                self.current_value.viewableType == 'annotation-list'):
+            self.controller.log(_("Result is not a list of annotations"))
+            return True
         duration = self.controller.cached_duration
         if duration <= 0:
             if self.controller.package.annotations:
@@ -312,41 +327,7 @@ class Browser(AdhocView):
         self.valuelabel = gtk.Label("here")
         self.valuelabel.set_selectable(True)
         vbox.pack_start(name_label(_("Value"), self.valuelabel), expand=False)
- 
 	
-	buttonbox = gtk.HButtonBox()
-
-	vbox.pack_start(buttonbox, expand=False)
-
-        self.view_button = gtk.Button (stock=gtk.STOCK_FIND)
-        self.view_button.connect ("clicked", self.display_timeline)
-        self.view_button.set_sensitive(False)
-
-        def validate_path(e):
-	    p=self.pathlabel.get_text()
-            self.close()
-            self.callback(p)
-            return True
-
-        def validate_value(e):
-	    v="string:%s" % self.valuelabel.get_text()
-            self.close()
-            self.callback(v)
-            return True
-
-	if self.callback:
-	    b = gtk.Button (_("Insert path"))
-	    b.connect ("clicked", validate_path)
-	    buttonbox.add (b)
-
-	    b = gtk.Button (_("Insert value"))
-	    b.connect ("clicked", validate_value)
-	    buttonbox.add (b)
-
-	buttonbox.pack_start(self.view_button, expand=False)
-
-	vbox.buttonbox = buttonbox
-
         vbox.show_all()
         return vbox
 
