@@ -854,7 +854,9 @@ class TextContentHandler (ContentHandler):
     """Create a textview edit form for the given element.
     """
     def can_handle(mimetype):
-	res=50
+	res=0
+        if 'text' in mimetype:
+            res=70
 	if mimetype == 'text/plain':
 	    res=80
 	return res
@@ -1006,6 +1008,116 @@ class TextContentHandler (ContentHandler):
         vbox.add(scroll_win)
         return vbox
 config.data.register_content_handler(TextContentHandler)
+
+class GenericContentHandler (ContentHandler):
+    """Generic content handler form.
+    
+    It allows to load/save the content to/from a file.
+    """
+    def can_handle(mimetype):
+	res=50
+	return res
+    can_handle=staticmethod(can_handle)
+
+    def __init__ (self, element, controller=None, **kw):
+        self.element = element
+        self.controller=controller
+        self.editable = True
+        self.fname=None
+        self.view = None
+        self.tooltips=gtk.Tooltips()
+
+    def set_editable (self, boolean):
+        self.editable = boolean
+
+    def set_filename(self, fname):
+        self.filename_entry.set_text(fname)
+        self.fname = fname
+        return fname
+
+    def update_element (self):
+        """Update the element fields according to the values in the view."""
+        if not self.editable:
+            return False
+        if self.fname:
+            size=os.stat(self.fname).st_size
+            f=open(self.fname, 'r')
+            self.element.data = f.read(size + 2)
+            f.close()
+        return True
+
+    def key_pressed_cb (self, win, event):
+        if event.state & gtk.gdk.CONTROL_MASK:
+            if event.keyval == gtk.keysyms.s:
+                self.content_save()
+                return True
+            elif event.keyval == gtk.keysyms.o:
+                self.content_open()
+                return True
+        return False
+
+    def content_open(self, b=None, fname=None):
+        if fname is None:
+            fname=advene.gui.util.get_filename(default_file=self.fname)
+        if fname is not None:
+            try:
+                f=open(fname, 'r')
+            except IOError, e:
+		advene.gui.util.message_dialog(
+                    _("Cannot read the data:\n%s") % unicode(e),
+		    icon=gtk.MESSAGE_ERROR)
+                return True
+            self.set_filename(fname)
+        return True
+
+    def content_save(self, b=None, fname=None):
+        if fname is None:
+            fname=advene.gui.util.get_filename(title=_("Save content to..."),
+                                               action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                               button=gtk.STOCK_SAVE,
+                                               default_file=self.fname)
+        if fname is not None:
+            if os.path.exists(fname):
+                os.rename(fname, fname + '~')
+            try:
+                f=open(fname, 'w')
+            except IOError, e:
+		advene.gui.util.message_dialog(
+                    _("Cannot save the data:\n%s") % unicode(e),
+		    icon=gtk.MESSAGE_ERROR)
+                return True
+            self.set_filename(fname)
+        return True
+
+    def get_view (self):
+        """Generate a view widget for editing text attribute."""
+        vbox=gtk.VBox()
+
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS)
+
+        b=gtk.ToolButton()
+        b.set_stock_id(gtk.STOCK_OPEN)
+        b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
+        b.connect("clicked", self.content_open)
+        tb.insert(b, -1)
+
+        b=gtk.ToolButton()
+        b.set_stock_id(gtk.STOCK_SAVE)
+        b.set_tooltip(self.tooltips, _("Save to a file (C-s)"))
+        b.connect("clicked", self.content_save)
+        tb.insert(b, -1)
+
+        tb.show_all()
+        vbox.pack_start(tb, expand=False)
+
+        self.filename_entry = gtk.Entry()
+        self.filename_entry.set_editable (self.editable)
+        vbox.connect ("key-press-event", self.key_pressed_cb)
+
+        vbox.pack_start(self.filename_entry, expand=False)
+        return vbox
+config.data.register_content_handler(GenericContentHandler)
 
 class EditFragmentForm(EditForm):
     def __init__(self, element=None, controller=None, editable=True):
