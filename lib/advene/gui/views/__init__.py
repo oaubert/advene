@@ -25,6 +25,9 @@ class AdhocView:
     def __init__(self, controller=None):
 	self.view_name = "Generic adhoc view"
 	self.view_id = 'generic'
+        # List of couples (label, action) that are use to
+        # generate contextual actions
+        self.contextual_actions = ()
 
 	# If True, the view should be closed when loading a new package.
 	# Else, it can respond to a package load and update
@@ -81,6 +84,15 @@ class AdhocView:
             self.controller.gui.register_view (self)
             window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
             self.controller.gui.init_window_size(window, self.view_id)
+
+        # Insert contextual_actions in buttonbox
+        try:
+            for label, action in self.contextual_actions:
+                b=gtk.Button(label)
+                b.connect("clicked", action)
+                window.buttonbox.add(b)
+        except AttributeError:
+            pass
 
         b = gtk.Button(stock=gtk.STOCK_CLOSE)
 
