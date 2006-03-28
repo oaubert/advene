@@ -115,7 +115,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image32">
+			<widget class="GtkImage" id="image34">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -137,7 +137,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image33">
+			<widget class="GtkImage" id="image35">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -452,6 +452,7 @@
 	      <property name="tooltip" translatable="yes">Loaded packages</property>
 	      <property name="label" translatable="yes">Packages</property>
 	      <property name="use_underline">True</property>
+	      <signal name="activate" handler="on_package_list_activate" last_modification_time="Tue, 28 Mar 2006 14:50:51 GMT"/>
 
 	      <child>
 		<widget class="GtkMenu" id="package_list_menu">

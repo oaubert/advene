@@ -736,9 +736,11 @@ class AdveneGUI (Connect):
             if a == 'advene':
                 continue
             if p == self.controller.package:
-                name = a + ' (*)'
+                name = '> ' + a
             else:
-                name = a
+                name = '  ' + a
+            if p._modified:
+                name += _(' (modified)')
             i=gtk.MenuItem(label=unicode(name), use_underline=False)
             i.connect('activate', activate_package, a)
             self.tooltips.set_tip(i, _("Activate %s") % self.controller.get_title(p))
@@ -1875,6 +1877,10 @@ class AdveneGUI (Connect):
 
     def on_about_web_button_clicked(self, button=None, data=None):
         self.controller.open_url('http://liris.cnrs.fr/advene/')
+        return True
+
+    def on_package_list_activate(self, menu=None):
+        self.update_package_list()
         return True
 
 if __name__ == '__main__':
