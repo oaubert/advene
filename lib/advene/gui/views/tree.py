@@ -424,7 +424,9 @@ class TreeWidget(AdhocView):
         self.view_name = _("Tree view")
 	self.view_id = 'treeview'
 	self.close_on_package_load = False
-
+        self.contextual_actions = (
+            (_("Refresh"), self.refresh),            
+            )
         self.package = package
         self.controller=controller
         self.modelclass=modelclass
@@ -462,8 +464,6 @@ class TreeWidget(AdhocView):
 	sw.treeview = tree_view
 
         return sw
-
-
 
     def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
         print "Drag data received"
@@ -539,6 +539,10 @@ class TreeWidget(AdhocView):
                         widget.expand_row(path, True)
                         retval=True
         return retval
+
+    def refresh(self, *p):
+        self.update_model(self.package)
+        return True
 
     def update_element(self, element=None, event=None):
 	#print "Update element ", str(element), str(event)
