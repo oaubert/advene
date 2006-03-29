@@ -80,6 +80,8 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
 class Resources:
     """Class accessing a resource dir.
     """
+    __metaclass__ = auto_properties
+
     DIRECTORY_TYPE=object()
 
     def __init__(self, package, resourcepath, parent=None):
@@ -156,7 +158,10 @@ class Resources:
     def __delitem__(self, key):
         self.filenames = None
         fname=os.path.join( self.dir_, key )
-        os.unlink(fname)
+	if os.path.isdir(fname):
+	    os.rmdir(fname)
+	else:
+	    os.unlink(fname)
 
     def getUri (self):
         """Return the URI of the element.
@@ -164,3 +169,5 @@ class Resources:
         p=urllib.quote(self.resourcepath, safe='')
         return "%s#data_%s" % (self.package.uri, p)
 
+    def getId(self):
+        return self.resourcepath.split('/')[-1]
