@@ -31,7 +31,6 @@ from util.auto_properties import auto_properties
 
 import _impl
 import advene.model.annotation as annotation
-import advene.model.content as content
 import advene.model.modeled as modeled
 import advene.model.query as query
 import advene.model.schema as schema
