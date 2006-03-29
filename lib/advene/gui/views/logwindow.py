@@ -21,15 +21,9 @@ This view defines a new action, Log. It will be invoked with a text
 and an associated URL as parameter.  Every invocation will be stored
 in a timestamped clickable list."""
 
-import sys
 import time
 
 import advene.core.config as config
-from advene.model.package import Package
-from advene.model.annotation import Annotation
-from advene.model.schema import Schema, AnnotationType
-from advene.model.bundle import AbstractBundle
-from advene.model.view import View
 from advene.gui.views import AdhocView
 
 import advene.util.vlclib as vlclib
@@ -37,7 +31,6 @@ import advene.util.vlclib as vlclib
 from gettext import gettext as _
 
 import gtk
-import gobject
 
 import advene.rules.elements
 
