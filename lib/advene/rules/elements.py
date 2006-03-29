@@ -21,11 +21,8 @@ The event framework makes it possible to bind actions to specific
 events that match a condition."""
 
 import sre
-import sys
 import sets
 import StringIO
-
-import urllib
 
 import xml.dom.ext.reader.PyExpat
 
@@ -1052,7 +1049,6 @@ if __name__ == "__main__":
     else:
         filename=sys.argv[1]
 
-    import actions
     controller=None
     catalog=ECACatalog()
     r=RuleSet()
