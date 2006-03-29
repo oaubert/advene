@@ -18,8 +18,6 @@
 """VLC library functions."""
 
 import advene.core.config as config
-import os
-import sys
 import time
 import StringIO
 import inspect
@@ -362,7 +360,7 @@ def unimport_element(package, element, controller):
     p=package
     if element.viewableClass == 'view':
         p.views.remove(element)
-        controller.notify("ViewDelete", view=v)
+        controller.notify("ViewDelete", view=element)
     elif element.viewableClass == 'schema':
         p.schemas.remove(element)
         controller.notify("SchemaDelete", schema=element)
