@@ -329,6 +329,7 @@ class Config(object):
     def get_registry_value (self, subkey, name):
         if self.os != 'win32':
             return None
+	import _winreg
         try:
             a=_winreg.HKEY_LOCAL_MACHINE
         except NameError:
