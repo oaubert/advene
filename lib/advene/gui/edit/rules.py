@@ -882,7 +882,6 @@ if __name__ == "__main__":
 
     controller=Controller()
 
-    import advene.rules.actions
     catalog=advene.rules.elements.ECACatalog()
 
     ruleset=RuleSet()
