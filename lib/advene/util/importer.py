@@ -197,7 +197,7 @@ class GenericImporter(object):
             p=Package(uri=filename, source=None)
             if filename is not None:
                 p.setMetaData(config.data.namespace_prefix['dc'],
-                              description,
+                              'description',
                               _("Converted from %s") % filename)
             self.update_statistics('package')
         else:
