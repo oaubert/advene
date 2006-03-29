@@ -22,19 +22,15 @@ import sys
 
 # Advene part
 import advene.core.config as config
-from advene.model.package import Package
-from advene.model.exception import AdveneException
 
-import advene.model.tal.context
 import advene.gui.util
 from advene.gui.views import AdhocView
+from advene.gui.views.timeline import TimeLine
 import advene.util.vlclib as vlclib
-import inspect
 
 from gettext import gettext as _
 
 import gtk
-import gobject
 
 class BrowserColumn:
     def __init__(self, element=None, name="", callback=None, parent=None):
@@ -261,10 +257,10 @@ class Browser(AdhocView):
                 duration = max([a.fragment.end for a in self.controller.package.annotations])
             else:
                 duration = 0
-        t=advene.gui.views.timeline.TimeLine(self.current_value,
-                                             minimum=0,
-                                             maximum=duration,
-                                             controller=self.controller)
+        t=TimeLine(self.current_value,
+		   minimum=0,
+		   maximum=duration,
+		   controller=self.controller)
         t.popup()
         return True
 
@@ -332,6 +328,7 @@ class Browser(AdhocView):
         return vbox
 
 if __name__ == "__main__":
+    from advene.model.package import Package
     if len(sys.argv) < 2:
         print _("Should provide a package name")
         sys.exit(1)
