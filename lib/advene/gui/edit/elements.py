@@ -36,9 +36,8 @@ import os
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.bundle import AbstractBundle
 from advene.model.view import View
-from advene.model.resources import Resources, ResourceData
+from advene.model.resources import ResourceData
 from advene.model.query import Query
 
 from advene.gui.edit.timeadjustment import TimeAdjustment
@@ -47,18 +46,15 @@ from advene.gui.views.browser import Browser
 import advene.util.vlclib as vlclib
 import advene.gui.util
 
-import advene.model.tal.global_methods as global_methods
 import advene.gui.edit.rules
 import advene.rules.actions
-import xml.dom
-import StringIO
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
 
 # Common content MIME-types
 common_content_mimetypes = [
     'text/plain',
-    'application/x-advene/structured',
+    'application/x-advene-structured',
     'application/x-advene-zone',
     ]
 
