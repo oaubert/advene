@@ -51,7 +51,6 @@ import simpletal.simpleTALES as simpleTALES
 
 import sys
 import os
-import posixpath
 import urlparse
 import urllib
 import cgi
@@ -59,7 +58,6 @@ import socket
 import select
 import mimetypes
 import logging
-import StringIO
 
 import imghdr
 
@@ -1894,6 +1892,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
 
 if __name__ == "__main__":
     from advene.core.controller  import AdveneController
+    from advene.model.zippackage import ZipPackage
 
     controller=AdveneController()
     controller.init(config.data.args)
