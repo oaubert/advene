@@ -144,9 +144,9 @@ class CreateElementPopup(object):
     def is_valid_id(self, i):
         if self.type_ == ResourceData:
             # Allow filename extensions for ResourceData
-            return sre.match('^[a-zA-Z0-9_.]+$', i)
+            return sre.match(r'^[a-zA-Z0-9_\.]+$', i)
         else:
-            return sre.match('^[a-zA-Z0-9_]+$', i)
+            return sre.match(r'^[a-zA-Z0-9_]+$', i)
     
     def do_create_element(self):
         """Create the element according to the widget data.
