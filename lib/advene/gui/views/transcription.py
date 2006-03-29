@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -31,6 +31,7 @@ import advene.util.vlclib as vlclib
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
+import advene.gui.util
 import advene.gui.popup
 
 class TranscriptionView(AdhocView):
@@ -38,12 +39,20 @@ class TranscriptionView(AdhocView):
         self.view_name = _("Transcription")
         self.view_id = 'transcriptionview'
         self.close_on_package_load = True
+        self.contextual_actions = (
+            (_("Refresh"), self.refresh),
+	    (_("Validate"), self.validate),
+            )
 
         self.controller=controller
         self.package=controller.package
         self.model = annotationtype
         # Annotation where the cursor is set
         self.currentannotation=None
+
+	# Used when batch-updating modified annotations when closing
+	# the window
+	self.ignore_updates = False
 
         self.modified=False
 
@@ -79,13 +88,58 @@ class TranscriptionView(AdhocView):
             self.generate_buffer_content()
         return True
 
+    def close(self):
+	l=self.check_modified()
+	if l:
+	    if self.options['representation']:
+		# FIXME: we could handle at least the simple representation (here/content/parsed/foobar)
+		advene.gui.util.message_dialog(label=_("%d annotation(s) were modified\nbut we cannot propagate the modifications\nsince the representation parameter is used.") % len(l))
+	    else:
+		if advene.gui.util.message_dialog(label=_("%d annotations were modified.\nDo you want to update their content?") % len(l),
+						  icon=gtk.MESSAGE_QUESTION):
+		    self.ignore_updates = True
+		    self.update_modified(l)
+	AdhocView.close(self)
+	return True
+
+    def check_modified(self):
+        b=self.textview.get_buffer()
+	modified = []
+	for a in self.model.annotations:
+	    beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
+	    enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
+	    if b.get_text(beginiter, enditer) != self.representation(a):
+		modified.append(a)
+	return modified
+
+    def update_modified(self, l):
+        b=self.textview.get_buffer()
+	for a in l:
+	    beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
+	    enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
+	    a.content.data = b.get_text(beginiter, enditer)
+	    self.controller.notify("AnnotationEditEnd", annotation=a)
+	return True
+
+    def refresh(self, *p):
+	self.update_model()
+	return True
+
+    def validate(self, *p):
+	l=self.check_modified()
+	if l:
+	    self.ignore_updates = True
+	    self.update_modified(l)
+	    self.ignore_updates = False
+	return True
+
     def build_widget(self):
         mainbox = gtk.VBox()
 
         if self.controller.gui:
             toolbar=self.controller.gui.get_player_control_toolbar()
             mainbox.pack_start(toolbar, expand=False)
-            
+
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         sw.set_resize_mode(gtk.RESIZE_PARENT)
@@ -137,6 +191,14 @@ class TranscriptionView(AdhocView):
 
         return mainbox
 
+    def representation(self, a):
+	if self.options['representation']:
+	    rep=vlclib.get_title(self.controller, a,
+				 representation=self.options['representation'])
+	else:
+	    rep=a.content.data
+	return rep
+
     def generate_buffer_content(self):
         b=self.textview.get_buffer()
         # Clear the buffer
@@ -154,13 +216,7 @@ class TranscriptionView(AdhocView):
                                  left_gravity=True)
             mark.set_visible(self.options['display-bounds'])
 
-            if self.options['representation']:
-                rep=vlclib.get_title(self.controller, a, 
-                                     representation=self.options['representation'])
-            else:
-                rep=a.content.data
-
-            b.insert_at_cursor(unicode(rep))
+            b.insert_at_cursor(unicode(self.representation(a)))
             mark = b.create_mark("e_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
                                  left_gravity=True)
@@ -215,7 +271,7 @@ class TranscriptionView(AdhocView):
         textview.get_buffer().move_mark_by_name('insert', it)
         textview.get_buffer().move_mark_by_name('selection_bound', it)
         self.update_current_annotation()
-        return True
+        return False
 
     def move_cursor_cb(self, textview, step_size, count, extend_selection):
         self.update_current_annotation()
@@ -279,6 +335,9 @@ class TranscriptionView(AdhocView):
 
     def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
+	if self.ignore_updates:
+	    return True
+
         if event == 'AnnotationActivate':
             self.activate_annotation(annotation)
             return True
