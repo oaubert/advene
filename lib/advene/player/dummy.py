@@ -180,7 +180,7 @@ class Player:
         return None
 
     def all_snapshots(self):
-        self.log("all_snapshots %s" % str(position))
+        self.log("all_snapshots")
         return [ None ]
     
     def display_text (self, message, begin, end):
