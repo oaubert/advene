@@ -19,8 +19,11 @@
 """
 
 import sys
+import sre
 
 import gtk
+
+import advene.core.config as config
 
 # Advene part
 from advene.model.package import Package
@@ -33,6 +36,8 @@ from gettext import gettext as _
 from advene.gui.views import AdhocView
 import advene.gui.util
 import advene.gui.popup
+
+parsed_representation = sre.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 
 class TranscriptionView(AdhocView):
     def __init__ (self, controller=None, annotationtype=None, separator="  "):
@@ -66,6 +71,11 @@ class TranscriptionView(AdhocView):
             'representation': '',
             }
 
+        repr=self.model.getMetaData(config.data.namespace, 'representation')
+	if not sre.match('^\s*$', repr):
+	    # There is a standard representation for the type.
+	    self.options['representation'] = repr
+
         self.widget=self.build_widget()
 
     def edit_options(self, button):
@@ -91,8 +101,7 @@ class TranscriptionView(AdhocView):
     def close(self):
 	l=self.check_modified()
 	if l:
-	    if self.options['representation']:
-		# FIXME: we could handle at least the simple representation (here/content/parsed/foobar)
+	    if self.options['representation'] and not parsed_representation.match(self.options['representation']):
 		advene.gui.util.message_dialog(label=_("%d annotation(s) were modified\nbut we cannot propagate the modifications\nsince the representation parameter is used.") % len(l))
 	    else:
 		if advene.gui.util.message_dialog(label=_("%d annotations were modified.\nDo you want to update their content?") % len(l),
@@ -113,11 +122,22 @@ class TranscriptionView(AdhocView):
 	return modified
 
     def update_modified(self, l):
+	m=parsed_representation.match(self.options['representation'])
+	if m:
+	    # We have a simple representation (here/content/parsed/name)
+	    # so we can update the name field.
+	    name=m.group(1)
+	    reg = sre.compile('^' + name + '=(.+?)$', sre.MULTILINE)
+	    def update(a, text):
+		a.content.data = reg.sub(name + '=' + text, a.content.data)
+	else:
+	    def update(a, text):
+		a.content.data = text
         b=self.textview.get_buffer()
 	for a in l:
 	    beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
 	    enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
-	    a.content.data = b.get_text(beginiter, enditer)
+	    update(a, b.get_text(beginiter, enditer))
 	    self.controller.notify("AnnotationEditEnd", annotation=a)
 	return True
 
@@ -128,6 +148,9 @@ class TranscriptionView(AdhocView):
     def validate(self, *p):
 	l=self.check_modified()
 	if l:
+	    if self.options['representation'] and not parsed_representation.match(self.options['representation']):
+		advene.gui.util.message_dialog(label=_("Cannot validate the update.\nThe representation pattern is too complex."))
+		return True
 	    self.ignore_updates = True
 	    self.update_modified(l)
 	    self.ignore_updates = False
@@ -164,7 +187,6 @@ class TranscriptionView(AdhocView):
 
         self.textview.connect("button-press-event", self.button_press_event_cb)
         self.textview.connect_after("move-cursor", self.move_cursor_cb)
-        self.textview.connect("insert-at-cursor", self.insert_at_cursor_cb)
         self.textview.connect("populate-popup", self.populate_popup_cb)
 
         self.update_current_annotation(self.textview, None)
@@ -240,19 +262,6 @@ class TranscriptionView(AdhocView):
         menu.append(item)
 
         return False
-
-    def insert_at_cursor_cb(self, textview, s):
-        if self.currentannotation is None:
-            return False
-        self.modified=True
-        b=self.textview.get_buffer()
-        b.insert_at_cursor(s)
-        # Update the annotation's content
-        beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % self.currentannotation.id))
-        enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % self.currentannotation.id))
-        self.currentannotation.content.data = b.get_text(beginiter, enditer)
-        print "Updated value to %s" % self.currentannotation.content.data
-        return True
 
     def button_press_event_cb(self, textview, event):
         if event.button != 1:
@@ -347,9 +356,8 @@ class TranscriptionView(AdhocView):
         if event == 'AnnotationCreate':
             # If it does not exist yet, we should create it if it is now in self.list
             if annotation in self.model.annotationTypes:
-                # FIXME
-                print "Not implemented yet."
-                pass
+		# Update the whole model.
+		self.update_model()
             return True
 
         if event == 'AnnotationEditEnd':
@@ -361,7 +369,7 @@ class TranscriptionView(AdhocView):
             enditer  =b.get_iter_at_mark(endmark)
 
             b.delete(beginiter, enditer)
-            b.insert(beginiter, annotation.content.data)
+            b.insert(beginiter, unicode(self.representation(annotation)))
             # After insert, beginiter is updated to point to the end
             # of the invalidated text.
             b.move_mark(endmark, beginiter)
