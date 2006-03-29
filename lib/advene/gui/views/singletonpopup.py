@@ -90,7 +90,6 @@ class SingletonPopup(AdhocView):
     
     def build_widget(self):
         mainbox=gtk.VBox()
-        window.add(mainbox)
         
         self.vbox = gtk.VBox()
         mainbox.add(self.vbox)
