@@ -22,7 +22,6 @@ Imagecache module for advene
 import advene.core.config as config
 
 import os
-import cStringIO
 
 class TypedString(str):
     """String with a mimetype attribute.
