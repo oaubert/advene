@@ -37,9 +37,7 @@ from advene.model.query import Query
 from advene.rules.elements import RuleSet, Rule, Event, Action
 
 import advene.gui.util
-import advene.gui.edit.rules
 import advene.gui.edit.elements
-import advene.rules.actions
 
 element_label = {
     Package: _("Package"),
