@@ -21,15 +21,9 @@
 import sys
 
 import gtk
-import gobject
-import pango
 
 # Advene part
 from advene.model.package import Package
-from advene.model.annotation import Annotation, Relation
-from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.bundle import AbstractBundle
-from advene.model.view import View
 from advene.gui.edit.properties import EditWidget
 
 import advene.util.vlclib as vlclib
@@ -37,8 +31,6 @@ import advene.util.vlclib as vlclib
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-import advene.gui.edit.elements
-import advene.gui.edit.create
 import advene.gui.popup
 
 class TranscriptionView(AdhocView):
