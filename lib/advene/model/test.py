@@ -19,8 +19,6 @@ import unittest
 
 import xml.dom.ext.reader.PyExpat
 
-from xml.dom.Text import Text
-
 from modeled import Modeled
 
 class ModeledTestCase(unittest.TestCase):
