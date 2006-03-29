@@ -23,19 +23,26 @@ import time
 import gtk
 
 from gettext import gettext as _
+from advene.gui.views import AdhocView
 
-class SingletonPopup:
+class SingletonPopup(AdhocView):
     """View displaying a unique popup.
     """
-    def __init__ (self, controller=None, autohide=False, container=None):
+    def __init__ (self, controller=None, autohide=False):
+        self.view_name = _("SingletonPopup")
+	self.view_id = 'singletonpopup'
+	self.close_on_package_load = False
+
         self.controller=controller
         # Hide the popup if there is no widget
         self.autohide = autohide
         self.widget=None
-        self.container=container
         # When should the widget be destroyed ?
         self.hidetime=None
-        self.window=self.build_widget()
+        self.widget=self.build_widget()
+
+    def close(self, *p):
+	return False
 
     def display(self, widget=None, timeout=None, title=None):
         """Display the given widget.
@@ -62,16 +69,16 @@ class SingletonPopup:
             self.widget=None
         self.hidetime=None
         if self.autohide:
-            self.window.hide()
+            self.widget.hide()
         return True
     
     def hide(self, *p, **kw):
         self.undisplay()
-        self.window.hide()
+        self.widget.hide()
         return True
 
     def show(self, *p, **kw):
-        self.window.show_all()
+        self.widget.show_all()
         return True
 
     def update_position(self, pos):
@@ -82,12 +89,6 @@ class SingletonPopup:
         return True
     
     def build_widget(self):
-        if self.container:
-            window=self.container
-        else:
-            window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-            window.set_title (_("Navigation popup"))
-
         mainbox=gtk.VBox()
         window.add(mainbox)
         
@@ -96,36 +97,5 @@ class SingletonPopup:
 
         self.widget=gtk.Label(_("Navigation popup"))
         self.vbox.add(self.widget)
-
-        if self.controller.gui:
-            self.controller.gui.register_view (self)
-
-        if self.container is None:
-            window.connect ("destroy", lambda w: True)
-            
-            hb=gtk.HButtonBox()
-            
-            b=gtk.Button(stock=gtk.STOCK_CLOSE)
-            b.connect("clicked", self.hide)
-            hb.add(b)
-            
-            mainbox.pack_start(hb, expand=False)
         
-        return window
-
-    def reparent(self, container=None):
-        """Set a new container for the singleton popup."""
-        self.container=container
-        self.widget.destroy()
-        self.vbox.destroy()
-        self.window.destroy()
-        self.window=self.build_widget()
-        return self.window
-    
-    def get_widget (self):
-        """Return the TreeView widget."""
-        return self.window
-
-    def popup(self):
-        self.window.show_all()
-        return self.window
+        return mainbox
