@@ -361,8 +361,10 @@ class DefaultActionsRepository:
         if not stbvid:
             return True
         stbv=context.evaluateValue('package/views/%s' % stbvid)
-        if stbv is not None and stbv.content.data == 'application/x-advene-ruleset':
+        if stbv is not None and stbv.content.mimetype == 'application/x-advene-ruleset':
             self.controller.activate_stbv(stbv)
+	else:
+	    self.controller.log(_("Cannot find the stbv %s") % stbvid)
         return True
 
     def SendUserEvent(self, context, parameters):
