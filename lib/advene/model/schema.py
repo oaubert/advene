@@ -16,8 +16,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 import advene.model._impl as _impl
-import advene.model.annotation as annotation
-import advene.model.bundle as bundle
 import advene.model.content as content
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
