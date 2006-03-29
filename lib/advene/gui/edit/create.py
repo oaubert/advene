@@ -25,17 +25,12 @@ import sys
 import time
 import sre
 
-#import pygtk
-#pygtk.require('2.0')
 import gtk
-import gobject
-import pango
 
 from advene.model.package import Package
 from advene.model.fragment import MillisecondFragment
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.bundle import AbstractBundle
 from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
