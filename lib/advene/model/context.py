@@ -19,7 +19,7 @@ class __UniversalContext:
     def __contains__(self, other):
         return 1
 
-universalContext = __UniversalContext()
+_universalContext = __UniversalContext()
 
 
 class __ContextFactory(dict):
@@ -45,7 +45,7 @@ class __ContextFactory(dict):
 
     def __getitem__(self, key):
         try:
-            return dict__getitem__(self, key)
+            return dict.__getitem__(self, key)
         except KeyError:
             return _universalContext
 
