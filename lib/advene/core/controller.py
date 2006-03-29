@@ -53,7 +53,6 @@ from advene.model.package import Package
 from advene.model.zippackage import ZipPackage
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
-import advene.model.constants
 import advene.model.tal.context
 
 import advene.util.vlclib as vlclib
