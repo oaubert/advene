@@ -23,8 +23,6 @@ FIXME: add navigation buttons (back, history)
 import advene.core.config as config
 
 import gtk
-import gobject
-import pango
 import urllib
 
 engine=None
