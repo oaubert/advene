@@ -1,8 +1,6 @@
-* implement .apl (advene package list) file format
+* gui.popup: allow to insert a resource directory
 
-* webserver: implement a loop to process dynamic events when
-   standalone (in fact, we should use controller and invoke
-   controller.update)
+* implement .apl (advene package list) file format
 
 * allow to specify the browser for open_url in preferences
 
@@ -21,18 +19,12 @@
 
 * edit.elements: focus on content window on open
 
-* resource creation: allow to create non-text  resources (specify the
-   filename/mimetype)
-
 * Define a ParameteredQuery which takes a single parameter in the path, e.g.:
   here/annotations/containedIn/foobar 
   (use a wrapper similar to the one used for views. Maybe we can
   generalize this principle).
 
-* Implement a charpicker for transcription
-
-* Implement a new action: Enter information -> fill an attribute of an
-  annotation (pause the stream, enter the answer)
+* Implement a charpicker for transcribe
 
 * Upgrade to simpletal 4.1
 
@@ -52,6 +44,9 @@ that should return the same URI. The proposed solution is to enforce the importi
 * Implement in controller.current_annotation which would allow
    to loop on an annotation through an internal rule : on
    current_annotation end goto currentannotation.fragment.begin
+  [or more generally offer the possibility to have some state
+   information in rules. A state root element (dict) that would be
+   reset on some events? ]
 
 * Store advene conf files in Application Data on win32
 
@@ -135,7 +130,7 @@ of movie time)
 
 * Views: design a parent class with facilities to register views,
    precise their parameters (usable from actions and webserver
-   invocation).
+   invocation) -> half-done (AdhocView), no parameters yet
 
 * make navigation history accessible from TALES (/options/history ?)
 
@@ -151,9 +146,6 @@ of movie time)
 
 * vlc: use picture+mosaic to implement video embedded inside video (to
   quickly preview a fragment)
-
-* transcription : catch the AnnotationEditEnd event and update the
-  display
 
 * Expand the notify action to add a "comment" parameter to specify the
 context of the action, in order to build an interaction history and
@@ -176,8 +168,6 @@ common mime-types -> wait for gtk2.6 with CellRendererCombo
   * implement get/set_rate
 
 * All GUI views: convert action buttons to toolbars
-
-* transcription: handle annotation content modification (on window close)
 
 * navigation history: put 2 snapshots (origin, destination) to contextualize
 
@@ -273,8 +263,6 @@ transcode -H 10 -z -k -o snapshot -y jpg,null -i /dev/dvd -x dvd,null -T 21,1 -c
 when there is a syntax error in a TALES expression (missing string orbadly written symbol) and display a meaningful message
 
 * Rename advene.util.vlclib to something more meaningful (advene.util.helper)
-
-* Transcription: complete annotation edition
 
 * Annotation chanson: paroles / refrain /couplet + UTBV/STBV (transcription)
 
@@ -1111,4 +1099,23 @@ res.startswith('<html>') [useful for Kupu]
 * timeline: redraw marks on update_model if necessary
 
 * webserver: use controller.build_context
+
+* build_context: add /packages (+valid tales)
+
+* webserver: implement a loop to process dynamic events when
+   standalone (in fact, we should use controller and invoke
+   controller.update)
+
+* Implement a new action: Enter information -> fill an attribute of an
+  annotation (pause the stream, enter the answer)
+
+* resource creation: allow to create non-text  resources (specify the
+   filename/mimetype)
+
+* transcription : catch the AnnotationEditEnd event and update the
+  display
+
+* transcription: handle annotation content modification (on window close)
+
+* Transcription: complete annotation edition
 
