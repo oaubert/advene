@@ -46,9 +46,6 @@ from advene.gui.views.browser import Browser
 import advene.util.vlclib as vlclib
 import advene.gui.util
 
-import advene.gui.edit.rules
-import advene.rules.actions
-
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
 
 # Common content MIME-types
