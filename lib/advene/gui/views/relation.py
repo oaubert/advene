@@ -18,12 +18,7 @@
 import sys
 
 # Advene part
-import advene.core.config
-from advene.model.package import Package
-from advene.model.annotation import Annotation, Relation
-from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.bundle import AbstractBundle
-from advene.model.view import View
+import advene.core.config as config
 
 from gettext import gettext as _
 
@@ -217,6 +212,7 @@ class RelationsBox:
 
 
 if __name__ == "__main__":
+    from advene.model.package import Package
     if len(sys.argv) < 2:
         print "Should provide a package name"
         sys.exit(1)
