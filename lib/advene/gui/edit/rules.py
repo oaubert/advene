@@ -20,7 +20,6 @@
 import gtk
 
 import sre
-import copy
 
 import advene.rules.elements
 from advene.rules.elements import Event, Condition, ConditionList, Action, ActionList
