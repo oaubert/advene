@@ -4,7 +4,7 @@
     Resources are available when using a .azp package file::
 
       resources/: associated resources, 
-	          available through the TALES expression /package/advene/resources/...
+                  available through the TALES expression /package/advene/resources/...
 
 """
 import os
@@ -25,7 +25,8 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
 
     def __init__(self, package, resourcepath, parent=None):
         self.package = package
-        self.rootPackage = package
+        self.rootPackage = parent.rootPackage
+        self.ownerPackage = parent.ownerPackage
         self.resourcepath = resourcepath
         self.parent = parent
 
@@ -83,7 +84,8 @@ class Resources:
 
     def __init__(self, package, resourcepath, parent=None):
         self.package = package
-        self.rootPackage = package
+        self.rootPackage = parent.rootPackage
+        self.ownerPackage = parent.ownerPackage
         self.parent = parent
 
         # Resource path name
@@ -161,3 +163,4 @@ class Resources:
         """
         p=urllib.quote(self.resourcepath, safe='')
         return "%s#data_%s" % (self.package.uri, p)
+
