@@ -35,10 +35,6 @@ import gobject
 import advene.core.config as config
 
 from advene.model.package import Package
-from advene.model.annotation import Annotation, Relation
-from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.bundle import AbstractBundle
-from advene.model.view import View
 from advene.gui.views import AdhocView
 
 import advene.util.vlclib as vlclib
@@ -46,7 +42,6 @@ import advene.util.vlclib as vlclib
 from gettext import gettext as _
 
 import advene.gui.edit.elements
-import advene.gui.edit.create
 import advene.gui.popup
 
 class SequenceModel(gtk.GenericTreeModel):
