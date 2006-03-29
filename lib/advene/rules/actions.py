@@ -20,12 +20,8 @@ import advene.core.config as config
 
 from gettext import gettext as _
 
-import advene.util.vlclib as vlclib
-
-from advene.rules.elements import RegisteredAction, Action, Condition
+from advene.rules.elements import RegisteredAction, Condition
 from advene.model.tal.context import AdveneTalesException
-
-import cStringIO
 
 name="Default core actions"
 
