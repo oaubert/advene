@@ -21,8 +21,6 @@
 import advene.core.config as config
 
 import gtk
-import gobject
-import pango
 
 from gettext import gettext as _
 from advene.gui.views import AdhocView
