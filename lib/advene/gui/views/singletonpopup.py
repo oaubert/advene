@@ -18,18 +18,11 @@
 """Singleton popup.
 """
 
-import sys
 import time
 
 import gtk
-import gobject
-import pango
 
 from gettext import gettext as _
-
-import advene.gui.edit.elements
-import advene.gui.edit.create
-import advene.gui.popup
 
 class SingletonPopup:
     """View displaying a unique popup.
@@ -134,5 +127,5 @@ class SingletonPopup:
         return self.window
 
     def popup(self):
-        window.show_all()
-        return window
+        self.window.show_all()
+        return self.window
