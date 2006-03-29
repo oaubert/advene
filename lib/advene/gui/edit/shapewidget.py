@@ -17,7 +17,6 @@
 
 import gtk
 import pango
-import sys
 from math import sqrt
 
 import gettext
