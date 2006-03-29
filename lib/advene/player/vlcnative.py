@@ -18,12 +18,7 @@
 """VLC access using the native python module.
 """
 
-import time
-
 import advene.core.config as config
-
-from gettext import gettext as _
-
 
 # Alias the vlc module so that we can happily copy/paste from
 # vlcorbit.py
