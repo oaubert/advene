@@ -98,6 +98,37 @@ class Menu:
         cr.popup()
         return True
 
+    def do_insert_resource_file(self, parent=None, filename=None, id_=None):
+	if id_ is None:
+	    # Generate the id_
+	    basename = os.path.basename(filename)
+	    id_=sre.sub('[^a-zA-Z0-9_.]', '_', basename)	    
+        size=os.stat(filename).st_size
+        f=open(filename, 'r')
+        parent[id_]=f.read(size + 2)
+        f.close()
+        el=parent[id_]
+        self.controller.notify('ResourceCreate', 
+                               resource=el)
+	return el
+
+    def do_insert_resource_dir(self, parent=None, dirname=None, id_=None):
+	if id_ is None:
+	    # Generate the id_
+	    basename = os.path.basename(dirname)
+	    id_=sre.sub('[^a-zA-Z0-9_.]', '_', basename)
+	parent[id_] = parent.DIRECTORY_TYPE
+	el=parent[id_]
+        self.controller.notify('ResourceCreate', 
+                               resource=el)
+	for n in os.listdir(dirname):
+	    filename = os.path.join(dirname, n)
+	    if os.path.isdir(filename):
+		self.do_insert_resource_dir(parent=el, dirname=filename)
+	    else:
+		self.do_insert_resource_file(parent=el, filename=filename)
+	return el
+
     def insert_resource_data(self, widget, parent=None):
         filename=advene.gui.util.get_filename(title=_("Choose the file to insert"))
         if filename is None:
@@ -114,14 +145,15 @@ class Menu:
                     return True
                 elif sre.match('^[a-zA-Z0-9_.]+$', id_):
                     break
+	self.do_insert_resource_file(parent=parent, filename=filename, id_=id_)
+        return True
 
-        size=os.stat(filename).st_size
-        f=open(filename, 'r')
-        el=f.read(size + 2)
-        f.close()
-        parent[id_]=el
-        self.controller.notify('ResourceCreate', 
-                               resource=el)
+    def insert_resource_directory(self, widget, parent=None):
+	dirname=advene.gui.util.get_dirname(title=_("Choose the directory to insert"))
+        if dirname is None:
+            return True
+	
+	self.do_insert_resource_dir(parent=parent, dirname=dirname)
         return True
 
     def edit_element (self, widget, el):
@@ -362,6 +394,7 @@ class Menu:
         add_item(_("Create a new folder..."), self.create_element, Resources, element)
         add_item(_("Create a new resource file..."), self.create_element, ResourceData, element)
         add_item(_("Insert a new resource file..."), self.insert_resource_data, element)
+        add_item(_("Insert a new resource directory..."), self.insert_resource_directory, element)
         return
 
     def make_schema_menu(self, element, menu):
