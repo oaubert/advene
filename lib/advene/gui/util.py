@@ -21,7 +21,6 @@ from gettext import gettext as _
 
 import gtk
 import gobject
-import StringIO
 
 import advene.core.config as config
 import advene.util.vlclib as vlclib
