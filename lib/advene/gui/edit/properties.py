@@ -19,7 +19,6 @@
 """
 
 import gtk
-import pango
 
 class EditWidget(gtk.VBox):
     """Configuration edit widget.
