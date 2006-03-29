@@ -232,7 +232,7 @@ class Condition:
         else:
             self.operator='value'
         if not node.hasAttribute('lhs'):
-            raise Exception("Invalid condition (no value) in rule %s." % rule)
+            raise Exception("Invalid condition (no left value) in rule.")
         self.lhs=node.getAttribute('lhs')
         if node.hasAttribute('rhs'):
             self.rhs=node.getAttribute('rhs')
