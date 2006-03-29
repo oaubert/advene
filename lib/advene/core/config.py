@@ -139,7 +139,7 @@ class Config(object):
         self.namespace = "http://experience.univ-lyon1.fr/advene/ns/advenetool"
 
         # These files are stored in the resources directory
-        self.templatefilename = "template.xml"
+        self.templatefilename = "template.azp"
         self.gladefilename = "advene.glade"
 
         # Generic options
