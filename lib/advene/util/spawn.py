@@ -125,5 +125,5 @@ class ProcessLauncher:
 
 if __name__ == '__main__':
     args = ('10', )
-    l = Launcher ('sleep', args=args)
+    l = ProcessLauncher ('sleep', args=args)
     print "l = Launcher(%s)" % l.program_name
