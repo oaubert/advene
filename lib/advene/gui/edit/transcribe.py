@@ -37,9 +37,6 @@ import advene.util.vlclib as vlclib
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-import advene.gui.edit.elements
-import advene.gui.edit.create
-import advene.gui.popup
 import advene.gui.util
 
 class TranscriptionImporter(advene.util.importer.GenericImporter):
