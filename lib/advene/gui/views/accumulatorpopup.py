@@ -18,18 +18,12 @@
 """Accumulator popup.
 """
 
-import sys
 import time
 
 import gtk
-import gobject
-import pango
 
 from gettext import gettext as _
 
-import advene.gui.edit.elements
-import advene.gui.edit.create
-import advene.gui.popup
 from advene.gui.views import AdhocView
 
 class DummyLock:
