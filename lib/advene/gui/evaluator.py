@@ -20,7 +20,6 @@
 
 # FIXME: completion of named parameters: inspect.getargspec
 
-import sys
 import os
 import StringIO
 import traceback
