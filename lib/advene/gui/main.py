@@ -25,9 +25,8 @@ C{on_} prefix).
 It also defines GUI-specific actions (DisplayPopup, etc).
 """
 
-import sys, time
+import time
 import os
-import socket
 import StringIO
 
 import advene.core.config as config
@@ -1314,7 +1313,7 @@ class AdveneGUI (Connect):
             try:
                 self.controller.load_package (uri=filename)
             except Exception, e:
-                self.log(_("Cannot load package %s:\n%s") % (fname, unicode(e)))
+                self.log(_("Cannot load package %s:\n%s") % (filename, unicode(e)))
         return True
 
     def on_save1_activate (self, button=None, package=None):
@@ -1901,6 +1900,7 @@ class AdveneGUI (Connect):
         return True
 
 if __name__ == '__main__':
+    import sys
     v = AdveneGUI ()
     try:
         v.main (config.data.args)
