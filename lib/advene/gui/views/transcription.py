@@ -36,8 +36,8 @@ import advene.gui.popup
 class TranscriptionView(AdhocView):
     def __init__ (self, controller=None, annotationtype=None, separator="  "):
         self.view_name = _("Transcription")
-	self.view_id = 'transcriptionview'
-	self.close_on_package_load = True
+        self.view_id = 'transcriptionview'
+        self.close_on_package_load = True
 
         self.controller=controller
         self.package=controller.package
@@ -48,19 +48,19 @@ class TranscriptionView(AdhocView):
         self.modified=False
 
         self.options = {
-	    'display-bounds': False,
-	    'display-time': False,
-	    'separator': ' ',
-	    # If representation is not None, it is used as a TALES
-	    # expression to generate the representation of the
-	    # transcripted annotation. Useful with structured annotations
-	    'representation': '',
-	    }
+            'display-bounds': False,
+            'display-time': False,
+            'separator': ' ',
+            # If representation is not None, it is used as a TALES
+            # expression to generate the representation of the
+            # transcripted annotation. Useful with structured annotations
+            'representation': '',
+            }
 
         self.widget=self.build_widget()
 
     def edit_options(self, button):
-	cache=dict(self.options)
+        cache=dict(self.options)
 
         ew=EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Transcription options"))
@@ -71,13 +71,13 @@ class TranscriptionView(AdhocView):
         res=ew.popup()
 
         if res:
-	    # Process special characters
-	    for c in ('representation', 'separator'):
-		self.options[c]=cache[c].replace('\\n', '\n').replace('\\t', '\t')
-	    for c in ('display-time', 'display-bounds'):
-		self.options[c]=cache[c]
-	    self.generate_buffer_content()
-	return True
+            # Process special characters
+            for c in ('representation', 'separator'):
+                self.options[c]=cache[c].replace('\\n', '\n').replace('\\t', '\t')
+            for c in ('display-time', 'display-bounds'):
+                self.options[c]=cache[c]
+            self.generate_buffer_content()
+        return True
 
     def build_widget(self):
         mainbox = gtk.VBox()
@@ -88,7 +88,7 @@ class TranscriptionView(AdhocView):
             
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-	sw.set_resize_mode(gtk.RESIZE_PARENT)
+        sw.set_resize_mode(gtk.RESIZE_PARENT)
         mainbox.add (sw)
 
         self.textview = gtk.TextView()
@@ -131,7 +131,7 @@ class TranscriptionView(AdhocView):
 
         mainbox.pack_start(hb, expand=False)
 
-	mainbox.buttonbox = hb
+        mainbox.buttonbox = hb
 
         mainbox.show_all()
 
@@ -156,7 +156,7 @@ class TranscriptionView(AdhocView):
 
             if self.options['representation']:
                 rep=vlclib.get_title(self.controller, a, 
-				     representation=self.options['representation'])
+                                     representation=self.options['representation'])
             else:
                 rep=a.content.data
 
@@ -222,8 +222,8 @@ class TranscriptionView(AdhocView):
         return False
 
     def update_model(self, package):
-	self.generate_buffer_content()
-	return True
+        self.generate_buffer_content()
+        return True
 
     def update_current_annotation(self, *p, **kw):
         b=self.textview.get_buffer()
@@ -294,11 +294,27 @@ class TranscriptionView(AdhocView):
             return True
 
         if event == 'AnnotationEditEnd':
-            # FIXME
-            print "Update representation"
+            b=self.textview.get_buffer()
+            beginmark=b.get_mark("b_%s" % annotation.id)
+            endmark=b.get_mark("e_%s" % annotation.id)
+
+            beginiter=b.get_iter_at_mark(beginmark)
+            enditer  =b.get_iter_at_mark(endmark)
+
+            b.delete(beginiter, enditer)
+            b.insert(beginiter, annotation.content.data)
+            # After insert, beginiter is updated to point to the end
+            # of the invalidated text.
+            b.move_mark(endmark, beginiter)
         elif event == 'AnnotationDelete':
-            # FIXME
-            print "Remove representation"
+            b=self.textview.get_buffer()
+            beginmark=b.get_mark("b_%s" % annotation.id)
+            endmark=b.get_mark("e_%s" % annotation.id)
+            beginiter=b.get_iter_at_mark(beginmark)
+            enditer  =b.get_iter_at_mark(endmark)
+            b.delete(beginiter, enditer)
+	    b.delete_mark(beginmark)
+	    b.delete_mark(endmark)
         else:
             print "Unknown event %s" % event
         return True
@@ -347,11 +363,11 @@ class TranscriptionView(AdhocView):
         return True
 
     def save_transcription(self, button=None):
-	fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
-					   action=gtk.FILE_CHOOSER_ACTION_SAVE,
-					   button=gtk.STOCK_SAVE)
-	if fname is not None:
-	    self.save_output(filename=fname)
+        fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
+                                           action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                           button=gtk.STOCK_SAVE)
+        if fname is not None:
+            self.save_output(filename=fname)
             return True
         return True
 
@@ -359,12 +375,12 @@ class TranscriptionView(AdhocView):
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()
         out=b.get_text(begin, end)
-	try:
-	    f=open(filename, "w")
-	except Exception, e:
-	    self.controller.log(_("Cannot write to %s: %s:") %
-				  (filename, unicode(e)))
-	    return True
+        try:
+            f=open(filename, "w")
+        except Exception, e:
+            self.controller.log(_("Cannot write to %s: %s:") %
+                                  (filename, unicode(e)))
+            return True
         f.write(out)
         f.close()
         self.controller.log(_("Transcription saved to %s") % filename)
