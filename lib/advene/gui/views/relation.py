@@ -25,7 +25,6 @@ from gettext import gettext as _
 import advene.gui.popup
 
 import gtk
-import gobject
 
 class RelationView:
     """Controller for the MVC representing a relation."""
