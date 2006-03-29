@@ -20,13 +20,9 @@
 Based on gst >= 0.10 API
 """
 
-import gobject
-import urllib
-
 import pygst
 pygst.require('0.10')
 import gst
-import gst.interfaces
 import os
 
 class StreamInformation:
@@ -198,7 +194,7 @@ class Player:
         return None
 
     def all_snapshots(self):
-        self.log("all_snapshots %s" % str(position))
+        self.log("all_snapshots %s")
         return [ None ]
     
     def display_text (self, message, begin, end):
