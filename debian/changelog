@@ -1,5 +1,10 @@
 advene (0.21) unstable; urgency=low
 
+  * New command line options. Do advene --help to see them.
+  
+  * The default template is now template.azp, so that new packages have a
+    Resources reference by default.
+
   * GUI:
   
     * it is now possible to load multiple packages in the GUI. Only one
@@ -12,10 +17,26 @@ advene (0.21) unstable; urgency=low
     package. Other packages are accessed through expressions like
     /packages/alias
   
+    * non-text resources/contents are now handled by a GenericContentHandler,
+    that offers loading/saving to/from a file.
+  
+    * it is now possible to insert a resource directly from a file
+    
+  * Views:
+  
     * view notebooks are also used for the right-hand side of the video
   
+    * in transcription view, annotations can be modified and update the
+      content accordingly
+  
   * Actions:
+  
     * new action: Entry (to allow entry of information through a popup)
+  
+    * in webserver, /action offers links (with form if necessary for
+      parameters) in the list of actions
+  
+    * new TALES root element: /packages (to access all the loaded packages)
 
  --
 
