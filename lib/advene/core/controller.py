@@ -580,7 +580,7 @@ class AdveneController:
             try:
                 self.package = Package (uri="new_pkg",
                                         source=config.data.advenefile(config.data.templatefilename))
-            except OSerror:
+            except OSError:
                 self.log(_("Cannot find the template package."))
                 self.package = Package ()
                 alias='new_pkg'
