@@ -28,9 +28,6 @@ import sched
 import threading
 import copy
 
-import sre
-
-import advene.model.tal.context
 import advene.rules.elements
 
 class ECAEngine:
@@ -299,7 +296,7 @@ class ECAEngine:
         except ValueError:
             # Ignore the error if the rule was already removed.
             # but display a warning anyway (it should not happen)
-            print "Trying to remove non-existant rule %s from %s ruleset" % (str(ruleid), type_)
+            print "Trying to remove non-existant rule %s from %s ruleset" % (str(rule.name), type_)
             pass
         
     def notify (self, event_name, *param, **kw):
