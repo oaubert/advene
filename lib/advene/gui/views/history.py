@@ -78,7 +78,7 @@ class HistoryNavigation(AdhocView):
         e.connect("button-release-event", self.activate, t)
         e.add(i)
         vbox.pack_start(e, expand=False)
-        l = gtk.Label(advene.util.vlclib.format_time(t))
+        l = gtk.Label(vlclib.format_time(t))
         vbox.pack_start(l, expand=False)
         
         vbox.show_all()
