@@ -17,10 +17,8 @@
 #
 import unittest
 
-import xml.dom.Document
 import xml.dom.ext.reader.PyExpat
 
-from xml.dom.Element import Element
 from xml.dom.Text import Text
 
 from modeled import Modeled
