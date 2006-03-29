@@ -21,6 +21,7 @@ Display the query results in a view (timeline, tree, etc).
 """
 import advene.core.config as config
 import time
+from gettext import gettext as _
 
 import gtk
 
@@ -31,7 +32,7 @@ from advene.model.annotation import Annotation
 from advene.model.tal.context import AdveneTalesException
 import advene.gui.util
 
-import advene.gui.views.timeline
+from advene.gui.views.timeline import TimeLine
 
 import advene.util.vlclib as vlclib
 
@@ -108,9 +109,9 @@ class InteractiveQuery:
                 self.controller.log(_("Displaying %s of %d elements")
                          % (vlclib.format_element_name("annotation", len(l)),
                             len(res)))
-                t = advene.gui.views.timeline.TimeLine (l,
-                                                        minimum=0,
-                                                        controller=self.controller)
+                t = TimeLine (l,
+			      minimum=0,
+			      controller=self.controller)
                 window=t.popup()
                 window.set_title(_("Results of _interactive query"))
             else:
