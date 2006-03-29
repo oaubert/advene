@@ -1345,14 +1345,15 @@ class AdveneGUI (Connect):
 	    (p, ext) = os.path.splitext(filename)
 	    if ext == '':
 		# Add a pertinent extension
-		if p.resources:
+		if package.resources and package.resources.children():
 		    # There are resources -> save as an .azp package
 		    ext='.azp'
 		else:
 		    ext='.xml'
 		filename = filename + ext
 
-	    if p.resources and ext.lower() != '.azp':
+	    if (package.resources and package.resources.children() 
+		and ext.lower() != '.azp'):
 		ret=advene.gui.util.yes_no_cancel_popup(title=_("Invalid file extension"),
 							text=_("Your package contains resources,\nthe filename (%s) should have a .azp extension.\nShould I put the correct extension?") % filename)
 		if ret == gtk.RESPONSE_YES:
@@ -1362,7 +1363,7 @@ class AdveneGUI (Connect):
 		else:
 		    self.log(_("Aborting package saving"))
 		    return True
-		
+
             alias=self.controller.aliases[package]
             self.controller.save_package(name=filename, alias=alias)
         return True
