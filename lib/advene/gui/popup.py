@@ -129,6 +129,28 @@ class Menu:
 		self.do_insert_resource_file(parent=el, filename=filename)
 	return el
 
+    def do_remove_resource_dir(self, r):
+	for c in r.children():
+	    if isinstance(c, ResourceData):
+		self.do_remove_resource_file(c)
+	    elif isinstance(c, Resources):
+		self.do_remove_resource_dir(c)
+	    else:
+		print "Strange bug in do_remove_resource_dir"
+		return True
+	p=r.parent
+	del(p[r.id])
+        self.controller.notify('ResourceDelete',
+                               resource=r)
+	return True
+
+    def do_remove_resource_file(self, r):
+	p=r.parent
+	del(p[r.id])
+        self.controller.notify('ResourceDelete',
+                               resource=r)
+	return True
+    
     def insert_resource_data(self, widget, parent=None):
         filename=advene.gui.util.get_filename(title=_("Choose the file to insert"))
         if filename is None:
@@ -254,6 +276,10 @@ class Menu:
         elif isinstance(el, Query):
             p.queries.remove(el)
             self.controller.notify('QueryDelete', query=el)
+        elif isinstance(el, Resources):
+	    self.do_remove_resource_dir(el)
+	elif isinstance(el, ResourceData):
+	    self.do_remove_resource_file(el)	    
         return True
 
     def delete_elements (self, widget, el, elements):
@@ -318,6 +344,7 @@ class Menu:
             Package: self.make_package_menu,
             Query: self.make_query_menu,
             Resources: self.make_resources_menu,
+	    ResourceData: self.make_resourcedata_menu,
             }
 
         for t, method in specific_builder.iteritems():
@@ -395,6 +422,14 @@ class Menu:
         add_item(_("Create a new resource file..."), self.create_element, ResourceData, element)
         add_item(_("Insert a new resource file..."), self.insert_resource_data, element)
         add_item(_("Insert a new resource directory..."), self.insert_resource_directory, element)
+	if isinstance(element.parent, Resources):
+	    add_item(_("Delete the resource..."), self.delete_element, element)
+        return
+
+    def make_resourcedata_menu(self, element, menu):
+        def add_item(*p, **kw):
+            self.add_menuitem(menu, *p, **kw)
+        add_item(_("Delete the resource..."), self.delete_element, element)
         return
 
     def make_schema_menu(self, element, menu):
@@ -418,7 +453,6 @@ class Menu:
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
         add_item(_("Delete all relations..."), self.delete_elements, element, element.relations)
-        #add_item(_("Create a new relation..."), self.create_element, Relation, element)
         return
 
     def make_query_menu(self, element, menu):
