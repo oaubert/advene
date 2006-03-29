@@ -36,12 +36,10 @@ import sre
 import shutil
 import urllib
 from advene.model.exception import AdveneException
-from advene.model.resources import Resources, ResourceData
-import util.uri
+from advene.model.resources import Resources
 import mimetypes
 import warnings
 
-import xml.dom.ext.reader.PyExpat
 import xml.sax
 
 from gettext import gettext as _
