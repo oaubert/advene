@@ -850,6 +850,8 @@ class TextContentHandler (ContentHandler):
 	res=0
         if 'text' in mimetype:
             res=70
+	if 'xml' in mimetype:
+	    res=60
 	if mimetype == 'text/plain' or mimetype in config.data.text_mimetypes:
 	    res=80
 	return res
