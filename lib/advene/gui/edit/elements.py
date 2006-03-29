@@ -376,7 +376,7 @@ class EditRelationPopup (EditElementPopup):
                 try:
                     pop = advene.gui.edit.elements.get_edit_popup (annotation, self.controller)
                 except TypeError, e:
-                    print _("Error: unable to find an edit popup for %s:\n%s") % (el,
+                    print _("Error: unable to find an edit popup for %s:\n%s") % (annotation,
                                                                                   unicode(e))
                 else:
                     pop.edit ()
