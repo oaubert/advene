@@ -29,7 +29,6 @@ from gettext import gettext as _
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.bundle import AbstractBundle
 from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
