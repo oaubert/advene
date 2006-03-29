@@ -16,8 +16,6 @@ import xml.dom.ext.reader.PyExpat
 from advene.model.util.auto_properties import auto_properties
 import advene.model.viewable as viewable
 
-from gettext import gettext as _
-
 class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
     """Class accessing a resource data (file).
     
