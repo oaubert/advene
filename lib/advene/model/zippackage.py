@@ -74,17 +74,25 @@ class ZipPackage:
         self.file_ = None
 
         if uri is not None:
-            if uri.startswith('file://'):
-                uri=uri[5:]
-            if os.path.exists(uri):
-                # It is a real filename
-                self.uri = 'file://' + os.path.abspath(uri)
-                self.file_ = uri
+            if uri.startswith('file:'):
+                n=uri[5:]
             else:
-		if sre.match('[a-zA-Z]:', uri):
-		    # Windows drive: notation. Convert it to
-		    # a more URI-compatible syntax
-		    uri=urllib.pathname2url(uri)
+                n=uri
+            if os.path.exists(n):
+                # It is a real filename
+                self.uri = uri
+                self.file_ = n
+            elif sre.match('^[a-zA-Z]:', uri):
+                # Windows drive: notation. Convert it to
+                # a more URI-compatible syntax
+                self.uri=urllib.pathname2url(uri)
+                self.file_ = uri
+            elif sre.search('/[a-zA-Z]|', n):
+                print "pathname2url apth"
+                # It is a pathname2url encoded path
+                self.uri = uri
+                self.file_ = urllib.url2pathname(uri)
+            else:
                 u=urllib.urlopen(uri)
 
                 # Use the same extension
