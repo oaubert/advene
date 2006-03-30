@@ -1,7 +1,0 @@
-#! /bin/sh
-
-[ -d html ] || mkdir html
-
-epydoc --output html --name Advene  --url http://experience.univ-lyon1.fr/advene/ --verbose \
-adveneserver.py     audio.py   mediacontrol.py  spawn.py \
-advenetool.py       config.py  imagecache.py  vlclib.py
