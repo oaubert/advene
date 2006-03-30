@@ -1,3 +1,9 @@
+* treeview: update on CreateResource
+
+* GenericContentHandler: add "Open with..." functionality
+
+* make save button inactive when not modified
+
 * implement .apl (advene package list) file format
 
 * allow to specify the browser for open_url in preferences
@@ -1098,11 +1104,13 @@ res.startswith('<html>') [useful for Kupu]
 
 * webserver: use controller.build_context
 
-* build_context: add /packages (+valid tales)
+* Build packages menu on-demand to be able to display modified status
 
 * webserver: implement a loop to process dynamic events when
    standalone (in fact, we should use controller and invoke
-   controller.update)
+   controller.update) -> self_loop
+
+* create_popup: allow to directly insert a file (add a file...)
 
 * Implement a new action: Enter information -> fill an attribute of an
   annotation (pause the stream, enter the answer)
@@ -1120,4 +1128,3 @@ res.startswith('<html>') [useful for Kupu]
 * gui.popup: allow to insert a resource directory
 
 * gui.popup: allow to remove resources
-
