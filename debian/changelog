@@ -26,9 +26,11 @@ advene (0.21) unstable; urgency=low
   
     * view notebooks are also used for the right-hand side of the video
   
+    * added a GenericContentHandler to edit non-text resources
+
     * in transcription view, annotations can be modified and update the
       content accordingly
-  
+
   * Actions:
   
     * new action: Entry (to allow entry of information through a popup)
