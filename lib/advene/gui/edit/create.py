@@ -95,7 +95,8 @@ class CreateElementPopup(object):
         vbox.add(hbox)
 
         # Choose a type
-        if self.type_ in (Annotation, Relation, View, Query, Resources, ResourceData):
+        if self.type_ in (Annotation, Relation, AnnotationType, RelationType, 
+			  View, Query, Resources, ResourceData):
             hbox = gtk.HBox()
             l = gtk.Label(_("Type"))
             hbox.pack_start(l)
@@ -110,9 +111,17 @@ class CreateElementPopup(object):
                     type_list = [ self.parent ]
                 else:
                     type_list = self.parent.relationTypes
+	    elif self.type_ in (AnnotationType, RelationType):
+                type_list = [ ViewType('text/plain', _("Plain text content")),
+			      ViewType('application/x-advene-structured', _("Simple-structured content")),
+			      ViewType('application/x-advene-zone', _("Rectangular zone content")),
+			      ]		
             elif self.type_ == View:
                 type_list = [ ViewType('application/x-advene-ruleset', _("Dynamic view")),
-                              ViewType('text/html', _("HTML template")) ]
+                              ViewType('text/html', _("HTML template")),
+                              ViewType('image/svg+xml', _("SVG template")),
+                              ViewType('text/plain', _("Plain text template")),
+			      ]
             elif self.type_ == Query:
                 type_list = [ ViewType('application/x-advene-simplequery', _("Simple query")),
 			      ViewType('application/x-advene-sparqlquery', _("SPARQL query")) ]
@@ -260,7 +269,7 @@ class CreateElementPopup(object):
                 el.author=config.data.userid
                 el.date=self.get_date()
                 el.title=id_
-                el.mimetype='text/plain'
+                el.mimetype=t.id
             self.parent.annotationTypes.append(el)
             self.controller.notify('AnnotationTypeCreate', annotationtype=el)
         elif self.type_ == RelationType:
@@ -273,7 +282,7 @@ class CreateElementPopup(object):
                 el.author=config.data.userid
                 el.date=self.get_date()
                 el.title=id_
-                el.mimetype='text/plain'
+                el.mimetype=t.id
             self.parent.relationTypes.append(el)
             self.controller.notify('RelationTypeCreate', relationtype=el)
         elif self.type_ == Resources:
