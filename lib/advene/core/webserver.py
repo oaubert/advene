@@ -51,6 +51,7 @@ import simpletal.simpleTALES as simpleTALES
 
 import sys
 import os
+import sre
 import urlparse
 import urllib
 import cgi
@@ -701,12 +702,16 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """
         self.start_html (_("Available files"), duplicate_title=True)
         self.wfile.write ("<ul>")
-        import glob
-        for i in glob.glob (os.path.join (config.data.path['data'], '*.xml')):
-            name = i.replace (".xml", "")
+
+	l=[ os.path.join(config.data.path['data'], n)
+	    for n in os.listdir(config.data.path['data'])
+	    if n.lower().endswith('.xml') or n.lower().endswith('.azp') ]
+        for uri in l:
+            name, ext = os.path.splitext(uri)
+	    alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
             self.wfile.write ("""
             <li><a href="/admin/load?alias=%(alias)s&uri=%(uri)s">%(uri)s</a></li>
-            """ % {'alias':name, 'uri':i})
+            """ % {'alias':alias, 'uri':uri})
         self.wfile.write ("""
         </ul>
         """)
