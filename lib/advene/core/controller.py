@@ -581,8 +581,8 @@ class AdveneController:
                                         source=config.data.advenefile(config.data.templatefilename))
             except OSError:
                 self.log(_("Cannot find the template package."))
-                self.package = Package ()
                 alias='new_pkg'
+                self.package = Package (alias, source=None)
             self.package.author = config.data.userid
 	    self.package.date = self.get_timestamp()
         else:
