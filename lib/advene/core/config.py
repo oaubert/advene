@@ -224,27 +224,24 @@ class Config(object):
         # MIMEtypes that can be edited by the TextContentHandler
         self.text_mimetypes = ( 'application/x-advene-structured' )
 
-	# Drag and drop parameters for URIed element
-        self.target_type = {
-            'annotation' : 42,
-            'rule' : 43,
-            'view': 44,
-            'schema': 45,
-            'annotation-type': 46,
-            'relation-type': 47,
-            'relation': 48,
-            }
-        self.drag_type={}
-        for t in self.target_type:
-            self.drag_type[t] = [ ( "application/x-advene-%s-uri" % t,
-                                    0,
-                                    self.target_type[t] ) ]
-	# Other DnD types
-        n='adhoc-view'
-	self.target_type[n] = 49
-	self.drag_type[n] =  [ ( "application/x-advene-%s" % n,
-				 0,
-				 self.target_type[n] ) ]
+	# Drag and drop parameters for URIed element and other elements
+	self.target_type = {}
+	self.drag_type = {}
+	for name, type, mime in (
+            ('annotation',        42, None),
+            ('rule',              43, None),
+            ('view',              44, None),
+            ('schema',            45, None),
+            ('annotation-type',   46, None),
+            ('relation-type',     47, None),
+            ('relation',          48, None),
+	    ('adhoc-view',        49, 'application/x-advene-adhoc-view'),
+	    ('uri-list',          80, 'text/uri-list'),
+	    ):
+	    self.target_type[name] = type
+	    if mime is None:
+		mime = "application/x-advene-%s-uri" % type
+	    self.drag_type[name] = [ ( mime, 0, type) ]
 
 	# Content-handlers
 	self.content_handlers = []
