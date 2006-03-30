@@ -100,9 +100,13 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                     element = reader.fromUri("file://" + f)._get_documentElement()    
                 else:
                     element = reader.fromUri(abs_uri)._get_documentElement()
-            elif hasattr(source,'read'):
+            elif hasattr(source, 'read'):
                 element = reader.fromStream(source)._get_documentElement()
             else:
+		if sre.match('[a-zA-Z]:', source):
+		    # Windows drive: notation. Convert it to
+		    # a more URI-compatible syntax
+		    source=urllib.pathname2url(source)
                 source_uri = util.uri.urljoin (
                     'file:%s/' % urllib.pathname2url (os.getcwd ()),
                      str(source)
