@@ -1,46 +1,47 @@
 advene (0.21) unstable; urgency=low
 
   * New command line options. Do advene --help to see them.
-  
+
   * The default template is now template.azp, so that new packages have a
     Resources reference by default.
 
   * GUI:
-  
+
     * it is now possible to load multiple packages in the GUI. Only one
     package is active at a time (for movie, dynamic views...) but it is
     possible to easily switch between packages (through the Packages
     menuitem) and access to all packages data is possible through the
     webserver.
-  
+
     The /packages/advene expression always represents the currently active
     package. Other packages are accessed through expressions like
     /packages/alias
-  
+
     * non-text resources/contents are now handled by a GenericContentHandler,
     that offers loading/saving to/from a file.
-  
+
     * it is now possible to insert a resource directly from a file
-    
+
     * if the user tries to open a videofile through the Open package
       menuitem, do what is expected (select the videofile).
 
   * Views:
+
     * view notebooks are also used for the right-hand side of the video
-  
+
     * added a GenericContentHandler to edit non-text resources
 
     * in transcription view, annotations can be modified and update the
       content accordingly
 
   * Actions:
-  
+
     * new action: Entry (to allow entry of information through a popup)
-  
+
     * in webserver, /action offers links (with form if necessary for
       parameters) in the list of actions
-  
-    * new TALES root element: /packages (to access all the loaded packages)
+
+    * new TALES root element: packages (to access all the loaded packages)
 
  --
 
@@ -48,8 +49,8 @@ advene (0.20) unstable; urgency=low
 
   * New package format (.azp, for Advene Zip Package) allowing to embed
     resources (files) in packages. You can save old .xml files into .azp
-    files to get them converted. For instance, 
-    access to resources is done through the TALES expression 
+    files to get them converted. For instance,
+    access to resources is done through the TALES expression
     package/resources/style.css
     To use this resource in a TAL template, you can then use:
     <link tal:attributes="href package/resources/style.css/absolute_url" type="text/css" rel="stylesheet" />
@@ -58,7 +59,7 @@ advene (0.20) unstable; urgency=low
     present.
 
   * Advene now depends on gtk >= 2.8
-  
+
   * New global method: related. Returns, for an annotation, its related
     annotation. It is a shortcut useful for the case of binary relations:
     annotation/related/id
@@ -67,14 +68,14 @@ advene (0.20) unstable; urgency=low
 
   * global methods can be defined by user plugins (in .advene/plugins
     directory) through controller.register_global_method
-  
+
   * ! Moved config and preferences files to ~/.advene directory
     (UserDir/advene on Windows)
 
   * New annotation mimetype (application/x-advene-zone) which allows to
     define rectangular zones.
 
-  * GUI: 
+  * GUI:
     * a view notebook holds the popupaccumulator below the video. It allows
       to embed other views (timeline, treeview, transcription...) simply by
       drag and drop of the view toolbutton into the notebook
@@ -90,7 +91,7 @@ advene (0.20) unstable; urgency=low
     * Imagecache saves files with a .png extension
     * The not_yet_available image is now loaded from share/pixmaps/notavailable.png
     * Automatically close non-updateable views on package loading
-  
+
   * The dummy player now returns a running time
 
   * Importer
@@ -99,8 +100,8 @@ advene (0.20) unstable; urgency=low
   * Timeline
     * Add shortcut to edit an annotation: 'e' to edit the selected
       annotation (selection can be moved with arrow keys)
-  
-  * TranscriptionEdit: 
+
+  * TranscriptionEdit:
     * clicking on a mark now goes to the position. Use the popup menu to remove marks.
     * control-space now sets a mark and pauses the movie
 
@@ -112,13 +113,13 @@ advene (0.20) unstable; urgency=low
     * message log is now available from the menu (View->Webserver log), and
       not displayed on the console
     * new action: /admin/halt (useful for the standalone case)
-    * new action: /admin/methods displays the list of available TALES methods  
+    * new action: /admin/methods displays the list of available TALES methods
     * new path: /action/ActionName?param=TALESexpr to invoke actions defined
       in the ECA framework
 
   * Advene no longer depends on the Image module. It only uses it if image
     type conversion is necessary.
-  
+
   * Added spanish translations (courtesy of Emmanuel Ayala)
   * Bugfix in path initialization
 
@@ -133,7 +134,7 @@ advene (0.18) unstable; urgency=low
 
   * TranscriptionEdit:
     * It is now embedded into the main GUI
-    * New keybindings: 
+    * New keybindings:
       Tab: player play/pause
       Control-Return: insert a timestamp mark with the current position value
       Control-left/right: forward/backward in video
@@ -141,12 +142,12 @@ advene (0.18) unstable; urgency=low
       Control-PageDown/Up: goto the next/previous mark
   * TranscriptionView:
     * Sort annotations before displaying them
-  * Textual annotation/view editing: 
-      handle open/save to a file, with corresponding 
+  * Textual annotation/view editing:
+      handle open/save to a file, with corresponding
       keyboard shortcuts (control-o, control-s), and reload (control-r)
   * Package properties :
     * Add a Open button to select associated video file
-  
+
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 29 May 2005 18:39:30 +0200
 
 advene (0.17) unstable; urgency=low
@@ -154,7 +155,7 @@ advene (0.17) unstable; urgency=low
   * Main GUI :
     * Video output is now embedded
     * Added a --no-embedded option
-    * Added some views (navigation history, urlstack, popups) 
+    * Added some views (navigation history, urlstack, popups)
       around the video window
     * Popups now use the AccumulatorPopup
     * Screenshots are now displayed in popups
@@ -165,37 +166,37 @@ advene (0.17) unstable; urgency=low
     * The webbrowser icon now displays a UTBV menu
     * The Edit/Find functionality is implemented (using InteractiveQuery)
     * Results from the Advene browser can be displayed in a line
-  
+
   * New action: OpenURL
 
   * Added default_utbv and default_stbv metadata to package
-  
-  * New config variables: 
-     * config.data.webserver['displaymode'] : default display 
+
+  * New config variables:
+     * config.data.webserver['displaymode'] : default display
        mode (default or raw)
      * config.data.path['moviepath'] : movie files search path
-  
+
   * Webserver:
      * Default display mode is now 'raw'
      * query parameters are available through the 'request' root element
      * /media/play now accepts a ?stbv=... parameter
-     * implemented /application/adhoc to open GUI views and 
+     * implemented /application/adhoc to open GUI views and
        /application/stbv to activate STBVs
-  
-  * Timeline : 
+
+  * Timeline :
      * implemented annotation alignment (by drag'n drop)
      * annotations can be transmuted (by DND on an annotation type)
      * all annotation types (event empty ones) are displayed
      * new zoom possibility by clicking on timestamps labels
-     * relations can be displayed by moving the cursor 
-       over the annotation widgets (option controlled by toolbar)  
-  
+     * relations can be displayed by moving the cursor
+       over the annotation widgets (option controlled by toolbar)
+
   * New player module: mplayer (incomplete)
-  
+
   * TranscriptionEdit :
      * added adjustment possibilities for the marks, using adjustable
        reaction time value
-     * it is now possible to create a new annotation type/schema 
+     * it is now possible to create a new annotation type/schema
        when doing the conversion
      * "Save" action preserves timestamps
      * "Ignore text" functionality
@@ -204,23 +205,23 @@ advene (0.17) unstable; urgency=low
      * added player control toolbar
      * C-s shortcut to save transcription
      * Insert a default 0-mark
-  
+
   * Importer
     * implemented PRAAT import
     * use the userid as author for imported elements
 
   * Internal
-    * Identifiers are now generated through the IDGenerator 
+    * Identifiers are now generated through the IDGenerator
       module (more readable ids)
     * Evaluator: implemented dict key completion
-    * Use an event queue for notify events, so that the GUI 
-      does not freeze when receiving input from webserver 
+    * Use an event queue for notify events, so that the GUI
+      does not freeze when receiving input from webserver
       (player interaction, STBV selection, etc)
-    * Edit elements forms now do a simple check 
+    * Edit elements forms now do a simple check
       for the validity of TALES expressions
     * Re-generated API documentation in doc/html
     * Added an example bin/sample_player
-  
+
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 13 Mar 2005 22:03:50 +0100
 
 advene (0.16) unstable; urgency=low
@@ -255,15 +256,15 @@ advene (0.14) unstable; urgency=low
 advene (0.13) unstable; urgency=low
 
   * Check that no relation use the annotation on annotation delete
-  
+
   * Update to pygtk 2.4
-  
+
   * Added three toolbars: player control, file operations, views access
-  
+
   * The package explorer now displays categories for elements (members, attributes, methods)
-  
+
   * Use the new FileChooser from gtk 2.4
-  
+
   * Added a "display preview" button in the file selector
 
   * Added a description parameter to the PopupGoto action
@@ -273,7 +274,7 @@ advene (0.13) unstable; urgency=low
 advene (0.12) unstable; urgency=low
 
   * Action and Condition selection is now categorized
-  
+
   * Implemented (unusable) vlchttp (too slow)
 
   * Implemented update of relationtype.membertypes
@@ -283,7 +284,7 @@ advene (0.12) unstable; urgency=low
 advene (0.11) unstable; urgency=low
 
   * It is possible to save the output of the transcription view
-  
+
   * Update to match the API changes in simpletal 3.9
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 16 Sep 2004 13:05:50 +0200
@@ -293,71 +294,71 @@ advene (0.10) unstable; urgency=low
   * Added ELAN conversion capability
 
   * Added "Offset" method in popup menu
-  
+
   * Implemented Allen's relations in conditions
 
   * Implemented TranscriptionView (accessible from popup menu on
     AnnotationType, or from the Views menu).
-  
+
   * Implemented read-only edit popup for imported elements
 
   * The MIME-Type is displayed/editable on all content-editing windows
 
   * Autocompletion facility in evaluator window
-  
+
   * All imports (view, schema, ...) work. A GUI is accessible to edit them from
     the Edit menu
-  
+
   * New actions: ActivateSTBV, DisplayPopup2, DisplayPopup3, SendUserEvent
-  
+
   * Added UserEvent event
-  
+
   * Window sizes are memorized from one session to another
-  
+
   * Navigation popups now use SingletonPopup (only one is displayed, timeout handled)
 
   * Basic GUI for importing external data (menu File/Import).
-  
+
   * DVD chapter import is accessible in the File menu (it needs the chaplin program)
-  
+
   * Added members edition GUI for RelationTypes (but the model does not
     support updating them yet)
 
   * Implemented DnD of rules in RuleSet editing popups (through the "Copy" button
     in the lower right hand corner)
-  
-  * Parameters values are now remembered when editing the action name (so that 
+
+  * Parameters values are now remembered when editing the action name (so that
     scrolling the action name list by mistake does not erase all the values)
-  
+
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu,  2 Sep 2004 12:13:10 +0200
 
 advene (0.9) unstable; urgency=low
 
   * New action: DisplayMarker
-  
+
   * When editing actions, parameters are now sorted
-  
+
   * New component: advene.util.importer which can import data from text
     files, srt files, lsdvd, chaplin, xi files. Usable as command-line
     tool for the moment.
-  
+
   * Validity checks in data input (fragment-related)
-  
+
   * The player is now launched at application start
-  
+
   * It is now possible to save the output of the evaluator window with C-s
-  
+
   * Browser is now accessible from generic popup for all elements
-  
+
   * New shortcut: Control-Return validates current annotation and begins
     editing a new one
-  
+
   * Annotations in timeline are bold if they have relations
-  
+
   * Added the possibility to edit the description of schemas and its elements
-  
+
   * Annotation-highlighting is accessible from popup menu
-  
+
   * Annotations are accessible from the relation popup menu
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Fri, 18 Jun 2004 19:36:20 +0200
@@ -372,12 +373,12 @@ advene (0.8) unstable; urgency=low
   * It is now possible to edit the 'representation' attribute for
     AnnotationTypes
   * Added a python evaluator window (Control-e to invoke)
-  
+
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue,  1 Jun 2004 00:14:31 +0200
 
 advene (0.7) unstable; urgency=low
 
-  * Unicode-related bug fixes 
+  * Unicode-related bug fixes
   * Some user documentation (doc/user.txt)
   * Added a "display" meta-attribute to AnnotationTypes and
     RelationTypes. When present, it defines a TALES expression returning
