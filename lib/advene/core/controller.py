@@ -350,8 +350,7 @@ class AdveneController:
             else:
                 # Try to load the file as a video file
                 if ('dvd' in name 
-                    or ext.lower() in ('.avi', '.mpg', '.mov', 
-                                       '.mp4', '.asf', '.rm')):
+                    or ext.lower() in config.data.video_extensions):
                     self.set_default_media(uri)
             
         # If no package is defined yet, load the template
