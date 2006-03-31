@@ -243,6 +243,17 @@ class Config(object):
 		mime = "application/x-advene-%s-uri" % type
 	    self.drag_type[name] = [ ( mime, 0, type) ]
 
+	self.video_extensions = (
+	    '.asf', 
+	    '.avi', 
+	    '.mov',
+	    '.mpg', '.mpeg',  '.mp4', 
+	    '.ogm',
+	    '.rm', 
+	    '.vob',
+	    '.wmv',
+	    )
+	
 	# Content-handlers
 	self.content_handlers = []
 
