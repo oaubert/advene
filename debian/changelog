@@ -22,8 +22,10 @@ advene (0.21) unstable; urgency=low
   
     * it is now possible to insert a resource directly from a file
     
+    * if the user tries to open a videofile through the Open package
+      menuitem, do what is expected (select the videofile).
+
   * Views:
-  
     * view notebooks are also used for the right-hand side of the video
   
     * added a GenericContentHandler to edit non-text resources
