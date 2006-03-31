@@ -1312,9 +1312,8 @@ class AdveneGUI (Connect):
         if filename:
 	    name, ext = os.path.splitext(filename.lower())
 	    if ext in config.data.video_extensions:
-		advene.gui.util.message_dialog(
-		    _("The file %s looks like a video file. You should open it through the Select video file menuitem, or the eject button in the toolbar.") % filename,
-		    icon=gtk.MESSAGE_WARNING)
+		self.log(_("A video file was selected. Pretend that the user selected 'Select a video file'..."))
+		self.controller.set_default_media(filename)
 		return True
 	    if not ext in ('.xml', '.azp'):
 		# Does not look like a valid package
