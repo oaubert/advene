@@ -42,6 +42,7 @@ import advene.core.version
 from gettext import gettext as _
 
 from advene.model.package import Package
+from advene.model.annotation import Relation
 from advene.model.exception import AdveneException
 from advene.model.content import Content
 
@@ -130,7 +131,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header ('Cache-Control', 'max-age=0')
 
     def start_html (self, title="", headers=None, head_section=None, body_attributes="",
-                    mode="navigation", mimetype=None, duplicate_title=False, cache=False):
+                    mode=None, mimetype=None, duplicate_title=False, cache=False):
         """Starts writing a HTML response (header + common body start).
 
         @param title: Title of the HTML document (default : "")
@@ -150,6 +151,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         @type cache: boolean
         @return: nothing
         """
+        if mode is None:
+            mode = config.data.webserver['displaymode']
         self.send_response (200)
         if mode == 'navigation':
             mimetype='text/html'
@@ -891,7 +894,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         """
 
-        self.start_html (_("Setting value"))
+        #self.start_html (_("Setting value"))
 
         (scheme,
          netloc,
@@ -923,7 +926,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 expr = "here/%s" % tales
 
-            context = self.server.controller.build_context(here=self.server.controller.packages[alias],
+            package = self.server.controller.packages[alias]
+            context = self.server.controller.build_context(here=package,
                                                            alias=alias)
             context.pushLocals()
             context.setLocal('request', query)
@@ -940,10 +944,18 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write (_("<p>Invalid request</p>."))
                 return
 
+            def answer(message):
+                if query.has_key('redirect') and query['redirect']:
+                    self.send_redirect(query['redirect'])
+                    self.wfile.write("<html><head><title>%s</title></head><body>" % message)
+                else:
+                    self.start_html(message)
+
             # Different actions : update, create, delete
             if query['action'] == 'update':
                 if hasattr(objet, query['key']):
                     objet.__setattr__(query['key'], query['data'])
+                    answer(_("Value updated"))
                     self.wfile.write (_("""
                     <h1>Value updated</h1>
                     The value of %s has been updated to
@@ -959,6 +971,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         o = objet[query['object']]
                         if hasattr(o, query['key']):
                             o.__setattr__(query['key'], query['data'])
+                            answer(_("Value updated"))
                             self.wfile.write (_("""
                             <h1>Value updated</h1>
                             The value of %s has been updated to
@@ -980,6 +993,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                  # Create a new element. For the moment, only
                  # View is supported
                  if not isinstance (objet, Package):
+                     answer(_("Error"))
                      self.wfile.write (_("""
                      <h1>Error</h1>
                      <p>Cannot create an element in something else than a package.</p>
@@ -991,7 +1005,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                                content_data=query['data'])
                          objet.views.append(v)
                      except Exception, e:
-                         self.wfile.write (_("<h1>Error</h1>"))
+                         answer(_("<h1>Error</h1>"))
                          self.wfile.write (_("<p>Error while creating view %s</p>")
                                            % query['id'])
                          self.wfile.write("""
@@ -1001,6 +1015,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                          """ % (unicode(e)))
                          return
 
+                     answer(_("View created"))
                      self.wfile.write (_("""
                      <h1>View <em>%s</em> created</h1>
                      <p>The view <a href="%s">%s</a> was successfully created.</p>
@@ -1008,10 +1023,53 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                             "/packages/%s/views/%s" % (self.server.controller.aliases[objet],
                                                       v.id),
                             v.id))
+                 elif query['type'] == 'relation':
+                     # Takes as parameters:
+                     # id = identifier (optional)
+                     # relationtype = relation type identifier
+                     # member1 = first member (annotation id)
+                     # member2 = second member (annotation id)
+                     rt = context.evaluateValue("package/relationTypes/%s" % query['relationtype'])
+                     try:
+                         id_ = query['id']
+                     except KeyError:
+                         id_ = package._idgenerator.get_id(Relation)
+                     m1 = context.evaluateValue('package/annotations/%s' % query['member1'])
+                     m2 = context.evaluateValue('package/annotations/%s' % query['member2'])
+                     
+                     relationtypes=vlclib.matching_relationtypes(package, m1, m2)
+                     if rt not in relationtypes:
+                         answer(_("Error"))
+                         self.wfile.write (_("<h1>Error</h1>"))
+                         self.wfile.write (_("<p>Cannot create relation between %s and %s: invalid type</p>") % (query['member1'], query['member2']))
+                         return
+                     try:
+                         relation=package.createRelation(ident=id_,
+                                                         members=(m1, m2),
+                                                         type=rt)
+                         package._idgenerator.add(id_)
+                         package.relations.append(relation)
+                         self.server.controller.notify("RelationCreate", relation=relation)
+                     except Exception, e:
+                         answer(_("Error"))
+                         self.wfile.write (_("<h1>Error</h1>"))
+                         self.wfile.write (_("<p>Error while creating relation between %s and %s :</p><pre>%s</pre>") % (query['member1'], query['member2'], unicode(e)))
+                         self.wfile.write("""
+                         <pre>
+                         %s
+                         </pre>
+                         """ % (unicode(e)))
+                         return
+                     answer(_("Relation created"))
+                     self.wfile.write (_("""
+                     <h1>Relation <em>%s</em> created</h1>
+                     """) % (relation.id))
                  else:
+                     answer(_("Error"))
                      self.wfile.write (_("<h1>Error</h1>"))
                      self.wfile.write (_("<p>Cannot create an object of type %s.</p>") % (query['type']))
             else:
+                answer(_("Error"))
                 self.wfile.write (_("<h1>Error</h1>"))
                 self.wfile.write (_("<p>Cannot perform the action <em>%s</em> on <code>%s</code></p>")
                                   % (query['action'], cgi.escape(unicode(objet))))
