@@ -24,6 +24,7 @@ import sys
 import advene.core.config as config
 
 import advene.gui.util
+from advene.model.annotation import Annotation
 from advene.gui.views import AdhocView
 from advene.gui.views.timeline import TimeLine
 import advene.util.vlclib as vlclib
@@ -247,17 +248,24 @@ class Browser(AdhocView):
     def display_timeline(self, *p):
         """Display the results as annotations in a timeline.
         """
-        if not (hasattr(self.current_value, 'viewableType') and
-                self.current_value.viewableType == 'annotation-list'):
+        l=None
+        if (hasattr(self.current_value, 'viewableType') 
+            and self.current_value.viewableType == 'annotation-list'):
+            l=self.current_value
+        elif isinstance(self.current_value, list):
+            l = [ i for i in self.current_value if isinstance(i, Annotation) ]
+
+        if not l:
             self.controller.log(_("Result is not a list of annotations"))
             return True
+
         duration = self.controller.cached_duration
         if duration <= 0:
             if self.controller.package.annotations:
                 duration = max([a.fragment.end for a in self.controller.package.annotations])
             else:
                 duration = 0
-        t=TimeLine(self.current_value,
+        t=TimeLine(l,
 		   minimum=0,
 		   maximum=duration,
 		   controller=self.controller)
