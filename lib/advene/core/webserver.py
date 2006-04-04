@@ -42,7 +42,8 @@ import advene.core.version
 from gettext import gettext as _
 
 from advene.model.package import Package
-from advene.model.annotation import Relation
+from advene.model.annotation import Annotation, Relation
+from advene.model.fragment import MillisecondFragment
 from advene.model.exception import AdveneException
 from advene.model.content import Content
 
@@ -576,9 +577,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if atid is not None:
                         atid=vlclib.get_id(self.server.controller.package.annotationTypes,
                                            atid)
-		    else:
-			self.send_error(404, _("You should provide an annotation-type id parameter"))
-			return
+                    else:
+                        self.send_error(404, _("You should provide an annotation-type id parameter"))
+                        return
 
                     c.queue_action(c.gui.open_adhoc_view, view, annotation_type_id=atid)
                     self.send_no_content()
@@ -706,12 +707,12 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.start_html (_("Available files"), duplicate_title=True)
         self.wfile.write ("<ul>")
 
-	l=[ os.path.join(config.data.path['data'], n)
-	    for n in os.listdir(config.data.path['data'])
-	    if n.lower().endswith('.xml') or n.lower().endswith('.azp') ]
+        l=[ os.path.join(config.data.path['data'], n)
+            for n in os.listdir(config.data.path['data'])
+            if n.lower().endswith('.xml') or n.lower().endswith('.azp') ]
         for uri in l:
             name, ext = os.path.splitext(uri)
-	    alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+            alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
             self.wfile.write ("""
             <li><a href="/admin/load?alias=%(alias)s&uri=%(uri)s">%(uri)s</a></li>
             """ % {'alias':alias, 'uri':uri})
@@ -884,13 +885,53 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         specifying the C{action=create} parameter.
 
         The type of the created object is given through the C{type}
-        parameter. For the moment, only C{view} is valid.
+        parameter. For the moment, C{view}, C{annotationtype} and
+        C{relationtype} are valid.
 
         A view is created with the following data, specified with parameters:
 
           - C{id} : the identifier of the view. Should not be already used.
           - C{class} : the class that this view should apply on.
           - C{data} : the content data of the view (the TAL template).
+
+        An annotation is created with the following data:
+          - C{id}: the identifier (optional, is generated if empty)
+          - C{type}: the annotation-type id
+          - C{begin}, C{end}: the begin and end time in ms
+          - C{data}: the content data (optional)
+
+        The following HTML code gives an example of relation creation::
+
+           <form method="POST" action="http://localhost:1234/packages/advene">
+             <input type="hidden" name="action" value="create" />
+             <input type="hidden" name="type" value="annotation" />
+           AnnotationType:  <input name="annotationtype" value="annotation"/><br />
+           Begin (in  ms): <input name="begin" value="1" /><br />
+           End (in ms): <input name="end" value="5000" /><br />
+           Content: <input name="data" value="Empty Annotation" /><br />
+           Redirect: <input name="redirect" value="" /><br />
+           <input type="submit" name="submit" />
+           </form>
+
+        An relation is created with the following data:
+          - C{id}: the identifier (optional, is generated if empty)
+          - C{type}: the relation-type id
+          - C{member1}, C{member2}: the ids of the members of the relation
+          - C{data}: the content data (optional)
+
+        The following HTML code gives an example of relation creation::
+
+           <form method="POST" action="http://localhost:1234/packages/advene">
+             <input type="hidden" name="action" value="create" />
+             <input type="hidden" name="type" value="relation" />
+           RelationType:  <input name="relationtype" value="basic-relation"/><br />
+           Member1:  <input name="member1" value="a1" /><br />
+           Member2  <input name="member2" value="a2" /><br />
+           Content: <input name="data" value="Empty Relation" /><br />
+           Redirect: <input name="redirect" value="" /><br />
+           <input type="submit" name="submit" />
+           </form>
+
 
         """
 
@@ -991,7 +1032,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     """ % (tales, query['key']))
             elif query['action'] == 'create':
                  # Create a new element. For the moment, only
-                 # View is supported
+                 # View, Relation, Annotation is supported
                  if not isinstance (objet, Package):
                      answer(_("Error"))
                      self.wfile.write (_("""
@@ -1029,6 +1070,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                      # relationtype = relation type identifier
                      # member1 = first member (annotation id)
                      # member2 = second member (annotation id)
+                     # data = content data (optional)
                      rt = context.evaluateValue("package/relationTypes/%s" % query['relationtype'])
                      try:
                          id_ = query['id']
@@ -1036,7 +1078,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                          id_ = package._idgenerator.get_id(Relation)
                      m1 = context.evaluateValue('package/annotations/%s' % query['member1'])
                      m2 = context.evaluateValue('package/annotations/%s' % query['member2'])
-                     
+
                      relationtypes=vlclib.matching_relationtypes(package, m1, m2)
                      if rt not in relationtypes:
                          answer(_("Error"))
@@ -1054,16 +1096,53 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                          answer(_("Error"))
                          self.wfile.write (_("<h1>Error</h1>"))
                          self.wfile.write (_("<p>Error while creating relation between %s and %s :</p><pre>%s</pre>") % (query['member1'], query['member2'], unicode(e)))
-                         self.wfile.write("""
-                         <pre>
-                         %s
-                         </pre>
-                         """ % (unicode(e)))
                          return
                      answer(_("Relation created"))
                      self.wfile.write (_("""
                      <h1>Relation <em>%s</em> created</h1>
                      """) % (relation.id))
+                 elif query['type'] == 'annotation':
+                     # Takes as parameters:
+                     # id = identifier (optional)
+                     # annotationtype = relation type identifier
+                     # begin, end = begin and end time (in ms)
+                     # data = content data (optional)
+                     at = context.evaluateValue("package/annotationTypes/%s" % query['annotationtype'])
+                     try:
+                         id_ = query['id']
+                     except KeyError:
+                         id_ = package._idgenerator.get_id(Annotation)
+                     try:
+                         begin=long(query['begin'])
+                         end=long(query['end'])
+                         fragment=MillisecondFragment(begin=begin,
+                                                      end=end)
+                         a=package.createAnnotation(ident=id_,
+                                                    type=at,
+                                                    fragment=fragment)
+                         package._idgenerator.add(id_)
+                         try:
+                             a.content.data = query['data']
+                         except KeyError:
+                             a.content.data = "Annotation %s" % id_
+                         package.annotations.append(a)
+                         self.server.controller.notify("AnnotationCreate", annotation=a)
+                     except Exception, e:
+                         t, v, tr = sys.exc_info()
+                         answer(_("Error"))
+                         self.wfile.write (_("<h1>Error</h1>"))
+                         self.wfile.write (_("<p>Error while creating annotation of type %s :") % query['annotationtype'])
+                         import code
+                         self.wfile.write(_("""<pre>
+                         %s
+                         %s
+                         %s</pre>""") % (unicode(t), unicode(v), "\n".join(code.traceback.format_tb (tr))))
+                         return
+
+                     answer(_("Annotation created"))
+                     self.wfile.write (_("""
+                     <h1>Annotation <em>%s</em> created</h1>
+                     """) % (a.id))
                  else:
                      answer(_("Error"))
                      self.wfile.write (_("<h1>Error</h1>"))
@@ -1244,7 +1323,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           - C{/admin/access} : display access control list
           - C{/admin/status} : display current status
           - C{/admin/display} : display or set the default webserver display mode
-	  - C{/admin/methods} : list the available global methods
+          - C{/admin/methods} : list the available global methods
           - C{/admin/halt} : halt the webserver
 
         Accessing the C{/admin} folder itself displays the summary
@@ -1285,23 +1364,23 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             except:
                 self.send_error (501,
                                  _("""You should specify an alias"""))
-		return
+                return
             try:
                 uri = query['uri']
             except:
                 self.send_error (501,
                                  _("""You should specify an uri"""))
-		return
+                return
             try:
                 self.server.controller.load_package (uri=uri, alias=alias)
                 self.start_html (_("Package %s loaded") % alias, duplicate_title=True)
                 self.display_loaded_packages (embedded=True)
-		return
+                return
             except:
                 self.send_error(501,
                                 _("""<p>Cannot load package %s</p>""")
                                 % uri)
-		return
+                return
         elif command == 'delete':
             alias = query['alias']
             self.server.controller.sunregister_package (alias)
@@ -1339,16 +1418,16 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.handle_access (l, query)
         elif command == 'methods':
             self.start_html (_('Available TALES methods'), duplicate_title=True)
-	    self.wfile.write('<ul>')
-	    c=self.server.controller.build_context(here=None)
-	    k=c.methods.keys()
-	    k.sort()
-	    for name in k:
-		descr=c.methods[name].__doc__
-		if descr:
-		    descr=descr.split('\n')[0]
-		self.wfile.write("<li><strong>%s</strong>: %s</li>\n" % (name, descr))
-	    self.wfile.write("</ul>")
+            self.wfile.write('<ul>')
+            c=self.server.controller.build_context(here=None)
+            k=c.methods.keys()
+            k.sort()
+            for name in k:
+                descr=c.methods[name].__doc__
+                if descr:
+                    descr=descr.split('\n')[0]
+                self.wfile.write("<li><strong>%s</strong>: %s</li>\n" % (name, descr))
+            self.wfile.write("</ul>")
         elif command == 'display':
             if l:
                 # Set default display mode
@@ -1391,19 +1470,19 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             k=d.keys()
             k.sort()
             for name in k:
-		a=catalog.get_action(name)
-		if a.parameters:
-		    # There are parameters. Display a link to the form.
-		    self.wfile.write(_("""<li>%s: %s""")
-				     % (name,
-					d[name]))
-		    self.wfile.write(a.as_html("/action/%s" % name))
-	        else:
-		    # No parameter, we can directly link the action
-		    self.wfile.write("""<li><a href="%s">%s</a>: %s"""
-				     % ("/action/%s" % name,
-					name,
-					d[name]))
+                a=catalog.get_action(name)
+                if a.parameters:
+                    # There are parameters. Display a link to the form.
+                    self.wfile.write(_("""<li>%s: %s""")
+                                     % (name,
+                                        d[name]))
+                    self.wfile.write(a.as_html("/action/%s" % name))
+                else:
+                    # No parameter, we can directly link the action
+                    self.wfile.write("""<li><a href="%s">%s</a>: %s"""
+                                     % ("/action/%s" % name,
+                                        name,
+                                        d[name]))
                 self.wfile.write("</li>\n")
             self.wfile.write("</ul>")
 
@@ -1666,8 +1745,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if displaymode != "raw":
             displaymode = "navigation"
 
-	self.start_html(title=_("TALES evaluation - %s") % tales,
-			mode=displaymode)
+        self.start_html(title=_("TALES evaluation - %s") % tales,
+                        mode=displaymode)
 
         # Display content
         if hasattr (objet, 'view') and callable (objet.view):
@@ -1884,7 +1963,7 @@ class AdveneWebServer(SocketServer.ThreadingMixIn,
         # Log messages go to sys.stderr by default.
         self.set_log_handler(None)
 
-	self.is_embedded = True
+        self.is_embedded = True
 
         self.controller=controller
         self.urlbase = u"http://localhost:%d/" % port
@@ -1961,11 +2040,11 @@ if __name__ == "__main__":
     controller.init(config.data.args)
 
     if config.data.webserver['mode'] == 1:
-	# Warning: in this case, the controller.update() method
-	# will not be called, so dynamic views will not work.
-	# Cf bin/advene-webserver for a correct example.
-	print _("Server ready to serve requests.")
-	controller.server.serve_forawhile ()
+        # Warning: in this case, the controller.update() method
+        # will not be called, so dynamic views will not work.
+        # Cf bin/advene-webserver for a correct example.
+        print _("Server ready to serve requests.")
+        controller.server.serve_forawhile ()
 
     # Cleanup the ZipPackage directories
     ZipPackage.cleanup()
