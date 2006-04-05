@@ -633,10 +633,13 @@ class EditRelationTypePopup (EditElementPopup):
                                        )
         vbox.add(f.get_view ())
 
+	members=[ ('#'+at.id, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
+	members.append( ('', _("Any annotation type")) )
         f = EditElementListForm(
             title=_("Members"),
-            element=self.element, field='hackedMemberTypes',
-            members=[ '#'+at.id for at in self.controller.package.annotationTypes ],
+            element=self.element, 
+	    field='hackedMemberTypes',
+            members=members,
             controller=self.controller,
             editable=editable)
         self.register_form(f)
@@ -1407,7 +1410,8 @@ class EditElementListForm(EditForm):
         """Edit an element list.
 
         The field attribute of element contains a list of elements.
-        Valid elements are specified in members.
+        Valid elements are specified in members, which is a list of couples
+	(element, label)
         """
         self.title=title
         self.model=element
@@ -1436,14 +1440,22 @@ class EditElementListForm(EditForm):
                     retval = True
         return retval
 
+    def get_representation(self, v):
+	r='???'
+	for el, label in self.members:
+	    if el == v:
+		r = label
+		break
+	return r
+	
     def create_store(self):
         store=gtk.ListStore(
             gobject.TYPE_PYOBJECT,
             gobject.TYPE_STRING
             )
         for el in getattr(self.model, self.field):
-            store.append( [el,
-                           vlclib.get_title(self.controller, el)] )
+            store.append( [ el,
+			    self.get_representation(el) ] )
         return store
 
     def insert_new(self, button=None, treeview=None):
@@ -1453,7 +1465,7 @@ class EditElementListForm(EditForm):
                                               controller=self.controller)
         if element is not None:
             treeview.get_model().append( [element,
-                                          vlclib.get_title(self.controller, element)] )
+					  self.get_representation(element) ])
         return True
 
     def delete_current(self, button=None, treeview=None):
