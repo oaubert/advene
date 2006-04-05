@@ -72,7 +72,9 @@ class TranscriptionView(AdhocView):
             }
 
         repr=self.model.getMetaData(config.data.namespace, 'representation')
-	if not sre.match('^\s*$', repr):
+	if repr is None:
+	    self.options['representation'] = ""
+	elif not sre.match(r'^\s*$', repr):
 	    # There is a standard representation for the type.
 	    self.options['representation'] = repr
 
