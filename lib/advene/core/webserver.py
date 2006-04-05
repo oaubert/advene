@@ -388,11 +388,12 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 if query.has_key ('filename'):
                     name = urllib.unquote(query['filename'])
                     if name == 'dvd':
-                        name = "dvd:///dev/dvd"
+                        name = self.server.controller.player.dvd_uri(1,1)
                     try:
                         if isinstance(name, unicode):
                             name=name.encode('utf8')
                         self.server.controller.player.playlist_add_item (name)
+                        self.server.controller.notify("MediaChange", uri=name)
 
                         self.start_html (_("File added"))
                         self.wfile.write (_("""<p><strong>%s has been added to the playlist</strong></p>""") % name)
@@ -455,6 +456,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if isinstance(f, unicode):
                         f=f.encode('utf8')
                     self.server.controller.player.playlist_add_item (f)
+		    self.server.controller.notify("MediaChange", uri=f)
 
                 if len(param) != 0:
                     # First parameter is the position
