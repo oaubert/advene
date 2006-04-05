@@ -525,6 +525,7 @@ class AdveneController:
         self.player.playlist_clear()
 	if uri is not None and uri != "":
 	    self.player.playlist_add_item (uri)
+	self.notify("MediaChange", uri=uri)
 
     def transmute_annotation(self, annotation, annotationType, delete=False):
         """Transmute an annotation to a new type.
@@ -558,6 +559,7 @@ class AdveneController:
                 mediafile=mediafile.encode('utf8')
             self.player.playlist_clear()
             self.player.playlist_add_item (mediafile)
+	    self.notify("MediaChange", uri=uri)
 
     def get_timestamp(self):
 	return time.strftime("%Y-%m-%d")
@@ -678,8 +680,10 @@ class AdveneController:
                         mediafile=mediafile.encode('utf8')
                     self.player.playlist_clear()
                     self.player.playlist_add_item (mediafile)
+		    self.notify("MediaChange", uri=mediafile)
 	else:
 	    self.player.playlist_clear()
+	    self.notify("MediaChange", uri=None)
 
         self.notify ("PackageActivate", package = self.package)
 
