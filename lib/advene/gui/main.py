@@ -1132,7 +1132,7 @@ class AdveneGUI (Connect):
         elif len(ats) > 1:
             at=advene.gui.util.list_selector(title=_("Choose an annotation type"),
                                              text=text,
-                                             members=ats,
+                                             members=[ (a, self.controller.get_title(a)) for a in ats],
                                              controller=self.controller)
         else:
 	    advene.gui.util.message_dialog(_("No annotation type is defined."),
@@ -1183,7 +1183,7 @@ class AdveneGUI (Connect):
         elif len(schemas) > 1:
             schema=advene.gui.util.list_selector(title=_("Choose a schema"),
                                                  text=text,
-                                                 members=schemas,
+                                                 members=[ (s, self.controller.get_title(s)) for s in schemas],
                                                  controller=self.controller)
         else:
 	    advene.gui.util.message_dialog(_("No schema is defined."),

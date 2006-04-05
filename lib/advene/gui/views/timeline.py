@@ -490,7 +490,7 @@ class TimeLine(AdhocView):
                                          text=_("Choose the type of relation\n you want to set between\n%s\nand\n%s") % (
             self.controller.get_title(source),
             self.controller.get_title(dest)),
-                                         members=relationtypes,
+                                         members=[ (r, self.controller.get_title(r)) for r in relationtypes],
                                          controller=self.controller)
         if rt is not None:
             relation=self.controller.package.createRelation(members=(source, dest),
