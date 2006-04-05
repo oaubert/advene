@@ -107,13 +107,11 @@ def list_selector(title=None,
                   preselect=None):
     """Pick an element from a list.
 
-    vlclib.get_title is invoked to get a textual representation of
-    the elements of members.
+    members is a list of couples (element, label).
 
     Return None if the action is cancelled.
     """
-    combobox = list_selector_widget(members=[ (e, vlclib.get_title(controller, e))
-                                              for e in members ],
+    combobox = list_selector_widget(members=members,
                                     preselect=preselect)
     
     d = gtk.Dialog(title=title,
