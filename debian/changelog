@@ -5,6 +5,8 @@ advene (0.21) unstable; urgency=low
   * The default template is now template.azp, so that new packages have a
     Resources reference by default.
 
+  * A RelationType can now specify a "Any annotation type" as member
+  
   * GUI:
 
     * it is now possible to load multiple packages in the GUI. Only one
@@ -34,6 +36,8 @@ advene (0.21) unstable; urgency=low
     * in transcription view, annotations can be modified and update the
       content accordingly
 
+    * the history view is cleared on media change
+ 
   * Actions:
 
     * new action: Entry (to allow entry of information through a popup)
@@ -43,7 +47,7 @@ advene (0.21) unstable; urgency=low
 
     * new TALES root element: packages (to access all the loaded packages)
 
- --
+ -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Wed,  5 Apr 2006 13:42:22 +0200
 
 advene (0.20) unstable; urgency=low
 
