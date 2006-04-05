@@ -27,6 +27,9 @@ from advene.model.constants import *
 
 from advene.model.util.auto_properties import auto_properties
 
+import xml.dom
+ELEMENT_NODE = xml.dom.Node.ELEMENT_NODE
+
 class AbstractType(modeled.Importable,
                    _impl.Uried, _impl.Authored, _impl.Dated, _impl.Titled):
 
@@ -262,11 +265,12 @@ class RelationType(AbstractType,
             return []
         l = []
         for i in e._get_childNodes ():
-            try:
-                uri = i.getAttributeNS (xlinkNS, 'href')
-                l.append (uri)
-            except:
-                pass
+            if i._get_nodeType() is ELEMENT_NODE:
+                try:
+                    uri = i.getAttributeNS (xlinkNS, 'href')
+                    l.append (uri)
+                except:
+                    l.append (None)
         return tuple (l)
 
     def setHackedMemberTypes (self, membertypes):
@@ -287,7 +291,8 @@ class RelationType(AbstractType,
         # Create the children nodes
         for m in membertypes:
             c = self._getDocument ().createElementNS (adveneNS, "member-type")
-            c.setAttributeNS (xlinkNS, 'xlink:href', unicode(m))
+            if m is not None:
+                c.setAttributeNS (xlinkNS, 'xlink:href', unicode(m))
             e.appendChild (c)
         return True
 

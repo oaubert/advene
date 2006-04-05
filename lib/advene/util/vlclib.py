@@ -244,7 +244,9 @@ def matching_relationtypes(package, ann1, ann2):
         t2=get_id(ann2.type.uri)
 
         #print "Testing (%s, %s) matching %s" % (t1, t2, lat)
-        if t1 == lat[0] and t2 == lat[1]:
+        if len (lat) == 2 \
+        and (lat[0] == u'' or lat[0] == t1) \
+        and (lat[1] == u'' or lat[1] == t2):
             r.append(rt)
     #print "Matching: %s" % r
     return r

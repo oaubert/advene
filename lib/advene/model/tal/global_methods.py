@@ -522,6 +522,9 @@ def query(target, context):
                     for l in f:
                         l = l.strip()
                         if l:
+                            # TODO: if l is a literal, convert it to a string
+                            # with additional attr 'lang' and 'datatype'
+                            # else do the following
                             for s in search:
                                 i = s.get(l)
                                 if i is not None:
