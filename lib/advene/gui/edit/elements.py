@@ -719,12 +719,13 @@ class EditForm(object):
             expr=element.getMetaData(namespace, data)
             if expr is None:
                 expr=""
-            if sre.match('^\s+', expr):
+            if sre.match('^\s*$', expr):
+		# The field can contain just a newline, which will be then ignored
                 try:
                     i=element.id
                 except AttributeError:
                     i=str(element)
-                print "Messed up metadata for %s" % i
+                print "Messed up metadata for %s (%s)" % (i, expr)
                 expr=""
             return expr
         return get_method
