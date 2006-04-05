@@ -1923,8 +1923,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         return
 
-class AdveneWebServer(SocketServer.ThreadingMixIn,
-                       BaseHTTPServer.HTTPServer):
+class AdveneWebServer(BaseHTTPServer.HTTPServer):
     """Specialized HTTP server for the Advene framework.
 
     This is a specialized HTTP Server dedicated to serving Advene
