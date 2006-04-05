@@ -85,28 +85,7 @@ class Config(object):
             print "Warning: undefined platform: ", os.sys.platform
             self.os=os.sys.platform
 
-        if self.os != 'win32':
-            self.path = {
-                # VLC binary path
-                'vlc': '/usr/bin',
-                # VLC additional plugins path
-                'plugins': '/usr/lib/vlc',
-                # Advene modules path
-                'advene': '/usr/lib/advene',
-                # Advene resources (.glade, template, ...) path
-                'resources': '/usr/share/advene',
-                # Advene data files default path
-                'data': self.get_homedir(),
-                # Imagecache save directory
-                'imagecache': '/tmp',
-                # Web data files
-                'web': '/usr/share/advene/web',
-                # Movie files search path. _ is the
-                # current package path
-                'moviepath': '_',
-                'locale': '/usr/share/advene/locale',
-                }
-        else:
+        if self.os == 'win32':
             self.path = {
                 # VLC binary path
                 'vlc': 'c:\\Program Files\\VideoLAN\\VLC',
@@ -126,6 +105,49 @@ class Config(object):
                 # current package path
                 'moviepath': '_',
                 'locale': 'c:\\Program Files\\Advene\\locale',
+                }
+        elif self.os == 'darwin':
+            self.path = {
+                # VLC binary path
+                'vlc': '/Applications/VLC.app',
+                # VLC additional plugins path
+                'plugins': '/Applications/VLC.app',
+                # Advene modules path
+                'advene': '/Applications/Advene.app',
+                # Advene resources (.glade, template, ...) path FIXME
+                'resources': '/Applications/Advene.app/share',
+                # Advene data files default path
+                'data': self.get_homedir(),
+                # Imagecache save directory
+                'imagecache': '/tmp',
+                # Web data files FIXME
+                'web': '/Applications/Advene.app/share/advene/web',
+                # Movie files search path. _ is the
+                # current package path
+                'moviepath': '_',
+		# Locale dir FIXME
+                'locale': '/Applications/Advene.app/locale',
+                }
+        else:
+            self.path = {
+                # VLC binary path
+                'vlc': '/usr/bin',
+                # VLC additional plugins path
+                'plugins': '/usr/lib/vlc',
+                # Advene modules path
+                'advene': '/usr/lib/advene',
+                # Advene resources (.glade, template, ...) path
+                'resources': '/usr/share/advene',
+                # Advene data files default path
+                'data': self.get_homedir(),
+                # Imagecache save directory
+                'imagecache': '/tmp',
+                # Web data files
+                'web': '/usr/share/advene/web',
+                # Movie files search path. _ is the
+                # current package path
+                'moviepath': '_',
+                'locale': '/usr/share/advene/locale',
                 }
 
         self.path['settings'] = self.get_settings_dir()
@@ -190,7 +212,6 @@ class Config(object):
             'caption': True,
             'snapshot-dimensions': (160,100),
             'snapshot-chroma': 'RV32',
-            'dvd-device': 'dvd:///dev/dvd',
             }
 
         self.webserver = {
@@ -262,6 +283,8 @@ class Config(object):
 
         if self.os == 'win32':
             self.win32_specific_config()
+	elif self.os == 'darwin':
+	    self.darwin_specific_config()
 
     def parse_options(self):
 	parser=OptionParser(usage="""Advene - annotate digital videos, exchange on the Net.
@@ -334,6 +357,15 @@ class Config(object):
         self.path['resources'] = os.path.sep.join( (advenehome, 'share') )
         self.path['web'] = os.path.sep.join( (advenehome, 'share', 'web') )
 
+    def darwin_specific_config(self):
+	"""MacOS X specific tweaks.
+	"""
+	if self.os != 'darwin':
+	    return
+	# This one should go away sometime. But for the moment, the only way
+	# to embed vlc is to use the X11 video output
+	self.player['vout'] = 'x11'
+	
     def get_registry_value (self, subkey, name):
         if self.os != 'win32':
             return None
