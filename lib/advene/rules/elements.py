@@ -903,6 +903,7 @@ class ECACatalog:
         'ApplicationStart':       _("Start of the application"),
         'ApplicationEnd':         _("End of the application"),
         'UserEvent':              _("User-defined event"),
+	'MediaChange':            _("Modification of the associated media"),
         }
 
     # Events that set the controller.modified state
