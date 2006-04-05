@@ -51,6 +51,15 @@ class HistoryNavigation(AdhocView):
     def close(self, *p):
 	return False
 
+    def register_callback (self, controller=None):
+        self.changerule=controller.event_handler.internal_rule (event="MediaChange",
+								method=self.clear)
+	return True
+
+    def unregister_callback (self, controller=None):
+        controller.event_handler.remove_rule(self.changerule, type_="internal")
+	return True
+
     def activate(self, widget=None, data=None, timestamp=None):
         self.controller.update_status("set", timestamp, notify=False)
         return True
