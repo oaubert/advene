@@ -1,23 +1,23 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 """
 Import external data.
-=====================   
+=====================
 
 Provides a generic framework to import/convert external data.
 
@@ -26,25 +26,25 @@ The general idea is:
   - Create an instance of Importer, called im.
     If the destination package already exists, call the constructor with
     package and defaultype named parameters.
-  
+
   - Initialisation:
     - If the destination package already exists, set the
       ``im.package``
       and
       ``im.defaultype``
       to appropriate values
-  
+
     - If you want to create a new package with specific type and schema id, use
       ``im.init_package(schemaid=..., annotationtypeid=...)``
-  
+
     - If nothing is given, a default package will be created, with a
       default schema and annotationtype
-  
+
   - Conversion:
   Call
   ``im.process_file(filename)``
   which will return the package containing the converted annotations
-  
+
 im.statistics hold a dictionary containing the creation statistics.
 """
 
@@ -69,7 +69,7 @@ import xml.dom
 
 IMPORTERS=[]
 
-def register(imp):    
+def register(imp):
     if hasattr(imp, 'can_handle'):
         IMPORTERS.append(imp)
 
@@ -91,10 +91,10 @@ def get_importer(fname, **kw):
             print "Using first one."
         i=l[0](**kw)
     return i
-    
+
 class GenericImporter(object):
     """Generic importer class
-    
+
     @ivar statistics: Dictionary holding the creation statistics
     @type statistics: dict
     FIXME...
@@ -151,17 +151,17 @@ class GenericImporter(object):
 
     def update_statistics(self, elementtype):
         self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
-        
+
     def create_annotation (self, type_=None, begin=None, end=None,
                            data=None, ident=None, author=None,
                            timestamp=None, title=None):
         """Create an annotation in the package
-        """        
+        """
         begin += self.offset
         end += self.offset
         if ident is None and self.controller is not None:
             ident=self.controller.package._idgenerator.get_id(Annotation)
-            
+
         if ident is None:
             a=self.package.createAnnotation(type=type_,
                                             fragment=MillisecondFragment(begin=begin, end=end))
@@ -185,7 +185,7 @@ class GenericImporter(object):
             v=self.statistics[k]
             res.append("\t%s" % vlclib.format_element_name(k, v))
         return "\n".join(res)
-    
+
     def init_package(self,
                      filename=None,
                      annotationtypeid='imported-type',
@@ -217,7 +217,7 @@ class GenericImporter(object):
         at.mimetype='text/plain'
         s.annotationTypes.append(at)
         self.update_statistics('annotation-type')
-        
+
         return p, at
 
     def convert(self, source):
@@ -228,7 +228,7 @@ class GenericImporter(object):
           - begin (in ms)
           - end or duration (in ms)
           - content
-          
+
         The following keys are optional:
           - id
           - type (which must be a *type*, not a type-id)
@@ -289,7 +289,7 @@ class TextImporter(GenericImporter):
     """Text importer.
 
     In addition to the parameters of GenericImporter, you can specify
-    
+
     regexp: a regexp with named matching parentheses (coded
     as"(?P<name>\d+)" for instance, see sre doc) returning the
     parameters needed by GenericImporter.convert
@@ -392,7 +392,7 @@ class ChaplinImporter(GenericImporter):
 
     def __init__(self, **kw):
         super(ChaplinImporter, self).__init__(**kw)
-        
+
         self.command="/usr/bin/chaplin -c"
         #   chapter 03  begin:    200.200 005005 00:03:20.05
         self.regexp="^\s*chapter\s*(?P<chapter>\d+)\s*begin:\s*.+(?P<begin>[0-9:])\s*$"
@@ -577,7 +577,7 @@ class ElanImporter(GenericImporter):
                     # Related annotation:
                     rel_id = ref.ANNOTATION_REF
                     rel_uri = '#'.join( (self.package.uri, rel_id) )
-                    
+
                     if self.package.annotations.has_key(rel_uri):
                         rel_an=self.package.annotations[rel_uri]
                         # We reuse the related annotation fragment
@@ -697,7 +697,7 @@ class SubtitleImporter(GenericImporter):
 
     def __init__(self, encoding=None, **kw):
         super(SubtitleImporter, self).__init__(**kw)
-        
+
         if encoding is None:
             encoding='latin1'
         self.encoding=encoding
@@ -707,29 +707,30 @@ class SubtitleImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def srt_iterator(self, f):
-        base='\d\d:\d\d:\d+[,.]\d+'
-        pattern=sre.compile('(?P<begin>' + base + ').+(P?<end>' + base + ')')
-        for l in f:
-            tc=None
-            content=[]
-            for line in f:
-                line=line.rstrip()
-                match=pattern.search(line)
-                if match is not None:
-                    d=match.groupdict()
-                    tc=(d['begin'], d['end'])                  
-                elif len(line) == 0:
-                    # Empty line: end of subtitle
-                    # Convert if and reset the data
-                    d={'begin': tc[0],
-                       'end': tc[1],
-                       'content': "\n".join(content)}
-                    tc=None
-                    content=[]
-                    yield d
-                else:
-                    if tc is not None:
-                        content.append(unicode(line, self.encoding).encode('utf-8'))
+        base=r'\d+:\d+:\d+[,\.]\d+'
+        pattern=sre.compile('(' + base + ').+(' + base + ')')
+        tc=None
+        content=[]
+        for line in f:
+            line=line.rstrip()
+            match=pattern.search(line)
+            if match is not None:
+                tc=(match.group(1), match.group(2))
+            elif len(line) == 0:
+                # Empty line: end of subtitle
+                # Convert it and reset the data
+                if tc is None:
+                    print "Strange error: no timestamp was found for content ", "".join(content)
+                    content = []
+                d={'begin': tc[0],
+                   'end': tc[1],
+                   'content': "\n".join(content)}
+                tc=None
+                content=[]
+                yield d
+            else:
+                if tc is not None:
+                    content.append(unicode(line, self.encoding).encode('utf-8'))
                     # else We could check line =~ /^\d+$/
 
     def process_file(self, filename):
@@ -761,7 +762,7 @@ class PraatImporter(GenericImporter):
     def can_handle(fname):
         return (fname.endswith('.praat') or fname.endswith('.TextGrid'))
     can_handle=staticmethod(can_handle)
-        
+
     def iterator(self, f):
         l=f.readline()
         if not 'ooTextFile' in l:
@@ -778,7 +779,7 @@ class PraatImporter(GenericImporter):
         begin=None
         end=None
         content=None
-        
+
         while True:
             l=f.readline()
             if not l:
@@ -921,7 +922,7 @@ class CmmlImporter(GenericImporter):
                 d['end']=begin
                 yield d
             delayed=[]
-                
+
             try:
                 end=self.npt2time(clip.end)
             except AttributeError:
@@ -976,7 +977,7 @@ class CmmlImporter(GenericImporter):
                     yield d
             except AttributeError:
                 pass
-                
+
             # Meta attributes (need to create schemas as needed)
             try:
                 for meta in clip.meta:
@@ -1016,7 +1017,7 @@ class CmmlImporter(GenericImporter):
             self.package=Package(uri='new_pkg', source=None)
 
         p=self.package
-        schema=p.createSchema(ident='cmml')     
+        schema=p.createSchema(ident='cmml')
         schema.author=config.data.userid
         schema.date=self.timestamp
         schema.title="CMML converted schema"
@@ -1040,7 +1041,7 @@ class CmmlImporter(GenericImporter):
         except AttributeError:
             # Not <head> componenent
             pass
-        
+
         # Handle stream information
         if len(cm.stream) > 1:
             self.log("Multiple streams. Will handle only the first one. Support yet to come...")
@@ -1052,7 +1053,7 @@ class CmmlImporter(GenericImporter):
         except AttributeError:
             t=0
         self.basetime=t
-        
+
         # Stream src:
         try:
             il=cm.node.xpath('//import')
@@ -1062,7 +1063,7 @@ class CmmlImporter(GenericImporter):
         except AttributeError:
             src=""
         self.package.setMetaData (config.data.namespace, "mediafile", src)
-                    
+
         self.convert(self.iterator(cm))
 
         return self.package
