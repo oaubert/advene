@@ -54,7 +54,16 @@ def image_from_position(controller, position=None, width=None, height=None):
 	# Some png_data corruption have been reported. Handle them here.
 	i.set_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
     return i
-    
+
+def dialog_keypressed_cb(widget=None, event=None):
+    if event.keyval == gtk.keysyms.Return:
+        widget.response(gtk.RESPONSE_ACCEPT)
+        return True
+    elif event.keyval == gtk.keysyms.Escape:
+        widget.response(gtk.RESPONSE_REJECT)
+        return True
+    return False
+
 def generate_list_model(elements, active_element=None):
     """Create a TreeModel matching the elements list.
 
@@ -128,6 +137,8 @@ def list_selector(title=None,
     d.vbox.add(combobox)
     combobox.show_all()
 
+    d.connect("key_press_event", dialog_keypressed_cb)
+
     res=d.run()
     retval=None
     if res == gtk.RESPONSE_ACCEPT:
@@ -144,6 +155,8 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO):
 	None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
 	icon, button, label)
     dialog.set_position(gtk.WIN_POS_MOUSE)
+    dialog.connect("key_press_event", dialog_keypressed_cb)
+
     res=dialog.run()
     dialog.destroy()
     if icon == gtk.MESSAGE_QUESTION:
@@ -177,6 +190,7 @@ def yes_no_cancel_popup(title=None,
         l=gtk.Label(text)
         l.show()
         hb.add(l)
+    d.connect("key_press_event", dialog_keypressed_cb)
 
     retval=d.run()
     d.destroy()
@@ -204,13 +218,7 @@ def entry_dialog(title=None,
     if default:
         e.set_text(default)
     
-    def keypressed_cb(widget=None, event=None):
-        if event.keyval == gtk.keysyms.Return:
-            # Validate the activated entry
-            d.response(gtk.RESPONSE_ACCEPT)
-            return True
-        return False
-    e.connect("key_press_event", keypressed_cb)
+    d.connect("key_press_event", dialog_keypressed_cb)
 
     d.vbox.add(e)
 
