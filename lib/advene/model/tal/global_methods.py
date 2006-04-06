@@ -514,27 +514,37 @@ def query(target, context):
                     # FIXME: this is alpha code !
                     import os
                     r = []
-                    cmd = os.environ.get("ADVENE_PELLET", "/home/pa/exe/advene-pellet")
+                    cmd = os.environ.get("PELLET", "/usr/local/bin/pellet")
                     queryfile = "http://localhost:1234/packages/advene/queries/%s/content/data" % q.id
-                    f = os.popen ("%s -queryFile %s" % (cmd, queryfile), "r", 0)
-                    r = []
-                    t = []
-                    for l in f:
-                        l = l.strip()
-                        if l:
-                            # TODO: if l is a literal, convert it to a string
-                            # with additional attr 'lang' and 'datatype'
-                            # else do the following
-                            for s in search:
-                                i = s.get(l)
-                                if i is not None:
-                                        l = i
+                    f = os.popen ("%s -qf %s" % (cmd, queryfile), "r", 0)
+                    from advene.util.pellet import PelletResult
+                    final_result = []
+                    for r in PelletResult (f).results:
+                        t = []
+                        for i in r:
+                            if i.startswith ('"'):
+                                i = i[1:-1]
+                            elif i == "<<null>>":
+                                i = None
+                            else:
+                                # FIXME: there should be a safer way to decide
+                                # whether this QName is an Advene URI
+                                id = i.split(":")[-1]
+                                if id.startswith ("-"):
+                                    # FIXME: get rid of any row with a blank
+                                    # node. A bit brutal. Any better idea ?
+                                    # Pellet does not seem to understand isIRI
+                                    # so we have to do it ourselves.
+                                    t = None
+                                    break
+                                for s in search:
+                                    j = s.get("%s#%s" % (p.uri, id))
+                                    if j is not None:
+                                        i = j
                                         break
-                            t.append (l)
-                        else:
-                            r.append (tuple(t))
-                            t = []
-                    return r
+                            t.append (i)
+                        if t: final_result.append (t)
+                    return final_result
                 else:
                     raise Exception("Unsupported query type for %s" % q.id)
             return render
