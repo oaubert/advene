@@ -315,17 +315,8 @@ class CreateElementPopup(object):
                        buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
 
+        d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
         d.vbox.add(self.widget)
-
-        def keypressed_cb(widget=None, event=None):
-            if event.keyval == gtk.keysyms.Return:
-                d.response(gtk.RESPONSE_ACCEPT)
-                return True
-            elif event.keyval == gtk.keysyms.Escape:
-                d.response(gtk.RESPONSE_REJECT)
-                return True
-            return False
-        d.connect("key_press_event", keypressed_cb)
 
 	while True:
 	    res=d.run()
