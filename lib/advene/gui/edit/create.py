@@ -330,7 +330,7 @@ class CreateElementPopup(object):
 		break
 	d.destroy()
 
-        if retval is not None and not modal:
+        if retval is not None and not modal and not isinstance(retval, Resources):
             try:
                 pop = advene.gui.edit.elements.get_edit_popup (retval,
                                                                controller=self.controller)
