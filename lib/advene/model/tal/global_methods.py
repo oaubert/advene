@@ -500,7 +500,7 @@ def query(target, context):
                     res=qexpr.execute(context=self._context)
                     self._context.popLocals()
                     return res
-                elif q.content.mimetype == 'text/x-advene-sparql-query':
+                elif q.content.mimetype == 'application/x-advene-sparql-query':
                     p = self._target.rootPackage
                     search = [
                         p.getAnnotations(),
