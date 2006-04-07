@@ -1,4 +1,10 @@
+* create a new view content type:
+  application/x-advene-adhoc-parameters to store parameters for adhoc
+  views
+
 * content encoding bug in query when passing accents in query parameters
+
+* Bug in webserver.py for files with accents in their fullpath (encoding pb). Should check all encodings everywhere and make sure everything is utf8 internally.
 
 * notification of new popups when embedded (flash tab)
 
@@ -12,22 +18,29 @@
 
 * make save button inactive when not modified
 
-* implement .apl (advene package list) file format
+* implement .apl (advene package list) file format (cf .m3u)
 
 * allow to specify the browser for open_url in preferences
 
-* fix bug in snapshot when vout == x11
+* fix bug in snapshot when vout == x11?
 
 * check http://chardet.feedparser.org/
 
 * DnD to/from common apps: cf http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq23.018.htp and http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq23.031.htp
 
-* create a meta-package that gives a list of packages to load (Cf .m3u)
-
-* timeline: allow to specify annotation types (2 lists: available,
-   present + > < buttons), or reuse gui.edit.elements.EditElementListForm
-
 * timeline: allow to specify  default height
+
+* timeline: select a region to fit to window
+
+* timeline: find a way to render overlapping buttons
+
+* add parameters to TimeLine view (displayed annotation types, zoom)
+
+* timeline: directly create annotations from timeline
+
+* Annotation resize in timeline -> Hack (right button). Should
+reimplement a native widget for annotations or use DiaCanvas
+
 
 * edit.elements: focus on content window on open
 
@@ -93,10 +106,6 @@ that should return the same URI. The proposed solution is to enforce the importi
 
 * Rewrite admin templates with AJAX functionalities (cf http://ajaxpatterns.org/Main_Page)
 
-* Linux-installer (one file executable): http://pyinstaller.hpcf.upr.edu/cgi-bin/trac.cgi
-
-* Bug in webserver.py for files with accents in their fullpath (encoding pb). Should check all encodings everywhere and make sure everything is utf8 internally.
-
 * Demo movie maker : http://en.wikipedia.org/wiki/Screencast
 http://www.debugmode.com/wink/
 vlc --screen-fps=2 screen:// --no-sout-audio --sout '#transcode{vcodec=mp4v,venc=ffmpeg,scale=0.2}:standard{access=file,mux=avi,url=/tmp/foo.avi}'
@@ -109,15 +118,11 @@ istanbul
 occurring events (but base timeline is then application time instead
 of movie time)
 
-* timeline: find a way to render overlapping buttons
-
 * SMIL examples: http://webmonkey.wired.com/webmonkey/00/41/index4a_page3.html?tw=authoring
 
 * exports.xml: define a CMML export view (cf www.annodex.net)
 
 * TTS on Win32: http://www.cs.unc.edu/~parente/tech/tr02.shtml
-
-* Timeline: select a region to fit to window
 
 * Transcribe: add an option "Cursor follows time" to set the cursor
    according to movie time 
@@ -207,18 +212,11 @@ annotation event.
   advene.iss
  + wget Twiki:AdveneUserGuide to doc/user.html (cf scripts/update_doc)
 
-* Add parameters to TimeLine view (displayed annotation types, zoom)
-
 * Morphix image : use Ubuntu as a base (pygtk included). Missing: vlc + python-vlc
 
 * Rewrite webserver using Twisted (and maybe use it also for ECAEngine) ?
 
 * Correct bug when no type is present (cf export_views.xml)
-
-* timeline: directly create annotations from timeline
-
-* Annotation resize in timeline -> Hack (right button). Should
-reimplement a native widget for annotations or use DiaCanvas
 
 * Génération régulière d'annotations (toutes les XX secondes), pour
 alignement plus facile par la suite (couplé avec les fonctions
@@ -1138,3 +1136,9 @@ res.startswith('<html>') [useful for Kupu]
 * gui.popup: allow to remove resources
 
 * annotationtype,relationtype: propose common mimetypes at creation
+
+* timeline: allow to specify annotation types (2 lists: available,
+   present + > < buttons), or reuse gui.edit.elements.EditElementListForm
+
+* Linux-installer (one file executable): http://pyinstaller.hpcf.upr.edu/cgi-bin/trac.cgi
+
