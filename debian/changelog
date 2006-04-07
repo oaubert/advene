@@ -37,7 +37,10 @@ advene (0.21) unstable; urgency=low
       content accordingly
 
     * the history view is cleared on media change
- 
+  
+    * in the timeline, it is now possible to specify the ordered list of
+      displayed annotations
+  
   * Actions:
 
     * new action: Entry (to allow entry of information through a popup)
