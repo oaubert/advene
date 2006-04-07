@@ -214,7 +214,7 @@ class Shape:
                        parent=None,
                        flags=gtk.DIALOG_DESTROY_WITH_PARENT,
                        buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-                                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ) )
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ) )
 
         d.vbox.add(edit)
 
@@ -223,7 +223,7 @@ class Shape:
                 d.response(gtk.RESPONSE_ACCEPT)
                 return True
             elif event.keyval == gtk.keysyms.Escape:
-                d.response(gtk.RESPONSE_REJECT)
+                d.response(gtk.RESPONSE_CANCEL)
                 return True
             return False
         d.connect("key_press_event", keypressed_cb)

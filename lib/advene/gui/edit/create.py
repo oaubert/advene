@@ -313,7 +313,7 @@ class CreateElementPopup(object):
                        parent=None,
                        flags=flags,
                        buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-                                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
 
         d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
         d.vbox.add(self.widget)
