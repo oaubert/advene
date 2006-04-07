@@ -515,7 +515,7 @@ def query(target, context):
                     import os
                     r = []
                     cmd = os.environ.get("PELLET", "/usr/local/bin/pellet")
-                    queryfile = "http://localhost:1234/packages/advene/queries/%s/content/data" % q.id
+		    queryfile = self._context.evaluateValue('here/content/data/absolute_url')
                     f = os.popen ("%s -qf %s" % (cmd, queryfile), "r", 0)
                     from advene.util.pellet import PelletResult
                     final_result = []
