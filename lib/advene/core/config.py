@@ -243,7 +243,10 @@ class Config(object):
         self.reaction_time=200
 
         # MIMEtypes that can be edited by the TextContentHandler
-        self.text_mimetypes = ( 'application/x-advene-structured' )
+        self.text_mimetypes = ( 
+	    'application/x-advene-structured',
+	    'application/x-advene-sparql-query'
+	    )
 
 	# Drag and drop parameters for URIed element and other elements
 	self.target_type = {}
