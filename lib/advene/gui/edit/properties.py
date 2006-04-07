@@ -319,6 +319,7 @@ class EditWidget(gtk.VBox):
                        buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
         d.vbox.add(self)
+
         self.show_all()
         res=d.run()
         d.destroy()
