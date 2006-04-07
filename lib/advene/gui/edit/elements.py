@@ -202,7 +202,7 @@ class EditElementPopup (object):
                            parent=None,
                            flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL,
                            buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-                                     gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
+                                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
 
             d.vbox.add(self.vbox)
             d.vbox.show_all()
@@ -214,7 +214,7 @@ class EditElementPopup (object):
                 retval=False
                 if res == gtk.RESPONSE_ACCEPT:
                     retval=self.apply_cb()
-                elif res == gtk.RESPONSE_REJECT:
+                elif res == gtk.RESPONSE_CANCEL:
                     retval=True
 
                 if retval:
@@ -898,7 +898,7 @@ class TextContentHandler (ContentHandler):
                 b=self.view.get_buffer()
                 b.insert_at_cursor(unicode(e))
             return True
-        browser = Browser(element=self.controller.package,
+        browser = Browser(element=self.element,
                           controller=self.controller,
 			  callback=callback)
         browser.popup()
