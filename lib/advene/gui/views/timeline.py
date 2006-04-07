@@ -16,12 +16,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 import sys
+import sets
 
 # Advene part
 import advene.core.config as config
 
 from advene.model.package import Package
 from advene.gui.views import AdhocView
+import advene.gui.edit.elements
 
 import advene.util.vlclib as vlclib
 import advene.gui.util
@@ -37,35 +39,53 @@ class TimeLine(AdhocView):
     """
     Representation of a list of annotations placed on a timeline.
 
-    If l is None, then use controller.package.annotations (and handle updates accordingly).
+    If l is None, then use controller.package.annotations (and handle
+    updates accordingly).
     """
     def __init__ (self, l=None,
                   minimum=None,
                   maximum=None,
                   adjustment=None,
-                  controller=None):
+                  controller=None,
+                  annotationtypes=None):
 
         self.view_name = _("Timeline")
-	self.view_id = 'timeline'
-	self.close_on_package_load = False
+        self.view_id = 'timeline'
+        self.close_on_package_load = False
         self.contextual_actions = (
-            (_("Refresh"), self.refresh),            
+            (_("Refresh"), self.refresh),
             )
 
         self.list = l
         self.controller=controller
+        self.annotationtypes = annotationtypes
         self.tooltips = gtk.Tooltips ()
 
+        # Now that self.list is initialized, we reuse the l variable
+        # for various checks.
+        if l is None:
+            l = controller.package.annotations
+        # Initialize annotation types if needed
+        if self.annotationtypes is None:
+            if self.list is None:
+                # We display the whole package, so display also
+                # empty annotation types
+                self.annotationtypes = list(self.controller.package.annotationTypes)
+            else:
+                # We specified a list. Display only the annotation
+                # types for annotations present in the set
+                self.annotationtypes = list(sets.Set([ a.type for a in self.list ]))
+
         if minimum is None and maximum is None and controller is not None:
-	    # No dimension. Get them from the controller.
-	    duration = controller.cached_duration
-	    if duration <= 0:
-		if controller.package.annotations:
-		    duration = max([a.fragment.end for a in controller.package.annotations])
-		else:
-		    duration = 0
-	    minimum=0
-	    maximum=duration
+            # No dimension. Get them from the controller.
+            duration = controller.cached_duration
+            if duration <= 0:
+                if controller.package.annotations:
+                    duration = max([a.fragment.end for a in l])
+                else:
+                    duration = 0
+            minimum=0
+            maximum=duration
 
         if minimum is None or maximum is None:
             b, e = self.bounds ()
@@ -123,9 +143,8 @@ class TimeLine(AdhocView):
         self.layout.connect('scroll_event', self.scroll_event)
         self.layout.connect("key_press_event", self.key_pressed_cb)
         self.layout.connect('button_press_event', self.mouse_pressed_cb)
-	self.layout.connect ("size-allocate", self.resize_event)
+        self.layout.connect ("size-allocate", self.resize_event)
 
-        self.rapport = 1
         self.old_ratio_value = self.ratio_adjustment.value
 
         self.colors = {
@@ -140,9 +159,6 @@ class TimeLine(AdhocView):
         # Used for paste operations
         self.selected_position = 0
         self.selection_marker = None
-
-        # Dictionary holding the vertical position for each type
-        self.layer_position = {}
 
         # Annotation subject to resizing methods
         self.resized_annotation = None
@@ -160,16 +176,25 @@ class TimeLine(AdhocView):
         self.update_adjustment ()
         self.adjustment.set_value (u2p(minimum))
 
+        # Dictionary holding the vertical position for each type
+        self.layer_position = {}
+        self.update_layer_position()
+
         self.populate ()
-        # Add empty annotation types:
-        for at in self.controller.package.annotationTypes:
-            self.layer_position.setdefault (at,
-                                            max(self.layer_position.values() or (1,)) + self.button_height + 10)
 
         self.draw_marks ()
 
         self.draw_current_mark()
-	self.widget = self.get_full_widget()
+        self.widget = self.get_full_widget()
+
+    def update_layer_position(self):
+        """Update the layer_position attribute
+
+        """
+        h = self.button_height + 10
+        for at in self.annotationtypes:
+            self.layer_position[at] = h
+            h += self.button_height + 10
 
     def refresh(self, *p):
         self.update_model(self.controller.package)
@@ -319,9 +344,11 @@ class TimeLine(AdhocView):
         self.tooltips.set_tip(b, tip)
         return True
 
-    def update_model(self, package):
+    def update_model(self, package=None):
         """Update the whole model.
         """
+        if package is None:
+            package = self.controller.package
         self.layer_position.clear()
         self.minimum = 0
         oldmax=self.maximum
@@ -334,13 +361,9 @@ class TimeLine(AdhocView):
         if self.maximum != oldmax:
             self.update_layout()
         self.layout.foreach(self.remove_widget, self.layout)
+        self.update_layer_position()
         self.populate()
-        if self.maximum != oldmax:
-            self.draw_marks()
-        # Add empty annotation types:
-        for at in package.annotationTypes:
-            self.layer_position.setdefault (at,
-                                            max(self.layer_position.values() or (1,)) + self.button_height + 10)
+        self.draw_marks()
         self.ratio_event()
         self.legend.foreach(self.remove_widget, self.legend)
         self.update_legend_widget(self.legend)
@@ -409,7 +432,6 @@ class TimeLine(AdhocView):
         a = self.adjustment
         print ("Lower: %.1f\tUpper: %.1f\tValue: %.1f\tPage size: %.1f"
                % (a.lower, a.upper, a.value, a.page_size))
-        print "Ratio: %.3f" % self.rapport
 
     def align_annotations(self, source, dest, mode):
         new={
@@ -457,6 +479,14 @@ class TimeLine(AdhocView):
             print "Unknown target type for drop: %d" % targetType
         return True
 
+    def type_drag_sent(self, widget, context, selection, targetType, eventTime):
+        #print "drag_sent event from %s" % widget.annotation.content.data
+        if targetType == config.data.target_type['annotation-type']:
+            selection.set(selection.target, 8, widget.annotationtype.uri)
+        else:
+            print "Unknown target type for drag: %d" % targetType
+        return True
+
     def type_drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
@@ -464,13 +494,26 @@ class TimeLine(AdhocView):
             dest=widget.annotationtype
 
             if self.delete_transmuted_toggle.get_active() and source.relations:
-		advene.gui.util.message_dialog(_("Cannot delete the annotation : it has relations."),
-					       icon=gtk.MESSAGE_WARNING)
+                advene.gui.util.message_dialog(_("Cannot delete the annotation : it has relations."),
+                                               icon=gtk.MESSAGE_WARNING)
                 return True
 
             self.controller.transmute_annotation(source,
                                                  dest,
                                                  delete=self.delete_transmuted_toggle.get_active())
+        elif targetType == config.data.target_type['annotation-type']:
+            source_uri=selection.data
+            source=self.controller.package.annotationTypes.get(source_uri)
+            dest=widget.annotationtype
+            if source in self.annotationtypes:
+                self.annotationtypes.remove(source)
+
+                j=self.annotationtypes.index(dest)
+                l= self.annotationtypes[:j+1]
+                l.append(source)
+                l.extend(self.annotationtypes[j+1:])
+                self.annotationtypes = l
+                self.update_model()
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -482,8 +525,8 @@ class TimeLine(AdhocView):
                                                     source,
                                                     dest)
         if not relationtypes:
-	    advene.gui.util.message_dialog(_("No compatible relation types are defined."),
-					   icon=gtk.MESSAGE_WARNING)
+            advene.gui.util.message_dialog(_("No compatible relation types are defined."),
+                                           icon=gtk.MESSAGE_WARNING)
             return True
 
         rt=advene.gui.util.list_selector(title=_("Create a relation"),
@@ -540,23 +583,28 @@ class TimeLine(AdhocView):
         return True
 
     def deactivate_all(self):
-	"""Deactivate all annotations.
-	"""
-	def desactivate(widget):
-	    try:
-		if widget.active:
-		    widget.active = False
-		    for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-				  gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-				  gtk.STATE_PRELIGHT):
-			widget.modify_bg (style, self.colors['inactive'])
-	    except AttributeError:
-		pass
-	    return True
-	self.layout.foreach(desactivate)
-	return True
+        """Deactivate all annotations.
+        """
+        def desactivate(widget):
+            try:
+                if widget.active:
+                    widget.active = False
+                    for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                                  gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                                  gtk.STATE_PRELIGHT):
+                        widget.modify_bg (style, self.colors['inactive'])
+            except AttributeError:
+                pass
+            return True
+        self.layout.foreach(desactivate)
+        return True
 
     def create_annotation_widget(self, annotation):
+        try:
+            pos = self.layer_position[annotation.type]
+        except KeyError:
+            return None
+
         u2p = self.unit2pixel
         title=vlclib.get_title(self.controller, annotation)
         b = gtk.Button()
@@ -579,10 +627,6 @@ class TimeLine(AdhocView):
 
         b.set_size_request(u2p(annotation.fragment.duration),
                            self.button_height)
-        # Get the default height for the annotation type. If not defined,
-        # set it to the following value.
-        pos = self.layer_position.setdefault (annotation.type,
-                                              max(self.layer_position.values() or (1,)) + self.button_height + 10)
 
         self.layout.put(b, u2p(annotation.fragment.begin), pos)
         tip = _("%s\nBegin: %s\tEnd: %s") % (title,
@@ -646,9 +690,9 @@ class TimeLine(AdhocView):
         return True
 
     def position_reset(self):
-	# The position was reset. Deactive active annotations.
-	self.deactivate_all()
-	return True
+        # The position was reset. Deactive active annotations.
+        self.deactivate_all()
+        return True
 
     def mark_press_cb(self, eventbox, event, t):
         # What is the current relative position of the
@@ -723,9 +767,9 @@ class TimeLine(AdhocView):
         return minimum, maximum
 
     def key_pressed_cb (self, win, event):
-	# Process player shortcuts
-	if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
-	    return True
+        # Process player shortcuts
+        if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
+            return True
 
         if event.state & gtk.gdk.CONTROL_MASK:
             # The Control-key is held. Special actions :
@@ -865,17 +909,17 @@ class TimeLine(AdhocView):
         return True
 
     def resize_event(self, widget=None, *p):
-	"""Recompute elements when the layout size changes
-	"""
+        """Recompute elements when the layout size changes
+        """
         parent = self.layout.window
-	if not parent:
-	    return False
+        if not parent:
+            return False
         (w, h) = parent.get_size ()
-	if (w, h) != self.layout_size:
-	    # Widget size changed.
-	    self.fraction_event(None)
-	    self.layout_size = (w, h)
-	return False
+        if (w, h) != self.layout_size:
+            # Widget size changed.
+            self.fraction_event(None)
+            self.layout_size = (w, h)
+        return False
 
     def fraction_event (self, widget=None, *p):
         """Set the zoom factor to display the given fraction of the movie.
@@ -883,8 +927,8 @@ class TimeLine(AdhocView):
         fraction is > 0 and <= 1.
         """
         parent = self.layout.window
-	if not parent:
-	    return True
+        if not parent:
+            return True
         (w, h) = parent.get_size ()
 
         fraction=self.fraction_adj.value
@@ -962,11 +1006,12 @@ class TimeLine(AdhocView):
         """
         width=0
         height=0
-        for t in self.layer_position.keys():
+        for t in self.annotationtypes:
             b=gtk.Button()
             l=gtk.Label(self.controller.get_title(t))
             l.modify_font(self.annotation_font)
             b.add(l)
+            b.set_size_request(-1, self.button_height)
             layout.put (b, 0, self.layer_position[t])
             b.annotationtype=t
             b.show()
@@ -977,11 +1022,17 @@ class TimeLine(AdhocView):
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                             gtk.DEST_DEFAULT_HIGHLIGHT |
                             gtk.DEST_DEFAULT_ALL,
-                            config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+                            [ config.data.drag_type['annotation'][0],
+                              config.data.drag_type['annotation-type'][0] ],
+                            gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+            # The button can generate drags (to change annotation type order)
+            b.connect("drag_data_get", self.type_drag_sent)
+            b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                              config.data.drag_type['annotation-type'], gtk.gdk.ACTION_MOVE)
 
             a=b.get_allocation()
             width=max(width, a.width)
-            height=max (height, self.layer_position[t] + a.height)
+            height=max (height, self.layer_position[t] + 3 * self.button_height)
 
         layout.set_size (width, height)
         return
@@ -993,8 +1044,8 @@ class TimeLine(AdhocView):
         return legend
 
     def get_full_widget(self):
-	"""Return the layout with its controllers.
-	"""
+        """Return the layout with its controllers.
+        """
         vbox = gtk.VBox()
         vbox.connect ("key-press-event", self.key_pressed_cb)
 
@@ -1013,6 +1064,29 @@ class TimeLine(AdhocView):
         hbox.set_homogeneous (False)
         vbox.pack_start (hbox, expand=False)
 
+
+        def trash_drag_received(widget, context, x, y, selection, targetType, time):
+            if targetType == config.data.target_type['annotation-type']:
+                source_uri=selection.data
+                source=self.controller.package.annotationTypes.get(source_uri)
+                if source in self.annotationtypes:
+                    self.annotationtypes.remove(source)
+                    self.update_model()
+            else:
+                print "Unknown target type for drop: %d" % targetType
+            return True
+
+        b=gtk.Button(_("Displayed types"))
+        self.tooltips.set_tip(b, _("Drag an annotation type here to remove it from display.\nClick to edit all displayed types"))
+        b.connect("clicked", self.edit_annotation_types)
+        b.connect("drag_data_received", trash_drag_received)
+        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.drag_type['annotation-type'],
+                        gtk.gdk.ACTION_MOVE)
+        hbox.add(b)
+
         s = gtk.HScale (self.fraction_adj)
         s.set_digits(2)
         s.connect ("value-changed", self.fraction_event)
@@ -1020,7 +1094,6 @@ class TimeLine(AdhocView):
 
         hbox.pack_start (self.highlight_activated_toggle, expand=False)
         hbox.pack_start (self.scroll_to_activated_toggle, expand=False)
-
 
         vbox.set_homogeneous (False)
 
@@ -1030,9 +1103,9 @@ class TimeLine(AdhocView):
         # fraction widget value
         self.fraction_event (vbox)
 
-	setattr(vbox, 'buttonbox', hbox)
+        setattr(vbox, 'buttonbox', hbox)
 
-	return vbox
+        return vbox
 
     def get_packed_widget (self):
         """Return the widget packed into a scrolledwindow."""
@@ -1135,6 +1208,112 @@ class TimeLine(AdhocView):
         tb.insert(self.delete_transmuted_toggle, -1)
         tb.show_all()
         return tb
+
+    def edit_annotation_types(self, *p):
+        l=self.annotationtypes
+        notselected = [ at
+                        for at in self.controller.package.annotationTypes
+                        if at not in l ]
+        selected_store, it = advene.gui.util.generate_list_model(
+            [ (at, self.controller.get_title(at)) for at in l ])
+        notselected_store, it = advene.gui.util.generate_list_model(
+            [ (at, self.controller.get_title(at)) for at in notselected ])
+
+        hbox = gtk.HBox()
+        selectedtree = gtk.TreeView(model=selected_store)
+        cell = gtk.CellRendererText()
+        column = gtk.TreeViewColumn(_('Displayed'), cell, text=0)
+        selectedtree.append_column(column)
+
+        selectedtree.set_reorderable(True)
+
+        notselectedtree = gtk.TreeView(model=notselected_store)
+        cell = gtk.CellRendererText()
+        column = gtk.TreeViewColumn(_('Not displayed'), cell, text=0)
+        notselectedtree.append_column(column)
+
+        hbox.add(selectedtree)
+        actions = gtk.VBox()
+
+        def transfer(b, source, dest):
+            path, column = source.get_cursor()
+            if path is None:
+                return True
+            m=source.get_model()
+            it=m.get_iter(path)
+            # Add el to dest
+            dest.get_model().append(m[path])
+            m.remove(it)
+            return True
+
+        def transferselection(b, source, dest):
+            s, selected_paths=source.get_selection().get_selected_rows()
+            d=dest.get_model()
+
+            it=m.get_iter(path)
+            # Add el to dest
+            dest.get_model().append(m[path])
+            m.remove(it)
+            return True
+
+        def transferall(b, source, dest):
+            s=source.get_model()
+            d=dest.get_model()
+            while True:
+                it=s.get_iter_first()
+                if it is None:
+                    break
+                d.append(s[it])
+                s.remove(it)
+            return True
+
+        def row_activated(treeview, path, view_column, source, dest):
+            transfer(None, source, dest)
+            return True
+
+        b=gtk.Button('<<<')
+        b.connect("clicked", transfer, notselectedtree, selectedtree)
+        notselectedtree.connect("row-activated", row_activated, notselectedtree, selectedtree)
+        actions.add(b)
+
+        b=gtk.Button(_('< All <'))
+        b.connect("clicked", transferall, notselectedtree, selectedtree)
+        actions.add(b)
+
+        b=gtk.Button(_('> All >'))
+        b.connect("clicked", transferall, selectedtree, notselectedtree)
+        actions.add(b)
+
+        b=gtk.Button('>>>')
+        b.connect("clicked", transfer, selectedtree, notselectedtree)
+        selectedtree.connect("row-activated", row_activated, selectedtree, notselectedtree)
+        actions.add(b)
+
+        # FIXME: allow multiple selection?
+        hbox.add(actions)
+
+        hbox.add(notselectedtree)
+
+        hbox.show_all()
+
+        # The widget is built. Put it in the dialog.
+        d = gtk.Dialog(title=_("Displayed annotation types"),
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+
+        d.vbox.add(hbox)
+
+        d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
+
+        res=d.run()
+        if res == gtk.RESPONSE_ACCEPT:
+            self.annotationtypes = [ at[1] for at in selected_store ]
+            self.update_model()
+        d.destroy()
+
+        return True
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
