@@ -33,8 +33,18 @@ class ViewPlugin(AdhocView):
     calls to register_view () so that it gets notified of the
     element's changes.
 
+    Do not inherit from this class, as it defines many optional
+    methods. Inherit from AdhocView, and define the relevant
+    additional methods.
+
     @ivar view_name: the name of the view
     @type view_name: string
+    @ivar view_id: the id of the view
+    @type view_id: string
+    @ivar controller: the controller
+    @type controller: AdveneController
+    @ivar widget: the gtk widget representing the view
+    @type widget: gkt.Widget
     """
     def __init__(self, controller=None):
         self.view_name = _("Generic view plugin")
@@ -73,7 +83,7 @@ class ViewPlugin(AdhocView):
         @return: the corresponding view
         @rtype: a Gtk Widget
         """
-        pass
+        return self.widget
 
     def popup(self):
         """Popup the view in a toplevel window.
