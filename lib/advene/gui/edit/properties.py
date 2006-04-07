@@ -84,7 +84,7 @@ class EditWidget(gtk.VBox):
 
         property, mode = args[-2:]
         args = args[:-2]
-	value = None
+        value = None
 
         if (mode == self.CHANGE_ENTRY):
             value = src.get_text()
@@ -98,11 +98,11 @@ class EditWidget(gtk.VBox):
         elif (mode == self.CHANGE_SPIN):
             value = src.get_value_as_int()
 
-	else:
-	    print "Unknown type", str(mode)
+        else:
+            print "Unknown type", str(mode)
 
-	if value is not None:
-	    self.__set_config(property, value)
+        if value is not None:
+            self.__set_config(property, value)
 
     #
     # Sets/returns the name of this configurator. That name will appear in the
@@ -234,7 +234,7 @@ class EditWidget(gtk.VBox):
             filename=None
             if res == gtk.RESPONSE_OK:
                 filename=fs.get_filename()
-		entry.set_text(filename)
+                entry.set_text(filename)
             fs.destroy()
 
         lbl = gtk.Label(label)
@@ -281,7 +281,7 @@ class EditWidget(gtk.VBox):
             filename=None
             if res == gtk.RESPONSE_OK:
                 filename=fs.get_filename()
-		entry.set_text(filename)
+                entry.set_text(filename)
             fs.destroy()
 
         lbl = gtk.Label(label)
@@ -317,7 +317,7 @@ class EditWidget(gtk.VBox):
                        parent=None,
                        flags=gtk.DIALOG_DESTROY_WITH_PARENT,
                        buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-                                 gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
         d.vbox.add(self)
         self.show_all()
         res=d.run()
