@@ -178,6 +178,7 @@ class TimeLine(AdhocView):
 
         # Dictionary holding the vertical position for each type
         self.layer_position = {}
+
         self.update_layer_position()
 
         self.populate ()
@@ -186,6 +187,54 @@ class TimeLine(AdhocView):
 
         self.draw_current_mark()
         self.widget = self.get_full_widget()
+
+    def update_model(self, package=None, partial_update=False):
+        """Update the whole model.
+	
+	@param package: the package
+	@type package: Package
+	@param update: it is only an update for the existing package, we do not need to rebuild everything
+	@param update: boolean
+        """
+        if package is None:
+            package = self.controller.package
+
+	if not update:
+	    # It is not just an update, do a full redraw
+	    self.minimum = 0
+	    oldmax=self.maximum
+	    duration = package.getMetaData (config.data.namespace, "duration")
+	    if duration is not None:
+		self.maximum = long(duration)
+	    else:
+		b,e=self.bounds()
+		self.maximum = e
+	    if self.maximum != oldmax:
+		self.update_layout()
+
+	    if self.list is None:
+		# We display the whole package, so display also
+		# empty annotation types
+		self.annotationtypes = list(self.controller.package.annotationTypes)
+	    else:
+		# We specified a list. Display only the annotation
+		# types for annotations present in the set
+		self.annotationtypes = list(sets.Set([ a.type for a in self.list ]))
+
+	def remove_widget(widget=None, layout=None):
+	    layout.remove(widget)
+	    return True
+
+	self.layout.foreach(remove_widget, self.layout)
+	self.layer_position.clear()
+	self.update_layer_position()
+	self.populate()
+	self.draw_marks()
+	self.ratio_event()
+	self.legend.foreach(remove_widget, self.legend)
+	self.update_legend_widget(self.legend)
+	self.legend.show_all()
+	return
 
     def update_layer_position(self):
         """Update the layer_position attribute
@@ -197,7 +246,7 @@ class TimeLine(AdhocView):
             h += self.button_height + 10
 
     def refresh(self, *p):
-        self.update_model(self.controller.package)
+        self.update_model(self.controller.package, partial_update=True)
         return True
 
     def selection_handle(self, widget, selection_data, info, time_stamp):
@@ -344,32 +393,6 @@ class TimeLine(AdhocView):
         self.tooltips.set_tip(b, tip)
         return True
 
-    def update_model(self, package=None):
-        """Update the whole model.
-        """
-        if package is None:
-            package = self.controller.package
-        self.layer_position.clear()
-        self.minimum = 0
-        oldmax=self.maximum
-        duration = package.getMetaData (config.data.namespace, "duration")
-        if duration is not None:
-            self.maximum = long(duration)
-        else:
-            b,e=self.bounds()
-            self.maximum = e
-        if self.maximum != oldmax:
-            self.update_layout()
-        self.layout.foreach(self.remove_widget, self.layout)
-        self.update_layer_position()
-        self.populate()
-        self.draw_marks()
-        self.ratio_event()
-        self.legend.foreach(self.remove_widget, self.legend)
-        self.update_legend_widget(self.legend)
-        self.legend.show_all()
-        return
-
     def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
         if self.list is None:
@@ -513,7 +536,7 @@ class TimeLine(AdhocView):
                 l.append(source)
                 l.extend(self.annotationtypes[j+1:])
                 self.annotationtypes = l
-                self.update_model()
+                self.update_model(partial_update=True)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -877,10 +900,6 @@ class TimeLine(AdhocView):
             pass
         return True
 
-    def remove_widget(self, widget=None, layout=None):
-        layout.remove(widget)
-        return True
-
     def update_layout (self):
         (w, h) = self.layout.get_size ()
         self.layout.set_size (self.unit2pixel(self.maximum - self.minimum), h)
@@ -1071,7 +1090,7 @@ class TimeLine(AdhocView):
                 source=self.controller.package.annotationTypes.get(source_uri)
                 if source in self.annotationtypes:
                     self.annotationtypes.remove(source)
-                    self.update_model()
+                    self.update_model(partial_update=True)
             else:
                 print "Unknown target type for drop: %d" % targetType
             return True
@@ -1310,7 +1329,7 @@ class TimeLine(AdhocView):
         res=d.run()
         if res == gtk.RESPONSE_ACCEPT:
             self.annotationtypes = [ at[1] for at in selected_store ]
-            self.update_model()
+            self.update_model(partial_update=True)
         d.destroy()
 
         return True
