@@ -28,6 +28,7 @@ It also defines GUI-specific actions (DisplayPopup, etc).
 import time
 import os
 import StringIO
+import textwrap
 
 import advene.core.config as config
 
@@ -592,7 +593,7 @@ class AdveneGUI (Connect):
         vis.show_all()
 
 	# Information message
-	l=gtk.Label(_("You can drag and drop view icons\n(timeline, treeview, transcription...)\nin this notebook to embed\nvarious views."))
+	l=gtk.Label(textwrap.fill(_("You can drag and drop view icons (timeline, treeview, transcription...) in this notebook to embed various views."), 50))
 	self.popupwidget.display(l, timeout=5000, title=_("Information"))
 
         return vis
@@ -858,8 +859,8 @@ class AdveneGUI (Connect):
 			   controller=self.controller)
 	elif name == 'webbrowser':
 	    if self.controller.package is not None:
-		m=self.build_utbv_menu()
-		m.popup(None, None, None, 0, gtk.get_current_event_time())
+                m=self.build_utbv_menu()
+                m.popup(None, None, None, 0, gtk.get_current_event_time())
 	    else:
 		self.log (("No current package"))
 	elif name == 'transcribe':
