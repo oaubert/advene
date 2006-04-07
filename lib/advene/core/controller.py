@@ -338,20 +338,31 @@ class AdveneController:
 
         # Arguments handling
         for uri in args:
-            name, ext = os.path.splitext(uri)
-            if ext.lower() in ('.xml', '.azp'):
-                alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+	    if '=' in uri:
+		# alias=uri syntax
+		alias, uri = uri.split('=', 2)
+		alias = sre.sub('[^a-zA-Z0-9_]', '_', alias)
                 try:
                     self.load_package (uri=uri, alias=alias)
                     self.log(_("Loaded %s as %s") % (uri, alias))
                 except Exception, e:
                     self.log(_("Cannot load package from file %s: %s") % (uri,
                                                                           unicode(e)))
-            else:
-                # Try to load the file as a video file
-                if ('dvd' in name 
-                    or ext.lower() in config.data.video_extensions):
-                    self.set_default_media(uri)
+	    else:
+		name, ext = os.path.splitext(uri)
+		if ext.lower() in ('.xml', '.azp'):
+		    alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+		    try:
+			self.load_package (uri=uri, alias=alias)
+			self.log(_("Loaded %s as %s") % (uri, alias))
+		    except Exception, e:
+			self.log(_("Cannot load package from file %s: %s") % (uri,
+									      unicode(e)))
+		else:
+		    # Try to load the file as a video file
+		    if ('dvd' in name 
+			or ext.lower() in config.data.video_extensions):
+			self.set_default_media(uri)
             
         # If no package is defined yet, load the template
         if self.package is None:
