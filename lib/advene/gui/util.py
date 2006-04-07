@@ -60,7 +60,7 @@ def dialog_keypressed_cb(widget=None, event=None):
         widget.response(gtk.RESPONSE_ACCEPT)
         return True
     elif event.keyval == gtk.keysyms.Escape:
-        widget.response(gtk.RESPONSE_REJECT)
+        widget.response(gtk.RESPONSE_CANCEL)
         return True
     return False
 
@@ -127,7 +127,7 @@ def list_selector(title=None,
                    parent=None,
                    flags=gtk.DIALOG_DESTROY_WITH_PARENT,
                    buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-                             gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT ))
+                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
 
     if text is not None:
         l=gtk.Label(text)
@@ -196,7 +196,6 @@ def yes_no_cancel_popup(title=None,
     d.destroy()
     return retval
 
-
 def entry_dialog(title=None,
                  text=None,
                  default=""):
@@ -205,7 +204,7 @@ def entry_dialog(title=None,
     d = gtk.Dialog(title=title,
                    parent=None,
                    flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                   buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
+                   buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                              gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
                              ))
     if text:
