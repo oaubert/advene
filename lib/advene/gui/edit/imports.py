@@ -325,28 +325,18 @@ class Importer:
             d=config.data.path['data']
         else:
             d=None        
-        filename=advene.gui.util.get_filename(title=_("Choose the package to import"),
-                                              action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                              button=gtk.STOCK_OPEN,
-                                              default_dir=d)
+        filename, alias=advene.gui.util.get_filename(title=_("Choose the package to import, and its alias"),
+                                                     action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                                     button=gtk.STOCK_OPEN,
+                                                     default_dir=d,
+                                                     alias=True)
         if not filename:
-            return True
-
-        # Determine a default alias for the filename
-        alias=os.path.splitext( os.path.basename(filename) )[0]
-        alias=alias.lower()
-
-        alias=advene.gui.util.entry_dialog(title=_('Enter the package alias'),
-                                           text=_("Specify the alias which will be used\nas prefix for the package's elements."),
-                                           default=alias)
-        if alias is None:
-            # The user canceled the action
             return True
 
         # p = advene.model.package.Package(uri=file_, importer=self.controller.package)
         i = advene.model.package.Import(parent=self.controller.package,
                                         uri=filename)
-        i.as=alias
+        i.setAs(alias)
         self.controller.package.imports.append(i)
         
         # Update the ListStore
