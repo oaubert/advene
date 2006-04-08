@@ -531,7 +531,7 @@ class TreeWidget(AdhocView):
     
     def update_model(self, package):
         """Update the model with a new package."""
-        print "Treeview: update model %s" % str(package)
+        #print "Treeview: update model %s" % str(package)
         # Get current path
         oldpath=self.widget.treeview.get_cursor()[0]
         self.model = self.modelclass(controller=self.controller,
