@@ -199,7 +199,7 @@ class TimeLine(AdhocView):
         if package is None:
             package = self.controller.package
 
-	if not update:
+	if not partial_update:
 	    # It is not just an update, do a full redraw
 	    self.minimum = 0
 	    oldmax=self.maximum
@@ -1259,16 +1259,6 @@ class TimeLine(AdhocView):
             if path is None:
                 return True
             m=source.get_model()
-            it=m.get_iter(path)
-            # Add el to dest
-            dest.get_model().append(m[path])
-            m.remove(it)
-            return True
-
-        def transferselection(b, source, dest):
-            s, selected_paths=source.get_selection().get_selected_rows()
-            d=dest.get_model()
-
             it=m.get_iter(path)
             # Add el to dest
             dest.get_model().append(m[path])
