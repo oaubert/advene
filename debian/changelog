@@ -1,6 +1,8 @@
 advene (0.21) unstable; urgency=low
 
-  * New command line options. Do advene --help to see them.
+  * New command line options. Do advene --help to see them. It is possible
+    to specify the alias for packages loaded from the command line, with
+    the syntax: alias=uri
 
   * The default template is now template.azp, so that new packages have a
     Resources reference by default.
