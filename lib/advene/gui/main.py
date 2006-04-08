@@ -1306,10 +1306,11 @@ class AdveneGUI (Connect):
         else:
             d=None
 
-        filename=advene.gui.util.get_filename(title=_("Load a package"),
-                                              action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                              button=gtk.STOCK_OPEN,
-                                              default_dir=d)
+        filename, alias=advene.gui.util.get_filename(title=_("Load a package"),
+                                                     action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                                     button=gtk.STOCK_OPEN,
+                                                     default_dir=d,
+                                                     alias=True)
         if filename:
 	    name, ext = os.path.splitext(filename.lower())
 	    if ext in config.data.video_extensions:
@@ -1323,7 +1324,7 @@ class AdveneGUI (Connect):
 		    icon=gtk.MESSAGE_QUESTION):
 		    return True
             try:
-                self.controller.load_package (uri=filename)
+                self.controller.load_package (uri=filename, alias=alias)
             except Exception, e:
                 self.log(_("Cannot load package %s:\n%s") % (filename, unicode(e)))
         return True
