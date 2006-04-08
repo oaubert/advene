@@ -21,6 +21,8 @@ from gettext import gettext as _
 
 import gtk
 import gobject
+import sre
+import os
 
 import advene.core.config as config
 import advene.util.vlclib as vlclib
@@ -272,18 +274,37 @@ def get_filename(title=_("Open a file"),
                  action=gtk.FILE_CHOOSER_ACTION_OPEN,
                  button=gtk.STOCK_OPEN,
                  default_dir=None,
-                 default_file=None):
+                 default_file=None,
+                 alias=None):
+    preview_box = gtk.VBox()
     
-    preview=gtk.Button(_("N/C"))
-    
+    preview = gtk.Button(_("N/C"))
+    preview_box.add(preview)
+
+    if alias:
+        h=gtk.HBox()
+        l=gtk.Label(_("Alias"))
+        h.add(l)
+        alias_entry = gtk.Entry()
+        h.add(alias_entry)
+        preview_box.add(h)
+
+    preview_box.show_all()
+
     def update_preview(chooser):
         filename=chooser.get_preview_filename()
         setattr(preview, '_filename', filename)
         if filename and (filename.endswith('.xml') or filename.endswith('.azp')):
             preview.set_label(_("Press to\ndisplay\ninformation"))
+            if alias:
+                name, ext = os.path.splitext(filename)
+                al = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+                alias_entry.set_text(al)
             chooser.set_preview_widget_active(True)
         else:
             preview.set_label(_("N/C"))
+            if alias:
+                alias_entry.set_text('')
             chooser.set_preview_widget_active(False)
         return True
 
@@ -329,7 +350,7 @@ Description:
                                        gtk.RESPONSE_OK,
                                        gtk.STOCK_CANCEL,
                                        gtk.RESPONSE_CANCEL ))
-    fs.set_preview_widget(preview)
+    fs.set_preview_widget(preview_box)
     fs.connect("selection_changed", update_preview)
     if default_dir:
         fs.set_current_folder(default_dir)
@@ -338,11 +359,18 @@ Description:
         
     res=fs.run()
     filename=None
+    al=None
     if res == gtk.RESPONSE_OK:
         filename=fs.get_filename()
+        if alias:
+            al=alias_entry.get_text()
+            al = sre.sub('[^a-zA-Z0-9_]', '_', al)
     fs.destroy()
     
-    return filename
+    if alias:
+        return filename, al
+    else:
+        return filename
 
 def get_dirname(title=_("Choose a directory"),
                  action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
