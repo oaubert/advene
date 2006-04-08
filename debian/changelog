@@ -10,17 +10,20 @@ advene (0.21) unstable; urgency=low
   * GUI:
 
     * it is now possible to load multiple packages in the GUI. Only one
-    package is active at a time (for movie, dynamic views...) but it is
-    possible to easily switch between packages (through the Packages
-    menuitem) and access to all packages data is possible through the
-    webserver.
+      package is active at a time (for movie, dynamic views...) but it is
+      possible to easily switch between packages (through the Packages
+      menuitem) and access to all packages data is possible through the
+      webserver.
 
-    The /packages/advene expression always represents the currently active
-    package. Other packages are accessed through expressions like
-    /packages/alias
+      The /packages/advene expression always represents the currently active
+      package. Other packages are accessed through expressions like
+      /packages/alias
+  
+      The alias is automatically generated from the filename, and can be
+      modified in the file selector dialog.
 
     * non-text resources/contents are now handled by a GenericContentHandler,
-    that offers loading/saving to/from a file.
+      that offers loading/saving to/from a file.
 
     * it is now possible to insert a resource directly from a file
 
