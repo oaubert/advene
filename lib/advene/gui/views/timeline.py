@@ -109,11 +109,10 @@ class TimeLine(AdhocView):
         self.scroll_to_activated_toggle.set_active (True)
 
         # Create annotation widget style:
-        self.annotation_font = pango.FontDescription("sans 8")
+        self.annotation_font = pango.FontDescription("sans %d" % config.data.preferences['timeline']['font-size'])
 
-        # FIXME: Hardcoded values are bad...
         # Maybe we should ask pango the height of 'l' plus margins
-        self.button_height = 20
+        self.button_height = config.data.preferences['timeline']['button-height']
 
         # Shortcut
         u2p = self.unit2pixel
@@ -240,10 +239,11 @@ class TimeLine(AdhocView):
         """Update the layer_position attribute
 
         """
-        h = self.button_height + 10
+        s = config.data.preferences['timeline']['interline-height']
+        h = self.button_height + s
         for at in self.annotationtypes:
             self.layer_position[at] = h
-            h += self.button_height + 10
+            h += self.button_height + s
 
     def refresh(self, *p):
         self.update_model(self.controller.package, partial_update=True)
@@ -680,7 +680,7 @@ class TimeLine(AdhocView):
 
         self.layout.set_size (u2p (self.maximum - self.minimum),
                               max(self.layer_position.values() or (0,))
-                              + self.button_height + 10)
+                              + self.button_height + config.data.preferences['timeline']['interline-height'])
         self.layout.show_all ()
 
     def remove_marks(self, widget=None, data=None):
