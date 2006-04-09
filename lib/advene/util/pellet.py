@@ -32,6 +32,7 @@ class PelletResult (object):
         self.reason = None
         self.results = []
         for l in f:
+            print "===", l
             if l.startswith ("Consistent: "):
                 self.consistent = l[12:].startswith("Yes")
             elif l.startswith ("Reason: "):
@@ -44,6 +45,8 @@ class PelletResult (object):
         r = []
         it = iter (f)
         header = it.next()
+        if headers.startsWith ("NO RESULT"):
+            return r
         equals = it.next()
         columns = [ (i.strip(), len(i)) for i in header.split("| ") ]
         r = []

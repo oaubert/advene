@@ -514,7 +514,6 @@ def query(target, context):
                     # FIXME: this is alpha code !
                     import os
                     r = []
-                    print "==="
                     cmd = os.environ.get("PELLET", "/usr/local/bin/pellet")
 		    queryfile = "%s/queries/%s/content/data" % (
                         self._context.evaluateValue('here/absolute_url'),
