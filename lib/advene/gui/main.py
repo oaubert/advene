@@ -1745,6 +1745,9 @@ class AdveneGUI (Connect):
 	    'advene': config.data.path['advene'],
 	    'imagecache': config.data.path['imagecache'],
 	    'moviepath': config.data.path['moviepath'],
+            'font-size': config.data.preferences['timeline']['font-size'],
+            'button-height': config.data.preferences['timeline']['button-height'],
+            'interline-height': config.data.preferences['timeline']['interline-height'],
             }
 
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
@@ -1768,6 +1771,11 @@ class AdveneGUI (Connect):
         ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
         ew.add_dir_selector(_("Player"), "plugins", _("Directory of the video player"))
 
+	ew.add_title(_("Timeline parameters"))
+        ew.add_spin(_("Font size"), 'font-size', _("Font size for annotation widgets"), 4, 20)
+        ew.add_spin(_("Button height"), 'button-height', _("Height of annotation widgets"), 10, 50)
+        ew.add_spin(_("Interline height"), 'interline-height', _("Height of interlines"), 0, 40)
+
         res=ew.popup()
         if res:
             config.data.player_preferences['osdtext']=cache['osd']
@@ -1775,6 +1783,8 @@ class AdveneGUI (Connect):
             config.data.preferences['embed-treeview']=cache['embed-treeview']
             for t in ('toolbar_control', 'toolbar_view', 'toolbar_fileop', 'toolbar_create'):
                 self.gui.get_widget(t).set_style(cache['toolbarstyle'])
+            for k in ('font-size', 'button-height', 'interline-height'):
+                config.data.preferences['timeline'][k] = cache[k]
 	    for k in ('data', 'moviepath', 'plugins', 'imagecache', 'advene'):
 		if cache[k] != config.data.path[k]:
 		    config.data.path[k]=cache[k]
