@@ -46,6 +46,9 @@ advene (0.21) unstable; urgency=low
     * in the timeline, it is now possible to specify the ordered list of
       displayed annotations
   
+    * display parameters of the timeline (font-size, button height...) are
+      customizable through the Preferences dialog
+  
   * Actions:
 
     * new action: Entry (to allow entry of information through a popup)
