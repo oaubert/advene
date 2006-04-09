@@ -184,6 +184,11 @@ class Config(object):
 			    'weblogview': (800, 600),
                             },
             'gui': { 'popup-textwidth': 40 },
+            'timeline': { 
+                'font-size': 8,
+                'button-height': 20,
+                'interline-height': 10
+                },
             # File history
             'history': [],
             'history-size-limit': 5,
