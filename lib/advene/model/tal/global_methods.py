@@ -514,8 +514,12 @@ def query(target, context):
                     # FIXME: this is alpha code !
                     import os
                     r = []
+                    print "==="
                     cmd = os.environ.get("PELLET", "/usr/local/bin/pellet")
-		    queryfile = self._context.evaluateValue('here/content/data/absolute_url')
+		    queryfile = "%s/queries/%s/content/data" % (
+                        self._context.evaluateValue('here/absolute_url'),
+                        q.id,
+                    )
                     f = os.popen ("%s -qf %s" % (cmd, queryfile), "r", 0)
                     from advene.util.pellet import PelletResult
                     final_result = []
@@ -544,6 +548,7 @@ def query(target, context):
                                         break
                             t.append (i)
                         if t: final_result.append (t)
+                    print "===", final_result
                     return final_result
                 else:
                     raise Exception("Unsupported query type for %s" % q.id)
