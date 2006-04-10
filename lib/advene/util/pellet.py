@@ -26,6 +26,14 @@ class PelletRow (object):
         self.d[k] = v
 
 class PelletResult (object):
+    """
+    Given the output of Pellet as a file,
+    produces a PelletResult object with the following attributes:
+      - consistent (True or False)
+      - reason (textual explanation if not consistent)
+      - results (list of results if a query was given)
+    """
+
     def __init__ (self, f):
         print "=== start reading Pellet output"
         self.consistent = None
