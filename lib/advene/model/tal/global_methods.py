@@ -472,6 +472,9 @@ def query(target, context):
 
         def __init__ (self, target, context):
             self._target = target
+	    # Note: we are in a wrapper. self._context is the context
+	    # of the query method target, i.e. package for instance, and not
+	    # of the query itself.
             self._context = context
 
         def has_key (self, key):
@@ -515,10 +518,7 @@ def query(target, context):
                     import os
                     r = []
                     cmd = os.environ.get("PELLET", "/usr/local/bin/pellet")
-		    queryfile = "%s/queries/%s/content/data" % (
-                        self._context.evaluateValue('here/absolute_url'),
-                        q.id,
-                    )
+		    queryfile = self._context.evaluateValue('here/queries/%s/content/data/absolute_url' % q.id)
                     f = os.popen ("%s -qf %s" % (cmd, queryfile), "r", 0)
                     from advene.util.pellet import PelletResult
                     final_result = []
