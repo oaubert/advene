@@ -492,7 +492,7 @@ def query(target, context):
                         for q in self._target.rootPackage.queries
                         if q.id == key ]
                 if len(qlist) != 1:
-                    raise KeyError
+                    raise KeyError(_("The query %s cannot be found") % key)
                 q=qlist[0]
                 if q.content.mimetype == 'application/x-advene-simplequery':
                     qexpr=advene.rules.elements.Query()
