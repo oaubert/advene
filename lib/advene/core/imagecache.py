@@ -219,7 +219,7 @@ class ImageCache(dict):
 		    f.close ()
 
     def ids (self):
-        return self.keys ()
+        return [ str(k) for k in self.keys () ]
 
     def __str__ (self):
         return "ImageCache object (%d images)" % len(self)
