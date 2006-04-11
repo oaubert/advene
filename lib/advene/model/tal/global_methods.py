@@ -266,7 +266,6 @@ def snapshot_url (target, context):
     """
     import advene.model.annotation
     import advene.model.fragment
-    import advene.model.exception
     
     begin=""
     p=None
@@ -327,7 +326,6 @@ def formatted (target, context):
     dictionary with begin, end and duration keys.
     """
     import advene.model.fragment
-    import advene.model.exception
     import time
 
     if isinstance(target, int) or isinstance(target, long):
@@ -468,8 +466,6 @@ def query(target, context):
     """Apply a query on target.
     
     """
-    import advene.model.exception
-        
     class QueryWrapper (object):
 
         """
