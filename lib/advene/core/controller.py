@@ -290,6 +290,7 @@ class AdveneController:
 		u'namespace_prefix': config.data.namespace_prefix,
 		u'config': config.data.web,
                 u'aliases': self.aliases,
+                u'controller': self,
 		})
 	c.addGlobal(u'package', self.package)
 	c.addGlobal(u'packages', self.packages)
