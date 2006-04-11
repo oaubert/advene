@@ -316,8 +316,8 @@ def player_url (target, context):
         return "/media/play/%s" % str(begin)
     else:
         c=context.evaluateValue('options/controller')
-        return "/media/play/%s?filename=%s" % (str(begin),
-                                               urllib.quote(c.get_default_media(p)))
+        return "/media/play/%s?%s" % (str(begin),
+				      urllib.urlencode( {'filename': c.get_default_media(p)} ) )
 
 def formatted (target, context):
     """Return a formatted timestamp as hh:mm:ss.mmmm
