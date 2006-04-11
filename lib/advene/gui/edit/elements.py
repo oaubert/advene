@@ -66,6 +66,11 @@ _edit_popup_list = []
 
 def get_edit_popup (el, controller=None):
     """Return the right edit popup for the given element."""
+    if controller and controller.gui:
+	for p in controller.gui.edit_popups:
+	    if p.element == el:
+		if p.window:
+		    return p
     for c in _edit_popup_list:
         if c.can_edit (el):
             return c(el, controller)
@@ -100,6 +105,8 @@ class EditElementPopup (object):
         self.editable=True
         # List of defined forms in the window
         self.forms = []
+	if controller and controller.gui:
+	    controller.gui.register_edit_popup(self)
         # Dictionary of callbacks according to keys
         self.key_cb = {}
 
@@ -163,14 +170,8 @@ class EditElementPopup (object):
 
     def get_title (self):
         """Return the element title."""
-        c = self.element.viewableClass
-        if hasattr (self.element, 'title') and self.element.title is not None:
-            name=self.element.title
-        elif hasattr (self.element, 'id') and self.element.id is not None:
-            name=self.element.id
-        else:
-            name=str(self.element)
-        return "%s %s" % (c, name)
+        return "%s %s" % (self.element.viewableClass, 
+			  self.controller.get_title(self.element))
 
     def framed (self, widget, label=""):
         fr = gtk.Frame ()
@@ -181,6 +182,10 @@ class EditElementPopup (object):
     def edit (self, callback=None, modal=False):
         """Display the edit window.
         """
+	if hasattr(self, 'window') and self.window:
+	    self.window.set_urgency_hint(True)
+	    return True
+
         self.key_cb[gtk.keysyms.Return] = self.validate_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
 
@@ -219,6 +224,8 @@ class EditElementPopup (object):
 
                 if retval:
                     d.destroy()
+ 		    if self.controller and self.controller.gui:
+			self.controller.gui.unregister_edit_popup(self)
                     break
 
             return self.element
@@ -247,6 +254,12 @@ class EditElementPopup (object):
 
             self.window.add(self.vbox)
 
+	    def destroy_cb(*p):
+		if self.controller and self.controller.gui:
+		    self.controller.gui.unregister_edit_popup(self)
+		return True
+	    self.window.connect("destroy", destroy_cb)
+
             if self.controller.gui:
                 self.controller.gui.init_window_size(self.window, 'editpopup')
             self.window.show_all ()
@@ -254,6 +267,10 @@ class EditElementPopup (object):
 
     def display (self):
         """Display the display window (not editable)."""
+	if hasattr(self, 'window') and self.window:
+	    self.window.set_urgency_hint(True)
+	    return True
+
         self.key_cb[gtk.keysyms.Return] = self.close_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
 
