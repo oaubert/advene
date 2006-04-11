@@ -1,8 +1,12 @@
+* on notification, check that controller.package ==
+   element.rootPackage to make sure that we update properly the
+   views
+
+* make parsed a Content method rather than a global method
+
 * create a new view content type:
   application/x-advene-adhoc-parameters to store parameters for adhoc
   views
-
-* content encoding bug in query when passing accents in query parameters
 
 * Bug in webserver.py for files with accents in their fullpath (encoding pb). Should check all encodings everywhere and make sure everything is utf8 internally.
 
@@ -11,8 +15,6 @@
 * update_imports script that ensures that all elements of specified
    type from a given package are imported in a list of packages, and
    adds them if necessary.
-
-* treeview: update on CreateResource
 
 * GenericContentHandler: add "Open with..." functionality
 
@@ -28,8 +30,6 @@
 
 * DnD to/from common apps: cf http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq23.018.htp and http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq23.031.htp
 
-* timeline: allow to specify  default height
-
 * timeline: select a region to fit to window
 
 * timeline: find a way to render overlapping buttons
@@ -40,7 +40,6 @@
 
 * Annotation resize in timeline -> Hack (right button). Should
 reimplement a native widget for annotations or use DiaCanvas
-
 
 * edit.elements: focus on content window on open
 
@@ -1141,4 +1140,13 @@ res.startswith('<html>') [useful for Kupu]
    present + > < buttons), or reuse gui.edit.elements.EditElementListForm
 
 * Linux-installer (one file executable): http://pyinstaller.hpcf.upr.edu/cgi-bin/trac.cgi
+
+* gui/plugins/actions: fix action_open_view
+
+* content encoding bug in query when passing accents in query
+   parameters -> OK (rev. 2069)
+
+* treeview: update on CreateResource -> OK
+
+* timeline: allow to specify  default height
 
