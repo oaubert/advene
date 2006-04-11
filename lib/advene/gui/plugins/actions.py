@@ -149,12 +149,8 @@ class DefaultGUIActions:
         view=self.parse_parameter(context, parameters, 'guiview', None)
         if view is None:
             return True
-        match={
-            'timeline': self.gui.on_timeline1_activate,
-            'tree': self.gui.on_view_annotations_activate,
-            }
-        if view in match:
-            match[view]()
+        if view in ('tree', 'timeline', 'browser', 'transcribe', 'transcription'):
+            self.gui.open_adhoc_view(view)
         else:
             self.gui.log(_("Error: undefined GUI view %s") % view)
         return True
