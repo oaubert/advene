@@ -289,6 +289,7 @@ class AdveneController:
 		u'snapshot': self.package.imagecache,
 		u'namespace_prefix': config.data.namespace_prefix,
 		u'config': config.data.web,
+                u'aliases': self.aliases,
 		})
 	c.addGlobal(u'package', self.package)
 	c.addGlobal(u'packages', self.packages)
