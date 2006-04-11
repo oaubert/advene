@@ -233,6 +233,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         res = {}
         if q == "":
             return res
+        q=unicode(q)
         for t in q.split("&"):
             k,v = t.split("=", 1)
             res[urllib.unquote_plus(k)] = urllib.unquote_plus(v)
