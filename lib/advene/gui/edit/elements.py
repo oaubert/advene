@@ -64,7 +64,7 @@ common_view_mimetypes = [
 
 _edit_popup_list = []
 
-def get_edit_popup (el, controller=None):
+def get_edit_popup (el, controller=None, editable=True):
     """Return the right edit popup for the given element."""
     if controller and controller.gui:
 	for p in controller.gui.edit_popups:
@@ -73,7 +73,7 @@ def get_edit_popup (el, controller=None):
 		    return p
     for c in _edit_popup_list:
         if c.can_edit (el):
-            return c(el, controller)
+            return c(el, controller, editable)
     raise TypeError(_("No edit popup available for element %s") % el)
 
 class EditPopupClass (type):
@@ -95,14 +95,14 @@ class EditElementPopup (object):
     """
     __metaclass__ = EditPopupClass
 
-    def __init__ (self, el, controller=None):
+    def __init__ (self, el, controller=None, editable=True):
         """Create an edit window for the given element."""
         self.element = el
         self.controller = controller
         self.window=None
         self.vbox = gtk.VBox ()
         self.vbox.connect ("key-press-event", self.key_pressed_cb)
-        self.editable=True
+        self.editable=editable
         # List of defined forms in the window
         self.forms = []
 	if controller and controller.gui:
