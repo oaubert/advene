@@ -186,8 +186,8 @@ class Config(object):
             'gui': { 'popup-textwidth': 40 },
             'timeline': { 
                 'font-size': 8,
-                'button-height': 20,
-                'interline-height': 10
+                'button-height': 24,
+                'interline-height': 6
                 },
             # File history
             'history': [],
