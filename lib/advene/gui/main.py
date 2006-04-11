@@ -236,6 +236,8 @@ class AdveneGUI (Connect):
 
         # List of active annotation views (timeline, tree, ...)
         self.adhoc_views = []
+	# List of active element edit popups
+	self.edit_popups = []
 
         # Populate default STBV and type lists
         self.update_gui()
@@ -1015,6 +1017,23 @@ class AdveneGUI (Connect):
                 view.unregister_callback (controller=self.controller)
             except AttributeError:
                 pass
+        return True
+
+    def register_edit_popup (self, e):
+        """Register an edit popup.
+
+        @param e: the popup to register
+        @type popup: an edit popup (cf advene.gui.edit.elements)
+        """
+        if e not in self.edit_popups:
+            self.edit_popups.append (e)
+        return True
+
+    def unregister_edit_popup (self, e):
+        """Unregister an edit popup.
+        """
+        if e in self.edit_popups:
+            self.edit_popups.remove (e)
         return True
 
     def close_view_cb (self, win=None, widget=None, view=None):
