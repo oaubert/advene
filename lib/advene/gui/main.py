@@ -1318,7 +1318,8 @@ class AdveneGUI (Connect):
         return True
 
     def on_close1_activate (self, button=None, data=None):
-        if self.controller.package._modified:
+	p=self.controller.package
+        if p._modified:
             response=advene.gui.util.yes_no_cancel_popup(title=_("Package modified"),
                                                          text=_("Your package has been modified but not saved.\nSave it now?"))
             if response == gtk.RESPONSE_CANCEL:
@@ -1333,6 +1334,14 @@ class AdveneGUI (Connect):
                 return True
         else:
             self.controller.remove_package()
+
+	# Close all edit popups for this element
+	for e in self.edit_popups:
+	    try:
+		if p == e.element.rootPackage:
+		    e.window.destroy()
+	    except KeyError:
+		pass
 
         return True
 
