@@ -784,7 +784,7 @@ class EditAction(EditGeneric):
         self.paramlist={}
 
         ra=self.catalog.get_action(self.current_name)
-        if self.cached_parameters.has_key(self.current_name):
+        if self.current_name in self.cached_parameters:
             self.current_parameters=self.cached_parameters[self.current_name]
         else:
             self.current_parameters={}.fromkeys(ra.parameters, "")

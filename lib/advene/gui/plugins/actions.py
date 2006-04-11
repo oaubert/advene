@@ -114,7 +114,7 @@ class DefaultGUIActions:
     def parse_parameter(self, context, parameters, name, default_value):
         """Helper method used in actions.
         """
-        if parameters.has_key(name):
+        if name in parameters:
             try:
                 result=context.evaluateValue(parameters[name])
             except advene.model.tal.context.AdveneTalesException, e:
@@ -153,7 +153,7 @@ class DefaultGUIActions:
             'timeline': self.gui.on_timeline1_activate,
             'tree': self.gui.on_view_annotations_activate,
             }
-        if match.has_key(view):
+        if view in match:
             match[view]()
         else:
             self.gui.log(_("Error: undefined GUI view %s") % view)

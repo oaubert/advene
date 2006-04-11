@@ -129,11 +129,11 @@ class LogWindow(AdhocView):
 
     def pushURL (self, context, parameters):
         """Log the url and message in a specialized window"""
-        if parameters.has_key('message'):
+        if 'message' in parameters:
             message=context.evaluateValue(parameters['message'])
         else:
             return False
-        if parameters.has_key('url'):
+        if 'url' in parameters:
             url=context.evaluateValue(parameters['url'])
         else:
             url=None

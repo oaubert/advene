@@ -312,11 +312,11 @@ class DetailedTreeModel(AdveneTreeModel):
         elif isinstance (node, Relation):
             children = None
         elif isinstance (node, AnnotationType):
-            if not self.childrencache.has_key (node):
+            if not node in self.childrencache:
                 self.childrencache[node] = node.annotations
             children = self.childrencache[node]
         elif isinstance (node, RelationType):
-            if not self.childrencache.has_key (node):
+            if not node in self.childrencache:
                 self.childrencache[node] = node.relations
             children = self.childrencache[node]
         elif isinstance (node, Schema):
@@ -329,13 +329,13 @@ class DetailedTreeModel(AdveneTreeModel):
         elif isinstance (node, Query):
             children = None
         elif isinstance (node, Package):
-            if not self.childrencache.has_key (node):
+            if not node in self.childrencache:
                 self.childrencache[node] = [node.schemas, node.views, node.queries, node.resources ]
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
         elif isinstance (node, Resources):
-            if not self.childrencache.has_key (node):
+            if not node in self.childrencache:
                 self.childrencache[node] = node.children()
             children = self.childrencache[node]
         elif isinstance (node, ResourceData):

@@ -156,7 +156,7 @@ class EditElementPopup (object):
         return True
 
     def key_pressed_cb (self, button=None, event=None):
-        if self.key_cb.has_key (event.keyval):
+        if event.keyval in self.key_cb:
             return self.key_cb[event.keyval] (button, event)
         else:
             return False
@@ -1233,7 +1233,7 @@ class EditAttributesForm (EditForm):
 
     def attribute_type (self, at):
         typ = None
-        if self.types.has_key (at):
+        if at in self.types:
             typ=self.types[at]
         else:
             # No specific type was given. Guess it...
@@ -1375,7 +1375,7 @@ class EditAttributesForm (EditForm):
 
         for at in self.attributes:
             editable = at in self.editable
-            if self.labels.has_key (at):
+            if at in self.labels:
                 label=self.labels[at]
             else:
                 label=at
