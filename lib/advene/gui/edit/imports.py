@@ -52,6 +52,21 @@ class TreeViewImporter:
         self.controller=controller
         self.widget=self.build_widget()
 
+    def get_selected_node (self, treeview):
+        """Return the currently selected node.
+
+        None if no node is selected.
+        """
+        selection = treeview.get_selection ()
+        if not selection:
+            return None
+        store, it = selection.get_selected()
+        node = None
+        if it is not None:
+            node = treeview.get_model().get_value (it,
+						   TreeViewImporter.COLUMN_ELEMENT)
+        return node
+
     def tree_view_button_cb(self, widget=None, event=None):
         retval = False
         button = event.button
@@ -70,6 +85,22 @@ class TreeViewImporter:
                     menu.popup()
                     retval = True
         return retval
+
+    def row_activated_cb(self, widget, path, view_column):
+        """Edit the element on Return or double click
+        """
+        node = self.get_selected_node (widget)
+        if node is not None:
+            try:
+                pop = advene.gui.edit.elements.get_edit_popup (node,
+                                                               controller=self.controller,
+							       editable=False)
+            except TypeError, e:
+                pass
+            else:
+                pop.edit ()
+            return True
+        return False
 
     def is_imported(self, el):
         """Check wether the element is imported in the controller's package."""
@@ -281,6 +312,7 @@ class TreeViewImporter:
 
         treeview=gtk.TreeView(model=self.store)
         treeview.connect("button_press_event", self.tree_view_button_cb)
+        treeview.connect("row-activated", self.row_activated_cb)
 
         renderer = gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
