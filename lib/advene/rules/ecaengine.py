@@ -68,7 +68,6 @@ class ECAEngine:
         self.ruledict = {}
         self.controller=controller
         self.catalog=advene.rules.elements.ECACatalog()
-        self.modifying_events = self.catalog.modifying_events
         self.scheduler=sched.scheduler(time.time, time.sleep)
         self.schedulerthread=threading.Thread(target=self.scheduler.run)
 
@@ -318,12 +317,6 @@ class ECAEngine:
         It contains the delay to apply to the rule execution.
         """
         #print "notify %s for %s" % (event_name, str(kw))
-
-        # Set the controller.package._modified state
-        # This does not really belong here, but it is the more convenient and
-        # maybe more effective way to implement it
-        if event_name in self.modifying_events:
-            self.controller.package._modified = True
 
         delay=0
         if kw.has_key('delay'):

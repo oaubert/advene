@@ -160,7 +160,9 @@ class AdveneController:
 
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
+	self.modifying_events = self.event_handler.catalog.modifying_events
         self.event_queue = []
+
 	# Load default actions
 	advene.rules.actions.register(self)	
 
@@ -381,6 +383,16 @@ class AdveneController:
                 event_name,
                 vlclib.format_time(self.player.current_position_value),
                 str(kw))
+
+        # Set the package._modified state
+        # This does not really belong here, but it is the more convenient and
+        # maybe more effective way to implement it
+        if event_name in self.modifying_events:
+	    # Find the element's package
+	    el=kw.values()[0]
+	    p=el.ownerPackage
+            p._modified = True
+
         if kw.has_key('immediate'):
             del kw['immediate']
             self.event_handler.notify(event_name, *param, **kw)
