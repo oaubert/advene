@@ -247,6 +247,8 @@ class AdveneGUI (Connect):
         """
         annotation=context.evaluateValue('annotation')
         event=context.evaluateValue('event')
+	if annotation.ownerPackage != self.controller.package:
+	    return True
         for v in self.adhoc_views:
             try:
                 v.update_annotation(annotation=annotation, event=event)
@@ -261,6 +263,8 @@ class AdveneGUI (Connect):
         """
         relation=context.evaluateValue('relation')
         event=context.evaluateValue('event')
+	if relation.ownerPackage != self.controller.package:
+	    return True
         for v in self.adhoc_views:
             try:
                 v.update_relation(relation=relation, event=event)
@@ -275,6 +279,8 @@ class AdveneGUI (Connect):
         """
         view=context.evaluateValue('view')
         event=context.evaluateValue('event')
+	if view.ownerPackage != self.controller.package:
+	    return True
         for v in self.adhoc_views:
             try:
                 v.update_view(view=view, event=event)
@@ -297,6 +303,8 @@ class AdveneGUI (Connect):
         """
         query=context.evaluateValue('query')
         event=context.evaluateValue('event')
+	if query.ownerPackage != self.controller.package:
+	    return True
         for v in self.adhoc_views:
             try:
                 v.update_query(query=query, event=event)
@@ -311,6 +319,9 @@ class AdveneGUI (Connect):
         """
         resource=context.evaluateValue('resource')
         event=context.evaluateValue('event')
+	if resource.ownerPackage != self.controller.package:
+	    return True
+
         for v in self.adhoc_views:
             try:
                 v.update_resource(resource=resource, event=event)
@@ -325,6 +336,9 @@ class AdveneGUI (Connect):
         """
         schema=context.evaluateValue('schema')
         event=context.evaluateValue('event')
+	if schema.ownerPackage != self.controller.package:
+	    return True
+
         for v in self.adhoc_views:
             try:
                 v.update_schema(schema=schema, event=event)
@@ -340,6 +354,8 @@ class AdveneGUI (Connect):
         """
         at=context.evaluateValue('annotationtype')
         event=context.evaluateValue('event')
+	if at.ownerPackage != self.controller.package:
+	    return True
         for v in self.adhoc_views:
             try:
                 v.update_annotationtype(annotationtype=at, event=event)
@@ -356,6 +372,8 @@ class AdveneGUI (Connect):
         """
         rt=context.evaluateValue('relationtype')
         event=context.evaluateValue('event')
+	if rt.ownerPackage != self.controller.package:
+	    return True
         for v in self.adhoc_views:
             try:
                 v.update_relationtype(relationtype=rt, event=event)
