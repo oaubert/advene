@@ -269,19 +269,23 @@ def snapshot_url (target, context):
     import advene.model.exception
     
     begin=""
+    p=None
     if isinstance(target, advene.model.annotation.Annotation):
         begin = target.fragment.begin
+        p=target.rootPackage
     elif isinstance(target, advene.model.fragment.MillisecondFragment):
         begin = target.begin
+        p=target.rootPackage
     elif isinstance(target, int) or isinstance(target, long):
 	begin=target
+        # Use the current package
+        p=context.evaluateValue('package')
     else:
         return None
-    
-    #options = context.globals['options'].value()
+
     options = context.globals['options']
-    return "%s/options/snapshot/%s" % (options['package_url'],
-                                       str(begin))
+    return "/packages/%s/imagecache/%s" % (options['aliases'][p],
+                                           str(begin))
 
 def player_url (target, context):
     """Return the URL to play the video from the element position.
