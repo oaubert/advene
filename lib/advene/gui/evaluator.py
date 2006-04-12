@@ -76,6 +76,16 @@ class Window:
     def get_widget(self):
         return self.widget
 
+    def close(self, *p):
+	self.save_history()
+	if isinstance(self.widget.parent, gtk.Window):
+	    # Embedded in a toplevel window
+	    self.widget.parent.destroy()
+	else:
+	    # Embedded in another component, just destroy the widget
+	    self.widget.destroy()
+	return True
+
     def clear_output(self, *p, **kw):
         b=self.output.get_buffer()
         begin,end=b.get_bounds()
@@ -463,6 +473,62 @@ class Window:
 
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window.connect ("destroy", lambda e: window.destroy())
+        window.set_title ("Python evaluation")
+
+        window.add (self.get_widget())
+        window.show_all()
+        self.help()
+        return window
+
+    def build_widget(self):
+        vbox=gtk.VBox()
+
+        self.source=gtk.TextView ()
+        self.source.set_editable(True)
+        self.source.set_wrap_mode (gtk.WRAP_CHAR)
+
+        f=gtk.Frame("Expression")
+        s=gtk.ScrolledWindow()
+        s.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        s.add(self.source)
+        f.add(s)
+        vbox.pack_start(f, expand=False)
+
+        self.output=gtk.TextView()
+        self.output.set_editable(False)
+        self.output.set_wrap_mode (gtk.WRAP_CHAR)
+
+        f=gtk.Frame("Result")
+        self.resultscroll=gtk.ScrolledWindow()
+        self.resultscroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.resultscroll.add(self.output)
+        self.resultscroll.set_size_request( -1, 200 )
+        f.add(self.resultscroll)
+        vbox.add(f)
+
+        hb=gtk.HButtonBox()
+
+        b=gtk.Button("_Save output")
+        b.connect("clicked", self.save_output_cb)
+        hb.add(b)
+
+        b=gtk.Button("Clear _output")
+        b.connect("clicked", self.clear_output)
+        hb.add(b)
+
+        b=gtk.Button("Clear _expression")
+        b.connect("clicked", self.clear_expression)
+        hb.add(b)
+
+        b=gtk.Button("E_valuate expression")
+        b.connect("clicked", self.evaluate_expression)
+        hb.add(b)
+
+        # So that applications can defined their own buttons
+        self.hbox=hb
+
+        vbox.pack_start(hb, expand=False)
 
         def key_pressed_cb (win, event):
 
@@ -475,7 +541,7 @@ class Window:
 
             if event.state & gtk.gdk.CONTROL_MASK:
                 if event.keyval == gtk.keysyms.w:
-                    window.destroy()
+		    self.close()
                     return True
                 elif event.keyval == gtk.keysyms.l:
                     self.clear_expression()
@@ -516,63 +582,9 @@ class Window:
 
             return False
 
-        window.connect ("key-press-event", key_pressed_cb)
-        window.connect ("destroy", lambda e: window.destroy())
-        window.set_title ("Python evaluation")
+        self.source.connect ("key-press-event", key_pressed_cb)
+        self.output.connect ("key-press-event", key_pressed_cb)
 
-        window.add (self.get_widget())
-        window.show_all()
-        self.help()
-        return window
-
-    def build_widget(self):
-        vbox=gtk.VBox()
-
-        self.source=gtk.TextView ()
-        self.source.set_editable(True)
-        self.source.set_wrap_mode (gtk.WRAP_CHAR)
-
-        f=gtk.Frame("Expression")
-        s=gtk.ScrolledWindow()
-        s.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        s.add(self.source)
-        f.add(s)
-        vbox.pack_start(f, expand=False)
-
-        self.output=gtk.TextView()
-        self.output.set_editable(False)
-        self.output.set_wrap_mode (gtk.WRAP_CHAR)
-
-        f=gtk.Frame("Result")
-        self.resultscroll=gtk.ScrolledWindow()
-        self.resultscroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.resultscroll.add(self.output)
-        self.resultscroll.set_size_request( -1, 500 )
-        f.add(self.resultscroll)
-        vbox.add(f)
-
-        hb=gtk.HButtonBox()
-
-        b=gtk.Button("_Save output")
-        b.connect("clicked", self.save_output_cb)
-        hb.add(b)
-
-        b=gtk.Button("Clear _output")
-        b.connect("clicked", self.clear_output)
-        hb.add(b)
-
-        b=gtk.Button("Clear _expression")
-        b.connect("clicked", self.clear_expression)
-        hb.add(b)
-
-        b=gtk.Button("E_valuate expression")
-        b.connect("clicked", self.evaluate_expression)
-        hb.add(b)
-
-        # So that applications can defined their own buttons
-        self.hbox=hb
-
-        vbox.pack_start(hb, expand=False)
         vbox.show_all()
 
         return vbox
@@ -595,4 +607,3 @@ if __name__ == "__main__":
 
     gtk.main ()
     ev.save_history(ev.historyfile)
-
