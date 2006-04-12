@@ -467,6 +467,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     position = 0
 
+		if not self.server.controller.player.playlist_get_list():
+		    self.send_no_content()
+		    return
                 if self.server.controller.player.status != self.server.controller.player.PlayingStatus:
                     self.server.controller.update_status ("start", long(position))
                 self.server.controller.update_status ("set", long(position))
