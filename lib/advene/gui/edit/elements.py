@@ -43,7 +43,6 @@ from advene.model.query import Query
 from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.browser import Browser
 
-import advene.util.vlclib as vlclib
 import advene.gui.util
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes

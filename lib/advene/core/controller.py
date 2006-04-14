@@ -41,7 +41,7 @@ import advene.core.config as config
 from gettext import gettext as _
 
 import advene.core.plugin
-import advene.core.mediacontrol
+from advene.core.mediacontrol import PlayerFactory
 from advene.core.imagecache import ImageCache
 import advene.core.idgenerator
 
@@ -147,7 +147,7 @@ class AdveneController:
 
         self.package = None
 
-        playerfactory=advene.core.mediacontrol.PlayerFactory()
+        playerfactory=PlayerFactory()
         self.player = playerfactory.get_player()
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
