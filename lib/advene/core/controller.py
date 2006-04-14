@@ -340,6 +340,7 @@ class AdveneController:
                 self.serverthread = threading.Thread (target=self.server.serve_forawhile)
                 self.serverthread.start ()
 
+	media=None
         # Arguments handling
         for uri in args:
 	    if '=' in uri:
@@ -366,11 +367,14 @@ class AdveneController:
 		    # Try to load the file as a video file
 		    if ('dvd' in name 
 			or ext.lower() in config.data.video_extensions):
-			self.set_default_media(uri)
+			media = uri
             
         # If no package is defined yet, load the template
         if self.package is None:
             self.load_package ()
+
+	if media is not None:
+	    self.set_default_media(media)
 
         self.player.check_player()
 
