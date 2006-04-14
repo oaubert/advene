@@ -271,8 +271,6 @@ transcode -H 10 -z -k -o snapshot -y jpg,null -i /dev/dvd -x dvd,null -T 21,1 -c
 * In Context (or the GUI), catch AdveneTalesException that happens
 when there is a syntax error in a TALES expression (missing string orbadly written symbol) and display a meaningful message
 
-* Rename advene.util.vlclib to something more meaningful (advene.util.helper)
-
 * Annotation chanson: paroles / refrain /couplet + UTBV/STBV (transcription)
 
 * Create a 'shapes' package which will define various SVG shapes
@@ -1149,4 +1147,6 @@ res.startswith('<html>') [useful for Kupu]
 * treeview: update on CreateResource -> OK
 
 * timeline: allow to specify  default height
+
+* Rename advene.util.vlclib to something more meaningful (advene.util.helper)
 
