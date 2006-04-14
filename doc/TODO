@@ -1,6 +1,13 @@
-* on notification, check that controller.package ==
-   element.rootPackage to make sure that we update properly the
-   views
+* package
+   http://www.fsfeurope.org/projects/gplv3/torino-rms-transcript.en.html
+
+* store event history + context (media, position) and save it as a
+   package
+
+* import fixer: allow to edit imports without loading the package
+   (which fails if imported package is not present).
+
+* allow to edit the path of imported packages, to allow relative paths
 
 * make parsed a Content method rather than a global method
 
@@ -1147,6 +1154,10 @@ res.startswith('<html>') [useful for Kupu]
 * treeview: update on CreateResource -> OK
 
 * timeline: allow to specify  default height
+
+* on notification, check that controller.package ==
+   element.rootPackage to make sure that we update properly the
+   views
 
 * Rename advene.util.vlclib to something more meaningful (advene.util.helper)
 
