@@ -25,7 +25,7 @@ import sre
 import os
 
 import advene.core.config as config
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 import advene.model.package
 
 def png_to_pixbuf (png_data, width=None, height=None):
@@ -326,13 +326,13 @@ def get_filename(title=_("Open a file"),
 Description:
 %s
 """) % (p.title,
-        vlclib.format_element_name('schema', len(p.schemas)),
-        vlclib.format_element_name('annotation', len(p.annotations)),
-        vlclib.format_element_name('annotation_type', len(p.annotationTypes)),
-        vlclib.format_element_name('relation', len(p.relations)),
-        vlclib.format_element_name('relation_type', len(p.relationTypes)),
-        vlclib.format_element_name('query', len(p.queries)),
-        vlclib.format_element_name('view', len(p.views)),
+        helper.format_element_name('schema', len(p.schemas)),
+        helper.format_element_name('annotation', len(p.annotations)),
+        helper.format_element_name('annotation_type', len(p.annotationTypes)),
+        helper.format_element_name('relation', len(p.relations)),
+        helper.format_element_name('relation_type', len(p.relationTypes)),
+        helper.format_element_name('query', len(p.queries)),
+        helper.format_element_name('view', len(p.views)),
         p.getMetaData(config.data.namespace_prefix['dc'],
                       'description'))
         

@@ -37,7 +37,7 @@ import advene.core.config as config
 from advene.model.package import Package
 from advene.gui.views import AdhocView
 
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 from gettext import gettext as _
 
@@ -94,9 +94,9 @@ class SequenceModel(gtk.GenericTreeModel):
 
     def on_get_value(self, node, column):
         if column == self.COLUMN_BEGIN:
-            return unicode(vlclib.format_time(node.fragment.begin))
+            return unicode(helper.format_time(node.fragment.begin))
         elif column == self.COLUMN_END:
-            return unicode(vlclib.format_time(node.fragment.end))
+            return unicode(helper.format_time(node.fragment.end))
         elif column == self.COLUMN_DATA:
             return unicode(node.content.data)
         elif column == self.COLUMN_TYPE:

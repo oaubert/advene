@@ -32,7 +32,7 @@ from advene.model.package import Package
 
 import advene.util.importer
 
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 from gettext import gettext as _
 
@@ -226,7 +226,7 @@ class TranscriptionEdit(AdhocView):
 
         def popup_modify(win, t):
             timestamp=child.timestamp + t
-            self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
+            self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
             child.timestamp=timestamp
             return True
 
@@ -238,7 +238,7 @@ class TranscriptionEdit(AdhocView):
             self.remove_timestamp_mark(button, anchor, child)
             return True
 
-        item = gtk.MenuItem(_("Position %s") % vlclib.format_time(timestamp))
+        item = gtk.MenuItem(_("Position %s") % helper.format_time(timestamp))
         menu.append(item)
 
         item = gtk.SeparatorMenuItem()
@@ -306,7 +306,7 @@ class TranscriptionEdit(AdhocView):
         child=gtk.Button("")
         child.connect("clicked", popup_goto)
         child.connect("button-press-event", self.mark_button_press_cb, anchor, child)
-        self.tooltips.set_tip(child, "%s" % vlclib.format_time(timestamp))
+        self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
         child.timestamp=timestamp
         child.ignore=False
         self.update_mark(child)
@@ -510,17 +510,17 @@ class TranscriptionEdit(AdhocView):
         for d in self.parse_transcription(show_ignored=True,
                                           strip_blank=False):
             if d['ignored']:
-                f.writelines( ( '[I%s]' % vlclib.format_time(d['begin']),
+                f.writelines( ( '[I%s]' % helper.format_time(d['begin']),
                                 d['content'],
-                                '[%s]' % vlclib.format_time(d['end']) ) )
+                                '[%s]' % helper.format_time(d['end']) ) )
 
             elif last != d['begin']:
-                f.writelines( ( '[%s]' % vlclib.format_time(d['begin']),
+                f.writelines( ( '[%s]' % helper.format_time(d['begin']),
                                 d['content'],
-                                '[%s]' % vlclib.format_time(d['end']) ) )
+                                '[%s]' % helper.format_time(d['end']) ) )
             else:
                 f.writelines( ( d['content'],
-                                '[%s]' % vlclib.format_time(d['end']) ) )
+                                '[%s]' % helper.format_time(d['end']) ) )
             last=d['end']
         f.close()
         self.controller.log(_("Transcription saved to %s") % filename)
@@ -566,7 +566,7 @@ class TranscriptionEdit(AdhocView):
                 # transcription by mistake
                 self.sourcefile=filename
                 ignore, timestamp, text = m.group(1, 2, 3)
-                t=vlclib.convert_time(timestamp)
+                t=helper.convert_time(timestamp)
                 if last_time != t or ignore:
                     it=b.get_iter_at_mark(b.get_insert())
                     mark=self.create_timestamp_mark(t, it)

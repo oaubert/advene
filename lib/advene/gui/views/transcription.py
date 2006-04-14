@@ -29,7 +29,7 @@ import advene.core.config as config
 from advene.model.package import Package
 from advene.gui.edit.properties import EditWidget
 
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 from gettext import gettext as _
 
@@ -217,7 +217,7 @@ class TranscriptionView(AdhocView):
 
     def representation(self, a):
 	if self.options['representation']:
-	    rep=vlclib.get_title(self.controller, a,
+	    rep=helper.get_title(self.controller, a,
 				 representation=self.options['representation'])
 	else:
 	    rep=a.content.data
@@ -233,7 +233,7 @@ class TranscriptionView(AdhocView):
         l.sort(lambda a,b: cmp(a.fragment.begin, b.fragment.begin))
         for a in l:
             if self.options['display-time']:
-                b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.begin))
+                b.insert_at_cursor("[%s]" % helper.format_time(a.fragment.begin))
 
             mark = b.create_mark("b_%s" % a.id,
                                  b.get_iter_at_mark(b.get_insert()),
@@ -247,7 +247,7 @@ class TranscriptionView(AdhocView):
             mark.set_visible(self.options['display-bounds'])
 
             if self.options['display-time']:
-                b.insert_at_cursor("[%s]" % vlclib.format_time(a.fragment.end))
+                b.insert_at_cursor("[%s]" % helper.format_time(a.fragment.end))
 
             b.insert_at_cursor(self.options['separator'])
         return

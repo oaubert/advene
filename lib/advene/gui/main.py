@@ -62,7 +62,7 @@ import advene.model.constants
 import advene.model.tal.context
 
 import advene.core.mediacontrol
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 import advene.util.importer
 
@@ -716,7 +716,7 @@ class AdveneGUI (Connect):
         @return: the formatted string
         @rtype: string
         """
-        return vlclib.format_time (val)
+        return helper.format_time (val)
 
     def init_window_size(self, window, name):
         """Initialize window size according to stored values.
@@ -913,9 +913,9 @@ class AdveneGUI (Connect):
         """
         self.log (_("Package %s saved: %s and %s.")
                   % (self.controller.package.uri,
-                     vlclib.format_element_name('annotation',
+                     helper.format_element_name('annotation',
                                                 len(self.controller.package.annotations)),
-                     vlclib.format_element_name('relation',
+                     helper.format_element_name('relation',
                                                 len(self.controller.package.relations))
                      ))
         return True
@@ -945,9 +945,9 @@ class AdveneGUI (Connect):
         """
         self.log (_("Package %s loaded: %s and %s.")
                   % (self.controller.package.uri,
-                     vlclib.format_element_name('annotation',
+                     helper.format_element_name('annotation',
                                                 len(self.controller.package.annotations)),
-                     vlclib.format_element_name('relation',
+                     helper.format_element_name('relation',
                                                 len(self.controller.package.relations))
                      ))
 
@@ -1161,7 +1161,7 @@ class AdveneGUI (Connect):
         ats=list(self.controller.package.annotationTypes)
 
         if create:
-            newat=vlclib.TitledElement(value=None,
+            newat=helper.TitledElement(value=None,
                                        title=_("Create a new annotation type"))
             ats.append(newat)
             
@@ -1212,7 +1212,7 @@ class AdveneGUI (Connect):
         schemas=list(self.controller.package.schemas)
 
         if create:
-            newschema=vlclib.TitledElement(value=None,
+            newschema=helper.TitledElement(value=None,
                                            title=_("Create a new schema"))
             schemas.append(newschema)
             
@@ -1637,11 +1637,11 @@ class AdveneGUI (Connect):
         """View mediainformation."""
         self.controller.position_update ()
         self.log (_("**** Media information ****"))
-        self.log (_("Cached duration   : %s") % vlclib.format_time(self.controller.cached_duration))
+        self.log (_("Cached duration   : %s") % helper.format_time(self.controller.cached_duration))
         if self.controller.player.is_active():
             self.log (_("Current playlist : %s") % str(self.controller.player.playlist_get_list ()))
-            self.log (_("Current position : %s") % vlclib.format_time(self.controller.player.current_position_value))
-            self.log (_("Duration         : %s") % vlclib.format_time(self.controller.player.stream_duration))
+            self.log (_("Current position : %s") % helper.format_time(self.controller.player.current_position_value))
+            self.log (_("Duration         : %s") % helper.format_time(self.controller.player.stream_duration))
             self.log (_("Status           : %s") % self.statustext[self.controller.player.status])
         else:
             self.log (_("Player not active."))
@@ -1891,7 +1891,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_save_imagecache1_activate (self, button=None, data=None):
-	id_ = vlclib.mediafile2id (self.controller.get_default_media())
+	id_ = helper.mediafile2id (self.controller.get_default_media())
         d=self.controller.package.imagecache.save (id_)
 	self.log(_("Imagecache saved to %s") % d)
         return True

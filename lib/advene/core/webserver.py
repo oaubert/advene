@@ -64,7 +64,7 @@ import logging
 
 import imghdr
 
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 import SocketServer
 import BaseHTTPServer
@@ -264,8 +264,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             </table>
             """) % (
                 str(self.server.controller.current_stbv),
-                vlclib.format_time(self.server.controller.player.current_position_value),
-                vlclib.format_time(self.server.controller.player.stream_duration),
+                helper.format_time(self.server.controller.player.current_position_value),
+                helper.format_time(self.server.controller.player.stream_duration),
                 repr(self.server.controller.player.status)))
 
             if len(l) == 0:
@@ -289,7 +289,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write (_("""<h3><a href="/media/snapshot">Access to current packages snapshots</h3>"""))
 
     def activate_stbvid(self, stbvid):
-        stbv=vlclib.get_id(self.server.controller.package.views, stbvid)
+        stbv=helper.get_id(self.server.controller.package.views, stbvid)
         if stbv is None:
             self.send_error(404, _('Unknown STBV identifier: %s') % stbvid)
             return
@@ -581,7 +581,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         atid=query['type']
 
                     if atid is not None:
-                        atid=vlclib.get_id(self.server.controller.package.annotationTypes,
+                        atid=helper.get_id(self.server.controller.package.annotationTypes,
                                            atid)
                     else:
                         self.send_error(404, _("You should provide an annotation-type id parameter"))
@@ -1085,7 +1085,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                      m1 = context.evaluateValue('package/annotations/%s' % query['member1'])
                      m2 = context.evaluateValue('package/annotations/%s' % query['member2'])
 
-                     relationtypes=vlclib.matching_relationtypes(package, m1, m2)
+                     relationtypes=helper.matching_relationtypes(package, m1, m2)
                      if rt not in relationtypes:
                          answer(_("Error"))
                          self.wfile.write (_("<h1>Error</h1>"))
@@ -1511,7 +1511,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         for p in ra.parameters:
             if not p in query:
                 missing.append(p)
-            elif not vlclib.is_valid_tales(query[p]):
+            elif not helper.is_valid_tales(query[p]):
                 invalid.append(p)
 
         if missing:
@@ -1797,7 +1797,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if displaymode != "raw":
             levelup = self.path[:self.path.rindex("/")]
             auto_components = [ c
-                                for c in vlclib.get_valid_members (objet)
+                                for c in helper.get_valid_members (objet)
                                 if not c.startswith('----') ]
             auto_components.sort()
             try:

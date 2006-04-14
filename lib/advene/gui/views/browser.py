@@ -27,7 +27,7 @@ import advene.gui.util
 from advene.model.annotation import Annotation
 from advene.gui.views import AdhocView
 from advene.gui.views.timeline import TimeLine
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 from gettext import gettext as _
 
@@ -49,13 +49,13 @@ class BrowserColumn:
         ls=gtk.ListStore(str)
         if self.model is None:
             return ls
-        for att in vlclib.get_valid_members(self.model):
+        for att in helper.get_valid_members(self.model):
             ls.append([att])
         return ls
 
     def update(self, element=None, name=""):
         self.liststore.clear()
-        for att in vlclib.get_valid_members(element):
+        for att in helper.get_valid_members(element):
             self.liststore.append([att])
         self.model=element
         self.name=name

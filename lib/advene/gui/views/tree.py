@@ -34,7 +34,7 @@ from gettext import gettext as _
 import advene.gui.edit.elements
 import advene.gui.popup
 
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 import gtk
 import gobject
@@ -181,8 +181,8 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
             title=title[:50]
         if isinstance(node, Annotation):
             title="%s (%s, %s)" % (title,
-                                   vlclib.format_time(node.fragment.begin),
-                                   vlclib.format_time(node.fragment.end))
+                                   helper.format_time(node.fragment.begin),
+                                   helper.format_time(node.fragment.end))
         if isinstance (node, View) and node.content.mimetype == 'application/x-advene-ruleset':
             title += ' [STBV]'
         if ((hasattr(node, 'isImported') and node.isImported())

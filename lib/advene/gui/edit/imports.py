@@ -28,7 +28,7 @@ import advene.core.config as config
 
 import advene.gui.popup
 import advene.gui.util
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 class TreeViewImporter:
     COLUMN_ELEMENT=0
@@ -249,13 +249,13 @@ class TreeViewImporter:
                    # The user selected a whole category.
                    for e in element:
                        if not self.is_imported(e):
-                           vlclib.import_element(self.controller.package,
+                           helper.import_element(self.controller.package,
                                                  e,
                                                  self.controller)
                    for c in model[path].iterchildren():
                        c[self.COLUMN_IMPORTED] = True
                elif element.viewableClass == 'schema':
-                   vlclib.import_element(self.controller.package,
+                   helper.import_element(self.controller.package,
                                          element,
                                          self.controller)
                    # The user selected a schema, it automatically
@@ -267,7 +267,7 @@ class TreeViewImporter:
                    # We should import the parent schema
                    print "Annotation types and relation types are not directly importable.\nImport their schema instead."
                else:
-                   vlclib.import_element(self.controller.package,
+                   helper.import_element(self.controller.package,
                                          element,
                                          self.controller)
            else:
@@ -276,7 +276,7 @@ class TreeViewImporter:
                if self.is_imported(element):
                    # It was previously imported. Unimport it
                    print "Removing %s" % model[path][self.COLUMN_LABEL]
-                   vlclib.unimport_element(self.controller.package,
+                   helper.unimport_element(self.controller.package,
                                            element,
                                            self.controller)
                    if element.viewableClass == 'schema':
@@ -288,7 +288,7 @@ class TreeViewImporter:
                    # The user selected a whole category.
                    for e in element:
                        if self.is_imported(e):
-                           vlclib.unimport_element(self.controller.package,
+                           helper.unimport_element(self.controller.package,
                                                    e,
                                                    self.controller)
                    for c in model[path].iterchildren():

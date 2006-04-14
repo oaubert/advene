@@ -19,7 +19,7 @@
 
 # Advene part
 import advene.core.config as config
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 import advene.gui.util
 from advene.gui.views import AdhocView
 
@@ -87,7 +87,7 @@ class HistoryNavigation(AdhocView):
         e.connect("button-release-event", self.activate, t)
         e.add(i)
         vbox.pack_start(e, expand=False)
-        l = gtk.Label(vlclib.format_time(t))
+        l = gtk.Label(helper.format_time(t))
         vbox.pack_start(l, expand=False)
         
         vbox.show_all()

@@ -19,7 +19,7 @@ import gtk
 import sre
 
 from advene.gui.views.browser import Browser
-import advene.util.vlclib
+import advene.util.helper
 
 class TALESEntry:
     """TALES expression entry widget.
@@ -74,7 +74,7 @@ class TALESEntry:
         """
         if expr is None:
             expr=self.entry.get_text()
-        return advene.util.vlclib.is_valid_tales(expr)
+        return advene.util.helper.is_valid_tales(expr)
     
     def build_widget(self):
         hbox=gtk.HBox()

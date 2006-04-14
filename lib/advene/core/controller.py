@@ -55,7 +55,7 @@ from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 import advene.model.tal.context
 
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 if config.data.webserver['mode']:
     import advene.core.webserver
@@ -383,7 +383,7 @@ class AdveneController:
         if False:
             print "Notify %s (%s): %s" % (
                 event_name,
-                vlclib.format_time(self.player.current_position_value),
+                helper.format_time(self.player.current_position_value),
                 str(kw))
 
         # Set the package._modified state
@@ -417,7 +417,7 @@ class AdveneController:
                 print "Exception in snapshot: %s" % e
                 return False
             if i is not None and i.height != 0:
-                self.package.imagecache[position] = vlclib.snapshot2png (i)
+                self.package.imagecache[position] = helper.snapshot2png (i)
         else:
             # FIXME: do something useful (warning) ?
             pass
@@ -488,7 +488,7 @@ class AdveneController:
         return url
 
     def get_title(self, element, representation=None):
-        return vlclib.get_title(self, element, representation)
+        return helper.get_title(self, element, representation)
 
     def get_default_media (self, package=None):
         if package is None:
@@ -781,7 +781,7 @@ class AdveneController:
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
             # Load the imagecache
-            id_ = vlclib.mediafile2id (mediafile)
+            id_ = helper.mediafile2id (mediafile)
             self.package.imagecache.load (id_)
             # Populate the missing keys
             for a in self.package.annotations:
@@ -791,7 +791,7 @@ class AdveneController:
         # Activate the default STBV
         default_stbv = self.package.getMetaData (config.data.namespace, "default_stbv")
         if default_stbv:
-	    view=vlclib.get_id( self.package.views, default_stbv )
+	    view=helper.get_id( self.package.views, default_stbv )
 	    if view:
 		self.activate_stbv(view)
 
@@ -957,7 +957,7 @@ class AdveneController:
         future_begins.sort(lambda a, b: cmp(a[1], b[1]))
         future_ends.sort(lambda a, b: cmp(a[2], b[2]))
 
-        #print "Position: %s" % vlclib.format_time(position)
+        #print "Position: %s" % helper.format_time(position)
         #print "Begins: %s\nEnds: %s" % ([ a[0].id for a in future_begins[:4] ],
         #                                [ a[0].id for a in future_ends[:4] ])
         return future_begins, future_ends

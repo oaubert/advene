@@ -25,7 +25,7 @@ from advene.model.package import Package
 from advene.gui.views import AdhocView
 import advene.gui.edit.elements
 
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 import advene.gui.util
 
 from gettext import gettext as _
@@ -378,7 +378,7 @@ class TimeLine(AdhocView):
         a = b.annotation
         l = b.label
         u2p = self.unit2pixel
-        title=vlclib.get_title(self.controller, a)
+        title=helper.get_title(self.controller, a)
         if a.relations:
             l.set_markup('<b>%s</b>' % title)
         else:
@@ -388,8 +388,8 @@ class TimeLine(AdhocView):
 
         self.layout.move(b, u2p(a.fragment.begin), self.layer_position[a.type])
         tip = _("%s\nBegin: %s\tEnd: %s") % (title,
-                                            vlclib.format_time(a.fragment.begin),
-                                            vlclib.format_time(a.fragment.end))
+                                            helper.format_time(a.fragment.begin),
+                                            helper.format_time(a.fragment.end))
         self.tooltips.set_tip(b, tip)
         return True
 
@@ -544,7 +544,7 @@ class TimeLine(AdhocView):
     def create_relation_popup(self, source, dest):
         """Display a popup to create a binary relation between source and dest.
         """
-        relationtypes=vlclib.matching_relationtypes(self.controller.package,
+        relationtypes=helper.matching_relationtypes(self.controller.package,
                                                     source,
                                                     dest)
         if not relationtypes:
@@ -629,7 +629,7 @@ class TimeLine(AdhocView):
             return None
 
         u2p = self.unit2pixel
-        title=vlclib.get_title(self.controller, annotation)
+        title=helper.get_title(self.controller, annotation)
         b = gtk.Button()
         l = gtk.Label()
         if annotation.relations:
@@ -653,8 +653,8 @@ class TimeLine(AdhocView):
 
         self.layout.put(b, u2p(annotation.fragment.begin), pos)
         tip = _("%s\nBegin: %s\tEnd: %s") % (title,
-                                             vlclib.format_time(annotation.fragment.begin),
-                                             vlclib.format_time(annotation.fragment.end))
+                                             helper.format_time(annotation.fragment.begin),
+                                             helper.format_time(annotation.fragment.end))
         self.tooltips.set_tip(b, tip)
         # The button can generate drags
         b.connect("drag_data_get", self.drag_sent)
@@ -759,7 +759,7 @@ class TimeLine(AdhocView):
             a.mark = t
             a.pos = 1
             self.layout.put (a, u2p(t), a.pos)
-            l = gtk.Label (vlclib.format_time (t))
+            l = gtk.Label (helper.format_time (t))
             l.mark = t
             l.pos = 10
             e=gtk.EventBox()
@@ -848,7 +848,7 @@ class TimeLine(AdhocView):
                 self.controller.notify("AnnotationEditEnd", annotation=self.resized_annotation)
             return True
 
-        item = gtk.MenuItem(_("Position %s") % vlclib.format_time(position))
+        item = gtk.MenuItem(_("Position %s") % helper.format_time(position))
         menu.append(item)
 
         item = gtk.SeparatorMenuItem()

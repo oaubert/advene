@@ -26,7 +26,7 @@ import time
 import advene.core.config as config
 from advene.gui.views import AdhocView
 
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 from gettext import gettext as _
 
@@ -115,7 +115,7 @@ class LogWindow(AdhocView):
         self.tooltips.set_tip(b, _("Go to %s") % url)
         hb.add(b)
 
-        b=gtk.Button(vlclib.format_time(position))
+        b=gtk.Button(helper.format_time(position))
         b.child.set_alignment(0.0, 0.5)
         b.connect("clicked", self.goto_position, position)
         self.tooltips.set_tip(b, _("Go to the given position"))

@@ -24,7 +24,7 @@ import advene.core.config as config
 
 import re
 import gtk
-import advene.util.vlclib
+import advene.util.helper
 import advene.gui.util
 
 from gettext import gettext as _
@@ -80,7 +80,7 @@ class TimeAdjustment:
 
         self.entry=gtk.Entry()
         # Default width of the entry field (+2 chars for security)
-        self.entry.set_width_chars(len(advene.util.vlclib.format_time(0))+2)
+        self.entry.set_width_chars(len(advene.util.helper.format_time(0))+2)
         self.entry.connect("changed", self.convert_entered_value)
         self.entry.set_editable(self.editable)
         hbox.add(self.entry)
@@ -189,7 +189,7 @@ class TimeAdjustment:
 
     def update_display(self):
         """Updates the value displayed in the entry according to the current value."""
-        self.entry.set_text(advene.util.vlclib.format_time(self.value))
+        self.entry.set_text(advene.util.helper.format_time(self.value))
         # Update the image
         self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value]))
         

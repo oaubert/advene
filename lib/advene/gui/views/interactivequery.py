@@ -34,7 +34,7 @@ import advene.gui.util
 
 from advene.gui.views.timeline import TimeLine
 
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 
 class InteractiveQuery:
     def __init__(self, here=None, controller=None, source="package/annotations"):
@@ -52,7 +52,7 @@ class InteractiveQuery:
         self.window=None
 
     def get_interactive_query(self):
-	l=vlclib.get_id(self.controller.package.queries, '_interactive')
+	l=helper.get_id(self.controller.package.queries, '_interactive')
         if l:
             q=Query()
             q.from_dom(l.content.model)
@@ -107,7 +107,7 @@ class InteractiveQuery:
             l=[ a for a in res if isinstance(a, Annotation) ]
             if l:
                 self.controller.log(_("Displaying %s of %d elements")
-                         % (vlclib.format_element_name("annotation", len(l)),
+                         % (helper.format_element_name("annotation", len(l)),
                             len(res)))
                 t = TimeLine (l,
 			      minimum=0,

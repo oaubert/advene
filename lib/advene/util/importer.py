@@ -63,7 +63,7 @@ from advene.model.package import Package
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 
-import advene.util.vlclib as vlclib
+import advene.util.helper as helper
 import advene.util.handyxml as handyxml
 import xml.dom
 
@@ -183,7 +183,7 @@ class GenericImporter(object):
         kl.sort()
         for k in kl:
             v=self.statistics[k]
-            res.append("\t%s" % vlclib.format_element_name(k, v))
+            res.append("\t%s" % helper.format_element_name(k, v))
         return "\n".join(res)
 
     def init_package(self,
@@ -237,13 +237,13 @@ class GenericImporter(object):
             self.package, self.defaulttype=self.init_package()
         for d in source:
             try:
-                begin=vlclib.convert_time(d['begin'])
+                begin=helper.convert_time(d['begin'])
             except KeyError:
                 raise Exception("Begin is mandatory")
             if 'end' in d:
-                end=vlclib.convert_time(d['end'])
+                end=helper.convert_time(d['end'])
             elif 'duration' in d:
-                end=begin+vlclib.convert_time(d['duration'])
+                end=begin+helper.convert_time(d['duration'])
             else:
                 raise Exception("end or duration is missing")
             try:
@@ -360,7 +360,7 @@ class LsDVDImporter(GenericImporter):
             m=reg.search(l)
             if m is not None:
                 d=m.groupdict()
-                duration=vlclib.convert_time(d['duration'])
+                duration=helper.convert_time(d['duration'])
                 res={'content': "Chapter %s" % d['chapter'],
                      'begin': begin,
                      'duration': duration}
@@ -413,7 +413,7 @@ class ChaplinImporter(GenericImporter):
             m=reg.search(l)
             if m is not None:
                 d=m.groupdict()
-                end=vlclib.convert_time(d['begin'])
+                end=helper.convert_time(d['begin'])
                 if chapter is not None:
                     res={ 'content': "Chapter %s" % chapter,
                           'begin': begin,
@@ -878,7 +878,7 @@ class CmmlImporter(GenericImporter):
             npt=npt[4:]
 
         try:
-            msec=vlclib.convert_time(npt)
+            msec=helper.convert_time(npt)
         except Exception, e:
             self.log("Unhandled NPT format: " + npt)
             self.log(str(e))
