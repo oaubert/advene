@@ -253,10 +253,12 @@ def view(target, context):
             """
             return self._target.getValidViews()
 
-    if isinstance (target, advene.model.viewable.Viewable):
-        return context.wrap_nocall(ViewWrapper (target, context))
-    else:
-        return None
+    if not isinstance (target, advene.model.viewable.Viewable):
+	if hasattr(target, '__len__'):
+	    target = advene.model.viewable.GenericViewableList(target, context.locals['__resolved_stack'])
+	else:
+	    target = advene.model.viewable.GenericViewable(target, context.locals['__resolved_stack'])
+    return context.wrap_nocall(ViewWrapper (target, context))
 
 def snapshot_url (target, context):
     """Return the URL of the snapshot for the given annotation or fragment.
