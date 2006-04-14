@@ -584,7 +584,7 @@ class AdveneController:
                 mediafile=mediafile.encode('utf8')
             self.player.playlist_clear()
             self.player.playlist_add_item (mediafile)
-	    self.notify("MediaChange", uri=uri)
+	    self.notify("MediaChange", uri=mediafile)
 
     def get_timestamp(self):
 	return time.strftime("%Y-%m-%d")
