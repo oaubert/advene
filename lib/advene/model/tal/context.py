@@ -21,7 +21,6 @@ from cStringIO import StringIO
 
 from simpletal import simpleTAL
 from simpletal import simpleTALES
-from simpletal.simpleTALES import *
 
 from advene.model.exception import AdveneException
 
