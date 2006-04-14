@@ -171,7 +171,7 @@ class Player:
             s.position=self.player.controls.currentposition
             # For status list:
             # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmplay/mmp_sdk/playercurrentplaylist.asp
-            s.streamstatus=statusmapping[self.player.playstate]
+            s.streamstatus=self.statusmapping[self.player.playstate]
         
     def sound_get_volume(self):
         # FIXME: Normalize volume to be in [0..255]
