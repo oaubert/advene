@@ -18,7 +18,6 @@
 """GUI to import package elements.
 """
 import sys
-import os
 
 import gtk
 import gobject
