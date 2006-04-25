@@ -87,6 +87,7 @@ from advene.gui.views.transcription import TranscriptionView
 from advene.gui.edit.transcribe import TranscriptionEdit
 from advene.gui.views.interactivequery import InteractiveQuery
 from advene.gui.views.viewbook import ViewBook
+from advene.gui.views.html import HTMLView
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -878,7 +879,10 @@ class AdveneGUI (Connect):
 	    view = Browser(element=self.controller.package,
 			   controller=self.controller)
 	elif name == 'webbrowser':
-	    if self.controller.package is not None:
+	    if not popup and HTMLView._engine is not None:
+		view = HTMLView(controller=self.controller)
+		view.open_url(self.controller.get_default_url())
+	    elif self.controller.package is not None:
                 m=self.build_utbv_menu()
                 m.popup(None, None, None, 0, gtk.get_current_event_time())
 	    else:
