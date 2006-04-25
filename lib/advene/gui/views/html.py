@@ -27,13 +27,13 @@ import urllib
 
 engine=None
 try:
-    import gtkhtml2
-    engine='gtkhtml2'
+    import gtkmozembed
+    gtkmozembed.set_comp_path('')
+    engine='mozembed'
 except ImportError:
     try:
-        import gtkmozembed
-        gtkmozembed.gtk_moz_embed_set_comp_path()
-        engine='mozembed'
+	import gtkhtml2
+	engine='gtkhtml2'
     except ImportError:
         pass
 
@@ -41,6 +41,7 @@ from gettext import gettext as _
 from advene.gui.views import AdhocView
 
 class HTMLView(AdhocView):
+    _engine = engine
     def __init__ (self, controller=None, url=None):
         self.view_name = _("HTML Viewer")
         self.view_id = 'htmlview'
@@ -64,13 +65,18 @@ class HTMLView(AdhocView):
             # http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq19.018.htp
             gtkmozembed.set_profile_path("/tmp", "foobar")
 
-            def open_uri(c, uri):
-                # FIXME: uri is a gobject.GPointer...
-                self.u = uri
+	    def debug(*p):
+		print "debug", p
+		return True
+
+	    def update_location(c):
+		uri = c.get_location()
+		self.current_url(uri)
                 self.update_history(uri)
                 return False
 
-            w.connect('open-uri', open_uri)
+            #w.connect("link-message", debug, "link-message")
+            w.connect("location", update_location)
             self.component=w
         elif engine == 'gtkhtml2':
             w=gtk.ScrolledWindow()
@@ -94,6 +100,7 @@ class HTMLView(AdhocView):
 
             c.document.connect("link-clicked", link_clicked)
             c.document.connect("request-url", request_url)
+	    
             c.get_vadjustment().set_value(0)
             w.set_hadjustment(c.get_hadjustment())
             w.set_vadjustment(c.get_vadjustment())
@@ -105,7 +112,7 @@ class HTMLView(AdhocView):
         vbox=gtk.VBox()
         vbox.add(w)
 
-        buttonbox=gtk.HButtonBox()
+	hbox = gtk.HBox()
 
         def entry_validated(e):
             self.open_url(self.current_url())
@@ -113,21 +120,27 @@ class HTMLView(AdhocView):
 
         self.url_entry=gtk.Entry()
         self.url_entry.connect("activate", entry_validated)
-        buttonbox.pack_start(self.url_entry, expand=True)
+        hbox.pack_start(self.url_entry, expand=True, fill=True)
+
+        buttonbox=gtk.HButtonBox()
 
         b=gtk.Button(stock=gtk.STOCK_GO_BACK)
         b.connect("clicked", self.history_back)
         buttonbox.add(b)
 
         def refresh(b):
-            self.open_url(self.current_url())
+	    if engine == 'mozembed':
+		self.component.reload(0)
+	    else:
+		self.open_url(self.current_url())
             return True
 
         b=gtk.Button(stock=gtk.STOCK_REFRESH)
         b.connect("clicked", refresh)
         buttonbox.add(b)
 
-        vbox.pack_start(buttonbox, expand=False)
+	hbox.add(buttonbox)
+        vbox.pack_start(hbox, expand=False)
 
         vbox.buttonbox = buttonbox
         return vbox
@@ -138,6 +151,9 @@ class HTMLView(AdhocView):
         return self.url_entry.get_text()
 
     def history_back(self, *p):
+	if engine == 'mozembed':
+	    self.component.go_back()
+	    return True
         if len(self.history) <= 1:
             self.controller.log(_("Cannot go back: first item in history"))
         else:
