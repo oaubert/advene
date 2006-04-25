@@ -44,11 +44,14 @@ advene (0.21) unstable; urgency=low
     * the history view is cleared on media change
   
     * in the timeline, it is now possible to specify the ordered list of
-      displayed annotations
+      displayed annotation types
   
     * display parameters of the timeline (font-size, button height...) are
       customizable through the Preferences dialog
   
+    * if the gtkmozembed or gtkhtml2 library is present, DnD of the web
+      browser button will embed a HTML view in the GUI.
+
   * Actions:
 
     * new action: Entry (to allow entry of information through a popup)
@@ -57,6 +60,9 @@ advene (0.21) unstable; urgency=low
       parameters) in the list of actions
 
     * new TALES root element: packages (to access all the loaded packages)
+  
+    * TALES global methods can now be applied on non-advene elements (for
+      instance lists)
 
  -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Wed,  5 Apr 2006 13:42:22 +0200
 
