@@ -109,7 +109,11 @@ class ViewBook(AdhocView):
 	    if self.controller.gui:
 		view=self.controller.gui.open_adhoc_view(name, popup=False)
 		if view is not None:
-		    self.add_view(view)
+		    if view.view_id == 'htmlview':
+			permanent=True
+		    else:
+			permanent=False
+		    self.add_view(view, permanent=permanent)
 		else:
 		    print "Cannot open", name
 	    return True
