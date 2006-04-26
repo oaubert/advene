@@ -155,7 +155,13 @@ class mozembed_wrapper:
 		self.notify(url=self.get_url())
 	    return False
 
+	def update_label(c):
+	    if self.notify:
+		self.notify(label=c.get_link_message())
+	    return False
+
 	w.connect("location", update_location)
+	w.connect("link-message", update_label)
 	self.component=w
 	return w
 
@@ -173,9 +179,11 @@ class HTMLView(AdhocView):
         if url is not None:
             self.open_url(url)
 
-    def notify(self, url=None):
+    def notify(self, url=None, label=None):
 	if url is not None:
 	    self.current_url(url)
+	if label is not None:
+	    self.url_label.set_text(label)
 	return True
 
     def open_url(self, url=None):
@@ -195,10 +203,15 @@ class HTMLView(AdhocView):
 					      notify=self.notify)
 	    w=self.component.widget
 
-        vbox=gtk.VBox()
-        vbox.add(w)
+        buttonbox=gtk.HBox()
 
-	hbox = gtk.HBox()
+        b=gtk.Button(stock=gtk.STOCK_GO_BACK)
+        b.connect("clicked", self.component.back)
+        buttonbox.pack_start(b, expand=False, fill=False)
+
+        b=gtk.Button(stock=gtk.STOCK_REFRESH)
+        b.connect("clicked", self.component.refresh)
+        buttonbox.pack_start(b, expand=False, fill=False)
 
         def entry_validated(e):
             self.component.set_url(self.current_url())
@@ -206,20 +219,17 @@ class HTMLView(AdhocView):
 
         self.url_entry=gtk.Entry()
         self.url_entry.connect("activate", entry_validated)
-        hbox.pack_start(self.url_entry, expand=True, fill=True)
+        buttonbox.add(self.url_entry)
 
-        buttonbox=gtk.HButtonBox()
+        vbox=gtk.VBox()
 
-        b=gtk.Button(stock=gtk.STOCK_GO_BACK)
-        b.connect("clicked", self.component.back)
-        buttonbox.add(b)
+        vbox.pack_start(buttonbox, expand=False)
 
-        b=gtk.Button(stock=gtk.STOCK_REFRESH)
-        b.connect("clicked", self.component.refresh)
-        buttonbox.add(b)
+        vbox.add(w)
 
-	hbox.add(buttonbox)
-        vbox.pack_start(hbox, expand=False)
+        self.url_label=gtk.Label('')
+	self.url_label.set_alignment(0, 0)
+        vbox.pack_start(self.url_label, expand=False)
 
         vbox.buttonbox = buttonbox
         return vbox
