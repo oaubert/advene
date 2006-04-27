@@ -203,6 +203,12 @@ class HTMLView(AdhocView):
 					      notify=self.notify)
 	    w=self.component.widget
 
+	def utbv_menu(*p):
+	    if self.controller and self.controller.gui:
+		m=self.controller.gui.build_utbv_menu(action=self.open_url)
+                m.popup(None, None, None, 0, gtk.get_current_event_time())
+	    return True
+
         buttonbox=gtk.HBox()
 
         b=gtk.Button(stock=gtk.STOCK_GO_BACK)
@@ -211,6 +217,10 @@ class HTMLView(AdhocView):
 
         b=gtk.Button(stock=gtk.STOCK_REFRESH)
         b.connect("clicked", self.component.refresh)
+        buttonbox.pack_start(b, expand=False, fill=False)
+
+        b=gtk.Button(stock=gtk.STOCK_HOME)
+        b.connect("clicked", utbv_menu)
         buttonbox.pack_start(b, expand=False, fill=False)
 
         def entry_validated(e):
