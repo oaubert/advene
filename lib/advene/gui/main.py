@@ -865,7 +865,7 @@ class AdveneGUI (Connect):
 	elif name == 'webbrowser':
 	    if not popup and HTMLView._engine is not None:
 		view = HTMLView(controller=self.controller)
-		view.open_url(self.controller.get_default_url())
+		view.open_url(self.controller.get_default_url(alias='advene'))
 	    elif self.controller.package is not None:
                 m=self.build_utbv_menu()
                 m.popup(None, None, None, 0, gtk.get_current_event_time())
