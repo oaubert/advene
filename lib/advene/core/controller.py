@@ -809,6 +809,30 @@ class AdveneController:
         else:
             return []
 
+    def get_utbv_list(self):
+	"""Return the list of valid UTBV for the current package.
+
+	Returns a list of tuples (title, url) for each UTBV in the
+	current package that is appliable on the package.
+	"""
+	res=[]
+	if not self.package:
+            return res
+
+        url=self.get_default_url(root=True, alias='advene')
+
+        # Add defaultview first if it exists
+        defaultview=self.package.getMetaData(config.data.namespace,
+					     'default_utbv')
+        if defaultview:
+	    res.append( (_("Default view"), self.get_default_url(alias='advene')) )
+
+        for utbv in self.package.views:
+            if (utbv.matchFilter['class'] == 'package'
+                and utbv.content.mimetype != 'application/x-advene-ruleset'):
+		res.append( (self.get_title(utbv), "%s/view/%s" % (url, utbv.id)) )
+	return res
+
     def activate_stbv(self, view=None, force=False):
         """Activates a given STBV.
 
