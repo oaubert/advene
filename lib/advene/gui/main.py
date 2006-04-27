@@ -824,35 +824,19 @@ class AdveneGUI (Connect):
         i.show()
         menu.append(i)
 
-    def build_utbv_menu(self):
+    def build_utbv_menu(self, action=None):
+	if action is None:
+	    action = self.controller.open_url
+
         def open_utbv(button, u):
-            self.controller.open_url (u)
+            action (u)
             return True
 
-        c=self.controller
-
-        url=c.get_default_url(root=True, alias='advene')
-        
         menu=gtk.Menu()
-
-        if not self.controller.package:
-            return menu
-
-        # Add defaultview first if it exists
-        defaultview=c.package.getMetaData(config.data.namespace,
-                                          'default_utbv')
-        if defaultview:
-            i=gtk.MenuItem(label=_("Default view"))
-            i.connect('activate', open_utbv, c.get_default_url())
-            menu.append(i)
-        
-        for utbv in c.package.views:
-            if (utbv.matchFilter['class'] == 'package'
-                and utbv.content.mimetype != 'application/x-advene-ruleset'):
-                i=gtk.MenuItem(label=c.get_title(utbv), use_underline=False)
-                i.connect('activate', open_utbv, "%s/view/%s" % (url,
-                                                                 utbv.id))
-                menu.append(i)
+        for title, url in self.controller.get_utbv_list():
+	    i=gtk.MenuItem(label=title, use_underline=False)
+	    i.connect('activate', open_utbv, url)
+	    menu.append(i)
         menu.show_all()
         return menu
 
