@@ -24,6 +24,8 @@ advene (0.21) unstable; urgency=low
       The alias is automatically generated from the filename, and can be
       modified in the file selector dialog.
 
+    * the player control toolbar has been put beneath the video output.
+
     * non-text resources/contents are now handled by a GenericContentHandler,
       that offers loading/saving to/from a file.
 
