@@ -571,7 +571,10 @@ class AdveneGUI (Connect):
 
         self.displayhbox=gtk.HPaned()
 
-        self.displayhbox.pack1(self.drawable, shrink=False)
+	v=gtk.VBox()
+	v.add(self.drawable)
+	v.pack_start(self.get_player_control_toolbar(), expand=False)
+        self.displayhbox.pack1(v, shrink=False)
 	self.displayhbox.add2(hpane)
 
 	vb1 = ViewBook(controller=self.controller)
@@ -1553,12 +1556,32 @@ class AdveneGUI (Connect):
         w.show()
         return True
 
+    def on_adhoc_treeview_activate (self, button=None, data=None):
+	self.open_adhoc_view('treeview')
+        return True
+
+    def on_adhoc_timeline_activate (self, button=None, data=None):
+	self.open_adhoc_view('timeline')
+        return True
+
     def on_view_urlstack_activate (self, button=None, data=None):
         """Open the URL stack view plugin.
 	
 	Useless now, the urlstack is always here. This code will be
 	removed sometime...
 	"""
+        return True
+
+    def on_adhoc_transcription_activate (self, button=None, data=None):
+	self.open_adhoc_view('transcription')
+        return True
+
+    def on_adhoc_browser_activate (self, button=None, data=None):
+	self.open_adhoc_view('browser')
+        return True
+
+    def on_adhoc_web_browser_activate (self, button=None, data=None):
+	self.open_adhoc_view('webbrowser')
         return True
 
     def on_evaluator2_activate (self, button=None, data=None):
