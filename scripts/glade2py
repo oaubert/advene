@@ -8,7 +8,7 @@ while (<>)
 	print <<"EOF";
     def ${callback} (self, button=None, data=None):
 	print "${callback} activated (%s, %s, %s)" % (self, button, data)
-	return gtk.TRUE
+	return True
 
 EOF
     }
