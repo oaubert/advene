@@ -162,21 +162,12 @@ class AdveneGUI (Connect):
         
         # Frequently used GUI widgets
         self.gui.logmessages = self.gui.get_widget("logmessages")
-        self.gui.slider = self.gui.get_widget ("slider")
-        # slider holds the position in ms units
         self.slider_move = False
-        # but we display it in ms
-        self.gui.slider.connect ("format-value", self.format_slider_value)
+	# Will be initialized in get_visualisation_widget
+	self.gui.stbv_combo = None
 
         # About box
         self.gui.get_widget('about_web_button').set_label(config.data.version_string)
-
-        # Define combobox cell renderers
-        for n in ("stbv_combo", ):
-            combobox=self.gui.get_widget(n)
-            cell = gtk.CellRendererText()
-            combobox.pack_start(cell, True)
-            combobox.add_attribute(cell, 'text', 0)
 
 	# Adhoc view toolbuttons signal handling
 	def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
@@ -387,7 +378,7 @@ class AdveneGUI (Connect):
     def on_view_activation(self, context, parameters):
         """Handler used to update the STBV GUI.
         """
-        combo = self.gui.get_widget("stbv_combo")
+        combo = self.gui.stbv_combo
         store = combo.get_model()
         i = store.get_iter_first()
         while i is not None:
@@ -571,9 +562,47 @@ class AdveneGUI (Connect):
 
         self.displayhbox=gtk.HPaned()
 
+	tb=self.get_player_control_toolbar()
+
+	# Dynamic view selection
+	hb=gtk.HBox()
+	hb.pack_start(gtk.Label(_('D.view')), expand=False)
+	self.gui.stbv_combo = gtk.ComboBox()
+	cell = gtk.CellRendererText()
+	self.gui.stbv_combo.pack_start(cell, True)
+	self.gui.stbv_combo.add_attribute(cell, 'text', 0)
+	hb.pack_start(self.gui.stbv_combo, expand=True)
+	b=gtk.Button(stock=gtk.STOCK_EDIT)
+	b.connect('clicked', self.on_edit_current_stbv_clicked)
+	hb.pack_start(b, expand=False)
+	
+	# Append the player status label to the toolbar
+	ts=gtk.SeparatorToolItem()
+	ts.set_draw(False)
+	ts.set_expand(True)
+	tb.insert(ts, -1)
+
+	ti=gtk.ToolItem()
+	self.gui.player_status=gtk.Label('--')
+	ti.add(self.gui.player_status)
+	tb.insert(ti, -1)
+
+	# Create the slider
+	adj = gtk.Adjustment(0, 0, 100, 1, 1, 10)
+	self.gui.slider = gtk.HScale(adj)
+	self.gui.slider.set_draw_value(True)
+	self.gui.slider.set_value_pos(gtk.POS_BOTTOM)
+        self.gui.slider.connect ("format-value", self.format_slider_value)
+        self.gui.slider.connect ("button-press-event", self.on_slider_button_press_event)
+        self.gui.slider.connect ("button-release-event", self.on_slider_button_release_event)
+
+	# Stack the video components
 	v=gtk.VBox()
-	v.add(self.drawable)
-	v.pack_start(self.get_player_control_toolbar(), expand=False)
+	v.pack_start(hb, expand=False)
+	v.pack_start(self.drawable, expand=True)
+	v.pack_start(tb, expand=False)
+	v.pack_start(self.gui.slider, expand=False)
+
         self.displayhbox.pack1(v, shrink=False)
 	self.displayhbox.add2(hpane)
 
@@ -739,7 +768,7 @@ class AdveneGUI (Connect):
         return False
     
     def on_edit_current_stbv_clicked(self, button):
-        combo=self.gui.get_widget("stbv_combo")
+        combo=self.gui.stbv_combo
         i=combo.get_active_iter()
         stbv=combo.get_model().get_value(i, 1)
         if stbv is None:
@@ -792,7 +821,9 @@ class AdveneGUI (Connect):
     def update_stbv_list (self):
         """Update the STBV list.
         """
-        stbv_combo = self.gui.get_widget("stbv_combo")
+        stbv_combo = self.gui.stbv_combo
+	if stbv_combo is None:
+	    return True
         l=[ None ]
         l.extend(self.controller.get_stbv_list())
         st, i = advene.gui.util.generate_list_model([ (i, self.controller.get_title(i)) 
