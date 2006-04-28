@@ -211,6 +211,7 @@ class Config(object):
             'embedded': True,
             'name': 'vlc',
             'vout': 'default',
+	    'svg': True,
             'osdfont': '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
             'verbose': None, # None, 0, 1, 2
             'snapshot': True,
@@ -446,7 +447,21 @@ class Config(object):
         return os.path.join( self.get_homedir(), dirname )
 
     def read_preferences(self):
-        preffile=self.advenefile('advene.prefs', 'settings')
+	prefs=self.read_preferences_file(d=self.preferences, name='advene')
+	if prefs and prefs.has_key('path'):
+	    self.path.update(prefs['path'])
+	self.read_preferences_file(d=self.player, name='player')
+	return True
+
+    def save_preferences(self):
+	self.save_preferences_file(d=self.preferences, name='advene')
+	self.save_preferences_file(d=self.player, name='player')
+	return True
+
+    def read_preferences_file(self, d=None, name='advene'):
+	if d is None:
+	    d=self.preferences
+        preffile=self.advenefile(name+'.prefs', 'settings')
         try:
             f = open(preffile, "r")
         except IOError:
@@ -455,17 +470,17 @@ class Config(object):
             prefs=cPickle.load(f)
         except:
             return False
-        self.preferences.update(prefs)
-	if prefs.has_key('path'):
-	    self.path.update(prefs['path'])
-        return True
+        d.update(prefs)
+        return prefs
 
-    def save_preferences(self):
-        preffile=self.advenefile('advene.prefs', 'settings')
-        d=os.path.dirname(preffile)
-        if not os.path.isdir(d):
+    def save_preferences_file(self, d=None, name='advene'):
+	if d is None:
+	    d=self.preferences
+        preffile=self.advenefile(name+'.prefs', 'settings')
+        dp=os.path.dirname(preffile)
+        if not os.path.isdir(dp):
             try:
-                os.mkdir(d)
+                os.mkdir(dp)
             except OSError, e:
                 print "Error: ", str(e)
                 return False
@@ -474,7 +489,7 @@ class Config(object):
         except IOError:
             return False
         try:
-            cPickle.dump(self.preferences, f)
+            cPickle.dump(d, f)
         except:
             return False
         return True
@@ -524,7 +539,8 @@ class Config(object):
             args.append (self.player['verbose'])
         if self.player['vout'] != 'default':
             args.extend( [ '--vout', self.player['vout'] ] )
-	#args.extend( [ '--text-renderer', 'svg' ] )
+	if self.player['svg']:
+	    args.extend( [ '--text-renderer', 'svg' ] )
         if filters != []:
             # Some filters have been defined
             args.extend (['--vout-filter', ":".join(filters)])
