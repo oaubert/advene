@@ -1889,7 +1889,7 @@ class AdveneGUI (Connect):
             'height': config.data.player['snapshot-dimensions'][1],
             'level': config.data.player['verbose'] or -1,
             }
-        for n in ('caption', 'osdfont', 'snapshot', 'vout'):
+        for n in ('caption', 'osdfont', 'snapshot', 'vout', 'svg'):
             cache[n] = config.data.player[n]
 
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
@@ -1897,6 +1897,7 @@ class AdveneGUI (Connect):
         ew.add_title(_("Captions"))
         ew.add_checkbox(_("Enable"), "caption", _("Enable video captions"))
         ew.add_file_selector(_("Font"), "osdfont", _("TrueType font for captions"))
+        ew.add_checkbox(_("Enable SVG"), "svg", _("Enable SVG captions"))
         
         ew.add_title(_("Snapshots"))
         ew.add_checkbox(_("Enable"), "snapshot", _("Enable snapshots"))
@@ -1919,7 +1920,7 @@ class AdveneGUI (Connect):
         
         res=ew.popup()
         if res:
-            for n in ('caption', 'osdfont', 'snapshot', 'vout'):
+            for n in ('caption', 'osdfont', 'snapshot', 'vout', 'svg'):
                 config.data.player[n] = cache[n]
             config.data.player['snapshot-dimensions']    = (cache['width'] , 
                                                             cache['height'])
