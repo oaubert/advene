@@ -227,10 +227,6 @@ class Config(object):
             # 'admin' or 'raw'
             'displaymode': 'raw',
             }
-        # Threading does not work correctly on Win32. Use gtk_input
-        # method.
-        if self.os == 'win32':
-            self.webserver['mode'] = 1
 
         # Global context options
         self.namespace_prefix = {'advenetool': self.namespace,
@@ -354,6 +350,9 @@ class Config(object):
     def win32_specific_config(self):
         if self.os != 'win32':
             return
+        # Threading does not work correctly on Win32. Force gtk_input
+        # method.
+	self.webserver['mode'] = 1
         advenehome=self.get_registry_value('software\\advene','path')
         if advenehome is None:
             print "Cannot get the Advene location from registry"
@@ -525,9 +524,11 @@ class Config(object):
             args.append (self.player['verbose'])
         if self.player['vout'] != 'default':
             args.extend( [ '--vout', self.player['vout'] ] )
+	#args.extend( [ '--text-renderer', 'svg' ] )
         if filters != []:
             # Some filters have been defined
             args.extend (['--vout-filter', ":".join(filters)])
+	#print "player args", args
         return [ str(i) for i in args ]
 
     def get_userid (self):
