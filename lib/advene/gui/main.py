@@ -1827,7 +1827,7 @@ class AdveneGUI (Connect):
             'osd': config.data.player_preferences['osdtext'],
             'history-limit': config.data.preferences['history-size-limit'],
             'embed-treeview': config.data.preferences['embed-treeview'],
-	    'toolbarstyle': self.gui.get_widget("toolbar_control").get_style(),
+	    'toolbarstyle': self.gui.get_widget("toolbar_view").get_style(),
 	    'data': config.data.path['data'],
 	    'plugins': config.data.path['plugins'],
 	    'advene': config.data.path['advene'],
@@ -1869,7 +1869,7 @@ class AdveneGUI (Connect):
             config.data.player_preferences['osdtext']=cache['osd']
             config.data.preferences['history-size-limit']=cache['history-limit']
             config.data.preferences['embed-treeview']=cache['embed-treeview']
-            for t in ('toolbar_control', 'toolbar_view', 'toolbar_fileop', 'toolbar_create'):
+            for t in ('toolbar_view', 'toolbar_fileop', 'toolbar_create'):
                 self.gui.get_widget(t).set_style(cache['toolbarstyle'])
             for k in ('font-size', 'button-height', 'interline-height'):
                 config.data.preferences['timeline'][k] = cache[k]
