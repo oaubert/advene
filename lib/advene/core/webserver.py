@@ -233,10 +233,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         res = {}
         if q == "":
             return res
-        q=unicode(q)
+        # Implicit conversion of input string from latin1
+        q=unicode(urllib.unquote_plus(q), 'latin1')
         for t in q.split("&"):
             k,v = t.split("=", 1)
-            res[urllib.unquote_plus(k)] = urllib.unquote_plus(v)
+            res[k] = v
         return res
 
     def display_media_status (self):
