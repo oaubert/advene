@@ -211,7 +211,7 @@ class Config(object):
             'embedded': True,
             'name': 'vlc',
             'vout': 'default',
-	    'svg': True,
+	    'svg': False,
             'osdfont': '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
             'verbose': None, # None, 0, 1, 2
             'snapshot': True,
