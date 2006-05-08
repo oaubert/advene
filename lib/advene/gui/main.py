@@ -600,8 +600,8 @@ class AdveneGUI (Connect):
 	v=gtk.VBox()
 	v.pack_start(hb, expand=False)
 	v.pack_start(self.drawable, expand=True)
-	v.pack_start(tb, expand=False)
 	v.pack_start(self.gui.slider, expand=False)
+	v.pack_start(tb, expand=False)
 
         self.displayhbox.pack1(v, shrink=False)
 	self.displayhbox.add2(hpane)
@@ -882,7 +882,7 @@ class AdveneGUI (Connect):
 	    view = advene.gui.views.tree.TreeWidget(self.controller.package,
 						    controller=self.controller)
 	elif name == 'timeline':
-	    view = advene.gui.views.timeline.TimeLine (l=None,
+            view = advene.gui.views.timeline.TimeLine (l=None,
 						       controller=self.controller)
 	elif name == 'transcription':
 	    try:
