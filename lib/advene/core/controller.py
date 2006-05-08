@@ -740,7 +740,7 @@ class AdveneController:
             name=p.uri
         old_uri = p.uri
 
-        if alias is None:
+        if p == self.package:
             # Check if we know the stream duration. If so, save it as
             # package metadata
             if self.cached_duration > 0:
