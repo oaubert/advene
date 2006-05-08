@@ -135,8 +135,7 @@ class AdveneController:
         self.future_begins = None
         self.future_ends = None
         self.last_position = -1
-        self.cached_duration = 0
-
+        
         # GUI (optional)
         self.gui=None
         # Useful for debug in the evaluator window
@@ -186,6 +185,17 @@ class AdveneController:
                                                 prefix="advene_plugins_user")
         except OSError:
             pass
+
+    def get_cached_duration(self):
+        return self.package.cached_duration
+
+    def set_cached_duration(self, value):
+        if self.package is not None:
+            self.package.cached_duration = value
+
+    cached_duration = property(fget=get_cached_duration,
+                               fset=set_cached_duration,
+                               doc="Cached duration for the current package")
 
     def self_loop(self):
 	"""Autonomous gobject loop for controller.
@@ -541,7 +551,6 @@ class AdveneController:
     def set_default_media (self, uri, package=None):
         if package is None:
             package=self.package
-	self.cached_duration = 0
         m=self.dvd_regexp.match(uri)
         if m:
             title,chapter=m.group(1,2)
@@ -635,6 +644,12 @@ class AdveneController:
         self.package._idgenerator = advene.core.idgenerator.Generator(self.package)
         self.package._modified = False
 
+        duration = self.package.getMetaData (config.data.namespace, "duration")
+        if duration is not None:
+            self.package.cached_duration = long(duration)
+        else:
+            self.package.cached_duration = 0
+
         self.register_package(alias, self.package)
         self.notify ("PackageLoad")
         self.activate_package(alias)
@@ -691,14 +706,15 @@ class AdveneController:
         else:
             self.package = None
             self.current_alias = None
+            return
         self.packages['advene']=self.package
 
         # Reset the cached duration
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
-            self.cached_duration = long(duration)
+            self.package.cached_duration = long(duration)
         else:
-            self.cached_duration = 0
+            self.package.cached_duration = 0
 
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
@@ -740,13 +756,14 @@ class AdveneController:
             name=p.uri
         old_uri = p.uri
 
+        # Check if we know the stream duration. If so, save it as
+        # package metadata
+        d=p.cached_duration
+        if d > 0:
+            p.setMetaData (config.data.namespace,
+                           "duration", unicode(d))
+
         if p == self.package:
-            # Check if we know the stream duration. If so, save it as
-            # package metadata
-            if self.cached_duration > 0:
-                p.setMetaData (config.data.namespace,
-                               "duration",
-                               unicode(self.cached_duration))
             # Set if necessary the mediafile metadata
             if self.get_default_media() == "":
                 pl = self.player.playlist_get_list()
@@ -1120,9 +1137,9 @@ class AdveneController:
                     break
 
         # Update the cached duration if necessary
-        if self.cached_duration <= 0 and self.player.stream_duration > 0:
+        if self.package.cached_duration <= 0 and self.player.stream_duration > 0:
             print "updating cached duration"
-            self.cached_duration = self.player.stream_duration
+            self.package.cached_duration = self.player.stream_duration
 
         return pos
 
