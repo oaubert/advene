@@ -493,7 +493,8 @@ class TranscriptionEdit(AdhocView):
         else:
             fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
                                                action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                               button=gtk.STOCK_SAVE)
+                                               button=gtk.STOCK_SAVE,
+                                               default_dir=config.data.path['data'])
         if fname is not None:
             self.save_transcription(filename=fname)
         return True
@@ -528,7 +529,8 @@ class TranscriptionEdit(AdhocView):
         return True
 
     def load_transcription_cb(self, button=None):
-        fname=advene.gui.util.get_filename(title=_("Select transcription file to load"))
+        fname=advene.gui.util.get_filename(title=_("Select transcription file to load"),
+                                           default_dir=config.data.path['data'])
         if fname is not None:
             self.load_transcription(filename=fname)
         return True
