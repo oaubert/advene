@@ -536,12 +536,14 @@ class TranscriptionEdit(AdhocView):
         return True
 
     def load_transcription(self, filename=None):
-        if sre.match('[a-zA-Z]:', filename):
-            # Windows drive: notation. Convert it to
-            # a more URI-compatible syntax
-            filename=urllib.pathname2url(filename)
         try:
-            f=urllib.urlopen(filename)
+            if sre.match('[a-zA-Z]:', filename):
+                # Windows drive: notation. Convert it to
+                # a more URI-compatible syntax
+                fname=urllib.pathname2url(filename)
+            else:
+                fname=filename
+            f=urllib.urlopen(fname)
         except IOError, e:
             self.controller.log(_("Cannot open %s: %s") % (filename, str(e)))
             return
