@@ -1798,7 +1798,7 @@ class AdveneGUI (Connect):
             'author': self.controller.package.author,
             'date': self.controller.package.date,
             'media': self.controller.get_default_media() or "",
-	    'duration': str(self.controller.cached_duration),
+	    'duration': str(self.controller.package.cached_duration),
             'title': self.controller.package.title or ""
             }
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
@@ -1818,8 +1818,9 @@ class AdveneGUI (Connect):
             self.update_window_title()
             self.controller.set_default_media(cache['media'])
             try:
-                self.controller.cached_duration = long(cache['duration'])
-            except ValueError:
+                self.controller.package.cached_duration = long(cache['duration'])
+            except ValueError, e:
+		print "Cannot convert duration", str(e)
                 pass
         return True
 
