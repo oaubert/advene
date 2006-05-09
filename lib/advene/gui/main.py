@@ -571,6 +571,7 @@ class AdveneGUI (Connect):
 	cell = gtk.CellRendererText()
 	self.gui.stbv_combo.pack_start(cell, True)
 	self.gui.stbv_combo.add_attribute(cell, 'text', 0)
+	self.gui.stbv_combo.connect('changed', self.on_stbv_combo_changed)
 	hb.pack_start(self.gui.stbv_combo, expand=True)
 	b=gtk.Button(stock=gtk.STOCK_EDIT)
 	b.connect('clicked', self.on_edit_current_stbv_clicked)
