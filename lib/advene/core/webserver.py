@@ -2037,7 +2037,10 @@ class AdveneWebServer(
         and quitting variable.
         """
         while self.shouldrun:
-            r, w, x = select.select ([ self.socket ], [], [], 1)
+	    try:
+		r, w, x = select.select ([ self.socket ], [], [], 1)
+	    except select.error:
+		continue
             if len(r) != 0:
                 self.handle_request()
 
