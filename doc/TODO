@@ -1,5 +1,14 @@
+* strange error when a view import cannot be resolved (try copying
+   unicode.xml to ~)
+
+* embed swfplayer
+
+* embedding advene in browser: see
+   http://savannah.nongnu.org/projects/genres/
+
 * package
    http://www.fsfeurope.org/projects/gplv3/torino-rms-transcript.en.html
+See also http://filmlibre.org/ et http://media.april.org/
 
 * store event history + context (media, position) and save it as a
    package
@@ -62,8 +71,6 @@ reimplement a native widget for annotations or use DiaCanvas
 * Implement transmission of elements between different applications (esp. transmission of annotations [bounds + content] between 2 timelines) -> new target type + element xml repr.
 
 * allow i18n of template.xml
-
-* save player preferences
 
 * extend unit tests for the model (imports, add, del elements...) in model/test.py
 
@@ -1160,4 +1167,6 @@ res.startswith('<html>') [useful for Kupu]
    views
 
 * Rename advene.util.vlclib to something more meaningful (advene.util.helper)
+
+* save player preferences
 
