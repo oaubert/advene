@@ -472,8 +472,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		    self.send_no_content()
 		    return
                 if self.server.controller.player.status != self.server.controller.player.PlayingStatus:
-                    self.server.controller.update_status ("start", long(position))
-                self.server.controller.update_status ("set", long(position))
+		    self.server.controller.queue_action( self.server.controller.update_status, "start", long(position) )
+		else:
+		    self.server.controller.queue_action( self.server.controller.update_status, "set", long(position) )
                 self.send_no_content()
             elif command in ('pause', 'stop', 'resume'):
                 self.server.controller.update_status (command)
