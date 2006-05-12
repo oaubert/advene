@@ -394,7 +394,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     try:
                         if isinstance(name, unicode):
                             name=name.encode('utf8')
-                        self.server.controller.player.playlist_add_item (name)
+                        self.server.controller.queue_action(self.server.controller.player.playlist_add_item, name)
                         self.server.controller.notify("MediaChange", uri=name)
 
                         self.start_html (_("File added"))
@@ -457,7 +457,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     f=query['filename']
                     if isinstance(f, unicode):
                         f=f.encode('utf8')
-                    self.server.controller.player.playlist_add_item (f)
+		    self.server.controller.queue_action(self.server.controller.player.playlist_clear, f)
+		    self.server.controller.queue_action(self.server.controller.player.playlist_add_item, f)
 		    self.server.controller.notify("MediaChange", uri=f)
 
                 if len(param) != 0:
@@ -2027,7 +2028,7 @@ class AdveneWebServer(
         """Stop the media player."""
         try:
             if self.controller.player.is_active ():
-                self.controller.player.stop ()
+                self.controller.queue_action(self.controller.player.stop)
         except:
             pass
 
