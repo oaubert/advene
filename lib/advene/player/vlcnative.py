@@ -27,21 +27,11 @@ import vlc as VLC
 class Snapshot:
     def __init__(self, d=None):
         if d is not None:
-            self.width=d['width']
-            self.height=d['height']
-            self.data=d['data']
-            self.type=d['type']
-	    try:
-		# Added to python-vlc module from svn version #
-		self.date=d['date']
-	    except KeyError:
-		self.date=None
-#            code=self.type
-#            t="%c%c%c%c" % (code & 0xff,
-#                          code >> 8 & 0xff,
-#                          code >> 16 & 0xff,
-#                          code >> 24)
-#            print "Snapshot: (%d,%d) %s" % (self.width, self.height, t)
+	    for k in ('width', 'height', 'data', 'type', 'date'):
+		try:
+		    setattr(self, k, d[k])
+		except KeyError:
+		    setattr(self, k, None)
 
 class Player(object):
     """Wrapper class for a native vlc.MediaControl object.
