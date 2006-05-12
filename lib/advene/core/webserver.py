@@ -2043,7 +2043,7 @@ class AdveneWebServer(
 		r, w, x = select.select ([ self.socket ], [], [], 1)
 	    except select.error:
 		continue
-            if len(r) != 0:
+            if r:
                 self.handle_request()
 
 if __name__ == "__main__":
