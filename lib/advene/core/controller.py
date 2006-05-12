@@ -429,7 +429,7 @@ class AdveneController:
                 i = self.player.snapshot (self.player.relative_position)
             except self.player.InternalException, e:
                 print "Exception in snapshot: %s" % e
-                return False
+                return True
             if i is not None and i.height != 0:
                 self.package.imagecache[position] = helper.snapshot2png (i)
         else:
