@@ -73,9 +73,11 @@ class ViewBook(AdhocView):
 	def popup_menu(button, event, view):
 	    if event.button == 3:
 		menu = gtk.Menu()
-		item = gtk.MenuItem(_("Close"))
-		item.connect("activate", close_view, view)
-		menu.append(item)
+
+                if not permanent:
+                    item = gtk.MenuItem(_("Close"))
+                    item.connect("activate", close_view, view)
+                    menu.append(item)
 
                 try:
                     for label, action in view.contextual_actions:
