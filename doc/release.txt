@@ -1,11 +1,11 @@
-Checklist pour la release d'une nouvelle version :
+Checklist for the release of a new version :
 
-    * MAJ lib/advene/core/version.py
-    * génération des installeurs/packages
-    * tests
-    * copie svn de trunk vers tags/n_version
-    * téléchargement sur gna.org
-    * annonce sur gna.org
-    * mise à jour de downloads + news sur le site
-    * diffusion de l'AnnonceRelease sur advene-users, AVIS, vlc-devel...
+    * Update lib/advene/core/version.py (version + date)
+    * Generate installers/packages
+    * Test
+    * svn-copy from trunk to tags/n_version
+    * Upload on gna.org
+    * Announce on gna.org
+    * Update downloads + news on the website
+    * Send the announce on  advene-users, AVIS, vlc-devel...
 
