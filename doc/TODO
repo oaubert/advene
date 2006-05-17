@@ -1,3 +1,10 @@
+* Create a TimeBookmark structure in the controller, to trigger time
+   events. Basetime can be movie time or clock time. Should have 2
+   parameters (clear_on_stbv_change, clear_on_position_change)
+
+* handle unicode query strings : cf
+   http://pycheesecake.org/wiki/ZenOfUnicode
+
 * strange error when a view import cannot be resolved (try copying
    unicode.xml to ~)
 
