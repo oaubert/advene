@@ -1331,13 +1331,15 @@ class AdveneGUI (Connect):
 	return False
 
     def on_new1_activate (self, button=None, data=None):
-        """New package. Erase the current one."""
-        if self.controller.package._modified:
-	    if not advene.gui.util.message_dialog(
-                _("Your package has been modified but not saved.\nCreate a new one anyway?"),
-		icon=gtk.MESSAGE_QUESTION):
-                return True
-        self.controller.load_package ()
+        """New package. Erase the current one.
+	"""
+	if 'new_pkg' in self.controller.packages:
+	    # An unsaved template package already exists.
+	    # Ask to save it first.
+	    advene.gui.util.message_dialog(
+                _("An unsaved template package exists\nSave it first."))
+	else:
+	    self.controller.load_package ()
         return True
 
     def on_close1_activate (self, button=None, data=None):
