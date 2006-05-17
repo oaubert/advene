@@ -224,7 +224,7 @@ class Config(object):
             'port': 1234,
             # Whether to launch the HTTP server in the gtk interface
             # 0 for no, 1 for gtk_input, 2 for threading
-            'mode': 1,
+            'mode': 2,
             # 'admin' or 'raw'
             'displaymode': 'raw',
             }
@@ -351,9 +351,6 @@ class Config(object):
     def win32_specific_config(self):
         if self.os != 'win32':
             return
-        # Threading does not work correctly on Win32. Force gtk_input
-        # method.
-	self.webserver['mode'] = 1
         advenehome=self.get_registry_value('software\\advene','path')
         if advenehome is None:
             print "Cannot get the Advene location from registry"
