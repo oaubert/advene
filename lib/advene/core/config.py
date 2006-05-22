@@ -44,9 +44,8 @@ class Config(object):
 
     Example advene.ini file::
 
-      config.data.path['vlc']='/usr/local/src/vlc-0.5.0'
-      config.data.path['plugins']='/usr/local/src/vlc-0.5.0'
-      config.data.path['advene']='/usr/local/bin'
+      config.data.path['plugins']='/usr/local/src/vlc-0.8.5'
+      config.data.path['data']='/home/foo/advene/examples'
 
     @ivar path: dictionary holding path values. The keys are:
       - vlc : path to the VLC binary
@@ -247,7 +246,8 @@ class Config(object):
         # MIMEtypes that can be edited by the TextContentHandler
         self.text_mimetypes = ( 
 	    'application/x-advene-structured',
-	    'application/x-advene-sparql-query'
+	    'application/x-advene-sparql-query',
+            'application/x-javascript',
 	    )
 
 	# Drag and drop parameters for URIed element and other elements
