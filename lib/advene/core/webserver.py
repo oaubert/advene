@@ -1729,7 +1729,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write (str(objet))
             return
         elif displaymode == 'content':
-            if isinstance (objet, Content):
+            if hasattr(objet, 'mimetype'):
                 self.send_response (200)
                 self.send_header ('Content-type', objet.mimetype)
                 self.no_cache ()
@@ -1754,8 +1754,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if displaymode != "raw":
             displaymode = "navigation"
 
-        self.start_html(title=_("TALES evaluation - %s") % tales,
-                        mode=displaymode)
 
         # Display content
         if hasattr (objet, 'view') and callable (objet.view):
@@ -1766,19 +1764,27 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             # FIXME: should be default view
             context.setLocal(u'view', objet)
             try:
-                self.wfile.write (objet.view (context=context).encode('utf-8'))
+                res=objet.view (context=context)
+                self.send_response (200)
+                self.send_header ('Content-type', res.contenttype)
+                self.no_cache ()
+                self.end_headers ()
+                self.wfile.write (res.encode('utf-8'))
             except simpletal.simpleTAL.TemplateParseException, e:
+                self.start_html(_("Error"))
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>There was an error in the template code.</p>
                 <p>Tag name: <strong>%s</strong></p>
                 <p>Error message: <em>%s</em></p>""") % (cgi.escape(e.location),
                                                          e.errorDescription))
             except simpleTALES.ContextContentException, e:
+                self.start_html(_("Error"))
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>An invalid character is in the Context:</p>
                 <p>Error message: <em>%s</em></p><pre>%s</pre>""")
                                  % (e.errorDescription, unicode(e.args[0]).encode('utf-8')))
             except AdveneException, e:
+                self.start_html(_("Error"))
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>There was an error in the TALES expression.</p>
                 <pre>%s</pre>""") % cgi.escape(unicode(e.args[0]).encode('utf-8')))
