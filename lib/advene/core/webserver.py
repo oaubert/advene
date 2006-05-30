@@ -1765,10 +1765,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             context.setLocal(u'view', objet)
             try:
                 res=objet.view (context=context)
-                self.send_response (200)
-                self.send_header ('Content-type', res.contenttype)
-                self.no_cache ()
-                self.end_headers ()
+		self.start_html(mimetype=res.contenttype)
                 self.wfile.write (res.encode('utf-8'))
             except simpletal.simpleTAL.TemplateParseException, e:
                 self.start_html(_("Error"))
