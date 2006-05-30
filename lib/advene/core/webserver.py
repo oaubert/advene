@@ -233,8 +233,14 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         res = {}
         if q == "":
             return res
-        # Implicit conversion of input string from latin1
-        q=unicode(urllib.unquote_plus(q), 'latin1')
+        # Implicit conversion of input string. We try utf-8 first.
+        # That will work only if it is ascii or utf-8.
+        # If it fails, the most frequent case is latin1
+        s=urllib.unquote_plus(q)
+        try:
+            q=unicode(s, 'utf-8')
+        except UnicodeDecodeError:
+            q=unicode(s, 'latin1')
         for t in q.split("&"):
             k,v = t.split("=", 1)
             res[k] = v
@@ -1716,9 +1722,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             del (query['mode'])
         if isinstance(objet, str) and self.image_type (objet) is not None:
             displaymode = 'image'
-        if hasattr(objet, 'contenttype') and objet.contenttype not in ('text/plain',
-                                                                       'text/html'):
-            displaymode = 'content'
 
         if displaymode == 'image':
             # Return an image, so build the correct headers
@@ -1754,7 +1757,6 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if displaymode != "raw":
             displaymode = "navigation"
 
-
         # Display content
         if hasattr (objet, 'view') and callable (objet.view):
 
@@ -1786,7 +1788,16 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write(_("""<p>There was an error in the TALES expression.</p>
                 <pre>%s</pre>""") % cgi.escape(unicode(e.args[0]).encode('utf-8')))
         else:
+            mimetype=None
             try:
+                mimetype = objet.mimetype
+            except AttributeError:
+                try:
+                    mimetype = objet.contenttype
+                except AttributeError:
+                    pass
+            try:
+		self.start_html(mimetype=mimetype)
                 self.wfile.write (unicode(objet).encode('utf-8'))
             except AdveneException, e:
                 self.wfile.write(_("<h1>Error</h1>"))
