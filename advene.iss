@@ -18,20 +18,18 @@ Source: \devel\gtk\bin\libpng12.dll; DestDir: {app}
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.20
+AppVerName=Advene 0.21
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.20
+VersionInfoVersion=0.21
 VersionInfoCompany=LIRIS
-PrivilegesRequired=poweruser
+PrivilegesRequired=none
 LicenseFile=debian\copyright
 DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.20
-VersionInfoTextVersion=0.20
-[Registry]
-Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
+OutputBaseFilename=setup_advene_0.21
+VersionInfoTextVersion=0.21
 [Icons]
 Name: {group}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; IconIndex: 0

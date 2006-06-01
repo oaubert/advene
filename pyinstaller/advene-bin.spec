@@ -1,6 +1,6 @@
 Summary: Annotate DVDs, Exchange on the NEt! (binary version)
 Name: advene-bin
-Version: 0.20
+Version: 0.21
 Release: 1
 License: GPL
 Packager: Olivier Aubert <olivier.aubert@liris.cnrs.fr>
