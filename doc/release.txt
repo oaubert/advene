@@ -7,5 +7,5 @@ Checklist for the release of a new version :
     * Upload on gna.org
     * Announce on gna.org
     * Update downloads + news on the website
-    * Send the announce on  advene-users, AVIS, vlc-devel...
+    * Send the announce on  advene-users, AVIS, vlc-devel, partners
 
