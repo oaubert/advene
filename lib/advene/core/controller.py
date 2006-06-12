@@ -417,7 +417,10 @@ class AdveneController:
         return
 
     def update_snapshot (self, position=None):
-        """Event handler used to take a snapshot for the given position (current).
+        """Event handler used to take a snapshot for the given position.
+
+	!!! For the moment, the position parameter is ignored, and the
+            snapshot is taken for the current position.
 
         @return: a boolean (~desactivation)
         """
