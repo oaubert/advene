@@ -148,6 +148,8 @@ class ImageCache(dict):
         @return: True if the given key is initialized.
         @rtype: boolean
         """
+	if key is None:
+	    return False
         key = self.approximate(long(key))
         if dict.__getitem__(self, key) == self.not_yet_available_image:
             return False
