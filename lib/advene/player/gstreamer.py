@@ -23,6 +23,7 @@ Based on gst >= 0.10 API
 import pygst
 pygst.require('0.10')
 import gst
+import gst.interfaces
 import os
 
 class StreamInformation:
@@ -119,10 +120,10 @@ class Player:
 
     def current_status(self):
 	st=self.player.get_state()
-	print repr(st)
-	if st == gst.STATE_PLAYING:
+	#rint repr(st)
+	if gst.STATE_PLAYING in st:
 	    return self.PlayingStatus
-	elif st == gst.STATE_PAUSED:
+	elif gst.STATE_PAUSED in st:
 	    return self.PauseStatus
 	else:
 	    return self.UndefinedStatus
@@ -300,7 +301,7 @@ class Player:
 
     def position_update(self):
         s = self.get_stream_information ()
-        self.status = s.streamstatus
+        self.status = s.streamstatus or Player.UndefinedStatus
         self.stream_duration = s.length
         self.current_position_value = s.position
 
