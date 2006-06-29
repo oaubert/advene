@@ -41,7 +41,7 @@ def fourcc2rawcode (code):
     rawcode specification used by the python Image module.
 
     @param code: the FOURCC code from VideoLan
-    @type code: string
+    @type code: int or string
     @return: the corresponding PIL code
     @rtype: string
     """
