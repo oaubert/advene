@@ -98,6 +98,8 @@ class Player:
 
         self.videofile=None
         self.status=Player.UndefinedStatus
+	self.current_position_value = 0
+	self.stream_duration = 0
         self.relative_position=self.create_position(0, 
 						    origin=self.RelativePosition)
         self.position_update()
@@ -120,7 +122,6 @@ class Player:
 
     def current_status(self):
 	st=self.player.get_state()
-	#rint repr(st)
 	if gst.STATE_PLAYING in st:
 	    return self.PlayingStatus
 	elif gst.STATE_PAUSED in st:
@@ -132,11 +133,12 @@ class Player:
         """Returns the current position in ms.
 	"""
         try:
-            ret = self.player.query_position(gst.FORMAT_TIME)
+            pos, format = self.player.query_position(gst.FORMAT_TIME)
         except:
             position = 0
         else:
-            position = ret[0] / 1000
+            position = float(pos) / 1e6
+	return position
 	
     def dvd_uri(self, title=None, chapter=None):
         return "dvd@%s:%s" % (str(title),
@@ -149,7 +151,7 @@ class Player:
 	return self.current_position()
 
     def set_media_position(self, position):
-	position = self.position2value(position) * 1000
+	position = self.position2value(position) * 1e6
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
 				   gst.SEEK_FLAG_FLUSH,
 				   gst.SEEK_TYPE_SET, position,
@@ -162,13 +164,10 @@ class Player:
         self.player.set_state(gst.STATE_PLAYING)
 
     def pause(self, position): 
-        if self.status == Player.PlayingStatus:
-	    self.player.set_state(gst.STATE_PAUSED)
-        else:
-	    self.player.set_state(gst.STATE_PLAYING)
+	self.player.set_state(gst.STATE_PAUSED)
 	    
     def resume(self, position):
-	self.pause(position)
+	self.player.set_state(gst.STATE_PLAYING)
 
     def stop(self, position): 
         self.player.set_state(gst.STATE_READY)
@@ -191,14 +190,17 @@ class Player:
         return [ self.videofile ]
 
     def snapshot(self, position):
+	# FIXME: todo
         self.log("snapshot %s" % str(position))
         return None
 
     def all_snapshots(self):
+	# FIXME: todo (or not? )
         self.log("all_snapshots %s")
         return [ None ]
     
     def display_text (self, message, begin, end):
+	# FIXME: todo
         self.log("display_text %s" % str(message))
 
     def get_stream_information(self):
@@ -209,11 +211,11 @@ class Player:
 	    s.url=self.videofile
 
         try:
-            ret = self.player.query_duration(gst.FORMAT_TIME)
+            dur, format = self.player.query_duration(gst.FORMAT_TIME)
         except:
             duration = 0
         else:
-            duration = ret[0] / 1000
+            duration = float(dur) / 1e6
 
 	s.length=duration
 	s.position=self.current_position()
@@ -264,6 +266,7 @@ class Player:
         @param position: the position
         @type position: long
         """
+	print "gst - update_status ", status, str(position)
 	if position is None:
 	    position=0
 	else:
@@ -301,11 +304,12 @@ class Player:
 
     def position_update(self):
         s = self.get_stream_information ()
-        self.status = s.streamstatus or Player.UndefinedStatus
+        self.status = s.status
         self.stream_duration = s.length
-        self.current_position_value = s.position
+        self.current_position_value = float(s.position)
 
     def set_visual(self, xid):
+	# FIXME: set xid again on player stop/restart
         self.imagesink.set_xwindow_id(xid)
         return True
 
