@@ -1,6 +1,6 @@
 Source: advene
 Maintainer: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>
-Build-Depends: debhelper (>= 4.0.0)
+Build-Depends: debhelper (>= 5.0.37.2)
 Standards-Version: 3.6.0
 Section: graphics
 Priority: optional
