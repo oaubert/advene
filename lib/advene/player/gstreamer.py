@@ -92,9 +92,14 @@ class Player:
 #	}
 
     def __init__(self):
+	self.xid = None
         self.player = gst.element_factory_make("playbin", "player")
         self.imagesink = gst.element_factory_make('xvimagesink')
         self.player.set_property('video-sink', self.imagesink)
+
+	bus = self.player.get_bus()
+	bus.enable_sync_message_emission()
+	bus.connect('sync-message::element', self.on_sync_message)
 
         self.videofile=None
         self.status=Player.UndefinedStatus
@@ -309,11 +314,19 @@ class Player:
         self.current_position_value = float(s.position)
 
     def set_visual(self, xid):
+	self.xid = xid
 	# FIXME: set xid again on player stop/restart
-        self.imagesink.set_xwindow_id(xid)
+        self.imagesink.set_xwindow_id(self.xid)
         return True
 
     def restart_player(self):
 	# FIXME
 	print "gstreamer: restart player"
 	return True
+
+    def on_sync_message(self, bus, message):
+	if message.structure is None:
+	    return
+	if message.structure.get_name() == 'prepare-xwindow-id':
+	    self.imagesink.set_xwindow_id(self.xid)
+	    message.src.set_property('force-aspect-ratio', True)
