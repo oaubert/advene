@@ -40,6 +40,9 @@ class Position:
 	self.origin=0
 	self.key=2
 
+    def __str__(self):
+	return "Position " + str(self.value)
+
 class PositionKeyNotSupported(Exception):
     pass
 
@@ -117,19 +120,17 @@ class Player:
 	    if p.key != self.MediaTime:
 		print "gstreamer: unsupported key ", p.key
 		return 0
-	    if p.origin == self.AbsolutePosition:
-		v=p.value
-	    else:
-		v=self.current_position() + p.value
+	    if p.origin != self.AbsolutePosition:
+		v += self.current_position()
 	else:
-	    v=long(p)
-	return v
+	    v=p
+	return long(v)
 
     def current_status(self):
-	st=self.player.get_state()
-	if gst.STATE_PLAYING in st:
+	st=self.player.get_state()[1]
+	if st == gst.STATE_PLAYING:
 	    return self.PlayingStatus
-	elif gst.STATE_PAUSED in st:
+	elif st == gst.STATE_PAUSED:
 	    return self.PauseStatus
 	else:
 	    return self.UndefinedStatus
@@ -142,7 +143,7 @@ class Player:
         except:
             position = 0
         else:
-            position = float(pos) / 1e6
+            position = pos / 1e6
 	return position
 	
     def dvd_uri(self, title=None, chapter=None):
@@ -156,10 +157,12 @@ class Player:
 	return self.current_position()
 
     def set_media_position(self, position):
-	position = self.position2value(position) * 1e6
+	# 1e6 is a float. Then we have to explicitly convert the result to a long
+	p = long(self.position2value(position) * 1e6)
+	#print "Going to position ", str(p)
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
 				   gst.SEEK_FLAG_FLUSH,
-				   gst.SEEK_TYPE_SET, position,
+				   gst.SEEK_TYPE_SET, p,
 				   gst.SEEK_TYPE_NONE, 0)
         res = self.player.send_event(event)
         if not res:
@@ -169,17 +172,20 @@ class Player:
         self.player.set_state(gst.STATE_PLAYING)
 
     def pause(self, position): 
-	self.player.set_state(gst.STATE_PAUSED)
+	if self.status == self.PlayingStatus:
+	    self.player.set_state(gst.STATE_PAUSED)
+	else:
+	    self.player.set_state(gst.STATE_PLAYING)
 	    
     def resume(self, position):
-	self.player.set_state(gst.STATE_PLAYING)
+	self.pause(position)
 
     def stop(self, position): 
         self.player.set_state(gst.STATE_READY)
 
     def exit(self):
 	# FIXME
-	pass
+	print "exit: not implemented yet."
     
     def playlist_add_item(self, item):
 	self.videofile=item
@@ -206,6 +212,7 @@ class Player:
     
     def display_text (self, message, begin, end):
 	# FIXME: todo
+	# use http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/gst-plugins-base-plugins-textoverlay.html
         self.log("display_text %s" % str(message))
 
     def get_stream_information(self):
@@ -220,7 +227,7 @@ class Player:
         except:
             duration = 0
         else:
-            duration = float(dur) / 1e6
+            duration = dur / 1e6
 
 	s.length=duration
 	s.position=self.current_position()
@@ -228,12 +235,20 @@ class Player:
         return s
 
     def sound_get_volume(self):
-	# FIXME
-        return 0
+	"""Get the current volume.
+
+	The result is a long value in [0, 100]
+	"""
+        v = self.player.get_property('volume') * 100 / 4
+        return long(v)
 
     def sound_set_volume(self, v):
-	# FIXME
-	return 0
+	if v > 100:
+	    v = 100
+	elif v < 0:
+	    v = 0
+	v = v * 4.0 / 100
+	self.player.set_property('volume', v)
 
     # Helper methods
     def create_position (self, value=0, key=None, origin=None):
