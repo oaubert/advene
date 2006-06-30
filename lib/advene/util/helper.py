@@ -48,6 +48,9 @@ def fourcc2rawcode (code):
     if code == 'PNG' or code == 'png':
 	return 'PNG'
 
+    if code == 'video/x-raw-rgb':
+	return 'BGRX'
+
     conv = { 'RV32' : 'BGRX',
              'png ' : 'PNG' }
     fourcc = "%c%c%c%c" % (code & 0xff,
@@ -93,7 +96,7 @@ def snapshot2png (image, output=None):
     @return: an image buffer (optional)
     @rtype: string
     """
-    if image.height == 0:
+    if image.height == 0 or image.height is None:
         print "Error : 0 sized snapshot"
         return ""
 
