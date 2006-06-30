@@ -23,8 +23,10 @@ Based on gst >= 0.10 API
 import pygst
 pygst.require('0.10')
 import gst
+import gobject
 import gst.interfaces
 import os
+from mutex import mutex
 
 class StreamInformation:
     def __init__(self):
@@ -32,6 +34,15 @@ class StreamInformation:
         self.url=""
         self.position=0
         self.length=0
+
+class Snapshot:
+    def __init__(self, d=None):
+        if d is not None:
+	    for k in ('width', 'height', 'data', 'type', 'date'):
+		try:
+		    setattr(self, k, d[k])
+		except KeyError:
+		    setattr(self, k, None)
 
 class Position:
     def __init__(self, value=0):
@@ -83,22 +94,23 @@ class Player:
     PlaylistException=Exception()
     InternalException=Exception()
 
-#    statusmapping = {
-#	#gst.STATE_ASYNC: UndefinedStatus,
-#	gst.STATE_PAUSED: PauseStatus,
-#        #gst.STATE_SUCCESS: UndefinedStatus,
-#	#gst.STATE_FAILURE: UndefinedStatus,
-#	gst.STATE_PLAYING: PlayingStatus,
-#	gst.STATE_VOID_PENDING: UndefinedStatus,
-#	gst.STATE_NULL: UndefinedStatus,
-#	gst.STATE_READY: UndefinedStatus,
-#	}
-
     def __init__(self):
 	self.xid = None
         self.player = gst.element_factory_make("playbin", "player")
         self.imagesink = gst.element_factory_make('xvimagesink')
         self.player.set_property('video-sink', self.imagesink)
+
+	# Defined video types: http://gstreamer.freedesktop.org/data/doc/gstreamer/head/pwg/html/section-types-definitions.html
+        caps = "video/x-raw-rgb,bpp=24,depth=24"# ,"\
+#                "width={8,16,32,64,128,256,512,1024},"\
+#                "height={8,16,32,64,128,256,512,1024}";
+        self._sink = VideoSinkBin(caps)
+	# If we do :
+        #self.player.set_property("video-sink", self._sink)
+	# we get snapshots but no video, because we replace the xvimagesink
+	# We could maybe use a tee ?
+	# tee=gst.element_factory_make('tee', 'tee')
+	# or, better, manage to embed the snapshot functionality over the xvimagesink
 
 	bus = self.player.get_bus()
 	bus.enable_sync_message_emission()
@@ -184,8 +196,7 @@ class Player:
         self.player.set_state(gst.STATE_READY)
 
     def exit(self):
-	# FIXME
-	print "exit: not implemented yet."
+        self.player.set_state(gst.STATE_NULL)
     
     def playlist_add_item(self, item):
 	self.videofile=item
@@ -202,8 +213,8 @@ class Player:
 
     def snapshot(self, position):
 	# FIXME: todo
-        self.log("snapshot %s" % str(position))
-        return None
+        #self.log("snapshot %s" % str(position))
+        return self._sink.get_snapshot()
 
     def all_snapshots(self):
 	# FIXME: todo (or not? )
@@ -286,7 +297,7 @@ class Player:
         @param position: the position
         @type position: long
         """
-	print "gst - update_status ", status, str(position)
+	#print "gst - update_status ", status, str(position)
 	if position is None:
 	    position=0
 	else:
@@ -345,3 +356,88 @@ class Player:
 	if message.structure.get_name() == 'prepare-xwindow-id':
 	    self.imagesink.set_xwindow_id(self.xid)
 	    message.src.set_property('force-aspect-ratio', True)
+
+# The following code is borrowed from the Elisa project (GPL) :
+# Elisa - Home multimedia server - Copyright (C) 2006 Fluendo, S.A. (www.fluendo.com).
+class VideoSinkBin(gst.Bin):
+
+    def __init__(self, needed_caps):
+        self._width = None
+        self._height = None
+        self._current_frame = None
+        self._current_timestamp = 0
+        gobject.threads_init()
+        self._mutex = mutex()
+        gst.Bin.__init__(self)
+        self._capsfilter = gst.element_factory_make('capsfilter', 'capsfilter')
+
+        self.set_caps(needed_caps)
+        self.add(self._capsfilter)
+
+        fakesink = gst.element_factory_make('fakesink', 'fakesink')
+        fakesink.set_property("sync", True)
+        self.add(fakesink)
+        self._capsfilter.link(fakesink)
+
+        pad = self._capsfilter.get_pad("sink")
+        ghostpad = gst.GhostPad("sink", pad)
+
+        pad2probe = fakesink.get_pad("sink")
+        pad2probe.add_buffer_probe(self.buffer_probe)
+
+        self.add_pad(ghostpad)
+        self.sink = self._capsfilter
+
+    def set_current_frame(self, value, timestamp=0):
+        self._mutex.testandset()
+        self._current_frame = value
+	self._current_timestamp = timestamp
+        self._mutex.unlock()
+
+    def set_caps(self, caps):
+        gst_caps = gst.caps_from_string(caps)
+        self._capsfilter.set_property("caps", gst_caps)
+
+    def get_current_frame(self):
+        self._mutex.testandset()
+        frame = self._current_frame
+        self._current_frame = None
+        self._mutex.unlock()
+        return frame
+
+    def buffer_probe(self, pad, buffer):
+        if self.get_width() == None or self.get_height() == None:
+            caps = pad.get_negotiated_caps()
+            if caps != None:
+                s = caps[0]
+                self.set_width(s['width'])
+                self.set_height(s['height'])
+        if self.get_width() != None and self.get_height() != None and buffer != None:
+            self.set_current_frame(buffer.data, buffer.timestamp)
+        return True
+
+    def set_width(self, width):
+        self._width = width
+
+    def set_height(self, height):
+        self._height = height
+
+    def get_height(self):
+        return self._height
+
+    def get_width(self):
+        return self._width
+
+    def get_snapshot(self):
+        self._mutex.testandset()
+	s=Snapshot({'data': self._current_frame,
+		    'width': self._width,
+		    'height': self._height,
+		    'type': self._capsfilter.get_property("caps")[0].get_name(),
+		    'date': self._current_timestamp})
+	self._current_frame = None
+	self._current_timestamp = 0
+        self._mutex.unlock()
+	return s
+
+gobject.type_register(VideoSinkBin)
