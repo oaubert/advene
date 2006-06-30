@@ -315,8 +315,8 @@ class Player:
 
     def set_visual(self, xid):
 	self.xid = xid
-	# FIXME: set xid again on player stop/restart
         self.imagesink.set_xwindow_id(self.xid)
+	self.imagesink.set_property('force-aspect-ratio', True)
         return True
 
     def restart_player(self):
