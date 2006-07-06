@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-06-01 16:06+0200\n"
-"PO-Revision-Date: 2006-05-22 14:44+0200\n"
+"PO-Revision-Date: 2006-07-06 14:43+0200\n"
 "Last-Translator: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
 "MIME-Version: 1.0\n"
@@ -1511,7 +1511,7 @@ msgstr "DébutFin"
 
 #: ../lib/advene/gui/views/timeline.py:1177
 msgid "Align the begin time to the selected end time"
-msgstr "Aligner le temps de fin sur le temps de fin sélectionné"
+msgstr "Aligner le temps de début sur le temps de fin sélectionné"
 
 #: ../lib/advene/gui/views/timeline.py:1181
 msgid "EndEnd"
@@ -1519,7 +1519,7 @@ msgstr "FinFin"
 
 #: ../lib/advene/gui/views/timeline.py:1181
 msgid "Align the end time to the selected end time"
-msgstr "Aligner le temps de fin sur le temps de fin sélectionné"
+msgstr "Fixer le même temps de fin que l'annotation sélectionnée"
 
 #: ../lib/advene/gui/views/timeline.py:1184
 msgid "EndBegin"
