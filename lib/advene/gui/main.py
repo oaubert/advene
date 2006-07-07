@@ -552,6 +552,13 @@ class AdveneGUI (Connect):
                 # Do not kill the widget if the application exits
                 return True
             self.drawable.connect("plug-removed", handle_remove)
+
+        black=gtk.gdk.Color(0, 0, 0)
+        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                      gtk.STATE_PRELIGHT):
+            self.drawable.modify_bg (state, black)
+
         self.drawable.set_size_request(320,200)
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
         self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
