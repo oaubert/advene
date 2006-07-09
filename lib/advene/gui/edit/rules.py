@@ -791,7 +791,7 @@ class EditAction(EditGeneric):
 
         for name in self.sorted(self.current_parameters):
             p=self.build_parameter_widget(name,
-                                          self.current_parameters[name],
+                                          ra.default_value(name),
                                           ra.describe_parameter(name))
             self.paramlist[name]=p
             p.show_all()
@@ -850,9 +850,9 @@ class EditAction(EditGeneric):
             # we have information about its parameters
             ra=self.model.registeredaction
             for name in self.sorted(ra.parameters):
-                p=self.build_parameter_widget(name,
-                                              self.model.parameters.setdefault(name,""),
-                                              ra.describe_parameter(name))
+                p=self.build_parameter_widget(name=name,
+                                              value=ra.default_value(name),
+                                              description=ra.describe_parameter(name))
                 self.paramlist[name]=p
                 vbox.add(p)
         else:
