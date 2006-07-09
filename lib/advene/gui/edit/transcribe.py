@@ -583,6 +583,34 @@ class TranscriptionEdit(AdhocView):
             b.insert_at_cursor(data)
         return
 
+    def import_annotations_cb(self, button=None):
+        if not self.controller.gui:
+            self.controller.log(_("Cannot import annotations: no existing interface"))
+            return True
+
+        at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to import"), create=False)
+        if at is None:
+            return True
+
+        b=self.textview.get_buffer()
+        begin,end=b.get_bounds()
+        b.delete(begin, end)
+
+        al=at.annotations
+        al.sort(lambda a, b: cmp(a.fragment.begin, b.fragment.begin))
+
+        last_time=None
+
+        for a in al:
+            if a.fragment.begin != last_time:
+                it=b.get_iter_at_mark(b.get_insert())
+                mark=self.create_timestamp_mark(a.fragment.begin, it)
+            b.insert_at_cursor(a.content.data)
+            it=b.get_iter_at_mark(b.get_insert())
+            mark=self.create_timestamp_mark(a.fragment.end, it)
+            last_time = a.fragment.end
+        return True
+
     def convert_transcription_cb(self, button=None):
         if not self.controller.gui:
             self.controller.log(_("Cannot convert the data : no associated package"))
@@ -617,7 +645,8 @@ class TranscriptionEdit(AdhocView):
             (_("Open"),    _("Open"), gtk.STOCK_OPEN, self.load_transcription_cb),
             (_("Save"),    _("Save"), gtk.STOCK_SAVE, self.save_transcription_cb),
             (_("Save As"), _("Save As"), gtk.STOCK_SAVE_AS, self.save_as_cb),
-            (_("Convert"), _("Convert"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
+            (_("Import"), _("Import"), gtk.STOCK_EXECUTE, self.import_annotations_cb),
+            (_("Export"), _("Export"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
             )
 
         for text, tooltip, icon, callback in tb_list:
