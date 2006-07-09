@@ -1072,8 +1072,8 @@ class TimeLine(AdhocView):
         toolbar = self.get_toolbar()
         hb.add(toolbar)
         if self.controller.gui:
-            toolbar=self.controller.gui.get_player_control_toolbar()
-            hb.add(toolbar)
+            self.player_toolbar=self.controller.gui.get_player_control_toolbar()
+            hb.add(self.player_toolbar)
 
         vbox.pack_start(hb, expand=False)
 

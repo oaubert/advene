@@ -109,8 +109,8 @@ class TranscriptionEdit(AdhocView):
         hb=gtk.HBox()
         vbox.pack_start(hb, expand=False)
         if self.controller.gui:
-            toolbar=self.controller.gui.get_player_control_toolbar()
-            hb.add(toolbar)
+            self.player_toolbar=self.controller.gui.get_player_control_toolbar()
+            hb.add(self.player_toolbar)
         hb.add(self.get_toolbar())
 
         # Spinbutton for reaction time

@@ -162,8 +162,8 @@ class TranscriptionView(AdhocView):
         mainbox = gtk.VBox()
 
         if self.controller.gui:
-            toolbar=self.controller.gui.get_player_control_toolbar()
-            mainbox.pack_start(toolbar, expand=False)
+            self.player_toolbar=self.controller.gui.get_player_control_toolbar()
+            mainbox.pack_start(self.player_toolbar, expand=False)
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
