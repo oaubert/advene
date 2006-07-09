@@ -55,6 +55,11 @@ class TimeLine(AdhocView):
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
             )
+        self.options = {
+            'highlight': True,
+            'autoscroll': True,
+            'delete_transmuted': False,
+            }
 
         self.list = l
         self.controller=controller
@@ -96,17 +101,23 @@ class TimeLine(AdhocView):
         self.minimum = minimum
         self.maximum = maximum
 
+        def handle_toggle(b, option):
+            self.options[option]=b.get_active()
+            return True
+
         # Highlight activated annotations
         self.highlight_activated_toggle=gtk.CheckButton(_("Active"))
         self.tooltips.set_tip(self.highlight_activated_toggle,
                               _("Highlight active annotations"))
-        self.highlight_activated_toggle.set_active (True)
+        self.highlight_activated_toggle.set_active (self.options['highlight'])
+        self.highlight_activated_toggle.connect('toggled', handle_toggle, 'highlight')
 
         # Scroll the window to display the activated annotations
         self.scroll_to_activated_toggle=gtk.CheckButton(_("AutoScroll"))
         self.tooltips.set_tip(self.scroll_to_activated_toggle,
                               _("Scroll to active annotation"))
-        self.scroll_to_activated_toggle.set_active (True)
+        self.scroll_to_activated_toggle.set_active (self.options['autoscroll'])
+        self.scroll_to_activated_toggle.connect('toggled', handle_toggle, 'autoscroll')
 
         # Create annotation widget style:
         self.annotation_font = pango.FontDescription("sans %d" % config.data.preferences['timeline']['font-size'])
@@ -306,9 +317,9 @@ class TimeLine(AdhocView):
     def activate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
         if annotation is not None:
-            if self.scroll_to_activated_toggle.get_active():
+            if self.options['autoscroll']:
                 self.scroll_to_annotation(annotation)
-            if self.highlight_activated_toggle.get_active():
+            if self.options['highlight']:
                 self.activate_annotation (annotation)
             self.update_position (None)
         return True
@@ -316,7 +327,7 @@ class TimeLine(AdhocView):
     def desactivate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
         if annotation is not None:
-            if self.highlight_activated_toggle.get_active():
+            if self.options['highlight']:
                 self.desactivate_annotation (annotation)
         return True
 
@@ -401,7 +412,7 @@ class TimeLine(AdhocView):
             l=self.list
         if event == 'AnnotationActivate' and annotation in l:
             self.activate_annotation(annotation)
-            if self.scroll_to_activated_toggle.get_active():
+            if self.options['autoscroll']:
                 self.scroll_to_annotation(annotation)
             return True
         if event == 'AnnotationDeactivate' and annotation in l:
@@ -516,14 +527,14 @@ class TimeLine(AdhocView):
             source=self.controller.package.annotations.get(source_uri)
             dest=widget.annotationtype
 
-            if self.delete_transmuted_toggle.get_active() and source.relations:
+            if self.options['delete_transmuted'] and source.relations:
                 advene.gui.util.message_dialog(_("Cannot delete the annotation : it has relations."),
                                                icon=gtk.MESSAGE_WARNING)
                 return True
 
             self.controller.transmute_annotation(source,
                                                  dest,
-                                                 delete=self.delete_transmuted_toggle.get_active())
+                                                 delete=self.options['delete_transmuted'])
         elif targetType == config.data.target_type['annotation-type']:
             source_uri=selection.data
             source=self.controller.package.annotationTypes.get(source_uri)
@@ -1221,9 +1232,14 @@ class TimeLine(AdhocView):
             if radiogroup_ref is None:
                 radiogroup_ref=b
 
+        def handle_toggle(b, option):
+            self.options[option]=b.get_active()
+            return True
+
         self.delete_transmuted_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_DELETE)
         self.delete_transmuted_toggle.set_tooltip(self.tooltips, _("Delete the original transmuted annotation"))
-        self.delete_transmuted_toggle.set_active(False)
+        self.delete_transmuted_toggle.set_active(self.options['delete_transmuted'])
+        self.delete_transmuted_toggle.connect('toggled', handle_toggle, 'delete_transmuted')
         tb.insert(self.delete_transmuted_toggle, -1)
         tb.show_all()
         return tb
