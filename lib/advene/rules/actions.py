@@ -33,6 +33,7 @@ def register(controller=None):
             method=ac.Message,
             description=_("Display a message"),
             parameters={'message': _("Message to display")},
+            defaults={'message': 'annotation/content/data'},
             category='gui',
             )
 			       )
@@ -41,6 +42,7 @@ def register(controller=None):
             method=ac.PlayerStart,
             description=_("Start the player"),
             parameters={'position': _("Start position (in ms)")},
+            defaults={'position': 'string:0'},
             category='player',
             )
 			       )
@@ -50,6 +52,7 @@ def register(controller=None):
             method=ac.PlayerGoto,
             description=_("Go to the given position"),
             parameters={'position': _("Goto position (in ms)")},
+            defaults={'position': 'annotation/fragment/begin'},
             category='player',
             )
 			       )
@@ -91,6 +94,8 @@ def register(controller=None):
             description=_("Display a caption"),
             parameters={'message': _("Message to display"),
                         'duration': _("Duration of the caption")},
+            defaults={'message': 'annotation/content/data',
+                      'duration': 'annotation/fragment/duration'},
             category='advanced',
             )
 			       )
@@ -99,6 +104,7 @@ def register(controller=None):
             method=ac.AnnotationCaption,
             description=_("Caption the annotation"),
             parameters={'message': _("Message to display")},
+            defaults={'message': 'annotation/content/data'},
             category='advanced',
             )
 			       )
@@ -112,6 +118,12 @@ def register(controller=None):
                         'y': _("y-position (percentage of screen)"),
                         'size': _("Size (arbitrary units)"),
                         'duration': _("Duration of the display in ms")},
+            defaults={'shape': 'string:circle',
+                      'color': 'string:red',
+                      'x': 'string:10',
+                      'y': 'string:10',
+                      'size': 'string:5',
+                      'duration': 'annotation/fragment/duration'},
             category='advanced',
             )
 			       )
@@ -142,6 +154,7 @@ def register(controller=None):
             method=ac.ActivateSTBV,
             description=_("Activate a STBV"),
             parameters={'viewid': _("STBV id")},
+            defaults={'viewid': 'string:stbv_id'},
             category='gui',
             )
 			       )
@@ -152,6 +165,8 @@ def register(controller=None):
             description=_("Send a user event"),
             parameters={'identifier': _("Identifier"),
                         'delay': _("Delay in ms before sending the event.")},
+            defaults={'identifier': 'string:name',
+                      'delay': 'string:2000'},
             category='generic',
             )
 			       )
@@ -161,6 +176,7 @@ def register(controller=None):
             method=ac.OpenURL,
             description=_("Open a URL in the web browser"),
             parameters={'url': _("URL")},
+            defaults={'url': 'string:http://liris.cnrs.fr/advene/'},
             category='gui',
             )
 			       )

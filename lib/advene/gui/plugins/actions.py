@@ -34,6 +34,7 @@ def register(controller=None):
             method=ac.action_message_log,
             description=_("Display a message"),
             parameters={'message': _("String to display.")},
+            defaults={'message': 'annotation/content/data'},
             category='gui',
             ))
     
@@ -43,6 +44,8 @@ def register(controller=None):
             description=_("Display a popup"),
             parameters={'message': _("String to display."),
                         'duration': _("Display duration in ms. Ignored if empty.")},
+            defaults={'message': 'annotation/content/data',
+                      'duration': 'annotation/fragment/duration'},
             category='gui',            
             ))
 
@@ -53,6 +56,9 @@ def register(controller=None):
             parameters={'message': _("String to display."),
 			'destination': _("Object where to store the answer (should have a content)"),
                         'duration': _("Display duration in ms. Ignored if empty.")},
+            defaults={'message': 'annotation/content/data',
+                      'destination': 'annotation/related',
+                      'duration': 'annotation/fragment/duration'},
             category='gui',            
             ))
 
@@ -64,6 +70,10 @@ def register(controller=None):
                         'message': _("String to display."),
                         'position': _("New position"),
                         'duration': _("Display duration in ms. Ignored if empty.")},
+            defaults={'description': 'annotation/content/data',
+                      'message': _('string:Go to related annotation'),
+                      'position': 'annotation/related/fragment/begin',
+                      'duration': 'annotation/fragment/duration'},
             category='gui',
             ))
     
@@ -71,8 +81,9 @@ def register(controller=None):
             name="OpenView",
             method=ac.action_open_view,
             description=_("Open a GUI view"),
-            parameters={'guiview': _("View name (timeline or tree)"),
+            parameters={'guiview': _("View name (timeline, tree, transcription, browser, webbrowser, transcribe)"),
                         },
+            defaults={'guiview': 'string:timeline'},
             category='gui',
             ))
     
@@ -87,6 +98,13 @@ def register(controller=None):
                         'position2': _("Second position"),
                         'duration': _("Display duration in ms. Ignored if empty.")
                         },
+            defaults={'description': 'annotation/content/data',
+                      'message1': 'string:Go to the beginning',
+                      'position1': 'annotation/fragment/begin',
+                      'message2': 'string:Go to the end',
+                      'position2': 'annotation/fragment/end',
+                      'duration': 'annotation/fragment/duration',
+                      },
             category='gui',
             ))
     
@@ -103,6 +121,15 @@ def register(controller=None):
                         'position3': _("Third position"),
                         'duration': _("Display duration in ms. Ignored if empty.")
                         },
+            defaults={'description': 'annotation/content/data',
+                      'message1': 'string:Go to the beginning',
+                      'position1': 'annotation/fragment/begin',
+                      'message2': 'string:Go to the end',
+                      'position2': 'annotation/fragment/end',
+                      'message3': 'string:Go to related annotation',
+                      'position3': 'annotation/related/fragment/begin',
+                      'duration': 'annotation/fragment/duration',
+                      },
             category='gui',
             ))
 

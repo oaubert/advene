@@ -178,6 +178,7 @@ class AdveneController:
             method=self.message_log,
             description=_("Display a message"),
             parameters={'message': _("String to display.")},
+            defaults={'message': 'annotation/content/data'},
             category='gui',
             ))
         try:
