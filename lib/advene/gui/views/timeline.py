@@ -314,11 +314,24 @@ class TimeLine(AdhocView):
         self.update_position (None)
         return True
 
+    def center_on_position(self, position):
+        """Scroll the view to center on the given position.
+        """
+        (w, h) = self.layout.window.get_size ()
+        pos = self.unit2pixel (position) - w/2
+        a = self.adjustment
+        if pos < a.lower:
+            pos = a.lower
+        elif pos > a.upper:
+            pos = a.upper
+        a.set_value (pos)
+        return True
+
     def activate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
         if annotation is not None:
-            if self.options['autoscroll']:
-                self.scroll_to_annotation(annotation)
+            #if self.options['autoscroll']:
+            #    self.scroll_to_annotation(annotation)
             if self.options['highlight']:
                 self.activate_annotation (annotation)
             self.update_position (None)
@@ -412,8 +425,8 @@ class TimeLine(AdhocView):
             l=self.list
         if event == 'AnnotationActivate' and annotation in l:
             self.activate_annotation(annotation)
-            if self.options['autoscroll']:
-                self.scroll_to_annotation(annotation)
+            #if self.options['autoscroll']:
+            #    self.scroll_to_annotation(annotation)
             return True
         if event == 'AnnotationDeactivate' and annotation in l:
             self.desactivate_annotation(annotation)
@@ -720,6 +733,10 @@ class TimeLine(AdhocView):
         self.layout.move (a, u2p(pos), a.pos)
 
     def update_position (self, pos):
+        if pos is None:
+            pos = self.current_position
+        if self.options['autoscroll']:
+            self.center_on_position(pos)
         self.update_current_mark (pos)
         return True
 
