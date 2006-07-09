@@ -99,6 +99,11 @@ class ViewBook(AdhocView):
 	e.show_all()
         self.widget.append_page(v.widget, e)
 	v.widget.show_all()
+        # Hide the player toolbar when the view is embedded
+        try:
+            v.player_toolbar.hide()
+        except AttributeError:
+            pass
 
 	num=self.widget.page_num(v.widget)
 	self.widget.set_current_page(num)
