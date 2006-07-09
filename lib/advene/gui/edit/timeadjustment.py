@@ -53,7 +53,7 @@ class TimeAdjustment:
         vbox=gtk.VBox()
         
         self.image = gtk.Image()
-        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], width=100))
+        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], width=60))
         vbox.add(self.image)
 
         hbox=gtk.HBox()
