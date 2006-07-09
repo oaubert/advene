@@ -814,7 +814,8 @@ class RegisteredAction:
                  description="No available description",
                  parameters=None,
                  category="generic",
-                 immediate=False):
+                 immediate=False,
+                 defaults=None):
         self.name=name
         # The method attribute is in fact ignored, since we always lookup in the
         # ECACatalog for each invocation
@@ -825,6 +826,12 @@ class RegisteredAction:
         if parameters is None:
             parameters={}
         self.parameters=parameters
+        if defaults is None:
+            defaults={}
+        # Set default values for non-specified default
+        for k, v in parameters.iteritems():
+            defaults.setdefault(k, "string:%s" % v)
+        self.defaults=defaults
         # If immediate, the action will be run in the main thread, and not
         # in the scheduler thread.
         self.immediate=immediate
@@ -838,6 +845,10 @@ class RegisteredAction:
     def describe_parameter(self, name):
         """Describe the parameter."""
         return self.parameters[name]
+
+    def default_value(self, name):
+        """Get the parameter default value."""
+        return self.defaults[name]
 
     def as_html(self, action_url):
 	r="""<form method="GET" action="%s">""" % action_url
