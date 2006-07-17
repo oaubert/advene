@@ -297,6 +297,7 @@ class Menu:
         if action is not None:
             i.connect("activate", action, *param, **kw)
         menu.append(i)
+	return i
 
     def make_base_menu(self, element):
         """Build a base popup menu dedicated to the given element.
@@ -310,29 +311,17 @@ class Menu:
         menu = gtk.Menu()
 
         def add_item(*p, **kw):
-            self.add_menuitem(menu, *p, **kw)
+            return self.add_menuitem(menu, *p, **kw)
 
-        add_item(self.get_title(element))
+	title=add_item(self.get_title(element))
+        title.set_submenu(self.common_submenu(element))
+
         add_item("")
 
         if isinstance(element, StandardXmlBundle):
             self.make_bundle_menu(element, menu)
             menu.show_all()
             return menu
-
-        # Common to all other elements:
-        add_item(_("Edit"), self.edit_element, element)
-        add_item(_("Browse"), self.browse_element, element)
-        add_item(_("Query"), self.query_element, element)
-
-        # Common to deletable elements
-        if type(element) in (Annotation, Relation, View, Query,
-                             Schema, AnnotationType, RelationType):
-            add_item(_("Delete"), self.delete_element, element)
-
-        # Common to offsetable elements
-        if type(element) in (Annotation, Schema, AnnotationType, Package):
-            add_item(_("Offset"), self.offset_element, element)
 
         specific_builder={
             Annotation: self.make_annotation_menu,
@@ -353,6 +342,31 @@ class Menu:
 
         menu.show_all()
         return menu
+
+    def common_submenu(self, element):
+        """Build the common submenu for all elements.
+	"""
+        submenu=gtk.Menu()
+        def add_item(*p, **kw):
+            self.add_menuitem(submenu, *p, **kw)
+            
+        # Common to all other elements:
+        add_item(_("Edit"), self.edit_element, element)
+        add_item(_("Browse"), self.browse_element, element)
+        add_item(_("Query"), self.query_element, element)
+
+        # Common to deletable elements
+        if type(element) in (Annotation, Relation, View, Query,
+                             Schema, AnnotationType, RelationType):
+            add_item(_("Delete"), self.delete_element, element)
+
+        # Common to offsetable elements
+        if type(element) in (Annotation, Schema, AnnotationType, Package):
+            add_item(_("Offset"), self.offset_element, element)
+
+        submenu.show_all()
+        return submenu
+    
 
     def activate_submenu(self, element):
         """Build an "activate" submenu for the given annotation"""
@@ -387,7 +401,7 @@ class Menu:
         item.connect("activate", self.goto_annotation, element)
         menu.append(item)
 
-        add_item(element.content.data[:40])
+        #add_item(element.content.data[:40])
         add_item(_("Begin: %s")
                  % helper.format_time (element.fragment.begin))
         add_item(_("End: %s") % helper.format_time (element.fragment.end))
