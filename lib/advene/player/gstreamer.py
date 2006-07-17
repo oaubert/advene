@@ -155,7 +155,7 @@ class Player:
         except:
             position = 0
         else:
-            position = pos / 1e6
+            position = pos * 1.0 / gst.MSECOND
 	return position
 	
     def dvd_uri(self, title=None, chapter=None):
@@ -169,8 +169,7 @@ class Player:
 	return self.current_position()
 
     def set_media_position(self, position):
-	# 1e6 is a float. Then we have to explicitly convert the result to a long
-	p = long(self.position2value(position) * 1e6)
+	p = long(self.position2value(position) * gst.MSECOND)
 	#print "Going to position ", str(p)
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
 				   gst.SEEK_FLAG_FLUSH,
@@ -238,7 +237,7 @@ class Player:
         except:
             duration = 0
         else:
-            duration = dur / 1e6
+            duration = dur * 1.0 / gst.MSECOND
 
 	s.length=duration
 	s.position=self.current_position()
