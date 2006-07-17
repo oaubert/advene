@@ -14,7 +14,7 @@
 
 * Rewrite admin templates with AJAX functionalities (cf
    http://ajaxpatterns.org/Main_Page and http://pyjamas.pyworks.org/
-   (GWT in python)
+   (GWT in python) http://mail.zope.org/pipermail/zpt/2006-April/006262.html
 
 * implement a 'record' player, that would record from the mic and
    allow to take notes on the fly while recording a speech [http://divmod.org/projects/shtoom]
