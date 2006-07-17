@@ -592,6 +592,31 @@ class AdveneController:
 
         return an
 
+    def split_annotation(self, annotation, fraction):
+        """Split an annotation.
+        """
+	# Create the new one
+        ident=self.package._idgenerator.get_id(Annotation)
+        an = self.package.createAnnotation(type = annotation.type,
+                                           ident=ident,
+                                           fragment=annotation.fragment.clone())
+
+	# Shorten the first one.
+	end=annotation.fragment.end
+	duration=long(annotation.fragment.duration * fraction)
+	annotation.fragment.end = annotation.fragment.begin + duration
+	self.notify("AnnotationEditEnd", annotation=annotation)
+
+	# Shorten the second one
+	an.fragment.begin = annotation.fragment.end
+
+        self.package.annotations.append(an)
+        an.author=config.data.userid
+        an.content.data=annotation.content.data
+        an.setDate(self.get_timestamp())
+        self.notify("AnnotationCreate", annotation=an)
+        return an
+
     def restart_player (self):
         """Restart the media player."""
         self.player.restart_player ()
