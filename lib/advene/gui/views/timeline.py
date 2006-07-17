@@ -454,6 +454,29 @@ class TimeLine(AdhocView):
                 print "Unknown event %s" % event
         return True
 
+    def update_annotationtype (self, annotationtype=None, event=None):
+        """Update an annotationtype's representation.
+	"""
+        if event == 'AnnotationTypeCreate':
+	    self.annotationtypes.append(annotationtype)
+	    self.update_model(partial_update=True)
+	elif event == 'AnnotationTypeEditEnd':
+	    def remove_widget(widget=None, layout=None):
+		layout.remove(widget)
+		return True
+
+	    self.legend.foreach(remove_widget, self.legend)
+	    self.update_legend_widget(self.legend)
+	    self.legend.show_all()
+	elif event == 'AnnotationTypeDelete':
+	    try:
+		self.annotationtypes.remove(annotationtype)
+		self.update_model(partial_update=True)
+	    except ValueError:
+		# It was not displayed anyway
+		pass
+        return True
+
     def select_for_resize(self, widget, ann):
         self.resized_annotation=ann
         return True
@@ -1387,12 +1410,7 @@ class TimeLine(AdhocView):
 	    cr=CreateElementPopup(type_=AnnotationType,
 				  parent=sc,
 				  controller=self.controller)
-	    at=cr.popup(modal=True)
-	    if at is not None:
-		# Display it immediately in the timeline
-		self.annotationtypes.append(at)
-		self.update_model(partial_update=True)
-		
+	    at=cr.popup(modal=True)		
 	return True
 
 if __name__ == "__main__":
