@@ -458,11 +458,17 @@ class TimeLine(AdhocView):
         self.resized_annotation=ann
         return True
 
-    def annotation_cb (self, widget, ann):
+    def split_annotation(self, menu, widget, ann, x):
+	w = widget.allocation.width
+	self.controller.split_annotation(ann, 1.0 * x / w)
+	return True
+
+    def annotation_cb (self, widget, ann, x):
         """Display the popup menu when clicking on annotation.
         """
         menu=advene.gui.popup.Menu(ann, controller=self.controller)
         menu.add_menuitem(menu.menu, _("Select for resize"), self.select_for_resize, ann)
+	menu.add_menuitem(menu.menu, _("Split annotation"), self.split_annotation, widget, ann, x)
         menu.menu.show_all()
         menu.popup()
         return True
@@ -599,7 +605,7 @@ class TimeLine(AdhocView):
 
     def button_press_handler(self, widget, event, annotation):
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-            self.annotation_cb(widget, annotation)
+            self.annotation_cb(widget, annotation, event.x)
             return True
         return False
 
