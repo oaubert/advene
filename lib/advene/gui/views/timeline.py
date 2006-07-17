@@ -159,9 +159,9 @@ class TimeLine(AdhocView):
 
         self.layout = gtk.Layout ()
         self.layout.connect('scroll_event', self.scroll_event)
-        self.layout.connect("key_press_event", self.key_pressed_cb)
+        self.layout.connect('key_press_event', self.key_pressed_cb)
         self.layout.connect('button_press_event', self.mouse_pressed_cb)
-        self.layout.connect ("size-allocate", self.resize_event)
+        self.layout.connect ('size_allocate', self.resize_event)
 
         self.old_ratio_value = self.ratio_adjustment.value
 
