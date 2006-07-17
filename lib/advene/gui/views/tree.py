@@ -374,6 +374,7 @@ class TreeWidget(AdhocView):
         
         tree_view.connect("button_press_event", self.tree_view_button_cb)
         tree_view.connect("row-activated", self.row_activated_cb)
+	tree_view.set_search_column(AdveneTreeModel.COLUMN_TITLE)
         
         #tree_view.connect("select-cursor-row", self.debug_cb)
         #select.connect ("changed", self.debug_cb)
