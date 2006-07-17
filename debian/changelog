@@ -24,7 +24,8 @@ advene (0.21) unstable; urgency=low
       The alias is automatically generated from the filename, and can be
       modified in the file selector dialog.
 
-    * the player control toolbar has been put beneath the video output.
+    * the player control toolbar has been put beneath the video output,
+      and is hidden in embedded adhoc views
 
     * non-text resources/contents are now handled by a GenericContentHandler,
       that offers loading/saving to/from a file.
@@ -45,15 +46,26 @@ advene (0.21) unstable; urgency=low
 
     * the history view is cleared on media change
   
-    * in the timeline, it is now possible to specify the ordered list of
-      displayed annotation types
+    * timeline:
+  
+      * it is now possible to specify the ordered list of
+        displayed annotation types
+  
+      * autoscroll can either scroll discontinuously, or keep the current
+        mark centered and continuously scroll the widgets
   
     * display parameters of the timeline (font-size, button height...) are
-      customizable through the Preferences dialog
-  
+    customizable through the Preferences dialog
     * if the gtkmozembed or gtkhtml2 library is present, DnD of the web
       browser button will embed a HTML view in the GUI.
 
+    * transcription edition:
+  
+      * it is possible to import existing annotations
+  
+      * when converting to annotations, propose to delete existing
+        annotations of the given type
+  
   * Actions:
 
     * new action: Entry (to allow entry of information through a popup)
@@ -65,7 +77,13 @@ advene (0.21) unstable; urgency=low
   
     * TALES global methods can now be applied on non-advene elements (for
       instance lists)
+  
+    * Registered actions now propose meaningful default values
 
+  * Players
+  
+    * There is a new gstreamer plugin. It depends on python-gst >= 0.10
+  
  -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Thu,  1 Jun 2006 16:01:10 +0200
 
 advene (0.20) unstable; urgency=low
