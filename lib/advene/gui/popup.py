@@ -254,14 +254,14 @@ class Menu:
 		advene.gui.util.message_dialog(
                     _("Cannot delete the annotation type %s:\nthere are still annotations of this type.") % (el.title or el.id))
                 return True
-	    el.schema.remove(el)
+	    el.schema.annotationTypes.remove(el)
             self.controller.notify('AnnotationTypeDelete', annotationtype=el)
         elif isinstance(el, RelationType):
             if len(el.relations) > 0:
 		advene.gui.util.message_dialog(
                     _("Cannot delete the relation type %s:\nthere are still relations of this type.") % (el.title or el.id))
                 return True
-            p.remove(el)
+            el.schema.relationTypes.remove(el)
             self.controller.notify('RelationTypeDelete', relationtype=el)
         elif isinstance(el, Schema):
             if len(el.annotationTypes) > 0 or len(el.relationTypes) > 0:
