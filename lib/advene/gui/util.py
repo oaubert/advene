@@ -84,7 +84,8 @@ def generate_list_model(elements, active_element=None):
     return store, active_iter
                 
 def list_selector_widget(members=None,
-                         preselect=None):
+                         preselect=None,
+			 callback=None):
     """Generate a widget to pick an element from a list.
 
 
@@ -108,6 +109,9 @@ def list_selector_widget(members=None,
         
     # Bind the method to the combobox object
     combobox.get_current_element = get_current_element.__get__(combobox)
+
+    if callback is not None:
+	combobox.connect('changed', callback)
 
     return combobox
 
