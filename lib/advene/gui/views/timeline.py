@@ -57,7 +57,8 @@ class TimeLine(AdhocView):
             )
         self.options = {
             'highlight': True,
-            'autoscroll': True,
+	    # Autoscroll: 0: None, 1: continuous, 2: discrete
+            'autoscroll': 1,
             'delete_transmuted': False,
             }
 
@@ -112,12 +113,17 @@ class TimeLine(AdhocView):
         self.highlight_activated_toggle.set_active (self.options['highlight'])
         self.highlight_activated_toggle.connect('toggled', handle_toggle, 'highlight')
 
+	def handle_autoscroll_combo(combo):
+	    self.options['autoscroll'] = combo.get_current_element()
+	    return True
+	    
         # Scroll the window to display the activated annotations
-        self.scroll_to_activated_toggle=gtk.CheckButton(_("AutoScroll"))
-        self.tooltips.set_tip(self.scroll_to_activated_toggle,
-                              _("Scroll to active annotation"))
-        self.scroll_to_activated_toggle.set_active (self.options['autoscroll'])
-        self.scroll_to_activated_toggle.connect('toggled', handle_toggle, 'autoscroll')
+	self.autoscroll_choice = advene.gui.util.list_selector_widget(
+	    members= ( ( 0, _("No scrolling") ),
+		       ( 1, _("Continuous scrolling")),
+		       ( 2, _("Discrete scrolling")) ),
+	    preselect= self.options['autoscroll'],
+	    callback=handle_autoscroll_combo)
 
         # Create annotation widget style:
         self.annotation_font = pango.FontDescription("sans %d" % config.data.preferences['timeline']['font-size'])
@@ -330,8 +336,8 @@ class TimeLine(AdhocView):
     def activate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
         if annotation is not None:
-            #if self.options['autoscroll']:
-            #    self.scroll_to_annotation(annotation)
+            if self.options['autoscroll'] == 2:
+		self.scroll_to_annotation(annotation)
             if self.options['highlight']:
                 self.activate_annotation (annotation)
             self.update_position (None)
@@ -425,8 +431,8 @@ class TimeLine(AdhocView):
             l=self.list
         if event == 'AnnotationActivate' and annotation in l:
             self.activate_annotation(annotation)
-            #if self.options['autoscroll']:
-            #    self.scroll_to_annotation(annotation)
+            if self.options['autoscroll'] == 2:
+		self.scroll_to_annotation(annotation)
             return True
         if event == 'AnnotationDeactivate' and annotation in l:
             self.desactivate_annotation(annotation)
@@ -735,7 +741,7 @@ class TimeLine(AdhocView):
     def update_position (self, pos):
         if pos is None:
             pos = self.current_position
-        if self.options['autoscroll']:
+        if self.options['autoscroll'] == 1:
             self.center_on_position(pos)
         self.update_current_mark (pos)
         return True
@@ -1140,7 +1146,7 @@ class TimeLine(AdhocView):
         hbox.add (s)
 
         hbox.pack_start (self.highlight_activated_toggle, expand=False)
-        hbox.pack_start (self.scroll_to_activated_toggle, expand=False)
+	hbox.pack_start (self.autoscroll_choice, expand=False)
 
         vbox.set_homogeneous (False)
 
