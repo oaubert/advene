@@ -22,8 +22,10 @@ import sets
 import advene.core.config as config
 
 from advene.model.package import Package
+from advene.model.schema import AnnotationType
 from advene.gui.views import AdhocView
 import advene.gui.edit.elements
+from advene.gui.edit.create import CreateElementPopup
 
 import advene.util.helper as helper
 import advene.gui.util
@@ -1129,6 +1131,9 @@ class TimeLine(AdhocView):
                 print "Unknown target type for drop: %d" % targetType
             return True
 
+	bbox=gtk.HBox()
+	hbox.add(bbox)
+
         b=gtk.Button(_("Displayed types"))
         self.tooltips.set_tip(b, _("Drag an annotation type here to remove it from display.\nClick to edit all displayed types"))
         b.connect("clicked", self.edit_annotation_types)
@@ -1138,7 +1143,12 @@ class TimeLine(AdhocView):
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['annotation-type'],
                         gtk.gdk.ACTION_MOVE)
-        hbox.add(b)
+        bbox.pack_start(b, expand=False)
+
+        b=gtk.Button(stock=gtk.STOCK_NEW)
+        self.tooltips.set_tip(b, _("Create a new annotation type."))
+        b.connect("clicked", self.create_annotation_type)
+        bbox.pack_start(b, expand=False, fill=False)
 
         s = gtk.HScale (self.fraction_adj)
         s.set_digits(2)
@@ -1362,6 +1372,22 @@ class TimeLine(AdhocView):
         d.destroy()
 
         return True
+
+    def create_annotation_type(self, *p):
+	if self.controller.gui:
+	    sc=self.controller.gui.ask_for_schema(text=_("Select the schema where you want to\ncreate the new annotation type."), create=True)
+	    if sc is None:
+		return None
+	    cr=CreateElementPopup(type_=AnnotationType,
+				  parent=sc,
+				  controller=self.controller)
+	    at=cr.popup(modal=True)
+	    if at is not None:
+		# Display it immediately in the timeline
+		self.annotationtypes.append(at)
+		self.update_model(partial_update=True)
+		
+	return True
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
