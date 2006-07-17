@@ -1,3 +1,17 @@
+* Use screen:// as input stream. Allow to parameterize (source display...)
+
+* VerticalList : equiv. navigation history parameterized with 2 tales expressions: item list, representation [ history / annotation/fragment/formatted/duration ]
+
+* Transcribe: use ctrl + scroll wheel to adjust mark timestamp
+
+* component "scroller" below the vout. Parameters: text, href (optional), past duration, current
+  duration, future duration [ | past | current | future | ]  
+
+* accumulator: stack from left to right, most current on the leftmost side.
+
+* adhoc views: add 'position' parameter to specify the destination of
+  the new adhoc view (popup, viewpopup S or E).
+
 * Rewrite admin templates with AJAX functionalities (cf
    http://ajaxpatterns.org/Main_Page and http://pyjamas.pyworks.org/
    (GWT in python)
@@ -19,9 +33,6 @@
 * Create a TimeBookmark structure in the controller, to trigger time
    events. Basetime can be movie time or clock time. Should have 2
    parameters (clear_on_stbv_change, clear_on_position_change)
-
-* handle unicode query strings : cf
-   http://pycheesecake.org/wiki/ZenOfUnicode
 
 * strange error when a view import cannot be resolved (try copying
    unicode.xml to ~)
@@ -78,6 +89,14 @@ See also http://filmlibre.org/ et http://media.april.org/
 * add parameters to TimeLine view (displayed annotation types, zoom)
 
 * timeline: directly create annotations from timeline
+
+* timeline: cf http://www.jonobacon.org/gallery/main.php?g2_view=core.ShowItem&g2_itemId=3382&g2_GALLERYSID=8f6c485df08f046ac9658e6fe0928260
+
+http://jokosher.python-hosting.com/wiki/GnonlinNotes
+
+http://jokosher.org/
+
+http://jokosher.python-hosting.com/file/JonoEdit/trunk/TimeLine.py?rev=389
 
 * Annotation resize in timeline -> Hack (right button). Should
 reimplement a native widget for annotations or use DiaCanvas
@@ -240,7 +259,7 @@ annotation event.
   advene.iss
  + wget Twiki:AdveneUserGuide to doc/user.html (cf scripts/update_doc)
 
-* Morphix image : use Ubuntu as a base (pygtk included). Missing: vlc + python-vlc
+* Morphix image : use Ubuntu as a base (pygtk included). Missing: vlc + python-vlc. Use gstreamer
 
 * Rewrite webserver using Twisted (and maybe use it also for ECAEngine) ?
 
@@ -251,9 +270,6 @@ alignement plus facile par la suite (couplé avec les fonctions
 d'alignement dans la timeline).
 
 * browser: select base element (annotation, package, ...)
-
-* GUI: use icons and graphic files from openclipart, to alleviate any
-copyright problems
 
 * Mandrake: need
 pygtk2
@@ -1184,4 +1200,21 @@ res.startswith('<html>') [useful for Kupu]
 * Rename advene.util.vlclib to something more meaningful (advene.util.helper)
 
 * save player preferences
+
+* handle unicode query strings : cf
+   http://pycheesecake.org/wiki/ZenOfUnicode
+
+* GUI: use icons and graphic files from openclipart, to alleviate any
+copyright problems
+
+* STBV Parameters: add interesting default values
+
+* timeline: add "CenterCurrentTime" option, to scroll the whole widget
+  around the current time mark
+
+* Transcribe: add an "Import from annotation type" button
+
+* Do not add player control toolbars when embedding views
+
+* transcribe: on export, ask if we should remove existing annotations of the same annotation type
 
