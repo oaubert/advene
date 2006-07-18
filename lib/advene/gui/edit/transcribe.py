@@ -223,6 +223,8 @@ class TranscriptionEdit(AdhocView):
             timestamp=child.timestamp + t
             self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
             child.timestamp=timestamp
+	    if self.options['play-on-scroll']:
+		popup_goto(child, timestamp)	    
             return True
 
         def popup_ignore(win, button):
@@ -310,6 +312,8 @@ class TranscriptionEdit(AdhocView):
 	    elif event.direction == gtk.gdk.SCROLL_UP:
 		button.timestamp -= config.data.preferences['scroll-increment']
 	    self.tooltips.set_tip(button, "%s" % helper.format_time(button.timestamp))
+	    if self.options['play-on-scroll']:
+		popup_goto(button)
 	    if self.tooltips.active_tips_data is None:
 		button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
 	    button.grab_focus()
