@@ -127,9 +127,9 @@ class TimeAdjustment:
 	    if not (event.state & gtk.gdk.CONTROL_MASK):
 		return True
 	    if event.direction == gtk.gdk.SCROLL_DOWN:
-		incr=config.data.preferences['gui']['scroll-increment']
+		incr=config.data.preferences['scroll-increment']
 	    else:
-		incr=-config.data.preferences['gui']['scroll-increment']
+		incr=-config.data.preferences['scroll-increment']
 
 	    v=self.value
 	    self.value += incr

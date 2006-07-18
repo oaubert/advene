@@ -311,9 +311,9 @@ class TranscriptionEdit(AdhocView):
 	    if not (event.state & gtk.gdk.CONTROL_MASK):
 		return True
 	    if event.direction == gtk.gdk.SCROLL_DOWN:
-		button.timestamp += config.data.preferences['gui']['scroll-increment']
+		button.timestamp += config.data.preferences['scroll-increment']
 	    elif event.direction == gtk.gdk.SCROLL_UP:
-		button.timestamp -= config.data.preferences['gui']['scroll-increment']
+		button.timestamp -= config.data.preferences['scroll-increment']
 	    self.tooltips.set_tip(button, "%s" % helper.format_time(button.timestamp))
 	    if self.tooltips.active_tips_data is None:
 		button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
