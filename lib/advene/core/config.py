@@ -182,7 +182,9 @@ class Config(object):
                             'browserview': (800, 600),
 			    'weblogview': (800, 600),
                             },
-            'gui': { 'popup-textwidth': 40 },
+            'gui': { 'popup-textwidth': 40,
+		     # Scroll increment in ms
+		     'scroll-increment': 100 },
             'timeline': { 
                 'font-size': 8,
                 'button-height': 24,
