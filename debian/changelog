@@ -8,7 +8,7 @@ advene (0.21) unstable; urgency=low
     Resources reference by default.
 
   * A RelationType can now specify a "Any annotation type" as member
-  
+
   * GUI:
 
     * it is now possible to load multiple packages in the GUI. Only one
@@ -20,7 +20,7 @@ advene (0.21) unstable; urgency=low
       The /packages/advene expression always represents the currently active
       package. Other packages are accessed through expressions like
       /packages/alias
-  
+
       The alias is automatically generated from the filename, and can be
       modified in the file selector dialog.
 
@@ -45,27 +45,42 @@ advene (0.21) unstable; urgency=low
       content accordingly
 
     * the history view is cleared on media change
-  
+
     * timeline:
-  
+
       * it is now possible to specify the ordered list of
         displayed annotation types
+
+      * annotations can be resized by dragging the bounds (must be dragged
+        on the layout background, not on another annotation)
   
+      * annotations can be split through their context menu
+  
+      * annotations can be created from the popup menu (with a default
+        duration of 1/20 of the media duration)
+  
+      * control + scrollwheel on an annotation widget
+        increments/decrements the value of the begin or
+        end. Control+shift+scrollwheel moves the whole annotation.
+
       * autoscroll can either scroll discontinuously, or keep the current
         mark centered and continuously scroll the widgets
-  
+
     * display parameters of the timeline (font-size, button height...) are
-    customizable through the Preferences dialog
+      customizable through the Preferences dialog
+
     * if the gtkmozembed or gtkhtml2 library is present, DnD of the web
       browser button will embed a HTML view in the GUI.
 
     * transcription edition:
-  
+
       * it is possible to import existing annotations
-  
+
       * when converting to annotations, propose to delete existing
         annotations of the given type
-  
+
+      * control+scroll on an annotation mark updates the timestamp
+
   * Actions:
 
     * new action: Entry (to allow entry of information through a popup)
@@ -74,16 +89,16 @@ advene (0.21) unstable; urgency=low
       parameters) in the list of actions
 
     * new TALES root element: packages (to access all the loaded packages)
-  
+
     * TALES global methods can now be applied on non-advene elements (for
       instance lists)
-  
+
     * Registered actions now propose meaningful default values
 
   * Players
-  
+
     * There is a new gstreamer plugin. It depends on python-gst >= 0.10
-  
+
  -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Thu,  1 Jun 2006 16:01:10 +0200
 
 advene (0.20) unstable; urgency=low
