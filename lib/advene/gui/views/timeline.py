@@ -695,6 +695,21 @@ class TimeLine(AdhocView):
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
             self.annotation_cb(widget, annotation, event.x)
             return True
+	elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS and event.state & gtk.gdk.CONTROL_MASK:
+	    # Control + click : set annotation begin/end time to current time
+	    f=self.annotation_fraction(widget)
+	    if f < .25:
+		at='begin'
+	    elif f > .75:
+		at='end'
+	    else:
+		return False
+	    f=annotation.fragment
+	    setattr(f, at, long(self.controller.player.current_position_value))
+	    if f.begin > f.end:
+		f.begin, f.end = f.end, f.begin
+	    self.controller.notify('AnnotationEditEnd', annotation=annotation)
+	    return True
         return False
 
     def button_key_handler(self, widget, event, annotation):
