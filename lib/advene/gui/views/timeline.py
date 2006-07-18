@@ -555,6 +555,7 @@ class TimeLine(AdhocView):
 	f = 100 * x / w
 	#print context, x, y, w, f
 	
+	widget._drag_fraction = f
 	if f < 25:
 	    widget._drag_position = 'begin'
 	elif f > 75:
@@ -571,7 +572,8 @@ class TimeLine(AdhocView):
             selection.set(selection.target, 8, 
 			  cgi.urllib.urlencode( { 
 			'uri': widget.annotation.uri,
-			'position': widget._drag_position 
+			'position': widget._drag_position,
+			'fraction': widget._drag_fraction,
 			} ))
         else:
             print "Unknown target type for drag: %d" % targetType
@@ -651,9 +653,13 @@ class TimeLine(AdhocView):
 		# Modify begin
 		f.begin=pos
 	    elif c == 'end':
+		# Modify end
 		f.end = pos
 	    else:
-		print "Not handled"
+		d=f.duration
+		# Move annotation
+		f.begin = long(pos - (float(q['fraction']) * d) / 100)
+		f.end = f.begin + d
 	    if f.begin > f.end:
 		f.begin, f.end = f.end, f.begin
 	    self.controller.notify('AnnotationEditEnd', annotation=source)
