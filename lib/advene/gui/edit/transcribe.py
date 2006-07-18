@@ -169,7 +169,7 @@ class TranscriptionEdit(AdhocView):
         p=self.controller.player
         if (p.status == p.PlayingStatus or p.status == p.PlayingStatus):
             # Check that preceding mark.timestamp is lower
-            t=p.current_position_value + self.delay.value
+            t=p.current_position_value - self.options['delay']
             m, i=self.find_preceding_mark(it)
             if m is not None and m.timestamp >= t:
                 self.controller.log(_("Invalid timestamp mark"))
@@ -205,26 +205,13 @@ class TranscriptionEdit(AdhocView):
     def mark_button_press_cb(self, button, event, anchor=None, child=None):
         """Handler for right-button click on timestamp mark.
         """
-        if event.button != 3:
-            return False
         timestamp=button.timestamp
-        # Create a popup menu for timestamp
-        menu = gtk.Menu()
-
         def popup_goto (win, position):
             c=self.controller
             pos = c.create_position (value=position,
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
-            return True
-
-        def popup_modify(win, t):
-            timestamp=child.timestamp + t
-            self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
-            child.timestamp=timestamp
-	    if self.options['play-on-scroll']:
-		popup_goto(child, timestamp)	    
             return True
 
         def popup_ignore(win, button):
@@ -234,6 +221,27 @@ class TranscriptionEdit(AdhocView):
         def popup_remove(win):
             self.remove_timestamp_mark(button, anchor, child)
             return True
+
+        def popup_modify(win, t):
+            timestamp=child.timestamp + t
+            self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
+	    if self.tooltips.active_tips_data is None:
+		button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)	    
+            child.timestamp=timestamp
+	    if self.options['play-on-scroll']:
+		popup_goto(child, timestamp)	    
+            return True
+
+	if event.button == 1 and event.state & gtk.gdk.CONTROL_MASK:
+	    # Set current video time
+	    popup_modify(None, self.controller.player.current_position_value - timestamp)
+	    return True
+
+        if event.button != 3:
+            return False
+
+        # Create a popup menu for timestamp
+        menu = gtk.Menu()
 
         item = gtk.MenuItem(_("Position %s") % helper.format_time(timestamp))
         menu.append(item)
@@ -254,7 +262,7 @@ class TranscriptionEdit(AdhocView):
         menu.append(item)
 
         item = gtk.MenuItem(_("Reaction-time offset"))
-        item.connect("activate", popup_modify, self.delay.value)
+        item.connect("activate", popup_modify, -self.options['delay'])
         menu.append(item)
 
         item = gtk.MenuItem(_("-1 sec"))
@@ -312,10 +320,10 @@ class TranscriptionEdit(AdhocView):
 	    elif event.direction == gtk.gdk.SCROLL_UP:
 		button.timestamp -= config.data.preferences['scroll-increment']
 	    self.tooltips.set_tip(button, "%s" % helper.format_time(button.timestamp))
-	    if self.options['play-on-scroll']:
-		popup_goto(button)
 	    if self.tooltips.active_tips_data is None:
 		button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
+	    if self.options['play-on-scroll']:
+		popup_goto(button)
 	    button.grab_focus()
 	    return True
 
