@@ -1,13 +1,16 @@
+* EditAccumulator: component holding reduced edition windows for annotations
+
 * Use screen:// as input stream. Allow to parameterize (source display...)
 
 * VerticalList : equiv. navigation history parameterized with 2 tales expressions: item list, representation [ history / annotation/fragment/formatted/duration ]
-
-* Transcribe: use ctrl + scroll wheel to adjust mark timestamp
 
 * component "scroller" below the vout. Parameters: text, href (optional), past duration, current
   duration, future duration [ | past | current | future | ]  
 
 * accumulator: stack from left to right, most current on the leftmost side.
+
+* initial preferences: offer to specify the content of S, E viewbooks
+   [through an expression with the same syntax as webserver adhoc views]
 
 * adhoc views: add 'position' parameter to specify the destination of
   the new adhoc view (popup, viewpopup S or E).
@@ -46,8 +49,7 @@
    http://www.fsfeurope.org/projects/gplv3/torino-rms-transcript.en.html
 See also http://filmlibre.org/ et http://media.april.org/
 
-* store event history + context (media, position) and save it as a
-   package
+* store event history + context (media, position) and save it as a package
 
 * import fixer: allow to edit imports without loading the package
    (which fails if imported package is not present).
@@ -67,8 +69,6 @@ See also http://filmlibre.org/ et http://media.april.org/
 * update_imports script that ensures that all elements of specified
    type from a given package are imported in a list of packages, and
    adds them if necessary.
-
-* GenericContentHandler: add "Open with..." functionality
 
 * make save button inactive when not modified
 
@@ -1217,4 +1217,18 @@ copyright problems
 * Do not add player control toolbars when embedding views
 
 * transcribe: on export, ask if we should remove existing annotations of the same annotation type
+
+* Transcribe: use ctrl + scroll wheel to adjust mark timestamp
+
+* GenericContentHandler: add "Open with..." functionality: NO: it
+   would prevent from signalling that the content has changed.
+
+* Timeline: offer a "Divide annotation" feature
+
+* timeline: popup menu: "Create a new annotation" with a default duration
+
+* timeline: ctrl+scroll on annotation widget => move begin/end or
+   whole annotation
+
+* EditFragmentPopup: handle DND of annotation widgets to set begin/end time
 
