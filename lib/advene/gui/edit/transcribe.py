@@ -38,6 +38,7 @@ from gettext import gettext as _
 
 from advene.gui.views import AdhocView
 import advene.gui.util
+import advene.gui.edit.properties
 
 class TranscriptionImporter(advene.util.importer.GenericImporter):
     """Transcription importer.
@@ -68,26 +69,12 @@ class TranscriptionEdit(AdhocView):
         self.sourcefile=None
         self.empty_re = sre.compile('^\s*$')
 
-        self.timestamp_mode_toggle=gtk.ToggleToolButton()
-        self.timestamp_mode_toggle.set_label(_("Timestamps"))
-        self.timestamp_mode_toggle.set_stock_id(gtk.STOCK_INDEX)
-        self.timestamp_mode_toggle.set_active (True)
-        self.timestamp_mode_toggle.set_tooltip(self.tooltips,
-                                               _("If unchecked, allows to edit text"))
-
-        # Discontinuous is True by default
-        self.discontinuous_toggle=gtk.ToggleToolButton()
-        self.discontinuous_toggle.set_label(_("Discontinuous"))
-        self.discontinuous_toggle.set_active (True)
-        self.discontinuous_toggle.set_stock_id(gtk.STOCK_REMOVE)
-        self.discontinuous_toggle.set_tooltip(self.tooltips,
-                                              _("Do not generate annotations for empty text"))
-
-        self.delay=gtk.Adjustment(value=-config.data.reaction_time,
-                                  lower=-5000,
-                                  upper=5000,
-                                  step_incr=10,
-                                  page_incr=100)
+	self.options = {
+	    'timestamp': True, # _("If checked, click inserts timestamp marks"))
+	    'play-on-scroll': False,
+	    'empty-annotations': True, # _("Do not generate annotations for empty text"))
+	    'delay': config.data.reaction_time,
+	    }
 
         self.colors = {
             'default': gtk.gdk.color_parse ('lightblue'),
@@ -103,6 +90,20 @@ class TranscriptionEdit(AdhocView):
         if filename is not None:
             self.load_transcription(filename)
 
+    def edit_preferences(self, *p):
+        cache=dict(self.options)
+
+        ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
+        ew.set_name(_("Preferences"))
+        ew.add_checkbox(_("Timestamp"), "timestamp", _("Click inserts timestamp marks"))
+        ew.add_checkbox(_("Play on scroll"), "play-on-scroll", _("Play the new position upon timestamp modification"))
+        ew.add_checkbox(_("Generate empty annotations"), "empty-annotations", _("Generate annotations for empty text"))
+        ew.add_spin(_("Reaction time"), "delay", _("Reaction time (substracted from current player time)"), -5000, 5000)
+        res=ew.popup()
+        if res:
+	    self.options.update(cache)
+        return True
+
     def build_widget(self):
         vbox = gtk.VBox()
 
@@ -112,12 +113,6 @@ class TranscriptionEdit(AdhocView):
             self.player_toolbar=self.controller.gui.get_player_control_toolbar()
             hb.add(self.player_toolbar)
         hb.add(self.get_toolbar())
-
-        # Spinbutton for reaction time
-        l=gtk.Label(_("Reaction time"))
-        hb.pack_start(l, expand=False)
-        sp=gtk.SpinButton(self.delay)
-        hb.pack_start(sp, expand=False)
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -155,7 +150,7 @@ class TranscriptionEdit(AdhocView):
             return False
         if event.button != 1:
             return False
-        if not self.timestamp_mode_toggle.get_active():
+        if not self.options['timestamp']:
             return False
         textwin=textview.get_window(gtk.TEXT_WINDOW_TEXT)
         if event.window != textwin:
@@ -462,8 +457,7 @@ class TranscriptionEdit(AdhocView):
                 text=b.get_text(begin, end, include_hidden_chars=False)
                 if strip_blank:
                     text=text.rstrip().lstrip()
-                if (self.discontinuous_toggle.get_active() and
-                    self.empty_re.match(text)):
+                if self.options['empty-annotation'] and self.empty_re.match(text):
                     pass
                 elif ignore_next:
                     if show_ignored:
@@ -482,8 +476,7 @@ class TranscriptionEdit(AdhocView):
         # End of buffer. Create the last annotation
         timestamp=self.controller.player.stream_duration
         text=b.get_text(begin, end, include_hidden_chars=False)
-        if (self.discontinuous_toggle.get_active() and
-            self.empty_re.match(text)):
+        if self.options['empty-annotations'] and self.empty_re.match(text):
             pass
         elif ignore_next:
             if show_ignored:
@@ -669,6 +662,7 @@ class TranscriptionEdit(AdhocView):
             (_("Save As"), _("Save As"), gtk.STOCK_SAVE_AS, self.save_as_cb),
             (_("Import"), _("Import"), gtk.STOCK_EXECUTE, self.import_annotations_cb),
             (_("Export"), _("Export"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
+            (_("Preferences"), _("Preferences"), gtk.STOCK_PREFERENCES, self.edit_preferences),
             )
 
         for text, tooltip, icon, callback in tb_list:
@@ -677,9 +671,6 @@ class TranscriptionEdit(AdhocView):
             b.set_tooltip(self.tooltips, tooltip)
             b.connect("clicked", callback)
             tb.insert(b, -1)
-
-        tb.insert(self.timestamp_mode_toggle, -1)
-        tb.insert(self.discontinuous_toggle, -1)
 
         tb.show_all()
         return tb
