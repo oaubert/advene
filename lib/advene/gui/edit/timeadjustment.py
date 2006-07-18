@@ -108,10 +108,10 @@ class TimeAdjustment:
             b.connect("clicked", self.use_current_position)
             hbox.add(b)
         
-        b=gtk.Button(_("Snap"))
-        self.tooltips.set_tip(b, _("Update the associated snapshot"))
-        b.connect("clicked", self.update_snapshot)
-        hbox.add(b)
+#        b=gtk.Button(_("Snap"))
+#        self.tooltips.set_tip(b, _("Update the associated snapshot"))
+#        b.connect("clicked", self.update_snapshot)
+#        hbox.add(b)
 
         vbox.pack_start(hbox, expand=False)
 
@@ -121,6 +121,22 @@ class TimeAdjustment:
 				  gtk.DEST_DEFAULT_HIGHLIGHT |
 				  gtk.DEST_DEFAULT_ALL,
 				  config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+
+	# Handle scroll actions
+	def handle_scroll_event(button, event):
+	    if not (event.state & gtk.gdk.CONTROL_MASK):
+		return True
+	    if event.direction == gtk.gdk.SCROLL_DOWN:
+		incr=100
+	    else:
+		incr=-100
+
+	    v=self.value
+	    self.value += incr
+	    self.update_display()
+	    return True
+
+        vbox.connect("scroll-event", handle_scroll_event)
 
         vbox.show_all()
         return vbox
