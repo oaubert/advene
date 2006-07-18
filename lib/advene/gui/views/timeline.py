@@ -24,6 +24,8 @@ import advene.core.config as config
 
 from advene.model.package import Package
 from advene.model.schema import AnnotationType
+from advene.model.annotation import Annotation
+from advene.model.fragment import MillisecondFragment
 from advene.gui.views import AdhocView
 import advene.gui.edit.elements
 from advene.gui.edit.create import CreateElementPopup
@@ -943,11 +945,11 @@ class TimeLine(AdhocView):
         """
         retval = False
         if event.button == 3 or event.button == 1:
-            self.context_cb (timel=self, position=self.pixel2unit(event.x))
+            self.context_cb (timel=self, position=self.pixel2unit(event.x), height=event.y)
             retval = True
         return retval
 
-    def context_cb (self, timel=None, position=None):
+    def context_cb (self, timel=None, position=None, height=None):
         """Display the context menu for a right-click in the timeline window.
         """
         # This callback is called on a right-mouse-button press
@@ -962,6 +964,29 @@ class TimeLine(AdhocView):
                                      origin=c.player.AbsolutePosition)
             self.controller.update_status (status="set", position=pos)
             return True
+
+	def create_annotation(win, position):
+	    id_=self.controller.package._idgenerator.get_id(Annotation)
+	    # Determine annotation type
+	    at=None
+	    h=long(height)
+	    for a, p in self.layer_position.iteritems():
+		if h >= p and h < p + self.button_height:
+		    at=a
+		    break
+	    if at is None:
+		at=self.controller.package.annotationTypes[0]
+            el=self.controller.package.createAnnotation(
+                ident=id_,
+                type=at,
+                author=config.data.userid,
+                date=self.controller.get_timestamp(),
+                fragment=MillisecondFragment(begin=long(position),
+                                             duration=self.controller.player.stream_duration / 100))
+            el.title=id_
+            self.controller.package.annotations.append(el)
+            self.controller.notify('AnnotationCreate', annotation=el)
+	    return True
 
         def copy_value(win, position):
             timel.set_selection(position)
@@ -987,6 +1012,10 @@ class TimeLine(AdhocView):
         item = gtk.MenuItem(_("Copy value into clipboard"))
         item.connect("activate", copy_value, position)
         menu.append(item)
+
+	item = gtk.MenuItem(_("Create a new annotation"))
+	item.connect('activate', create_annotation, position)
+	menu.append(item)
 
         if self.resized_annotation is not None:
             item = gtk.MenuItem(_("Set %s.begin") % self.resized_annotation.id)
