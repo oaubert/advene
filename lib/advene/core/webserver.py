@@ -230,21 +230,19 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         @return: a dictionary with (keys, values) taken from C{q}
         @rtype: dictionary
         """
-        res = {}
         if q == "":
-            return res
-        # Implicit conversion of input string. We try utf-8 first.
-        # That will work only if it is ascii or utf-8.
-        # If it fails, the most frequent case is latin1
-        s=urllib.unquote_plus(q)
-        try:
-            q=unicode(s, 'utf-8')
-        except UnicodeDecodeError:
-            q=unicode(s, 'latin1')
-        for t in q.split("&"):
-            k,v = t.split("=", 1)
-            res[k] = v
-        return res
+            return {}
+	res={}
+	for k, v in cgi.parse_qsl(q):
+	    # Implicit conversion of parameters. We try utf-8 first.
+	    # That will work only if it is ascii or utf-8.
+	    # If it fails, the most frequent case is latin1
+	    try:
+		v=unicode(v, 'utf-8')
+	    except UnicodeDecodeError:
+		v=unicode(v, 'latin1')
+	    res[k]=v
+	return res
 
     def display_media_status (self):
         """Display current media status.
