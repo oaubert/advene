@@ -592,6 +592,22 @@ class AdveneController:
 
         return an
 
+    def duplicate_annotation(self, annotation):
+        """Duplicate an annotation.
+        """
+        ident=self.package._idgenerator.get_id(Annotation)
+        an = self.package.createAnnotation(type = annotation.type,
+                                           ident=ident,
+                                           fragment=annotation.fragment.clone())
+	an.fragment.begin = annotation.fragment.end
+	an.fragment.end = an.fragment.begin + annotation.fragment.duration
+        self.package.annotations.append(an)
+        an.author=config.data.userid
+        an.content.data=annotation.content.data
+        an.setDate(self.get_timestamp())
+        self.notify("AnnotationCreate", annotation=an)
+        return an
+
     def split_annotation(self, annotation, fraction):
         """Split an annotation.
         """

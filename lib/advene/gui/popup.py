@@ -62,6 +62,10 @@ class Menu:
         c.update_status (status="set", position=pos)
         return True
 
+    def duplicate_annotation(self, widget, ann):
+	self.controller.duplicate_annotation(ann)
+	return True
+
     def activate_annotation (self, widget, ann):
         self.controller.notify("AnnotationActivate", annotation=ann)
         return True
@@ -387,6 +391,7 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
 
         add_item(_("Go to..."), self.goto_annotation, element)
+	add_item(_("Duplicate"), self.duplicate_annotation, element)
 
         item = gtk.MenuItem(_("Highlight"))
         item.set_submenu(self.activate_submenu(element))
