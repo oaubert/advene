@@ -65,9 +65,6 @@ class TranscriptionEdit(AdhocView):
         self.package=controller.package
         self.tooltips=gtk.Tooltips()
 
-	# Increment value in ms, when scrolling marks
-	self.scroll_increment = 100
-
         self.sourcefile=None
         self.empty_re = sre.compile('^\s*$')
 
@@ -314,9 +311,9 @@ class TranscriptionEdit(AdhocView):
 	    if not (event.state & gtk.gdk.CONTROL_MASK):
 		return True
 	    if event.direction == gtk.gdk.SCROLL_DOWN:
-		button.timestamp += self.scroll_increment
+		button.timestamp += config.data.preferences['gui']['scroll-increment']
 	    elif event.direction == gtk.gdk.SCROLL_UP:
-		button.timestamp -= self.scroll_increment
+		button.timestamp -= config.data.preferences['gui']['scroll-increment']
 	    self.tooltips.set_tip(button, "%s" % helper.format_time(button.timestamp))
 	    if self.tooltips.active_tips_data is None:
 		button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
