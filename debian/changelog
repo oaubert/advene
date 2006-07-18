@@ -46,6 +46,8 @@ advene (0.21) unstable; urgency=low
 
     * the history view is cleared on media change
 
+    * it is possible to duplicate an annotation (same duration)
+  
     * timeline:
 
       * it is now possible to specify the ordered list of
@@ -63,6 +65,9 @@ advene (0.21) unstable; urgency=low
         increments/decrements the value of the begin or
         end. Control+shift+scrollwheel moves the whole annotation.
 
+      * control+click on the begin or end of the annotation sets the
+        bound to the current player position value
+  
       * autoscroll can either scroll discontinuously, or keep the current
         mark centered and continuously scroll the widgets
 
@@ -79,7 +84,9 @@ advene (0.21) unstable; urgency=low
       * when converting to annotations, propose to delete existing
         annotations of the given type
 
-      * control+scroll on an annotation mark updates the timestamp
+      * control+scroll on a timestamp mark updates the timestamp
+  
+      * control+click on a mark sets the timestamp to the current movie time
 
   * Actions:
 
