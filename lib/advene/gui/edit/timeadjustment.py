@@ -114,9 +114,26 @@ class TimeAdjustment:
         hbox.add(b)
 
         vbox.pack_start(hbox, expand=False)
-        
+
+        # The widget can receive drops from annotations
+        vbox.connect("drag_data_received", self.drag_received)
+        vbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+				  gtk.DEST_DEFAULT_HIGHLIGHT |
+				  gtk.DEST_DEFAULT_ALL,
+				  config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+
         vbox.show_all()
         return vbox
+
+    def drag_received(self, widget, context, x, y, selection, targetType, time):
+        if targetType == config.data.target_type['annotation']:
+            source_uri=selection.data
+            source=self.controller.package.annotations.get(source_uri)
+	    self.value = source.fragment.begin
+	    self.update_display()
+        else:
+            print "Unknown target type for drop: %d" % targetType
+        return True
 
     def play_from_here(self, button):
         if self.controller.player.status == self.controller.player.PauseStatus:
