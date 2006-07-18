@@ -1847,6 +1847,7 @@ class AdveneGUI (Connect):
             'font-size': config.data.preferences['timeline']['font-size'],
             'button-height': config.data.preferences['timeline']['button-height'],
             'interline-height': config.data.preferences['timeline']['interline-height'],
+	    'scroll-increment': config.data.preferences['scroll-increment'],
             }
 
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
@@ -1856,6 +1857,7 @@ class AdveneGUI (Connect):
         ew.add_checkbox(_("Embed treeview"), "embed-treeview", _("Embed a treeview in the application window\nChange will apply on application restart."))
         ew.add_spin(_("History size"), "history-limit", _("History filelist size limit"),
                     -1, 20)
+        ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 2000)
         ew.add_option(_("Toolbar style"), "toolbarstyle", _("Toolbar style"), 
                       { _('Icons only'): gtk.TOOLBAR_ICONS,
                         _('Text only'): gtk.TOOLBAR_TEXT,
@@ -1880,6 +1882,7 @@ class AdveneGUI (Connect):
             config.data.player_preferences['osdtext']=cache['osd']
             config.data.preferences['history-size-limit']=cache['history-limit']
             config.data.preferences['embed-treeview']=cache['embed-treeview']
+            config.data.preferences['scroll-increment']=cache['scroll-increment']
             for t in ('toolbar_view', 'toolbar_fileop', 'toolbar_create'):
                 self.gui.get_widget(t).set_style(cache['toolbarstyle'])
             for k in ('font-size', 'button-height', 'interline-height'):
