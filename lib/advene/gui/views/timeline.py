@@ -982,7 +982,7 @@ class TimeLine(AdhocView):
                 author=config.data.userid,
                 date=self.controller.get_timestamp(),
                 fragment=MillisecondFragment(begin=long(position),
-                                             duration=self.controller.player.stream_duration / 100))
+                                             duration=self.controller.cached_duration / 20))
             el.title=id_
             self.controller.package.annotations.append(el)
             self.controller.notify('AnnotationCreate', annotation=el)
