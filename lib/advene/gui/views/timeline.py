@@ -17,6 +17,7 @@
 #
 import sys
 import sets
+import cgi
 
 # Advene part
 import advene.core.config as config
@@ -162,6 +163,12 @@ class TimeLine(AdhocView):
         self.layout.connect('key_press_event', self.key_pressed_cb)
         self.layout.connect('button_press_event', self.mouse_pressed_cb)
         self.layout.connect ('size_allocate', self.resize_event)
+        # The layout can receive drops (to resize annotations)
+        self.layout.connect("drag_data_received", self.layout_drag_received)
+        self.layout.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+				  gtk.DEST_DEFAULT_HIGHLIGHT |
+				  gtk.DEST_DEFAULT_ALL,
+				  config.data.drag_type['annotation-resize'], gtk.gdk.ACTION_LINK)
 
         self.old_ratio_value = self.ratio_adjustment.value
 
@@ -537,10 +544,33 @@ class TimeLine(AdhocView):
         self.controller.notify("AnnotationEditEnd", annotation=source)
         return True
 
+    def drag_begin(self, widget, context):
+	"""Handle drag begin for annotations.
+	"""
+	# Determine in which part of the annotation we clicked.
+	x, y = widget.get_pointer()
+	w = widget.allocation.width
+	f = 100 * x / w
+	#print context, x, y, w, f
+	
+	if f < 25:
+	    widget._drag_position = 'begin'
+	elif f > 75:
+	    widget._drag_position = 'end'
+	else:
+	    widget._drag_position = 'middle'
+	return False
+	
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.target, 8, widget.annotation.uri)
+        elif targetType == config.data.target_type['annotation-resize']:
+            selection.set(selection.target, 8, 
+			  cgi.urllib.urlencode( { 
+			'uri': widget.annotation.uri,
+			'position': widget._drag_position 
+			} ))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
@@ -598,6 +628,33 @@ class TimeLine(AdhocView):
                 l.extend(self.annotationtypes[j+1:])
                 self.annotationtypes = l
                 self.update_model(partial_update=True)
+        else:
+            print "Unknown target type for drop: %d" % targetType
+        return True
+
+    def layout_drag_received(self, widget, context, x, y, selection, targetType, time):
+	"""Handle the drop from an annotation to the layout.
+	"""
+        if targetType == config.data.target_type['annotation-resize']:
+            q=dict(cgi.parse_qsl(selection.data))
+            source=self.controller.package.annotations.get(q['uri'])
+	    try:
+		c = q['position']
+	    except:
+		c='middle'
+	    #print "Resizing ", source.id, self.pixel2unit(x), c
+	    pos=long(self.pixel2unit(x))
+	    f=source.fragment
+	    if c == 'begin':
+		# Modify begin
+		f.begin=pos
+	    elif c == 'end':
+		f.end = pos
+	    else:
+		print "Not handled"
+	    if f.begin > f.end:
+		f.begin, f.end = f.end, f.begin
+	    self.controller.notify('AnnotationEditEnd', annotation=source)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -719,8 +776,12 @@ class TimeLine(AdhocView):
         self.tooltips.set_tip(b, tip)
         # The button can generate drags
         b.connect("drag_data_get", self.drag_sent)
+        b.connect("drag_begin", self.drag_begin)
+
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+			  config.data.drag_type['annotation'] 
+			  + config.data.drag_type['annotation-resize'],
+			  gtk.gdk.ACTION_LINK)
         # The button can receive drops (to create relations)
         b.connect("drag_data_received", self.drag_received)
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
