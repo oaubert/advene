@@ -53,7 +53,7 @@ class TimeAdjustment:
         vbox=gtk.VBox()
         
         self.image = gtk.Image()
-        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], width=60))
+        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], width=100))
         vbox.add(self.image)
 
         hbox=gtk.HBox()
@@ -191,7 +191,8 @@ class TimeAdjustment:
         """Updates the value displayed in the entry according to the current value."""
         self.entry.set_text(advene.util.helper.format_time(self.value))
         # Update the image
-        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value]))
+        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], 
+								  width=100))
         
     def update_value_cb(self, widget, increment):
         if not self.editable:
