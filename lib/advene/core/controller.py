@@ -993,9 +993,8 @@ class AdveneController:
 
             # Terminate the VLC server
             try:
-                print "Exiting vlc player"
+                #print "Exiting vlc player"
                 self.player.exit()
-                print "done"
             except Exception, e:
                 import traceback
                 s=StringIO.StringIO()
