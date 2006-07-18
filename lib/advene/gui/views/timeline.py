@@ -71,6 +71,7 @@ class TimeLine(AdhocView):
         self.controller=controller
         self.annotationtypes = annotationtypes
         self.tooltips = gtk.Tooltips ()
+	self.scroll_increment = 100
 
         # Now that self.list is initialized, we reuse the l variable
         # for various checks.
@@ -794,6 +795,35 @@ class TimeLine(AdhocView):
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+
+	# Handle scroll actions
+	def handle_scroll_event(button, event):
+	    if not (event.state & gtk.gdk.CONTROL_MASK):
+		return True
+	    if event.direction == gtk.gdk.SCROLL_DOWN:
+		direction=1
+	    #elif event.direction == gtk.gdk.SCROLL_UP:
+	    else:
+		direction=-1
+
+	    fr=self.annotation_fraction(button)
+	    f=button.annotation.fragment
+	    if event.state & gtk.gdk.SHIFT_MASK:
+		f.begin += direction * self.scroll_increment
+		f.end += direction * self.scroll_increment
+	    elif fr < .5:
+		f.begin += direction * self.scroll_increment
+	    elif fr >= .5:
+		f.end += direction * self.scroll_increment
+
+	    self.controller.notify('AnnotationEditEnd', annotation=button.annotation)
+	    if self.tooltips.active_tips_data is None:
+		button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
+	    button.grab_focus()
+	    return True
+
+        b.connect("scroll-event", handle_scroll_event)
+
         b.show()
         return b
 
