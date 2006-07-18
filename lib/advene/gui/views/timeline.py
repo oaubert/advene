@@ -546,22 +546,21 @@ class TimeLine(AdhocView):
         self.controller.notify("AnnotationEditEnd", annotation=source)
         return True
 
+    def annotation_fraction(self, widget):
+	"""Return the fraction of the cursor position relative to the annotation widget.
+    
+	@return: a fraction (float)
+	"""
+	x, y = widget.get_pointer()
+	w = widget.allocation.width
+	f = 1.0 * x / w
+	return f
+
     def drag_begin(self, widget, context):
 	"""Handle drag begin for annotations.
 	"""
 	# Determine in which part of the annotation we clicked.
-	x, y = widget.get_pointer()
-	w = widget.allocation.width
-	f = 100 * x / w
-	#print context, x, y, w, f
-	
-	widget._drag_fraction = f
-	if f < 25:
-	    widget._drag_position = 'begin'
-	elif f > 75:
-	    widget._drag_position = 'end'
-	else:
-	    widget._drag_position = 'middle'
+	widget._drag_fraction = self.annotation_fraction(widget)
 	return False
 	
     def drag_sent(self, widget, context, selection, targetType, eventTime):
@@ -572,7 +571,6 @@ class TimeLine(AdhocView):
             selection.set(selection.target, 8, 
 			  cgi.urllib.urlencode( { 
 			'uri': widget.annotation.uri,
-			'position': widget._drag_position,
 			'fraction': widget._drag_fraction,
 			} ))
         else:
@@ -643,22 +641,22 @@ class TimeLine(AdhocView):
             q=dict(cgi.parse_qsl(selection.data))
             source=self.controller.package.annotations.get(q['uri'])
 	    try:
-		c = q['position']
+		fr = float(q['fraction'])
 	    except:
-		c='middle'
-	    #print "Resizing ", source.id, self.pixel2unit(x), c
+		fr = 0.0
+	    #print "Resizing ", source.id, self.pixel2unit(x), fr
 	    pos=long(self.pixel2unit(x))
 	    f=source.fragment
-	    if c == 'begin':
+	    if fr < 0.25:
 		# Modify begin
 		f.begin=pos
-	    elif c == 'end':
+	    elif fr > 0.75:
 		# Modify end
 		f.end = pos
 	    else:
 		d=f.duration
 		# Move annotation
-		f.begin = long(pos - (float(q['fraction']) * d) / 100)
+		f.begin = long(pos - fr * d)
 		f.end = f.begin + d
 	    if f.begin > f.end:
 		f.begin, f.end = f.end, f.begin
