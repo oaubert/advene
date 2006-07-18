@@ -132,6 +132,8 @@ class TimeLine(AdhocView):
 
         # Create annotation widget style:
         self.annotation_font = pango.FontDescription("sans %d" % config.data.preferences['timeline']['font-size'])
+        self.annotation_type_font = self.annotation_font.copy()
+	self.annotation_type_font.set_style(pango.STYLE_ITALIC)
 
         # Maybe we should ask pango the height of 'l' plus margins
         self.button_height = config.data.preferences['timeline']['button-height']
@@ -1216,8 +1218,9 @@ class TimeLine(AdhocView):
         for t in self.annotationtypes:
             b=gtk.Button()
             l=gtk.Label(self.controller.get_title(t))
-            l.modify_font(self.annotation_font)
+            l.modify_font(self.annotation_type_font)
             b.add(l)
+	    self.tooltips.set_tip(b, _("From schema %s") % self.controller.get_title(t.schema))
             b.set_size_request(-1, self.button_height)
             layout.put (b, 0, self.layer_position[t])
             b.annotationtype=t
