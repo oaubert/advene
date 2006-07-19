@@ -1013,7 +1013,7 @@ class TimeLine(AdhocView):
         elif event.keyval == gtk.keysyms.p:
 	    # Play at the current position
 	    x, y = win.get_pointer()
-	    position=long(self.pixel2unit(x))
+	    position=long(self.pixel2unit(self.adjustment.value + x))
             c=self.controller
             pos = c.create_position (value=position,
                                      key=c.player.MediaTime,
@@ -1028,7 +1028,7 @@ class TimeLine(AdhocView):
         """
         retval = False
         if event.button == 3 or event.button == 1:
-            self.context_cb (timel=self, position=self.pixel2unit(event.x), height=event.y)
+            self.context_cb (timel=self, position=self.pixel2unit(self.adjustment.value + event.x), height=event.y)
             retval = True
         return retval
 
