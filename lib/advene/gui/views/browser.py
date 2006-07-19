@@ -54,10 +54,10 @@ class BrowserColumn:
         return ls
 
     def update(self, element=None, name=""):
+        self.model=element
         self.liststore.clear()
         for att in helper.get_valid_members(element):
             self.liststore.append([att])
-        self.model=element
         self.name=name
         self.label.set_label(name)
         # Destroy all following columns
@@ -138,7 +138,7 @@ class Browser(AdhocView):
     def __init__(self, element=None, controller=None, callback=None):
         self.view_name = _("Package browser")
 	self.view_id = 'browserview'
-	self.close_on_package_load = True
+	self.close_on_package_load = False
         self.contextual_actions = [
                     (_("Display annotations in timeline"), self.display_timeline),
                     ]
@@ -170,6 +170,24 @@ class Browser(AdhocView):
         self.rootcolumn=None
         self.current_value=None
         self.widget=self.build_widget()
+
+    def update_model(self, package=None):
+        if package is None:
+            package = self.controller.package
+
+	# Reset to the rootcolumn
+	cb=self.rootcolumn.next
+	while cb is not None:
+	    cb.widget.destroy()
+	    cb=cb.next
+	self.rootcolumn.next=None
+
+	# Update the rootcolumn element
+	self.rootcolumn.update(element=package, name="here")
+	self.update_view('here', package)
+	# The clicked_callback must use the new package
+	self.element = package
+	return True
 
     def clicked_callback(self, columnbrowser, attribute):
         # We could use here=columnbrowser.model, but then the traversal
@@ -333,6 +351,13 @@ class Browser(AdhocView):
         vbox.pack_start(name_label(_("Value"), self.valuelabel), expand=False)
 	
         vbox.show_all()
+	def debug(*p):
+	    print "browser debug", p
+	    import traceback
+	    traceback.print_stack()
+	    return True
+
+	#vbox.connect('destroy', debug)
         return vbox
 
 if __name__ == "__main__":
