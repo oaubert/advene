@@ -725,6 +725,7 @@ class TimeLine(AdhocView):
         return False
 
     def rel_activate(self, button):
+	button.grab_focus()
         if self.over_mode:
             a=button.annotation
             for r in button.annotation.relations:
