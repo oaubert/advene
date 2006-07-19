@@ -721,7 +721,19 @@ class TimeLine(AdhocView):
             else:
                 pop.edit ()
             return True
-            pass
+        elif event.keyval == gtk.keysyms.p:
+	    # Play
+	    f=self.annotation_fraction(widget)
+	    if f > .5:
+		position=annotation.fragment.end
+	    else:
+		position=annotation.fragment.begin
+            c=self.controller
+            pos = c.create_position (value=position,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)	    
+            return True
         return False
 
     def rel_activate(self, button):
