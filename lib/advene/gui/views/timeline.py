@@ -647,7 +647,7 @@ class TimeLine(AdhocView):
 	    except:
 		fr = 0.0
 	    #print "Resizing ", source.id, self.pixel2unit(x), fr
-	    pos=long(self.pixel2unit(x))
+	    pos=long(self.pixel2unit(self.adjustment.value + x))
 	    f=source.fragment
 	    if fr < 0.25:
 		# Modify begin
