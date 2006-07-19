@@ -601,6 +601,8 @@ class AdveneController:
                                            fragment=annotation.fragment.clone())
 	an.fragment.begin = annotation.fragment.end
 	an.fragment.end = an.fragment.begin + annotation.fragment.duration
+	if an.fragment.end > self.cached_duration:
+	    an.fragment.end = self.cached_duration
         self.package.annotations.append(an)
         an.author=config.data.userid
         an.content.data=annotation.content.data
