@@ -783,8 +783,8 @@ class TimeLine(AdhocView):
         b.annotation = annotation
         b.active = False
         #b.connect("clicked", self.annotation_cb, annotation)
-        b.connect("button-press-event", self.button_press_handler, annotation)
-        b.connect("key-press-event", self.button_key_handler, annotation)
+        b.connect("button_press_event", self.button_press_handler, annotation)
+        b.connect("key_press_event", self.button_key_handler, annotation)
 
         b.connect("enter", self.rel_activate)
         b.connect("leave", self.rel_deactivate)
@@ -838,7 +838,7 @@ class TimeLine(AdhocView):
 	    button.grab_focus()
 	    return True
 
-        b.connect("scroll-event", handle_scroll_event)
+        b.connect("scroll_event", handle_scroll_event)
 
         b.show()
         return b
@@ -941,7 +941,7 @@ class TimeLine(AdhocView):
             l.mark = t
             l.pos = 10
             e=gtk.EventBox()
-            e.connect("button-press-event", self.mark_press_cb, t)
+            e.connect("button_press_event", self.mark_press_cb, t)
             e.add(l)
 
             self.layout.put (e, u2p(t), l.pos)
@@ -1241,7 +1241,7 @@ class TimeLine(AdhocView):
             b.annotationtype=t
             b.show()
             b.connect("clicked", self.annotation_type_cb)
-            b.connect("button-press-event", self.annotation_type_pressed_cb)
+            b.connect("button_press_event", self.annotation_type_pressed_cb)
             # The button can receive drops (to transmute annotations)
             b.connect("drag_data_received", self.type_drag_received)
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -1272,7 +1272,7 @@ class TimeLine(AdhocView):
         """Return the layout with its controllers.
         """
         vbox = gtk.VBox()
-        vbox.connect ("key-press-event", self.key_pressed_cb)
+        vbox.connect ("key_press_event", self.key_pressed_cb)
 
         hb=gtk.HBox()
         toolbar = self.get_toolbar()
@@ -1322,7 +1322,7 @@ class TimeLine(AdhocView):
 
         s = gtk.HScale (self.fraction_adj)
         s.set_digits(2)
-        s.connect ("value-changed", self.fraction_event)
+        s.connect ("value_changed", self.fraction_event)
         hbox.add (s)
 
         hbox.pack_start (self.highlight_activated_toggle, expand=False)
@@ -1501,7 +1501,7 @@ class TimeLine(AdhocView):
 
         b=gtk.Button('<<<')
         b.connect("clicked", transfer, notselectedtree, selectedtree)
-        notselectedtree.connect("row-activated", row_activated, notselectedtree, selectedtree)
+        notselectedtree.connect("row_activated", row_activated, notselectedtree, selectedtree)
         actions.add(b)
 
         b=gtk.Button(_('< All <'))
@@ -1514,7 +1514,7 @@ class TimeLine(AdhocView):
 
         b=gtk.Button('>>>')
         b.connect("clicked", transfer, selectedtree, notselectedtree)
-        selectedtree.connect("row-activated", row_activated, selectedtree, notselectedtree)
+        selectedtree.connect("row_activated", row_activated, selectedtree, notselectedtree)
         actions.add(b)
 
         # FIXME: allow multiple selection?
