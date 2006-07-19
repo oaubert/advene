@@ -835,7 +835,7 @@ class TimeLine(AdhocView):
 	# Handle scroll actions
 	def handle_scroll_event(button, event):
 	    if not (event.state & gtk.gdk.CONTROL_MASK):
-		return True
+		return False
 	    if event.direction == gtk.gdk.SCROLL_DOWN:
 		incr=config.data.preferences['scroll-increment']
 	    #elif event.direction == gtk.gdk.SCROLL_UP:
@@ -1059,13 +1059,23 @@ class TimeLine(AdhocView):
 		    break
 	    if at is None:
 		at=self.controller.package.annotationTypes[0]
+		
+	    duration=self.controller.cached_duration / 20
+	    # Make the end bound not override the screen
+	    d=long(self.pixel2unit(self.adjustment.value + self.layout.window.get_size()[0]) - position)
+	    if d > 0:
+		duration=min(d, duration)
+	    else:
+		# Should not happen
+		print "Strange, click outside the timeline"
+
             el=self.controller.package.createAnnotation(
                 ident=id_,
                 type=at,
                 author=config.data.userid,
                 date=self.controller.get_timestamp(),
                 fragment=MillisecondFragment(begin=long(position),
-                                             duration=self.controller.cached_duration / 20))
+                                             duration=duration))
             el.title=id_
             self.controller.package.annotations.append(el)
             self.controller.notify('AnnotationCreate', annotation=el)
