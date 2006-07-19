@@ -724,6 +724,13 @@ class TimeLine(AdhocView):
         elif event.keyval == gtk.keysyms.p:
 	    # Play
 	    f=self.annotation_fraction(widget)
+	    x, y = widget.get_pointer()
+	    if (x < 0 or y < 0 
+		or x > widget.allocation.width 
+		or y > widget.allocation.height):
+		# We are outside the widget. Let the key_pressed_cb
+		# callback from layout handle the key
+		return False
 	    if f > .5:
 		position=annotation.fragment.end
 	    else:
@@ -989,18 +996,31 @@ class TimeLine(AdhocView):
             # The Control-key is held. Special actions :
             if event.keyval == gtk.keysyms.q:
                 win.emit('destroy')
-            return True
+		return True
+	    else:
+		return False
         if event.keyval == gtk.keysyms.Escape:
             win.emit('destroy')
             return True
-        if event.keyval >= 49 and event.keyval <= 57:
+        elif event.keyval >= 49 and event.keyval <= 57:
             self.fraction_adj.value=1.0/pow(2, event.keyval-49)
             self.fraction_event (widget=win)
             return True
-        if event.keyval == gtk.keysyms.Return:
+        elif event.keyval == gtk.keysyms.Return:
             self.fraction_adj.value=1.0
             self.fraction_event (widget=win)
             return True
+        elif event.keyval == gtk.keysyms.p:
+	    # Play at the current position
+	    x, y = win.get_pointer()
+	    position=long(self.pixel2unit(x))
+            c=self.controller
+            pos = c.create_position (value=position,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)	    
+            return True
+
         return False
 
     def mouse_pressed_cb(self, widget=None, event=None):
