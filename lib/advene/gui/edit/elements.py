@@ -1061,6 +1061,9 @@ class GenericContentHandler (ContentHandler):
             elif event.keyval == gtk.keysyms.o:
                 self.content_open()
                 return True
+            elif event.keyval == gtk.keysyms.r:
+                self.content_reload()
+                return True
         return False
 
     def content_open(self, b=None, fname=None):
@@ -1075,6 +1078,10 @@ class GenericContentHandler (ContentHandler):
 		    icon=gtk.MESSAGE_ERROR)
                 return True
             self.set_filename(fname)
+        return True
+
+    def content_reload(self, b=None):
+        self.content_open(fname=self.fname)
         return True
 
     def content_save(self, b=None, fname=None):
@@ -1113,6 +1120,12 @@ class GenericContentHandler (ContentHandler):
         b.set_stock_id(gtk.STOCK_SAVE)
         b.set_tooltip(self.tooltips, _("Save to a file (C-s)"))
         b.connect("clicked", self.content_save)
+        tb.insert(b, -1)
+
+        b=gtk.ToolButton()
+        b.set_stock_id(gtk.STOCK_REFRESH)
+        b.set_tooltip(self.tooltips, _("Reload the file (C-r)"))
+        b.connect("clicked", self.content_reload)
         tb.insert(b, -1)
 
         tb.show_all()
