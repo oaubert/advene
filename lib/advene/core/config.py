@@ -196,7 +196,12 @@ class Config(object):
 	    # User-defined paths. Will overwrite 
 	    # config.data.path items
 	    'path': {},
-            'embed-treeview': False,
+	    # Default adhoc views to open.
+	    # Syntax: timeline:tree:transcribe
+	    'adhoc-south': '',
+	    'adhoc-east': '',
+	    'adhoc-popup': '',
+	    'record-actions': False,
             }
 
         # Player options

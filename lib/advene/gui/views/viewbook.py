@@ -114,7 +114,7 @@ class ViewBook(AdhocView):
         if targetType == config.data.target_type['adhoc-view']:
             name=selection.data
 	    if self.controller.gui:
-		view=self.controller.gui.open_adhoc_view(name, popup=False)
+		view=self.controller.gui.open_adhoc_view(name, destination=None)
 		if view is not None:
 		    if view.view_id == 'htmlview':
 			permanent=True

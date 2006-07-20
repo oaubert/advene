@@ -189,7 +189,7 @@ class AdveneGUI (Connect):
             if (x >= 0 and x <= alloc.width
                 and y >= 0 and y <= alloc.height):
                 # Release was done in the toolbar, so emulate a click
-                self.open_adhoc_view(name, popup=True)
+                self.open_adhoc_view(name, destination='popup')
 
             return True
 
@@ -527,6 +527,14 @@ class AdveneGUI (Connect):
         for filename in config.data.preferences['history']:
             self.append_file_history_menu(filename)
 
+	# Open the default adhoc popup views
+	for dest in ('popup', 'east', 'south'):
+	    for n in config.data.preferences['adhoc-%s' % dest].split(':'):
+		try:
+		    v=self.open_adhoc_view(n, destination=dest)
+		except Exception, e:
+		    self.log(_("Cannot open adhoc view %s in %s: %s") % (n, dest, unicode(e)))
+
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
         gobject.timeout_add (100, self.update_display)
@@ -617,6 +625,8 @@ class AdveneGUI (Connect):
         vb1 = ViewBook(controller=self.controller)
         vb2 = ViewBook(controller=self.controller)
 
+	self.east_viewbook = vb1
+
         hpane.add1(vb1.widget)
         hpane.add2(vb2.widget)
 
@@ -624,10 +634,6 @@ class AdveneGUI (Connect):
         vb1.add_view(self.logwindow, _("URL stack"), permanent=True)
         # URL stack is embedded. The menu item is useless :
         self.gui.get_widget('urlstack1').set_property('visible', False)           
-        if config.data.preferences['embed-treeview']:
-            tree = advene.gui.views.tree.TreeWidget(self.controller.package,
-                                                    controller=self.controller)
-            vb1.add_view(tree)
 
         # Second viewbook
         self.navigation_history=HistoryNavigation(controller=self.controller)
@@ -643,7 +649,9 @@ class AdveneGUI (Connect):
         vis.add1(self.displayhbox)
 
         self.viewbook=ViewBook(controller=self.controller)
-        
+
+        self.south_viewbook = self.viewbook
+
         vis.add2(self.viewbook.widget)
 
         self.popupwidget=AccumulatorPopup(controller=self.controller,
@@ -882,8 +890,10 @@ class AdveneGUI (Connect):
         menu.show_all()
         return menu
 
-    def open_adhoc_view(self, name, popup=True, **kw):
+    def open_adhoc_view(self, name, destination='popup', **kw):
         """Open the given adhoc view.
+	
+	Destination can be: 'popup', 'south', 'east' or None
         """
         view=None
         if name == 'treeview' or name == 'tree':
@@ -905,7 +915,7 @@ class AdveneGUI (Connect):
             view = Browser(element=self.controller.package,
                            controller=self.controller)
         elif name == 'webbrowser':
-            if not popup and HTMLView._engine is not None:
+            if destination != 'popup' and HTMLView._engine is not None:
                 view = HTMLView(controller=self.controller)
                 view.open_url(self.controller.get_default_url(alias='advene'))
             elif self.controller.package is not None:
@@ -919,8 +929,14 @@ class AdveneGUI (Connect):
             except KeyError:
                 filename=None
             view=TranscriptionEdit(controller=self.controller, filename=filename)
-        if view is not None and popup:
+	if view is None:
+	    return view
+        if destination == 'popup':
             view.popup()
+	elif destination == 'south':
+	    self.south_viewbook.add_view(view)
+	elif destination == 'east':
+	    self.east_viewbook.add_view(view)
         return view
 
     def update_gui (self):
@@ -1835,9 +1851,14 @@ class AdveneGUI (Connect):
 
     def on_preferences1_activate (self, button=None, data=None):
         cache={
-            'osd': config.data.player_preferences['osdtext'],
-            'history-limit': config.data.preferences['history-size-limit'],
-            'embed-treeview': config.data.preferences['embed-treeview'],
+            'osdtext': config.data.player_preferences['osdtext'],
+            'history-size-limit': config.data.preferences['history-size-limit'],
+
+	    'adhoc-south': config.data.preferences['adhoc-south'],
+	    'adhoc-east': config.data.preferences['adhoc-east'],
+	    'adhoc-popup': config.data.preferences['adhoc-popup'],
+	    'scroll-increment': config.data.preferences['scroll-increment'],
+
             'toolbarstyle': self.gui.get_widget("toolbar_view").get_style(),
             'data': config.data.path['data'],
             'plugins': config.data.path['plugins'],
@@ -1847,15 +1868,13 @@ class AdveneGUI (Connect):
             'font-size': config.data.preferences['timeline']['font-size'],
             'button-height': config.data.preferences['timeline']['button-height'],
             'interline-height': config.data.preferences['timeline']['interline-height'],
-	    'scroll-increment': config.data.preferences['scroll-increment'],
             }
 
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
         ew.add_title(_("General"))
-        ew.add_checkbox(_("OSD"), "osd", _("Display captions on the video"))
-        ew.add_checkbox(_("Embed treeview"), "embed-treeview", _("Embed a treeview in the application window\nChange will apply on application restart."))
-        ew.add_spin(_("History size"), "history-limit", _("History filelist size limit"),
+        ew.add_checkbox(_("OSD"), "osdtext", _("Display captions on the video"))
+        ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
                     -1, 20)
         ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 2000)
         ew.add_option(_("Toolbar style"), "toolbarstyle", _("Toolbar style"), 
@@ -1863,8 +1882,17 @@ class AdveneGUI (Connect):
                         _('Text only'): gtk.TOOLBAR_TEXT,
                         _('Both'): gtk.TOOLBAR_BOTH, 
                         }
-                      )
+                     )
 
+	ew.add_title(_("Default adhoc views"))
+	ew.add_label(_("""List of adhoc views to open on application startup.
+Multiple views can be separated by :
+Available views: timeline, tree, browser, transcribe"""))
+
+	ew.add_entry(_("Below"), 'adhoc-south', _("Embedded below the video"))
+	ew.add_entry(_("Right"), 'adhoc-east', _("Embedded at the right of the video"))
+	ew.add_entry(_("Popup"), 'adhoc-popup', _("In their own window"))
+	
         ew.add_title(_("Paths"))
 
         ew.add_dir_selector(_("Data"), "data", _("Default directory for data files"))
@@ -1879,10 +1907,9 @@ class AdveneGUI (Connect):
 
         res=ew.popup()
         if res:
-            config.data.player_preferences['osdtext']=cache['osd']
-            config.data.preferences['history-size-limit']=cache['history-limit']
-            config.data.preferences['embed-treeview']=cache['embed-treeview']
-            config.data.preferences['scroll-increment']=cache['scroll-increment']
+	    for k in ('history-size-limit', 'osdtext', 'scroll-increment',
+		      'adhoc-south', 'adhoc-east', 'adhoc-popup'):
+		config.data.preferences[k] = cache[k]
             for t in ('toolbar_view', 'toolbar_fileop', 'toolbar_create'):
                 self.gui.get_widget(t).set_style(cache['toolbarstyle'])
             for k in ('font-size', 'button-height', 'interline-height'):
