@@ -72,6 +72,7 @@ class TimeLine(AdhocView):
         self.annotationtypes = annotationtypes
         self.tooltips = gtk.Tooltips ()
 
+	self.current_marker = None
         # Now that self.list is initialized, we reuse the l variable
         # for various checks.
         if l is None:
@@ -259,6 +260,7 @@ class TimeLine(AdhocView):
 	self.update_layer_position()
 	self.populate()
 	self.draw_marks()
+	self.draw_current_mark()
 	self.ratio_event()
 	self.legend.foreach(remove_widget, self.legend)
 	self.update_legend_widget(self.legend)
@@ -647,6 +649,8 @@ class TimeLine(AdhocView):
 	    except:
 		fr = 0.0
 	    #print "Resizing ", source.id, self.pixel2unit(x), fr
+	    # Note: x is here relative to the visible portion of the window. Thus we must
+	    # add self.adjustment.value
 	    pos=long(self.pixel2unit(self.adjustment.value + x))
 	    f=source.fragment
 	    if fr < 0.25:
@@ -893,12 +897,12 @@ class TimeLine(AdhocView):
         a.show ()
 
     def update_current_mark (self, pos=None):
+        a = self.current_marker
         u2p = self.unit2pixel
         if pos is None:
             pos = self.current_position
         else:
             self.current_position = pos
-        a = self.current_marker
         a.mark = pos
         self.layout.move (a, u2p(pos), a.pos)
 
@@ -1013,6 +1017,8 @@ class TimeLine(AdhocView):
         elif event.keyval == gtk.keysyms.p:
 	    # Play at the current position
 	    x, y = win.get_pointer()
+	    # Note: x is here relative to the visible portion of the window. Thus we must
+	    # add self.adjustment.value
 	    position=long(self.pixel2unit(self.adjustment.value + x))
             c=self.controller
             pos = c.create_position (value=position,
@@ -1028,7 +1034,7 @@ class TimeLine(AdhocView):
         """
         retval = False
         if event.button == 3 or event.button == 1:
-            self.context_cb (timel=self, position=self.pixel2unit(self.adjustment.value + event.x), height=event.y)
+            self.context_cb (timel=self, position=self.pixel2unit(event.x), height=event.y)
             retval = True
         return retval
 
