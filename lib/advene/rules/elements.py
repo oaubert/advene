@@ -855,10 +855,11 @@ class RegisteredAction:
 	l=self.parameters.keys()
 	l.sort()
 	for k in l:
-	    r += """%s: <input name="%s" title="%s">""" % (k,
-								 k,
-								 self.parameters[k])
-	r += """<input type="submit" name="Execute"></form>"""
+	    r += """%s: <input name="%s" title="%s" value="%s"/>""" % (k,
+								       k,
+								       self.parameters[k],
+								       self.defaults[k])
+	r += """<input type="submit" name="Execute" /></form>"""
 	return r
 
 class ECACatalog:
