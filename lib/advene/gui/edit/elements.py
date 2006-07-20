@@ -182,7 +182,11 @@ class EditElementPopup (object):
         """Display the edit window.
         """
 	if hasattr(self, 'window') and self.window:
-	    self.window.set_urgency_hint(True)
+	    try:
+		self.window.set_urgency_hint(True)
+	    except AttributeError:
+		# Does not exist in gtk < 2.8
+		pass
 	    return True
 
         self.key_cb[gtk.keysyms.Return] = self.validate_cb
@@ -852,7 +856,9 @@ class EditContentForm(EditForm):
 				     annotation=self.annotation)
 
         self.contentform.set_editable(self.editable)
-        vbox.add(self.contentform.get_view())
+	self.content_handler_widget = self.contentform.get_view()
+        vbox.add(self.content_handler_widget)
+	self.content_handler_widget.grab_focus()
         return vbox
 
 class TextContentHandler (ContentHandler):
