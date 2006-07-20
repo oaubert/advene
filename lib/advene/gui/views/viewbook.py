@@ -129,7 +129,7 @@ class ViewBook(AdhocView):
     def build_widget(self):
         notebook=gtk.Notebook()
         notebook.set_tab_pos(gtk.POS_BOTTOM)
-        notebook.popup_enable()
+        notebook.popup_disable()
         notebook.set_scrollable(True)
 
         notebook.connect("drag_data_received", self.drag_received)
