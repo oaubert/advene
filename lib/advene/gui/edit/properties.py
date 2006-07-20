@@ -111,16 +111,20 @@ class EditWidget(gtk.VBox):
     def set_name(self, name): self.__name = name
     def get_name(self): return self.__name
 
-    def add_title(self, label):
+    def add_label(self, label):
 
         lbl = gtk.Label("")
-        lbl.set_markup("<b>" + label + "</b>")
+        lbl.set_markup(label)
         lbl.show()
         align = gtk.Alignment()
         align.show()
         align.add(lbl)
 
         self.__add_line(0, align)
+
+    def add_title(self, label):
+
+	self.add_label("<b>" + label + "</b>")
 
     def add_checkbox(self, label, property, help):
 
