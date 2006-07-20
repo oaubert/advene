@@ -82,8 +82,11 @@ def register(controller=None):
             method=ac.action_open_view,
             description=_("Open a GUI view"),
             parameters={'guiview': _("View name (timeline, tree, transcription, browser, webbrowser, transcribe)"),
+			'destination': _("Destination: popup, south, east"),
                         },
-            defaults={'guiview': 'string:timeline'},
+            defaults={'guiview': 'string:timeline',
+		      'destination': 'string:south', 
+		      },
             category='gui',
             ))
     
@@ -171,13 +174,14 @@ class DefaultGUIActions:
     def action_open_view (self, context, parameters):
         """Event Handler for the OpenView action.
 
-        The parameters should have a 'guiview' key.
+        The parameters should have a 'guiview' key and a 'destination' key.
         """
         view=self.parse_parameter(context, parameters, 'guiview', None)
+        dest=self.parse_parameter(context, parameters, 'destination', 'popup')
         if view is None:
             return True
         if view in ('tree', 'timeline', 'browser', 'transcribe', 'transcription'):
-            self.gui.open_adhoc_view(view)
+            self.gui.open_adhoc_view(view, destination=dest)
         else:
             self.gui.log(_("Error: undefined GUI view %s") % view)
         return True
