@@ -1,3 +1,5 @@
+* timeline: with epidemic package, bug in initial display
+
 * EditAccumulator: component holding reduced edition windows for annotations
 
 * Use screen:// as input stream. Allow to parameterize (source display...)
@@ -8,12 +10,6 @@
   duration, future duration [ | past | current | future | ]  
 
 * accumulator: stack from left to right, most current on the leftmost side.
-
-* initial preferences: offer to specify the content of S, E viewbooks
-   [through an expression with the same syntax as webserver adhoc views]
-
-* adhoc views: add 'position' parameter to specify the destination of
-  the new adhoc view (popup, viewpopup S or E).
 
 * Rewrite admin templates with AJAX functionalities (cf
    http://ajaxpatterns.org/Main_Page and http://pyjamas.pyworks.org/
@@ -1231,4 +1227,10 @@ copyright problems
    whole annotation
 
 * EditFragmentPopup: handle DND of annotation widgets to set begin/end time
+
+* initial preferences: offer to specify the content of S, E viewbooks
+   [through an expression with the same syntax as webserver adhoc views]
+
+* adhoc views action: add 'position' parameter to specify the destination of
+  the new adhoc view (popup, viewpopup S or E).
 
