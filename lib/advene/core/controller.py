@@ -406,8 +406,9 @@ class AdveneController:
         # maybe more effective way to implement it
         if event_name in self.modifying_events:
 	    # Find the element's package
-	    el=kw.values()[0]
-	    p=el.ownerPackage
+	    # Kind of hackish... This information should be clearly available somewhere
+	    el=event_name.lower().replace('create','').replace('editend','').replace('delete', '')
+	    p=kw[el].ownerPackage
             p._modified = True
 
         if kw.has_key('immediate'):
@@ -567,7 +568,7 @@ class AdveneController:
         self.player.playlist_clear()
 	if uri is not None and uri != "":
 	    self.player.playlist_add_item (uri)
-	self.notify("MediaChange", uri=uri)
+	self.notify("MediaChange", uri=uri, comment="Set default media")
 
     def transmute_annotation(self, annotation, annotationType, delete=False):
         """Transmute an annotation to a new type.
@@ -584,11 +585,11 @@ class AdveneController:
         an.content.data=annotation.content.data
         an.setDate(self.get_timestamp())
         # FIXME: check if the types are compatible
-        self.notify("AnnotationCreate", annotation=an)
+        self.notify("AnnotationCreate", annotation=an, comment="Transmute annotation")
 
         if delete and not annotation.relations:
             self.package.annotations.remove(annotation)
-            self.notify('AnnotationDelete', annotation=annotation)
+            self.notify('AnnotationDelete', annotation=annotation, comment="Transmute annotation")
 
         return an
 
@@ -607,7 +608,7 @@ class AdveneController:
         an.author=config.data.userid
         an.content.data=annotation.content.data
         an.setDate(self.get_timestamp())
-        self.notify("AnnotationCreate", annotation=an)
+        self.notify("AnnotationCreate", annotation=an, comment="Duplicate annotation")
         return an
 
     def split_annotation(self, annotation, fraction):
@@ -623,7 +624,7 @@ class AdveneController:
 	end=annotation.fragment.end
 	duration=long(annotation.fragment.duration * fraction)
 	annotation.fragment.end = annotation.fragment.begin + duration
-	self.notify("AnnotationEditEnd", annotation=annotation)
+	self.notify("AnnotationEditEnd", annotation=annotation, comment="Duplicate annotation")
 
 	# Shorten the second one
 	an.fragment.begin = annotation.fragment.end
@@ -632,7 +633,7 @@ class AdveneController:
         an.author=config.data.userid
         an.content.data=annotation.content.data
         an.setDate(self.get_timestamp())
-        self.notify("AnnotationCreate", annotation=an)
+        self.notify("AnnotationCreate", annotation=an, comment="Duplicate annotation")
         return an
 
     def restart_player (self):
@@ -644,7 +645,7 @@ class AdveneController:
                 mediafile=mediafile.encode('utf8')
             self.player.playlist_clear()
             self.player.playlist_add_item (mediafile)
-	    self.notify("MediaChange", uri=mediafile)
+	    self.notify("MediaChange", uri=mediafile, comment="Restart player")
 
     def get_timestamp(self):
 	return time.strftime("%Y-%m-%d")
@@ -772,10 +773,10 @@ class AdveneController:
                         mediafile=mediafile.encode('utf8')
                     self.player.playlist_clear()
                     self.player.playlist_add_item (mediafile)
-		    self.notify("MediaChange", uri=mediafile)
+		    self.notify("MediaChange", uri=mediafile, comment="Activate package")
 	else:
 	    self.player.playlist_clear()
-	    self.notify("MediaChange", uri=None)
+	    self.notify("MediaChange", uri=None, comment="Activate package")
 
         self.notify ("PackageActivate", package = self.package)
 
@@ -910,14 +911,14 @@ class AdveneController:
         self.current_stbv=view
         if view is None:
             self.event_handler.clear_ruleset(type_='user')
-            self.notify("ViewActivation", view=None)
+            self.notify("ViewActivation", view=None, comment="Deactivate STBV")
             return
         rs=advene.rules.elements.RuleSet()
         rs.from_dom(catalog=self.event_handler.catalog,
                     domelement=view.content.model,
                     origin=view.uri)
         self.event_handler.set_ruleset(rs, type_='user')
-        self.notify("ViewActivation", view=view)
+        self.notify("ViewActivation", view=view, comment="Activate STBV")
         return
 
     def handle_http_request (self, source, condition):
