@@ -66,6 +66,8 @@ class ECAEngine:
         """
         self.clear_state()
         self.ruledict = {}
+	# History of events
+	self.event_history = []
         self.controller=controller
         self.catalog=advene.rules.elements.ECACatalog()
         self.scheduler=sched.scheduler(time.time, time.sleep)
@@ -318,6 +320,13 @@ class ECAEngine:
         """
         #print "notify %s for %s" % (event_name, str(kw))
 
+	if config.data.preferences['record-actions']:
+	    # FIXME: we should not store the whole element, it is too costly
+	    d=dict(kw)
+	    d['event_name'] = event_name
+	    d['parameters'] = param
+	    d['timestamp'] = time.time()
+	    self.event_history.append(d)
         delay=0
         if kw.has_key('delay'):
             delay=long(kw['delay']) / 1000.0
