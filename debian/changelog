@@ -7,11 +7,11 @@ advene (0.21) unstable; urgency=low
   * The default template is now template.azp, so that new packages have a
     Resources reference by default.
 
-  * A RelationType can now specify a "Any annotation type" as member
+  * A RelationType can specify a "Any annotation type" as member
 
   * GUI:
 
-    * it is now possible to load multiple packages in the GUI. Only one
+    * it is possible to load multiple packages in the GUI. Only one
       package is active at a time (for movie, dynamic views...) but it is
       possible to easily switch between packages (through the Packages
       menuitem) and access to all packages data is possible through the
@@ -27,13 +27,16 @@ advene (0.21) unstable; urgency=low
     * the player control toolbar has been put beneath the video output,
       and is hidden in embedded adhoc views
 
-    * non-text resources/contents are now handled by a GenericContentHandler,
+    * non-text resources/contents are handled by a GenericContentHandler,
       that offers loading/saving to/from a file.
 
-    * it is now possible to insert a resource directly from a file
+    * it is possible to insert a resource directly from a file
 
     * if the user tries to open a videofile through the Open package
       menuitem, do what is expected (select the videofile).
+  
+    * default adhoc views to be opened/embedded on application startup can
+      be specified through the Preferences menu
 
   * Views:
 
@@ -50,7 +53,7 @@ advene (0.21) unstable; urgency=low
   
     * timeline:
 
-      * it is now possible to specify the ordered list of
+      * it is possible to specify the ordered list of
         displayed annotation types
 
       * annotations can be resized by dragging the bounds (must be dragged
@@ -71,6 +74,12 @@ advene (0.21) unstable; urgency=low
       * autoscroll can either scroll discontinuously, or keep the current
         mark centered and continuously scroll the widgets
 
+      * annotation widget shortcuts: 'e' to edit, 'p' to play (begin or
+        end, depending on the cursor position)
+  
+      * shortcut: 'p' in the timeline background plays the movie at the
+        cursor position
+  
     * display parameters of the timeline (font-size, button height...) are
       customizable through the Preferences dialog
 
@@ -97,10 +106,10 @@ advene (0.21) unstable; urgency=low
 
     * new TALES root element: packages (to access all the loaded packages)
 
-    * TALES global methods can now be applied on non-advene elements (for
+    * TALES global methods can be applied on non-advene elements (for
       instance lists)
 
-    * Registered actions now propose meaningful default values
+    * Registered actions propose meaningful default values
 
   * Players
 
