@@ -184,6 +184,10 @@ class TranscriptionEdit(AdhocView):
             self.create_timestamp_mark(t, it)
         return False
 
+    def buffer_is_empty(self):
+        b=self.textview.get_buffer()
+        return b.get_char_count() == 0
+
     def set_color(self, button, color):
         for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
                       gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
@@ -549,6 +553,10 @@ class TranscriptionEdit(AdhocView):
         return True
 
     def load_transcription_cb(self, button=None):
+        if not self.buffer_is_empty():
+            if not advene.gui.util.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
+                                                  icon=gtk.MESSAGE_QUESTION):
+                return True
         fname=advene.gui.util.get_filename(title=_("Select transcription file to load"),
                                            default_dir=config.data.path['data'])
         if fname is not None:
@@ -607,10 +615,14 @@ class TranscriptionEdit(AdhocView):
         if not self.controller.gui:
             self.controller.log(_("Cannot import annotations: no existing interface"))
             return True
-
         at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to import"), create=False)
         if at is None:
             return True
+
+        if not self.buffer_is_empty():
+            if not advene.gui.util.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
+                                                  icon=gtk.MESSAGE_QUESTION):
+                return True
 
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()
@@ -633,7 +645,7 @@ class TranscriptionEdit(AdhocView):
 
     def convert_transcription_cb(self, button=None):
         if not self.controller.gui:
-            self.controller.log(_("Cannot convert the data : no associated package"))
+            self.controller.log(_("Cannot convert the data: no associated package"))
             return True
 
         at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to generate"), create=True)
