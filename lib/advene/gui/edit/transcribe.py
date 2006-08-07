@@ -469,7 +469,7 @@ class TranscriptionEdit(AdhocView):
                 text=b.get_text(begin, end, include_hidden_chars=False)
                 if strip_blank:
                     text=text.rstrip().lstrip()
-                if self.options['empty-annotation'] and self.empty_re.match(text):
+                if self.options['empty-annotations'] and self.empty_re.match(text):
                     pass
                 elif ignore_next:
                     if show_ignored:
@@ -672,8 +672,8 @@ class TranscriptionEdit(AdhocView):
             (_("Open"),    _("Open"), gtk.STOCK_OPEN, self.load_transcription_cb),
             (_("Save"),    _("Save"), gtk.STOCK_SAVE, self.save_transcription_cb),
             (_("Save As"), _("Save As"), gtk.STOCK_SAVE_AS, self.save_as_cb),
-            (_("Import"), _("Import"), gtk.STOCK_EXECUTE, self.import_annotations_cb),
-            (_("Export"), _("Export"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
+            (_("Import"), _("Import from annotations"), gtk.STOCK_EXECUTE, self.import_annotations_cb),
+            (_("Convert"), _("Convert to annotations"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
             (_("Preferences"), _("Preferences"), gtk.STOCK_PREFERENCES, self.edit_preferences),
             )
 
