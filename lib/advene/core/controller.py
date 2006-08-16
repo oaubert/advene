@@ -56,6 +56,7 @@ from advene.model.fragment import MillisecondFragment
 import advene.model.tal.context
 
 import advene.util.helper as helper
+import advene.rules.importer
 
 if config.data.webserver['mode']:
     import advene.core.webserver
@@ -1194,6 +1195,14 @@ class AdveneController:
         """Remove the annotation from the package."""
         self.package.annotations.remove(annotation)
         self.notify('AnnotationDelete', annotation=annotation)
+        return True
+
+    def import_event_history(self):
+        """Import the event history in the current package.
+        """
+        i=advene.rules.importer.EventHistoryImporter(package=self.package)
+        i.process_file(self.event_handler.event_history)
+        self.notify("PackageActivate", package=self.package)
         return True
 
 if __name__ == '__main__':
