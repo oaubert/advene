@@ -86,6 +86,10 @@ class TranscriptionEdit(AdhocView):
 
         self.current_mark = None
 
+        # When modifying an offset with Control+Scroll, store the last value.
+        # If play-on-scroll, then set the destination upon Control release
+        self.timestamp_play = None
+
         self.widget=self.build_widget()
         if filename is not None:
             self.load_transcription(filename)
@@ -326,12 +330,24 @@ class TranscriptionEdit(AdhocView):
 	    self.tooltips.set_tip(button, "%s" % helper.format_time(button.timestamp))
 	    if self.tooltips.active_tips_data is None:
 		button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
-	    if self.options['play-on-scroll']:
-		popup_goto(button)
+            self.timestamp_play = button.timestamp
 	    button.grab_focus()
 	    return True
 
+        def mark_key_release_cb(button, event, anchor=None, child=None):
+            """Handler for key release on timestamp mark.
+            """
+            # Control key released. Goto the position if we were scrolling a mark
+            if self.timestamp_play is not None and (event.state & gtk.gdk.CONTROL_MASK):
+                # self.timestamp_play contains the new value, but child.timestamp
+                # as well. So we can use popup_goto
+                self.timestamp_play = None
+                popup_goto(child)
+                return True
+            return False
+
         child.connect("scroll-event", handle_scroll_event)
+        child.connect("key-release-event", mark_key_release_cb, anchor, child)
         self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
         child.timestamp=timestamp
         child.ignore=False
