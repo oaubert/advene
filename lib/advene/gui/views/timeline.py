@@ -50,7 +50,6 @@ class TimeLine(AdhocView):
     def __init__ (self, l=None,
                   minimum=None,
                   maximum=None,
-                  adjustment=None,
                   controller=None,
                   annotationtypes=None):
 
@@ -145,9 +144,9 @@ class TimeLine(AdhocView):
         # How many units does a pixel represent ?
         # ratio_adjustment.value = unit by pixel
         # Unit = ms
-        self.ratio_adjustment = gtk.Adjustment (value=3600,
+        self.ratio_adjustment = gtk.Adjustment (value=36000,
                                                 lower=1,
-                                                upper=3600,
+                                                upper=36000,
                                                 step_incr=5,
                                                 page_incr=1000)
         self.ratio_adjustment.connect ("changed", self.ratio_event)
@@ -158,7 +157,7 @@ class TimeLine(AdhocView):
                                             upper=1.0,
                                             step_incr=.01,
                                             page_incr=.02)
-        self.ratio_adjustment.connect ("changed", self.ratio_event)
+        self.fraction_adj.connect ("changed", self.fraction_event)
 
 
         self.layout_size=(None, None)
@@ -200,9 +199,7 @@ class TimeLine(AdhocView):
 
         # Adjustment corresponding to the Virtual display
         # The page_size is the really displayed area
-        if adjustment is None:
-            adjustment = gtk.Adjustment ()
-        self.adjustment = adjustment
+        self.adjustment = gtk.Adjustment ()
         self.update_adjustment ()
         self.adjustment.set_value (u2p(minimum))
 
@@ -1207,8 +1204,7 @@ class TimeLine(AdhocView):
         fraction=self.fraction_adj.value
         v = (self.maximum - self.minimum) / float(w) * fraction
         self.ratio_adjustment.set_value(v)
-        self.ratio_adjustment.changed ()
-        #self.ratio_event (widget)
+        self.ratio_adjustment.changed()
         return True
 
     def scroll_event(self, widget=None, event=None):
