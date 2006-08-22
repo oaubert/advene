@@ -266,6 +266,12 @@ class EditElementPopup (object):
             if self.controller.gui:
                 self.controller.gui.init_window_size(self.window, 'editpopup')
             self.window.show_all ()
+            for f in self.forms:
+                try:
+                    if f.get_focus():
+                        break
+                except:
+                    continue
             return self.element
 
     def display (self):
@@ -811,6 +817,12 @@ class EditContentForm(EditForm):
     def set_editable (self, bool):
         self.editable = bool
 
+    def get_focus(self):
+        try:
+            return self.contentform.get_focus()
+        except:
+            return False
+
     def check_validity(self):
 	if self.contentform is None:
 	    return True
@@ -882,6 +894,10 @@ class TextContentHandler (ContentHandler):
         self.fname=None
         self.view = None
         self.tooltips=gtk.Tooltips()
+
+    def get_focus(self):
+        self.view.grab_focus()
+        return True
 
     def set_editable (self, boolean):
         self.editable = boolean
