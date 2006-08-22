@@ -696,6 +696,9 @@ class TimeLine(AdhocView):
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
             self.annotation_cb(widget, annotation, event.x)
             return True
+        elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            self.quick_edit(annotation)
+            return True
 	elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS and event.state & gtk.gdk.CONTROL_MASK:
 	    # Control + click : set annotation begin/end time to current time
 	    f=self.annotation_fraction(widget)
@@ -712,6 +715,40 @@ class TimeLine(AdhocView):
 	    self.controller.notify('AnnotationEditEnd', annotation=annotation)
 	    return True
         return False
+
+    def quick_edit(self, annotation):
+        """Quickly edit a textual annotation
+        """
+        w=gtk.Window(gtk.WINDOW_TOPLEVEL)
+        w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        w.set_decorated(False)
+        # Find the containing gtk.Window
+        next=self.layout
+        while next is not None:
+            p=next
+            next=p.get_parent()
+        w.set_transient_for(p)
+        w.set_position(gtk.WIN_POS_MOUSE)
+        e=gtk.Entry()
+        e.set_text(annotation.content.data)
+        e.set_activates_default(True)
+        w.add(e)
+        def key_handler(widget, event):
+            if event.keyval == gtk.keysyms.Return:
+                # Validate the entry
+                annotation.content.data = e.get_text()
+                self.controller.notify('AnnotationEditEnd', annotation=annotation)
+                w.destroy()
+                return True
+            elif event.keyval == gtk.keysyms.Escape:
+                # Abort and close the entry
+                w.destroy()
+                return True
+            return False
+        e.connect("key_press_event", key_handler)
+        w.show_all()
+        e.grab_focus()
+        return
 
     def button_key_handler(self, widget, event, annotation):
         if event.keyval == gtk.keysyms.e:
@@ -741,6 +778,10 @@ class TimeLine(AdhocView):
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)	    
+            return True
+        elif event.keyval == gtk.keysyms.q:
+            # Quick edit
+            self.quick_edit(annotation)
             return True
         return False
 
@@ -1000,10 +1041,7 @@ class TimeLine(AdhocView):
 		return True
 	    else:
 		return False
-        if event.keyval == gtk.keysyms.Escape:
-            win.emit('destroy')
-            return True
-        elif event.keyval >= 49 and event.keyval <= 57:
+        if event.keyval >= 49 and event.keyval <= 57:
             self.fraction_adj.value=1.0/pow(2, event.keyval-49)
             self.fraction_event (widget=win)
             return True
