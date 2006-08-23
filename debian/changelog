@@ -75,7 +75,7 @@ advene (0.21) unstable; urgency=low
         mark centered and continuously scroll the widgets
 
       * annotation widget shortcuts: 'e' to edit, 'p' to play (begin or
-        end, depending on the cursor position)
+        end, depending on the cursor position), 'q' to quickly edit the content
   
       * shortcut: 'p' in the timeline background plays the movie at the
         cursor position
