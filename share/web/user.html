@@ -4,7 +4,9 @@
 <LINK REL="stylesheet" HREF="advene.css">
 </HEAD><BODY BGCOLOR="white">
 
-<hr class=wikilineheader></div><div class=wikitext><h1>Advene user guide</h1>
+<hr class=wikilineheader></div><div class=wikitext><strong>Editing is temporarily closed, due to WikiSpam attacks. Please contact the Advene team if you need to edit some content.</strong>
+<p>
+<h1>Advene user guide</h1>
 
 <p>
 If you have a local copy of this file, you can find the original document (that may be more up to date) at: <a href="http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneUserGuide">http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneUserGuide</a>. You may also consult the 
@@ -37,7 +39,9 @@ This guide will be included as help file in any Advene release.
 2. <a href="#Saving_a_package">Saving a package</a></dd>
 <dt> </dt><dd>3. <a href="#Visualizing_annotations">Visualizing annotations</a></dd>
 <dt> </dt><dd><dl><dt> </dt><dd>3.1. <a href="#Timeline_view">Timeline view</a></dd>
-<dt> </dt><dd><dl><dt> </dt><dd>3.1.1. <a href="#Annotation_transmutation">Annotation transmutation</a></dd>
+<dt> </dt><dd><dl><dt> </dt><dd>3.1.1. <a href="#Annotation_creation">Annotation creation</a></dd>
+<dt> </dt><dd>3.1.2. <a href="#Annotation_fragment_modification">Annotation fragment modification</a></dd>
+<dt> </dt><dd>3.1.3. <a href="#Annotation_transmutation">Annotation transmutation</a></dd>
 <dt> </dt><dd></dd></dl>
 
 3.2. <a href="#Tree_view">Tree view</a></dd>
@@ -88,15 +92,15 @@ This guide will be included as help file in any Advene release.
 
 <p>
 When the application is launched, a base package is loaded. It contains 
-one schema <em>Texte simple</em> (Simple text), which defines 
-one annotation type <em>Annotation texte</em> (Textual annotation) and one relation type 
-<em>Relation élémentaire</em> (Elementary relation). It is thus possible to 
+one schema &#39;&#39;Texte simple&#39;&#39; (Simple text), which defines 
+one annotation type &#39;&#39;Annotation texte&#39;&#39; (Textual annotation) and one relation type 
+&#39;&#39;Relation élémentaire&#39;&#39; (Elementary relation). It is thus possible to 
 immediately annotate a video  with this initial schema.
 <p>
 <h3><a name="Selecting_the_video_data"></a>1.1. Selecting the video data</h3>
 
 <p>
-The choice of the video data is done through the application Graphical User Interface (GUI). It is possible to select either a DVD, through the DVD icon (and the select the appropriate title and chapter), or a video file through the <em>Eject</em> icon.
+The choice of the video data is done through the application Graphical User Interface (GUI). It is possible to select either a DVD, through the DVD icon (and the select the appropriate title and chapter), or a video file through the &#39;&#39;Eject&#39;&#39; icon.
 <p>
 Once the video source selected, it is possible to navigate in the movie with the navigation buttons (play, pause, fast forward and rewind) and with the cursor. 
 <p>
@@ -106,15 +110,15 @@ Once the video source selected, it is possible to navigate in the movie with the
 <h4><a name="Creation_by_alignment_transcription"></a>1.2.1. Creation by alignment transcription</h4>
 
 <p>
-It is possible, from a textual transcription of the contents of the video, to simply pose timestamp marks, in order to generate annotations from the timestamped text. This function is available from the menu <em>File/Import a transcription</em>.
+It is possible, from a textual transcription of the contents of the video, to simply pose timestamp marks, in order to generate annotations from the timestamped text. This function is available from the menu &#39;&#39;File/Import a transcription&#39;&#39;.
 <p>
 Once the video is started, timestamps marks can be set just by clicking in the text at the right moment. A time difference
 is automatically added, for taking into account reaction time. Its default value is -200ms, but it is possible to adjust it.
 Clicking on a erroneous timestamp mark deletes it. A right click on a mark gives access to several commands: move the player 
 to the moment it indicates, make temporal adjustments. It is also possible to indicate 
-that Advene should not to take into account the text between a mark and the following one. Such "ignored text" marks are represented with a light red color.
+that Advene should not to take into account the text between a mark and the following one. Such &quot;ignored text&quot; marks are represented with a light red color.
 <p>
-After having completed the edition of marks, click on <em>convert</em> to convert 
+After having completed the edition of marks, click on &#39;&#39;convert&#39;&#39; to convert 
 the text into annotations of a chosen type. At any moment, you can save and 
 reload your transcription work in the import transcription window.
 <p>
@@ -130,7 +134,7 @@ The import module can generate a package of annotations (and often also schemas)
 <li> the PRRAT format
 </UL>
 <p>
-You can import external data through the menu <em>File/Import file</em> 
+You can import external data through the menu &#39;&#39;File/Import file&#39;&#39; 
 <p>
 <h2><a name="Saving_a_package"></a>2. Saving a package</h2>
 
@@ -140,21 +144,51 @@ There are two storage formats for packages: a native XML format, and a OpenDocum
 <h2><a name="Visualizing_annotations"></a>3. Visualizing annotations</h2>
 
 <p>
-After having created some annotations, it's possible to visualize them through the graphical interface or the web server. We are going to detail some of these visualization modules.
+After having created some annotations, it&#39;s possible to visualize them through the graphical interface or the web server. We are going to detail some of these visualization modules.
 <p>
 <a name="Timeline"></a>
 <h3><a name="Timeline_view"></a>3.1. Timeline view</h3>
 
 <p>
 The timeline view shows a linear representation of the annotations, where
-each line corresponds to an annotation type. The slider in the lower 
+each line corresponds to an annotation type. It is possible to select the 
+displayed annotation types ("displayed types" button), and to reorganize their order 
+(drag and drop from one type to another, drag and drop in the type selection windows).
+<p>
+<p>
+The slider in the lower 
 left-hand corner of the window indicates the zoom factor. A click on 
 the timestamps marks that are on the top of the window changes the 
 zoom factor: left-click zooms in, right-click zooms out. The keys 1 to 9
 also set the zoom factor (1 displays the whole timeline, 9 displays 
-a small fraction of the timeline)
+a small fraction of the timeline).
 <p>
-<h4><a name="Annotation_transmutation"></a>3.1.1. Annotation transmutation</h4>
+<h4><a name="Annotation_creation"></a>3.1.1. Annotation creation</h4>
+
+<p>
+From the contextual menu of an annotation type: 
+<UL >
+<li> creation of a new annotation that covers the whole movie, launch of this annotation edit window.
+<li> split of an annotation: creates two annotations from one (same content), using the pointer timeline location as the end of the first, and the beginning of the second
+<li> duplication of an annotation: creates a duplicate that lasts the same duration, and begins when the selected annotation ends.
+</UL>
+<p>
+From the contextual menu of the timeline: creation of a new annotation that begins at the clicked timecode and that lasts 1/20 of the movie total duration, launch of this annotation edit window.
+<p>
+<h4><a name="Annotation_fragment_modification"></a>3.1.2. Annotation fragment modification</h4>
+
+<p>
+There are multiple ways to adjust the limits of the temporal fragments associated to an annotation:
+<UL >
+<li> edit the annotation
+<li> use the annotation/annotation adjustment: first select one adjust mode (e.g. "Align the end time to the selected end time"), then drag from the annotation to be adjusted to the annotation that serves as a reference for the adjustment.
+<li> use Control+wheel on an annotation: depending on the location of the pointer on the annotation (left/right) it will increase/decrease the begin/end time 
+<li> use Control+click on an annotation: depending on the location of the pointer on the annotation (left/right) it will set the video current time as begin/end time
+<li> drag the beginning or the end of an annotation, and drop it in the timeline, appart from another annotation
+<li> drag the middle of an annotation, and drop it in the timeline, appart from another annotation: it will move the whole annotation 
+</UL>
+<p>
+<h4><a name="Annotation_transmutation"></a>3.1.3. Annotation transmutation</h4>
 
 <p>
 To change the type of an annotation, just drag and drop the annotation upon the 
@@ -162,10 +196,13 @@ desired annotation type in the left-hand side of the window. If the delete icon 
 activated, the original annotation will be deleted, otherwise, it will simply
 be duplicated in a new type.
 <p>
+<p>
+<p>
+<p>
 <h3><a name="Tree_view"></a>3.2. Tree view</h3>
 
 <p>
-A tree view of the package is available through the main window. It's also possible to open new ones through the 'view' menu.This view allow the creation of new elements in the package through the contextual menus accessible by right-clicking on the elements.
+A tree view of the package is available through the main window. It&#39;s also possible to open new ones through the &#39;view&#39; menu.This view allow the creation of new elements in the package through the contextual menus accessible by right-clicking on the elements.
 <p>
 The contextual menu of the package (root element) allow the creation of new schemes, new views or new queries.
 <p>
@@ -175,7 +212,7 @@ The contextual menu of the schemes allow the creation of new types of annotation
 
 <p>
 An integrated web server, based on the views defined in the Advene model, give acces to the content of the package by the mean of a simple web browser.
-For that, we can use the element <em>Launch the Web browser</em> of the menu <em>View</em> or directly indicate the URL in the browser:
+For that, we can use the element &#39;&#39;Launch the Web browser&#39;&#39; of the menu &#39;&#39;View&#39;&#39; or directly indicate the URL in the browser:
 <p>
 <a href="http://localhost:1234/packages/advene/">http://localhost:1234/packages/advene/</a>
 <p>
@@ -186,13 +223,13 @@ Default views in the package allow us to browse its content.
 <p>
 This view shows all the annotations of a same type as a single text. The main utilty of this view is to show a set of annotations corresponding to a dialog in order to find and localize an annotation in the text.
 <p>
-There are two manners to acces to this view : by right-clicking on an annotation in a tree-view and choosing <em>Transcription</em>, or through the <em>view</em> menu of the main frame.
+There are two manners to acces to this view : by right-clicking on an annotation in a tree-view and choosing &#39;&#39;Transcription&#39;&#39;, or through the &#39;&#39;view&#39;&#39; menu of the main frame.
 <p>
 <a name="TALESSyntax"></a>
 <h2><a name="TALES_syntax"></a>4. TALES syntax</h2>
 
 <p>
-The TALES syntax (<em>TAL Expression Syntax</em>) is used in several components of advene :
+The TALES syntax (&#39;&#39;TAL Expression Syntax&#39;&#39;) is used in several components of advene :
 <UL >
 <li> in the web server (address building)
 <li> in dynamic views (definition of the conditions and parameters of the actions)
@@ -200,7 +237,7 @@ The TALES syntax (<em>TAL Expression Syntax</em>) is used in several components 
 <li> in simple queries (definition of the conditions)
 </UL>
 <p>
-It's important to understand this syntax and the Advene model, to better exploit the possibilities offered by Advene.
+It&#39;s important to understand this syntax and the Advene model, to better exploit the possibilities offered by Advene.
 <p>
 <h3><a name="The_Advene_model"></a>4.1. The Advene model</h3>
 
@@ -209,12 +246,12 @@ FIXME Hierarchy (package, schemes, annotationTypes, relationTypes, annotations, 
 <p>
 This hierarchy can be considered as a file system in which there are elements. A TALES expression will then be a path in this file system.
 <p>
-A particularity of Advene is that some elements can be reached by several paths. An annotation will be in the <tt>package/annotations</tt> "directory" and in the <tt>package/annotationTypes/simple_text/annotations</tt> "directory" too.
+A particularity of Advene is that some elements can be reached by several paths. An annotation will be in the <tt>package/annotations</tt> &quot;directory&quot; and in the <tt>package/annotationTypes/simple_text/annotations</tt> &quot;directory&quot; too.
 <p>
 <h3><a name="TALES_use_in_the_web_server"></a>4.2. TALES use in the web server</h3>
 
 <p>
-The integrated web server directly interprets TALES expressions. It's so possible to browse the data structure and it's content.
+The integrated web server directly interprets TALES expressions. It&#39;s so possible to browse the data structure and it&#39;s content.
 The start point of TALES expressions is the URL 
 <a href="http://localhost:1234/packages/advene/">http://localhost:1234/packages/advene/</a>
 <p>
@@ -229,7 +266,7 @@ will return the annotation with the <tt>a4</tt> identifier contained in the set 
 <h3><a name="TALES_use_in_the_static_views"></a>4.3. TALES use in the static views</h3>
 
 <p>
-The static views (UTBV) allow to specify a render mode for each element of the model. They consist of models of documents (<em>templates</em>) using TAL syntax. TAL is using TALES to specify which content must be inserted into the specified location.
+The static views (UTBV) allow to specify a render mode for each element of the model. They consist of models of documents (&#39;&#39;templates&#39;&#39;) using TAL syntax. TAL is using TALES to specify which content must be inserted into the specified location.
 <p>
 Base elements of the TALES expressions are :
 <p>
@@ -248,7 +285,7 @@ Base elements of the TALES expressions are :
 <h3><a name="TALES_use_in_the_dynamic_views"></a>4.4. TALES use in the dynamic views</h3>
 
 <p>
-Similar elements are available in the dynamic views, in order to specify at the same time the conditions having to be filled and the parameters of the actions to be carried out.  On the other hand, more "basic" elements are accessible, of which some are only defined on particular events:
+Similar elements are available in the dynamic views, in order to specify at the same time the conditions having to be filled and the parameters of the actions to be carried out.  On the other hand, more &quot;basic&quot; elements are accessible, of which some are only defined on particular events:
 <p>
 <UL >
 <li> <tt>package</tt> : current package
@@ -270,13 +307,13 @@ Queries also use a TALES syntax, making it possible to specify
 <li> the return value
 </OL>
 <p>
-For the last two parameters, an additional basic element is defined.  It has as for name <tt>element</tt> and takes the value of the tested element. Let us recall that the basic element <em>here</em> corresponds then to the value of the element to which the query is applied.
+For the last two parameters, an additional basic element is defined.  It has as for name <tt>element</tt> and takes the value of the tested element. Let us recall that the basic element &#39;&#39;here&#39;&#39; corresponds then to the value of the element to which the query is applied.
 <p>
 Thus, to obtain the annotations of same type preceding the annotation to which the query is applied, and to return their identifiers, we use the following syntax:
 <p>
 <UL >
 <li> Starting set: <tt>here/type/annotations</tt>
-<li> Condition:  <tt>element</tt> <em>is before (Allen)</em> <tt>here</tt>
+<li> Condition:  <tt>element</tt> &#39;&#39;is before (Allen)&#39;&#39; <tt>here</tt>
 <li> Return value: <tt>element/id</tt>
 </UL>
 <p>
@@ -288,7 +325,7 @@ and we apply the query to the desired annotation through a TALES expression :
 <h3><a name="Access_to_package_specific_resources"></a>4.6. Access to package-specific resources</h3>
 
 <p>
-By using the new <tt>.azp</tt> package format (just save an .xml package with the .azp extension), you can add resources (any kind of file) to the package itself. It is commonly used for stylesheets used by the package's static views.
+By using the new <tt>.azp</tt> package format (just save an .xml package with the .azp extension), you can add resources (any kind of file) to the package itself. It is commonly used for stylesheets used by the package&#39;s static views.
 <p>
 You can browse and edit (add, delete) resources through the tree view, which will display a new <tt>Resources</tt> item.
 You can access the resources with TALES expressions such as
@@ -299,12 +336,12 @@ If you want to use the resource, you can choose to either embed its content in t
 <p>
 <pre>
 &lt;!-- Embedding the resources content --&gt;
-&lt;html&gt;...&lt;style type="text/css" tal:content="package/resources/style.css/content/data"&gt;&lt;/style&gt;...
+&lt;html&gt;...&lt;style type=&quot;text/css&quot; tal:content=&quot;package/resources/style.css/content/data&quot;&gt;&lt;/style&gt;...
 </pre>
 <p>
 <pre>
 &lt;!-- Referencing the resource --&gt;
-&lt;html&gt;...&lt;link tal:attributes="href package/resources/style.css/absolute_url" type="text/css" rel="stylesheet" /&gt;
+&lt;html&gt;...&lt;link tal:attributes=&quot;href package/resources/style.css/absolute_url&quot; type=&quot;text/css&quot; rel=&quot;stylesheet&quot; /&gt;
 </pre>
 <p>
 <h2><a name="Dynamic_views"></a>5. Dynamic views</h2>
@@ -313,7 +350,7 @@ If you want to use the resource, you can choose to either embed its content in t
 <h3><a name="Definition"></a>5.1. Definition</h3>
 
 <p>
-A dynamic view is a set of rules, which will be applied playing a video.  Playing the video, with the structure of annotation, allows to generate a certain number of events (<tt>AnnotationBegin</tt>, <tt>AnnotationEnd</tt>, <tt>PlayerPause</tt>, etc).  A rule will specify
+
 <p>
 <OL >
 <li> the event which can start it
@@ -325,15 +362,15 @@ The syntax of the conditions uses the <a href="#TALESSyntax">[TALES syntax]</a>,
 <p>
 The most current use is to filter the event <tt>AnnotationBegin</tt> on a particular type of annotation, which gives following syntax:
 <p>
-<tt>annotation/type</tt> <em>is equal to</em> <tt>packages/annotationTypes/foobar</tt>
+<tt>annotation/type</tt> &#39;&#39;is equal to&#39;&#39; <tt>packages/annotationTypes/foobar</tt>
 <p>
 <a name="DefaultSTBV"></a>
 <h3><a name="Automatic_launching"></a>5.2. Automatic launching</h3>
 
 <p>
-It is possible to specify a default dynamic view, which will be activated when loading the package.  For that, it is necessary to edit the package itself (via a right-click at the root of the tree view) and to indicate in the field <em>Default dynamic view</em> the identifier of the dynamic view.
+It is possible to specify a default dynamic view, which will be activated when loading the package.  For that, it is necessary to edit the package itself (via a right-click at the root of the tree view) and to indicate in the field &#39;&#39;Default dynamic view&#39;&#39; the identifier of the dynamic view.
 <p>
-To carry out particular actions (showing a message, starting the video player, etc), we need to specify in the dynamic view a rule reacting to the event <em>Activation of the view</em>.
+To carry out particular actions (showing a message, starting the video player, etc), we need to specify in the dynamic view a rule reacting to the event &#39;&#39;Activation of the view&#39;&#39;.
 <p>
 <h2><a name="Static_views"></a>6. Static views</h2>
 
@@ -342,7 +379,7 @@ To carry out particular actions (showing a message, starting the video player, e
 <h3><a name="Default_static_view"></a>6.1. Default static view</h3>
 
 <p>
-It is possible to specify a default static view, which will be loaded when clicking on the button <em>Web Browser</em> in the toolbar.  For that, it is necessary to edit the package itself (via the tree view) and to indicate in the field <em>Default static view</em> the identifier of the view.
+It is possible to specify a default static view, which will be loaded when clicking on the button &#39;&#39;Web Browser&#39;&#39; in the toolbar.  For that, it is necessary to edit the package itself (via the tree view) and to indicate in the field &#39;&#39;Default static view&#39;&#39; the identifier of the view.
 <p>
 <h2><a name="Schema_definition"></a>7. Schema definition</h2>
 
@@ -350,17 +387,17 @@ It is possible to specify a default static view, which will be loaded when click
 <h3><a name="New_schema_creation"></a>7.1. New schema creation</h3>
 
 <p>
-The creation of a new schema is carried out starting from the arborescent view. We need to right-click on the collection and to select <em>Create a new schema</em>, then to provide requested informations. It is also possible to use the "V" icon in the main window toolbar.
+The creation of a new schema is carried out starting from the arborescent view. We need to right-click on the collection and to select &#39;&#39;Create a new schema&#39;&#39;, then to provide requested informations. It is also possible to use the &quot;V&quot; icon in the main window toolbar.
 <p>
 <h3><a name="Adding_an_annotation_type_to_a_schema"></a>7.2. Adding an annotation type to a schema</h3>
 
 <p>
-The creation of a new type of annotation is carried out starting from the arborescent view. We need to right-click on the schema in which we wish to create the new type and to select <em>Create a new type of annotation</em>, then to provide requested informations.
+The creation of a new type of annotation is carried out starting from the arborescent view. We need to right-click on the schema in which we wish to create the new type and to select &#39;&#39;Create a new type of annotation&#39;&#39;, then to provide requested informations.
 <p>
 <h3><a name="Adding_a_relation_type_to_a_schema"></a>7.3. Adding a relation type to a schema</h3>
 
 <p>
-The creation of a new type of relation is carried out starting from the arborescent view. We need to right-click on the schema in which we wish to create the new type and to select <em>Create a new type of relation</em>, then to provide requested informations.
+The creation of a new type of relation is carried out starting from the arborescent view. We need to right-click on the schema in which we wish to create the new type and to select &#39;&#39;Create a new type of relation&#39;&#39;, then to provide requested informations.
 <p>
 <h2><a name="Package_elements_edition"></a>8. Package elements edition</h2>
 
@@ -381,17 +418,17 @@ Each element in the model has the following attributes :
 <li> <tt>Description</tt>: a short description of the element
 </UL>
 <p>
-Attributes <tt>URI</tt> and <tt>id</tt> aren't modifiable (they're so shown in bold). 
+Attributes <tt>URI</tt> and <tt>id</tt> aren&#39;t modifiable (they&#39;re so shown in bold). 
 <p>
 <h3><a name="Package_specific_attributes"></a>8.2. Package specific attributes</h3>
 
 <p>
-The packages have two additional attributes, <em><a href="#DefaultSTBV">[Default dynamic view]</a></em> and <em><a href="#DefaultUTBV">[Default static view]</a></em>, which make it possible to specify default views to be activated during the loading of the package or activation of the Web Browser.
+The packages have two additional attributes, &#39;&#39;<a href="#DefaultSTBV">[Default dynamic view]</a>&#39;&#39; and &#39;&#39;<a href="#DefaultUTBV">[Default static view]</a>&#39;&#39;, which make it possible to specify default views to be activated during the loading of the package or activation of the Web Browser.
 <p>
 <h3><a name="Annotation_types"></a>8.3. Annotation types</h3>
 
 <p>
-Types of annotations allow to specify the MIME type of the contents of their annotations (field <em>MIME type</em>), as well as an expression of generation of the representation of the annotations (field <em>Representation</em>).
+Types of annotations allow to specify the MIME type of the contents of their annotations (field &#39;&#39;MIME type&#39;&#39;), as well as an expression of generation of the representation of the annotations (field &#39;&#39;Representation&#39;&#39;).
 For the first field, values typicaly are 
 <p>
 <UL >
@@ -400,7 +437,7 @@ For the first field, values typicaly are
 <li> <tt>text/xml</tt>: XML
 </UL>
 <p>
-The second field (<em>Representation</em>) allows to indicate an expression to be applied to the annotation of the edited type.  Its typical use is in the case of a structured type of annotation (in the Simplistic structured form, or in XML, etc), where we do not want to represent the corresponding annotations by their entire contents. We can so specify the field to be used to build the representation, via a TALES expression.
+The second field (&#39;&#39;Representation&#39;&#39;) allows to indicate an expression to be applied to the annotation of the edited type.  Its typical use is in the case of a structured type of annotation (in the Simplistic structured form, or in XML, etc), where we do not want to represent the corresponding annotations by their entire contents. We can so specify the field to be used to build the representation, via a TALES expression.
 <p>
 Thus, a structured annotation whith the fields <tt>title</tt>, <tt>content</tt> and <tt>number</tt> will be able to use as a representation
 <p>
@@ -429,12 +466,12 @@ The exploitation of this type of content is carried out in the TALES expressions
 <h3><a name="Relation_types"></a>8.4. Relation types</h3>
 
 <p>
-The types of relations allows to enforce the type of the annotations in relation. That is carried out in the edition window via the field <em>Members</em> where it is possible to insert, remove and reorder the types of annotations.
+The types of relations allows to enforce the type of the annotations in relation. That is carried out in the edition window via the field &#39;&#39;Members&#39;&#39; where it is possible to insert, remove and reorder the types of annotations.
 <p>
 <h3><a name="Views"></a>8.5. Views</h3>
 
 <p>
-The views are applicable on any element of the model.  It is possible to force their use to certain types of elements by specifying the fields <em>Class</em> and <em>Type</em>. The field <em>Class</em> is by default fixed at <tt>'''</tt>, indicating the generic character of the view. If we wish to restrict his application to a package, <tt>package</tt> should be indicated. The various possible values are:
+The views are applicable on any element of the model.  It is possible to force their use to certain types of elements by specifying the fields &#39;&#39;Class&#39;&#39; and &#39;&#39;Type&#39;&#39;. The field &#39;&#39;Class&#39;&#39; is by default fixed at <tt>&#39;&#39;&#39;</tt>, indicating the generic character of the view. If we wish to restrict his application to a package, <tt>package</tt> should be indicated. The various possible values are:
 <p>
 <UL >
 <li> <tt>package</tt>
@@ -444,7 +481,7 @@ The views are applicable on any element of the model.  It is possible to force t
 <li> <tt>view</tt>
 <li> <tt>annotation</tt>
 <li> <tt>relation</tt>
-<li> <tt>list</tt> : In this case, we can indicate the type of the elements in the list, in the field <em>Type</em>
+<li> <tt>list</tt> : In this case, we can indicate the type of the elements in the list, in the field &#39;&#39;Type&#39;&#39;
 </UL>
 <p>
 Each view has a MIME type, defining its contents.  This field generally contains the values <tt>text/html</tt> (HTML), <tt>image/svg+xml</tt> (SVG) or <tt>text/plain</tt> (simple text).
@@ -462,9 +499,8 @@ There is no Advene-specific template user guide yet. The best way to define new 
 <li> reaction time value
 <li> advene model
 </UL>
-<p>
 </div><hr class=wikilinefooter>
 
 
-Last edited March 6, 2006 4:28 pm by pepper.info.enstb.org  (diff)
+Last edited July 19, 2006 10:43 am by  OlivierAubert
 </form></div></body></html>
