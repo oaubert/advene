@@ -93,7 +93,9 @@ advene (0.21) unstable; urgency=low
       * when converting to annotations, propose to delete existing
         annotations of the given type
 
-      * control+scroll on a timestamp mark updates the timestamp
+      * control+scroll on a timestamp mark updates the timestamp. If the
+        play-on-scroll option is active, the player will play the new
+        timestamp when the control key is released. 
   
       * control+click on a mark sets the timestamp to the current movie time
 
