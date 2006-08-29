@@ -1,4 +1,4 @@
-* timeline: with epidemic package, bug in initial display
+* autocompletion of words in transcribe widget
 
 * EditAccumulator: component holding reduced edition windows for annotations
 
@@ -47,6 +47,10 @@ See also http://filmlibre.org/ et http://media.april.org/
 
 * store event history + context (media, position) and save it as a package
 
+* Store the navigation history as a package with viewed sequences and
+occurring events (but base timeline is then application time instead
+of movie time)
+
 * import fixer: allow to edit imports without loading the package
    (which fails if imported package is not present).
 
@@ -62,17 +66,11 @@ See also http://filmlibre.org/ et http://media.april.org/
 
 * notification of new popups when embedded (flash tab)
 
-* update_imports script that ensures that all elements of specified
-   type from a given package are imported in a list of packages, and
-   adds them if necessary.
-
 * make save button inactive when not modified
 
 * implement .apl (advene package list) file format (cf .m3u)
 
 * allow to specify the browser for open_url in preferences
-
-* fix bug in snapshot when vout == x11?
 
 * check http://chardet.feedparser.org/
 
@@ -84,8 +82,6 @@ See also http://filmlibre.org/ et http://media.april.org/
 
 * add parameters to TimeLine view (displayed annotation types, zoom)
 
-* timeline: directly create annotations from timeline
-
 * timeline: cf http://www.jonobacon.org/gallery/main.php?g2_view=core.ShowItem&g2_itemId=3382&g2_GALLERYSID=8f6c485df08f046ac9658e6fe0928260
 
 http://jokosher.python-hosting.com/wiki/GnonlinNotes
@@ -93,11 +89,6 @@ http://jokosher.python-hosting.com/wiki/GnonlinNotes
 http://jokosher.org/
 
 http://jokosher.python-hosting.com/file/JonoEdit/trunk/TimeLine.py?rev=389
-
-* Annotation resize in timeline -> Hack (right button). Should
-reimplement a native widget for annotations or use DiaCanvas
-
-* edit.elements: focus on content window on open
 
 * Define a ParameteredQuery which takes a single parameter in the path, e.g.:
   here/annotations/containedIn/foobar 
@@ -130,8 +121,6 @@ that should return the same URI. The proposed solution is to enforce the importi
 
 * transcribe: make validity check on bounds only on demand or on export.
 
-* transcribe: offset on marks must be followed by goto
-
 * Convert importers to plugin architecture
 
 * MacOS X: write a qtplayer using the Carbon.Qt functionalities (cf
@@ -156,10 +145,6 @@ istanbul
 
 * Read http://www.ling.uni-potsdam.de/~stede/Downloads/xbrac04.pdf
 (survey of annotation tools)
-
-* Store the navigation history as a package with viewed sequences and
-occurring events (but base timeline is then application time instead
-of movie time)
 
 * SMIL examples: http://webmonkey.wired.com/webmonkey/00/41/index4a_page3.html?tw=authoring
 
@@ -1205,9 +1190,6 @@ copyright problems
 
 * STBV Parameters: add interesting default values
 
-* timeline: add "CenterCurrentTime" option, to scroll the whole widget
-  around the current time mark
-
 * Transcribe: add an "Import from annotation type" button
 
 * Do not add player control toolbars when embedding views
@@ -1233,4 +1215,29 @@ copyright problems
 
 * adhoc views action: add 'position' parameter to specify the destination of
   the new adhoc view (popup, viewpopup S or E).
+
+* timeline: add "CenterCurrentTime" option, to scroll the whole widget
+  around the current time mark
+
+* transcribe: when control+scroll, go to the new position on button release
+
+* timeline: with epidemic package, bug in initial display
+
+* timeline: directly create annotations from timeline
+
+* Annotation resize in timeline -> Hack (right button). Should
+reimplement a native widget for annotations or use DiaCanvas -> Re-hacked through DND of the annotation bound
+
+* timeline: a shortcut to quickly edit a one-line annotation (popup a gtk.Entry)
+
+* edit.elements: focus on content window on open
+
+* update_imports script that ensures that all elements of specified
+   type from a given package are imported in a list of packages, and
+   adds them if necessary -> not necessary with the future new model,
+   where a package import will allow to access all its elements
+
+* fix bug in snapshot when vout == x11?
+
+* transcribe: offset on marks must be followed by goto
 
