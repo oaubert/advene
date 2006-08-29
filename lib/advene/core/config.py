@@ -261,6 +261,9 @@ class Config(object):
 	self.target_type = {}
 	self.drag_type = {}
 	for name, type, mime in (
+            ('text-plain',         0, 'text/plain'),
+            ('TEXT',               1, 'TEXT'),
+            ('STRING',             2, 'UTF8_STRING'),
             ('annotation',        42, None),
             ('rule',              43, None),
             ('view',              44, None),
