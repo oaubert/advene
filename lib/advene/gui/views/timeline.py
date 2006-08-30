@@ -568,6 +568,14 @@ class TimeLine(AdhocView):
         #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.target, 8, widget.annotation.uri)
+        elif targetType == config.data.target_type['uri-list']:
+            c=self.controller.build_context(here=widget.annotation)
+            uri=c.evaluateValue('here/absolute_url')
+            selection.set(selection.target, 8, uri)
+        elif (targetType == config.data.target_type['text-plain']
+              or targetType == config.data.target_type['TEXT']
+              or targetType == config.data.target_type['STRING']):
+            selection.set(selection.target, 8, widget.annotation.content.data)
         elif targetType == config.data.target_type['annotation-resize']:
             selection.set(selection.target, 8, 
 			  cgi.urllib.urlencode( { 
@@ -865,7 +873,11 @@ class TimeLine(AdhocView):
 
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
 			  config.data.drag_type['annotation'] 
-			  + config.data.drag_type['annotation-resize'],
+			  + config.data.drag_type['annotation-resize']
+                          + config.data.drag_type['uri-list']
+                          + config.data.drag_type['text-plain']
+                          + config.data.drag_type['TEXT']
+                          + config.data.drag_type['STRING'],
 			  gtk.gdk.ACTION_LINK)
         # The button can receive drops (to create relations)
         b.connect("drag_data_received", self.drag_received)
