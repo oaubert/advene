@@ -201,6 +201,7 @@ class Config(object):
 	    'adhoc-south': '',
 	    'adhoc-east': '',
 	    'adhoc-popup': '',
+            'display-scroller': False,
 	    'record-actions': False,
             }
 
