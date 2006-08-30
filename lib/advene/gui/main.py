@@ -88,6 +88,7 @@ from advene.gui.edit.transcribe import TranscriptionEdit
 from advene.gui.views.interactivequery import InteractiveQuery
 from advene.gui.views.viewbook import ViewBook
 from advene.gui.views.html import HTMLView
+from advene.gui.views.scroller import ScrollerView
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -616,6 +617,9 @@ class AdveneGUI (Connect):
         v=gtk.VBox()
         v.pack_start(hb, expand=False)
         v.pack_start(self.drawable, expand=True)
+        if config.data.preferences['display-scroller']:
+            self.scroller=ScrollerView(controller=self.controller)
+            v.pack_start(self.scroller.widget, expand=False)
         v.pack_start(self.gui.slider, expand=False)
         v.pack_start(tb, expand=False)
 
@@ -1857,6 +1861,7 @@ class AdveneGUI (Connect):
 	    'adhoc-south': config.data.preferences['adhoc-south'],
 	    'adhoc-east': config.data.preferences['adhoc-east'],
 	    'adhoc-popup': config.data.preferences['adhoc-popup'],
+            'display-scroller': config.data.preferences['display-scroller'],
 	    'scroll-increment': config.data.preferences['scroll-increment'],
 
             'toolbarstyle': self.gui.get_widget("toolbar_view").get_style(),
@@ -1870,7 +1875,7 @@ class AdveneGUI (Connect):
             'interline-height': config.data.preferences['timeline']['interline-height'],
             }
 
-        ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
+        ew=advene.gui.edit.properties.EditNotebook(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
         ew.add_title(_("General"))
         ew.add_checkbox(_("OSD"), "osdtext", _("Display captions on the video"))
@@ -1883,7 +1888,6 @@ class AdveneGUI (Connect):
                         _('Both'): gtk.TOOLBAR_BOTH, 
                         }
                      )
-
 	ew.add_title(_("Default adhoc views"))
 	ew.add_label(_("""List of adhoc views to open on application startup.
 Multiple views can be separated by :
@@ -1892,7 +1896,9 @@ Available views: timeline, tree, browser, transcribe"""))
 	ew.add_entry(_("Below"), 'adhoc-south', _("Embedded below the video"))
 	ew.add_entry(_("Right"), 'adhoc-east', _("Embedded at the right of the video"))
 	ew.add_entry(_("Popup"), 'adhoc-popup', _("In their own window"))
-	
+
+	ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
+
         ew.add_title(_("Paths"))
 
         ew.add_dir_selector(_("Data"), "data", _("Default directory for data files"))
@@ -1908,7 +1914,7 @@ Available views: timeline, tree, browser, transcribe"""))
         res=ew.popup()
         if res:
 	    for k in ('history-size-limit', 'osdtext', 'scroll-increment',
-		      'adhoc-south', 'adhoc-east', 'adhoc-popup'):
+		      'adhoc-south', 'adhoc-east', 'adhoc-popup', 'display-scroller'):
 		config.data.preferences[k] = cache[k]
             for t in ('toolbar_view', 'toolbar_fileop', 'toolbar_create'):
                 self.gui.get_widget(t).set_style(cache['toolbarstyle'])
