@@ -20,6 +20,49 @@
 
 import gtk
 
+class EditNotebook(object):
+    def __init__(self, set_config, get_config):
+        self._set_config = set_config
+        self._get_config = get_config
+        self.book = gtk.Notebook()
+        self.current_widget = None
+        
+    def __getattribute__ (self, name):
+        """Use the defined method if necessary. Else, forward the request
+        to the current_widget object
+        """
+        try:
+            return object.__getattribute__ (self, name)
+        except AttributeError:
+            if self.current_widget is None:
+                self.add_title(_("Preferences"))
+            return self.current_widget.__getattribute__ (name)
+
+    def set_name(self, name):
+        self.__name = name
+        
+    def add_title(self, title):
+        self.current_widget = EditWidget(self._set_config, self._get_config)
+        self.current_widget.set_name(title)
+        self.book.append_page(self.current_widget, gtk.Label(title))
+        return
+        
+    def popup(self):
+        d = gtk.Dialog(title=self.get_name(),
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+        d.vbox.add(self.book)
+        self.book.show_all()
+        res=d.run()
+        d.destroy()
+        if res == gtk.RESPONSE_ACCEPT:
+            return True
+        else:
+            return False
+
+
 class EditWidget(gtk.VBox):
     """Configuration edit widget.
 
