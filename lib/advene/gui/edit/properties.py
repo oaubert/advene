@@ -22,6 +22,7 @@ import gtk
 
 class EditNotebook(object):
     def __init__(self, set_config, get_config):
+        self.__name = _("Properties")
         self._set_config = set_config
         self._get_config = get_config
         self.book = gtk.Notebook()
@@ -41,6 +42,9 @@ class EditNotebook(object):
     def set_name(self, name):
         self.__name = name
         
+    def get_name(self):
+        return self.__name
+
     def add_title(self, title):
         self.current_widget = EditWidget(self._set_config, self._get_config)
         self.current_widget.set_name(title)
