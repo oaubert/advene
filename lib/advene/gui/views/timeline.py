@@ -262,6 +262,7 @@ class TimeLine(AdhocView):
 	self.legend.foreach(remove_widget, self.legend)
 	self.update_legend_widget(self.legend)
 	self.legend.show_all()
+        self.fraction_event(widget=None)
 	return
 
     def update_layer_position(self):
