@@ -340,9 +340,10 @@ class TimeLine(AdhocView):
         a = self.adjustment
         if pos < a.lower:
             pos = a.lower
-        elif pos > a.upper:
-            pos = a.upper
-        a.set_value (pos)
+        elif pos >= a.upper - a.page_size:
+            pos = a.upper - a.page_size
+        if a.value != pos:
+            a.set_value (pos)
         return True
 
     def activate_annotation_handler (self, context, parameters):
