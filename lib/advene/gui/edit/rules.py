@@ -847,11 +847,15 @@ class EditAction(EditGeneric):
 
         if self.model.registeredaction:
             # Action is derived from a RegisteredAction
-            # we have information about its parameters
+            # we have information about its parameters.
             ra=self.model.registeredaction
             for name in self.sorted(ra.parameters):
+                try:
+                    v=self.model.parameters[name]
+                except KeyError:
+                    v=ra.default_value(name)
                 p=self.build_parameter_widget(name=name,
-                                              value=ra.default_value(name),
+                                              value=v,
                                               description=ra.describe_parameter(name))
                 self.paramlist[name]=p
                 vbox.add(p)
