@@ -325,8 +325,8 @@ class TimeLine(AdhocView):
         a = self.adjustment
         if pos < a.lower:
             pos = a.lower
-        elif pos > a.upper:
-            pos = a.upper
+        elif pos > a.upper - a.page_size:
+            pos = a.upper - a.page_size
         if pos < a.value or pos > (a.value + a.page_size):
             a.set_value (pos)
         self.update_position (None)
@@ -993,8 +993,8 @@ class TimeLine(AdhocView):
         pos = self.unit2pixel (t) - ( w * rel )
         if pos < a.lower:
             pos = a.lower
-        elif pos > a.upper:
-            pos = a.upper
+        elif pos > a.upper - a.page_size:
+            pos = a.upper - a.page_size
         a.set_value (pos)
         self.update_position (None)
         return True
