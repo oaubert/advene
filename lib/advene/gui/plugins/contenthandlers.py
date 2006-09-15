@@ -94,7 +94,7 @@ class ZoneContentHandler (ContentHandler):
 	self.element.data = text
         return True
 
-    def get_view (self):
+    def get_view (self, compact=False):
         """Generate a view widget for editing zone attributes."""
         vbox=gtk.VBox()
         
@@ -172,7 +172,7 @@ class RuleSetContentHandler (ContentHandler):
 	self.element.data = self.edit.model.xml_repr()
         return True
 
-    def get_view (self):
+    def get_view (self, compact=False):
         """Generate a view widget to edit the ruleset."""
         rs=advene.rules.elements.RuleSet()
         rs.from_dom(catalog=self.controller.event_handler.catalog,
@@ -231,7 +231,7 @@ class SimpleQueryContentHandler (ContentHandler):
         self.element.mimetype = 'application/x-advene-simplequery'
         return True
 
-    def get_view (self):
+    def get_view (self, compact=False):
         """Generate a view widget to edit the ruleset."""
         q=advene.rules.elements.Query()
         q.from_dom(domelement=self.element.model)
