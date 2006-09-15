@@ -34,7 +34,7 @@ class TimeAdjustment:
 
     Note: time values are integers in milliseconds.
     """    
-    def __init__(self, value=0, controller=None, videosync=False, editable=True):
+    def __init__(self, value=0, controller=None, videosync=False, editable=True, compact=False):
         self.value=value
         self.controller=controller
         self.sync_video=videosync
@@ -44,26 +44,27 @@ class TimeAdjustment:
         self.large_increment=1000
         self.image=None
         self.editable=editable
+        self.compact=compact
         self.widget=self.make_widget()
         self.update_display()
         
     def make_widget(self):
-        self.tooltips = gtk.Tooltips ()
-        
-        vbox=gtk.VBox()
-        
-        self.image = gtk.Image()
-        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], width=100))
-        vbox.add(self.image)
 
-        hbox=gtk.HBox()
+        def handle_image_click(button, event):
+	    if not (event.state & gtk.gdk.CONTROL_MASK):
+                self.play_from_here(button)
+		return True
+            else:
+                self.use_current_position(button)
+                return True
+            return False
 
         def make_button(incr_value, pixmap):
             """Helper function to build the buttons."""
             b=gtk.Button()
             i=gtk.Image()
-            i.set_from_file(config.data.advenefile(pixmap))
-            b.add(i)
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
+            b.set_image(i)
             b.connect("clicked", self.update_value_cb, incr_value)
             if incr_value < 0:
                 tip=_("Decrement value by %.2f s") % (incr_value / 1000.0)
@@ -72,48 +73,47 @@ class TimeAdjustment:
             self.tooltips.set_tip(b, tip)
             return b
 
-        if self.editable:
-            b=make_button(-self.large_increment, "pixmaps/2leftarrow.png")
-            hbox.add(b)
-            b=make_button(-self.small_increment, "pixmaps/1leftarrow.png")
-            hbox.add(b)
+        self.tooltips = gtk.Tooltips ()
+        
+        vbox=gtk.VBox()
+
+        hbox=gtk.HBox()
+        hbox.set_homogeneous(False)
+
+        vb=gtk.VBox()
+        if self.editable and not self.compact:
+            b=make_button(-self.large_increment, "2leftarrow.png")
+            vb.pack_start(b, expand=False)
+            b=make_button(-self.small_increment, "1leftarrow.png")
+            vb.pack_start(b, expand=False)
+        hbox.pack_start(vb, expand=False)
+
+        self.image = gtk.Image()
+        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], width=100))
+
+        b=gtk.Button()
+        b.connect("button-press-event", handle_image_click)
+        b.set_image(self.image)
+        self.tooltips.set_tip(b, _("Click to play, control+click to set to current time"))
+        hbox.pack_start(b, expand=False)
+
+        vb=gtk.VBox()
+        if self.editable and not self.compact:
+            b=make_button(self.large_increment, "2rightarrow.png")
+            vb.pack_start(b, expand=False)
+            b=make_button(self.small_increment, "1rightarrow.png")
+            vb.pack_start(b, expand=False)
+        hbox.pack_start(vb, expand=False)
 
         self.entry=gtk.Entry()
-        # Default width of the entry field (+2 chars for security)
-        self.entry.set_width_chars(len(advene.util.helper.format_time(0))+2)
+        # Default width of the entry field
+        #self.entry.set_width_chars(len(advene.util.helper.format_time(0.0)))
         self.entry.connect("changed", self.convert_entered_value)
         self.entry.set_editable(self.editable)
-        hbox.add(self.entry)
-
-        if self.editable:
-            b=make_button(self.small_increment, "pixmaps/1rightarrow.png")
-            hbox.add(b)
-            b=make_button(self.large_increment, "pixmaps/2rightarrow.png")
-            hbox.add(b)
-
-        hbox.show_all()
-        
-        vbox.pack_start(hbox, expand=False)
-
-        hbox=gtk.HButtonBox()
-
-        b=gtk.Button(_("Play"))
-        self.tooltips.set_tip(b, _("Play from the indicated position"))
-        b.connect("clicked", self.play_from_here)
-        hbox.add(b)
-
-        if self.editable:
-            b=gtk.Button(_("Current"))
-            self.tooltips.set_tip(b, _("Use the current position value"))
-            b.connect("clicked", self.use_current_position)
-            hbox.add(b)
-        
-#        b=gtk.Button(_("Snap"))
-#        self.tooltips.set_tip(b, _("Update the associated snapshot"))
-#        b.connect("clicked", self.update_snapshot)
-#        hbox.add(b)
 
         vbox.pack_start(hbox, expand=False)
+        vbox.pack_start(self.entry, expand=False)
+        vbox.show_all()
 
         # The widget can receive drops from annotations
         vbox.connect("drag_data_received", self.drag_received)
