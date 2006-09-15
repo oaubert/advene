@@ -17,7 +17,7 @@
 #
 import gtk
 
-class AdhocView:
+class AdhocView(object):
     """Implementation of the generic parts of AdhocViews.
 
     For details about the API of adhoc views, see gui.views.viewplugin.
