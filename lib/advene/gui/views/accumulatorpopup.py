@@ -43,7 +43,7 @@ class DummyLock:
 class AccumulatorPopup(AdhocView):
     """View displaying a limited number of popups.
     """
-    def __init__ (self, size=3, controller=None, autohide=False):
+    def __init__ (self, size=3, controller=None, autohide=False, vertical=False):
         self.view_name = _("PopupAccumulator")
 	self.view_id = 'popupaccumulator'
 	self.close_on_package_load = False
@@ -52,6 +52,7 @@ class AccumulatorPopup(AdhocView):
         self.controller=controller
         # Hide the window if there is no widget
         self.autohide = autohide
+        self.vertical=vertical
 
         self.new_color = gtk.gdk.color_parse ('tomato')
         self.old_color = gtk.Button().get_style().bg[0]        
@@ -97,7 +98,7 @@ class AccumulatorPopup(AdhocView):
         self.widgets.append( (widget, hidetime, f) )
         self.widgets.sort(lambda a,b: cmp(a[1],b[1]))
         self.lock.release()
-        self.hbox.pack_start(f, expand=False)
+        self.contentbox.pack_start(f, expand=False)
 
         f.show_all()
         self.show()
@@ -114,7 +115,7 @@ class AccumulatorPopup(AdhocView):
 
         According to the hbox size and the max number of popups.
         """
-        return self.hbox.get_allocation().width / self.size
+        return self.contentbox.get_allocation().width / self.size
     
     def undisplay(self, widget=None):
         # Find the associated frame
@@ -159,9 +160,13 @@ class AccumulatorPopup(AdhocView):
     
     def build_widget(self):
         mainbox=gtk.VBox()
-        
-        self.hbox = gtk.HBox()
-        mainbox.add(self.hbox)
+
+        if self.vertical:
+            self.contentbox = gtk.VBox()
+            mainbox.add(self.contentbox)
+        else:
+            self.contentbox = gtk.HBox()
+            mainbox.add(self.contentbox)
 
         if self.controller.gui:
             self.controller.gui.register_view (self)
