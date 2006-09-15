@@ -245,11 +245,19 @@ class TimeAdjustment:
 
 if __name__ == "__main__":
     # Unit test
+    import os
     import advene.core.imagecache
-    
+    from advene.model.package import Package
+
+    p=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
+    config.data.fix_paths(p)
+                      
+    #config.data.fix_paths()
     class DummyController:
-        def __init__(self):
-            self.imagecache=advene.core.imagecache.ImageCache()
+        def __init__(self, package):
+            self.package=package
+            self.package.imagecache=advene.core.imagecache.ImageCache()
+            self.cached_duration = 2 * 3600 * 1000
 
         def move_position (self, value, relative=True):
             print "Move position %d (relative: %s)" % (value, str(relative))
@@ -266,7 +274,8 @@ if __name__ == "__main__":
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())
     
-    con=DummyController()
+    p=Package ('dummy', source=None)
+    con=DummyController(p)
     ta=TimeAdjustment(value=6000, controller=con)
     window.add(ta.get_widget())
     window.show_all()
