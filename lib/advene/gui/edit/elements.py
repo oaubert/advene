@@ -120,7 +120,7 @@ class EditElementPopup (object):
         return False
     can_edit = staticmethod (can_edit)
 
-    def make_widget (self, editable=True):
+    def make_widget (self, editable=True, compact=False):
         """Create the editing widget (and return it)."""
         raise Exception ("This method should be defined in the subclasses.")
 
@@ -298,6 +298,29 @@ class EditElementPopup (object):
             self.controller.gui.init_window_size(self.window, 'editpopup')
         self.window.show_all ()
 
+    def compact(self, callback=None):
+        """Display the compact edit window.
+        """
+        self.key_cb[gtk.keysyms.Return] = self.validate_cb
+        self.key_cb[gtk.keysyms.Escape] = self.close_cb
+
+        if hasattr(self.element, 'isImported') and self.element.isImported():
+            self.editable=False
+        elif hasattr(self.element, 'schema') and self.element.schema.isImported():
+            self.editable=False
+
+        w=self.make_widget (editable=self.editable, compact=True)
+        self.vbox.add (w)
+        
+        def handle_destroy(*p):
+            if self.controller and self.controller.gui:
+                self.controller.gui.unregister_edit_popup(self)
+            return True
+
+        self.vbox.connect("destroy", handle_destroy)
+
+        return self.vbox
+
     def make_registered_form (self,
                               element=None,
                               fields=(),
@@ -326,22 +349,23 @@ class EditAnnotationPopup (EditElementPopup):
         self.controller.notify("AnnotationEditEnd", annotation=element)
         return True
 
-    def make_widget (self, editable=True):
+    def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
-        # Annotation data
-        f = self.make_registered_form (element=self.element,
-                                       fields=('id', 'uri', 'type',
-                                               'author', 'date'),
-                                       editable=editable,
-                                       editables=('author', 'date'),
-                                       labels={'id':     _('Id'),
-                                               'type':   _('Type'),
-                                               'uri':    _('URI'),
-                                               'author': _('Author'),
-                                               'date':   _('Date')}
-                                       )
-        vbox.pack_start (f.get_view (), expand=False)
+        if not compact:
+            # Annotation data
+            f = self.make_registered_form (element=self.element,
+                                           fields=('id', 'uri', 'type',
+                                                   'author', 'date'),
+                                           editable=editable,
+                                           editables=('author', 'date'),
+                                           labels={'id':     _('Id'),
+                                                   'type':   _('Type'),
+                                                   'uri':    _('URI'),
+                                                   'author': _('Author'),
+                                                   'date':   _('Date')}
+                                           )
+            vbox.pack_start (f.get_view (), expand=False)
 
         f = EditFragmentForm(element=self.element.fragment, controller=self.controller)
         self.register_form (f)
@@ -350,9 +374,9 @@ class EditAnnotationPopup (EditElementPopup):
         f = EditContentForm(self.element.content, controller=self.controller,
                             mimetypeeditable=False, annotation=self.element)
         f.set_editable(editable)
-        t = f.get_view()
+        t = f.get_view(compact=compact)
         self.register_form(f)
-        vbox.pack_start(self.framed(t, _("Content")), expand=True)
+        vbox.pack_start(t, expand=True)
 
         return vbox
 
@@ -365,7 +389,7 @@ class EditRelationPopup (EditElementPopup):
         self.controller.notify("RelationEditEnd", relation=element)
         return True
 
-    def make_widget (self, editable=True):
+    def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
         # Annotation data
@@ -428,7 +452,7 @@ class EditViewPopup (EditElementPopup):
         self.controller.notify("ViewEditEnd", view=element)
         return True
 
-    def make_widget (self, editable=True):
+    def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
         f = self.make_registered_form (element=self.element,
@@ -474,7 +498,7 @@ class EditQueryPopup (EditElementPopup):
         self.controller.notify("QueryEditEnd", query=element)
         return True
 
-    def make_widget (self, editable=True):
+    def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
         f = self.make_registered_form (element=self.element,
@@ -507,7 +531,7 @@ class EditPackagePopup (EditElementPopup):
         self.controller.notify("PackageEditEnd", package=element)
         return True
 
-    def make_widget (self, editable=False):
+    def make_widget (self, editable=False, compact=False):
         vbox=gtk.VBox()
         f = self.make_registered_form (element=self.element,
                                        fields=('uri', 'title',
@@ -554,7 +578,7 @@ class EditSchemaPopup (EditElementPopup):
         self.controller.notify("SchemaEditEnd", schema=element)
         return True
 
-    def make_widget (self, editable=True):
+    def make_widget (self, editable=True, compact=False):
         vbox=gtk.VBox()
 
         f = self.make_registered_form (element=self.element,
@@ -589,7 +613,7 @@ class EditAnnotationTypePopup (EditElementPopup):
         self.controller.notify("AnnotationTypeEditEnd", annotationtype=element)
         return True
 
-    def make_widget (self, editable=False):
+    def make_widget (self, editable=False, compact=False):
         vbox = gtk.VBox()
 
         f = self.make_registered_form (element=self.element,
@@ -633,7 +657,7 @@ class EditRelationTypePopup (EditElementPopup):
         self.controller.notify("RelationTypeEditEnd", relationtype=element)
         return True
 
-    def make_widget (self, editable=False):
+    def make_widget (self, editable=False, compact=False):
         vbox=gtk.VBox()
 
         f = self.make_registered_form (element=self.element,
@@ -682,7 +706,7 @@ class EditResourcePopup (EditElementPopup):
         self.controller.notify("ResourceEditEnd", resource=element)
         return True
 
-    def make_widget (self, editable=True):
+    def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
         # Resource data
@@ -726,7 +750,7 @@ class EditForm(object):
         """
         raise Exception ("This method should be implemented in subclasses.")
 
-    def get_view (self):
+    def get_view (self, compact=False):
         """Return the view (gtk Widget) for this form.
         """
         raise Exception ("This method should be implemented in subclasses.")
@@ -838,24 +862,25 @@ class EditContentForm(EditForm):
         self.contentform.update_element()
         return True
 
-    def get_view (self):
+    def get_view (self, compact=False):
         """Generate a view widget for editing content."""
         vbox = gtk.VBox()
 
-        hbox = gtk.HBox()
-        l=gtk.Label(_("MIME Type"))
-        hbox.pack_start(l, expand=False)
+        if not compact:
+            hbox = gtk.HBox()
+            l=gtk.Label(_("MIME Type"))
+            hbox.pack_start(l, expand=False)
 
-        self.mimetype=gtk.combo_box_entry_new_text()
-	if self.mimetypeeditable:
-	    for c in common_view_mimetypes:
-		self.mimetype.append_text(c)
+            self.mimetype=gtk.combo_box_entry_new_text()
+            if self.mimetypeeditable:
+                for c in common_view_mimetypes:
+                    self.mimetype.append_text(c)
 
-        self.mimetype.child.set_text(self.element.mimetype)
-        self.mimetype.child.set_editable(self.mimetypeeditable)
-        hbox.pack_start(self.mimetype)
+            self.mimetype.child.set_text(self.element.mimetype)
+            self.mimetype.child.set_editable(self.mimetypeeditable)
+            hbox.pack_start(self.mimetype)
 
-        vbox.pack_start(hbox, expand=False)
+            vbox.pack_start(hbox, expand=False)
 
         handler = config.data.get_content_handler(self.element.mimetype)
 	if handler is None:
@@ -868,7 +893,7 @@ class EditContentForm(EditForm):
 				     annotation=self.annotation)
 
         self.contentform.set_editable(self.editable)
-	self.content_handler_widget = self.contentform.get_view()
+	self.content_handler_widget = self.contentform.get_view(compact=compact)
         vbox.add(self.content_handler_widget)
 	self.content_handler_widget.grab_focus()
         return vbox
@@ -988,40 +1013,41 @@ class TextContentHandler (ContentHandler):
             self.fname=fname
         return True
 
-    def get_view (self):
+    def get_view (self, compact=False):
         """Generate a view widget for editing text attribute."""
         vbox=gtk.VBox()
 
-        tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)
+        if not compact:
+            tb=gtk.Toolbar()
+            tb.set_style(gtk.TOOLBAR_ICONS)
 
-        b=gtk.ToolButton()
-        b.set_stock_id(gtk.STOCK_OPEN)
-        b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
-        b.connect("clicked", self.content_open)
-        tb.insert(b, -1)
+            b=gtk.ToolButton()
+            b.set_stock_id(gtk.STOCK_OPEN)
+            b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
+            b.connect("clicked", self.content_open)
+            tb.insert(b, -1)
 
-        b=gtk.ToolButton()
-        b.set_stock_id(gtk.STOCK_SAVE)
-        b.set_tooltip(self.tooltips, _("Save to a file (C-s)"))
-        b.connect("clicked", self.content_save)
-        tb.insert(b, -1)
+            b=gtk.ToolButton()
+            b.set_stock_id(gtk.STOCK_SAVE)
+            b.set_tooltip(self.tooltips, _("Save to a file (C-s)"))
+            b.connect("clicked", self.content_save)
+            tb.insert(b, -1)
 
-        b=gtk.ToolButton()
-        b.set_stock_id(gtk.STOCK_REFRESH)
-        b.set_tooltip(self.tooltips, _("Reload the file (C-r)"))
-        b.connect("clicked", self.content_reload)
-        tb.insert(b, -1)
+            b=gtk.ToolButton()
+            b.set_stock_id(gtk.STOCK_REFRESH)
+            b.set_tooltip(self.tooltips, _("Reload the file (C-r)"))
+            b.connect("clicked", self.content_reload)
+            tb.insert(b, -1)
 
-        i=gtk.Image()
-        i.set_from_file(config.data.advenefile( ('pixmaps', 'browser.png') ))
-        b=gtk.ToolButton(icon_widget=i)
-        b.set_tooltip(self.tooltips, _("Insert a value from the browser (C-i)"))
-        b.connect("clicked", self.browser_open)
-        tb.insert(b, -1)
+            i=gtk.Image()
+            i.set_from_file(config.data.advenefile( ('pixmaps', 'browser.png') ))
+            b=gtk.ToolButton(icon_widget=i)
+            b.set_tooltip(self.tooltips, _("Insert a value from the browser (C-i)"))
+            b.connect("clicked", self.browser_open)
+            tb.insert(b, -1)
 
-        tb.show_all()
-        vbox.pack_start(tb, expand=False)
+            tb.show_all()
+            vbox.pack_start(tb, expand=False)
 
         textview = gtk.TextView ()
         textview.set_editable (self.editable)
@@ -1125,7 +1151,7 @@ class GenericContentHandler (ContentHandler):
             self.set_filename(fname)
         return True
 
-    def get_view (self):
+    def get_view (self, compact=False):
         """Generate a view widget for editing text attribute."""
         vbox=gtk.VBox()
 
@@ -1186,8 +1212,8 @@ class EditFragmentForm(EditForm):
         self.element.end=self.end.value
         return True
 
-    def get_view(self):
-        hbox=gtk.HBox()
+    def get_view(self, compact=False):
+        hbox=gtk.HButtonBox()
 
         self.begin=TimeAdjustment(value=self.element.begin,
                                   controller=self.controller,
@@ -1217,7 +1243,7 @@ class EditGenericForm(EditForm):
         self.entry=None
         self.view=None
 
-    def get_view(self):
+    def get_view(self, compact=False):
         hbox = gtk.HBox()
 
         l=gtk.Label(self.title)
@@ -1394,7 +1420,7 @@ class EditAttributesForm (EditForm):
 		icon=gtk.MESSAGE_ERROR)
         return True
 
-    def get_view (self):
+    def get_view (self, compact=False):
         """Generate a view widget for editing el attributes.
 
         Return the view widget.
@@ -1518,7 +1544,7 @@ class EditElementListForm(EditForm):
             model.remove(iter)
         return True
 
-    def get_view(self):
+    def get_view(self, compact=False):
         vbox=gtk.VBox()
         self.store=self.create_store()
 
