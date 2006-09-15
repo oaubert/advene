@@ -605,6 +605,17 @@ class Config(object):
     version_string = property(fget=get_version_string,
 			      doc="Version string")
 
+    def fix_paths(self, maindir):
+      # We override any modification that could have been made in
+      # .advenerc. Rationale: if the .advenerc was really correct, it
+      # would have set the correct package path in the first place.
+      print "Overriding 'resources', 'locale', 'advene' and 'web' config paths"
+      data.path['resources']=os.path.sep.join((maindir, 'share'))
+      data.path['locale']=os.path.sep.join( (maindir, 'locale') )
+      data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
+      data.path['advene']=maindir
+      #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
+
 data = Config ()
 data.read_preferences()
 # Config file (advene.ini) may override settings from preferences

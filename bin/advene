@@ -24,18 +24,6 @@ import StringIO
 # Magic stuff before the instanciation of Advene : we set the
 # sys.path and the various config.data.path
 
-def fix_paths(path):
-  # We override any modification that could have been made in
-  # .advenerc. Rationale: if the .advenerc was really correct, it
-  # would have set the correct package path in the first place.
-  print "Overriding 'resources', 'locale', 'advene' and 'web' config paths"
-  config.data.path['resources']=os.path.sep.join((maindir, 'share'))
-  config.data.path['locale']=os.path.sep.join( (maindir, 'locale') )
-  config.data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
-  config.data.path['advene']=maindir
-  #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
-
-
 # Try to find if we are in a development tree.
 (maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
 if subdir == 'bin' and  os.path.exists(os.path.join(maindir, "setup.py")):
@@ -45,7 +33,7 @@ if subdir == 'bin' and  os.path.exists(os.path.join(maindir, "setup.py")):
   sys.path.insert (0, libpath)
 
   import advene.core.config as config
-  fix_paths(maindir)
+  config.data.fix_paths(maindir)
 else:
   try:
     import advene.core.config as config
@@ -61,7 +49,7 @@ if not os.path.exists(config.data.path['resources']):
     # There is a 'share' directory at the same level as the executable
     # This can mean that we are in a pyinstaller version
     print "Seemingly running from a pyinstaller version in\n%s" % maindir
-    fix_paths(maindir)
+    config.data.fix_paths(maindir)
 
 if config.data.os == 'win32':
   import _winreg
