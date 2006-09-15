@@ -89,6 +89,7 @@ from advene.gui.views.interactivequery import InteractiveQuery
 from advene.gui.views.viewbook import ViewBook
 from advene.gui.views.html import HTMLView
 from advene.gui.views.scroller import ScrollerView
+from advene.gui.views.editaccumulator import EditAccumulator
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -1294,7 +1295,12 @@ class AdveneGUI (Connect):
                     at=pop.edit (modal=True)
             
         return schema
-        
+
+    def popup_edit_accumulator(self, *p):
+        a=EditAccumulator(controller=self.controller)
+        a.popup()
+        return True
+
     def on_stbv_combo_changed (self, combo=None):
         """Callback used to select the current stbv.
         """
@@ -1353,6 +1359,10 @@ class AdveneGUI (Connect):
             elif event.keyval == gtk.keysyms.s:
                 # Save the current annotation file
                 self.on_save1_activate (win, None)
+                return True
+            elif event.keyval == gtk.keysyms.a:
+                # EditAccumulator popup
+                self.popup_edit_accumulator()
                 return True
 
         return False
