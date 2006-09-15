@@ -170,6 +170,7 @@ class Config(object):
             # Various sizes of windows.
             'windowsize': { 'main': (800, 600),
                             'editpopup': (640,480),
+                            'editaccumulator': (200, 800),
                             'evaluator': (800, 600),
                             'relationview': (640, 480),
                             'sequenceview': (640, 480),
