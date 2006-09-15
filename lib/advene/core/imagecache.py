@@ -57,9 +57,9 @@ class ImageCache(dict):
         dict.__init__ (self)
 
         # The content of the not_yet_available_file file
-	f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
-        s=TypedString(f.read(10000))
-	f.close()
+        f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
+        s=TypedString(f.read())
+        f.close()
         s.contenttype='image/png'
         self.not_yet_available_image = s
 
@@ -148,8 +148,8 @@ class ImageCache(dict):
         @return: True if the given key is initialized.
         @rtype: boolean
         """
-	if key is None:
-	    return False
+        if key is None:
+            return False
         key = self.approximate(long(key))
         if dict.__getitem__(self, key) == self.not_yet_available_image:
             return False
@@ -164,8 +164,8 @@ class ImageCache(dict):
 
         @param name: the name
         @type name: string
-	@return: the created directory
-	@rtype: string
+        @return: the created directory
+        @rtype: string
         """
         directory=config.data.path['imagecache']
         if not os.path.isdir (directory):
@@ -204,21 +204,21 @@ class ImageCache(dict):
             return
         else:
             for name in os.listdir (d):
-		(n, ext) = os.path.splitext(name)
-		# We must do some checks, in case there are non-well
-		# formatted filenames in the directory
-		if ext.lower() == '.png':
-		    try:
-			n=n.lstrip('0')
-			if n == '':
-			    n=0
-			i=long(n)
-		    except ValueError:
-			print "Invalid filename in imagecache: " + name
-			continue
-		    f = open(os.path.join (d, name), 'rb')
-		    dict.__setitem__(self, i, f.read ())
-		    f.close ()
+                (n, ext) = os.path.splitext(name)
+                # We must do some checks, in case there are non-well
+                # formatted filenames in the directory
+                if ext.lower() == '.png':
+                    try:
+                        n=n.lstrip('0')
+                        if n == '':
+                            n=0
+                        i=long(n)
+                    except ValueError:
+                        print "Invalid filename in imagecache: " + name
+                        continue
+                    f = open(os.path.join (d, name), 'rb')
+                    dict.__setitem__(self, i, f.read ())
+                    f.close ()
 
     def ids (self):
         return [ str(k) for k in self.keys () ]
