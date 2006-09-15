@@ -108,7 +108,7 @@ class TimeAdjustment:
         self.entry=gtk.Entry()
         # Default width of the entry field
         #self.entry.set_width_chars(len(advene.util.helper.format_time(0.0)))
-        self.entry.connect("changed", self.convert_entered_value)
+        self.entry.connect("activate", self.convert_entered_value)
         self.entry.set_editable(self.editable)
 
         vbox.pack_start(hbox, expand=False)
@@ -170,10 +170,10 @@ class TimeAdjustment:
         pass
         
     # Static values used in numericTime
-    _hour = r'(?P<hour>[012]?\d)'
-    _minute = r'(?P<minute>[0-6]\d)'
-    _second = r'(?P<second>[0-6]\d(?:\.\d+)?)'
-    _time = _hour + r':' + _minute + r'(?::' + _second + r')?'
+    _hour = r'(?P<hour>\d+)'
+    _minute = r'(?P<minute>\d+)'
+    _second = r'(?P<second>\d+(\.\d+))'
+    _time = _hour + r':' + _minute + r'(:' + _second + r')?'
     _timeRE = re.compile(_time, re.I)
 
     def numericTime(self, s):
@@ -191,15 +191,14 @@ class TimeAdjustment:
         dt = None
         match = TimeAdjustment._timeRE.search(s)
         if match is not None:
-            hour = match.group('hour')
-            minute = match.group('minute')
+            hh = int(match.group('hour'))
+            mm = int(match.group('minute'))
             second = match.group('second')
-            hh = int(hour); mm = int(minute)
             if second:
-                ss = int(float(second)*1000)
+                ss = float(second)
             else:
-                ss = 0
-            dt=ss + (60 * 1000 * mm) + (3600 * 1000 * hh)
+                ss = 0.0
+            dt=int(1000 * (ss + (60 * mm) + (3600 * hh)))
         return dt
 
     def convert_entered_value(self, dummy):
@@ -222,6 +221,7 @@ class TimeAdjustment:
 
     def update_display(self):
         """Updates the value displayed in the entry according to the current value."""
+        print "Value ", self.value
         self.entry.set_text(advene.util.helper.format_time(self.value))
         # Update the image
         self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], 
