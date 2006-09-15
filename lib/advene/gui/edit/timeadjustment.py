@@ -38,10 +38,10 @@ class TimeAdjustment:
         self.value=value
         self.controller=controller
         self.sync_video=videosync
-        # Small increment: 1/10 sec
-        self.small_increment=100
-        # Large increment: 1 sec
-        self.large_increment=1000
+        # Small increment
+        self.small_increment=config.data.preferences['scroll-increment']
+        # Large increment
+        self.large_increment=10 * config.data.preferences['scroll-increment']
         self.image=None
         self.editable=editable
         self.compact=compact
@@ -94,7 +94,7 @@ class TimeAdjustment:
         b=gtk.Button()
         b.connect("button-press-event", handle_image_click)
         b.set_image(self.image)
-        self.tooltips.set_tip(b, _("Click to play, control+click to set to current time"))
+        self.tooltips.set_tip(b, _("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value"))
         hbox.pack_start(b, expand=False)
 
         vb=gtk.VBox()
