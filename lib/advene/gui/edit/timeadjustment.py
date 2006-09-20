@@ -221,7 +221,6 @@ class TimeAdjustment:
 
     def update_display(self):
         """Updates the value displayed in the entry according to the current value."""
-        print "Value ", self.value
         self.entry.set_text(advene.util.helper.format_time(self.value))
         # Update the image
         self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], 
