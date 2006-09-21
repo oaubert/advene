@@ -159,6 +159,7 @@ class Player:
 	return position
 	
     def dvd_uri(self, title=None, chapter=None):
+        # FIXME: todo
         return "dvd@%s:%s" % (str(title),
                               str(chapter))
 
@@ -181,6 +182,8 @@ class Player:
     
     def start(self, position):
         self.player.set_state(gst.STATE_PLAYING)
+        if position != 0:
+            self.set_media_position(position)
 
     def pause(self, position): 
 	if self.status == self.PlayingStatus:
