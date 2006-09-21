@@ -259,13 +259,17 @@ class Window:
         m=sre.match('import\s+(\S+)', expr)
         if m is not None:
             modname=m.group(1)
-            try:
-                m=__import__(modname)
-                self.globals_[modname]=m
-            except ImportError:
-                print "Cannot import module %s" % modname
             self.clear_output()
-            self.log("Successfully imported ", modname)
+            try:
+                mod=__import__(modname)
+                self.globals_[modname]=mod
+                self.log("Successfully imported %s" % modname)
+            except ImportError, e:
+                self.log("Cannot import module %s:" % modname)
+                f=StringIO.StringIO()
+                traceback.print_exc(file=f)
+                self.log(f.getvalue())
+                f.close()
             return True
 
         # Handle variable assignment only for restricted forms of
@@ -294,7 +298,7 @@ class Window:
                             self.log('\n\n[Unable to store data in %s[%s]]'
                                      % (obj, attr))
                             return True
-                        print "%s, %s" % (o, attr)
+                        #print "%s, %s" % (o, attr)
                         o[attr]=res
                         self.log('\n\n[Value stored in %s]' % symbol)
                         return True
