@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -20,30 +20,28 @@
 
 import advene.core.config as config
 
-# Alias the vlc module so that we can happily copy/paste from
-# vlcorbit.py
-import vlc as VLC
+import vlc
 
 class Snapshot:
     def __init__(self, d=None):
         if d is not None:
-	    for k in ('width', 'height', 'data', 'type', 'date'):
-		try:
-		    setattr(self, k, d[k])
-		except KeyError:
-		    setattr(self, k, None)
+            for k in ('width', 'height', 'data', 'type', 'date'):
+                try:
+                    setattr(self, k, d[k])
+                except KeyError:
+                    setattr(self, k, None)
 
 class Player(object):
     """Wrapper class for a native vlc.MediaControl object.
 
     It provides some helper methods, and forwards other requests to
-    the VLC.MediaControl object.
+    the vlc.MediaControl object.
 
-    @ivar mc: the VLC.MediaControl player
-    @type mc: VLC.MediaControl
+    @ivar mc: the vlc.MediaControl player
+    @type mc: vlc.MediaControl
 
     @ivar relative_position: a predefined position (0-relative)
-    @type relative_position: VLC.Position
+    @type relative_position: vlc.Position
 
     Status attributes :
 
@@ -52,32 +50,32 @@ class Player(object):
     @ivar stream_duration: the current stream duration
     @type stream_duration: long
     @ivar status: the player's current status
-    @type status: VLC.Status
+    @type status: vlc.Status
     """
     # Class attributes
-    AbsolutePosition=VLC.AbsolutePosition
-    RelativePosition=VLC.RelativePosition
-    ModuloPosition=VLC.ModuloPosition
+    AbsolutePosition=vlc.AbsolutePosition
+    RelativePosition=vlc.RelativePosition
+    ModuloPosition=vlc.ModuloPosition
 
-    ByteCount=VLC.ByteCount
-    SampleCount=VLC.SampleCount
-    MediaTime=VLC.MediaTime
+    ByteCount=vlc.ByteCount
+    SampleCount=vlc.SampleCount
+    MediaTime=vlc.MediaTime
 
     # Status
-    PlayingStatus=VLC.PlayingStatus
-    PauseStatus=VLC.PauseStatus
-    ForwardStatus=VLC.ForwardStatus
-    BackwardStatus=VLC.BackwardStatus
-    InitStatus=VLC.InitStatus
-    EndStatus=VLC.EndStatus
-    UndefinedStatus=VLC.UndefinedStatus
-    
+    PlayingStatus=vlc.PlayingStatus
+    PauseStatus=vlc.PauseStatus
+    ForwardStatus=vlc.ForwardStatus
+    BackwardStatus=vlc.BackwardStatus
+    InitStatus=vlc.InitStatus
+    EndStatus=vlc.EndStatus
+    UndefinedStatus=vlc.UndefinedStatus
+
     # Exceptions
-    PositionKeyNotSupported=VLC.PositionKeyNotSupported
-    PositionOriginNotSupported=VLC.PositionOriginNotSupported
-    InvalidPosition=VLC.InvalidPosition
-    PlaylistException=VLC.PlaylistException
-    InternalException=VLC.InternalException
+    PositionKeyNotSupported=vlc.PositionKeyNotSupported
+    PositionOriginNotSupported=vlc.PositionOriginNotSupported
+    InvalidPosition=vlc.InvalidPosition
+    PlaylistException=vlc.PlaylistException
+    InternalException=vlc.InternalException
 
     def __getattribute__ (self, name):
         """
@@ -108,27 +106,27 @@ class Player(object):
 
         self.args=config.data.get_player_args()
 
-        self.mc = VLC.MediaControl( self.args )
+        self.mc = vlc.MediaControl( self.args )
 
         # 0 relative position
-        pos = VLC.Position ()
-        pos.origin = VLC.RelativePosition
-        pos.key = VLC.MediaTime
+        pos = vlc.Position ()
+        pos.origin = vlc.RelativePosition
+        pos.key = vlc.MediaTime
         pos.value = 0
         self.relative_position = pos
 
-        o=VLC.Object(0)
+        o=vlc.Object(0)
         self.dvd_device = o.config_get("dvd")
 
         o.config_set("repeat", True)
         o.config_set("loop", True)
 
         # For debug purposes, it can be interesting to directly
-        # deal with the VLC.Object
+        # deal with the vlc.Object
         self.o=o
 
         # Current position value (updated by self.position_update ())
-        self.status = VLC.UndefinedStatus
+        self.status = vlc.UndefinedStatus
         self.current_position_value = 0
         self.stream_duration = 0
 
@@ -169,50 +167,50 @@ class Player(object):
         @param status: the new status
         @type status: string
         @param position: the position
-        @type position: VLC.Position
+        @type position: vlc.Position
         """
         if status == "start":
             if position is None:
-                position = VLC.Position ()
-                position.origin = VLC.AbsolutePosition
-                position.key = VLC.MediaTime
+                position = vlc.Position ()
+                position.origin = vlc.AbsolutePosition
+                position.key = vlc.MediaTime
                 position.value = 0
-            elif not isinstance(position, VLC.Position):
+            elif not isinstance(position, vlc.Position):
                 p=long(position)
-                position = VLC.Position ()
-                position.origin = VLC.AbsolutePosition
-                position.key = VLC.MediaTime
+                position = vlc.Position ()
+                position.origin = vlc.AbsolutePosition
+                position.key = vlc.MediaTime
                 position.value = p
             self.check_player ()
             self.mc.start (position)
         else:
             if position is None:
                 position = self.relative_position
-            elif not isinstance(position, VLC.Position):
+            elif not isinstance(position, vlc.Position):
                 p=long(position)
-                position = VLC.Position ()
-                position.origin = VLC.AbsolutePosition
-                position.key = VLC.MediaTime
+                position = vlc.Position ()
+                position.origin = vlc.AbsolutePosition
+                position.key = vlc.MediaTime
                 position.value = p
             if status == "pause":
                 self.check_player ()
-                if self.status == VLC.PlayingStatus:
+                if self.status == vlc.PlayingStatus:
                     self.mc.pause (position)
-                elif self.status == VLC.PauseStatus:
-                    self.mc.resume (position)                   
+                elif self.status == vlc.PauseStatus:
+                    self.mc.resume (position)
             elif status == "resume":
                 self.check_player()
-                if self.status == VLC.PauseStatus:
+                if self.status == vlc.PauseStatus:
                     self.mc.resume (position)
                 else:
                     self.mc.start (position)
             elif status == "stop":
                 self.check_player()
-                if not self.status in (VLC.EndStatus, VLC.UndefinedStatus):
+                if not self.status in (vlc.EndStatus, vlc.UndefinedStatus):
                     self.mc.stop (position)
             elif status == "set":
                 self.check_player()
-                if self.status in (VLC.EndStatus, VLC.UndefinedStatus):
+                if self.status in (vlc.EndStatus, vlc.UndefinedStatus):
                     self.mc.start (position)
                 else:
                     self.mc.set_media_position (position)
@@ -227,7 +225,7 @@ class Player(object):
         """Updates the current status information."""
         if self.mc is not None:
             try:
-                s = self.mc.get_stream_information (VLC.MediaTime)
+                s = self.mc.get_stream_information (vlc.MediaTime)
             except:
                 raise self.InternalException()
             self.status = s['status']
@@ -242,7 +240,7 @@ class Player(object):
                 self.stream_duration = 0
                 self.current_position_value = 0
         else:
-            self.status = VLC.UndefinedStatus
+            self.status = vlc.UndefinedStatus
             self.stream_duration = 0
             self.current_position_value = 0
             self.url=''
@@ -257,24 +255,24 @@ class Player(object):
 
     def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
-        
+
         Returns a Position object initialized to the right value, by
         default using a MediaTime in AbsolutePosition.
 
         @param value: the value
         @type value: int
         @param key: the Position key
-        @type key: VLC.Key
+        @type key: vlc.Key
         @param origin: the Position origin
-        @type origin: VLC.Origin
+        @type origin: vlc.Origin
         @return: a position
-        @rtype: VLC.Position
+        @rtype: vlc.Position
         """
         if key is None:
-            key=VLC.MediaTime
+            key=vlc.MediaTime
         if origin is None:
-            origin=VLC.AbsolutePosition
-        p = VLC.Position ()
+            origin=vlc.AbsolutePosition
+        p = vlc.Position ()
         p.origin = origin
         p.key = key
         p.value=long(value)
@@ -284,16 +282,16 @@ class Player(object):
         return True
 
     def snapshot(self, position):
-	# Do not update the snapshot if we are not playing
-	if self.status != self.PlayingStatus:
-	    return None	
-	# FIXME: dirty hack to workaround a bug in VLC snapshot
-	# functionality (unstability of the GUI when taking a snapshot
-	# < 100ms)
-	if (self.current_position_value <= 100 and
-	    (config.data.os == 'win32' or config.data.os == 'darwin')):     
-	    print "Snapshots <=100ms dropped"
-	    return None
+        # Do not update the snapshot if we are not playing
+        if self.status != self.PlayingStatus:
+            return None
+        # FIXME: dirty hack to workaround a bug in VLC snapshot
+        # functionality (unstability of the GUI when taking a snapshot
+        # < 100ms)
+        if (self.current_position_value <= 100 and
+            (config.data.os == 'win32' or config.data.os == 'darwin')):
+            print "Snapshots <=100ms dropped"
+            return None
         d=self.mc.snapshot(position)
         return Snapshot(d)
 
@@ -301,8 +299,8 @@ class Player(object):
         try:
             self.mc.set_visual(xid)
         except AttributeError:
-            # Old vlc API. Use the old way            
-            o=VLC.Object(0)
+            # Old vlc API. Use the old way
+            o=vlc.Object(0)
             o.set('drawable', xid)
         return
-    
+
