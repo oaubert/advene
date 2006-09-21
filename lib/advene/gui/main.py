@@ -1400,7 +1400,7 @@ class AdveneGUI (Connect):
         # Close all edit popups for this element
         for e in self.edit_popups:
             try:
-                if p == e.element.rootPackage:
+                if p == e.element.rootPackage and e.window:
                     e.window.destroy()
             except KeyError:
                 pass
