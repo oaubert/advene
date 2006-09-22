@@ -86,10 +86,14 @@ class AccumulatorPopup(AdhocView):
 
         # Build a titled frame around the widget
         f=gtk.Frame()
-        b=gtk.Button(title)
-        b.connect("clicked", self.undisplay_cb, widget)
-        self.set_color(b, self.new_color)
-        f.set_label_widget(b)
+        if isinstance(title, basestring):
+            b=gtk.Button(title)
+            b.connect("clicked", self.undisplay_cb, widget)
+            self.set_color(b, self.new_color)
+            f.set_label_widget(b)
+        else:
+            # Hopefully it is a gtk widget
+            f.set_label_widget(title)
         f.add(widget)
 
         self.lock.acquire()
