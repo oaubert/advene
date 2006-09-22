@@ -860,6 +860,13 @@ class TimeLine(AdhocView):
 
         b.connect("enter", self.rel_activate)
         b.connect("leave", self.rel_deactivate)
+        
+        def focus_in(b, event):
+            if self.options['autoscroll']:
+                self.scroll_to_annotation(b.annotation)
+            return False
+
+        b.connect("focus_in_event", focus_in)
 
         b.set_size_request(u2p(annotation.fragment.duration),
                            self.button_height)
