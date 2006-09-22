@@ -44,10 +44,27 @@ class EditAccumulator(AccumulatorPopup):
             # The edit popup is already open
             return True
         w=e.compact()
+
+        # Build the title widget
+        hbox=gtk.HBox()
+        b=gtk.Button(stock=gtk.STOCK_CANCEL)
+        b.connect("clicked", self.undisplay_cb, w)
+        hbox.pack_start(b, expand=False)
+
+        def handle_ok(b, w):
+            e.apply_cb()
+            self.undisplay_cb(b, w)
+            return True
+
+        b=gtk.Button(stock=gtk.STOCK_OK)
+        b.connect("clicked", handle_ok, w)
+        hbox.pack_start(b, expand=False)
+
         b=gtk.Button(stock=gtk.STOCK_APPLY)
         b.connect("clicked", lambda x: e.apply_cb())
-        w.pack_start(b, expand=False)
-        self.display(w, title=self.controller.get_title(element))
+        hbox.pack_start(b, expand=False)
+        
+        self.display(w, title=hbox)
 
     def update_position(self, pos):
         return True
