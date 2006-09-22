@@ -2016,7 +2016,7 @@ Available views: timeline, tree, browser, transcribe"""))
     def on_help1_activate (self, button=None, data=None):
         helpfile=os.path.join( config.data.path['web'], 'user.html' )
         if os.access(helpfile, os.R_OK):
-            self.controller.open_url (helpfile)
+            self.controller.open_url ('file:///' + helpfile)
         else:
             self.log(_("Unable to find the help file at %s") % helpfile)
         return True
