@@ -67,9 +67,9 @@ def get_edit_popup (el, controller=None, editable=True):
     """Return the right edit popup for the given element."""
     if controller and controller.gui:
 	for p in controller.gui.edit_popups:
-	    if p.element == el:
-		if p.window:
-		    return p
+	    if p.element == el and p.window:
+                # The edit popup is already open.
+                return p
     for c in _edit_popup_list:
         if c.can_edit (el):
             return c(el, controller, editable)
@@ -311,6 +311,7 @@ class EditElementPopup (object):
 
         w=self.make_widget (editable=self.editable, compact=True)
         self.vbox.add (w)
+        self.window = self.vbox
         
         def handle_destroy(*p):
             if self.controller and self.controller.gui:
