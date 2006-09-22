@@ -789,7 +789,7 @@ class TimeLine(AdhocView):
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)	    
             return True
-        elif event.keyval == gtk.keysyms.q:
+        elif event.keyval == gtk.keysyms.Return:
             # Quick edit
             self.quick_edit(annotation)
             return True
