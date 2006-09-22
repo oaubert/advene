@@ -64,7 +64,16 @@ class TimeAdjustment:
             b=gtk.Button()
             i=gtk.Image()
             i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-            b.set_image(i)
+            # FIXME: to re-enable 
+            # The proper way is to do
+            #b.set_image(i)
+            # but it works only on linux, gtk 2.10
+            # and is broken on windows and mac
+            al=gtk.Alignment()
+            al.set_padding(0, 0, 0, 0)
+            al.add(i)
+            b.add(al)
+
             b.connect("clicked", self.update_value_cb, incr_value)
             if incr_value < 0:
                 tip=_("Decrement value by %.2f s") % (incr_value / 1000.0)
@@ -93,7 +102,11 @@ class TimeAdjustment:
 
         b=gtk.Button()
         b.connect("button-press-event", handle_image_click)
-        b.set_image(self.image)
+        #b.set_image(self.image)
+        al=gtk.Alignment()
+        al.set_padding(0, 0, 0, 0)
+        al.add(self.image)
+        b.add(al)
         self.tooltips.set_tip(b, _("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value"))
         hbox.pack_start(b, expand=False)
 
