@@ -1,6 +1,17 @@
-* autocompletion of words in transcribe widget
+* make player modules into plugins, allow to select
 
-* EditAccumulator: component holding reduced edition windows for annotations
+* editaccumulator: "Apply", "Close", "Set end time to current time and
+  close" buttons should be in the frame title ? And/or shortcuts?
+
+* add a "color" metainformation to annotation types
+
+* DND in timeline: change displayed bitmap according to action
+
+* bug: begin event is generated when setting position inside an annotation.
+
+* cf r16483: subpicture_t now has a b_pausable attribute. When set to VLC_TRUE (default value is VLC_FALSE), this will keep displaying the subpicture_t when the parent input is paused. This means that subtitles should now be paused when clicking on pause. (refs #29)
+
+* autocompletion of words in transcribe widget
 
 * Use screen:// as input stream. Allow to parameterize (source display...)
 
@@ -1240,4 +1251,15 @@ reimplement a native widget for annotations or use DiaCanvas -> Re-hacked throug
 * fix bug in snapshot when vout == x11?
 
 * transcribe: offset on marks must be followed by goto
+
+* gui.edit.properties : use Tabs
+
+* timeadjustment: improve the text entry behaviour
+
+* timeline: Pb scrolling continuous with zoom = 100% and position around the end.
+
+* timeadjustment: click on image -> play, coontrol  + clic -> set  
+current time,  timestamp: use spinbutton
+
+* EditAccumulator: component holding reduced edition windows for annotations
 
