@@ -40,7 +40,13 @@ class EditAccumulator(AccumulatorPopup):
         
     def edit(self, element):
         e=get_edit_popup(element, self.controller)
+        if e.window:
+            # The edit popup is already open
+            return True
         w=e.compact()
+        b=gtk.Button(stock=gtk.STOCK_APPLY)
+        b.connect("clicked", lambda x: e.apply_cb())
+        w.pack_start(b, expand=False)
         self.display(w, title=self.controller.get_title(element))
 
     def update_position(self, pos):
