@@ -53,6 +53,7 @@ import time
 import sre
 import os
 import optparse
+import urllib
 
 import gettext
 gettext.install('advene', unicode=True)
@@ -152,6 +153,32 @@ class GenericImporter(object):
     def update_statistics(self, elementtype):
         self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
 
+    def create_annotation_type (self, schema, id_, author=None, date=None, title=None, 
+                                representation=None, description=None, mimetype=None):
+        at=schema.createAnnotationType(ident=id_)
+        at.author=author or schema.author
+        at.date=date or self.timestamp
+        at.title=title or at.id.title()
+        at.mimetype=mimetype or 'text/plain'
+        if description:
+            at.setMetaData(config.data.namespace, "description", description)
+        if representation:
+            at.setMetaData(config.data.namespace, "representation", representation)
+        schema.annotationTypes.append(at)
+        self.update_statistics('annotation-type')
+        return at
+
+    def create_schema (self, id_, author=None, date=None, title=None, description=None):
+        schema=self.package.createSchema(ident=id_)
+        schema.author=author or self.author
+        schema.date=date or self.timestamp
+        schema.title=title or "Generated schema"
+        if description:
+            schema.setMetaData(config.data.namespace, "description", description)
+        self.package.schemas.append(schema)
+        self.update_statistics('schema')
+        return schema
+
     def create_annotation (self, type_=None, begin=None, end=None,
                            data=None, ident=None, author=None,
                            timestamp=None, title=None):
@@ -203,20 +230,23 @@ class GenericImporter(object):
         else:
             p=self.package
 
-        s=p.createSchema(ident=schemaid)
-        s.author=self.author
-        s.date=self.timestamp
-        s.title=s.id
-        p.schemas.append(s)
-        self.update_statistics('schema')
+        at=None
+        if schemaid:
+            s=p.createSchema(ident=schemaid)
+            s.author=self.author
+            s.date=self.timestamp
+            s.title=s.id
+            p.schemas.append(s)
+            self.update_statistics('schema')
 
-        at=s.createAnnotationType(ident=annotationtypeid)
-        at.author=self.author
-        at.date=self.timestamp
-        at.title=at.id
-        at.mimetype='text/plain'
-        s.annotationTypes.append(at)
-        self.update_statistics('annotation-type')
+            if annotationtypeid:
+                at=s.createAnnotationType(ident=annotationtypeid)
+                at.author=self.author
+                at.date=self.timestamp
+                at.title=at.id
+                at.mimetype='text/plain'
+                s.annotationTypes.append(at)
+                self.update_statistics('annotation-type')
 
         return p, at
 
@@ -554,7 +584,7 @@ class ElanImporter(GenericImporter):
                 tid=valid_id_re.sub('', tid)
 
                 if not self.atypes.has_key(tid):
-                    self.create_annotation_type(self.schema, tid)
+                    self.atypes[tid]=self.create_annotation_type(self.schema, tid)
 
                 d['type']=self.atypes[tid]
                 #d['type']=self.atypes[tier.TIER_ID.replace(' ','_')]
@@ -628,16 +658,6 @@ class ElanImporter(GenericImporter):
             self.package.relations.append(r)
             self.update_statistics('relation')
 
-    def create_annotation_type (self, schema, id_):
-        at=schema.createAnnotationType(ident=id_)
-        #at.author=schema.author
-        at.date=schema.date
-        at.title=at.id
-        at.mimetype='text/plain'
-        schema.annotationTypes.append(at)
-        self.update_statistics('annotation-type')
-        self.atypes[at.id]=at
-
     def fix_forward_references(self):
         for (an_id, rel_uri) in self.forward_references:
             an_uri = '#'.join( (self.package.uri, an_id) )
@@ -654,15 +674,12 @@ class ElanImporter(GenericImporter):
             self.package=Package(uri='new_pkg', source=None)
 
         p=self.package
-        schema=p.createSchema(ident='elan')
-        schema.author=config.data.userid
+
+        self.schema=self.create_schema(id_='elan', title="ELAN converted schema")
         try:
-            schema.date=elan.DATE
+            self.schema.date=elan.DATE
         except AttributeError:
-            schema.date = self.timestamp
-        schema.title="ELAN converted schema"
-        p.schemas.append(schema)
-        self.schema = schema
+            self.schema.date = self.timestamp
 
         # self.anchors init
         if elan.HEADER[0].TIME_UNITS != 'milliseconds':
@@ -790,7 +807,7 @@ class PraatImporter(GenericImporter):
                 ws, current_type=m.group(1, 2)
                 type_align=len(ws)
                 if not self.atypes.has_key(current_type):
-                    self.create_annotation_type(self.schema, current_type)
+                    self.atypes[current_type]=self.create_annotation_type(self.schema, current_type)
                 continue
             m=boundary_re.match(l)
             if m:
@@ -822,16 +839,6 @@ class PraatImporter(GenericImporter):
                     'content': text,
                     }
 
-    def create_annotation_type (self, schema, id_):
-        at=schema.createAnnotationType(ident=id_)
-        #at.author=schema.author
-        at.date=schema.date
-        at.title=at.id
-        at.mimetype='text/plain'
-        schema.annotationTypes.append(at)
-        self.update_statistics('annotation-type')
-        self.atypes[id_]=at
-
     def process_file(self, filename):
         f=open(filename, 'r')
 
@@ -839,12 +846,8 @@ class PraatImporter(GenericImporter):
             self.package=Package(uri='new_pkg', source=None)
 
         p=self.package
-        schema=p.createSchema(ident='praat')
-        schema.author=config.data.userid
-        schema.date=self.timestamp
-        schema.title="PRAAT converted schema"
-        p.schemas.append(schema)
-        self.schema = schema
+        self.schema=self.create_schema('praat', 
+                                       title="PRAAT converted schema")
         self.convert(self.iterator(f))
         return self.package
 
@@ -982,7 +985,7 @@ class CmmlImporter(GenericImporter):
             try:
                 for meta in clip.meta:
                     if not self.atypes.has_key(meta.name):
-                        self.create_annotation_type(self.schema, meta.name)
+                        self.atypes[meta.name]=self.create_annotation_type(self.schema, meta.name)
                     d={
                         'type': self.atypes[meta.name],
                         'begin': begin,
@@ -996,16 +999,6 @@ class CmmlImporter(GenericImporter):
             except AttributeError:
                 pass
 
-    def create_annotation_type (self, schema, id_):
-        at=schema.createAnnotationType(ident=id_)
-        #at.author=schema.author
-        at.date=schema.date
-        at.title=at.id
-        at.mimetype='text/plain'
-        schema.annotationTypes.append(at)
-        self.update_statistics('annotation-type')
-        self.atypes[id_]=at
-
     def process_file(self, filename):
         cm=handyxml.xml(filename)
 
@@ -1017,16 +1010,11 @@ class CmmlImporter(GenericImporter):
             self.package=Package(uri='new_pkg', source=None)
 
         p=self.package
-        schema=p.createSchema(ident='cmml')
-        schema.author=config.data.userid
-        schema.date=self.timestamp
-        schema.title="CMML converted schema"
-        p.schemas.append(schema)
-        self.schema = schema
+        self.schema=self.create_schema('cmml', title="CMML converted schema")
 
         # Create the 3 default types : link, image, description
         for n in ('link', 'image', 'description'):
-            self.create_annotation_type(self.schema, n)
+            self.atypes[n]=self.create_annotation_type(self.schema, n)
         self.atypes['link'].mimetype = 'application/x-advene-structured'
 
         # Handle heading information
@@ -1070,6 +1058,94 @@ class CmmlImporter(GenericImporter):
 
 register(CmmlImporter)
 
+
+class IRIImporter(GenericImporter):
+    """IRI importer.
+    """
+    name = _("IRI importer")
+
+    def __init__(self, **kw):
+        super(IRIImporter, self).__init__(**kw)
+        self.atypes={}
+
+    def can_handle(fname):
+        return (fname.lower().endswith('.iri') or fname.lower().endswith('.xml'))
+    can_handle=staticmethod(can_handle)
+
+    def iterator(self, iri):
+        schema = None
+        for ensemble in iri.body[0].ensembles[0].ensemble:
+            sid=ensemble.id
+            print "Ensemble", sid
+            schema=self.create_schema(sid,
+                                      author=ensemble.author or self.author,
+                                      date=ensemble.date,
+                                      title=ensemble.title,
+                                      description=ensemble.abstract)
+
+            for decoupage in ensemble.decoupage:
+                tid = decoupage.id
+                print "  Decoupage ", tid
+                # Create the type
+                if not self.atypes.has_key(tid):
+                    at=self.create_annotation_type(schema, tid,
+                                                   mimetype='application/x-advene-structured',
+                                                   author=decoupage.author or self.author,
+                                                   title= decoupage.title,
+                                                   date = decoupage.date,
+                                                   description=decoupage.abstract,
+                                                   representation="here/content/parsed/title")
+                    at.setMetaData(config.data.namespace, "color", decoupage.color)
+                    self.atypes[tid]=at
+                else:
+                    at=self.atypes[tid]
+
+                for el in decoupage.elements[0].element:
+                    d={'id': el.id,
+                       'type': at,
+                       'begin': el.begin,
+                       'duration': el.dur,
+                       'author': el.author or self.author,
+                       'date': el.date,
+                       'content': "title=%s\nabstract=%s\nsrc=%s" % (
+                            el.title.encode('utf-8').replace('\n', '\\n'),
+                            el.abstract.encode('utf-8').replace('\n', '\\n'),
+                            el.src.encode('utf-8').replace('\n', '\\n'),
+                                )
+                       }
+                    yield d
+
+    def process_file(self, filename):
+        iri=handyxml.xml(filename)
+
+        p, at=self.init_package(filename=filename,
+                                schemaid=None,
+                                annotationtypeid=None)
+        if self.package is None:
+            self.package=p
+        self.defaulttype=at
+
+        # Get the video file.
+        med=[ i for i in iri.body[0].medias[0].media  if i.id == 'video' ]
+        if med:
+            # Got a video file reference
+            self.package.setMetaData (config.data.namespace, "mediafile", med[0].video[0].src)
+
+        # Metadata extraction
+        meta=dict([ (m.name, m.content) for m in iri.head[0].meta ])
+        try:
+            self.package.title = meta['title']
+        except KeyError:
+            pass
+        try:
+            self.package.author = meta['contributor'] or self.author
+        except KeyError:
+            pass
+            
+        self.convert(self.iterator(iri))
+        return self.package
+register(IRIImporter)
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print "Should provide a file name and a package name"
@@ -1089,3 +1165,5 @@ if __name__ == "__main__":
     print "Converting %s to %s using %s" % (fname, pname, i.name)
     p=i.process_file(fname)
     p.save(pname)
+    print i.statistics_formatted()
+
