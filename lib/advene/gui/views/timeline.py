@@ -167,6 +167,8 @@ class TimeLine(AdhocView):
         self.layout.connect('key_press_event', self.key_pressed_cb)
         self.layout.connect('button_press_event', self.mouse_pressed_cb)
         self.layout.connect ('size_allocate', self.resize_event)
+        #self.layout.connect('expose_event', self.draw_background)
+
         # The layout can receive drops (to resize annotations)
         self.layout.connect("drag_data_received", self.layout_drag_received)
         self.layout.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -181,6 +183,7 @@ class TimeLine(AdhocView):
             'inactive': gtk.Button().get_style().bg[0],
             'incoming': gtk.gdk.color_parse ('green'),
             'outgoing': gtk.gdk.color_parse ('yellow'),
+            'background': gtk.gdk.color_parse('red'),
             }
         # Current position in units
         self.current_position = minimum
@@ -214,6 +217,16 @@ class TimeLine(AdhocView):
 
         self.draw_current_mark()
         self.widget = self.get_full_widget()
+
+    def draw_background(self, layout, event):
+        width, height = layout.get_size()
+        h=config.data.preferences['timeline']['button-height'] + config.data.preferences['timeline']['interline-height']
+        drawable=layout.bin_window
+        gc=drawable.new_gc(foreground=self.colors['background'])
+        for i in range(0, len(self.layer_position), 2):
+            # Draw a different background
+            drawable.draw_rectangle(gc, True, 0, h * i, width, h)
+        return True
 
     def update_model(self, package=None, partial_update=False):
         """Update the whole model.
@@ -1334,6 +1347,18 @@ class TimeLine(AdhocView):
         """
         width=0
         height=0
+
+        def keypress_handler(widget, event, at):
+            if event.keyval == gtk.keysyms.e:
+                try:
+                    pop = advene.gui.edit.elements.get_edit_popup (at, self.controller)
+                except TypeError, e:
+                    self.controller.log(_("Error: unable to find an edit popup for %s:\n%s") % (annotation, unicode(e)))
+                else:
+                    pop.edit ()
+                return True
+            return False
+        
         for t in self.annotationtypes:
             b=gtk.Button()
             l=gtk.Label(self.controller.get_title(t))
@@ -1345,7 +1370,9 @@ class TimeLine(AdhocView):
             b.annotationtype=t
             b.show()
             b.connect("clicked", self.annotation_type_cb)
+            b.connect("key_press_event", keypress_handler, t)
             b.connect("button_press_event", self.annotation_type_pressed_cb)
+            b.connect("enter", lambda b: b.grab_focus() and True)
             # The button can receive drops (to transmute annotations)
             b.connect("drag_data_received", self.type_drag_received)
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -1369,6 +1396,7 @@ class TimeLine(AdhocView):
     def build_legend_widget (self):
         """Return a Layout containing the legend widget."""
         legend = gtk.Layout ()
+        #legend.connect('expose_event', self.draw_background)
         self.update_legend_widget(legend)
         return legend
 
