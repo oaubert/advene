@@ -335,12 +335,12 @@ class TimeLine(AdhocView):
         """Scroll the view to put the annotation in the middle.
         """
         (w, h) = self.layout.window.get_size ()
-        pos = self.unit2pixel (annotation.fragment.begin) - w/2
+        pos = self.unit2pixel (annotation.fragment.begin)
         a = self.adjustment
         if pos < a.lower:
             pos = a.lower
-        elif pos > a.upper - a.page_size:
-            pos = a.upper - a.page_size
+        elif pos > a.upper:
+            pos = a.upper
         if pos < a.value or pos > (a.value + a.page_size):
             a.set_value (pos)
         self.update_position (None)
@@ -875,7 +875,8 @@ class TimeLine(AdhocView):
         b.connect("leave", self.rel_deactivate)
         
         def focus_in(b, event):
-            if self.options['autoscroll']:
+            if (self.options['autoscroll'] and 
+                self.controller.player.status != self.controller.player.PlayingStatus):
                 self.scroll_to_annotation(b.annotation)
             return False
 
@@ -981,7 +982,8 @@ class TimeLine(AdhocView):
     def update_position (self, pos):
         if pos is None:
             pos = self.current_position
-        if self.options['autoscroll'] == 1:
+        if (self.options['autoscroll'] == 1
+            and self.controller.player.status == self.controller.player.PlayingStatus):
             self.center_on_position(pos)
         self.update_current_mark (pos)
         return True
