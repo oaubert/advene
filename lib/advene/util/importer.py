@@ -1067,6 +1067,7 @@ class IRIImporter(GenericImporter):
     def __init__(self, **kw):
         super(IRIImporter, self).__init__(**kw)
         self.atypes={}
+        self.duration=0
 
     def can_handle(fname):
         return (fname.lower().endswith('.iri') or fname.lower().endswith('.xml'))
@@ -1086,6 +1087,9 @@ class IRIImporter(GenericImporter):
             for decoupage in ensemble.decoupage:
                 tid = decoupage.id
                 print "  Decoupage ", tid
+                # Update self.duration
+                self.duration=max(long(decoupage.dur), self.duration)
+
                 # Create the type
                 if not self.atypes.has_key(tid):
                     at=self.create_annotation_type(schema, tid,
@@ -1143,6 +1147,9 @@ class IRIImporter(GenericImporter):
             pass
             
         self.convert(self.iterator(iri))
+        if self.duration != 0:
+            self.package.setMetaData (config.data.namespace, "duration", str(self.duration))
+            
         return self.package
 register(IRIImporter)
 
