@@ -17,6 +17,7 @@
 #
 import sys
 import sets
+import sre
 import cgi
 
 # Advene part
@@ -39,6 +40,8 @@ import advene.gui.edit.elements
 
 import gtk
 import pango
+
+parsed_representation = sre.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 
 class TimeLine(AdhocView):
     """
@@ -753,13 +756,28 @@ class TimeLine(AdhocView):
         w.set_transient_for(p)
         w.set_position(gtk.WIN_POS_MOUSE)
         e=gtk.Entry()
-        e.set_text(annotation.content.data)
+        # get_title will either return the content data, or the computed representation
+        e.set_text(self.controller.get_title(annotation))
         e.set_activates_default(True)
         w.add(e)
         def key_handler(widget, event):
             if event.keyval == gtk.keysyms.Return:
                 # Validate the entry
-                annotation.content.data = e.get_text()
+                repr=annotation.type.getMetaData(config.data.namespace, "representation")
+                if repr is None or repr == '' or sre.match('^\s+', repr):
+                    r=e.get_text()
+                else:
+                    m=parsed_representation.match(repr)
+                    if m:
+                        # We have a simple representation (here/content/parsed/name)
+                        # so we can update the name field.
+                        name=m.group(1)
+                        reg = sre.compile('^' + name + '=(.+?)$', sre.MULTILINE)
+                        r = reg.sub(name + '=' + e.get_text(), annotation.content.data)
+                    else:
+                        self.log("Cannot update the annotation, its representation is too complex")
+                        r=annotation.content.data
+                annotation.content.data = r
                 self.controller.notify('AnnotationEditEnd', annotation=annotation)
                 w.destroy()
                 return True
