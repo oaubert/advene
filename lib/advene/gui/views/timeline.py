@@ -1099,10 +1099,6 @@ class TimeLine(AdhocView):
             self.fraction_adj.value=1.0/pow(2, event.keyval-49)
             self.fraction_event (widget=win)
             return True
-        elif event.keyval == gtk.keysyms.Return:
-            self.fraction_adj.value=1.0
-            self.fraction_event (widget=win)
-            return True
         elif event.keyval == gtk.keysyms.p:
 	    # Play at the current position
 	    x, y = win.get_pointer()
