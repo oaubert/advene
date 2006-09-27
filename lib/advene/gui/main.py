@@ -43,7 +43,11 @@ print "Using localedir %s" % config.data.path['locale']
 
 APP='advene'
 # Locale initialisation
-locale.setlocale(locale.LC_ALL, '')
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except locale.Error:
+    print "Error in locale initialization. Interface translation may be incorrect."
+    pass
 gettext.bindtextdomain(APP, config.data.path['locale'])
 gettext.textdomain(APP)
 gettext.install(APP, localedir=config.data.path['locale'], unicode=True)
