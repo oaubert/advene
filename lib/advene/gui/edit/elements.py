@@ -209,7 +209,7 @@ class EditElementPopup (object):
             d = gtk.Dialog(title=title,
                            parent=None,
                            flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL,
-                           buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                           buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
                                      gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
 
             d.vbox.add(self.vbox)
@@ -220,7 +220,7 @@ class EditElementPopup (object):
             while True:
                 res=d.run()
                 retval=False
-                if res == gtk.RESPONSE_ACCEPT:
+                if res == gtk.RESPONSE_OK:
                     retval=self.apply_cb()
                 elif res == gtk.RESPONSE_CANCEL:
                     retval=True
@@ -550,14 +550,16 @@ class EditPackagePopup (EditElementPopup):
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
-                         editable=editable)
+                         editable=editable, 
+                         tooltip=_("Textual description of the package"))
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
         f = EditMetaForm(title=_("Default dynamic view"),
                          element=self.element, name='default_stbv',
                          namespaceid='advenetool', controller=self.controller,
-                         editable=editable)
+                         editable=editable, 
+                         tooltip=_("Dynamic view to activate on package load"))
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -598,7 +600,8 @@ class EditSchemaPopup (EditElementPopup):
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
-                         editable=editable)
+                         editable=editable,
+                         tooltip=_("Textual description of the package"))
         self.register_form(f)
 
         vbox.pack_start(f.get_view(), expand=False)
@@ -636,16 +639,27 @@ class EditAnnotationTypePopup (EditElementPopup):
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
-                         editable=editable)
+                         editable=editable,
+                         tooltip=_("Textual description of the package"))
+
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
         f = EditMetaForm(title=_("Representation"),
                          element=self.element, name='representation',
                          controller=self.controller,
-                         editable=editable)
+                         editable=editable,
+                         tooltip=_("TALES expression used to get a compact representation of the annotations"))
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
+
+#        f = EditMetaForm(title=_("Color"),
+#                         element=self.element, name='color',
+#                         controller=self.controller,
+#                         editable=editable,
+#                         tooltip=_("TALES expression specifying a color"))
+#        self.register_form(f)
+#        vbox.pack_start(f.get_view(), expand=False)
 
         return vbox
 
@@ -691,7 +705,9 @@ class EditRelationTypePopup (EditElementPopup):
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
-                         editable=editable)
+                         editable=editable,
+                         tooltip=_("Textual description of the package"))
+
         self.register_form(f)
 
         vbox.pack_start(f.get_view(), expand=False)
@@ -1235,7 +1251,7 @@ class EditFragmentForm(EditForm):
         return hbox
 
 class EditGenericForm(EditForm):
-    def __init__(self, title=None, getter=None, setter=None, controller=None, editable=True):
+    def __init__(self, title=None, getter=None, setter=None, controller=None, editable=True, tooltip=None):
         self.title=title
         self.getter=getter
         self.setter=setter
@@ -1243,6 +1259,7 @@ class EditGenericForm(EditForm):
         self.editable=editable
         self.entry=None
         self.view=None
+        self.tooltip=tooltip
 
     def get_view(self, compact=False):
         hbox = gtk.HBox()
@@ -1251,6 +1268,9 @@ class EditGenericForm(EditForm):
         hbox.pack_start(l, expand=False)
 
         self.entry=gtk.Entry()
+        if self.tooltip:
+            tt=gtk.Tooltips()
+            tt.set_tip(self.entry, self.tooltip)
         v=self.getter()
         if v is None:
             v=""
@@ -1271,14 +1291,15 @@ class EditGenericForm(EditForm):
 class EditMetaForm(EditGenericForm):
     def __init__(self, title=None, element=None, name=None,
                  namespaceid='advenetool', controller=None,
-                 editable=True):
+                 editable=True, tooltip=None):
         getter=self.metadata_get_method(element, name, namespaceid)
         setter=self.metadata_set_method(element, name, namespaceid)
         super(EditMetaForm, self).__init__(title=title,
                                            getter=getter,
                                            setter=setter,
                                            controller=controller,
-                                           editable=editable)
+                                           editable=editable,
+                                           tooltip=tooltip)
 
 class EditAttributesForm (EditForm):
     """Creates an edit form for the given element."""
