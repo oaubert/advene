@@ -203,6 +203,7 @@ class Config(object):
 	    'adhoc-east': '',
 	    'adhoc-popup': '',
             'display-scroller': False,
+            'display-caption': False,
 	    'record-actions': False,
             }
 
@@ -414,6 +415,10 @@ class Config(object):
 	    name=method.func_name
 	self.global_methods[name]=method
 	return True
+
+    def register_player_plugin(self, module):
+        self.player_plugins[module.name] = module
+        return True
 
     def get_content_handler(self, mimetype):
 	"""Return a valid content handler for the given mimetype.
