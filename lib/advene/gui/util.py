@@ -356,6 +356,8 @@ Description:
                                        gtk.RESPONSE_CANCEL ))
     fs.set_preview_widget(preview_box)
     fs.connect("selection_changed", update_preview)
+    fs.connect("key_press_event", dialog_keypressed_cb)
+
     if default_dir:
         fs.set_current_folder(default_dir)
     if default_file:
