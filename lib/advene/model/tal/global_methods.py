@@ -438,6 +438,7 @@ def parsed (target, context):
         import urllib
         
         d={}
+        d['_all']=content.data
         for l in content.data.splitlines():
             if len(l) == 0:
                 # Ignore empty lines
