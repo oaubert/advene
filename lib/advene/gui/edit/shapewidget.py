@@ -213,14 +213,14 @@ class Shape:
         d = gtk.Dialog(title=_("Properties of %s") % self.name,
                        parent=None,
                        flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ) )
 
         d.vbox.add(edit)
 
         def keypressed_cb(widget=None, event=None):
             if event.keyval == gtk.keysyms.Return:
-                d.response(gtk.RESPONSE_ACCEPT)
+                d.response(gtk.RESPONSE_OK)
                 return True
             elif event.keyval == gtk.keysyms.Escape:
                 d.response(gtk.RESPONSE_CANCEL)
@@ -232,7 +232,7 @@ class Shape:
         res=d.run()
         d.destroy()
 
-        if res == gtk.RESPONSE_ACCEPT:
+        if res == gtk.RESPONSE_OK:
             # Get new values
             self.name = edit.widgets['name'].get_text()
             self.color = COLORS[edit.widgets['color'].get_active()]

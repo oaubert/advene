@@ -55,13 +55,13 @@ class EditNotebook(object):
         d = gtk.Dialog(title=self.get_name(),
                        parent=None,
                        flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
         d.vbox.add(self.book)
         self.book.show_all()
         res=d.run()
         d.destroy()
-        if res == gtk.RESPONSE_ACCEPT:
+        if res == gtk.RESPONSE_OK:
             return True
         else:
             return False
@@ -367,14 +367,14 @@ class EditWidget(gtk.VBox):
         d = gtk.Dialog(title=self.get_name(),
                        parent=None,
                        flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
         d.vbox.add(self)
 
         self.show_all()
         res=d.run()
         d.destroy()
-        if res == gtk.RESPONSE_ACCEPT:
+        if res == gtk.RESPONSE_OK:
             return True
         else:
             return False

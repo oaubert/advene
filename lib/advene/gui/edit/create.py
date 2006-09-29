@@ -312,7 +312,7 @@ class CreateElementPopup(object):
         d = gtk.Dialog(title=_("Creation: %s") % element_label[self.type_],
                        parent=None,
                        flags=flags,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
 
         d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
@@ -321,7 +321,7 @@ class CreateElementPopup(object):
 	while True:
 	    res=d.run()
 	    retval=None
-	    if res == gtk.RESPONSE_ACCEPT:
+	    if res == gtk.RESPONSE_OK:
 		retval=self.do_create_element()
 
 		if retval is not None:
