@@ -287,7 +287,11 @@ class DefaultActionsRepository:
         end = c.create_position (value=duration,
                                  key=c.player.MediaTime,
                                  origin=c.player.RelativePosition)
-        c.player.display_text (message.encode('utf8'), begin, end)
+        if c.gui and c.gui.captionview:
+            c.gui.captionview.display_text(message.encode('utf8'),
+                                           duration)
+        else:
+            c.player.display_text (message.encode('utf8'), begin, end)
         return True
 
     def DisplayMarker (self, context, parameters):
@@ -336,7 +340,11 @@ class DefaultActionsRepository:
         end = c.create_position (value=duration,
                                  key=c.player.MediaTime,
                                  origin=c.player.RelativePosition)
-        c.player.display_text (message.encode('utf8'), begin, end)
+        if c.gui and c.gui.captionview:
+            c.gui.captionview.display_text(message.encode('utf8'),
+                                           duration)
+        else:
+            c.player.display_text (message.encode('utf8'), begin, end)
         return True
 
     def AnnotationCaption (self, context, parameters):
@@ -354,7 +362,11 @@ class DefaultActionsRepository:
                                      origin=c.player.RelativePosition)
             #begin = c.create_position (value=annotation.fragment.begin)
             #end = c.create_position (value=annotation.fragment.end)
-            c.player.display_text (message.encode('utf8'), begin, end)
+            if c.gui and c.gui.captionview:
+                c.gui.captionview.display_text(message.encode('utf8'),
+                                               duration)
+            else:
+                c.player.display_text (message.encode('utf8'), begin, end)
         return True
 
     def SoundOff (self, context, parameters):
