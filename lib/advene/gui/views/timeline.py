@@ -148,7 +148,7 @@ class TimeLine(AdhocView):
         # ratio_adjustment.value = unit by pixel
         # Unit = ms
         self.ratio_adjustment = gtk.Adjustment (value=36000,
-                                                lower=1,
+                                                lower=1000,
                                                 upper=36000,
                                                 step_incr=5,
                                                 page_incr=1000)
@@ -253,6 +253,8 @@ class TimeLine(AdhocView):
 		b,e=self.bounds()
 		self.maximum = e
 	    if self.maximum != oldmax:
+                # Reset to display whole timeline
+                self.ratio_adjustment.set_value(36000)
 		self.update_layout()
 
 	    if self.list is None:
@@ -274,7 +276,6 @@ class TimeLine(AdhocView):
 	self.populate()
 	self.draw_marks()
 	self.draw_current_mark()
-	self.ratio_event()
 	self.legend.foreach(remove_widget, self.legend)
 	self.update_legend_widget(self.legend)
 	self.legend.show_all()
@@ -955,7 +956,7 @@ class TimeLine(AdhocView):
 
         b.connect("scroll_event", handle_scroll_event)
 
-        b.show()
+        b.show_all()
         return b
 
     def populate (self):
@@ -964,13 +965,14 @@ class TimeLine(AdhocView):
             l=self.controller.package.annotations
         else:
             l=self.list
+        
         for annotation in l:
             self.create_annotation_widget(annotation)
 
         self.layout.set_size (u2p (self.maximum - self.minimum),
                               max(self.layer_position.values() or (0,))
                               + self.button_height + config.data.preferences['timeline']['interline-height'])
-        self.layout.show_all ()
+        #self.layout.show_all ()
 
     def remove_marks(self, widget=None, data=None):
         if hasattr(widget, 'mark'):
@@ -1052,6 +1054,7 @@ class TimeLine(AdhocView):
             a = gtk.Arrow (gtk.ARROW_DOWN, gtk.SHADOW_NONE)
             a.mark = t
             a.pos = 1
+            a.show()
             self.layout.put (a, u2p(t), a.pos)
             l = gtk.Label (helper.format_time (t))
             l.mark = t
@@ -1059,10 +1062,10 @@ class TimeLine(AdhocView):
             e=gtk.EventBox()
             e.connect("button_press_event", self.mark_press_cb, t)
             e.add(l)
+            e.show_all()
 
             self.layout.put (e, u2p(t), l.pos)
             t += step
-        self.layout.show_all ()
 
     def bounds (self):
         """Bounds of the list.
@@ -1676,7 +1679,7 @@ class TimeLine(AdhocView):
         d = gtk.Dialog(title=_("Displayed annotation types"),
                        parent=None,
                        flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
 
         d.vbox.add(hbox)
@@ -1684,7 +1687,7 @@ class TimeLine(AdhocView):
         d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
 
         res=d.run()
-        if res == gtk.RESPONSE_ACCEPT:
+        if res == gtk.RESPONSE_OK:
             self.annotationtypes = [ at[1] for at in selected_store ]
             self.update_model(partial_update=True)
         d.destroy()
