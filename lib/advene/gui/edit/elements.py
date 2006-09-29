@@ -653,13 +653,13 @@ class EditAnnotationTypePopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
-#        f = EditMetaForm(title=_("Color"),
-#                         element=self.element, name='color',
-#                         controller=self.controller,
-#                         editable=editable,
-#                         tooltip=_("TALES expression specifying a color"))
-#        self.register_form(f)
-#        vbox.pack_start(f.get_view(), expand=False)
+        f = EditMetaForm(title=_("Color"),
+                         element=self.element, name='color',
+                         controller=self.controller,
+                         editable=editable,
+                         tooltip=_("TALES expression specifying a color"))
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
 
         return vbox
 
