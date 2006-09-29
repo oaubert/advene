@@ -93,6 +93,7 @@ from advene.gui.views.interactivequery import InteractiveQuery
 from advene.gui.views.viewbook import ViewBook
 from advene.gui.views.html import HTMLView
 from advene.gui.views.scroller import ScrollerView
+from advene.gui.views.caption import CaptionView
 from advene.gui.views.editaccumulator import EditAccumulator
 
 class Connect:
@@ -625,6 +626,12 @@ class AdveneGUI (Connect):
         if config.data.preferences['display-scroller']:
             self.scroller=ScrollerView(controller=self.controller)
             v.pack_start(self.scroller.widget, expand=False)
+        if config.data.preferences['display-caption']:
+            self.captionview=CaptionView(controller=self.controller)
+            self.register_view(self.captionview)
+            v.pack_start(self.captionview.widget, expand=False)
+        else:
+            self.captionview=None
         v.pack_start(self.gui.slider, expand=False)
         v.pack_start(tb, expand=False)
 
@@ -1876,6 +1883,7 @@ class AdveneGUI (Connect):
 	    'adhoc-east': config.data.preferences['adhoc-east'],
 	    'adhoc-popup': config.data.preferences['adhoc-popup'],
             'display-scroller': config.data.preferences['display-scroller'],
+            'display-caption': config.data.preferences['display-caption'],
 	    'scroll-increment': config.data.preferences['scroll-increment'],
 
             'toolbarstyle': self.gui.get_widget("toolbar_view").get_style(),
@@ -1912,6 +1920,7 @@ Available views: timeline, tree, browser, transcribe"""))
 	ew.add_entry(_("Popup"), 'adhoc-popup', _("In their own window"))
 
 	ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
+	ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
 
         ew.add_title(_("Paths"))
 
@@ -1928,7 +1937,8 @@ Available views: timeline, tree, browser, transcribe"""))
         res=ew.popup()
         if res:
 	    for k in ('history-size-limit', 'osdtext', 'scroll-increment',
-		      'adhoc-south', 'adhoc-east', 'adhoc-popup', 'display-scroller'):
+		      'adhoc-south', 'adhoc-east', 'adhoc-popup', 
+                      'display-scroller', 'display-caption'):
 		config.data.preferences[k] = cache[k]
             for t in ('toolbar_view', 'toolbar_fileop', 'toolbar_create'):
                 self.gui.get_widget(t).set_style(cache['toolbarstyle'])
