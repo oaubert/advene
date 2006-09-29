@@ -1537,7 +1537,7 @@ class AdveneGUI (Connect):
             i.package=self.controller.package
             i.process_file(filename)
             self.controller.package._modified = True
-            self.controller.notify("PackageLoad", package=i.package)
+            self.controller.notify("PackageActivate", package=self.controller.package)
             self.log(_('Converted from file %s :') % filename_utf)
             self.log(i.statistics_formatted())
         return True
