@@ -148,7 +148,7 @@ class TimeLine(AdhocView):
         # ratio_adjustment.value = unit by pixel
         # Unit = ms
         self.ratio_adjustment = gtk.Adjustment (value=36000,
-                                                lower=1000,
+                                                lower=5,
                                                 upper=36000,
                                                 step_incr=5,
                                                 page_incr=1000)
@@ -280,6 +280,7 @@ class TimeLine(AdhocView):
 	self.update_legend_widget(self.legend)
 	self.legend.show_all()
         self.fraction_event(widget=None)
+        #self.layout.show_all()
 	return
 
     def update_layer_position(self):
@@ -973,7 +974,7 @@ class TimeLine(AdhocView):
                               max(self.layer_position.values() or (0,))
                               + self.button_height + config.data.preferences['timeline']['interline-height'])
         #self.layout.show_all ()
-
+        
     def remove_marks(self, widget=None, data=None):
         if hasattr(widget, 'mark'):
             self.layout.remove(widget)
