@@ -466,7 +466,11 @@ class TimeLine(AdhocView):
             try:
                 b._default_color=self.widget_colors[col]
             except:
-                self.widget_colors[col]=gtk.gdk.color_parse(col)
+                try:
+                    self.widget_colors[col]=gtk.gdk.color_parse(col)
+                except:
+                    print "Unable to parse ", col
+                    self.widget_colors[col]=self.colors['inactive']
                 b._default_color=self.widget_colors[col]
             self.set_widget_background_color(b)
         b.set_size_request(u2p(a.fragment.duration),
@@ -1407,7 +1411,10 @@ class TimeLine(AdhocView):
                 try:
                     b._default_color=self.widget_colors[col]
                 except:
-                    self.widget_colors[col]=gtk.gdk.color_parse(col)
+                    try:
+                        self.widget_colors[col]=gtk.gdk.color_parse(col)
+                    except:
+                        self.widget_colors[col]=self.colors['inactive']
                     b._default_color=self.widget_colors[col]
                 self.set_widget_background_color(b)
 
