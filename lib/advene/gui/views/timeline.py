@@ -188,6 +188,10 @@ class TimeLine(AdhocView):
             'outgoing': gtk.gdk.color_parse ('yellow'),
             'background': gtk.gdk.color_parse('red'),
             }
+        self.widget_colors = {
+            'inactive': self.colors['inactive']
+            }
+
         # Current position in units
         self.current_position = minimum
 
@@ -394,6 +398,18 @@ class TimeLine(AdhocView):
         controller.event_handler.remove_rule(self.beginrule, type_="internal")
         controller.event_handler.remove_rule(self.endrule, type_="internal")
 
+    def set_widget_background_color(self, widget, color=None):
+        if color is None:
+            try:
+                color=widget._default_color
+            except:
+                return True
+        for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                      gtk.STATE_PRELIGHT):
+            widget.modify_bg (style, color)
+        return True
+        
     def activate_annotation (self, annotation, buttons=None, color=None):
         """Activate the representation of the given annotation."""
         if buttons is None:
@@ -402,10 +418,7 @@ class TimeLine(AdhocView):
             color=self.colors['active']
         for b in buttons:
             b.active = True
-            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                          gtk.STATE_PRELIGHT):
-                b.modify_bg (style, color)
+            self.set_widget_background_color(b, color)
         return True
 
     def desactivate_annotation (self, annotation, buttons=None):
@@ -414,10 +427,7 @@ class TimeLine(AdhocView):
             buttons = self.get_widget_for_annotation (annotation)
         for b in buttons:
             b.active = False
-            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                          gtk.STATE_PRELIGHT):
-                b.modify_bg (style, self.colors['inactive'])
+            self.set_widget_background_color(b, b._default_color)
         return True
 
     def toggle_annotation (self, annotation):
@@ -445,6 +455,20 @@ class TimeLine(AdhocView):
             l.set_markup('<b>%s</b>' % title)
         else:
             l.set_text(title)
+        color=a.type.getMetaData(config.data.namespace, 'color')
+        if color:
+            c=self.controller.build_context(here=a)
+            col=None
+            try:
+                col=c.evaluateValue(color)
+            except:
+                col='inactive'
+            try:
+                b._default_color=self.widget_colors[col]
+            except:
+                self.widget_colors[col]=gtk.gdk.color_parse(col)
+                b._default_color=self.widget_colors[col]
+            self.set_widget_background_color(b)
         b.set_size_request(u2p(a.fragment.duration),
                            self.button_height)
 
@@ -751,11 +775,7 @@ class TimeLine(AdhocView):
         w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         w.set_decorated(False)
         # Find the containing gtk.Window
-        next=self.layout
-        while next is not None:
-            p=next
-            next=p.get_parent()
-        w.set_transient_for(p)
+        w.set_transient_for(self.layout.get_toplevel())
         w.set_position(gtk.WIN_POS_MOUSE)
         e=gtk.Entry()
         # get_title will either return the content data, or the computed representation
@@ -858,10 +878,7 @@ class TimeLine(AdhocView):
             try:
                 if widget.active:
                     widget.active = False
-                    for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                                  gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                                  gtk.STATE_PRELIGHT):
-                        widget.modify_bg (style, self.colors['inactive'])
+                    self.set_widget_background_color(widget, widget._default_color)
             except AttributeError:
                 pass
             return True
@@ -872,22 +889,20 @@ class TimeLine(AdhocView):
         try:
             pos = self.layer_position[annotation.type]
         except KeyError:
+            # The annotation is not displayed
             return None
 
         u2p = self.unit2pixel
-        title=helper.get_title(self.controller, annotation)
         b = gtk.Button()
-        l = gtk.Label()
-        if annotation.relations:
-            l.set_markup('<b>%s</b>' % title)
-        else:
-            l.set_text(title)
-        l.modify_font(self.annotation_font)
-        b.label=l
-        b.add(l)
-        b.annotation = annotation
+        b.label = gtk.Label()
+        b.label.modify_font(self.annotation_font)
+        b.add(b.label)
         b.active = False
-        #b.connect("clicked", self.annotation_cb, annotation)
+        b.annotation = annotation
+        # Put at a default position.
+        self.layout.put(b, 0, 0)
+        self.update_button(b)
+
         b.connect("button_press_event", self.button_press_handler, annotation)
         b.connect("key_press_event", self.button_key_handler, annotation)
 
@@ -901,15 +916,6 @@ class TimeLine(AdhocView):
             return False
 
         b.connect("focus_in_event", focus_in)
-
-        b.set_size_request(u2p(annotation.fragment.duration),
-                           self.button_height)
-
-        self.layout.put(b, u2p(annotation.fragment.begin), pos)
-        tip = _("%s\nBegin: %s\tEnd: %s") % (title,
-                                             helper.format_time(annotation.fragment.begin),
-                                             helper.format_time(annotation.fragment.end))
-        self.tooltips.set_tip(b, tip)
         # The button can generate drags
         b.connect("drag_data_get", self.drag_sent)
         b.connect("drag_begin", self.drag_begin)
@@ -1388,6 +1394,23 @@ class TimeLine(AdhocView):
             b.set_size_request(-1, self.button_height)
             layout.put (b, 0, self.layer_position[t])
             b.annotationtype=t
+
+            # Try to determine the color. This will work only for static colors.
+            color=t.getMetaData(config.data.namespace, 'color')
+            if color:
+                c=self.controller.build_context(here=t)
+                col=None
+                try:
+                    col=c.evaluateValue(color)
+                except:
+                    col='inactive'
+                try:
+                    b._default_color=self.widget_colors[col]
+                except:
+                    self.widget_colors[col]=gtk.gdk.color_parse(col)
+                    b._default_color=self.widget_colors[col]
+                self.set_widget_background_color(b)
+
             b.show()
             b.connect("clicked", self.annotation_type_cb)
             b.connect("key_press_event", keypress_handler, t)
