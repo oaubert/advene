@@ -3,6 +3,7 @@
 SCRIPTDIR=`dirname $0`
 ADVENEHOME=`dirname $SCRIPTDIR`
 output=${ADVENEHOME}/share/web/user.html
+shortcuts=${ADVENEHOME}/share/web/shortcuts.html
 
 if [ ! -d "${ADVENEHOME}/doc" ]
 then
@@ -11,12 +12,24 @@ then
 fi
 
 wget --quiet 'http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneUserGuide' -O $output
+
 if [ $? == 0 ]
 then
 	perl -pi -e 's/.+wiki(header|footer|pagelink).+//;' -e 's!/advene/advene.css!advene.css!;' -e 's!.+(Last\sedited.+?)<a.+?>(.+?)</a>.+!$1 $2!;' -e 's!"wiki\.pl\?AdveneUserGuide!"!g;' -e 's/http:\#/\#/g;' -e 's!<a href.+?>\?</a>!!g' $output
 	echo "User documentation updated in $output"
 else
 	echo "Wget error. $output is now corrupted."
+fi
+
+# Shortcuts
+wget --quiet 'http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneShortcuts' -O $shortcuts
+
+if [ $? == 0 ]
+then
+	perl -pi -e 's/.+wiki(header|footer|pagelink).+//;' -e 's!/advene/advene.css!advene.css!;' -e 's!.+(Last\sedited.+?)<a.+?>(.+?)</a>.+!$1 $2!;' -e 's!"wiki\.pl\?AdveneShortcuts!"!g;' -e 's/http:\#/\#/g;' -e 's!<a href.+?>\?</a>!!g' $shortcuts
+	echo "Shortcuts help updated in $shortcuts"
+else
+	echo "Wget error. $shortcuts is now corrupted."
 fi
 
 

@@ -115,7 +115,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image35">
+			<widget class="GtkImage" id="image36">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -137,7 +137,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image36">
+			<widget class="GtkImage" id="image37">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -485,6 +485,15 @@
 		      <property name="label">gtk-help</property>
 		      <property name="use_stock">True</property>
 		      <signal name="activate" handler="on_help1_activate" last_modification_time="Wed, 16 Jun 2004 20:53:39 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="helpshortcuts">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">Display shortcuts</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_helpshortcuts_activate" last_modification_time="Mon, 02 Oct 2006 16:51:54 GMT"/>
 		    </widget>
 		  </child>
 

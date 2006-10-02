@@ -2035,6 +2035,14 @@ Available views: timeline, tree, browser, transcribe"""))
             self.log(_("Unable to find the help file at %s") % helpfile)
         return True
 
+    def on_helpshortcuts_activate (self, button=None, data=None):
+        helpfile=os.path.join( config.data.path['web'], 'shortcuts.html' )
+        if os.access(helpfile, os.R_OK):
+            self.controller.open_url ('file:///' + helpfile)
+        else:
+            self.log(_("Unable to find the help file at %s") % helpfile)
+        return True
+
     def on_create_view_activate (self, button=None, data=None):
         cr = CreateElementPopup(type_ = View,
                                 parent=self.controller.package,
