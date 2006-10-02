@@ -22,6 +22,11 @@ import advene.core.config as config
 
 import vlc
 
+name="Default GUI actions"
+
+def register(controller=None):
+    config.data.register_player_plugin()
+
 class Snapshot:
     def __init__(self, d=None):
         if d is not None:
