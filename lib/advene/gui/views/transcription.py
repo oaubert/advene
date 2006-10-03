@@ -38,9 +38,10 @@ import advene.gui.util
 import advene.gui.popup
 
 parsed_representation = sre.compile(r'^here/content/parsed/([\w\d_\.]+)$')
+empty_representation = sre.compile(r'^\s*$')
 
 class TranscriptionView(AdhocView):
-    def __init__ (self, controller=None, annotationtype=None, separator="  "):
+    def __init__ (self, controller=None, model=None, separator="  "):
         self.view_name = _("Transcription")
         self.view_id = 'transcriptionview'
         self.close_on_package_load = True
@@ -51,7 +52,7 @@ class TranscriptionView(AdhocView):
 
         self.controller=controller
         self.package=controller.package
-        self.model = annotationtype
+        self.model = model
         # Annotation where the cursor is set
         self.currentannotation=None
 
@@ -65,18 +66,20 @@ class TranscriptionView(AdhocView):
             'display-bounds': False,
             'display-time': False,
             'separator': ' ',
-            # If representation is not None, it is used as a TALES
+            # Use the default representation parameter for annotations
+            'default-representation': True,
+            # If representation is not empty, it is used as a TALES
             # expression to generate the representation of the
             # transcripted annotation. Useful with structured annotations
             'representation': '',
             }
 
         repr=self.model.getMetaData(config.data.namespace, 'representation')
-	if repr is None:
-	    self.options['representation'] = ""
-	elif not sre.match(r'^\s*$', repr):
-	    # There is a standard representation for the type.
-	    self.options['representation'] = repr
+        if repr is None:
+            self.options['representation'] = ""
+        elif not sre.match(r'^\s*$', repr):
+            # There is a standard representation for the type.
+            self.options['representation'] = repr
 
         self.widget=self.build_widget()
 
@@ -87,18 +90,18 @@ class TranscriptionView(AdhocView):
 
         ew=EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Transcription options"))
-        ew.add_entry(_("Representation"), "representation", _("If not empty, this TALES expression that will be used to format the annotations."))
+        ew.add_checkbox(_("Default representation"), "default-representation", _("Use the default representation for annotations"))
+        ew.add_entry(_("Representation"), "representation", _("If default representation is unchecked,\nthis TALES expression that will be used to format the annotations."))
         ew.add_entry(_("Separator"), "separator", _("This separator will be inserted between the annotations.\nUse \\n for a newline and \\t for a tabulation."))
         ew.add_checkbox(_("Display timestamps"), "display-time", _("Insert timestsamp values"))
         ew.add_checkbox(_("Display annotation bounds"), 'display-bounds', _("Display annotation bounds"))
         res=ew.popup()
 
         if res:
+            self.options.update(cache)
             # Process special characters
             for c in ('representation', 'separator'):
-                self.options[c]=cache[c].replace('\\n', '\n').replace('\\t', '\t')
-            for c in ('display-time', 'display-bounds'):
-                self.options[c]=cache[c]
+                self.options[c]=self.options[c].replace('\\n', '\n').replace('\\t', '\t')
             self.generate_buffer_content()
         return True
 
@@ -126,23 +129,41 @@ class TranscriptionView(AdhocView):
 	return modified
 
     def update_modified(self, l):
-	m=parsed_representation.match(self.options['representation'])
-	if m:
-	    # We have a simple representation (here/content/parsed/name)
-	    # so we can update the name field.
-	    name=m.group(1)
-	    reg = sre.compile('^' + name + '=(.+?)$', sre.MULTILINE)
-	    def update(a, text):
-		a.content.data = reg.sub(name + '=' + text, a.content.data)
-	else:
-	    def update(a, text):
-		a.content.data = text
+        def update(a, text):
+            """Update an annotation content according to its representation.
+
+            If the update is not possible (too complex representation), return False.
+            """
+            if self.options['default-representation']:
+                repr=a.type.getMetaData(config.data.namespace, 'representation')
+            else:
+                repr=self.options['representation']
+            m=parsed_representation.match(repr)
+            if m:
+                # We have a simple representation (here/content/parsed/name)
+                # so we can update the name field.
+                name=m.group(1)
+                reg = sre.compile('^' + name + '=(.+?)$', sre.MULTILINE)
+                a.content.data = reg.sub(name + '=' + text, a.content.data)
+            else:
+                m=empty_representation.match(repr)
+                if m:
+                    a.content.data = text
+                else:
+                    return False
+            return True
+
         b=self.textview.get_buffer()
+        impossible=[]
 	for a in l:
 	    beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
 	    enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
-	    update(a, b.get_text(beginiter, enditer))
-	    self.controller.notify("AnnotationEditEnd", annotation=a)
+	    if update(a, b.get_text(beginiter, enditer)):
+                self.controller.notify("AnnotationEditEnd", annotation=a)
+            else:
+                impossible.append(a)
+        if impossible:
+		advene.gui.util.message_dialog(label=_("Cannot convert the following annotations,\nthe representation pattern is too complex.\n%s") % ",".join( [ a.id for a in impossible ] ))
 	return True
 
     def refresh(self, *p):
@@ -218,7 +239,9 @@ class TranscriptionView(AdhocView):
         return mainbox
 
     def representation(self, a):
-	if self.options['representation']:
+        if self.options['default-representation']:
+            rep=helper.get_title(self.controller, a)
+	elif self.options['representation']:
 	    rep=helper.get_title(self.controller, a,
 				 representation=self.options['representation'])
 	else:
@@ -231,7 +254,7 @@ class TranscriptionView(AdhocView):
         begin,end=b.get_bounds()
         b.delete(begin, end)
 
-        l=self.model.annotations[:]
+        l=list(self.model.annotations)
         l.sort(lambda a,b: cmp(a.fragment.begin, b.fragment.begin))
         for a in l:
             if self.options['display-time']:
@@ -290,7 +313,7 @@ class TranscriptionView(AdhocView):
         self.update_current_annotation()
         return False
 
-    def update_model(self, package):
+    def update_model(self, package=None):
         self.generate_buffer_content()
         return True
 
@@ -359,7 +382,7 @@ class TranscriptionView(AdhocView):
             return True
         if event == 'AnnotationCreate':
             # If it does not exist yet, we should create it if it is now in self.list
-            if annotation in self.model.annotationTypes:
+            if annotation in self.model.annotations:
 		# Update the whole model.
 		self.update_model()
             return True
