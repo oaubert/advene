@@ -9,8 +9,8 @@
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_NONE</property>
   <property name="modal">False</property>
-  <property name="default_width">800</property>
-  <property name="default_height">600</property>
+  <property name="default_width">640</property>
+  <property name="default_height">480</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
   <property name="icon">pixmaps/dvd.png</property>
@@ -670,134 +670,19 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkHandleBox" id="handlebox2">
+	    <widget class="GtkHBox" id="adhoc_hbox">
 	      <property name="visible">True</property>
-	      <property name="shadow_type">GTK_SHADOW_OUT</property>
-	      <property name="handle_position">GTK_POS_LEFT</property>
-	      <property name="snap_edge">GTK_POS_TOP</property>
+	      <property name="homogeneous">False</property>
+	      <property name="spacing">0</property>
 
 	      <child>
-		<widget class="GtkToolbar" id="toolbar_view">
-		  <property name="visible">True</property>
-		  <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
-		  <property name="toolbar_style">GTK_TOOLBAR_ICONS</property>
-		  <property name="tooltips">True</property>
-		  <property name="show_arrow">True</property>
-
-		  <child>
-		    <widget class="GtkToolButton" id="tb_treeview">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Open a tree view</property>
-		      <property name="label" translatable="yes">TreeView</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/treeview.png</property>
-		      <property name="visible_horizontal">True</property>
-		      <property name="visible_vertical">True</property>
-		      <property name="is_important">True</property>
-		      <signal name="clicked" handler="on_view_annotations_activate" last_modification_time="Wed, 13 Oct 2004 22:03:21 GMT"/>
-		    </widget>
-		    <packing>
-		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
-		    </packing>
-		  </child>
-
-		  <child>
-		    <widget class="GtkToolButton" id="tb_timeline">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Open a timeline view</property>
-		      <property name="label" translatable="yes">Timeline</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/timeline.png</property>
-		      <property name="visible_horizontal">True</property>
-		      <property name="visible_vertical">True</property>
-		      <property name="is_important">True</property>
-		      <signal name="clicked" handler="on_timeline1_activate" last_modification_time="Wed, 13 Oct 2004 22:04:39 GMT"/>
-		    </widget>
-		    <packing>
-		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
-		    </packing>
-		  </child>
-
-		  <child>
-		    <widget class="GtkToolButton" id="tb_transcription">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Open a transcription view</property>
-		      <property name="label" translatable="yes">Transcription</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/transcription.png</property>
-		      <property name="visible_horizontal">True</property>
-		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
-		      <signal name="clicked" handler="on_transcription1_activate" last_modification_time="Wed, 13 Oct 2004 22:05:41 GMT"/>
-		    </widget>
-		    <packing>
-		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
-		    </packing>
-		  </child>
-
-		  <child>
-		    <widget class="GtkToolButton" id="tb_browser">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Open a package browser view</property>
-		      <property name="label" translatable="yes">Explorer</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/browser.png</property>
-		      <property name="visible_horizontal">True</property>
-		      <property name="visible_vertical">True</property>
-		      <property name="is_important">False</property>
-		      <signal name="clicked" handler="on_browser1_activate" last_modification_time="Wed, 13 Oct 2004 22:06:06 GMT"/>
-		    </widget>
-		    <packing>
-		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
-		    </packing>
-		  </child>
-
-		  <child>
-		    <widget class="GtkToolButton" id="tb_webbrowser">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Open the webbrowser</property>
-		      <property name="label" translatable="yes">WebBrowser</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/web.png</property>
-		      <property name="visible_horizontal">True</property>
-		      <property name="visible_vertical">True</property>
-		      <property name="is_important">True</property>
-		      <signal name="clicked" handler="on_start_web_browser_activate" last_modification_time="Wed, 13 Oct 2004 22:09:26 GMT"/>
-		    </widget>
-		    <packing>
-		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
-		    </packing>
-		  </child>
-
-		  <child>
-		    <widget class="GtkToolButton" id="tb_transcribe">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Take notes on the fly</property>
-		      <property name="label" translatable="yes">Edit transcription</property>
-		      <property name="use_underline">True</property>
-		      <property name="icon">pixmaps/transcribe.png</property>
-		      <property name="visible_horizontal">True</property>
-		      <property name="visible_vertical">True</property>
-		      <property name="is_important">True</property>
-		      <signal name="clicked" handler="on_import_transcription1_activate" last_modification_time="Tue, 17 May 2005 20:38:46 GMT"/>
-		    </widget>
-		    <packing>
-		      <property name="expand">False</property>
-		      <property name="homogeneous">True</property>
-		    </packing>
-		  </child>
-		</widget>
+		<placeholder/>
 	      </child>
 	    </widget>
 	    <packing>
 	      <property name="padding">0</property>
-	      <property name="expand">True</property>
-	      <property name="fill">True</property>
+	      <property name="expand">False</property>
+	      <property name="fill">False</property>
 	    </packing>
 	  </child>
 

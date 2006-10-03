@@ -183,38 +183,31 @@ class AdveneGUI (Connect):
                 return True
             return False
 
-        def adhoc_view_release(widget, event, name):
-            widget.set_state(gtk.STATE_NORMAL)
-            # This is all hackish: we can only catch button-release
-            # event (because of set_use_drag_window() ) but it gets
-            # triggered both for a click and for a drag.  So we must
-            # try to guess if we are inside the toolbar (then click)
-            # or outside (then drag)
-            (x, y, m) = widget.window.get_pointer()
-            alloc=widget.get_parent().get_allocation()
-            #print x, y, alloc.width, alloc.height
-            if (x >= 0 and x <= alloc.width
-                and y >= 0 and y <= alloc.height):
-                # Release was done in the toolbar, so emulate a click
-                self.open_adhoc_view(name, destination='popup')
-
+        def open_view(widget, name):
+            self.open_adhoc_view(name)
             return True
 
-        def adhoc_view_press(widget, event, name):
-            widget.set_state(gtk.STATE_PRELIGHT)
-            return False
-
-        for n in ('tb_treeview', 'tb_timeline', 'tb_transcription', 
-                  'tb_browser', 'tb_webbrowser', 'tb_transcribe'):
-            b=self.gui.get_widget(n)
-            name=n.replace('tb_', '')
-            b.set_use_drag_window(True)
+        # Generate the adhoc view buttons
+        hb=self.gui.get_widget('adhoc_hbox')
+        for name, tip, pixmap in ( 
+            ('treeview', _('Open a tree view'), 'treeview.png'),
+            ('timeline', _('Display a timeline'), 'timeline.png'),
+            ('transcription', _('Display annotations as a transcription'), 'transcription.png'),
+            ('browser', _('Open a package browser'), 'browser.png'),
+            ('webbrowser', _('Open a web browser'), 'web.png'),
+            ('transcribe', _('Take notes on the fly'), 'transcribe.png')
+            ):
+            b=gtk.Button()
+            i=gtk.Image()
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
+            b.add(i)
+            self.tooltips.set_tip(b, tip)
             b.connect("drag_data_get", adhoc_view_drag_sent, name)
-            b.connect("button_release_event", adhoc_view_release, name)
-            b.connect("button_press_event", adhoc_view_press, name)
-
+            b.connect("clicked", open_view, name)
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
+            hb.pack_start(b, expand=False)
+        hb.show_all()
 
         # Player status
         p=self.controller.player
@@ -925,7 +918,7 @@ class AdveneGUI (Connect):
             except KeyError:
                 m=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."), 
                                                create=False)
-            if at is not None:
+            if m is not None:
                 view = TranscriptionView(controller=self.controller,
                                          model=m)
         elif name == 'browser':
@@ -1657,6 +1650,10 @@ class AdveneGUI (Connect):
 
     def on_adhoc_transcription_activate (self, button=None, data=None):
         self.open_adhoc_view('transcription')
+        return True
+
+    def on_adhoc_transcribe_activate (self, button=None, data=None):
+        self.open_adhoc_view('transcribe')
         return True
 
     def on_adhoc_transcription_package_activate (self, button=None, data=None):
