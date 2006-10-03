@@ -1516,6 +1516,17 @@ class TimeLine(AdhocView):
         b.connect("clicked", self.create_annotation_type)
         bbox.pack_start(b, expand=False, fill=False)
 
+        def center_on_current_position(*p):
+            if (self.controller.player.status == self.controller.player.PlayingStatus
+                or self.controller.player.status == self.controller.player.PauseStatus):
+                self.center_on_position(self.current_position)
+            return True
+
+        b=gtk.Button(_("Center"))
+        self.tooltips.set_tip(b, _("Center on current player position."))
+        b.connect("clicked", center_on_current_position)
+        bbox.pack_start(b, expand=False, fill=False)
+
         s = gtk.HScale (self.fraction_adj)
         s.set_digits(2)
         s.connect ("value_changed", self.fraction_event)
