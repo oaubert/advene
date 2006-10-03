@@ -583,9 +583,48 @@ class AdveneController:
                                            fragment=annotation.fragment.clone())
         self.package.annotations.append(an)
         an.author=config.data.userid
-        an.content.data=annotation.content.data
+        # Check if types are compatible.
+        # FIXME: should be made more generic, but we need more metadata for this.
+        if (an.type.mimetype == annotation.type.mimetype
+            or an.type.mimetype == 'text/plain'):
+            # We consider that text/plain can hold anything
+            an.content.data=annotation.content.data
+        elif an.type.mimetype == 'application/x-advene-zone':
+            # we want to define a zone.
+            if annotation.type.mimetype == 'text/plain':
+                d={ 'name': annotation.content.data.replace('\n', '\\n') }
+            elif annotation.type.mimetype == 'application/x-advene-structured':
+                r=sre.compile('^(\w+)=(.*)')
+                d=dict([ (r.findall(l) or [ ('_error', l) ])[0] for l in annotation.content.data.split('\n') ])
+                name="Unknown"
+                for n in ('name', 'title', 'content'):
+                    if d.has_key(n):
+                        name=d[n]
+                        break
+                d['name']=name.replace('\n', '\\n')
+            else:
+                d['name']='Unknown'
+            d.setdefault('x', 50)
+            d.setdefault('y', 50)
+            d.setdefault('width', 10)
+            d.setdefault('height', 10)
+            d.setdefault('shape', 'rect')
+            an.content.data="\n".join( [ "%s=%s" % (k, v) for k,v in d.iteritems() ] )
+        elif an.type.mimetype == 'application/x-advene-structured':
+            if annotation.type.mimetype == 'text/plain':
+                an.content.data = "title=" + annotation.content.data.replace('\n', '\\n')
+            elif annotation.type.mimetype == 'application/x-advene-structured':
+                an.content.data = annotation.content.data
+            else:
+                self.log("Cannot convert %s to %s" % (annotation.type.mimetype,
+                                                      an.type.mimetype))
+                an.content.data = annotation.content.data
+        else:
+                self.log("Do not know how to convert %s to %s" % (annotation.type.mimetype,
+                                                      an.type.mimetype))
+                an.content.data = annotation.content.data
         an.setDate(self.get_timestamp())
-        # FIXME: check if the types are compatible
+
         self.notify("AnnotationCreate", annotation=an, comment="Transmute annotation")
 
         if delete and not annotation.relations:
