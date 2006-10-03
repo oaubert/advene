@@ -588,13 +588,12 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         atid=query['type']
 
                     if atid is not None:
-                        atid=helper.get_id(self.server.controller.package.annotationTypes,
+                        m=helper.get_id(self.server.controller.package.annotationTypes,
                                            atid)
                     else:
-                        self.send_error(404, _("You should provide an annotation-type id parameter"))
-                        return
-
-                    c.queue_action(c.gui.open_adhoc_view, view, annotation_type_id=atid)
+                        # No provided annotation type. Use the whole package
+                        m=c.package
+                    c.queue_action(c.gui.open_adhoc_view, view, model=m)
                     self.send_no_content()
                 elif view == 'transcribe':
                     url=None
