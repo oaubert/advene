@@ -1888,7 +1888,7 @@ class AdveneGUI (Connect):
             'display-caption': config.data.preferences['display-caption'],
 	    'scroll-increment': config.data.preferences['scroll-increment'],
 
-            'toolbarstyle': self.gui.get_widget("toolbar_view").get_style(),
+            'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
             'data': config.data.path['data'],
             'plugins': config.data.path['plugins'],
             'advene': config.data.path['advene'],
@@ -1942,7 +1942,7 @@ Available views: timeline, tree, browser, transcribe"""))
 		      'adhoc-south', 'adhoc-east', 'adhoc-popup', 
                       'display-scroller', 'display-caption'):
 		config.data.preferences[k] = cache[k]
-            for t in ('toolbar_view', 'toolbar_fileop', 'toolbar_create'):
+            for t in ('toolbar_fileop', 'toolbar_create'):
                 self.gui.get_widget(t).set_style(cache['toolbarstyle'])
             for k in ('font-size', 'button-height', 'interline-height'):
                 config.data.preferences['timeline'][k] = cache[k]
