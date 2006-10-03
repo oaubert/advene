@@ -212,6 +212,7 @@ class AdveneGUI (Connect):
             b.connect("drag_data_get", adhoc_view_drag_sent, name)
             b.connect("button_release_event", adhoc_view_release, name)
             b.connect("button_press_event", adhoc_view_press, name)
+
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
 
@@ -920,13 +921,13 @@ class AdveneGUI (Connect):
                                                        controller=self.controller)
         elif name == 'transcription':
             try:
-                at=kw['annotation_type_id']
+                m=kw['model']
             except KeyError:
-                at=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."), 
-                                                create=False)
+                m=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."), 
+                                               create=False)
             if at is not None:
                 view = TranscriptionView(controller=self.controller,
-                                         annotationtype=at)
+                                         model=m)
         elif name == 'browser':
             view = Browser(element=self.controller.package,
                            controller=self.controller)
@@ -1656,6 +1657,10 @@ class AdveneGUI (Connect):
 
     def on_adhoc_transcription_activate (self, button=None, data=None):
         self.open_adhoc_view('transcription')
+        return True
+
+    def on_adhoc_transcription_package_activate (self, button=None, data=None):
+        self.open_adhoc_view('transcription', model=self.controller.package)
         return True
 
     def on_adhoc_browser_activate (self, button=None, data=None):
