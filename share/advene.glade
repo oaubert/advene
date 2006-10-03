@@ -115,7 +115,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image36">
+			<widget class="GtkImage" id="image38">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -137,7 +137,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image37">
+			<widget class="GtkImage" id="image39">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -333,7 +333,31 @@
 		      <property name="tooltip" translatable="yes">Display the annotations as a transcription</property>
 		      <property name="label" translatable="yes">T_ranscription</property>
 		      <property name="use_underline">True</property>
-		      <signal name="activate" handler="on_adhoc_transcription_activate" last_modification_time="Thu, 27 Apr 2006 12:08:00 GMT"/>
+
+		      <child>
+			<widget class="GtkMenu" id="transcription1_menu">
+
+			  <child>
+			    <widget class="GtkMenuItem" id="of_an_annotation_type1">
+			      <property name="visible">True</property>
+			      <property name="tooltip" translatable="yes">Display the transcription for an annotation type</property>
+			      <property name="label" translatable="yes">of an annotation type</property>
+			      <property name="use_underline">True</property>
+			      <signal name="activate" handler="on_adhoc_transcription_activate" last_modification_time="Tue, 03 Oct 2006 08:32:01 GMT"/>
+			    </widget>
+			  </child>
+
+			  <child>
+			    <widget class="GtkMenuItem" id="of_the_whole_package1">
+			      <property name="visible">True</property>
+			      <property name="tooltip" translatable="yes">Transcription of the whole package</property>
+			      <property name="label" translatable="yes">of the whole package</property>
+			      <property name="use_underline">True</property>
+			      <signal name="activate" handler="on_adhoc_transcription_package_activate" last_modification_time="Tue, 03 Oct 2006 08:32:01 GMT"/>
+			    </widget>
+			  </child>
+			</widget>
+		      </child>
 		    </widget>
 		  </child>
 
