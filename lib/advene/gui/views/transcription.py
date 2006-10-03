@@ -82,11 +82,13 @@ class TranscriptionView(AdhocView):
 
     def edit_options(self, button):
         cache=dict(self.options)
+        for c in ('representation', 'separator'):
+            cache[c] = cache[c].replace('\n', '\\n').replace('\t', '\\t')
 
         ew=EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Transcription options"))
         ew.add_entry(_("Representation"), "representation", _("If not empty, this TALES expression that will be used to format the annotations."))
-        ew.add_entry(_("Separator"), "separator", _("This separator will be inserted between the annotations."))
+        ew.add_entry(_("Separator"), "separator", _("This separator will be inserted between the annotations.\nUse \\n for a newline and \\t for a tabulation."))
         ew.add_checkbox(_("Display timestamps"), "display-time", _("Insert timestsamp values"))
         ew.add_checkbox(_("Display annotation bounds"), 'display-bounds', _("Display annotation bounds"))
         res=ew.popup()
