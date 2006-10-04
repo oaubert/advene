@@ -47,7 +47,7 @@ class TranscriptionView(AdhocView):
         self.close_on_package_load = True
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
-	    (_("Validate"), self.validate),
+            (_("Validate"), self.validate),
             )
 
         self.controller=controller
@@ -56,9 +56,9 @@ class TranscriptionView(AdhocView):
         # Annotation where the cursor is set
         self.currentannotation=None
 
-	# Used when batch-updating modified annotations when closing
-	# the window
-	self.ignore_updates = False
+        # Used when batch-updating modified annotations when closing
+        # the window
+        self.ignore_updates = False
 
         self.modified=False
 
@@ -106,27 +106,27 @@ class TranscriptionView(AdhocView):
         return True
 
     def close(self):
-	l=self.check_modified()
-	if l:
-	    if self.options['representation'] and not parsed_representation.match(self.options['representation']):
-		advene.gui.util.message_dialog(label=_("%d annotation(s) were modified\nbut we cannot propagate the modifications\nsince the representation parameter is used.") % len(l))
-	    else:
-		if advene.gui.util.message_dialog(label=_("%d annotations were modified.\nDo you want to update their content?") % len(l),
-						  icon=gtk.MESSAGE_QUESTION):
-		    self.ignore_updates = True
-		    self.update_modified(l)
-	AdhocView.close(self)
-	return True
+        l=self.check_modified()
+        if l:
+            if self.options['representation'] and not parsed_representation.match(self.options['representation']):
+                advene.gui.util.message_dialog(label=_("%d annotation(s) were modified\nbut we cannot propagate the modifications\nsince the representation parameter is used.") % len(l))
+            else:
+                if advene.gui.util.message_dialog(label=_("%d annotations were modified.\nDo you want to update their content?") % len(l),
+                                                  icon=gtk.MESSAGE_QUESTION):
+                    self.ignore_updates = True
+                    self.update_modified(l)
+        AdhocView.close(self)
+        return True
 
     def check_modified(self):
         b=self.textview.get_buffer()
-	modified = []
-	for a in self.model.annotations:
-	    beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
-	    enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
-	    if b.get_text(beginiter, enditer) != self.representation(a):
-		modified.append(a)
-	return modified
+        modified = []
+        for a in self.model.annotations:
+            beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
+            enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
+            if b.get_text(beginiter, enditer) != self.representation(a):
+                modified.append(a)
+        return modified
 
     def update_modified(self, l):
         def update(a, text):
@@ -155,31 +155,31 @@ class TranscriptionView(AdhocView):
 
         b=self.textview.get_buffer()
         impossible=[]
-	for a in l:
-	    beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
-	    enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
-	    if update(a, b.get_text(beginiter, enditer)):
+        for a in l:
+            beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
+            enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
+            if update(a, b.get_text(beginiter, enditer)):
                 self.controller.notify("AnnotationEditEnd", annotation=a)
             else:
                 impossible.append(a)
         if impossible:
-		advene.gui.util.message_dialog(label=_("Cannot convert the following annotations,\nthe representation pattern is too complex.\n%s") % ",".join( [ a.id for a in impossible ] ))
-	return True
+                advene.gui.util.message_dialog(label=_("Cannot convert the following annotations,\nthe representation pattern is too complex.\n%s") % ",".join( [ a.id for a in impossible ] ))
+        return True
 
     def refresh(self, *p):
-	self.update_model()
-	return True
+        self.update_model()
+        return True
 
     def validate(self, *p):
-	l=self.check_modified()
-	if l:
-	    if self.options['representation'] and not parsed_representation.match(self.options['representation']):
-		advene.gui.util.message_dialog(label=_("Cannot validate the update.\nThe representation pattern is too complex."))
-		return True
-	    self.ignore_updates = True
-	    self.update_modified(l)
-	    self.ignore_updates = False
-	return True
+        l=self.check_modified()
+        if l:
+            if self.options['representation'] and not parsed_representation.match(self.options['representation']):
+                advene.gui.util.message_dialog(label=_("Cannot validate the update.\nThe representation pattern is too complex."))
+                return True
+            self.ignore_updates = True
+            self.update_modified(l)
+            self.ignore_updates = False
+        return True
 
     def build_widget(self):
         mainbox = gtk.VBox()
@@ -241,12 +241,12 @@ class TranscriptionView(AdhocView):
     def representation(self, a):
         if self.options['default-representation']:
             rep=helper.get_title(self.controller, a)
-	elif self.options['representation']:
-	    rep=helper.get_title(self.controller, a,
-				 representation=self.options['representation'])
-	else:
-	    rep=a.content.data
-	return rep
+        elif self.options['representation']:
+            rep=helper.get_title(self.controller, a,
+                                 representation=self.options['representation'])
+        else:
+            rep=a.content.data
+        return rep
 
     def generate_buffer_content(self):
         b=self.textview.get_buffer()
@@ -371,8 +371,8 @@ class TranscriptionView(AdhocView):
 
     def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
-	if self.ignore_updates:
-	    return True
+        if self.ignore_updates:
+            return True
 
         if event == 'AnnotationActivate':
             self.activate_annotation(annotation)
@@ -383,8 +383,8 @@ class TranscriptionView(AdhocView):
         if event == 'AnnotationCreate':
             # If it does not exist yet, we should create it if it is now in self.list
             if annotation in self.model.annotations:
-		# Update the whole model.
-		self.update_model()
+                # Update the whole model.
+                self.update_model()
             return True
 
         if event == 'AnnotationEditEnd':
@@ -407,8 +407,8 @@ class TranscriptionView(AdhocView):
             beginiter=b.get_iter_at_mark(beginmark)
             enditer  =b.get_iter_at_mark(endmark)
             b.delete(beginiter, enditer)
-	    b.delete_mark(beginmark)
-	    b.delete_mark(endmark)
+            b.delete_mark(beginmark)
+            b.delete_mark(endmark)
         else:
             print "Unknown event %s" % event
         return True

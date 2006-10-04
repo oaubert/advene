@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -43,7 +43,7 @@ class InteractiveQuery:
             here=controller.package
 
         self.here=here
-	self.source=source
+        self.source=source
         self.controller=controller
 
         self.querycontainer, self.query = self.get_interactive_query()
@@ -52,7 +52,7 @@ class InteractiveQuery:
         self.window=None
 
     def get_interactive_query(self):
-	l=helper.get_id(self.controller.package.queries, '_interactive')
+        l=helper.get_id(self.controller.package.queries, '_interactive')
         if l:
             q=Query()
             q.from_dom(l.content.model)
@@ -73,9 +73,9 @@ class InteractiveQuery:
 
             el.content.data=q.xml_repr()
             el.content.mimetype='application/x-advene-simplequery'
-            
+
             self.controller.package.queries.append(el)
-            
+
             self.controller.notify('QueryCreate', query=el)
             return el, q
 
@@ -89,16 +89,16 @@ class InteractiveQuery:
         self.eq.update_value()
         # Store the query itself in the _interactive query
         self.querycontainer.content.data = self.eq.model.xml_repr()
-        
+
         self.window.destroy()
-        
+
         c=self.controller.build_context(here=self.here)
         try:
             res=c.evaluateValue("here/query/_interactive")
         except AdveneTalesException, e:
             # Display a dialog with the value
-	    advene.gui.util.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
-		icon=gtk.MESSAGE_ERROR)
+            advene.gui.util.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
+                icon=gtk.MESSAGE_ERROR)
             return True
 
         if (isinstance(res, list) or isinstance(res, tuple)
@@ -110,21 +110,21 @@ class InteractiveQuery:
                          % (helper.format_element_name("annotation", len(l)),
                             len(res)))
                 t = TimeLine (l,
-			      minimum=0,
-			      controller=self.controller)
+                              minimum=0,
+                              controller=self.controller)
                 window=t.popup()
                 window.set_title(_("Results of _interactive query"))
             else:
-		advene.gui.util.message_dialog(_("Empty list result."),
-					       icon=gtk.MESSAGE_WARNING)
+                advene.gui.util.message_dialog(_("Empty list result."),
+                                               icon=gtk.MESSAGE_WARNING)
         else:
-	    advene.gui.util.message_dialog(_("Result:\n%s") % unicode(res))
+            advene.gui.util.message_dialog(_("Result:\n%s") % unicode(res))
         return True
-    
+
     def cancel(self, button=None):
         self.window.destroy()
         return True
-    
+
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
@@ -139,7 +139,7 @@ class InteractiveQuery:
                           editable=True,
                           controller=self.controller)
         vbox.add(self.eq.widget)
-        
+
         if self.controller.gui:
             window.connect ("destroy", self.controller.gui.close_view_cb,
                             window, self)
@@ -161,4 +161,4 @@ class InteractiveQuery:
         window.show_all()
         self.window=window
         return window
-        
+

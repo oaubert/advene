@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -155,7 +155,7 @@ class AdveneGUI (Connect):
         """
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
-        
+
         gladefile=config.data.advenefile (config.data.gladefilename)
         # Glade init.
         self.gui = gtk.glade.XML(gladefile, domain=gettext.textdomain())
@@ -166,7 +166,7 @@ class AdveneGUI (Connect):
         self.init_window_size(window, 'main')
 
         self.tooltips = gtk.Tooltips()
-        
+
         # Frequently used GUI widgets
         self.gui.logmessages = self.gui.get_widget("logmessages")
         self.slider_move = False
@@ -189,7 +189,7 @@ class AdveneGUI (Connect):
 
         # Generate the adhoc view buttons
         hb=self.gui.get_widget('adhoc_hbox')
-        for name, tip, pixmap in ( 
+        for name, tip, pixmap in (
             ('treeview', _('Open a tree view'), 'treeview.png'),
             ('timeline', _('Display a timeline'), 'timeline.png'),
             ('transcription', _('Display annotations as a transcription'), 'transcription.png'),
@@ -219,7 +219,7 @@ class AdveneGUI (Connect):
             p.ForwardStatus  : _("Forward"),
             p.BackwardStatus : _("Backward"),
             p.InitStatus     : _("Init"),
-            p.EndStatus      : _("End"),    
+            p.EndStatus      : _("End"),
             p.UndefinedStatus: _("Undefined"),
             }
         self.gui.player_status = self.gui.get_widget ("player_status")
@@ -387,7 +387,7 @@ class AdveneGUI (Connect):
                 combo.set_active_iter(i)
                 return True
             i=store.iter_next(i)
-        
+
         return True
 
     def updated_position_cb (self, context, parameters):
@@ -429,7 +429,7 @@ class AdveneGUI (Connect):
         # to build one-file executables
         advene.gui.plugins.actions.register(self.controller)
         advene.gui.plugins.contenthandlers.register(self.controller)
-        
+
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
         self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
@@ -438,19 +438,19 @@ class AdveneGUI (Connect):
         self.visualisationwidget=self.get_visualisation_widget()
         self.gui.get_widget("displayvbox").add(self.visualisationwidget)
         self.gui.get_widget("vpaned").set_position(-1)
-  
-        for events, method in ( 
+
+        for events, method in (
             ("PackageLoad", self.manage_package_load),
             ("PackageActivate", self.manage_package_activate),
             ("PackageSave", self.manage_package_save),
             ( ('AnnotationCreate', 'AnnotationEditEnd',
-               'AnnotationDelete', 'AnnotationActivate', 
+               'AnnotationDelete', 'AnnotationActivate',
                'AnnotationDeactivate'),
               self.annotation_lifecycle ),
-            ( ('RelationCreate', 'RelationEditEnd', 
-               'RelationDelete'), 
+            ( ('RelationCreate', 'RelationEditEnd',
+               'RelationDelete'),
               self.relation_lifecycle ),
-            ( ('ViewCreate', 'ViewEditEnd', 'ViewDelete'), 
+            ( ('ViewCreate', 'ViewEditEnd', 'ViewDelete'),
               self.view_lifecycle ),
             ( ('QueryCreate', 'QueryEditEnd', 'QueryDelete'),
               self.query_lifecycle),
@@ -458,15 +458,15 @@ class AdveneGUI (Connect):
               self.resource_lifecycle),
             ( ('SchemaCreate', 'SchemaEditEnd', 'SchemaDelete'),
               self.schema_lifecycle),
-            ( ('AnnotationTypeCreate', 'AnnotationTypeEditEnd', 
+            ( ('AnnotationTypeCreate', 'AnnotationTypeEditEnd',
                'AnnotationTypeDelete'),
               self.annotationtype_lifecycle),
-            ( ('RelationTypeCreate', 'RelationTypeEditEnd', 
+            ( ('RelationTypeCreate', 'RelationTypeEditEnd',
                'RelationTypeDelete'),
               self.relationtype_lifecycle),
             ("PlayerSet", self.updated_position_cb),
             ("PlayerStop", self.player_stop_cb),
-            ("ViewActivation", self.on_view_activation) 
+            ("ViewActivation", self.on_view_activation)
             ):
             if isinstance(events, basestring):
                 self.controller.event_handler.internal_rule (event=events,
@@ -498,7 +498,7 @@ class AdveneGUI (Connect):
             self.register_view (tree)
             sw = gtk.ScrolledWindow ()
             sw.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-            
+
             sw.add (tree.get_widget())
             self.gui.get_widget("displayvbox").add(sw)
             sw.show_all()
@@ -528,13 +528,13 @@ class AdveneGUI (Connect):
         for filename in config.data.preferences['history']:
             self.append_file_history_menu(filename)
 
-	# Open the default adhoc popup views
-	for dest in ('popup', 'east', 'south'):
-	    for n in config.data.preferences['adhoc-%s' % dest].split(':'):
-		try:
-		    v=self.open_adhoc_view(n, destination=dest)
-		except Exception, e:
-		    self.log(_("Cannot open adhoc view %s in %s: %s") % (n, dest, unicode(e)))
+        # Open the default adhoc popup views
+        for dest in ('popup', 'east', 'south'):
+            for n in config.data.preferences['adhoc-%s' % dest].split(':'):
+                try:
+                    v=self.open_adhoc_view(n, destination=dest)
+                except Exception, e:
+                    self.log(_("Cannot open adhoc view %s in %s: %s") % (n, dest, unicode(e)))
 
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
@@ -592,7 +592,7 @@ class AdveneGUI (Connect):
         b=gtk.Button(stock=gtk.STOCK_EDIT)
         b.connect('clicked', self.on_edit_current_stbv_clicked)
         hb.pack_start(b, expand=False)
-        
+
         # Append the player status label to the toolbar
         ts=gtk.SeparatorToolItem()
         ts.set_draw(False)
@@ -635,7 +635,7 @@ class AdveneGUI (Connect):
         vb1 = ViewBook(controller=self.controller)
         vb2 = ViewBook(controller=self.controller)
 
-	self.east_viewbook = vb1
+        self.east_viewbook = vb1
 
         hpane.add1(vb1.widget)
         hpane.add2(vb2.widget)
@@ -643,7 +643,7 @@ class AdveneGUI (Connect):
         # First viewbook
         vb1.add_view(self.logwindow, _("URL stack"), permanent=True)
         # URL stack is embedded. The menu item is useless :
-        self.gui.get_widget('urlstack1').set_property('visible', False)           
+        self.gui.get_widget('urlstack1').set_property('visible', False)
 
         # Second viewbook
         self.navigation_history=HistoryNavigation(controller=self.controller)
@@ -652,7 +652,7 @@ class AdveneGUI (Connect):
         vb2.add_view(self.navigation_history, name=_("History"), permanent=True)
 
         # We should be able to specify 80%/20% for instance, but the allocation
-        # is not available here. We have to wait for the main GUI window to 
+        # is not available here. We have to wait for the main GUI window to
         # appear
         hpane.set_position (300)
 
@@ -666,9 +666,9 @@ class AdveneGUI (Connect):
 
         self.popupwidget=AccumulatorPopup(controller=self.controller,
                                           autohide=False)
-        
+
         self.viewbook.add_view(self.popupwidget, _("Popups"), permanent=True)
-        
+
         vis.show_all()
 
         # Information message
@@ -736,16 +736,16 @@ class AdveneGUI (Connect):
         """Return a player control toolbar
         """
         tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS) 
-        
+        tb.set_style(gtk.TOOLBAR_ICONS)
+
         tb_list = (
-            (_("Rewind"), _("Rewind"), gtk.STOCK_MEDIA_REWIND, 
+            (_("Rewind"), _("Rewind"), gtk.STOCK_MEDIA_REWIND,
              self.on_b_rewind_clicked),
             (_("Play"), _("Play"), gtk.STOCK_MEDIA_PLAY,
              self.on_b_play_clicked),
             (_("Pause"), _("Pause"), gtk.STOCK_MEDIA_PAUSE,
              self.on_b_pause_clicked),
-            (_("Stop"), _("Stop"), gtk.STOCK_MEDIA_STOP, 
+            (_("Stop"), _("Stop"), gtk.STOCK_MEDIA_STOP,
              self.on_b_stop_clicked),
             (_("Forward"), _("Forward"), gtk.STOCK_MEDIA_FORWARD,
              self.on_b_forward_clicked),
@@ -758,14 +758,14 @@ class AdveneGUI (Connect):
             tb.insert(b, -1)
         tb.show_all()
         return tb
-    
+
     def debug_cb(self, window, event, *p):
         print "Got event %s (%d, %d) in window %s" % (str(event),
                                                       event.x,
                                                       event.y,
                                                       str(window))
         return False
-    
+
     def format_slider_value (self, slider=None, val=0):
         """Formats a value (in milliseconds) into a time string.
 
@@ -784,7 +784,7 @@ class AdveneGUI (Connect):
         window.set_default_size (*s)
         window.connect ("size_allocate", self.resize_cb, name)
         return True
-    
+
     def resize_cb (self, widget, allocation, name):
         """Memorize the new dimensions of the widget.
         """
@@ -792,7 +792,7 @@ class AdveneGUI (Connect):
                                                        allocation.height)
         #print "New size for %s: %s" %  (name, config.data.preferences['windowsize'][name])
         return False
-    
+
     def on_edit_current_stbv_clicked(self, button):
         combo=self.gui.stbv_combo
         i=combo.get_active_iter()
@@ -852,7 +852,7 @@ class AdveneGUI (Connect):
             return True
         l=[ None ]
         l.extend(self.controller.get_stbv_list())
-        st, i = advene.gui.util.generate_list_model([ (i, self.controller.get_title(i)) 
+        st, i = advene.gui.util.generate_list_model([ (i, self.controller.get_title(i))
                                                       for i in l ],
                                                     active_element=self.controller.current_stbv)
         stbv_combo.set_model(st)
@@ -880,7 +880,7 @@ class AdveneGUI (Connect):
         i=gtk.MenuItem(label=unicode(os.path.basename(filename)), use_underline=False)
         i.connect('activate', open_history_file, filename)
         self.tooltips.set_tip(i, _("Open %s") % filename)
-        
+
         i.show()
         menu.append(i)
 
@@ -902,8 +902,8 @@ class AdveneGUI (Connect):
 
     def open_adhoc_view(self, name, destination='popup', **kw):
         """Open the given adhoc view.
-	
-	Destination can be: 'popup', 'south', 'east' or None
+
+        Destination can be: 'popup', 'south', 'east' or None
         """
         view=None
         if name == 'treeview' or name == 'tree':
@@ -916,7 +916,7 @@ class AdveneGUI (Connect):
             try:
                 m=kw['model']
             except KeyError:
-                m=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."), 
+                m=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."),
                                                create=False)
             if m is not None:
                 view = TranscriptionView(controller=self.controller,
@@ -939,14 +939,14 @@ class AdveneGUI (Connect):
             except KeyError:
                 filename=None
             view=TranscriptionEdit(controller=self.controller, filename=filename)
-	if view is None:
-	    return view
+        if view is None:
+            return view
         if destination == 'popup':
             view.popup()
-	elif destination == 'south':
-	    self.south_viewbook.add_view(view)
-	elif destination == 'east':
-	    self.east_viewbook.add_view(view)
+        elif destination == 'south':
+            self.south_viewbook.add_view(view)
+        elif destination == 'east':
+            self.east_viewbook.add_view(view)
         return view
 
     def update_gui (self):
@@ -989,7 +989,7 @@ class AdveneGUI (Connect):
                 try:
                     v.update_model(self.controller.package)
                 except AttributeError:
-                    pass        
+                    pass
         pass
 
     def manage_package_load (self, context, parameters):
@@ -1022,7 +1022,7 @@ class AdveneGUI (Connect):
         self.gui.get_widget ("win").set_title(" - ".join((_("Advene"),
                                                           self.controller.get_title(self.controller.package))))
         return True
-    
+
     def log (self, msg, level=None):
         """Add a new log message to the logmessage window.
 
@@ -1126,7 +1126,7 @@ class AdveneGUI (Connect):
         ev.hbox.add(b)
 
         self.init_window_size(w, 'evaluator')
-        
+
         return True
 
     def update_display (self):
@@ -1201,7 +1201,7 @@ class AdveneGUI (Connect):
             self.controller.position_update ()
 
         return True
-    
+
     def ask_for_annotation_type(self, text=None, create=False):
         """Display a popup asking to choose an annotation type.
 
@@ -1220,7 +1220,7 @@ class AdveneGUI (Connect):
             newat=helper.TitledElement(value=None,
                                        title=_("Create a new annotation type"))
             ats.append(newat)
-            
+
         if len(ats) == 1:
             at=ats[0]
         elif len(ats) > 1:
@@ -1250,9 +1250,9 @@ class AdveneGUI (Connect):
                     print _("Error: unable to find an edit popup for %s:\n%s") % (at, unicode(e))
                 else:
                     at=pop.edit (modal=True)
-                
+
         return at
-        
+
     def ask_for_schema(self, text=None, create=False):
         """Display a popup asking to choose a schema.
 
@@ -1271,7 +1271,7 @@ class AdveneGUI (Connect):
             newschema=helper.TitledElement(value=None,
                                            title=_("Create a new schema"))
             schemas.append(newschema)
-            
+
         if len(schemas) == 1:
             schema=schemas[0]
         elif len(schemas) > 1:
@@ -1298,7 +1298,7 @@ class AdveneGUI (Connect):
                                                                                   unicode(e))
                 else:
                     at=pop.edit (modal=True)
-            
+
         return schema
 
     def popup_edit_accumulator(self, *p):
@@ -1326,12 +1326,12 @@ class AdveneGUI (Connect):
                 response=advene.gui.util.yes_no_cancel_popup(title=_("Package %s modified") % t,
                                                              text=_("The package %s has been modified but not saved.\nSave it now?") % t)
                 if response == gtk.RESPONSE_CANCEL:
-                    return True            
+                    return True
                 if response == gtk.RESPONSE_YES:
                     self.on_save1_activate(package=p)
                 if response == gtk.RESPONSE_NO:
                     p._modified=False
-            
+
         if self.controller.on_exit():
             gtk.main_quit()
             return False
@@ -1477,7 +1477,7 @@ class AdveneGUI (Connect):
                     ext='.xml'
                 filename = filename + ext
 
-            if (package.resources and package.resources.children() 
+            if (package.resources and package.resources.children()
                 and ext.lower() != '.azp'):
                 ret=advene.gui.util.yes_no_cancel_popup(title=_("Invalid file extension"),
                                                         text=_("Your package contains resources,\nthe filename (%s) should have a .azp extension.\nShould I put the correct extension?") % filename)
@@ -1510,7 +1510,7 @@ class AdveneGUI (Connect):
             advene.gui.util.message_dialog(_("The associated media is not a DVD."),
                                            icon=gtk.MESSAGE_ERROR)
         return True
-        
+
     def on_import_file1_activate (self, button=None, data=None):
         if config.data.path['data']:
             d=config.data.path['data']
@@ -1547,7 +1547,7 @@ class AdveneGUI (Connect):
         """Gtk callback to quit."""
         return self.on_exit (button, data)
 
-    def on_find1_activate (self, button=None, data=None): 
+    def on_find1_activate (self, button=None, data=None):
         iq = InteractiveQuery(here=self.controller.package,
                               controller=self.controller)
         iq.popup()
@@ -1642,7 +1642,7 @@ class AdveneGUI (Connect):
 
     def on_view_urlstack_activate (self, button=None, data=None):
         """Open the URL stack view plugin.
-        
+
         Useless now, the urlstack is always here. This code will be
         removed sometime...
         """
@@ -1700,9 +1700,9 @@ class AdveneGUI (Connect):
         scroll_win.add(t)
 
         vbox.add(scroll_win)
-        
+
         hbox=gtk.HButtonBox()
-        
+
         b=gtk.Button(stock=gtk.STOCK_CLOSE)
         b.connect("clicked", close, w)
         hbox.pack_start(b, expand=False)
@@ -1712,7 +1712,7 @@ class AdveneGUI (Connect):
         hbox.pack_start(b, expand=False)
 
         vbox.pack_start(hbox, expand=False)
-        
+
         w.add(vbox)
         refresh(None, t)
 
@@ -1881,12 +1881,12 @@ class AdveneGUI (Connect):
             'osdtext': config.data.player_preferences['osdtext'],
             'history-size-limit': config.data.preferences['history-size-limit'],
 
-	    'adhoc-south': config.data.preferences['adhoc-south'],
-	    'adhoc-east': config.data.preferences['adhoc-east'],
-	    'adhoc-popup': config.data.preferences['adhoc-popup'],
+            'adhoc-south': config.data.preferences['adhoc-south'],
+            'adhoc-east': config.data.preferences['adhoc-east'],
+            'adhoc-popup': config.data.preferences['adhoc-popup'],
             'display-scroller': config.data.preferences['display-scroller'],
             'display-caption': config.data.preferences['display-caption'],
-	    'scroll-increment': config.data.preferences['scroll-increment'],
+            'scroll-increment': config.data.preferences['scroll-increment'],
 
             'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
             'data': config.data.path['data'],
@@ -1906,23 +1906,23 @@ class AdveneGUI (Connect):
         ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
                     -1, 20)
         ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 2000)
-        ew.add_option(_("Toolbar style"), "toolbarstyle", _("Toolbar style"), 
+        ew.add_option(_("Toolbar style"), "toolbarstyle", _("Toolbar style"),
                       { _('Icons only'): gtk.TOOLBAR_ICONS,
                         _('Text only'): gtk.TOOLBAR_TEXT,
-                        _('Both'): gtk.TOOLBAR_BOTH, 
+                        _('Both'): gtk.TOOLBAR_BOTH,
                         }
                      )
-	ew.add_title(_("Default adhoc views"))
-	ew.add_label(_("""List of adhoc views to open on application startup.
+        ew.add_title(_("Default adhoc views"))
+        ew.add_label(_("""List of adhoc views to open on application startup.
 Multiple views can be separated by :
 Available views: timeline, tree, browser, transcribe"""))
 
-	ew.add_entry(_("Below"), 'adhoc-south', _("Embedded below the video"))
-	ew.add_entry(_("Right"), 'adhoc-east', _("Embedded at the right of the video"))
-	ew.add_entry(_("Popup"), 'adhoc-popup', _("In their own window"))
+        ew.add_entry(_("Below"), 'adhoc-south', _("Embedded below the video"))
+        ew.add_entry(_("Right"), 'adhoc-east', _("Embedded at the right of the video"))
+        ew.add_entry(_("Popup"), 'adhoc-popup', _("In their own window"))
 
-	ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
-	ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
+        ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
+        ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
 
         ew.add_title(_("Paths"))
 
@@ -1938,10 +1938,10 @@ Available views: timeline, tree, browser, transcribe"""))
 
         res=ew.popup()
         if res:
-	    for k in ('history-size-limit', 'osdtext', 'scroll-increment',
-		      'adhoc-south', 'adhoc-east', 'adhoc-popup', 
+            for k in ('history-size-limit', 'osdtext', 'scroll-increment',
+                      'adhoc-south', 'adhoc-east', 'adhoc-popup',
                       'display-scroller', 'display-caption'):
-		config.data.preferences[k] = cache[k]
+                config.data.preferences[k] = cache[k]
             for t in ('toolbar_fileop', 'toolbar_create'):
                 self.gui.get_widget(t).set_style(cache['toolbarstyle'])
             for k in ('font-size', 'button-height', 'interline-height'):
@@ -1953,10 +1953,10 @@ Available views: timeline, tree, browser, transcribe"""))
                     config.data.preferences['path'][k]=cache[k]
                     if k == 'plugins':
                         self.controller.restart_player()
-                    
+
         return True
 
-    def on_configure_player1_activate (self, button=None, data=None): 
+    def on_configure_player1_activate (self, button=None, data=None):
         cache={
             'width': config.data.player['snapshot-dimensions'][0],
             'height': config.data.player['snapshot-dimensions'][1],
@@ -1971,12 +1971,12 @@ Available views: timeline, tree, browser, transcribe"""))
         ew.add_checkbox(_("Enable"), "caption", _("Enable video captions"))
         ew.add_file_selector(_("Font"), "osdfont", _("TrueType font for captions"))
         ew.add_checkbox(_("Enable SVG"), "svg", _("Enable SVG captions"))
-        
+
         ew.add_title(_("Snapshots"))
         ew.add_checkbox(_("Enable"), "snapshot", _("Enable snapshots"))
         ew.add_spin(_("Width"), "width", _("Snapshot width"), 0, 1280)
         ew.add_spin(_("Height"), "height", _("Snapshot height"), 0, 1280)
-        
+
         ew.add_title(_("Video"))
         options={_("Default"): 'default' }
         if config.data.os == 'win32':
@@ -1990,12 +1990,12 @@ Available views: timeline, tree, browser, transcribe"""))
         ew.add_title(_("Verbosity"))
         ew.add_spin(_("Level"), "level", _("Verbosity level. -1 for no messages."),
                     -1, 3)
-        
+
         res=ew.popup()
         if res:
             for n in ('caption', 'osdfont', 'snapshot', 'vout', 'svg'):
                 config.data.player[n] = cache[n]
-            config.data.player['snapshot-dimensions']    = (cache['width'] , 
+            config.data.player['snapshot-dimensions']    = (cache['width'] ,
                                                             cache['height'])
             if cache['level'] == -1:
                 config.data.player['verbose'] = None

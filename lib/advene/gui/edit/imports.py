@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -36,7 +36,7 @@ class TreeViewImporter:
     COLUMN_ID=2
     COLUMN_IMPORTED=3
     COLUMN_URI=4
-    
+
     types_mapping={
         'view': 'views',
         'schema': 'schemas',
@@ -46,7 +46,7 @@ class TreeViewImporter:
         'relation': 'relations',
         'query': 'queries',
         }
-    
+
     def __init__(self, controller=None):
         self.controller=controller
         self.widget=self.build_widget()
@@ -63,7 +63,7 @@ class TreeViewImporter:
         node = None
         if it is not None:
             node = treeview.get_model().get_value (it,
-						   TreeViewImporter.COLUMN_ELEMENT)
+                                                   TreeViewImporter.COLUMN_ELEMENT)
         return node
 
     def tree_view_button_cb(self, widget=None, event=None):
@@ -71,7 +71,7 @@ class TreeViewImporter:
         button = event.button
         x = int(event.x)
         y = int(event.y)
-        
+
         if button == 3:
             if event.window is widget.get_bin_window():
                 model = widget.get_model()
@@ -93,7 +93,7 @@ class TreeViewImporter:
             try:
                 pop = advene.gui.edit.elements.get_edit_popup (node,
                                                                controller=self.controller,
-							       editable=False)
+                                                               editable=False)
             except TypeError, e:
                 pass
             else:
@@ -135,7 +135,7 @@ class TreeViewImporter:
                               v.title or v.id,
                               v.id,
                               self.is_imported(v),
-                              v.uri]) 
+                              v.uri])
 
         schemasrow=store.append(parent=packagerow,
                                 row=[p.schemas,
@@ -187,7 +187,7 @@ class TreeViewImporter:
                               self.controller.get_title(a),
                               a.id,
                               self.is_imported(a),
-                              a.uri]) 
+                              a.uri])
 
         relationsrow=store.append(parent=packagerow,
                                   row=[p.relations,
@@ -202,7 +202,7 @@ class TreeViewImporter:
                               r.id,
                               self.is_imported(r),
                               r.uri])
-                
+
         queriesrow=store.append(parent=packagerow,
                                 row=[p.queries,
                                      _('Queries'),
@@ -216,9 +216,9 @@ class TreeViewImporter:
                               q.id,
                               self.is_imported(q),
                               q.uri])
-                
+
         return
-        
+
     def build_liststore(self):
         # Store reference to the element, string representation (title and id)
         # and boolean indicating wether it is imported or not
@@ -229,7 +229,7 @@ class TreeViewImporter:
             gobject.TYPE_BOOLEAN,
             gobject.TYPE_STRING,
             )
-        
+
         for i in self.controller.package.imports:
             self.add_package(store, package=i.package, as=i.getAs())
         return store
@@ -280,7 +280,7 @@ class TreeViewImporter:
                                            element,
                                            self.controller)
                    if element.viewableClass == 'schema':
-                       # The user selected a schema, 
+                       # The user selected a schema,
                        # show the types as non-imported
                        for c in model[path].iterchildren():
                            c[self.COLUMN_IMPORTED] = False
@@ -316,7 +316,7 @@ class TreeViewImporter:
         renderer = gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
         renderer.connect('toggled', self.toggled_cb, self.store, self.COLUMN_IMPORTED)
-        
+
         column = gtk.TreeViewColumn(_('Imported?'), renderer,
                                     active=self.COLUMN_IMPORTED)
         treeview.append_column(column)
@@ -325,26 +325,26 @@ class TreeViewImporter:
         column = gtk.TreeViewColumn(_('Id'), renderer,
                                     text=self.COLUMN_ID)
         column.set_resizable(True)
-        treeview.append_column(column)        
+        treeview.append_column(column)
 
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_('Title'), renderer,
                                     text=self.COLUMN_LABEL)
         column.set_resizable(True)
         treeview.append_column(column)
-        
+
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_('URI'), renderer,
                                     text=self.COLUMN_URI)
         column.set_resizable(True)
         treeview.append_column(column)
 
-        
+
         vbox.add(treeview)
         vbox.show_all()
-        
+
         return vbox
-    
+
 class Importer:
     def __init__(self, controller=None, sourcepackage=None):
         self.controller=controller
@@ -355,7 +355,7 @@ class Importer:
         if config.data.path['data']:
             d=config.data.path['data']
         else:
-            d=None        
+            d=None
         filename, alias=advene.gui.util.get_filename(title=_("Choose the package to import, and its alias"),
                                                      action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                                      button=gtk.STOCK_OPEN,
@@ -369,12 +369,12 @@ class Importer:
                                         uri=filename)
         i.setAs(alias)
         self.controller.package.imports.append(i)
-        
+
         # Update the ListStore
         self.ti.add_package(self.ti.store, package=i.package, as=alias)
 
         return True
-        
+
     def build_widget(self):
         vbox=gtk.VBox()
 
@@ -384,7 +384,7 @@ class Importer:
         scroll_win = gtk.ScrolledWindow ()
         scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         vbox.add(scroll_win)
-        
+
         self.ti=TreeViewImporter(controller=self.controller)
         scroll_win.add_with_viewport(self.ti.widget)
 
@@ -397,7 +397,7 @@ class Importer:
         vbox.pack_start(hb, expand=False)
 
         hb.show_all()
-        
+
         return vbox
 
     def popup(self):
@@ -422,9 +422,9 @@ class Importer:
         self.buttonbox.add (b)
 
         vbox.pack_start(self.buttonbox, expand=False)
-        
+
         window.show_all()
-        
+
         return window
 
 
@@ -437,15 +437,15 @@ if __name__ == "__main__":
         pass
 
     from advene.model.package import Package
-    
+
     controller=DummyController()
-    
+
     controller.package = Package (uri=sys.argv[1])
     controller.gui=None
 
     i=Importer(controller=controller)
     window=i.popup()
-    
+
     window.connect ("destroy", lambda e: gtk.main_quit())
 
     gtk.main ()

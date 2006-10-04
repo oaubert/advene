@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -49,8 +49,8 @@ class ViewPlugin(AdhocView):
     def __init__(self, controller=None):
         self.view_name = _("Generic view plugin")
         self.view_id = 'viewplugin'
-	self.controller=controller
-	self.widget = self.build_widget()
+        self.controller=controller
+        self.widget = self.build_widget()
 
     def register_callback (self, controller=None):
         """Method invoked on view creation.
@@ -62,13 +62,13 @@ class ViewPlugin(AdhocView):
         @type controller: advene.core.controller.Controller
         """
         pass
-    
+
     def unregister_callback (self, controller=None):
         """Method invoked on view closing.
 
         It is used to clean up the settings done in
         L{register_callback}.
-        
+
         @param controller: the Advene controller
         @type controller: advene.core.controller.Controller
         """
@@ -89,7 +89,7 @@ class ViewPlugin(AdhocView):
         """Popup the view in a toplevel window.
         """
         pass
-    
+
     def get_model (self):
         """Return the model (data structure) corresponding to the view.
 
@@ -108,7 +108,7 @@ class ViewPlugin(AdhocView):
     #    @type pos: long
     #    """
     #    pass
-    
+
     def activate_annotation (self, annotation):
         """Activate the given annotation (some kind of visual feedback).
 
@@ -134,7 +134,7 @@ class ViewPlugin(AdhocView):
         @type package: advene.model.package.Package
         """
         pass
-    
+
     def update_annotation (self, annotation=None, event=None):
         """Update the representation of the given annotation.
 
@@ -177,4 +177,4 @@ class ViewPlugin(AdhocView):
         @type event: advene.rules.elements.Event
         """
         pass
-    
+

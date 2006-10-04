@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -63,8 +63,8 @@ class Menu:
         return True
 
     def duplicate_annotation(self, widget, ann):
-	self.controller.duplicate_annotation(ann)
-	return True
+        self.controller.duplicate_annotation(ann)
+        return True
 
     def activate_annotation (self, widget, ann):
         self.controller.notify("AnnotationActivate", annotation=ann)
@@ -103,58 +103,58 @@ class Menu:
         return True
 
     def do_insert_resource_file(self, parent=None, filename=None, id_=None):
-	if id_ is None:
-	    # Generate the id_
-	    basename = os.path.basename(filename)
-	    id_=sre.sub('[^a-zA-Z0-9_.]', '_', basename)	    
+        if id_ is None:
+            # Generate the id_
+            basename = os.path.basename(filename)
+            id_=sre.sub('[^a-zA-Z0-9_.]', '_', basename)
         size=os.stat(filename).st_size
         f=open(filename, 'r')
         parent[id_]=f.read(size + 2)
         f.close()
         el=parent[id_]
-        self.controller.notify('ResourceCreate', 
+        self.controller.notify('ResourceCreate',
                                resource=el)
-	return el
+        return el
 
     def do_insert_resource_dir(self, parent=None, dirname=None, id_=None):
-	if id_ is None:
-	    # Generate the id_
-	    basename = os.path.basename(dirname)
-	    id_=sre.sub('[^a-zA-Z0-9_.]', '_', basename)
-	parent[id_] = parent.DIRECTORY_TYPE
-	el=parent[id_]
-        self.controller.notify('ResourceCreate', 
+        if id_ is None:
+            # Generate the id_
+            basename = os.path.basename(dirname)
+            id_=sre.sub('[^a-zA-Z0-9_.]', '_', basename)
+        parent[id_] = parent.DIRECTORY_TYPE
+        el=parent[id_]
+        self.controller.notify('ResourceCreate',
                                resource=el)
-	for n in os.listdir(dirname):
-	    filename = os.path.join(dirname, n)
-	    if os.path.isdir(filename):
-		self.do_insert_resource_dir(parent=el, dirname=filename)
-	    else:
-		self.do_insert_resource_file(parent=el, filename=filename)
-	return el
+        for n in os.listdir(dirname):
+            filename = os.path.join(dirname, n)
+            if os.path.isdir(filename):
+                self.do_insert_resource_dir(parent=el, dirname=filename)
+            else:
+                self.do_insert_resource_file(parent=el, filename=filename)
+        return el
 
     def do_remove_resource_dir(self, r):
-	for c in r.children():
-	    if isinstance(c, ResourceData):
-		self.do_remove_resource_file(c)
-	    elif isinstance(c, Resources):
-		self.do_remove_resource_dir(c)
-	    else:
-		print "Strange bug in do_remove_resource_dir"
-		return True
-	p=r.parent
-	del(p[r.id])
+        for c in r.children():
+            if isinstance(c, ResourceData):
+                self.do_remove_resource_file(c)
+            elif isinstance(c, Resources):
+                self.do_remove_resource_dir(c)
+            else:
+                print "Strange bug in do_remove_resource_dir"
+                return True
+        p=r.parent
+        del(p[r.id])
         self.controller.notify('ResourceDelete',
                                resource=r)
-	return True
+        return True
 
     def do_remove_resource_file(self, r):
-	p=r.parent
-	del(p[r.id])
+        p=r.parent
+        del(p[r.id])
         self.controller.notify('ResourceDelete',
                                resource=r)
-	return True
-    
+        return True
+
     def insert_resource_data(self, widget, parent=None):
         filename=advene.gui.util.get_filename(title=_("Choose the file to insert"))
         if filename is None:
@@ -171,15 +171,15 @@ class Menu:
                     return True
                 elif sre.match('^[a-zA-Z0-9_.]+$', id_):
                     break
-	self.do_insert_resource_file(parent=parent, filename=filename, id_=id_)
+        self.do_insert_resource_file(parent=parent, filename=filename, id_=id_)
         return True
 
     def insert_resource_directory(self, widget, parent=None):
-	dirname=advene.gui.util.get_dirname(title=_("Choose the directory to insert"))
+        dirname=advene.gui.util.get_dirname(title=_("Choose the directory to insert"))
         if dirname is None:
             return True
-	
-	self.do_insert_resource_dir(parent=parent, dirname=dirname)
+
+        self.do_insert_resource_dir(parent=parent, dirname=dirname)
         return True
 
     def edit_element (self, widget, el):
@@ -197,7 +197,7 @@ class Menu:
 
         transcription.popup()
         return True
-    
+
     def popup_get_offset(self):
         offset=advene.gui.util.entry_dialog(title='Enter an offset',
                                             text=_("Give the offset to use\non specified element.\nIt is in ms and can be\neither positive or negative."),
@@ -206,7 +206,7 @@ class Menu:
             return long(offset)
         else:
             return offset
-    
+
     def offset_element (self, widget, el):
         offset = self.popup_get_offset()
         if offset is None:
@@ -216,18 +216,18 @@ class Menu:
             el.fragment.end += offset
             self.controller.notify('AnnotationEditEnd', annotation=el)
         elif isinstance(el, AnnotationType) or isinstance(el, Package):
-            for a in el.annotations: 
+            for a in el.annotations:
                 a.fragment.begin += offset
-                a.fragment.end += offset 
+                a.fragment.end += offset
                 self.controller.notify('AnnotationEditEnd', annotation=a)
         elif isinstance(el, Schema):
             for at in el.annotationTypes:
-                for a in at.annotations: 
+                for a in at.annotations:
                     a.fragment.begin += offset
                     a.fragment.end += offset
                     self.controller.notify('AnnotationEditEnd', annotation=a)
         return True
-    
+
     def browse_element (self, widget, el):
         browser = advene.gui.views.browser.Browser(el, controller=self.controller)
         browser.popup()
@@ -245,7 +245,7 @@ class Menu:
                    for r in el.rootPackage.relations
                    if el in r.members ]
             if rels:
-		advene.gui.util.message_dialog(
+                advene.gui.util.message_dialog(
                     _("Cannot delete the annotation %s:\nThe following relation(s) use it:\n%s") % (helper.get_title(self.controller, el), ", ".join(rels)))
                 return True
             p.annotations.remove(el)
@@ -255,21 +255,21 @@ class Menu:
             self.controller.notify('RelationDelete', relation=el)
         elif isinstance(el, AnnotationType):
             if len(el.annotations) > 0:
-		advene.gui.util.message_dialog(
+                advene.gui.util.message_dialog(
                     _("Cannot delete the annotation type %s:\nthere are still annotations of this type.") % (el.title or el.id))
                 return True
-	    el.schema.annotationTypes.remove(el)
+            el.schema.annotationTypes.remove(el)
             self.controller.notify('AnnotationTypeDelete', annotationtype=el)
         elif isinstance(el, RelationType):
             if len(el.relations) > 0:
-		advene.gui.util.message_dialog(
+                advene.gui.util.message_dialog(
                     _("Cannot delete the relation type %s:\nthere are still relations of this type.") % (el.title or el.id))
                 return True
             el.schema.relationTypes.remove(el)
             self.controller.notify('RelationTypeDelete', relationtype=el)
         elif isinstance(el, Schema):
             if len(el.annotationTypes) > 0 or len(el.relationTypes) > 0:
-		advene.gui.util.message_dialog(
+                advene.gui.util.message_dialog(
                     _("Cannot delete the schema %s:\nthere are still types in it.") % (el.title or el.id))
                 return True
             p.remove(el)
@@ -281,9 +281,9 @@ class Menu:
             p.queries.remove(el)
             self.controller.notify('QueryDelete', query=el)
         elif isinstance(el, Resources):
-	    self.do_remove_resource_dir(el)
-	elif isinstance(el, ResourceData):
-	    self.do_remove_resource_file(el)	    
+            self.do_remove_resource_dir(el)
+        elif isinstance(el, ResourceData):
+            self.do_remove_resource_file(el)
         return True
 
     def delete_elements (self, widget, el, elements):
@@ -301,7 +301,7 @@ class Menu:
         if action is not None:
             i.connect("activate", action, *param, **kw)
         menu.append(i)
-	return i
+        return i
 
     def make_base_menu(self, element):
         """Build a base popup menu dedicated to the given element.
@@ -317,7 +317,7 @@ class Menu:
         def add_item(*p, **kw):
             return self.add_menuitem(menu, *p, **kw)
 
-	title=add_item(self.get_title(element))
+        title=add_item(self.get_title(element))
         title.set_submenu(self.common_submenu(element))
 
         add_item("")
@@ -337,7 +337,7 @@ class Menu:
             Package: self.make_package_menu,
             Query: self.make_query_menu,
             Resources: self.make_resources_menu,
-	    ResourceData: self.make_resourcedata_menu,
+            ResourceData: self.make_resourcedata_menu,
             }
 
         for t, method in specific_builder.iteritems():
@@ -349,11 +349,11 @@ class Menu:
 
     def common_submenu(self, element):
         """Build the common submenu for all elements.
-	"""
+        """
         submenu=gtk.Menu()
         def add_item(*p, **kw):
             self.add_menuitem(submenu, *p, **kw)
-            
+
         # Common to all other elements:
         add_item(_("Edit"), self.edit_element, element)
         add_item(_("Browse"), self.browse_element, element)
@@ -370,14 +370,14 @@ class Menu:
 
         submenu.show_all()
         return submenu
-    
+
 
     def activate_submenu(self, element):
         """Build an "activate" submenu for the given annotation"""
         submenu=gtk.Menu()
         def add_item(*p, **kw):
             self.add_menuitem(submenu, *p, **kw)
-            
+
         add_item(_("Activate"), self.activate_annotation, element)
         add_item(_("Desactivate"), self.desactivate_annotation, element)
         if element.relations:
@@ -385,13 +385,13 @@ class Menu:
             add_item(_("Desactivate related"), self.desactivate_related, element)
         submenu.show_all()
         return submenu
-    
+
     def make_annotation_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
 
         add_item(_("Go to..."), self.goto_annotation, element)
-	add_item(_("Duplicate"), self.duplicate_annotation, element)
+        add_item(_("Duplicate"), self.duplicate_annotation, element)
 
         item = gtk.MenuItem(_("Highlight"))
         item.set_submenu(self.activate_submenu(element))
@@ -441,8 +441,8 @@ class Menu:
         add_item(_("Create a new resource file..."), self.create_element, ResourceData, element)
         add_item(_("Insert a new resource file..."), self.insert_resource_data, element)
         add_item(_("Insert a new resource directory..."), self.insert_resource_directory, element)
-	if isinstance(element.parent, Resources):
-	    add_item(_("Delete the resource..."), self.delete_element, element)
+        if isinstance(element.parent, Resources):
+            add_item(_("Delete the resource..."), self.delete_element, element)
         return
 
     def make_resourcedata_menu(self, element, menu):

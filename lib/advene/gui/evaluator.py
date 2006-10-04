@@ -55,7 +55,7 @@ class Window:
         for l in f:
             l=l.rstrip().replace('\n', "\n")
             self.history.append(l)
-	f.close()
+        f.close()
         return
 
     def save_history(self, name=None):
@@ -77,14 +77,14 @@ class Window:
         return self.widget
 
     def close(self, *p):
-	self.save_history()
-	if isinstance(self.widget.parent, gtk.Window):
-	    # Embedded in a toplevel window
-	    self.widget.parent.destroy()
-	else:
-	    # Embedded in another component, just destroy the widget
-	    self.widget.destroy()
-	return True
+        self.save_history()
+        if isinstance(self.widget.parent, gtk.Window):
+            # Embedded in a toplevel window
+            self.widget.parent.destroy()
+        else:
+            # Embedded in another component, just destroy the widget
+            self.widget.destroy()
+        return True
 
     def clear_output(self, *p, **kw):
         b=self.output.get_buffer()
@@ -459,21 +459,21 @@ class Window:
 
     def make_window(self, widget=None):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-	vbox=gtk.VBox()
-	window.add(vbox)
+        vbox=gtk.VBox()
+        window.add(vbox)
 
         window.vbox = gtk.VBox()
-	vbox.add(window.vbox)
-	if widget:
-	    window.vbox.add(widget)
+        vbox.add(window.vbox)
+        if widget:
+            window.vbox.add(widget)
 
-	hb=gtk.HButtonBox()
-	b=gtk.Button(stock=gtk.STOCK_CLOSE)
-	b.connect("clicked", lambda b: window.destroy())
-	hb.add(b)
-	vbox.pack_start(hb, expand=False)
+        hb=gtk.HButtonBox()
+        b=gtk.Button(stock=gtk.STOCK_CLOSE)
+        b.connect("clicked", lambda b: window.destroy())
+        hb.add(b)
+        vbox.pack_start(hb, expand=False)
 
-	return window
+        return window
 
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -545,7 +545,7 @@ class Window:
 
             if event.state & gtk.gdk.CONTROL_MASK:
                 if event.keyval == gtk.keysyms.w:
-		    self.close()
+                    self.close()
                     return True
                 elif event.keyval == gtk.keysyms.l:
                     self.clear_expression()

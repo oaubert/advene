@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -59,7 +59,7 @@ class ViewType:
 
     def __str__(self):
         return self.title
-    
+
 class CreateElementPopup(object):
     def __init__(self, type_=None, parent=None, controller=None):
         self.type_=type_
@@ -67,10 +67,10 @@ class CreateElementPopup(object):
         self.controller=controller
         self.type_combo=None
         self.widget=self.build_widget()
-        
+
     def get_widget(self):
         return self.widget
-    
+
     def display(self):
         pass
 
@@ -95,8 +95,8 @@ class CreateElementPopup(object):
         vbox.add(hbox)
 
         # Choose a type
-        if self.type_ in (Annotation, Relation, AnnotationType, RelationType, 
-			  View, Query, Resources, ResourceData):
+        if self.type_ in (Annotation, Relation, AnnotationType, RelationType,
+                          View, Query, Resources, ResourceData):
             hbox = gtk.HBox()
             l = gtk.Label(_("Type"))
             hbox.pack_start(l)
@@ -111,20 +111,20 @@ class CreateElementPopup(object):
                     type_list = [ self.parent ]
                 else:
                     type_list = self.parent.relationTypes
-	    elif self.type_ in (AnnotationType, RelationType):
+            elif self.type_ in (AnnotationType, RelationType):
                 type_list = [ ViewType('text/plain', _("Plain text content")),
-			      ViewType('application/x-advene-structured', _("Simple-structured content")),
-			      ViewType('application/x-advene-zone', _("Rectangular zone content")),
-			      ]		
+                              ViewType('application/x-advene-structured', _("Simple-structured content")),
+                              ViewType('application/x-advene-zone', _("Rectangular zone content")),
+                              ]
             elif self.type_ == View:
                 type_list = [ ViewType('application/x-advene-ruleset', _("Dynamic view")),
                               ViewType('text/html', _("HTML template")),
                               ViewType('image/svg+xml', _("SVG template")),
                               ViewType('text/plain', _("Plain text template")),
-			      ]
+                              ]
             elif self.type_ == Query:
                 type_list = [ ViewType('application/x-advene-simplequery', _("Simple query")),
-			      ViewType('application/x-advene-sparql-query', _("SPARQL query")) ]
+                              ViewType('application/x-advene-sparql-query', _("SPARQL query")) ]
             elif self.type_ == Resources:
                 type_list = [ ViewType(Resources.DIRECTORY_TYPE, _("Directory")) ]
             elif self.type_ == ResourceData:
@@ -134,14 +134,14 @@ class CreateElementPopup(object):
                 return None
 
             if not type_list:
-		advene.gui.util.message_dialog(_("No available type."))
+                advene.gui.util.message_dialog(_("No available type."))
                 return None
 
             self.type_combo = advene.gui.util.list_selector_widget(
                 members=[ (t, self.controller.get_title(t)) for t in type_list  ],
                 preselect=type_list[0])
             hbox.pack_start(self.type_combo)
-            
+
             vbox.add(hbox)
 
         vbox.show_all()
@@ -156,7 +156,7 @@ class CreateElementPopup(object):
             return sre.match(r'^[a-zA-Z0-9_\.]+$', i)
         else:
             return sre.match(r'^[a-zA-Z0-9_]+$', i)
-    
+
     def do_create_element(self):
         """Create the element according to the widget data.
 
@@ -165,16 +165,16 @@ class CreateElementPopup(object):
         id_ = self.id_entry.get_text()
         # Check validity of id.
         if not self.is_valid_id(id_):
-	    advene.gui.util.message_dialog(
+            advene.gui.util.message_dialog(
                 _("The identifier %s is not valid.\nIt must be composed of non-accentuated alphabetic characters\nUnderscore is allowed.") % id_)
             return None
 
         if self.controller.package._idgenerator.exists(id_):
-	    advene.gui.util.message_dialog(
+            advene.gui.util.message_dialog(
                 _("The identifier %s is already defined.") % id_)
             return None
-	else:
-	    self.controller.package._idgenerator.add(id_)
+        else:
+            self.controller.package._idgenerator.add(id_)
 
         if self.type_combo:
             t = self.type_combo.get_current_element()
@@ -227,7 +227,7 @@ class CreateElementPopup(object):
                 ident=id_,
                 author=config.data.userid,
                 date=self.get_date(),
-                clazz=self.parent.viewableClass,                
+                clazz=self.parent.viewableClass,
                 content_mimetype=t.id,
                 )
             el.title=id_
@@ -246,9 +246,9 @@ class CreateElementPopup(object):
                           event=event,
                           action=action)
                 r.add_rule(rule)
-                
+
                 el.content.data=r.xml_repr()
-                
+
             self.parent.views.append(el)
             self.controller.notify('ViewCreate', view=el)
         elif self.type_ == Schema:
@@ -289,16 +289,16 @@ class CreateElementPopup(object):
             # Create a new dir.
             # Parent should be a Resources
             self.parent[id_]=Resources.DIRECTORY_TYPE
-	    el=self.parent[id_]
-            self.controller.notify('ResourceCreate', 
+            el=self.parent[id_]
+            self.controller.notify('ResourceCreate',
                                    resource=el)
         elif self.type_ == ResourceData:
             # Create a new resource file
             self.parent[id_]=_("New resource data")
-	    el=self.parent[id_]
-            self.controller.notify('ResourceCreate', 
+            el=self.parent[id_]
+            self.controller.notify('ResourceCreate',
                                    resource=el)
-            
+
         else:
             el=None
             print "Not implemented yet."
@@ -318,17 +318,17 @@ class CreateElementPopup(object):
         d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
         d.vbox.add(self.widget)
 
-	while True:
-	    res=d.run()
-	    retval=None
-	    if res == gtk.RESPONSE_OK:
-		retval=self.do_create_element()
+        while True:
+            res=d.run()
+            retval=None
+            if res == gtk.RESPONSE_OK:
+                retval=self.do_create_element()
 
-		if retval is not None:
-		    break
-	    else:
-		break
-	d.destroy()
+                if retval is not None:
+                    break
+            else:
+                break
+        d.destroy()
 
         if retval is not None and not modal and not isinstance(retval, Resources):
             try:
@@ -340,26 +340,26 @@ class CreateElementPopup(object):
                 pop.edit ()
 
         return retval
-    
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Should provide a package name"
         sys.exit(1)
 
     package = Package (uri=sys.argv[1])
-    
+
     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
     window.set_border_width(10)
     window.set_title (package.title)
-    vbox = gtk.VBox()    
+    vbox = gtk.VBox()
     window.add (vbox)
 
     def create_element_cb(button, t):
         cr = CreateElementPopup(type_=t, parent=package)
         cr.popup()
         return True
-        
+
     for (t, l) in element_label.iteritems():
         b = gtk.Button(l)
         b.connect("clicked", create_element_cb, t)
@@ -374,7 +374,7 @@ if __name__ == "__main__":
         package.save (name=filename)
         print "Package saved as %s" % filename
         gtk.main_quit ()
-        
+
     b = gtk.Button (stock=gtk.STOCK_SAVE)
     b.connect ("clicked", validate_cb, package)
     hbox.add (b)

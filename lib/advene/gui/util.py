@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -50,11 +50,11 @@ def image_from_position(controller, position=None, width=None, height=None):
     if position is None:
         position=controller.player.current_position_value
     try:
-	i.set_from_pixbuf(png_to_pixbuf (controller.package.imagecache[position],
-					 width=width, height=height))
+        i.set_from_pixbuf(png_to_pixbuf (controller.package.imagecache[position],
+                                         width=width, height=height))
     except:
-	# Some png_data corruption have been reported. Handle them here.
-	i.set_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+        # Some png_data corruption have been reported. Handle them here.
+        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
     return i
 
 def dialog_keypressed_cb(widget=None, event=None):
@@ -82,10 +82,10 @@ def generate_list_model(elements, active_element=None):
         if element == active_element:
             active_iter=i
     return store, active_iter
-                
+
 def list_selector_widget(members=None,
                          preselect=None,
-			 callback=None):
+                         callback=None):
     """Generate a widget to pick an element from a list.
 
 
@@ -106,12 +106,12 @@ def list_selector_widget(members=None,
 
     def get_current_element(combo):
         return combo.get_model().get_value(combo.get_active_iter(), 1)
-        
+
     # Bind the method to the combobox object
     combobox.get_current_element = get_current_element.__get__(combobox)
 
     if callback is not None:
-	combobox.connect('changed', callback)
+        combobox.connect('changed', callback)
 
     return combobox
 
@@ -128,7 +128,7 @@ def list_selector(title=None,
     """
     combobox = list_selector_widget(members=members,
                                     preselect=preselect)
-    
+
     d = gtk.Dialog(title=title,
                    parent=None,
                    flags=gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -154,21 +154,21 @@ def list_selector(title=None,
 
 def message_dialog(label="", icon=gtk.MESSAGE_INFO):
     if icon == gtk.MESSAGE_QUESTION:
-	button=gtk.BUTTONS_YES_NO
+        button=gtk.BUTTONS_YES_NO
     else:
-	button=gtk.BUTTONS_OK
+        button=gtk.BUTTONS_OK
     dialog = gtk.MessageDialog(
-	None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-	icon, button, label)
+        None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+        icon, button, label)
     dialog.set_position(gtk.WIN_POS_MOUSE)
     dialog.connect("key_press_event", dialog_keypressed_cb)
 
     res=dialog.run()
     dialog.destroy()
     if icon == gtk.MESSAGE_QUESTION:
-	return (res == gtk.RESPONSE_YES)
+        return (res == gtk.RESPONSE_YES)
     else:
-	return True
+        return True
 
 def yes_no_cancel_popup(title=None,
                         text=None):
@@ -186,12 +186,12 @@ def yes_no_cancel_popup(title=None,
     hb=gtk.HBox()
     hb.show()
     d.vbox.add(hb)
-    
+
     i=gtk.Image()
     i.set_from_stock(gtk.STOCK_DIALOG_QUESTION, gtk.ICON_SIZE_DIALOG)
     i.show()
     hb.pack_start(i, expand=False)
-    
+
     if text is not None:
         l=gtk.Label(text)
         l.show()
@@ -222,7 +222,7 @@ def entry_dialog(title=None,
     e.show()
     if default:
         e.set_text(default)
-    
+
     d.connect("key_press_event", dialog_keypressed_cb)
 
     d.vbox.add(e)
@@ -281,7 +281,7 @@ def get_filename(title=_("Open a file"),
                  default_file=None,
                  alias=None):
     preview_box = gtk.VBox()
-    
+
     preview = gtk.Button(_("N/C"))
     preview_box.add(preview)
 
@@ -339,12 +339,12 @@ Description:
         helper.format_element_name('view', len(p.views)),
         p.getMetaData(config.data.namespace_prefix['dc'],
                       'description'))
-        
+
             button.set_label(m)
             button._filename=None
             p.close()
         return True
-    
+
     preview.connect("clicked", do_preview)
 
     fs=gtk.FileChooserDialog(title=title,
@@ -362,7 +362,7 @@ Description:
         fs.set_current_folder(default_dir)
     if default_file:
         fs.set_filename(default_file)
-        
+
     res=fs.run()
     filename=None
     al=None
@@ -372,7 +372,7 @@ Description:
             al=alias_entry.get_text()
             al = sre.sub('[^a-zA-Z0-9_]', '_', al)
     fs.destroy()
-    
+
     if alias:
         return filename, al
     else:
@@ -392,13 +392,13 @@ def get_dirname(title=_("Choose a directory"),
                                        gtk.RESPONSE_CANCEL ))
     if default_dir:
         fs.set_current_folder(default_dir)
-        
+
     res=fs.run()
     dirname=None
     if res == gtk.RESPONSE_OK:
         dirname=fs.get_filename()
     fs.destroy()
-    
+
     return dirname
 
 class CategorizedSelector:
@@ -478,7 +478,7 @@ class CategorizedSelector:
         # Hide the selection
         self.popup_hide()
         return True
-        
+
     def build_widget(self):
         vbox=gtk.VBox()
 
@@ -511,9 +511,9 @@ class CategorizedSelector:
         b.connect("clicked", lambda w: self.popup_hide())
         hbox.add(b)
         vbox.pack_start(hbox, expand=False)
-        
+
         vbox.show_all()
-        
+
         return vbox
 
     def get_button(self):

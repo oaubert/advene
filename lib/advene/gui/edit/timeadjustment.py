@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -33,7 +33,7 @@ class TimeAdjustment:
     """TimeAdjustment widget.
 
     Note: time values are integers in milliseconds.
-    """    
+    """
     def __init__(self, value=0, controller=None, videosync=False, editable=True, compact=False):
         self.value=value
         self.controller=controller
@@ -47,13 +47,13 @@ class TimeAdjustment:
         self.compact=compact
         self.widget=self.make_widget()
         self.update_display()
-        
+
     def make_widget(self):
 
         def handle_image_click(button, event):
-	    if not (event.state & gtk.gdk.CONTROL_MASK):
+            if not (event.state & gtk.gdk.CONTROL_MASK):
                 self.play_from_here(button)
-		return True
+                return True
             else:
                 self.use_current_position(button)
                 return True
@@ -64,7 +64,7 @@ class TimeAdjustment:
             b=gtk.Button()
             i=gtk.Image()
             i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-            # FIXME: to re-enable 
+            # FIXME: to re-enable
             # The proper way is to do
             #b.set_image(i)
             # but it works only on linux, gtk 2.10
@@ -83,7 +83,7 @@ class TimeAdjustment:
             return b
 
         self.tooltips = gtk.Tooltips ()
-        
+
         vbox=gtk.VBox()
 
         hbox=gtk.HBox()
@@ -131,23 +131,23 @@ class TimeAdjustment:
         # The widget can receive drops from annotations
         vbox.connect("drag_data_received", self.drag_received)
         vbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-				  gtk.DEST_DEFAULT_HIGHLIGHT |
-				  gtk.DEST_DEFAULT_ALL,
-				  config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+                                  gtk.DEST_DEFAULT_HIGHLIGHT |
+                                  gtk.DEST_DEFAULT_ALL,
+                                  config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
 
-	# Handle scroll actions
-	def handle_scroll_event(button, event):
-	    if not (event.state & gtk.gdk.CONTROL_MASK):
-		return True
-	    if event.direction == gtk.gdk.SCROLL_DOWN:
-		incr=config.data.preferences['scroll-increment']
-	    else:
-		incr=-config.data.preferences['scroll-increment']
+        # Handle scroll actions
+        def handle_scroll_event(button, event):
+            if not (event.state & gtk.gdk.CONTROL_MASK):
+                return True
+            if event.direction == gtk.gdk.SCROLL_DOWN:
+                incr=config.data.preferences['scroll-increment']
+            else:
+                incr=-config.data.preferences['scroll-increment']
 
-	    v=self.value
-	    self.value += incr
-	    self.update_display()
-	    return True
+            v=self.value
+            self.value += incr
+            self.update_display()
+            return True
 
         vbox.connect("scroll-event", handle_scroll_event)
 
@@ -158,8 +158,8 @@ class TimeAdjustment:
         if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
             source=self.controller.package.annotations.get(source_uri)
-	    self.value = source.fragment.begin
-	    self.update_display()
+            self.value = source.fragment.begin
+            self.update_display()
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -171,17 +171,17 @@ class TimeAdjustment:
             self.controller.update_status("start", self.value)
         self.controller.update_status("set", self.value)
         return True
-        
+
     def use_current_position(self, button):
         self.value=self.controller.player.current_position_value
         self.update_display()
         return True
-        
+
     def update_snapshot(self, button):
         # FIXME: to implement
         print "Not implemented yet."
         pass
-        
+
     # Static values used in numericTime
     _hour = r'(?P<hour>\d+)'
     _minute = r'(?P<minute>\d+)'
@@ -199,7 +199,7 @@ class TimeAdjustment:
         form hh:mm:ss.sss or hh:mm:ss or hh:mm, return
         the corresponding value in milliseconds (float), else None
         """
-        
+
         if s is None: return None
         dt = None
         match = TimeAdjustment._timeRE.search(s)
@@ -220,7 +220,7 @@ class TimeAdjustment:
         if v is not None and v != self.value:
             self.value = self.check_bound_value(v)
             if self.sync_video:
-                self.controller.move_position(self.value, relative=False)            
+                self.controller.move_position(self.value, relative=False)
             self.update_display()
         return True
 
@@ -236,19 +236,19 @@ class TimeAdjustment:
         """Updates the value displayed in the entry according to the current value."""
         self.entry.set_text(advene.util.helper.format_time(self.value))
         # Update the image
-        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], 
-								  width=100))
-        
+        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value],
+                                                                  width=100))
+
     def update_value_cb(self, widget, increment):
         if not self.editable:
             return True
         self.value=self.value + increment
         self.value=self.check_bound_value(self.value)
         if self.sync_video:
-            self.controller.move_position(self.value, relative=False)            
+            self.controller.move_position(self.value, relative=False)
         self.update_display()
         return True
-    
+
     def get_widget(self):
         return self.widget
 
@@ -263,7 +263,7 @@ if __name__ == "__main__":
 
     p=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
     config.data.fix_paths(p)
-                      
+
     #config.data.fix_paths()
     class DummyController:
         def __init__(self, package):
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 
         def move_position (self, value, relative=True):
             print "Move position %d (relative: %s)" % (value, str(relative))
-            
+
     def key_pressed_cb (win, event):
         if event.state & gtk.gdk.CONTROL_MASK:
             # The Control-key is held. Special actions :
@@ -281,11 +281,11 @@ if __name__ == "__main__":
                 gtk.main_quit ()
                 return True
         return False
-                        
+
     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())
-    
+
     p=Package ('dummy', source=None)
     con=DummyController(p)
     ta=TimeAdjustment(value=6000, controller=con)

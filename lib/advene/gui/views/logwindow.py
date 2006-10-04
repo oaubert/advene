@@ -37,8 +37,8 @@ import advene.rules.elements
 class LogWindow(AdhocView):
     def __init__ (self, controller=None):
         self.view_name = _("URL stack")
-	self.view_id = 'urlstackview'
-	self.close_on_package_load = False
+        self.view_id = 'urlstackview'
+        self.close_on_package_load = False
         self.contextual_actions = (
             (_("Clear"), self.clear_data),
             )
@@ -55,7 +55,7 @@ class LogWindow(AdhocView):
         self.window=None
 
     def close(self, *p):
-	return False
+        return False
 
     def build_widget(self):
         w=gtk.VBox()

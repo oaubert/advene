@@ -66,8 +66,8 @@ _edit_popup_list = []
 def get_edit_popup (el, controller=None, editable=True):
     """Return the right edit popup for the given element."""
     if controller and controller.gui:
-	for p in controller.gui.edit_popups:
-	    if p.element == el and p.window:
+        for p in controller.gui.edit_popups:
+            if p.element == el and p.window:
                 # The edit popup is already open.
                 return p
     for c in _edit_popup_list:
@@ -104,8 +104,8 @@ class EditElementPopup (object):
         self.editable=editable
         # List of defined forms in the window
         self.forms = []
-	if controller and controller.gui:
-	    controller.gui.register_edit_popup(self)
+        if controller and controller.gui:
+            controller.gui.register_edit_popup(self)
         # Dictionary of callbacks according to keys
         self.key_cb = {}
 
@@ -169,8 +169,8 @@ class EditElementPopup (object):
 
     def get_title (self):
         """Return the element title."""
-        return "%s %s" % (self.element.viewableClass, 
-			  self.controller.get_title(self.element))
+        return "%s %s" % (self.element.viewableClass,
+                          self.controller.get_title(self.element))
 
     def framed (self, widget, label=""):
         fr = gtk.Frame ()
@@ -181,13 +181,13 @@ class EditElementPopup (object):
     def edit (self, callback=None, modal=False):
         """Display the edit window.
         """
-	if hasattr(self, 'window') and self.window:
-	    try:
-		self.window.set_urgency_hint(True)
-	    except AttributeError:
-		# Does not exist in gtk < 2.8
-		pass
-	    return True
+        if hasattr(self, 'window') and self.window:
+            try:
+                self.window.set_urgency_hint(True)
+            except AttributeError:
+                # Does not exist in gtk < 2.8
+                pass
+            return True
 
         self.key_cb[gtk.keysyms.Return] = self.validate_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
@@ -199,7 +199,7 @@ class EditElementPopup (object):
 
         w=self.make_widget (editable=self.editable)
         self.vbox.add (w)
-        
+
         if self.editable:
             title=_("Edit %s") % self.get_title()
         else:
@@ -227,8 +227,8 @@ class EditElementPopup (object):
 
                 if retval:
                     d.destroy()
- 		    if self.controller and self.controller.gui:
-			self.controller.gui.unregister_edit_popup(self)
+                    if self.controller and self.controller.gui:
+                        self.controller.gui.unregister_edit_popup(self)
                     break
 
             return self.element
@@ -257,11 +257,11 @@ class EditElementPopup (object):
 
             self.window.add(self.vbox)
 
-	    def destroy_cb(*p):
-		if self.controller and self.controller.gui:
-		    self.controller.gui.unregister_edit_popup(self)
-		return True
-	    self.window.connect("destroy", destroy_cb)
+            def destroy_cb(*p):
+                if self.controller and self.controller.gui:
+                    self.controller.gui.unregister_edit_popup(self)
+                return True
+            self.window.connect("destroy", destroy_cb)
 
             if self.controller.gui:
                 self.controller.gui.init_window_size(self.window, 'editpopup')
@@ -276,9 +276,9 @@ class EditElementPopup (object):
 
     def display (self):
         """Display the display window (not editable)."""
-	if hasattr(self, 'window') and self.window:
-	    self.window.set_urgency_hint(True)
-	    return True
+        if hasattr(self, 'window') and self.window:
+            self.window.set_urgency_hint(True)
+            return True
 
         self.key_cb[gtk.keysyms.Return] = self.close_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
@@ -312,7 +312,7 @@ class EditElementPopup (object):
         w=self.make_widget (editable=self.editable, compact=True)
         self.vbox.add (w)
         self.window = self.vbox
-        
+
         def handle_destroy(*p):
             if self.controller and self.controller.gui:
                 self.controller.gui.unregister_edit_popup(self)
@@ -550,7 +550,7 @@ class EditPackagePopup (EditElementPopup):
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
-                         editable=editable, 
+                         editable=editable,
                          tooltip=_("Textual description of the package"))
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
@@ -558,7 +558,7 @@ class EditPackagePopup (EditElementPopup):
         f = EditMetaForm(title=_("Default dynamic view"),
                          element=self.element, name='default_stbv',
                          namespaceid='advenetool', controller=self.controller,
-                         editable=editable, 
+                         editable=editable,
                          tooltip=_("Dynamic view to activate on package load"))
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
@@ -690,12 +690,12 @@ class EditRelationTypePopup (EditElementPopup):
                                        )
         vbox.add(f.get_view ())
 
-	members=[ ('#'+at.id, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
-	members.append( ('', _("Any annotation type")) )
+        members=[ ('#'+at.id, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
+        members.append( ('', _("Any annotation type")) )
         f = EditElementListForm(
             title=_("Members"),
-            element=self.element, 
-	    field='hackedMemberTypes',
+            element=self.element,
+            field='hackedMemberTypes',
             members=members,
             controller=self.controller,
             editable=editable)
@@ -779,7 +779,7 @@ class EditForm(object):
             if expr is None:
                 expr=""
             if sre.match('^\s+$', expr):
-		# The field can contain just a newline or whitespaces, which will be then ignored
+                # The field can contain just a newline or whitespaces, which will be then ignored
                 try:
                     i=element.id
                 except AttributeError:
@@ -821,12 +821,12 @@ class ContentHandler(EditForm):
     Generic content handlers return 50.
     """
     def can_handle(mimetype):
-	return 0
+        return 0
     can_handle=staticmethod(can_handle)
 
     def __init__ (self, content, controller=None, **kw):
-	self.element=content
-	self.controller=controller
+        self.element=content
+        self.controller=controller
 
 class EditContentForm(EditForm):
     """Create an edit form for the given content.
@@ -865,15 +865,15 @@ class EditContentForm(EditForm):
             return False
 
     def check_validity(self):
-	if self.contentform is None:
-	    return True
-	else:
-	    return self.contentform.check_validity()
+        if self.contentform is None:
+            return True
+        else:
+            return self.contentform.check_validity()
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
-	if self.contentform is None:
-	    return True
+        if self.contentform is None:
+            return True
         if self.mimetypeeditable:
             self.element.mimetype = self.mimetype.child.get_text()
         self.contentform.update_element()
@@ -900,33 +900,33 @@ class EditContentForm(EditForm):
             vbox.pack_start(hbox, expand=False)
 
         handler = config.data.get_content_handler(self.element.mimetype)
-	if handler is None:
-	    self.contentform=None
-	    vbox.add(gtk.Label(_("Error: cannot find a content handler for %s")
-			       % self.element.mimetype))
-	else:
-	    self.contentform=handler(self.element,
-				     controller=self.controller,
-				     annotation=self.annotation)
+        if handler is None:
+            self.contentform=None
+            vbox.add(gtk.Label(_("Error: cannot find a content handler for %s")
+                               % self.element.mimetype))
+        else:
+            self.contentform=handler(self.element,
+                                     controller=self.controller,
+                                     annotation=self.annotation)
 
         self.contentform.set_editable(self.editable)
-	self.content_handler_widget = self.contentform.get_view(compact=compact)
+        self.content_handler_widget = self.contentform.get_view(compact=compact)
         vbox.add(self.content_handler_widget)
-	self.content_handler_widget.grab_focus()
+        self.content_handler_widget.grab_focus()
         return vbox
 
 class TextContentHandler (ContentHandler):
     """Create a textview edit form for the given element.
     """
     def can_handle(mimetype):
-	res=0
+        res=0
         if 'text' in mimetype:
             res=70
-	if 'xml' in mimetype:
-	    res=60
-	if mimetype == 'text/plain' or mimetype in config.data.text_mimetypes:
-	    res=80
-	return res
+        if 'xml' in mimetype:
+            res=60
+        if mimetype == 'text/plain' or mimetype in config.data.text_mimetypes:
+            res=80
+        return res
     can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, **kw):
@@ -951,7 +951,7 @@ class TextContentHandler (ContentHandler):
         buf = self.view.get_buffer()
         start_iter, end_iter = buf.get_bounds ()
         text = buf.get_text (start_iter, end_iter)
-	self.element.data = text
+        self.element.data = text
         return True
 
     def key_pressed_cb (self, win, event):
@@ -980,7 +980,7 @@ class TextContentHandler (ContentHandler):
             return True
         browser = Browser(element=self.element,
                           controller=self.controller,
-			  callback=callback)
+                          callback=callback)
         browser.popup()
         return True
 
@@ -995,9 +995,9 @@ class TextContentHandler (ContentHandler):
             try:
                 f=open(fname, 'r')
             except IOError, e:
-		advene.gui.util.message_dialog(
+                advene.gui.util.message_dialog(
                     _("Cannot read the data:\n%s") % unicode(e),
-		    icon=gtk.MESSAGE_ERROR)
+                    icon=gtk.MESSAGE_ERROR)
                 return True
             b=self.view.get_buffer()
             begin,end = b.get_bounds ()
@@ -1019,9 +1019,9 @@ class TextContentHandler (ContentHandler):
             try:
                 f=open(fname, 'w')
             except IOError, e:
-		advene.gui.util.message_dialog(
+                advene.gui.util.message_dialog(
                     _("Cannot save the data:\n%s") % unicode(e),
-		    icon=gtk.MESSAGE_ERROR)
+                    icon=gtk.MESSAGE_ERROR)
                 return True
             b=self.view.get_buffer()
             begin,end = b.get_bounds ()
@@ -1083,12 +1083,12 @@ config.data.register_content_handler(TextContentHandler)
 
 class GenericContentHandler (ContentHandler):
     """Generic content handler form.
-    
+
     It allows to load/save the content to/from a file.
     """
     def can_handle(mimetype):
-	res=50
-	return res
+        res=50
+        return res
     can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, **kw):
@@ -1138,9 +1138,9 @@ class GenericContentHandler (ContentHandler):
             try:
                 f=open(fname, 'r')
             except IOError, e:
-		advene.gui.util.message_dialog(
+                advene.gui.util.message_dialog(
                     _("Cannot read the data:\n%s") % unicode(e),
-		    icon=gtk.MESSAGE_ERROR)
+                    icon=gtk.MESSAGE_ERROR)
                 return True
             self.set_filename(fname)
         return True
@@ -1161,9 +1161,9 @@ class GenericContentHandler (ContentHandler):
             try:
                 f=open(fname, 'w')
             except IOError, e:
-		advene.gui.util.message_dialog(
+                advene.gui.util.message_dialog(
                     _("Cannot save the data:\n%s") % unicode(e),
-		    icon=gtk.MESSAGE_ERROR)
+                    icon=gtk.MESSAGE_ERROR)
                 return True
             self.set_filename(fname)
         return True
@@ -1214,8 +1214,8 @@ class EditFragmentForm(EditForm):
 
     def check_validity(self):
         if self.begin.value >= self.end.value:
-	    advene.gui.util.message_dialog(_("Begin time is greater than end time"),
-					   icon=gtk.MESSAGE_ERROR)
+            advene.gui.util.message_dialog(_("Begin time is greater than end time"),
+                                           icon=gtk.MESSAGE_ERROR)
             return False
         else:
             return True
@@ -1375,10 +1375,10 @@ class EditAttributesForm (EditForm):
         try:
             val = self.repr_to_value (at, text)
         except ValueError, e:
-	    advene.gui.util.message_dialog(
+            advene.gui.util.message_dialog(
                 _("The %s attribute could not be updated:\n\n%s\n\nResetting to the original value.")
                 % (at, str(e)),
-		icon=gtk.MESSAGE_WARNING)
+                icon=gtk.MESSAGE_WARNING)
             # Invalid value -> we take the original value
             val = getattr(self.element, at)
 
@@ -1402,10 +1402,10 @@ class EditAttributesForm (EditForm):
             iter = model.iter_next(iter)
         # Display list of invalid attributes
         if invalid:
-	    advene.gui.util.message_dialog(
+            advene.gui.util.message_dialog(
                 _("The following attributes cannot be updated:\n\n%s")
                 % "\n".join ([ "%s: %s" % (at, str(e)) for (at, e) in invalid ]),
-		icon=gtk.MESSAGE_ERROR)
+                icon=gtk.MESSAGE_ERROR)
             return False
         else:
             return True
@@ -1436,10 +1436,10 @@ class EditAttributesForm (EditForm):
             iter = model.iter_next(iter)
         # Display list of invalid attributes
         if invalid:
-	    advene.gui.util.message_dialog(
+            advene.gui.util.message_dialog(
                 _("The following attributes could not be updated:\n\n%s")
                 % "\n".join ([ "%s: %s" % (at, str(e)) for (at, e) in invalid ]),
-		icon=gtk.MESSAGE_ERROR)
+                icon=gtk.MESSAGE_ERROR)
         return True
 
     def get_view (self, compact=False):
@@ -1503,7 +1503,7 @@ class EditElementListForm(EditForm):
 
         The field attribute of element contains a list of elements.
         Valid elements are specified in members, which is a list of couples
-	(element, label)
+        (element, label)
         """
         self.title=title
         self.model=element
@@ -1533,13 +1533,13 @@ class EditElementListForm(EditForm):
         return retval
 
     def get_representation(self, v):
-	r='???'
-	for el, label in self.members:
-	    if el == v:
-		r = label
-		break
-	return r
-	
+        r='???'
+        for el, label in self.members:
+            if el == v:
+                r = label
+                break
+        return r
+
     def create_store(self):
         store=gtk.ListStore(
             gobject.TYPE_PYOBJECT,
@@ -1547,7 +1547,7 @@ class EditElementListForm(EditForm):
             )
         for el in getattr(self.model, self.field):
             store.append( [ el,
-			    self.get_representation(el) ] )
+                            self.get_representation(el) ] )
         return store
 
     def insert_new(self, button=None, treeview=None):
@@ -1557,7 +1557,7 @@ class EditElementListForm(EditForm):
                                               controller=self.controller)
         if element is not None:
             treeview.get_model().append( [element,
-					  self.get_representation(element) ])
+                                          self.get_representation(element) ])
         return True
 
     def delete_current(self, button=None, treeview=None):

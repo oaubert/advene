@@ -58,9 +58,9 @@ class TranscriptionImporter(advene.util.importer.GenericImporter):
 
 class TranscriptionEdit(AdhocView):
     def __init__ (self, controller=None, filename=None):
-	self.view_name = _("Transcription edition")
-	self.view_id = 'transcribeview'
-	self.close_on_package_load = False
+        self.view_name = _("Transcription edition")
+        self.view_id = 'transcribeview'
+        self.close_on_package_load = False
 
         self.controller=controller
         self.package=controller.package
@@ -69,12 +69,12 @@ class TranscriptionEdit(AdhocView):
         self.sourcefile=None
         self.empty_re = sre.compile('^\s*$')
 
-	self.options = {
-	    'timestamp': True, # _("If checked, click inserts timestamp marks"))
-	    'play-on-scroll': False,
-	    'empty-annotations': True, # _("Do not generate annotations for empty text"))
-	    'delay': config.data.reaction_time,
-	    }
+        self.options = {
+            'timestamp': True, # _("If checked, click inserts timestamp marks"))
+            'play-on-scroll': False,
+            'empty-annotations': True, # _("Do not generate annotations for empty text"))
+            'delay': config.data.reaction_time,
+            }
 
         self.colors = {
             'default': gtk.gdk.color_parse ('lightblue'),
@@ -105,7 +105,7 @@ class TranscriptionEdit(AdhocView):
         ew.add_spin(_("Reaction time"), "delay", _("Reaction time (substracted from current player time)"), -5000, 5000)
         res=ew.popup()
         if res:
-	    self.options.update(cache)
+            self.options.update(cache)
         return True
 
     def build_widget(self):
@@ -136,7 +136,7 @@ class TranscriptionEdit(AdhocView):
 
         sw.add_with_viewport (self.textview)
 
-	vbox.show_all()
+        vbox.show_all()
         return vbox
 
     def remove_timestamp_mark(self, button, anchor, child):
@@ -233,17 +233,17 @@ class TranscriptionEdit(AdhocView):
         def popup_modify(win, t):
             timestamp=child.timestamp + t
             self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
-	    if self.tooltips.active_tips_data is None:
-		button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)	    
+            if self.tooltips.active_tips_data is None:
+                button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
             child.timestamp=timestamp
-	    if self.options['play-on-scroll']:
-		popup_goto(child, timestamp)	    
+            if self.options['play-on-scroll']:
+                popup_goto(child, timestamp)
             return True
 
-	if event.button == 1 and event.state & gtk.gdk.CONTROL_MASK:
-	    # Set current video time
-	    popup_modify(None, self.controller.player.current_position_value - timestamp)
-	    return True
+        if event.button == 1 and event.state & gtk.gdk.CONTROL_MASK:
+            # Set current video time
+            popup_modify(None, self.controller.player.current_position_value - timestamp)
+            return True
 
         if event.button != 3:
             return False
@@ -319,20 +319,20 @@ class TranscriptionEdit(AdhocView):
         child=gtk.Button("")
         child.connect("clicked", popup_goto)
         child.connect("button-press-event", self.mark_button_press_cb, anchor, child)
-	
-	def handle_scroll_event(button, event):
-	    if not (event.state & gtk.gdk.CONTROL_MASK):
-		return True
-	    if event.direction == gtk.gdk.SCROLL_DOWN:
-		button.timestamp += config.data.preferences['scroll-increment']
-	    elif event.direction == gtk.gdk.SCROLL_UP:
-		button.timestamp -= config.data.preferences['scroll-increment']
-	    self.tooltips.set_tip(button, "%s" % helper.format_time(button.timestamp))
-	    if self.tooltips.active_tips_data is None:
-		button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
+
+        def handle_scroll_event(button, event):
+            if not (event.state & gtk.gdk.CONTROL_MASK):
+                return True
+            if event.direction == gtk.gdk.SCROLL_DOWN:
+                button.timestamp += config.data.preferences['scroll-increment']
+            elif event.direction == gtk.gdk.SCROLL_UP:
+                button.timestamp -= config.data.preferences['scroll-increment']
+            self.tooltips.set_tip(button, "%s" % helper.format_time(button.timestamp))
+            if self.tooltips.active_tips_data is None:
+                button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
             self.timestamp_play = button.timestamp
-	    button.grab_focus()
-	    return True
+            button.grab_focus()
+            return True
 
         def mark_key_release_cb(button, event, anchor=None, child=None):
             """Handler for key release on timestamp mark.

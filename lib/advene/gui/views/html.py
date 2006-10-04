@@ -128,7 +128,7 @@ class mozembed_wrapper:
 	self.controller=controller
 	self.notify=notify
 	self.widget=self.build_widget()
-    
+
     def refresh(self, *p):
 	self.component.reload(0)
 	return True
@@ -143,7 +143,7 @@ class mozembed_wrapper:
 
     def get_url(self):
 	return self.component.get_location()
-    
+
     def build_widget(self):
 	w=gtkmozembed.MozEmbed()
 	# A profile must be initialized, cf

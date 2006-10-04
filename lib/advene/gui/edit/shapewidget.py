@@ -20,10 +20,10 @@
 
   This component provides a simple framework allowing to edit basic
   shapes, and generate the corresponding XML.
-  
+
   This component should not have dependencies on Advene, so that it
   can be reused in other projects.
-  
+
   FIXME
 
      - implement text shape ?
@@ -68,99 +68,99 @@ class Shape:
         self.set_bounds( ( (0, 0), (10, 10) ) )
 
     def set_bounds(self, bounds):
-	"""Set the bounds of the shape.
-	
-	The bounds are the coordinates of the rectangular selection
-	used to define the shape.
+        """Set the bounds of the shape.
 
-	@param bounds: a tuple of 2 int couples
-	@type bounds: tuple
-	"""
+        The bounds are the coordinates of the rectangular selection
+        used to define the shape.
+
+        @param bounds: a tuple of 2 int couples
+        @type bounds: tuple
+        """
         pass
 
     def get_bounds(self):
-	"""Return the bounds of the shape.
+        """Return the bounds of the shape.
 
-	@return: a tuple of 2 int couples
-	@rtype: tuple
-	"""
+        @return: a tuple of 2 int couples
+        @rtype: tuple
+        """
         return ( (0, 0), (10, 10) )
 
     def render(self, pixmap, invert=False):
-	"""Render the shape on the given pixmap.
-	
-	@param pixmap: the destination pixmap
-	@type pixmap: gtk.gdk.Pixmap
-	@param invert: should the rendering inverse the selection ?
-	@type invert: boolean
-	"""
+        """Render the shape on the given pixmap.
+
+        @param pixmap: the destination pixmap
+        @type pixmap: gtk.gdk.Pixmap
+        @param invert: should the rendering inverse the selection ?
+        @type invert: boolean
+        """
         return
 
     def translate(self, vector):
-	"""Translate the shape.
+        """Translate the shape.
 
-	@param vector: the translation vector
-	@type vector: a couple of int
-	"""
+        @param vector: the translation vector
+        @type vector: a couple of int
+        """
         pass
 
     def control_point(self, point):
         """Test if the given point is a control point.
 
-	If on a control point, return its coordinates (x, y) and those of the
-	other bound, else None
+        If on a control point, return its coordinates (x, y) and those of the
+        other bound, else None
 
-	@param point: the tested point
-	@type point: a couple of int
-	@return: None, or a couple of coordinates
-	@rtype: tuple
+        @param point: the tested point
+        @type point: a couple of int
+        @return: None, or a couple of coordinates
+        @rtype: tuple
         """
         return None
 
     def __contains__(self, point):
-	"""Test if the given point is inside the shape.
+        """Test if the given point is inside the shape.
 
-	@param point: the tested point
-	@type point: a couple of int
-	@rtype: boolean
-	"""
+        @param point: the tested point
+        @type point: a couple of int
+        @rtype: boolean
+        """
         return False
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
 
-	@param relative: should dimensions be relative to the container size or absolute?
-	@type relative: boolean
-	@param size: the container size in pixels
-	@type size: a couple of int
-	@return: the SVG representation
-	@rtype: string
+        @param relative: should dimensions be relative to the container size or absolute?
+        @type relative: boolean
+        @param size: the container size in pixels
+        @type size: a couple of int
+        @return: the SVG representation
+        @rtype: string
         """
         return u"<text>Generic shape</text>"
 
     def copy_from(self, shape, style=False):
-	"""Copy data from another shape.
-	
-	@param shape: the original shape
-	@param style: should the style be copied also?
-	@type style: boolean
-	"""
+        """Copy data from another shape.
+
+        @param shape: the original shape
+        @param style: should the style be copied also?
+        @type style: boolean
+        """
         return
 
     def clone(self, style=False):
-	"""Clone the shape.
-	
-	@param style: should the style be copied also?
-	@type style: boolean
-	@return: a new shape
-	"""
+        """Clone the shape.
+
+        @param style: should the style be copied also?
+        @type style: boolean
+        @return: a new shape
+        """
         s=self.__class__()
         s.copy_from(self, style)
         return s
 
     def edit_properties_widget(self):
- 	"""Build a widget to edit the shape properties.
-	"""
+        """Build a widget to edit the shape properties.
+        """
         vbox=gtk.VBox()
 
         def label_widget(label, widget):
@@ -206,8 +206,8 @@ class Shape:
         return vbox
 
     def edit_properties(self):
- 	"""Display a widget to edit the shape properties.
-	"""
+        """Display a widget to edit the shape properties.
+        """
         edit=self.edit_properties_widget()
 
         d = gtk.Dialog(title=_("Properties of %s") % self.name,
@@ -501,7 +501,7 @@ class ShapeDrawer:
 
     @ivar callback: method called when the button is released.
     @type callback: method taking a rectangle as parameter
-    
+
     @ivar background: the canvas background
     @type background: gtk.Image
     @ivar objects: the list of defined objects
@@ -511,25 +511,25 @@ class ShapeDrawer:
     @ivar feedback_shape: the currently edited shape, displayed as feedback
     @type feedback_shape: Shape
     @ivar shape_class: the default shape class to be created
-    
+
     @ivar mode: the current editing mode ("create", "resize" or "translate")
     @type mode: string
-    
+
     @ivar pixmap: the edited pixmap
     @type pixmap: gtk.gdk.Pixmap
     @ivar canvaswidth, canvasheight: the canvas dimensions
     @type canvaswidth, canvasheight: int
-    
+
     @ivar widget: the gtk Widget for the component
     @type widget: gtk.Widget
-    
+
     """
     def __init__(self, callback=None, background=None):
-	"""
-	@param callback: the callback method
-	@param background: an optional background image
-	@type background: gtk.Image
-	"""
+        """
+        @param callback: the callback method
+        @param background: an optional background image
+        @type background: gtk.Image
+        """
         self.callback = callback or self.default_callback
 
         # background is a gtk.Image()
@@ -565,22 +565,22 @@ class ShapeDrawer:
             self.canvasheight=h
 
     def default_callback(self, rectangle):
-	"""Default callback.
-	"""
+        """Default callback.
+        """
         print "Got selection ", str(rectangle)
 
     def add_object(self, o):
-	"""Add an object (shape) to the object list.
-	"""
+        """Add an object (shape) to the object list.
+        """
         self.objects.append( (o, o.name) )
         self.plot()
 
     def find_object(self, o):
         """Return the iterator for the given object.
-	
-	@param o: the searched object
-	@return: the iterator
-	@rtype: gtk.Iterator
+
+        @param o: the searched object
+        @return: the iterator
+        @rtype: gtk.Iterator
         """
         i = self.objects.get_iter_first()
         while i is not None:
@@ -590,19 +590,19 @@ class ShapeDrawer:
         return None
 
     def remove_object(self, o):
-	"""Remove the given object from the list.
-	"""
+        """Remove the given object from the list.
+        """
         i = self.find_object(o)
         if i is not None:
             self.objects.remove( i )
         self.plot()
 
     def dimensions(self):
-	"""Return the canvas dimensions.
-	
-	@return: the dimensions in pixel
-	@rtype: a couple (width, height)
-	"""
+        """Return the canvas dimensions.
+
+        @return: the dimensions in pixel
+        @rtype: a couple (width, height)
+        """
         return (self.canvaswidth, self.canvasheight)
 
     def configure_event(self, widget, event):
@@ -626,8 +626,8 @@ class ShapeDrawer:
         return False
 
     def clicked_shape(self, point):
-	"""Check if point is on a shape.
-	"""
+        """Check if point is on a shape.
+        """
         for o in self.objects:
             if point in o[0]:
                 return o[0]
@@ -751,7 +751,7 @@ class ShapeDrawer:
 
     def plot(self):
         """Draw in the pixmap.
-	"""
+        """
         if self.pixmap is None:
             return
         self.pixmap.draw_rectangle(self.widget.get_style().white_gc, True, 0, 0, self.canvaswidth, self.canvasheight)
@@ -813,7 +813,7 @@ class ShapeEditor:
         button = event.button
         x = int(event.x)
         y = int(event.y)
-        
+
         # On double-click, edit element
         if event.type == gtk.gdk._2BUTTON_PRESS:
             node = self.get_selected_node (widget)
@@ -857,7 +857,7 @@ class ShapeEditor:
         self.treeview.append_column(column)
         self.treeview.connect('row_activated', self.remove_item)
         self.treeview.connect("button_press_event", self.tree_view_button_cb)
-        
+
         control = gtk.VBox()
 
         # FIXME: toolbar at the top

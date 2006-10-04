@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -35,9 +35,9 @@ class EditAccumulator(AccumulatorPopup):
         kw['vertical']=True
         super(EditAccumulator, self).__init__(self, *p, **kw)
         self.view_name = _("EditAccumulator")
-	self.view_id = 'editaccumulator'
-	self.close_on_package_load = False
-        
+        self.view_id = 'editaccumulator'
+        self.close_on_package_load = False
+
     def edit(self, element):
         e=get_edit_popup(element, self.controller)
         if e.window:
@@ -63,7 +63,7 @@ class EditAccumulator(AccumulatorPopup):
         b=gtk.Button(stock=gtk.STOCK_APPLY)
         b.connect("clicked", lambda x: e.apply_cb())
         hbox.pack_start(b, expand=False)
-        
+
         self.display(w, title=hbox)
 
     def update_position(self, pos):
@@ -84,8 +84,8 @@ class EditAccumulator(AccumulatorPopup):
         # The widget can receive drops from annotations
         mainbox.connect("drag_data_received", self.drag_received)
         mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-				  gtk.DEST_DEFAULT_HIGHLIGHT |
-				  gtk.DEST_DEFAULT_ALL,
-				  config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+                                  gtk.DEST_DEFAULT_HIGHLIGHT |
+                                  gtk.DEST_DEFAULT_ALL,
+                                  config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
 
         return mainbox

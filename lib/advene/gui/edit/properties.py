@@ -27,7 +27,7 @@ class EditNotebook(object):
         self._get_config = get_config
         self.book = gtk.Notebook()
         self.current_widget = None
-        
+
     def __getattribute__ (self, name):
         """Use the defined method if necessary. Else, forward the request
         to the current_widget object
@@ -41,7 +41,7 @@ class EditNotebook(object):
 
     def set_name(self, name):
         self.__name = name
-        
+
     def get_name(self):
         return self.__name
 
@@ -50,7 +50,7 @@ class EditNotebook(object):
         self.current_widget.set_name(title)
         self.book.append_page(self.current_widget, gtk.Label(title))
         return
-        
+
     def popup(self):
         d = gtk.Dialog(title=self.get_name(),
                        parent=None,
@@ -171,7 +171,7 @@ class EditWidget(gtk.VBox):
 
     def add_title(self, label):
 
-	self.add_label("<b>" + label + "</b>")
+        self.add_label("<b>" + label + "</b>")
 
     def add_checkbox(self, label, property, help):
 

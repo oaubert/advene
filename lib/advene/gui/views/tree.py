@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -42,7 +42,7 @@ import gobject
 class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest):
     COLUMN_TITLE=0
     COLUMN_ELEMENT=1
-    
+
     def nodeParent (self, node):
         raise Exception("This has to be implemented in subclasses.")
 
@@ -51,7 +51,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
 
     def nodeHasChildren (self, node):
         raise Exception("This has to be implemented in subclasses.")
-        
+
     def __init__(self, controller=None, package=None):
         gtk.GenericTreeModel.__init__(self)
         self.clear_cache ()
@@ -62,7 +62,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
 
     def get_package(self):
         return self.__package
-                    
+
     def clear_cache (self):
         self.childrencache = {}
 
@@ -81,7 +81,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
 	    path=self.on_get_path(parent)
 	    self.row_changed(path, self.get_iter(path))
 	    return
-	
+
 	parent=None
 	for p in self.childrencache:
 	    if e in self.childrencache[p]:
@@ -120,10 +120,10 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
             else:
                 self.row_changed(path, self.get_iter(path))
         return
-        
+
     def on_get_flags(self):
         return 0
-    
+
     def on_get_n_columns(self):
         return 2
 
@@ -189,7 +189,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
             or (hasattr(node, 'schema') and node.schema.isImported())):
             title += " (*)"
         return title
-    
+
     def on_get_value(self, node, column):
         if column == AdveneTreeModel.COLUMN_TITLE:
             return self.title(node)
@@ -221,7 +221,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         else:
             assert len(children), _("No children in on_iter_children()!")
             return children[0]
-    
+
     def on_iter_has_child(self, node):
         """returns true if this node has children"""
         return self.nodeHasChildren(node)
@@ -250,7 +250,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
 #             return True
 #         else:
 #             return False
-     
+
     def drag_data_delete(self, path):
         print "drag delete %s" % str(path)
         return False
@@ -258,7 +258,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
     def drag_data_received (self, *p, **kw):
         print "drag data received: %s %s" % (str(p), str(kw))
         return True
-    
+
     def drag_data_get(self, path, selection):
         print "drag data get %s %s" % (str(path), str(selection))
         node = self.on_get_iter(path)
@@ -356,7 +356,7 @@ class TreeWidget(AdhocView):
 	self.view_id = 'treeview'
 	self.close_on_package_load = False
         self.contextual_actions = (
-            (_("Refresh"), self.refresh),            
+            (_("Refresh"), self.refresh),
             )
         self.package = package
         self.controller=controller
@@ -371,11 +371,11 @@ class TreeWidget(AdhocView):
 
         select = tree_view.get_selection()
         select.set_mode(gtk.SELECTION_SINGLE)
-        
+
         tree_view.connect("button_press_event", self.tree_view_button_cb)
         tree_view.connect("row-activated", self.row_activated_cb)
 	tree_view.set_search_column(AdveneTreeModel.COLUMN_TITLE)
-        
+
         #tree_view.connect("select-cursor-row", self.debug_cb)
         #select.connect ("changed", self.debug_cb)
 
@@ -401,10 +401,10 @@ class TreeWidget(AdhocView):
         print "Drag data received"
         treeselection = treeview.get_selection()
         model, iter = treeselection.get_selected()
-        
+
         annotation = model.get_value(iter, AdveneTreeModel.COLUMN_ELEMENT)
         print "Got drag for %s" % str(annotation)
-        
+
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.target, 8, annotation.uri)
         else:
@@ -425,7 +425,7 @@ class TreeWidget(AdhocView):
             node = tree_view.get_model().get_value (it,
                                                     AdveneTreeModel.COLUMN_ELEMENT)
         return node
-    
+
     def debug_cb (self, *p, **kw):
         print "Debug cb:\n"
         print "Parameters: %s" % str(p)
@@ -451,7 +451,7 @@ class TreeWidget(AdhocView):
         button = event.button
         x = int(event.x)
         y = int(event.y)
-        
+
         if button == 3 or button == 2:
             if event.window is widget.get_bin_window():
                 model = self.model
@@ -491,7 +491,7 @@ class TreeWidget(AdhocView):
         else:
             return "Unknown event %s" % event
         return
-        
+
     def update_annotation(self, annotation=None, event=None):
         """Update the annotation.
         """
@@ -507,19 +507,19 @@ class TreeWidget(AdhocView):
     def update_view(self, view=None, event=None):
         self.update_element(view, event)
         return
-    
+
     def update_query(self, query=None, event=None):
         self.update_element(query, event)
         return
-    
+
     def update_schema(self, schema=None, event=None):
         self.update_element(schema, event)
         return
-    
+
     def update_annotationtype(self, annotationtype=None, event=None):
         self.update_element(annotationtype, event)
         return
-    
+
     def update_relationtype(self, relationtype=None, event=None):
         """Update the relationtype
         """
@@ -529,7 +529,7 @@ class TreeWidget(AdhocView):
     def update_resource(self, resource=None, event=None):
         self.update_element(resource, event)
         return
-    
+
     def update_model(self, package):
         """Update the model with a new package."""
         #print "Treeview: update model %s" % str(package)
@@ -563,7 +563,7 @@ class TreeWidget(AdhocView):
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
-    
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Should provide a package name"
@@ -573,20 +573,20 @@ if __name__ == "__main__":
         pass
 
     controller=DummyController()
-    
+
     controller.package = Package (uri=sys.argv[1])
     controller.gui=None
-    
+
     tree = TreeWidget(controller.package, modelclass=DetailedTreeModel,
                       controller=controller)
 
     window=tree.popup()
-    
+
     def validate_cb (win, package):
         filename="/tmp/package.xml"
         package.save (name=filename)
         print "Package saved as %s" % filename
-        gtk.main_quit ()    
+        gtk.main_quit ()
 
     b = gtk.Button (stock=gtk.STOCK_SAVE)
     b.connect ("clicked", validate_cb, controller.package)
@@ -608,7 +608,7 @@ if __name__ == "__main__":
                 pop.display ()
             else:
                 print _("Error: unable to find an edit popup for %s") % node
-        return False            
+        return False
 
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())

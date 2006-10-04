@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -37,14 +37,14 @@ class RelationView:
         self.relation=relation
         self.controller=controller
         self.widget=self.build_widget()
-        self.widget.connect("clicked", self.activate)        
+        self.widget.connect("clicked", self.activate)
 
     def activate(self, button):
         print "Relation %s activated" % self.relation.id
         if self.controller:
             self.controller.notify("RelationActivate", relation=self.relation)
         return True
-    
+
     def build_widget(self):
         l=gtk.Label()
         l.set_markup("<b>%s</b> relation between\nann. <i>%s</i>\nand\nann. <i>%s</i>" %
@@ -54,12 +54,12 @@ class RelationView:
         b=gtk.Button()
         b.add(l)
         b.connect("clicked", self.popup)
-        
+
         return b
 
     def get_widget(self):
         return self.widget
-        
+
 class RelationsBox:
     """
     Representation of a list of relations
@@ -84,13 +84,13 @@ class RelationsBox:
             vbox.pack_start(v.get_widget(), expand=False)
         vbox.show_all()
         return vbox
-    
+
     def debug_cb (self, widget, data=None):
         print "Debug event."
         if data is not None:
             print "Data: %s" % data
         return True
-    
+
     def get_widget_for_relation (self, relation):
         bs = [ b
                for b in self.widget.get_children()
@@ -102,13 +102,13 @@ class RelationsBox:
         if relation is not None:
             self.activate_relation(relation)
         return True
-            
+
     def desactivate_relation_handler (self, context, parameters):
         relation=context.evaluateValue('relation')
         if relation is not None:
             self.desactivate_relation(relation)
         return True
-            
+
     def register_callback (self, controller=None):
         """Add the activate handler for annotations."""
         pass
@@ -116,12 +116,12 @@ class RelationsBox:
         #                                        method=self.activate_annotation_handler)
         #self.endrule=controller.event_handler.internal_rule (event="AnnotationEnd",
         #                                        method=self.desactivate_annotation_handler)
-        
+
     def unregister_callback (self, controller=None):
         pass
         #controller.event_handler.remove_rule(self.beginrule)
         #controller.event_handler.remove_rule(self.endrule)
-    
+
     def activate_relation (self, relation):
         """Activate the representation of the given relation."""
         bs = self.get_widget_for_relation (relation)
@@ -143,7 +143,7 @@ class RelationsBox:
                           gtk.STATE_PRELIGHT):
                 b.modify_bg (style, self.inactive_color)
         return True
-    
+
     def get_widget (self):
         """Return the display widget."""
         return self.widget
@@ -173,7 +173,7 @@ class RelationsBox:
         bs = self.get_widget_for_relation (element)
         for b in bs:
             self.update_button (b)
-        
+
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
@@ -217,7 +217,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     package = Package (uri=sys.argv[1])
-    
+
     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
     window.set_size_request (320, 200)
 
@@ -228,19 +228,19 @@ if __name__ == "__main__":
                 gtk.main_quit ()
                 return True
         return False
-            
+
 
     def validate_cb (win, package):
         filename="/tmp/package.xml"
         package.save (name=filename)
         print "Package saved as %s" % filename
         gtk.main_quit ()
-        
+
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())
     window.set_title (package.title or "None")
     vbox = gtk.VBox()
-    
+
     window.add (vbox)
 
     relbox=RelationsBox(package=package, controller=None)

@@ -30,15 +30,15 @@ name="Default content handlers"
 
 def register(controller=None):
     for c in ZoneContentHandler, RuleSetContentHandler, SimpleQueryContentHandler:
-	controller.register_content_handler(c)
+        controller.register_content_handler(c)
 
 class ZoneContentHandler (ContentHandler):
     """Create a zone edit form for the given element."""
     def can_handle(mimetype):
-	res=0
-	if mimetype == 'application/x-advene-zone':
-	    res=80
-	return res
+        res=0
+        if mimetype == 'application/x-advene-zone':
+            res=80
+        return res
     can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, annotation=None, **kw):
@@ -55,10 +55,10 @@ class ZoneContentHandler (ContentHandler):
         self.editable = boolean
 
     def callback(self, l):
-	if l[0][0] is None or l[1][0] is None:
-	    self.shape = None
-	    self.view.plot()
-	    return
+        if l[0][0] is None or l[1][0] is None:
+            self.shape = None
+            self.view.plot()
+            return
 
         if self.shape is None:
             r = Rectangle()
@@ -71,7 +71,7 @@ class ZoneContentHandler (ContentHandler):
             self.shape.set_bounds(l)
             self.view.plot()
         return
-        
+
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if not self.editable:
@@ -79,11 +79,11 @@ class ZoneContentHandler (ContentHandler):
         if self.shape is None:
             return True
 
-	if not self.shape:
-	    return True
+        if not self.shape:
+            return True
 
         shape=self.shape
-	shape.name=self.nameentry.get_text()
+        shape.name=self.nameentry.get_text()
         text="""shape=rect\nname=%s\nx=%02f\ny=%02f\nwidth=%02f\nheight=%02f""" % (
             shape.name,
             shape.x * 100.0 / self.view.canvaswidth,
@@ -91,13 +91,13 @@ class ZoneContentHandler (ContentHandler):
             shape.width * 100.0 / self.view.canvaswidth,
             shape.height * 100.0 / self.view.canvasheight)
 
-	self.element.data = text
+        self.element.data = text
         return True
 
     def get_view (self, compact=False):
         """Generate a view widget for editing zone attributes."""
         vbox=gtk.VBox()
-        
+
         i=advene.gui.util.image_from_position(self.controller, self.annotation.fragment.begin, height=300)
         self.view = ShapeDrawer(callback=self.callback, background=i)
 
@@ -117,15 +117,15 @@ class ZoneContentHandler (ContentHandler):
                                      (10.0, 10.0) ) )
                     self.shape.name = self.element.data
 
-	# Name edition
-	hb=gtk.HBox()
-	hb.pack_start(gtk.Label(_("Label")), expand=False)
-	self.nameentry=gtk.Entry()
-	if self.shape is not None:
-	    self.nameentry.set_text(self.shape.name)
-	hb.pack_start(self.nameentry)
+        # Name edition
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Label")), expand=False)
+        self.nameentry=gtk.Entry()
+        if self.shape is not None:
+            self.nameentry.set_text(self.shape.name)
+        hb.pack_start(self.nameentry)
 
-	vbox.pack_start(hb, expand=False)
+        vbox.pack_start(hb, expand=False)
 
         vbox.add(self.view.widget)
 
@@ -136,10 +136,10 @@ class RuleSetContentHandler (ContentHandler):
     """Create a RuleSet edit form for the given element (a view, presumably).
     """
     def can_handle(mimetype):
-	res=0
-	if mimetype == 'application/x-advene-ruleset':
-	    res=80
-	return res
+        res=0
+        if mimetype == 'application/x-advene-ruleset':
+            res=80
+        return res
     can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, **kw):
@@ -154,10 +154,10 @@ class RuleSetContentHandler (ContentHandler):
     def check_validity(self):
         iv=self.edit.invalid_items()
         if iv:
-	    advene.gui.util.message_dialog(
+            advene.gui.util.message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
                 "\n".join(iv),
-		icon=gtk.MESSAGE_ERROR)
+                icon=gtk.MESSAGE_ERROR)
             return False
         else:
             return True
@@ -169,7 +169,7 @@ class RuleSetContentHandler (ContentHandler):
             return False
         if not self.edit.update_value():
             return False
-	self.element.data = self.edit.model.xml_repr()
+        self.element.data = self.edit.model.xml_repr()
         return True
 
     def get_view (self, compact=False):
@@ -194,10 +194,10 @@ class SimpleQueryContentHandler (ContentHandler):
     """Create a Query edit form for the given element (a view, presumably).
     """
     def can_handle(mimetype):
-	res=0
-	if mimetype == 'application/x-advene-simplequery':
-	    res=80
-	return res
+        res=0
+        if mimetype == 'application/x-advene-simplequery':
+            res=80
+        return res
     can_handle=staticmethod(can_handle)
 
     def __init__ (self, element, controller=None, editable=True, **kw):
@@ -209,10 +209,10 @@ class SimpleQueryContentHandler (ContentHandler):
     def check_validity(self):
         iv=self.edit.invalid_items()
         if iv:
-	    advene.gui.util.message_dialog(
+            advene.gui.util.message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
                 "\n".join(iv),
-		icon=gtk.MESSAGE_ERROR)
+                icon=gtk.MESSAGE_ERROR)
             return False
         else:
             return True
@@ -226,8 +226,8 @@ class SimpleQueryContentHandler (ContentHandler):
             return False
         if not self.edit.update_value():
             return False
-	self.element.data = self.edit.model.xml_repr()
-	# Just to be sure:
+        self.element.data = self.edit.model.xml_repr()
+        # Just to be sure:
         self.element.mimetype = 'application/x-advene-simplequery'
         return True
 

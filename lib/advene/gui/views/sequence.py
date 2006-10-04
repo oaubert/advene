@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -51,7 +51,7 @@ class SequenceModel(gtk.GenericTreeModel):
     COLUMN_TYPE=3
     COLUMN_ELEMENT=4
     COLUMN_EDITABLE=5
-    
+
     def __init__(self, elements):
         gtk.GenericTreeModel.__init__(self)
         self.elements = elements
@@ -64,13 +64,13 @@ class SequenceModel(gtk.GenericTreeModel):
 
     def nodeHasChildren (self, node):
         return False
-        
+
     def on_get_flags(self):
         return 0
-    
+
     def on_get_n_columns(self):
         return 6
-    
+
     def on_get_column_type(self, index):
         # Data is stored as:
         # begin, end, content, type, annotation, element, editable
@@ -83,7 +83,7 @@ class SequenceModel(gtk.GenericTreeModel):
         # print "node: " + str(node)
         # node is either an Annotation or an AnnotationType
         return (self.elements.index(node), )
-            
+
     def on_get_iter(self, path):
         """Return the node corresponding to the given path.
         """
@@ -121,7 +121,7 @@ class SequenceModel(gtk.GenericTreeModel):
         children = self.nodeChildren(node)
         assert len(children), _("No children in on_iter_children()!")
         return children[0]
-    
+
     def on_iter_has_child(self, node):
         """returns true if this node has children"""
         return False
@@ -142,9 +142,9 @@ class SequenceEditor(AdhocView):
     def __init__ (self, controller=None):
         # FIXME: pass AnnotationType here, and (optionaly) an existing list of
         # annotations
-	self.view_name = _("Sequence Editor")
-	self.view_id = 'sequenceview'
-	self.close_on_package_load = True
+        self.view_name = _("Sequence Editor")
+        self.view_id = 'sequenceview'
+        self.close_on_package_load = True
 
         self.controller=controller
         self.package=controller.package
@@ -155,16 +155,16 @@ class SequenceEditor(AdhocView):
         # Two solutions: either have a model directly interacting with
         # the package's data, *or* creating an intermediate model in
         # order to be able to cancel actions
-        
+
     def set_type(self, type):
         self.annotationtype=type
 
     def build_widget(self):
         tree_view = gtk.TreeView(self.model)
-        
+
         select = tree_view.get_selection()
         select.set_mode(gtk.SELECTION_SINGLE)
-        
+
         # Define the 4 cell renderers
         cell = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_("Begin"), cell,
@@ -194,7 +194,7 @@ class SequenceEditor(AdhocView):
         tree_view.connect("button-press-event", self.tree_select_cb)
 
         return tree_view
-    
+
     def get_selected_node (self):
         """Return the currently selected node.
 
@@ -210,7 +210,7 @@ class SequenceEditor(AdhocView):
             node = tree_view.get_model().get_value (it,
                                                     SequenceModel.COLUMN_ELEMENT)
         return node
-    
+
     def tree_select_cb(self, tree_view, event):
         # On double-click, edit element
         if event.type == gtk.gdk._2BUTTON_PRESS:
@@ -225,7 +225,7 @@ class SequenceEditor(AdhocView):
                     pop.edit ()
                 return True
         return False
-        
+
     def debug_cb (self, *p, **kw):
         print "Debug cb:\n"
         print "Parameters: %s" % str(p)
@@ -257,31 +257,31 @@ if __name__ == "__main__":
         sys.exit(1)
 
     import advene.core.imagecache
-    
+
     class DummyController:
         def notify(self, *p, **kw):
             print "Notify %s %s" % (p, kw)
 
     controller=DummyController()
-    
+
     controller.package = Package (uri=sys.argv[1])
     controller.imagecache = advene.core.imagecache.ImageCache()
-    
+
     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
     window.set_size_request (640, 480)
 
     window.set_border_width(10)
     window.set_title (controller.package.title)
     vbox = gtk.VBox()
-    
+
     window.add (vbox)
-    
+
     sw = gtk.ScrolledWindow()
     sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
     vbox.add (sw)
 
     seq = SequenceEditor(controller=controller)
-    
+
     sw.add (seq.get_widget())
 
     hbox = gtk.HButtonBox()
@@ -292,7 +292,7 @@ if __name__ == "__main__":
         package.save (name=filename)
         print "Package saved as %s" % filename
         gtk.main_quit ()
-        
+
 
     b = gtk.Button (stock=gtk.STOCK_SAVE)
     b.connect ("clicked", validate_cb, controller.package)
@@ -319,7 +319,7 @@ if __name__ == "__main__":
                     pop.display ()
                 else:
                     print _("Error: unable to find an edit popup for %s") % node
-        return False            
+        return False
 
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())

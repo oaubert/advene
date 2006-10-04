@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,15 +30,15 @@ import gtk
 class ScrollerView(AdhocView):
     def __init__(self, controller=None):
         self.view_name = _("Scroller")
-	self.view_id = 'scroller'
-	self.close_on_package_load = False
+        self.view_id = 'scroller'
+        self.close_on_package_load = False
         self.contextual_actions = ()
 
         self.controller=controller
         self.widget=self.build_widget()
 
     def close(self, *p):
-	return False
+        return False
 
     def display_text(self, text, where=None):
         l=self.present_label
@@ -48,9 +48,9 @@ class ScrollerView(AdhocView):
             l=self.future_label
         l.set_text(text)
         return True
-    
+
     def build_widget(self):
-	v=gtk.HBox()
+        v=gtk.HBox()
 
         style=v.get_style().copy()
         self.style = style
@@ -66,12 +66,12 @@ class ScrollerView(AdhocView):
             style.fg[state]=white
             style.text[state]=white
             #style.base[state]=white
-            
+
         v.set_style(style)
 
         self.past_widget=gtk.VBox()
         self.past_widget.set_style(style)
-        
+
         self.present_widget=gtk.VBox()
         self.present_widget.set_style(style)
         #self.present_alignment=gtk.Alignment(0.25, 0.25, 0, 0)

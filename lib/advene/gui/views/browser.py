@@ -137,15 +137,15 @@ class BrowserColumn:
 class Browser(AdhocView):
     def __init__(self, element=None, controller=None, callback=None):
         self.view_name = _("Package browser")
-	self.view_id = 'browserview'
-	self.close_on_package_load = False
+        self.view_id = 'browserview'
+        self.close_on_package_load = False
         self.contextual_actions = [
                     (_("Display annotations in timeline"), self.display_timeline),
                     ]
 
         self.element=element
         self.controller=controller
-	self.callback = callback
+        self.callback = callback
 
         if self.callback:
             def validate_path(*p):
@@ -175,24 +175,24 @@ class Browser(AdhocView):
         if package is None:
             package = self.controller.package
 
-	# Reset to the rootcolumn
-	cb=self.rootcolumn.next
-	while cb is not None:
-	    cb.widget.destroy()
-	    cb=cb.next
-	self.rootcolumn.next=None
+        # Reset to the rootcolumn
+        cb=self.rootcolumn.next
+        while cb is not None:
+            cb.widget.destroy()
+            cb=cb.next
+        self.rootcolumn.next=None
 
-	# Update the rootcolumn element
-	self.rootcolumn.update(element=package, name="here")
-	self.update_view('here', package)
-	# The clicked_callback must use the new package
-	self.element = package
-	return True
+        # Update the rootcolumn element
+        self.rootcolumn.update(element=package, name="here")
+        self.update_view('here', package)
+        # The clicked_callback must use the new package
+        self.element = package
+        return True
 
     def clicked_callback(self, columnbrowser, attribute):
         # We could use here=columnbrowser.model, but then the traversal
         # of path is not done and absolute_url does not work
-	context = self.controller.build_context(here=self.element)
+        context = self.controller.build_context(here=self.element)
 
         # Rebuild path
         path=['here']
@@ -219,8 +219,8 @@ class Browser(AdhocView):
                 columnbrowser.next=None
                 columnbrowser.listview.get_selection().unselect_all()
 
-	    advene.gui.util.message_dialog(_("Exception: %s") % e,
-					   icon=gtk.MESSAGE_WARNING)
+            advene.gui.util.message_dialog(_("Exception: %s") % e,
+                                           icon=gtk.MESSAGE_WARNING)
             return
 
         self.update_view(path, el)
@@ -267,7 +267,7 @@ class Browser(AdhocView):
         """Display the results as annotations in a timeline.
         """
         l=None
-        if (hasattr(self.current_value, 'viewableType') 
+        if (hasattr(self.current_value, 'viewableType')
             and self.current_value.viewableType == 'annotation-list'):
             l=self.current_value
         elif isinstance(self.current_value, list):
@@ -284,9 +284,9 @@ class Browser(AdhocView):
             else:
                 duration = 0
         t=TimeLine(l,
-		   minimum=0,
-		   maximum=duration,
-		   controller=self.controller)
+                   minimum=0,
+                   maximum=duration,
+                   controller=self.controller)
         t.popup()
         return True
 
@@ -349,15 +349,15 @@ class Browser(AdhocView):
         self.valuelabel = gtk.Label("here")
         self.valuelabel.set_selectable(True)
         vbox.pack_start(name_label(_("Value"), self.valuelabel), expand=False)
-	
-        vbox.show_all()
-	def debug(*p):
-	    print "browser debug", p
-	    import traceback
-	    traceback.print_stack()
-	    return True
 
-	#vbox.connect('destroy', debug)
+        vbox.show_all()
+        def debug(*p):
+            print "browser debug", p
+            import traceback
+            traceback.print_stack()
+            return True
+
+        #vbox.connect('destroy', debug)
         return vbox
 
 if __name__ == "__main__":

@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -31,7 +31,7 @@ class DVDSelect:
     FIXME: we could access the DVD and request its structure.
 
     FIXME: we should not base on URI but the package metadata should be more structured
-    
+
     """
     def __init__(self, controller=None, current=None):
         self.controller=controller
@@ -48,7 +48,7 @@ class DVDSelect:
             self.titlewidget.set_value(long(title))
             self.chapterwidget.set_value(long(chapter))
         return True
-    
+
     def get_chapter(self):
         return int(self.chapterwidget.get_value())
 
@@ -85,13 +85,13 @@ class DVDSelect:
 
     def get_widget(self):
         return self.widget
-    
+
     def make_widget(self):
         vbox=gtk.VBox()
-        
+
         label=gtk.Label(_("Select the correct\ntitle and chapter\nof the DVD"))
         vbox.add(label)
-        
+
         hbox=gtk.HBox()
         hbox.add(gtk.Label(_("Title")))
         sp=gtk.SpinButton()
@@ -100,7 +100,7 @@ class DVDSelect:
         hbox.pack_start(sp, expand=False)
         self.titlewidget=sp
         vbox.add(hbox)
-        
+
         hbox=gtk.HBox()
         hbox.add(gtk.Label(_("Chapter")))
         sp=gtk.SpinButton()
@@ -113,14 +113,14 @@ class DVDSelect:
         b=gtk.Button(_("Preview"))
         b.connect("clicked", self.preview)
         vbox.add(b)
-                 
+
         vbox.show_all()
         return vbox
 
 if __name__ == "__main__":
 
     import advene.core.mediacontrol
-    
+
     class DummyController:
         def __init__(self):
             f=advene.core.mediacontrol.PlayerFactory()
@@ -134,7 +134,7 @@ if __name__ == "__main__":
                 gtk.main_quit ()
                 return True
         return False
-                        
+
     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
     window.connect ("key-press-event", key_pressed_cb)
     window.connect ("destroy", lambda e: gtk.main_quit())

@@ -37,7 +37,7 @@ def register(controller=None):
             defaults={'message': 'annotation/content/data'},
             category='gui',
             ))
-    
+
     controller.register_action(RegisteredAction(
             name="Popup",
             method=ac.action_popup,
@@ -46,7 +46,7 @@ def register(controller=None):
                         'duration': _("Display duration in ms. Ignored if empty.")},
             defaults={'message': 'annotation/content/data',
                       'duration': 'annotation/fragment/duration'},
-            category='gui',            
+            category='gui',
             ))
 
     controller.register_action(RegisteredAction(
@@ -54,12 +54,12 @@ def register(controller=None):
             method=ac.action_entry,
             description=_("Popup an entry box"),
             parameters={'message': _("String to display."),
-			'destination': _("Object where to store the answer (should have a content)"),
+                        'destination': _("Object where to store the answer (should have a content)"),
                         'duration': _("Display duration in ms. Ignored if empty.")},
             defaults={'message': 'annotation/content/data',
                       'destination': 'annotation/related',
                       'duration': 'annotation/fragment/duration'},
-            category='gui',            
+            category='gui',
             ))
 
     controller.register_action(RegisteredAction(
@@ -76,20 +76,20 @@ def register(controller=None):
                       'duration': 'annotation/fragment/duration'},
             category='gui',
             ))
-    
+
     controller.register_action(RegisteredAction(
             name="OpenView",
             method=ac.action_open_view,
             description=_("Open a GUI view"),
             parameters={'guiview': _("View name (timeline, tree, transcription, browser, webbrowser, transcribe)"),
-			'destination': _("Destination: popup, south, east"),
+                        'destination': _("Destination: popup, south, east"),
                         },
             defaults={'guiview': 'string:timeline',
-		      'destination': 'string:south', 
-		      },
+                      'destination': 'string:south',
+                      },
             category='gui',
             ))
-    
+
     controller.register_action(RegisteredAction(
             name="PopupGoto2",
             method=ac.generate_action_popup_goton(2),
@@ -110,7 +110,7 @@ def register(controller=None):
                       },
             category='gui',
             ))
-    
+
     controller.register_action(RegisteredAction(
             name="PopupGoto3",
             method=ac.generate_action_popup_goton(3),
@@ -138,8 +138,8 @@ def register(controller=None):
 
 class DefaultGUIActions:
     def __init__(self, controller=None):
-	self.controller=controller
-	self.gui=self.controller.gui
+        self.controller=controller
+        self.gui=self.controller.gui
 
     def parse_parameter(self, context, parameters, name, default_value):
         """Helper method used in actions.
@@ -198,7 +198,7 @@ class DefaultGUIActions:
         duration=self.parse_parameter(context, parameters, 'duration', None)
         if duration == "" or duration == 0:
             duration = None
-        
+
         w=self.gui.get_illustrated_text(message)
 
         self.gui.popupwidget.display(widget=w, timeout=duration, title=_("Information popup"))
@@ -213,37 +213,37 @@ class DefaultGUIActions:
         message=message.replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
-	destination=self.parse_parameter(context, parameters, 'destination', None)
-	if destination is None:
-	    self.log(_("Empty destination for entry popup: %s") % parameters['destination'])
-	    return True
-	if not hasattr(destination, 'content'):
-	    self.log(_("Destination does not have a content: %s") % parameters['destination'])	
-	    return True
+        destination=self.parse_parameter(context, parameters, 'destination', None)
+        if destination is None:
+            self.log(_("Empty destination for entry popup: %s") % parameters['destination'])
+            return True
+        if not hasattr(destination, 'content'):
+            self.log(_("Destination does not have a content: %s") % parameters['destination'])
+            return True
 
         duration=self.parse_parameter(context, parameters, 'duration', None)
         if duration == "" or duration == 0:
             duration = None
 
         def handle_response(button, widget, entry, dest):
-	    # Update the destination
-	    dest.content.data = entry.get_text()
-	    # FIXME: notify element modification
+            # Update the destination
+            dest.content.data = entry.get_text()
+            # FIXME: notify element modification
             self.gui.popupwidget.undisplay(widget)
             return True
-        
-	v=gtk.VBox()
+
+        v=gtk.VBox()
 
         w=self.gui.get_illustrated_text(message)
-	v.add(w)
-	e=gtk.Entry()
-	e.set_text(destination.content.data)
-	v.add(e)
-	b=gtk.Button(stock=gtk.STOCK_OK)
-	b.connect("clicked", handle_response, v, e, destination)
-	v.add(b)
+        v.add(w)
+        e=gtk.Entry()
+        e.set_text(destination.content.data)
+        v.add(e)
+        b=gtk.Button(stock=gtk.STOCK_OK)
+        b.connect("clicked", handle_response, v, e, destination)
+        v.add(b)
 
-	v.show_all()
+        v.show_all()
 
         self.gui.popupwidget.display(widget=v, timeout=duration, title=_("Entry popup"))
         return True
@@ -261,7 +261,7 @@ class DefaultGUIActions:
         description=self.parse_parameter(context, parameters, 'description', _("Make a choice"))
         description=description.replace('\\n', '\n')
         description=textwrap.fill(description, config.data.preferences['gui']['popup-textwidth'])
-        
+
         message=self.parse_parameter(context, parameters, 'message', _("Click to go to another position"))
         message=message.replace('\\n', '\n')
         message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
@@ -276,11 +276,11 @@ class DefaultGUIActions:
         vbox.pack_start(self.gui.get_illustrated_text(description), expand=False)
 
         b=gtk.Button()
-        b.add(self.gui.get_illustrated_text(message, position))    
+        b.add(self.gui.get_illustrated_text(message, position))
         vbox.pack_start(b, expand=False)
-        
+
         b.connect("clicked", handle_response, position, vbox)
-        
+
         self.gui.popupwidget.display(widget=vbox, timeout=duration, title=_("Navigation popup"))
         return True
 
@@ -309,9 +309,9 @@ class DefaultGUIActions:
                 message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
 
                 position=self.parse_parameter(context, parameters, 'position%d' % i, 0)
-                
+
                 b=gtk.Button()
-                b.add(self.gui.get_illustrated_text(message, position))                
+                b.add(self.gui.get_illustrated_text(message, position))
                 b.connect("clicked", handle_response, position, vbox)
                 vbox.add(b)
 
