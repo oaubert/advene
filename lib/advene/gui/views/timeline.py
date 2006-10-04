@@ -1522,19 +1522,21 @@ class TimeLine(AdhocView):
                 self.center_on_position(self.current_position)
             return True
 
-        b=gtk.Button(_("Center"))
-        self.tooltips.set_tip(b, _("Center on current player position."))
-        b.connect("clicked", center_on_current_position)
-        bbox.pack_start(b, expand=False, fill=False)
-
         s = gtk.HScale (self.fraction_adj)
         s.set_digits(2)
         s.connect ("value_changed", self.fraction_event)
         hbox.add (s)
 
         hbox.pack_start (self.highlight_activated_toggle, expand=False)
+
+        b=gtk.Button(_("Center"))
+        self.tooltips.set_tip(b, _("Center on current player position."))
+        b.connect("clicked", center_on_current_position)
+        hbox.pack_start(b, expand=False, fill=False)
+
         hbox.pack_start (self.autoscroll_choice, expand=False)
 
+        hbox.set_homogeneous (False)
         vbox.set_homogeneous (False)
 
         height=max(self.layer_position.values() or (1,)) + 3 * self.button_height
