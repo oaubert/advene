@@ -801,7 +801,16 @@ class TimeLine(AdhocView):
                         # so we can update the name field.
                         name=m.group(1)
                         reg = sre.compile('^' + name + '=(.+?)$', sre.MULTILINE)
-                        r = reg.sub(name + '=' + e.get_text(), annotation.content.data)
+                        if reg.match(annotation.content.data):
+                            r = reg.sub(name + '=' + e.get_text().replace('\n', '\\n'), annotation.content.data)
+                        else:
+                            # The key is not present, add it
+                            if annotation.content.data:
+                                r = annotation.content.data + "\n%s=%s" % (name,
+                                                                           e.get_text().replace('\n', '\\n'))
+                            else:
+                                r = "%s=%s" % (name,
+                                               e.get_text().replace('\n', '\\n'))
                     else:
                         self.log("Cannot update the annotation, its representation is too complex")
                         r=annotation.content.data
