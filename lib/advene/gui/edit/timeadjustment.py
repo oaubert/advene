@@ -124,8 +124,8 @@ class TimeAdjustment:
         self.entry.connect("activate", self.convert_entered_value)
         self.entry.set_editable(self.editable)
 
-        vbox.pack_start(hbox, expand=False)
         vbox.pack_start(self.entry, expand=False)
+        vbox.pack_start(hbox, expand=False)
         vbox.show_all()
 
         # The widget can receive drops from annotations
