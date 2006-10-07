@@ -95,6 +95,15 @@ class TimeAdjustment:
             vb.pack_start(b, expand=False)
             b=make_button(-self.small_increment, "1leftarrow.png")
             vb.pack_start(b, expand=False)
+            
+            b=gtk.Button()
+            i=gtk.Image()
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
+            self.tooltips.set_tip(b, _("Set to current player position"))
+            b.add(i)
+            b.connect("clicked", self.use_current_position)
+            vb.pack_start(b, expand=False)
+
         hbox.pack_start(vb, expand=False)
 
         self.image = gtk.Image()
