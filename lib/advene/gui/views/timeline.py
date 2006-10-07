@@ -455,6 +455,7 @@ class TimeLine(AdhocView):
             l.set_markup('<b>%s</b>' % title)
         else:
             l.set_text(title)
+        b._default_color=self.colors['inactive']
         color=a.type.getMetaData(config.data.namespace, 'color')
         if color:
             c=self.controller.build_context(here=a)
