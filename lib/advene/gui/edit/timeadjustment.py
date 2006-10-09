@@ -96,13 +96,6 @@ class TimeAdjustment:
             b=make_button(-self.small_increment, "1leftarrow.png")
             vb.pack_start(b, expand=False)
             
-            b=gtk.Button()
-            i=gtk.Image()
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
-            self.tooltips.set_tip(b, _("Set to current player position"))
-            b.add(i)
-            b.connect("clicked", self.use_current_position)
-            vb.pack_start(b, expand=False)
 
         hbox.pack_start(vb, expand=False)
 
@@ -127,13 +120,25 @@ class TimeAdjustment:
             vb.pack_start(b, expand=False)
         hbox.pack_start(vb, expand=False)
 
+        hb = gtk.HBox()
+
         self.entry=gtk.Entry()
         # Default width of the entry field
-        #self.entry.set_width_chars(len(advene.util.helper.format_time(0.0)))
+        self.entry.set_width_chars(len(advene.util.helper.format_time(0.0)))
         self.entry.connect("activate", self.convert_entered_value)
         self.entry.set_editable(self.editable)
 
-        vbox.pack_start(self.entry, expand=False)
+        b=gtk.Button()
+        i=gtk.Image()
+        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
+        self.tooltips.set_tip(b, _("Set to current player position"))
+        b.add(i)
+        b.connect("clicked", self.use_current_position)
+
+        hb.pack_start(self.entry, expand=False)
+        hb.pack_start(b, expand=False)
+
+        vbox.pack_start(hb, expand=False)
         vbox.pack_start(hbox, expand=False)
         vbox.show_all()
 
