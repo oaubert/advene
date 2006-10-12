@@ -132,7 +132,18 @@ class ImageCache(dict):
             self.init_value (key)
 
         return key
-    
+
+    def invalidate(self, key):
+        """Invalidate the given key.
+
+        This method is used when the player has some trouble getting
+        an accurate screenshot.
+        """
+        key = self.approximate(long(key))
+        if dict.__getitem__(self, key) != self.not_yet_available_image:
+            dict.__setitem__(self, key, self.not_yet_available_image)
+        return
+
     def missing_snapshots (self):
         """Return a list of positions of missing snapshots.
 
@@ -141,6 +152,15 @@ class ImageCache(dict):
         return [ pos
                  for pos in self.keys()
                  if dict.__getitem__(self, pos) == self.not_yet_available_image ]
+
+    def valid_snapshots (self):
+        """Return the list of positions of valid snapshots.
+
+        @return: a list of keys
+        """
+        return [ pos
+                 for pos in self.keys()
+                 if dict.__getitem__(self, pos) != self.not_yet_available_image ]
 
     def is_initialized (self, key):
         """Return True if the given key is initialized.
@@ -184,7 +204,7 @@ class ImageCache(dict):
             else:
                 os.mkdir (d)
 
-        for k in self.keys():
+        for k in self.valid_snapshots():
             f = open(os.path.join (d, "%010d.png" % k), 'wb')
             f.write (dict.__getitem__(self, k))
             f.close ()
