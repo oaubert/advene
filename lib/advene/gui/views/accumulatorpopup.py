@@ -73,6 +73,7 @@ class AccumulatorPopup(AdhocView):
         """Display the given widget.
 
         timeout is in ms.
+        title is either a string (that will be converted to a label), or a gtk widget.
         """
         if title is None:
             title="X"
@@ -90,6 +91,7 @@ class AccumulatorPopup(AdhocView):
             b=gtk.Button(title)
             b.connect("clicked", self.undisplay_cb, widget)
             self.set_color(b, self.new_color)
+            self.controller.gui.tooltips.set_tip(b, _("Click to close"))
             f.set_label_widget(b)
         else:
             # Hopefully it is a gtk widget
@@ -151,14 +153,12 @@ class AccumulatorPopup(AdhocView):
     def update_position(self, pos):
         # This method is regularly called. We use it as a side-effect to
         # remove the widgets when the timeout expires.
-        # We should do a loop to remove all expired widgets, but
-        # in a first approximation, update_position will itself
-        # quietly loop
         if self.widgets:
             self.lock.acquire()
-            t=self.widgets[0][1]
-            if t is not None and time.time() >= t:
-                self.undisplay(self.widgets[0][0])
+            for w in self.widgets[:]:
+                t=w[1]
+                if t is not None and time.time() >= t:
+                    self.undisplay(w[0])
             self.lock.release()
         return True
 
