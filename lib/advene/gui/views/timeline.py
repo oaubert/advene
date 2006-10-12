@@ -110,6 +110,18 @@ class TimeLine(AdhocView):
         self.minimum = minimum
         self.maximum = maximum
 
+        self.colors = {
+            'active': gtk.gdk.color_parse ('red'),
+            'inactive': gtk.Button().get_style().bg[0],
+            'incoming': gtk.gdk.color_parse ('green'),
+            'outgoing': gtk.gdk.color_parse ('yellow'),
+            'background': gtk.gdk.color_parse('red'),
+            'relations': gtk.gdk.color_parse('orange'),
+            }
+        self.widget_colors = {
+            'inactive': self.colors['inactive']
+            }
+
         def handle_toggle(b, option):
             self.options[option]=b.get_active()
             return True
@@ -166,11 +178,13 @@ class TimeLine(AdhocView):
         self.layout_size=(None, None)
 
         self.layout = gtk.Layout ()
+        #self.layout.bin_window.get_colormap().alloc_color(self.colors['relations'])
         self.layout.connect('scroll_event', self.scroll_event)
         self.layout.connect('key_press_event', self.key_pressed_cb)
         self.layout.connect('button_press_event', self.mouse_pressed_cb)
         self.layout.connect ('size_allocate', self.resize_event)
         #self.layout.connect('expose_event', self.draw_background)
+        self.layout.connect_after('expose_event', self.draw_relation_lines)
 
         # The layout can receive drops (to resize annotations)
         self.layout.connect("drag_data_received", self.layout_drag_received)
@@ -181,16 +195,8 @@ class TimeLine(AdhocView):
 
         self.old_ratio_value = self.ratio_adjustment.value
 
-        self.colors = {
-            'active': gtk.gdk.color_parse ('red'),
-            'inactive': gtk.Button().get_style().bg[0],
-            'incoming': gtk.gdk.color_parse ('green'),
-            'outgoing': gtk.gdk.color_parse ('yellow'),
-            'background': gtk.gdk.color_parse('red'),
-            }
-        self.widget_colors = {
-            'inactive': self.colors['inactive']
-            }
+        # Lines to draw in order to indicate related annotations
+        self.lines_to_draw = []
 
         # Current position in units
         self.current_position = minimum
@@ -234,6 +240,27 @@ class TimeLine(AdhocView):
             # Draw a different background
             drawable.draw_rectangle(gc, True, 0, h * i, width, h)
         return True
+
+    def update_relation_lines(self):
+        self.layout.queue_draw()
+
+    def draw_relation_lines(self, layout, event):
+        if not self.lines_to_draw:
+            return False
+        drawable=layout.bin_window
+        gc=drawable.new_gc(foreground=self.colors['relations'],
+                           background=self.colors['relations'],
+                           line_width=1,
+                           line_style = gtk.gdk.LINE_DOUBLE_DASH,
+                           cap_style=gtk.gdk.CAP_ROUND)
+        for b1, b2 in self.lines_to_draw:
+            # Draw a different background
+            r1 = b1.get_allocation()
+            r2 = b2.get_allocation()
+            drawable.draw_line(gc, 
+                               r1.x + 3 * r1.width / 4, r1.y + r1.height / 4, 
+                               r2.x + r2.width / 4, r2.y + 3 * r2.height / 4)
+        return False
 
     def update_model(self, package=None, partial_update=False):
         """Update the whole model.
@@ -338,7 +365,10 @@ class TimeLine(AdhocView):
         bs = [ b
                for b in self.layout.get_children()
                if hasattr (b, 'annotation') and b.annotation == annotation ]
-        return bs
+        if bs:
+            return bs[0]
+        else:
+            return None
 
     def scroll_to_annotation(self, annotation):
         """Scroll the view to put the annotation in the middle.
@@ -413,7 +443,7 @@ class TimeLine(AdhocView):
     def activate_annotation (self, annotation, buttons=None, color=None):
         """Activate the representation of the given annotation."""
         if buttons is None:
-            buttons = self.get_widget_for_annotation (annotation)
+            buttons = [ self.get_widget_for_annotation (annotation) ]
         if color is None:
             color=self.colors['active']
         for b in buttons:
@@ -424,19 +454,19 @@ class TimeLine(AdhocView):
     def desactivate_annotation (self, annotation, buttons=None):
         """Desactivate the representation of the given annotation."""
         if buttons is None:
-            buttons = self.get_widget_for_annotation (annotation)
+            buttons = [ self.get_widget_for_annotation (annotation) ]
         for b in buttons:
             b.active = False
             self.set_widget_background_color(b, b._default_color)
         return True
 
     def toggle_annotation (self, annotation):
-        buttons = self.get_widget_for_annotation (annotation)
-        if buttons:
-            if buttons[0].active:
-                self.desactivate_annotation (annotation, buttons=buttons)
+        button = self.get_widget_for_annotation (annotation)
+        if button:
+            if button.active:
+                self.desactivate_annotation (annotation, buttons=button)
             else:
-                self.activate_annotation (annotation, buttons=buttons)
+                self.activate_annotation (annotation, buttons=button)
 
     def unit2pixel (self, v):
         return (long(v / self.ratio_adjustment.value)) or 1
@@ -503,14 +533,13 @@ class TimeLine(AdhocView):
             self.layout.show_all()
             return True
 
-        bs = self.get_widget_for_annotation (annotation)
-        for b in bs:
-            if event == 'AnnotationEditEnd':
-                self.update_button (b)
-            elif event == 'AnnotationDelete':
-                b.destroy()
-            else:
-                print "Unknown event %s" % event
+        b = self.get_widget_for_annotation (annotation)
+        if event == 'AnnotationEditEnd':
+            self.update_button (b)
+        elif event == 'AnnotationDelete':
+            b.destroy()
+        else:
+            print "Unknown event %s" % event
         return True
 
     def update_annotationtype (self, annotationtype=None, event=None):
@@ -879,22 +908,20 @@ class TimeLine(AdhocView):
         if self.over_mode:
             a=button.annotation
             for r in button.annotation.relations:
+                # FIXME: handle more-than-binary relations
                 if r.members[0] != a:
-                    self.activate_annotation(r.members[0],
-                                             color=self.colors['outgoing'])
+                    self.lines_to_draw.append( (button, 
+                                                self.get_widget_for_annotation(r.members[0])) )
                 if r.members[1] != a:
-                    self.activate_annotation(r.members[1],
-                                             color=self.colors['incoming'])
+                    self.lines_to_draw.append( (self.get_widget_for_annotation(r.members[1]),
+                                                button) )
+            self.update_relation_lines()
         return True
 
     def rel_deactivate(self, button):
         if self.over_mode:
-            a=button.annotation
-            for r in button.annotation.relations:
-                if r.members[0] != a:
-                    self.desactivate_annotation(r.members[0])
-                if r.members[1] != a:
-                    self.desactivate_annotation(r.members[1])
+            self.lines_to_draw = []
+            self.update_relation_lines()
         return True
 
     def deactivate_all(self):
