@@ -131,7 +131,7 @@ class Player:
     def start(self, position):
         self.log("start %s" % str(position))
         self.status=Player.PlayingStatus
-	self.basetime=time() * 1000
+	self.basetime=time() * 1000 - position
 	self.pausetime=None
 
     def pause(self, position): 
