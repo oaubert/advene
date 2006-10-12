@@ -205,6 +205,8 @@ class Config(object):
             'display-scroller': False,
             'display-caption': False,
 	    'record-actions': False,
+            # Imagecache save on exit: None (==never), 'ask' or 'always'
+            'imagecache-save-on-exit': 'ask',
             }
 
         # Player options
