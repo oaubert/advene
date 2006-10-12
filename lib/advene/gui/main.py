@@ -1327,11 +1327,25 @@ class AdveneGUI (Connect):
                                                              text=_("The package %s has been modified but not saved.\nSave it now?") % t)
                 if response == gtk.RESPONSE_CANCEL:
                     return True
-                if response == gtk.RESPONSE_YES:
+                elif response == gtk.RESPONSE_YES:
                     self.on_save1_activate(package=p)
-                if response == gtk.RESPONSE_NO:
+                elif response == gtk.RESPONSE_NO:
                     p._modified=False
-
+            if p.imagecache.valid_snapshots() and config.data.preferences['imagecache-save-on-exit'] != 'never':
+                if config.data.preferences['imagecache-save-on-exit'] == 'ask':
+                    media=self.controller.get_default_media(package=p)
+                    response=advene.gui.util.yes_no_cancel_popup(title=_("%s snapshots") % media,
+                                                             text=_("Do you want to save the snapshots for media %s?") % media)
+                    if response == gtk.RESPONSE_CANCEL:
+                        return True
+                    elif response == gtk.RESPONSE_YES:
+                        p.imagecache.save (helper.mediafile2id (media))
+                    elif response == gtk.RESPONSE_NO:
+                        pass
+                elif config.data.preferences['imagecache-save-on-exit'] == 'always':
+                    media=self.controller.get_default_media(package=p)
+                    p.imagecache.save (helper.mediafile2id (media))
+                    
         if self.controller.on_exit():
             gtk.main_quit()
             return False
@@ -1877,17 +1891,10 @@ class AdveneGUI (Connect):
         return True
 
     def on_preferences1_activate (self, button=None, data=None):
+        direct_options=('history-size-limit', 'osdtext', 'scroll-increment',
+                        'adhoc-south', 'adhoc-east', 'adhoc-popup',
+                        'display-scroller', 'display-caption', 'imagecache-save-on-exit')
         cache={
-            'osdtext': config.data.player_preferences['osdtext'],
-            'history-size-limit': config.data.preferences['history-size-limit'],
-
-            'adhoc-south': config.data.preferences['adhoc-south'],
-            'adhoc-east': config.data.preferences['adhoc-east'],
-            'adhoc-popup': config.data.preferences['adhoc-popup'],
-            'display-scroller': config.data.preferences['display-scroller'],
-            'display-caption': config.data.preferences['display-caption'],
-            'scroll-increment': config.data.preferences['scroll-increment'],
-
             'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
             'data': config.data.path['data'],
             'plugins': config.data.path['plugins'],
@@ -1898,6 +1905,8 @@ class AdveneGUI (Connect):
             'button-height': config.data.preferences['timeline']['button-height'],
             'interline-height': config.data.preferences['timeline']['interline-height'],
             }
+        for k in direct_options:
+            cache[k] = config.data.preferences[k]
 
         ew=advene.gui.edit.properties.EditNotebook(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
@@ -1912,6 +1921,15 @@ class AdveneGUI (Connect):
                         _('Both'): gtk.TOOLBAR_BOTH,
                         }
                      )
+        ew.add_option(_("On exit,"), 'imagecache-save-on-exit', 
+                      _("How to handle screenshots on exit"), 
+                      {
+                _("never save screenshots"): 'never',
+                _("always save screenshots"): 'always',
+                _("ask before saving screenshots"): 'ask',
+                }
+                      )
+
         ew.add_title(_("Default adhoc views"))
         ew.add_label(_("""List of adhoc views to open on application startup.
 Multiple views can be separated by :
@@ -1938,9 +1956,7 @@ Available views: timeline, tree, browser, transcribe"""))
 
         res=ew.popup()
         if res:
-            for k in ('history-size-limit', 'osdtext', 'scroll-increment',
-                      'adhoc-south', 'adhoc-east', 'adhoc-popup',
-                      'display-scroller', 'display-caption'):
+            for k in direct_options:
                 config.data.preferences[k] = cache[k]
             for t in ('toolbar_fileop', 'toolbar_create'):
                 self.gui.get_widget(t).set_style(cache['toolbarstyle'])
