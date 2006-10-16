@@ -24,7 +24,6 @@ from advene.model.constants import *
 from advene.model.exception import AdveneException
 
 import advene.model.util as util
-
 from util.auto_properties import auto_properties
 
 class TypedUnicode(unicode):
@@ -129,8 +128,11 @@ class Viewable(object):
         # if isinstance(self, ResourceData):
         # but it would break encapsulation
         if view is None and hasattr(self, 'data'):
-            s=TypedUnicode(unicode(self.data))
             s.contenttype=self.getMimetype()
+            if s.contenttype.startswith('text'): 
+                s=TypedUnicode(self.data)
+            else:
+                s=TypedString(self.data)
             return s
         elif view is None:
             raise AdveneException('View %s not found' % view_id)
