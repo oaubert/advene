@@ -251,7 +251,6 @@ class TimeLine(AdhocView):
         gc=drawable.new_gc(foreground=self.colors['relations'],
                            background=self.colors['relations'],
                            line_width=1,
-                           line_style = gtk.gdk.LINE_DOUBLE_DASH,
                            cap_style=gtk.gdk.CAP_ROUND)
         for b1, b2 in self.lines_to_draw:
             # Draw a different background
@@ -482,7 +481,7 @@ class TimeLine(AdhocView):
         u2p = self.unit2pixel
         title=helper.get_title(self.controller, a)
         if a.relations:
-            l.set_markup('<b>%s</b>' % title)
+            l.set_markup('<u>%s</u>' % title)
         else:
             l.set_text(title)
         b._default_color=self.colors['inactive']
