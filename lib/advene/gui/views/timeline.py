@@ -252,13 +252,30 @@ class TimeLine(AdhocView):
                            background=self.colors['relations'],
                            line_width=1,
                            cap_style=gtk.gdk.CAP_ROUND)
-        for b1, b2 in self.lines_to_draw:
-            # Draw a different background
+        c=layout.get_pango_context()
+        c.set_font_description(self.annotation_font)
+        l=pango.Layout(c)
+
+        for b1, b2, r in self.lines_to_draw:
             r1 = b1.get_allocation()
             r2 = b2.get_allocation()
+            x_start = r1.x + 3 * r1.width / 4
+            y_start  = r1.y + r1.height / 4
             drawable.draw_line(gc, 
-                               r1.x + 3 * r1.width / 4, r1.y + r1.height / 4, 
+                               x_start, y_start,
                                r2.x + r2.width / 4, r2.y + 3 * r2.height / 4)
+            drawable.draw_rectangle(gc,
+                                    True,
+                                    x_start - 2, y_start - 2,
+                                    4, 4)
+            t = r.type.title
+            if r.content.data:
+                t += "\n" + r.content.data
+            l.set_text(t)
+            drawable.draw_layout(gc,
+                                 (r1.x + r2.x ) / 2,
+                                 (r1.y + r2.y ) / 2,
+                                 l)
         return False
 
     def update_model(self, package=None, partial_update=False):
@@ -909,11 +926,13 @@ class TimeLine(AdhocView):
             for r in button.annotation.relations:
                 # FIXME: handle more-than-binary relations
                 if r.members[0] != a:
-                    self.lines_to_draw.append( (button, 
-                                                self.get_widget_for_annotation(r.members[0])) )
+                    self.lines_to_draw.append( (self.get_widget_for_annotation(r.members[0]),
+                                                button,
+                                                r) )
                 if r.members[1] != a:
-                    self.lines_to_draw.append( (self.get_widget_for_annotation(r.members[1]),
-                                                button) )
+                    self.lines_to_draw.append( (button,
+                                                self.get_widget_for_annotation(r.members[1]),
+                                                r) )
             self.update_relation_lines()
         return True
 
