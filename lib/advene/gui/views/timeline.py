@@ -117,6 +117,7 @@ class TimeLine(AdhocView):
             'outgoing': gtk.gdk.color_parse ('yellow'),
             'background': gtk.gdk.color_parse('red'),
             'relations': gtk.gdk.color_parse('orange'),
+            'white': gtk.gdk.color_parse('white'),
             }
         self.widget_colors = {
             'inactive': self.colors['inactive']
@@ -272,10 +273,14 @@ class TimeLine(AdhocView):
             if r.content.data:
                 t += "\n" + r.content.data
             l.set_text(t)
+            # FIXME: We draw the relation type on a white background,
+            # but this should depend on the active gtk theme
             drawable.draw_layout(gc,
                                  (r1.x + r2.x ) / 2,
                                  (r1.y + r2.y ) / 2,
-                                 l)
+                                 l,
+                                 background=self.colors['white']
+                                 )
         return False
 
     def update_model(self, package=None, partial_update=False):
