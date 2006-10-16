@@ -74,22 +74,6 @@ class Menu:
         self.controller.notify("AnnotationDeactivate", annotation=ann)
         return True
 
-    def activate_related (self, widget, ann):
-        self.activate_annotation(widget, ann)
-        for r in ann.relations:
-            for a in r.members:
-                if a != ann:
-                    self.activate_annotation(widget, a)
-        return True
-
-    def desactivate_related (self, widget, ann):
-        self.desactivate_annotation(widget, ann)
-        for r in ann.relations:
-            for a in r.members:
-                if a != ann:
-                    self.desactivate_annotation(widget, a)
-        return True
-
     def activate_stbv (self, view):
         self.controller.activate_stbv(view)
         return True
@@ -380,9 +364,6 @@ class Menu:
 
         add_item(_("Activate"), self.activate_annotation, element)
         add_item(_("Desactivate"), self.desactivate_annotation, element)
-        if element.relations:
-            add_item(_("Activate related"), self.activate_related, element)
-            add_item(_("Desactivate related"), self.desactivate_related, element)
         submenu.show_all()
         return submenu
 
