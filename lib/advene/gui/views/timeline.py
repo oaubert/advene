@@ -931,13 +931,14 @@ class TimeLine(AdhocView):
             for r in button.annotation.relations:
                 # FIXME: handle more-than-binary relations
                 if r.members[0] != a:
-                    self.lines_to_draw.append( (self.get_widget_for_annotation(r.members[0]),
-                                                button,
-                                                r) )
-                if r.members[1] != a:
-                    self.lines_to_draw.append( (button,
-                                                self.get_widget_for_annotation(r.members[1]),
-                                                r) )
+                    b=self.get_widget_for_annotation(r.members[0])
+                    if b:
+                        # b may be None, if the related annotation is not displayed
+                        self.lines_to_draw.append( (b, button, r) )
+                elif r.members[1] != a:
+                    b=self.get_widget_for_annotation(r.members[1])
+                    if b:
+                        self.lines_to_draw.append( (button, b, r) )
             self.update_relation_lines()
         return True
 
