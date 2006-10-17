@@ -51,11 +51,18 @@ class TimeAdjustment:
     def make_widget(self):
 
         def handle_image_click(button, event):
-            if not (event.state & gtk.gdk.CONTROL_MASK):
-                self.play_from_here(button)
+            if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+                # Invalidate the image
+                self.controller.package.imagecache.invalidate(self.value)
+                self.update_display()
+                return True
+            if event.button != 1:
+                return False
+            if event.state & gtk.gdk.CONTROL_MASK:
+                self.use_current_position(button)
                 return True
             else:
-                self.use_current_position(button)
+                self.play_from_here(button)
                 return True
             return False
 
@@ -82,7 +89,7 @@ class TimeAdjustment:
             self.tooltips.set_tip(b, tip)
             return b
 
-        self.tooltips = gtk.Tooltips ()
+        self.tooltips = self.controller.gui.tooltips
 
         vbox=gtk.VBox()
 
@@ -109,7 +116,7 @@ class TimeAdjustment:
         al.set_padding(0, 0, 0, 0)
         al.add(self.image)
         b.add(al)
-        self.tooltips.set_tip(b, _("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value"))
+        self.tooltips.set_tip(b, _("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value\nright-click to invalidate screenshot"))
         hbox.pack_start(b, expand=False)
 
         vb=gtk.VBox()
