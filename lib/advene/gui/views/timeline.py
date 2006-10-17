@@ -1734,24 +1734,36 @@ class TimeLine(AdhocView):
         selectedtree.append_column(column)
 
         selectedtree.set_reorderable(True)
+        selectedtree.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
 
         notselectedtree = gtk.TreeView(model=notselected_store)
         cell = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_('Not displayed'), cell, text=0)
         notselectedtree.append_column(column)
+        notselectedtree.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
 
         hbox.add(selectedtree)
         actions = gtk.VBox()
 
         def transfer(b, source, dest):
-            path, column = source.get_cursor()
-            if path is None:
+            selection = source.get_selection ()
+            if not selection:
                 return True
-            m=source.get_model()
-            it=m.get_iter(path)
-            # Add el to dest
-            dest.get_model().append(m[path])
-            m.remove(it)
+            store, paths = selection.get_selected_rows()
+
+            rows = [ gtk.TreeRowReference(store, path) for path in paths ]
+            
+            m=dest.get_model()
+            for r in rows:
+                path=r.get_path()
+                if path is None:
+                    # Should not happen...
+                    print "Strange..."
+                    continue
+                it=store.get_iter(path)
+                # Add el to dest
+                m.append(store[path])
+                store.remove(it)
             return True
 
         def transferall(b, source, dest):
