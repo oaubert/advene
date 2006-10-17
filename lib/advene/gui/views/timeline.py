@@ -935,6 +935,10 @@ class TimeLine(AdhocView):
         return True
 
     def rel_deactivate(self, button):
+        d=self.tooltips.active_tips_data
+        if d and d[1] == button:
+            # Hide the tooltip
+            button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
         if self.over_mode:
             self.lines_to_draw = []
             self.update_relation_lines()
