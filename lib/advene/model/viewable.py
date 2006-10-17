@@ -128,11 +128,11 @@ class Viewable(object):
         # if isinstance(self, ResourceData):
         # but it would break encapsulation
         if view is None and hasattr(self, 'data'):
-            s.contenttype=self.getMimetype()
-            if s.contenttype.startswith('text'): 
+            if self.getMimetype().startswith('text'): 
                 s=TypedUnicode(self.data)
             else:
                 s=TypedString(self.data)
+            s.contenttype=self.getMimetype()
             return s
         elif view is None:
             raise AdveneException('View %s not found' % view_id)
