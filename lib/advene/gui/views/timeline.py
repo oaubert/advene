@@ -180,10 +180,10 @@ class TimeLine(AdhocView):
 
         self.layout = gtk.Layout ()
         #self.layout.bin_window.get_colormap().alloc_color(self.colors['relations'])
-        self.layout.connect('scroll_event', self.scroll_event)
-        self.layout.connect('key_press_event', self.key_pressed_cb)
-        self.layout.connect('button_press_event', self.mouse_pressed_cb)
-        self.layout.connect ('size_allocate', self.resize_event)
+        self.layout.connect('scroll_event', self.layout_scroll_cb)
+        self.layout.connect('key_press_event', self.layout_key_press_cb)
+        self.layout.connect('button_press_event', self.layout_button_press_cb)
+        self.layout.connect ('size_allocate', self.layout_resize_event)
         #self.layout.connect('expose_event', self.draw_background)
         self.layout.connect_after('expose_event', self.draw_relation_lines)
 
@@ -605,7 +605,7 @@ class TimeLine(AdhocView):
         menu.popup()
         return True
 
-    def annotation_type_cb (self, widget):
+    def annotation_type_clicked_cb (self, widget):
         """Display the popup menu when clicking on annotation type.
         """
         menu=advene.gui.popup.Menu(widget.annotationtype,
@@ -613,11 +613,11 @@ class TimeLine(AdhocView):
         menu.popup()
         return True
 
-    def annotation_type_pressed_cb(self, widget, event):
+    def annotation_type_key_press_cb(self, widget, event):
         """Display the popup menu when right-clicking on annotation type.
         """
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-            self.annotation_type_cb(widget)
+            self.annotation_type_clicked_cb(widget)
             return True
         return False
 
@@ -711,7 +711,7 @@ class TimeLine(AdhocView):
             print "Unknown target type for drag: %d" % targetType
         return True
 
-    def type_drag_received(self, widget, context, x, y, selection, targetType, time):
+    def annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
             source=self.controller.package.annotations.get(source_uri)
@@ -1170,7 +1170,7 @@ class TimeLine(AdhocView):
                 maximum = a.fragment.end
         return minimum, maximum
 
-    def key_pressed_cb (self, win, event):
+    def layout_key_press_cb (self, win, event):
         """Handles key presses in the timeline background
         """
         # Process player shortcuts
@@ -1203,7 +1203,7 @@ class TimeLine(AdhocView):
 
         return False
 
-    def mouse_pressed_cb(self, widget=None, event=None):
+    def layout_button_press_cb(self, widget=None, event=None):
         """Handle right-mouse click in timeline window.
         """
         retval = False
@@ -1355,7 +1355,7 @@ class TimeLine(AdhocView):
         self.redraw_event ()
         return True
 
-    def resize_event(self, widget=None, *p):
+    def layout_resize_event(self, widget=None, *p):
         """Recompute elements when the layout size changes
         """
         parent = self.layout.window
@@ -1384,12 +1384,12 @@ class TimeLine(AdhocView):
         self.ratio_adjustment.changed()
         return True
 
-    def scroll_event(self, widget=None, event=None):
+    def layout_scroll_cb(self, widget=None, event=None):
         """Handle mouse scrollwheel events.
         """
         if event.state & gtk.gdk.CONTROL_MASK:
-            a = self.ratio_adjustment
-            incr = a.page_size / 2
+            a = self.fraction_adj
+            incr = a.step_increment
         else:
             a = self.adjustment
             incr = a.step_incr
@@ -1458,7 +1458,7 @@ class TimeLine(AdhocView):
                 try:
                     pop = advene.gui.edit.elements.get_edit_popup (at, self.controller)
                 except TypeError, e:
-                    self.controller.log(_("Error: unable to find an edit popup for %s:\n%s") % (annotation, unicode(e)))
+                    self.controller.log(_("Error: unable to find an edit popup for %s:\n%s") % (at, unicode(e)))
                 else:
                     pop.edit ()
                 return True
@@ -1494,12 +1494,12 @@ class TimeLine(AdhocView):
                 self.set_widget_background_color(b)
 
             b.show()
-            b.connect("clicked", self.annotation_type_cb)
+            b.connect("clicked", self.annotation_type_clicked_cb)
             b.connect("key_press_event", keypress_handler, t)
-            b.connect("button_press_event", self.annotation_type_pressed_cb)
+            b.connect("button_press_event", self.annotation_type_key_press_cb)
             b.connect("enter", lambda b: b.grab_focus() and True)
             # The button can receive drops (to transmute annotations)
-            b.connect("drag_data_received", self.type_drag_received)
+            b.connect("drag_data_received", self.annotation_type_drag_received_cb)
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                             gtk.DEST_DEFAULT_HIGHLIGHT |
                             gtk.DEST_DEFAULT_ALL,
@@ -1529,7 +1529,7 @@ class TimeLine(AdhocView):
         """Return the layout with its controllers.
         """
         vbox = gtk.VBox()
-        vbox.connect ("key_press_event", self.key_pressed_cb)
+        vbox.connect ("key_press_event", self.layout_key_press_cb)
 
         hb=gtk.HBox()
         toolbar = self.get_toolbar()
