@@ -206,9 +206,6 @@ class TimeLine(AdhocView):
         self.selected_position = 0
         self.selection_marker = None
 
-        # Annotation subject to resizing methods
-        self.resized_annotation = None
-
         # Default drag mode : create a relation
         self.drag_mode = "relation"
         # Default mode for over-buttons events (boolean)
@@ -586,10 +583,6 @@ class TimeLine(AdhocView):
                 pass
         return True
 
-    def select_for_resize(self, widget, ann):
-        self.resized_annotation=ann
-        return True
-
     def split_annotation(self, menu, widget, ann, x):
         w = widget.allocation.width
         self.controller.split_annotation(ann, 1.0 * x / w)
@@ -599,8 +592,7 @@ class TimeLine(AdhocView):
         """Display the popup menu when clicking on annotation.
         """
         menu=advene.gui.popup.Menu(ann, controller=self.controller)
-        menu.add_menuitem(menu.menu, _("Select for resize"), self.select_for_resize, ann)
-        menu.add_menuitem(menu.menu, _("Split annotation"), self.split_annotation, widget, ann, x)
+        menu.add_menuitem(menu.menu, _("Split here"), self.split_annotation, widget, ann, x)
         menu.menu.show_all()
         menu.popup()
         return True
@@ -1266,12 +1258,6 @@ class TimeLine(AdhocView):
             timel.activate_selection()
             return True
 
-        def set_value(win, position, attr):
-            if self.resized_annotation is not None:
-                setattr(self.resized_annotation.fragment, attr, long(position))
-                self.controller.notify("AnnotationEditEnd", annotation=self.resized_annotation)
-            return True
-
         item = gtk.MenuItem(_("Position %s") % helper.format_time(position))
         menu.append(item)
 
@@ -1289,14 +1275,6 @@ class TimeLine(AdhocView):
         item = gtk.MenuItem(_("Create a new annotation"))
         item.connect('activate', create_annotation, position)
         menu.append(item)
-
-        if self.resized_annotation is not None:
-            item = gtk.MenuItem(_("Set %s.begin") % self.resized_annotation.id)
-            item.connect("activate", set_value, position, 'begin')
-            menu.append(item)
-            item = gtk.MenuItem(_("Set %s.end") % self.resized_annotation.id)
-            item.connect("activate", set_value, position, 'end')
-            menu.append(item)
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -1799,7 +1777,6 @@ class TimeLine(AdhocView):
         selectedtree.connect("row_activated", row_activated, selectedtree, notselectedtree)
         actions.add(b)
 
-        # FIXME: allow multiple selection?
         hbox.add(actions)
 
         hbox.add(notselectedtree)
