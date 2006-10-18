@@ -50,11 +50,21 @@ class TimeAdjustment:
 
     def make_widget(self):
 
+        def invalidate_snapshot(item, value):
+            # Invalidate the image
+            self.controller.package.imagecache.invalidate(value)
+            self.update_display()
+            return True
+
         def handle_image_click(button, event):
             if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-                # Invalidate the image
-                self.controller.package.imagecache.invalidate(self.value)
-                self.update_display()
+                # Display the popup menu
+                menu = gtk.Menu()
+                item = gtk.MenuItem(_("Invalidate snapshot"))
+                item.connect('activate', invalidate_snapshot, self.value)
+                menu.append(item)
+                menu.show_all()
+                menu.popup(None, None, None, 0, gtk.get_current_event_time())
                 return True
             if event.button != 1:
                 return False
