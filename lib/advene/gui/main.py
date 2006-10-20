@@ -1891,7 +1891,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_preferences1_activate (self, button=None, data=None):
-        direct_options=('history-size-limit', 'osdtext', 'scroll-increment',
+        direct_options=('history-size-limit', 'scroll-increment',
                         'adhoc-south', 'adhoc-east', 'adhoc-popup',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit')
         cache={
@@ -1907,7 +1907,7 @@ class AdveneGUI (Connect):
             }
         for k in direct_options:
             cache[k] = config.data.preferences[k]
-
+	cache['osdtext'] = config.data.player_preferences['osdtext']
         ew=advene.gui.edit.properties.EditNotebook(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
         ew.add_title(_("General"))
