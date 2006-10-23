@@ -391,7 +391,6 @@ class TimeLine(AdhocView):
     def scroll_to_annotation(self, annotation):
         """Scroll the view to put the annotation in the middle.
         """
-        (w, h) = self.layout.window.get_size ()
         pos = self.unit2pixel (annotation.fragment.begin)
         a = self.adjustment
         if pos < a.lower:
@@ -985,6 +984,18 @@ class TimeLine(AdhocView):
         def focus_in(b, event):
             if (self.options['autoscroll'] and
                 self.controller.player.status != self.controller.player.PlayingStatus):
+                # Check if the annotation is not already visible
+                a = self.adjustment
+                begin = self.unit2pixel (annotation.fragment.begin)
+                if begin >= a.lower and begin <= a.upper:
+                    return False
+                end = self.unit2pixel (annotation.fragment.end)
+                if end >= a.lower and end <= a.upper:
+                    return False
+                if begin <= a.lower and end >= a.upper:
+                    # The annotation bounds are off-screen anyway. Do
+                    # not move.
+                    return False
                 self.scroll_to_annotation(b.annotation)
             return False
 
