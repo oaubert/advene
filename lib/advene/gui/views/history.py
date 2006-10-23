@@ -113,7 +113,6 @@ class HistoryNavigation(AdhocView):
             mainbox=gtk.VBox()
         else:
             mainbox=gtk.HBox()
-            mainbox.set_size_request(self.snapshot_width, -1)
 
         sw=gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
