@@ -986,13 +986,15 @@ class TimeLine(AdhocView):
                 self.controller.player.status != self.controller.player.PlayingStatus):
                 # Check if the annotation is not already visible
                 a = self.adjustment
+                start=a.value
+                finish=a.value + a.page_size
                 begin = self.unit2pixel (annotation.fragment.begin)
-                if begin >= a.lower and begin <= a.upper:
+                if begin >= start and begin <= finish:
                     return False
                 end = self.unit2pixel (annotation.fragment.end)
-                if end >= a.lower and end <= a.upper:
+                if end >= start and end <= finish:
                     return False
-                if begin <= a.lower and end >= a.upper:
+                if begin <= start and end >= finish:
                     # The annotation bounds are off-screen anyway. Do
                     # not move.
                     return False
