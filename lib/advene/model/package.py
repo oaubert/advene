@@ -72,7 +72,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if sre.match('[a-zA-Z]:', uri):
             # Windows drive: notation. Convert it to
             # a more URI-compatible syntax
-            uri=urllib.pathname2url(uri)
+           uri=urllib.pathname2url(uri)
         self.__uri = uri
         self.__importer = importer
         # Possible container
@@ -206,7 +206,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if absolute:
             base_uri = 'file:%s/' % urllib.pathname2url (os.getcwd ())
             uri = util.uri.urljoin(base_uri, uri)
-            
+           
         return uri
 
     def getImports (self):
@@ -289,7 +289,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             # Windows drive: notation. Convert it from
             # a more URI-compatible syntax
             name=urllib.url2pathname(name)
-
+	    
         # handle .azp files.
         if name.endswith('.azp') or name.endswith('.AZP'):
             # AZP format

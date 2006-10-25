@@ -383,8 +383,7 @@ class AdveneController:
             
         # If no package is defined yet, load the template
         if self.package is None:
-            self.load_package ()
-
+           self.load_package ()
 	if media is not None:
 	    self.set_default_media(media)
 
@@ -534,14 +533,13 @@ class AdveneController:
             name=os.path.basename(n)
             for d in config.data.path['moviepath'].split(os.pathsep):
                 if d == '_':
-                    # Get package dirname
+                  # Get package dirname
                     d=self.package.uri
                     # And convert it to a pathname (for Windows)
-                    d=urllib.url2pathname(d)
                     if d.startswith('file:'):
                         d=d.replace('file://', '')
+                    d=urllib.url2pathname(d)
                     d=os.path.dirname(d)
-
                 if '~' in d:
                     # Expand userdir
                     d=os.path.expanduser(d)
