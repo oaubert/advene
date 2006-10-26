@@ -93,7 +93,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             if source is _get_from_uri:
                 # Determine the package format (plain XML or AZP)
                 # FIXME: should be done by content rather than extension
-                if abs_uri.endswith('.azp') or abs_uri.endswith('.AZP'):
+                if abs_uri.lower().endswith('.azp'):
                     # Advene Zip Package. Do some magic.
                     self.__zip = ZipPackage(uri)
                     f=urllib.pathname2url(self.__zip.getContentsFile())
