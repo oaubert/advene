@@ -316,6 +316,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           - C{/media/play}
           - C{/media/pause}
           - C{/media/stop}
+          - C{/media/current}
 
         Accessing the folder itself will display the media status.
 
@@ -484,6 +485,15 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             elif command in ('pause', 'stop', 'resume'):
                 self.server.controller.update_status (command)
                 self.send_no_content()
+            elif command == 'current':
+                self.send_response (200)
+                self.send_header ('Content-type', 'text/plain')                
+                self.end_headers ()
+                l=self.server.controller.player.playlist_get_list()
+                if l:
+                    self.wfile.write (l[0])
+                else:
+                    self.wfile.write('N/C')
             elif command == 'stbv':
                 if len(param) != 0:
                     stbvid=param[0]
