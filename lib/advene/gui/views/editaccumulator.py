@@ -66,6 +66,28 @@ class EditAccumulator(AccumulatorPopup):
 
         self.display(w, title=hbox)
 
+    def edit_element_handler(self, context, parameters):
+        event=context.evaluateValue('event')
+        if not event.endswith('Create'):
+            return True
+        el=event.replace('Create', '').lower()
+        element=context.evaluateValue(el)
+        self.edit(element)
+        return True
+
+    def register_callback (self, controller=None):
+        """Add the handler for annotation edit.
+        """
+        self.callbacks = []
+        for e in ('Annotation', 'View', 'Relation'):
+            r=controller.event_handler.internal_rule (event="%sCreate" % e,
+                                                      method=self.edit_element_handler)
+            self.callbacks.append(r)
+
+    def unregister_callback (self, controller=None):
+        for c in self.callbacks:
+            controller.event_handler.remove_rule(c, type_="internal")
+
     def update_position(self, pos):
         return True
 
