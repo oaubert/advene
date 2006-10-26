@@ -9,6 +9,8 @@ advene (0.21) unstable; urgency=low
 
   * A RelationType can specify a "Any annotation type" as member
 
+  * Importers: implemented importer for .iri files
+  
   * GUI:
 
     * it is possible to load multiple packages in the GUI. Only one
@@ -38,18 +40,28 @@ advene (0.21) unstable; urgency=low
     * default adhoc views to be opened/embedded on application startup can
       be specified through the Preferences menu
 
+    * better drag and drop interaction with other applications
+  
+    * optionally ask to save the imagecache on exit (cf preferences)
+  
   * Views:
 
     * view notebooks are also used for the right-hand side of the video
 
     * added a GenericContentHandler to edit non-text resources
 
+    * snapshots can be invalidated from the annotation edition popup
+     (right-click on the snapshot)
+  
     * in transcription view, annotations can be modified and update the
       content accordingly
 
     * the history view is cleared on media change
 
     * it is possible to duplicate an annotation (same duration)
+
+    * new 'Caption' view widget intended to replace the caption
+      functionality in non-complete players
   
     * timeline:
 
@@ -58,6 +70,9 @@ advene (0.21) unstable; urgency=low
 
       * annotations can be resized by dragging the bounds (must be dragged
         on the layout background, not on another annotation)
+
+      * relations are represented by lines, with a dot as starting
+        point. Annotations with relations are underlined (rather than bold)
   
       * annotations can be split through their context menu
   
@@ -75,10 +90,20 @@ advene (0.21) unstable; urgency=low
         mark centered and continuously scroll the widgets
 
       * annotation widget shortcuts: 'e' to edit, 'p' to play (begin or
-        end, depending on the cursor position), 'q' to quickly edit the content
+        end, depending on the cursor position), 'Return' to quickly edit the
+	content, space plays the active annotation (even it the cursor is
+        not on the annotation widget) 
   
       * shortcut: 'p' in the timeline background plays the movie at the
-        cursor position
+        cursor position. 
+
+      * annotations can be colored according to a TALES expression from
+        their type
+  
+      * new button "Center on current position"
+  
+      * some basic type checking and conversion is done when transmuting
+        annotations
   
     * display parameters of the timeline (font-size, button height...) are
       customizable through the Preferences dialog
@@ -86,6 +111,11 @@ advene (0.21) unstable; urgency=low
     * if the gtkmozembed or gtkhtml2 library is present, DnD of the web
       browser button will embed a HTML view in the GUI.
 
+    * transcription:
+    
+      * allow to get a transcription either for the whole package, or for
+        a given annotation type
+  
     * transcription edition:
 
       * it is possible to import existing annotations
@@ -103,15 +133,19 @@ advene (0.21) unstable; urgency=low
 
     * new action: Entry (to allow entry of information through a popup)
 
-    * in webserver, /action offers links (with form if necessary for
-      parameters) in the list of actions
-
     * new TALES root element: packages (to access all the loaded packages)
 
     * TALES global methods can be applied on non-advene elements (for
       instance lists)
 
     * Registered actions propose meaningful default values
+
+  * Webserver
+  
+    * /action displays links (with form if necessary for
+        parameters) in the list of actions
+
+    * /media/current returns the current media file
 
   * Players
 
