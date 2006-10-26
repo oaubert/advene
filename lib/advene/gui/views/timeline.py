@@ -67,6 +67,8 @@ class TimeLine(AdhocView):
             # Autoscroll: 0: None, 1: continuous, 2: discrete
             'autoscroll': 1,
             'delete_transmuted': False,
+            'display-relation-type': True,
+            'display-relation-content': True,
             }
 
         self.list = l
@@ -197,7 +199,7 @@ class TimeLine(AdhocView):
         self.old_ratio_value = self.ratio_adjustment.value
 
         # Lines to draw in order to indicate related annotations
-        self.lines_to_draw = []
+        self.relations_to_draw = []
 
         # Current position in units
         self.current_position = minimum
@@ -243,7 +245,7 @@ class TimeLine(AdhocView):
         self.layout.queue_draw()
 
     def draw_relation_lines(self, layout, event):
-        if not self.lines_to_draw:
+        if not self.relations_to_draw:
             return False
         drawable=layout.bin_window
         gc=drawable.new_gc(foreground=self.colors['relations'],
@@ -254,7 +256,7 @@ class TimeLine(AdhocView):
         c.set_font_description(self.annotation_font)
         l=pango.Layout(c)
 
-        for b1, b2, r in self.lines_to_draw:
+        for b1, b2, r in self.relations_to_draw:
             r1 = b1.get_allocation()
             r2 = b2.get_allocation()
             x_start = r1.x + 3 * r1.width / 4
@@ -262,22 +264,30 @@ class TimeLine(AdhocView):
             drawable.draw_line(gc, 
                                x_start, y_start,
                                r2.x + r2.width / 4, r2.y + 3 * r2.height / 4)
+            # Display the starting mark
             drawable.draw_rectangle(gc,
                                     True,
                                     x_start - 2, y_start - 2,
                                     4, 4)
-            t = r.type.title
-            if r.content.data:
-                t += "\n" + r.content.data
-            l.set_text(t)
-            # FIXME: We draw the relation type on a white background,
-            # but this should depend on the active gtk theme
-            drawable.draw_layout(gc,
-                                 (r1.x + r2.x ) / 2,
-                                 (r1.y + r2.y ) / 2,
-                                 l,
-                                 background=self.colors['white']
-                                 )
+            t=""
+            if self.options['display-relation-type']:
+                t = r.type.title
+            if self.options['display-relation-content']:
+                if r.content.data:
+                    if t:
+                        t += "\n" + r.content.data
+                    else:
+                        t = r.content.data
+            if t:
+                l.set_text(t)
+                # FIXME: We draw the relation type on a white background,
+                # but this should depend on the active gtk theme
+                drawable.draw_layout(gc,
+                                     (r1.x + r2.x ) / 2,
+                                     (r1.y + r2.y ) / 2,
+                                     l,
+                                     background=self.colors['white']
+                                     )
         return False
 
     def update_model(self, package=None, partial_update=False):
@@ -925,11 +935,11 @@ class TimeLine(AdhocView):
                     b=self.get_widget_for_annotation(r.members[0])
                     if b:
                         # b may be None, if the related annotation is not displayed
-                        self.lines_to_draw.append( (b, button, r) )
+                        self.relations_to_draw.append( (b, button, r) )
                 elif r.members[1] != a:
                     b=self.get_widget_for_annotation(r.members[1])
                     if b:
-                        self.lines_to_draw.append( (button, b, r) )
+                        self.relations_to_draw.append( (button, b, r) )
             self.update_relation_lines()
         return True
 
@@ -939,7 +949,7 @@ class TimeLine(AdhocView):
             # Hide the tooltip
             button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
         if self.over_mode:
-            self.lines_to_draw = []
+            self.relations_to_draw = []
             self.update_relation_lines()
         return True
 
@@ -1709,6 +1719,14 @@ class TimeLine(AdhocView):
         self.delete_transmuted_toggle.set_active(self.options['delete_transmuted'])
         self.delete_transmuted_toggle.connect('toggled', handle_toggle, 'delete_transmuted')
         tb.insert(self.delete_transmuted_toggle, -1)
+
+        for text, tooltip, icon, callback in ( 
+            (_("Preferences"), _("Preferences"), 
+             gtk.STOCK_PREFERENCES, self.edit_preferences), ):
+            b=gtk.ToolButton(stock_id=icon)
+            b.set_tooltip(self.tooltips, tooltip)
+            b.connect("clicked", callback)
+            tb.insert(b, -1)
         tb.show_all()
         return tb
 
@@ -1828,6 +1846,18 @@ class TimeLine(AdhocView):
                                   parent=sc,
                                   controller=self.controller)
             at=cr.popup(modal=True)
+        return True
+
+    def edit_preferences(self, *p):
+        cache=dict(self.options)
+
+        ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
+        ew.set_name(_("Preferences"))
+        ew.add_checkbox(_("Relation type"), "display-relation-type", _("Display relation types"))
+        ew.add_checkbox(_("Relation content"), "display-relation-content", _("Display relation content"))
+        res=ew.popup()
+        if res:
+            self.options.update(cache)
         return True
 
 if __name__ == "__main__":
