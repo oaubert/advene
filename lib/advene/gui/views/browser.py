@@ -255,7 +255,10 @@ class Browser(AdhocView):
     def update_view(self, path, element):
         self.pathlabel.set_text("/".join(path))
         self.typelabel.set_text(unicode(type(element)))
-        val=unicode(element)
+        try:
+            val=unicode(element)
+        except UnicodeDecodeError:
+            val=unicode(repr(element))
         if '\n' in val:
             val=val[:val.index('\n')]+'...'
         if len(val) > 80:
