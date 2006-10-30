@@ -45,9 +45,13 @@ class EditAccumulator(AccumulatorPopup):
             return True
         w=e.compact()
 
-        # Build the title widget
         hbox=gtk.HBox()
-        b=gtk.Button(stock=gtk.STOCK_CANCEL)
+        
+        # Right align (hackish)
+        b=gtk.HBox()
+        hbox.pack_start(b, expand=True)
+
+        b=gtk.Button(stock=gtk.STOCK_CLOSE)
         b.connect("clicked", self.undisplay_cb, w)
         hbox.pack_start(b, expand=False)
 
@@ -64,7 +68,9 @@ class EditAccumulator(AccumulatorPopup):
         b.connect("clicked", lambda x: e.apply_cb())
         hbox.pack_start(b, expand=False)
 
-        self.display(w, title=hbox)
+        w.pack_start(hbox, expand=False)
+
+        self.display(w, title=self.controller.get_title(element))
 
     def edit_element_handler(self, context, parameters):
         event=context.evaluateValue('event')
