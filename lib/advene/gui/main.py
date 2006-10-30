@@ -231,6 +231,8 @@ class AdveneGUI (Connect):
         self.adhoc_views = []
         # List of active element edit popups
         self.edit_popups = []
+        
+        self.edit_accumulator = None
 
         # Populate default STBV and type lists
         self.update_gui()
@@ -793,6 +795,20 @@ class AdveneGUI (Connect):
         #print "New size for %s: %s" %  (name, config.data.preferences['windowsize'][name])
         return False
 
+    def edit_element(self, element, modal=False):
+        if self.edit_accumulator:
+            self.edit_accumulator.edit(element)
+            return True
+
+        try:
+            pop = get_edit_popup (element, self.controller)
+        except TypeError, e:
+            print _("Error: unable to find an edit popup for %s:\n%s") % (element, unicode(e))
+        else:
+                
+            pop.edit (modal)
+        return True
+
     def on_edit_current_stbv_clicked(self, button):
         combo=self.gui.stbv_combo
         i=combo.get_active_iter()
@@ -806,12 +822,7 @@ class AdveneGUI (Connect):
                                     controller=self.controller)
             cr.popup()
             return True
-        try:
-            pop = get_edit_popup (stbv, self.controller)
-        except TypeError, e:
-            print _("Error: unable to find an edit popup for %s:\n%s") % (stbv, unicode(e))
-        else:
-            pop.edit ()
+        self.edit_element(stbv)
         return True
 
     def update_package_list (self):
@@ -1244,13 +1255,7 @@ class AdveneGUI (Connect):
                                   controller=self.controller)
             at=cr.popup(modal=True)
             if at:
-                try:
-                    pop = get_edit_popup (at, self.controller)
-                except TypeError, e:
-                    print _("Error: unable to find an edit popup for %s:\n%s") % (at, unicode(e))
-                else:
-                    at=pop.edit (modal=True)
-
+                self.edit_element(at, modal=True)
         return at
 
     def ask_for_schema(self, text=None, create=False):
@@ -1290,20 +1295,22 @@ class AdveneGUI (Connect):
                                     controller=self.controller)
             schema=cr.popup(modal=True)
             if schema:
-                try:
-                    pop = get_edit_popup (schema,
-                                          self.controller)
-                except TypeError, e:
-                    print _("Error: unable to find an edit popup for %s:\n%s") % (schema,
-                                                                                  unicode(e))
-                else:
-                    at=pop.edit (modal=True)
+                self.edit_element(schema, modal=True)
 
         return schema
 
     def popup_edit_accumulator(self, *p):
-        a=EditAccumulator(controller=self.controller, scrollable=True)
-        a.popup()
+        if not self.edit_accumulator:
+            self.edit_accumulator=EditAccumulator(controller=self.controller, scrollable=True)
+            w=self.edit_accumulator.popup()
+            self.edit_accumulator._window = w
+            def handle_accumulator_close(w):
+                self.edit_accumulator = None
+                return False
+            w.connect('destroy', handle_accumulator_close)
+        else:
+            # Find the editaccumulator window and call present()
+            self.edit_accumulator._window.present()
         return True
 
     def on_stbv_combo_changed (self, combo=None):
