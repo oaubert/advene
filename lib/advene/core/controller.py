@@ -269,7 +269,13 @@ class AdveneController:
             try:
                 method(*args, **kw)
             except Exception, e:
-                self.queue_action(self.log, _("Exception :") + str(e))
+                import traceback
+                s=StringIO.StringIO()
+                traceback.print_exc (file = s)
+                self.queue_action(self.log, _("Exception (traceback in console):") + str(e))
+                print str(e)
+                print s.getvalue()
+
         return True
 
     def register_gui(self, gui):
