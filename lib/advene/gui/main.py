@@ -1302,7 +1302,7 @@ class AdveneGUI (Connect):
         return schema
 
     def popup_edit_accumulator(self, *p):
-        a=EditAccumulator(controller=self.controller)
+        a=EditAccumulator(controller=self.controller, scrollable=True)
         a.popup()
         return True
 
