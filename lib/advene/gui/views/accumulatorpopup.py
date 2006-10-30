@@ -43,7 +43,8 @@ class DummyLock:
 class AccumulatorPopup(AdhocView):
     """View displaying a limited number of popups.
     """
-    def __init__ (self, size=3, controller=None, autohide=False, vertical=False):
+    def __init__ (self, size=3, controller=None, autohide=False, 
+                  vertical=False, scrollable=False):
         self.view_name = _("PopupAccumulator")
         self.view_id = 'popupaccumulator'
         self.close_on_package_load = False
@@ -53,6 +54,7 @@ class AccumulatorPopup(AdhocView):
         # Hide the window if there is no widget
         self.autohide = autohide
         self.vertical=vertical
+        self.scrollable=scrollable
 
         self.new_color = gtk.gdk.color_parse ('tomato')
         self.old_color = gtk.Button().get_style().bg[0]
@@ -96,6 +98,8 @@ class AccumulatorPopup(AdhocView):
         else:
             # Hopefully it is a gtk widget
             f.set_label_widget(title)
+        f.set_label_align(0.5, 0.5)
+        f.set_shadow_type(gtk.SHADOW_ETCHED_OUT)
         f.add(widget)
 
         self.lock.acquire()
@@ -104,10 +108,11 @@ class AccumulatorPopup(AdhocView):
         self.widgets.append( (widget, hidetime, f) )
         self.widgets.sort(lambda a,b: cmp(a[1],b[1]))
         self.lock.release()
-        self.contentbox.pack_start(f, expand=False)
+        self.contentbox.pack_start(f, expand=False, padding=2)
 
         f.show_all()
         self.show()
+        self.controller.notify('PopupDisplay', view=self)
         return True
 
     def set_color(self, button, color):
@@ -175,4 +180,10 @@ class AccumulatorPopup(AdhocView):
         if self.controller.gui:
             self.controller.gui.register_view (self)
 
-        return mainbox
+        if self.scrollable:
+            sw=gtk.ScrolledWindow()
+            sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+            sw.add_with_viewport(mainbox)
+            return sw
+        else:
+            return mainbox
