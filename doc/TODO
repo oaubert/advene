@@ -1,9 +1,47 @@
+* Study transana code
+
+* relation view: display annotation content rather than id, add spaces betw. annotations, honour colour, make size depend on duration
+
+* replace highlight->activate by hightlight->color->...
+
+* gstreamer: cf tutorial http://www.jonobacon.org/?p=750
+http://www.cin.ufpe.br/~cinlug/wiki/index.php/Apresentando_o_GStreamer
+
+* think about printing support
+
+* get things from http://svn.berlios.de/svnroot/repos/solipsis/trunk/main/ ?
+
+* timeline: Center on related annotation
+
+* HTML action to update all displayed screenshots
+
+* automatic switch to the accumulatorpopup view when a new popup
+  appears, or display an indicator (color, blink) -> option
+  on-new-popup
+
+* javascript timelines: http://simile.mit.edu/timeline/docs/create-timelines.html
+http://simile.mit.edu/timeline/
+
+* import MIT video lectures http://web.sls.csail.mit.edu/lectures/
+
+* Example javascript media player bindings: http://publicsvn.songbirdnest.com/trac/browser/trunk/app/chrome/scripts
+
+* reuse MIT video lecture javsascript code
+http://service.real.com/help/library/guides/ScriptingGuide/HTML/htmfiles/methodin.htm
+
+* implement ColorPicker, that could be used to set a colour (either dnd in the "color" metadata field, or DND directly on the annotation type widget)
+
+* vlc audio extraction: vlc --no-sout-video --sout '#es{access-audio=file,mux-audio=ts,dst-audio=-}'  k.mpg vlc:quit
+
+* vlc wav audio extraction: vlc --no-sout-video --sout '#transcode{acodec=s16l}:es{access-audio=file,mux-audio=wav,dst-audio=foo.raw}'  k.mpg vlc:quit
+
+module wave, audioop
+
+* cahier des charges pour le modele (serialisation relative/absolue des elements, multivideo...)
+
+* timeline: add a striped colored background
+
 * make player modules into plugins, allow to select
-
-* editaccumulator: "Apply", "Close", "Set end time to current time and
-  close" buttons should be in the frame title ? And/or shortcuts?
-
-* add a "color" metainformation to annotation types
 
 * DND in timeline: change displayed bitmap according to action
 
@@ -39,6 +77,8 @@
    http://pymedia.org//tut/src/voice_recorder.py.html
 
 * allow to dynamically switch between different players
+
+* investigate https://pyplayer.helixcommunity.org/
 
 * Create a TimeBookmark structure in the controller, to trigger time
    events. Basetime can be movie time or clock time. Should have 2
@@ -1262,4 +1302,47 @@ reimplement a native widget for annotations or use DiaCanvas -> Re-hacked throug
 current time,  timestamp: use spinbutton
 
 * EditAccumulator: component holding reduced edition windows for annotations
+
+* editaccumulator: "Apply", "Close", "Set end time to current time and
+  close" buttons should be in the frame title ? And/or shortcuts?
+
+* timeline: quick edit: should handle simple representation expressions
+
+* timeline: duration not updated after a package import.
+
+* add a "color" metainformation to annotation types
+
+* popup: tooltip on popup title (close popup)
+
+* ask on application close if screenshots should be saved
+
+* allow to suppress invalid screenshots
+
+* timeline relations: use arrows/lines to display
+
+* timeline: display link type (+content?) ?
+
+* timeline : display arrows (at beginning and end)
+
+* pb affichage ressource image (cf Nosferatu)
+
+* timeline: control+scroll = zoom in background
+
+* timeline: type displayed selection: allow multiple selection
+
+* history: remove minimum size specification
+
+* timeline: do not scroll on enter focus if the annotation is already visible
+
+* timeline: optionnaly display relation types (from preferences)
+
+* accumulatorpopup: add 'scrollable' parameter
+
+* RAZ URL stack on packageactivate/packageclose
+
+* editaccumulator: Apply / Close on the right HS
+
+* compact view for relations
+
+* editaccumulator: option to automatically edit new annotations in it
 
