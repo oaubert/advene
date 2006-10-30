@@ -151,3 +151,9 @@ class LogWindow(AdhocView):
                         'url': _("URL")},
             category='gui',
             ))
+        self.callback=controller.event_handler.internal_rule (event="PackageActivate",
+                                                              method=self.clear_data)
+
+    def unregister_callback (self, controller=None):
+        controller.event_handler.remove_rule(self.callback, type_="internal")
+
