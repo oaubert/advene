@@ -117,24 +117,24 @@ class Player:
     def log(self, *p):
         print "Dummy player: %s" % p
         
-    def get_media_position(self, origin, key):
+    def get_media_position(self, origin=None, key=None):
         self.log("get_media_position")
 	return self.current_position()
 
-    def set_media_position(self, position):
+    def set_media_position(self, position=0):
 	position = self.position2value(position)
         self.log("set_media_position %s" % str(position))
 	self.basetime = time() * 1000 - position
 	self.pausetime = None
         return
     
-    def start(self, position):
+    def start(self, position=0):
         self.log("start %s" % str(position))
         self.status=Player.PlayingStatus
 	self.basetime=time() * 1000 - position
 	self.pausetime=None
 
-    def pause(self, position): 
+    def pause(self, position=0): 
         self.log("pause %s" % str(position))
         if self.status == Player.PlayingStatus:
 	    self.pausetime=time() * 1000 - self.basetime
@@ -144,7 +144,7 @@ class Player:
 	    self.basetime=time() * 1000 - self.pausetime
 	    self.pausetime=None
 
-    def resume(self, position):
+    def resume(self, position=0):
         self.log("resume %s" % str(position))
         if self.status == Player.PlayingStatus:
 	    self.pausetime=time() * 1000 - self.basetime
@@ -154,7 +154,7 @@ class Player:
 	    self.basetime=time() * 1000 - self.pausetime
 	    self.pausetime=None
 
-    def stop(self, position): 
+    def stop(self, position=0): 
         self.log("stop %s" % str(position))
         self.status=Player.UndefinedStatus
 	self.basetime=None
