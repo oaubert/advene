@@ -178,6 +178,13 @@ class EditElementPopup (object):
         fr.add (widget)
         return fr
 
+    def expandable (self, widget, label="", expanded=False):
+        fr = gtk.Expander ()
+        fr.set_label (label)
+        fr.add (widget)
+        fr.set_expanded(expanded)
+        return fr
+
     def edit (self, callback=None, modal=False):
         """Display the edit window.
         """
@@ -353,20 +360,22 @@ class EditAnnotationPopup (EditElementPopup):
     def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
-        if not compact:
-            # Annotation data
-            f = self.make_registered_form (element=self.element,
-                                           fields=('id', 'uri', 'type',
-                                                   'author', 'date'),
-                                           editable=editable,
-                                           editables=('author', 'date'),
-                                           labels={'id':     _('Id'),
-                                                   'type':   _('Type'),
-                                                   'uri':    _('URI'),
-                                                   'author': _('Author'),
-                                                   'date':   _('Date')}
-                                           )
-            vbox.pack_start (f.get_view (), expand=False)
+        # Annotation data
+        f = self.make_registered_form (element=self.element,
+                                       fields=('id', 'uri', 'type',
+                                               'author', 'date'),
+                                       editable=editable,
+                                       editables=('author', 'date'),
+                                       labels={'id':     _('Id'),
+                                               'type':   _('Type'),
+                                               'uri':    _('URI'),
+                                               'author': _('Author'),
+                                               'date':   _('Date')}
+                                       )
+        ex=self.expandable(f.get_view(), _("Attributes"))
+        ex.set_expanded(not compact)
+
+        vbox.pack_start (ex, expand=False)
 
         f = EditFragmentForm(element=self.element.fragment, controller=self.controller)
         self.register_form (f)
@@ -393,7 +402,6 @@ class EditRelationPopup (EditElementPopup):
     def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
-        # Annotation data
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'type',
                                                'author', 'date'),
@@ -405,7 +413,8 @@ class EditRelationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (f.get_view (), expand=False)
+        ex=self.expandable(f.get_view(), _("Attributes"))
+        ex.set_expanded(not compact)
 
         def button_press_handler(widget, event, annotation):
             if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
@@ -413,13 +422,7 @@ class EditRelationPopup (EditElementPopup):
                 menu.popup()
                 return True
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-                try:
-                    pop = advene.gui.edit.elements.get_edit_popup (annotation, self.controller)
-                except TypeError, e:
-                    print _("Error: unable to find an edit popup for %s:\n%s") % (annotation,
-                                                                                  unicode(e))
-                else:
-                    pop.edit ()
+                self.controller.gui.edit_element(annotation)
                 return True
             return False
 
@@ -427,7 +430,7 @@ class EditRelationPopup (EditElementPopup):
         hb = gtk.HButtonBox()
         hb.set_layout(gtk.BUTTONBOX_START)
         for a in self.element.members:
-            b = gtk.Button(a.id)
+            b = gtk.Button(self.controller.get_title(a))
             b.connect("button_press_event", button_press_handler, a)
             b.show()
             hb.add(b)
@@ -440,7 +443,7 @@ class EditRelationPopup (EditElementPopup):
         f.set_editable(editable)
         t = f.get_view()
         self.register_form(f)
-        vbox.pack_start(self.framed(t, _("Content")), expand=True)
+        vbox.pack_start(self.expandable(t, _("Content")), expand=True)
 
         return vbox
 
@@ -512,7 +515,9 @@ class EditQueryPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (f.get_view (), expand=False)
+
+        vbox.pack_start (self.expandable(f.get_view (), expanded=not compact),
+                         expand=False)
 
         f = EditContentForm (self.element.content, controller=self.controller,
                              mimetypeeditable=editable)
@@ -635,7 +640,6 @@ class EditAnnotationTypePopup (EditElementPopup):
                                        )
         vbox.add(f.get_view())
 
-        # FIXME: should be in a hidable frame (gtk.Expander)
         f = EditMetaForm(title=_("Description"),
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
