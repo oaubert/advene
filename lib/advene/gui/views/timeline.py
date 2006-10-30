@@ -25,7 +25,7 @@ import advene.core.config as config
 
 from advene.model.package import Package
 from advene.model.schema import AnnotationType
-from advene.model.annotation import Annotation
+from advene.model.annotation import Annotation, Relation
 from advene.model.fragment import MillisecondFragment
 from advene.gui.views import AdhocView
 import advene.gui.edit.elements
@@ -794,9 +794,13 @@ class TimeLine(AdhocView):
                                          members=[ (r, self.controller.get_title(r)) for r in relationtypes],
                                          controller=self.controller)
         if rt is not None:
-            relation=self.controller.package.createRelation(members=(source, dest),
-                                                            type=rt)
-            self.controller.package.relations.append(relation)
+            # Get the id from the idgenerator
+            p=self.controller.package
+            id_=self.controller.package._idgenerator.get_id(Relation)
+            relation=p.createRelation(ident=id_,
+                                     members=(source, dest),
+                                     type=rt)
+            p.relations.append(relation)
             self.controller.notify("RelationCreate", relation=relation)
         return True
 
