@@ -436,13 +436,7 @@ class TreeWidget(AdhocView):
         """
         node = self.get_selected_node (widget)
         if node is not None:
-            try:
-                pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                               controller=self.controller)
-            except TypeError, e:
-                pass
-            else:
-                pop.edit ()
+            self.controller.gui.edit_element(node)
             return True
         return False
 
@@ -563,55 +557,3 @@ class TreeWidget(AdhocView):
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print "Should provide a package name"
-        sys.exit(1)
-
-    class DummyController:
-        pass
-
-    controller=DummyController()
-
-    controller.package = Package (uri=sys.argv[1])
-    controller.gui=None
-
-    tree = TreeWidget(controller.package, modelclass=DetailedTreeModel,
-                      controller=controller)
-
-    window=tree.popup()
-
-    def validate_cb (win, package):
-        filename="/tmp/package.xml"
-        package.save (name=filename)
-        print "Package saved as %s" % filename
-        gtk.main_quit ()
-
-    b = gtk.Button (stock=gtk.STOCK_SAVE)
-    b.connect ("clicked", validate_cb, controller.package)
-    b.show()
-    tree.buttonbox.add (b)
-
-    def key_pressed_cb (win, event):
-        if event.state & gtk.gdk.CONTROL_MASK:
-            # The Control-key is held. Special actions :
-            if event.keyval == gtk.keysyms.q:
-                gtk.main_quit ()
-                return True
-        elif event.keyval == gtk.keysyms.Return:
-            # Open popup to edit current element
-            node=tree.get_selected_node(tree.get_widget())
-            pop = advene.gui.edit.elements.get_edit_popup (node,
-                                                           controller=controller)
-            if pop is not None:
-                pop.display ()
-            else:
-                print _("Error: unable to find an edit popup for %s") % node
-        return False
-
-    window.connect ("key-press-event", key_pressed_cb)
-    window.connect ("destroy", lambda e: gtk.main_quit())
-
-    gtk.main ()
-

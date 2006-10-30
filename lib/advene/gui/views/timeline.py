@@ -888,12 +888,7 @@ class TimeLine(AdhocView):
         """Handle key presses on annotation widgets.
         """
         if event.keyval == gtk.keysyms.e:
-            try:
-                pop = advene.gui.edit.elements.get_edit_popup (annotation, self.controller)
-            except TypeError, e:
-                self.controller.log(_("Error: unable to find an edit popup for %s:\n%s") % (annotation, unicode(e)))
-            else:
-                pop.edit ()
+            self.controller.gui.edit_element(annotation)
             return True
         elif event.keyval == gtk.keysyms.space:
             # Play the annotation
@@ -1464,12 +1459,7 @@ class TimeLine(AdhocView):
 
         def keypress_handler(widget, event, at):
             if event.keyval == gtk.keysyms.e:
-                try:
-                    pop = advene.gui.edit.elements.get_edit_popup (at, self.controller)
-                except TypeError, e:
-                    self.controller.log(_("Error: unable to find an edit popup for %s:\n%s") % (at, unicode(e)))
-                else:
-                    pop.edit ()
+                self.controller.gui.edit_element(at)
                 return True
             return False
 
@@ -1863,22 +1853,3 @@ class TimeLine(AdhocView):
         if res:
             self.options.update(cache)
         return True
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print "Should provide a package name"
-        sys.exit(1)
-
-    class DummyController:
-        pass
-
-    controller=DummyController()
-
-    controller.package = Package (uri=sys.argv[1])
-    controller.gui = None
-
-    timeline = TimeLine (controller.package.annotations,
-                         controller=controller)
-    timeline.popup()
-
-    gtk.main ()
