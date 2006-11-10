@@ -415,6 +415,7 @@ class EditRelationPopup (EditElementPopup):
                                        )
         ex=self.expandable(f.get_view(), _("Attributes"))
         ex.set_expanded(not compact)
+        vbox.pack_start(ex, expand=False)
 
         def button_press_handler(widget, event, annotation):
             if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
@@ -1234,7 +1235,7 @@ class EditFragmentForm(EditForm):
         return True
 
     def get_view(self, compact=False):
-        hbox=gtk.HButtonBox()
+        hbox=gtk.HBox()
 
         self.begin=TimeAdjustment(value=self.element.begin,
                                   controller=self.controller,
@@ -1242,7 +1243,7 @@ class EditFragmentForm(EditForm):
         f=gtk.Frame()
         f.set_label(_("Begin"))
         f.add(self.begin.get_widget())
-        hbox.add(f)
+        hbox.pack_start(f, expand=False)
 
         self.end=TimeAdjustment(value=self.element.end,
                                 controller=self.controller,
@@ -1250,7 +1251,7 @@ class EditFragmentForm(EditForm):
         f=gtk.Frame()
         f.set_label(_("End"))
         f.add(self.end.get_widget())
-        hbox.add(f)
+        hbox.pack_start(f, expand=False)
 
         return hbox
 
