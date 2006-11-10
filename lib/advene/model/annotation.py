@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -33,10 +33,10 @@ from fragment import fragmentFactory, unknownFragment
 
 class Annotation(modeled.Importable, content.WithContent,
                  viewable.Viewable.withClass('annotation','_get_type_uri'),
-                 _impl.Authored, _impl.Dated, _impl.Uried):
+                 _impl.Authored, _impl.Dated, _impl.Uried, _impl.Tagged):
 
     __metaclass__ = auto_properties
-    
+
     def getNamespaceUri(): return adveneNS
     getNamespaceUri = staticmethod(getNamespaceUri)
 
@@ -108,7 +108,7 @@ class Annotation(modeled.Importable, content.WithContent,
 
             e = doc.createElementNS(None,"dummyFragment")
             self._getModel().appendChild(e)
- 
+
             self.setType(type)
             # TODO: check that type is referenced in package
             self.setFragment(fragment)
@@ -139,7 +139,7 @@ class Annotation(modeled.Importable, content.WithContent,
     def _get_type_uri(self, absolute=True):
         """Return the type URI - used to retrieve the viewable-type"""
         return self.getType().getUri(absolute)
-        
+
     def getType(self):
         """Return the type of this annotation"""
         type_uri = self._getModel().getAttributeNS(None, "type")
@@ -184,7 +184,7 @@ class Annotation(modeled.Importable, content.WithContent,
     def delFragment(self):
         """Delete the fragment associated to this annotation"""
         self.setFragment(None)
-        
+
     def getContext(self):
         pass
 
@@ -254,10 +254,9 @@ class Annotation(modeled.Importable, content.WithContent,
         """
         return self.getRelations (rank=1, order=2)
 
-
 class Relation(modeled.Importable, content.WithContent,
                viewable.Viewable.withClass('relation', '_get_type_uri'),
-               _impl.Authored, _impl.Dated, _impl.Uried):
+               _impl.Authored, _impl.Dated, _impl.Uried, _impl.Tagged):
     """Relation between annotations"""
     __metaclass__ = auto_properties
 
@@ -353,7 +352,7 @@ class Relation(modeled.Importable, content.WithContent,
 
     def __str__(self):
         return "Relation of type <%s>" % self.getType()
-    
+
     # dom dependant methods
 
     def getNamespaceUri(): return adveneNS
@@ -365,11 +364,11 @@ class Relation(modeled.Importable, content.WithContent,
     def _get_type_uri(self, absolute=True):
         """Return the type URI - used to retrieve the viewable-type"""
         return self.getType().getUri(absolute)
-        
+
     def getType(self):
         """Return the type of this relation"""
         type_uri = self._getModel().getAttributeNS(None, "type")
-        pkg_uri = self.getOwnerPackage ().getUri (absolute=True) 
+        pkg_uri = self.getOwnerPackage ().getUri (absolute=True)
         type_uri = util.uri.urljoin (pkg_uri, type_uri)
         return self.getOwnerPackage().getRelationTypes()[type_uri]
 
