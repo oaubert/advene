@@ -237,7 +237,9 @@ class ImageCache(dict):
                         print "Invalid filename in imagecache: " + name
                         continue
                     f = open(os.path.join (d, name), 'rb')
-                    dict.__setitem__(self, i, f.read ())
+                    s=TypedString(f.read())
+                    s.contenttype='image/png'
+                    dict.__setitem__(self, i, s)
                     f.close ()
 
     def ids (self):
