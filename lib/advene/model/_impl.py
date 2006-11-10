@@ -18,6 +18,7 @@
 import xml.dom
 
 from cStringIO import StringIO
+from sets import Set
 
 import advene.model.util.uri
 
@@ -218,6 +219,68 @@ class Authored(Metaed):
     author = property(getAuthor, setAuthor, delAuthor)
     authorUrl = property(getAuthorUrl, setAuthorUrl, delAuthorUrl)
 
+
+class Tagged(Metaed):
+    """Implementation of the tags support.
+
+    Tags are stored as a comma-separated list of strings.  An optional
+    namespace may be provided, in order to store different kinds of
+    tags.
+    """
+    def _getTagsMeta(self, ns=None):
+        """Returns a set of tags
+        """
+        if ns is None:
+            ns=adveneNS
+        tagmeta = self.getMetaData (ns, "tags")
+        if tagmeta is None:
+            return Set()
+        else:
+            return Set(tagmeta.split(','))
+
+    def _updateTagsMeta(self, tagset, ns=None):
+        """Update the tags metadata.
+
+        Expects a set of tags and a namespace-uri
+        """
+        if ns is None:
+            ns=adveneNS
+        if tagset:
+            self.setMetaData (ns, "tags", ','.join(tagset))
+        else:
+            if self.getMetaData (ns, "tags"):
+                self.setMetaData (ns, "tags", None)
+
+    def addTag(self, tag, ns=None):
+        """Add a new tag.
+        """
+        tagset = self._getTagsMeta(ns)
+        tagset.add(tag)
+        self._updateTagsMeta(tagset, ns)
+        return tagset
+
+    def removeTag(self, tag, ns=None):
+        """Remove a tag
+        """
+        tagset = self._getTagsMeta(ns)
+        tagset.discard(tag)
+        self._updateTagsMeta(tagset, ns)
+        return tagset
+
+    def hasTag(self, tag, ns=None):
+        """Check for the presence of a tag
+        """
+        tagset = self._getTagsMeta(ns)
+        return tag in tagset
+
+    def getTagList(self, ns=None):
+        """Return the list of tags.
+        """
+        return self._getTagsMeta(ns)
+
+    def setTagList(self, tagset, ns=None):
+        self._updateTagsMeta(tagset, ns)
+        return getTagList()
 
 # TODO: take into account cases where dc:date is an element in the meta element
 #       rather than an attribute
