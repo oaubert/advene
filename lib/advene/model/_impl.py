@@ -16,9 +16,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 import xml.dom
+import urllib
 
 from cStringIO import StringIO
-from sets import Set
 
 import advene.model.util.uri
 
@@ -226,6 +226,9 @@ class Tagged(Metaed):
     Tags are stored as a comma-separated list of strings.  An optional
     namespace may be provided, in order to store different kinds of
     tags.
+
+    Warning: the tags property returns a *copy* of the list of
+    tags. To add or remove elements, use addTag and removeTag methods.
     """
     def _getTagsMeta(self, ns=None):
         """Returns a set of tags
@@ -234,9 +237,9 @@ class Tagged(Metaed):
             ns=adveneNS
         tagmeta = self.getMetaData (ns, "tags")
         if tagmeta is None:
-            return Set()
+            return []
         else:
-            return Set(tagmeta.split(','))
+            return [ urllib.unquote(t) for t in tagmeta.split(',') ]
 
     def _updateTagsMeta(self, tagset, ns=None):
         """Update the tags metadata.
@@ -246,7 +249,7 @@ class Tagged(Metaed):
         if ns is None:
             ns=adveneNS
         if tagset:
-            self.setMetaData (ns, "tags", ','.join(tagset))
+            self.setMetaData (ns, "tags", ','.join( [ urllib.quote(t) for t in tagset ] ))
         else:
             if self.getMetaData (ns, "tags"):
                 self.setMetaData (ns, "tags", None)
@@ -255,7 +258,8 @@ class Tagged(Metaed):
         """Add a new tag.
         """
         tagset = self._getTagsMeta(ns)
-        tagset.add(tag)
+        if tag not in tagset:
+            tagset.append(tag)
         self._updateTagsMeta(tagset, ns)
         return tagset
 
@@ -263,24 +267,31 @@ class Tagged(Metaed):
         """Remove a tag
         """
         tagset = self._getTagsMeta(ns)
-        tagset.discard(tag)
+        try:
+            tagset.remove(tag)
+        except ValueError:
+            pass
         self._updateTagsMeta(tagset, ns)
         return tagset
 
     def hasTag(self, tag, ns=None):
         """Check for the presence of a tag
         """
-        tagset = self._getTagsMeta(ns)
-        return tag in tagset
+        return tag in self._getTagsMeta(ns)
 
-    def getTagList(self, ns=None):
+    def getTags(self, ns=None):
         """Return the list of tags.
         """
         return self._getTagsMeta(ns)
 
-    def setTagList(self, tagset, ns=None):
+    def setTags(self, tagset, ns=None):
         self._updateTagsMeta(tagset, ns)
-        return getTagList()
+        return self.getTags()
+
+    def delTags(self, ns=None):
+        self._updateTagsMeta( [], ns )
+
+    tags = property(getTags, setTags, delTags)
 
 # TODO: take into account cases where dc:date is an element in the meta element
 #       rather than an attribute
