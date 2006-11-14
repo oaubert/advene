@@ -70,7 +70,12 @@ class EditAccumulator(AccumulatorPopup):
 
         w.pack_start(hbox, expand=False)
 
-        self.display(w, title=self.controller.get_title(element))
+        if hasattr(element, 'type'):
+            t="%s (%s)" % (self.controller.get_title(element),
+                           self.controller.get_title(element.type))
+        else:
+            t=self.controller.get_title(element)
+        self.display(w, title=t)
 
     def edit_element_handler(self, context, parameters):
         event=context.evaluateValue('event')
