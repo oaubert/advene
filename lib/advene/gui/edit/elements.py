@@ -372,8 +372,7 @@ class EditAnnotationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        ex=self.expandable(f.get_view(), _("Attributes"))
-        ex.set_expanded(not compact)
+        ex=self.expandable(f.get_view(), _("Attributes"), expanded=not compact)
 
         vbox.pack_start (ex, expand=False)
 
@@ -413,8 +412,7 @@ class EditRelationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        ex=self.expandable(f.get_view(), _("Attributes"))
-        ex.set_expanded(not compact)
+        ex=self.expandable(f.get_view(), _("Attributes"), expanded=not compact)
         vbox.pack_start(ex, expand=False)
 
         def button_press_handler(widget, event, annotation):
@@ -444,7 +442,7 @@ class EditRelationPopup (EditElementPopup):
         f.set_editable(editable)
         t = f.get_view()
         self.register_form(f)
-        vbox.pack_start(self.expandable(t, _("Content")), expand=True)
+        vbox.pack_start(self.expandable(t, _("Content"), expanded=False), expand=True)
 
         return vbox
 
@@ -470,7 +468,8 @@ class EditViewPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        vbox.pack_start (f.get_view (), expand=False)
+        vbox.pack_start (self.expandable(f.get_view (), _("Attributes"),
+                                         expanded=False), expand=False)
 
         # matchFilter
         f = self.make_registered_form (element=self.element.matchFilter,
