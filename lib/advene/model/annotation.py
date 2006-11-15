@@ -31,6 +31,25 @@ from constants import *
 from exception import AdveneException
 from fragment import fragmentFactory, unknownFragment
 
+# From ASPN python cookbook
+import copy
+
+class DefaultDict(dict):
+    """Dictionary with a default value for unknown keys."""
+    def __init__(self, default=None, **items):
+        dict.__init__(self, **items)
+        self.default = default
+
+    def __getitem__(self, key):
+        if key in self: 
+            return self.get(key)
+        else:
+            ## Need copy in case self.default is something like []
+            return self.setdefault(key, copy.deepcopy(self.default))
+
+    def __copy__(self):
+        return DefaultDict(self.default, **self)
+
 class Annotation(modeled.Importable, content.WithContent,
                  viewable.Viewable.withClass('annotation','_get_type_uri'),
                  _impl.Authored, _impl.Dated, _impl.Uried, _impl.Tagged):
@@ -253,6 +272,45 @@ class Annotation(modeled.Importable, content.WithContent,
         member.
         """
         return self.getRelations (rank=1, order=2)
+
+    def getRelatedOut(self):
+        """Return the related outgoing annotation.
+        
+        This is a shortcut for the case where there is only 1 binary
+        relation.
+        """
+        r=self.outgoingRelations
+        if r:
+            return r[0].members[-1]
+        return None
+
+    def getRelatedIn(self):
+        """Return the related incoming annotation.
+        
+        This is a shortcut for the case where there is only 1 binary
+        relation.
+        """
+        r=self.incomingRelations
+        if r:
+            return r[0].members[0]
+        return None
+
+    def getTypedRelatedOut(self):
+        """Return the related outgoing annotations sorted by relation type ids.
+        """
+
+        d=DefaultDict(default=[])
+        for r in self.outgoingRelations:
+            d[r.type.id].append(r.members[-1])
+        return d
+
+    def getTypedRelatedIn(self):
+        """Return the related incoming annotations sorted by relation type ids.
+        """
+        d=DefaultDict(default=[])
+        for r in self.incomingRelations:
+            d[r.type.id].append(r.members[0])
+        return d
 
 class Relation(modeled.Importable, content.WithContent,
                viewable.Viewable.withClass('relation', '_get_type_uri'),
