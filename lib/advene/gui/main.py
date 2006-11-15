@@ -59,6 +59,7 @@ import advene.core.controller
 import advene.rules.elements
 import advene.rules.ecaengine
 
+from advene.model.package import Package
 from advene.model.view import View
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.query import Query
@@ -83,6 +84,7 @@ from advene.gui.edit.rules import EditRuleSet
 from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
+from advene.gui.edit.merge import Merger
 import advene.gui.evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
@@ -591,6 +593,7 @@ class AdveneGUI (Connect):
         self.gui.stbv_combo.add_attribute(cell, 'text', 0)
         self.gui.stbv_combo.connect('changed', self.on_stbv_combo_changed)
         hb.pack_start(self.gui.stbv_combo, expand=True)
+        # BROKEN self.tooltips.set_tip(self.gui.stbv_combo, _("Current dynamic view"))
         b=gtk.Button(stock=gtk.STOCK_EDIT)
         b.connect('clicked', self.on_edit_current_stbv_clicked)
         hb.pack_start(b, expand=False)
@@ -617,7 +620,6 @@ class AdveneGUI (Connect):
 
         # Stack the video components
         v=gtk.VBox()
-        v.pack_start(hb, expand=False)
         v.pack_start(self.drawable, expand=True)
         if config.data.preferences['display-scroller']:
             self.scroller=ScrollerView(controller=self.controller)
@@ -630,6 +632,7 @@ class AdveneGUI (Connect):
             self.captionview=None
         v.pack_start(self.gui.slider, expand=False)
         v.pack_start(tb, expand=False)
+        v.pack_start(hb, expand=False)
 
         self.displayhbox.pack1(v, shrink=False)
         self.displayhbox.add2(hpane)
@@ -2115,6 +2118,21 @@ Available views: timeline, tree, browser, transcribe"""))
 
     def on_package_list_activate(self, menu=None):
         self.update_package_list()
+        return True
+
+    def on_merge_package_activate(self, button=None, data=None):
+        filename=advene.gui.util.get_filename(title=_("Select the package to merge"),
+                                              action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                              button=gtk.STOCK_OPEN)
+        if not filename:
+            return True
+        try:
+            source=Package(uri=filename)
+        except Exception, e:
+            self.log("Cannot load %s file: %s" % (filename, unicode(e)))
+            return True
+        m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
+        m.popup()
         return True
 
 if __name__ == '__main__':

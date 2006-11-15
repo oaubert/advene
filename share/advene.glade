@@ -115,7 +115,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image38">
+			<widget class="GtkImage" id="image39">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -129,6 +129,16 @@
 		  </child>
 
 		  <child>
+		    <widget class="GtkMenuItem" id="merge_package">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Merge elements from another package</property>
+		      <property name="label" translatable="yes">Merge package</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_merge_package_activate" last_modification_time="Wed, 15 Nov 2006 18:25:24 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
 		    <widget class="GtkImageMenuItem" id="import_dvd_chapters1">
 		      <property name="visible">True</property>
 		      <property name="tooltip" translatable="yes">Create annotations based on DVD chapters</property>
@@ -137,7 +147,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image39">
+			<widget class="GtkImage" id="image40">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
