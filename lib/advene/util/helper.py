@@ -31,7 +31,14 @@ except ImportError:
 
 from gettext import gettext as _
 
+from advene.model.package import Package
+from advene.model.fragment import MillisecondFragment
 from advene.model.annotation import Annotation, Relation
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.resources import Resources, ResourceData
+from advene.model.view import View
+from advene.model.query import Query
+
 from advene.model.tal.context import AdveneContext, AdveneTalesException
 
 def fourcc2rawcode (code):
@@ -229,7 +236,7 @@ def matching_relationtypes(package, ann1, ann2):
             else:
                 return uri
 
-        def get_id(uri):
+        def get_id_from_fragment(uri):
             try:
                 i=uri[uri.index('#')+1:]
             except ValueError:
@@ -242,9 +249,9 @@ def matching_relationtypes(package, ann1, ann2):
         # t2=ann2.type.uri
 
         # Id version
-        lat= [ get_id(t) for t in rt.getHackedMemberTypes() ]
-        t1=get_id(ann1.type.uri)
-        t2=get_id(ann2.type.uri)
+        lat= [ get_id_from_fragment(t) for t in rt.getHackedMemberTypes() ]
+        t1=get_id_from_fragment(ann1.type.uri)
+        t2=get_id_from_fragment(ann2.type.uri)
 
         #print "Testing (%s, %s) matching %s" % (t1, t2, lat)
         if len (lat) == 2 \
@@ -293,6 +300,26 @@ def get_title(controller, element, representation=None):
     if hasattr(element, 'id') and element.id:
         return unicode(element.id)
     return unicode(element)
+
+element_label = {
+    Package: _("Package"),
+    Annotation: _("Annotation"),
+    Relation: _("Relation"),
+    Schema: _("Schema"),
+    AnnotationType: _("Annotation Type"),
+    RelationType: _("Relation Type"),
+    View: _("View"),
+    Query: _("Query"),
+    Resources: _("Resource Folder"),
+    ResourceData: _("Resource File"),
+    }
+
+def get_type(el):
+    try:
+        t=element_label[type(el)]
+    except:
+        t=unicode(type(el))
+    return t
 
 def get_valid_members (el):
     """Return a list of strings, valid members for the object el in TALES.
