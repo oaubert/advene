@@ -38,19 +38,9 @@ from advene.rules.elements import RuleSet, Rule, Event, Action
 
 import advene.gui.util
 import advene.gui.edit.elements
+import advene.util.helper as helper
 
-element_label = {
-    Package: _("Package"),
-    Annotation: _("Annotation"),
-    Relation: _("Relation"),
-    Schema: _("Schema"),
-    AnnotationType: _("Annotation Type"),
-    RelationType: _("Relation Type"),
-    View: _("View"),
-    Query: _("Query"),
-    Resources: _("Resource Folder"),
-    ResourceData: _("Resource File"),
-    }
+element_label = helper.element_label
 
 class ViewType:
     def __init__(self, id_, title):
