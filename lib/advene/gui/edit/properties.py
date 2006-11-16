@@ -19,6 +19,7 @@
 """
 
 import gtk
+import os
 
 class EditNotebook(object):
     def __init__(self, set_config, get_config):
@@ -279,7 +280,7 @@ class EditWidget(gtk.VBox):
                                                gtk.RESPONSE_OK,
                                                gtk.STOCK_CANCEL,
                                                gtk.RESPONSE_CANCEL ))
-            if default_file:
+            if default_file and os.path.exists(default_file):
                 fs.set_filename(default_file)
             res=fs.run()
             filename=None
