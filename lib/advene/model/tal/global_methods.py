@@ -621,7 +621,7 @@ def randompick(target, context):
        e=None
     return e
 
-def related(target, context):
+def old_related(target, context):
     """Return the related annotation.
 
     This is a shortcut for the case where there is only 1 binary

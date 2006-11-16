@@ -273,27 +273,32 @@ class Annotation(modeled.Importable, content.WithContent,
         """
         return self.getRelations (rank=1, order=2)
 
-    def getRelatedOut(self):
-        """Return the related outgoing annotation.
-        
+    def getRelated(self):
+        """Return the related annotation.
+
         This is a shortcut for the case where there is only 1 binary
         relation.
+
+        We search first outgoingRelations. If none exist, we check
+        incomingRelations.
         """
         r=self.outgoingRelations
         if r:
             return r[0].members[-1]
-        return None
-
-    def getRelatedIn(self):
-        """Return the related incoming annotation.
-        
-        This is a shortcut for the case where there is only 1 binary
-        relation.
-        """
         r=self.incomingRelations
         if r:
             return r[0].members[0]
         return None
+
+    def getRelatedOut(self):
+        """Return the list of related outgoing annotations.
+        """
+        return [ r.members[-1] for r in self.outgoingRelations ]
+
+    def getRelatedIn(self):
+        """Return the list of related incoming annotations.
+        """
+        return [ r.members[0] for r in self.incomingRelations ]
 
     def getTypedRelatedOut(self):
         """Return the related outgoing annotations sorted by relation type ids.
