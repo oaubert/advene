@@ -10,6 +10,15 @@ advene (0.21) unstable; urgency=low
   * A RelationType can specify a "Any annotation type" as member
 
   * Importers: implemented importer for .iri files
+
+  * preliminary tags support has been implemented for annotations and
+    relations (based on Frank Wagner work)
+
+  * new annotation methods to deal with relations: 
+    * relatedOut and relatedIn return a list of related (outgoing or
+      incoming) annotations.
+    * typedRelatedOut and typedRelatedIn return a dictionary indexed by
+      relation type id, which holds the list of related annotations.
   
   * GUI:
 
@@ -26,6 +35,9 @@ advene (0.21) unstable; urgency=low
       The alias is automatically generated from the filename, and can be
       modified in the file selector dialog.
 
+    * merge functionality (menu File/Merge): elements from another package
+      can be merged into the current package.
+  
     * the player control toolbar has been put beneath the video output,
       and is hidden in embedded adhoc views
 
