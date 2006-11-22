@@ -98,7 +98,7 @@ class AccumulatorPopup(AdhocView):
         else:
             # Hopefully it is a gtk widget
             f.set_label_widget(title)
-        f.set_label_align(0.5, 0.5)
+        f.set_label_align(1.0, 0.5)
         f.set_shadow_type(gtk.SHADOW_ETCHED_OUT)
         f.add(widget)
 
