@@ -374,6 +374,34 @@ class Menu:
         add_item(_("Go to..."), self.goto_annotation, element)
         add_item(_("Duplicate"), self.duplicate_annotation, element)
 
+        def build_submenu(submenu, el, items):
+            """Build the submenu for the given element.
+            """
+            if submenu.get_children():
+                # The submenu was already populated.
+                return False
+            for i in items:
+                item=gtk.MenuItem(self.controller.get_title(i))
+                m=Menu(element=i, controller=self.controller)
+                item.set_submenu(m.menu)
+                submenu.append(item)
+            submenu.show_all()
+            return False
+
+        if element.incomingRelations:
+            i=gtk.MenuItem(_("Incoming relations"))
+            submenu=gtk.Menu()
+            i.set_submenu(submenu)
+            submenu.connect("map", build_submenu, element, element.incomingRelations)
+            menu.append(i)
+
+        if element.outgoingRelations:
+            i=gtk.MenuItem(_("Outgoing relations"))
+            submenu=gtk.Menu()
+            i.set_submenu(submenu)
+            submenu.connect("map", build_submenu, element, element.outgoingRelations)
+            menu.append(i)
+
         item = gtk.MenuItem(_("Highlight"))
         item.set_submenu(self.activate_submenu(element))
         menu.append(item)
