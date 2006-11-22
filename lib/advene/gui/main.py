@@ -60,6 +60,7 @@ import advene.rules.elements
 import advene.rules.ecaengine
 
 from advene.model.package import Package
+from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.query import Query
@@ -799,7 +800,8 @@ class AdveneGUI (Connect):
         return False
 
     def edit_element(self, element, modal=False):
-        if self.edit_accumulator:
+        if self.edit_accumulator and (
+            isinstance(element, Annotation) or isinstance(element, Relation)):
             self.edit_accumulator.edit(element)
             return True
 
