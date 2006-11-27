@@ -306,6 +306,7 @@ class Differ:
     def copy_view(self, s):
         el=self.destination.createView(
             ident=s.id,
+            clazz=s.viewableClass,
             author=s.author,
             date=s.date)
         el.title=s.title
