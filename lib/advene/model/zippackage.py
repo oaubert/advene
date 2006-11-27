@@ -172,7 +172,9 @@ class ZipPackage:
         # FIXME: check the portability (convert / to os.path.sep ?)
         for name in z.namelist():
             if name.endswith('/'):
-                os.mkdir(os.path.join(self._tempdir, name))
+                d=os.path.join(self._tempdir, name)
+                if not os.path.exists(d):
+                    os.mkdir(d)
             else:
                 fname=os.path.join(self._tempdir, name)
                 if not os.path.isdir(os.path.dirname(fname)):
@@ -219,6 +221,9 @@ class ZipPackage:
                 zpath=zpath[1:]
 
             for f in filenames:
+                if f == 'manifest.xml':
+                    # We will write it later on.
+                    continue
                 if zpath:
                     name='/'.join( (zpath, f) )
                 else:
