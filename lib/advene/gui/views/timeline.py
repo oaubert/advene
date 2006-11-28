@@ -470,7 +470,11 @@ class TimeLine(AdhocView):
     def activate_annotation (self, annotation, buttons=None, color=None):
         """Activate the representation of the given annotation."""
         if buttons is None:
-            buttons = [ self.get_widget_for_annotation (annotation) ]
+            b=self.get_widget_for_annotation (annotation)
+            if b:
+                buttons = [ b ]
+            else:
+                return True
         if color is None:
             color=self.colors['active']
         for b in buttons:
@@ -481,7 +485,11 @@ class TimeLine(AdhocView):
     def desactivate_annotation (self, annotation, buttons=None):
         """Desactivate the representation of the given annotation."""
         if buttons is None:
-            buttons = [ self.get_widget_for_annotation (annotation) ]
+            b=self.get_widget_for_annotation (annotation)
+            if b:
+                buttons = [ b ]
+            else:
+                return True
         for b in buttons:
             b.active = False
             self.set_widget_background_color(b, b._default_color)
