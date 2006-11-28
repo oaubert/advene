@@ -965,6 +965,19 @@ class AdveneGUI (Connect):
             self.east_viewbook.add_view(view)
         return view
 
+    def open_url_embedded(self, url):
+        """Open an URL in the embedded web browser.
+
+        If no embedded web browser is present, return False.
+        """
+        l=[ v for v in self.adhoc_views if v.view_id == 'htmlview' ]
+        if l:
+            # We use the first one available.
+            v.open_url(url)
+            return True
+        else:
+            return False
+
     def update_gui (self):
         """Update the GUI.
 
