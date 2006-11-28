@@ -790,11 +790,13 @@ class EditAction(EditGeneric):
             self.current_parameters={}.fromkeys(ra.parameters, "")
 
         for name in self.sorted(self.current_parameters):
+            v=ra.default_value(name)
             p=self.build_parameter_widget(name,
-                                          ra.default_value(name),
+                                          v,
                                           ra.describe_parameter(name))
+            self.current_parameters[name]=v
             self.paramlist[name]=p
-            p.show_all()
+            p.show()
             self.widget.add(p)
 
         return True
@@ -857,6 +859,7 @@ class EditAction(EditGeneric):
                 p=self.build_parameter_widget(name=name,
                                               value=v,
                                               description=ra.describe_parameter(name))
+                self.current_parameters[name]=v
                 self.paramlist[name]=p
                 vbox.add(p)
         else:
