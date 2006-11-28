@@ -279,7 +279,7 @@ class Annotation(modeled.Importable, content.WithContent,
 
         d=DefaultDict(default=[])
         for r in self.outgoingRelations:
-            d[r.id].append(r)
+            d[r.type.id].append(r)
         return d
 
     def getTypedIncomingRelations(self):
@@ -288,7 +288,7 @@ class Annotation(modeled.Importable, content.WithContent,
 
         d=DefaultDict(default=[])
         for r in self.incomingRelations:
-            d[r.id].append(r)
+            d[r.type.id].append(r)
         return d
 
     def getRelated(self):
