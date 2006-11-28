@@ -27,6 +27,7 @@ import time
 import sched
 import threading
 import copy
+import StringIO
 
 import advene.rules.elements
 
@@ -198,7 +199,15 @@ class ECAEngine:
             else:
                 self.scheduler.enter(delay, 0, action.execute, (context,))
             if not self.schedulerthread.isAlive():
-                self.schedulerthread.run()
+                try:
+                    self.schedulerthread.run()
+                except Exception, e:
+                    import traceback
+                    s=StringIO.StringIO()
+                    traceback.print_exc (file = s)
+                    self.controller.queue_action(self.controller.log, _("Exception (traceback in console):") + unicode(e))
+                    print str(e)
+                    print s.getvalue()
 
     def reset_queue (self):
         """Reset the scheduler's queue.
