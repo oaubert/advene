@@ -388,7 +388,10 @@ class DefaultActionsRepository:
         stbvid=self.parse_parameter(context, parameters, 'viewid', None)
         if not stbvid:
             return True
-        stbv=context.evaluateValue('package/views/%s' % stbvid)
+        try:
+            stbv=context.evaluateValue('package/views/%s' % stbvid)
+        except:
+            stbv=None
         if stbv is not None and stbv.content.mimetype == 'application/x-advene-ruleset':
             self.controller.activate_stbv(stbv)
 	else:
