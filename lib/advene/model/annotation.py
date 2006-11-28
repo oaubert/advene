@@ -273,6 +273,24 @@ class Annotation(modeled.Importable, content.WithContent,
         """
         return self.getRelations (rank=1, order=2)
 
+    def getTypedOutgoingRelations(self):
+        """Return the outgoing relations  sorted by relation type ids.
+        """
+
+        d=DefaultDict(default=[])
+        for r in self.outgoingRelations:
+            d[r.id].append(r)
+        return d
+
+    def getTypedIncomingRelations(self):
+        """Return the incoming relations  sorted by relation type ids.
+        """
+
+        d=DefaultDict(default=[])
+        for r in self.incomingRelations:
+            d[r.id].append(r)
+        return d
+
     def getRelated(self):
         """Return the related annotation.
 
