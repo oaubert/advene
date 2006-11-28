@@ -78,6 +78,21 @@ def register(controller=None):
             ))
 
     controller.register_action(RegisteredAction(
+            name="PopupURL",
+            method=ac.action_popup_url,
+            description=_("Display a popup linking to an URL"),
+            parameters={'description': _("General description"),
+                        'message': _("String to display."),
+                        'url': _("URL"),
+                        'duration': _("Display duration in ms. Ignored if empty.")},
+            defaults={'description': 'annotation/content/data',
+                      'message': _('string:Display annotation in web browser'),
+                      'url': 'annotation/absolute_url',
+                      'duration': 'annotation/fragment/duration'},
+            category='gui',
+            ))
+
+    controller.register_action(RegisteredAction(
             name="OpenView",
             method=ac.action_open_view,
             description=_("Open a GUI view"),
@@ -153,7 +168,7 @@ class DefaultGUIActions:
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
                 self.controller.log(_("Rule %s: Error in the evaluation of the parameter %s:" % (rulename, name)))
-                self.controller.log(str(e)[:160])
+                self.controller.log(unicode(e)[:160])
                 result=default_value
         else:
             result=default_value
@@ -246,6 +261,42 @@ class DefaultGUIActions:
         v.show_all()
 
         self.gui.popupwidget.display(widget=v, timeout=duration, title=_("Entry popup"))
+        return True
+
+    def action_popup_url (self, context, parameters):
+        """PopupURL action.
+
+        Displays a popup with a message and a linked URL.
+        """
+        def handle_response(button, url, widget):
+            if url:
+                self.controller.open_url(url)
+            self.gui.popupwidget.undisplay(widget)
+            return True
+
+        description=self.parse_parameter(context, parameters, 'description', _("Follow a link"))
+        description=description.replace('\\n', '\n')
+        description=textwrap.fill(description, config.data.preferences['gui']['popup-textwidth'])
+
+        message=self.parse_parameter(context, parameters, 'message', _("Click to open the URL"))
+        message=message.replace('\\n', '\n')
+        message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
+
+        url=self.parse_parameter(context, parameters, 'url', 'string:http://liris.cnrs.fr/advene/')
+        duration=self.parse_parameter(context, parameters, 'duration', None)
+        if duration == "" or duration == 0:
+            duration = None
+
+        vbox=gtk.VBox()
+
+        vbox.pack_start(self.gui.get_illustrated_text(description), expand=False)
+
+        b=gtk.Button(message)
+        vbox.pack_start(b, expand=False)
+
+        b.connect("clicked", handle_response, url, vbox)
+
+        self.gui.popupwidget.display(widget=vbox, timeout=duration, title=_("URL popup"))
         return True
 
     def action_popup_goto (self, context, parameters):
