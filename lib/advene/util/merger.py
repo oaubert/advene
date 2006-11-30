@@ -44,7 +44,7 @@ class Differ:
         Structure of returned elements:
         (action_name, source_element, dest_element, action)
         """
-        for m in (self.diff_schemas, 
+        for m in (self.diff_schemas,
                   self.diff_annotation_types, 
                   self.diff_relation_types,
                   self.diff_annotations,
@@ -213,10 +213,10 @@ class Differ:
 
     def copy_annotation_type(self, s):
         # Find parent, and create it if necessary
-        sch=helper.get_id(self.destination.schemas, s.id)
+        sch=helper.get_id(self.destination.schemas, s.schema.id)
         if not sch:
             # Create it
-            sch=helper.get_id(self.source.schemas, s.id)
+            sch=helper.get_id(self.source.schemas, s.schema.id)
             sch=self.copy_schema(sch)
         el=self.sch.createAnnotationType(ident=s.id)
         el.author=s.author
@@ -228,10 +228,10 @@ class Differ:
 
     def copy_relation_type(self, s):
         # Find parent, and create it if necessary
-        sch=helper.get_id(self.destination.schemas, s.id)
+        sch=helper.get_id(self.destination.schemas, s.schema.id)
         if not sch:
             # Create it
-            sch=helper.get_id(self.source.schemas, s.id)
+            sch=helper.get_id(self.source.schemas, s.schema.id)
             sch=self.copy_schema(sch)
         el=self.sch.createRelationType(ident=s.id)
         el.author=s.author
