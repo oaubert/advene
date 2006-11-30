@@ -81,16 +81,20 @@ class TreeViewMerger:
         def build_popup_menu(l):
             menu=gtk.Menu()
             
-            i=gtk.MenuItem(_("Current element"))
-            m = advene.gui.popup.Menu(l[1], controller=self.controller, readonly=False)
-            i.set_submenu(m.menu)
-            menu.append(i)
+            name, s, d, action = l
+
+            if name != 'new':
+                i=gtk.MenuItem(_("Current element"))
+                m = advene.gui.popup.Menu(d, controller=self.controller, readonly=False)
+                i.set_submenu(m.menu)
+                menu.append(i)
 
             i=gtk.MenuItem(_("Updated element"))
-            m = advene.gui.popup.Menu(l[2], controller=self.controller, readonly=True)
+            m = advene.gui.popup.Menu(s, controller=self.controller, readonly=True)
             i.set_submenu(m.menu)
             menu.append(i)
 
+            # FIXME: display diff
             menu.show_all()
             return menu
 
@@ -200,8 +204,34 @@ class Merger:
             window.destroy()
             return True
 
+        def select_all(b):
+            model=self.mergerview.store
+            for l in model:
+                l[self.mergerview.COLUMN_APPLY] = True
+            return True
+
+        def unselect_all(b):
+            model=self.mergerview.store
+            for l in model:
+                l[self.mergerview.COLUMN_APPLY] = False
+            return True
+
+
+        b = gtk.Button(_("All"))
+        b.connect("clicked", select_all)
+        self.buttonbox.add (b)
+
+        
+        b = gtk.Button(_("None"))
+        b.connect("clicked", unselect_all)
+        self.buttonbox.add (b)
+
         b = gtk.Button(stock=gtk.STOCK_OK)
         b.connect("clicked", validate)
+        self.buttonbox.add (b)
+
+        b = gtk.Button(stock=gtk.STOCK_CANCEL)
+        b.connect("clicked", lambda b: window.destroy())
         self.buttonbox.add (b)
 
         vbox.pack_start(self.buttonbox, expand=False)
