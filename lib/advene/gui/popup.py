@@ -41,9 +41,10 @@ import advene.util.helper as helper
 import advene.gui.edit.elements
 
 class Menu:
-    def __init__(self, element=None, controller=None):
+    def __init__(self, element=None, controller=None, readonly=False):
         self.element=element
         self.controller=controller
+        self.readonly=readonly
         self.menu=self.make_base_menu(element)
 
     def popup(self):
@@ -168,7 +169,8 @@ class Menu:
 
     def edit_element (self, widget, el):
         try:
-            pop = advene.gui.edit.elements.get_edit_popup (el, self.controller)
+            pop = advene.gui.edit.elements.get_edit_popup (el, self.controller, 
+                                                           editable=not self.readonly)
         except TypeError, e:
             print _("Error: unable to find an edit popup for %s:\n%s") % (el, unicode(e))
         else:
@@ -343,14 +345,15 @@ class Menu:
         add_item(_("Browse"), self.browse_element, element)
         add_item(_("Query"), self.query_element, element)
 
-        # Common to deletable elements
-        if type(element) in (Annotation, Relation, View, Query,
-                             Schema, AnnotationType, RelationType):
-            add_item(_("Delete"), self.delete_element, element)
+        if not self.readonly:
+            # Common to deletable elements
+            if type(element) in (Annotation, Relation, View, Query,
+                                 Schema, AnnotationType, RelationType):
+                add_item(_("Delete"), self.delete_element, element)
 
-        # Common to offsetable elements
-        if type(element) in (Annotation, Schema, AnnotationType, Package):
-            add_item(_("Offset"), self.offset_element, element)
+            # Common to offsetable elements
+            if type(element) in (Annotation, Schema, AnnotationType, Package):
+                add_item(_("Offset"), self.offset_element, element)
 
         submenu.show_all()
         return submenu
@@ -436,6 +439,8 @@ class Menu:
     def make_package_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        if self.readonly:
+            return
         add_item(_("Create a new view..."), self.create_element, View, element)
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
         #add_item(_("Create a new relation..."), self.create_element, Relation, element)
@@ -446,6 +451,8 @@ class Menu:
     def make_resources_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        if self.readonly:
+            return
         add_item(_("Create a new folder..."), self.create_element, Resources, element)
         add_item(_("Create a new resource file..."), self.create_element, ResourceData, element)
         add_item(_("Insert a new resource file..."), self.insert_resource_data, element)
@@ -457,12 +464,16 @@ class Menu:
     def make_resourcedata_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        if self.readonly:
+            return
         add_item(_("Delete the resource..."), self.delete_element, element)
         return
 
     def make_schema_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        if self.readonly:
+            return
         add_item(_("Create a new annotation type..."),
                  self.create_element, AnnotationType, element)
         add_item(_("Create a new relation type..."),
@@ -472,14 +483,18 @@ class Menu:
     def make_annotationtype_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        add_item(_("Display as transcription"), self.display_transcription, element)
+        if self.readonly:
+            return
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
         add_item(_("Delete all annotations..."), self.delete_elements, element, element.annotations)
-        add_item(_("Display as transcription"), self.display_transcription, element)
         return
 
     def make_relationtype_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        if self.readonly:
+            return
         add_item(_("Delete all relations..."), self.delete_elements, element, element.relations)
         return
 
@@ -498,6 +513,8 @@ class Menu:
     def make_bundle_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        if self.readonly:
+            return
         if element.viewableType == 'query-list':
             add_item(_("Create a new query..."), self.create_element, Query, element.rootPackage)
         elif element.viewableType == 'view-list':
