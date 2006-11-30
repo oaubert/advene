@@ -78,7 +78,45 @@ class TreeViewMerger:
     def build_widget(self):
         vbox=gtk.VBox()
 
+        def build_popup_menu(l):
+            menu=gtk.Menu()
+            
+            i=gtk.MenuItem(_("Current element"))
+            m = advene.gui.popup.Menu(l[1], controller=self.controller, readonly=False)
+            i.set_submenu(m.menu)
+            menu.append(i)
+
+            i=gtk.MenuItem(_("Updated element"))
+            m = advene.gui.popup.Menu(l[2], controller=self.controller, readonly=True)
+            i.set_submenu(m.menu)
+            menu.append(i)
+
+            menu.show_all()
+            return menu
+
+        def tree_view_button_cb(widget=None, event=None):
+            retval = False
+            button = event.button
+            x = int(event.x)
+            y = int(event.y)
+
+            if button == 3:
+                if event.window is widget.get_bin_window():
+                    model = widget.get_model()
+                    t = widget.get_path_at_pos(x, y)
+                    if t is not None:
+                        path, col, cx, cy = t
+                        it = model.get_iter(path)
+                        node = model.get_value(it, self.COLUMN_ELEMENT)
+                        widget.get_selection().select_path (path)
+                        menu=build_popup_menu(node)
+                        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+                        retval = True
+            return retval
+
+
         treeview=gtk.TreeView(model=self.store)
+        treeview.connect("button_press_event", tree_view_button_cb)
 
         renderer = gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
