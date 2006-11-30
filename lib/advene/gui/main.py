@@ -2136,9 +2136,14 @@ Available views: timeline, tree, browser, transcribe"""))
         return True
 
     def on_merge_package_activate(self, button=None, data=None):
+        if config.data.path['data']:
+            d=config.data.path['data']
+        else:
+            d=None
         filename=advene.gui.util.get_filename(title=_("Select the package to merge"),
                                               action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                              button=gtk.STOCK_OPEN)
+                                              button=gtk.STOCK_OPEN,
+                                              default_dir=d)
         if not filename:
             return True
         try:
