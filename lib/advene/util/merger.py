@@ -218,7 +218,7 @@ class Differ:
             # Create it
             sch=helper.get_id(self.source.schemas, s.schema.id)
             sch=self.copy_schema(sch)
-        el=self.sch.createAnnotationType(ident=s.id)
+        el=sch.createAnnotationType(ident=s.id)
         el.author=s.author
         el.date=s.date
         el.title=s.title
@@ -233,7 +233,7 @@ class Differ:
             # Create it
             sch=helper.get_id(self.source.schemas, s.schema.id)
             sch=self.copy_schema(sch)
-        el=self.sch.createRelationType(ident=s.id)
+        el=sch.createRelationType(ident=s.id)
         el.author=s.author
         el.date=s.date
         el.title=s.title
