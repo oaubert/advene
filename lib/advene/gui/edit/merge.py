@@ -21,6 +21,7 @@ import sys
 
 import gtk
 import gobject
+import difflib
 
 from gettext import gettext as _
 
@@ -78,6 +79,31 @@ class TreeViewMerger:
     def build_widget(self):
         vbox=gtk.VBox()
 
+        def show_diff(item, l):
+            name, s, d, action = l
+
+            diff=difflib.Differ()
+
+            w=gtk.Window()
+
+            v=gtk.VBox()
+
+            sw = gtk.ScrolledWindow()
+            sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+            v.add(sw)
+
+            
+            tv=gtk.TextView()
+            for l in diff.compare(s.content.data.splitlines(1),
+                                  d.content.data.splitlines(1)):
+                tv.get_buffer().insert_at_cursor(l)
+                #tv.get_buffer().insert_at_cursor("\n")
+            sw.add_with_viewport(tv)
+
+            w.add(v)
+            w.show_all()
+            return True
+
         def build_popup_menu(l):
             menu=gtk.Menu()
             
@@ -94,6 +120,11 @@ class TreeViewMerger:
             i.set_submenu(m.menu)
             menu.append(i)
 
+            if name == 'update_content':
+                i=gtk.MenuItem(_("Show diff"))
+                i.connect("activate", show_diff, l)
+                menu.append(i)
+                
             # FIXME: display diff
             menu.show_all()
             return menu
