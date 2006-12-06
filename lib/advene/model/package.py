@@ -274,6 +274,15 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         else:
             return self.__zip.getResources(package=self)
 
+    def get_element_by_id(self, i):
+        for m in (self.getSchemas, self.getViews, self.getAnnotationTypes,
+                  self.getRelationTypes, self.getAnnotations,
+                  self.getRelations):
+            for el in m():
+                if el.id == i:
+                    return el
+        return None
+
     def serialize(self, stream=sys.stdout):
         """Serialize the Package on the specified stream"""
         xml.dom.ext.PrettyPrint(self._getModel(), stream)
