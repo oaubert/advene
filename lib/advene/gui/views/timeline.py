@@ -819,7 +819,7 @@ class TimeLine(AdhocView):
             self.annotation_cb(widget, annotation, event.x)
             return True
         elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-            self.quick_edit(annotation)
+            self.quick_edit(annotation, button=widget)
             return True
         elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS and event.state & gtk.gdk.CONTROL_MASK:
             # Control + click : set annotation begin/end time to current time
@@ -838,20 +838,17 @@ class TimeLine(AdhocView):
             return True
         return False
 
-    def quick_edit(self, annotation):
+    def quick_edit(self, annotation, button=None):
         """Quickly edit a textual annotation
         """
-        w=gtk.Window(gtk.WINDOW_TOPLEVEL)
-        w.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
-        w.set_decorated(False)
-        # Find the containing gtk.Window
-        w.set_transient_for(self.layout.get_toplevel())
-        w.set_position(gtk.WIN_POS_MOUSE)
+        if button is None:
+            button=self.get_widget_for_annotation(annotation)
+        if button is None:
+            return False
         e=gtk.Entry()
         # get_title will either return the content data, or the computed representation
         e.set_text(self.controller.get_title(annotation))
         e.set_activates_default(True)
-        w.add(e)
         def key_handler(widget, event):
             if event.keyval == gtk.keysyms.Return:
                 # Validate the entry
@@ -880,16 +877,23 @@ class TimeLine(AdhocView):
                         r=annotation.content.data
                 annotation.content.data = r
                 self.controller.notify('AnnotationEditEnd', annotation=annotation)
-                w.destroy()
+                e.destroy()
+                button.grab_focus()
                 return True
             elif event.keyval == gtk.keysyms.Escape:
                 # Abort and close the entry
-                w.destroy()
+                e.destroy()
+                button.grab_focus()
                 return True
             return False
         e.connect("key_press_event", key_handler)
-        w.show_all()
+
+        # Put the entry on the layout
+        al=button.get_allocation()
+        self.layout.put(e, al.x, al.y)
+        e.show()
         e.grab_focus()
+
         return
 
     def button_key_handler(self, widget, event, annotation):
@@ -928,7 +932,7 @@ class TimeLine(AdhocView):
             return True
         elif event.keyval == gtk.keysyms.Return:
             # Quick edit
-            self.quick_edit(annotation)
+            self.quick_edit(annotation, button=widget)
             return True
         return False
 
