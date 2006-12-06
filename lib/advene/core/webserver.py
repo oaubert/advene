@@ -534,7 +534,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
           C{/application/adhoc} opens the given ad-hoc view. It takes
           the view name as next element in the path. Accessible views
-          are: C{tree}, C{timeline}, C{transcription}, C{transcribe}.
+          are: C{tree}, C{timeline}, C{transcription}, C{transcribe},
+          C{edit}.
 
           The transcription view can take an optional C{type}
           parameter, either as next element in the URI or as a
@@ -543,6 +544,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           C{/application/adhoc/transcription/simple_text}
 
           The transcribe view takes a mandatory C{url} parameter.
+
+          The edit view takes a mandatory C{id} parameter, which is
+          the id of the element to be edited.
         """
         def current_adhoc():
             if not c.gui:
@@ -610,6 +614,22 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if query.has_key('url'):
                         url=query['url']
                     c.queue_action(c.gui.open_adhoc_view, view, filename=url)
+                    self.send_no_content()
+                elif view == 'edit':
+                    elid=None
+                    if len(param) > 1:
+                        elid=param[1]
+                    elif query.has_key('id'):
+                        elid=query['id']
+
+                    if elid is None:
+                        self.send_error(404, _("Missing element id parameter"))
+                        return
+                    el=c.package.get_element_by_id(elid)
+                    if el is None:
+                        self.send_error(404, _("No existing element with id %s") % elid)
+                        return
+                    c.queue_action(c.gui.open_adhoc_view, view, element=el)
                     self.send_no_content()
                 else:
                     self.start_html (_('Error'))
