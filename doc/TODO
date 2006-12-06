@@ -1,3 +1,51 @@
+* implement get_rate/set_rate actions
+
+* define a virtual "global" package that will iterate and forward methods (annotations, relation...) over all loaded packages
+
+* cloud representation of tag collection
+
+* tags: define a "tag bag" from where you can drag and drop tags to annotations
+ 
+* tags: define a "tag_color" method that returns a color depending on present tags
+
+* Transcribe: shortcut to play the current segment?? Cf control-pageup/down
+
+* Timeline: create annotations with mouse cursor on the annotation type. When we start typing, create an annotation with the right content. On annotation validation, update the end time.
+
+* Generate a transcription view powerpoint like
+
+* Transcribe: automatically put timestamp mark when beginning to type
+
+* UCK: http://sourceforge.net/forum/forum.php?forum_id=629763
+
+* video plugin: ffmpeg
+
+* internal_tour: 2 dyn. views: popup activates stbv_nightmare 
+stbv_nightmare == open UTBV + go to first annotation + activate internal_tour
++ 2 UTBV (nightmare, supernatural) at level 2 + explain in technical_details
+
+New popup: navigation popup (description, message, duration, URL)
+
+* sort views in dyn/static + alphabetic order
+
+* content browser (nextstep-style) using the same structure as the treeview
+
+* EditRelationPopup : display snapshot in members widgets
+
+* EditAccumulator: filet plus gras autour des elements
+
+* IRI importer: handle <views> tags
+
+* VLC: fix playlist export, cf http://trac.videolan.org/vlc/changeset/17857
+
+* transtyping: keep relations
+
+* popup menu on dynamic view to get rid of edit button / remove D.view
+  label, replace by tooltip and >Name> / None -> No active dynamic
+  view / D.view below the video
+
+* nosferatu: provide an example query (full text search on panels)
+
 * Study transana code
 
 * relation view: display annotation content rather than id, add spaces betw. annotations, honour colour, make size depend on duration
@@ -6,6 +54,7 @@
 
 * gstreamer: cf tutorial http://www.jonobacon.org/?p=750
 http://www.cin.ufpe.br/~cinlug/wiki/index.php/Apresentando_o_GStreamer
+http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/gst-plugins-base-plugins-textoverlay.html
 
 * think about printing support
 
@@ -503,15 +552,6 @@ Transmit python data to javascript:
 http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/285099
 Cf basic tutorial
 http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
-
-* Windows/gtk has a problem with threads. Solve using the recipe given in:
-  http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
-  http://www.daa.com.au/pipermail/pygtk/2004-February/006960.html
-
-* Fix for SVG module :
- - find a way to trigger the svg module rather than the freetype module
-
-* Create a simple SVG editor (rectangle and ellipse) and integrate it in Advene
 
 * Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
 
@@ -1345,4 +1385,21 @@ current time,  timestamp: use spinbutton
 * compact view for relations
 
 * editaccumulator: option to automatically edit new annotations in it
+
+* typed_related_in / typed_related_out
+
+* nosferatu: fix panel_details UTBV : outgoingRelations/type ?
+
+* edit relations through annotation context menu
+
+* EditAccumulator : only annotations et relations, not queries/views
+
+* Fix for SVG module :
+ - find a way to trigger the svg module rather than the freetype module
+
+* Create a simple SVG editor (rectangle and ellipse) and integrate it in Advene
+
+* Windows/gtk has a problem with threads. Solve using the recipe given in:
+  http://www.daa.com.au/pipermail/pygtk/2004-February/006900.htm
+  http://www.daa.com.au/pipermail/pygtk/2004-February/006960.html
 
