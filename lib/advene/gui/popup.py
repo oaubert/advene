@@ -53,7 +53,10 @@ class Menu:
 
     def get_title (self, element):
         """Return the element title."""
-        return helper.get_title(self.controller, element)
+        t=helper.get_title(self.controller, element)
+        if len(t) > 80:
+            t=t[:80]
+        return t
 
     def goto_annotation (self, widget, ann):
         c=self.controller
@@ -384,7 +387,7 @@ class Menu:
                 # The submenu was already populated.
                 return False
             for i in items:
-                item=gtk.MenuItem(self.controller.get_title(i))
+                item=gtk.MenuItem(self.get_title(i))
                 m=Menu(element=i, controller=self.controller)
                 item.set_submenu(m.menu)
                 submenu.append(item)
