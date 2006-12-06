@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # This file is part of Advene.
 #
@@ -33,6 +34,7 @@ class EditAccumulator(AccumulatorPopup):
     """
     def __init__ (self, *p, **kw):
         kw['vertical']=True
+        kw['borderwidth']=4
         super(EditAccumulator, self).__init__(self, *p, **kw)
         self.view_name = _("EditAccumulator")
         self.view_id = 'editaccumulator'
@@ -45,37 +47,46 @@ class EditAccumulator(AccumulatorPopup):
             return True
         w=e.compact()
 
+        # Buttons hbox
         hbox=gtk.HBox()
+
+        # Title
+        if hasattr(element, 'type'):
+            t="%s (%s)" % (self.controller.get_title(element),
+                           self.controller.get_title(element.type))
+        else:
+            t=self.controller.get_title(element)
+        l=gtk.Label(t)
+        hbox.pack_start(l, expand=False)
         
         # Right align (hackish)
         b=gtk.HBox()
         hbox.pack_start(b, expand=True)
-
-        b=gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect("clicked", self.undisplay_cb, w)
-        hbox.pack_start(b, expand=False)
 
         def handle_ok(b, w):
             e.apply_cb()
             self.undisplay_cb(b, w)
             return True
 
-        b=gtk.Button(stock=gtk.STOCK_OK)
-        b.connect("clicked", handle_ok, w)
-        hbox.pack_start(b, expand=False)
-
-        b=gtk.Button(stock=gtk.STOCK_APPLY)
+        # Validate button
+        b=gtk.Button('V')
         b.connect("clicked", lambda x: e.apply_cb())
+        self.controller.gui.tooltips.set_tip(b, _("Validate"))
         hbox.pack_start(b, expand=False)
 
-        w.pack_start(hbox, expand=False)
+        # OK button
+        b=gtk.Button('OK')
+        b.connect("clicked", handle_ok, w)
+        self.controller.gui.tooltips.set_tip(b, _("Validate and close"))
+        hbox.pack_start(b, expand=False)
 
-        if hasattr(element, 'type'):
-            t="%s (%s)" % (self.controller.get_title(element),
-                           self.controller.get_title(element.type))
-        else:
-            t=self.controller.get_title(element)
-        self.display(w, title=t)
+        # Close button
+        b=gtk.Button('X')
+        b.connect("clicked", self.undisplay_cb, w)
+        self.controller.gui.tooltips.set_tip(b, _("Close"))
+        hbox.pack_start(b, expand=False)
+
+        self.display(w, title=hbox)
 
     def edit_element_handler(self, context, parameters):
         event=context.evaluateValue('event')
