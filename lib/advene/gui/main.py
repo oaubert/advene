@@ -970,6 +970,14 @@ class AdveneGUI (Connect):
             if element is None:
                 return None
             view=get_edit_popup(element, self.controller)
+        elif name == 'editaccumulator':
+            if not self.edit_accumulator:
+                self.edit_accumulator=EditAccumulator(controller=self.controller, scrollable=True)
+                view=self.edit_accumulator
+                def handle_accumulator_close(w):
+                    self.edit_accumulator = None
+                    return False 
+                self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
         if view is None:
             return view
         if destination == 'popup':
@@ -1202,6 +1210,7 @@ class AdveneGUI (Connect):
             s=StringIO.StringIO()
             traceback.print_exc (file = s)
             self.log(_("Got exception %s. Trying to continue.") % str(e), s.getvalue())
+            traceback.print_exc()
             return True
         #gtk.threads_leave()
 
@@ -1334,17 +1343,7 @@ class AdveneGUI (Connect):
         return schema
 
     def popup_edit_accumulator(self, *p):
-        if not self.edit_accumulator:
-            self.edit_accumulator=EditAccumulator(controller=self.controller, scrollable=True)
-            w=self.edit_accumulator.popup()
-            self.edit_accumulator._window = w
-            def handle_accumulator_close(w):
-                self.edit_accumulator = None
-                return False
-            w.connect('destroy', handle_accumulator_close)
-        else:
-            # Find the editaccumulator window and call present()
-            self.edit_accumulator._window.present()
+        self.open_adhoc_view('editaccumulator')
         return True
 
     def on_stbv_combo_changed (self, combo=None):
