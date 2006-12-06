@@ -447,6 +447,7 @@ def parsed (target, context):
                 (k, v) = l.split('=', 1)
                 d[k] = urllib.unquote(v)
             else:
+                d['_error']=l
                 print "Syntax error in content: >%s<" % l
         return d
     #FIXME: we parse x-advene-ruleset as xml for the moment
