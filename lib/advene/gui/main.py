@@ -715,7 +715,13 @@ class AdveneGUI (Connect):
                 c.update_status("start")
             return True
         elif event.state & gtk.gdk.CONTROL_MASK:
-            if event.keyval == gtk.keysyms.Right:
+            if event.keyval == gtk.keysyms.Up:
+                c.move_position (1000/25)
+                return True
+            elif event.keyval == gtk.keysyms.Down:
+                c.move_position (-1000/25)
+                return True
+            elif event.keyval == gtk.keysyms.Right:
                 c.move_position (config.data.player_preferences['time_increment'])
                 return True
             elif event.keyval == gtk.keysyms.Left:
@@ -955,6 +961,14 @@ class AdveneGUI (Connect):
             except KeyError:
                 filename=None
             view=TranscriptionEdit(controller=self.controller, filename=filename)
+        elif name == 'edit':
+            try:
+                element=kw['element']
+            except KeyError:
+                element=None
+            if element is None:
+                return None
+            view=get_edit_popup(element, self.controller)
         if view is None:
             return view
         if destination == 'popup':
