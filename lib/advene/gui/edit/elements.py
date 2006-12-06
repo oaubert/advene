@@ -96,6 +96,9 @@ class EditElementPopup (object):
 
     def __init__ (self, el, controller=None, editable=True):
         """Create an edit window for the given element."""
+        self.view_name = _("Edit Window")
+        self.view_id = 'editwindow'
+        
         self.element = el
         self.controller = controller
         self.window=None
@@ -184,6 +187,9 @@ class EditElementPopup (object):
         fr.add (widget)
         fr.set_expanded(expanded)
         return fr
+
+    def popup(self, *p, **kw):
+        return self.edit(*p, **kw)
 
     def edit (self, callback=None, modal=False):
         """Display the edit window.
