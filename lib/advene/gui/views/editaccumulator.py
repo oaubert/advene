@@ -34,7 +34,6 @@ class EditAccumulator(AccumulatorPopup):
     """
     def __init__ (self, *p, **kw):
         kw['vertical']=True
-        kw['borderwidth']=4
         super(EditAccumulator, self).__init__(self, *p, **kw)
         self.view_name = _("EditAccumulator")
         self.view_id = 'editaccumulator'
