@@ -1,3 +1,36 @@
+* timeline: add a "Display tooltip" toggle
+
+* timeline: refresh problem when opening in its own window
+
+* internal rule to play only a specific annotation + convenient shortcut
+
+* timeline: remove annotation resizing by DND
+
+* editaccumulator: add icon for embedding
+
+* imagecache: if the image is stored on disk, use a Storage proxy to get data directly from disk instead of  memory
+
+* 'master' metadata attribute for packages, to specify a default importing package
+
+* 'master-types': if empty, default to views, schemas, queries. Could
+  also add annotations/relations.
+
+* load/save hooks
+
+* snapshot precision: use set_rate to slow down, add "Select keyframe"
+  to the popup menu + shortcut
+
+* bookmarks: associate actions to timestamp, for instance "When reaching 124, go to 2343"
+
+* Convention: is_illustrated_by relation-type. In snapshot_url, if a
+  relation exists, use it to get the snapshot. Else use the begin
+  time.
+
+* merge functionality: use author/date information to determine if the
+  annotation was completely updated or created
+
+* azp format: store essential information (title, statistics) in a simple file for fast access
+
 * implement get_rate/set_rate actions
 
 * define a virtual "global" package that will iterate and forward methods (annotations, relation...) over all loaded packages
