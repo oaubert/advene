@@ -564,6 +564,10 @@ class TimeLine(AdhocView):
             self.desactivate_annotation(annotation)
             return True
         if event == 'AnnotationCreate' and annotation in l:
+            if self.get_widget_for_annotation(annotation):
+                # It was already created (for instance by the code
+                # in update_legend_widget/create_annotation
+                return True
             b=self.create_annotation_widget(annotation)
             self.layout.show_all()
             return True
@@ -838,7 +842,7 @@ class TimeLine(AdhocView):
             return True
         return False
 
-    def quick_edit(self, annotation, button=None):
+    def quick_edit(self, annotation, button=None, callback=None):
         """Quickly edit a textual annotation
         """
         if button is None:
@@ -876,6 +880,8 @@ class TimeLine(AdhocView):
                         self.log("Cannot update the annotation, its representation is too complex")
                         r=annotation.content.data
                 annotation.content.data = r
+                if callback:
+                    callback(annotation)
                 self.controller.notify('AnnotationEditEnd', annotation=annotation)
                 e.destroy()
                 button.grab_focus()
@@ -1286,7 +1292,6 @@ class TimeLine(AdhocView):
                 date=self.controller.get_timestamp(),
                 fragment=MillisecondFragment(begin=long(position),
                                              duration=duration))
-            el.title=id_
             self.controller.package.annotations.append(el)
             self.controller.notify('AnnotationCreate', annotation=el)
             return True
@@ -1469,8 +1474,31 @@ class TimeLine(AdhocView):
         width=0
         height=0
 
+        def set_end_time(an):
+            an.fragment.end=self.controller.player.current_position_value 
+            return True
+    
         def keypress_handler(widget, event, at):
-            if event.keyval == gtk.keysyms.e:
+            if event.keyval == gtk.keysyms.space:
+                # Create a new annotation
+                id_=self.controller.package._idgenerator.get_id(Annotation)
+
+                duration=self.controller.cached_duration / 20
+                el=self.controller.package.createAnnotation(
+                    ident=id_,
+                    type=at,
+                    author=config.data.userid,
+                    date=self.controller.get_timestamp(),
+                    fragment=MillisecondFragment(begin=long(self.controller.player.current_position_value),
+                                                 duration=duration))
+                self.controller.package.annotations.append(el)
+                self.controller.notify('AnnotationCreate', annotation=el)
+                b=self.create_annotation_widget(el)
+                b.show()
+                # FIXME: problem: quick edit puts the entry widget in self.layout,
+                # but we should put it in the legend layout...
+                self.quick_edit(el, button=widget, callback=set_end_time)
+            elif event.keyval == gtk.keysyms.e:
                 self.controller.gui.edit_element(at)
                 return True
             return False
