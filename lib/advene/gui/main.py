@@ -794,7 +794,7 @@ class AdveneGUI (Connect):
         """Initialize window size according to stored values.
         """
         s=config.data.preferences['windowsize'].setdefault(name, (640,480))
-        window.set_default_size (*s)
+        window.resize(*s)
         window.connect ("size_allocate", self.resize_cb, name)
         return True
 
