@@ -35,6 +35,7 @@ import advene.core.config as config
 import gtk
 import gtk.glade
 import gobject
+import pprint
 
 import gettext
 import locale
@@ -1153,7 +1154,8 @@ class AdveneGUI (Connect):
                                                 'p': p,
                                                 'a': a,
                                                 'c': self.controller,
-                                                'self': self },
+                                                'self': self,
+                                                'pp': pprint.pformat },
                                        historyfile=config.data.advenefile('evaluator.log', 'settings')
                                        )
         w=ev.popup()
