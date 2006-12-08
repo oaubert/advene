@@ -67,6 +67,7 @@ class TimeLine(AdhocView):
             # Autoscroll: 0: None, 1: continuous, 2: discrete
             'autoscroll': 1,
             'delete_transmuted': False,
+            'resize-by-dnd': False,
             'display-relation-type': True,
             'display-relation-content': True,
             }
@@ -753,6 +754,8 @@ class TimeLine(AdhocView):
         """Handle the drop from an annotation to the layout.
         """
         if targetType == config.data.target_type['annotation-resize']:
+            if not self.options['resize-by-dnd']:
+                return False
             q=dict(cgi.parse_qsl(selection.data))
             source=self.controller.package.annotations.get(q['uri'])
             try:
@@ -1896,6 +1899,7 @@ class TimeLine(AdhocView):
         ew.add_checkbox(_("Relation type"), "display-relation-type", _("Display relation types"))
         ew.add_checkbox(_("Relation content"), "display-relation-content", _("Display relation content"))
         ew.add_checkbox(_("Highlight"), "highlight", _("Highlight active annotations"))
+        ew.add_checkbox(_("DND Resize"), "resize-by-dnd", _("Resize annotations by drag and drop on the background window"))
         res=ew.popup()
         if res:
             self.options.update(cache)
