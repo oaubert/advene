@@ -1747,6 +1747,19 @@ class TimeLine(AdhocView):
         self.delete_transmuted_toggle.connect('toggled', handle_toggle, 'delete_transmuted')
         tb.insert(self.delete_transmuted_toggle, -1)
 
+        def handle_tooltip_toggle(b):
+            if b.get_active():
+                self.tooltips.enable()
+            else:
+                self.tooltips.disable()
+            return True
+
+        self.display_tooltips_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_INFO)
+        self.display_tooltips_toggle.set_tooltip(self.tooltips, _("Display tooltips"))
+        self.display_tooltips_toggle.connect('toggled', handle_tooltip_toggle)
+        self.display_tooltips_toggle.set_active(True)
+        tb.insert(self.display_tooltips_toggle, -1)
+
         for text, tooltip, icon, callback in ( 
             (_("Preferences"), _("Preferences"), 
              gtk.STOCK_PREFERENCES, self.edit_preferences), ):
