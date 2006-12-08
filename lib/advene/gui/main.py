@@ -1093,15 +1093,18 @@ class AdveneGUI (Connect):
         self.gui.logmessages.scroll_mark_onscreen (endmark)
         return
 
-    def get_illustrated_text(self, text, position=None):
+    def get_illustrated_text(self, text, position=None, vertical=False):
         """Return a HBox with the given text and a snapshot corresponding to position.
         """
-        hbox=gtk.HBox()
-        hbox.add(advene.gui.util.image_from_position(self.controller,
-                                                     position=position,
-                                                     height=40))
-        hbox.add(gtk.Label(text))
-        return hbox
+        if vertical:
+            box=gtk.VBox()
+        else:
+            box=gtk.HBox()
+        box.add(advene.gui.util.image_from_position(self.controller,
+                                                    position=position,
+                                                    height=40))
+        box.add(gtk.Label(text))
+        return box
 
     def register_view (self, view):
         """Register a view plugin.
