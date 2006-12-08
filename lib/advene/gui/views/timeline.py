@@ -599,16 +599,18 @@ class TimeLine(AdhocView):
                 pass
         return True
 
-    def split_annotation(self, menu, widget, ann, x):
-        w = widget.allocation.width
-        self.controller.split_annotation(ann, 1.0 * x / w)
-        return True
-
     def annotation_cb (self, widget, ann, x):
         """Display the popup menu when clicking on annotation.
         """
+        def split_annotation(menu, widget, ann, p):
+            self.controller.split_annotation(ann, p)
+            return True
+
+        p=self.pixel2unit(widget.allocation.x + x)
         menu=advene.gui.popup.Menu(ann, controller=self.controller)
-        menu.add_menuitem(menu.menu, _("Split here"), self.split_annotation, widget, ann, x)
+        menu.add_menuitem(menu.menu,
+                          _("Split at %s") % helper.format_time(p), 
+                          split_annotation, widget, ann, p)
         menu.menu.show_all()
         menu.popup()
         return True
