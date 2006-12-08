@@ -124,13 +124,13 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
         return long(self._getModel().getAttributeNS(None, 'begin'))
     
     def setBegin(self, value):
-        return self._getModel().setAttributeNS(None, 'begin', unicode(value))
+        return self._getModel().setAttributeNS(None, 'begin', unicode(long(value)))
 
     def getEnd(self):
         return long(self._getModel().getAttributeNS(None, 'end'))
     
     def setEnd(self, value):
-        return self._getModel().setAttributeNS(None, 'end', unicode(value))
+        return self._getModel().setAttributeNS(None, 'end', unicode(long(value)))
 
     def getDuration(self):
         return self.getEnd() - self.getBegin()
