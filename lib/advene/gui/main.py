@@ -199,7 +199,8 @@ class AdveneGUI (Connect):
             ('transcription', _('Display annotations as a transcription'), 'transcription.png'),
             ('browser', _('Open a package browser'), 'browser.png'),
             ('webbrowser', _('Open a web browser'), 'web.png'),
-            ('transcribe', _('Take notes on the fly'), 'transcribe.png')
+            ('transcribe', _('Take notes on the fly'), 'transcribe.png'),
+            ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
             ):
             b=gtk.Button()
             i=gtk.Image()
