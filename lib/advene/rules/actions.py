@@ -181,6 +181,26 @@ def register(controller=None):
             )
 			       )
 
+    controller.register_action(RegisteredAction(
+            name="SetVolume",
+            method=ac.SetVolume,
+            description=_("Set the audio volume"),
+            parameters={'volume': _("Volume level (from 0 to 100)")},
+            defaults={'volume': 'string:50'},
+            category='player',
+            )
+			       )
+
+    controller.register_action(RegisteredAction(
+            name="SetRate",
+            method=ac.SetRate,
+            description=_("Set the playing rate"),
+            parameters={'rate': _("Rate (100: normal rate, 200: twice slower)")},
+            defaults={'rate': 'string:100'},
+            category='player',
+            )
+			       )
+
 class DefaultActionsRepository:
     def __init__(self, controller=None):
         self.controller=controller
@@ -437,4 +457,28 @@ class DefaultActionsRepository:
         if not url:
             return True
         self.controller.open_url(url)
+        return True
+
+    def SetVolume (self, context, parameters):
+        """Set the video volume."""
+        volume=self.parse_parameter(context, parameters, 'volume', None)
+        if volume is None:
+            return True
+        self.controller.player.sound_set_volume(int(volume))
+        return True
+
+    def SetRate (self, context, parameters):
+        """Set the playing rate.
+        
+        The value is the percentage of frame display time, so
+        100 means normal rate,
+        200 means twice slower than normal
+        """
+        rate=self.parse_parameter(context, parameters, 'rate', None)
+        if rate is None:
+            return True
+        try:
+            self.controller.player.set_rate(int(rate))
+        except:
+            self.controller.log(_("The set_rate method is unavailable."))
         return True
