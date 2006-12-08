@@ -217,6 +217,11 @@ class Menu:
                     self.controller.notify('AnnotationEditEnd', annotation=a)
         return True
 
+    def copy_id (self, widget, el):
+        clip=gtk.clipboard_get()
+        clip.set_text(el.id)
+        return True
+
     def browse_element (self, widget, el):
         browser = advene.gui.views.browser.Browser(el, controller=self.controller)
         browser.popup()
@@ -310,6 +315,14 @@ class Menu:
         title.set_submenu(self.common_submenu(element))
 
         add_item("")
+
+        try:
+            i=element.id
+            add_item(_("Copy id %s") % i,
+                     self.copy_id,
+                     element)
+        except AttributeError:
+            pass
 
         if isinstance(element, StandardXmlBundle):
             self.make_bundle_menu(element, menu)
