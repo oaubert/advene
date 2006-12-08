@@ -172,8 +172,13 @@ class EditElementPopup (object):
 
     def get_title (self):
         """Return the element title."""
-        return "%s %s" % (self.element.viewableClass,
-                          self.controller.get_title(self.element))
+        t="%s %s" % (self.element.viewableClass,
+                     self.controller.get_title(self.element))
+        try:
+            t += " [%s]" % self.element.id
+        except:
+            pass
+        return t
 
     def framed (self, widget, label=""):
         fr = gtk.Frame ()
