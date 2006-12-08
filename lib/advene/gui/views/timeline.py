@@ -890,7 +890,7 @@ class TimeLine(AdhocView):
 
         # Put the entry on the layout
         al=button.get_allocation()
-        self.layout.put(e, al.x, al.y)
+        button.parent.put(e, al.x, al.y)
         e.show()
         e.grab_focus()
 
