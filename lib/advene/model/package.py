@@ -313,6 +313,9 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             self.serialize(stream)
             stream.close ()
             
+            # Generate the statistics
+            self.__zip.update_statistics(self)
+
             # Save the whole .azp
             self.__zip.save(name)
         else:
