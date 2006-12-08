@@ -58,7 +58,7 @@ class TranscriptionImporter(advene.util.importer.GenericImporter):
 
 class TranscriptionEdit(AdhocView):
     def __init__ (self, controller=None, filename=None):
-        self.view_name = _("Transcription edition")
+        self.view_name = _("Note taking")
         self.view_id = 'transcribeview'
         self.close_on_package_load = False
 
@@ -74,6 +74,7 @@ class TranscriptionEdit(AdhocView):
             'play-on-scroll': False,
             'empty-annotations': True, # _("Do not generate annotations for empty text"))
             'delay': config.data.reaction_time,
+            'automatic-mark-insertion-delay': 0,
             }
 
         self.colors = {
@@ -103,6 +104,8 @@ class TranscriptionEdit(AdhocView):
         ew.add_checkbox(_("Play on scroll"), "play-on-scroll", _("Play the new position upon timestamp modification"))
         ew.add_checkbox(_("Generate empty annotations"), "empty-annotations", _("Generate annotations for empty text"))
         ew.add_spin(_("Reaction time"), "delay", _("Reaction time (substracted from current player time)"), -5000, 5000)
+        ew.add_spin(_("Automatic insertion delay"), 'automatic-mark-insertion-delay', _("If not null, timestamp marks will be automatically inserted when text is entered after no interaction since this delay (in ms).\n1000 is typically a good value."), 0, 100000)
+
         res=ew.popup()
         if res:
             self.options.update(cache)
@@ -131,6 +134,9 @@ class TranscriptionEdit(AdhocView):
         zero=self.create_timestamp_mark(0, self.textview.get_buffer().get_start_iter())
         self.current_mark=zero
 
+        # Memorize the last keypress time
+        self.last_keypress_time = 0
+        
         self.textview.connect("button-press-event", self.button_press_event_cb)
         self.textview.connect("key-press-event", self.key_pressed_cb)
 
@@ -148,6 +154,15 @@ class TranscriptionEdit(AdhocView):
         b.delete_interactive(begin, end, True)
         button.destroy()
         return True
+
+    def insert_timestamp_mark(self):
+        """Insert a timestamp mark with the current player position, at the current cursor position.
+        """
+        b=self.textview.get_buffer()
+        it=b.get_iter_at_mark(b.get_insert())
+        self.create_timestamp_mark(self.controller.player.current_position_value,
+                                   it)
+        
 
     def button_press_event_cb(self, textview, event):
         if event.state & gtk.gdk.CONTROL_MASK:
@@ -731,19 +746,13 @@ class TranscriptionEdit(AdhocView):
             elif event.keyval == gtk.keysyms.Return:
                 # Insert current timestamp mark
                 if p.status == p.PlayingStatus or p.status == p.PauseStatus:
-                    b=self.textview.get_buffer()
-                    it=b.get_iter_at_mark(b.get_insert())
-                    self.create_timestamp_mark(p.current_position_value,
-                                               it)
+                    self.insert_timestamp_mark()
                 return True
             elif event.keyval == gtk.keysyms.space:
                 # Pause and insert current timestamp mark
                 if p.status == p.PlayingStatus or p.status == p.PauseStatus:
                     c.update_status("pause")
-                    b=self.textview.get_buffer()
-                    it=b.get_iter_at_mark(b.get_insert())
-                    self.create_timestamp_mark(p.current_position_value,
-                                               it)
+                    self.insert_timestamp_mark()
                 return True
             elif event.keyval == gtk.keysyms.Page_Down:
                 self.goto_next_mark()
@@ -751,6 +760,12 @@ class TranscriptionEdit(AdhocView):
             elif event.keyval == gtk.keysyms.Page_Up:
                 self.goto_previous_mark()
                 return True
+        elif self.options['automatic-mark-insertion-delay']:
+            if event.time - self.last_keypress_time >= self.options['automatic-mark-insertion-delay']:
+                # Insert a mark
+                self.insert_timestamp_mark()
+            self.last_keypress_time = event.time
+            return False
 
         return False
 
