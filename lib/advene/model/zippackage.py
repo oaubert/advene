@@ -47,6 +47,7 @@
 
   """
 
+import advene.core.config as config
 import zipfile
 import os
 import sre
@@ -237,6 +238,33 @@ class ZipPackage:
                     self.list_to_manifest(manifest) )
 
         z.close()
+
+    def update_statistics(self, p):
+        # Generation of the statistics file
+        d=os.path.join( self._tempdir, 'META-INF')
+        if not os.path.isdir(d):
+            os.mkdir(d)
+        f=open(os.path.join(d, 'statistics.xml'), 'w')
+        f.write(self.generate_statistics(p))
+        f.close()
+        return True
+        
+    def generate_statistics(self, p):
+        out=u"""<?xml version="1.0" encoding="UTF-8"?>
+<statistics:statistics xmlns:statistics="urn:advene:names:tc:opendocument:xmlns:manifest:1.0">
+"""
+        out += """<statistics:title>%s</statistics:title>""" % p.title
+        out += """<statistics:description>%s</statistics:description>""" % p.getMetaData(config.data.namespace_prefix['dc'], 'description')
+        for n, l in ( ('schema', len(p.schemas)),
+                      ('annotation', len(p.annotations)),
+                      ('annotation_type', len(p.annotationTypes)),
+                      ('relation', len(p.relations)),
+                      ('relation_type', len(p.relationTypes)),
+                      ('query', len(p.queries)),
+                      ('view', len(p.views)) ):
+            out += """<statistics:item name="%s" value="%d" />""" % (n, l)
+        out += """</statistics:statistics>"""
+        return out
 
     def list_to_manifest(self, manifest):
         """Generate the XML representation of the manifest.
