@@ -435,7 +435,10 @@ class EditRelationPopup (EditElementPopup):
         hb = gtk.HButtonBox()
         hb.set_layout(gtk.BUTTONBOX_START)
         for a in self.element.members:
-            b = gtk.Button(self.controller.get_title(a))
+            b = gtk.Button()
+            b.add(self.controller.gui.get_illustrated_text(text=self.controller.get_title(a),
+                                                           position=a.fragment.begin,
+                                                           vertical=True))
             b.connect("button_press_event", button_press_handler, a)
             b.show()
             hb.add(b)
