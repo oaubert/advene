@@ -137,6 +137,10 @@ class AdveneController:
         self.future_ends = None
         self.last_position = -1
         
+        # List of (time, action) tuples, sorted along time
+        # When the player reaches 'time', execute the action.
+        self.time_bookmarks = []
+
         # GUI (optional)
         self.gui=None
         # Useful for debug in the evaluator window
@@ -657,9 +661,14 @@ class AdveneController:
         self.notify("AnnotationCreate", annotation=an, comment="Duplicate annotation")
         return an
 
-    def split_annotation(self, annotation, fraction):
-        """Split an annotation.
+    def split_annotation(self, annotation, position):
+        """Split an annotation at the given position
         """
+        if (position <= annotation.fragment.begin
+            or position >= annotation.fragment.end):
+            self.log(_("Cannot split the annotation: the given position is outside."))
+            return annotation
+
 	# Create the new one
         ident=self.package._idgenerator.get_id(Annotation)
         an = self.package.createAnnotation(type = annotation.type,
@@ -667,13 +676,11 @@ class AdveneController:
                                            fragment=annotation.fragment.clone())
 
 	# Shorten the first one.
-	end=annotation.fragment.end
-	duration=long(annotation.fragment.duration * fraction)
-	annotation.fragment.end = annotation.fragment.begin + duration
+	annotation.fragment.end = position
 	self.notify("AnnotationEditEnd", annotation=annotation, comment="Duplicate annotation")
 
 	# Shorten the second one
-	an.fragment.begin = annotation.fragment.end
+	an.fragment.begin = position
 
         self.package.annotations.append(an)
         an.author=config.data.userid
