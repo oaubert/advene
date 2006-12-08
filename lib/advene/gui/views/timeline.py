@@ -129,13 +129,6 @@ class TimeLine(AdhocView):
             self.options[option]=b.get_active()
             return True
 
-        # Highlight activated annotations
-        self.highlight_activated_toggle=gtk.CheckButton(_("Active"))
-        self.tooltips.set_tip(self.highlight_activated_toggle,
-                              _("Highlight active annotations"))
-        self.highlight_activated_toggle.set_active (self.options['highlight'])
-        self.highlight_activated_toggle.connect('toggled', handle_toggle, 'highlight')
-
         def handle_autoscroll_combo(combo):
             self.options['autoscroll'] = combo.get_current_element()
             return True
@@ -186,6 +179,7 @@ class TimeLine(AdhocView):
         self.layout.connect('key_press_event', self.layout_key_press_cb)
         self.layout.connect('button_press_event', self.layout_button_press_cb)
         self.layout.connect ('size_allocate', self.layout_resize_event)
+        self.layout.connect ('map', self.layout_resize_event)
         #self.layout.connect('expose_event', self.draw_background)
         self.layout.connect_after('expose_event', self.draw_relation_lines)
 
@@ -1581,7 +1575,7 @@ class TimeLine(AdhocView):
 
         vbox.add (self.get_packed_widget())
 
-        hbox = gtk.HButtonBox()
+        hbox = gtk.HBox()
         hbox.set_homogeneous (False)
         vbox.pack_start (hbox, expand=False)
 
@@ -1598,7 +1592,8 @@ class TimeLine(AdhocView):
             return True
 
         bbox=gtk.HBox()
-        hbox.add(bbox)
+        bbox.set_homogeneous (False)
+        hbox.pack_start(bbox, expand=False)
 
         b=gtk.Button(_("Displayed types"))
         self.tooltips.set_tip(b, _("Drag an annotation type here to remove it from display.\nClick to edit all displayed types"))
@@ -1626,8 +1621,6 @@ class TimeLine(AdhocView):
         s.set_digits(2)
         s.connect ("value_changed", self.fraction_event)
         hbox.add (s)
-
-        hbox.pack_start (self.highlight_activated_toggle, expand=False)
 
         b=gtk.Button(_("Center"))
         self.tooltips.set_tip(b, _("Center on current player position."))
@@ -1889,6 +1882,7 @@ class TimeLine(AdhocView):
         ew.set_name(_("Preferences"))
         ew.add_checkbox(_("Relation type"), "display-relation-type", _("Display relation types"))
         ew.add_checkbox(_("Relation content"), "display-relation-content", _("Display relation content"))
+        ew.add_checkbox(_("Highlight"), "highlight", _("Highlight active annotations"))
         res=ew.popup()
         if res:
             self.options.update(cache)
