@@ -80,17 +80,12 @@ class AdhocView(object):
             window.buttonbox = gtk.HButtonBox()
             vbox.pack_start(window.buttonbox, expand=False)
 
-        if self.controller and self.controller.gui:
-            self.controller.gui.register_view (self)
-            window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
-            self.controller.gui.init_window_size(window, self.view_id)
-
         # Insert contextual_actions in buttonbox
         try:
             for label, action in self.contextual_actions:
                 b=gtk.Button(label)
                 b.connect("clicked", action)
-                window.buttonbox.add(b)
+                window.buttonbox.pack_start(b, expand=False)
         except AttributeError:
             pass
 
@@ -100,8 +95,13 @@ class AdhocView(object):
             b.connect ("clicked", self.controller.gui.close_view_cb, window, self)
         else:
             b.connect ("clicked", lambda w: window.destroy())
-        window.buttonbox.add (b)
+        window.buttonbox.pack_start (b, expand=False)
 
         window.show_all()
+
+        if self.controller and self.controller.gui:
+            self.controller.gui.register_view (self)
+            window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
+            self.controller.gui.init_window_size(window, self.view_id)
 
         return window
