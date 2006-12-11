@@ -19,6 +19,7 @@ advene (0.21) unstable; urgency=low
       incoming) annotations.
     * typedRelatedOut and typedRelatedIn return a dictionary indexed by
       relation type id, which holds the list of related annotations.
+    * typedIncomingRelations/typedOutgoingRelations: return categorized relations
   
   * GUI:
 
@@ -116,7 +117,10 @@ advene (0.21) unstable; urgency=low
   
       * some basic type checking and conversion is done when transmuting
         annotations
-  
+
+       * Return on an annotation type will create a new annotation "on the
+        fly" (aligned with the current video time).
+
     * display parameters of the timeline (font-size, button height...) are
       customizable through the Preferences dialog
 
@@ -143,7 +147,8 @@ advene (0.21) unstable; urgency=low
 
   * Actions:
 
-    * new action: Entry (to allow entry of information through a popup)
+    * new actions: Entry (to allow entry of information through a popup),
+                   SetVolume, SetRate
 
     * new TALES root element: packages (to access all the loaded packages)
 
