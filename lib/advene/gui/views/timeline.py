@@ -1478,7 +1478,7 @@ class TimeLine(AdhocView):
             return True
     
         def keypress_handler(widget, event, at):
-            if event.keyval == gtk.keysyms.space:
+            if event.keyval == gtk.keysyms.Return:
                 # Create a new annotation
                 id_=self.controller.package._idgenerator.get_id(Annotation)
 
@@ -1494,8 +1494,6 @@ class TimeLine(AdhocView):
                 self.controller.notify('AnnotationCreate', annotation=el)
                 b=self.create_annotation_widget(el)
                 b.show()
-                # FIXME: problem: quick edit puts the entry widget in self.layout,
-                # but we should put it in the legend layout...
                 self.quick_edit(el, button=widget, callback=set_end_time)
             elif event.keyval == gtk.keysyms.e:
                 self.controller.gui.edit_element(at)
