@@ -68,6 +68,7 @@ class TimeLine(AdhocView):
             'autoscroll': 1,
             'delete_transmuted': False,
             'resize-by-dnd': False,
+            'display-relations': True,
             'display-relation-type': True,
             'display-relation-content': True,
             }
@@ -205,8 +206,6 @@ class TimeLine(AdhocView):
 
         # Default drag mode : create a relation
         self.drag_mode = "relation"
-        # Default mode for over-buttons events (boolean)
-        self.over_mode = True
 
         # Adjustment corresponding to the Virtual display
         # The page_size is the really displayed area
@@ -943,7 +942,7 @@ class TimeLine(AdhocView):
 
     def rel_activate(self, button):
         button.grab_focus()
-        if self.over_mode:
+        if self.options['display-relations']:
             a=button.annotation
             for r in button.annotation.relations:
                 # FIXME: handle more-than-binary relations
@@ -964,7 +963,7 @@ class TimeLine(AdhocView):
         if d and d[1] == button:
             # Hide the tooltip
             button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
-        if self.over_mode:
+        if self.options['display-relations']:
             self.relations_to_draw = []
             self.update_relation_lines()
         return True
@@ -1688,29 +1687,31 @@ class TimeLine(AdhocView):
 
         tb_list = (
             (_("Relations"), _("Create relations"),
-             gtk.STOCK_CONVERT, self.set_drag_mode, "relation"),
+             "create-relations.png", self.set_drag_mode, "relation"),
 
             (_("BeginBegin"), _("Set the same begin time as the selected annotation"),
-             gtk.STOCK_JUSTIFY_LEFT, self.set_drag_mode, "begin-begin"),
+             "begin-begin.png", self.set_drag_mode, "begin-begin"),
 
             (_("BeginEnd"), _("Align the begin time to the selected end time"),
-             gtk.STOCK_JUSTIFY_CENTER, self.set_drag_mode, "begin-end"),
+             "begin-end.png", self.set_drag_mode, "begin-end"),
 
 
             (_("EndEnd"), _("Align the end time to the selected end time"),
-             gtk.STOCK_JUSTIFY_RIGHT, self.set_drag_mode, "end-end"),
+             "end-end.png", self.set_drag_mode, "end-end"),
 
             (_("EndBegin"), _("Align the end time to the selected begin time"),
-             gtk.STOCK_JUSTIFY_CENTER, self.set_drag_mode, "end-begin"),
+             "end-begin.png", self.set_drag_mode, "end-begin"),
 
             (_("Align"), _("Align the boundaries"),
-             gtk.STOCK_JUSTIFY_FILL, self.set_drag_mode, "align"),
+             "align.png", self.set_drag_mode, "align"),
 
             )
 
-        for text, tooltip, icon, callback, arg in tb_list:
-            b=gtk.RadioToolButton(group=radiogroup_ref,
-                                  stock_id=icon)
+        for text, tooltip, pixmap, callback, arg in tb_list:
+            b=gtk.RadioToolButton(group=radiogroup_ref)
+            i=gtk.Image()
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
+            b.set_icon_widget(i)
             b.set_tooltip(self.tooltips, tooltip)
             b.connect("clicked", callback, arg)
             tb.insert(b, -1)
@@ -1718,37 +1719,18 @@ class TimeLine(AdhocView):
             if radiogroup_ref is None:
                 radiogroup_ref=b
 
-        def set_over_mode(button, value):
-            self.over_mode=value
-            return True
-
-        radiogroup_ref=None
-        tb_list = (
-            (_("Relations"), _("Display relations"),
-             gtk.STOCK_REDO, set_over_mode, True),
-            (_("No Display"), _("Do not display relations"),
-             gtk.STOCK_REMOVE, set_over_mode, False),
-            )
-
-        for text, tooltip, icon, callback, arg in tb_list:
-            b=gtk.RadioToolButton(group=radiogroup_ref,
-                                  stock_id=icon)
-            b.set_tooltip(self.tooltips, tooltip)
-            b.connect("clicked", callback, arg)
-            tb.insert(b, -1)
-
-            if radiogroup_ref is None:
-                radiogroup_ref=b
+        b=gtk.SeparatorToolItem()
+        tb.insert(b, -1)
 
         def handle_toggle(b, option):
             self.options[option]=b.get_active()
             return True
 
-        self.delete_transmuted_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_DELETE)
-        self.delete_transmuted_toggle.set_tooltip(self.tooltips, _("Delete the original transmuted annotation"))
-        self.delete_transmuted_toggle.set_active(self.options['delete_transmuted'])
-        self.delete_transmuted_toggle.connect('toggled', handle_toggle, 'delete_transmuted')
-        tb.insert(self.delete_transmuted_toggle, -1)
+        self.display_relations_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_REDO)
+        self.display_relations_toggle.set_tooltip(self.tooltips, _("Display relations"))
+        self.display_relations_toggle.set_active(self.options['display-relations'])
+        self.display_relations_toggle.connect('toggled', handle_toggle, 'display-relations')
+        tb.insert(self.display_relations_toggle, -1)
 
         def handle_tooltip_toggle(b):
             if b.get_active():
@@ -1762,6 +1744,15 @@ class TimeLine(AdhocView):
         self.display_tooltips_toggle.connect('toggled', handle_tooltip_toggle)
         self.display_tooltips_toggle.set_active(True)
         tb.insert(self.display_tooltips_toggle, -1)
+
+        b=gtk.SeparatorToolItem()
+        tb.insert(b, -1)
+
+        self.delete_transmuted_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_DELETE)
+        self.delete_transmuted_toggle.set_tooltip(self.tooltips, _("Delete the original transmuted annotation"))
+        self.delete_transmuted_toggle.set_active(self.options['delete_transmuted'])
+        self.delete_transmuted_toggle.connect('toggled', handle_toggle, 'delete_transmuted')
+        tb.insert(self.delete_transmuted_toggle, -1)
 
         for text, tooltip, icon, callback in ( 
             (_("Preferences"), _("Preferences"), 
