@@ -92,11 +92,37 @@
 		  </child>
 
 		  <child>
+		    <widget class="GtkSeparatorMenuItem" id="separator6">
+		      <property name="visible">True</property>
+		    </widget>
+		  </child>
+
+		  <child>
 		    <widget class="GtkMenuItem" id="select_a_video_file1">
 		      <property name="visible">True</property>
 		      <property name="label" translatable="yes">Select a video file</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_b_addfile_clicked" last_modification_time="Fri, 25 Nov 2005 13:27:35 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="select_a_dvd1">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Select a chapter from a DVD</property>
+		      <property name="label" translatable="yes">Select a DVD</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_b_selectdvd_clicked" last_modification_time="Mon, 11 Dec 2006 13:53:15 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="select_a_video_stream1">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Enter a video stream address</property>
+		      <property name="label" translatable="yes">Select a video stream</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_select_a_video_stream1_activate" last_modification_time="Mon, 11 Dec 2006 13:53:15 GMT"/>
 		    </widget>
 		  </child>
 
@@ -115,7 +141,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image39">
+			<widget class="GtkImage" id="image41">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -147,7 +173,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image40">
+			<widget class="GtkImage" id="image42">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -157,16 +183,6 @@
 			  <property name="ypad">0</property>
 			</widget>
 		      </child>
-		    </widget>
-		  </child>
-
-		  <child>
-		    <widget class="GtkMenuItem" id="import_transcription1">
-		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Take notes on the fly as an timestamped transcription</property>
-		      <property name="label" translatable="yes">Take notes on the _Fly</property>
-		      <property name="use_underline">True</property>
-		      <signal name="activate" handler="on_import_transcription1_activate" last_modification_time="Fri, 11 Feb 2005 15:42:43 GMT"/>
 		    </widget>
 		  </child>
 
@@ -307,6 +323,16 @@
 
 	      <child>
 		<widget class="GtkMenu" id="menuitem3_menu">
+
+		  <child>
+		    <widget class="GtkMenuItem" id="adhoc_transcribe">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Take notes on the fly as a timestamped transcription</property>
+		      <property name="label" translatable="yes">Take notes on the fly</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_adhoc_transcribe_activate" last_modification_time="Mon, 11 Dec 2006 13:54:08 GMT"/>
+		    </widget>
+		  </child>
 
 		  <child>
 		    <widget class="GtkMenuItem" id="view_annotations">

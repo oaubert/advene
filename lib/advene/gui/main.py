@@ -1894,6 +1894,13 @@ class AdveneGUI (Connect):
 
         return True
 
+    def on_select_a_video_stream1_activate(self, button=None, data=None):
+        stream=advene.gui.util.entry_dialog(title=_("Select a video stream"),
+                                            text=_("Enter the address of a video stream"))
+        if stream:
+            self.controller.set_default_media(stream)
+        return True
+    
     def on_b_exit_clicked (self, button=None, data=None):
         return self.on_exit (button, data)
 
