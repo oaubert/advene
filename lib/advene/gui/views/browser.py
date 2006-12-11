@@ -184,7 +184,7 @@ class Browser(AdhocView):
 
         # Update the rootcolumn element
         self.rootcolumn.update(element=package, name="here")
-        self.update_view('here', package)
+        self._update_view('here', package)
         # The clicked_callback must use the new package
         self.element = package
         return True
@@ -223,7 +223,7 @@ class Browser(AdhocView):
                                            icon=gtk.MESSAGE_WARNING)
             return
 
-        self.update_view(path, el)
+        self._update_view(path, el)
 
         if columnbrowser is None:
             # We selected  the rootcolumn. Delete the next ones
@@ -252,7 +252,7 @@ class Browser(AdhocView):
         adj.value = adj.upper - .1
         return True
 
-    def update_view(self, path, element):
+    def _update_view(self, path, element):
         self.pathlabel.set_text("/".join(path))
         self.typelabel.set_text(unicode(type(element)))
         try:
