@@ -490,23 +490,32 @@ def query(target, context):
 	    # of the query itself.
             self._context = context
 
+        def _get_query_by_id(self, key):
+            try:
+                l=self._target.rootPackage.queries
+            except AttributeError:
+                # We are querying an element that has no rootPackage
+                # (a list for instance). So fallback to the context
+                # package global.
+                l=self._context.globals['package'].queries
+            qlist=[ q for q in l if q.id == key ]
+            if qlist:
+                return qlist[0]
+            else:
+                return None
+
         def has_key (self, key):
-            qlist=[ q
-                    for q in self._target.rootPackage.queries
-                    if q.id == key ]
-            return qlist
+            return self._get_query_by_id(key)
 
         def __getitem__ (self, key):
             #print "getitem %s" % key
             def render ():
                 import advene.rules.elements
                 # Key is the query id
-                qlist=[ q
-                        for q in self._target.rootPackage.queries
-                        if q.id == key ]
-                if len(qlist) != 1:
+                q=self._get_query_by_id(key)
+                if not q:
                     raise KeyError(_("The query %s cannot be found") % key)
-                q=qlist[0]
+
                 if q.content.mimetype == 'application/x-advene-simplequery':
                     qexpr=advene.rules.elements.Query()
                     qexpr.from_dom(q.content.model)
