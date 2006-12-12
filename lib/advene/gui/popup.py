@@ -291,7 +291,7 @@ class Menu:
         if item is None or item == "":
             i = gtk.SeparatorMenuItem()
         else:
-            i = gtk.MenuItem(item)
+            i = gtk.MenuItem(item, use_underline=False)
         if action is not None:
             i.connect("activate", action, *param, **kw)
         menu.append(i)
@@ -400,7 +400,7 @@ class Menu:
                 # The submenu was already populated.
                 return False
             for i in items:
-                item=gtk.MenuItem(self.get_title(i))
+                item=gtk.MenuItem(self.get_title(i), use_underline=False)
                 m=Menu(element=i, controller=self.controller)
                 item.set_submenu(m.menu)
                 submenu.append(item)
@@ -408,20 +408,20 @@ class Menu:
             return False
 
         if element.incomingRelations:
-            i=gtk.MenuItem(_("Incoming relations"))
+            i=gtk.MenuItem(_("Incoming relations"), use_underline=False)
             submenu=gtk.Menu()
             i.set_submenu(submenu)
             submenu.connect("map", build_submenu, element, element.incomingRelations)
             menu.append(i)
 
         if element.outgoingRelations:
-            i=gtk.MenuItem(_("Outgoing relations"))
+            i=gtk.MenuItem(_("Outgoing relations"), use_underline=False)
             submenu=gtk.Menu()
             i.set_submenu(submenu)
             submenu.connect("map", build_submenu, element, element.outgoingRelations)
             menu.append(i)
 
-        item = gtk.MenuItem(_("Highlight"))
+        item = gtk.MenuItem(_("Highlight"), use_underline=False)
         item.set_submenu(self.activate_submenu(element))
         menu.append(item)
 
@@ -446,7 +446,7 @@ class Menu:
         add_item(element.content.data)
         add_item(_("Members:"))
         for a in element.members:
-            item=gtk.MenuItem(self.get_title(a))
+            item=gtk.MenuItem(self.get_title(a), use_underline=False)
             m=Menu(element=a, controller=self.controller)
             item.set_submenu(m.menu)
             menu.append(item)
