@@ -176,7 +176,7 @@ class TimeLine(AdhocView):
         self.layout_size=(None, None)
 
         self.layout = gtk.Layout ()
-	self.layout.add_events(gtk.gdk.BUTTON_PRESS_MASK)
+	#self.layout.add_events(gtk.gdk.BUTTON_PRESS_MASK)
 	#to catch mouse clics on win32
         #self.layout.bin_window.get_colormap().alloc_color(self.colors['relations'])
         self.layout.connect('scroll_event', self.layout_scroll_cb)
