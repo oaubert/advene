@@ -23,6 +23,7 @@ import StringIO
 import inspect
 import md5
 import sre
+import zipfile
 
 try:
     import Image
@@ -38,8 +39,10 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
+import advene.model.zippackage
 
 from advene.model.tal.context import AdveneContext, AdveneTalesException
+from advene.model.exception import AdveneException
 
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
@@ -387,6 +390,73 @@ def import_element(package, element, controller):
         controller.notify("QueryCreate", query=q)
     else:
         print "Import element of class %s not supported yet." % element.viewableClass
+
+def get_statistics(fname):
+    """Return formatted statistics about the package.
+    """
+    st=None
+    if fname.lower().endswith('.azp'):
+        # If the file is a .azp, then it may have a
+        # META-INF/statistics.xml file. Use it.
+        try:
+            z=zipfile.ZipFile(fname, 'r')
+        except Exception, e:
+            raise AdveneException(_("Cannot read %s: %s") % (fname, unicode(e)))
+
+        # Check the validity of mimetype
+        try:
+            typ = z.read('mimetype')
+        except KeyError:
+            raise AdveneException(_("File %s is not an Advene zip package.") % fname)
+        if typ != advene.model.zippackage.MIMETYPE:
+            raise AdveneException(_("File %s is not an Advene zip package.") % fname)
+
+        try:
+            st=z.read('META-INF/statistics.xml')
+        except KeyError:
+            st=None
+
+        try:
+            z.close()
+        except:
+            pass
+
+    if not st:
+        # If we are here, it is that we could not get the statistics.xml.
+        # Generate it (it can take some time)
+        try:
+            p=Package(uri=fname)
+        except Exception, e:
+            raise(_("Error:\n%s") % unicode(e))
+        st=p.generate_statistics()
+        p.close()
+
+    # We have the statistics in XML format. Render it.
+    s=StringIO.StringIO(st)
+    h=advene.model.package.StatisticsHandler()
+    data=h.parse_file(s)
+    s.close()
+
+    m=_("""Package %s:
+%s
+%s in %s
+%s in %s
+%s
+%s
+
+Description:
+%s
+""") % (data['title'],
+        format_element_name('schema', data['schema']),
+        format_element_name('annotation', data['annotation']),
+        format_element_name('annotation_type', data['annotation_type']),
+        format_element_name('relation', data['relation']),
+        format_element_name('relation_type', data['relation_type']),
+        format_element_name('query', data['query']),
+        format_element_name('view', data['view']),
+        data['description'])
+    return m
+
 
 def unimport_element(package, element, controller):
     p=package
