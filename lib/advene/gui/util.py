@@ -23,10 +23,11 @@ import gtk
 import gobject
 import sre
 import os
+import StringIO
 
 import advene.core.config as config
 import advene.util.helper as helper
-import advene.model.package
+from advene.model.exception import AdveneException
 
 def png_to_pixbuf (png_data, width=None, height=None):
     """Load PNG data into a pixbuf
@@ -311,38 +312,16 @@ def get_filename(title=_("Open a file"),
                 alias_entry.set_text('')
             chooser.set_preview_widget_active(False)
         return True
-
+        
     def do_preview(button):
         if hasattr(button, '_filename') and button._filename:
             button.set_label(_("Wait..."))
             try:
-                p=advene.model.package.Package(uri=button._filename)
-            except Exception, e:
-                m=_("Error:\n%s") % str(e)
-            else:
-                m=_("""Package %s:
-%s
-%s in %s
-%s in %s
-%s
-%s
-
-Description:
-%s
-""") % (p.title,
-        helper.format_element_name('schema', len(p.schemas)),
-        helper.format_element_name('annotation', len(p.annotations)),
-        helper.format_element_name('annotation_type', len(p.annotationTypes)),
-        helper.format_element_name('relation', len(p.relations)),
-        helper.format_element_name('relation_type', len(p.relationTypes)),
-        helper.format_element_name('query', len(p.queries)),
-        helper.format_element_name('view', len(p.views)),
-        p.getMetaData(config.data.namespace_prefix['dc'],
-                      'description'))
-
-            button.set_label(m)
+                st=helper.get_statistics(button._filename)
+            except AdveneException, e:
+                st=_("Error: %s") % unicode(e)
+            button.set_label(st)
             button._filename=None
-            p.close()
         return True
 
     preview.connect("clicked", do_preview)
