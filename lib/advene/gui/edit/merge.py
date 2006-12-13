@@ -95,11 +95,22 @@ class TreeViewMerger:
             
             tv=gtk.TextView()
             f=pango.FontDescription("courier 12")
-
             tv.modify_font(f)
+            
+            b=tv.get_buffer()
+
+            
+            minustag=b.create_tag("minus", background="lightsalmon")
+            plustag=b.create_tag("plus", background="palegreen1")
+
             for l in diff.compare(s.content.data.splitlines(1),
                                   d.content.data.splitlines(1)):
-                tv.get_buffer().insert_at_cursor(l)
+                if l.startswith('-'):
+                    b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), l, minustag)
+                elif l.startswith('+'):
+                    b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), l, plustag)
+                else:
+                    b.insert_at_cursor(l)
             sw.add_with_viewport(tv)
 
             hb=gtk.HButtonBox()
