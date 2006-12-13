@@ -47,7 +47,6 @@
 
   """
 
-import advene.core.config as config
 import zipfile
 import os
 import sre
@@ -61,12 +60,11 @@ import warnings
 import xml.sax
 
 from gettext import gettext as _
-    
-class ZipPackage:
-    # Some constants
-    MIMETYPE='application/x-advene-zip-package'
-    MANIFEST_NAMESPACE='urn:oasis:names:tc:opendocument:xmlns:manifest:1.0'
 
+# Some constants
+MIMETYPE='application/x-advene-zip-package'
+
+class ZipPackage:
     # Global method for cleaning up
     tempdir_list = []
     
@@ -140,7 +138,7 @@ class ZipPackage:
         os.mkdir(self._tempdir)
         self.tempdir_list.append(self._tempdir)
 
-        open(os.path.join(self._tempdir, 'mimetype'), 'w').write(self.MIMETYPE)
+        open(os.path.join(self._tempdir, 'mimetype'), 'w').write(MIMETYPE)
 
         os.mkdir(os.path.join(self._tempdir, 'resources'))
 
@@ -160,7 +158,7 @@ class ZipPackage:
             typ = z.read('mimetype')
         except KeyError:
             raise AdveneException(_("File %s is not an Advene zip package.") % self.file_)
-        if typ != self.MIMETYPE:
+        if typ != MIMETYPE:
             raise AdveneException(_("File %s is not an Advene zip package.") % self.file_)
 
         # The file is an advene zip package. We can extract its contents
@@ -240,32 +238,16 @@ class ZipPackage:
         z.close()
 
     def update_statistics(self, p):
-        # Generation of the statistics file
+        """Update the META-INF/statistics.xml file
+        """
         d=os.path.join( self._tempdir, 'META-INF')
         if not os.path.isdir(d):
             os.mkdir(d)
         f=open(os.path.join(d, 'statistics.xml'), 'w')
-        f.write(self.generate_statistics(p))
+        f.write(p.generate_statistics())
         f.close()
         return True
         
-    def generate_statistics(self, p):
-        out=u"""<?xml version="1.0" encoding="UTF-8"?>
-<statistics:statistics xmlns:statistics="urn:advene:names:tc:opendocument:xmlns:manifest:1.0">
-"""
-        out += """<statistics:title>%s</statistics:title>""" % p.title
-        out += """<statistics:description>%s</statistics:description>""" % p.getMetaData(config.data.namespace_prefix['dc'], 'description')
-        for n, l in ( ('schema', len(p.schemas)),
-                      ('annotation', len(p.annotations)),
-                      ('annotation_type', len(p.annotationTypes)),
-                      ('relation', len(p.relations)),
-                      ('relation_type', len(p.relationTypes)),
-                      ('query', len(p.queries)),
-                      ('view', len(p.views)) ):
-            out += """<statistics:item name="%s" value="%d" />""" % (n, l)
-        out += """</statistics:statistics>"""
-        return out
-
     def list_to_manifest(self, manifest):
         """Generate the XML representation of the manifest.
 	
@@ -279,7 +261,7 @@ class ZipPackage:
         out=u"""<?xml version="1.0" encoding="UTF-8"?>
 <manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0">
 """
-        out += u"""<manifest:file-entry manifest:media-type="%s" manifest:full-path="/"/>\n""" % self.MIMETYPE
+        out += u"""<manifest:file-entry manifest:media-type="%s" manifest:full-path="/"/>\n""" % MIMETYPE
 
         for f in manifest:
             if f == 'mimetype' or f == 'META-INF/manifest.xml':
