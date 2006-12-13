@@ -22,6 +22,7 @@ import sys
 import gtk
 import gobject
 import difflib
+import pango
 
 from gettext import gettext as _
 
@@ -91,17 +92,26 @@ class TreeViewMerger:
             sw = gtk.ScrolledWindow()
             sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
             v.add(sw)
-
             
             tv=gtk.TextView()
+            f=pango.FontDescription("courier 12")
+
+            tv.modify_font(f)
             for l in diff.compare(s.content.data.splitlines(1),
                                   d.content.data.splitlines(1)):
                 tv.get_buffer().insert_at_cursor(l)
-                #tv.get_buffer().insert_at_cursor("\n")
             sw.add_with_viewport(tv)
 
+            hb=gtk.HButtonBox()
+            b=gtk.Button(stock=gtk.STOCK_CLOSE)
+            b.connect('clicked', lambda b: w.destroy())
+            hb.add(b)
+            
+            v.pack_start(hb, expand=False)
             w.add(v)
+
             w.show_all()
+            w.resize(800, 600)
             return True
 
         def build_popup_menu(l):
