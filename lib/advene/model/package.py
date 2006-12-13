@@ -24,11 +24,13 @@ import urllib
 import sre
 
 import xml.dom.ext.reader.PyExpat
+import xml.sax
 
 import util.uri
 
 from util.auto_properties import auto_properties
 
+import advene.core.config as config
 import _impl
 import advene.model.annotation as annotation
 import advene.model.modeled as modeled
@@ -283,6 +285,25 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                     return el
         return None
 
+    def generate_statistics(self):
+        """Generate the statistics.xml file.
+        """
+        out=u"""<?xml version="1.0" encoding="UTF-8"?>
+    <statistics:statistics xmlns:statistics="urn:advene:names:tc:opendocument:xmlns:manifest:1.0">
+    """
+        out += """<statistics:title value="%s" />""" % urllib.quote(self.title)
+        out += """<statistics:description value="%s" />""" % urllib.quote(self.getMetaData(config.data.namespace_prefix['dc'], 'description'))
+        for n, l in ( ('schema', len(self.schemas)),
+                      ('annotation', len(self.annotations)),
+                      ('annotation_type', len(self.annotationTypes)),
+                      ('relation', len(self.relations)),
+                      ('relation_type', len(self.relationTypes)),
+                      ('query', len(self.queries)),
+                      ('view', len(self.views)) ):
+            out += """<statistics:item name="%s" value="%d" />""" % (n, l)
+        out += """</statistics:statistics>"""
+        return out
+    
     def serialize(self, stream=sys.stdout):
         """Serialize the Package on the specified stream"""
         xml.dom.ext.PrettyPrint(self._getModel(), stream)
@@ -447,3 +468,26 @@ class Import(modeled.Modeled, _impl.Ased):
         populating bundle.
         """
         return self.getAs()
+
+class StatisticsHandler(xml.sax.handler.ContentHandler):
+    """Parse a statistics.xml file.
+    """
+    def __init__(self):
+        # Data will contain parsed elements:
+        # title, description, view, schema...
+        self.data={}
+ 
+    def startElement(self, name, attributes):
+        if name == "statistics:title":
+            self.data['title']=urllib.unquote(attributes['value'])
+        elif name == 'statistics:description':
+            self.data['description']=urllib.unquote(attributes['value'])
+        elif name == 'statistics:item':
+            self.data[attributes['name']]=int(attributes['value'])
+    
+    def parse_file(self, name):
+        p=xml.sax.make_parser()
+        p.setFeature(xml.sax.handler.feature_namespaces, False)
+        p.setContentHandler(self)
+        p.parse(name)
+        return self.data
