@@ -1742,7 +1742,11 @@ class TimeLine(AdhocView):
                 self.tooltips.disable()
             return True
 
-        self.display_tooltips_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_INFO)
+        try:
+            sid=gtk.STOCK_INFO
+        except:
+            sid=gtk.STOCK_HELP
+        self.display_tooltips_toggle=gtk.ToggleToolButton(stock_id=sid)
         self.display_tooltips_toggle.set_tooltip(self.tooltips, _("Display tooltips"))
         self.display_tooltips_toggle.connect('toggled', handle_tooltip_toggle)
         self.display_tooltips_toggle.set_active(True)
