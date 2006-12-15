@@ -102,7 +102,7 @@ class ZoneContentHandler (ContentHandler):
         self.view = ShapeDrawer(callback=self.callback, background=i)
 
         if self.element.data:
-            d=global_methods.parsed( self.element, None )
+            d=self.element.parsed()
             if isinstance(d, dict):
                 try:
                     x = int(float(d['x']) * self.view.canvaswidth / 100)

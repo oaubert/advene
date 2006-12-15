@@ -149,6 +149,79 @@ class Content(modeled.Modeled,
         """
         return ContentPlugin.find_plugin (self)
 
+    def parsed (self):
+        """Parse the content.
+
+        This method parses the data of the content according to its
+        mime-type. The most common parser is an structured text
+        parser, but there is also a basic XML parser.
+
+        a.content.parsed.key1
+
+        Simple structured data
+        ======================
+
+        This is a simple-minded format for structured information (waiting
+        for a better solution based on XML):
+
+        The structure of the data consists in 1 line per information:
+
+        key1=value1
+        key2=value2
+
+        The values are on 1 line only. URL-style escape conventions are
+        used (mostly to represent the linefeed as %0a).
+
+        It returns a dict with key/values.
+
+        XML data
+        ========
+
+        It returns a Node object whose attributes are the different
+        attributes and children of the node.
+
+        @return: a data structure
+        """
+        # FIXME: the right way to implement this would be to subclass the Content
+        # into SimpleStructuredContent, XMLContent...
+        # but this would require changes all over the place. Use this for the moment.
+        if self.mimetype is None or self.mimetype == 'text/plain':
+            # If nothing is specified, assume text/plain and return the content data
+            return self.data
+
+        if (self.mimetype in ( 'application/x-advene-structured',
+                               'text/x-advene-structured',
+                               'application/x-advene-zone' ) ):
+            import urllib
+
+            d={}
+            d['_all']=self.data
+            for l in self.data.splitlines():
+                if len(l) == 0:
+                    # Ignore empty lines
+                    continue
+                if '=' in l:
+                    (k, v) = l.split('=', 1)
+                    d[k] = urllib.unquote(v)
+                else:
+                    d['_error']=l
+                    print "Syntax error in content: >%s<" % l
+            return d
+        #FIXME: we parse x-advene-ruleset as xml for the moment
+        elif self.mimetype in ('text/xml',
+                               'application/x-advene-ruleset',
+                               'application/x-advene-simplequery'):
+            import advene.util.handyxml
+            h=advene.util.handyxml.xml(self.stream)
+            # FIXME: use a cache of DOM trees in order to avoid to
+            # repeatdly parse the same data in the case of repetitive
+            # access to the same element.
+            # FIXME: use ElementTree.iterparse
+
+            return h
+
+        # Last fallback:
+        return self.data
 
 class WithContent(object):
     """An implementation for the 'content' property and related properties.
