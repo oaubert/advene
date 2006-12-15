@@ -1481,14 +1481,15 @@ class AdveneGUI (Connect):
                                                      action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                                      button=gtk.STOCK_OPEN,
                                                      default_dir=d,
-                                                     alias=True)
+                                                     alias=True,
+                                                     filter='advene')
         if filename:
             name, ext = os.path.splitext(filename.lower())
             if ext in config.data.video_extensions:
                 self.log(_("A video file was selected. Pretend that the user selected 'Select a video file'..."))
                 self.controller.set_default_media(filename)
                 return True
-            if not ext in ('.xml', '.azp'):
+            if not ext in ('.xml', '.azp', '.apl'):
                 # Does not look like a valid package
                 if not advene.gui.util.message_dialog(
                     _("The file %s does not look like a valid Advene package. It should have a .azp or .xml extension. Try to open anyway?") % filename,
@@ -1523,7 +1524,8 @@ class AdveneGUI (Connect):
         filename=advene.gui.util.get_filename(title=_("Save the package %s") % self.controller.get_title(package),
                                               action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                               button=gtk.STOCK_SAVE,
-                                              default_dir=d)
+                                              default_dir=d,
+                                              filter='advene')
         if filename:
             (p, ext) = os.path.splitext(filename)
             if ext == '':
@@ -1577,7 +1579,8 @@ class AdveneGUI (Connect):
         filename=advene.gui.util.get_filename(title=_("Choose the file to import"),
                                               action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                               button=gtk.STOCK_OPEN,
-                                              default_dir=d)
+                                              default_dir=d,
+                                              filter='advene')
         if not filename:
             return True
         filename_utf=unicode(filename, 'iso-8859-1').encode('utf-8')
@@ -1845,7 +1848,8 @@ class AdveneGUI (Connect):
         filename=advene.gui.util.get_filename(title=_("Select a movie file"),
                                               action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                               button=gtk.STOCK_OPEN,
-                                              default_dir=d)
+                                              default_dir=d,
+                                              filter='video')
         if filename:
             self.controller.set_default_media(filename)
         return True
@@ -2169,7 +2173,8 @@ Available views: timeline, tree, browser, transcribe"""))
         filename=advene.gui.util.get_filename(title=_("Select the package to merge"),
                                               action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                               button=gtk.STOCK_OPEN,
-                                              default_dir=d)
+                                              default_dir=d,
+                                              filter='advene')
         if not filename:
             return True
         try:
