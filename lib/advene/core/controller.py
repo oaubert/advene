@@ -367,7 +367,8 @@ class AdveneController:
             pid=l.rstrip().split()[-1]
             processes.append(pid)
         f.close()
-        self.log(_("Cannot start the webserver\nThe following processes seem to use the %s port: %s") % (pat, processes))
+        self.log(_("Cannot start the webserver\nThe following processes seem to use the %(port)s port: %(processes)s") % { 'port': pat,
+                                                                                                                           'processes':  processes})
 
     def init(self, args=None):
         if args is None:
@@ -405,20 +406,23 @@ class AdveneController:
 		alias = sre.sub('[^a-zA-Z0-9_]', '_', alias)
                 try:
                     self.load_package (uri=uri, alias=alias)
-                    self.log(_("Loaded %s as %s") % (uri, alias))
+                    self.log(_("Loaded %(uri)s as %(alias)s") % {'uri': uri, 'alias': alias})
                 except Exception, e:
-                    self.log(_("Cannot load package from file %s: %s") % (uri,
-                                                                          unicode(e)))
+                    self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
+                            'uri': uri,
+                            'error': unicode(e)})
 	    else:
 		name, ext = os.path.splitext(uri)
-		if ext.lower() in ('.xml', '.azp'):
+		if ext.lower() in ('.xml', '.azp', '.apl'):
 		    alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
 		    try:
 			self.load_package (uri=uri, alias=alias)
-			self.log(_("Loaded %s as %s") % (uri, alias))
+			self.log(_("Loaded %(uri)s as %(alias)s") % {
+                                'uri': uri, 'alias':  alias})
 		    except Exception, e:
-			self.log(_("Cannot load package from file %s: %s") % (uri,
-									      unicode(e)))
+			self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
+                                'uri': uri,
+                                'error': unicode(e)})
 		else:
 		    # Try to load the file as a video file
 		    if ('dvd' in name 
@@ -754,9 +758,9 @@ class AdveneController:
                 self.package = Package (uri="new_pkg",
                                         source=config.data.advenefile(config.data.templatefilename))
             except (IOError, OSError), e:
-                self.log(_("Cannot find the template package %s: %s") 
-			 % (config.data.advenefile(config.data.templatefilename),
-			    unicode(e)))
+                self.log(_("Cannot find the template package %(filename)s: %(error)s") 
+			 % {'filename': config.data.advenefile(config.data.templatefilename),
+                            'error': unicode(e)})
                 alias='new_pkg'
                 self.package = Package (alias, source=None)
             self.package.author = config.data.userid
@@ -1201,7 +1205,7 @@ class AdveneController:
         @type position: Position
         """
         position_before=self.player.current_position_value
-        #print "update status: %s" % status
+        #print "update status:", status, position
         if status == 'set' or status == 'start' or status == 'stop':
             self.reset_annotation_lists()
             # It was defined in a rule, but this prevented the snapshot
