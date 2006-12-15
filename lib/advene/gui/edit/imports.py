@@ -360,7 +360,8 @@ class Importer:
                                                      action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                                      button=gtk.STOCK_OPEN,
                                                      default_dir=d,
-                                                     alias=True)
+                                                     alias=True,
+                                                     filter='advene')
         if not filename:
             return True
 
