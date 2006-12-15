@@ -684,7 +684,7 @@ class AdveneGUI (Connect):
 
         # Information message
         l=gtk.Label(textwrap.fill(_("You can drag and drop view icons (timeline, treeview, transcription...) in this notebook to embed various views."), 50))
-        self.popupwidget.display(l, timeout=5000, title=_("Information"))
+        self.popupwidget.display(l, timeout=10000, title=_("Information"))
 
         return vis
 
