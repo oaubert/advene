@@ -161,7 +161,7 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO):
     dialog = gtk.MessageDialog(
         None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
         icon, button, label)
-    dialog.set_position(gtk.WIN_POS_MOUSE)
+    dialog.set_position(gtk.WIN_POS_CENTER_ALWAYS)
     dialog.connect("key_press_event", dialog_keypressed_cb)
 
     res=dialog.run()
@@ -179,7 +179,7 @@ def yes_no_cancel_popup(title=None,
     """
     d = gtk.Dialog(title=title,
                    parent=None,
-                   flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                   flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                    buttons=( gtk.STOCK_YES, gtk.RESPONSE_YES,
                              gtk.STOCK_NO, gtk.RESPONSE_NO,
                              gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
