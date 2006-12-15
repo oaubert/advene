@@ -1553,6 +1553,28 @@ class AdveneGUI (Connect):
             self.controller.save_package(name=filename, alias=alias)
         return True
 
+    def on_save_session1_activate (self, button=None, data=None):
+        """Save the current session.
+        """
+        if config.data.path['data']:
+            d=config.data.path['data']
+        else:
+            d=None
+        filename=advene.gui.util.get_filename(title=_("Save the session in..."),
+                                              action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                              button=gtk.STOCK_SAVE,
+                                              default_dir=d,
+                                              filter='session')
+        if filename:
+            (p, ext) = os.path.splitext(filename)
+            if ext == '':
+                # Add a pertinent extension
+                filename = filename + '.apl'
+            self.controller.save_session(filename)
+            self.log(_("Session saved in %s") % filename)
+        return True
+
+
     def on_import_dvd_chapters1_activate (self, button=None, data=None):
         # FIXME: loosy test
         if (self.controller.get_default_media() is None
