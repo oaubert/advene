@@ -35,6 +35,7 @@ import webbrowser
 import urllib
 import StringIO
 import gobject
+import xml.sax
 
 import advene.core.config as config
 
@@ -137,10 +138,6 @@ class AdveneController:
         self.future_ends = None
         self.last_position = -1
         
-        # List of (time, action) tuples, sorted along time
-        # When the player reaches 'time', execute the action.
-        self.time_bookmarks = []
-
         # GUI (optional)
         self.gui=None
         # Useful for debug in the evaluator window
@@ -204,7 +201,7 @@ class AdveneController:
                                doc="Cached duration for the current package")
 
     def self_loop(self):
-	"""Autonomous gobject loop for controller.
+	"""Autonomous gobject loop for GUI-less controller.
 	"""
 	self.mainloop = gobject.MainLoop()
         if config.data.webserver['mode'] == 1:
@@ -703,7 +700,7 @@ class AdveneController:
     def get_timestamp(self):
 	return time.strftime("%Y-%m-%d")
 
-    def load_package (self, uri=None, alias=None):
+    def load_package (self, uri=None, alias=None, activate=True):
         """Load a package.
 
         This method is esp. used as a callback for webserver. If called
@@ -727,6 +724,20 @@ class AdveneController:
                 self.package = Package (alias, source=None)
             self.package.author = config.data.userid
 	    self.package.date = self.get_timestamp()
+        elif uri.lower().endswith('.apl'):
+            # Advene package list. Parse it and call 'load_package' for each package
+            package_list=PackageListHandler().parse_file(uri)
+            default_alias=None
+            for u, a, d in package_list:
+                self.load_package(u, a, activate=False)
+                if d:
+                    default_alias=a
+            if not default_alias:
+                # If no default package was specified, use the last one
+                default_alias=a
+            if activate:
+                self.activate_package(default_alias)
+            return
         else:
             self.package = Package (uri=uri)
 
@@ -753,7 +764,8 @@ class AdveneController:
 
         self.register_package(alias, self.package)
         self.notify ("PackageLoad")
-        self.activate_package(alias)
+        if activate:
+            self.activate_package(alias)
 
     def remove_package(self, package=None):
         if package is None:
@@ -841,6 +853,31 @@ class AdveneController:
         # and
         # recreate a template package
         pass
+
+    def save_session(self, name=None):
+        """Save a session as a package list.
+
+        Note: this does *not* save individual packages, only their
+        list.
+        """
+        f=open(name, 'w')
+        f.write(u"""<?xml version="1.0" encoding="UTF-8"?>
+    <advene:package-list xmlns:advene="http://liris.cnrs.fr/advene/1.0">
+    """)
+        for a, p in self.packages.iteritems():
+            if a == 'advene' or a == 'new_pkg':
+                # Do not write the default or template package
+                continue
+            if a == self.current_alias:
+                default=u"""default=''"""
+            else:
+                default=u""
+            f.write(u"""<advene:package uri="%s" alias="%s" %s />
+""" % (p.uri, a, default))
+        f.write(u"""</advene:package-list>
+""")
+        f.close()
+        return True
 
     def save_package (self, name=None, alias=None):
         """Save the package (current or specified)
@@ -1126,8 +1163,8 @@ class AdveneController:
         @type position: Position
         """
         position_before=self.player.current_position_value
-        #print "update status: %s" % status
-        if status == 'set' or status == 'start':
+        #print "update status:", status, position
+        if status == 'set' or status == 'start' or status == 'stop':
             self.reset_annotation_lists()
             # It was defined in a rule, but this prevented the snapshot
             # to be taken *before* moving
@@ -1256,6 +1293,26 @@ class AdveneController:
         i.process_file(self.event_handler.event_history)
         self.notify("PackageActivate", package=self.package)
         return True
+
+class PackageListHandler(xml.sax.handler.ContentHandler):
+    """Parse an advene package list (.apl) file.
+    """
+    def __init__(self):
+        # self.data will contain (uri, alias, default) tuples
+        self.data=[]
+ 
+    def startElement(self, name, attributes):
+        if name == "advene:package":
+            # Auto-generate the alias if needed ?
+            default=attributes.has_key('default')
+            self.data.append ( (attributes['uri'], attributes['alias'], default) )
+    
+    def parse_file(self, name):
+        p=xml.sax.make_parser()
+        p.setFeature(xml.sax.handler.feature_namespaces, False)
+        p.setContentHandler(self)
+        p.parse(name)
+        return self.data
 
 if __name__ == '__main__':
     c = AdveneController()
