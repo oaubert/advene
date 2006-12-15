@@ -374,7 +374,7 @@ class AdveneController:
                                                                           unicode(e)))
 	    else:
 		name, ext = os.path.splitext(uri)
-		if ext.lower() in ('.xml', '.azp'):
+		if ext.lower() in ('.xml', '.azp', '.apl'):
 		    alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
 		    try:
 			self.load_package (uri=uri, alias=alias)
