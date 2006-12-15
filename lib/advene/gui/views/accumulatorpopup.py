@@ -83,7 +83,7 @@ class AccumulatorPopup(AdhocView):
             # Remove the last one
             self.undisplay(self.widgets[0][0])
         if timeout is not None and timeout != 0:
-            hidetime=time.time() + (long(timeout) / 1000.0)
+            hidetime=time.time() * 1000 + long(timeout)
         else:
             hidetime=None
 
@@ -106,6 +106,9 @@ class AccumulatorPopup(AdhocView):
         for t in self.widgets:
             self.set_color(t[2].get_label_widget(), self.old_color)
         self.widgets.append( (widget, hidetime, f) )
+        if hidetime:
+            self.controller.register_usertime_action( hidetime,
+                                                      lambda c, time: self.undisplay(widget))
         self.widgets.sort(lambda a,b: cmp(a[1],b[1]))
         self.lock.release()
         self.contentbox.pack_start(f, expand=False, padding=2)
