@@ -220,7 +220,9 @@ class SequenceEditor(AdhocView):
                     pop = advene.gui.edit.elements.get_edit_popup (node,
                                                                    controller=self.controller)
                 except TypeError, e:
-                    print _("Error: unable to find an edit popup for %s:\n%s") % (node, str(e))
+                    print _("Error: unable to find an edit popup for %(element)s:\n%(error)s") % { 
+                        'element': node,
+                        'error': str(e) }
                 else:
                     pop.edit ()
                 return True

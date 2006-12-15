@@ -540,9 +540,10 @@ class TimeLine(AdhocView):
                            self.button_height)
 
         self.layout.move(b, u2p(a.fragment.begin), self.layer_position[a.type])
-        tip = _("%s\nBegin: %s\tEnd: %s") % (title,
-                                            helper.format_time(a.fragment.begin),
-                                            helper.format_time(a.fragment.end))
+        tip = _("%(title)s\nBegin: %(begin)s\tEnd: %(end)s") % {
+            'title': title,
+            'begin': helper.format_time(a.fragment.begin),
+            'end': helper.format_time(a.fragment.end) }
         self.tooltips.set_tip(b, tip)
         return True
 
@@ -801,9 +802,8 @@ class TimeLine(AdhocView):
             return True
 
         rt=advene.gui.util.list_selector(title=_("Create a relation"),
-                                         text=_("Choose the type of relation\n you want to set between\n%s\nand\n%s") % (
-            self.controller.get_title(source),
-            self.controller.get_title(dest)),
+                                         text=_("Choose the type of relation\n you want to set between\n%(source)s\nand\n%(destination)s") % { 'source': self.controller.get_title(source),
+                                                                                                                                               'destination': self.controller.get_title(dest)},
                                          members=[ (r, self.controller.get_title(r)) for r in relationtypes],
                                          controller=self.controller)
         if rt is not None:

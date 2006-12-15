@@ -472,8 +472,9 @@ class TranscriptionView(AdhocView):
         try:
             f=open(filename, "w")
         except Exception, e:
-            self.controller.log(_("Cannot write to %s: %s:") %
-                                  (filename, unicode(e)))
+            self.controller.log(_("Cannot write to %(filename)s: %(error)s:") %
+                                  {'filename': filename, 
+                                   'error': unicode(e)})
             return True
         f.write(out)
         f.close()

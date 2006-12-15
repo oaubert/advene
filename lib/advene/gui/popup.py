@@ -175,7 +175,9 @@ class Menu:
             pop = advene.gui.edit.elements.get_edit_popup (el, self.controller, 
                                                            editable=not self.readonly)
         except TypeError, e:
-            print _("Error: unable to find an edit popup for %s:\n%s") % (el, unicode(e))
+            print _("Error: unable to find an edit popup for %(element)s:\n%(error)s") % {
+                'element': el,
+                'error': unicode(e)}
         else:
             pop.edit ()
         return True
@@ -240,7 +242,8 @@ class Menu:
                    if el in r.members ]
             if rels:
                 advene.gui.util.message_dialog(
-                    _("Cannot delete the annotation %s:\nThe following relation(s) use it:\n%s") % (helper.get_title(self.controller, el), ", ".join(rels)))
+                    _("Cannot delete the annotation %(annotation)s:\nThe following relation(s) use it:\n%(relations)s") % { 'annotation': helper.get_title(self.controller, el), 
+                                                                                                                            'relations': ", ".join(rels)})
                 return True
             p.annotations.remove(el)
             self.controller.notify('AnnotationDelete', annotation=el)

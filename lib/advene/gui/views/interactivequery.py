@@ -106,16 +106,16 @@ class InteractiveQuery:
             # Assume it is a list of annotations
             l=[ a for a in res if isinstance(a, Annotation) ]
             if l:
-                self.controller.log(_("Displaying %s of %d elements")
-                         % (helper.format_element_name("annotation", len(l)),
-                            len(res)))
+                self.controller.log(_("Displaying %(elements)s of %(number)d elements")
+                         % { 'elements': helper.format_element_name("annotation", len(l)),
+                             'number': len(res)} )
                 t = TimeLine (l,
                               minimum=0,
                               controller=self.controller)
                 window=t.popup()
                 window.set_title(_("Results of _interactive query"))
             else:
-                advene.gui.util.message_dialog(_("Empty list result."),
+                advene.gui.util.message_dialog(_("Empty list result (no annotations)."),
                                                icon=gtk.MESSAGE_WARNING)
         else:
             advene.gui.util.message_dialog(_("Result:\n%s") % unicode(res))

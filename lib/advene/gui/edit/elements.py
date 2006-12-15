@@ -1394,8 +1394,8 @@ class EditAttributesForm (EditForm):
             val = self.repr_to_value (at, text)
         except ValueError, e:
             advene.gui.util.message_dialog(
-                _("The %s attribute could not be updated:\n\n%s\n\nResetting to the original value.")
-                % (at, str(e)),
+                _("The %(attribute)s attribute could not be updated:\n\n%(error)s\n\nResetting to the original value.")
+                % {'attribute': at, 'error': unicode(e)},
                 icon=gtk.MESSAGE_WARNING)
             # Invalid value -> we take the original value
             val = getattr(self.element, at)

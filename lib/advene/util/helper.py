@@ -401,7 +401,8 @@ def get_statistics(fname):
         try:
             z=zipfile.ZipFile(fname, 'r')
         except Exception, e:
-            raise AdveneException(_("Cannot read %s: %s") % (fname, unicode(e)))
+            raise AdveneException(_("Cannot read %(filename)s: %(error)s") % {'filename': fname, 
+                                                                              'error': unicode(e)})
 
         # Check the validity of mimetype
         try:
@@ -437,24 +438,26 @@ def get_statistics(fname):
     data=h.parse_file(s)
     s.close()
 
-    m=_("""Package %s:
-%s
-%s in %s
-%s in %s
-%s
-%s
+    m=_("""Package %(title)s:
+%(schema)s
+%(annotation)s in %(annotation_type)s
+%(relation)s in %(relation_type)s
+%(query)s
+%(view)s
 
 Description:
-%s
-""") % (data['title'],
-        format_element_name('schema', data['schema']),
-        format_element_name('annotation', data['annotation']),
-        format_element_name('annotation_type', data['annotation_type']),
-        format_element_name('relation', data['relation']),
-        format_element_name('relation_type', data['relation_type']),
-        format_element_name('query', data['query']),
-        format_element_name('view', data['view']),
-        data['description'])
+%(description)s
+""") % {
+        'title': data['title'],
+        'schema': format_element_name('schema', data['schema']),
+        'annotation': format_element_name('annotation', data['annotation']),
+        'annotation_type': format_element_name('annotation_type', data['annotation_type']),
+        'relation': format_element_name('relation', data['relation']),
+        'relation_type': format_element_name('relation_type', data['relation_type']),
+        'query': format_element_name('query', data['query']),
+        'view': format_element_name('view', data['view']),
+        'description': data['description'] 
+        }
     return m
 
 
@@ -505,7 +508,9 @@ def format_element_name(name, count=None):
     elif count == 1:
         return _("1 %s") % element_declinations[name][0]
     else:
-        return _("%d %s") % (count, element_declinations[name][1])
+        return _("%(count)d %(plural)s") % {
+            'count': count, 
+            'plural': element_declinations[name][1]}
 
 def get_id(source, id_):
     """Return the element whose id is id_ in source.

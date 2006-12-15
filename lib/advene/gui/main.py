@@ -541,7 +541,10 @@ class AdveneGUI (Connect):
                 try:
                     v=self.open_adhoc_view(n, destination=dest)
                 except Exception, e:
-                    self.log(_("Cannot open adhoc view %s in %s: %s") % (n, dest, unicode(e)))
+                    self.log(_("Cannot open adhoc view %(viewname)s in %(destination)s: %(error)s") % {
+                            'viewname': n,
+                            'destination': dest,
+                            'error': unicode(e)})
 
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
@@ -816,7 +819,9 @@ class AdveneGUI (Connect):
         try:
             pop = get_edit_popup (element, self.controller)
         except TypeError, e:
-            print _("Error: unable to find an edit popup for %s:\n%s") % (element, unicode(e))
+            print _("Error: unable to find an edit popup for %(element)s:\n%(error)s") % {
+                'element': element, 
+                'error': unicode(e)}
         else:
                 
             pop.edit (modal)
@@ -895,7 +900,9 @@ class AdveneGUI (Connect):
             try:
                 self.controller.load_package (uri=fname)
             except Exception, e:
-                self.log(_("Cannot load package %s:\n%s") % (fname, unicode(e)))
+                self.log(_("Cannot load package %(filename)s:\n%(error)s") % {
+                        'filename': fname, 
+                        'error': unicode(e)})
             return True
 
         # We cannot set the widget name to something more sensible (like
@@ -1020,13 +1027,14 @@ class AdveneGUI (Connect):
 
         @return: a boolean (~desactivation)
         """
-        self.log (_("Package %s saved: %s and %s.")
-                  % (self.controller.package.uri,
-                     helper.format_element_name('annotation',
-                                                len(self.controller.package.annotations)),
-                     helper.format_element_name('relation',
-                                                len(self.controller.package.relations))
-                     ))
+        self.log (_("Package %(uri)s saved: %(annotations)s and %(relations)s.")
+                  % {
+                'uri': self.controller.package.uri,
+                'annotations': helper.format_element_name('annotation',
+                                                          len(self.controller.package.annotations)),
+                'relations': helper.format_element_name('relation',
+                                                        len(self.controller.package.relations))
+                })
         return True
 
     def manage_package_activate (self, context, parameters):
@@ -1052,13 +1060,14 @@ class AdveneGUI (Connect):
 
         @return: a boolean (~desactivation)
         """
-        self.log (_("Package %s loaded: %s and %s.")
-                  % (self.controller.package.uri,
-                     helper.format_element_name('annotation',
-                                                len(self.controller.package.annotations)),
-                     helper.format_element_name('relation',
-                                                len(self.controller.package.relations))
-                     ))
+        self.log (_("Package %(uri)s loaded: %(annotations)s and %(relations)s.")
+                  % {
+                'uri': self.controller.package.uri,
+                'annotations': helper.format_element_name('annotation',
+                                                          len(self.controller.package.annotations)),
+                'relations': helper.format_element_name('relation',
+                                                        len(self.controller.package.relations))
+                })
 
         f=self.controller.package.uri
         h=config.data.preferences['history']
@@ -1498,7 +1507,9 @@ class AdveneGUI (Connect):
             try:
                 self.controller.load_package (uri=filename, alias=alias)
             except Exception, e:
-                self.log(_("Cannot load package %s:\n%s") % (filename, unicode(e)))
+                self.log(_("Cannot load package %(filename)s:\n%(error)s") % {
+                        'filename': filename, 
+                        'error': unicode(e)})
         return True
 
     def on_save1_activate (self, button=None, package=None):
@@ -1615,8 +1626,9 @@ class AdveneGUI (Connect):
             # FIXME: build a dialog to enter optional parameters
             # FIXME: handle the multiple possible importers case (for XML esp.)
             if not advene.gui.util.message_dialog(
-                _("Do you confirm the import of data from\n%s\nby the %s filter?") % (
-                    filename_utf, i.name), icon=gtk.MESSAGE_QUESTION):
+                _("Do you confirm the import of data from\n%(filename)s\nby the %(filter)s filter?") % {
+                    'filename': filename_utf, 
+                    'filter': i.name}, icon=gtk.MESSAGE_QUESTION):
                 return True
             i.package=self.controller.package
             i.process_file(filename)

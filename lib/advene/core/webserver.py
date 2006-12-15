@@ -257,21 +257,22 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             l = self.server.controller.player.playlist_get_list ()
             self.server.controller.update_status ()
             self.wfile.write (_("""
-            <h1>Current STBV: %s</h1>
+            <h1>Current STBV: %(currentstbv)s</h1>
 
             <h1>Player status</h1>
             <table border="1">
             <tr>
-            <td>Current position</td><td>%s</td>
-            <td>Input size</td><td>%s</td>
-            <td>Player status</td><td>%s</td>
+            <td>Current position</td><td>%(position)s</td>
+            <td>Duration</td><td>%(duration)s</td>
+            <td>Player status</td><td>%(status)s</td>
             </tr>
             </table>
-            """) % (
-                str(self.server.controller.current_stbv),
-                helper.format_time(self.server.controller.player.current_position_value),
-                helper.format_time(self.server.controller.player.stream_duration),
-                repr(self.server.controller.player.status)))
+            """) % {
+                    'currentstbv': str(self.server.controller.current_stbv),
+                    'position': helper.format_time(self.server.controller.player.current_position_value),
+                    'duration': helper.format_time(self.server.controller.player.stream_duration),
+                    'status': repr(self.server.controller.player.status)
+                    })
 
             if len(l) == 0:
                 self.wfile.write (_("""<h1>No playlist</h1>"""))
@@ -726,8 +727,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         <p><a href="/media">Media control</a></p>
         <p><a href="/application">Display GUI status</a></p>
         <p><a href="/admin/list">List available files</a></p>
-        <p><a href="/packages">List loaded packages</a> (%s)</p>
-        <p>Display mode : %s</p>
+        <p><a href="/packages">List loaded packages</a> (%(packagelist)s)</p>
+        <p>Display mode : %(displaymode)s</p>
         <hr>
         <p>Load a package :
         <form action="/admin/load" method="GET">
@@ -736,9 +737,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         <input type="submit" value="Load" />
         </form>
         </body></html>
-        """) % (" | ".join( ['<a href="/packages/%s">%s</a>' % (alias, alias)
-                             for alias in self.server.controller.packages.keys() ] ),
-                mode_sw))
+        """) % { 'packagelist': " | ".join( ['<a href="/packages/%s">%s</a>' % (alias, alias)
+                                             for alias in self.server.controller.packages.keys() ] ),
+                 'displaymode': mode_sw })
 
     def display_packages_list (self):
         """Display available Advene files.
@@ -1041,12 +1042,12 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     answer(_("Value updated"))
                     self.wfile.write (_("""
                     <h1>Value updated</h1>
-                    The value of %s has been updated to
+                    The value of %(path)s has been updated to
                     <pre>
-                    %s
+                    %(value)s
                     </pre>
-                    """) % ("/".join([tales, query['key']]),
-                           cgi.escape(query['data'])))
+                    """) % { 'path': "/".join([tales, query['key']]),
+                             'value': cgi.escape(query['data']) })
                 else:
                     # Fallback mode : maybe we were in a list, and
                     # query['object'] has the id of the object in the list
@@ -1057,14 +1058,14 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                             answer(_("Value updated"))
                             self.wfile.write (_("""
                             <h1>Value updated</h1>
-                            The value of %s has been updated to
+                            The value of %(path)s has been updated to
                             <pre>
-                            %s
+                            %(value)s
                             </pre>
-                            """) % ("/".join([tales,
-                                             query['object'],
-                                             query['key']]),
-                                   cgi.escape(query['data'])))
+                            """) % { 'path': "/".join([tales,
+                                                       query['object'],
+                                                       query['key']]),
+                                     'value': cgi.escape(query['data']) })
                             return
                     except:
                         pass
@@ -1100,12 +1101,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
                      answer(_("View created"))
                      self.wfile.write (_("""
-                     <h1>View <em>%s</em> created</h1>
-                     <p>The view <a href="%s">%s</a> was successfully created.</p>
-                     """) % (v.id,
-                            "/packages/%s/views/%s" % (self.server.controller.aliases[objet],
-                                                      v.id),
-                            v.id))
+                     <h1>View <em>%(id)s</em> created</h1>
+                     <p>The view <a href="%(url)s">%(id)s</a> was successfully created.</p>
+                     """) % { 'id': v.id,
+                              'url': "/packages/%s/views/%s" % (self.server.controller.aliases[objet],
+                                                                v.id) })
                  elif query['type'] == 'relation':
                      # Takes as parameters:
                      # id = identifier (optional)
@@ -1125,7 +1125,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                      if rt not in relationtypes:
                          answer(_("Error"))
                          self.wfile.write (_("<h1>Error</h1>"))
-                         self.wfile.write (_("<p>Cannot create relation between %s and %s: invalid type</p>") % (query['member1'], query['member2']))
+                         self.wfile.write (_("<p>Cannot create relation between %(member1)s and %(member2)s: invalid type</p>") % query)
                          return
                      try:
                          relation=package.createRelation(ident=id_,
@@ -1137,7 +1137,8 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                      except Exception, e:
                          answer(_("Error"))
                          self.wfile.write (_("<h1>Error</h1>"))
-                         self.wfile.write (_("<p>Error while creating relation between %s and %s :</p><pre>%s</pre>") % (query['member1'], query['member2'], unicode(e)))
+                         query['error']=unicode(e)
+                         self.wfile.write (_("<p>Error while creating relation between %(member1)s and %(member2)s :</p><pre>%(error)s</pre>") % query)
                          return
                      answer(_("Relation created"))
                      self.wfile.write (_("""
@@ -1176,9 +1177,13 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                          self.wfile.write (_("<p>Error while creating annotation of type %s :") % query['annotationtype'])
                          import code
                          self.wfile.write(_("""<pre>
-                         %s
-                         %s
-                         %s</pre>""") % (unicode(t), unicode(v), "\n".join(code.traceback.format_tb (tr))))
+                         %(type)s
+                         %(value)s
+                         %(traceback)s</pre>""") % {
+                                 'type': unicode(t), 
+                                 'value': unicode(v), 
+                                 'traceback': "\n".join(code.traceback.format_tb (tr))
+                                 })
                          return
 
                      answer(_("Annotation created"))
@@ -1192,8 +1197,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 answer(_("Error"))
                 self.wfile.write (_("<h1>Error</h1>"))
-                self.wfile.write (_("<p>Cannot perform the action <em>%s</em> on <code>%s</code></p>")
-                                  % (query['action'], cgi.escape(unicode(objet))))
+                self.wfile.write (_("<p>Cannot perform the action <em>%(action)s</em> on <code>%(object)s</code></p>")
+                                  % { 'action': query['action'], 
+                                      'object': cgi.escape(unicode(objet)) })
         elif path[0] == 'config':
             if len(path) == 2:
                 # We have a config value to set
@@ -1205,8 +1211,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 return
             else:
                 self.wfile.write (_("<h1>Error</h1>"))
-                self.wfile.write (_("<p>Cannot perform the action <em>%s</em> on <code>%s</code></p>")
-                                  % (query['action'], cgi.escape(unicode(objet))))
+                self.wfile.write (_("<p>Cannot perform the action <em>%(action)s</em> on <code>%(object)s</code></p>")
+                                  % { 'action': query['action'], 
+                                      'object': cgi.escape(unicode(objet)) } )
 
 
     def do_GET(self):
@@ -1336,9 +1343,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except simpletal.simpleTAL.TemplateParseException, e:
             self.wfile.write(_("<h1>Error</h1>"))
             self.wfile.write(_("""<p>There was an error in the template code.</p>
-            <p>Tag name: <strong>%s</strong></p>
-            <p>Error message: <em>%s</em></p>""" % (cgi.escape(e.location),
-                                                    e.errorDescription)))
+            <p>Tag name: <strong>%(tagname)s</strong></p>
+            <p>Error message: <em>%(message)s</em></p>""") % {
+                        'tagname': cgi.escape(e.location),
+                        'message': e.errorDescription })
         except AdveneException, e:
             self.wfile.write(_("<h1>Error</h1>"))
             self.wfile.write(_("""<p>There was an error in the expression.</p>
@@ -1347,10 +1355,15 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             t, v, tr = sys.exc_info()
             import code
             self.wfile.write(_("<h1>Error</h1>"))
-            self.wfile.write(_("""<p>Cannot resolve TALES expression %s on package %s<p><pre>
-            %s
-            %s
-            %s</pre>""") % (t, pkgid, unicode(t), unicode(v), "\n".join(code.traceback.format_tb (tr))))
+            self.wfile.write(_("""<p>Cannot resolve TALES expression %(expr)s on package %(package)s<p><pre>
+            %(type)s
+            %(value)s
+            %(traceback)s</pre>""") % {
+                    'expr': t, 
+                    'package': pkgid, 
+                    'type': unicode(t), 
+                    'value': unicode(v), 
+                    'traceback': "\n".join(code.traceback.format_tb (tr)) })
 
     def do_GET_admin (self, l, query):
         """Handles the X{/admin}  requests.
@@ -1515,9 +1528,9 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 a=catalog.get_action(name)
                 if a.parameters:
                     # There are parameters. Display a link to the form.
-                    self.wfile.write(_("""<li>%s: %s""")
-                                     % (name,
-                                        d[name]))
+                    self.wfile.write(_("""<li>%(name)s: %(value)s""")
+                                     % {'name': name,
+                                        'value': d[name]})
                     self.wfile.write(a.as_html("/action/%s" % name))
                 else:
                     # No parameter, we can directly link the action
@@ -1624,8 +1637,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def display_server_root(self):
         """Display the server root document."""
         self.start_html (_("Advene webserver"), duplicate_title=True)
-        self.wfile.write(_("""<p>Welcome on the <a href="http://liris.cnrs.fr/advene/">Advene</a> webserver run by %s on %s:%d.</p>""") %
-                         (config.data.userid, self.server.server_name, self.server.server_port))
+        self.wfile.write(_("""<p>Welcome on the <a href="http://liris.cnrs.fr/advene/">Advene</a> webserver run by %(userid)s on %(servername)s:%(serverport)d.</p>""") %
+                         {
+                'userid': config.data.userid, 
+                'servername': self.server.server_name, 
+                'serverport': self.server.server_port })
 
         if len(self.server.controller.packages) == 0:
             self.wfile.write(_(""" <p>No package is loaded. You can access the <a href="/admin">server administration page</a>.<p>"""))
@@ -1638,7 +1654,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 p=self.server.controller.packages['advene']
                 defaultview=p.getMetaData(config.data.namespace, 'default_utbv')
                 if defaultview:
-                    mes=_("""the <a href="/packages/%s/view/%s">loaded package's default view</a>""") % (alias, defaultview)
+                    mes=_("""the <a href="/packages/%(alias)s/view/%(view)s">loaded package's default view</a>""") % {'alias': alias, 'view': defaultview}
                 else:
                     mes=_("""the <a href="/packages/%s">loaded package's data</a>""") % alias
             else:
@@ -1803,15 +1819,17 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.start_html(_("Error"))
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>There was an error in the template code.</p>
-                <p>Tag name: <strong>%s</strong></p>
-                <p>Error message: <em>%s</em></p>""") % (cgi.escape(e.location),
-                                                         e.errorDescription))
+                <p>Tag name: <strong>%(tagname)s</strong></p>
+                <p>Error message: <em>%(message)s</em></p>""") % {
+                        'tagname': cgi.escape(e.location),
+                        'message': e.errorDescription} )
             except simpleTALES.ContextContentException, e:
                 self.start_html(_("Error"))
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>An invalid character is in the Context:</p>
-                <p>Error message: <em>%s</em></p><pre>%s</pre>""")
-                                 % (e.errorDescription, unicode(e.args[0]).encode('utf-8')))
+                <p>Error message: <em>%(error)s</em></p><pre>%(message)s</pre>""")
+                                 % {'error': e.errorDescription, 
+                                    'message': unicode(e.args[0]).encode('utf-8')})
             except AdveneException, e:
                 self.start_html(_("Error"))
                 self.wfile.write(_("<h1>Error</h1>"))
@@ -1836,9 +1854,10 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             except simpletal.simpleTAL.TemplateParseException, e:
                 self.wfile.write(_("<h1>Error</h1>"))
                 self.wfile.write(_("""<p>There was an error in the template code.</p>
-                <p>Tag name: <strong>%s</strong></p>
-                <p>Error message: <em>%s</em></p>""" % (cgi.escape(e.location),
-                                                        e.errorDescription)))
+                <p>Tag name: <strong>%(tagname)s</strong></p>
+                <p>Error message: <em>%(message)s</em></p>""") % {
+                            'tagname': cgi.escape(e.location),
+                            'message': e.errorDescription})
 
         # Generating navigation footer
         if displaymode != "raw":
@@ -1856,13 +1875,14 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write (_("""
             <hr>
             <p>
-            Location: %s<br>
+            Location: %(location)s<br>
             <form name="navigation" method="GET">
-            <a href="%s">Up one level</a> |
+            <a href="%(levelup)s">Up one level</a> |
             Next level :
             <select name="path" onchange="submit()">
-            """) % (self.location_bar (),
-                   levelup))
+            """) % {
+                    'location': self.location_bar (),
+                    'levelup': levelup})
 
             if hasattr (objet, 'view'):
                 self.wfile.write ("<option selected>view</option>")
@@ -1890,8 +1910,11 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             <input type="submit" value="go"></form>
             """)
             self.wfile.write (_("""<hr>
-            <p>Evaluating expression "<strong>%s</strong>" on package %s returns %s</p>
-            """) % (tales , p.uri, cgi.escape(str(type(objet)))))
+            <p>Evaluating expression "<strong>%(expression)s</strong>" on package %(uri)s returns %(value)s</p>
+            """) % {
+                    'expression': tales , 
+                    'uri': p.uri, 
+                    'value': cgi.escape(str(type(objet)))})
         return
 
     def do_eval (self, q):

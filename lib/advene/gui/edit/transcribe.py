@@ -604,7 +604,8 @@ class TranscriptionEdit(AdhocView):
                 fname=filename
             f=urllib.urlopen(fname)
         except IOError, e:
-            self.controller.log(_("Cannot open %s: %s") % (filename, str(e)))
+            self.controller.log(_("Cannot open %(filename)s: %(error)s") % {'filename': filename, 
+                                                                            'error': unicode(e) })
             return
         data=unicode("".join(f.readlines()))
 

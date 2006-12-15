@@ -167,7 +167,8 @@ class DefaultGUIActions:
                     rulename=context.evaluateValue('rule')
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
-                self.controller.log(_("Rule %s: Error in the evaluation of the parameter %s:" % (rulename, name)))
+                self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename, 
+                                                                                                                          'parametername': name})
                 self.controller.log(unicode(e)[:160])
                 result=default_value
         else:
