@@ -280,7 +280,8 @@ def get_filename(title=_("Open a file"),
                  button=gtk.STOCK_OPEN,
                  default_dir=None,
                  default_file=None,
-                 alias=None):
+                 alias=None, 
+                 filter='any'):
     preview_box = gtk.VBox()
 
     preview = gtk.Button(_("N/C"))
@@ -334,6 +335,26 @@ def get_filename(title=_("Open a file"),
                                        gtk.STOCK_CANCEL,
                                        gtk.RESPONSE_CANCEL ))
     fs.set_preview_widget(preview_box)
+
+    # filter may be: 'any', 'advene', 'video'
+    filters={}
+    filters['any']=gtk.FileFilter()
+    filters['any'].set_name(_("Any type of file"))
+    filters['any'].add_pattern('*')
+    filters['advene']=gtk.FileFilter()
+    filters['advene'].set_name(_("Advene files (.xml, .azp, .apl)"))
+    filters['advene'].add_pattern('*.azp')
+    filters['advene'].add_pattern('*.xml')
+    filters['advene'].add_pattern('*.apl')
+    filters['video']=gtk.FileFilter()
+    filters['video'].set_name(_("Video files"))
+    for e in config.data.video_extensions:
+        filters['video'].add_pattern('*%s' % e)
+
+    for n in ('any', 'advene', 'video'):
+        fs.add_filter(filters[n])
+    fs.set_filter(filters[filter])
+
     fs.connect("selection_changed", update_preview)
     fs.connect("key_press_event", dialog_keypressed_cb)
 
