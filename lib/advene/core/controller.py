@@ -138,6 +138,11 @@ class AdveneController:
         self.future_ends = None
         self.last_position = -1
         
+        # List of (time, action) tuples, sorted along time
+        # When the player or usertime reaches 'time', execute the action.
+        self.videotime_bookmarks = []
+        self.usertime_bookmarks = []
+
         # GUI (optional)
         self.gui=None
         # Useful for debug in the evaluator window
@@ -301,6 +306,38 @@ class AdveneController:
         else:
             self.log(_("No available event handler"))
 
+    def register_videotime_action(self, t, action):
+        """Register an action to be executed when reaching the given movie time.
+
+        action will be given the controller and current position as parameters.
+        """
+        self.videotime_bookmarks.append( (t, action) )
+        return True
+
+    def register_usertime_action(self, t, action):
+        """Register an action to be executed when reaching the given user time (in ms)
+
+        action will be given the controller and current position as parameters.
+        """
+        self.usertime_bookmarks.append( (t / 1000.0, action) )
+        return True
+
+    def register_usertime_delayed_action(self, delay, action):
+        """Register an action to be executed after a given delay (in ms).
+
+        action will be given the controller and current position as parameters.
+        """
+        self.usertime_bookmarks.append( (time.time() + delay / 1000.0, action) )
+        return True
+
+    def loop_on_annotation(self, a):
+        def action_loop(controller, position):
+            self.queue_action(controller.update_status, 'set', a.fragment.begin, notify=False)
+            self.queue_action(controller.loop_on_annotation, a)
+            return True
+        self.register_videotime_action( a.fragment.end, action_loop )
+        return True
+
     def build_context(self, here=None, alias=None):
         c=advene.model.tal.context.AdveneContext(here,
 						 options={
@@ -330,8 +367,7 @@ class AdveneController:
             pid=l.rstrip().split()[-1]
             processes.append(pid)
         f.close()
-        self.log(_("Cannot start the webserver\nThe following processes seem to use the %(port)s port: %(processes)s") % { 'port': pat,
-                                                                                                                           'processes':  processes})
+        self.log(_("Cannot start the webserver\nThe following processes seem to use the %s port: %s") % (pat, processes))
 
     def init(self, args=None):
         if args is None:
@@ -369,23 +405,20 @@ class AdveneController:
 		alias = sre.sub('[^a-zA-Z0-9_]', '_', alias)
                 try:
                     self.load_package (uri=uri, alias=alias)
-                    self.log(_("Loaded %(uri)s as %(alias)s") % {'uri': uri, 'alias': alias})
+                    self.log(_("Loaded %s as %s") % (uri, alias))
                 except Exception, e:
-                    self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
-                            'uri': uri,
-                            'error': unicode(e)})
+                    self.log(_("Cannot load package from file %s: %s") % (uri,
+                                                                          unicode(e)))
 	    else:
 		name, ext = os.path.splitext(uri)
-		if ext.lower() in ('.xml', '.azp', '.apl'):
+		if ext.lower() in ('.xml', '.azp'):
 		    alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
 		    try:
 			self.load_package (uri=uri, alias=alias)
-			self.log(_("Loaded %(uri)s as %(alias)s") % {
-                                'uri': uri, 'alias':  alias})
+			self.log(_("Loaded %s as %s") % (uri, alias))
 		    except Exception, e:
-			self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
-                                'uri': uri,
-                                'error': unicode(e)})
+			self.log(_("Cannot load package from file %s: %s") % (uri,
+									      unicode(e)))
 		else:
 		    # Try to load the file as a video file
 		    if ('dvd' in name 
@@ -721,9 +754,9 @@ class AdveneController:
                 self.package = Package (uri="new_pkg",
                                         source=config.data.advenefile(config.data.templatefilename))
             except (IOError, OSError), e:
-                self.log(_("Cannot find the template package %(filename)s: %(error)s") 
-			 % {'filename': config.data.advenefile(config.data.templatefilename),
-                            'error': unicode(e)})
+                self.log(_("Cannot find the template package %s: %s") 
+			 % (config.data.advenefile(config.data.templatefilename),
+			    unicode(e)))
                 alias='new_pkg'
                 self.package = Package (alias, source=None)
             self.package.author = config.data.userid
@@ -1154,6 +1187,7 @@ class AdveneController:
         self.future_begins = None
         self.future_ends = None
         self.active_annotations = []
+        self.videotime_bookmarks = []
 
     def update_status (self, status=None, position=None, notify=True):
         """Update the player status.
@@ -1167,7 +1201,7 @@ class AdveneController:
         @type position: Position
         """
         position_before=self.player.current_position_value
-        #print "update status:", status, position
+        #print "update status: %s" % status
         if status == 'set' or status == 'start' or status == 'stop':
             self.reset_annotation_lists()
             # It was defined in a rule, but this prevented the snapshot
@@ -1241,6 +1275,27 @@ class AdveneController:
             self.reset_annotation_lists()
 
         self.last_position = pos
+
+        if self.videotime_bookmarks:
+            t, a = self.videotime_bookmarks[0]
+            while t and t <= pos:
+                self.videotime_bookmarks.pop(0)
+                a(self, pos)
+                if self.videotime_bookmarks:
+                    t, a = self.videotime_bookmarks[0]
+                else:
+                    t = 0
+
+        if self.usertime_bookmarks:
+            t, a = self.usertime_bookmarks[0]
+            v=time.time()
+            while t and t <= v:
+                self.usertime_bookmarks.pop(0)
+                a(self, v)
+                if self.usertime_bookmarks:
+                    t, a = self.usertime_bookmarks[0]
+                else:
+                    t = 0
 
         if self.future_begins is None or self.future_ends is None:
             self.future_begins, self.future_ends = self.generate_sorted_lists (pos)
