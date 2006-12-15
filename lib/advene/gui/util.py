@@ -336,25 +336,24 @@ def get_filename(title=_("Open a file"),
                                        gtk.RESPONSE_CANCEL ))
     fs.set_preview_widget(preview_box)
 
-    # filter may be: 'any', 'advene', 'video'
+    # filter may be: 'any', 'advene', 'session', 'video'
     filters={}
-    filters['any']=gtk.FileFilter()
-    filters['any'].set_name(_("Any type of file"))
-    filters['any'].add_pattern('*')
-    filters['advene']=gtk.FileFilter()
-    filters['advene'].set_name(_("Advene files (.xml, .azp, .apl)"))
-    filters['advene'].add_pattern('*.azp')
-    filters['advene'].add_pattern('*.xml')
-    filters['advene'].add_pattern('*.apl')
-    filters['video']=gtk.FileFilter()
-    filters['video'].set_name(_("Video files"))
-    for e in config.data.video_extensions:
-        filters['video'].add_pattern('*%s' % e)
 
-    for n in ('any', 'advene', 'video'):
-        fs.add_filter(filters[n])
+    for name, descr, exts in (
+        ('any', _("Any type of file"), ( '*', ) ),
+        ('advene', 
+         _("Advene files (.xml, .azp, .apl)"), 
+         ('*.xml', '*.azp', '*.apl')),
+        ('session', _("Advene session (.apl)"), ( '*.apl', ) ),
+        ('video', _("Video files"), [ "*%s" % e for e in config.data.video_extensions ])
+        ):
+        filters[name]=gtk.FileFilter()
+        filters[name].set_name(descr)
+        for e in exts:
+            filters[name].add_pattern(e)
+        fs.add_filter(filters[name])
+
     fs.set_filter(filters[filter])
-
     fs.connect("selection_changed", update_preview)
     fs.connect("key_press_event", dialog_keypressed_cb)
 
