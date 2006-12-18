@@ -22,6 +22,7 @@ Display the query results in a view (timeline, tree, etc).
 import advene.core.config as config
 import time
 from gettext import gettext as _
+import pprint
 
 import gtk
 
@@ -30,6 +31,7 @@ from advene.model.bundle import AbstractBundle
 from advene.rules.elements import Query, Condition
 from advene.model.annotation import Annotation
 from advene.model.tal.context import AdveneTalesException
+from advene.gui.views.editaccumulator import EditAccumulator
 import advene.gui.util
 
 from advene.gui.views.timeline import TimeLine
@@ -101,24 +103,110 @@ class InteractiveQuery:
                 icon=gtk.MESSAGE_ERROR)
             return True
 
+        # Offer the choice
+
         if (isinstance(res, list) or isinstance(res, tuple)
             or isinstance(res, AbstractBundle)):
-            # Assume it is a list of annotations
+
+            if not res:
+                advene.gui.util.message_dialog(_("Empty list result"))
+                return True
+
+            # Check if there are annotations
             l=[ a for a in res if isinstance(a, Annotation) ]
-            if l:
-                self.controller.log(_("Displaying %(elements)s of %(number)d elements")
-                         % { 'elements': helper.format_element_name("annotation", len(l)),
-                             'number': len(res)} )
-                t = TimeLine (l,
-                              minimum=0,
-                              controller=self.controller)
-                window=t.popup()
-                window.set_title(_("Results of _interactive query"))
+            cr=len(res)
+            cl=len(l)
+
+            w=gtk.Window()
+            w.set_title(_("Interactive evaluation result"))
+            v=gtk.VBox()
+            w.add(v)
+
+            if cr == cl:
+                t=_("Result is a list of %d annotations.") % cr
             else:
-                advene.gui.util.message_dialog(_("Empty list result (no annotations)."),
-                                               icon=gtk.MESSAGE_WARNING)
+                t=_("Result is a list of  %(number)d elements with %(elements)s.") % { 
+                    'elements': helper.format_element_name("annotation", len(l)),
+                    'number': len(res)}
+            v.add(gtk.Label(t))
+
+            hb=gtk.HButtonBox()
+            v.pack_start(hb)
+            if cl:
+                b=gtk.Button(_("Display annotations in timeline"))
+                b.connect('clicked', lambda b: self.open_in_timeline(l))
+                hb.add(b)
+            b=gtk.Button(_("Edit elements"))
+            b.connect('clicked', lambda b: self.open_in_edit_accumulator(res))
+            hb.add(b)
+            b=gtk.Button(_("Open in python evaluator"))
+            b.connect('clicked', lambda b: self.open_in_evaluator(res))
+            hb.add(b)
+            b=gtk.Button(stock=gtk.STOCK_CLOSE)
+            b.connect('clicked', lambda b: w.destroy())
+            hb.add(b)
+            
+            w.show_all()
         else:
             advene.gui.util.message_dialog(_("Result:\n%s") % unicode(res))
+        return True
+
+    def open_in_timeline(self, l):
+        t = TimeLine (l,
+                      minimum=0,
+                      controller=self.controller)
+        window=t.popup()
+        window.set_title(_("Results of _interactive query"))
+        return True
+
+    def open_in_edit_accumulator(self, l):
+        if self.controller.gui.edit_accumulator:
+            a=self.controller.gui.edit_accumulator()
+        else:
+            a=EditAccumulator(controller=self.controller, scrollable=True)
+
+        for e in l:
+            a.edit(e)
+
+        if a != self.controller.gui.edit_accumulator:
+            window=a.popup()
+            window.set_title(_("Results of _interactive query"))
+        
+        return True
+
+    def open_in_evaluator(self, l):
+        p=self.controller.package
+        try:
+            a=p.annotations[-1]
+        except IndexError:
+            a=None
+
+        ev=advene.gui.evaluator.Window(globals_=globals(),
+                                       locals_={'package': p,
+                                                'result': l,
+                                                'p': p,
+                                                'a': a,
+                                                'c': self.controller,
+                                                'self': self,
+                                                'pp': pprint.pformat },
+                                       historyfile=config.data.advenefile('evaluator.log', 'settings')
+                                       )
+        w=ev.popup()
+        b=gtk.Button(stock=gtk.STOCK_CLOSE)
+
+        def close_evaluator(*p):
+            ev.save_history()
+            w.destroy()
+            return True
+
+        b.connect("clicked", close_evaluator)
+        b.show()
+        ev.hbox.add(b)
+
+        self.controller.gui.init_window_size(w, 'evaluator')
+        
+        w.set_title(_("Results of _interactive query"))
+        ev.set_expression('result')
         return True
 
     def cancel(self, button=None):
