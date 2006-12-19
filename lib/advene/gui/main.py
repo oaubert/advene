@@ -549,6 +549,7 @@ class AdveneGUI (Connect):
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
         gobject.timeout_add (100, self.update_display)
+        gobject.timeout_add (1000, self.slow_update_display)
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
@@ -773,6 +774,17 @@ class AdveneGUI (Connect):
             b.set_tooltip(self.tooltips, tooltip)
             b.connect("clicked", callback)
             tb.insert(b, -1)
+
+        b=gtk.ToolItem()
+        adj=gtk.Adjustment(value=50, lower=0, upper=100, step_incr=1, page_incr=10)
+        adj.set_value(self.controller.player.sound_get_volume())
+        self.volumeslider=gtk.SpinButton(adj, digits=0)
+        self.volumeslider.set_update_policy(gtk.UPDATE_IF_VALID)
+        self.volumeslider.set_numeric(True)
+        self.volumeslider.connect('value-changed', lambda b: self.controller.set_volume(int(b.get_value())))
+        b.add(self.volumeslider)
+        b.set_tooltip(self.tooltips, _("Sound level (0..100)"))
+        tb.insert(b, -1)
         tb.show_all()
         return tb
 
@@ -1267,6 +1279,18 @@ class AdveneGUI (Connect):
             # returned status is None)
             self.controller.position_update ()
 
+        return True
+
+    def slow_update_display (self):
+        """Update the interface (slow version)
+
+        This method is regularly called by the Gtk mainloop, and
+        updates elements with a slower rate than update_display
+        """
+        d=int(self.volumeslider.get_value())
+        v=int(self.controller.get_volume())
+        if v != d:
+            self.volumeslider.set_value(v)
         return True
 
     def ask_for_annotation_type(self, text=None, create=False):
