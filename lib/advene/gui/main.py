@@ -589,7 +589,7 @@ class AdveneGUI (Connect):
 
         self.displayhbox=gtk.HPaned()
 
-        tb=self.get_player_control_toolbar()
+        self.player_toolbar=self.get_player_control_toolbar()
 
         # Dynamic view selection
         hb=gtk.HBox()
@@ -605,16 +605,29 @@ class AdveneGUI (Connect):
         b.connect('clicked', self.on_edit_current_stbv_clicked)
         hb.pack_start(b, expand=False)
 
+        # Append the volume control to the toolbar
+        b=gtk.ToolItem()
+        adj=gtk.Adjustment(value=50, lower=0, upper=100, step_incr=1, page_incr=10)
+        adj.set_value(self.controller.player.sound_get_volume())
+        volumeslider=gtk.SpinButton(adj, digits=0)
+        volumeslider.set_update_policy(gtk.UPDATE_IF_VALID)
+        volumeslider.set_numeric(True)
+        volumeslider.connect('value-changed', lambda b: self.controller.set_volume(int(b.get_value())))
+        b.add(volumeslider)
+        self.player_toolbar.volumeslider=volumeslider
+        b.set_tooltip(self.tooltips, _("Sound level (0..100)"))
+        self.player_toolbar.insert(b, -1)
+        
         # Append the player status label to the toolbar
         ts=gtk.SeparatorToolItem()
         ts.set_draw(False)
         ts.set_expand(True)
-        tb.insert(ts, -1)
+        self.player_toolbar.insert(ts, -1)
 
         ti=gtk.ToolItem()
         self.gui.player_status=gtk.Label('--')
         ti.add(self.gui.player_status)
-        tb.insert(ti, -1)
+        self.player_toolbar.insert(ti, -1)
 
         # Create the slider
         adj = gtk.Adjustment(0, 0, 100, 1, 1, 10)
@@ -638,7 +651,7 @@ class AdveneGUI (Connect):
         else:
             self.captionview=None
         v.pack_start(self.gui.slider, expand=False)
-        v.pack_start(tb, expand=False)
+        v.pack_start(self.player_toolbar, expand=False)
         v.pack_start(hb, expand=False)
 
         self.displayhbox.pack1(v, shrink=False)
@@ -775,17 +788,8 @@ class AdveneGUI (Connect):
             b.connect("clicked", callback)
             tb.insert(b, -1)
 
-        b=gtk.ToolItem()
-        adj=gtk.Adjustment(value=50, lower=0, upper=100, step_incr=1, page_incr=10)
-        adj.set_value(self.controller.player.sound_get_volume())
-        self.volumeslider=gtk.SpinButton(adj, digits=0)
-        self.volumeslider.set_update_policy(gtk.UPDATE_IF_VALID)
-        self.volumeslider.set_numeric(True)
-        self.volumeslider.connect('value-changed', lambda b: self.controller.set_volume(int(b.get_value())))
-        b.add(self.volumeslider)
-        b.set_tooltip(self.tooltips, _("Sound level (0..100)"))
-        tb.insert(b, -1)
         tb.show_all()
+        
         return tb
 
     def debug_cb(self, window, event, *p):
@@ -1287,10 +1291,10 @@ class AdveneGUI (Connect):
         This method is regularly called by the Gtk mainloop, and
         updates elements with a slower rate than update_display
         """
-        d=int(self.volumeslider.get_value())
+        d=int(self.player_toolbar.volumeslider.get_value())
         v=int(self.controller.get_volume())
         if v != d:
-            self.volumeslider.set_value(v)
+            self.player_toolbar.volumeslider.set_value(v)
         return True
 
     def ask_for_annotation_type(self, text=None, create=False):
