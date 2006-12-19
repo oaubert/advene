@@ -41,6 +41,7 @@ def sort_id(source):
     Returns a new Element
     """
     dest=Element(source.tag)
+    dest.attrib.update(source.attrib)
     
     res=[ e for e in source ]
     res.sort(cmp_id)
@@ -60,6 +61,7 @@ def sort_time(source):
     Returns a new Element
     """
     dest=Element(source.tag)
+    dest.attrib.update(source.attrib)
     
     antag=tag('annotation')
     reltag=tag('relation')
@@ -84,7 +86,6 @@ def sort_time(source):
         dest.append(e)
 
     return dest
-
 
 # Namespace handling
 ns='http://experience.univ-lyon1.fr/advene/ns'
