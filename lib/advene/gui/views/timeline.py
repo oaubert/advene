@@ -609,11 +609,26 @@ class TimeLine(AdhocView):
             self.controller.split_annotation(ann, p)
             return True
 
+        def center_and_zoom(menu, widget, ann):
+            # Set the zoom
+            self.fraction_adj.value=1.0 * ann.fragment.duration / (self.maximum - self.minimum)
+            self.fraction_event ()
+
+            # Center on annotation
+            pos = self.unit2pixel (ann.fragment.begin)
+            self.adjustment.set_value(pos)
+            return True
+
         p=self.pixel2unit(widget.allocation.x + x)
         menu=advene.gui.popup.Menu(ann, controller=self.controller)
         menu.add_menuitem(menu.menu,
                           _("Split at %s") % helper.format_time(p), 
                           split_annotation, widget, ann, p)
+
+        menu.add_menuitem(menu.menu,
+                          _("Center and zoom"),
+                          center_and_zoom, widget, ann)
+
         menu.menu.show_all()
         menu.popup()
         return True
