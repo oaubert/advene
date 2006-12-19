@@ -4,6 +4,9 @@ advene (0.21) unstable; urgency=low
     to specify the alias for packages loaded from the command line, with
     the syntax: alias=uri
 
+  * New file format: .apl (Advene package list). It is used to save a work
+	session (list of opened packages), from the File/Save session menu.
+	
   * The default template is now template.azp, so that new packages have a
     Resources reference by default.
 
@@ -56,7 +59,10 @@ advene (0.21) unstable; urgency=low
     * better drag and drop interaction with other applications
   
     * optionally ask to save the imagecache on exit (cf preferences)
-  
+
+    * in interactive query (menu Edit/Find), propose multiple output modes
+	(timeline, edit window, python evaluator)
+
   * Views:
 
     * view notebooks are also used for the right-hand side of the video
