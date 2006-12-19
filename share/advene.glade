@@ -157,7 +157,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image42">
+			<widget class="GtkImage" id="image43">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -189,7 +189,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image43">
+			<widget class="GtkImage" id="image44">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -278,6 +278,65 @@
 		      <property name="label">gtk-delete</property>
 		      <property name="use_stock">True</property>
 		      <signal name="activate" handler="on_delete1_activate" last_modification_time="Mon, 27 Jan 2003 14:07:57 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="create1">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">Create</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_create1_activate" last_modification_time="Tue, 19 Dec 2006 16:45:52 GMT"/>
+
+		      <child>
+			<widget class="GtkMenu" id="create1_menu">
+
+			  <child>
+			    <widget class="GtkMenuItem" id="schema1">
+			      <property name="visible">True</property>
+			      <property name="label" translatable="yes">Schema</property>
+			      <property name="use_underline">True</property>
+			      <signal name="activate" handler="on_create_schema_activate" last_modification_time="Tue, 19 Dec 2006 16:45:52 GMT"/>
+			    </widget>
+			  </child>
+
+			  <child>
+			    <widget class="GtkMenuItem" id="view1">
+			      <property name="visible">True</property>
+			      <property name="label" translatable="yes">View</property>
+			      <property name="use_underline">True</property>
+			      <signal name="activate" handler="on_create_view_activate" last_modification_time="Tue, 19 Dec 2006 16:45:52 GMT"/>
+			    </widget>
+			  </child>
+
+			  <child>
+			    <widget class="GtkMenuItem" id="query1">
+			      <property name="visible">True</property>
+			      <property name="label" translatable="yes">Query</property>
+			      <property name="use_underline">True</property>
+			      <signal name="activate" handler="on_create_query_activate" last_modification_time="Tue, 19 Dec 2006 16:45:52 GMT"/>
+			    </widget>
+			  </child>
+
+			  <child>
+			    <widget class="GtkMenuItem" id="annotation_type1">
+			      <property name="visible">True</property>
+			      <property name="label" translatable="yes">Annotation Type</property>
+			      <property name="use_underline">True</property>
+			      <signal name="activate" handler="on_create_annotation_type_activate" last_modification_time="Tue, 19 Dec 2006 16:45:52 GMT"/>
+			    </widget>
+			  </child>
+
+			  <child>
+			    <widget class="GtkMenuItem" id="relation_type1">
+			      <property name="visible">True</property>
+			      <property name="label" translatable="yes">Relation Type</property>
+			      <property name="use_underline">True</property>
+			      <signal name="activate" handler="on_create_relation_type_activate" last_modification_time="Tue, 19 Dec 2006 16:45:52 GMT"/>
+			    </widget>
+			  </child>
+			</widget>
+		      </child>
 		    </widget>
 		  </child>
 
