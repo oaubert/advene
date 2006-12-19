@@ -13,9 +13,7 @@
 * snapshot precision: use set_rate to slow down, add "Select keyframe"
   to the popup menu + shortcut
 
-* bookmarks: associate actions to timestamp, for instance "When reaching 124, go to a4.fragment.begin"
-
-* internal rule to play only a specific annotation + convenient shortcut
+* internal rule to loop over a specific annotation + convenient shortcut
 
 * Convention: is_illustrated_by relation-type. In snapshot_url, if a
   relation exists, use it to get the snapshot. Else use the begin
@@ -39,8 +37,6 @@
 * UCK: http://sourceforge.net/forum/forum.php?forum_id=629763
 
 * video plugin: ffmpeg
-
-* sort views in dyn/static + alphabetic order
 
 * content browser (nextstep-style) using the same structure as the treeview
 
@@ -166,8 +162,6 @@ of movie time)
 
 * allow to edit the path of imported packages, to allow relative paths
 
-* make parsed a Content method rather than a global method
-
 * create a new view content type:
   application/x-advene-adhoc-parameters to store parameters for adhoc
   views
@@ -177,8 +171,6 @@ of movie time)
 * notification of new popups when embedded (flash tab)
 
 * make save button inactive when not modified
-
-* implement .apl (advene package list) file format (cf .m3u)
 
 * allow to specify the browser for open_url in preferences
 
@@ -292,8 +284,6 @@ istanbul
 * keep a viewed_segments structure to propose a view "Not yet viewed sequences"
 
 * Remove show_all() calls in EditElement popups
-
-* InteractiveQuery: propose other output modes
 
 * timeadjustment: make Play create an internal rule that pauses the player at the end of the fragment
 
@@ -1440,3 +1430,16 @@ current time,  timestamp: use spinbutton
 * azp format: store essential information (title, statistics) in a
   simple file (statistics.xml) for fast access and use it for preview
 
+* get_filename: use extension filter
+
+* implement .apl (advene package list) file format (cf .m3u)
+
+* make parsed a Content method rather than a global method
+
+* bookmarks: associate actions to timestamp, for instance "When reaching 124, go to a4.fragment.begin"
+
+* InteractiveQuery: propose other output modes
+
+* interactivequery: if annotation list, open in an editaccumulator
+
+* sort views in dyn/static + alphabetic order + annotation in time order: make a script
