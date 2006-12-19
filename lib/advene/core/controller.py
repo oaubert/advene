@@ -466,6 +466,20 @@ class AdveneController:
             self.queue_action(self.event_handler.notify, event_name, *param, **kw)
         return
 
+    def set_volume(self, v):
+        """Set the audio volume.
+        """
+        self.queue_action(self.player.sound_set_volume, v)
+        return
+
+    def get_volume(self):
+        try:
+            v=self.player.sound_get_volume()
+        except Exception, e:
+            self.log(_("Cannot get audio volume: %s") % unicode(e))
+            v=0
+        return v
+
     def update_snapshot (self, position=None):
         """Event handler used to take a snapshot for the given position.
 
