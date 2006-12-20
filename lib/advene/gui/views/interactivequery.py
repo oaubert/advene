@@ -82,29 +82,35 @@ class InteractiveQuery:
             return el, q
 
     def validate(self, button=None):
-        # Get the query
-        l=self.eq.invalid_items()
-        if l:
-            self.controller.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
-                     % ", ".join(l))
-            return True
-        self.eq.update_value()
-        # Store the query itself in the _interactive query
-        self.querycontainer.content.data = self.eq.model.xml_repr()
+        # Check if we are doing a short search
+        if not self.advanced.get_expanded():
+            # The advanced query is not shown. Use the self.entry
+            s=self.entry.get_text()
+            res=[ a for a in self.controller.package.annotations if s in a.content.data ]
+        else:
+            # Get the query
+            l=self.eq.invalid_items()
+            if l:
+                self.controller.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
+                         % ", ".join(l))
+                return True
+            self.eq.update_value()
+            # Store the query itself in the _interactive query
+            self.querycontainer.content.data = self.eq.model.xml_repr()
 
+            c=self.controller.build_context(here=self.here)
+            try:
+                res=c.evaluateValue("here/query/_interactive")
+            except AdveneTalesException, e:
+                # Display a dialog with the value
+                advene.gui.util.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
+                    icon=gtk.MESSAGE_ERROR)
+                return True
+
+        # Close the search window
         self.window.destroy()
 
-        c=self.controller.build_context(here=self.here)
-        try:
-            res=c.evaluateValue("here/query/_interactive")
-        except AdveneTalesException, e:
-            # Display a dialog with the value
-            advene.gui.util.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
-                icon=gtk.MESSAGE_ERROR)
-            return True
-
-        # Offer the choice
-
+        # Present choices to display the result
         if (isinstance(res, list) or isinstance(res, tuple)
             or isinstance(res, AbstractBundle)):
 
@@ -223,10 +229,22 @@ class InteractiveQuery:
 
         vbox = gtk.VBox()
 
+        l=gtk.Label(_("Search for text in the content of annotations"))
+        vbox.pack_start(l, expand=False)
+
+        self.entry=gtk.Entry()
+        vbox.pack_start(self.entry, expand=False)
+        
+        self.advanced = gtk.Expander ()
+        self.advanced.set_label (_("Advanced search"))
+        self.advanced.set_expanded(False)
+
+        vbox.add(self.advanced)
+
         self.eq=EditQuery(self.query,
                           editable=True,
                           controller=self.controller)
-        vbox.add(self.eq.widget)
+        self.advanced.add(self.eq.widget)
 
         if self.controller.gui:
             window.connect ("destroy", self.controller.gui.close_view_cb,
