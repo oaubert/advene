@@ -97,7 +97,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                 # FIXME: should be done by content rather than extension
                 if abs_uri.lower().endswith('.azp'):
                     # Advene Zip Package. Do some magic.
-                    self.__zip = ZipPackage(uri)
+                    self.__zip = ZipPackage(abs_uri)
                     f=urllib.pathname2url(self.__zip.getContentsFile())
                     element = reader.fromUri("file://" + f)._get_documentElement()    
                 else:
@@ -208,7 +208,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if absolute:
             base_uri = 'file:%s/' % urllib.pathname2url (os.getcwd ())
             uri = util.uri.urljoin(base_uri, uri)
-           
+            
         return uri
 
     def getImports (self):
@@ -456,6 +456,7 @@ class Import(modeled.Modeled, _impl.Ased):
                     break
                 except:
                     pass
+                
             if cached is None:
                 cached = Package(uri, importer=self._getParent())
             # NB: creating the package with parameter 'importer' DOES put it
