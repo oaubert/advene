@@ -163,6 +163,13 @@ class Player:
         return "dvd@%s:%s" % (str(title),
                               str(chapter))
 
+    def check_uri(self):
+        if gst.uri_is_valid(self.player.get_property('uri')):
+            return True
+        else:
+            print "Invalid URI", self.player.get_property('uri') 
+            return False
+
     def log(self, *p):
         print "gstreamer player: %s" % p
 
@@ -170,6 +177,8 @@ class Player:
         return self.current_position()
 
     def set_media_position(self, position):
+        if not self.check_uri():
+            return
         p = long(self.position2value(position) * gst.MSECOND)
         #print "Going to position ", str(p)
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
@@ -181,11 +190,15 @@ class Player:
             raise InternalException
 
     def start(self, position):
+        if not self.check_uri():
+            return
         self.player.set_state(gst.STATE_PLAYING)
         if position != 0:
             self.set_media_position(position)
 
     def pause(self, position):
+        if not self.check_uri():
+            return
         if self.status == self.PlayingStatus:
             self.player.set_state(gst.STATE_PAUSED)
         else:
@@ -195,6 +208,8 @@ class Player:
         self.pause(position)
 
     def stop(self, position):
+        if not self.check_uri():
+            return
         self.player.set_state(gst.STATE_READY)
 
     def exit(self):
@@ -214,6 +229,8 @@ class Player:
         return [ self.videofile ]
 
     def snapshot(self, position):
+        if not self.check_uri():
+            return None
         # FIXME: todo
         #self.log("snapshot %s" % str(position))
         return self._sink.get_snapshot()
@@ -226,6 +243,8 @@ class Player:
     def display_text (self, message, begin, end):
         # FIXME: todo
         # use http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/gst-plugins-base-plugins-textoverlay.html
+        if not self.check_uri():
+            return
         self.log("display_text %s" % str(message))
 
     def get_stream_information(self):
