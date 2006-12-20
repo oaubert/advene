@@ -292,7 +292,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
     <statistics:statistics xmlns:statistics="urn:advene:names:tc:opendocument:xmlns:manifest:1.0">
     """
         out += """<statistics:title value="%s" />""" % urllib.quote(self.title)
-        out += """<statistics:description value="%s" />""" % urllib.quote(self.getMetaData(config.data.namespace_prefix['dc'], 'description'))
+        out += """<statistics:description value="%s" />""" % (urllib.quote(self.getMetaData(config.data.namespace_prefix['dc'], 'description') or ""))
         for n, l in ( ('schema', len(self.schemas)),
                       ('annotation', len(self.annotations)),
                       ('annotation_type', len(self.annotationTypes)),
