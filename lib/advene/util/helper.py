@@ -366,30 +366,60 @@ def get_valid_members (el):
 
     return l
 
-def import_element(package, element, controller):
+def import_element(package, element, controller, notify=True):
     p=package
     if element.viewableClass == 'view':
         v=p.importView(element)
         p.views.append(v)
-        controller.notify("ViewCreate", view=v)
+        if notify:
+            controller.notify("ViewCreate", view=v)
     elif element.viewableClass == 'schema':
         s=p.importSchema(element)
         p.schemas.append(s)
-        controller.notify("SchemaCreate", schema=s)
+        if notify:
+            contaroller.notify("SchemaCreate", schema=s)
     elif element.viewableClass == 'annotation':
         a=p.importAnnotation(element)
         p.annotations.append(a)
-        controller.notify("AnnotationCreate", annotation=a)
+        if notify:
+            controller.notify("AnnotationCreate", annotation=a)
     elif element.viewableClass == 'relation':
         r=p.importRelation(element)
         p.relations.append(r)
-        controller.notify("RelationCreate", relation=r)
+        if notify:
+            controller.notify("RelationCreate", relation=r)
     elif element.viewableClass == 'query':
         q=p.importQuery(element)
         p.queries.append(q)
-        controller.notify("QueryCreate", query=q)
+        if notify:
+            controller.notify("QueryCreate", query=q)
     else:
         print "Import element of class %s not supported yet." % element.viewableClass
+
+def unimport_element(package, element, controller, notify=True):
+    p=package
+    if element.viewableClass == 'view':
+        p.views.remove(element)
+        if notify:
+            controller.notify("ViewDelete", view=element)
+    elif element.viewableClass == 'schema':
+        p.schemas.remove(element)
+        if notify:
+            controller.notify("SchemaDelete", schema=element)
+    elif element.viewableClass == 'annotation':
+        p.annotations.remove(element)
+        if notify:
+            controller.notify("AnnotationDelete", annotation=element)
+    elif element.viewableClass == 'relation':
+        p.relations.remove(element)
+        if notify:
+            controller.notify("RelationDelete", relation=element)
+    elif element.viewableClass == 'query':
+        p.queries.remove(element)
+        if notify:
+            controller.notify("QueryDelete", query=element)
+    else:
+        print "%s Not supported yet." % element.viewableClass
 
 def get_statistics(fname):
     """Return formatted statistics about the package.
@@ -459,28 +489,6 @@ Description:
         'description': data['description'] 
         }
     return m
-
-
-def unimport_element(package, element, controller):
-    p=package
-    if element.viewableClass == 'view':
-        p.views.remove(element)
-        controller.notify("ViewDelete", view=element)
-    elif element.viewableClass == 'schema':
-        p.schemas.remove(element)
-        controller.notify("SchemaDelete", schema=element)
-    elif element.viewableClass == 'annotation':
-        p.annotations.remove(element)
-        controller.notify("AnnotationDelete", annotation=element)
-    elif element.viewableClass == 'relation':
-        p.relations.remove(element)
-        controller.notify("RelationDelete", relation=element)
-    elif element.viewableClass == 'query':
-        p.queries.remove(element)
-        controller.notify("QueryDelete", query=element)
-    else:
-        print "%s Not supported yet." % element.viewableClass
-
 
 element_declinations={
     'schema': (_('schema'), _('schemas')),
