@@ -794,7 +794,19 @@ class AdveneController:
                 self.activate_package(default_alias)
             return
         else:
-            self.package = Package (uri=uri)
+            p = Package (uri=uri)
+            # Check if the imported package was found. Else it will
+            # fail when accessing elements...
+            for i in p.imports:
+                print i.uri
+                try:
+                    p=i.package
+                    print p
+                except Exception, e:
+                    raise Exception(_("Cannot read the imported package %(uri)s: %(error)s") % {
+                            'uri': i.uri,
+                            'error': unicode(e)})
+            self.package=p
 
         if alias is None:
             # Autogenerate the alias
