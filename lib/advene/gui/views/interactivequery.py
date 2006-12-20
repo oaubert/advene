@@ -262,9 +262,22 @@ class InteractiveQuery:
 
         vbox.pack_start(hb, expand=False)
 
+
+        def handle_key_press_event(widget, event):
+            if event.keyval == gtk.keysyms.Return:
+                self.validate()
+                return True
+            elif event.keyval == gtk.keysyms.Escape:
+                self.cancel()
+                return True
+            return False
+
+        window.connect('key-press-event', handle_key_press_event)
+
         window.add(vbox)
 
         window.show_all()
+        self.entry.grab_focus()
         self.window=window
         return window
 
