@@ -33,7 +33,6 @@ except ImportError:
 from gettext import gettext as _
 
 from advene.model.package import Package
-from advene.model.fragment import MillisecondFragment
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.resources import Resources, ResourceData
@@ -377,7 +376,7 @@ def import_element(package, element, controller, notify=True):
         s=p.importSchema(element)
         p.schemas.append(s)
         if notify:
-            contaroller.notify("SchemaCreate", schema=s)
+            controller.notify("SchemaCreate", schema=s)
     elif element.viewableClass == 'annotation':
         a=p.importAnnotation(element)
         p.annotations.append(a)
