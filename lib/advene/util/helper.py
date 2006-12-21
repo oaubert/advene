@@ -60,8 +60,11 @@ def fourcc2rawcode (code):
     if code == 'video/x-raw-rgb':
 	return 'BGRX'
 
-    conv = { 'RV32' : 'BGRX',
-             'png ' : 'PNG' }
+    conv = { 
+        'RV32' : 'BGRX',
+        'png ' : 'PNG',
+        ' gnp' : 'PNG', # On PPC-MacOS X
+        }
     fourcc = "%c%c%c%c" % (code & 0xff,
                            code >> 8 & 0xff,
                            code >> 16 & 0xff,
