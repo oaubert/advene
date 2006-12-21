@@ -798,10 +798,8 @@ class AdveneController:
             # Check if the imported package was found. Else it will
             # fail when accessing elements...
             for i in p.imports:
-                print i.uri
                 try:
-                    p=i.package
-                    print p
+                    imp=i.package
                 except Exception, e:
                     raise Exception(_("Cannot read the imported package %(uri)s: %(error)s") % {
                             'uri': i.uri,
@@ -972,7 +970,7 @@ class AdveneController:
             # Set if necessary the mediafile metadata
             if self.get_default_media() == "":
                 pl = self.player.playlist_get_list()
-                if pl:
+                if pl and pl[0]:
                     self.set_default_media(pl[0])
 
         p.save(name=name)
@@ -1021,6 +1019,27 @@ class AdveneController:
 	    if view:
 		self.activate_stbv(view)
 
+        # Handle 'auto-import' meta-attribute
+        master_uri=self.package.getMetaData(config.data.namespace, 'auto-import')
+        if master_uri:
+            i=[ p for p in self.package.imports if p.getUri(absolute=False) == master_uri ]
+            if not i:
+                self.log(_("Cannot handle master attribute, the package %s is not imported.") % master_uri)
+            else:
+                self.log(_("Checking master package %s for not yet imported elements.") % master_uri)
+                self.handle_master_meta(self.package, i[0].package)
+
+        return True
+
+    def handle_auto_import(self, p, i):
+        """Ensure that all views, schemas, queries are imported from i in p.
+        """
+        for source in ('views', 'schemas', 'queries'):
+            uris=[ e.uri for e in getattr(p, source) ]
+            for e in getattr(i, source):
+                if not e.uri in uris:
+                    print "Missing %s: importing it" % str(e)
+                    helper.import_element(p, e, self, notify=False)
         return True
 
     def get_stbv_list(self):
