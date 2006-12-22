@@ -393,7 +393,12 @@ class Menu:
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
 
+        def loop_on_annotation(menu, ann):
+            self.controller.gui.loop_on_annotation_gui(ann, goto=True)
+            return True
+
         add_item(_("Go to..."), self.goto_annotation, element)
+        add_item(_("Loop"), loop_on_annotation, element)
         add_item(_("Duplicate"), self.duplicate_annotation, element)
 
         def build_submenu(submenu, el, items):
