@@ -339,6 +339,15 @@ class TimeLine(AdhocView):
         #self.layout.show_all()
         return
 
+    def set_autoscroll_mode(self, v):
+        """Set the autoscroll value.
+        """
+        if v not in (0, 1, 2):
+            return False
+        # Update self.autoscroll_choice
+        self.autoscroll_choice.set_active(v)
+        return True
+
     def update_layer_position(self):
         """Update the layer_position attribute
 
@@ -610,6 +619,9 @@ class TimeLine(AdhocView):
             return True
 
         def center_and_zoom(menu, widget, ann):
+            # Deactivate autoscroll...
+            self.set_autoscroll_mode(0)
+
             # Set the zoom
             z=1.0 * ann.fragment.duration / (self.maximum - self.minimum)
             if z < 0.05:
