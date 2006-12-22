@@ -611,7 +611,10 @@ class TimeLine(AdhocView):
 
         def center_and_zoom(menu, widget, ann):
             # Set the zoom
-            self.fraction_adj.value=1.0 * ann.fragment.duration / (self.maximum - self.minimum)
+            z=1.0 * ann.fragment.duration / (self.maximum - self.minimum)
+            if z < 0.05:
+                z=0.05
+            self.fraction_adj.value=z
             self.fraction_event ()
 
             # Center on annotation
