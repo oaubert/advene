@@ -64,6 +64,7 @@ class Menu:
                                  key=c.player.MediaTime,
                                  origin=c.player.AbsolutePosition)
         c.update_status (status="set", position=pos)
+        c.gui.set_current_annotation(ann)
         return True
 
     def duplicate_annotation(self, widget, ann):
