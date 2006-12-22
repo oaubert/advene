@@ -25,6 +25,7 @@ C{on_} prefix).
 It also defines GUI-specific actions (DisplayPopup, etc).
 """
 
+import sys
 import time
 import os
 import StringIO
@@ -1348,6 +1349,15 @@ class AdveneGUI (Connect):
         # reset by user interaction            
         if not self.controller.videotime_bookmarks and self.loop_toggle_button.get_active():
             self.loop_toggle_button.set_active(False)
+	# Fix the webserver reaction time on win32
+	if config.data.os == 'win32':
+ 	    if self.controller.player.status in self.active_player_status:
+        	i=57
+  	    else:
+        	i=10
+  	    if sys.getcheckinterval() != i:
+		sys.setcheckinterval(i)
+	
         return True
 
     def ask_for_annotation_type(self, text=None, create=False):
