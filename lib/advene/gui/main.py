@@ -1344,6 +1344,10 @@ class AdveneGUI (Connect):
         v=int(self.controller.get_volume())
         if v != d:
             self.player_toolbar.volumeslider.set_value(v)
+        # Update the loop toggle button, if the bookmark has been
+        # reset by user interaction            
+        if not self.controller.videotime_bookmarks and self.loop_toggle_button.get_active():
+            self.loop_toggle_button.set_active(False)
         return True
 
     def ask_for_annotation_type(self, text=None, create=False):
