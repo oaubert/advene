@@ -1236,7 +1236,6 @@ class AdveneController:
         self.future_begins = None
         self.future_ends = None
         self.active_annotations = []
-        self.videotime_bookmarks = []
 
     def update_status (self, status=None, position=None, notify=True):
         """Update the player status.
@@ -1253,6 +1252,12 @@ class AdveneController:
         #print "update status:", status, position
         if status == 'set' or status == 'start' or status == 'stop':
             self.reset_annotation_lists()
+            if notify:
+                # Bit of a hack... In a loop context, setting the
+                # position is done with notify=False, so we do not
+                # want to remove videotime_bookmarks                
+                self.videotime_bookmarks = []
+
             # It was defined in a rule, but this prevented the snapshot
             # to be taken *before* moving
             self.update_snapshot(position_before)
