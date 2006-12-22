@@ -232,6 +232,8 @@ class AdveneGUI (Connect):
         self.oldstatus = "NotStarted"
 
         self.last_slow_position = 0
+        
+        self.current_annotation = None
 
         # List of active annotation views (timeline, tree, ...)
         self.adhoc_views = []
@@ -554,14 +556,16 @@ class AdveneGUI (Connect):
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
-    def update_loop_button(self, b, a=None):
-        b.annotation=a
-        if a is None:
+    def set_current_annotation(self, a):
+        self.current_annotation=a
+        self.update_loop_button()
+
+    def update_loop_button(self):
+        b=self.loop_toggle_button
+        if self.current_annotation is None:
             mes=_("No loop annotation")
-            b.set_active(False)
         else:
-            mes=_("Looping on %s") % self.controller.get_title(a)
-            b.set_active(True)
+            mes=_("Looping on %s") % self.controller.get_title(self.current_annotation)
         b.set_tooltip(self.tooltips, mes)
         return True
 
@@ -633,15 +637,15 @@ class AdveneGUI (Connect):
         # Append the loop checkitem to the toolbar
         def loop_toggle_cb(b):
             if b.get_active():
-                if b.annotation:
-                    self.loop_on_annotation_gui(b.annotation, goto=True)
+                if self.current_annotation:
+                    self.loop_on_annotation_gui(self.current_annotation, goto=True)
                 else:
                     # No annotation was previously defined, deactivate the button
                     b.set_active(False)
             return True
 
         self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
-        self.update_loop_button(self.loop_toggle_button, None)
+        self.update_loop_button()
         self.loop_toggle_button.connect("toggled", loop_toggle_cb)
         self.player_toolbar.insert(self.loop_toggle_button, -1)
         
@@ -826,7 +830,7 @@ class AdveneGUI (Connect):
         In addition to the standard "Loop on annotation", it updates a
         checkbox to activate/deactivate looping.
         """
-        self.update_loop_button(self.loop_toggle_button, a)
+        self.set_current_annotation(a)
         def action_loop(controller, position):
             if self.loop_toggle_button.get_active():
                 # Reactivate the loop.
@@ -1349,15 +1353,16 @@ class AdveneGUI (Connect):
         # reset by user interaction            
         if not self.controller.videotime_bookmarks and self.loop_toggle_button.get_active():
             self.loop_toggle_button.set_active(False)
+
 	# Fix the webserver reaction time on win32
-	if config.data.os == 'win32':
- 	    if self.controller.player.status in self.active_player_status:
-        	i=57
-  	    else:
-        	i=10
-  	    if sys.getcheckinterval() != i:
-		sys.setcheckinterval(i)
-	
+        if config.data.os == 'win32':
+            if self.controller.player.status in self.active_player_status:
+                i=57
+            else:
+                i=10
+            if sys.getcheckinterval() != i:
+                sys.setcheckinterval(i)
+        
         return True
 
     def ask_for_annotation_type(self, text=None, create=False):
