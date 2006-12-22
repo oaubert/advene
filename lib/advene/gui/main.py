@@ -553,6 +553,17 @@ class AdveneGUI (Connect):
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
+    def update_loop_button(self, b, a=None):
+        b.annotation=a
+        if a is None:
+            mes=_("No loop annotation")
+            b.set_active(False)
+        else:
+            mes=_("Looping on %s") % self.controller.get_title(a)
+            b.set_active(True)
+        b.set_tooltip(self.tooltips, mes)
+        return True
+
     def get_visualisation_widget(self):
         """Return the main visualisation widget.
 
@@ -617,6 +628,21 @@ class AdveneGUI (Connect):
         self.player_toolbar.volumeslider=volumeslider
         b.set_tooltip(self.tooltips, _("Sound level (0..100)"))
         self.player_toolbar.insert(b, -1)
+        
+        # Append the loop checkitem to the toolbar
+        def loop_toggle_cb(b):
+            if b.get_active():
+                if b.annotation:
+                    self.loop_on_annotation_gui(b.annotation, goto=True)
+                else:
+                    # No annotation was previously defined, deactivate the button
+                    b.set_active(False)
+            return True
+
+        self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
+        self.update_loop_button(self.loop_toggle_button, None)
+        self.loop_toggle_button.connect("toggled", loop_toggle_cb)
+        self.player_toolbar.insert(self.loop_toggle_button, -1)
         
         # Append the player status label to the toolbar
         ts=gtk.SeparatorToolItem()
@@ -792,6 +818,29 @@ class AdveneGUI (Connect):
         
         return tb
 
+    def loop_on_annotation_gui(self, a, goto=False):
+        """GUI version of controller.loop_on_annotation
+
+        If "goto" is True, then go to the beginning of the annotation
+        In addition to the standard "Loop on annotation", it updates a
+        checkbox to activate/deactivate looping.
+        """
+        self.update_loop_button(self.loop_toggle_button, a)
+        def action_loop(controller, position):
+            if self.loop_toggle_button.get_active():
+                # Reactivate the loop.
+                self.loop_on_annotation_gui(a, goto=True)
+            return True
+        # Note: the goto action has to be done *before* registering the videotime action, since 
+        # setting a position resets the action queue.
+        def reg():
+            if goto:
+                self.controller.update_status('set', a.fragment.begin, notify=False)
+            self.controller.register_videotime_action(a.fragment.end, action_loop)
+            return True
+        self.controller.queue_action(reg)
+        return True
+    
     def debug_cb(self, window, event, *p):
         print "Got event %s (%d, %d) in window %s" % (str(event),
                                                       event.x,
