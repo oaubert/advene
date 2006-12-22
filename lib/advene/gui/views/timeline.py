@@ -847,7 +847,7 @@ class TimeLine(AdhocView):
             self.controller.notify("RelationCreate", relation=relation)
         return True
 
-    def button_press_handler(self, widget, event, annotation):
+    def annotation_button_press_cb(self, widget, event, annotation):
         """Handle button presses on annotation widgets.
         """
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
@@ -933,7 +933,7 @@ class TimeLine(AdhocView):
 
         return
 
-    def button_key_handler(self, widget, event, annotation):
+    def annotation_key_press_cb(self, widget, event, annotation):
         """Handle key presses on annotation widgets.
         """
         if event.keyval == gtk.keysyms.e:
@@ -946,6 +946,7 @@ class TimeLine(AdhocView):
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
+            c.gui.set_current_annotation(annotation)
             return True
         elif event.keyval == gtk.keysyms.p:
             # Play
@@ -966,6 +967,7 @@ class TimeLine(AdhocView):
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
+            c.gui.set_current_annotation(annotation)
             return True
         elif event.keyval == gtk.keysyms.Return:
             # Quick edit
@@ -1033,8 +1035,8 @@ class TimeLine(AdhocView):
         self.layout.put(b, 0, 0)
         self.update_button(b)
 
-        b.connect("button_press_event", self.button_press_handler, annotation)
-        b.connect("key_press_event", self.button_key_handler, annotation)
+        b.connect("button_press_event", self.annotation_button_press_cb, annotation)
+        b.connect("key_press_event", self.annotation_key_press_cb, annotation)
 
         b.connect("enter", self.rel_activate)
         b.connect("leave", self.rel_deactivate)
