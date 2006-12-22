@@ -5,8 +5,8 @@ advene (0.21) unstable; urgency=low
     the syntax: alias=uri
 
   * New file format: .apl (Advene package list). It is used to save a work
-	session (list of opened packages), from the File/Save session menu.
-	
+        session (list of opened packages), from the File/Save session menu.
+        
   * The default template is now template.azp, so that new packages have a
     Resources reference by default.
 
@@ -43,7 +43,8 @@ advene (0.21) unstable; urgency=low
       can be merged into the current package.
   
     * the player control toolbar has been put beneath the video output,
-      and is hidden in embedded adhoc views
+      and is hidden in embedded adhoc views. The main player control
+      toolbar presents a volume control widget.
 
     * non-text resources/contents are handled by a GenericContentHandler,
       that offers loading/saving to/from a file.
@@ -61,7 +62,8 @@ advene (0.21) unstable; urgency=low
     * optionally ask to save the imagecache on exit (cf preferences)
 
     * in interactive query (menu Edit/Find), propose multiple output modes
-	(timeline, edit window, python evaluator)
+        (timeline, edit window, python evaluator), and offer a simplified
+        search box to search for a string in the annotations content.
 
   * Views:
 
@@ -80,8 +82,11 @@ advene (0.21) unstable; urgency=low
     * it is possible to duplicate an annotation (same duration)
 
     * new 'Caption' view widget intended to replace the caption
-      functionality in non-complete players
-  
+      functionality in non-complete players (experimental)
+
+    * "Loop on annotation" feature, accessible from the context menu of
+      annotations
+        
     * timeline:
 
       * it is possible to specify the ordered list of
@@ -110,7 +115,7 @@ advene (0.21) unstable; urgency=low
 
       * annotation widget shortcuts: 'e' to edit, 'p' to play (begin or
         end, depending on the cursor position), 'Return' to quickly edit the
-	content, space plays the active annotation (even it the cursor is
+        content, space plays the active annotation (even it the cursor is
         not on the annotation widget) 
   
       * shortcut: 'p' in the timeline background plays the movie at the
@@ -120,11 +125,14 @@ advene (0.21) unstable; urgency=low
         their type
   
       * new button "Center on current position"
+
+      * new contextual action "Center and zoom", to center and zoom on the
+        given annotation
   
       * some basic type checking and conversion is done when transmuting
         annotations
 
-       * Return on an annotation type will create a new annotation "on the
+      * Return on an annotation type will create a new annotation "on the
         fly" (aligned with the current video time).
 
     * display parameters of the timeline (font-size, button height...) are
@@ -138,7 +146,7 @@ advene (0.21) unstable; urgency=low
       * allow to get a transcription either for the whole package, or for
         a given annotation type
   
-    * transcription edition:
+    * note-taking widget:
 
       * it is possible to import existing annotations
 
@@ -150,6 +158,9 @@ advene (0.21) unstable; urgency=low
         timestamp when the control key is released. 
   
       * control+click on a mark sets the timestamp to the current movie time
+
+      * timestamps marks can be auto-inserted when starting to type, by
+        setting an appropriate delay in the Preferences
 
   * Actions:
 
