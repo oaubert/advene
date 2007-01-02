@@ -1,6 +1,7 @@
 doc/README
-doc/TODO
 doc/copyright
 doc/developper.txt
 doc/mimetypes.txt
 doc/mediacontrol.txt
+doc/adhoc-views.txt
+doc/fileformat.txt
