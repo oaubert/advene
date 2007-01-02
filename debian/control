@@ -1,5 +1,5 @@
 Source: advene
-Maintainer: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>
+Maintainer: Olivier Aubert <olivier.aubert@liris.cnrs.fr>
 Build-Depends: debhelper (>= 5.0.37.2)
 Standards-Version: 3.6.0
 Section: graphics
