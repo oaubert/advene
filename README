@@ -2,10 +2,13 @@ Advene prototype
 
 * Requirements:
 
-The only supported player for the moment is VLC through a native VLC plugin
-or a CORBA module. You have to install the python-vlc plugin
-or CORBA support for VLC (see http://liris.cnrs.fr/advene/download/)
-to access movies.
+The only supported cross-platform player for the moment is VLC through
+a native VLC plugin or a CORBA module. You have to install the
+python-vlc plugin or CORBA support for VLC (see
+http://liris.cnrs.fr/advene/download/) to access movies.
+
+Linux users may use the gstreamer framework, through the
+python-gstreamer module (>= 0.10).
 
 * Linux version
 
