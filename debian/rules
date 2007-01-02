@@ -2,7 +2,7 @@
 
 build_dir   = build
 install_dir = debian/tmp
-setup       = /usr/bin/python2.3 ./setup.py --quiet
+setup       = python ./setup.py --quiet
 
 binary: binary-indep
 
