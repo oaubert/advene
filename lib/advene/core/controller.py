@@ -631,6 +631,10 @@ class AdveneController:
         self.player.playlist_clear()
 	if uri is not None and uri != "":
 	    self.player.playlist_add_item (uri)
+            # Reset the imagecache
+            id_ = helper.mediafile2id (uri)
+            self.package.imagecache=ImageCache()
+            self.package.imagecache.load (id_)
 	self.notify("MediaChange", uri=uri, comment="Set default media")
 
     def transmute_annotation(self, annotation, annotationType, delete=False):
