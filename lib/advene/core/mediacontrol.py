@@ -50,9 +50,18 @@ class PlayerFactory:
 		print "Fallback to dummy module"
                 import advene.player.dummy as playermodule
         except ImportError:
-            print "Cannot import %s mediaplayer. Using dummy player." % p
-            import advene.player.dummy as playermodule
-            
+            if config.data.os == 'linux':
+                try:
+                    print "Cannot import %s mediaplayer. Trying gstreamer player." % p
+                    import advene.player.gstreamer as playermodule
+                    print "gstreamer player activated."
+                except ImportError:
+                    print "Cannot import gstreamer mediaplayer. Using dummy player."
+                    import advene.player.dummy as playermodule
+            else:
+                print "Cannot import gstreamer mediaplayer. Using dummy player."
+                import advene.player.dummy as playermodule
+
         return playermodule.Player()
 
     def nativevlc_win32_import(self):
