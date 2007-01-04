@@ -1031,7 +1031,7 @@ class AdveneController:
                 self.log(_("Cannot handle master attribute, the package %s is not imported.") % master_uri)
             else:
                 self.log(_("Checking master package %s for not yet imported elements.") % master_uri)
-                self.handle_master_meta(self.package, i[0].package)
+                self.handle_auto_import(self.package, i[0].package)
 
         return True
 
