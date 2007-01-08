@@ -2163,7 +2163,8 @@ Available views: timeline, tree, browser, transcribe"""))
             'height': config.data.player['snapshot-dimensions'][1],
             'level': config.data.player['verbose'] or -1,
             }
-        for n in ('caption', 'osdfont', 'snapshot', 'vout', 'svg'):
+        items=('caption', 'osdfont', 'snapshot', 'vout', 'svg', 'dvd-device')
+        for n in items:
             cache[n] = config.data.player[n]
 
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
@@ -2181,9 +2182,11 @@ Available views: timeline, tree, browser, transcribe"""))
         ew.add_title(_("Video"))
         options={_("Default"): 'default' }
         if config.data.os == 'win32':
+            ew.add_entry(_("DVD drive"), 'dvd-device', _("Drive letter for the DVD"))
             options[_("GDI")] = 'wingdi'
             options[_("Direct X")] = 'directx'
         else:
+            ew.add_entry(_("DVD device"), 'dvd-device', _("Device for the DVD"))
             options[_("X11")] = 'x11'
             options[_("XVideo")] = 'xvideo'
         ew.add_option(_("Output"), "vout", _("Video output module"), options)
@@ -2194,7 +2197,7 @@ Available views: timeline, tree, browser, transcribe"""))
 
         res=ew.popup()
         if res:
-            for n in ('caption', 'osdfont', 'snapshot', 'vout', 'svg'):
+            for n in items:
                 config.data.player[n] = cache[n]
             config.data.player['snapshot-dimensions']    = (cache['width'] ,
                                                             cache['height'])
