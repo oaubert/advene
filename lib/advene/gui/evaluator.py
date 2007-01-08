@@ -283,7 +283,10 @@ class Window:
         try:
             res=eval(expr, self.globals_, self.locals_)
             self.clear_output()
-            self.log(unicode(res))
+            try:
+                self.log(unicode(res))
+            except UnicodeDecodeError:
+                self.log(unicode(repr(res)))
             if symbol is not None:
                 if not '.' in symbol and not symbol.endswith(']'):
                     self.log('\n\n[Value stored in %s]' % symbol)
