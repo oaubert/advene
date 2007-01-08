@@ -120,17 +120,10 @@ class Player(object):
         pos.value = 0
         self.relative_position = pos
 
-        o=vlc.Object(0)
-        self.dvd_device = o.config_get("dvd")
+        
+        self.dvd_device = config.data.player['dvd-device']
 
-        o.config_set("repeat", True)
-        o.config_set("loop", True)
-
-        # For debug purposes, it can be interesting to directly
-        # deal with the vlc.Object
-        self.o=o
-
-        # Current position value (updated by self.position_update ())
+        # Attributes updated by self.position_update
         self.status = vlc.UndefinedStatus
         self.current_position_value = 0
         self.stream_duration = 0
@@ -301,11 +294,5 @@ class Player(object):
         return Snapshot(d)
 
     def set_visual(self, xid):
-        try:
-            self.mc.set_visual(xid)
-        except AttributeError:
-            # Old vlc API. Use the old way
-            o=vlc.Object(0)
-            o.set('drawable', xid)
-        return
+        self.mc.set_visual(xid)
 
