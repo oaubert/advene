@@ -229,6 +229,7 @@ class Config(object):
             'caption': True,
             'snapshot-dimensions': (160,100),
             'snapshot-chroma': 'RV32',
+            'dvd-device': '/dev/dvd',
             }
 
         self.webserver = {
@@ -367,6 +368,7 @@ class Config(object):
     def win32_specific_config(self):
         if self.os != 'win32':
             return
+        self.player['dvd-device']='E:'
         advenehome=self.get_registry_value('software\\advene','path')
         if advenehome is None:
             print "Cannot get the Advene location from registry"
