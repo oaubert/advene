@@ -67,6 +67,8 @@ class HistoryNavigation(AdhocView):
         return True
 
     def append(self, position):
+        if position in self.history:
+            return True
         self.history.append(position)
         if self.ordered:
             self.history.sort()
