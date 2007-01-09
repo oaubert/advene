@@ -114,6 +114,14 @@ class HistoryNavigation(AdhocView):
         self.mainbox.show_all()
         return True
 
+    def drag_received(self, widget, context, x, y, selection, targetType, time):
+        if targetType == config.data.target_type['timestamp']:
+            position=long(selection.data)
+            self.append(position)
+        else:
+            print "Unknown target type for drop: %d" % targetType
+        return True
+
     def build_widget(self):
         v=gtk.VBox()
 
@@ -128,6 +136,12 @@ class HistoryNavigation(AdhocView):
         sw.add_with_viewport(mainbox)
         self.scrollwindow=sw
         self.mainbox=mainbox
+
+        self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                  gtk.DEST_DEFAULT_HIGHLIGHT |
+                                  gtk.DEST_DEFAULT_ALL,
+                                  config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK)
+        self.mainbox.connect("drag_data_received", self.drag_received)
 
         v.add(sw)
 
