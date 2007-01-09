@@ -393,7 +393,7 @@ class TimeLine(AdhocView):
         print "Debug event."
         if data is not None:
             print "Data: %s" % data
-        return True
+        return False
 
     def get_widget_for_annotation (self, annotation):
         bs = [ b
@@ -724,6 +724,8 @@ class TimeLine(AdhocView):
                         'uri': widget.annotation.uri,
                         'fraction': widget._drag_fraction,
                         } ))
+        elif targetType == config.data.target_type['timestamp']:
+            selection.set(selection.target, 8, str(widget.annotation.fragment.begin))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
@@ -1072,7 +1074,9 @@ class TimeLine(AdhocView):
                           + config.data.drag_type['uri-list']
                           + config.data.drag_type['text-plain']
                           + config.data.drag_type['TEXT']
-                          + config.data.drag_type['STRING'],
+                          + config.data.drag_type['STRING']
+                          + config.data.drag_type['timestamp']
+                          ,
                           gtk.gdk.ACTION_LINK)
         # The button can receive drops (to create relations)
         b.connect("drag_data_received", self.drag_received)
