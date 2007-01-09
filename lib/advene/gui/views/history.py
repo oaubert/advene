@@ -27,10 +27,8 @@ from gettext import gettext as _
 
 import gtk
 
-# FIXME: handle DND from navigation and/or timeline
-
 class HistoryNavigation(AdhocView):
-    def __init__(self, controller=None, history=None, vertical=True, ordered=False):
+    def __init__(self, controller=None, history=None, vertical=True, ordered=False, closable=True):
         self.view_name = _("Navigation history")
         self.view_id = 'historyview'
         self.close_on_package_load = False
@@ -38,6 +36,7 @@ class HistoryNavigation(AdhocView):
             (_("Clear"), self.clear),
             )
 
+        self.closable=closable
         self.controller=controller
         self.history=history
         self.scrollwindow=None
@@ -48,10 +47,14 @@ class HistoryNavigation(AdhocView):
         self.ordered=ordered
         self.mainbox=None
         self.widget=self.build_widget()
-        self.fill_widget()
+        self.refresh()
 
     def close(self, *p):
-        return False
+        if self.closable:
+            AdhocView.close(self)
+            return True
+        else:
+            return False
 
     def register_callback (self, controller=None):
         self.changerule=controller.event_handler.internal_rule (event="MediaChange",
@@ -62,7 +65,7 @@ class HistoryNavigation(AdhocView):
         controller.event_handler.remove_rule(self.changerule, type_="internal")
         return True
 
-    def activate(self, widget=None, data=None, timestamp=None):
+    def activate(self, widget=None, timestamp=None):
         self.controller.update_status("set", timestamp, notify=False)
         return True
 
@@ -72,15 +75,20 @@ class HistoryNavigation(AdhocView):
         self.history.append(position)
         if self.ordered:
             self.history.sort()
-            self.mainbox.foreach(self.remove_widget, self.mainbox)
-            for p in self.history:
-                self.append_repr(p)
+            self.refresh()
         else:
             self.append_repr(position)
         return True
 
     def remove_widget(self, widget=None, container=None):
         container.remove(widget)
+        return True
+
+    def refresh(self, *p):
+        self.mainbox.foreach(self.remove_widget, self.mainbox)
+        for p in self.history:
+            self.append_repr(p)
+        self.mainbox.show_all()
         return True
 
     def clear(self, *p):
@@ -101,8 +109,9 @@ class HistoryNavigation(AdhocView):
         i=advene.gui.util.image_from_position(self.controller,
                                               t,
                                               width=self.snapshot_width)
-        e=gtk.EventBox()
-        e.connect("button-release-event", self.activate, t)
+        e=gtk.Button()
+        #e.connect("button-release-event", self.activate, t)
+        e.connect("clicked", self.activate, t)
         e.add(i)
 
         # The button can generate drags
@@ -125,21 +134,6 @@ class HistoryNavigation(AdhocView):
             adj.set_value(adj.upper)
         self.mainbox.add(vbox)
 
-    def fill_widget(self):
-        self.mainbox.foreach(self.remove_widget, self.mainbox)
-        for t in self.history:
-            self.append_repr(t)
-        self.mainbox.show_all()
-        return True
-
-    def drag_received(self, widget, context, x, y, selection, targetType, time):
-        if targetType == config.data.target_type['timestamp']:
-            position=long(selection.data)
-            self.append(position)
-        else:
-            print "Unknown target type for drop: %d" % targetType
-        return True
-
     def build_widget(self):
         v=gtk.VBox()
 
@@ -155,12 +149,39 @@ class HistoryNavigation(AdhocView):
         self.scrollwindow=sw
         self.mainbox=mainbox
 
+        def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
+            if targetType == config.data.target_type['timestamp']:
+                position=long(selection.data)
+                self.append(position)
+            else:
+                print "Unknown target type for drop: %d" % targetType
+            return True
+
         self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
                                   gtk.DEST_DEFAULT_ALL,
                                   config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK)
-        self.mainbox.connect("drag_data_received", self.drag_received)
+        self.mainbox.connect("drag_data_received", mainbox_drag_received)
+
+        def remove_drag_received(widget, context, x, y, selection, targetType, time):
+            if targetType == config.data.target_type['timestamp']:
+                position=long(selection.data)
+                if position in self.history:
+                    self.history.remove(position)
+                self.refresh()
+            else:
+                print "Unknown target type for drop: %d" % targetType
+            return True
 
         v.add(sw)
+
+        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
+        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK)
+        b.connect("drag_data_received", remove_drag_received)
+        v.pack_start(b, expand=False)
 
         return v
