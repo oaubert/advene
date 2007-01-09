@@ -87,6 +87,14 @@ class HistoryNavigation(AdhocView):
         return True
 
     def append_repr(self, t):
+
+        def drag_sent(widget, context, selection, targetType, eventTime):
+            if targetType == config.data.target_type['timestamp']:
+                selection.set(selection.target, 8, str(t))
+            else:
+                print "Unknown target type for drag: %d" % targetType
+            return True
+
         vbox=gtk.VBox()
         i=advene.gui.util.image_from_position(self.controller,
                                               t,
@@ -94,6 +102,14 @@ class HistoryNavigation(AdhocView):
         e=gtk.EventBox()
         e.connect("button-release-event", self.activate, t)
         e.add(i)
+
+        # The button can generate drags
+        e.connect("drag_data_get", drag_sent)
+
+        e.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.drag_type['timestamp'],
+                          gtk.gdk.ACTION_LINK)
+
         vbox.pack_start(e, expand=False)
         l = gtk.Label(helper.format_time(t))
         vbox.pack_start(l, expand=False)
