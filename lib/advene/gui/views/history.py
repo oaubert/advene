@@ -30,7 +30,7 @@ import gtk
 # FIXME: handle DND from navigation and/or timeline
 
 class HistoryNavigation(AdhocView):
-    def __init__(self, controller=None, history=None, vertical=True):
+    def __init__(self, controller=None, history=None, vertical=True, ordered=False):
         self.view_name = _("Navigation history")
         self.view_id = 'historyview'
         self.close_on_package_load = False
@@ -45,6 +45,7 @@ class HistoryNavigation(AdhocView):
         if history is None:
             self.history=[]
         self.vertical=vertical
+        self.ordered=ordered
         self.mainbox=None
         self.widget=self.build_widget()
         self.fill_widget()
@@ -67,7 +68,13 @@ class HistoryNavigation(AdhocView):
 
     def append(self, position):
         self.history.append(position)
-        self.append_repr(position)
+        if self.ordered:
+            self.history.sort()
+            self.mainbox.foreach(self.remove_widget, self.mainbox)
+            for p in self.history:
+                self.append_repr(p)
+        else:
+            self.append_repr(position)
         return True
 
     def remove_widget(self, widget=None, container=None):
