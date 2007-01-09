@@ -1,3 +1,16 @@
+advene (0.22) unstable; urgency=low
+
+  * DVD device/drive: it can be configured from the Player preferences window
+	
+  * Navigation history:
+	* items from the history are removable (by drag and drop on the
+	Remove button)
+	* it is possible to open many history views. They can be populated
+	by drag and drop from the other history views or the timeline, and
+	act as a visual table of contents.
+	
+ -- Olivier Aubert <oaubert@liris.cnrs.fr>
+	
 advene (0.21) unstable; urgency=low
 
   * New command line options. Do advene --help to see them. It is possible
