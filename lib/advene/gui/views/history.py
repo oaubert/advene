@@ -27,8 +27,10 @@ from gettext import gettext as _
 
 import gtk
 
+# FIXME: handle DND from navigation and/or timeline
+
 class HistoryNavigation(AdhocView):
-    def __init__(self, controller=None, history=None, container=None, vertical=True):
+    def __init__(self, controller=None, history=None, vertical=True):
         self.view_name = _("Navigation history")
         self.view_id = 'historyview'
         self.close_on_package_load = False
@@ -38,7 +40,6 @@ class HistoryNavigation(AdhocView):
 
         self.controller=controller
         self.history=history
-        self.container=container
         self.scrollwindow=None
         self.snapshot_width=100
         if history is None:
