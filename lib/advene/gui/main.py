@@ -202,6 +202,7 @@ class AdveneGUI (Connect):
             ('webbrowser', _('Open a web browser'), 'web.png'),
             ('transcribe', _('Take notes on the fly'), 'transcribe.png'),
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
+            ('history', _('Entry points'), 'history.png'),
             ):
             b=gtk.Button()
             i=gtk.Image()
@@ -702,7 +703,7 @@ class AdveneGUI (Connect):
         self.gui.get_widget('urlstack1').set_property('visible', False)
 
         # Second viewbook
-        self.navigation_history=HistoryNavigation(controller=self.controller)
+        self.navigation_history=HistoryNavigation(controller=self.controller, closable=True)
         # Navigation history is embedded. The menu item is useless :
         self.gui.get_widget('navigationhistory1').set_property('visible', False)
         vb2.add_view(self.navigation_history, name=_("History"), permanent=True)
@@ -1013,6 +1014,8 @@ class AdveneGUI (Connect):
         elif name == 'timeline':
             view = advene.gui.views.timeline.TimeLine (l=None,
                                                        controller=self.controller)
+        if name == 'history':
+            view=advene.gui.views.history.HistoryNavigation(self.controller, ordered=True)
         elif name == 'transcription':
             try:
                 m=kw['model']
@@ -1915,7 +1918,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_navigationhistory1_activate (self, button=None, data=None):
-        h=advene.gui.views.history.HistoryNavigation(self.controller, self.navigation_history)
+        h=advene.gui.views.history.HistoryNavigation(self.controller, self.navigation_history, closable=False)
         h.popup()
         return True
 
