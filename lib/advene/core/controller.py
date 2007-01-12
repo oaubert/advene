@@ -616,6 +616,14 @@ class AdveneController:
                     break
         return mediafile
 
+    def set_media(self, uri=None):
+        if isinstance(uri, unicode):
+            uri=uri.encode('utf8')
+        self.player.playlist_clear()
+        if uri is not None:
+            self.player.playlist_add_item (uri)
+        self.notify("MediaChange", uri=uri)
+
     def set_default_media (self, uri, package=None):
         if package is None:
             package=self.package
@@ -628,14 +636,12 @@ class AdveneController:
         package.setMetaData (config.data.namespace, "mediafile", uri)
         if m:
             uri=self.player.dvd_uri(title, chapter)
-        self.player.playlist_clear()
+        self.set_media(uri)
+        # Reset the imagecache
+        self.package.imagecache=ImageCache()
 	if uri is not None and uri != "":
-	    self.player.playlist_add_item (uri)
-            # Reset the imagecache
             id_ = helper.mediafile2id (uri)
-            self.package.imagecache=ImageCache()
             self.package.imagecache.load (id_)
-	self.notify("MediaChange", uri=uri, comment="Set default media")
 
     def transmute_annotation(self, annotation, annotationType, delete=False):
         """Transmute an annotation to a new type.
@@ -750,11 +756,7 @@ class AdveneController:
         self.player.restart_player ()
         mediafile = self.get_default_media()
         if mediafile != "":
-            if isinstance(mediafile, unicode):
-                mediafile=mediafile.encode('utf8')
-            self.player.playlist_clear()
-            self.player.playlist_add_item (mediafile)
-	    self.notify("MediaChange", uri=mediafile, comment="Restart player")
+            self.set_media(mediafile)
 
     def get_timestamp(self):
 	return time.strftime("%Y-%m-%d")
@@ -903,14 +905,9 @@ class AdveneController:
             if self.player.is_active():
                 if mediafile not in self.player.playlist_get_list ():
                     # Update the player playlist
-                    if isinstance(mediafile, unicode):
-                        mediafile=mediafile.encode('utf8')
-                    self.player.playlist_clear()
-                    self.player.playlist_add_item (mediafile)
-		    self.notify("MediaChange", uri=mediafile, comment="Activate package")
+                    self.set_media(mediafile)
 	else:
-	    self.player.playlist_clear()
-	    self.notify("MediaChange", uri=None, comment="Activate package")
+            self.set_media(None)
 
         self.notify ("PackageActivate", package = self.package)
 
