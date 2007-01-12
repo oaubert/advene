@@ -910,7 +910,7 @@ class TimeLine(AdhocView):
                                 r = "%s=%s" % (name,
                                                e.get_text().replace('\n', '\\n'))
                     else:
-                        self.log("Cannot update the annotation, its representation is too complex")
+                        self.controller.log("Cannot update the annotation, its representation is too complex")
                         r=annotation.content.data
                 annotation.content.data = r
                 if callback:
