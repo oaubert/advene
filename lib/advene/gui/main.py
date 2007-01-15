@@ -514,27 +514,6 @@ class AdveneGUI (Connect):
             self.gui.get_widget("displayvbox").add(sw)
             sw.show_all()
 
-        self.webserver_logstream = StringIO.StringIO()
-        if self.controller.server:
-            self.controller.server.set_log_handler(self.webserver_logstream)
-        else:
-            self.webserver_logstream.write(_("There is no active webserver."))
-
-        if config.data.webserver['mode'] == 1:
-            if self.controller.server:
-                self.log(_("Using Mainloop input handling for webserver..."))
-                gobject.io_add_watch (self.controller.server,
-                                      gobject.IO_IN,
-                                      self.controller.handle_http_request)
-                if config.data.os == 'win32':
-                    # Win32 workaround for the reactivity problem
-                    def sleeper():
-                        time.sleep(.001)
-                        return True
-                    gobject.timeout_add(400, sleeper)
-            else:
-                self.log(_("No available webserver"))
-
         # Populate the file history menu
         for filename in config.data.preferences['history']:
             self.append_file_history_menu(filename)
@@ -1873,10 +1852,9 @@ class AdveneGUI (Connect):
             b=t.get_buffer()
             begin,end = b.get_bounds ()
             b.delete(begin, end)
-            if self.controller.server:
-                b.set_text(self.webserver_logstream.getvalue())
-            else:
-                b.set_text(_("No available webserver"))
+            f=open(config.data.advenefile('webserver.log', 'settings'), 'r')
+            b.set_text("".join(f.readlines()))
+            f.close()
             return True
 
         def close(b, w):
