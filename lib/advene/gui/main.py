@@ -1360,9 +1360,9 @@ class AdveneGUI (Connect):
 	# Fix the webserver reaction time on win32
         if config.data.os == 'win32':
             if self.controller.player.status in self.active_player_status:
-                i=57
+                i=config.data.play_interval
             else:
-                i=10
+                i=config.data.noplay_interval
             if sys.getcheckinterval() != i:
                 sys.setcheckinterval(i)
         
