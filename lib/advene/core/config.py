@@ -371,8 +371,8 @@ class Config(object):
             return
 
         # Trying to get around win32's problems with threads...
-        config.data.noplay_interval=10
-        config.data.play_interval=57
+        self.noplay_interval=10
+        self.play_interval=57
 
         self.player['dvd-device']='E:'
         advenehome=self.get_registry_value('software\\advene','path')
