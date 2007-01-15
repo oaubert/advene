@@ -60,7 +60,11 @@ import advene.util.helper as helper
 import advene.rules.importer
 
 if config.data.webserver['mode']:
-    import advene.core.webserver
+    e=config.data.webserver['engine']
+    if e == 'cherrypy':
+        from advene.core.webcherry import AdveneWebServer
+    else:
+        from advene.core.webserver import AdveneWebServer
 
 import threading
 
@@ -209,15 +213,6 @@ class AdveneController:
 	"""Autonomous gobject loop for GUI-less controller.
 	"""
 	self.mainloop = gobject.MainLoop()
-        if config.data.webserver['mode'] == 1:
-	    # Run webserver in gobject mainloop
-	    if self.server:
-		self.log(_("Using Mainloop input handling for webserver..."))
-		gobject.io_add_watch (self.server,
-				      gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
-				      self.handle_http_request)
-	    else:
-		self.log(_("No available webserver"))
 
 	def update_wrapper():
 	    """Wrapper for the application update.
@@ -338,10 +333,12 @@ class AdveneController:
         self.register_videotime_action( a.fragment.end, action_loop )
         return True
 
-    def build_context(self, here=None, alias=None):
+    def build_context(self, here=None, alias=None, baseurl=None):
+        if baseurl is None:
+            baseurl=self.get_default_url(root=True, alias=alias)
         c=advene.model.tal.context.AdveneContext(here,
 						 options={
-		u'package_url': self.get_default_url(root=True, alias=alias),
+		u'package_url': baseurl,
 		u'snapshot': self.package.imagecache,
 		u'namespace_prefix': config.data.namespace_prefix,
 		u'config': config.data.web,
@@ -384,18 +381,17 @@ class AdveneController:
         if config.data.webserver['mode']:
             self.server=None
             try:
-                self.server = advene.core.webserver.AdveneWebServer(controller=self,
-                                                                    port=config.data.webserver['port'])
+                self.server = AdveneWebServer(controller=self, port=config.data.webserver['port'])
             except socket.error:
                 if config.data.os != 'win32':
                     self.busy_port_info()
                 self.log(_("Deactivating web server"))
 
-            # If == 1, it is the responsibility of the Gtk app
-            # to set the input loop
-            if config.data.webserver['mode'] == 2 and self.server:
-                self.serverthread = threading.Thread (target=self.server.serve_forawhile)
-                self.serverthread.start ()
+        # If == 1, it is the responsibility of the Gtk app
+        # to set the input loop
+        if config.data.webserver['mode'] == 2 and self.server:
+            self.serverthread = threading.Thread (target=self.server.start)
+            self.serverthread.start ()
 
 	media=None
         # Arguments handling
@@ -1167,7 +1163,7 @@ class AdveneController:
 
             # Terminate the web server
             try:
-                self.server.stop_serving ()
+                self.server.stop()
             except:
                 pass
 
