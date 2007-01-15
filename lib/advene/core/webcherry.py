@@ -43,8 +43,8 @@ import socket
 import imghdr
 import cherrypy
 
-if int(cherrypy.__version__.split('.')[0]) != 2:
-    raise _("The webserver requires version 2.2 of CherryPy.")
+if int(cherrypy.__version__.split('.')[0]) < 3:
+    raise _("The webserver requires version 3.0 of CherryPy at least.")
 
 from advene.model.package import Package
 from advene.model.fragment import MillisecondFragment
@@ -1878,24 +1878,18 @@ class AdveneWebServer:
                 'server.socket_port' : port,
                 #'server.socket_queue_size': 5,
                 #'server.protocol_version': "HTTP/1.0",
-                'server.log_to_screen': False,
-                'server.log_file': config.data.advenefile('webserver.log', 'settings'),
+                'log.screen': False,
+                'log.access_file': config.data.advenefile('webserver.log', 'settings'),
+                'log.error_file': config.data.advenefile('webserver-error.log', 'settings'),
                 'server.reverse_dns': False,
                 'server.thread_pool': 10,
+                'engine.autoreload_on': False,
                 #'server.environment': "development",
                 'server.environment': "production",
                 },
             #    '/admin': {
             #        'session_authenticate_filter.on' :True
             #        },
-            '/favicon.ico': {
-                'static_filter.on': True,
-                'static_filter.file': config.data.advenefile( ( 'pixmaps', 'dvd.ico' ) ),
-                },
-            '/data': {
-                'static_filter.on': True,
-                'static_filter.dir': config.data.path['web'],
-                },
             }
         cherrypy.config.update(settings)
 
@@ -1906,11 +1900,23 @@ class AdveneWebServer:
 
         self.urlbase = u"http://localhost:%d/" % port
 
-        cherrypy.tree.mount(Root(controller))
+        app_config={             
+            '/favicon.ico': {
+                'tools.staticfile.on': True,
+                'tools.staticfile.filename': config.data.advenefile( ( 'pixmaps', 'dvd.ico' ) ),
+                },
+            '/data': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': config.data.path['web'],
+                },
+            }
+        cherrypy.tree.mount(Root(controller), config=app_config)
 
     def start(self):
-        cherrypy.server.start()
+        cherrypy.server.quickstart()
+        cherrypy.engine.start()
         return True
 
     def stop(self):
+        cherrypy.engine.stop()
         cherrypy.server.stop()
