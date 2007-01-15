@@ -71,6 +71,10 @@ class PlaylistException(Exception):
 class InternalException(Exception):
     pass
 
+# Placeholder
+class Caption:
+    pass
+
 class Player:
     # Class attributes
     AbsolutePosition=0
@@ -100,12 +104,25 @@ class Player:
 
         self.xid = None
         sink='xvimagesink'
-        if config.data.player['vout'] == 'x11':
-            sink='ximagesink'
-            
+        #if config.data.player['vout'] == 'x11':
+        #    sink='ximagesink'
+
         self.player = gst.element_factory_make("playbin", "player")
+
+        self.video_sink = gst.Bin()
+
+        self.csp = gst.element_factory_make('ffmpegcolorspace', 'csp')
+        self.captioner=gst.element_factory_make('textoverlay', 'captioner')
+        self.captioner.props.font_desc='Sans 24'
+        #self.caption.props.text="Foobar"
         self.imagesink = gst.element_factory_make(sink, 'sink')
-        self.player.set_property('video-sink', self.imagesink)
+
+        self.video_sink.add(self.csp, self.captioner, self.imagesink)
+        self.csp.link(self.captioner)
+        self.captioner.link(self.imagesink)
+        self.video_sink.add_pad(gst.GhostPad('sink', self.csp.get_pad('sink')))
+
+        self.player.props.video_sink=self.video_sink
 
         # Snapshot format conversion infrastructure. Does not work...
         #self.pngconverter = gst.parse_launch("freeze name=source ! video/x-raw-rgb,width=160 ! pngenc name=encoder ! fakesink name=sink")
@@ -114,12 +131,18 @@ class Player:
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', self.on_sync_message)
 
+        self.caption=Caption()
+        self.caption.text=""
+        self.caption.begin=-1
+        self.caption.end=-1
+
         self.videofile=None
         self.status=Player.UndefinedStatus
         self.current_position_value = 0
         self.stream_duration = 0
         self.relative_position=self.create_position(0,
                                                     origin=self.RelativePosition)
+
         self.position_update()
 
     def position2value(self, p):
@@ -255,7 +278,10 @@ class Player:
         # use http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/gst-plugins-base-plugins-textoverlay.html
         if not self.check_uri():
             return
-        self.log("display_text %s" % str(message))
+        caption.begin=self.position2value(begin)
+        caption.end=self.position2value(end)
+        caption.text=message
+        self.captioner.props.text=message
 
     def get_stream_information(self):
         s=StreamInformation()
@@ -368,7 +394,10 @@ class Player:
         s = self.get_stream_information ()
         self.status = s.status
         self.stream_duration = s.length
-        self.current_position_value = float(s.position)
+        self.current_position_value = long(s.position)
+        if self.caption.text and (s.position < self.caption.begin
+                                  or s.position > self.caption.end):
+            self.display_text('', -1, -1)
 
     def set_visual(self, xid):
         self.xid = xid
