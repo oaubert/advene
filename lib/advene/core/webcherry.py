@@ -143,7 +143,7 @@ class Common:
         # Enforce utf-8 encoding on all text resources
         if mimetype.startswith('text/') and 'charset' not in mimetype:
             mimetype += '; charset=utf-8'
-        cherrypy.request.headers['Content-type']=mimetype
+        cherrypy.response.headers['Content-type']=mimetype
         if headers is not None:
             for h in headers:
                 cherrypy.request.headers[h[0]]=h[1]
@@ -1151,7 +1151,7 @@ class Packages(Common):
                 v=objet.view (context=context)
                 res.append( self.start_html(mimetype=v.contenttype) )
                 if v.contenttype.startswith('text'):
-                    res.append (v.encode('utf-8'))
+                    res.append (unicode(v).encode('utf-8'))
                 else:
                     res.append(v)
             except simpletal.simpleTAL.TemplateParseException, e:
