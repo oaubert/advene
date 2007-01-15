@@ -1,5 +1,3 @@
-#FIXME: in rewriting process. To know the place, look for FIXME:XXX
-
 #
 # This file is part of Advene.
 #
@@ -44,6 +42,9 @@ import cgi
 import socket
 import imghdr
 import cherrypy
+
+if int(cherrypy.__version__.split('.')[0]) != 2:
+    raise _("The webserver requires version 2.2 of CherryPy.")
 
 from advene.model.package import Package
 from advene.model.fragment import MillisecondFragment
@@ -90,7 +91,7 @@ class Common:
         @rtype: string
         """
         s = urllib.splittag(
-            urllib.splitquery(cherrypy.request.path)[0]
+            urllib.splitquery(cherrypy.request.path_info)[0]
             )[0]
         path = s.split('/')[1:]
         return """<a href="/">/</a>""" + "/".join(
@@ -137,10 +138,11 @@ class Common:
         if mode is None:
             mode = config.data.webserver['displaymode']
         cherrypy.response.status=200
-        if mode == 'navigation':
-            mimetype='text/html'
-        if mimetype is None or mimetype == 'text/html':
+        if mode == 'navigation' or mimetype is None or mimetype == 'text/html':
             mimetype='text/html; charset=utf-8'
+        # Enforce utf-8 encoding on all text resources
+        if mimetype.startswith('text/') and 'charset' not in mimetype:
+            mimetype += '; charset=utf-8'
         cherrypy.request.headers['Content-type']=mimetype
         if headers is not None:
             for h in headers:
@@ -166,7 +168,7 @@ class Common:
             Location: %(locationbar)s
             <hr>
             """) % { 'locationbar': self.location_bar (),
-                     'path': self.path})
+                     'path': cherrypy.request.path_info } )
 
         if duplicate_title and mode == 'navigation':
             res.append("<h1>%s</h1>\n" % title)
@@ -297,7 +299,7 @@ class Common:
                 res.append (_("""<h1>No playlist</h1>"""))
             else:
                 res.append (_("""<h1>Current playlist</h1>
-                <ul>%s</ul>""") % ("\n<li>".join (l)))
+                <ul>%s</ul>""") % ("\n<li>".join ([ str(i) for i in l ])))
                 res.append (_("""
                 <form action="/media/play" method="GET">
                 Starting pos: <input type="text" name="position" value="0">
@@ -318,12 +320,10 @@ class Common:
         if stbvid is not None:
             stbv=helper.get_id(self.controller.package.views, stbvid)
             if stbv is None:
-                self.send_error(400, _('Unknown STBV identifier: %s') % stbvid)
-                return
+                raise cherrypy.HTTPError(400, _('Unknown STBV identifier: %s') % stbvid)
         else:
             stbv=None
-        self.controller.activate_stbv(view=stbv)
-        return
+        self.controller.queue_action(self.controller.activate_stbv, view=stbv)
 
 class Media(Common):
     """Handles X{/media} access requests.
@@ -406,11 +406,7 @@ class Media(Common):
             if name == 'dvd':
                 name = self.controller.player.dvd_uri(1,1)
             try:
-                if isinstance(name, unicode):
-                    name=name.encode('utf8')
-                self.controller.queue_action(self.controller.player.playlist_add_item, name)
-                self.controller.notify("MediaChange", uri=name)
-
+                self.controller.queue_action(self.controller.set_media, name)
                 res.append(_("File added"))
                 res.append(_("""<p><strong>%s has been added to the playlist</strong></p>""") % name)
                 res.append(self.display_media_status ())
@@ -475,7 +471,7 @@ class Media(Common):
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
         if params.has_key ('filename'):
-            self.controller.set_media(params['filename'])
+            self.controller.queue_action(self.controller.set_media, params['filename'])
 
         if not self.controller.player.playlist_get_list():
             return self.send_no_content()
@@ -497,21 +493,21 @@ class Media(Common):
     def pause(self, **params):
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
-        self.controller.update_status('pause')
+        self.controller.queue_action(self.controller.update_status, 'pause')
         return self.send_no_content()
     pause.exposed=True
 
     def stop(self, **params):
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
-        self.controller.update_status('stop')
+        self.controller.queue_action(self.controller.update_status, 'stop')
         return self.send_no_content()
     stop.exposed=True
 
     def resume(self, **params):
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
-        self.controller.update_status('resume')
+        self.controller.queue_action(self.controller.update_status, 'resume')
         return self.send_no_content()
     resume.exposed=True
 
@@ -524,6 +520,26 @@ class Media(Common):
             return 'N/C'
     current.exposed=True
 
+    def stbv(self, *args, **query):
+        if not args and not query.has_key('id'):
+            cherrypy.response.headers['Content-Type']='text/plain'
+            return self.controller.current_stbv.id or 'None'
+        else:
+            if args:
+                stbvid=args[0]
+            else:
+                stbvid=query['id']
+            if stbvid == 'None':
+                stbvid=None
+            try:
+                self.activate_stbvid(stbvid)
+            except Exception, e:
+                return self.send_error(400, _("Cannot activate stbvid %(stbvid)s: %(error)s") % { 'stbvid': stbvid,
+                                                                                           'error': unicode(e) })
+            return self.send_redirect("/application/")
+
+    stbv.exposed=True
+        
 class Application(Common):
     """Handles X{/application} access requests.
 
@@ -737,6 +753,7 @@ class Access(Common):
     def index(self):
         return "".join( ( self.start_html(_('Access control'), duplicate_title=True),
                           self.display_access_list()) )
+    index.exposed=True
 
     def add(self, hostname):
         res=[self.start_html(_('Access control - add a hostname'), duplicate_title=True)]
@@ -763,7 +780,9 @@ class Access(Common):
         except:
             res.append (_("""<strong>Error: %s is an invalid hostname.</strong>""") % hostname)
 
-        if ip is not None:
+        if ip == '127.0.0.1':
+            res.append(_("""<strong>Cannot remove the localhost access.</strong>"""))
+        elif ip is not None:
             # Remove the hostname
             if ip in self.controller.server.authorized_hosts:
                 del self.controller.server.authorized_hosts[ip]
@@ -862,6 +881,7 @@ class Admin(Common):
         l=[ os.path.join(config.data.path['data'], n)
             for n in os.listdir(config.data.path['data'])
             if n.lower().endswith('.xml') or n.lower().endswith('.azp') ]
+        l.sort(lambda a, b: cmp(a.lower(), b.lower()))
         for uri in l:
             name, ext = os.path.splitext(uri)
             alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
@@ -888,6 +908,8 @@ class Admin(Common):
             return self.send_error (501,
                                     _("""You should specify an uri"""))
         try:
+            # FIXME: potential problem: this method executes in the webserver thread, which may
+            # cause problems with the GUI
             self.controller.load_package (uri=uri, alias=alias)
             return "".join( (
                 self.start_html (_("Package %s loaded") % alias, duplicate_title=True),
@@ -1054,7 +1076,7 @@ class Packages(Common):
         else:
             expr = "here/%s" % tales
 
-        context = self.controller.build_context (here=p, alias=alias)
+        context = self.controller.build_context (here=p, alias=alias, baseurl=cherrypy.url())
         context.pushLocals()
         context.setLocal('request', query)
         # FIXME: the following line is a hack for having qname-keys work
@@ -1140,6 +1162,7 @@ class Packages(Common):
                 <p>Error message: <em>%(message)s</em></p>""") % {
                         'tagname': cgi.escape(e.location),
                         'message': e.errorDescription} )
+                return "".join(res)
             except simpleTALES.ContextContentException, e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
@@ -1147,12 +1170,13 @@ class Packages(Common):
                 <p>Error message: <em>%(error)s</em></p><pre>%(message)s</pre>""")
                                  % {'error': e.errorDescription,
                                     'message': unicode(e.args[0]).encode('utf-8')})
+                return "".join(res)
             except AdveneException, e:
                 res.append( self.start_html(_("Error")) )
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error in the TALES expression.</p>
                 <pre>%s</pre>""") % cgi.escape(unicode(e.args[0]).encode('utf-8')))
-            return "".join(res)
+                return "".join(res)
         else:
             mimetype=None
             try:
@@ -1178,8 +1202,9 @@ class Packages(Common):
                             'message': e.errorDescription})
 
         # Generating navigation footer
-        if displaymode != "raw":
-            levelup = self.path[:self.path.rindex("/")]
+        if True or  displaymode == 'navigation':
+            uri=cherrypy.request.path_info
+            levelup = uri[:uri.rindex("/")]
             auto_components = [ c
                                 for c in helper.get_valid_members (objet)
                                 if not c.startswith('----') ]
@@ -1208,7 +1233,6 @@ class Packages(Common):
             res.append ("\n".join(
                 ["""<option>%s</option>""" % c for c in auto_components]))
 
-            alias = self.path.split("/")[2]
             res.append (_("""
             </select> View: <select name="view" onchange="submit()">
             <option selected></option>
@@ -1216,7 +1240,7 @@ class Packages(Common):
 
             res.append ("\n".join(
                 ["""<option value="%s">%s</option>""" %
-                 ("/".join((self.path, "view", c)), c)
+                 ("/".join((cherrypy.url(), "view", c)), c)
                  for c in auto_views]))
 
             res.append ("""
@@ -1279,7 +1303,7 @@ class Packages(Common):
 
         if query.has_key('path'):
             # Append the given path to the current URL
-            p="/".join( cherrypy.request.path, query['path'])
+            p="/".join( (cherrypy.url(), query['path']) )
             if query['path'].find ('..') != -1:
                 p = os.path.normpath (p)
             del(query['path'])
@@ -1637,7 +1661,7 @@ class Packages(Common):
                      objet.relations.append(relation)
                      self.controller.notify("RelationCreate", relation=relation)
                  except Exception, e:
-                     query['error']=unicode(e).encode('utf8')
+                     query['error']=unicode(e).encode('utf-8')
                      return self.send_error(500, _("<p>Error while creating relation between %(member1)s and %(member2)s :</p><pre>%(error)s</pre>") % query)
 
                  if query.has_key('redirect') and query['redirect']:
@@ -1888,5 +1912,5 @@ class AdveneWebServer:
         cherrypy.server.start()
         return True
 
-    def halt(self):
+    def stop(self):
         cherrypy.server.stop()
