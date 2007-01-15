@@ -239,6 +239,8 @@ class Config(object):
             'mode': 2,
             # 'admin' or 'raw'
             'displaymode': 'raw',
+            # engine: simple (for SimpleHTTPServer) or cherrypy (for CherryPy)
+            'engine': 'simple',
             }
 
         # Global context options
