@@ -369,6 +369,11 @@ class Config(object):
     def win32_specific_config(self):
         if self.os != 'win32':
             return
+
+        # Trying to get around win32's problems with threads...
+        config.data.noplay_interval=10
+        config.data.play_interval=57
+
         self.player['dvd-device']='E:'
         advenehome=self.get_registry_value('software\\advene','path')
         if advenehome is None:
