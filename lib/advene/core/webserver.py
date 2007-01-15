@@ -45,7 +45,6 @@ from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.fragment import MillisecondFragment
 from advene.model.exception import AdveneException
-from advene.model.content import Content
 
 import advene.model.tal.context
 import simpletal.simpleTAL
@@ -2038,8 +2037,12 @@ class AdveneWebServer(
         self.logger = logging.getLogger('webserver')
         # set the level to logging.DEBUG to get more messages
         self.logger.setLevel(logging.INFO)
-        # Log messages go to sys.stderr by default.
-        self.set_log_handler(None)
+        
+        # Write webserver log to ~/.advene/webserver.log
+        f=open(config.data.advenefile('webserver.log', 'settings'), 'w')
+        handler=logging.StreamHandler(f)
+        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+        self.logger.addHandler(handler)
 
         self.is_embedded = True
 
@@ -2050,14 +2053,6 @@ class AdveneWebServer(
 
         BaseHTTPServer.HTTPServer.__init__(self, ('', port),
                                            AdveneRequestHandler)
-
-    def set_log_handler(self, handler=None):
-        for h in self.logger.handlers:
-            self.logger.removeHandler(h)
-        handler=logging.StreamHandler(handler)
-        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
-        self.logger.addHandler(handler)
-        return True
 
     def verify_request (self, request, client_address):
         """Access control method.
@@ -2113,6 +2108,20 @@ class AdveneWebServer(
             if r:
                 self.handle_request()
 
+    def start(self):
+        """Stops the web server.
+
+        New API.
+        """
+        self.serve_forawhile()
+
+    def stop(self):
+        """Stops the web server.
+
+        New API.
+        """
+        self.stop_serving()
+        
 if __name__ == "__main__":
     from advene.core.controller  import AdveneController
     from advene.model.zippackage import ZipPackage
