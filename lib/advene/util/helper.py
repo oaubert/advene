@@ -24,6 +24,7 @@ import inspect
 import md5
 import sre
 import zipfile
+import urllib
 
 try:
     import Image
@@ -65,10 +66,13 @@ def fourcc2rawcode (code):
         'png ' : 'PNG',
         ' gnp' : 'PNG', # On PPC-MacOS X
         }
-    fourcc = "%c%c%c%c" % (code & 0xff,
-                           code >> 8 & 0xff,
-                           code >> 16 & 0xff,
-                           code >> 24)
+    if isinstance(code, int) or isinstance(code, long):
+        fourcc = "%c%c%c%c" % (code & 0xff,
+                               code >> 8 & 0xff,
+                               code >> 16 & 0xff,
+                               code >> 24)
+    else:
+        fourcc=code
     try:
         ret=conv[fourcc]
     except KeyError:
@@ -565,3 +569,47 @@ def is_valid_tales(expr):
         # Check that the first element is a valid TALES root element
         root=expr.split('/', 1)[0]
         return root in root_elements
+
+def get_video_stream_from_website(url):
+    """Return the videostream embedded in the given website.
+    
+    Return None if no stream can be found.
+
+    Supports: dailymotion, youtube, googlevideo
+    """
+    stream=None
+    if  'dailymotion' in url:
+        if '/get/' in url:
+            return url
+        u=urllib.urlopen(url)
+        data=[ l for l in u.readlines() if '.addVariable' in l and 'flv' in l ]
+        u.close()
+        if data:
+            addr=sre.findall('\"(http.+?)\"', data[0])
+            if addr:
+                stream=urllib.unquote(addr[0])
+    elif 'youtube.com' in url:
+        if '/get_video' in url:
+            return url
+        u=urllib.urlopen(url)
+        data=[ l for l in u.readlines() if 'player2.swf' in l ]
+        u.close()
+        if data:
+            addr=sre.findall('(video_id=.+?)\"', data[0])
+            if addr:
+                stream='http://www.youtube.com/get_video?' + addr[0].strip()
+    elif 'video.google.com' in url:
+        if '/videodownload' in url:
+            return url
+        u=urllib.urlopen(url)
+        data=[ l for l in u.readlines() if '.gvp' in l ]
+        u.close()
+        if data:
+            addr=sre.findall('http://.+?.gvp\?docid=.\d+', data[0])
+            if addr:
+                u=urllib.urlopen(addr[0])
+                data=[ l for l in u.readlines() if 'url:' in l ]
+                u.close()
+                if data:
+                    stream=data[0][4:].strip()
+    return stream
