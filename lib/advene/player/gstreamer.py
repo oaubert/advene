@@ -111,16 +111,15 @@ class Player:
 
         self.video_sink = gst.Bin()
 
-        self.csp = gst.element_factory_make('ffmpegcolorspace', 'csp')
         self.captioner=gst.element_factory_make('textoverlay', 'captioner')
+        # FIXME: move to config.data
         self.captioner.props.font_desc='Sans 24'
         #self.caption.props.text="Foobar"
         self.imagesink = gst.element_factory_make(sink, 'sink')
 
-        self.video_sink.add(self.csp, self.captioner, self.imagesink)
-        self.csp.link(self.captioner)
+        self.video_sink.add(self.captioner, self.imagesink)
         self.captioner.link(self.imagesink)
-        self.video_sink.add_pad(gst.GhostPad('sink', self.csp.get_pad('sink')))
+        self.video_sink.add_pad(gst.GhostPad('sink', self.captioner.get_pad('video_sink')))
 
         self.player.props.video_sink=self.video_sink
 
@@ -201,7 +200,6 @@ class Player:
         if not self.check_uri():
             return
         p = long(self.position2value(position) * gst.MSECOND)
-        #print "Going to position ", str(p)
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
                                    gst.SEEK_FLAG_FLUSH,
                                    gst.SEEK_TYPE_SET, p,
@@ -254,7 +252,7 @@ class Player:
         if not self.check_uri():
             return None
         try:
-            f=self.player.props.frame
+            f=self.player.props.frame.copy()
         except:
             return None
         # Holds width, height
@@ -269,13 +267,10 @@ class Player:
                            'height': caps['height']})
 
     def all_snapshots(self):
-        # FIXME: todo (or not? )
         self.log("all_snapshots %s")
         return [ None ]
 
     def display_text (self, message, begin, end):
-        # FIXME: todo
-        # use http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/gst-plugins-base-plugins-textoverlay.html
         if not self.check_uri():
             return
         caption.begin=self.position2value(begin)
