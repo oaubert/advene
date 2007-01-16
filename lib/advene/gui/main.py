@@ -2013,6 +2013,10 @@ class AdveneGUI (Connect):
         stream=advene.gui.util.entry_dialog(title=_("Select a video stream"),
                                             text=_("Enter the address of a video stream"))
         if stream:
+            s=helper.get_video_stream_from_website(stream)
+            if s is not None:
+               advene.gui.util.message_dialog(_("Successfully extracted the video stream address from the given url"))
+               stream=s
             self.controller.set_default_media(stream)
         return True
     
