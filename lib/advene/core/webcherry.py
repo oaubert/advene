@@ -1076,7 +1076,7 @@ class Packages(Common):
         else:
             expr = "here/%s" % tales
 
-        context = self.controller.build_context (here=p, alias=alias, baseurl=cherrypy.url())
+        context = self.controller.build_context (here=p, alias=alias)
         context.pushLocals()
         context.setLocal('request', query)
         # FIXME: the following line is a hack for having qname-keys work
