@@ -336,6 +336,8 @@ class AdveneController:
     def build_context(self, here=None, alias=None, baseurl=None):
         if baseurl is None:
             baseurl=self.get_default_url(root=True, alias=alias)
+        if here is None:
+            here=self.package
         c=advene.model.tal.context.AdveneContext(here,
 						 options={
 		u'package_url': baseurl,
