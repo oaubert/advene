@@ -1202,7 +1202,7 @@ class Packages(Common):
                             'message': e.errorDescription})
 
         # Generating navigation footer
-        if True or  displaymode == 'navigation':
+        if displaymode == 'navigation' and 'html' in cherrypy.response.headers['Content-type']:
             uri=cherrypy.request.path_info
             levelup = uri[:uri.rindex("/")]
             auto_components = [ c
