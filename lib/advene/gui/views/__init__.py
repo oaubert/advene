@@ -15,14 +15,21 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import StringIO
+
+import advene.core.config as config
+
+from advene.model.content import Content
+
 import gtk
+import xml.dom.DOMImplementation
 
 class AdhocView(object):
     """Implementation of the generic parts of AdhocViews.
 
     For details about the API of adhoc views, see gui.views.viewplugin.
     """
-    def __init__(self, controller=None):
+    def __init__(self, controller=None, parameters=None):
         self.view_name = "Generic adhoc view"
         self.view_id = 'generic'
         # List of couples (label, action) that are use to
@@ -39,12 +46,87 @@ class AdhocView(object):
         # defined its own buttonbox, and the generic popup method
         # can but the "Close" button in it:
         # self.buttonbox = gtk.HButtonBox()
+
+        if parameters is not None:
+            self.load_parameters(parameters)
+
         self.widget=self.build_widget()
 
     def close(self):
         if self.controller and self.controller.gui:
             self.controller.gui.unregister_view (self)
         self.widget.destroy()
+        return True
+
+    def load_parameters(self, content):
+        """Load the parameters from a Content object.
+ 
+        It will update the self.options dictionary, as well as
+        create a self.arguments list of tuples (name, value)
+        """
+        try:
+            m=content.mimetype
+        except:
+            return False
+        if  m != 'application/x-advene-adhoc-view':
+            return False
+
+        p=AdhocViewParametersParser()
+        p.parse_file(content.stream)
+        
+        if p.view_id != self.view_id:
+            self.controller.log(_("Invalid view id"))
+            return False
+
+        for name, value in p.options.iteritems():
+            if self.options.has_key(name):
+                op=self.options[name]
+                if value == 'None':
+                    value=None
+                elif value == 'True':
+                    value=True
+                elif value == 'False':
+                    value=False
+                elif isinstance(op, int) or isinstance(op, long):
+                    value=long(value)
+                elif isinstance(op, float):
+                    value=float(value)
+            self.options[name]=value
+        
+        self.arguments=p.arguments
+        return True
+
+    def save_parameters(self, content, options=None, arguments=None):
+        """Save the view parameters to a Content object.
+        """
+        if not isinstance(content, Content):
+            raise Exception("save_parameters saves to a Content object")
+
+        content.mimetype='application/x-advene-adhoc-view'
+
+        di = xml.dom.DOMImplementation.DOMImplementation()
+        dom = di.createDocument(config.data.namespace, "adhoc", None)
+        node=dom._get_documentElement()
+        node.setAttribute('id', self.view_id)
+
+        if options:
+            for n, v in options.iteritems():
+                o=dom.createElement('option')
+                o.setAttribute('name', n)
+                o.setAttribute('value', unicode(v))
+                node.appendChild(o)
+        if arguments:
+            for n, v in arguments:
+                o=dom.createElement('argument')
+                o.setAttribute('name', n)
+                o.setAttribute('value', unicode(v))
+                node.appendChild(o)
+        stream=StringIO.StringIO()
+        xml.dom.ext.PrettyPrint(dom, stream)
+        content.setData(stream.getvalue())
+        stream.close()
+        xml.dom.ext.PrettyPrint(dom)
+
         return True
 
     def get_widget (self):
@@ -105,3 +187,33 @@ class AdhocView(object):
             self.controller.gui.init_window_size(window, self.view_id)
 
         return window
+
+class AdhocViewParametersParser(xml.sax.handler.ContentHandler):
+    """Parse an AdhocView parameters content.
+    """
+    def __init__(self):
+        self.view_id=None
+        self.options={}
+        # self.arguments will contain (name, value) tuples
+        self.arguments=[]
+ 
+    def startElement(self, name, attributes):
+        if name == 'adhoc':
+            self.view_id=attributes['id']
+        elif name == "option":
+            name=attributes['name']
+            value=attributes['value']
+            self.options[name]=value
+        elif name == 'argument':
+            name=attributes['name']
+            value=attributes['value']
+            self.arguments.append( (name, value) )
+        else:
+            print "Unknown tag %s in AdhocViewParametersParser" % name
+
+    def parse_file(self, name):
+        p=xml.sax.make_parser()
+        p.setFeature(xml.sax.handler.feature_namespaces, False)
+        p.setContentHandler(self)
+        p.parse(name)
+        return self
