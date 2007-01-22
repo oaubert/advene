@@ -8,3 +8,36 @@ Moreover, all views should inherit from AdhocView, defined in
 lib/advene/gui/views/__init__.py
 that provides common methods.
 
+Parameters
+==========
+
+Mimetype: application/x-advene-adhoc-view
+
+Content:
+<adhoc id="timeline">
+ <!-- Parameters -->
+ <option name="" value="" />
+ <argument name="" value="" />
+</adhoc>
+
+Options will directly update the self.options dictionary for each
+view. Arguments will be passed, preserving their order, as .arguments
+attribute of the view.
+
+Timeline:
+---------
+
+id: timeline
+
+Arguments:
+ annotation-type (id): id of an annotation type to display. May be put multiple tmes.
+ source (tales expr.): TALES expression (applied to the package) used
+ to get the elements to display.
+
+Options:
+ highlight (boolean)
+ autoscroll (int)
+ delete_transmuted (boolean)
+ resize_by_dnd (boolean)
+ display_relations_type (boolean)
+ display_relation_content (boolean)
