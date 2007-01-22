@@ -25,6 +25,7 @@ import advene.core.config as config
 
 from advene.model.package import Package
 from advene.model.schema import AnnotationType
+from advene.model.view import View
 from advene.model.annotation import Annotation, Relation
 from advene.model.fragment import MillisecondFragment
 from advene.gui.views import AdhocView
@@ -54,13 +55,15 @@ class TimeLine(AdhocView):
                   minimum=None,
                   maximum=None,
                   controller=None,
-                  annotationtypes=None):
+                  annotationtypes=None, 
+                  parameters=None):
 
         self.view_name = _("Timeline")
         self.view_id = 'timeline'
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
+            (_("Save"), self.save_view),
             )
         self.options = {
             'highlight': True,
@@ -72,9 +75,27 @@ class TimeLine(AdhocView):
             'display-relation-type': True,
             'display-relation-content': True,
             }
+        self.controller=controller
+
+        if parameters:
+            self.load_parameters(parameters)
+            ats=[]
+            for n, v in self.arguments:
+                if n == 'annotation-type':
+                    at=helper.get_id(self.controller.package.annotationTypes,
+                                     v)
+                    if at:
+                        ats.append(at)
+                    else:
+                        self.log(_("Cannot find annotation type %s") % v)
+                elif n == 'source':
+                    c=self.controller.build_context()
+                    # Override a potentially existing value of l
+                    l=c.evaluateValue(v)
+            if ats:
+                annotationtypes=ats
 
         self.list = l
-        self.controller=controller
         self.annotationtypes = annotationtypes
         self.tooltips = gtk.Tooltips ()
 
@@ -236,6 +257,21 @@ class TimeLine(AdhocView):
         for i in range(0, len(self.layer_position), 2):
             # Draw a different background
             drawable.draw_rectangle(gc, True, 0, h * i, width, h)
+        return True
+
+    def save_view(self, *p):
+        ident=advene.gui.util.entry_dialog(title=_("Timeline saving"),
+                                           text=_("Enter a view name to save this timeline"),
+                                           default=self.controller.package._idgenerator.get_id(View))
+        if ident is not None:
+            if not sre.match(r'^[a-zA-Z0-9_]+$', ident):
+                advene.gui.util.message_dialog(_("Error: the identifier %s contains invalid characters."))
+                return True
+            # FIXME: if this viewid already exists, check if it is an adhoc-view. If so, update it
+            v=self.controller.package.createView(ident=ident, clazz='package')
+            self.save_parameters(v.content, self.options, [ ('annotation-type', at.id) for at in self.annotationtypes ])
+            self.controller.package.views.append(v)
+            self.controller.notify("ViewCreate", view=v)
         return True
 
     def update_relation_lines(self):
