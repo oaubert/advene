@@ -79,8 +79,12 @@ class Menu:
         self.controller.notify("AnnotationDeactivate", annotation=ann)
         return True
 
-    def activate_stbv (self, view):
+    def activate_stbv (self, widget, view):
         self.controller.activate_stbv(view)
+        return True
+
+    def open_adhoc_view (self, widget, view):
+        self.controller.gui.open_adhoc_view(view)
         return True
 
     def create_element(self, widget, elementtype=None, parent=None):
@@ -533,6 +537,8 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         if element.content.mimetype == 'application/x-advene-ruleset':
             add_item(_("Activate view"), self.activate_stbv, element)
+        elif element.content.mimetype == 'application/x-advene-adhoc-view':
+            add_item(_("Open adhoc view"), self.open_adhoc_view, element)
         return
 
     def make_bundle_menu(self, element, menu):
