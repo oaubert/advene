@@ -37,19 +37,29 @@ class ViewPlugin(AdhocView):
     methods. Inherit from AdhocView, and define the relevant
     additional methods.
 
+    self.load_parameters() takes a Content object as parameter, that
+    must be of application/x-advene-adhoc-view mimetype. It will read
+    the Content data, update the self.options dictionary, and put
+    arguments in the self.arguments list (which is a list of (name,
+    value) tuples).
+
     @ivar view_name: the name of the view
     @type view_name: string
     @ivar view_id: the id of the view
     @type view_id: string
+    @ivar options: view options
+    @type options: dict
     @ivar controller: the controller
     @type controller: AdveneController
     @ivar widget: the gtk widget representing the view
     @type widget: gkt.Widget
     """
-    def __init__(self, controller=None):
+    def __init__(self, controller=None, parameters=None):
         self.view_name = _("Generic view plugin")
         self.view_id = 'viewplugin'
         self.controller=controller
+        self.options={}
+        self.load_parameters(parameters)
         self.widget = self.build_widget()
 
     def register_callback (self, controller=None):
