@@ -79,6 +79,7 @@ import advene.gui.util
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
+from advene.gui.views import AdhocViewParametersParser
 import advene.gui.views.timeline
 import advene.gui.views.logwindow
 from advene.gui.views.browser import Browser
@@ -985,14 +986,35 @@ class AdveneGUI (Connect):
         """Open the given adhoc view.
 
         Destination can be: 'popup', 'south', 'east' or None
+
+        If name is a 'view' object, then try to interpret it as a
+        application/x-advene-adhoc-view and open the appropriate view
+        with the given parameters.
         """
         view=None
+        if isinstance(name, View):
+            if name.content.mimetype != 'application/x-advene-adhoc-view':
+                self.log(_("View %s is not an adhoc view") % name.id)
+                return None
+            # Parse the content, extract the view id
+            parameters=name.content
+            p=AdhocViewParametersParser()
+            p.parse_file(name.content.stream)
+            if p.view_id:
+                name=p.view_id
+            else:
+                self.log(_("Cannot identify the adhoc view %s") % name.id)
+                return None
+        else:
+            parameters=None
+
         if name == 'treeview' or name == 'tree':
             view = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
         elif name == 'timeline':
             view = advene.gui.views.timeline.TimeLine (l=None,
-                                                       controller=self.controller)
+                                                       controller=self.controller, 
+                                                       parameters=parameters)
         if name == 'history':
             view=advene.gui.views.history.HistoryNavigation(self.controller, ordered=True)
         elif name == 'transcription':
