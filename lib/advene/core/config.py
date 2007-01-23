@@ -235,9 +235,9 @@ class Config(object):
         self.webserver = {
             'port': 1234,
             # Whether to launch the HTTP server in the gtk interface
-            # 0 for no, 1 for gtk_input, 2 for threading
-            'mode': 2,
-            # 'admin' or 'raw'
+            # True or False
+            'mode': True,
+            # 'navigation' or 'raw'
             'displaymode': 'raw',
             # engine: simple (for SimpleHTTPServer) or cherrypy (for CherryPy)
             'engine': 'simple',
