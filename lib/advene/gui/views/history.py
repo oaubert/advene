@@ -35,9 +35,10 @@ class HistoryNavigation(AdhocView):
         self.contextual_actions = (
             (_("Clear"), self.clear),
             )
+        self.options={}
+        self.controller=controller
 
         self.closable=closable
-        self.controller=controller
         self.history=history
         self.scrollwindow=None
         self.snapshot_width=100
