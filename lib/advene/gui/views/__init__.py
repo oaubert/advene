@@ -15,14 +15,20 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import StringIO
-
 import advene.core.config as config
 
-from advene.model.content import Content
-
+import sre
 import gtk
+import StringIO
+
+from gettext import gettext as _
+
 import xml.dom.DOMImplementation
+
+from advene.model.content import Content
+from advene.model.view import View
+import advene.gui.util
+import advene.util.helper as helper
 
 class AdhocView(object):
     """Implementation of the generic parts of AdhocViews.
@@ -127,6 +133,53 @@ class AdhocView(object):
         stream.close()
         xml.dom.ext.PrettyPrint(dom)
 
+        return True
+
+    def get_save_arguments(self):
+        """Method called when saving a parametered view.
+        
+        It should return a tuple (options, arguments) where options is
+        the options dictionary, and arguments is a list of (name,
+        value) tuples).
+
+        If it returns None, None, it means that the view saving is cancelled.
+        """
+        return None, None
+
+    def save_view(self, *p):
+        ident=advene.gui.util.entry_dialog(title=_("%s saving" % self.view_name),
+                                           text=_("Enter a view name to save this parametered view"),
+                                           default=self.controller.package._idgenerator.get_id(View))
+        if ident is not None:
+            if not sre.match(r'^[a-zA-Z0-9_]+$', ident):
+                advene.gui.util.message_dialog(_("Error: the identifier %s contains invalid characters.") % ident)
+                return True
+
+            options, arguments = self.get_save_arguments()
+            if options is None and arguments is None:
+                # Cancel view saving
+                return True
+
+            v=helper.get_id(self.controller.package.views, ident)
+            if v is None:
+                create=True
+                v=self.controller.package.createView(ident=ident, clazz='package')
+                v.title=ident
+            else:
+                # Existing view. Check that it is already an adhoc-view
+                if v.content.mimetype != 'application/x-advene-adhoc-view':
+                    advene.gui.util.message_dialog(_("Error: the view %s is not an adhoc view.") % ident)
+                    return True
+                create=False
+            v.author=config.data.userid
+            v.date=self.controller.get_timestamp()
+
+            self.save_parameters(v.content, options, arguments)
+            if create:
+                self.controller.package.views.append(v)
+                self.controller.notify("ViewCreate", view=v)
+            else:
+                self.controller.notify("ViewEditEnd", view=v)
         return True
 
     def get_widget (self):
