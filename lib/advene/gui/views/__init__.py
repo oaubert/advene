@@ -64,6 +64,13 @@ class AdhocView(object):
         self.widget.destroy()
         return True
 
+    def log(self, msg, level=None):
+        m=": ".join( (self.view_name, msg) )
+        if self.controller:
+            self.controller.log(m, level)
+        else:
+            print m
+
     def load_parameters(self, content):
         """Load the parameters from a Content object.
  
