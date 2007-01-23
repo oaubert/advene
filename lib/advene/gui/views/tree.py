@@ -15,9 +15,7 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import sys
 
-# Advene part
 import advene.core.config as config
 
 from advene.model.package import Package
@@ -361,8 +359,10 @@ class TreeWidget(AdhocView):
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
             )
-        self.package = package
         self.controller=controller
+        self.options={}
+
+        self.package = package
         self.modelclass=modelclass
 
         self.model = modelclass(controller=controller, package=package)
