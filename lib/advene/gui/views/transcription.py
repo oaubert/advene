@@ -20,6 +20,7 @@
 
 import sys
 import sre
+import sets
 
 import gtk
 
@@ -41,7 +42,7 @@ parsed_representation = sre.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 empty_representation = sre.compile(r'^\s*$')
 
 class TranscriptionView(AdhocView):
-    def __init__ (self, controller=None, model=None, parameters=None):
+    def __init__ (self, controller=None, source=None, parameters=None):
         self.view_name = _("Transcription")
         self.view_id = 'transcriptionview'
         self.close_on_package_load = True
@@ -69,22 +70,19 @@ class TranscriptionView(AdhocView):
             self.load_parameters(parameters)
             a=dict(self.arguments)
 
-            if model is None and a.has_key('model'):
-                if a['model'] == 'package':
-                    model=self.controller.package
-                else:
-                    try:
-                        model=helper.get_id(self.controller.package.annotationtypes, 
-                                        a['model'])
-                    except:
-                        self.log(_("Cannot find annotation type %s. Using the whole package") % a['model'])
-                        model=self.controller.package
+            if source is None and a.has_key('source'):
+                source=a['source']
 
-        # Model is a container of annotations: either an
-        # annotation-type or a package. It *must* have an .annotations
-        # attribute
-        self.model = model
+        if source is None:
+            # Use whole package
+            source="here/annotations"
 
+        # source is a TALES expression, which is evaluated in the
+        # package context. It must return a list of annotations.
+        self.source = source
+        self.model=[]
+        self.regenerate_model()
+        
         # Annotation where the cursor is set
         self.currentannotation=None
 
@@ -94,24 +92,38 @@ class TranscriptionView(AdhocView):
 
         self.modified=False
 
-        repr=self.model.getMetaData(config.data.namespace, 'representation')
-        if repr is None:
-            self.options['representation'] = ""
-        elif not sre.match(r'^\s*$', repr):
-            # There is a standard representation for the type.
-            # But if the current value is != '', then it has been
-            # updated by the parameters, so keep it.
-            if self.options['representation'] == '':
-                self.options['representation'] = repr
+        # Try to determine a default representation
+        try:
+            t=sets.Set([ a.type for a in self.model ])
+        except:
+            t=[]
+        if len(t) == 1:
+            # Unique type, the model is homogeneous. Use the
+            # annotation-type representation
+            at=self.model[0].type
+            repr=at.getMetaData(config.data.namespace, 'representation')
+            if repr is not None and not sre.match(r'^\s*$', repr):
+                # There is a standard representation for the type.
+                # But if the current value is != '', then it has been
+                # updated by the parameters, so keep it.
+                if self.options['representation'] == '':
+                    self.options['representation'] = repr
         self.widget=self.build_widget()
 
     def get_save_arguments(self):
-        try:
-            t=self.model.id
-        except:
-            t='package'
-        arguments = [ ('model', t) ]
+        arguments = [ ('source', self.source) ]
         return self.options, arguments
+
+    def regenerate_model(self):
+        c=self.controller.build_context()
+        try:
+            self.model=c.evaluateValue(self.source)
+        except Exception, e:
+            self.log(_("Error in source evaluation %(source)s: %(error)s") % {
+                    'source': self.source,
+                    'error': unicode(e) })
+            self.model=[]
+        return
 
     def edit_options(self, button):
         cache=dict(self.options)
@@ -151,7 +163,9 @@ class TranscriptionView(AdhocView):
     def check_modified(self):
         b=self.textview.get_buffer()
         modified = []
-        for a in self.model.annotations:
+        # Update the model to be sure.
+        self.regenerate_model()
+        for a in self.model:
             beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
             enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
             if b.get_text(beginiter, enditer) != self.representation(a):
@@ -284,8 +298,8 @@ class TranscriptionView(AdhocView):
         begin,end=b.get_bounds()
         b.delete(begin, end)
 
-        l=list(self.model.annotations)
-        l.sort(lambda a,b: cmp(a.fragment.begin, b.fragment.begin))
+        l=list(self.model)
+        #l.sort(lambda a,b: cmp(a.fragment.begin, b.fragment.begin))
         for a in l:
             if self.options['display-time']:
                 b.insert_at_cursor("[%s]" % helper.format_time(a.fragment.begin))
@@ -344,6 +358,7 @@ class TranscriptionView(AdhocView):
         return False
 
     def update_model(self, package=None):
+        self.regenerate_model()
         self.generate_buffer_content()
         return True
 
@@ -404,6 +419,9 @@ class TranscriptionView(AdhocView):
         if self.ignore_updates:
             return True
 
+        # Update the model value
+        self.regenerate_model()
+
         if event == 'AnnotationActivate':
             self.activate_annotation(annotation)
             return True
@@ -411,13 +429,15 @@ class TranscriptionView(AdhocView):
             self.desactivate_annotation(annotation)
             return True
         if event == 'AnnotationCreate':
-            # If it does not exist yet, we should create it if it is now in self.list
-            if annotation in self.model.annotations:
+            # If it does not exist yet, we should create it if it is now in self.model
+            if annotation in self.model:
                 # Update the whole model.
                 self.update_model()
             return True
 
         if event == 'AnnotationEditEnd':
+            if not annotation in self.model:
+                return True
             b=self.textview.get_buffer()
             beginmark=b.get_mark("b_%s" % annotation.id)
             endmark=b.get_mark("e_%s" % annotation.id)
@@ -432,6 +452,8 @@ class TranscriptionView(AdhocView):
             b.move_mark(endmark, beginiter)
         elif event == 'AnnotationDelete':
             b=self.textview.get_buffer()
+            # FIXME: handle the case where the annotation was not in
+            # this transcription (i.e. beginmark does not exist)
             beginmark=b.get_mark("b_%s" % annotation.id)
             endmark=b.get_mark("e_%s" % annotation.id)
             beginiter=b.get_iter_at_mark(beginmark)
