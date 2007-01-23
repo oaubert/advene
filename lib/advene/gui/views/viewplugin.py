@@ -62,6 +62,17 @@ class ViewPlugin(AdhocView):
         self.load_parameters(parameters)
         self.widget = self.build_widget()
 
+    def get_save_arguments(self):
+        """Method called when saving a parametered view.
+        
+        It should return a tuple (options, arguments) where options is
+        the options dictionary, and arguments is a list of (name,
+        value) tuples).
+
+        If it returns None, None, it means that the view saving is cancelled.
+        """
+        return None, None
+
     def register_callback (self, controller=None):
         """Method invoked on view creation.
 
