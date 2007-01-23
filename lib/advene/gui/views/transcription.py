@@ -41,27 +41,16 @@ parsed_representation = sre.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 empty_representation = sre.compile(r'^\s*$')
 
 class TranscriptionView(AdhocView):
-    def __init__ (self, controller=None, model=None, separator="  "):
+    def __init__ (self, controller=None, model=None, parameters=None):
         self.view_name = _("Transcription")
         self.view_id = 'transcriptionview'
         self.close_on_package_load = True
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
             (_("Validate"), self.validate),
+            (_("Save view"), self.save_view),
             )
-
         self.controller=controller
-        self.package=controller.package
-        self.model = model
-        # Annotation where the cursor is set
-        self.currentannotation=None
-
-        # Used when batch-updating modified annotations when closing
-        # the window
-        self.ignore_updates = False
-
-        self.modified=False
-
         self.options = {
             'display-bounds': False,
             'display-time': False,
@@ -74,14 +63,55 @@ class TranscriptionView(AdhocView):
             'representation': '',
             }
 
+        self.package=controller.package
+        
+        if parameters:
+            self.load_parameters(parameters)
+            a=dict(self.arguments)
+
+            if model is None and a.has_key('model'):
+                if a['model'] == 'package':
+                    model=self.controller.package
+                else:
+                    try:
+                        model=helper.get_id(self.controller.package.annotationtypes, 
+                                        a['model'])
+                    except:
+                        self.log(_("Cannot find annotation type %s. Using the whole package") % a['model'])
+                        model=self.controller.package
+
+        # Model is a container of annotations: either an
+        # annotation-type or a package. It *must* have an .annotations
+        # attribute
+        self.model = model
+
+        # Annotation where the cursor is set
+        self.currentannotation=None
+
+        # Used when batch-updating modified annotations when closing
+        # the window
+        self.ignore_updates = False
+
+        self.modified=False
+
         repr=self.model.getMetaData(config.data.namespace, 'representation')
         if repr is None:
             self.options['representation'] = ""
         elif not sre.match(r'^\s*$', repr):
             # There is a standard representation for the type.
-            self.options['representation'] = repr
-
+            # But if the current value is != '', then it has been
+            # updated by the parameters, so keep it.
+            if self.options['representation'] == '':
+                self.options['representation'] = repr
         self.widget=self.build_widget()
+
+    def get_save_arguments(self):
+        try:
+            t=self.model.id
+        except:
+            t='package'
+        arguments = [ ('model', t) ]
+        return self.options, arguments
 
     def edit_options(self, button):
         cache=dict(self.options)
