@@ -388,10 +388,6 @@ class AdveneController:
                 if config.data.os != 'win32':
                     self.busy_port_info()
                 self.log(_("Deactivating web server"))
-
-        # If == 1, it is the responsibility of the Gtk app
-        # to set the input loop
-        if config.data.webserver['mode'] == 2 and self.server:
             self.serverthread = threading.Thread (target=self.server.start)
             self.serverthread.start ()
 
@@ -1095,27 +1091,6 @@ class AdveneController:
         self.event_handler.set_ruleset(rs, type_='user')
         self.notify("ViewActivation", view=view, comment="Activate STBV")
         return
-
-    def handle_http_request (self, source, condition):
-        """Handle a HTTP request.
-
-        This method is used if config.data.webserver['mode'] == 1.
-        """
-        if condition in (gobject.IO_ERR, gobject.IO_HUP):  
-	    self.log("Aborted connection")
-	    return True
-        # Make sure that all exceptions are catched, else the gtk mainloop
-        # will not execute update_display.
-        try:
-            source.handle_request ()
-        except socket.error, e:
-            print _("Network exception: %s") % str(e)
-        except Exception, e:
-            import traceback
-            s=StringIO.StringIO()
-            traceback.print_exc (file = s)
-            self.log(_("Got exception %s in web server.") % str(e), s.getvalue())
-        return True
 
     def log (self, msg, level=None):
         """Add a new log message.
