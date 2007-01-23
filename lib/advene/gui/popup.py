@@ -189,8 +189,7 @@ class Menu:
 
     def display_transcription(self, widget, annotationtype):
         transcription = TranscriptionView(controller=self.controller,
-                                          model=annotationtype.annotations)
-
+                                          source="here/annotationTypes/%s/annotations/sorted" % annotationtype.id)
         transcription.popup()
         return True
 

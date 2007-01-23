@@ -1019,17 +1019,20 @@ class AdveneGUI (Connect):
             view=advene.gui.views.history.HistoryNavigation(self.controller, ordered=True)
         elif name == 'transcription' or name == 'transcriptionview':
             try:
-                m=kw['model']
+                source=kw['source']
             except KeyError:
                 if parameters:
-                    m=None
+                    # source may be defined in parameters
+                    source=None
                 else:
-                    m=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."),
-                                                   create=False)
-                    if m is None:
-                        return None            
+                    at=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."),
+                                                    create=False)
+                    if at is None:
+                        return None
+                    else:
+                        source="here/annotationTypes/%s/annotations/sorted" % at.id
             view = TranscriptionView(controller=self.controller,
-                                     model=m, parameters=parameters)
+                                     source=source, parameters=parameters)
         elif name == 'browser' or name == 'browserview':
             view = Browser(element=self.controller.package,
                            controller=self.controller)
@@ -1856,7 +1859,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_adhoc_transcription_package_activate (self, button=None, data=None):
-        self.open_adhoc_view('transcription', model=self.controller.package)
+        self.open_adhoc_view('transcription', source="here/annotations/sorted")
         return True
 
     def on_adhoc_browser_activate (self, button=None, data=None):

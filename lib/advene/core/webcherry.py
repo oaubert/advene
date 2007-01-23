@@ -656,11 +656,15 @@ class Application(Common):
                     pass
 
             if atid is not None:
-                m=helper.get_id(c.package.annotationTypes, atid)
+                source="here/annotationTypes/%s/annotations/sorted" % atid
             else:
-                # No provided annotation type. Use the whole package
-                m=c.package
-            c.queue_action(c.gui.open_adhoc_view, view, model=m)
+                # Maybe there was a source parameter ?
+                try:
+                    source=query['source']
+                except:
+                    # No provided source. Use the whole package
+                    source="here/annotations/sorted"
+            c.queue_action(c.gui.open_adhoc_view, view, source=source)
             return self.send_no_content()
 
         if view == 'transcribe':
