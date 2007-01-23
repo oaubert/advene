@@ -63,7 +63,7 @@ class TimeLine(AdhocView):
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
-            (_("Save"), self.save_view),
+            (_("Save view"), self.save_view),
             )
         self.options = {
             'highlight': True,
