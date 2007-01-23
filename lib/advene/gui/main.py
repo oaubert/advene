@@ -1011,25 +1011,29 @@ class AdveneGUI (Connect):
         if name == 'treeview' or name == 'tree':
             view = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
-        elif name == 'timeline':
+        elif name == 'timeline' or name == 'timelineview':
             view = advene.gui.views.timeline.TimeLine (l=None,
                                                        controller=self.controller, 
                                                        parameters=parameters)
-        if name == 'history':
+        if name == 'history' or name == 'historyview':
             view=advene.gui.views.history.HistoryNavigation(self.controller, ordered=True)
-        elif name == 'transcription':
+        elif name == 'transcription' or name == 'transcriptionview':
             try:
                 m=kw['model']
             except KeyError:
-                m=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."),
-                                               create=False)
-            if m is not None:
-                view = TranscriptionView(controller=self.controller,
-                                         model=m)
-        elif name == 'browser':
+                if parameters:
+                    m=None
+                else:
+                    m=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."),
+                                                   create=False)
+                    if m is None:
+                        return None            
+            view = TranscriptionView(controller=self.controller,
+                                     model=m, parameters=parameters)
+        elif name == 'browser' or name == 'browserview':
             view = Browser(element=self.controller.package,
                            controller=self.controller)
-        elif name == 'webbrowser':
+        elif name == 'webbrowser' or name == 'htmlview':
             if destination != 'popup' and HTMLView._engine is not None:
                 view = HTMLView(controller=self.controller)
                 view.open_url(self.controller.get_default_url(alias='advene'))
@@ -1038,7 +1042,7 @@ class AdveneGUI (Connect):
                 m.popup(None, None, None, 0, gtk.get_current_event_time())
             else:
                 self.log (("No current package"))
-        elif name == 'transcribe':
+        elif name == 'transcribe' or name == 'transcribeview':
             try:
                 filename=kw['filename']
             except KeyError:
