@@ -277,7 +277,7 @@ class Browser(AdhocView):
             l = [ i for i in self.current_value if isinstance(i, Annotation) ]
 
         if not l:
-            self.controller.log(_("Result is not a list of annotations"))
+            self.log(_("Result is not a list of annotations"))
             return True
 
         duration = self.controller.cached_duration
