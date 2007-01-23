@@ -42,6 +42,9 @@ class AdhocView(object):
         # generate contextual actions
         self.contextual_actions = ()
 
+        # Dictionary of view-specific options.
+        self.options = {}
+
         # If True, the view should be closed when loading a new package.
         # Else, it can respond to a package load and update
         # itself accordingly (through the update_model method).
@@ -151,7 +154,7 @@ class AdhocView(object):
 
         If it returns None, None, it means that the view saving is cancelled.
         """
-        return None, None
+        return self.options, []
 
     def save_view(self, *p):
         ident=advene.gui.util.entry_dialog(title=_("%s saving" % self.view_name),
