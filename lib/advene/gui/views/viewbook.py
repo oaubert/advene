@@ -46,7 +46,7 @@ class ViewBook(AdhocView):
 
     def remove_view(self, view):
         if view in self.permanent_widgets:
-            self.controller.log(_("Cannot remove this widget, it is essential."))
+            self.log(_("Cannot remove this widget, it is essential."))
             return False
         view.close()
         return True
