@@ -249,6 +249,11 @@ class TimeLine(AdhocView):
         self.draw_current_mark()
         self.widget = self.get_full_widget()
 
+    def get_save_arguments(self):
+        # FIXME: add a dialog to ask for what elements to save
+        arguments = [ ('annotation-type', at.id) for at in self.annotationtypes ]
+        return self.options, arguments
+
     def draw_background(self, layout, event):
         width, height = layout.get_size()
         h=config.data.preferences['timeline']['button-height'] + config.data.preferences['timeline']['interline-height']
@@ -257,21 +262,6 @@ class TimeLine(AdhocView):
         for i in range(0, len(self.layer_position), 2):
             # Draw a different background
             drawable.draw_rectangle(gc, True, 0, h * i, width, h)
-        return True
-
-    def save_view(self, *p):
-        ident=advene.gui.util.entry_dialog(title=_("Timeline saving"),
-                                           text=_("Enter a view name to save this timeline"),
-                                           default=self.controller.package._idgenerator.get_id(View))
-        if ident is not None:
-            if not sre.match(r'^[a-zA-Z0-9_]+$', ident):
-                advene.gui.util.message_dialog(_("Error: the identifier %s contains invalid characters."))
-                return True
-            # FIXME: if this viewid already exists, check if it is an adhoc-view. If so, update it
-            v=self.controller.package.createView(ident=ident, clazz='package')
-            self.save_parameters(v.content, self.options, [ ('annotation-type', at.id) for at in self.annotationtypes ])
-            self.controller.package.views.append(v)
-            self.controller.notify("ViewCreate", view=v)
         return True
 
     def update_relation_lines(self):
