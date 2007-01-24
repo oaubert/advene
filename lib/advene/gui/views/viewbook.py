@@ -24,6 +24,7 @@ import gtk
 
 from gettext import gettext as _
 from advene.gui.views import AdhocView
+import advene.util.helper as helper
 
 class ViewBook(AdhocView):
     """Notebook containing multiple views
@@ -113,6 +114,16 @@ class ViewBook(AdhocView):
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['adhoc-view']:
             name=selection.data
+            # Parametered view. Get the view itself.
+            if name.startswith('id:'):
+                ident=name[3:]
+                v=helper.get_id(self.controller.package.views, ident)
+                # Get the view_id
+                if v is None:
+                    self.log(_("Cannot find the view %s") % ident)
+                    return True
+                name=v
+            
             if self.controller.gui:
                 view=self.controller.gui.open_adhoc_view(name, destination=None)
                 if view is not None:
