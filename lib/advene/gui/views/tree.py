@@ -387,9 +387,16 @@ class TreeWidget(AdhocView):
         tree_view.append_column(column)
 
         # Drag and drop for annotations
-        tree_view.enable_model_drag_source(gtk.gdk.BUTTON1_MASK,
-                                           config.data.drag_type['annotation'],
-                                           gtk.gdk.ACTION_LINK)
+        tree_view.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.drag_type['adhoc-view']
+                          + config.data.drag_type['annotation-type']
+                          + config.data.drag_type['annotation']
+                          + config.data.drag_type['text-plain']
+                          + config.data.drag_type['TEXT']
+                          + config.data.drag_type['STRING']
+                          ,
+                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+
         tree_view.connect("drag_data_get", self.drag_data_get_cb)
 
         sw = gtk.ScrolledWindow()
@@ -401,15 +408,28 @@ class TreeWidget(AdhocView):
         return sw
 
     def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
-        print "Drag data received"
         treeselection = treeview.get_selection()
         model, iter = treeselection.get_selected()
 
-        annotation = model.get_value(iter, AdveneTreeModel.COLUMN_ELEMENT)
-        print "Got drag for %s" % str(annotation)
+        el = model.get_value(iter, AdveneTreeModel.COLUMN_ELEMENT)
 
         if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, annotation.uri)
+            if not isinstance(el, Annotation):
+                return False
+            selection.set(selection.target, 8, el.uri)
+            return True
+        elif targetType == config.data.target_type['annotation-type']:
+            if not isinstance(el, AnnotationType):
+                return False
+            selection.set(selection.target, 8, el.uri)
+            return True
+        elif targetType == config.data.target_type['adhoc-view']:
+            if not isinstance(el, View):
+                return False
+            if el.content.mimetype != 'application/x-advene-adhoc-view':
+                return False
+            selection.set(selection.target, 8, 'id:' + el.id)
+            return True
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
