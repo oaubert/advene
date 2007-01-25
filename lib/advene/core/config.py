@@ -283,6 +283,7 @@ class Config(object):
 	    ('adhoc-view',        49, 'application/x-advene-adhoc-view'),
 	    ('annotation-resize', 50, None),
             ('timestamp',         51, 'application/x-advene-timestamp'),
+            ('tag',               52, None),
 	    ('uri-list',          80, 'text/uri-list'),
 	    ):
 	    self.target_type[name] = type
