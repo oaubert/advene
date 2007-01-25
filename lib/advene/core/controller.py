@@ -29,6 +29,7 @@ notifications and actions triggering.
 
 import sys, time
 import os
+import cgi
 import socket
 import sre
 import webbrowser
@@ -821,6 +822,14 @@ class AdveneController:
         self.package._idgenerator = advene.core.idgenerator.Generator(self.package)
         self.package._modified = False
 
+        # Parse tag_colors attribute
+        cols = self.package.getMetaData (config.data.namespace, "tag_colors")
+        if cols:
+            d = dict(cgi.parse_qsl(cols))
+        else:
+            d={}
+        self.package._tag_colors=d
+         
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
             self.package.cached_duration = long(duration)
@@ -953,6 +962,12 @@ class AdveneController:
         if name is None:
             name=p.uri
         old_uri = p.uri
+
+        # Handle tag_colors
+        # Parse tag_colors attribute.
+        self.package.setMetaData (config.data.namespace, 
+                                  "tag_colors", 
+                                  cgi.urllib.urlencode(self.package._tag_colors))
 
         # Check if we know the stream duration. If so, save it as
         # package metadata
