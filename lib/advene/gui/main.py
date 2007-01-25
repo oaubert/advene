@@ -1611,6 +1611,16 @@ class AdveneGUI (Connect):
                     _("The file %s does not look like a valid Advene package. It should have a .azp or .xml extension. Try to open anyway?") % filename,
                     icon=gtk.MESSAGE_QUESTION):
                     return True
+            if ext == '.apl':
+                modif=[ (a, p) 
+                        for (a, p) in self.controller.packages.iteritems() 
+                        if p._modified ]
+                if modif:
+                    if not advene.gui.util.message_dialog(
+                        _("You are trying to load a session file, but there are unsaved packages. Proceed anyway?"),
+                        icon=gtk.MESSAGE_QUESTION):
+                        return True
+
             try:
                 self.controller.load_package (uri=filename, alias=alias)
             except Exception, e:
