@@ -131,6 +131,12 @@ class TagBag(AdhocView):
 
         def set_color(widget, tag):
             d=gtk.ColorSelectionDialog(_("Choose the color for tag %s") % tag)
+            try:
+                col=self.controller.package._tag_colors[tag]
+                d.colorsel.set_current_color(gtk.gdk.color_parse(col))
+            except:
+                pass
+
             res=d.run()
             if res == gtk.RESPONSE_OK:
                 col=d.colorsel.get_current_color()
@@ -140,7 +146,7 @@ class TagBag(AdhocView):
             return True
 
         def popup_menu(widget, event):
-            if event.button != 3 or event.type == gtk.gdk.BUTTON_PRESS:
+            if not (event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS):
                 return False
 
             menu=gtk.Menu()
