@@ -27,6 +27,7 @@ import advene.gui.util
 
 from gettext import gettext as _
 
+import re
 import gtk
 
 class TagBag(AdhocView):
@@ -65,6 +66,10 @@ class TagBag(AdhocView):
         tag=advene.gui.util.entry_dialog(title=_("New tag name"),
                                          text=_("Enter a new tag name"))
         if tag and not tag in self.tags:
+            if not re.match('^[\w\d_]+$', tag):
+                advene.gui.util.message_dialog(_("The tag contains invalid characters"),
+                                               icon=gtk.MESSAGE_ERROR)
+                return True            
             self.tags.append(tag)
             self.refresh()
         return True
@@ -157,6 +162,10 @@ class TagBag(AdhocView):
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['tag'], gtk.gdk.ACTION_LINK)
         b.connect("drag_data_received", remove_drag_received)
+        v.pack_start(b, expand=False)
+
+        b=gtk.Button(stock=gtk.STOCK_ADD)
+        b.connect("clicked", self.new_tag)
         v.pack_start(b, expand=False)
 
         return v
