@@ -15,9 +15,18 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Tag bag view.
+"""Tag bag view
+============
 
 Note: this adhoc view is also used in element edit popups.
+
+This view presents a number of tags to the user, so that she can apply
+them to various elements by drag and drop.
+
+Dragging a tag to an annotation with add the tag to the annotation's tag.
+
+Dragging an annotation to the tag bag will add the annotation tags to
+the presented list of tags.
 """
 
 # Advene part
@@ -85,6 +94,16 @@ class TagBag(AdhocView):
         self.mainbox.show_all()
         return True
 
+    def set_widget_color(self, widget, color):
+        if isinstance(color, basestring):
+            color=gtk.gdk.color_parse (color)
+            
+        for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                      gtk.STATE_PRELIGHT):
+            widget.modify_bg (style, color)
+        return True
+
     def append_repr(self, t):
         def drag_sent(widget, context, selection, targetType, eventTime):
             if targetType == config.data.target_type['tag']:
@@ -94,14 +113,54 @@ class TagBag(AdhocView):
             return True
 
         b=gtk.Button(t)
-        #b.connect("clicked", self.activate, t)
+        
+        try:
+            col=self.controller.package._tag_colors[t]
+            self.set_widget_color(b, col)
+        except KeyError:
+            pass
+
         # The button can generate drags
         b.connect("drag_data_get", drag_sent)
+
+        def remove(widget, tag):
+            if tag in self.tags:
+                self.tags.remove(tag)
+                self.refresh()
+            return True
+
+        def set_color(widget, tag):
+            d=gtk.ColorSelectionDialog(_("Choose the color for tag %s") % tag)
+            res=d.run()
+            if res == gtk.RESPONSE_OK:
+                col=d.colorsel.get_current_color()
+                self.controller.package._tag_colors[tag]="#%04x%04x%04x" % (col.red, col.green, col.blue)
+                self.set_widget_color(b, col)
+            d.destroy()
+            return True
+
+        def popup_menu(widget, event):
+            if event.button != 3 or event.type == gtk.gdk.BUTTON_PRESS:
+                return False
+
+            menu=gtk.Menu()
+
+            for label, action in ( 
+                (_("Set color"), set_color),
+                (_("Remove"), remove)
+                ):
+                item = gtk.MenuItem(label)
+                item.connect("activate", action, t)
+                menu.append(item)
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            return True
 
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['tag'],
                           gtk.gdk.ACTION_LINK)
 
+        b.connect("button_press_event", popup_menu)
         self.mainbox.pack_start(b, expand=False)
 
     def build_widget(self):
