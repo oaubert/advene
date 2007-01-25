@@ -42,6 +42,7 @@ from advene.model.query import Query
 
 from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.browser import Browser
+from advene.gui.views.tagbag import TagBag
 
 import advene.gui.util
 
@@ -189,7 +190,7 @@ class EditElementPopup (object):
     def expandable (self, widget, label="", expanded=False):
         fr = gtk.Expander ()
         fr.set_label (label)
-        fr.add (widget)
+        fr.add(widget)
         fr.set_expanded(expanded)
         return fr
 
@@ -391,6 +392,11 @@ class EditAnnotationPopup (EditElementPopup):
         self.register_form (f)
         vbox.pack_start (f.get_view (), expand=False)
 
+        f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
+        self.register_form(f)
+        ex=self.expandable(f.get_view(), _("Tags"), expanded=not compact)
+        vbox.pack_start (ex, expand=False)
+
         f = EditContentForm(self.element.content, controller=self.controller,
                             mimetypeeditable=False, annotation=self.element)
         f.set_editable(editable)
@@ -450,6 +456,12 @@ class EditRelationPopup (EditElementPopup):
 
         vbox.pack_start(self.framed(hb, _("Members")), expand=True)
 
+        # Tags
+        f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
+        self.register_form(f)
+        ex=self.expandable(f.get_view(), _("Tags"), expanded=not compact)
+        vbox.pack_start (ex, expand=False)
+
         # Relation content
         f = EditContentForm(self.element.content, controller=self.controller,
                             mimetypeeditable=False)
@@ -495,6 +507,12 @@ class EditViewPopup (EditElementPopup):
                                        )
         vbox.pack_start (self.framed(f.get_view (), _("Match Filter")),
                          expand=False)
+
+        # Tags
+        f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
+        self.register_form(f)
+        ex=self.expandable(f.get_view(), _("Tags"), expanded=not compact)
+        vbox.pack_start (ex, expand=False)
 
         # View content
 
@@ -1621,6 +1639,40 @@ class EditElementListForm(EditForm):
         elements=[ e[self.COLUMN_ELEMENT] for e in self.store ]
         setattr(self.model, self.field, elements)
         return True
+
+class EditTagForm(EditForm):
+    """Edit form to tags
+    """
+    def __init__(self, element=None, controller=None, editable=True):
+        self.element = element
+        self.controller = controller
+        self.view=None
+        self.editable=editable
+
+    def check_validity(self):
+        invalid=[ t for t in self.get_current_tags()
+                  if not sre.match('^[\w\d_]+$', t) ]
+        if invalid:
+            advene.gui.util.message_dialog(_("Some tags contain invalid characters: %s") % ", ".join(invalid),
+                                           icon=gtk.MESSAGE_ERROR)
+            return False
+        else:
+            return True
+
+    def get_current_tags(self):
+        return self.view.tags
+
+    def update_element(self):
+        if not self.editable:
+            return False
+        if not self.check_validity():
+            return False
+        self.element.setTags( self.get_current_tags() )
+        return True
+
+    def get_view(self, compact=False):
+        self.view=TagBag(controller=self.controller, tags=self.element.tags, vertical=False)
+        return self.view.widget
 
 if __name__ == "__main__":
     class Foo:
