@@ -574,3 +574,21 @@ def old_related(target, context):
     if r:
 	return r[0].members[0]
     return None
+
+def tag_color(target, context):
+    """Return a color matching one of the tags.
+    """
+    try:
+        tags=target.tags
+    except:
+        return None
+    try:
+        d=target.rootPackage._tag_colors
+    except:
+        return None
+    for t in tags:
+        try:
+            return d[t]
+        except:
+            pass
+    return None
