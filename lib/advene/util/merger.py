@@ -37,6 +37,10 @@ class Differ:
         self.destination=destination
         self.controller=controller
         self.source_ids = {}
+        # translated ids for different elements with the same id.  The
+        # key is the id in the source package, the value the (new) id
+        # in the destination package.
+        self.translated_ids = {}
 
     def diff(self):
         """Iterator returning a changelist.
@@ -123,7 +127,8 @@ class Differ:
                 c=self.check_meta(s, d, 'dc', 'description')
                 if c:
                     yield c
-                # FIXME: check members
+                if s.hackedMemberTypes != d.hackedMemberTypes:
+                    yield ('update_member_types', s, d, lambda s, d: d.setHackedMemberTypes( s.hackedMemberTypes ))
             else:
                 yield ('new', s, None, lambda s, d: self.copy_relation_type(s) )
 
@@ -134,6 +139,9 @@ class Differ:
         for s in self.source.annotations:
             if s.id in ids:
                 d=ids[s.id]
+                # FIXME: check author/date. If different, it is very
+                # likely that it is in fact a new annotation, with
+                # duplicate ids.
                 # Present. Check if it was modified
                 if s.fragment.begin != d.fragment.begin:
                     yield ('update_begin', s, d, lambda s, d: d.fragment.setBegin(s.fragment.begin))
@@ -141,7 +149,8 @@ class Differ:
                     yield ('update_end', s, d, lambda s, d: d.fragment.setEnd(s.fragment.end))
                 if s.content.data != d.content.data:
                     yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
-                # FIXME: check tags
+                if s.tags != d.tags:
+                    yield ('update_tags', s, d, lambda s, d: d.setTags( s.tags ))
             else:
                 yield ('new', s, None, lambda s, d: self.copy_annotation(s) )
 
@@ -155,8 +164,12 @@ class Differ:
                 # Present. Check if it was modified
                 if s.content.data != d.content.data:
                     yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
-                # FIXME: check members
-                # FIXME: check tags
+                sm=[ a.id for a in s.members ]
+                dm=[ a.id for a in d.members ]
+                if sm != dm:
+                    yield ('update_members', s, d, self.update_members)
+                if s.tags != d.tags:
+                    yield ('update_tags', s, d, lambda s, d: d.setTags( s.tags ))
             else:
                 yield ('new', s, None, lambda s, d: self.copy_relation(s) )
 
@@ -225,6 +238,19 @@ class Differ:
         el.mimetype=s.mimetype
         sch.annotationTypes.append(el)
         return el
+
+    def update_members(self, s, d):
+        """Update the relation members.
+        """
+        sm=[ a.id for a in s.members ]
+        d.members.clear()
+        for i in sm:
+            # FIXME: handle translated ids
+            a=helper.get_id(self.destination.annotations, i)
+            if a is None:
+                raise "Error: missing annotation %s" % i
+            d.members.append(a)
+        return d
 
     def copy_relation_type(self, s):
         # Find parent, and create it if necessary
