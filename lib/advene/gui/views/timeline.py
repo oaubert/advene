@@ -771,6 +771,12 @@ class TimeLine(AdhocView):
                 self.align_annotations(source, dest, self.drag_mode)
             else:
                 print "Unknown drag mode: %s" % self.drag_mode
+        elif targetType == config.data.target_type['tag']:
+            tags=selection.data.split(',')
+            a=widget.annotation
+            l=[t for t in tags if not t in a.tags ]
+            a.tags = a.tags + l
+            self.controller.notify('TagUpdate', element=a)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -1103,6 +1109,7 @@ class TimeLine(AdhocView):
                           + config.data.drag_type['TEXT']
                           + config.data.drag_type['STRING']
                           + config.data.drag_type['timestamp']
+                          + config.data.drag_type['tag']
                           ,
                           gtk.gdk.ACTION_LINK)
         # The button can receive drops (to create relations)
@@ -1110,7 +1117,9 @@ class TimeLine(AdhocView):
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+                        config.data.drag_type['annotation']
+                        + config.data.drag_type['tag']
+                        , gtk.gdk.ACTION_LINK)
 
         # Handle scroll actions
         def handle_scroll_event(button, event):
