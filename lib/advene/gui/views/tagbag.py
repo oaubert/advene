@@ -15,7 +15,9 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Tag bag
+"""Tag bag view.
+
+Note: this adhoc view is also used in element edit popups.
 """
 
 # Advene part
@@ -28,7 +30,7 @@ from gettext import gettext as _
 import gtk
 
 class TagBag(AdhocView):
-    def __init__(self, controller=None, parameters=None, tags=None):
+    def __init__(self, controller=None, parameters=None, tags=None, vertical=True):
         self.view_name = _("Tag Bag")
         self.view_id = 'tagbagview'
         self.close_on_package_load = False
@@ -39,6 +41,7 @@ class TagBag(AdhocView):
             )
         self.options={}
         self.controller=controller
+        self.vertical=vertical
 
         if parameters:
             opt, arg = self.load_parameters()
@@ -97,9 +100,14 @@ class TagBag(AdhocView):
         self.mainbox.pack_start(b, expand=False)
 
     def build_widget(self):
-        v=gtk.VBox()
+        
+        if self.vertical:
+            v=gtk.VBox()
+            mainbox=gtk.VBox()
+        else:
+            v=gtk.HBox()
+            mainbox=gtk.HBox()
 
-        mainbox=gtk.VBox()
         sw=gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         sw.add_with_viewport(mainbox)
