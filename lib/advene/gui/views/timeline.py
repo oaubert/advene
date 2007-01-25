@@ -776,7 +776,7 @@ class TimeLine(AdhocView):
             a=widget.annotation
             l=[t for t in tags if not t in a.tags ]
             a.tags = a.tags + l
-            self.controller.notify('TagUpdate', element=a)
+            self.controller.notify('AnnotationEditEnd', annotation=a)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
