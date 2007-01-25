@@ -30,6 +30,7 @@ import time
 import os
 import StringIO
 import textwrap
+from sets import Set
 
 import advene.core.config as config
 
@@ -101,6 +102,7 @@ from advene.gui.views.html import HTMLView
 from advene.gui.views.scroller import ScrollerView
 from advene.gui.views.caption import CaptionView
 from advene.gui.views.editaccumulator import EditAccumulator
+from advene.gui.views.tagbag import TagBag
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -204,6 +206,7 @@ class AdveneGUI (Connect):
             ('transcribe', _('Take notes on the fly'), 'transcribe.png'),
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
             ('history', _('Entry points'), 'history.png'),
+            ('tagbag', _("Bag of tags"), 'tagbag.png'),
             ):
             b=gtk.Button()
             i=gtk.Image()
@@ -1015,8 +1018,16 @@ class AdveneGUI (Connect):
             view = advene.gui.views.timeline.TimeLine (l=None,
                                                        controller=self.controller, 
                                                        parameters=parameters)
-        if name == 'history' or name == 'historyview':
+        elif name == 'history' or name == 'historyview':
             view=advene.gui.views.history.HistoryNavigation(self.controller, ordered=True)
+        elif name == 'tagbag' or name == 'tagbagview':
+            tags=Set()
+            if not parameters:
+                # Populate with annotations and relations tags
+                for l in self.controller.package.annotations, self.controller.package.relations:
+                    for e in l:
+                        tags.update(e.tags)
+            view=TagBag(self.controller, parameters=parameters, tags=list(tags))
         elif name == 'transcription' or name == 'transcriptionview':
             try:
                 source=kw['source']
