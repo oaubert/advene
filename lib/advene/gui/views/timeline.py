@@ -78,9 +78,10 @@ class TimeLine(AdhocView):
         self.controller=controller
 
         if parameters:
-            self.load_parameters(parameters)
+            opt, arg = self.load_parameters(parameters)
+            self.options.update(opt)
             ats=[]
-            for n, v in self.arguments:
+            for n, v in arg:
                 if n == 'annotation-type':
                     at=helper.get_id(self.controller.package.annotationTypes,
                                      v)

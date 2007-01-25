@@ -39,9 +39,8 @@ class ViewPlugin(AdhocView):
 
     self.load_parameters() takes a Content object as parameter, that
     must be of application/x-advene-adhoc-view mimetype. It will read
-    the Content data, update the self.options dictionary, and put
-    arguments in the self.arguments list (which is a list of (name,
-    value) tuples).
+    the Content data, and return an options dictionary, and arguments
+    as a list of (name, value) tuples.
 
     @ivar view_name: the name of the view
     @type view_name: string
@@ -59,7 +58,8 @@ class ViewPlugin(AdhocView):
         self.view_id = 'viewplugin'
         self.controller=controller
         self.options={}
-        self.load_parameters(parameters)
+        opt, arg = self.load_parameters(parameters)
+        self.options.update(opt)
         self.widget = self.build_widget()
 
     def get_save_arguments(self):

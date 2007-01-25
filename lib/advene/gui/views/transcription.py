@@ -67,9 +67,9 @@ class TranscriptionView(AdhocView):
         self.package=controller.package
         
         if parameters:
-            self.load_parameters(parameters)
-            a=dict(self.arguments)
-
+            opt, arg = self.load_parameters(parameters)
+            self.options.update(opt)
+            a=dict(arg)
             if source is None and a.has_key('source'):
                 source=a['source']
 

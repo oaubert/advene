@@ -57,7 +57,8 @@ class AdhocView(object):
         # self.buttonbox = gtk.HButtonBox()
 
         if parameters is not None:
-            self.load_parameters(parameters)
+            opt, arg = self.load_parameters(parameters)
+            self.options.update(opt)
 
         self.widget=self.build_widget()
 
@@ -77,15 +78,18 @@ class AdhocView(object):
     def load_parameters(self, content):
         """Load the parameters from a Content object.
  
-        It will update the self.options dictionary, as well as
-        create a self.arguments list of tuples (name, value)
+        It will return a tuple (options, arguments) where options is a
+        dictionary and arguments a list of tuples (name, value).
+
+        In case of problem, it will simply return None, None.
         """
+        opt, arg = {}, []
         try:
             m=content.mimetype
         except:
-            return False
+            return opt, arg
         if  m != 'application/x-advene-adhoc-view':
-            return False
+            return opt, arg
 
         p=AdhocViewParametersParser()
         p.parse_file(content.stream)
@@ -95,7 +99,9 @@ class AdhocView(object):
             return False
 
         for name, value in p.options.iteritems():
-            if self.options.has_key(name):
+            # If there is a self.options dictionary, try to guess
+            # value types from its content.
+            try:
                 op=self.options[name]
                 if value == 'None':
                     value=None
@@ -107,10 +113,10 @@ class AdhocView(object):
                     value=long(value)
                 elif isinstance(op, float):
                     value=float(value)
-            self.options[name]=value
-        
-        self.arguments=p.arguments
-        return True
+            except (KeyError, AttributeError):
+                pass
+            opt[name]=value
+        return opt, p.arguments
 
     def save_parameters(self, content, options=None, arguments=None):
         """Save the view parameters to a Content object.
@@ -257,7 +263,8 @@ class AdhocViewParametersParser(xml.sax.handler.ContentHandler):
     def __init__(self):
         self.view_id=None
         self.options={}
-        # self.arguments will contain (name, value) tuples
+        # self.arguments will contain (name, value) tuples, in order
+        # to preserve order.
         self.arguments=[]
  
     def startElement(self, name, attributes):
