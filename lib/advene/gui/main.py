@@ -1019,7 +1019,7 @@ class AdveneGUI (Connect):
                                                        controller=self.controller, 
                                                        parameters=parameters)
         elif name == 'history' or name == 'historyview':
-            view=advene.gui.views.history.HistoryNavigation(self.controller, ordered=True)
+            view=advene.gui.views.history.HistoryNavigation(self.controller, parameters=parameters)
         elif name == 'tagbag' or name == 'tagbagview':
             tags=Set()
             if not parameters:
