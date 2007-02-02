@@ -28,11 +28,12 @@ from gettext import gettext as _
 import gtk
 
 class HistoryNavigation(AdhocView):
-    def __init__(self, controller=None, history=None, vertical=True, ordered=False, closable=True):
+    def __init__(self, controller=None, history=None, vertical=True, ordered=False, closable=True, parameters=None):
         self.view_name = _("Navigation history")
         self.view_id = 'historyview'
         self.close_on_package_load = False
         self.contextual_actions = (
+            (_("Save view"), self.save_view),
             (_("Clear"), self.clear),
             )
         self.options={
@@ -41,15 +42,23 @@ class HistoryNavigation(AdhocView):
             'vertical': vertical,
             }
         self.controller=controller
-
-        self.closable=closable
         self.history=history
-        self.scrollwindow=None
         if history is None:
             self.history=[]
+
+        if parameters:
+            opt, arg = self.load_parameters(parameters)
+            self.options.update(opt)
+            self.history=[ long(v) for (n, v) in arg if n == 'timestamp' ]
+            
+        self.closable=closable
         self.mainbox=None
+        self.scrollwindow=None
         self.widget=self.build_widget()
         self.refresh()
+
+    def get_save_arguments(self):
+        return self.options, [ ('timestamp', t) for t in self.history ]
 
     def close(self, *p):
         if self.closable:
