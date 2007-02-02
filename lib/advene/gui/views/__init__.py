@@ -147,7 +147,6 @@ class AdhocView(object):
         xml.dom.ext.PrettyPrint(dom, stream)
         content.setData(stream.getvalue())
         stream.close()
-        xml.dom.ext.PrettyPrint(dom)
 
         return True
 
