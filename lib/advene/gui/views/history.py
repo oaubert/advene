@@ -35,17 +35,18 @@ class HistoryNavigation(AdhocView):
         self.contextual_actions = (
             (_("Clear"), self.clear),
             )
-        self.options={}
+        self.options={
+            'ordered': ordered,
+            'snapshot_width': 100,
+            'vertical': vertical,
+            }
         self.controller=controller
 
         self.closable=closable
         self.history=history
         self.scrollwindow=None
-        self.snapshot_width=100
         if history is None:
             self.history=[]
-        self.vertical=vertical
-        self.ordered=ordered
         self.mainbox=None
         self.widget=self.build_widget()
         self.refresh()
@@ -74,7 +75,7 @@ class HistoryNavigation(AdhocView):
         if position in self.history:
             return True
         self.history.append(position)
-        if self.ordered:
+        if self.options['ordered']:
             self.history.sort()
             self.refresh()
         else:
@@ -109,7 +110,7 @@ class HistoryNavigation(AdhocView):
         vbox=gtk.VBox()
         i=advene.gui.util.image_from_position(self.controller,
                                               t,
-                                              width=self.snapshot_width)
+                                              width=self.options['snapshot_width'])
         e=gtk.Button()
         #e.connect("button-release-event", self.activate, t)
         e.connect("clicked", self.activate, t)
@@ -128,7 +129,7 @@ class HistoryNavigation(AdhocView):
 
         vbox.show_all()
         if self.scrollwindow:
-            if self.vertical:
+            if self.options['vertical']:
                 adj=self.scrollwindow.get_vadjustment()
             else:
                 adj=self.scrollwindow.get_hadjustment()
@@ -138,7 +139,7 @@ class HistoryNavigation(AdhocView):
     def build_widget(self):
         v=gtk.VBox()
 
-        if self.vertical:
+        if self.options['vertical']:
             mainbox=gtk.VBox()
         else:
             mainbox=gtk.HBox()
