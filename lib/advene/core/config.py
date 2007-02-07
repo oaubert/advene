@@ -586,12 +586,23 @@ class Config(object):
 	if self.options.userid is not None:
 	    return self.options.userid
 
-        id = "Undefined id"
+        id_ = "Undefined id"
         for name in ('USER', 'USERNAME', 'LOGIN'):
             if os.environ.has_key (name):
-                id = os.environ[name]
+                id_ = os.environ[name]
                 break
-        return id
+        # Convert to unicode
+        try:
+            # If there are any accented characters and the encoding is
+            # not UTF-8, this will fail
+            id_ = unicode(id_, 'utf-8')
+        except UnicodeDecodeError:
+            # Decoding to latin1 will always work (but may produce
+            # strange characters depending on the system charset).
+            # This looks however like the best fallback for the moment
+            # (even on win32)
+            id_ = unicode(id_, 'latin1')
+        return id_
 
     def advenefile(self, filename, category='resources'):
         """Return an absolute pathname for the given file.
