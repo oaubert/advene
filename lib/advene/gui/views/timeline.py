@@ -483,10 +483,22 @@ class TimeLine(AdhocView):
                                                 method=self.activate_annotation_handler)
         self.endrule=controller.event_handler.internal_rule (event="AnnotationEnd",
                                                 method=self.desactivate_annotation_handler)
+        self.tagrule=controller.event_handler.internal_rule (event="TagUpdate",
+                                                             method=self.tag_update)
+
+    def tag_update(self, context, parameters):
+        tag=context.evaluateValue('tag')
+        bs = [ b
+               for b in self.layout.get_children()
+               if hasattr (b, 'annotation') and tag in b.annotation.tags ]
+        for b in bs:
+            self.update_button(b)
+        return True
 
     def unregister_callback (self, controller=None):
         controller.event_handler.remove_rule(self.beginrule, type_="internal")
         controller.event_handler.remove_rule(self.endrule, type_="internal")
+        controller.event_handler.remove_rule(self.tagrule, type_="internal")
 
     def set_widget_background_color(self, widget, color=None):
         if color is None:
