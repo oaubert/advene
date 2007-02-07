@@ -43,7 +43,7 @@ advene (0.22) unstable; urgency=low
 	
   * gstreamer plugin: it can display text subtitles
 
- -- Olivier Aubert <oaubert@liris.cnrs.fr>
+ -- Olivier Aubert <oaubert@liris.cnrs.fr>  Wed Feb  7 17:46:52 CET 2007
 	
 advene (0.21) unstable; urgency=low
 
