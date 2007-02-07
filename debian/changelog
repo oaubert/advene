@@ -10,12 +10,12 @@ advene (0.22) unstable; urgency=low
 	
   * DVD device/drive: it can be configured from the Player preferences window
 
-  * Adhoc-views (timeline, transcription...): parametered adhoc-views
-	can be saved as Advene views (for instance, choosing the displayed
-	annotation types in the timeline) and restored. To save them, use
-	the "Save view" menuitem from the view tab contextual menu. To
-	restore them, do a right-click or drag and drop from the item in
-	the tree view.
+  * Adhoc-views (timeline, transcription...): parametered
+	adhoc-views can be saved as Advene views (for instance, choosing
+	the displayed annotation types in the timeline) and restored. To
+	save them, use the "Save view" menuitem from the view tab
+	contextual menu (right click on the view name). To restore them,
+	do a right-click or drag and drop from the item in the tree view.
 
 	* Transcription view: it now uses a TALES expression as
 	argument. It can thus display query results or any set of
