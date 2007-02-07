@@ -69,6 +69,30 @@ class TagBag(AdhocView):
         del self.tags[:]
         self.refresh()
 
+    def tag_update(self, context, parameters):
+        tag=context.evaluateValue('tag')
+        # Is there an associated color ?
+        try:
+            col=self.controller.package._tag_colors[tag]
+        except KeyError:
+            return True
+
+        l=[ b for b in self.mainbox.get_children() if b.get_label() == tag ]
+        for b in l:
+            self.set_widget_color(b, col)
+        return True
+
+    def register_callback (self, controller=None):
+        """Add the activate handler for annotations.
+        """
+        self.callback=controller.event_handler.internal_rule (event="TagUpdate",
+                                                              method=self.tag_update)
+        return True
+
+    def unregister_callback (self, controller=None):
+        controller.event_handler.remove_rule(self.callback, type_="internal")
+        return True
+
     def new_tag(self, *p):
         """Enter a new tag.
         """
@@ -80,6 +104,7 @@ class TagBag(AdhocView):
                                                icon=gtk.MESSAGE_ERROR)
                 return True            
             self.tags.append(tag)
+            self.controller.notify('TagUpdate', tag=tag)
             self.refresh()
         return True
 
@@ -126,6 +151,11 @@ class TagBag(AdhocView):
         def remove(widget, tag):
             if tag in self.tags:
                 self.tags.remove(tag)
+                try:
+                    del self.controller.package._tag_colors[tag]
+                except KeyError:
+                    pass
+                self.controller.notify('TagUpdate', tag=tag)
                 self.refresh()
             return True
 
@@ -141,7 +171,8 @@ class TagBag(AdhocView):
             if res == gtk.RESPONSE_OK:
                 col=d.colorsel.get_current_color()
                 self.controller.package._tag_colors[tag]="#%04x%04x%04x" % (col.red, col.green, col.blue)
-                self.set_widget_color(b, col)
+                self.controller.notify('TagUpdate', tag=tag)
+                # The color setting of the widget is done in the callback for TagUpdate
             d.destroy()
             return True
 
