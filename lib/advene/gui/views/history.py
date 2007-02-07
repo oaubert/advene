@@ -112,9 +112,10 @@ class HistoryNavigation(AdhocView):
         def drag_sent(widget, context, selection, targetType, eventTime):
             if targetType == config.data.target_type['timestamp']:
                 selection.set(selection.target, 8, str(t))
+                return True
             else:
                 print "Unknown target type for drag: %d" % targetType
-            return True
+            return False
 
         vbox=gtk.VBox()
         i=advene.gui.util.image_from_position(self.controller,
@@ -164,9 +165,10 @@ class HistoryNavigation(AdhocView):
             if targetType == config.data.target_type['timestamp']:
                 position=long(selection.data)
                 self.append(position)
+                return True
             else:
                 print "Unknown target type for drop: %d" % targetType
-            return True
+            return False
 
         self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
@@ -180,9 +182,10 @@ class HistoryNavigation(AdhocView):
                 if position in self.history:
                     self.history.remove(position)
                 self.refresh()
+                return True
             else:
                 print "Unknown target type for drop: %d" % targetType
-            return True
+            return False
 
         v.add(sw)
 
