@@ -23,8 +23,10 @@ advene (0.22) unstable; urgency=low
 
 	* Bag of tags: this new view allows to manage tags applied to
 	elements (mostly annotations), through drag-and-drop.
+
+	* Timeline: new shortcut ('t') to toggle tooltips display
 	
-       * Navigation history:
+        * Navigation history:
           * items from the history are removable (by drag and drop on the
           Remove button)
           * it is possible to open many history views. They can be populated
