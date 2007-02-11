@@ -167,7 +167,7 @@ class EditElementPopup (object):
 
     def key_pressed_cb (self, button=None, event=None):
         # Process player shortcuts
-        if c.gui and c.gui.process_player_shortcuts(win, event):
+        if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
             return True
 
         if event.keyval in self.key_cb:
