@@ -3,6 +3,10 @@
 
 Advene uses internally mimetypes to identify specific elements.
 
+* application/x-advene-adhoc
+
+  Parameters and arguments for adhoc views.
+
 * application/x-advene-ruleset
 
   Dynamic views (rulesets).
@@ -19,8 +23,16 @@ Advene uses internally mimetypes to identify specific elements.
 
   Structured content stored in a simple way
   (keyword=content...). Annotations of this type can be parsed by the
-  global method 'parsed'.
+  Content method 'parsed'.
  
+* application/x-advene-simplequery
+
+  Simple query language based on ECA conditions.
+
+* application/x-advene-zip-package
+
+  An Advene Zip Package (cf advene.model.zippackage)
+
 * application/x-advene-zone
 
   A specialized structured content, that defines the following fields:
@@ -30,11 +42,3 @@ Advene uses internally mimetypes to identify specific elements.
   y=...
   width=...
   height=...
-
-* application/x-advene-simplequery
-
-  Simple query language based on ECA conditions.
-
-* application/x-advene-zip-package
-
-  An Advene Zip Package (cf advene.model.zippackage)
