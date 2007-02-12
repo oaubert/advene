@@ -112,6 +112,8 @@ class Player:
 	return v
 
     def current_position(self):
+        # FIXME: if performance is too low, it could maybe help to shortcut
+        # directly to qtlowlevel functions.
         if self.movie:
             rec=self.movie.GetMovieTime()
             if rec.scale:
@@ -140,8 +142,8 @@ class Player:
         if self.movie:
             self.movie.StartMovie()
             self.status=Player.PlayingStatus
-        if position:
-            self.set_media_position(position)
+            if position:
+                self.set_media_position(position)
 
     def pause(self, position=0):
         if self.status == Player.PlayingStatus:
@@ -160,6 +162,7 @@ class Player:
         self.status=Player.UndefinedStatus
 
     def exit(self):
+        # FIXME: cleanly exit the player (DisposeMovie + ExitMovies + TerminateQTML)
         self.log("exit")
     
     def playlist_add_item(self, item):
@@ -176,10 +179,12 @@ class Player:
         return self.playlist[:]
 
     def snapshot(self, position):
+        # FIXME: to implement (GetMoviePict)
         self.log("snapshot %s" % str(position))
         return None
 
     def display_text (self, message, begin, end):
+        # FIXME: to implement (cf http://developer.apple.com/documentation/QuickTime/Reference/QTRef_MovieManager/Reference/reference.html#//apple_ref/c/func/TextMediaAddTextSample)
         self.log("display_text %s" % str(message))
 
     def get_stream_information(self):
@@ -200,6 +205,7 @@ class Player:
             return 0
 
     def sound_set_volume(self, v):
+        # FIXME: normalize in 0..100
         if self.movie:
             self.movie.SetMovieVolume(v)
 
