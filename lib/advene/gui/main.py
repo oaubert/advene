@@ -498,11 +498,14 @@ class AdveneGUI (Connect):
         try:
             if not config.data.player['embedded']:
                 raise Exception()
-            if config.data.os == 'win32':
-                self.visual_id=self.drawable.window.handle
-            else:
-                self.visual_id=self.drawable.window.xid
-            self.controller.player.set_visual(self.visual_id)
+            try:
+                self.controller.player.set_widget(self.drawable)
+            except AttributeError:
+                if config.data.os == 'win32':
+                    self.visual_id=self.drawable.window.handle
+                else:
+                    self.visual_id=self.drawable.window.xid
+                self.controller.player.set_visual(self.visual_id)
         except Exception, e:
             print "Cannot set visual: %s" % str(e)
             self.displayhbox.destroy()
@@ -2241,8 +2244,11 @@ Available views: timeline, tree, browser, transcribe"""))
             else:
                 config.data.player['verbose'] = cache['level']
             self.controller.restart_player ()
-            if self.visual_id:
-                self.controller.player.set_visual(self.visual_id)
+            try:
+                self.controller.player.set_widget(self.drawable)
+            except AttributeError:
+                if self.visual_id:
+                    self.controller.player.set_visual(self.visual_id)
         return True
 
     def on_save_imagecache1_activate (self, button=None, data=None):
@@ -2254,8 +2260,11 @@ Available views: timeline, tree, browser, transcribe"""))
     def on_restart_player1_activate (self, button=None, data=None):
         self.log (_("Restarting player..."))
         self.controller.restart_player ()
-        if self.visual_id:
-            self.controller.player.set_visual(self.visual_id)
+        try:
+            self.controller.player.set_widget(self.drawable)
+        except AttributeError:
+            if self.visual_id:
+                self.controller.player.set_visual(self.visual_id)
         return True
 
     def on_slider_button_press_event (self, button=None, data=None):
