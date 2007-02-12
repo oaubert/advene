@@ -46,6 +46,8 @@ class PlayerFactory:
                 import advene.player.mplayer as playermodule
 	    elif p == 'gstreamer':
 		import advene.player.gstreamer as playermodule
+	    elif p == 'quicktime':
+		import advene.player.quicktime as playermodule
             else:
 		print "Fallback to dummy module"
                 import advene.player.dummy as playermodule
