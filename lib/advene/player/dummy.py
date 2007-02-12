@@ -92,7 +92,7 @@ class Player:
 	if isinstance(p, Position):
 	    v=p.value
 	    if p.key != self.MediaTime:
-		print "dummy: unsupported key ", p.key
+		self.log("unsupported key ", p.key)
 		return 0
 	    if p.origin == self.AbsolutePosition:
 		v=p.value
@@ -114,8 +114,8 @@ class Player:
         return "dvd@%s:%s" % (str(title),
                               str(chapter))
 
-    def log(self, *p):
-        print "Dummy player: %s" % p
+    def log(self, *m):
+        print "dummy plugin:", " ".join([str(i) for i in m])
         
     def get_media_position(self, origin=None, key=None):
         self.log("get_media_position")
@@ -244,7 +244,7 @@ class Player:
         @param position: the position
         @type position: long
         """
-        print "dummy update_status %s" % status
+        self.log("update_status %s" % status)
 
 	if position is None:
 	    position=0
@@ -271,14 +271,14 @@ class Player:
             elif status == "" or status == None:
                 pass
             else:
-                print "******* Error : unknown status %s in dummy player" % status
+                self.log("******* Error : unknown status %s")
         self.position_update ()
 
     def is_active(self):
         return True
 
     def check_player(self):
-        print "check player"
+        self.log("check player")
         return True
 
     def position_update(self):
@@ -288,8 +288,12 @@ class Player:
         self.current_position_value = s.position
 
     def set_visual(self, xid):
+        """Set the window id for the video output.
+
+        It is widget.window.xid on X, widget.window.handle on Win32.
+        """
         return True
 
     def restart_player(self):
-	print "dummy: restart player"
+	self.log("restart player")
 	return True
