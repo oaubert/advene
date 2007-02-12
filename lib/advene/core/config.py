@@ -336,7 +336,8 @@ class Config(object):
                           dest="player",
                           action="store",
                           type="choice",
-                          choices=("vlcnative", "dummy", "vlcorbit", "xine", "gstreamer"),
+                          # FIXME: we should register player plugins and use introspection
+                          choices=("vlcnative", "dummy", "vlcorbit", "xine", "gstreamer", "quicktime"),
                           default=None,
                           help="Video player selection")
 
