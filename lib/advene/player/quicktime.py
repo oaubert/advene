@@ -119,7 +119,9 @@ class Player:
             if rec.scale:
                 ms=1000 * rec.value / rec.scale
             else:
-                ms=-1
+                # It so happens that rec.scale == 0, so let us just
+                # consider that rec.value is in microseconds (to confirm ?)
+                ms=rec.value / 1000
         else:
             ms=-1
         return ms
