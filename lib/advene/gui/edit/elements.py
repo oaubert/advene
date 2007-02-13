@@ -165,13 +165,13 @@ class EditElementPopup (object):
             self.window.destroy ()
         return True
 
-    def key_pressed_cb (self, button=None, event=None):
+    def key_pressed_cb (self, widget=None, event=None):
         # Process player shortcuts
-        if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
+        if self.controller.gui and self.controller.gui.process_player_shortcuts(widget, event):
             return True
 
         if event.keyval in self.key_cb:
-            return self.key_cb[event.keyval] (button, event)
+            return self.key_cb[event.keyval] (widget, event)
         else:
             return False
 
