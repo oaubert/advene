@@ -20,15 +20,12 @@
 Based on gst >= 0.10 API
 """
 
-import advene.core.config as config
+#import advene.core.config as config
 
 import pygst
 pygst.require('0.10')
 import gst
-import gobject
-import gst.interfaces
 import os
-from mutex import mutex
 
 class StreamInformation:
     def __init__(self):
@@ -125,7 +122,7 @@ class Player:
 
         # Snapshot format conversion infrastructure. Does not work...
         #self.pngconverter = gst.parse_launch("freeze name=source ! video/x-raw-rgb,width=160 ! pngenc name=encoder ! fakesink name=sink")
-
+        # p=gst.parse_launch('fakesrc name=src ! ffmpegcolorspace ! video/x-raw-rgb,width=320 ! pngenc ! fakesink name=sink')
         bus = self.player.get_bus()
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', self.on_sync_message)
@@ -273,9 +270,9 @@ class Player:
     def display_text (self, message, begin, end):
         if not self.check_uri():
             return
-        caption.begin=self.position2value(begin)
-        caption.end=self.position2value(end)
-        caption.text=message
+        self.caption.begin=self.position2value(begin)
+        self.caption.end=self.position2value(end)
+        self.caption.text=message
         self.captioner.props.text=message
 
     def get_stream_information(self):
