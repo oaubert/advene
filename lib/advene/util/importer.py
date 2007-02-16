@@ -1115,9 +1115,24 @@ class IRIImporter(GenericImporter):
                             el.title.encode('utf-8').replace('\n', '\\n'),
                             el.abstract.encode('utf-8').replace('\n', '\\n'),
                             el.src.encode('utf-8').replace('\n', '\\n'),
-                                )
+                            )
                        }
                     yield d
+                # process "views" elements to add attributes
+                try:
+                    views=decoupage.views[0].view
+                except AttributeError:
+                    # No defined views
+                    views=[]
+                for view in views:
+                    print "     ", view.title.encode('latin1')
+                    for ref in view.ref:
+                        an = [a for a in self.package.annotations if a.id == ref.id ]
+                        if not an:
+                            print "Invalid id", ref.id
+                        else:
+                            an[0].content.data += '\n%s=%s' % (view.id,
+                                                               ref.type.encode('utf-8').replace('\n', '\\n'))
 
     def process_file(self, filename):
         iri=handyxml.xml(filename)
