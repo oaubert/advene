@@ -1744,7 +1744,7 @@ class AdveneGUI (Connect):
                                               action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                               button=gtk.STOCK_OPEN,
                                               default_dir=d,
-                                              filter='advene')
+                                              filter='any')
         if not filename:
             return True
         filename_utf=unicode(filename, 'iso-8859-1').encode('utf-8')
