@@ -1,31 +1,32 @@
 advene (0.22) unstable; urgency=low
 
   * It is possible to enter a googlevideo/youtube/dailymotion URL in the
-	"File/Select a video stream" dialog.
+    "File/Select a video stream" dialog.
 
   * Annotation coloring: a new global method, tag_color, has been
-	introduced to offer a color tagging facility. To use it,
-	you must specify the TALES expression "here/tag_color"
-	as the Color attribute of the annotation type.
-	
+    introduced to offer a color tagging facility. To use it, you must
+    specify the TALES expression "here/tag_color" as the "color" attribute
+    of the annotation type, and set the tag color through the tag bag
+    view.
+  
   * DVD device/drive: it can be configured from the Player preferences window
 
-  * Adhoc-views (timeline, transcription...): parametered
-	adhoc-views can be saved as Advene views (for instance, choosing
-	the displayed annotation types in the timeline) and restored. To
-	save them, use the "Save view" menuitem from the view tab
-	contextual menu (right click on the view name). To restore them,
-	do a right-click or drag and drop from the item in the tree view.
+  * Adhoc-views (timeline, transcription...): parametered adhoc-views can
+    be saved as Advene views (for instance, choosing the displayed
+    annotation types in the timeline) and restored. To save them, use the
+    "Save view" menuitem from the view tab contextual menu (right click on
+    the view name). To restore them, do a right-click or drag and drop
+    from the item in the tree view.
 
-	* Transcription view: it now uses a TALES expression as
-	argument. It can thus display query results or any set of
-	annotations as a transcription.
+        * Transcription view: it now uses a TALES expression as
+          argument. It can thus display query results or any set of annotations
+          as a transcription.
 
-	* Bag of tags: this new view allows to manage tags applied to
-	elements (mostly annotations), through drag-and-drop.
+        * Bag of tags: this new view allows to manage tags applied to
+          elements (mostly annotations), through drag-and-drop.
 
-	* Timeline: new shortcut ('t') to toggle tooltips display
-	
+        * Timeline: new shortcut ('t') to toggle tooltips display
+        
         * Navigation history:
           * items from the history are removable (by drag and drop on the
           Remove button)
@@ -34,19 +35,22 @@ advene (0.22) unstable; urgency=low
           act as a visual table of contents.
 
   * Web server:
-	* webserver logs are stored in ~/.advene/webserver.log
+  
+        * webserver logs are stored in ~/.advene/webserver.log
+  
         * the old mainloop-based mode (1) for webservers has been
-	removed. The config.data.webserver['mode'] parameter is now a
-	boolean.
-	* an experimental webcherry-based webserver has been
-	implemented. To test it, install cherrypy 3.0 and add the
-	following line to advene.ini:
-	config.data.webserver['engine']='cherrypy'
-	
+        removed. The config.data.webserver['mode'] parameter is now a
+        boolean.
+  
+        * an experimental webcherry-based webserver has been
+        implemented. To test it, install cherrypy 3.0 and add the
+        following line to advene.ini:
+        config.data.webserver['engine']='cherrypy'
+        
   * gstreamer plugin: it can display text subtitles
 
- -- Olivier Aubert <oaubert@liris.cnrs.fr>  Wed Feb  7 17:46:52 CET 2007
-	
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 18 Feb 2007 18:54:15 +0100
+        
 advene (0.21) unstable; urgency=low
 
   * New command line options. Do advene --help to see them. It is possible
