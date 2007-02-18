@@ -29,7 +29,7 @@ import gtk
 
 class HistoryNavigation(AdhocView):
     def __init__(self, controller=None, history=None, vertical=True, ordered=False, closable=True, parameters=None):
-        self.view_name = _("Navigation history")
+        self.view_name = _("History")
         self.view_id = 'historyview'
         self.close_on_package_load = False
         self.contextual_actions = (
