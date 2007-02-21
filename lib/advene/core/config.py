@@ -347,7 +347,7 @@ class Config(object):
 
 	parser.add_option("-m", "--webserver-mode", dest="mode", action="store",
 			  type="int", default=None, metavar="WEBSERVER_MODE",
-			  help="0: deactivated ; 1: mainloop mode ; 2: threaded mode.")
+			  help="0: deactivated ; 1: threaded mode.")
 
 	(self.options, self.args) = parser.parse_args()
 	if self.options.version:
