@@ -49,6 +49,8 @@
 
 import zipfile
 import os
+import sys
+import tempfile
 import sre
 import shutil
 import urllib
@@ -86,6 +88,7 @@ class ZipPackage:
 
     def __init__(self, uri=None):
         self.uri = None
+        # Temp. directory, a unicode string
         self._tempdir = None
         self.file_ = None
 
@@ -111,11 +114,10 @@ class ZipPackage:
                 u=urllib.urlopen(uri)
 
                 # Use the same extension
-                (n, e) = os.path.splitext(uri)
-                self.file_ = os.tempnam(None, 'adv') + e                
-                print "Making a local copy of %s" % uri
                 self.uri = uri
-                f=open(self.file_, 'w')
+                (n, e) = os.path.splitext(uri)
+                print "Making a local copy of %s" % uri
+                f, self.file_ = tempfile.mkstemp(e, 'adv')
                 f.write(u.read())
                 f.close()
                 u.close()
@@ -129,18 +131,17 @@ class ZipPackage:
 	@return: the XML filename
 	@rtype: string
 	"""
-        return os.path.join( self._tempdir, 'content.xml' )
+        return os.path.join( self._tempdir, u'content.xml' )
 
     def new(self):
         """Prepare a new AZP expanded package.
         """
-        self._tempdir=os.tempnam(None, 'adv')
-        os.mkdir(self._tempdir)
+        self._tempdir=unicode(tempfile.mkdtemp('', 'adv'), sys.getfilesystemencoding())
         self.tempdir_list.append(self._tempdir)
 
-        open(os.path.join(self._tempdir, 'mimetype'), 'w').write(MIMETYPE)
+        open(os.path.join(self._tempdir, u'mimetype'), 'w').write(MIMETYPE)
 
-        os.mkdir(os.path.join(self._tempdir, 'resources'))
+        os.mkdir(os.path.join(self._tempdir, u'resources'))
 
     def open(self, fname=None):
 	"""Open the given AZP file.
@@ -163,8 +164,7 @@ class ZipPackage:
 
         # The file is an advene zip package. We can extract its contents
         # to a temporary directory
-        self._tempdir=os.tempnam(None, 'adv')
-        os.mkdir(self._tempdir)
+        self._tempdir=unicode(tempfile.mkdtemp('', 'adv'), sys.getfilesystemencoding())
         os.mkdir(os.path.join( self._tempdir, 'resources'))
         self.tempdir_list.append(self._tempdir)
         
@@ -318,5 +318,3 @@ class ManifestHandler(xml.sax.handler.ContentHandler):
         p.setContentHandler(self)
         p.parse(name)
         return self.filelist
-
-warnings.filterwarnings('ignore', 'tempnam', RuntimeWarning)
