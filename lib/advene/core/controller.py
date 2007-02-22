@@ -385,13 +385,12 @@ class AdveneController:
             self.server=None
             try:
                 self.server = AdveneWebServer(controller=self, port=config.data.webserver['port'])
+                self.serverthread = threading.Thread (target=self.server.start)
+                self.serverthread.start ()
             except socket.error:
                 if config.data.os != 'win32':
                     self.busy_port_info()
                 self.log(_("Deactivating web server"))
-            self.serverthread = threading.Thread (target=self.server.start)
-            self.serverthread.start ()
-
 	media=None
         # Arguments handling
         for uri in args:
