@@ -512,11 +512,11 @@ class EditViewPopup (EditElementPopup):
         vbox.pack_start (self.framed(f.get_view (), _("Match Filter")),
                          expand=False)
 
-        # Tags
-        f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
-        self.register_form(f)
-        ex=self.expandable(f.get_view(), _("Tags"), expanded=not compact)
-        vbox.pack_start (ex, expand=False)
+        # Tags (not tags in view)
+        #f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
+        #self.register_form(f)
+        #ex=self.expandable(f.get_view(), _("Tags"), expanded=not compact)
+        #vbox.pack_start (ex, expand=False)
 
         # View content
 
