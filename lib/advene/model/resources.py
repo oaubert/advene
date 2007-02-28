@@ -50,9 +50,7 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
         self.author=None
         self.date=None
 
-        self.file_ = os.path.join( self.package._tempdir,
-                                   'resources',
-                                   resourcepath.replace('/', os.path.sep, -1) )
+        self.file_ = self.package.tempfile('resources', resourcepath.replace('/', os.path.sep, -1) )
         self._mimetype = None
         self.title = str(self)
 
@@ -113,9 +111,7 @@ class Resources:
         self.resourcepath = resourcepath
 
         # Real directory
-        self.dir_ = os.path.join( self.package._tempdir,
-                                  'resources',
-                                  resourcepath.replace('/', os.path.sep, -1) )
+        self.dir_ = self.package.tempfile( 'resources', resourcepath.replace('/', os.path.sep, -1) )
         self.filenames=None
         self.title = str(self)
 
