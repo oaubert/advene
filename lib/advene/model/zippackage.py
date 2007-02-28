@@ -131,17 +131,17 @@ class ZipPackage:
 	"""
         return os.path.join( self._tempdir, u'content.xml' )
 
-    def tempfile(self, name):
-        """Return a tempfile.
+    def tempfile(self, *names):
+        """Return a tempfile name in the filesystem encoding.
 
         Try to deal appropriately with filesystem encodings:
         
         self._tempdir is a unicode string.  
 
-        tempfile takes a unicode parameter, and return a path encoded
+        tempfile takes unicode parameters, and returns a path encoded
         in sys.getfilesystemencoding()
         """
-        return os.path.join(self._tempdir, unicode(name)).encode(sys.getfilesystemencoding())
+        return os.path.join(self._tempdir, *names).encode(sys.getfilesystemencoding())
 
     def new(self):
         """Prepare a new AZP expanded package.
@@ -200,7 +200,7 @@ class ZipPackage:
             os.mkdir(resource_dir)
 
         # FIXME: Check against the MANIFEST file
-        for (name, mimetype) in self.manifest_to_list(self.tempfile(os.path.join('META-INF', 'manifest.xml'))):
+        for (name, mimetype) in self.manifest_to_list(self.tempfile(u'META-INF', u'manifest.xml')):
             if name == u'/':
                 pass
             n=name.replace('/', os.path.sep)
@@ -250,10 +250,10 @@ class ZipPackage:
     def update_statistics(self, p):
         """Update the META-INF/statistics.xml file
         """
-        d=self.tempfile('META-INF')
+        d=self.tempfile(u'META-INF')
         if not os.path.isdir(d):
             os.mkdir(d)
-        f=open(self.tempfile(os.path.join('META-INF', 'statistics.xml')), 'w')
+        f=open(self.tempfile(u'META-INF', u'statistics.xml'), 'w')
         f.write(p.generate_statistics())
         f.close()
         return True
