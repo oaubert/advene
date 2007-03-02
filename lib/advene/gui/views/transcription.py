@@ -498,13 +498,13 @@ class TranscriptionView(AdhocView):
 
     def activate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
-        if annotation is not None and annotation.type == self.model:
+        if annotation is not None and annotation in self.model:
             self.activate_annotation (annotation)
         return True
 
     def desactivate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
-        if annotation is not None and annotation.type == self.model:
+        if annotation is not None and annotation in self.model:
             self.desactivate_annotation (annotation)
         return True
 
