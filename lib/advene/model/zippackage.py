@@ -129,7 +129,7 @@ class ZipPackage:
 	@return: the XML filename
 	@rtype: string
 	"""
-        return os.path.join( self._tempdir, u'content.xml' )
+        return self.tempfile(u'content.xml')
 
     def tempfile(self, *names):
         """Return a tempfile name in the filesystem encoding.
