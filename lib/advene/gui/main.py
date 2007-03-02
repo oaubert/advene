@@ -818,6 +818,7 @@ class AdveneGUI (Connect):
         checkbox to activate/deactivate looping.
         """
         self.set_current_annotation(a)
+        self.loop_toggle_button.set_active(True)
         def action_loop(controller, position):
             if self.loop_toggle_button.get_active():
                 # Reactivate the loop.
