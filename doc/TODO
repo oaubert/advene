@@ -1,11 +1,56 @@
-* new query type: python-query, to allow to build adhoc and fast
-  queries such as search_content
+* Current: 
+  MIT video js code
+  merger improvements (duplicate ids)
+
+* SOAP interface: cf soaplib http://trac.optio.webfactional.com/
+
+* timeline parameters: use TALES expressions for each line instead of annotation types (-> we can use queries)
+
+* multiple packages in the same timeline ?
+
+* new app: montage, which takes a package and generates a montage based on annotations. Cf http://www.jonobacon.org/?p=851
+
+* Save dynamic view rendering: ~/src/vlc-dev/vlc --plugin-path ~/src/vlc-dev jurannessic_320x192.mpg :sout='#transcode{vcodec=mp1v,vb=4096,acodec=mpga,ab=192,scale=1,channels=2,deinterlace,audio-sync}:std{access=file,mux=ps,url="foo.mpg"}'
+
+* Investigate http://freevo.sourceforge.net/cgi-bin/freevo-2.0/SourceDoc/KaaMetadata
+
+* import MIT video lectures http://web.sls.csail.mit.edu/lectures/
+
+* merge functionality: use author/date information to determine if the
+  annotation/element was completely updated or created
+
+* website: write the Advene roadmap
+
+* write a flashplayer plugin using ctypes
+
+* Keep /application, or use /action for everything ?
+
+* make most admin views return XML + XSL stylesheets (action, methods...)
+
+* /packages: convert to XML/XSL + offer the possibility to activate a package
+
+* shapewidget: import SVG (parse SVG to object structure...)
+
+* timeline: scrollbar arrows do not work
+
+* timeline: allow to group annotation types with tags
+
+* integration/export with googlevideo: http://video.google.com/videoplay?docid=3441112139250395703#0h0m54s
+
+* waveform functionality
+
+* note-taking: integrate Gobby component
+
+* transcription: add Find capability
+
+* Fix DND to webbrowser on windows
+ 
+* new query type: builtin-query, to allow to build adhoc and fast
+  queries such as search_content ? or builtin-condition ?
 
 * imagecache: if the image is stored on disk, use a Storage proxy to get data directly from disk instead of  memory (the OS will handle memory caching)
 
-* 'master' metadata attribute for packages, to specify a default importing package
-
-* 'master-types': if empty, default to views, schemas, queries. Could
+* 'auto-import-types': if empty, default to views, schemas, queries. Could
   also add annotations/relations.
 
 * load/save hooks
@@ -13,21 +58,14 @@
 * snapshot precision: use set_rate to slow down, add "Select keyframe"
   to the popup menu + shortcut
 
-* internal rule to loop over a specific annotation + convenient shortcut
-
 * Convention: is_illustrated_by relation-type. In snapshot_url, if a
   relation exists, use it to get the snapshot. Else use the begin
   time.
-
-* merge functionality: use author/date information to determine if the
-  annotation/element was completely updated or created
 
 * define a virtual "global" package that will iterate and forward methods (annotations, relation...) over all loaded packages
 
 * cloud representation of tag collection
 
-* tags: define a "tag bag" from where you can drag and drop tags to annotations
- 
 * tags: define a "tag_color" method that returns a color depending on present tags
 
 * Transcribe: shortcut to play the current segment?? Cf control-pageup/down
@@ -76,8 +114,6 @@ http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugin
 
 * javascript timelines: http://simile.mit.edu/timeline/docs/create-timelines.html
 http://simile.mit.edu/timeline/
-
-* import MIT video lectures http://web.sls.csail.mit.edu/lectures/
 
 * Example javascript media player bindings: http://publicsvn.songbirdnest.com/trac/browser/trunk/app/chrome/scripts
 
@@ -161,10 +197,6 @@ of movie time)
    (which fails if imported package is not present).
 
 * allow to edit the path of imported packages, to allow relative paths
-
-* create a new view content type:
-  application/x-advene-adhoc-parameters to store parameters for adhoc
-  views
 
 * Bug in webserver.py for files with accents in their fullpath (encoding pb). Should check all encodings everywhere and make sure everything is utf8 internally.
 
@@ -341,8 +373,6 @@ annotation event.
  + wget Twiki:AdveneUserGuide to doc/user.html (cf scripts/update_doc)
 
 * Morphix image : use Ubuntu as a base (pygtk included). Missing: vlc + python-vlc. Use gstreamer
-
-* Rewrite webserver using Twisted (and maybe use it also for ECAEngine) ?
 
 * Correct bug when no type is present (cf export_views.xml)
 
@@ -573,8 +603,6 @@ widget "sendmail.*.mail" style "blue_text"
 gtk.rc_parse_string(sendmail_styles)
 
 * Find a meaningful way to concisely display relations and annotations.
-
-* Reorganize webserver code
 
 * EPOZ: implement data templates according to the edited element,
   by hacking around LinkTool
@@ -1443,3 +1471,39 @@ current time,  timestamp: use spinbutton
 * interactivequery: if annotation list, open in an editaccumulator
 
 * sort views in dyn/static + alphabetic order + annotation in time order: make a script
+
+* GUI: add volume slider
+
+* timeline: popup action: center and zoom on annotation
+
+* Menu Edit/Create elements
+
+* Edit/Find annotation (by content)
+
+* internal rule to loop over a specific annotation + convenient shortcut
+
+* 'auto-import' metadata attribute for packages, to specify a default importing package
+
+* view "TableOfContents", drag and drop from the navigation history or
+  timeline, to create entry points with snapshot in the video.
+
+* use cherrypy as webserver ?? cf http://www.cherrypy.org/browser/trunk/cherrypy/tutorial/
+
+* Rewrite webserver using Twisted (and maybe use it also for ECAEngine) [Cf cherrypy above]
+
+* Reorganize webserver code [Cf cherrypy above]
+
+* offer possibility to enter the address of a stream as a youtube/googlevideo/dailymotion URL
+
+* check that imagecache is coherent when set_default_media
+
+* transcription: use source=TALES instead of model, to be able to transcript query results.
+
+* create a new view content type:
+  application/x-advene-adhoc-view to store parameters for adhoc
+  views
+
+* tags: define a "tag bag" from where you can drag and drop tags to annotations
+ 
+* session list: when loading .apl, check the we do not overwrite existing unsaved packages
+
