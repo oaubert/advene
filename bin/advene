@@ -109,4 +109,3 @@ if __name__ == '__main__':
     traceback.print_exc (file = s)
     print s.getvalue()
 
-    gui.on_exit ()
