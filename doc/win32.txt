@@ -1,0 +1,36 @@
+* Running from sources
+
+If you want to run Advene from sources on win32, you will need to
+install some additional packages:
+
+    * Gtk/win32 >= v. 2.8 (dev package) [ from http://gladewin32.sourceforge.net/ ]
+
+    * Python v. 2.3 or 2.4 [ From http://python.org/ ]
+
+    * PyGtk for python2.3 or 2.4: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/ [ From http://www.pygtk.org/ ]
+
+    * PyXML >= 0.8 : [ From http://pyxml.sourceforge.net/ ]
+
+And eventually the application sources, downloaded from
+http://liris.cnrs.fr/advene/download/index_en.html or from the
+subversion repository svn://liris.cnrs.fr/dev/advene-project/trunk
+
+The bin/advene python scripts tries to autodetect wether it is running
+from a standard location (c:\Program Files\Advene on windows) or from
+a development tree, and setups the right paths in the latter case.
+
+To try the Advene interface without any video player, you can invoke
+it with the -pdummy option, that selects a dummy video player.
+
+* Webserver reactivity
+
+The webserver reactivity problem is due to the interaction of the Gtk
+GUI with threads in python. To alleviate this problem, we try to
+mingle with an internal parameter of the python interpreter. You can
+try to tweak the values of:
+config.data.play_interval
+and
+config.data.noplay_interval
+from the python evaluator, to find values that fit your computer. The
+default value is 100. With a lower value, it seems to work better.
+
