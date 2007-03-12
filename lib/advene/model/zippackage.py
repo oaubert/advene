@@ -61,6 +61,9 @@ import xml.sax
 
 from gettext import gettext as _
 
+# In some cases, sys.getfilesystemencoding returns None
+_fs_encoding = sys.getfilesystemencoding() or 'ascii'
+
 # Some constants
 MIMETYPE='application/x-advene-zip-package'
 
@@ -79,7 +82,7 @@ class ZipPackage:
             # FIXME: there should be a way to determine wether it
             # is still used or not.
             print "Cleaning up %s" % d
-            if os.path.isdir(d.encode(sys.getfilesystemencoding())):
+            if os.path.isdir(d.encode(_fs_encoding)):
                 shutil.rmtree(d, ignore_errors=True)
 
     cleanup = staticmethod(cleanup)
@@ -141,12 +144,12 @@ class ZipPackage:
         tempfile takes unicode parameters, and returns a path encoded
         in sys.getfilesystemencoding()
         """
-        return os.path.join(self._tempdir, *names).encode(sys.getfilesystemencoding())
+        return os.path.join(self._tempdir, *names).encode(_fs_encoding)
 
     def new(self):
         """Prepare a new AZP expanded package.
         """
-        self._tempdir=unicode(tempfile.mkdtemp('', 'adv'), sys.getfilesystemencoding())
+        self._tempdir=unicode(tempfile.mkdtemp('', 'adv'), _fs_encoding)
         self.tempdir_list.append(self._tempdir)
 
         open(self.tempfile(u'mimetype'), 'w').write(MIMETYPE)
@@ -174,7 +177,7 @@ class ZipPackage:
 
         # The file is an advene zip package. We can extract its contents
         # to a temporary directory
-        self._tempdir=unicode(tempfile.mkdtemp('', 'adv'), sys.getfilesystemencoding())
+        self._tempdir=unicode(tempfile.mkdtemp('', 'adv'), _fs_encoding)
         os.mkdir(self.tempfile(u'resources'))
         self.tempdir_list.append(self._tempdir)
         
@@ -237,7 +240,7 @@ class ZipPackage:
                     name='/'.join( (zpath, f) )
                 else:
                     name=f
-                manifest.append(unicode(name, sys.getfilesystemencoding()))
+                manifest.append(unicode(name, _fs_encoding))
                 z.writestr( name,
                             open(os.path.join(dirpath, f)).read() )
 
@@ -298,7 +301,7 @@ class ZipPackage:
     def close(self):
         """Close the package and remove temporary files.
         """
-        shutil.rmtree(self._tempdir.encode(sys.getfilesystemencoding()), ignore_errors=True)
+        shutil.rmtree(self._tempdir.encode(_fs_encoding), ignore_errors=True)
         self.tempdir_list.remove(self._tempdir)
         return True
 
