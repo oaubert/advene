@@ -21,7 +21,7 @@ Source: c:\gtk\bin\jpeg62.dll; DestDir: {app}
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.22 unstable
+AppVerName=Advene 0.22
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
 VersionInfoVersion=0.22
@@ -32,7 +32,7 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.22_unstable
+OutputBaseFilename=setup_advene_0.22
 VersionInfoTextVersion=0.22
 [Registry]
 Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
