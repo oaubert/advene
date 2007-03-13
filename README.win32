@@ -10,9 +10,9 @@ Upstream Authors:
 
 Installation Notes:
 
-  You'll need to install Videolan VLC 0.8.6 in order to properly use this version of Advene. 
-  It can be downloaded from videolan website: 
-  http://www.videolan.org/vlc/download-windows.html
+  You'll need to install Videolan VLC 0.9.svn-advene in order to properly use this version of Advene. 
+  It can be downloaded from advene website: 
+  http://liris.cnrs.com/advene
 
 Documentation:
 

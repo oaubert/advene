@@ -29,16 +29,16 @@ You should install in this order (note the version numbers) :
 
 Gtk/win32 v. >= 2.10 : http://gladewin32.sourceforge.net/ (runtime environment)
 
-Python    v. 2.3 : http://www.python.org/ftp/python/2.3.4/Python-2.3.4.exe
+Python    v. 2.4 : http://www.python.org/ftp/python/2.4.4/Python-2.4.4.exe
 [ From http://python.org/ ]
 
-PyGtk for python2.3: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/ [ From http://www.pygtk.org ]
+PyGtk for python2.4: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/ [ From http://www.pygtk.org ]
 
-PyXML 0.8 : http://prdownloads.sourceforge.net/pyxml/PyXML-0.8.4.win32-py2.3.exe?download
+PyXML 0.8 : http://prdownloads.sourceforge.net/pyxml/PyXML-0.8.4.win32-py2.4.exe?download
 [ From http://pyxml.sourceforge.net/ ]
 
 Optionally:
-Python Imaging Library : http://effbot.org/downloads/PIL-1.1.4.win32-py2.3.exe
+Python Imaging Library : http://effbot.org/downloads/PIL-1.1.5.win32-py2.4.exe
 [ From http://www.pythonware.com/products/pil/ ]
 
 VLC [ From http://www.videolan.org/ ] + python-vlc mediacontrol
