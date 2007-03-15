@@ -21,6 +21,7 @@ foo.azp/
         resources/
 	meta.xml (optional)
 	META-INF/manifest.xml
+	statistics.xml
 
 with :
 * mimetype: application/x-advene-zip-package
@@ -28,3 +29,4 @@ with :
 * resources/: associated resources, available through the TALES expression /package/resources/...
 * meta.xml: metadata (cf OpenDocument specification)
 * META-INF/manifest.xml : Manifest (package contents)
+* statistics.xml: various statistics about the package

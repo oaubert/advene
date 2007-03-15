@@ -1,3 +1,10 @@
+* XML schema/relaxng: http://www.rexx.com/~dkuhlman/#generateds-py-generate-python-data-bindings-from-xml-schema
+http://gnosis.cx/download/relax/
+
+* REST vs WS*: http://bitworking.org/news/125/REST-and-WS
+
+* python bindings: update vlm API http://trac.videolan.org/vlc/changeset/19233
+
 * Current: 
   MIT video js code
   merger improvements (duplicate ids)
@@ -1506,4 +1513,3 @@ current time,  timestamp: use spinbutton
 * tags: define a "tag bag" from where you can drag and drop tags to annotations
  
 * session list: when loading .apl, check the we do not overwrite existing unsaved packages
-
