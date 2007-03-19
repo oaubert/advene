@@ -1,11 +1,13 @@
 Source: advene
 Maintainer: Olivier Aubert <olivier.aubert@liris.cnrs.fr>
-Build-Depends: debhelper (>= 5.0.37.2)
+Build-Depends: debhelper (>= 5.0.38), python-all-dev (>= 2.3.5-11), python-central (>= 0.5.6)
 Standards-Version: 3.6.0
 Section: graphics
 Priority: optional
+XS-Python-Version: >= 2.3
 
 Package: advene
+XB-Python-Version: >= 2.3
 Architecture: all
 Depends: ${python:Depends}, python-gtk2 (>=2.8), python-glade2 (>=2.8), python-xml (>=0.8.0)
 Recommends: vlc-plugin-svg, firefox | www-browser, python-vlc | python-gst0.10, python-imaging

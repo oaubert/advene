@@ -2,7 +2,8 @@
 
 build_dir   = build
 install_dir = debian/tmp
-setup       = python ./setup.py --quiet
+
+PYVERS=$(shell pyversions -vr)
 
 binary: binary-indep
 
@@ -16,24 +17,26 @@ binary-indep: build install
 	dh_installexamples
 	dh_install --sourcedir $(install_dir)
 	dh_fixperms
-	dh_python
+	dh_pycentral
 	dh_compress -X.py
 	dh_installdeb
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
 
-install: build
-	dh_testdir
-	dh_testroot 
-	$(setup) install --no-compile --prefix=/usr --root=$(install_dir)
+build: $(PYVERS:%=build-python%)
+	touch $@
 
-build: build-stamp
-build-stamp: 
+build-python%:
 	dh_testdir
 	cd po; make mo
-	$(setup) build --build-base $(build_dir)
-	touch build-stamp
+	python$* setup.py build --quiet --build-base $(build_dir)
+	touch $@
+
+install: build $(PYVERS:%=install-python%)
+
+install-python%:
+	python$* setup.py install --no-compile --root=$(install_dir)
 
 clean:
 	dh_testdir
@@ -45,4 +48,3 @@ clean:
 	dh_clean
 
 .PHONY: binary binary-indep install build clean
-
