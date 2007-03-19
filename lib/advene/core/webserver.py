@@ -2042,7 +2042,17 @@ class AdveneWebServer(
         self.logger.setLevel(logging.INFO)
         
         # Write webserver log to ~/.advene/webserver.log
-        f=open(config.data.advenefile('webserver.log', 'settings'), 'w')
+        logfile=config.data.advenefile('webserver.log', 'settings')
+        dp=os.path.dirname(preffile)
+        if not os.path.isdir(dp):
+            try:
+                os.mkdir(dp)
+            except OSError, e:
+                print "Error: ", str(e)
+                logfile="/tmp/webserver.log"
+                print "Using %s as logfile" % logfile
+
+        f=open(logfile, 'w')
         handler=logging.StreamHandler(f)
         handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
         self.logger.addHandler(handler)
