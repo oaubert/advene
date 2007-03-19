@@ -9,8 +9,10 @@ XS-Python-Version: >= 2.3
 Package: advene
 XB-Python-Version: >= 2.3
 Architecture: all
-Depends: ${python:Depends}, python-gtk2 (>=2.8), python-glade2 (>=2.8), python-xml (>=0.8.0)
+Depends: ${python:Depends}, python-gtk2 (>=2.8), python-glade2 (>=2.8), python-xml (>=0.8.0), python-simpletal (>=3.12)
 Recommends: vlc-plugin-svg, firefox | www-browser, python-vlc | python-gst0.10, python-imaging
+Ubuntu-Depends: Depends: ${python:Depends}, python-gtk2 (>=2.8), python-glade2 (>=2.8), python-xml (>=0.8.0), python-gst0.10, gstreamer0.10-plugins-base, gstreamer0.10-x
+Ubuntu-Recommends: firefox | www-browser, python-vlc, python-imaging
 Description: Annotate DVDs, Exchange on the Net
  The Advene (Annotate DVd, Exchange on the NEt) project is aimed
  towards communities exchanging discourses (analysis, studies) about
