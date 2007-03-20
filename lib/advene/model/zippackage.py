@@ -167,6 +167,12 @@ class ZipPackage:
 
         z=zipfile.ZipFile(fname, 'r')
 
+        def recursive_mkdir(d):
+            parent=os.path.dirname(d)
+            if not os.path.exists(parent):
+                recursive_mkdir(parent)
+            os.mkdir(d)
+
         # Check the validity of mimetype
         try:
             typ = z.read('mimetype')
@@ -186,11 +192,11 @@ class ZipPackage:
             if name.endswith('/'):
                 d=self.tempfile(name)
                 if not os.path.exists(d):
-                    os.mkdir(d)
+                    recursive_mkdir(d)
             else:
                 fname=self.tempfile(name)
                 if not os.path.isdir(os.path.dirname(fname)):
-                    os.mkdir(os.path.dirname(fname))
+                    recursive_mkdir(os.path.dirname(fname))
                 outfile = open(fname, 'wb')
                 outfile.write(z.read(name))
                 outfile.close()
@@ -240,8 +246,10 @@ class ZipPackage:
                     name='/'.join( (zpath, f) )
                 else:
                     name=f
-                manifest.append(unicode(name, _fs_encoding))
-                z.writestr( name,
+                if isinstance(name, str):
+                    name=unicode(name, _fs_encoding)
+                manifest.append(name)
+                z.writestr( name.encode('utf-8'),
                             open(os.path.join(dirpath, f)).read() )
 
         # Generation of the manifest file
