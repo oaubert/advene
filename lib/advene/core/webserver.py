@@ -2043,7 +2043,7 @@ class AdveneWebServer(
         
         # Write webserver log to ~/.advene/webserver.log
         logfile=config.data.advenefile('webserver.log', 'settings')
-        dp=os.path.dirname(preffile)
+        dp=os.path.dirname(logfile)
         if not os.path.isdir(dp):
             try:
                 os.mkdir(dp)
