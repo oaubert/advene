@@ -435,7 +435,7 @@ class AdveneGUI (Connect):
             args=[]
         if config.data.os != 'win32':
             try:
-                gtk.threads_init ()
+                gtk.gdk.threads_init ()
             except RuntimeError:
                 print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
 
