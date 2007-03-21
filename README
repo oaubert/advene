@@ -18,6 +18,13 @@ Debian, they may slightly vary on other distributions) :
 python-gtk2 (>=2.10)
 python-glade2 (>=2.10)
 python-xml (>=0.8.0)
+python-cherrypy3 (>=3.0.0)
+
+For the gstreamer plugin:
+python-gst0.10
+gstreamer0.10-plugins-base
+gstreamer0.10-x
++ other gstreamer packages needed to decode various formats
 
 No more required:
 [ python-simpletal (>=3.9) -- included in the Advene distribution ]
@@ -36,6 +43,8 @@ PyGtk for python2.4: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/ [ From http:
 
 PyXML 0.8 : http://prdownloads.sourceforge.net/pyxml/PyXML-0.8.4.win32-py2.4.exe?download
 [ From http://pyxml.sourceforge.net/ ]
+
+CherryPy: http://download.cherrypy.org/cherrypy/3.0.1/
 
 Optionally:
 Python Imaging Library : http://effbot.org/downloads/PIL-1.1.5.win32-py2.4.exe
