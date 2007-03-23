@@ -1,0 +1,28 @@
+Source: advene
+Maintainer: Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+Build-Depends: debhelper (>= 5.0.38), python-all-dev (>= 2.3.5-11), python-central (>= 0.5.6)
+Standards-Version: 3.6.0
+Section: graphics
+Priority: optional
+
+Package: advene
+Architecture: all
+Depends: ${python:Depends}, python-gtk2 (>=2.8), python-glade2 (>=2.8), python-xml (>=0.8.0), python-simpletal (>=3.0), python-gst0.10, gstreamer0.10-plugins-base, gstreamer0.10-x
+Recommends: vlc-plugin-svg, firefox | www-browser, python-vlc, python-imaging, python-cherrypy3 (>=3.0.0)
+Description: Annotate DVDs, Exchange on the Net
+ The Advene (Annotate DVd, Exchange on the NEt) project is aimed
+ towards communities exchanging discourses (analysis, studies) about
+ audiovisual documents (e.g. movies) in DVD format. This requires that
+ audiovisual content and hypertext facilities be integrated, thanks to
+ annotations providing explicit structures on  audiovisual streams, upon
+ which hypervideo documents can be engineered.
+ .
+ The Advene framework provides models and tools allowing to design and reuse
+ annotations schemas; annotate video streams according to these schemas;
+ generate and create Stream-Time Based (mainly video-centred) or User-Time
+ Based (mainly text-centred) visualisations of the annotations. Schemas
+ (annotation- and relation-types), annotations and relations, queries and
+ views can be clustered and shared in units called packages. Hypervideo
+ documents are generated when needed, both from packages (for annotation and
+ view description) and DVDs (audiovisual streams).
+ .

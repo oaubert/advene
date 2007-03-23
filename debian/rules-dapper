@@ -1,0 +1,47 @@
+#!/usr/bin/make -f
+
+build_dir   = build
+install_dir = debian/tmp
+setup       = python ./setup.py --quiet
+
+binary: binary-indep
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_installdocs
+	dh_installman
+	dh_installmenu
+	dh_installexamples
+	dh_install --sourcedir $(install_dir)
+	dh_fixperms
+	dh_python
+	dh_compress -X.py
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+install: build
+	dh_testdir
+	dh_testroot 
+	$(setup) install --no-compile --prefix=/usr --root=$(install_dir)
+
+build: build-stamp
+build-stamp: 
+	dh_testdir
+	cd po; make mo
+	$(setup) build --build-base $(build_dir)
+	touch build-stamp
+
+clean:
+	dh_testdir
+	rm -f build-stamp
+	$(setup) clean
+	find . -name "*.pyc" | xargs rm -f
+	find . -name "*.pyo" | xargs rm -f
+	rm -rf $(build_dir) $(install_dir)
+	dh_clean
+
+.PHONY: binary binary-indep install build clean
