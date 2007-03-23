@@ -41,10 +41,10 @@ class ZoneContentHandler (ContentHandler):
         return res
     can_handle=staticmethod(can_handle)
 
-    def __init__ (self, element, controller=None, annotation=None, **kw):
+    def __init__ (self, element, controller=None, parent=None, **kw):
         self.element = element
         self.controller=controller
-        self.annotation=annotation
+        self.parent=parent
         self.editable = True
         self.fname=None
         self.view = None
@@ -98,8 +98,11 @@ class ZoneContentHandler (ContentHandler):
         """Generate a view widget for editing zone attributes."""
         vbox=gtk.VBox()
 
-        i=advene.gui.util.image_from_position(self.controller, self.annotation.fragment.begin, height=300)
-        self.view = ShapeDrawer(callback=self.callback, background=i)
+        if self.parent is not None and hasattr(self.parent, 'fragment'):
+            i=advene.gui.util.image_from_position(self.controller, self.parent.fragment.begin, height=300)
+            self.view = ShapeDrawer(callback=self.callback, background=i)
+        else:
+            self.view = ShapeDrawer(callback=self.callback)
 
         if self.element.data:
             d=self.element.parsed()
@@ -142,9 +145,10 @@ class RuleSetContentHandler (ContentHandler):
         return res
     can_handle=staticmethod(can_handle)
 
-    def __init__ (self, element, controller=None, **kw):
+    def __init__ (self, element, controller=None, parent=None, **kw):
         self.element = element
         self.controller=controller
+        self.parent=parent
         self.editable = True
         self.view = None
 
@@ -200,9 +204,10 @@ class SimpleQueryContentHandler (ContentHandler):
         return res
     can_handle=staticmethod(can_handle)
 
-    def __init__ (self, element, controller=None, editable=True, **kw):
+    def __init__ (self, element, controller=None, parent=None, editable=True, **kw):
         self.element = element
         self.controller=controller
+        self.parent=parent
         self.editable = editable
         self.view = None
 
