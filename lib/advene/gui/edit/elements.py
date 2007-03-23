@@ -402,7 +402,7 @@ class EditAnnotationPopup (EditElementPopup):
         vbox.pack_start (ex, expand=False)
 
         f = EditContentForm(self.element.content, controller=self.controller,
-                            mimetypeeditable=False, annotation=self.element)
+                            mimetypeeditable=False, parent=self.element)
         f.set_editable(editable)
         t = f.get_view(compact=compact)
         self.register_form(f)
@@ -468,7 +468,7 @@ class EditRelationPopup (EditElementPopup):
 
         # Relation content
         f = EditContentForm(self.element.content, controller=self.controller,
-                            mimetypeeditable=False)
+                            mimetypeeditable=False, parent=self.element)
         f.set_editable(editable)
         t = f.get_view()
         self.register_form(f)
@@ -521,7 +521,7 @@ class EditViewPopup (EditElementPopup):
         # View content
 
         f = EditContentForm (self.element.content, controller=self.controller,
-                             mimetypeeditable=editable)
+                             mimetypeeditable=editable, parent=self.element)
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
@@ -556,7 +556,7 @@ class EditQueryPopup (EditElementPopup):
                          expand=False)
 
         f = EditContentForm (self.element.content, controller=self.controller,
-                             mimetypeeditable=editable)
+                             mimetypeeditable=editable, parent=self.element)
         f.set_editable (editable)
         t = f.get_view ()
         self.register_form (f)
@@ -781,7 +781,7 @@ class EditResourcePopup (EditElementPopup):
         vbox.pack_start (f.get_view (), expand=False)
 
         f = EditContentForm(self.element, controller=self.controller,
-                            mimetypeeditable=False)
+                            mimetypeeditable=False, parent=self.element)
         f.set_editable(editable)
         t = f.get_view()
         self.register_form(f)
@@ -871,14 +871,14 @@ class ContentHandler(EditForm):
 class EditContentForm(EditForm):
     """Create an edit form for the given content.
     """
-    def __init__ (self, element, controller=None, annotation=None,
+    def __init__ (self, element, controller=None, parent=None,
                   editable=True, mimetypeeditable=True, **kw):
         # self.element is a Content object
         self.element = element
         self.controller=controller
 
-        # Annotation context, sometimes needed
-        self.annotation=annotation
+        # Parent context, sometimes needed
+        self.parent=parent
         # self.contentform will be an appropriate EditForm
         # (EditTextForm,EditRuleSetForm,...)
         self.contentform = None
@@ -947,7 +947,7 @@ class EditContentForm(EditForm):
         else:
             self.contentform=handler(self.element,
                                      controller=self.controller,
-                                     annotation=self.annotation)
+                                     parent=self.parent)
 
         self.contentform.set_editable(self.editable)
         self.content_handler_widget = self.contentform.get_view(compact=compact)
@@ -969,9 +969,10 @@ class TextContentHandler (ContentHandler):
         return res
     can_handle=staticmethod(can_handle)
 
-    def __init__ (self, element, controller=None, **kw):
+    def __init__ (self, element, controller=None, parent=None, **kw):
         self.element = element
         self.controller=controller
+        self.parent=parent
         self.editable = True
         self.fname=None
         self.view = None
@@ -1052,10 +1053,16 @@ class TextContentHandler (ContentHandler):
 
     def content_save(self, b=None, fname=None):
         if fname is None:
+            default=None
+            if self.parent is not None:
+                try:
+                    default=self.parent.id + '.txt'
+                except AttributeError:
+                    pass
             fname=advene.gui.util.get_filename(title=_("Save content to..."),
                                                action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                                button=gtk.STOCK_SAVE,
-                                               default_file=self.fname)
+                                               default_file=default)
         if fname is not None:
             if os.path.exists(fname):
                 os.rename(fname, fname + '~')
@@ -1134,12 +1141,13 @@ class GenericContentHandler (ContentHandler):
         return res
     can_handle=staticmethod(can_handle)
 
-    def __init__ (self, element, controller=None, **kw):
+    def __init__ (self, element, controller=None, parent=None, **kw):
         self.element = element
         self.controller=controller
         self.editable = True
         self.fname=None
         self.view = None
+        self.parent=None
         self.tooltips=gtk.Tooltips()
 
     def set_editable (self, boolean):
@@ -1197,10 +1205,16 @@ class GenericContentHandler (ContentHandler):
 
     def content_save(self, b=None, fname=None):
         if fname is None:
+            default=None
+            if self.parent is not None:
+                try:
+                    default=self.parent.id + '.txt'
+                except AttributeError:
+                    pass
             fname=advene.gui.util.get_filename(title=_("Save content to..."),
                                                action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                                button=gtk.STOCK_SAVE,
-                                               default_file=self.fname)
+                                               default_file=default)
         if fname is not None:
             if os.path.exists(fname):
                 os.rename(fname, fname + '~')
