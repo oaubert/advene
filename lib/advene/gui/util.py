@@ -361,6 +361,7 @@ def get_filename(title=_("Open a file"),
         fs.set_current_folder(default_dir)
     if default_file:
         fs.set_filename(default_file)
+        fs.set_current_name(default_file)
 
     res=fs.run()
     filename=None
