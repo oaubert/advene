@@ -299,6 +299,7 @@ class Config(object):
 	    '.ogm',
 	    '.rm', 
 	    '.vob',
+            '.mkv',
 	    '.wmv',
 	    )
 	
