@@ -23,11 +23,15 @@ import gtk
 import gobject
 import sre
 import os
+import sys
 import StringIO
 
 import advene.core.config as config
 import advene.util.helper as helper
 from advene.model.exception import AdveneException
+
+# In some cases, sys.getfilesystemencoding returns None
+_fs_encoding = sys.getfilesystemencoding() or 'ascii'
 
 def png_to_pixbuf (png_data, width=None, height=None):
     """Load PNG data into a pixbuf
@@ -372,6 +376,9 @@ def get_filename(title=_("Open a file"),
             al=alias_entry.get_text()
             al = sre.sub('[^a-zA-Z0-9_]', '_', al)
     fs.destroy()
+
+    if not isinstance(filename, unicode):
+        filename=unicode(filename, _fs_encoding)
 
     if alias:
         return filename, al
