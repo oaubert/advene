@@ -136,11 +136,17 @@ class InteractiveQuery:
                     'number': len(res)}
             v.add(gtk.Label(t))
 
-            hb=gtk.HButtonBox()
+            hb=gtk.VButtonBox()
             v.pack_start(hb)
             if cl:
                 b=gtk.Button(_("Display annotations in timeline"))
                 b.connect('clicked', lambda b: self.open_in_timeline(l))
+                hb.add(b)
+                b=gtk.Button(_("Highlight annotations"))
+                b.connect('clicked', lambda b: self.highlight_annotations(l))
+                hb.add(b)
+                b=gtk.Button(_("Unhighlight annotations"))
+                b.connect('clicked', lambda b: self.unhighlight_annotations(l))
                 hb.add(b)
             b=gtk.Button(_("Edit elements"))
             b.connect('clicked', lambda b: self.open_in_edit_accumulator(res))
@@ -163,6 +169,16 @@ class InteractiveQuery:
                       controller=self.controller)
         window=t.popup()
         window.set_title(_("Results of _interactive query"))
+        return True
+
+    def highlight_annotations(self, l):
+        for a in l:
+            self.controller.notify("AnnotationActivate", annotation=a)
+        return True
+
+    def unhighlight_annotations(self, l):
+        for a in l:
+            self.controller.notify("AnnotationDeactivate", annotation=a)
         return True
 
     def open_in_edit_accumulator(self, l):
