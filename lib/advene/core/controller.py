@@ -204,7 +204,7 @@ class AdveneController:
 
     def set_cached_duration(self, value):
         if self.package is not None:
-            self.package.cached_duration = value
+            self.package.cached_duration = long(value)
 
     cached_duration = property(fget=get_cached_duration,
                                fset=set_cached_duration,
@@ -386,6 +386,7 @@ class AdveneController:
             try:
                 self.server = AdveneWebServer(controller=self, port=config.data.webserver['port'])
                 self.serverthread = threading.Thread (target=self.server.start)
+                self.serverthread.setName("Advene webserver")
                 self.serverthread.start ()
             except socket.error:
                 if config.data.os != 'win32':
@@ -563,7 +564,11 @@ class AdveneController:
         a default view.
         """
         if alias is None:
-            alias=self.aliases[self.package]
+            try:
+                alias=self.aliases[self.package]
+            except KeyError:
+                # self.package is not yet registered in self.aliases
+                return None
         url = self.get_url_for_alias(alias)
         if not url:
             return None
@@ -781,7 +786,7 @@ class AdveneController:
             try:
                 self.package = Package (uri="new_pkg",
                                         source=config.data.advenefile(config.data.templatefilename))
-            except (IOError, OSError), e:
+            except Exception, e:
                 self.log(_("Cannot find the template package %(filename)s: %(error)s") 
 			 % {'filename': config.data.advenefile(config.data.templatefilename),
                             'error': unicode(e)})
@@ -841,11 +846,12 @@ class AdveneController:
          
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
-            self.package.cached_duration = long(duration)
+            self.package.cached_duration = long(float(duration))
         else:
             self.package.cached_duration = 0
 
         self.register_package(alias, self.package)
+
         self.notify ("PackageLoad")
         if activate:
             self.activate_package(alias)
@@ -908,7 +914,7 @@ class AdveneController:
         # Reset the cached duration
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
-            self.package.cached_duration = long(duration)
+            self.package.cached_duration = long(float(duration))
         else:
             self.package.cached_duration = 0
 
@@ -1387,7 +1393,7 @@ class AdveneController:
         # Update the cached duration if necessary
         if self.package.cached_duration <= 0 and self.player.stream_duration > 0:
             print "updating cached duration"
-            self.package.cached_duration = self.player.stream_duration
+            self.package.cached_duration = long(self.player.stream_duration)
 
         return pos
 
