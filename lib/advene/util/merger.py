@@ -21,12 +21,14 @@ Merge packages
 """
 
 import sys
+import os
+import filecmp
+import shutil
+
 import advene.core.config as config
 
 from advene.model.package import Package
-from advene.model.annotation import Annotation, Relation
-from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.fragment import MillisecondFragment
+from advene.model.annotation import Annotation
 import advene.util.helper as helper
 
 class Differ:
@@ -75,6 +77,7 @@ class Differ:
         d.setMetaData(ns, name,
                       s.getMetaData(ns, name))
 
+        
     def diff_schemas(self):
         ids = dict([ (s.id, s) for s in self.destination.schemas ])
         self.source_ids['schemas']=ids
@@ -139,9 +142,16 @@ class Differ:
         for s in self.source.annotations:
             if s.id in ids:
                 d=ids[s.id]
-                # FIXME: check author/date. If different, it is very
+                # check type and author/date. If different, it is very
                 # likely that it is in fact a new annotation, with
                 # duplicate ids.
+                if s.type.id != d.type.id:
+                    yield ('new_annotation', s, d, self.new_annotation)
+                    continue
+                if s.author != d.author and s.date != d.date:
+                    # New annotation.
+                    yield ('new_annotation', s, d, self.new_annotation)
+                    continue
                 # Present. Check if it was modified
                 if s.fragment.begin != d.fragment.begin:
                     yield ('update_begin', s, d, lambda s, d: d.fragment.setBegin(s.fragment.begin))
@@ -161,6 +171,16 @@ class Differ:
         for s in self.source.relations:
             if s.id in ids:
                 d=ids[s.id]
+                # check author/date. If different, it is very
+                # likely that it is in fact a new relation, with
+                # duplicate id.
+                if s.type.id != d.type.id:
+                    yield ('new_relation', s, d, self.new_relation)
+                    continue
+                if s.author != d.author and s.date != d.date:
+                    # New relation.
+                    yield ('new_relation', s, d, self.new_relation)
+                    continue
                 # Present. Check if it was modified
                 if s.content.data != d.content.data:
                     yield ('update_content', s, d, lambda s, d: d.content.setData(s.content.data))
@@ -209,11 +229,36 @@ class Differ:
                 yield ('new', s, None, lambda s, d: self.copy_query(s) )
 
     def diff_resources(self):
-        ids=[]
-        self.source_ids['resources']=ids
-        # FIXME: todo
-        if False:
-            yield None
+        sdir=self.source.resources.dir_
+        ddir=self.destination.resources.dir_
+        if sdir is None or ddir is None:
+            # FIXME: warning message ?
+            return
+
+        d=filecmp.dircmp(sdir, ddir)
+
+        def relative_path(origin, dirname, name):
+            """Return the relative path (hence id) for the resource 'name' in resource dir 'dirname',
+            relative to the origin dir.
+            """
+            return os.path.join(dirname, name).replace(origin, '')
+
+        def handle_dircmp(dc):
+            for n in dc.left_only:
+                yield ('create_resource', 
+                       relative_path(sdir, dc.left, n), 
+                       relative_path(ddir, dc.right, n), self.create_resource)
+            for n in dc.diff_files:
+                yield ('update_resource',
+                       relative_path(sdir, dc.left, n), 
+                       relative_path(ddir, dc.right, n), self.update_resource)
+
+        for t in handle_dircmp(d):
+            yield t
+
+        for sd in d.subdirs.itervalues():
+            for t in handle_dircmp(sd):
+                yield t
         return
 
     def copy_schema(self, s):
@@ -245,12 +290,39 @@ class Differ:
         sm=[ a.id for a in s.members ]
         d.members.clear()
         for i in sm:
-            # FIXME: handle translated ids
+            # Handle translated ids
+            if i in self.translated_ids:
+                i=self.translated_ids[i]
             a=helper.get_id(self.destination.annotations, i)
             if a is None:
                 raise "Error: missing annotation %s" % i
             d.members.append(a)
         return d
+
+    def new_annotation(self, s, d):
+        """Create a new annotation.
+
+        Try to keep track of the occurences of its id, to fix them later on.
+        """
+        id_=self.destination._idgenerator.get_id(Annotation)
+        self.destination._idgenerator.add(id_)
+
+        # Find parent, and create it if necessary
+        at=helper.get_id(self.destination.annotationTypes, s.type.id)
+        if not at:
+            # The annotation type does not exist. Create it.
+            at=self.copy_annotation_type(helper.get_id(self.source.annotationTypes, 
+                                                       s.type.id))
+        el=self.destination.createAnnotation(
+            ident=id_,
+            type=at,
+            author=s.author,
+            date=s.date,
+            fragment=s.fragment.clone())
+        el.content.data=s.content.data
+        self.destination.annotations.append(el)
+        self.translated_ids[s.id]=id_
+        return el
 
     def copy_relation_type(self, s):
         # Find parent, and create it if necessary
@@ -303,7 +375,12 @@ class Differ:
         # Ensure that annotations exist
         members=[]
         for sa in s.members:
-            a=helper.get_id(self.destination.annotations, sa.id)
+            # check translated_ids
+            i=sa.id
+            if i in self.translated_ids:
+                i=self.translated_ids[i]
+                
+            a=helper.get_id(self.destination.annotations, i)
             if not a:
                 a=self.copy_annotation(sa)
             members.append(a)
@@ -336,14 +413,32 @@ class Differ:
             author=s.author,
             date=s.date)
         el.title=s.title
+        # FIXME: ideally, we should try to fix translated_ids in
+        # views. Or at least try to signal possible occurrences.
         el.content.data=s.content.data
         el.content.mimetype=s.content.mimetype
         self.destination.views.append(el)
         return el
 
-    def copy_resource(self, s):
-        print "Not implemented yet: copy resource", str(s)
-        pass
+    def create_resource(self, s, d):
+        source_name=os.path.join(self.source.resources.dir_, d)
+        destination_name=os.path.join(self.destination.resources.dir_, d)
+        if not os.path.exists(source_name):
+            print "Package integrity problem: %s does not exist" % source_name
+            return
+        if os.path.isdir(source_name):
+            shutil.copytree(source_name, destination_name)
+        else:
+            shutil.copyfile(source_name, destination_name)
+
+    def update_resource(self, s, d):
+        source_name=os.path.join(self.source.resources.dir_, d)
+        destination_name=os.path.join(self.destination.resources.dir_, d)
+        for rep in (source_name, destination_name):
+            if not os.path.exists(source_name):
+                print "Package integrity problem: %s does not exist" % source_name
+                return
+        shutil.copyfile(source_name, destination_name)
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
@@ -363,5 +458,3 @@ if __name__ == "__main__":
         print name, unicode(s).encode('utf-8'), unicode(d).encode('utf-8')
         #action(s, d)
     #dest.save('foo.xml')
-
-
