@@ -107,7 +107,8 @@ def list_selector_widget(members=None,
     combobox.set_active(-1)
     if i is None:
         i = store.get_iter_first()
-    combobox.set_active_iter(i)
+    if i is not None:
+        combobox.set_active_iter(i)
 
     def get_current_element(combo):
         return combo.get_model().get_value(combo.get_active_iter(), 1)
