@@ -18,6 +18,10 @@ Source: c:\gtk\bin\libpng12.dll; DestDir: {app}
 Source: c:\gtk\bin\libpangoft2-1.0-0.dll; DestDir: {app}
 Source: c:\gtk\bin\libtiff3.dll; DestDir: {app}
 Source: c:\gtk\bin\jpeg62.dll; DestDir: {app}
+Source: c:\gtk\bin\librsvg-2-2.dll; DestDir: {app}
+Source: c:\gtk\bin\libcroco-0.6-3.dll; DestDir: {app}
+Source: c:\gtk\bin\libgsf-1-114.dll; DestDir: {app}
+Source: c:\gtk\bin\bzip2.dll; DestDir: {app}
 [Setup]
 AppCopyright=GPL
 AppName=Advene
