@@ -53,10 +53,8 @@ import time
 import sre
 import os
 import optparse
-import urllib
 
-import gettext
-gettext.install('advene', unicode=True)
+from gettext import gettext as _
 
 import advene.core.config as config
 
@@ -71,17 +69,29 @@ import xml.dom
 IMPORTERS=[]
 
 def register(imp):
+    """Register an importer
+    """
     if hasattr(imp, 'can_handle'):
         IMPORTERS.append(imp)
 
 def get_valid_importers(fname):
+    """Return a list of valid importers for fname.
+
+    The list is sorted in priority order (best choice first)
+    """
     res=[]
+    n=fname.lower()
     for i in IMPORTERS:
-        if i.can_handle(fname):
-            res.append(i)
-    return res
+        v=i.can_handle(n)
+        if v:
+            res.append( (i, v) )
+    # reverse sort along matching scores
+    res.sort(lambda a, b: cmp(b[1], a[1]))
+    return [ i for (i, v) in res ]
 
 def get_importer(fname, **kw):
+    """Return the first/best valid importer.
+    """
     l=get_valid_importers(fname)
     i=None
     if len(l) == 0:
@@ -102,7 +112,7 @@ class GenericImporter(object):
     """
     name = _("Generic importer")
 
-    def __init__(self, author=None, package=None, defaulttype=None, controller=None):
+    def __init__(self, author=None, package=None, defaulttype=None, controller=None, callback=None):
         self.package=package
         if author is None:
             author=config.data.userid
@@ -110,6 +120,7 @@ class GenericImporter(object):
         self.controller=controller
         self.timestamp=time.strftime("%Y-%m-%d")
         self.defaulttype=defaulttype
+        self.callback=callback
         # Default offset in ms
         self.offset=0
         # Dictionary holding the number of created elements
@@ -130,8 +141,16 @@ class GenericImporter(object):
                                      help=_("Specify the offset in ms"))
 
     def can_handle(fname):
-        return False
+        """Return a score between 0 and 100.
+
+        100 is for the best match (specific extension), 0 is for no match at all.
+        """
+        return 0
     can_handle=staticmethod(can_handle)
+
+    def progress(self, value=None, label=None):
+        if self.callback:
+            self.callback(value, label)
 
     def process_options(self, option_list):
         (self.options, self.args) = self.optionparser.parse_args(args=option_list)
@@ -341,11 +360,19 @@ class TextImporter(GenericImporter):
                                      help=_("Specify the regexp used to parse data"))
 
     def can_handle(fname):
-        return fname.endswith('.txt')
+        if fname.endswith('.txt'):
+            return 100
+        else:
+            # It may handle any type of file ?
+            return 1
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
+        incr=0.02
+        progress=0.1
         for l in f:
+            self.progress(progress)
+            progress += incr
             l=l.rstrip()
             l=unicode(l, self.encoding).encode('utf-8')
             m=self.regexp.search(l)
@@ -360,6 +387,7 @@ class TextImporter(GenericImporter):
         if self.package is None:
             self.init_package(filename=filename)
         self.convert(self.iterator(f))
+        self.progress(1.0)
         return self.package
 
 register(TextImporter)
@@ -378,13 +406,20 @@ class LsDVDImporter(GenericImporter):
         self.encoding='latin1'
 
     def can_handle(fname):
-        return 'dvd' in fname
+        if 'dvd' in fname:
+            return 100
+        else:
+            return 0
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
         reg=sre.compile(self.regexp)
         begin=1
+        incr=0.02
+        progress=0.1
         for l in f:
+            progress += incr
+            self.progress(progress, _("Processing data"))
             l=l.rstrip()
             l=unicode(l, self.encoding).encode('utf-8')
             m=reg.search(l)
@@ -409,8 +444,10 @@ class LsDVDImporter(GenericImporter):
             p.setMetaData (config.data.namespace, "mediafile", "dvd@1,1")
             self.package=p
         self.defaulttype=at
+        self.progress(0.1, _("Launching lsdvd..."))
         f=os.popen(self.command, "r")
         self.convert(self.iterator(f))
+        self.progress(1.0)
         return self.package
 
 register(LsDVDImporter)
@@ -429,7 +466,10 @@ class ChaplinImporter(GenericImporter):
         self.encoding='latin1'
 
     def can_handle(fname):
-        return 'dvd' in fname
+        if 'dvd' in fname:
+            return 100
+        else:
+            return 0
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
@@ -467,6 +507,7 @@ class ChaplinImporter(GenericImporter):
             p.setMetaData (config.data.namespace, "mediafile", "dvd@1,1")
         self.defaulttype=at
         self.convert(self.iterator(f))
+        self.progress(1.0)
         return self.package
 
 register(ChaplinImporter)
@@ -484,7 +525,12 @@ class XiImporter(GenericImporter):
         self.signals={}
 
     def can_handle(fname):
-        return (fname.endswith('.xi') or fname.endswith('.xml'))
+        if fname.endswith('.xi'):
+            return 100
+        elif fname.endswith('.xml'):
+            return 50
+        else:
+            return 0
     can_handle=staticmethod(can_handle)
 
     def iterator(self, xi):
@@ -532,6 +578,7 @@ class XiImporter(GenericImporter):
                                       "mediafile", filename)
 
         self.convert(self.iterator(xi))
+        self.progress(1.0)
         return self.package
 
 register(XiImporter)
@@ -549,7 +596,14 @@ class ElanImporter(GenericImporter):
         self.relations=[]
 
     def can_handle(fname):
-        return fname.endswith('.eaf')
+        if fname.endswith('.eaf'):
+            return 100
+        elif fname.endswith('.elan'):
+            return 100
+        elif fname.endswith('.xml'):
+            return 50
+        else:
+            return 0
     can_handle=staticmethod(can_handle)
 
     def xml_to_text(self, element):
@@ -701,6 +755,7 @@ class ElanImporter(GenericImporter):
         self.convert(self.iterator(elan))
         self.fix_forward_references()
         self.create_relations()
+        self.progress(1.0)
         return self.package
 
 register(ElanImporter)
@@ -720,7 +775,10 @@ class SubtitleImporter(GenericImporter):
         self.encoding=encoding
 
     def can_handle(fname):
-        return fname.endswith('.srt')
+        if fname.endswith('.srt'):
+            return 100
+        else:
+            return 0
     can_handle=staticmethod(can_handle)
 
     def srt_iterator(self, f):
@@ -761,6 +819,7 @@ class SubtitleImporter(GenericImporter):
         self.defaulttype=at
         # FIXME: implement subtitle type detection
         self.convert(self.srt_iterator(f))
+        self.progress(1.0)
         return self.package
 
 register(SubtitleImporter)
@@ -777,7 +836,10 @@ class PraatImporter(GenericImporter):
         self.schema=None
 
     def can_handle(fname):
-        return (fname.endswith('.praat') or fname.endswith('.TextGrid'))
+        if fname.endswith('.praat') or fname.endswith('.textgrid'):
+            return 100
+        else:
+            return 0
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
@@ -849,6 +911,7 @@ class PraatImporter(GenericImporter):
         self.schema=self.create_schema('praat', 
                                        title="PRAAT converted schema")
         self.convert(self.iterator(f))
+        self.progress(1.0)
         return self.package
 
 register(PraatImporter)
@@ -866,7 +929,12 @@ class CmmlImporter(GenericImporter):
         self.schema=None
 
     def can_handle(fname):
-        return fname.endswith('.cmml')
+        if fname.endswith('.cmml'):
+            return 100
+        elif fname.endswith('.xml'):
+            return 50
+        else:
+            return 0
     can_handle=staticmethod(can_handle)
 
     def npt2time(self, npt):
@@ -912,7 +980,12 @@ class CmmlImporter(GenericImporter):
         # if the end attribute was not filled.
         delayed=[]
 
+        progress=0.5
+        incr=0.5 / len(cm.clip)
+        
         for clip in cm.clip:
+            self.progress(progress, _("Parsing clip information"))
+            progress += incr
             try:
                 begin=clip.start
             except AttributeError, e:
@@ -1007,22 +1080,26 @@ class CmmlImporter(GenericImporter):
             return
 
         if self.package is None:
+            self.progress(0.1, _("Creating package"))
             self.package=Package(uri='new_pkg', source=None)
 
         p=self.package
+        self.progress(0.2, _("Creating CMML schema"))
         self.schema=self.create_schema('cmml', title="CMML converted schema")
 
         # Create the 3 default types : link, image, description
+        self.progress(0.3, _("Creating annotation types"))
         for n in ('link', 'image', 'description'):
             self.atypes[n]=self.create_annotation_type(self.schema, n)
         self.atypes['link'].mimetype = 'application/x-advene-structured'
 
         # Handle heading information
+        self.progress(0.4, _("Parsing header information"))
         try:
             h=cm.head[0]
             try:
                 t=h.title
-                schema.title=self.xml_to_text(t)
+                self.schema.title=self.xml_to_text(t)
             except AttributeError:
                 pass
             #FIXME: conversion of metadata (meta name=Producer, DC.Author)
@@ -1031,6 +1108,7 @@ class CmmlImporter(GenericImporter):
             pass
 
         # Handle stream information
+        self.progress(0.5, _("Parsing stream information"))
         if len(cm.stream) > 1:
             self.log("Multiple streams. Will handle only the first one. Support yet to come...")
         s=cm.stream[0]
@@ -1054,6 +1132,8 @@ class CmmlImporter(GenericImporter):
 
         self.convert(self.iterator(cm))
 
+        self.progress(1.0)
+
         return self.package
 
 register(CmmlImporter)
@@ -1070,14 +1150,24 @@ class IRIImporter(GenericImporter):
         self.duration=0
 
     def can_handle(fname):
-        return (fname.lower().endswith('.iri') or fname.lower().endswith('.xml'))
+        if fname.endswith('.iri'):
+            return 100
+        elif fname.endswith('.xml'):
+            return 60
+        else:
+            return 0
     can_handle=staticmethod(can_handle)
 
     def iterator(self, iri):
         schema = None
-        for ensemble in iri.body[0].ensembles[0].ensemble:
+        ensembles=iri.body[0].ensembles[0].ensemble
+        progress=0.1
+        incr=0.02
+        for ensemble in ensembles:
             sid=ensemble.id
             print "Ensemble", sid
+            progress += incr
+            self.progress(progress, _("Parsing ensemble %s") % sid)
             schema=self.create_schema(sid,
                                       author=ensemble.author or self.author,
                                       date=ensemble.date,
@@ -1086,6 +1176,8 @@ class IRIImporter(GenericImporter):
 
             for decoupage in ensemble.decoupage:
                 tid = decoupage.id
+                progress += incr
+                self.progress(progress, _("Parsing decoupage %s") % tid)
                 print "  Decoupage ", tid
                 # Update self.duration
                 self.duration=max(long(decoupage.dur), self.duration)
@@ -1119,12 +1211,16 @@ class IRIImporter(GenericImporter):
                        }
                     yield d
                 # process "views" elements to add attributes
+                progress += incr
+                self.progress(progress, _("Parsing views"))
                 try:
                     views=decoupage.views[0].view
                 except AttributeError:
                     # No defined views
                     views=[]
                 for view in views:
+                    progress += incr
+                    self.progress(progress, view.title)
                     print "     ", view.title.encode('latin1')
                     for ref in view.ref:
                         an = [a for a in self.package.annotations if a.id == ref.id ]
@@ -1137,6 +1233,7 @@ class IRIImporter(GenericImporter):
     def process_file(self, filename):
         iri=handyxml.xml(filename)
 
+        self.progress(0.1, _("Initializing package"))
         p, at=self.init_package(filename=filename,
                                 schemaid=None,
                                 annotationtypeid=None)
@@ -1165,6 +1262,7 @@ class IRIImporter(GenericImporter):
         if self.duration != 0:
             self.package.setMetaData (config.data.namespace, "duration", str(self.duration))
             
+        self.progress(1.0)
         return self.package
 register(IRIImporter)
 
