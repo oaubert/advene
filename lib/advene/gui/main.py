@@ -90,6 +90,7 @@ from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.merge import Merger
+from advene.gui.edit.importer import ExternalImporter
 import advene.gui.evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
@@ -1737,38 +1738,9 @@ class AdveneGUI (Connect):
         return True
 
     def on_import_file1_activate (self, button=None, data=None):
-        if config.data.path['data']:
-            d=config.data.path['data']
-        else:
-            d=None
-        filename=advene.gui.util.get_filename(title=_("Choose the file to import"),
-                                              action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                              button=gtk.STOCK_OPEN,
-                                              default_dir=d,
-                                              filter='any')
-        if not filename:
-            return True
-        filename_utf=unicode(filename, 'iso-8859-1').encode('utf-8')
-        i=advene.util.importer.get_importer(filename, controller=self.controller)
-        if i is None:
-            advene.gui.util.message_dialog(
-                _("The format of the file\n%s\nis not recognized.") % filename_utf,
-                icon=gtk.MESSAGE_ERROR)
-        else:
-            # FIXME: build a dialog to enter optional parameters
-            # FIXME: handle the multiple possible importers case (for XML esp.)
-            if not advene.gui.util.message_dialog(
-                _("Do you confirm the import of data from\n%(filename)s\nby the %(filter)s filter?") % {
-                    'filename': filename_utf, 
-                    'filter': i.name}, icon=gtk.MESSAGE_QUESTION):
-                return True
-            i.package=self.controller.package
-            i.process_file(filename)
-            self.controller.package._modified = True
-            self.controller.notify("PackageActivate", package=self.controller.package)
-            self.log(_('Converted from file %s :') % filename_utf)
-            self.log(i.statistics_formatted())
-        return True
+        v=ExternalImporter(controller=self.controller)
+        v.popup()
+        return False
 
     def on_quit1_activate (self, button=None, data=None):
         """Gtk callback to quit."""
