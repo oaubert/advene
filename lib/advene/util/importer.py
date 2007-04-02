@@ -626,19 +626,23 @@ class ElanImporter(GenericImporter):
         # List of tuples (annotation-id, related-annotation-uri) of
         # forward referenced annotations
         self.forward_references = []
+        progress=0.1
+        incr=0.02
         for tier in elan.TIER:
             if not hasattr(tier, 'ANNOTATION'):
                 # Empty tier
                 continue
+            tid = tier.LINGUISTIC_TYPE_REF.replace(' ','_') + '__' + tier.TIER_ID.replace(' ', '_')
+
+            tid=valid_id_re.sub('', tid)
+
+            if not self.atypes.has_key(tid):
+                self.atypes[tid]=self.create_annotation_type(self.schema, tid)
+
+            self.progress(progress, _("Converting tier %s") % tid)
+            progress += incr
             for an in tier.ANNOTATION:
                 d={}
-
-                tid = tier.LINGUISTIC_TYPE_REF.replace(' ','_') + '__' + tier.TIER_ID.replace(' ', '_')
-
-                tid=valid_id_re.sub('', tid)
-
-                if not self.atypes.has_key(tid):
-                    self.atypes[tid]=self.create_annotation_type(self.schema, tid)
 
                 d['type']=self.atypes[tid]
                 #d['type']=self.atypes[tier.TIER_ID.replace(' ','_')]
@@ -739,6 +743,7 @@ class ElanImporter(GenericImporter):
         if elan.HEADER[0].TIME_UNITS != 'milliseconds':
             raise Exception('Cannot process non-millisecond fragments')
 
+        self.progress(0.1, _("Processing time slots"))
         for a in elan.TIME_ORDER[0].TIME_SLOT:
             try:
                 self.anchors[a.TIME_SLOT_ID] = long(a.TIME_VALUE)
@@ -753,7 +758,9 @@ class ElanImporter(GenericImporter):
         #    self.create_annotation_type(schema, i)
 
         self.convert(self.iterator(elan))
+        self.progress(0.8, _("Fixing forward references"))
         self.fix_forward_references()
+        self.progress(0.9, _("Creating relations"))
         self.create_relations()
         self.progress(1.0)
         return self.package
