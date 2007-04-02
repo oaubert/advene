@@ -35,6 +35,8 @@ from advene.util.merger import Differ
 
 labels = {
  'new': _("Create element"),
+ 'new_annotation': _("Create annotation (duplicate id)"),
+ 'new_relation': _("Create relation (duplicate id)"),
  'update_meta_color': _("Update the color"),
  'update_meta_representation': _("Update the representation"),
  'update_meta_description': _("Update the description"),
@@ -44,6 +46,8 @@ labels = {
  'update_end': _("Update the end time"),
  'update_content': _("Update the content"),
  'update_matchfilter': _("Update the matchFilter"),
+ 'update_member_types': _("Update the member types"),
+ 'update_tags': _("Update tags"),
  }
 
 class TreeViewMerger:
@@ -146,7 +150,6 @@ class TreeViewMerger:
                 i.connect("activate", show_diff, l)
                 menu.append(i)
                 
-            # FIXME: display diff
             menu.show_all()
             return menu
 
