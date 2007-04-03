@@ -17,7 +17,9 @@
 #
 """Gstreamer player interface.
 
-Based on gst >= 0.10 API
+Based on gst >= 0.10 API.
+
+See http://pygstdocs.berlios.de/pygst-reference/index.html for API
 """
 
 #import advene.core.config as config
@@ -26,6 +28,7 @@ import pygst
 pygst.require('0.10')
 import gst
 import os
+from threading import Condition
 
 class StreamInformation:
     def __init__(self):
@@ -120,9 +123,24 @@ class Player:
 
         self.player.props.video_sink=self.video_sink
 
-        # Snapshot format conversion infrastructure. Does not work...
-        #self.pngconverter = gst.parse_launch("freeze name=source ! video/x-raw-rgb,width=160 ! pngenc name=encoder ! fakesink name=sink")
-        # p=gst.parse_launch('fakesrc name=src ! ffmpegcolorspace ! video/x-raw-rgb,width=320 ! pngenc ! fakesink name=sink')
+        # Snapshot format conversion infrastructure.
+        self.converter=gst.parse_launch('fakesrc name=src ! queue name=queue ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=160 ! pngenc ! fakesink name=sink signal-handoffs=true')
+        self.converter._lock = Condition()
+        
+        self.converter.queue=self.converter.get_by_name('queue')
+        self.converter.sink=self.converter.get_by_name('sink')
+
+        def converter_cb(element, buffer, pad):
+            c=self.converter
+            c._lock.acquire()
+            c._buffer=buffer
+            c._lock.notify()
+            c._lock.release()
+            return True
+        
+        self.converter.sink.connect('handoff', converter_cb)
+        self.converter.set_state(gst.STATE_PLAYING)
+
         bus = self.player.get_bus()
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', self.on_sync_message)
@@ -198,7 +216,7 @@ class Player:
             return
         p = long(self.position2value(position) * gst.MSECOND)
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
-                                   gst.SEEK_FLAG_FLUSH,
+                                   gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
                                    gst.SEEK_TYPE_SET, p,
                                    gst.SEEK_TYPE_NONE, 0)
         res = self.player.send_event(event)
@@ -244,24 +262,45 @@ class Player:
     def playlist_get_list(self):
         return [ self.videofile ]
 
+    def convert_snapshot(self, frame):
+        """Synchronously convert a frame (gst.Buffer) to jpeg.
+        """
+        c=self.converter
+        # Lock the conversion pipeline
+        c._lock.acquire()
+        c._buffer=None
+
+        # Push the frame into the conversion pipeline
+        c.queue.get_pad('src').push(frame)
+
+        # Wait for the lock to be released
+        while c._buffer is None:
+            c._lock.wait()
+
+        b=c._buffer.copy()
+        c._lock.release()
+        return b
+
     def snapshot(self, position):
-        return None
         if not self.check_uri():
             return None
+
         try:
-            f=self.player.props.frame.copy()
-        except:
+            b=self.player.props.frame.copy()
+        except SystemError:
             return None
-        # Holds width, height
-        caps=f.caps[0]
+        
+        f=self.convert_snapshot(b)
         t=f.timestamp / gst.MSECOND
 
-        # FIXME: find a way to convert f.data through pngenc
         return Snapshot( { 'data': f.data,
-                           'type': caps['format'].fourcc,
+                           'type': 'PNG',
                            'date': t,
-                           'width': caps['width'],
-                           'height': caps['height']})
+                           # Hardcoded size values. They are not used
+                           # by the application, since their are
+                           # encoded in the PNG file anyway.
+                           'width': 160,
+                           'height': 100 } )
 
     def all_snapshots(self):
         self.log("all_snapshots %s")
