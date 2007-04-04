@@ -128,8 +128,12 @@ class ExternalImporter(AdhocView):
         line.pack_start(b, expand=False)
 
         # Importer choice list
+        line=gtk.HBox()
+        vbox.pack_start(line, expand=False)
+
+        line.pack_start(gtk.Label(_("Import filter")), expand=False)
         self.importers=advene.gui.util.list_selector_widget([], None)
-        vbox.pack_start(self.importers, expand=False)
+        line.pack_start(self.importers, expand=False)
 
         bb=gtk.HButtonBox()
 
