@@ -11,6 +11,9 @@ advene (0.22) unstable; urgency=low
   
   * DVD device/drive: it can be configured from the Player preferences window
 
+  * File import: allow to choose the desired import filter, and display a
+    progress bar
+ 
   * Adhoc-views (timeline, transcription...): parametered adhoc-views can
     be saved as Advene views (for instance, choosing the displayed
     annotation types in the timeline) and restored. To save them, use the
@@ -33,6 +36,8 @@ advene (0.22) unstable; urgency=low
           * it is possible to open many history views. They can be populated
           by drag and drop from the other history views or the timeline, and
           act as a visual table of contents.
+  
+        * Interactive query: offer to activate/desactivate result annotations
 
   * Web server:
   
@@ -47,7 +52,7 @@ advene (0.22) unstable; urgency=low
         following line to advene.ini:
         config.data.webserver['engine']='cherrypy'
         
-  * gstreamer plugin: it can display text subtitles
+  * gstreamer plugin: it can display text subtitles, and make snapshots
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 18 Feb 2007 18:54:15 +0100
         
