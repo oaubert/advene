@@ -23,7 +23,7 @@ advene (0.22) unstable; urgency=low
 
         * Transcription view: it now uses a TALES expression as
           argument. It can thus display query results or any set of annotations
-          as a transcription.
+          as a transcription. Preferences offer a set of predefined separators.
 
         * Bag of tags: this new view allows to manage tags applied to
           elements (mostly annotations), through drag-and-drop.
@@ -54,7 +54,7 @@ advene (0.22) unstable; urgency=low
         
   * gstreamer plugin: it can display text subtitles, and make snapshots
 
- -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 18 Feb 2007 18:54:15 +0100
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu,  5 Apr 2007 11:04:36 +0200
         
 advene (0.21) unstable; urgency=low
 
