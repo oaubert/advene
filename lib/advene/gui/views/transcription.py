@@ -126,20 +126,35 @@ class TranscriptionView(AdhocView):
         return
 
     def edit_options(self, button):
+        user_defined=object()
         cache=dict(self.options)
         for c in ('representation', 'separator'):
             cache[c] = cache[c].replace('\n', '\\n').replace('\t', '\\t')
+        cache['user-separator']=cache['separator']
+        if cache['separator'] not in (' ', '\\n', '\\t', ' - '):
+            cache['separator']=user_defined
 
         ew=EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Transcription options"))
         ew.add_checkbox(_("Default representation"), "default-representation", _("Use the default representation for annotations"))
         ew.add_entry(_("Representation"), "representation", _("If default representation is unchecked,\nthis TALES expression that will be used to format the annotations."))
-        ew.add_entry(_("Separator"), "separator", _("This separator will be inserted between the annotations.\nUse \\n for a newline and \\t for a tabulation."))
+        ew.add_option(_("Separator"), "separator", 
+                      _("This separator will be inserted between the annotations."),
+                      { _('Whitespace'): ' ',
+                        _('Newline'): "\\n",
+                        _('Tabulation'): "\\t",
+                        _('Dash'): " - ",
+                        _('User defined'): user_defined,
+                        })
+        ew.add_entry(_("User-defined separator"), "user-separator", _("Separator used if user-defined is selected.Use \\n for a newline and \\t for a tabulation."))
         ew.add_checkbox(_("Display timestamps"), "display-time", _("Insert timestsamp values"))
         ew.add_checkbox(_("Display annotation bounds"), 'display-bounds', _("Display annotation bounds"))
         res=ew.popup()
 
         if res:
+            if cache['separator'] == user_defined:
+                # User-defined has been selected. Use the user-separator value
+                cache['separator']=cache['user-separator']
             self.options.update(cache)
             # Process special characters
             for c in ('representation', 'separator'):
@@ -166,9 +181,13 @@ class TranscriptionView(AdhocView):
         # Update the model to be sure.
         self.regenerate_model()
         for a in self.model:
-            beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
-            enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
-            if b.get_text(beginiter, enditer) != self.representation(a):
+            try:
+                beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
+                enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
+                if b.get_text(beginiter, enditer) != self.representation(a):
+                    modified.append(a)
+            except TypeError:
+                # Some missing annotations
                 modified.append(a)
         return modified
 
