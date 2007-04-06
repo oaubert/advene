@@ -381,8 +381,8 @@ class AdveneController:
         self.event_handler.internal_rule (event="PackageLoad",
                                           method=self.manage_package_load)
 
+        self.server=None
         if config.data.webserver['mode']:
-            self.server=None
             try:
                 self.server = AdveneWebServer(controller=self, port=config.data.webserver['port'])
                 self.serverthread = threading.Thread (target=self.server.start)
