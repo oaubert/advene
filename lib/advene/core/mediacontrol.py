@@ -27,8 +27,9 @@ class PlayerFactory:
     def __init__(self):
         pass
 
-    def get_player(self):
-        p=config.data.player['plugin']
+    def get_player(self, p=None):
+        if p is None:
+            p=config.data.player['plugin']
         print "mediacontrol: using %s" % p
 
         try:
@@ -51,17 +52,16 @@ class PlayerFactory:
             else:
 		print "Fallback to dummy module"
                 import advene.player.dummy as playermodule
-        except ImportError:
-            if config.data.os == 'linux':
-                try:
-                    print "Cannot import %s mediaplayer. Trying gstreamer player." % p
-                    import advene.player.gstreamer as playermodule
-                    print "gstreamer player activated."
-                except ImportError:
-                    print "Cannot import gstreamer mediaplayer. Using dummy player."
-                    import advene.player.dummy as playermodule
+        except ImportError, e:
+            if config.data.os == 'linux' and p != 'gstreamer':
+                print "Cannot import %(player)s mediaplayer: %(error)s.\nTrying gstreamer player." % {
+                    'player': p,
+                    'error': str(e) }
+                return self.get_player('gstreamer')
             else:
-                print "Cannot import %s mediaplayer. Using dummy player." % p
+                print "Cannot import %(player)s mediaplayer: %(error)s.\nUsing dummy player." % {
+                    'player': p,
+                    'error': str(e) }
                 import advene.player.dummy as playermodule
 
         return playermodule.Player()
