@@ -207,7 +207,7 @@ class TimeLine(AdhocView):
         self.layout.connect('button_press_event', self.layout_button_press_cb)
         self.layout.connect ('size_allocate', self.layout_resize_event)
         self.layout.connect ('map', self.layout_resize_event)
-        #self.layout.connect('expose_event', self.draw_background)
+        self.layout.connect('expose_event', self.draw_background)
         self.layout.connect_after('expose_event', self.draw_relation_lines)
 
         # The layout can receive drops (to resize annotations)
@@ -257,13 +257,13 @@ class TimeLine(AdhocView):
 
     def draw_background(self, layout, event):
         width, height = layout.get_size()
-        h=config.data.preferences['timeline']['button-height'] + config.data.preferences['timeline']['interline-height']
+        i=config.data.preferences['timeline']['interline-height']
         drawable=layout.bin_window
-        gc=drawable.new_gc(foreground=self.colors['background'])
-        for i in range(0, len(self.layer_position), 2):
+        gc=drawable.new_gc(foreground=self.colors['background'], line_style=gtk.gdk.LINE_ON_OFF_DASH)
+        for p in sorted(self.layer_position.itervalues()):
             # Draw a different background
-            drawable.draw_rectangle(gc, True, 0, h * i, width, h)
-        return True
+            drawable.draw_line(gc, 0, p - i / 2, width, p - i / 2)
+        return False
 
     def update_relation_lines(self):
         self.layout.queue_draw()
@@ -1646,7 +1646,6 @@ class TimeLine(AdhocView):
     def build_legend_widget (self):
         """Return a Layout containing the legend widget."""
         legend = gtk.Layout ()
-        #legend.connect('expose_event', self.draw_background)
         self.update_legend_widget(legend)
         return legend
 
