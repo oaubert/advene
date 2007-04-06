@@ -69,7 +69,6 @@ class TimeLine(AdhocView):
             'highlight': True,
             # Autoscroll: 0: None, 1: continuous, 2: discrete
             'autoscroll': 1,
-            'delete_transmuted': False,
             'resize-by-dnd': False,
             'display-relations': True,
             'display-relation-type': True,
@@ -228,9 +227,6 @@ class TimeLine(AdhocView):
         # Used for paste operations
         self.selected_position = 0
         self.selection_marker = None
-
-        # Default drag mode : create a relation
-        self.drag_mode = "relation"
 
         # Adjustment corresponding to the Virtual display
         # The page_size is the really displayed area
@@ -776,13 +772,27 @@ class TimeLine(AdhocView):
             source=self.controller.package.annotations.get(source_uri)
             dest=widget.annotation
 
-            if self.drag_mode == 'relation':
-                self.create_relation_popup(source, dest)
-            elif self.drag_mode in ( 'begin-begin', 'begin-end',
-                                     'end-begin', 'end-end', 'align' ):
-                self.align_annotations(source, dest, self.drag_mode)
-            else:
-                print "Unknown drag mode: %s" % self.drag_mode
+            # Popup a menu to propose the drop options
+            menu=gtk.Menu()
+            for (title, action) in ( 
+                (_("Create a relation"), 
+                 lambda i: self.create_relation_popup(source, dest)),
+                (_("Align both begin times"),
+                 lambda i: self.align_annotations(source, dest, 'begin-begin')),
+                (_("Align both end times"),
+                 lambda i: self.align_annotations(source, dest, 'end-end')),
+                (_("Align end time to selected begin time"),
+                 lambda i: self.align_annotations(source, dest, 'end-begin')),
+                (_("Align begin time to selected end time"),
+                 lambda i: self.align_annotations(source, dest, 'begin-end')),
+                (_("Align all times"),
+                 lambda i: self.align_annotations(source, dest, 'align')),
+                ):
+                item=gtk.MenuItem(title)
+                item.connect('activate', action)
+                menu.append(item)
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
         elif targetType == config.data.target_type['tag']:
             tags=selection.data.split(',')
             a=widget.annotation
@@ -807,14 +817,32 @@ class TimeLine(AdhocView):
             source=self.controller.package.annotations.get(source_uri)
             dest=widget.annotationtype
 
-            if self.options['delete_transmuted'] and source.relations:
-                advene.gui.util.message_dialog(_("Cannot delete the annotation : it has relations."),
-                                               icon=gtk.MESSAGE_WARNING)
+            def move_annotation(*p):
+                if source.relations:
+                    advene.gui.util.message_dialog(_("Cannot delete the annotation : it has relations."),
+                                                   icon=gtk.MESSAGE_WARNING)
+                    return True
+
+                self.controller.transmute_annotation(source,
+                                                     dest,
+                                                     delete=True)
                 return True
 
-            self.controller.transmute_annotation(source,
-                                                 dest,
-                                                 delete=self.options['delete_transmuted'])
+            # Popup a menu to propose the drop options
+            menu=gtk.Menu()
+            for (title, action) in ( 
+                (_("Copy annotation"), 
+                 lambda i: self.controller.transmute_annotation(source,
+                                                                dest,
+                                                                delete=False)),
+                (_("Move annotation"), move_annotation)
+                 ):
+                item=gtk.MenuItem(title)
+                item.connect('activate', action)
+                menu.append(item)
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+
         elif targetType == config.data.target_type['annotation-type']:
             source_uri=selection.data
             source=self.controller.package.annotationTypes.get(source_uri)
@@ -1765,51 +1793,10 @@ class TimeLine(AdhocView):
 
         return vbox
 
-    def set_drag_mode(self, button, mode):
-        self.drag_mode = mode
-        return True
-
     def get_toolbar(self):
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
         radiogroup_ref=None
-
-        tb_list = (
-            (_("Relations"), _("Create relations"),
-             "create-relations.png", self.set_drag_mode, "relation"),
-
-            (_("BeginBegin"), _("Set the same begin time as the selected annotation"),
-             "begin-begin.png", self.set_drag_mode, "begin-begin"),
-
-            (_("BeginEnd"), _("Align the begin time to the selected end time"),
-             "begin-end.png", self.set_drag_mode, "begin-end"),
-
-
-            (_("EndEnd"), _("Align the end time to the selected end time"),
-             "end-end.png", self.set_drag_mode, "end-end"),
-
-            (_("EndBegin"), _("Align the end time to the selected begin time"),
-             "end-begin.png", self.set_drag_mode, "end-begin"),
-
-            (_("Align"), _("Align the boundaries"),
-             "align.png", self.set_drag_mode, "align"),
-
-            )
-
-        for text, tooltip, pixmap, callback, arg in tb_list:
-            b=gtk.RadioToolButton(group=radiogroup_ref)
-            i=gtk.Image()
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-            b.set_icon_widget(i)
-            b.set_tooltip(self.tooltips, tooltip)
-            b.connect("clicked", callback, arg)
-            tb.insert(b, -1)
-
-            if radiogroup_ref is None:
-                radiogroup_ref=b
-
-        b=gtk.SeparatorToolItem()
-        tb.insert(b, -1)
 
         def handle_toggle(b, option):
             self.options[option]=b.get_active()
@@ -1840,12 +1827,6 @@ class TimeLine(AdhocView):
 
         b=gtk.SeparatorToolItem()
         tb.insert(b, -1)
-
-        self.delete_transmuted_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_DELETE)
-        self.delete_transmuted_toggle.set_tooltip(self.tooltips, _("Delete the original transmuted annotation"))
-        self.delete_transmuted_toggle.set_active(self.options['delete_transmuted'])
-        self.delete_transmuted_toggle.connect('toggled', handle_toggle, 'delete_transmuted')
-        tb.insert(self.delete_transmuted_toggle, -1)
 
         for text, tooltip, icon, callback in ( 
             (_("Preferences"), _("Preferences"), 
