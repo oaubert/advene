@@ -447,7 +447,7 @@ class Window:
         return True
 
     def get_selection_or_cursor(self):
-        """Return either the selection or what is before the cursor.
+        """Return either the selection or what is on the line before the cursor.
         """
         b=self.source.get_buffer()
         if b.get_selection_bounds():
@@ -455,8 +455,8 @@ class Window:
             cursor=end
             b.place_cursor(end)
         else:
-            begin,end=b.get_bounds()
             cursor=b.get_iter_at_mark(b.get_insert())
+            begin=b.get_iter_at_line(cursor.get_line())
         expr=b.get_text(begin, cursor)
         return expr
 
