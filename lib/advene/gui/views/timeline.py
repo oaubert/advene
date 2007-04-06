@@ -69,7 +69,6 @@ class TimeLine(AdhocView):
             'highlight': True,
             # Autoscroll: 0: None, 1: continuous, 2: discrete
             'autoscroll': 1,
-            'resize-by-dnd': False,
             'display-relations': True,
             'display-relation-type': True,
             'display-relation-content': True,
@@ -864,33 +863,51 @@ class TimeLine(AdhocView):
         """Handle the drop from an annotation to the layout.
         """
         if targetType == config.data.target_type['annotation-resize']:
-            if not self.options['resize-by-dnd']:
-                return False
             q=dict(cgi.parse_qsl(selection.data))
             source=self.controller.package.annotations.get(q['uri'])
             try:
                 fr = float(q['fraction'])
             except:
                 fr = 0.0
-            #print "Resizing ", source.id, self.pixel2unit(x), fr
-            # Note: x is here relative to the visible portion of the window. Thus we must
-            # add self.adjustment.value
             pos=long(self.pixel2unit(self.adjustment.value + x))
-            f=source.fragment
+
+            def move_or_resize(*p):
+                #print "Resizing ", source.id, self.pixel2unit(x), fr
+                # Note: x is here relative to the visible portion of the window. Thus we must
+                # add self.adjustment.value
+                f=source.fragment
+                if fr < 0.25:
+                    # Modify begin
+                    f.begin=pos
+                elif fr > 0.75:
+                    # Modify end
+                    f.end = pos
+                else:
+                    d=f.duration
+                    # Move annotation
+                    f.begin = long(pos - fr * d)
+                    f.end = f.begin + d
+                if f.begin > f.end:
+                    f.begin, f.end = f.end, f.begin
+                self.controller.notify('AnnotationEditEnd', annotation=source)
+                return True
+                
             if fr < 0.25:
-                # Modify begin
-                f.begin=pos
+                message=_("Set begin time to %s" % helper.format_time(pos))
             elif fr > 0.75:
-                # Modify end
-                f.end = pos
+                message=_("Set end time to %s" % helper.format_time(pos))
             else:
-                d=f.duration
-                # Move annotation
-                f.begin = long(pos - fr * d)
-                f.end = f.begin + d
-            if f.begin > f.end:
-                f.begin, f.end = f.end, f.begin
-            self.controller.notify('AnnotationEditEnd', annotation=source)
+                message=_("Move annotation to %s" % helper.format_time(long(pos - fr * source.fragment.duration)))
+
+            menu=gtk.Menu()
+            item=gtk.MenuItem(message)
+            item.connect('activate', move_or_resize)
+            menu.append(item)
+            item=gtk.MenuItem(_("Cancel"))
+            menu.append(item)
+            
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -1964,7 +1981,6 @@ class TimeLine(AdhocView):
         ew.add_checkbox(_("Relation type"), "display-relation-type", _("Display relation types"))
         ew.add_checkbox(_("Relation content"), "display-relation-content", _("Display relation content"))
         ew.add_checkbox(_("Highlight"), "highlight", _("Highlight active annotations"))
-        ew.add_checkbox(_("DND Resize"), "resize-by-dnd", _("Resize annotations by drag and drop on the background window"))
         res=ew.popup()
         if res:
             self.options.update(cache)
