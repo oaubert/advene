@@ -168,7 +168,9 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO):
         icon, button, label)
     dialog.set_position(gtk.WIN_POS_CENTER_ALWAYS)
     dialog.connect("key_press_event", dialog_keypressed_cb)
-
+    
+    dialog.show()
+    center_on_mouse(dialog)
     res=dialog.run()
     dialog.destroy()
     if icon == gtk.MESSAGE_QUESTION:
@@ -204,6 +206,8 @@ def yes_no_cancel_popup(title=None,
         hb.add(l)
     d.connect("key_press_event", dialog_keypressed_cb)
 
+    d.show()
+    center_on_mouse(d)
     retval=d.run()
     d.destroy()
     return retval
@@ -232,6 +236,9 @@ def entry_dialog(title=None,
     d.connect("key_press_event", dialog_keypressed_cb)
 
     d.vbox.add(e)
+
+    d.show()
+    center_on_mouse(d)
 
     res=d.run()
     ret=None
@@ -368,6 +375,8 @@ def get_filename(title=_("Open a file"),
         fs.set_filename(default_file)
         fs.set_current_name(default_file)
 
+    fs.show()
+    center_on_mouse(fs)
     res=fs.run()
     filename=None
     al=None
@@ -401,6 +410,8 @@ def get_dirname(title=_("Choose a directory"),
     if default_dir:
         fs.set_current_folder(default_dir)
 
+    fs.show()
+    center_on_mouse(fs)
     res=fs.run()
     dirname=None
     if res == gtk.RESPONSE_OK:
@@ -554,8 +565,8 @@ class CategorizedSelector:
             # advene.gui.main.init_window_size
             w.set_default_size(240,300)
             self.popup=w
-        self.popup.set_position(gtk.WIN_POS_MOUSE)
         self.popup.show_all()
+        center_on_mouse(self.popup)
         return True
 
     def popup_hide(self):
@@ -563,3 +574,14 @@ class CategorizedSelector:
             self.popup.hide()
         return True
 
+def center_on_mouse(w):
+    """Center the given gtk.Window on the mouse position.
+    """
+    d=gtk.gdk.device_get_core_pointer()
+    (x, y) = d.get_state(gtk.gdk.get_default_root_window())[0]
+    x, y = long(x), long(y)
+
+    # Let's try to center the window on the mouse as much as possible.
+    width, height=w.get_size()
+    w.move(max(0, x - width/2),
+           max(0, y - height/2))
