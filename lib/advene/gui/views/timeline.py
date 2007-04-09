@@ -1954,6 +1954,8 @@ class TimeLine(AdhocView):
 
         d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
 
+        d.show()
+        advene.gui.util.center_on_mouse(d)
         res=d.run()
         if res == gtk.RESPONSE_OK:
             self.annotationtypes = [ at[1] for at in selected_store ]

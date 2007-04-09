@@ -309,6 +309,8 @@ class CreateElementPopup(object):
         d.vbox.add(self.widget)
 
         while True:
+            d.show()
+            advene.gui.util.center_on_mouse(d)
             res=d.run()
             retval=None
             if res == gtk.RESPONSE_OK:

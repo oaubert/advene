@@ -241,6 +241,8 @@ class EditElementPopup (object):
             d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
 
             while True:
+                d.show()
+                advene.gui.util.center_on_mouse(d)
                 res=d.run()
                 retval=False
                 if res == gtk.RESPONSE_OK:
@@ -289,6 +291,7 @@ class EditElementPopup (object):
             if self.controller.gui:
                 self.controller.gui.init_window_size(self.window, 'editpopup')
             self.window.show_all ()
+            advene.gui.util.center_on_mouse(self.window)
             for f in self.forms:
                 try:
                     if f.get_focus():
