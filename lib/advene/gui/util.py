@@ -389,7 +389,7 @@ def get_filename(title=_("Open a file"),
             al = sre.sub('[^a-zA-Z0-9_]', '_', al)
     fs.destroy()
 
-    if not isinstance(filename, unicode):
+    if filename is not None and not isinstance(filename, unicode):
         filename=unicode(filename, _fs_encoding)
 
     if alias:
