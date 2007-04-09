@@ -151,6 +151,8 @@ def list_selector(title=None,
 
     d.connect("key_press_event", dialog_keypressed_cb)
 
+    d.show()
+    center_on_mouse(d)
     res=d.run()
     retval=None
     if res == gtk.RESPONSE_OK:
