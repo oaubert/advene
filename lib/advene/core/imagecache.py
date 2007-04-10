@@ -23,6 +23,22 @@ import advene.core.config as config
 
 import os
 
+class CachedString(str):
+    """String cached in a file.
+    """
+    def __init__(self, filename):
+        self._filename=filename
+        self.contenttype='text/plain'
+
+    def __str__(self):
+        try:
+            return open(self._filename).read()
+        except:
+            return ''
+
+    def __repr__(self):
+        return "Cached content from " + self._filename
+
 class TypedString(str):
     """String with a mimetype attribute.
     """
@@ -56,7 +72,8 @@ class ImageCache(dict):
         # not yet been updated.
         dict.__init__ (self)
 
-        # The content of the not_yet_available_file file
+        # The content of the not_yet_available_file file. We could use
+        # CachedString but as it is frequently used, let us keep it in memory.
         f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
         s=TypedString(f.read())
         f.close()
@@ -241,11 +258,9 @@ class ImageCache(dict):
                     except ValueError:
                         print "Invalid filename in imagecache: " + name
                         continue
-                    f = open(os.path.join (d, name), 'rb')
-                    s=TypedString(f.read())
+                    s=CachedString(os.path.join (d, name))
                     s.contenttype='image/png'
                     dict.__setitem__(self, i, s)
-                    f.close ()
         self._modified=False
 
     def ids (self):
