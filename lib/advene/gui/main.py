@@ -182,9 +182,6 @@ class AdveneGUI (Connect):
         # Will be initialized in get_visualisation_widget
         self.gui.stbv_combo = None
 
-        # About box
-        self.gui.get_widget('about_web_button').set_label(config.data.version_string)
-
         # Adhoc view toolbuttons signal handling
         def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
             if targetType == config.data.target_type['adhoc-view']:
@@ -1942,12 +1939,17 @@ class AdveneGUI (Connect):
 
     def on_about1_activate (self, button=None, data=None):
         """Activate the About window."""
-        self.gui.get_widget("about").show ()
-        return True
+        gtk.about_dialog_set_url_hook(lambda dialog, link: self.controller.open_url(link))
+        d=gtk.AboutDialog()
+        d.set_name('Advene')
+        d.set_version(config.data.version_string)
+        d.set_copyright("Copyright 2002,2003,2004,2005,2006,2007 Olivier Aubert, Pierre-Antoine Champin")
+        d.set_license("""_('GNU General Public License\nSee http://www.gnu.org/copyleft/gpl.html for more details')""")
+        d.set_website('http://liris.cnrs.fr/advene/')
+        d.set_website_label('Visit the Advene web site for examples and documentation.')
+        d.set_authors( [ 'Olivier Aubert', 'Pierre-Antoine Champin', 'Yannick Prie', 'Bertrand Richard', 'Frank Wagner' ] )
+        d.run()
 
-    def about_hide (self, button=None, data=None):
-        """Hide the About window."""
-        self.gui.get_widget("about").hide ()
         return True
 
     def on_b_rewind_clicked (self, button=None, data=None):
@@ -2305,10 +2307,6 @@ Available views: timeline, tree, browser, transcribe"""))
                               parent=sc,
                               controller=self.controller)
         cr.popup()
-        return True
-
-    def on_about_web_button_clicked(self, button=None, data=None):
-        self.controller.open_url('http://liris.cnrs.fr/advene/')
         return True
 
     def on_package_list_activate(self, menu=None):
