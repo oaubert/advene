@@ -1619,7 +1619,7 @@ class TimeLine(AdhocView):
                 # Create a new annotation
                 id_=self.controller.package._idgenerator.get_id(Annotation)
 
-                duration=self.controller.cached_duration / 20
+                duration=0
                 el=self.controller.package.createAnnotation(
                     ident=id_,
                     type=at,
