@@ -463,8 +463,8 @@ class Media(Common):
             self.no_cache ()
         snapshot=i[position]
         cherrypy.response.headers['Content-type']=snapshot.contenttype
-        res.append (snapshot)
-        return snapshot
+        res.append (str(snapshot))
+        return res
     snapshot.exposed=True
 
     def play(self, position=None, **params):
@@ -1915,12 +1915,13 @@ class AdveneWebServer:
                 },
             }
         cherrypy.tree.mount(Root(controller), config=app_config)
+
         try:
             # server.quickstart *must* be started from the main thread.
-            print "Starting webserver"
             cherrypy.server.quickstart()
         except Exception, e:
             self.controller.log(_("Cannot start HTTP server: %s") % unicode(e))
+            return False
 
     def start(self):
         cherrypy.engine.start()
