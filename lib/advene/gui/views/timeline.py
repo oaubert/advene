@@ -1613,6 +1613,9 @@ class TimeLine(AdhocView):
     
         def keypress_handler(widget, event, at):
             if event.keyval == gtk.keysyms.Return:
+                if (self.controller.player.status != self.controller.player.PlayingStatus
+                    and self.controller.player.status != self.controller.player.PauseStatus):
+                    return True
                 # Create a new annotation
                 id_=self.controller.package._idgenerator.get_id(Annotation)
 
