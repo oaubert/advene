@@ -63,6 +63,8 @@ class ImageCache(dict):
         s.contenttype='image/png'
         self.not_yet_available_image = s
 
+        self._modified=False
+
         self.epsilon = epsilon
         if name is not None:
             self.load (name)
@@ -106,6 +108,8 @@ class ImageCache(dict):
         @type value: PNG data
         """
         key = self.approximate(long(key))
+        if value != self.not_yet_available_image:
+            self._modified=True
         return dict.__setitem__(self, key, value)
 
     def approximate (self, key):
@@ -209,6 +213,7 @@ class ImageCache(dict):
             f.write (dict.__getitem__(self, k))
             f.close ()
 
+        self._modified=False
         return d
 
     def load (self, name):
@@ -241,6 +246,7 @@ class ImageCache(dict):
                     s.contenttype='image/png'
                     dict.__setitem__(self, i, s)
                     f.close ()
+        self._modified=False
 
     def ids (self):
         return [ str(k) for k in self.keys () ]
