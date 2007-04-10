@@ -1504,7 +1504,7 @@ class AdveneGUI (Connect):
                     self.on_save1_activate(package=p)
                 elif response == gtk.RESPONSE_NO:
                     p._modified=False
-            if p.imagecache.valid_snapshots() and config.data.preferences['imagecache-save-on-exit'] != 'never':
+            if p.imagecache._modified and config.data.preferences['imagecache-save-on-exit'] != 'never':
                 if config.data.preferences['imagecache-save-on-exit'] == 'ask':
                     media=self.controller.get_default_media(package=p)
                     response=advene.gui.util.yes_no_cancel_popup(title=_("%s snapshots") % media,
@@ -1514,6 +1514,7 @@ class AdveneGUI (Connect):
                     elif response == gtk.RESPONSE_YES:
                         p.imagecache.save (helper.mediafile2id (media))
                     elif response == gtk.RESPONSE_NO:
+                        p.imagecache._modified=False
                         pass
                 elif config.data.preferences['imagecache-save-on-exit'] == 'always':
                     media=self.controller.get_default_media(package=p)
