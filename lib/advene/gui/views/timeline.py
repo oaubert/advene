@@ -764,6 +764,19 @@ class TimeLine(AdhocView):
             print "Unknown target type for drag: %d" % targetType
         return True
 
+    def create_relation(self, source, dest, rt):
+        """Create the reation of type rt between source and dest.
+        """
+        # Get the id from the idgenerator
+        p=self.controller.package
+        id_=self.controller.package._idgenerator.get_id(Relation)
+        relation=p.createRelation(ident=id_,
+                                 members=(source, dest),
+                                 type=rt)
+        p.relations.append(relation)
+        self.controller.notify("RelationCreate", relation=relation)
+        return True
+
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
@@ -773,9 +786,26 @@ class TimeLine(AdhocView):
 
             # Popup a menu to propose the drop options
             menu=gtk.Menu()
+
+            def create_relation(item, s, d, t):
+                self.create_relation(s, d, t)
+                return True
+
+            relationtypes=helper.matching_relationtypes(self.controller.package,
+                                                        source,
+                                                        dest)
+            if relationtypes:
+                item=gtk.MenuItem(_("Create a relation"))
+                # build a submenu
+                sm=gtk.Menu()
+                for rt in relationtypes:
+                    sitem=gtk.MenuItem(self.controller.get_title(rt))
+                    sitem.connect('activate', create_relation, source, dest, rt)
+                    sm.append(sitem)
+                menu.append(item)
+                item.set_submenu(sm)
+
             for (title, action) in ( 
-                (_("Create a relation"), 
-                 lambda i: self.create_relation_popup(source, dest)),
                 (_("Align both begin times"),
                  lambda i: self.align_annotations(source, dest, 'begin-begin')),
                 (_("Align both end times"),
@@ -910,33 +940,6 @@ class TimeLine(AdhocView):
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
         else:
             print "Unknown target type for drop: %d" % targetType
-        return True
-
-    def create_relation_popup(self, source, dest):
-        """Display a popup to create a binary relation between source and dest.
-        """
-        relationtypes=helper.matching_relationtypes(self.controller.package,
-                                                    source,
-                                                    dest)
-        if not relationtypes:
-            advene.gui.util.message_dialog(_("No compatible relation types are defined."),
-                                           icon=gtk.MESSAGE_WARNING)
-            return True
-
-        rt=advene.gui.util.list_selector(title=_("Create a relation"),
-                                         text=_("Choose the type of relation\n you want to set between\n%(source)s\nand\n%(destination)s") % { 'source': self.controller.get_title(source),
-                                                                                                                                               'destination': self.controller.get_title(dest)},
-                                         members=[ (r, self.controller.get_title(r)) for r in relationtypes],
-                                         controller=self.controller)
-        if rt is not None:
-            # Get the id from the idgenerator
-            p=self.controller.package
-            id_=self.controller.package._idgenerator.get_id(Relation)
-            relation=p.createRelation(ident=id_,
-                                     members=(source, dest),
-                                     type=rt)
-            p.relations.append(relation)
-            self.controller.notify("RelationCreate", relation=relation)
         return True
 
     def annotation_button_press_cb(self, widget, event, annotation):
