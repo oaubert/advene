@@ -37,6 +37,8 @@ def png_to_pixbuf (png_data, width=None, height=None):
     """Load PNG data into a pixbuf
     """
     loader = gtk.gdk.PixbufLoader ('png')
+    if not isinstance(png_data, str):
+        png_data=str(png_data)
     loader.write (png_data, len (png_data))
     pixbuf = loader.get_pixbuf ()
     loader.close ()
