@@ -140,17 +140,27 @@ class InteractiveQuery:
                     'number': len(res)}
             v.add(gtk.Label(t))
 
+            highlight_label=_("Highlight annotations")
+            def toggle_highlight(b, annotation_list):
+                if b.get_label() == highlight_label:
+                    event="AnnotationActivate"
+                    label= _("Unhighlight annotations")
+                else:
+                    event="AnnotationDeactivate"
+                    label= highlight_label
+                b.set_label(label)
+                for a in annotation_list:
+                    self.controller.notify(event, annotation=a)
+                return True
+
             hb=gtk.VButtonBox()
             v.pack_start(hb)
-            if cl:
+            if l:
                 b=gtk.Button(_("Display annotations in timeline"))
                 b.connect('clicked', lambda b: self.open_in_timeline(l))
                 hb.add(b)
-                b=gtk.Button(_("Highlight annotations"))
-                b.connect('clicked', lambda b: self.highlight_annotations(l))
-                hb.add(b)
-                b=gtk.Button(_("Unhighlight annotations"))
-                b.connect('clicked', lambda b: self.unhighlight_annotations(l))
+                b=gtk.Button(highlight_label)
+                b.connect('clicked', toggle_highlight, l)
                 hb.add(b)
             b=gtk.Button(_("Edit elements"))
             b.connect('clicked', lambda b: self.open_in_edit_accumulator(res))
@@ -163,6 +173,7 @@ class InteractiveQuery:
             hb.add(b)
             
             w.show_all()
+            advene.gui.util.center_on_mouse(w)
         else:
             advene.gui.util.message_dialog(_("Result:\n%s") % unicode(res))
         return True
@@ -173,16 +184,6 @@ class InteractiveQuery:
                       controller=self.controller)
         window=t.popup()
         window.set_title(_("Results of _interactive query"))
-        return True
-
-    def highlight_annotations(self, l):
-        for a in l:
-            self.controller.notify("AnnotationActivate", annotation=a)
-        return True
-
-    def unhighlight_annotations(self, l):
-        for a in l:
-            self.controller.notify("AnnotationDeactivate", annotation=a)
         return True
 
     def open_in_edit_accumulator(self, l):
