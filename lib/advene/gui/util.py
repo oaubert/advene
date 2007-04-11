@@ -192,7 +192,6 @@ def yes_no_cancel_popup(title=None,
                    buttons=( gtk.STOCK_YES, gtk.RESPONSE_YES,
                              gtk.STOCK_NO, gtk.RESPONSE_NO,
                              gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
-    d.set_position(gtk.WIN_POS_CENTER_ALWAYS)
     hb=gtk.HBox()
     hb.show()
     d.vbox.add(hb)
