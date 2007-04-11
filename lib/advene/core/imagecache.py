@@ -23,7 +23,7 @@ import advene.core.config as config
 
 import os
 
-class CachedString(str):
+class CachedString:
     """String cached in a file.
     """
     def __init__(self, filename):
@@ -225,9 +225,14 @@ class ImageCache(dict):
             else:
                 os.mkdir (d)
 
-        for k in self.valid_snapshots():
+        for k in self.iterkey():
+            i=dict.__getitem__(self, k)
+            if i == self.not_yet_available_image:
+                continue
+            if isinstance(i, CachedString):
+                continue
             f = open(os.path.join (d, "%010d.png" % k), 'wb')
-            f.write (dict.__getitem__(self, k))
+            f.write (i)
             f.close ()
 
         self._modified=False
