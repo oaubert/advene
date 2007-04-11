@@ -86,7 +86,11 @@ class InteractiveQuery:
         if not self.advanced.get_expanded():
             # The advanced query is not shown. Use the self.entry
             s=self.entry.get_text()
-            res=[ a for a in self.controller.package.annotations if s in a.content.data ]
+            if self.ignorecase.get_active():
+                s=s.lower()
+                res=[ a for a in self.controller.package.annotations if s in a.content.data.lower() ]
+            else:
+                res=[ a for a in self.controller.package.annotations if s in a.content.data ]
         else:
             # Get the query
             l=self.eq.invalid_items()
@@ -250,6 +254,10 @@ class InteractiveQuery:
 
         self.entry=gtk.Entry()
         vbox.pack_start(self.entry, expand=False)
+
+        self.ignorecase=gtk.CheckButton(_("Ignore case"))
+        self.ignorecase.set_active(True)
+        vbox.pack_start(self.ignorecase, expand=False)
         
         self.advanced = gtk.Expander ()
         self.advanced.set_label (_("Advanced search"))
@@ -295,5 +303,7 @@ class InteractiveQuery:
         window.show_all()
         self.entry.grab_focus()
         self.window=window
+        advene.gui.util.center_on_mouse(window)
+
         return window
 
