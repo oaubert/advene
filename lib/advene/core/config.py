@@ -200,6 +200,7 @@ class Config(object):
 	    # Default adhoc views to open.
 	    # Syntax: timeline:tree:transcribe
 	    'adhoc-south': '',
+	    'adhoc-west': '',
 	    'adhoc-east': '',
 	    'adhoc-popup': '',
             'display-scroller': False,
