@@ -505,26 +505,14 @@ class AdveneGUI (Connect):
                     self.visual_id=self.drawable.window.xid
                 self.controller.player.set_visual(self.visual_id)
         except Exception, e:
-            print "Cannot set visual: %s" % str(e)
-            self.displayhbox.destroy()
-
-            tree = advene.gui.views.tree.TreeWidget(self.controller.package,
-                                                    controller=self.controller)
-            tree.get_widget().show_all()
-            self.register_view (tree)
-            sw = gtk.ScrolledWindow ()
-            sw.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-
-            sw.add (tree.get_widget())
-            self.gui.get_widget("displayvbox").add(sw)
-            sw.show_all()
+            self.log("Cannot set visual: %s" % unicode(e))
 
         # Populate the file history menu
         for filename in config.data.preferences['history']:
             self.append_file_history_menu(filename)
 
         # Open the default adhoc popup views
-        for dest in ('popup', 'east', 'south'):
+        for dest in ('popup', 'west', 'east', 'south'):
             for n in config.data.preferences['adhoc-%s' % dest].split(':'):
                 try:
                     v=self.open_adhoc_view(n, destination=dest)
@@ -559,6 +547,7 @@ class AdveneGUI (Connect):
 
         It consists in the embedded video window plus the various views.
         """
+        self.viewbook={}
         vis=gtk.VPaned()
 
         if config.data.os == 'win32':
@@ -583,12 +572,6 @@ class AdveneGUI (Connect):
         self.drawable.set_size_request(320,200)
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
         self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
-
-        # This pane will be used to embed views on the right-side of
-        # the video output
-        hpane=gtk.HPaned()
-
-        self.displayhbox=gtk.HPaned()
 
         self.player_toolbar=self.get_player_control_toolbar()
 
@@ -670,45 +653,42 @@ class AdveneGUI (Connect):
         v.pack_start(self.player_toolbar, expand=False)
         v.pack_start(hb, expand=False)
 
-        self.displayhbox.pack1(v, shrink=False)
-        self.displayhbox.add2(hpane)
+        # create the viewbooks
+        for pos in ('east', 'west', 'south'):
+            self.viewbook[pos]=ViewBook(controller=self.controller)
 
-        vb1 = ViewBook(controller=self.controller)
-        vb2 = ViewBook(controller=self.controller)
+        hpane1=gtk.HPaned()
+        hpane2=gtk.HPaned()
 
-        self.east_viewbook = vb1
+        # pack all together
+        hpane1.add1(self.viewbook['west'].widget)
+        hpane1.add2(hpane2)
 
-        hpane.add1(vb1.widget)
-        hpane.add2(vb2.widget)
+        hpane2.pack1(v, shrink=False)
+        hpane2.add2(self.viewbook['east'].widget)
 
-        # First viewbook
-        vb1.add_view(self.logwindow, _("URL stack"), permanent=True)
-        # URL stack is embedded. The menu item is useless :
-        self.gui.get_widget('urlstack1').set_property('visible', False)
+        vis.add1(hpane1)
+        vis.add2(self.viewbook['south'].widget)
 
-        # Second viewbook
+        # Open default views:
+
+        # Navigation history
         self.navigation_history=HistoryNavigation(controller=self.controller, closable=True)
         # Navigation history is embedded. The menu item is useless :
         self.gui.get_widget('navigationhistory1').set_property('visible', False)
-        vb2.add_view(self.navigation_history, name=_("History"), permanent=True)
+        self.viewbook['west'].add_view(self.navigation_history, name=_("History"), permanent=True)
+        # Make the history snapshots + border visible
+        hpane1.set_position (self.navigation_history.options['snapshot_width'] + 20)
 
-        # We should be able to specify 80%/20% for instance, but the allocation
-        # is not available here. We have to wait for the main GUI window to
-        # appear
-        hpane.set_position (300)
+        # URL stack
+        self.viewbook['east'].add_view(self.logwindow, _("URL stack"), permanent=True)
+        # URL stack is embedded, the menu item is useless :
+        self.gui.get_widget('urlstack1').set_property('visible', False)
 
-        vis.add1(self.displayhbox)
-
-        self.viewbook=ViewBook(controller=self.controller)
-
-        self.south_viewbook = self.viewbook
-
-        vis.add2(self.viewbook.widget)
-
+        # Popup widget
         self.popupwidget=AccumulatorPopup(controller=self.controller,
                                           autohide=False)
-
-        self.viewbook.add_view(self.popupwidget, _("Popups"), permanent=True)
+        self.viewbook['south'].add_view(self.popupwidget, _("Popups"), permanent=True)
 
         vis.show_all()
 
@@ -1084,10 +1064,8 @@ class AdveneGUI (Connect):
             return view
         if destination == 'popup':
             view.popup()
-        elif destination == 'south':
-            self.south_viewbook.add_view(view)
-        elif destination == 'east':
-            self.east_viewbook.add_view(view)
+        elif destination in ('south', 'east', 'west'):
+            self.viewbook[destination].add_view(view)
         return view
 
     def open_url_embedded(self, url):
@@ -2091,7 +2069,7 @@ class AdveneGUI (Connect):
 
     def on_preferences1_activate (self, button=None, data=None):
         direct_options=('history-size-limit', 'scroll-increment',
-                        'adhoc-south', 'adhoc-east', 'adhoc-popup',
+                        'adhoc-south', 'adhoc-west', 'adhoc-east', 'adhoc-popup',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit')
         cache={
             'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
@@ -2134,8 +2112,9 @@ class AdveneGUI (Connect):
 Multiple views can be separated by :
 Available views: timeline, tree, browser, transcribe"""))
 
-        ew.add_entry(_("Below"), 'adhoc-south', _("Embedded below the video"))
-        ew.add_entry(_("Right"), 'adhoc-east', _("Embedded at the right of the video"))
+        ew.add_entry(_("South"), 'adhoc-south', _("Embedded below the video"))
+        ew.add_entry(_("West"), 'adhoc-west', _("Embedded at the left of the video"))
+        ew.add_entry(_("East"), 'adhoc-east', _("Embedded at the right of the video"))
         ew.add_entry(_("Popup"), 'adhoc-popup', _("In their own window"))
 
         ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
@@ -2336,7 +2315,6 @@ Available views: timeline, tree, browser, transcribe"""))
         return True
 
 if __name__ == '__main__':
-    import sys
     v = AdveneGUI ()
     try:
         v.main (config.data.args)
