@@ -581,10 +581,12 @@ def center_on_mouse(w):
     """Center the given gtk.Window on the mouse position.
     """
     d=gtk.gdk.device_get_core_pointer()
-    (x, y) = d.get_state(w.get_toplevel().get_root_window())[0]
+    root=w.get_toplevel().get_root_window()
+    (x, y) = d.get_state(root)[0]
     x, y = long(x), long(y)
 
     # Let's try to center the window on the mouse as much as possible.
     width, height=w.get_size()
-    w.move(max(0, x - width/2),
-           max(0, y - height/2))
+    rw, rh = root.get_size()
+    w.move( min( max(0, x - width/2), rw-width ),
+            min( max(0, y - height/2), rh-height) )
