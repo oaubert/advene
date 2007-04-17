@@ -97,7 +97,7 @@ import advene.gui.edit.imports
 import advene.gui.edit.properties
 from advene.gui.views.transcription import TranscriptionView
 from advene.gui.edit.transcribe import TranscriptionEdit
-from advene.gui.views.interactivequery import InteractiveQuery
+from advene.gui.views.interactivequery import InteractiveQuery, InteractiveResult
 from advene.gui.views.viewbook import ViewBook
 from advene.gui.views.html import HTMLView
 from advene.gui.views.scroller import ScrollerView
@@ -216,6 +216,17 @@ class AdveneGUI (Connect):
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
             hb.pack_start(b, expand=False)
+        hb.show_all()
+
+        # Generate the quick search entry
+        hb=self.gui.get_widget('search_hbox')
+        self.quicksearch_entry=gtk.Entry()
+        self.tooltips.set_tip(self.quicksearch_entry, _('String to search in the annotation contents'))
+        self.quicksearch_entry.connect('activate', self.do_quicksearch)
+        hb.pack_start(self.quicksearch_entry, expand=False)
+        b=gtk.Button(stock=gtk.STOCK_FIND)
+        b.connect('clicked', self.do_quicksearch)
+        hb.pack_start(b, expand=False)
         hb.show_all()
 
         # Player status
@@ -996,12 +1007,17 @@ class AdveneGUI (Connect):
         if name == 'treeview' or name == 'tree':
             view = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
+        elif name == 'interactivequeryview' or name == 'interactivequery':
+            view = InteractiveQuery(here=self.controller.package,
+                                    controller=self.controller, **kw)
+        elif name == 'interactiveresultview' or name == 'interactiveresult':
+            view = InteractiveResult(controller=self.controller, parameters=parameters, **kw)
         elif name == 'timeline' or name == 'timelineview':
-            view = advene.gui.views.timeline.TimeLine (l=None,
-                                                       controller=self.controller, 
-                                                       parameters=parameters)
+            view = advene.gui.views.timeline.TimeLine (controller=self.controller, 
+                                                       parameters=parameters, **kw)
         elif name == 'history' or name == 'historyview':
-            view=advene.gui.views.history.HistoryNavigation(self.controller, parameters=parameters)
+            view=advene.gui.views.history.HistoryNavigation(controller=self.controller, 
+                                                            parameters=parameters, **kw)
         elif name == 'tagbag' or name == 'tagbagview':
             tags=Set()
             if not parameters:
@@ -1062,6 +1078,7 @@ class AdveneGUI (Connect):
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
         if view is None:
             return view
+        view._destination=destination
         if destination == 'popup':
             view.popup()
         elif destination in ('south', 'east', 'west'):
@@ -1365,6 +1382,13 @@ class AdveneGUI (Connect):
             if sys.getcheckinterval() != i:
                 sys.setcheckinterval(i)
         
+        return True
+
+    def do_quicksearch(self, *p):
+        source=self.controller.package.annotations
+        s=self.quicksearch_entry.get_text().lower()
+        res=[ a for a in source if s in a.content.data.lower() ]
+        self.open_adhoc_view('interactiveresult', destination='east', result=res)
         return True
 
     def ask_for_annotation_type(self, text=None, create=False):
@@ -1723,9 +1747,7 @@ class AdveneGUI (Connect):
         return self.on_exit (button, data)
 
     def on_find1_activate (self, button=None, data=None):
-        iq = InteractiveQuery(here=self.controller.package,
-                              controller=self.controller)
-        iq.popup()
+        self.open_adhoc_view('interactivequery', 'east')
         return True
 
     def on_cut1_activate (self, button=None, data=None):
