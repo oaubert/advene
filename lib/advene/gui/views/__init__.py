@@ -62,7 +62,7 @@ class AdhocView(object):
 
         self.widget=self.build_widget()
 
-    def close(self):
+    def close(self, *p):
         if self.controller and self.controller.gui:
             self.controller.gui.unregister_view (self)
         self.widget.destroy()
