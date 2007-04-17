@@ -324,7 +324,10 @@ class TimeLine(AdhocView):
             # It is not just an update, do a full redraw
             self.minimum = 0
             oldmax=self.maximum
-            duration = package.getMetaData (config.data.namespace, "duration")
+            try:
+                duration = package.cached_duration
+            except:
+                duration=None
             if duration is not None:
                 self.maximum = long(duration)
             else:
