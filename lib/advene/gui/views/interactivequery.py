@@ -86,11 +86,15 @@ class InteractiveQuery:
         if not self.advanced.get_expanded():
             # The advanced query is not shown. Use the self.entry
             s=self.entry.get_text()
+            try:
+                source=self.here.annotations
+            except AttributeError:
+                source=self.controller.package.annotations
             if self.ignorecase.get_active():
                 s=s.lower()
-                res=[ a for a in self.controller.package.annotations if s in a.content.data.lower() ]
+                res=[ a for a in source if s in a.content.data.lower() ]
             else:
-                res=[ a for a in self.controller.package.annotations if s in a.content.data ]
+                res=[ a for a in source if s in a.content.data ]
         else:
             # Get the query
             l=self.eq.invalid_items()
@@ -261,7 +265,7 @@ class InteractiveQuery:
         vbox.pack_start(self.ignorecase, expand=False)
         
         self.advanced = gtk.Expander ()
-        self.advanced.set_label (_("Advanced search"))
+        self.advanced.set_label (_("Expert search"))
         self.advanced.set_expanded(False)
 
         vbox.add(self.advanced)
