@@ -158,8 +158,8 @@ class AdveneController:
 
         self.package = None
 
-        playerfactory=PlayerFactory()
-        self.player = playerfactory.get_player()
+        self.playerfactory=PlayerFactory()
+        self.player = self.playerfactory.get_player()
         self.player.get_default_media = self.get_default_media
         self.player_restarted = 0
 
