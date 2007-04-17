@@ -51,7 +51,7 @@ class TimeLine(AdhocView):
     If l is None, then use controller.package.annotations (and handle
     updates accordingly).
     """
-    def __init__ (self, l=None,
+    def __init__ (self, elements=None,
                   minimum=None,
                   maximum=None,
                   controller=None,
@@ -94,15 +94,15 @@ class TimeLine(AdhocView):
             if ats:
                 annotationtypes=ats
 
-        self.list = l
+        self.list = elements
         self.annotationtypes = annotationtypes
         self.tooltips = gtk.Tooltips ()
 
         self.current_marker = None
         # Now that self.list is initialized, we reuse the l variable
         # for various checks.
-        if l is None:
-            l = controller.package.annotations
+        if elements is None:
+            elements = controller.package.annotations
         # Initialize annotation types if needed
         if self.annotationtypes is None:
             if self.list is None:
@@ -119,7 +119,7 @@ class TimeLine(AdhocView):
             duration = controller.cached_duration
             if duration <= 0:
                 if controller.package.annotations:
-                    duration = max([a.fragment.end for a in l])
+                    duration = max([a.fragment.end for a in elements])
                 else:
                     duration = 0
             minimum=0
