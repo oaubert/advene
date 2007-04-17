@@ -287,12 +287,11 @@ class InteractiveResult(AdhocView):
 
     def open_in_timeline(self, l):
         self.controller.gui.open_adhoc_view('timeline', destination=self._destination, elements=l, minimum=0)
-        self.close()
         return True
 
     def open_in_edit_accumulator(self, l):
         if self.controller.gui.edit_accumulator:
-            a=self.controller.gui.edit_accumulator()
+            a=self.controller.gui.edit_accumulator
         else:
             a=EditAccumulator(controller=self.controller, scrollable=True)
 
@@ -303,7 +302,6 @@ class InteractiveResult(AdhocView):
             window=a.popup()
             window.set_title(_("Results of _interactive query"))
         
-        self.close()
         return True
 
     def open_in_evaluator(self, l):
@@ -339,6 +337,5 @@ class InteractiveResult(AdhocView):
         
         w.set_title(_("Results of _interactive query"))
         ev.set_expression('result')
-        self.close()
         return True
 
