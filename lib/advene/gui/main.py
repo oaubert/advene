@@ -523,7 +523,7 @@ class AdveneGUI (Connect):
             self.append_file_history_menu(filename)
 
         # Open the default adhoc popup views
-        for dest in ('popup', 'west', 'east', 'south'):
+        for dest in ('popup', 'west', 'east', 'south', 'fareast'):
             for n in config.data.preferences['adhoc-%s' % dest].split(':'):
                 try:
                     v=self.open_adhoc_view(n, destination=dest)
@@ -559,7 +559,9 @@ class AdveneGUI (Connect):
         It consists in the embedded video window plus the various views.
         """
         self.viewbook={}
-        vis=gtk.VPaned()
+        
+        vis=gtk.HPaned()
+        left=gtk.VPaned()
 
         if config.data.os == 'win32':
             # gtk.Socket is available on win32 only from gtk >= 2.8
@@ -665,7 +667,7 @@ class AdveneGUI (Connect):
         v.pack_start(hb, expand=False)
 
         # create the viewbooks
-        for pos in ('east', 'west', 'south'):
+        for pos in ('east', 'west', 'south', 'fareast'):
             self.viewbook[pos]=ViewBook(controller=self.controller)
 
         hpane1=gtk.HPaned()
@@ -678,8 +680,14 @@ class AdveneGUI (Connect):
         hpane2.pack1(v, shrink=False)
         hpane2.add2(self.viewbook['east'].widget)
 
-        vis.add1(hpane1)
-        vis.add2(self.viewbook['south'].widget)
+        left.add1(hpane1)
+        left.add2(self.viewbook['south'].widget)
+
+        vis.add1(left)
+        vis.add2(self.viewbook['fareast'].widget)
+        # Set position to a huge value to ensure that by default, the
+        # right pane is hidden
+        vis.set_position(5000)
 
         # Open default views:
 
@@ -981,7 +989,7 @@ class AdveneGUI (Connect):
     def open_adhoc_view(self, name, destination='popup', **kw):
         """Open the given adhoc view.
 
-        Destination can be: 'popup', 'south', 'east' or None
+        Destination can be: 'popup', 'south', 'east', 'fareast' or None
 
         If name is a 'view' object, then try to interpret it as a
         application/x-advene-adhoc-view and open the appropriate view
@@ -1081,7 +1089,7 @@ class AdveneGUI (Connect):
         view._destination=destination
         if destination == 'popup':
             view.popup()
-        elif destination in ('south', 'east', 'west'):
+        elif destination in ('south', 'east', 'west', 'fareast'):
             self.viewbook[destination].add_view(view)
         return view
 
@@ -2091,7 +2099,7 @@ class AdveneGUI (Connect):
 
     def on_preferences1_activate (self, button=None, data=None):
         direct_options=('history-size-limit', 'scroll-increment',
-                        'adhoc-south', 'adhoc-west', 'adhoc-east', 'adhoc-popup',
+                        'adhoc-south', 'adhoc-west', 'adhoc-east', 'adhoc-fareast', 'adhoc-popup',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit')
         cache={
             'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
@@ -2137,6 +2145,7 @@ Available views: timeline, tree, browser, transcribe"""))
         ew.add_entry(_("South"), 'adhoc-south', _("Embedded below the video"))
         ew.add_entry(_("West"), 'adhoc-west', _("Embedded at the left of the video"))
         ew.add_entry(_("East"), 'adhoc-east', _("Embedded at the right of the video"))
+        ew.add_entry(_("Right"), 'adhoc-fareast', _("Embedded at the right of the window"))
         ew.add_entry(_("Popup"), 'adhoc-popup', _("In their own window"))
 
         ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
@@ -2158,8 +2167,7 @@ Available views: timeline, tree, browser, transcribe"""))
         if res:
             for k in direct_options:
                 config.data.preferences[k] = cache[k]
-            for t in ('toolbar_fileop', 'toolbar_create'):
-                self.gui.get_widget(t).set_style(cache['toolbarstyle'])
+            self.gui.get_widget('toolbar_fileop').set_style(cache['toolbarstyle'])
             for k in ('font-size', 'button-height', 'interline-height'):
                 config.data.preferences['timeline'][k] = cache[k]
             for k in ('data', 'moviepath', 'plugins', 'imagecache', 'advene'):
