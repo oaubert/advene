@@ -23,9 +23,7 @@ import cgi
 # Advene part
 import advene.core.config as config
 
-from advene.model.package import Package
 from advene.model.schema import AnnotationType
-from advene.model.view import View
 from advene.model.annotation import Annotation, Relation
 from advene.model.fragment import MillisecondFragment
 from advene.gui.views import AdhocView
@@ -892,6 +890,44 @@ class TimeLine(AdhocView):
             print "Unknown target type for drop: %d" % targetType
         return True
 
+    def new_annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
+        if targetType == config.data.target_type['annotation']:
+            source_uri=selection.data
+            source=self.controller.package.annotations.get(source_uri)
+
+            # Create a type
+            dest=self.create_annotation_type()
+            if dest is None:
+                return True
+
+            # FIXME: Duplicated code from previous method. Should factorize.a
+            def move_annotation(*p):
+                if source.relations:
+                    advene.gui.util.message_dialog(_("Cannot delete the annotation : it has relations."),
+                                                   icon=gtk.MESSAGE_WARNING)
+                    return True
+
+                self.controller.transmute_annotation(source,
+                                                     dest,
+                                                     delete=True)
+                return True
+
+            # Popup a menu to propose the drop options
+            menu=gtk.Menu()
+            for (title, action) in ( 
+                (_("Copy annotation"), 
+                 lambda i: self.controller.transmute_annotation(source,
+                                                                dest,
+                                                                delete=False)),
+                (_("Move annotation"), move_annotation)
+                 ):
+                item=gtk.MenuItem(title)
+                item.connect('activate', action)
+                menu.append(item)
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        return True
+
     def layout_drag_received(self, widget, context, x, y, selection, targetType, time):
         """Handle the drop from an annotation to the layout.
         """
@@ -1694,6 +1730,27 @@ class TimeLine(AdhocView):
             width=max(width, a.width)
             height=max (height, self.layer_position[t] + 3 * self.button_height)
 
+        # Add the "New type" button at the end
+        b=gtk.Button()
+        l=gtk.Label()
+        l.set_markup("<span size='smaller' style='normal'>%s</span>" % _("New type"))
+        l.modify_font(self.annotation_type_font)
+        b.add(l)
+        self.tooltips.set_tip(b, _("Create a new annotation type"))
+        b.set_size_request(-1, self.button_height)
+        layout.put (b, 0, height - 2 * self.button_height + config.data.preferences['timeline']['interline-height'])
+        b.annotationtype=None
+        b.show()
+
+        b.connect("clicked", self.create_annotation_type)
+        # The button can receive drops (to create type and transmute annotations)
+        b.connect("drag_data_received", self.new_annotation_type_drag_received_cb)
+        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.drag_type['annotation'],
+                        gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+        
         layout.set_size (width, height)
         return
 
@@ -1724,37 +1781,9 @@ class TimeLine(AdhocView):
         hbox.set_homogeneous (False)
         vbox.pack_start (hbox, expand=False)
 
-
-        def trash_drag_received(widget, context, x, y, selection, targetType, time):
-            if targetType == config.data.target_type['annotation-type']:
-                source_uri=selection.data
-                source=self.controller.package.annotationTypes.get(source_uri)
-                if source in self.annotationtypes:
-                    self.annotationtypes.remove(source)
-                    self.update_model(partial_update=True)
-            else:
-                print "Unknown target type for drop: %d" % targetType
-            return True
-
         bbox=gtk.HBox()
         bbox.set_homogeneous (False)
         hbox.pack_start(bbox, expand=False)
-
-        b=gtk.Button(_("Displayed types"))
-        self.tooltips.set_tip(b, _("Drag an annotation type here to remove it from display.\nClick to edit all displayed types"))
-        b.connect("clicked", self.edit_annotation_types)
-        b.connect("drag_data_received", trash_drag_received)
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation-type'],
-                        gtk.gdk.ACTION_MOVE)
-        bbox.pack_start(b, expand=False)
-
-        b=gtk.Button(stock=gtk.STOCK_NEW)
-        self.tooltips.set_tip(b, _("Create a new annotation type."))
-        b.connect("clicked", self.create_annotation_type)
-        bbox.pack_start(b, expand=False, fill=False)
 
         def center_on_current_position(*p):
             if (self.controller.player.status == self.controller.player.PlayingStatus
@@ -1822,7 +1851,28 @@ class TimeLine(AdhocView):
     def get_toolbar(self):
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
-        radiogroup_ref=None
+
+        def trash_drag_received(widget, context, x, y, selection, targetType, time):
+            if targetType == config.data.target_type['annotation-type']:
+                source_uri=selection.data
+                source=self.controller.package.annotationTypes.get(source_uri)
+                if source in self.annotationtypes:
+                    self.annotationtypes.remove(source)
+                    self.update_model(partial_update=True)
+            else:
+                print "Unknown target type for drop: %d" % targetType
+            return True
+
+        b=gtk.ToolButton(stock_id=gtk.STOCK_SELECT_COLOR)
+        b.set_tooltip(self.tooltips, _("Drag an annotation type here to remove it from display.\nClick to edit all displayed types"))
+        b.connect("clicked", self.edit_annotation_types)
+        b.connect("drag_data_received", trash_drag_received)
+        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.drag_type['annotation-type'],
+                        gtk.gdk.ACTION_MOVE)
+        tb.insert(b, -1)
 
         def handle_toggle(b, option):
             self.options[option]=b.get_active()
@@ -2011,7 +2061,7 @@ class TimeLine(AdhocView):
                                   parent=sc,
                                   controller=self.controller)
             at=cr.popup(modal=True)
-        return True
+        return at
 
     def edit_preferences(self, *p):
         cache=dict(self.options)
