@@ -1855,19 +1855,32 @@ class TimeLine(AdhocView):
         tb.insert(b, -1)
 
         def zoom_change(combo):
-            self.fraction_adj.value=combo.get_current_element()
+            self.fraction_adj.set_value(combo.get_current_element())
             self.fraction_event (None)
             return True
+
+        def zoom(i, factor):
+            self.fraction_adj.set_value(self.fraction_adj.value * factor)
+            self.fraction_event (None)
+            return True
+
+        i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
+        i.connect('clicked', zoom, .7)
+        tb.insert(i, -1)
 
         combobox=advene.gui.util.list_selector_widget(members=[
                 ( f, "%3d%%" % long(100*f) ) 
                 for f in [ 
-                    (1.0 / n) for n in range(1, 10) 
+                    (1.0 / pow(1.5, n)) for n in range(0, 10) 
                     ] 
                 ],
                                                       callback=zoom_change)
         i=gtk.ToolItem()
         i.add(combobox)
+        tb.insert(i, -1)
+
+        i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
+        i.connect('clicked', zoom, 1.3)
         tb.insert(i, -1)
 
         for text, tooltip, icon, callback in ( 
