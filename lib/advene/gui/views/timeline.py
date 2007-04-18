@@ -1854,6 +1854,22 @@ class TimeLine(AdhocView):
         b=gtk.SeparatorToolItem()
         tb.insert(b, -1)
 
+        def zoom_change(combo):
+            self.fraction_adj.value=combo.get_current_element()
+            self.fraction_event (None)
+            return True
+
+        combobox=advene.gui.util.list_selector_widget(members=[
+                ( f, "%3d%%" % long(100*f) ) 
+                for f in [ 
+                    (1.0 / n) for n in range(1, 10) 
+                    ] 
+                ],
+                                                      callback=zoom_change)
+        i=gtk.ToolItem()
+        i.add(combobox)
+        tb.insert(i, -1)
+
         for text, tooltip, icon, callback in ( 
             (_("Preferences"), _("Preferences"), 
              gtk.STOCK_PREFERENCES, self.edit_preferences), ):
