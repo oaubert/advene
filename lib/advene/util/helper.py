@@ -22,9 +22,10 @@ import time
 import StringIO
 import inspect
 import md5
-import sre
+import re
 import zipfile
 import urllib
+import unicodedata
 
 try:
     import Image
@@ -179,6 +180,30 @@ def package2id (p):
     else:
         return "undefined"
 
+normalized_re=re.compile(r'LATIN (SMALL|CAPITAL) LETTER (\w)')
+valid_re=re.compile(r'[a-zA-Z0-9_]')
+
+def title2id(t):
+    """Convert a unicode title to a valid id.
+
+    It will replace spaces by underscores, accented chars by their
+    accented equivalent, and other characters by -
+    """
+    (text, count)=re.subn(r'\s', '_', t)
+    res=[]
+    for c in text:
+        if not valid_re.match(c):
+            # Try to normalize
+            m=normalized_re.search(unicodedata.name(c))
+            if m:
+                c=m.group(2)
+                if m.group(1) == 'SMALL':
+                    c=c.lower()
+            else:
+                c='_'
+        res.append(c)
+    return "".join(res)
+
 def format_time (val=0):
     """Formats a value (in milliseconds) into a time string.
 
@@ -193,8 +218,8 @@ def format_time (val=0):
     # Format: HH:MM:SS.mmm
     return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
 
-small_time_regexp=sre.compile('(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
-time_regexp=sre.compile('(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
+small_time_regexp=re.compile('(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
+time_regexp=re.compile('(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)[.,]?(?P<ms>\d+)?$')
 def convert_time(s):
     """Convert a time string as long.
 
@@ -289,7 +314,7 @@ def get_title(controller, element, representation=None):
             return r
 
         expr=element.type.getMetaData(config.data.namespace, "representation")
-        if expr is None or expr == '' or sre.match('^\s+', expr):
+        if expr is None or expr == '' or re.match('^\s+', expr):
             r=element.content.data
             if not r:
                 r=element.id
@@ -547,10 +572,10 @@ root_elements = ('here', 'nothing', 'default', 'options', 'repeat', 'request',
                  )
 
 # Path elements followed by any syntax
-path_any_re = sre.compile('^(string|python):')
+path_any_re = re.compile('^(string|python):')
 
 # Path elements followed by a TALES expression
-path_tales_re = sre.compile('^(exists|not|nocall):(.+)')
+path_tales_re = re.compile('^(exists|not|nocall):(.+)')
 
 def is_valid_tales(expr):
         """Return True if the expression looks like a valid TALES expression
@@ -585,7 +610,7 @@ def get_video_stream_from_website(url):
         data=[ l for l in u.readlines() if '.addVariable' in l and 'flv' in l ]
         u.close()
         if data:
-            addr=sre.findall('\"(http.+?)\"', data[0])
+            addr=re.findall('\"(http.+?)\"', data[0])
             if addr:
                 stream=urllib.unquote(addr[0])
     elif 'youtube.com' in url:
@@ -595,7 +620,7 @@ def get_video_stream_from_website(url):
         data=[ l for l in u.readlines() if 'player2.swf' in l ]
         u.close()
         if data:
-            addr=sre.findall('(video_id=.+?)\"', data[0])
+            addr=re.findall('(video_id=.+?)\"', data[0])
             if addr:
                 stream='http://www.youtube.com/get_video?' + addr[0].strip()
     elif 'video.google.com' in url:
@@ -605,7 +630,7 @@ def get_video_stream_from_website(url):
         data=[ l for l in u.readlines() if '.gvp' in l ]
         u.close()
         if data:
-            addr=sre.findall('http://.+?.gvp\?docid=.\d+', data[0])
+            addr=re.findall('http://.+?.gvp\?docid=.\d+', data[0])
             if addr:
                 u=urllib.urlopen(addr[0])
                 data=[ l for l in u.readlines() if 'url:' in l ]
