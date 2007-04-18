@@ -202,6 +202,7 @@ class Config(object):
 	    'adhoc-south': '',
 	    'adhoc-west': '',
 	    'adhoc-east': '',
+	    'adhoc-fareast': '',
 	    'adhoc-popup': '',
             'display-scroller': False,
             'display-caption': False,
