@@ -691,6 +691,11 @@ class AdveneGUI (Connect):
 
         # Open default views:
 
+        # URL stack
+        self.viewbook['west'].add_view(self.logwindow, _("URL stack"), permanent=True)
+        # URL stack is embedded, the menu item is useless :
+        self.gui.get_widget('urlstack1').set_property('visible', False)
+
         # Navigation history
         self.navigation_history=HistoryNavigation(controller=self.controller, closable=True)
         # Navigation history is embedded. The menu item is useless :
@@ -699,15 +704,10 @@ class AdveneGUI (Connect):
         # Make the history snapshots + border visible
         hpane1.set_position (self.navigation_history.options['snapshot_width'] + 20)
 
-        # URL stack
-        self.viewbook['east'].add_view(self.logwindow, _("URL stack"), permanent=True)
-        # URL stack is embedded, the menu item is useless :
-        self.gui.get_widget('urlstack1').set_property('visible', False)
-
         # Popup widget
         self.popupwidget=AccumulatorPopup(controller=self.controller,
                                           autohide=False)
-        self.viewbook['south'].add_view(self.popupwidget, _("Popups"), permanent=True)
+        self.viewbook['east'].add_view(self.popupwidget, _("Popups"), permanent=True)
 
         vis.show_all()
 
