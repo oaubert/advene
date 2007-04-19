@@ -645,7 +645,7 @@ class AdveneGUI (Connect):
         adj = gtk.Adjustment(0, 0, 100, 1, 1, 10)
         self.gui.slider = gtk.HScale(adj)
         self.gui.slider.set_draw_value(True)
-        self.gui.slider.set_value_pos(gtk.POS_BOTTOM)
+        self.gui.slider.set_value_pos(gtk.POS_LEFT)
         self.gui.slider.connect ("format-value", self.format_slider_value)
         self.gui.slider.connect ("button-press-event", self.on_slider_button_press_event)
         self.gui.slider.connect ("button-release-event", self.on_slider_button_release_event)
