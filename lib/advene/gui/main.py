@@ -224,9 +224,10 @@ class AdveneGUI (Connect):
         self.tooltips.set_tip(self.quicksearch_entry, _('String to search in the annotation contents'))
         self.quicksearch_entry.connect('activate', self.do_quicksearch)
         hb.pack_start(self.quicksearch_entry, expand=False)
-        b=gtk.Button(stock=gtk.STOCK_FIND)
+        b=gtk.Button()
+        b.add(gtk.image_new_from_stock(gtk.STOCK_FIND, gtk.ICON_SIZE_SMALL_TOOLBAR))
         b.connect('clicked', self.do_quicksearch)
-        hb.pack_start(b, expand=False)
+        hb.pack_start(b, expand=False, fill=False)
         hb.show_all()
 
         # Player status
