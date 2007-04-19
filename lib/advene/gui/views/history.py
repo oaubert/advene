@@ -189,7 +189,8 @@ class HistoryNavigation(AdhocView):
 
         v.add(sw)
 
-        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b=advene.gui.util.get_small_stock_button(gtk.STOCK_DELETE)
+                                                 
         self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
