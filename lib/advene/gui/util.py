@@ -590,3 +590,11 @@ def center_on_mouse(w):
     rw, rh = root.get_size()
     w.move( min( max(0, x - width/2), rw-width ),
             min( max(0, y - height/2), rh-height) )
+
+def get_small_stock_button(sid, callback=None):
+    b=gtk.Button()
+    b.add(gtk.image_new_from_stock(sid, gtk.ICON_SIZE_SMALL_TOOLBAR))
+    if callback:
+        b.connect('clicked', callback)
+    return b
+
