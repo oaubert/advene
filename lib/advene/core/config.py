@@ -199,9 +199,9 @@ class Config(object):
 	    'path': {},
 	    # Default adhoc views to open.
 	    # Syntax: timeline:tree:transcribe
-	    'adhoc-south': '',
+	    'adhoc-south': 'timeline',
 	    'adhoc-west': '',
-	    'adhoc-east': '',
+	    'adhoc-east': 'tree',
 	    'adhoc-fareast': '',
 	    'adhoc-popup': '',
             'display-scroller': False,
