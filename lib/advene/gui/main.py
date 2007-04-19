@@ -533,6 +533,9 @@ class AdveneGUI (Connect):
                             'destination': dest,
                             'error': unicode(e)})
 
+        # Use small toolbar button everywhere
+        gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
+
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
         gobject.timeout_add (100, self.update_display)
