@@ -1801,8 +1801,6 @@ class TimeLine(AdhocView):
         b.connect("clicked", center_on_current_position)
         hbox.pack_start(b, expand=False, fill=False)
 
-        hbox.pack_start (self.autoscroll_choice, expand=False)
-
         hbox.set_homogeneous (False)
         vbox.set_homogeneous (False)
 
@@ -1901,8 +1899,7 @@ class TimeLine(AdhocView):
         self.display_tooltips_toggle.set_active(True)
         tb.insert(self.display_tooltips_toggle, -1)
 
-        b=gtk.SeparatorToolItem()
-        tb.insert(b, -1)
+        tb.insert(gtk.SeparatorToolItem(), -1)
 
         def zoom_change(combo):
             self.fraction_adj.set_value(combo.get_current_element())
@@ -1915,7 +1912,7 @@ class TimeLine(AdhocView):
             return True
 
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
-        i.connect('clicked', zoom, .7)
+        i.connect('clicked', zoom, 1.3)
         tb.insert(i, -1)
 
         combobox=advene.gui.util.list_selector_widget(members=[
@@ -1930,7 +1927,13 @@ class TimeLine(AdhocView):
         tb.insert(i, -1)
 
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
-        i.connect('clicked', zoom, 1.3)
+        i.connect('clicked', zoom, .7)
+        tb.insert(i, -1)
+
+        tb.insert(gtk.SeparatorToolItem(), -1)
+
+        i=gtk.ToolItem()
+        i.add(self.autoscroll_choice)
         tb.insert(i, -1)
 
         for text, tooltip, icon, callback in ( 
