@@ -25,6 +25,7 @@ import gtk
 from gettext import gettext as _
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
+import advene.gui.util
 
 class ViewBook(AdhocView):
     """Notebook containing multiple views
@@ -97,8 +98,20 @@ class ViewBook(AdhocView):
         l=gtk.Label(name)
         e.add(l)
         e.connect("button_press_event", popup_menu, v)
-        e.show_all()
-        self.widget.append_page(v.widget, e)
+
+        hb=gtk.HBox()
+        hb.pack_start(e, expand=False, fill=False)
+
+        if not permanent:
+            b=gtk.Button()
+            i=gtk.Image()
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'small_close.png') ))
+            b.add(i)        
+            b.connect('clicked', close_view, v)
+            hb.pack_start(b, expand=False, fill=False)
+        hb.show_all()
+
+        self.widget.append_page(v.widget, hb)
         v.widget.show_all()
         # Hide the player toolbar when the view is embedded
         try:
@@ -139,7 +152,7 @@ class ViewBook(AdhocView):
 
     def build_widget(self):
         notebook=gtk.Notebook()
-        notebook.set_tab_pos(gtk.POS_BOTTOM)
+        notebook.set_tab_pos(gtk.POS_TOP)
         notebook.popup_disable()
         notebook.set_scrollable(True)
 
