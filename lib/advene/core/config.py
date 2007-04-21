@@ -178,7 +178,7 @@ class Config(object):
                             'transcriptionview': (640, 480),
                             'transcribeview': (640, 480),
                             'historyview': (640, 480),
-                            'urlstackview': (640, 480),
+                            'linksview': (640, 480),
                             'treeview': (800, 600),
                             'browserview': (800, 600),
 			    'weblogview': (800, 600),

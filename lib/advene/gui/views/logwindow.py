@@ -36,8 +36,8 @@ import advene.rules.elements
 
 class LogWindow(AdhocView):
     def __init__ (self, controller=None):
-        self.view_name = _("URL stack")
-        self.view_id = 'urlstackview'
+        self.view_name = _("Links")
+        self.view_id = 'linksview'
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Clear"), self.clear_data),
