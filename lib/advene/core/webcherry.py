@@ -1192,7 +1192,10 @@ class Packages(Common):
                     pass
             try:
                 res.append( self.start_html(mimetype=mimetype) )
-                res.append (unicode(objet).encode('utf-8'))
+                if mimetype.startswith('text'):
+                    res.append (unicode(objet).encode('utf-8'))
+                else:
+                    res.append(str(objet))
             except AdveneException, e:
                 res.append(_("<h1>Error</h1>"))
                 res.append(_("""<p>There was an error.</p>
