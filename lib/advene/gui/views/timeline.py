@@ -60,6 +60,7 @@ class TimeLine(AdhocView):
          displayed in the window. It thus depends on both the
          self.ratio_adj and the widget size.
 
+    and a 3rd one which controls the displayed area.
     """
     def __init__ (self, elements=None,
                   minimum=None,
@@ -794,6 +795,9 @@ class TimeLine(AdhocView):
             source_uri=selection.data
             source=self.controller.package.annotations.get(source_uri)
             dest=widget.annotation
+
+            if source == dest:
+                return True
 
             # Popup a menu to propose the drop options
             menu=gtk.Menu()
@@ -1544,6 +1548,13 @@ class TimeLine(AdhocView):
         """
         u2p = self.unit2pixel
         a = self.adjustment
+
+        # Get the current middle position in percent
+        try:
+            curpos=(a.value - a.lower) * 1.0 / (a.upper - a.lower)
+        except ZeroDivisionError:
+            curpos=0
+
         width = self.maximum - self.minimum
 
         #a.value=u2p(minimum)
@@ -1554,6 +1565,7 @@ class TimeLine(AdhocView):
         a.page_size=float(self.layout.get_size()[0])
         #print "Update: from %.2f to %.2f" % (a.lower, a.upper)
         a.changed ()
+        a.value = curpos * (a.upper - a.lower) + a.lower
 
     def ratio_event (self, widget=None, data=None):
         self.update_adjustment ()
@@ -1909,6 +1921,10 @@ class TimeLine(AdhocView):
         i.connect('clicked', zoom, 1.3)
         tb.insert(i, -1)
         
+        i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
+        i.connect('clicked', zoom, .7)
+        tb.insert(i, -1)
+
         self.zoom_combobox=advene.gui.util.list_selector_widget(members=[
                 ( f, "%d%%" % long(100*f) ) 
                 for f in [ 
@@ -1917,14 +1933,10 @@ class TimeLine(AdhocView):
                 ],
                                                                 entry=True,
                                                                 callback=zoom_change)
-        self.zoom_combobox.child.connect('activate', zoom_change)
+        self.zoom_combobox.child.connect('activate', zoom_entry)
         self.zoom_combobox.child.set_width_chars(4)
         i=gtk.ToolItem()
         i.add(self.zoom_combobox)
-        tb.insert(i, -1)
-
-        i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
-        i.connect('clicked', zoom, .7)
         tb.insert(i, -1)
 
         tb.insert(gtk.SeparatorToolItem(), -1)
