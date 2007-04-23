@@ -194,7 +194,7 @@ def title2id(t):
     for c in text:
         if not valid_re.match(c):
             # Try to normalize
-            m=normalized_re.search(unicodedata.name(c))
+            m=normalized_re.search(unicodedata.name(unicode(c)))
             if m:
                 c=m.group(2)
                 if m.group(1) == 'SMALL':
