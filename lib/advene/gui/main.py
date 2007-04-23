@@ -593,7 +593,7 @@ class AdveneGUI (Connect):
 
         # Dynamic view selection
         hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_('D.view')), expand=False)
+        #hb.pack_start(gtk.Label(_('D.view')), expand=False)
         self.gui.stbv_combo = gtk.ComboBox()
         cell = gtk.CellRendererText()
         self.gui.stbv_combo.pack_start(cell, True)
@@ -655,6 +655,7 @@ class AdveneGUI (Connect):
 
         # Stack the video components
         v=gtk.VBox()
+        v.pack_start(hb, expand=False)
         v.pack_start(self.drawable, expand=True)
         if config.data.preferences['display-scroller']:
             self.scroller=ScrollerView(controller=self.controller)
@@ -667,7 +668,6 @@ class AdveneGUI (Connect):
             self.captionview=None
         v.pack_start(self.gui.slider, expand=False)
         v.pack_start(self.player_toolbar, expand=False)
-        v.pack_start(hb, expand=False)
 
         # create the viewbooks
         for pos in ('east', 'west', 'south', 'fareast'):
