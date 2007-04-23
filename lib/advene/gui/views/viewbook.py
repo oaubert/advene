@@ -106,7 +106,8 @@ class ViewBook(AdhocView):
             b=gtk.Button()
             i=gtk.Image()
             i.set_from_file(config.data.advenefile( ( 'pixmaps', 'small_close.png') ))
-            b.add(i)        
+            b.add(i)
+            b.set_relief(gtk.RELIEF_NONE)
             b.connect('clicked', close_view, v)
             hb.pack_start(b, expand=False, fill=False)
         hb.show_all()
@@ -136,7 +137,7 @@ class ViewBook(AdhocView):
                     self.log(_("Cannot find the view %s") % ident)
                     return True
                 name=v
-            
+
             if self.controller.gui:
                 view=self.controller.gui.open_adhoc_view(name, destination=None)
                 if view is not None:
