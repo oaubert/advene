@@ -92,28 +92,46 @@ def generate_list_model(elements, active_element=None):
 
 def list_selector_widget(members=None,
                          preselect=None,
+                         entry=False,
                          callback=None):
     """Generate a widget to pick an element from a list.
 
 
     @param members: list of couples (element, label)
     @type members: list
+    @param preselect: the element to preselect
+    @type preselect: object
+    @param entry: use a comboboxentry ?
+    @type entry: boolean
+    @param callback: a callback to call on value change
+    @type callback: method
     """
     store, i=generate_list_model(members,
                                  active_element=preselect)
 
-    combobox=gtk.ComboBox(store)
-    cell = gtk.CellRendererText()
-    combobox.pack_start(cell, True)
-    combobox.add_attribute(cell, 'text', 0)
+    if entry:
+        combobox=gtk.ComboBoxEntry(store, column=0)
+    else:
+        combobox=gtk.ComboBox(store)
+        cell = gtk.CellRendererText()
+        combobox.pack_start(cell, expand=True)
+        combobox.add_attribute(cell, 'text', 0)
+
     combobox.set_active(-1)
     if i is None:
         i = store.get_iter_first()
     if i is not None:
         combobox.set_active_iter(i)
 
-    def get_current_element(combo):
-        return combo.get_model().get_value(combo.get_active_iter(), 1)
+    if entry:
+        def get_current_element(combo):
+            try:
+                return combo.get_model().get_value(combo.get_active_iter(), 1)
+            except:
+                return combo.child.get_text()
+    else:
+        def get_current_element(combo):
+            return combo.get_model().get_value(combo.get_active_iter(), 1)
 
     # Bind the method to the combobox object
     combobox.get_current_element = get_current_element.__get__(combobox)
@@ -127,7 +145,8 @@ def list_selector(title=None,
                   text=None,
                   members=None,
                   controller=None,
-                  preselect=None):
+                  preselect=None,
+                  entry=False):
     """Pick an element from a list.
 
     members is a list of couples (element, label).
@@ -135,7 +154,8 @@ def list_selector(title=None,
     Return None if the action is cancelled.
     """
     combobox = list_selector_widget(members=members,
-                                    preselect=preselect)
+                                    preselect=preselect,
+                                    entry=entry)
 
     d = gtk.Dialog(title=title,
                    parent=None,
