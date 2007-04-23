@@ -189,8 +189,36 @@ class AdveneGUI (Connect):
                 return True
             return False
 
-        def open_view(widget, name):
-            self.open_adhoc_view(name)
+        def open_view(widget, name, destination='popup'):
+            self.open_adhoc_view(name, destination=destination)
+            return True
+
+        def open_view_menu(widget, name):
+            menu=gtk.Menu()
+
+            item = gtk.MenuItem(_("Open this view..."))
+            item.connect('activate', open_view, name, 'popup')
+            menu.append(item)
+        
+            item = gtk.MenuItem(_("...in its own window"))
+            item.connect('activate', open_view, name, 'popup')
+            menu.append(item)
+        
+            item = gtk.MenuItem(_("...embedded east of the video"))
+            item.connect('activate', open_view, name, 'east')
+            menu.append(item)
+        
+            item = gtk.MenuItem(_("...embedded west of the video"))
+            item.connect('activate', open_view, name, 'west')
+            menu.append(item)
+        
+            item = gtk.MenuItem(_("...embedded south at the video"))
+            item.connect('activate', open_view, name, 'south')
+            menu.append(item)
+        
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            
             return True
 
         # Generate the adhoc view buttons
@@ -212,7 +240,7 @@ class AdveneGUI (Connect):
             b.add(i)
             self.tooltips.set_tip(b, tip)
             b.connect("drag_data_get", adhoc_view_drag_sent, name)
-            b.connect("clicked", open_view, name)
+            b.connect("clicked", open_view_menu, name)
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
             hb.pack_start(b, expand=False)
