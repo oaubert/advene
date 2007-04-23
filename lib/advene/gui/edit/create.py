@@ -260,6 +260,7 @@ class CreateElementPopup(object):
                 el.date=self.get_date()
                 el.title=id_
                 el.mimetype=t.id
+                el.setMetaData(config.data.namespace, 'color', 'here/tag_color')
             self.parent.annotationTypes.append(el)
             self.controller.notify('AnnotationTypeCreate', annotationtype=el)
         elif self.type_ == RelationType:
