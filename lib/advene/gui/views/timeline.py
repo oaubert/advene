@@ -48,6 +48,18 @@ class TimeLine(AdhocView):
 
     If l is None, then use controller.package.annotations (and handle
     updates accordingly).
+
+    There are 2 adjustments used to adjust the display scale: 
+
+       * self.ratio_adj stores how many units does a pixel
+         represent. It is an absolute value (and generally integer:
+         given that units are milliseconds, we should not need to
+         display fractions of ms.
+
+       * self.fraction_adj stores the fraction of the whole stream
+         displayed in the window. It thus depends on both the
+         self.ratio_adj and the widget size.
+
     """
     def __init__ (self, elements=None,
                   minimum=None,
@@ -180,7 +192,7 @@ class TimeLine(AdhocView):
                                                 upper=36000,
                                                 step_incr=5,
                                                 page_incr=1000)
-        self.ratio_adjustment.connect ("changed", self.ratio_event)
+        self.ratio_adjustment.connect ("value-changed", self.ratio_event)
 
         # The same value in relative form
         self.fraction_adj = gtk.Adjustment (value=1.0,
@@ -188,8 +200,7 @@ class TimeLine(AdhocView):
                                             upper=1.0,
                                             step_incr=.01,
                                             page_incr=.02)
-        self.fraction_adj.connect ("changed", self.fraction_event)
-
+        self.fraction_adj.connect ("value-changed", self.fraction_event)
 
         self.layout_size=(None, None)
 
@@ -662,7 +673,6 @@ class TimeLine(AdhocView):
             if z < 0.05:
                 z=0.05
             self.fraction_adj.value=z
-            self.fraction_event ()
 
             # Center on annotation
             pos = self.unit2pixel (ann.fragment.begin)
@@ -806,20 +816,22 @@ class TimeLine(AdhocView):
                 menu.append(item)
                 item.set_submenu(sm)
 
-            for (title, action) in ( 
-                (_("Align both begin times"),
-                 lambda i: self.align_annotations(source, dest, 'begin-begin')),
-                (_("Align both end times"),
-                 lambda i: self.align_annotations(source, dest, 'end-end')),
-                (_("Align end time to selected begin time"),
-                 lambda i: self.align_annotations(source, dest, 'end-begin')),
-                (_("Align begin time to selected end time"),
-                 lambda i: self.align_annotations(source, dest, 'begin-end')),
-                (_("Align all times"),
-                 lambda i: self.align_annotations(source, dest, 'align')),
+            def align_annotations(item, s, d, m):
+                self.align_annotations(s, d, m)
+                return True
+
+            for (title, mode) in ( 
+                (_("Align both begin times"), 'begin-begin'),
+                (_("Align both end times"), 'end-end'),
+                (_("Align end time to selected begin time"), 'end-begin'),
+                (_("Align begin time to selected end time"), 'begin-end'),
+                (_("Align all times"), 'align'),
                 ):
-                item=gtk.MenuItem(title)
-                item.connect('activate', action)
+                item=gtk.ImageMenuItem(title)
+                im=gtk.Image()
+                im.set_from_file(config.data.advenefile( ( 'pixmaps', mode + '.png') ))
+                item.set_image(im)
+                item.connect('activate', align_annotations, source, dest, mode)
                 menu.append(item)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -1322,8 +1334,7 @@ class TimeLine(AdhocView):
         if f > 1.0:
             f = 1.0
         self.fraction_adj.value=f
-        self.fraction_event(widget=None)
-
+        
         # Center the view around the selected mark
         pos = self.unit2pixel (t) - ( w * rel )
         if pos < a.lower:
@@ -1394,7 +1405,6 @@ class TimeLine(AdhocView):
                 return False
         if event.keyval >= 49 and event.keyval <= 57:
             self.fraction_adj.value=1.0/pow(2, event.keyval-49)
-            self.fraction_event (widget=win)
             return True
         elif event.keyval == gtk.keysyms.p:
             # Play at the current position
@@ -1575,9 +1585,10 @@ class TimeLine(AdhocView):
         (w, h) = parent.get_size ()
 
         fraction=self.fraction_adj.value
+        #print "fraction event", fraction
+        self.zoom_combobox.child.set_text('%d%%' % long(100 * fraction))
         v = (self.maximum - self.minimum) / float(w) * fraction
         self.ratio_adjustment.set_value(v)
-        self.ratio_adjustment.changed()
         return True
 
     def layout_scroll_cb(self, widget=None, event=None):
@@ -1733,7 +1744,7 @@ class TimeLine(AdhocView):
         # Add the "New type" button at the end
         b=gtk.Button()
         l=gtk.Label()
-        l.set_markup("<span size='smaller' style='normal'>%s</span>" % _("New type"))
+        l.set_markup("<b><span style='normal'>%s</span></b>" % _("+"))
         l.modify_font(self.annotation_type_font)
         b.add(l)
         self.tooltips.set_tip(b, _("Create a new annotation type"))
@@ -1777,40 +1788,9 @@ class TimeLine(AdhocView):
 
         vbox.add (self.get_packed_widget())
 
-        hbox = gtk.HBox()
-        hbox.set_homogeneous (False)
-        vbox.pack_start (hbox, expand=False)
-
-        bbox=gtk.HBox()
-        bbox.set_homogeneous (False)
-        hbox.pack_start(bbox, expand=False)
-
-        def center_on_current_position(*p):
-            if (self.controller.player.status == self.controller.player.PlayingStatus
-                or self.controller.player.status == self.controller.player.PauseStatus):
-                self.center_on_position(self.current_position)
-            return True
-
-        s = gtk.HScale (self.fraction_adj)
-        s.set_digits(2)
-        s.connect ("value_changed", self.fraction_event)
-        hbox.add (s)
-
-        b=gtk.Button(_("Center"))
-        self.tooltips.set_tip(b, _("Center on current player position."))
-        b.connect("clicked", center_on_current_position)
-        hbox.pack_start(b, expand=False, fill=False)
-
-        hbox.set_homogeneous (False)
-        vbox.set_homogeneous (False)
-
-        height=max(self.layer_position.values() or (1,)) + 3 * self.button_height
-
         # Make sure that the timeline display is in sync with the
         # fraction widget value
         self.fraction_event (vbox)
-
-        setattr(vbox, 'buttonbox', hbox)
 
         return vbox
 
@@ -1901,29 +1881,46 @@ class TimeLine(AdhocView):
 
         tb.insert(gtk.SeparatorToolItem(), -1)
 
+        def zoom_entry(entry):
+            f=entry.get_text()
+            #print "zoom_entry", f
+
+            i=sre.findall(r'\d+', f)
+            if i:
+                f=int(i[0])/100.0
+            else:
+                return True
+            self.fraction_adj.set_value(f)
+            return True
+
         def zoom_change(combo):
-            self.fraction_adj.set_value(combo.get_current_element())
-            self.fraction_event (None)
+            v=combo.get_current_element()
+            #print "zoom_change", v
+            if isinstance(v, float):
+                self.fraction_adj.value=v
+            #zoom_entry(self.zoom_combobox.child)
             return True
 
         def zoom(i, factor):
             self.fraction_adj.set_value(self.fraction_adj.value * factor)
-            self.fraction_event (None)
             return True
 
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
         i.connect('clicked', zoom, 1.3)
         tb.insert(i, -1)
-
-        combobox=advene.gui.util.list_selector_widget(members=[
-                ( f, "%3d%%" % long(100*f) ) 
+        
+        self.zoom_combobox=advene.gui.util.list_selector_widget(members=[
+                ( f, "%d%%" % long(100*f) ) 
                 for f in [ 
                     (1.0 / pow(1.5, n)) for n in range(0, 10) 
                     ] 
                 ],
-                                                      callback=zoom_change)
+                                                                entry=True,
+                                                                callback=zoom_change)
+        self.zoom_combobox.child.connect('activate', zoom_change)
+        self.zoom_combobox.child.set_width_chars(4)
         i=gtk.ToolItem()
-        i.add(combobox)
+        i.add(self.zoom_combobox)
         tb.insert(i, -1)
 
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
@@ -1935,6 +1932,17 @@ class TimeLine(AdhocView):
         i=gtk.ToolItem()
         i.add(self.autoscroll_choice)
         tb.insert(i, -1)
+
+        def center_on_current_position(*p):
+            if (self.controller.player.status == self.controller.player.PlayingStatus
+                or self.controller.player.status == self.controller.player.PauseStatus):
+                self.center_on_position(self.current_position)
+            return True
+
+        b=gtk.ToolButton(stock_id=gtk.STOCK_JUSTIFY_CENTER)
+        b.set_tooltip(self.tooltips, _("Center on current player position."))
+        b.connect("clicked", center_on_current_position)
+        tb.insert(b, -1)
 
         for text, tooltip, icon, callback in ( 
             (_("Preferences"), _("Preferences"), 
