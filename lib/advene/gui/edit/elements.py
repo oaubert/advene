@@ -827,7 +827,7 @@ class EditForm(object):
                     i=element.id
                 except AttributeError:
                     i=str(element)
-                print "Messed up metadata for %s (%s)" % (i, expr)
+                #print "Messed up metadata for %s (%s)" % (i, expr)
                 expr=""
             return expr
         return get_method
