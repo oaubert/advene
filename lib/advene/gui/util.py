@@ -24,7 +24,6 @@ import gobject
 import sre
 import os
 import sys
-import StringIO
 
 import advene.core.config as config
 import advene.util.helper as helper
@@ -309,6 +308,89 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
     optionmenu.set_sensitive(editable)
     optionmenu.show_all()
     return optionmenu
+
+def title_id_dialog(title=_("Name the element"),
+                    element_title=None,
+                    element_id=None,
+                    text=_("Choose a name for the element"),
+                    flags=None):
+    if flags is None:
+        flags=gtk.DIALOG_DESTROY_WITH_PARENT
+    d = gtk.Dialog(title=title,
+                   parent=None,
+                   flags=flags,
+                   buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                             gtk.STOCK_OK, gtk.RESPONSE_OK,
+                             ))
+    if text:
+        l=gtk.Label(text)
+        l.show()
+        d.vbox.add(l)
+
+    hb=gtk.HBox()
+    l=gtk.Label(_("Title"))
+    hb.pack_start(l, expand=False)
+
+    title_entry=gtk.Entry()
+    title_entry.show()
+    if element_title:
+        title_entry.set_text(element_title)
+
+    hb.pack_start(title_entry)
+    d.vbox.pack_start(hb, expand=False)
+
+    hb=gtk.HBox()
+
+    l=gtk.Label(_("Id"))
+    hb.pack_start(l, expand=False)
+
+    id_entry=gtk.Entry()
+    id_entry.show()
+    if element_id:
+        id_entry.set_text(element_id)
+    hb.pack_start(id_entry)
+
+    def update_id(entry):
+        id_entry.set_text(helper.title2id(unicode(entry.get_text())))
+        return True
+
+    title_entry.connect("changed", update_id)
+
+    d.vbox.pack_start(hb, expand=False)
+
+    d.connect("key_press_event", dialog_keypressed_cb)
+
+    d.id_entry=id_entry
+    d.title_entry=title_entry
+    return d
+
+def get_title_id(title=_("Name the element"),
+                 element_title=None,
+                 element_id=None,
+                 text=_("Choose a name for the element")):
+    d = title_id_dialog(title=title,
+                        element_title=element_title,
+                        element_id=element_id,
+                        text=text)
+    d.show_all()
+    center_on_mouse(d)
+
+    res=d.run()
+    ret=None
+    if res == gtk.RESPONSE_OK:
+        try:
+            t=unicode(d.title_entry.get_text())
+            i=unicode(d.id_entry.get_text())
+        except ValueError:
+            t=None
+            i=None
+    else:
+        t=None
+        i=None
+
+    d.destroy()
+    
+    return t, i
 
 def get_filename(title=_("Open a file"),
                  action=gtk.FILE_CHOOSER_ACTION_OPEN,
