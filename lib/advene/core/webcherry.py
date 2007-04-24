@@ -1192,7 +1192,7 @@ class Packages(Common):
                     pass
             try:
                 res.append( self.start_html(mimetype=mimetype) )
-                if mimetype.startswith('text'):
+                if mimetype and mimetype.startswith('text'):
                     res.append (unicode(objet).encode('utf-8'))
                 else:
                     res.append(str(objet))
