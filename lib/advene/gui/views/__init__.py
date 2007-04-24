@@ -204,9 +204,11 @@ class AdhocView(object):
     def build_widget(self):
         return gtk.Label(self.view_name)
 
-    def popup(self):
+    def popup(self, label=None):
+        if label is None:
+            label=self.view_name
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_title (self.view_name)
+        window.set_title (label)
 
         w=self.get_widget()
 
