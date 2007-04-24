@@ -1121,13 +1121,12 @@ class AdveneGUI (Connect):
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
         if view is None:
             return view
-        if label is not None:
-            view.view_name = label
         view._destination=destination
         if destination == 'popup':
             view.popup()
         elif destination in ('south', 'east', 'west', 'fareast'):
-            self.viewbook[destination].add_view(view)
+            print name, label
+            self.viewbook[destination].add_view(view, name=label)
         return view
 
     def open_url_embedded(self, url):
@@ -1434,7 +1433,8 @@ class AdveneGUI (Connect):
         source=self.controller.package.annotations
         s=self.quicksearch_entry.get_text().lower()
         res=[ a for a in source if s in a.content.data.lower() ]
-        self.open_adhoc_view('interactiveresult', destination='east', result=res)
+        label=_("Search for %s") % s
+        self.open_adhoc_view('interactiveresult', destination='east', result=res, label=label, query=s)
         return True
 
     def ask_for_annotation_type(self, text=None, create=False):
