@@ -194,6 +194,7 @@ class TimeLine(AdhocView):
                                                 step_incr=5,
                                                 page_incr=1000)
         self.ratio_adjustment.connect ("value-changed", self.ratio_event)
+        self.ratio_adjustment.connect ("changed", self.ratio_event)
 
         # The same value in relative form
         self.fraction_adj = gtk.Adjustment (value=1.0,
@@ -202,6 +203,7 @@ class TimeLine(AdhocView):
                                             step_incr=.01,
                                             page_incr=.02)
         self.fraction_adj.connect ("value-changed", self.fraction_event)
+        self.fraction_adj.connect ("changed", self.fraction_event)
 
         self.layout_size=(None, None)
 
@@ -330,17 +332,21 @@ class TimeLine(AdhocView):
         if package is None:
             package = self.controller.package
 
+        self.adjustment.value=0
         if not partial_update:
             # It is not just an update, do a full redraw
-            self.minimum = 0
             oldmax=self.maximum
+            self.minimum=0
+            self.maximum=0
             try:
-                duration = package.cached_duration
+                duration=package.cached_duration
             except:
-                duration=None
-            if duration is not None:
+                duration=0
+            if duration:
                 self.maximum = long(duration)
-            else:
+
+            if not self.maximum:
+                # self.maximum == 0, so try to compute it
                 b,e=self.bounds()
                 self.maximum = e
             if self.maximum != oldmax:
@@ -357,17 +363,13 @@ class TimeLine(AdhocView):
                 # types for annotations present in the set
                 self.annotationtypes = list(sets.Set([ a.type for a in self.list ]))
 
-        def remove_widget(widget=None, layout=None):
-            layout.remove(widget)
-            return True
-
-        self.layout.foreach(remove_widget, self.layout)
+        self.layout.foreach(self.layout.remove)
         self.layer_position.clear()
         self.update_layer_position()
         self.populate()
         self.draw_marks()
         self.draw_current_mark()
-        self.legend.foreach(remove_widget, self.legend)
+        self.legend.foreach(self.legend.remove)
         self.update_legend_widget(self.legend)
         self.legend.show_all()
         self.fraction_event(widget=None)
@@ -642,11 +644,7 @@ class TimeLine(AdhocView):
             self.annotationtypes.append(annotationtype)
             self.update_model(partial_update=True)
         elif event == 'AnnotationTypeEditEnd':
-            def remove_widget(widget=None, layout=None):
-                layout.remove(widget)
-                return True
-
-            self.legend.foreach(remove_widget, self.legend)
+            self.legend.foreach(self.legend.remove, self.legend)
             self.update_legend_widget(self.legend)
             self.legend.show_all()
         elif event == 'AnnotationTypeDelete':
@@ -1549,12 +1547,6 @@ class TimeLine(AdhocView):
         u2p = self.unit2pixel
         a = self.adjustment
 
-        # Get the current middle position in percent
-        try:
-            curpos=(a.value - a.lower) * 1.0 / (a.upper - a.lower)
-        except ZeroDivisionError:
-            curpos=0
-
         width = self.maximum - self.minimum
 
         #a.value=u2p(minimum)
@@ -1565,7 +1557,6 @@ class TimeLine(AdhocView):
         a.page_size=float(self.layout.get_size()[0])
         #print "Update: from %.2f to %.2f" % (a.lower, a.upper)
         a.changed ()
-        a.value = curpos * (a.upper - a.lower) + a.lower
 
     def ratio_event (self, widget=None, data=None):
         self.update_adjustment ()
@@ -1749,9 +1740,15 @@ class TimeLine(AdhocView):
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['annotation-type'], gtk.gdk.ACTION_MOVE)
 
+            # Does not work for the first time, since the layout itself is not realized,
+            # thus its children cannot know their allocation.
             a=b.get_allocation()
             width=max(width, a.width)
             height=max (height, self.layer_position[t] + 3 * self.button_height)
+
+        # Resize all buttons to fit the largest
+        if width > 1:
+            layout.foreach(lambda b: b.set_size_request(width, -1))
 
         # Add the "New type" button at the end
         b=gtk.Button()
