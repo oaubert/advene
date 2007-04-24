@@ -134,6 +134,7 @@ class ViewBook(AdhocView):
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['adhoc-view']:
             name=selection.data
+            label=None
             # Parametered view. Get the view itself.
             if name.startswith('id:'):
                 ident=name[3:]
@@ -143,6 +144,7 @@ class ViewBook(AdhocView):
                     self.log(_("Cannot find the view %s") % ident)
                     return True
                 name=v
+                label=v.title
 
             if self.controller.gui:
                 view=self.controller.gui.open_adhoc_view(name, destination=None)
@@ -151,7 +153,7 @@ class ViewBook(AdhocView):
                         permanent=True
                     else:
                         permanent=False
-                    self.add_view(view, permanent=permanent)
+                    self.add_view(view, permanent=permanent, name=label)
                 else:
                     print "Cannot open", name
             return True
