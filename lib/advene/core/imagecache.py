@@ -225,7 +225,7 @@ class ImageCache(dict):
             else:
                 os.mkdir (d)
 
-        for k in self.iterkey():
+        for k in self.iterkeys():
             i=dict.__getitem__(self, k)
             if i == self.not_yet_available_image:
                 continue
