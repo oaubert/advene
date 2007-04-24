@@ -1784,7 +1784,8 @@ class AdveneGUI (Connect):
 
     def on_import_file1_activate (self, button=None, data=None):
         v=ExternalImporter(controller=self.controller)
-        v.popup()
+        w=v.popup()
+        advene.gui.util.center_on_mouse(w)
         return False
 
     def on_quit1_activate (self, button=None, data=None):
