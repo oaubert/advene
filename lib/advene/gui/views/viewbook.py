@@ -95,7 +95,13 @@ class ViewBook(AdhocView):
             return False
 
         e=gtk.EventBox()
-        l=gtk.Label(name)
+        if len(name) > 13:
+            shortname=unicode(name[:12]) + u'\u2026'
+        else:
+            shortname=name
+        l=gtk.Label(shortname)
+        if self.controller.gui:
+            self.controller.gui.tooltips.set_tip(e, name)
         e.add(l)
         e.connect("button_press_event", popup_menu, v)
 
