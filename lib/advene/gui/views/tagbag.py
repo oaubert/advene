@@ -209,8 +209,9 @@ class TagBag(AdhocView):
             v=gtk.HBox()
             mainbox=gtk.HBox()
 
+        mainbox.set_homogeneous(False)
         sw=gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_NEVER)
         sw.add_with_viewport(mainbox)
         self.mainbox=mainbox
 
@@ -251,6 +252,9 @@ class TagBag(AdhocView):
 
         v.add(sw)
 
+        hb=gtk.HButtonBox()
+        v.pack_start(hb, expand=False)
+
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
         self.controller.gui.tooltips.set_tip(b, _("Drop a tag here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -258,10 +262,11 @@ class TagBag(AdhocView):
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['tag'], gtk.gdk.ACTION_LINK)
         b.connect("drag_data_received", remove_drag_received)
-        v.pack_start(b, expand=False)
+        hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect("clicked", self.new_tag)
-        v.pack_start(b, expand=False)
+        hb.pack_start(b, expand=False)
 
+        v.buttonbox=hb
         return v
