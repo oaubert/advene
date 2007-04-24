@@ -194,6 +194,10 @@ class AdveneGUI (Connect):
             return True
 
         def open_view_menu(widget, name):
+            if name == 'webbrowser':
+                open_view(widget, name)
+                return True
+
             menu=gtk.Menu()
 
             item = gtk.MenuItem(_("Open this view..."))
@@ -1305,10 +1309,11 @@ class AdveneGUI (Connect):
                                                 'p': p,
                                                 'a': a,
                                                 'c': self.controller,
-                                                'self': self,
+                                                'gui': self,
                                                 'pp': pprint.pformat },
                                        historyfile=config.data.advenefile('evaluator.log', 'settings')
                                        )
+        ev.locals_['self']=ev
         w=ev.popup()
         b=gtk.Button(stock=gtk.STOCK_CLOSE)
 
