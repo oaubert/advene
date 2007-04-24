@@ -723,7 +723,7 @@ class AdveneGUI (Connect):
         # Open default views:
 
         # URL stack
-        self.viewbook['west'].add_view(self.logwindow, _("URL stack"), permanent=True)
+        self.viewbook['west'].add_view(self.logwindow, permanent=True)
         # URL stack is embedded, the menu item is useless :
         self.gui.get_widget('urlstack1').set_property('visible', False)
 
@@ -1017,7 +1017,7 @@ class AdveneGUI (Connect):
         menu.show_all()
         return menu
 
-    def open_adhoc_view(self, name, destination='popup', **kw):
+    def open_adhoc_view(self, name, label=None, destination='popup', **kw):
         """Open the given adhoc view.
 
         Destination can be: 'popup', 'south', 'east', 'fareast' or None
@@ -1117,6 +1117,8 @@ class AdveneGUI (Connect):
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
         if view is None:
             return view
+        if label is not None:
+            view.view_name = label
         view._destination=destination
         if destination == 'popup':
             view.popup()
