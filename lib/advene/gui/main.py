@@ -1040,6 +1040,8 @@ class AdveneGUI (Connect):
             p=AdhocViewParametersParser()
             p.parse_file(name.content.stream)
             if p.view_id:
+                if label is None:
+                    label=name.title
                 name=p.view_id
             else:
                 self.log(_("Cannot identify the adhoc view %s") % name.id)
@@ -1123,7 +1125,7 @@ class AdveneGUI (Connect):
             return view
         view._destination=destination
         if destination == 'popup':
-            view.popup()
+            view.popup(label=label)
         elif destination in ('south', 'east', 'west', 'fareast'):
             self.viewbook[destination].add_view(view, name=label)
         return view
