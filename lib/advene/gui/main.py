@@ -1125,7 +1125,6 @@ class AdveneGUI (Connect):
         if destination == 'popup':
             view.popup()
         elif destination in ('south', 'east', 'west', 'fareast'):
-            print name, label
             self.viewbook[destination].add_view(view, name=label)
         return view
 
@@ -1793,7 +1792,7 @@ class AdveneGUI (Connect):
         return self.on_exit (button, data)
 
     def on_find1_activate (self, button=None, data=None):
-        self.open_adhoc_view('interactivequery', 'east')
+        self.open_adhoc_view('interactivequery', destination='east')
         return True
 
     def on_cut1_activate (self, button=None, data=None):
