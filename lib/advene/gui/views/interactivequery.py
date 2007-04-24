@@ -102,6 +102,8 @@ class InteractiveQuery(AdhocView):
         if not self.advanced.get_expanded():
             # The advanced query is not shown. Use the self.entry
             s=self.entry.get_text()
+            query=s
+            label=_("Search for %s") % s
             try:
                 source=self.here.annotations
             except AttributeError:
@@ -118,10 +120,12 @@ class InteractiveQuery(AdhocView):
                 self.controller.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
                          % ", ".join(l))
                 return True
+            query=self
             self.eq.update_value()
             # Store the query itself in the _interactive query
             self.querycontainer.content.data = self.eq.model.xml_repr()
 
+            label=_("Expert search")
             c=self.controller.build_context(here=self.here)
             try:
                 res=c.evaluateValue("here/query/_interactive")
@@ -138,7 +142,8 @@ class InteractiveQuery(AdhocView):
         self.result=res
 
         # And display the result in the same viewbook or window
-        self.controller.gui.open_adhoc_view('interactiveresult', destination=self._destination, query=self)
+        self.controller.gui.open_adhoc_view('interactiveresult', destination=self._destination, 
+                                            label=label, query=query, result=res)
         return True
         
     def cancel(self, button=None):
@@ -215,9 +220,15 @@ class InteractiveResult(AdhocView):
             )
         self.controller=controller
         self.query=query
-        if result is None and query is not None:
+        if result is None and isinstance(query, InteractiveQuery):
             result=query.result
         self.result=result
+
+        if isinstance(self.query, InteractiveQuery):
+            self.label=_("Result of interactive query")
+        else:
+            # Must be a string
+            self.label=_("Search for %s") % self.query
 
         self.widget=self.build_widget()
 
@@ -225,7 +236,7 @@ class InteractiveResult(AdhocView):
         v=gtk.VBox()
             
         # FIXME: if self.query: edit query again
-        if self.query:
+        if self.query and isinstance(self.query, InteractiveQuery):
             b=gtk.Button(_("Edit query again"))
             b.connect('clicked', self.edit_query)
             v.pack_start(b, expand=False)
@@ -282,11 +293,11 @@ class InteractiveResult(AdhocView):
         return v
 
     def edit_query(self, *p):
-        
+        #FIXME
         return True
 
     def open_in_timeline(self, l):
-        self.controller.gui.open_adhoc_view('timeline', destination=self._destination, elements=l, minimum=0)
+        self.controller.gui.open_adhoc_view('timeline', label=self.label, destination=self._destination, elements=l, minimum=0)
         return True
 
     def open_in_edit_accumulator(self, l):
