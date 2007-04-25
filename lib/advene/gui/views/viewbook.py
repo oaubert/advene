@@ -53,6 +53,18 @@ class ViewBook(AdhocView):
         view.close()
         return True
 
+    def detach_view(self, view):
+        if view in self.permanent_widgets:
+            self.log(_("Cannot remove this widget, it is essential."))
+            return True
+        self.views.remove(view)
+        # Reference the widget so that it is not destroyed
+        wid=view.widget
+        view._destination='popup'
+        wid.get_parent().remove(wid)
+        view.popup()
+        return True
+
     def add_view(self, v, name=None, permanent=False):
         """Add a new view to the notebook.
 
@@ -72,9 +84,16 @@ class ViewBook(AdhocView):
             self.remove_view(view)
             return True
 
+        def detach_view(item, view):
+            self.detach_view(view)
+            return True
+
         def popup_menu(button, event, view):
             if event.button == 3:
                 menu = gtk.Menu()
+                item=gtk.MenuItem(_("Detach"))
+                item.connect('activate', detach_view, view)
+                menu.append(item)
 
                 if not permanent:
                     item = gtk.MenuItem(_("Close"))
