@@ -56,13 +56,9 @@ class ViewBook(AdhocView):
     def detach_view(self, view):
         if view in self.permanent_widgets:
             self.log(_("Cannot remove this widget, it is essential."))
-            return True
+            return False
         self.views.remove(view)
-        # Reference the widget so that it is not destroyed
-        wid=view.widget
-        view._destination='popup'
-        wid.get_parent().remove(wid)
-        view.popup()
+        view.widget.get_parent().remove(view.widget)
         return True
 
     def add_view(self, v, name=None, permanent=False):
@@ -89,13 +85,39 @@ class ViewBook(AdhocView):
             return True
 
         def popup_menu(button, event, view):
+
+            def relocate_view(item, v, d):
+                # Reference the widget so that it is not destroyed
+                wid=v.widget
+                if not self.detach_view(v):
+                    return True
+                if d == 'popup':
+                    # FIXME: get the label somewhere...
+                    v.popup()
+                elif d in ('south', 'east', 'west', 'fareast'):
+                    v._destination=d
+                    self.controller.gui.viewbook[d].add_view(v)
+                return True
+
             if event.button == 3:
                 menu = gtk.Menu()
-                item=gtk.MenuItem(_("Detach"))
-                item.connect('activate', detach_view, view)
-                menu.append(item)
-
                 if not permanent:
+                    # Relocation submenu
+                    submenu=gtk.Menu()
+
+                    for (label, destination) in (
+                        (_("...in its own window"), 'popup'),
+                        (_("...embedded east of the video"), 'east'),
+                        (_("...embedded west of the video"), 'west'),
+                        (_("...embedded south at the video"), 'south')):
+                        item = gtk.MenuItem(label)
+                        item.connect('activate', relocate_view,  view, destination)
+                        submenu.append(item)
+
+                    item=gtk.MenuItem(_("Detach"))
+                    item.set_submenu(submenu)
+                    menu.append(item)
+
                     item = gtk.MenuItem(_("Close"))
                     item.connect("activate", close_view, view)
                     menu.append(item)
