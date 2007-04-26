@@ -82,6 +82,7 @@ import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
 from advene.gui.views import AdhocViewParametersParser
 import advene.gui.views.timeline
+import advene.gui.views.table
 import advene.gui.views.logwindow
 from advene.gui.views.browser import Browser
 from advene.gui.views.history import HistoryNavigation
@@ -200,25 +201,16 @@ class AdveneGUI (Connect):
 
             menu=gtk.Menu()
 
-            item = gtk.MenuItem(_("Open this view..."))
-            item.connect('activate', open_view, name, 'popup')
-            menu.append(item)
-        
-            item = gtk.MenuItem(_("...in its own window"))
-            item.connect('activate', open_view, name, 'popup')
-            menu.append(item)
-        
-            item = gtk.MenuItem(_("...embedded east of the video"))
-            item.connect('activate', open_view, name, 'east')
-            menu.append(item)
-        
-            item = gtk.MenuItem(_("...embedded west of the video"))
-            item.connect('activate', open_view, name, 'west')
-            menu.append(item)
-        
-            item = gtk.MenuItem(_("...embedded south at the video"))
-            item.connect('activate', open_view, name, 'south')
-            menu.append(item)
+            for (label, destination) in (
+                (_("Open this view..."), 'popup'),
+                (_("...in its own window"), 'popup'),
+                (_("...embedded east of the video"), 'east'),
+                (_("...embedded west of the video"), 'west'),
+                (_("...embedded south at the video"), 'south'),
+                (_("...embedded at the right of the window"), 'fareast')):
+                item = gtk.MenuItem(label)
+                item.connect('activate', open_view, name, destination)
+                menu.append(item)
         
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -251,6 +243,32 @@ class AdveneGUI (Connect):
         hb.show_all()
 
         # Generate the quick search entry
+        def quicksearch_options(button, event):
+            if event.button != 3 or event.type != gtk.gdk.BUTTON_PRESS:
+                return False
+            menu=gtk.Menu()
+            item=gtk.CheckMenuItem(_("Ignore case"))
+            item.set_active(config.data.preferences['quicksearch-ignore-case'])
+            item.connect('toggled', lambda i: config.data.preferences.__setitem__('quicksearch-ignore-case', i.get_active()))
+            menu.append(item)
+            
+            item=gtk.MenuItem(_("Searched annotations"))
+            submenu=gtk.Menu()
+            l=[ (_("All annotations"), 
+                 None) ] + [
+                (_("Annotations of type %s") % self.controller.get_title(at),
+                 'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ]
+            for (label, expression) in l:
+                i=gtk.MenuItem(label)
+                i.connect('activate', lambda i, expr: config.data.preferences.__setitem__('quicksearch-source', expr), expression)
+                submenu.append(i)
+            item.set_submenu(submenu)
+            menu.append(item)
+
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            return True
+
         hb=self.gui.get_widget('search_hbox')
         self.quicksearch_entry=gtk.Entry()
         self.tooltips.set_tip(self.quicksearch_entry, _('String to search in the annotation contents'))
@@ -258,6 +276,7 @@ class AdveneGUI (Connect):
         hb.pack_start(self.quicksearch_entry, expand=False)
         b=advene.gui.util.get_small_stock_button(gtk.STOCK_FIND,
                                                  self.do_quicksearch)
+        b.connect('button-press-event', quicksearch_options)
         hb.pack_start(b, expand=False, fill=False)
         hb.show_all()
 
@@ -1060,6 +1079,9 @@ class AdveneGUI (Connect):
         elif name == 'timeline' or name == 'timelineview':
             view = advene.gui.views.timeline.TimeLine (controller=self.controller, 
                                                        parameters=parameters, **kw)
+        elif name == 'table' or name == 'tableview':
+            view = advene.gui.views.table.AnnotationTable (controller=self.controller, 
+                                                          parameters=parameters, **kw)
         elif name == 'history' or name == 'historyview':
             view=advene.gui.views.history.HistoryNavigation(controller=self.controller, 
                                                             parameters=parameters, **kw)
@@ -1123,7 +1145,9 @@ class AdveneGUI (Connect):
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
         if view is None:
             return view
+        # Store destination and label, used when moving the view
         view._destination=destination
+        view._label=label
         if destination == 'popup':
             view.popup(label=label)
         elif destination in ('south', 'east', 'west', 'fareast'):
@@ -1431,9 +1455,19 @@ class AdveneGUI (Connect):
         return True
 
     def do_quicksearch(self, *p):
-        source=self.controller.package.annotations
-        s=self.quicksearch_entry.get_text().lower()
-        res=[ a for a in source if s in a.content.data.lower() ]
+        expr=config.data.preferences['quicksearch-source']
+        if expr is None:
+            source=self.controller.package.annotations
+        else:
+            c=self.controller.build_context()
+            source=c.evaluateValue(expr)
+        s=self.quicksearch_entry.get_text()
+        if config.data.preferences['quicksearch-ignore-case']:
+            s=s.lower()        
+            res=[ a for a in source if s in a.content.data.lower() ]
+        else:
+            res=[ a for a in source if s in a.content.data ]
+            
         label=_("Search for %s") % s
         self.open_adhoc_view('interactiveresult', destination='east', result=res, label=label, query=s)
         return True
@@ -1993,7 +2027,7 @@ class AdveneGUI (Connect):
         d.set_name('Advene')
         d.set_version(config.data.version_string)
         d.set_copyright("Copyright 2002,2003,2004,2005,2006,2007 Olivier Aubert, Pierre-Antoine Champin")
-        d.set_license("""_('GNU General Public License\nSee http://www.gnu.org/copyleft/gpl.html for more details')""")
+        d.set_license(_('GNU General Public License\nSee http://www.gnu.org/copyleft/gpl.html for more details'))
         d.set_website('http://liris.cnrs.fr/advene/')
         d.set_website_label('Visit the Advene web site for examples and documentation.')
         d.set_authors( [ 'Olivier Aubert', 'Pierre-Antoine Champin', 'Yannick Prie', 'Bertrand Richard', 'Frank Wagner' ] )
