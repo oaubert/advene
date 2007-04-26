@@ -644,7 +644,7 @@ class TimeLine(AdhocView):
             self.annotationtypes.append(annotationtype)
             self.update_model(partial_update=True)
         elif event == 'AnnotationTypeEditEnd':
-            self.legend.foreach(self.legend.remove, self.legend)
+            self.legend.foreach(self.legend.remove)
             self.update_legend_widget(self.legend)
             self.legend.show_all()
         elif event == 'AnnotationTypeDelete':
@@ -1406,7 +1406,9 @@ class TimeLine(AdhocView):
             else:
                 return False
         if event.keyval >= 49 and event.keyval <= 57:
+            pos=self.get_middle_position()
             self.fraction_adj.value=1.0/pow(2, event.keyval-49)
+            self.set_middle_position(pos)
             return True
         elif event.keyval == gtk.keysyms.p:
             # Play at the current position
@@ -1892,26 +1894,29 @@ class TimeLine(AdhocView):
 
         def zoom_entry(entry):
             f=entry.get_text()
-            #print "zoom_entry", f
 
             i=sre.findall(r'\d+', f)
             if i:
                 f=int(i[0])/100.0
             else:
                 return True
-            self.fraction_adj.set_value(f)
+            pos=self.get_middle_position()
+            self.fraction_adj.value=f
+            self.set_middle_position(pos)
             return True
 
         def zoom_change(combo):
             v=combo.get_current_element()
-            #print "zoom_change", v
             if isinstance(v, float):
+                pos=self.get_middle_position()
                 self.fraction_adj.value=v
-            #zoom_entry(self.zoom_combobox.child)
+                self.set_middle_position(pos)
             return True
 
         def zoom(i, factor):
+            pos=self.get_middle_position()
             self.fraction_adj.set_value(self.fraction_adj.value * factor)
+            self.set_middle_position(pos)
             return True
 
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
@@ -2095,3 +2100,15 @@ class TimeLine(AdhocView):
         if res:
             self.options.update(cache)
         return True
+
+    def get_middle_position(self):
+        """Return the current middle position, in ms.
+        """
+        a=self.adjustment
+        return self.pixel2unit( a.value + a.page_size / 2 )
+
+    def set_middle_position(self, pos):
+        """Set the current middle position, in ms.
+        """
+        a=self.adjustment
+        a.value = max(0, self.unit2pixel(pos) - a.page_size / 2)
