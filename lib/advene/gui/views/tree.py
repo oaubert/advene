@@ -268,6 +268,11 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         selection.set(selection.target, 8, node.uri)
         return True
 
+class VirtualNode:
+    def __init__(self, name, package):
+        self.title=name
+        self.rootPackage=package
+
 class DetailedTreeModel(AdveneTreeModel):
     """Detailed Tree Model.
 
@@ -278,6 +283,13 @@ class DetailedTreeModel(AdveneTreeModel):
        - Views depend on their package list of views
        - Resources depend on the Resource node
     """
+    def __init__(self, controller=None, package=None):
+        AdveneTreeModel.__init__(self, controller=controller, package=package)
+        self.views=VirtualNode(_("List of views"), package)
+        self.staticviews=VirtualNode(_("Static views"), package)
+        self.dynamicviews=VirtualNode(_("Dynamic views"), package)
+        self.adhocviews=VirtualNode(_("Adhoc views"), package)
+
     def nodeParent (self, node):
         #print "nodeparent %s" % node
         if isinstance (node, Annotation):
@@ -291,7 +303,12 @@ class DetailedTreeModel(AdveneTreeModel):
         elif isinstance (node, Schema):
             parent = node.rootPackage.schemas
         elif isinstance (node, View):
-            parent = node.rootPackage.views
+            if node.content.mimetype == 'application/x-advene-ruleset':
+                parent=self.dynamicviews
+            elif node.content.mimetype == 'application/x-advene-adhoc-view':
+                parent=self.adhocviews
+            else:
+                parent=self.staticviews
         elif isinstance (node, Query):
             parent = node.rootPackage.queries
         elif isinstance (node, Package):
@@ -302,6 +319,10 @@ class DetailedTreeModel(AdveneTreeModel):
             parent = node.parent
         elif isinstance (node, ResourceData):
             parent = node.parent
+        elif node in (self.staticviews, self.dynamicviews, self.adhocviews):
+            parent = self.views
+        elif node == self.views:
+            parent=node.rootPackage
         else:
             parent = None
         return parent
@@ -331,7 +352,7 @@ class DetailedTreeModel(AdveneTreeModel):
             children = None
         elif isinstance (node, Package):
             if not node in self.childrencache:
-                self.childrencache[node] = [node.schemas, node.views, node.queries, node.resources ]
+                self.childrencache[node] = [node.schemas, self.views, node.queries, node.resources ]
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
@@ -341,6 +362,21 @@ class DetailedTreeModel(AdveneTreeModel):
             children = self.childrencache[node]
         elif isinstance (node, ResourceData):
             children = None
+        elif node == self.views:
+            children=[ self.staticviews, self.dynamicviews, self.adhocviews ]
+        elif node == self.staticviews:
+            children=[ v 
+                       for v in node.rootPackage.views 
+                       if v.content.mimetype not in ('application/x-advene-ruleset',
+                                                        'application/x-advene-adhoc-view' ) ]
+        elif node == self.dynamicviews:
+            children=[ v 
+                       for v in node.rootPackage.views
+                       if v.content.mimetype == 'application/x-advene-ruleset' ] 
+        elif node == self.adhocviews:
+            children=[ v 
+                       for v in node.rootPackage.views
+                       if v.content.mimetype == 'application/x-advene-adhoc-view' ] 
         elif node is None:
             children = [ self.get_package() ]
         else:
