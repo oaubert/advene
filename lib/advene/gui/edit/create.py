@@ -55,11 +55,7 @@ class CreateElementPopup(object):
         self.type_=type_
         self.parent=parent
         self.controller=controller
-        self.type_combo=None
-        self.widget=self.build_widget()
-
-    def get_widget(self):
-        return self.widget
+        self.dialog=None
 
     def display(self):
         pass
@@ -67,24 +63,21 @@ class CreateElementPopup(object):
     def generate_id(self):
         return self.controller.package._idgenerator.get_id(self.type_)
 
-    def build_widget(self):
-        vbox = gtk.VBox()
+    def build_widget(self, modal=False):
+        i=self.generate_id()
+        if modal:
+            flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL
+        else:
+            flags=gtk.DIALOG_DESTROY_WITH_PARENT
 
-        l = gtk.Label(_("To create a new element of type %s,\nyou must give the following information.") % element_label[self.type_])
-        vbox.add(l)
+        d=advene.gui.util.title_id_dialog(title=_("%s creation")  % element_label[self.type_],
+                                          text=_("To create a new element of type %s,\nyou must give the following information.") % element_label[self.type_],
+                                          element_title=i,
+                                          element_id=i,
+                                          flags=flags)
+        d.type_combo=None
 
-        # Identifier
-        hbox = gtk.HBox()
-        l = gtk.Label(_("Identifier"))
-        hbox.pack_start(l)
-
-        self.id_entry = gtk.Entry()
-        self.id_entry.set_text(self.generate_id())
-        hbox.pack_start(self.id_entry)
-
-        vbox.add(hbox)
-
-        # Choose a type
+        # Choose a type if possible
         if self.type_ in (Annotation, Relation, AnnotationType, RelationType,
                           View, Query, Resources, ResourceData):
             hbox = gtk.HBox()
@@ -109,6 +102,7 @@ class CreateElementPopup(object):
             elif self.type_ == View:
                 type_list = [ ViewType('application/x-advene-ruleset', _("Dynamic view")),
                               ViewType('text/html', _("HTML template")),
+                              ViewType('application/xml', _("Plain XML")),
                               ViewType('image/svg+xml', _("SVG template")),
                               ViewType('text/plain', _("Plain text template")),
                               ]
@@ -127,15 +121,15 @@ class CreateElementPopup(object):
                 advene.gui.util.message_dialog(_("No available type."))
                 return None
 
-            self.type_combo = advene.gui.util.list_selector_widget(
+            d.type_combo = advene.gui.util.list_selector_widget(
                 members=[ (t, self.controller.get_title(t)) for t in type_list  ],
                 preselect=type_list[0])
-            hbox.pack_start(self.type_combo)
+            hbox.pack_start(d.type_combo)
+            
+            d.vbox.add(hbox)
 
-            vbox.add(hbox)
-
-        vbox.show_all()
-        return vbox
+        d.show_all()
+        return d
 
     def get_date(self):
         return time.strftime("%Y-%m-%d")
@@ -152,7 +146,8 @@ class CreateElementPopup(object):
 
         @return: the created element, None if an error occurred
         """
-        id_ = self.id_entry.get_text()
+        id_ = self.dialog.id_entry.get_text()
+        title_ = self.dialog.title_entry.get_text()
         # Check validity of id.
         if not self.is_valid_id(id_):
             advene.gui.util.message_dialog(
@@ -166,8 +161,8 @@ class CreateElementPopup(object):
         else:
             self.controller.package._idgenerator.add(id_)
 
-        if self.type_combo:
-            t = self.type_combo.get_current_element()
+        if self.dialog.type_combo:
+            t = self.dialog.type_combo.get_current_element()
 
         if self.type_ == Annotation:
             if isinstance(self.parent, AnnotationType):
@@ -181,7 +176,6 @@ class CreateElementPopup(object):
                 date=self.get_date(),
                 fragment=MillisecondFragment(begin=0,
                                              duration=self.controller.player.stream_duration))
-            el.title=id_
             parent.annotations.append(el)
             self.controller.notify('AnnotationCreate', annotation=el)
         elif self.type_ == Relation:
@@ -196,14 +190,13 @@ class CreateElementPopup(object):
                 author=config.data.userid,
                 date=self.get_date(),
                 members=())
-            el.title=id_
             parent.relations.append(el)
             self.controller.notify('RelationCreate', relation=el)
         elif self.type_ == Query:
             el=self.parent.createQuery(ident=id_)
             el.author=config.data.userid
             el.date=self.get_date()
-            el.title=id_
+            el.title=title_
             el.content.mimetype=t.id
             if t.id == 'application/x-advene-simplequery':
                 # Create a basic query
@@ -220,7 +213,7 @@ class CreateElementPopup(object):
                 clazz=self.parent.viewableClass,
                 content_mimetype=t.id,
                 )
-            el.title=id_
+            el.title=title_
             if t.id == 'application/x-advene-ruleset':
                 # Create an empty ruleset to begin with
                 r=RuleSet()
@@ -246,7 +239,7 @@ class CreateElementPopup(object):
                 ident=id_)
             el.author=config.data.userid
             el.date=self.get_date()
-            el.title=id_
+            el.title=title_
             self.parent.schemas.append(el)
             self.controller.notify('SchemaCreate', schema=el)
         elif self.type_ == AnnotationType:
@@ -258,7 +251,7 @@ class CreateElementPopup(object):
                     ident=id_)
                 el.author=config.data.userid
                 el.date=self.get_date()
-                el.title=id_
+                el.title=title_
                 el.mimetype=t.id
                 el.setMetaData(config.data.namespace, 'color', 'here/tag_color')
             self.parent.annotationTypes.append(el)
@@ -272,7 +265,7 @@ class CreateElementPopup(object):
                     ident=id_)
                 el.author=config.data.userid
                 el.date=self.get_date()
-                el.title=id_
+                el.title=title_
                 el.mimetype=t.id
             self.parent.relationTypes.append(el)
             self.controller.notify('RelationTypeCreate', relationtype=el)
@@ -296,19 +289,9 @@ class CreateElementPopup(object):
         return el
 
     def popup(self, modal=False):
-        if modal:
-            flags=gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_MODAL
-        else:
-            flags=gtk.DIALOG_DESTROY_WITH_PARENT
-        d = gtk.Dialog(title=_("Creation: %s") % element_label[self.type_],
-                       parent=None,
-                       flags=flags,
-                       buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
-
+        d=self.build_widget(modal)
         d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
-        d.vbox.add(self.widget)
-
+        self.dialog=d
         while True:
             d.show()
             advene.gui.util.center_on_mouse(d)
