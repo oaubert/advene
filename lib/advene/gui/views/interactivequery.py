@@ -275,6 +275,9 @@ class InteractiveResult(AdhocView):
             hb=gtk.VButtonBox()
             v.pack_start(hb)
             if l:
+                b=gtk.Button(_("Display annotations in table"))
+                b.connect('clicked', lambda b: self.open_in_table(l))
+                hb.add(b)
                 b=gtk.Button(_("Display annotations in timeline"))
                 b.connect('clicked', lambda b: self.open_in_timeline(l))
                 hb.add(b)
@@ -298,6 +301,10 @@ class InteractiveResult(AdhocView):
 
     def open_in_timeline(self, l):
         self.controller.gui.open_adhoc_view('timeline', label=self.label, destination=self._destination, elements=l, minimum=0)
+        return True
+
+    def open_in_table(self, l):
+        self.controller.gui.open_adhoc_view('table', label=self.label, destination=self._destination, elements=l)
         return True
 
     def open_in_edit_accumulator(self, l):
