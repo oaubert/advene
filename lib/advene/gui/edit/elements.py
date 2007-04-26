@@ -1529,6 +1529,8 @@ class EditAttributesForm (EditForm):
                                     text=self.COLUMN_VALUE,
                                     editable=self.COLUMN_EDITABLE,
                                     weight=self.COLUMN_WEIGHT)
+        column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+        column.set_resizable(True)
         column.set_clickable(False)
         treeview.append_column(column)
 
