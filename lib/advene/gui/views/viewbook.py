@@ -92,11 +92,10 @@ class ViewBook(AdhocView):
                 if not self.detach_view(v):
                     return True
                 if d == 'popup':
-                    # FIXME: get the label somewhere...
-                    v.popup()
+                    v.popup(label=v._label)
                 elif d in ('south', 'east', 'west', 'fareast'):
                     v._destination=d
-                    self.controller.gui.viewbook[d].add_view(v)
+                    self.controller.gui.viewbook[d].add_view(v, name=v._label)
                 return True
 
             if event.button == 3:
@@ -109,7 +108,8 @@ class ViewBook(AdhocView):
                         (_("...in its own window"), 'popup'),
                         (_("...embedded east of the video"), 'east'),
                         (_("...embedded west of the video"), 'west'),
-                        (_("...embedded south at the video"), 'south')):
+                        (_("...embedded south at the video"), 'south'),
+                        (_("...embedded at the right of the window"), 'fareast')):
                         item = gtk.MenuItem(label)
                         item.connect('activate', relocate_view,  view, destination)
                         submenu.append(item)
