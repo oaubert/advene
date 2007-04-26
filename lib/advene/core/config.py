@@ -209,6 +209,10 @@ class Config(object):
 	    'record-actions': False,
             # Imagecache save on exit: None (==never), 'ask' or 'always'
             'imagecache-save-on-exit': 'ask',
+            'quicksearch-ignore-case': True,
+            # quicksearch source. If None, it is all package's annotations.
+            # Else it is a TALES expression applied to the current package
+            'quicksearch-source': None,
             }
 
         # Player options
