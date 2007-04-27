@@ -22,8 +22,6 @@ import sys
 import gtk
 import gobject
 
-import advene.core.config as config
-
 import qtmovie
 
 class StreamInformation:
@@ -303,7 +301,7 @@ class Player:
             self.widget=widget
             reuse=False
 
-        if config.data.os == 'win32':
+        if sys.platform == 'win32':
             visual_id=widget.window.handle
         else:
             visual_id=widget.window.xid
@@ -342,7 +340,7 @@ class Player:
 	self.log("restart player")
 	return True
 
-def test():
+def test(fname):
     """Old code, for historical purpose.
     """
     w=gtk.Window()
@@ -350,37 +348,11 @@ def test():
     w.add(d)
     w.show_all()
     hwnd=d.window.handle
-    movie=qtmovie.new_movie_from_filename(sys.argv[1], MAX_PATH=255)
+    movie=qtmovie.new_movie_from_filename(fname, MAX_PATH=255)
 
-    # Resize widget to match movie size
-    rect=movie.GetMovieBox()
-    width=rect.right-rect.left
-    height=rect.bottom-rect.top
-    aspect_ratio=100*width/height
-    d.set_size_request( width, height )
-
-    def resize(widget, alloc, movie):
-        """Handle resize of DrawingArea.
-
-        Resize the video, keeping its aspect ratio.
-        """
-        if 100 * alloc.width / alloc.height > aspect_ratio:
-            w=alloc.height * aspect_ratio / 100
-            h=alloc.height
-        else:
-            w=alloc.width
-            h=w * 100 / aspect_ratio
-        movie.SetMovieBox( qtmovie.Rect(alloc.y + (alloc.height - h) / 2, 
-                                        alloc.x + (alloc.width -w) / 2, 
-                                        alloc.y + h,
-                                        alloc.x + w))
-        return True
-
-    d.connect('size-allocate', resize, movie)
-    #resize(d, d.get_allocation(), movie)
     w.connect('destroy', lambda w: gtk.main_quit())
 
-    movie.set_visual(hwnd)
+    movie.set_widget(d)
     movie.StartMovie()
 
     def update_movie(movie):
@@ -393,4 +365,4 @@ def test():
     gtk.main ()
 
 if __name__ == '__main__':
-    test()
+    test(sys.argv[1])
