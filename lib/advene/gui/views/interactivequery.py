@@ -37,6 +37,7 @@ import advene.gui.util
 from advene.gui.views import AdhocView
 
 from advene.gui.views.timeline import TimeLine
+from advene.gui.views.table import AnnotationTable
 
 import advene.util.helper as helper
 
@@ -103,7 +104,7 @@ class InteractiveQuery(AdhocView):
             # The advanced query is not shown. Use the self.entry
             s=self.entry.get_text()
             query=s
-            label=_("Search for %s") % s
+            label=_("'%s'") % s
             try:
                 source=self.here.annotations
             except AttributeError:
@@ -228,18 +229,21 @@ class InteractiveResult(AdhocView):
             self.label=_("Result of interactive query")
         else:
             # Must be a string
-            self.label=_("Search for %s") % self.query
+            self.label=_("""'%s'""") % self.query
 
         self.widget=self.build_widget()
 
     def build_widget(self):
         v=gtk.VBox()
-            
+
+        hb=gtk.HButtonBox()
+        v.pack_end(hb, expand=False)
+
         # FIXME: if self.query: edit query again
         if self.query and isinstance(self.query, InteractiveQuery):
             b=gtk.Button(_("Edit query again"))
             b.connect('clicked', self.edit_query)
-            v.pack_start(b, expand=False)
+            hb.pack_start(b, expand=False)
             
         # Present choices to display the result
         if not self.result:
@@ -257,38 +261,42 @@ class InteractiveResult(AdhocView):
                 t=_("Result is a list of  %(number)d elements with %(elements)s.") % { 
                     'elements': helper.format_element_name("annotation", len(l)),
                     'number': len(self.result)}
-            v.add(gtk.Label(t))
+            v.pack_start(gtk.Label(t), expand=False)
 
-            highlight_label=_("Highlight annotations")
             def toggle_highlight(b, annotation_list):
-                if b.get_label() == highlight_label:
+                if b.highlight:
                     event="AnnotationActivate"
                     label= _("Unhighlight annotations")
+                    b.highlight=False
                 else:
                     event="AnnotationDeactivate"
-                    label= highlight_label
-                b.set_label(label)
+                    label=_("Highlight annotations")
+                    b.highlight=True
+                self.controller.gui.tooltips.set_tip(b, label)
                 for a in annotation_list:
                     self.controller.notify(event, annotation=a)
                 return True
 
-            hb=gtk.VButtonBox()
-            v.pack_start(hb)
             if l:
-                b=gtk.Button(_("Display annotations in table"))
-                b.connect('clicked', lambda b: self.open_in_table(l))
+                # Instanciate a table view
+                table=AnnotationTable(controller=self.controller, elements=l)
+                v.add(table.widget)
+
+                b=advene.gui.util.get_pixmap_button('timeline.png', lambda b: self.open_in_timeline(l))
+                self.controller.gui.tooltips.set_tip(b, _("Display annotations in timeline"))
                 hb.add(b)
-                b=gtk.Button(_("Display annotations in timeline"))
-                b.connect('clicked', lambda b: self.open_in_timeline(l))
-                hb.add(b)
-                b=gtk.Button(highlight_label)
+
+                b=advene.gui.util.get_pixmap_button('highlight.png')
+                b.highlight=True
                 b.connect('clicked', toggle_highlight, l)
                 hb.add(b)
-            b=gtk.Button(_("Edit elements"))
-            b.connect('clicked', lambda b: self.open_in_edit_accumulator(self.result))
+
+            b=advene.gui.util.get_pixmap_button('editaccumulator.png', lambda b: self.open_in_edit_accumulator(self.result))
+            self.controller.gui.tooltips.set_tip(b, _("Edit elements"))
             hb.add(b)
-            b=gtk.Button(_("Open in python evaluator"))
-            b.connect('clicked', lambda b: self.open_in_evaluator(self.result))
+
+            b=advene.gui.util.get_pixmap_button('python.png', lambda b: self.open_in_evaluator(self.result))
+            self.controller.gui.tooltips.set_tip(b, _("Open in python evaluator"))
             hb.add(b)
         else:
             v.add(gtk.Label(_("Result:\n%s") % unicode(self.result)))
@@ -296,15 +304,12 @@ class InteractiveResult(AdhocView):
         return v
 
     def edit_query(self, *p):
+        self.controller.log("Not implemented yet")
         #FIXME
         return True
 
     def open_in_timeline(self, l):
         self.controller.gui.open_adhoc_view('timeline', label=self.label, destination=self._destination, elements=l, minimum=0)
-        return True
-
-    def open_in_table(self, l):
-        self.controller.gui.open_adhoc_view('table', label=self.label, destination=self._destination, elements=l)
         return True
 
     def open_in_edit_accumulator(self, l):
