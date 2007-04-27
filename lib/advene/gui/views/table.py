@@ -82,7 +82,14 @@ class AnnotationTable(AdhocView):
 
         tree_view.connect("button_press_event", self.tree_view_button_cb)
         tree_view.connect("row-activated", self.row_activated_cb)
-	tree_view.set_search_column(COLUMN_CONTENT)
+	#tree_view.set_search_column(COLUMN_CONTENT)
+
+        def search_content(model, column, key, iter):
+            if key in model.get_value(iter, COLUMN_CONTENT):
+                return False
+            return True
+
+        tree_view.set_search_equal_func(search_content)
 
         columns={}
         for (name, label, col) in (
@@ -101,6 +108,13 @@ class AnnotationTable(AdhocView):
         columns['begin'].set_sort_column_id(COLUMN_BEGIN)
         columns['end'].set_sort_column_id(COLUMN_END)
         self.model.set_sort_column_id(COLUMN_BEGIN, gtk.SORT_ASCENDING)
+
+        # Resizable columns: content, type
+        for name in ('content', 'type'):
+            columns[name].set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+            columns[name].set_resizable(True)
+            columns[name].set_min_width(40)
+        columns['content'].set_expand(True)
 
         # Drag and drop for annotations
         tree_view.drag_source_set(gtk.gdk.BUTTON1_MASK,
