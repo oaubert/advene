@@ -1468,7 +1468,7 @@ class AdveneGUI (Connect):
         else:
             res=[ a for a in source if s in a.content.data ]
             
-        label=_("Search for %s") % s
+        label=_("'%s'") % s
         self.open_adhoc_view('interactiveresult', destination='east', result=res, label=label, query=s)
         return True
 
