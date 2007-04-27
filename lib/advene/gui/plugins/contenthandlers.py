@@ -99,7 +99,7 @@ class ZoneContentHandler (ContentHandler):
         vbox=gtk.VBox()
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
-            i=advene.gui.util.image_from_position(self.controller, self.parent.fragment.begin, height=300)
+            i=advene.gui.util.image_from_position(self.controller, self.parent.fragment.begin, height=160)
             self.view = ShapeDrawer(callback=self.callback, background=i)
         else:
             self.view = ShapeDrawer(callback=self.callback)
