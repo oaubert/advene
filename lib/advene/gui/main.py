@@ -252,12 +252,12 @@ class AdveneGUI (Connect):
             item.connect('toggled', lambda i: config.data.preferences.__setitem__('quicksearch-ignore-case', i.get_active()))
             menu.append(item)
             
-            item=gtk.MenuItem(_("Searched annotations"))
+            item=gtk.MenuItem(_("Searched elements"))
             submenu=gtk.Menu()
             l=[ (_("All annotations"), 
                  None) ] + [
                 (_("Annotations of type %s") % self.controller.get_title(at),
-                 'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ]
+                 'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ] + [ (_("Views"), 'here/views') ]
             for (label, expression) in l:
                 i=gtk.MenuItem(label)
                 i.connect('activate', lambda i, expr: config.data.preferences.__setitem__('quicksearch-source', expr), expression)
