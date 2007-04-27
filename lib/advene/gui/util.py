@@ -700,3 +700,11 @@ def get_small_stock_button(sid, callback=None):
         b.connect('clicked', callback)
     return b
 
+def get_pixmap_button(pixmap, callback=None):
+    b=gtk.Button()
+    i=gtk.Image()
+    i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
+    b.add(i)
+    if callback:
+        b.connect('clicked', callback)
+    return b
