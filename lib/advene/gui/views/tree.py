@@ -365,18 +365,23 @@ class DetailedTreeModel(AdveneTreeModel):
         elif node == self.views:
             children=[ self.staticviews, self.dynamicviews, self.adhocviews ]
         elif node == self.staticviews:
-            children=[ v 
+            children=sorted([ v 
                        for v in node.rootPackage.views 
                        if v.content.mimetype not in ('application/x-advene-ruleset',
-                                                        'application/x-advene-adhoc-view' ) ]
+                                                        'application/x-advene-adhoc-view' ) ],
+                            key=lambda e: (e.title or e.id).lower())
+                            
         elif node == self.dynamicviews:
-            children=[ v 
-                       for v in node.rootPackage.views
-                       if v.content.mimetype == 'application/x-advene-ruleset' ] 
+            children=sorted([ v 
+                              for v in node.rootPackage.views
+                              if v.content.mimetype == 'application/x-advene-ruleset' ],
+                            key=lambda e: (e.title or e.id).lower())
+            
         elif node == self.adhocviews:
-            children=[ v 
-                       for v in node.rootPackage.views
-                       if v.content.mimetype == 'application/x-advene-adhoc-view' ] 
+            children=sorted([ v 
+                              for v in node.rootPackage.views
+                              if v.content.mimetype == 'application/x-advene-adhoc-view' ],
+                            key=lambda e: (e.title or e.id).lower())
         elif node is None:
             children = [ self.get_package() ]
         else:
