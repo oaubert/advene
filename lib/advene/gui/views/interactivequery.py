@@ -320,7 +320,7 @@ class InteractiveResult(AdhocView):
         return True
 
     def open_in_timeline(self, l):
-        self.controller.gui.open_adhoc_view('timeline', label=self.label, destination=self._destination, elements=l, minimum=0)
+        self.controller.gui.open_adhoc_view('timeline', label=self.label, destination=self._destination, elements=l)
         return True
 
     def open_in_edit_accumulator(self, l):
