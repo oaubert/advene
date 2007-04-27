@@ -55,6 +55,10 @@ class EditAccumulator(AccumulatorPopup):
                            self.controller.get_title(element.type))
         else:
             t=self.controller.get_title(element)
+
+        # Limit label size
+        if len(t) > 30:
+            t=unicode(t[:29])+u'\u2026'
         l=gtk.Label(t)
         hbox.pack_start(l, expand=False)
         
