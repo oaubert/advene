@@ -37,7 +37,7 @@ import advene.gui.util
 from advene.gui.views import AdhocView
 
 from advene.gui.views.timeline import TimeLine
-from advene.gui.views.table import AnnotationTable
+from advene.gui.views.table import AnnotationTable, GenericTable
 
 import advene.util.helper as helper
 
@@ -261,7 +261,14 @@ class InteractiveResult(AdhocView):
                 t=_("Result is a list of  %(number)d elements with %(elements)s.") % { 
                     'elements': helper.format_element_name("annotation", len(l)),
                     'number': len(self.result)}
+
+            notebook=gtk.Notebook()
+            notebook.set_tab_pos(gtk.POS_TOP)
+            notebook.popup_disable()
+
             v.pack_start(gtk.Label(t), expand=False)
+
+            v.add(notebook)
 
             def toggle_highlight(b, annotation_list):
                 if b.highlight:
@@ -280,7 +287,7 @@ class InteractiveResult(AdhocView):
             if l:
                 # Instanciate a table view
                 table=AnnotationTable(controller=self.controller, elements=l)
-                v.add(table.widget)
+                notebook.append_page(table.widget, gtk.Label(_("Annotations")))
 
                 b=advene.gui.util.get_pixmap_button('timeline.png', lambda b: self.open_in_timeline(l))
                 self.controller.gui.tooltips.set_tip(b, _("Display annotations in timeline"))
@@ -290,6 +297,10 @@ class InteractiveResult(AdhocView):
                 b.highlight=True
                 b.connect('clicked', toggle_highlight, l)
                 hb.add(b)
+            else:
+                # Instanciate a generic table view
+                gtable=GenericTable(controller=self.controller, elements=self.result)
+                notebook.append_page(gtable.widget, gtk.Label(_("Elements")))
 
             b=advene.gui.util.get_pixmap_button('editaccumulator.png', lambda b: self.open_in_edit_accumulator(self.result))
             self.controller.gui.tooltips.set_tip(b, _("Edit elements"))
