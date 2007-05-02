@@ -331,7 +331,7 @@ class Menu:
         except AttributeError:
             pass
 
-        if isinstance(element, StandardXmlBundle):
+        if hasattr(element, 'viewableType'):
             self.make_bundle_menu(element, menu)
             menu.show_all()
             return menu
