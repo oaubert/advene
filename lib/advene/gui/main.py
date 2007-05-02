@@ -1235,6 +1235,9 @@ class AdveneGUI (Connect):
             # Keep the 5 last elements
             config.data.preferences['history']=h[-config.data.preferences['history-size-limit']:]
 
+        # Initialize the color palette for the package
+        self.controller.package._color_palette=helper.CircularList(config.data.color_palette[:])
+
         return True
 
     def update_window_title(self):
