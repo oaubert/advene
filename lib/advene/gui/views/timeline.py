@@ -107,7 +107,8 @@ class TimeLine(AdhocView):
 
         self.list = elements
         self.annotationtypes = annotationtypes
-        self.tooltips = gtk.Tooltips ()
+        self.tooltips = gtk.Tooltips()
+        self.annotation_tips = gtk.Tooltips()
 
         self.current_marker = None
         # Now that self.list is initialized, we reuse the l variable
@@ -214,9 +215,11 @@ class TimeLine(AdhocView):
         #self.layout.bin_window.get_colormap().alloc_color(self.colors['relations'])
         self.layout.connect('scroll_event', self.layout_scroll_cb)
         self.layout.connect('key_press_event', self.layout_key_press_cb)
+        self.layout.connect('enter_notify_event', self.layout_enter_cb)
+        self.layout.connect('leave_notify_event', self.layout_leave_cb)
         self.layout.connect('button_press_event', self.layout_button_press_cb)
-        self.layout.connect ('size_allocate', self.layout_resize_event)
-        self.layout.connect ('map', self.layout_resize_event)
+        self.layout.connect('size_allocate', self.layout_resize_event)
+        self.layout.connect('map', self.layout_resize_event)
         self.layout.connect('expose_event', self.draw_background)
         self.layout.connect_after('expose_event', self.draw_relation_lines)
 
@@ -602,7 +605,7 @@ class TimeLine(AdhocView):
             'title': title,
             'begin': helper.format_time(a.fragment.begin),
             'end': helper.format_time(a.fragment.end) }
-        self.tooltips.set_tip(b, tip)
+        self.annotation_tips.set_tip(b, tip)
         return True
 
     def update_annotation (self, annotation=None, event=None):
@@ -1142,7 +1145,7 @@ class TimeLine(AdhocView):
         return True
 
     def rel_deactivate(self, button):
-        d=self.tooltips.active_tips_data
+        d=self.annotation_tips.active_tips_data
         if d and d[1] == button:
             # Hide the tooltip
             button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
@@ -1255,7 +1258,8 @@ class TimeLine(AdhocView):
                 f.end += incr
 
             self.controller.notify('AnnotationEditEnd', annotation=button.annotation)
-            if self.tooltips.active_tips_data is None:
+            # Update the tooltip
+            if self.annotation_tips.active_tips_data is None:
                 button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
             button.grab_focus()
             return True
@@ -1390,6 +1394,17 @@ class TimeLine(AdhocView):
             if a.fragment.end > maximum:
                 maximum = a.fragment.end
         return minimum, maximum
+
+    def layout_enter_cb(self, layout, event):
+        if self.display_tooltips_toggle.get_active():
+            self.annotation_tips.enable()
+        else:
+            self.annotation_tips.disable()
+        return True
+
+    def layout_leave_cb(self, layout, event):
+        self.annotation_tips.disable()
+        return True
 
     def layout_key_press_cb (self, win, event):
         """Handles key presses in the timeline background
@@ -1875,9 +1890,9 @@ class TimeLine(AdhocView):
 
         def handle_tooltip_toggle(b):
             if b.get_active():
-                self.tooltips.enable()
+                self.annotation_tips.enable()
             else:
-                self.tooltips.disable()
+                self.annotation_tips.disable()
             return True
 
         try:
