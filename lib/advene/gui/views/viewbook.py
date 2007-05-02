@@ -108,7 +108,7 @@ class ViewBook(AdhocView):
                         (_("...in its own window"), 'popup'),
                         (_("...embedded east of the video"), 'east'),
                         (_("...embedded west of the video"), 'west'),
-                        (_("...embedded south at the video"), 'south'),
+                        (_("...embedded south of the video"), 'south'),
                         (_("...embedded at the right of the window"), 'fareast')):
                         item = gtk.MenuItem(label)
                         item.connect('activate', relocate_view,  view, destination)
