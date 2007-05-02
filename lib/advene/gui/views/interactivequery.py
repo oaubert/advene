@@ -262,13 +262,7 @@ class InteractiveResult(AdhocView):
                     'elements': helper.format_element_name("annotation", len(l)),
                     'number': len(self.result)}
 
-            notebook=gtk.Notebook()
-            notebook.set_tab_pos(gtk.POS_TOP)
-            notebook.popup_disable()
-
             v.pack_start(gtk.Label(t), expand=False)
-
-            v.add(notebook)
 
             def toggle_highlight(b, annotation_list):
                 if b.highlight:
@@ -287,7 +281,24 @@ class InteractiveResult(AdhocView):
             if l:
                 # Instanciate a table view
                 table=AnnotationTable(controller=self.controller, elements=l)
-                notebook.append_page(table.widget, gtk.Label(_("Annotations")))
+
+                if cr == cl:
+                    # Only annotations.
+                    v.add(table.widget)
+                else:
+                    # Mixed annotations + other elements
+                    notebook=gtk.Notebook()
+                    notebook.set_tab_pos(gtk.POS_TOP)
+                    notebook.popup_disable()
+                    v.add(notebook)
+
+                    notebook.append_page(table.widget, gtk.Label(_("Annotations")))
+
+                    gtable=GenericTable(controller=self.controller, elements=[ e 
+                                                                               for e in self.result
+                                                                               if not isinstance(e, Annotation) ]
+                                                                               )
+                    notebook.append_page(gtable.widget, gtk.Label(_("Other elements")))
 
                 b=advene.gui.util.get_pixmap_button('timeline.png', lambda b: self.open_in_timeline(l))
                 self.controller.gui.tooltips.set_tip(b, _("Display annotations in timeline"))
@@ -298,9 +309,9 @@ class InteractiveResult(AdhocView):
                 b.connect('clicked', toggle_highlight, l)
                 hb.add(b)
             else:
-                # Instanciate a generic table view
+                # Only Instanciate a generic table view
                 gtable=GenericTable(controller=self.controller, elements=self.result)
-                notebook.append_page(gtable.widget, gtk.Label(_("Elements")))
+                v.add(gtable.widget)
 
             b=advene.gui.util.get_pixmap_button('editaccumulator.png', lambda b: self.open_in_edit_accumulator(self.result))
             self.controller.gui.tooltips.set_tip(b, _("Edit elements"))
