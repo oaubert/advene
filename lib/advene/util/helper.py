@@ -638,3 +638,15 @@ def get_video_stream_from_website(url):
                 if data:
                     stream=data[0][4:].strip()
     return stream
+
+def get_view_type(v):
+    """Return the type of the view.
+
+    Return values: static, dynamic, adhoc
+    """
+    if v.content.mimetype == 'application/x-advene-ruleset':
+        return 'dynamic'
+    elif v.content.mimetype == 'application/x-advene-adhoc-view':
+        return 'adhoc'
+    else:
+        return 'static'
