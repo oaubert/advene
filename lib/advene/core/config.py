@@ -308,7 +308,38 @@ class Config(object):
             '.mkv',
 	    '.wmv',
 	    )
-	
+
+	self.color_palette = (
+            u'string:#cccc99',
+            u'string:#AAAAEE',
+            u'string:#ccaaaa',
+            u'string:#ffcc52',
+            u'string:#AACCAA',
+            u'string:#deadbe',
+            u'string:#fedcba',
+            u'string:#abcdef',
+            u'string:#ff6666',
+            u'string:#66ff66',
+            u'string:#FFFF88',
+            u'string:#CDEB8B',
+            u'string:#C3D9FF',
+            u'string:#FF1A00',
+            u'string:#CC0000',
+            u'string:#FF7400',
+            u'string:#008C00',
+            u'string:#006E2E',
+            u'string:#4096EE',
+            u'string:#FF0084',
+            u'string:#B02B2C',
+            u'string:#D15600',
+            u'string:#C79810',
+            u'string:#73880A',
+            u'string:#6BBA70',
+            u'string:#3F4C6B',
+            u'string:#356AA0',
+            u'string:#D01F3C',
+            )
+
 	# Content-handlers
 	self.content_handlers = []
 
