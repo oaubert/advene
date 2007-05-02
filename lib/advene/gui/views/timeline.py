@@ -567,6 +567,66 @@ class TimeLine(AdhocView):
     def pixel2unit (self, v):
         return v * self.ratio_adjustment.value
 
+    def get_widget_color(self, element, metadata='color'):
+        """Return the color for the given element.
+
+        Return None if no color is defined.
+
+        It will first check if a 'color' metadata is set on the
+        element, and try to evaluate is as a TALES expression. If no
+        color is defined, or if the result of evaluation is None, it
+        will then try to use the 'item_color' metadata from the container type
+        (annotation type for annotations, schema for types).
+
+        If not defined (or evaluating to None), it will try to use the
+        'color' metadata of the container (annotation-type for
+        annotations, schema for types).
+        """
+        # First try the 'color' metadata from the element itself.
+        color=None
+        col=element.getMetaData(config.data.namespace, metadata)
+        if col:
+            c=self.controller.build_context(here=element)
+            try:
+                color=c.evaluateValue(col)
+            except:
+                color=None
+
+        if not color:
+            # Not found in element. Try item_color from the container.
+            if hasattr(element, 'type'):
+                container=element.type
+            elif hasattr(element, 'schema'):
+                container=element.schema
+            else: 
+                container=None
+            if container:
+                col=container.getMetaData(config.data.namespace, 'item_color')
+                if col:
+                    c=self.controller.build_context(here=element)
+                    try:
+                        color=c.evaluateValue(col)
+                    except:
+                        color=None
+                if not color:
+                    # Really not found. So use the container color.
+                    return self.get_widget_color(container)
+
+        if color:
+            # Found a color. Cache it.
+            try:
+                gtk_color=self.widget_colors[color]
+            except:
+                try:
+                    self.widget_colors[color]=gtk.gdk.color_parse(color)
+                except:
+                    print "Unable to parse ", color
+                    self.widget_colors[color]=self.colors['inactive']
+                gtk_color=self.widget_colors[color]
+        else:
+            gtk_color=None
+        return gtk_color
+        
     def update_button (self, b):
         """Update the representation for button b.
         """
@@ -579,23 +639,9 @@ class TimeLine(AdhocView):
         else:
             l.set_text(title)
         b._default_color=self.colors['inactive']
-        color=a.type.getMetaData(config.data.namespace, 'color')
+        color=self.get_widget_color(a)
         if color:
-            c=self.controller.build_context(here=a)
-            col=None
-            try:
-                col=c.evaluateValue(color)
-            except:
-                col='inactive'
-            try:
-                b._default_color=self.widget_colors[col]
-            except:
-                try:
-                    self.widget_colors[col]=gtk.gdk.color_parse(col)
-                except:
-                    print "Unable to parse ", col
-                    self.widget_colors[col]=self.colors['inactive']
-                b._default_color=self.widget_colors[col]
+            b._default_color=color
             self.set_widget_background_color(b)
         b.set_size_request(u2p(a.fragment.duration),
                            self.button_height)
@@ -1720,23 +1766,9 @@ class TimeLine(AdhocView):
             layout.put (b, 0, self.layer_position[t])
             b.annotationtype=t
 
-            # Try to determine the color. This will work only for static colors.
-            color=t.getMetaData(config.data.namespace, 'color')
+            color=self.get_widget_color(t)
             if color:
-                c=self.controller.build_context(here=t)
-                col=None
-                try:
-                    col=c.evaluateValue(color)
-                except:
-                    col='inactive'
-                try:
-                    b._default_color=self.widget_colors[col]
-                except:
-                    try:
-                        self.widget_colors[col]=gtk.gdk.color_parse(col)
-                    except:
-                        self.widget_colors[col]=self.colors['inactive']
-                    b._default_color=self.widget_colors[col]
+                b._default_color=color
                 self.set_widget_background_color(b)
 
             b.show()
