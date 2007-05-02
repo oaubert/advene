@@ -206,7 +206,7 @@ class AdveneGUI (Connect):
                 (_("...in its own window"), 'popup'),
                 (_("...embedded east of the video"), 'east'),
                 (_("...embedded west of the video"), 'west'),
-                (_("...embedded south at the video"), 'south'),
+                (_("...embedded south of the video"), 'south'),
                 (_("...embedded at the right of the window"), 'fareast')):
                 item = gtk.MenuItem(label)
                 item.connect('activate', open_view, name, destination)
@@ -1455,13 +1455,16 @@ class AdveneGUI (Connect):
         return True
 
     def do_quicksearch(self, *p):
+        s=self.quicksearch_entry.get_text()
+        if not s:
+            self.log(_("Empty quicksearch string"))
+            return True
         expr=config.data.preferences['quicksearch-source']
         if expr is None:
             source=self.controller.package.annotations
         else:
             c=self.controller.build_context()
             source=c.evaluateValue(expr)
-        s=self.quicksearch_entry.get_text()
         if config.data.preferences['quicksearch-ignore-case']:
             s=s.lower()        
             res=[ a for a in source if s in a.content.data.lower() ]
