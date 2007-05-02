@@ -253,7 +253,8 @@ class CreateElementPopup(object):
                 el.date=self.get_date()
                 el.title=title_
                 el.mimetype=t.id
-                el.setMetaData(config.data.namespace, 'color', 'here/tag_color')
+                el.setMetaData(config.data.namespace, 'color', self.parent.rootPackage._color_palette.next())
+                el.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
             self.parent.annotationTypes.append(el)
             self.controller.notify('AnnotationTypeCreate', annotationtype=el)
         elif self.type_ == RelationType:
@@ -267,6 +268,8 @@ class CreateElementPopup(object):
                 el.date=self.get_date()
                 el.title=title_
                 el.mimetype=t.id
+                el.setMetaData(config.data.namespace, 'color', self.parent.rootPackage._color_palette.next())
+                el.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
             self.parent.relationTypes.append(el)
             self.controller.notify('RelationTypeCreate', relationtype=el)
         elif self.type_ == Resources:
