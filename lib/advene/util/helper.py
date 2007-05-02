@@ -650,3 +650,24 @@ def get_view_type(v):
         return 'adhoc'
     else:
         return 'static'
+
+class CircularList(list):
+    """Circular list maintaing a current index.
+    """
+    def __init__(self, *p):
+        super(CircularList, self).__init__(*p)
+        self._index=0
+
+    def current(self):
+        if self:
+            return self[self._index]
+        else:
+            return None
+
+    def next(self):
+        self._index = (self._index + 1) % len(self)
+        return self.current()
+
+    def prev(self):
+        self._index = (self._index - 1) % len(self)
+        return self.current()
