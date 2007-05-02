@@ -19,6 +19,7 @@ import sys
 import sets
 import sre
 import cgi
+import struct
 
 # Advene part
 import advene.core.config as config
@@ -949,6 +950,12 @@ class TimeLine(AdhocView):
                 l.extend(self.annotationtypes[j+1:])
                 self.annotationtypes = l
                 self.update_model(partial_update=True)
+        elif targetType == config.data.target_type['color']:
+            # Got a color
+            # The structure consists in 4 unsigned shorts: r, g, b, opacity
+            (r, g, b, opacity)=struct.unpack('HHHH', selection.data)
+            widget.annotationtype.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (r, g, b))
+            self.set_widget_background_color(widget)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -1781,9 +1788,10 @@ class TimeLine(AdhocView):
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                             gtk.DEST_DEFAULT_HIGHLIGHT |
                             gtk.DEST_DEFAULT_ALL,
-                            [ config.data.drag_type['annotation'][0],
-                              config.data.drag_type['annotation-type'][0] ],
-                            gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+                            config.data.drag_type['annotation'] +
+                            config.data.drag_type['annotation-type'] +
+                            config.data.drag_type['color'],
+                            gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_COPY)
             # The button can generate drags (to change annotation type order)
             b.connect("drag_data_get", self.type_drag_sent)
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
