@@ -26,6 +26,8 @@ import os
 
 from gettext import gettext as _
 
+import advene.core.config as config
+
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
@@ -294,6 +296,10 @@ class Menu:
                 self.delete_element(widget, e)
         return True
 
+    def pick_color(self, widget, element):
+        self.controller.gui.update_color(element)
+        return True
+
     def add_menuitem(self, menu=None, item=None, action=None, *param, **kw):
         if item is None or item == "":
             i = gtk.SeparatorMenuItem()
@@ -333,8 +339,6 @@ class Menu:
 
         if hasattr(element, 'viewableType'):
             self.make_bundle_menu(element, menu)
-            menu.show_all()
-            return menu
 
         specific_builder={
             Annotation: self.make_annotation_menu,
@@ -374,9 +378,9 @@ class Menu:
                                  Schema, AnnotationType, RelationType):
                 add_item(_("Delete"), self.delete_element, element)
 
-            # Common to offsetable elements
-            if type(element) in (Annotation, Schema, AnnotationType, Package):
-                add_item(_("Offset"), self.offset_element, element)
+            ## Common to offsetable elements
+            #if type(element) in (Annotation, Schema, AnnotationType, Package):
+            #    add_item(_("Offset"), self.offset_element, element)
 
         submenu.show_all()
         return submenu
@@ -506,6 +510,7 @@ class Menu:
                  self.create_element, AnnotationType, element)
         add_item(_("Create a new relation type..."),
                  self.create_element, RelationType, element)
+        add_item(_("Select a color"), self.pick_color, element)
         return
 
     def make_annotationtype_menu(self, element, menu):
@@ -514,6 +519,7 @@ class Menu:
         add_item(_("Display as transcription"), self.display_transcription, element)
         if self.readonly:
             return
+        add_item(_("Select a color"), self.pick_color, element)
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
         add_item(_("Delete all annotations..."), self.delete_elements, element, element.annotations)
         return
@@ -523,6 +529,7 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         if self.readonly:
             return
+        add_item(_("Select a color"), self.pick_color, element)
         add_item(_("Delete all relations..."), self.delete_elements, element, element.relations)
         return
 
