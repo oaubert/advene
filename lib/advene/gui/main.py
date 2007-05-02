@@ -92,6 +92,7 @@ from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.merge import Merger
 from advene.gui.edit.importer import ExternalImporter
+from advene.gui.views.colorpicker import ColorPicker
 import advene.gui.evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
@@ -593,6 +594,38 @@ class AdveneGUI (Connect):
         gobject.timeout_add (1000, self.slow_update_display)
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
+
+    def update_color(self, element):
+        """Update the color for the given element.
+
+        element may be AnnotationType, RelationType or Schema
+        """
+        try:
+            c=self.controller.build_context(here=element)
+            colname=c.evaluateValue(element.getMetaData(config.data.namespace, 'color'))
+            gtk_color=gtk.gdk.color_parse(colname)
+        except:
+            gtk_color=None
+        d=gtk.ColorSelectionDialog(_("Choose a color"))
+        if gtk_color:
+            d.colorsel.set_current_color(gtk_color)
+        res=d.run()
+        if res == gtk.RESPONSE_OK:
+            col=d.colorsel.get_current_color()
+            element.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (col.red, 
+                                                                                           col.green,
+                                                                                           col.blue))
+            # Notify the change
+            if isinstance(element, AnnotationType):
+                self.controller.notify('AnnotationTypeEditEnd', annotationtype=element)
+            elif isinstance(element, RelationType):
+                self.controller.notify('RelationTypeEditEnd', relationtype=element)
+            elif isinstance(element, Schema):
+                self.controller.notify('SchemaEditEnd', schema=element)
+        else:
+            col=None
+        d.destroy()
+        return col
 
     def set_current_annotation(self, a):
         self.current_annotation=a
@@ -1143,6 +1176,8 @@ class AdveneGUI (Connect):
                     self.edit_accumulator = None
                     return False 
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
+        elif name == 'colorpicker':
+            view = ColorPicker(controller=self.controller)
         if view is None:
             return view
         # Store destination and label, used when moving the view
