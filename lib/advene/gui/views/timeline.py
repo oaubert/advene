@@ -697,6 +697,11 @@ class TimeLine(AdhocView):
             self.legend.foreach(self.legend.remove)
             self.update_legend_widget(self.legend)
             self.legend.show_all()
+            # Update also its annotations, since representation or
+            # color may have changed
+            for b in self.layout.get_children():
+                if hasattr (b, 'annotation') and b.annotation.type == annotationtype:
+                    self.update_button (b)
         elif event == 'AnnotationTypeDelete':
             try:
                 self.annotationtypes.remove(annotationtype)
