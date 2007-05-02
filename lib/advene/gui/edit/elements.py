@@ -647,7 +647,22 @@ class EditSchemaPopup (EditElementPopup):
                          editable=editable,
                          tooltip=_("Textual description of the package"))
         self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
 
+        f = EditMetaForm(title=_("Color"),
+                         element=self.element, name='color',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable,
+                         tooltip=_("TALES expression returning a color for the element"))
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+
+        f = EditMetaForm(title=_("Item color"),
+                         element=self.element, name='item_color',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable,
+                         tooltip=_("TALES expression returning a color for the items contained by the element"))
+        self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
         return vbox
@@ -698,12 +713,19 @@ class EditAnnotationTypePopup (EditElementPopup):
 
         f = EditMetaForm(title=_("Color"),
                          element=self.element, name='color',
-                         controller=self.controller,
+                         namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("TALES expression specifying a color"))
+                         tooltip=_("TALES expression returning a color for the element"))
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
+        f = EditMetaForm(title=_("Item color"),
+                         element=self.element, name='item_color',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable,
+                         tooltip=_("TALES expression returning a color for the items contained by the element"))
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
         return vbox
 
 class EditRelationTypePopup (EditElementPopup):
@@ -752,7 +774,14 @@ class EditRelationTypePopup (EditElementPopup):
                          tooltip=_("Textual description of the package"))
 
         self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
 
+        f = EditMetaForm(title=_("Color"),
+                         element=self.element, name='color',
+                         controller=self.controller,
+                         editable=editable,
+                         tooltip=_("TALES expression specifying a color"))
+        self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
         return vbox
