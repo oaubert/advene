@@ -32,6 +32,7 @@ import gobject
 import pango
 import sre
 import os
+import struct
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
@@ -653,7 +654,8 @@ class EditSchemaPopup (EditElementPopup):
                          element=self.element, name='color',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("TALES expression returning a color for the element"))
+                         tooltip=_("TALES expression returning a color for the element"),
+                         type='color')
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -661,7 +663,8 @@ class EditSchemaPopup (EditElementPopup):
                          element=self.element, name='item_color',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("TALES expression returning a color for the items contained by the element"))
+                         tooltip=_("TALES expression returning a color for the items contained by the element"),
+                         type='color')
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -715,7 +718,8 @@ class EditAnnotationTypePopup (EditElementPopup):
                          element=self.element, name='color',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("TALES expression returning a color for the element"))
+                         tooltip=_("TALES expression returning a color for the element"),
+                         type='color')
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -723,7 +727,8 @@ class EditAnnotationTypePopup (EditElementPopup):
                          element=self.element, name='item_color',
                          namespaceid='advenetool', controller=self.controller,
                          editable=editable,
-                         tooltip=_("TALES expression returning a color for the items contained by the element"))
+                         tooltip=_("TALES expression returning a color for the items contained by the element"),
+                         type='color')
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
         return vbox
@@ -780,7 +785,8 @@ class EditRelationTypePopup (EditElementPopup):
                          element=self.element, name='color',
                          controller=self.controller,
                          editable=editable,
-                         tooltip=_("TALES expression specifying a color"))
+                         tooltip=_("TALES expression specifying a color"),
+                         type='color')
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -1343,7 +1349,8 @@ class EditFragmentForm(EditForm):
         return hbox
 
 class EditGenericForm(EditForm):
-    def __init__(self, title=None, getter=None, setter=None, controller=None, editable=True, tooltip=None):
+    def __init__(self, title=None, getter=None, setter=None, 
+                 controller=None, editable=True, tooltip=None, type=None):
         self.title=title
         self.getter=getter
         self.setter=setter
@@ -1352,6 +1359,7 @@ class EditGenericForm(EditForm):
         self.entry=None
         self.view=None
         self.tooltip=tooltip
+        self.type=type
 
     def get_view(self, compact=False):
         hbox = gtk.HBox()
@@ -1370,6 +1378,44 @@ class EditGenericForm(EditForm):
         self.entry.set_editable(self.editable)
         hbox.pack_start(self.entry)
 
+        if self.type == 'color':
+            b=gtk.ColorButton()
+            b.set_use_alpha(False)
+
+            if v:
+                c=self.controller.build_context()
+                try:
+                    color=c.evaluateValue(v)
+                    gtk_color=gtk.gdk.color_parse(color)
+                    b.set_color(gtk_color)
+                except:
+                    pass
+
+            def handle_color(button):
+                col=button.get_color()
+                self.entry.set_text("string:#%04x%04x%04x" % (col.red, col.green, col.blue))
+                return True
+
+            b.connect('color-set', handle_color)
+            hbox.pack_start(b, expand=False)
+
+            def drag_received(widget, context, x, y, selection, targetType, time):
+                """Handle the drop of a color.
+                """
+                if targetType == config.data.target_type['color']:
+                    # The structure consists in 4 unsigned shorts: r, g, b, opacity
+                    (r, g, b, opacity)=struct.unpack('HHHH', selection.data)
+                    self.entry.set_text("string:#%04x%04x%04x" % (r, g, b))
+                return False
+
+            # Allow the entry to get drops of type application/x-color
+            self.entry.connect("drag_data_received", drag_received)
+            self.entry.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                  gtk.DEST_DEFAULT_HIGHLIGHT |
+                                  gtk.DEST_DEFAULT_ALL,
+                                  config.data.drag_type['color'], gtk.gdk.ACTION_COPY)
+
+
         hbox.show_all()
         return hbox
 
@@ -1383,7 +1429,7 @@ class EditGenericForm(EditForm):
 class EditMetaForm(EditGenericForm):
     def __init__(self, title=None, element=None, name=None,
                  namespaceid='advenetool', controller=None,
-                 editable=True, tooltip=None):
+                 editable=True, tooltip=None, type=None):
         getter=self.metadata_get_method(element, name, namespaceid)
         setter=self.metadata_set_method(element, name, namespaceid)
         super(EditMetaForm, self).__init__(title=title,
@@ -1391,7 +1437,8 @@ class EditMetaForm(EditGenericForm):
                                            setter=setter,
                                            controller=controller,
                                            editable=editable,
-                                           tooltip=tooltip)
+                                           tooltip=tooltip, 
+                                           type=type)
 
 class EditAttributesForm (EditForm):
     """Creates an edit form for the given element."""
