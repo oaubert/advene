@@ -290,6 +290,7 @@ class Config(object):
 	    ('annotation-resize', 50, None),
             ('timestamp',         51, 'application/x-advene-timestamp'),
             ('tag',               52, None),
+            ('color',             53, 'application/x-color'),
 	    ('uri-list',          80, 'text/uri-list'),
 	    ):
 	    self.target_type[name] = type
