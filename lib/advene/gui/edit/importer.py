@@ -56,6 +56,8 @@ class ExternalImporter(AdhocView):
             self.convert_button.set_sensitive(True)
         else:
             # Invalid filenames. Empty importers and disable convert button
+            model.append( (_("No valid importer"), None) )
+            self.importers.set_active(0)
             self.convert_button.set_sensitive(False)
 
         return True
@@ -145,6 +147,8 @@ class ExternalImporter(AdhocView):
 
         vbox.buttonbox=bb
         vbox.pack_start(bb, expand=False)
+
+        self.update_importers()
 
         vbox.show_all()
 
