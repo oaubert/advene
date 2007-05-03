@@ -1155,6 +1155,7 @@ class IRIImporter(GenericImporter):
         super(IRIImporter, self).__init__(**kw)
         self.atypes={}
         self.duration=0
+        self.multiple_types=False
 
     def can_handle(fname):
         if fname.endswith('.iri'):
@@ -1226,6 +1227,19 @@ class IRIImporter(GenericImporter):
                     # No defined views
                     views=[]
                 for view in views:
+                    if self.multiple_types:
+                        tid=view.id
+                        if not self.atypes.has_key(tid):
+                            at=self.create_annotation_type(schema, tid,
+                                                           mimetype='text/plain',
+                                                           author=view.author or self.author,
+                                                           title= view.title,
+                                                           date = view.date,
+                                                           description=view.abstract)
+                            at.setMetaData(config.data.namespace, "color", decoupage.color)
+                            self.atypes[tid]=at
+                        else:
+                            at=self.atypes[tid]
                     progress += incr
                     self.progress(progress, view.title)
                     print "     ", view.title.encode('latin1')
@@ -1234,8 +1248,20 @@ class IRIImporter(GenericImporter):
                         if not an:
                             print "Invalid id", ref.id
                         else:
-                            an[0].content.data += '\n%s=%s' % (view.id,
-                                                               ref.type.encode('utf-8').replace('\n', '\\n'))
+                            an=an[0]
+                            if self.multiple_types:
+                                d={
+                                   'type': at,
+                                   'begin': an.fragment.begin,
+                                   'end': an.fragment.end,
+                                   'author': an.author,
+                                   'date': an.date,
+                                   'content': ref.type.encode('utf-8')
+                                   }
+                                yield d
+                            else:
+                                an[0].content.data += '\n%s=%s' % (view.id,
+                                                                   ref.type.encode('utf-8').replace('\n', '\\n'))
 
     def process_file(self, filename):
         iri=handyxml.xml(filename)
