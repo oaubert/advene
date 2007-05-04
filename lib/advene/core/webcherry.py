@@ -608,8 +608,8 @@ class Application(Common):
         c=self.controller
         res.append(_("""<p>Current stbv: %s</p>""") % c.get_title(c.current_stbv))
         res.append(_("""<p>You can activate the following STBV:</p><ul>%s</ul>""")
-                         % "\n".join( [ """<li><a href="/application/stbv/%s">%s</a> (<a href="/media/play/0?stbv=%s">Activate and play</a>)</li>""" %
-                                        (s.id, c.get_title(s), s.id)
+                         % "\n".join( [ """<li><a href="/application/stbv/%s">%s</a> (<a href="/media/play/0?stbv=%s">%s</a>)</li>""" %
+                                        (s.id, c.get_title(s), s.id, _("Activate and play"))
                                         for s in c.get_stbv_list() ] ) )
         return "".join(res)
 

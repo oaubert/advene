@@ -24,8 +24,7 @@ View, Package).
 """
 
 import advene.core.config as config
-import gettext
-gettext.install('advene', unicode=True)
+from gettext import gettext as _
 
 import gtk
 import gobject

@@ -56,6 +56,7 @@ gettext.textdomain(APP)
 gettext.install(APP, localedir=config.data.path['locale'], unicode=True)
 gtk.glade.bindtextdomain(APP, config.data.path['locale'])
 gtk.glade.textdomain(APP)
+from gettext import gettext as _
 
 import advene.core.controller
 
@@ -220,12 +221,12 @@ class AdveneGUI (Connect):
         # Generate the adhoc view buttons
         hb=self.gui.get_widget('adhoc_hbox')
         for name, tip, pixmap in (
-            ('treeview', _('Open a tree view'), 'treeview.png'),
-            ('timeline', _('Display a timeline'), 'timeline.png'),
-            ('transcription', _('Display annotations as a transcription'), 'transcription.png'),
-            ('browser', _('Open a package browser'), 'browser.png'),
-            ('webbrowser', _('Open a web browser'), 'web.png'),
-            ('transcribe', _('Take notes on the fly'), 'transcribe.png'),
+            ('treeview', _('Tree view'), 'treeview.png'),
+            ('timeline', _('Timeline'), 'timeline.png'),
+            ('transcription', _('Transcription of annotations'), 'transcription.png'),
+            ('browser', _('Package browser'), 'browser.png'),
+            ('webbrowser', _('Web browser'), 'web.png'),
+            ('transcribe', _('Note-taking editor'), 'transcribe.png'),
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
             ('history', _('Entry points'), 'history.png'),
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
@@ -277,6 +278,7 @@ class AdveneGUI (Connect):
         b=advene.gui.util.get_small_stock_button(gtk.STOCK_FIND,
                                                  self.do_quicksearch)
         b.connect('button-press-event', quicksearch_options)
+        self.tooltips.set_tip(b, _("Left click to launch the search, right-click to set the quicksearch options"))
         hb.pack_start(b, expand=False, fill=False)
         hb.show_all()
 
