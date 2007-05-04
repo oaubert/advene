@@ -92,7 +92,6 @@ from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.merge import Merger
 from advene.gui.edit.importer import ExternalImporter
-from advene.gui.views.colorpicker import ColorPicker
 import advene.gui.evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
@@ -1176,8 +1175,6 @@ class AdveneGUI (Connect):
                     self.edit_accumulator = None
                     return False 
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
-        elif name == 'colorpicker':
-            view = ColorPicker(controller=self.controller)
         if view is None:
             return view
         # Store destination and label, used when moving the view
