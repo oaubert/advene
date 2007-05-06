@@ -315,13 +315,14 @@ class TimeLine(AdhocView):
                         t = r.content.data
             if t:
                 l.set_text(t)
-                # FIXME: We draw the relation type on a white background,
+                # We draw the relation type on a white background by default,
                 # but this should depend on the active gtk theme
+                color=self.get_widget_color(r) or self.colors['white']
                 drawable.draw_layout(gc,
                                      (r1.x + r2.x ) / 2,
                                      (r1.y + r2.y ) / 2,
                                      l,
-                                     background=self.colors['white']
+                                     background=color
                                      )
         return False
 
