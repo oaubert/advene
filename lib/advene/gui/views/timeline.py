@@ -20,6 +20,13 @@ import sets
 import sre
 import cgi
 import struct
+import gtk
+try:
+    import cairo
+except ImportError:
+    pass
+import pango
+from gettext import gettext as _
 
 # Advene part
 import advene.core.config as config
@@ -33,13 +40,12 @@ from advene.gui.edit.create import CreateElementPopup
 
 import advene.util.helper as helper
 import advene.gui.util
-
-from gettext import gettext as _
+try:
+    from advene.gui.annotation import AnnotationWidget
+except:
+    AnnotationWidget=None
 
 import advene.gui.edit.elements
-
-import gtk
-import pango
 
 parsed_representation = sre.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 
@@ -306,7 +312,7 @@ class TimeLine(AdhocView):
     def update_relation_lines(self):
         self.layout.queue_draw()
 
-    def draw_relation_lines(self, layout, event):
+    def draw_relation_lines_old(self, layout, event):
         if not self.relations_to_draw:
             return False
         drawable=layout.bin_window
@@ -352,6 +358,67 @@ class TimeLine(AdhocView):
                                      background=color
                                      )
         return False
+
+    def draw_relation_lines_cairo(self, layout, event):
+        if not self.relations_to_draw:
+            return False
+        context=layout.bin_window.cairo_create()
+
+        for b1, b2, r in self.relations_to_draw:
+            r1 = b1.get_allocation()
+            r2 = b2.get_allocation()
+            x_start = r1.x + 3 * r1.width / 4
+            y_start  = r1.y + r1.height / 4
+            x_end=r2.x + r2.width / 4
+            y_end=r2.y + 3 * r2.height / 4
+            context.set_source_rgb(0, 0, 0)
+            context.set_line_width(1)
+            context.move_to(x_start, y_start)
+            context.line_to(x_end, y_end)
+            context.stroke()
+            # Display the starting mark
+            context.rectangle(x_start - 2, y_start - 2,
+                              4, 4)
+            context.fill()
+
+            t=""
+            if self.options['display-relation-type']:
+                t = r.type.title
+            if self.options['display-relation-content']:
+                if r.content.data:
+                    if t:
+                        t += "\n" + r.content.data
+                    else:
+                        t = r.content.data
+            if t:
+                context.select_font_face("Helvetica",
+                                         cairo.FONT_SLANT_NORMAL, 
+                                         cairo.FONT_WEIGHT_NORMAL)
+                context.set_font_size(config.data.preferences['timeline']['font-size'])
+                ext=context.text_extents(t)
+
+                # We draw the relation type on a white background by default,
+                # but this should depend on the active gtk theme
+                color=self.get_element_color(r) or self.colors['white']
+                context.set_source_rgb(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0)
+                context.rectangle((x_start + x_end ) / 2,
+                                  (y_start + y_end ) / 2 - ext[3] - 4,
+                                  ext[2] + 2, 
+                                  ext[3] + 2)
+                context.fill()
+                
+                context.set_source_rgb(0, 0, 0)
+                context.move_to((x_start + x_end ) / 2,
+                                (y_start + y_end ) / 2)
+                context.show_text(t)
+            context.stroke()
+
+        return False
+
+    if AnnotationWidget is not None:
+        draw_relation_lines=draw_relation_lines_cairo
+    else:
+        draw_relation_lines=draw_relation_lines_old
 
     def update_model(self, package=None, partial_update=False):
         """Update the whole model.
@@ -543,6 +610,9 @@ class TimeLine(AdhocView):
         controller.event_handler.remove_rule(self.tagrule, type_="internal")
 
     def set_widget_background_color(self, widget, color=None):
+        if isinstance(widget, AnnotationWidget):
+            widget.update_widget()
+            return True
         if color is None:
             try:
                 color=widget._default_color
@@ -659,23 +729,9 @@ class TimeLine(AdhocView):
     def update_button (self, b):
         """Update the representation for button b.
         """
-        a = b.annotation
-        l = b.label
-        u2p = self.unit2pixel
-        title=helper.get_title(self.controller, a)
-        if a.relations:
-            l.set_markup('<u>%s</u>' % title)
-        else:
-            l.set_text(title)
-        b._default_color=self.colors['inactive']
-        color=self.get_element_color(a)
-        if color:
-            b._default_color=color
-            self.set_widget_background_color(b)
-        b.set_size_request(u2p(a.fragment.duration),
-                           self.button_height)
-
-        self.layout.move(b, u2p(a.fragment.begin), self.layer_position[a.type])
+        b.update_widget()
+        a=b.annotation
+        self.layout.move(b, self.unit2pixel(a.fragment.begin), self.layer_position[a.type])
         return True
 
     def update_annotation (self, annotation=None, event=None):
@@ -1255,14 +1311,11 @@ class TimeLine(AdhocView):
             return None
 
         u2p = self.unit2pixel
-        b = gtk.Button()
-        b.label = gtk.Label()
-        b.label.modify_font(self.annotation_font)
-        b.add(b.label)
+        b = AnnotationWidget(annotation=annotation, container=self)
         b.active = False
-        b.annotation = annotation
         # Put at a default position.
         self.layout.put(b, 0, 0)
+        b.show()
         self.update_button(b)
 
         b.connect("button_press_event", self.annotation_button_press_cb, annotation)
@@ -1713,11 +1766,9 @@ class TimeLine(AdhocView):
         """Update the annotation widget position.
         """
         if hasattr (widget, 'annotation'):
-            u2p = self.unit2pixel
-            widget.set_size_request(u2p(widget.annotation.fragment.duration),
-                                    self.button_height)
+            widget.update_widget()
             self.layout.move (widget,
-                              u2p(widget.annotation.fragment.begin),
+                              self.unit2pixel(widget.annotation.fragment.begin),
                               self.layer_position[widget.annotation.type])
         return True
 
@@ -2170,3 +2221,52 @@ class TimeLine(AdhocView):
         """
         a=self.adjustment
         a.value = max(0, self.unit2pixel(pos) - a.page_size / 2)
+
+class OldAnnotationWidget(gtk.Button):
+    """Old method to render annotation widgets (in order to be usable on
+       fink with gtk == 2.6 and no cairo is available)
+    """
+    def __init__(self, annotation=None, container=None):
+        gtk.Button.__init__(self)
+        self.annotation=annotation
+        # container is the Advene view instance that manages this instance
+        self.container=container
+        if container:
+            self.controller=container.controller
+        else:
+            self.controller=None
+
+        self.label=gtk.Label()
+        self.label.modify_font(self.container.annotation_font)
+
+        self.add(self.label)
+        w=self.container.unit2pixel(self.annotation.fragment.duration)
+        self.set_size_request(w, self.container.button_height)
+
+    def update_widget(self):
+        if not self.window:
+            return False
+
+        # First check width
+        w=self.container.unit2pixel(self.annotation.fragment.duration)
+        if w != self.window.get_size()[0]:
+            self.set_size_request(w, self.container.button_height)
+
+        color=self.container.get_element_color(self.annotation)
+        if color:
+            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                          gtk.STATE_PRELIGHT):
+                self.modify_bg (style, color)
+
+        # Draw the text
+        title=self.controller.get_title(self.annotation)
+        if self.annotation.relations:
+            self.label.set_markup('<u>%s</u>' % title)
+        else:
+            self.label.set_text(title)
+        return True
+
+if AnnotationWidget is None:
+    AnnotationWidget=OldAnnotationWidget
+
