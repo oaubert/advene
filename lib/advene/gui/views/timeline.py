@@ -1514,7 +1514,7 @@ class TimeLine(AdhocView):
         """Handle right-mouse click in timeline window.
         """
         retval = False
-        if event.button == 3 or event.button == 1:
+        if event.button == 3:
             self.context_cb (timel=self, position=self.pixel2unit(event.x), height=event.y)
             retval = True
         return retval
