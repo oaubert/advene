@@ -1927,7 +1927,7 @@ class AdveneWebServer:
             return False
 
     def start(self):
-        cherrypy.engine.start()
+        self.controller.queue_action(cherrypy.engine.start, False)
         return True
 
     def stop(self):
