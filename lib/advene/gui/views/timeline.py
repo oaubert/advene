@@ -43,6 +43,36 @@ import pango
 
 parsed_representation = sre.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 
+class QuickviewBar(gtk.HBox):
+    def __init__(self, controller=None):
+        gtk.HBox.__init__(self)
+        self.controller=controller
+        self.begin=gtk.Label()
+        self.end=gtk.Label()
+        self.content=gtk.Label()
+
+        self.annotation=None
+
+        self.pack_start(self.begin, expand=False)
+        self.pack_start(self.end, expand=False)
+        self.add(self.content)
+
+    def set_annotation(self, a=None):
+        if a is None:
+            b=""
+            e=""
+            c=""
+        else:
+            b=helper.format_time(a.fragment.begin)
+            e=" - " + helper.format_time(a.fragment.end) + ": "
+            c=self.controller.get_title(a)
+            if len(c) > 40:
+                c=c[:40]
+        self.annotation=a
+        self.begin.set_text(b)
+        self.end.set_text(e)
+        self.content.set_markup("<b>%s</b>" % c)
+
 class TimeLine(AdhocView):
     """
     Representation of a list of annotations placed on a timeline.
@@ -109,7 +139,6 @@ class TimeLine(AdhocView):
         self.list = elements
         self.annotationtypes = annotationtypes
         self.tooltips = gtk.Tooltips()
-        self.annotation_tips = gtk.Tooltips()
 
         self.current_marker = None
         # Now that self.list is initialized, we reuse the l variable
@@ -216,8 +245,6 @@ class TimeLine(AdhocView):
         #self.layout.bin_window.get_colormap().alloc_color(self.colors['relations'])
         self.layout.connect('scroll_event', self.layout_scroll_cb)
         self.layout.connect('key_press_event', self.layout_key_press_cb)
-        self.layout.connect('enter_notify_event', self.layout_enter_cb)
-        self.layout.connect('leave_notify_event', self.layout_leave_cb)
         self.layout.connect('button_press_event', self.layout_button_press_cb)
         self.layout.connect('size_allocate', self.layout_resize_event)
         self.layout.connect('map', self.layout_resize_event)
@@ -649,11 +676,6 @@ class TimeLine(AdhocView):
                            self.button_height)
 
         self.layout.move(b, u2p(a.fragment.begin), self.layer_position[a.type])
-        tip = _("%(title)s\nBegin: %(begin)s\tEnd: %(end)s") % {
-            'title': title,
-            'begin': helper.format_time(a.fragment.begin),
-            'end': helper.format_time(a.fragment.end) }
-        self.annotation_tips.set_tip(b, tip)
         return True
 
     def update_annotation (self, annotation=None, event=None):
@@ -1185,7 +1207,8 @@ class TimeLine(AdhocView):
             return True
         return False
 
-    def rel_activate(self, button):
+    def rel_activate(self, button, event):
+        self.statusbar.set_annotation(button.annotation)
         button.grab_focus()
         if self.options['display-relations']:
             a=button.annotation
@@ -1203,11 +1226,8 @@ class TimeLine(AdhocView):
             self.update_relation_lines()
         return True
 
-    def rel_deactivate(self, button):
-        d=self.annotation_tips.active_tips_data
-        if d and d[1] == button:
-            # Hide the tooltip
-            button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
+    def rel_deactivate(self, button, event):
+        self.statusbar.set_annotation(None)
         if self.options['display-relations']:
             self.relations_to_draw = []
             self.update_relation_lines()
@@ -1248,8 +1268,8 @@ class TimeLine(AdhocView):
         b.connect("button_press_event", self.annotation_button_press_cb, annotation)
         b.connect("key_press_event", self.annotation_key_press_cb, annotation)
 
-        b.connect("enter", self.rel_activate)
-        b.connect("leave", self.rel_deactivate)
+        b.connect("enter_notify_event", self.rel_activate)
+        b.connect("leave_notify_event", self.rel_deactivate)
 
         def focus_in(b, event):
             if (self.options['autoscroll'] and
@@ -1318,8 +1338,7 @@ class TimeLine(AdhocView):
 
             self.controller.notify('AnnotationEditEnd', annotation=button.annotation)
             # Update the tooltip
-            if self.annotation_tips.active_tips_data is None:
-                button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
+            self.statusbar.set_annotation(self.annotation)
             button.grab_focus()
             return True
 
@@ -1454,17 +1473,6 @@ class TimeLine(AdhocView):
                 maximum = a.fragment.end
         return minimum, maximum
 
-    def layout_enter_cb(self, layout, event):
-        if self.display_tooltips_toggle.get_active():
-            self.annotation_tips.enable()
-        else:
-            self.annotation_tips.disable()
-        return True
-
-    def layout_leave_cb(self, layout, event):
-        self.annotation_tips.disable()
-        return True
-
     def layout_key_press_cb (self, win, event):
         """Handles key presses in the timeline background
         """
@@ -1484,6 +1492,10 @@ class TimeLine(AdhocView):
             self.fraction_adj.value=1.0/pow(2, event.keyval-49)
             self.set_middle_position(pos)
             return True
+        elif event.keyval == gtk.keysyms.e:
+            if self.statusbar.annotation is not None:
+                self.controller.gui.edit_element(self.statusbar.annotation)
+                return True
         elif event.keyval == gtk.keysyms.p:
             # Play at the current position
             x, y = win.get_pointer()
@@ -1495,10 +1507,6 @@ class TimeLine(AdhocView):
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
-            return True
-        elif event.keyval == gtk.keysyms.t:
-            # Toggle tooltips display
-            self.display_tooltips_toggle.set_active(not self.display_tooltips_toggle.get_active())
             return True
         return False
 
@@ -1852,6 +1860,12 @@ class TimeLine(AdhocView):
         hb=gtk.HBox()
         toolbar = self.get_toolbar()
         hb.add(toolbar)
+
+        self.statusbar=QuickviewBar(self.controller)
+        ti=gtk.ToolItem()
+        ti.add(self.statusbar)
+        toolbar.insert(ti, -1)
+
         if self.controller.gui:
             self.player_toolbar=self.controller.gui.get_player_control_toolbar()
             hb.add(self.player_toolbar)
@@ -1933,23 +1947,6 @@ class TimeLine(AdhocView):
         self.display_relations_toggle.set_active(self.options['display-relations'])
         self.display_relations_toggle.connect('toggled', handle_toggle, 'display-relations')
         tb.insert(self.display_relations_toggle, -1)
-
-        def handle_tooltip_toggle(b):
-            if b.get_active():
-                self.annotation_tips.enable()
-            else:
-                self.annotation_tips.disable()
-            return True
-
-        try:
-            sid=gtk.STOCK_INFO
-        except:
-            sid=gtk.STOCK_HELP
-        self.display_tooltips_toggle=gtk.ToggleToolButton(stock_id=sid)
-        self.display_tooltips_toggle.set_tooltip(self.tooltips, _("Display tooltips"))
-        self.display_tooltips_toggle.connect('toggled', handle_tooltip_toggle)
-        self.display_tooltips_toggle.set_active(True)
-        tb.insert(self.display_tooltips_toggle, -1)
 
         tb.insert(gtk.SeparatorToolItem(), -1)
 
