@@ -344,7 +344,7 @@ class TimeLine(AdhocView):
                 l.set_text(t)
                 # We draw the relation type on a white background by default,
                 # but this should depend on the active gtk theme
-                color=self.get_widget_color(r) or self.colors['white']
+                color=self.get_element_color(r) or self.colors['white']
                 drawable.draw_layout(gc,
                                      (r1.x + r2.x ) / 2,
                                      (r1.y + r2.y ) / 2,
@@ -596,7 +596,7 @@ class TimeLine(AdhocView):
     def pixel2unit (self, v):
         return v * self.ratio_adjustment.value
 
-    def get_widget_color(self, element, metadata='color'):
+    def get_element_color(self, element, metadata='color'):
         """Return the color for the given element.
 
         Return None if no color is defined.
@@ -639,7 +639,7 @@ class TimeLine(AdhocView):
                         color=None
                 if not color:
                     # Really not found. So use the container color.
-                    return self.get_widget_color(container)
+                    return self.get_element_color(container)
 
         if color:
             # Found a color. Cache it.
@@ -668,7 +668,7 @@ class TimeLine(AdhocView):
         else:
             l.set_text(title)
         b._default_color=self.colors['inactive']
-        color=self.get_widget_color(a)
+        color=self.get_element_color(a)
         if color:
             b._default_color=color
             self.set_widget_background_color(b)
@@ -1787,7 +1787,7 @@ class TimeLine(AdhocView):
             layout.put (b, 0, self.layer_position[t])
             b.annotationtype=t
 
-            color=self.get_widget_color(t)
+            color=self.get_element_color(t)
             if color:
                 b._default_color=color
                 self.set_widget_background_color(b)
