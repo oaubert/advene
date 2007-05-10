@@ -45,7 +45,13 @@ class AnnotationWidget(gtk.DrawingArea):
     """
     def __init__(self, annotation=None, container=None):
         gtk.DrawingArea.__init__(self)
+        self.set_flags(self.flags() | gtk.CAN_FOCUS)
         self.annotation=annotation
+        
+        # If not None, it should contain a gtk.gdk.Color
+        # which will override the normal color
+        self.local_color=None
+
         # container is the Advene view instance that manages this instance
         self.container=container
         if container:
@@ -67,6 +73,8 @@ class AnnotationWidget(gtk.DrawingArea):
         self.connect("expose-event", self.expose_cb)
         self.connect("realize", self.realize_cb)
         self.connect_after('size-request', self.size_request_cb)
+        self.connect('focus-in-event', self.update_widget)
+        self.connect('focus-out-event', self.update_widget)
 
         self.annotation_surface = None
         self.annotation_context = None
@@ -103,7 +111,12 @@ class AnnotationWidget(gtk.DrawingArea):
         self.refresh()
         return False
 
-    def update_widget(self):
+    def set_color(self, color=None):
+        self.local_color=color
+        self.update_widget()
+        return True
+
+    def update_widget(self, *p):
         if not self.window:
             return False
         if self.annotation_context is None:
@@ -130,7 +143,10 @@ class AnnotationWidget(gtk.DrawingArea):
         #     c.rel_line_to(0, -4)
         #     c.close_path()
         self.annotation_context.rectangle(0, 0, bwidth, bheight)
-        color=self.container.get_element_color(self.annotation)
+        if self.local_color is not None:
+            color=self.local_color
+        else:
+            color=self.container.get_element_color(self.annotation)
         if color:
             rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, .7)
         else:
@@ -139,9 +155,12 @@ class AnnotationWidget(gtk.DrawingArea):
         self.annotation_context.fill_preserve()
         
         # Draw the border
+        if self.is_focus():
+            self.annotation_context.set_line_width(4)
+        else:
+            self.annotation_context.set_line_width(1)
         self.annotation_context.set_source_rgba(0, 0, 0, .9)
         self.annotation_context.stroke()
-        self.annotation_context.set_line_width(1)
         
         # Draw the text
         if self.annotation.relations:
@@ -182,4 +201,4 @@ class AnnotationWidget(gtk.DrawingArea):
         context.set_source_surface(self.annotation_surface, 0, 0)
         #context.paint_with_alpha(.9)
         context.paint()
-        return True
+        return False
