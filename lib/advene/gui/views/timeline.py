@@ -183,16 +183,13 @@ class TimeLine(AdhocView):
         self.maximum = maximum
 
         self.colors = {
-            'active': gtk.gdk.color_parse ('red'),
+            'active': gtk.gdk.color_parse ('#fdfd4b'),
             'inactive': gtk.Button().get_style().bg[0],
-            'incoming': gtk.gdk.color_parse ('green'),
-            'outgoing': gtk.gdk.color_parse ('yellow'),
             'background': gtk.gdk.color_parse('red'),
             'relations': gtk.gdk.color_parse('orange'),
             'white': gtk.gdk.color_parse('white'),
             }
         self.widget_colors = {
-            'inactive': self.colors['inactive']
             }
 
         def handle_toggle(b, option):
@@ -635,8 +632,7 @@ class TimeLine(AdhocView):
         if color is None:
             color=self.colors['active']
         for b in buttons:
-            b.active = True
-            self.set_widget_background_color(b, color)
+            b.set_color(color)
         return True
 
     def desactivate_annotation (self, annotation, buttons=None):
@@ -648,8 +644,7 @@ class TimeLine(AdhocView):
             else:
                 return True
         for b in buttons:
-            b.active = False
-            self.set_widget_background_color(b, b._default_color)
+            b.set_color(None)
         return True
 
     def toggle_annotation (self, annotation):
@@ -1296,7 +1291,7 @@ class TimeLine(AdhocView):
             try:
                 if widget.active:
                     widget.active = False
-                    self.set_widget_background_color(widget, widget._default_color)
+                    widget.update_widget()
             except AttributeError:
                 pass
             return True
@@ -1391,7 +1386,7 @@ class TimeLine(AdhocView):
 
             self.controller.notify('AnnotationEditEnd', annotation=button.annotation)
             # Update the tooltip
-            self.statusbar.set_annotation(self.annotation)
+            self.statusbar.set_annotation(button.annotation)
             button.grab_focus()
             return True
 
@@ -2236,12 +2231,17 @@ class OldAnnotationWidget(gtk.Button):
         else:
             self.controller=None
 
+        self.local_color=None
         self.label=gtk.Label()
         self.label.modify_font(self.container.annotation_font)
 
         self.add(self.label)
         w=self.container.unit2pixel(self.annotation.fragment.duration)
         self.set_size_request(w, self.container.button_height)
+
+    def set_color(self, color=None):
+        self.local_color=color
+        self.update_widget()
 
     def update_widget(self):
         if not self.window:
@@ -2252,7 +2252,10 @@ class OldAnnotationWidget(gtk.Button):
         if w != self.window.get_size()[0]:
             self.set_size_request(w, self.container.button_height)
 
-        color=self.container.get_element_color(self.annotation)
+        if self.local_color is not None:
+            color=self.local_color
+        else:
+            color=self.container.get_element_color(self.annotation)
         if color:
             for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
                           gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
