@@ -635,7 +635,7 @@ class AdveneGUI (Connect):
     def update_loop_button(self):
         b=self.loop_toggle_button
         if self.current_annotation is None:
-            mes=_("No loop annotation")
+            mes=_("Select an annotation to loop on it")
         else:
             mes=_("Looping on %s") % self.controller.get_title(self.current_annotation)
         b.set_tooltip(self.tooltips, mes)
