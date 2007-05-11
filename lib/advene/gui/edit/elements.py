@@ -1421,7 +1421,7 @@ class EditGenericForm(EditForm):
     def update_element(self):
         if not self.editable:
             return False
-        v=self.entry.get_text()
+        v=unicode(self.entry.get_text())
         self.setter(v)
         return True
 
