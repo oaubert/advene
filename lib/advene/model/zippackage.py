@@ -156,15 +156,11 @@ class ZipPackage:
 
         os.mkdir(self.tempfile(u'resources'))
 
-    def open(self, fname=None):
-	"""Open the given AZP file.
-	
-	@param fname: the file name
-	@type fname: string
-	"""
-        if fname is None:
-            fname=self.file_
+    def extract(self, fname):
+        """Extract the zip file to a temporary directory.
 
+        Return the temporary directory name.
+        """
         z=zipfile.ZipFile(fname, 'r')
 
         def recursive_mkdir(d):
@@ -207,6 +203,31 @@ class ZipPackage:
         resource_dir = self.tempfile(u'resources' )
         if not os.path.exists(resource_dir):
             os.mkdir(resource_dir)
+        return self._tempdir
+
+    def open(self, fname=None):
+	"""Open the given AZP file.
+	
+        It can also be a directory name containing an expanded AZP tree.
+
+	@param fname: the file name
+	@type fname: string
+	"""
+        if fname is None:
+            fname=self.file_
+
+        if os.path.isdir(fname):
+            # Do not append the dir to tempdir_list, since we do not
+            # want it to be removed upon application exit.
+            self._tempdir=fname
+            try:
+                typ=open(self.tempfile(u'mimetype'), 'r').read()
+            except IOError:
+                typ=None
+            if typ != MIMETYPE:
+                raise AdveneException(_("Directory %s is not an extracted Advene zip package.") % fname)
+        else:
+            self._tempdir=self.extract(fname)
 
         # FIXME: Check against the MANIFEST file
         for (name, mimetype) in self.manifest_to_list(self.tempfile(u'META-INF', u'manifest.xml')):
@@ -225,7 +246,11 @@ class ZipPackage:
         if fname is None:
             fname=self.file_
 
-        z=zipfile.ZipFile(fname, 'w')
+        if os.path.isdir(fname):
+            z=None
+        else:
+            z=zipfile.ZipFile(fname, 'w')
+
         manifest=[]
 
         for (dirpath, dirnames, filenames) in os.walk(self._tempdir):
@@ -249,14 +274,20 @@ class ZipPackage:
                 if isinstance(name, str):
                     name=unicode(name, _fs_encoding)
                 manifest.append(name)
-                z.writestr( name.encode('utf-8'),
-                            open(os.path.join(dirpath, f)).read() )
+                if z is not None:
+                    z.writestr( name.encode('utf-8'),
+                                open(os.path.join(dirpath, f)).read() )
 
-        # Generation of the manifest file
-        z.writestr( "META-INF/manifest.xml", 
-                    self.list_to_manifest(manifest) )
-
-        z.close()
+        if z is not None:
+            # Generation of the manifest file
+            z.writestr( "META-INF/manifest.xml", 
+                        self.list_to_manifest(manifest) )
+            z.close()
+        else:
+            # Generation of the manifest file
+            f=open(self.tempfile(u"META-INF", u"manifest.xml"), 'w')
+            f.write(self.list_to_manifest(manifest))
+            f.close()
 
     def update_statistics(self, p):
         """Update the META-INF/statistics.xml file
