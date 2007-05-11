@@ -1,3 +1,44 @@
+advene (0.23) unstable; urgency=low
+  
+  * Model: it is possible to open uncompressed .azp packages. The
+    directory name must end with the .azp extension.
+
+  * GUI:
+    * Dialogs position is centered on the mouse cursor  
+    * New layout: adhoc views can be put at the west, east and south
+      of the video window, as well as the right side of the application
+      window
+    * Quicksearch functionality (text entry at the top right hand corner),
+      with options through right-click on the search icon
+    * Search results are displayed in a table
+    * Clicking on an adhoc-view icon will display a contextual menu to
+      offer various display options (embed, popup...)
+    * Allow to move adhoc views from one zone to another
+    * Element creation: ask for a title, and generate a valid id from it
+    
+  * Widget colors: 
+    * container types (schema, annotation-type,
+      relation-type) have a 'color' and 'item_color' metadata attribute,
+      which hold TALES expressions returning color (names or code in the
+      form #RRGGBB). An element will first check if it has a valid color
+      attribute. If not, it will check if its container has a valid
+      item_color attribute. If not, it will use its container color.
+    * colored annotations work on Win32
+
+  * Timeline: GUI rework
+    * replace zoom slider by a zoom combo box + zoom in/out buttons
+    * draw separators between annotation type lines
+    * replace toolbar mode buttons by a popup menu when drag-and-dropping
+      annotations (relation creation, annotation alignment...)
+    * annotation tooltips are replaced by a status line in the toolbar
+
+  * Treeview:
+    * views are sorted alphabetically and categorized (static, dynamic, adhoc)
+
+  * New global method: representation, which returns a concise
+    representation for the element.
+ --
+
 advene (0.22) unstable; urgency=low
 
   * It is possible to enter a googlevideo/youtube/dailymotion URL in the
