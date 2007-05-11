@@ -90,10 +90,18 @@ class Menu:
         return True
 
     def create_element(self, widget, elementtype=None, parent=None):
-        #print "Creating a %s in %s" % (elementtype, parent)
+        if elementtype == 'staticview':
+            elementtype=View
+            mimetype='text/html'
+        elif elementtype == 'dynamicview':
+            elementtype=View
+            mimetype='application/x-advene-ruleset'
+        else:
+            mimetype=None
         cr = advene.gui.edit.create.CreateElementPopup(type_=elementtype,
                                                        parent=parent,
-                                                       controller=self.controller)
+                                                       controller=self.controller,
+                                                       mimetype=mimetype)
         cr.popup()
         return True
 
@@ -475,7 +483,8 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         if self.readonly:
             return
-        add_item(_("Create a new view..."), self.create_element, View, element)
+        add_item(_("Create a new static view..."), self.create_element, 'staticview', element)
+        add_item(_("Create a new dynamic view..."), self.create_element, 'dynamicview', element)
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
         #add_item(_("Create a new relation..."), self.create_element, Relation, element)
         add_item(_("Create a new schema..."), self.create_element, Schema, element)
@@ -557,7 +566,8 @@ class Menu:
         if element.viewableType == 'query-list':
             add_item(_("Create a new query..."), self.create_element, Query, element.rootPackage)
         elif element.viewableType == 'view-list':
-            add_item(_("Create a new view..."), self.create_element, View, element.rootPackage)
+            add_item(_("Create a new static view..."), self.create_element, 'staticview', element.rootPackage)
+            add_item(_("Create a new dynamic view..."), self.create_element, 'dynamicview', element.rootPackage)
         elif element.viewableType == 'schema-list':
             add_item(_("Create a new schema..."), self.create_element, Schema, element.rootPackage)
         return
