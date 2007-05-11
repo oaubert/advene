@@ -1491,8 +1491,10 @@ class EditAttributesForm (EditForm):
                 val = long(v)
             except ValueError:
                 raise ValueError (_('Expecting an integer.'))
+        elif isinstance(v, str):
+            val = unicode(v)
         else:
-            val = v
+            val=v
         return val
 
     def value_to_repr (self, at, v):
@@ -1501,7 +1503,7 @@ class EditAttributesForm (EditForm):
         Return None if the value could not be converted.
         """
         if v is not None:
-            return str(v)
+            return unicode(v)
         else:
             return None
 
