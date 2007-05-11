@@ -592,3 +592,10 @@ def tag_color(target, context):
         except:
             pass
     return None
+
+def representation(target, context):
+    """Return a concise representation for the element.
+    """
+    c=context.evaluateValue('options/controller')
+    return c.get_title(target)
+
