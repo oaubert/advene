@@ -20,9 +20,13 @@
 Based on gst >= 0.10 API.
 
 See http://pygstdocs.berlios.de/pygst-reference/index.html for API
+
+FIXME:
+- fullscreen (reparent to its own gtk.Window and use gtk.Window.(un)fullscreen )
+- get/set_rate
 """
 
-#import advene.core.config as config
+import advene.core.config as config
 
 import pygst
 pygst.require('0.10')
@@ -104,8 +108,8 @@ class Player:
 
         self.xid = None
         sink='xvimagesink'
-        #if config.data.player['vout'] == 'x11':
-        #    sink='ximagesink'
+        if config.data.player['vout'] == 'x11':
+            sink='ximagesink'
 
         self.player = gst.element_factory_make("playbin", "player")
 
@@ -117,8 +121,15 @@ class Player:
         #self.caption.props.text="Foobar"
         self.imagesink = gst.element_factory_make(sink, 'sink')
 
-        self.video_sink.add(self.captioner, self.imagesink)
-        self.captioner.link(self.imagesink)
+        if sink == 'ximagesink':
+            print "Using ximagesink."
+            csp=gst.element_factory_make('ffmpegcolorspace')
+            self.video_sink.add(self.captioner, csp, self.imagesink)
+            self.captioner.link(csp)
+            csp.link(self.imagesink)
+        else:
+            self.video_sink.add(self.captioner, self.imagesink)
+            self.captioner.link(self.imagesink)
         self.video_sink.add_pad(gst.GhostPad('sink', self.captioner.get_pad('video_sink')))
 
         self.player.props.video_sink=self.video_sink
