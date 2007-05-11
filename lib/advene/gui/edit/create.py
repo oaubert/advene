@@ -15,7 +15,8 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Dialogs for the creation of new elements."""
+"""Dialogs for the creation of new elements.
+"""
 
 import advene.core.config as config
 
@@ -51,8 +52,15 @@ class ViewType:
         return self.title
 
 class CreateElementPopup(object):
-    def __init__(self, type_=None, parent=None, controller=None):
+    """Popup for creating elements.
+
+    If takes as parameter the element type, its parent and the
+    application controller. When present, the optional mimetype
+    parameter is used as default mimetype.
+    """
+    def __init__(self, type_=None, parent=None, controller=None, mimetype=None):
         self.type_=type_
+        self.mimetype=mimetype
         self.parent=parent
         self.controller=controller
         self.dialog=None
@@ -121,9 +129,20 @@ class CreateElementPopup(object):
                 advene.gui.util.message_dialog(_("No available type."))
                 return None
 
+            # Check for self.mimetype
+            if self.mimetype is None:
+                preselect=type_list[0]
+            else:
+                l=[ e for e in type_list if e.id == self.mimetype ]
+                if l:
+                    preselect=l[0]
+                else:
+                    # Insert self.mimetype in the list
+                    preselect=ViewType(self.mimetype, self.mimetype)
+                    type_list.insert(0, preselect)
             d.type_combo = advene.gui.util.list_selector_widget(
                 members=[ (t, self.controller.get_title(t)) for t in type_list  ],
-                preselect=type_list[0])
+                preselect=preselect)
             hbox.pack_start(d.type_combo)
             
             d.vbox.add(hbox)
