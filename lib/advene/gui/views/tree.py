@@ -75,9 +75,12 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
 
 	if isinstance(e, View):
 	    # Remove the element from the list view and refresh list view
-	    parent=self.get_package().views
+            parent=self.nodeParent(e)
+	    #parent=self.get_package().views
 	    path=self.on_get_path(parent)
+            print "before row changed"
 	    self.row_changed(path, self.get_iter(path))
+            print "after row changed"
 	    return
 
 	parent=None
@@ -269,9 +272,12 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         return True
 
 class VirtualNode:
-    def __init__(self, name, package):
+    """Virtual node.
+    """
+    def __init__(self, name, package, viewableType=None):
         self.title=name
         self.rootPackage=package
+        self.viewableType=viewableType
 
 class DetailedTreeModel(AdveneTreeModel):
     """Detailed Tree Model.
@@ -285,10 +291,11 @@ class DetailedTreeModel(AdveneTreeModel):
     """
     def __init__(self, controller=None, package=None):
         AdveneTreeModel.__init__(self, controller=controller, package=package)
-        self.views=VirtualNode(_("List of views"), package)
-        self.staticviews=VirtualNode(_("Static views"), package)
-        self.dynamicviews=VirtualNode(_("Dynamic views"), package)
-        self.adhocviews=VirtualNode(_("Adhoc views"), package)
+        self.virtual={}
+        self.virtual['views']=VirtualNode(_("List of views"), package, viewableType='view-list')
+        self.virtual['static']=VirtualNode(_("Static views"), package, viewableType='view-list')
+        self.virtual['dynamic']=VirtualNode(_("Dynamic views"), package, viewableType='view-list')
+        self.virtual['adhoc']=VirtualNode(_("Adhoc views"), package)
 
     def nodeParent (self, node):
         #print "nodeparent %s" % node
@@ -303,12 +310,8 @@ class DetailedTreeModel(AdveneTreeModel):
         elif isinstance (node, Schema):
             parent = node.rootPackage.schemas
         elif isinstance (node, View):
-            if node.content.mimetype == 'application/x-advene-ruleset':
-                parent=self.dynamicviews
-            elif node.content.mimetype == 'application/x-advene-adhoc-view':
-                parent=self.adhocviews
-            else:
-                parent=self.staticviews
+            t=helper.get_view_type(node)
+            parent=self.virtual[t]
         elif isinstance (node, Query):
             parent = node.rootPackage.queries
         elif isinstance (node, Package):
@@ -319,9 +322,9 @@ class DetailedTreeModel(AdveneTreeModel):
             parent = node.parent
         elif isinstance (node, ResourceData):
             parent = node.parent
-        elif node in (self.staticviews, self.dynamicviews, self.adhocviews):
-            parent = self.views
-        elif node == self.views:
+        elif node in (self.virtual['static'], self.virtual['dynamic'], self.virtual['adhoc']):
+            parent = self.virtual['views']
+        elif node == self.virtual['views']:
             parent=node.rootPackage
         else:
             parent = None
@@ -352,7 +355,7 @@ class DetailedTreeModel(AdveneTreeModel):
             children = None
         elif isinstance (node, Package):
             if not node in self.childrencache:
-                self.childrencache[node] = [node.schemas, self.views, node.queries, node.resources ]
+                self.childrencache[node] = [node.schemas, self.virtual['views'], node.queries, node.resources ]
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
@@ -362,30 +365,19 @@ class DetailedTreeModel(AdveneTreeModel):
             children = self.childrencache[node]
         elif isinstance (node, ResourceData):
             children = None
-        elif node == self.views:
-            children=[ self.staticviews, self.dynamicviews, self.adhocviews ]
-        elif node == self.staticviews:
-            children=sorted([ v 
-                       for v in node.rootPackage.views 
-                       if v.content.mimetype not in ('application/x-advene-ruleset',
-                                                        'application/x-advene-adhoc-view' ) ],
-                            key=lambda e: (e.title or e.id).lower())
-                            
-        elif node == self.dynamicviews:
-            children=sorted([ v 
-                              for v in node.rootPackage.views
-                              if v.content.mimetype == 'application/x-advene-ruleset' ],
-                            key=lambda e: (e.title or e.id).lower())
-            
-        elif node == self.adhocviews:
-            children=sorted([ v 
-                              for v in node.rootPackage.views
-                              if v.content.mimetype == 'application/x-advene-adhoc-view' ],
-                            key=lambda e: (e.title or e.id).lower())
+        elif node == self.virtual['views']:
+            children=[ self.virtual['static'], self.virtual['dynamic'], self.virtual['adhoc'] ]
         elif node is None:
             children = [ self.get_package() ]
         else:
             children = None
+            for t in ('static', 'dynamic', 'adhoc'):
+                if node == self.virtual[t]:
+                    children=sorted([ v 
+                                      for v in node.rootPackage.views
+                                      if helper.get_view_type(v) == t ],
+                                    key=lambda e: (e.title or e.id).lower())
+                    break
         return children
 
     def nodeHasChildren (self, node):
