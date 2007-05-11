@@ -325,7 +325,9 @@ class Menu:
             return self.add_menuitem(menu, *p, **kw)
 
         title=add_item(self.get_title(element))
-        title.set_submenu(self.common_submenu(element))
+        
+        if hasattr(element, 'id') or isinstance(element, Package):
+            title.set_submenu(self.common_submenu(element))
 
         add_item("")
 
