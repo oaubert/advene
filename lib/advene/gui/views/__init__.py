@@ -204,6 +204,31 @@ class AdhocView(object):
     def build_widget(self):
         return gtk.Label(self.view_name)
 
+    def attach_view(self, menuitem, window):
+        def relocate_view(item, v, d):
+            # Reference the widget so that it is not destroyed
+            wid=v.widget
+            self.widget.get_parent().remove(self.widget)
+            if d in ('south', 'east', 'west', 'fareast'):
+                v._destination=d
+                self.controller.gui.viewbook[d].add_view(v, name=v._label)
+                window.destroy()
+            return True
+
+        menu=gtk.Menu()
+        for (label, destination) in (
+            (_("...embedded east of the video"), 'east'),
+            (_("...embedded west of the video"), 'west'),
+            (_("...embedded south of the video"), 'south'),
+            (_("...embedded at the right of the window"), 'fareast')):
+            item = gtk.MenuItem(label)
+            item.connect('activate', relocate_view, self, destination)
+            menu.append(item)
+
+        menu.show_all()
+        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        return True
+
     def popup(self, label=None):
         if label is None:
             label=self.view_name
@@ -240,6 +265,10 @@ class AdhocView(object):
                 window.buttonbox.pack_start(b, expand=False)
         except AttributeError:
             pass
+
+        b = gtk.Button(_("Reattach"))
+        b.connect('clicked', self.attach_view, window)
+        window.buttonbox.pack_start(b, expand=False)
 
         b = gtk.Button(stock=gtk.STOCK_CLOSE)
 

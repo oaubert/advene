@@ -62,6 +62,7 @@ class TranscriptionView(AdhocView):
             # expression to generate the representation of the
             # transcripted annotation. Useful with structured annotations
             'representation': '',
+            'autoscroll': True,
             }
 
         self.package=controller.package
@@ -497,6 +498,11 @@ class TranscriptionView(AdhocView):
         b.remove_tag_by_name(tagname, beginiter, enditer)
 
     def activate_annotation(self, a):
+        if self.options['autoscroll']:
+            # Make sure that the annotation is visible
+            m=self.textview.get_buffer().get_mark("b_%s" % a.id)
+            self.textview.scroll_to_mark(m, 0.2)
+
         self.tag_annotation(a, "activated")
         return True
 

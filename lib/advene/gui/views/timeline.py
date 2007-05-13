@@ -254,6 +254,14 @@ class TimeLine(AdhocView):
         self.layout.connect('expose_event', self.draw_background)
         self.layout.connect_after('expose_event', self.draw_relation_lines)
 
+        def doit(*p):
+            self.draw_relation_lines(self.layout, None)
+            return False
+
+        self.layout.connect('motion_notify_event', self.update_relation_lines)
+        #self.layout.connect('event', self.debug_cb, "Event")
+        #self.layout.connect_after('event', self.debug_cb, "After")
+
         # The layout can receive drops (to resize annotations)
         self.layout.connect("drag_data_received", self.layout_drag_received)
         self.layout.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -297,6 +305,7 @@ class TimeLine(AdhocView):
         return self.options, arguments
 
     def draw_background(self, layout, event):
+        print "draw background"
         width, height = layout.get_size()
         i=config.data.preferences['timeline']['interline-height']
         drawable=layout.bin_window
@@ -306,7 +315,8 @@ class TimeLine(AdhocView):
             drawable.draw_line(gc, 0, p - i / 2, width, p - i / 2)
         return False
 
-    def update_relation_lines(self):
+    def update_relation_lines(self, *p):
+        self.draw_relation_lines(self.layout, None)
         self.layout.queue_draw()
 
     def draw_relation_lines_old(self, layout, event):
@@ -357,6 +367,7 @@ class TimeLine(AdhocView):
         return False
 
     def draw_relation_lines_cairo(self, layout, event):
+        print "draw relation lines"
         if not self.relations_to_draw:
             return False
         context=layout.bin_window.cairo_create()
@@ -522,10 +533,8 @@ class TimeLine(AdhocView):
         self.set_selection_marker(self.selected_position)
         return
 
-    def debug_cb (self, widget, data=None):
-        print "Debug event."
-        if data is not None:
-            print "Data: %s" % data
+    def debug_cb (self, widget, event=None, data=None):
+        print "Debug event.", event.type, data
         return False
 
     def get_widget_for_annotation (self, annotation):
