@@ -274,7 +274,7 @@ class Config(object):
 	    )
 
         # Mimetypes DB
-        self.mimetypedb=mimetypes.Mimetypes()
+        self.mimetypedb=mimetypes.MimeTypes()
 
 	# Drag and drop parameters for URIed element and other elements
 	self.target_type = {}
@@ -413,10 +413,6 @@ class Config(object):
 	    self.player['plugin']=self.options.player
 	self.player['embedded']=self.options.embedded
 
-        # Make sure that the mime.types file is available (either in the OS,
-        # or our own private copy (for MacOS and win32)
-        if not os.path.exists(mimetypes.knownfiles[0]):
-            self.mimetypedb.read(data.advenefile('mime.types'))
 	return True
 
     def win32_specific_config(self):
@@ -684,6 +680,9 @@ class Config(object):
     version_string = property(fget=get_version_string,
 			      doc="Version string")
 
+    def register_mimetype_file(self, fname):
+        self.mimetypedb.read(fname)
+        
     def guess_mimetype(self, fname):
         return self.mimetypedb.guess_mimetype(fname)
 
