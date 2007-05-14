@@ -238,32 +238,6 @@ class Common:
         else:
             return None
 
-    def query2dict (self, q):
-        """Converts a query string to a dictionary.
-
-        This method converts a query string (C{attr1=val1&attr2=val2...}) into
-        a dictionary with keys and values unquoted.
-
-        @param q: the query string
-        @type q: string
-        @return: a dictionary with (keys, values) taken from C{q}
-        @rtype: dictionary
-        """
-        # FIXME: method maybe useless with cherrypy
-        if q == "":
-            return {}
-        res={}
-        for k, v in cgi.parse_qsl(q):
-            # Implicit conversion of parameters. We try utf-8 first.
-            # That will work only if it is ascii or utf-8.
-            # If it fails, the most frequent case is latin1
-            try:
-                v=unicode(v, 'utf-8')
-            except UnicodeDecodeError:
-                v=unicode(v, 'latin1')
-            res[k]=v
-        return res
-
     def display_media_status (self):
         """Display current media status.
 
