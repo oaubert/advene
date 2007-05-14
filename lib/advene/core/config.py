@@ -32,6 +32,7 @@ import sys
 import os
 import cPickle
 from optparse import OptionParser
+import mimetypes
 
 class Config(object):
     """Configuration information, platform specific.
@@ -693,3 +694,11 @@ data.read_config_file ()
 # We process options last, so that command-line options can
 # override preferences and .ini file.
 data.process_options()
+
+# Make sure that the mime.types file is available (either in the OS,
+# or our own private copy (for MacOS and win32)
+if not os.path.exists(mimetypes.knownfiles[0]):
+    mimetypes.knownfiles.insert(0, data.advenefile('mime.types'))
+    mimetypes.inited=False
+    mimetypes.init()
+
