@@ -41,7 +41,7 @@ from advene.gui.edit.create import CreateElementPopup
 import advene.util.helper as helper
 import advene.gui.util
 try:
-    from advene.gui.annotation import AnnotationWidget
+    from advene.gui.widget import AnnotationWidget
 except:
     AnnotationWidget=None
 
