@@ -254,6 +254,11 @@ class ZipPackage:
         manifest=[]
 
         for (dirpath, dirnames, filenames) in os.walk(self._tempdir):
+            # Ignore .cvs, .svn path
+            for d in ('.svn', '.cvs'):
+                if d in dirnames:
+                    dirnames.remove(d)
+
             # Remove tempdir prefix
             zpath=dirpath.replace(self._tempdir, '')
 
