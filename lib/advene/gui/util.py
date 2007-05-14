@@ -83,10 +83,11 @@ def generate_list_model(elements, active_element=None):
     """
     store=gtk.ListStore(str, object)
     active_iter=None
-    for element, label in elements:
-        i=store.append( ( label, element ) )
-        if element == active_element:
-            active_iter=i
+    if elements is not None:
+        for element, label in elements:
+            i=store.append( ( label, element ) )
+            if element == active_element:
+                active_iter=i
     return store, active_iter
 
 def list_selector_widget(members=None,
