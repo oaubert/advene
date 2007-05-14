@@ -318,8 +318,14 @@ class EditQuery(EditGeneric):
 
         # Event
         ef=gtk.Frame(_("For all elements in "))
+        predef=[ ('package/annotations', _("All annotations of the package")),
+                 ('package/views', _("All views of the package")) ]
+        for at in self.controller.package.annotationTypes:
+            predef.append( ('package/%s/annotations' % at.id,
+                            _("Annotations of type %s") % self.controller.get_title(at) ) )
         self.sourceentry=TALESEntry(context=self.model,
-                                    controller=self.controller)
+                                    controller=self.controller,
+                                    predefined=predef)
         self.sourceentry.set_text(self.model.source)
         self.sourceentry.set_editable(self.editable)
         ef.add(self.sourceentry.widget)
@@ -329,6 +335,8 @@ class EditQuery(EditGeneric):
         # Return value
         vf=gtk.Frame(_("Return "))
         self.valueentry=TALESEntry(context=self.model,
+                                   predefined=[ ('element', _("The element")),
+                                                ('element/content/data', _("The element's content")) ],
                                    controller=self.controller)
         v=self.model.rvalue
         if v is None or v == '':
@@ -681,13 +689,38 @@ class EditCondition(EditGeneric):
 
     def build_widget(self):
         hbox=gtk.HBox()
-
-        self.lhs=TALESEntry(controller=self.controller)
+        
+        predefined=[ 
+            ('element/fragment', _('The annotation fragment') ),
+            ('annotation/fragment/end', _('The annotation begin time') ),
+            ('annotation/fragment/end', _('The annotation end time') ),
+            ('annotation/type/id', _('The id of the annotation type') ),
+            ('annotation/incomingRelations', _("The annotation's incoming relations") ),
+            ('annotation/outgoingRelations', _("The annotation's outgoing relations") ),
+            ('element/content/data', _("The element's content") ),
+            ] + [
+            ('annotation/typedRelatedIn/%s' % rt.id, 
+             _("The %s-related incoming annotations") % self.controller.get_title(rt) ) 
+            for rt in self.controller.package.relationTypes
+            ] + [
+            ('annotation/typedRelatedOut/%s' % rt.id, 
+             _("The %s-related outgoing annotations") % self.controller.get_title(rt) )
+            for rt in self.controller.package.relationTypes  ]
+        
+        self.lhs=TALESEntry(controller=self.controller, predefined=predefined)
         self.lhs.set_text(self.model.lhs or "")
         self.lhs.set_editable(self.editable)
         self.lhs.show()
 
-        self.rhs=TALESEntry(controller=self.controller)
+        predef=[ ('string:%s' % at.id,
+                  "id of annotation-type %s" % self.controller.get_title(at) )
+                 for at in self.controller.package.annotationTypes
+                 ] + [ ('string:%s' % at.id,
+                        "id of relation-type %s" % self.controller.get_title(at) )
+                       for at in self.controller.package.relationTypes
+                       ]
+        self.rhs=TALESEntry(controller=self.controller,
+                            predefined=predef)
         self.rhs.set_text(self.model.rhs or "")
         self.rhs.set_editable(self.editable)
         self.rhs.hide()
