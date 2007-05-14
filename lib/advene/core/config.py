@@ -273,6 +273,9 @@ class Config(object):
             'application/x-advene-adhoc-view',
 	    )
 
+        # Mimetypes DB
+        self.mimetypedb=mimetypes.Mimetypes()
+
 	# Drag and drop parameters for URIed element and other elements
 	self.target_type = {}
 	self.drag_type = {}
@@ -409,6 +412,11 @@ class Config(object):
 	if self.options.player is not None:
 	    self.player['plugin']=self.options.player
 	self.player['embedded']=self.options.embedded
+
+        # Make sure that the mime.types file is available (either in the OS,
+        # or our own private copy (for MacOS and win32)
+        if not os.path.exists(mimetypes.knownfiles[0]):
+            self.mimetypedb.read(data.advenefile('mime.types'))
 	return True
 
     def win32_specific_config(self):
@@ -676,6 +684,9 @@ class Config(object):
     version_string = property(fget=get_version_string,
 			      doc="Version string")
 
+    def guess_mimetype(self, fname):
+        return self.mimetypedb.guess_mimetype(fname)
+
     def fix_paths(self, maindir):
       # We override any modification that could have been made in
       # .advenerc. Rationale: if the .advenerc was really correct, it
@@ -694,11 +705,3 @@ data.read_config_file ()
 # We process options last, so that command-line options can
 # override preferences and .ini file.
 data.process_options()
-
-# Make sure that the mime.types file is available (either in the OS,
-# or our own private copy (for MacOS and win32)
-if not os.path.exists(mimetypes.knownfiles[0]):
-    mimetypes.knownfiles.insert(0, data.advenefile('mime.types'))
-    mimetypes.inited=False
-    mimetypes.init()
-
