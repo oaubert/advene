@@ -76,12 +76,20 @@ class AnnotationWidget(gtk.DrawingArea):
         self.connect('focus-in-event', self.update_widget)
         self.connect('focus-out-event', self.update_widget)
 
+        #self.connect('event', self.debug_cb, "Event")
+        #self.connect_after('event', self.debug_cb, "After")
+
         self.annotation_surface = None
         self.annotation_context = None
 
         w=self.container.unit2pixel(self.annotation.fragment.duration)
         self.set_size_request(w, self.container.button_height)
 
+    def debug_cb (self, widget, event=None, data=None):
+        if self.annotation.id == 'a3':
+            print "*********** Debug event.", event.type, data
+        return False
+    
     def reset_surface_size(self, width=None, height=None): 
         if not self.window:
             return False
@@ -148,9 +156,9 @@ class AnnotationWidget(gtk.DrawingArea):
         else:
             color=self.container.get_element_color(self.annotation)
         if color:
-            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, .7)
+            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
         else:
-            rgba=(1.0, 1.0, 1.0, .7)
+            rgba=(1.0, 1.0, 1.0, 1)
         self.annotation_context.set_source_rgba(*rgba)
         self.annotation_context.fill_preserve()
         
@@ -159,7 +167,7 @@ class AnnotationWidget(gtk.DrawingArea):
             self.annotation_context.set_line_width(4)
         else:
             self.annotation_context.set_line_width(1)
-        self.annotation_context.set_source_rgba(0, 0, 0, .9)
+        self.annotation_context.set_source_rgba(0, 0, 0, 1)
         self.annotation_context.stroke()
         
         # Draw the text
@@ -169,11 +177,11 @@ class AnnotationWidget(gtk.DrawingArea):
             weight=cairo.FONT_WEIGHT_NORMAL
         self.annotation_context.select_font_face("Helvetica",
                                                  cairo.FONT_SLANT_NORMAL, weight)
-        self.annotation_context.set_font_size(12)
+        self.annotation_context.set_font_size(config.data.preferences['timeline']['font-size'])
         
         self.annotation_context.move_to(2, int(bheight * 0.7))
         
-        self.annotation_context.set_source_rgba(0, 0, 0, .9)
+        self.annotation_context.set_source_rgba(0, 0, 0, 1)
         title=self.controller.get_title(self.annotation)
         self.annotation_context.show_text(title)
         self.annotation_context.stroke()
