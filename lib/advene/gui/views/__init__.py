@@ -208,7 +208,7 @@ class AdhocView(object):
         def relocate_view(item, v, d):
             # Reference the widget so that it is not destroyed
             wid=v.widget
-            self.widget.get_parent().remove(self.widget)
+            v.widget.get_parent().remove(self.widget)
             if d in ('south', 'east', 'west', 'fareast'):
                 v._destination=d
                 self.controller.gui.viewbook[d].add_view(v, name=v._label)
