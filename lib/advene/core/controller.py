@@ -430,6 +430,10 @@ class AdveneController:
 	if media is not None:
 	    self.set_default_media(media)
 
+        # Register private mime.types if necessary
+        if config.data.os != 'linux':
+            config.data.register_mimetype_file(config.data.advenefile('mime.types'))
+
         self.player.check_player()
 
         return True
