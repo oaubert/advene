@@ -59,6 +59,7 @@ import cgi
 import socket
 import select
 import logging
+import mimetypes
 
 import imghdr
 
@@ -1613,7 +1614,7 @@ class AdveneRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             parameters.append('index.html')
             file_=os.path.join(datadir, *parameters)
 
-        (mimetype, encoding) = config.data.guess_mimetype(file_)
+        (mimetype, encoding) = mimetypes.guess_type(file_)
         if mimetype is None:
             mimetype = "text/plain"
         if encoding is None:
