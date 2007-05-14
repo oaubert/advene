@@ -20,7 +20,7 @@ import sre
 
 from advene.gui.views.browser import Browser
 import advene.util.helper
-
+import advene.gui.util
 class TALESEntry:
     """TALES expression entry widget.
 
@@ -30,14 +30,17 @@ class TALESEntry:
     @type context: object
     @ivar controller: the controller
     @type controller: advene.core.controller
+    @ivar predefined: list of (tales_expression, title) tuples
+    @type predefined: list
     """
-    def __init__(self, default="", context=None, controller=None):
+    def __init__(self, default="", context=None, controller=None, predefined=None):
         self.default=default
         self.editable=True
         self.controller=controller
         if context is None and controller is not None:
             context=controller.package
         self.context=context
+        self.predefined=predefined
 
         self.re_id = sre.compile('^([A-Za-z0-9_%]+/?)+$')
         self.re_number = sre.compile('^\d+$')
@@ -48,11 +51,25 @@ class TALESEntry:
         self.context=el
 
     def set_text(self, t):
+        # Check if the new value is in self.predefined. If so, use
+        # set_active_iter, else use self.entry
+        m=self.combo.get_model()
+        it=None
+        i=m.get_iter_first()
+        while i is not None:
+            #print m.get_value(i, 1)
+            if m.get_value(i, 1) == t:
+                it=i
+                break
+            i=m.iter_next(i)
+        if it is not None:
+            self.combo.set_active_iter(it)
+        else:
+            self.entry.set_text(t)
         self.default=t
-        self.entry.set_text(t)
 
     def get_text(self):
-        return self.entry.get_text()
+        return self.combo.get_current_element()
     
     def set_editable(self, b):
         self.editable=b
@@ -73,16 +90,25 @@ class TALESEntry:
         @type expr: string
         """
         if expr is None:
-            expr=self.entry.get_text()
+            expr=self.combo.get_current_element()
         return advene.util.helper.is_valid_tales(expr)
     
     def build_widget(self):
         hbox=gtk.HBox()
-        self.entry=gtk.Entry()
+
+        if self.predefined:
+            preselect=self.predefined[0][0]
+        else:
+            preselect=None
+        self.combo=advene.gui.util.list_selector_widget(members=self.predefined,
+                                                        preselect=preselect,
+                                                        entry=True)
+        self.entry=self.combo.child
         b=gtk.Button(stock=gtk.STOCK_FIND)
         b.connect("clicked", self.browse_expression)
-        hbox.pack_start(self.entry, expand=True)
+        hbox.pack_start(self.combo, expand=True)
         hbox.pack_start(b, expand=False)
+        
         hbox.show_all()
         return hbox
         
