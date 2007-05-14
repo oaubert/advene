@@ -273,9 +273,6 @@ class Config(object):
             'application/x-advene-adhoc-view',
 	    )
 
-        # Mimetypes DB
-        self.mimetypedb=mimetypes.MimeTypes()
-
 	# Drag and drop parameters for URIed element and other elements
 	self.target_type = {}
 	self.drag_type = {}
@@ -681,11 +678,9 @@ class Config(object):
 			      doc="Version string")
 
     def register_mimetype_file(self, fname):
-        self.mimetypedb.read(fname)
+        for ext, t in mimetypes.read_mime_types(fname).iteritems():
+            mimetypes.add_type(t, ext)
         
-    def guess_mimetype(self, fname):
-        return self.mimetypedb.guess_mimetype(fname)
-
     def fix_paths(self, maindir):
       # We override any modification that could have been made in
       # .advenerc. Rationale: if the .advenerc was really correct, it
