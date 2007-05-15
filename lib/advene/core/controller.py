@@ -61,11 +61,7 @@ import advene.util.helper as helper
 import advene.rules.importer
 
 if config.data.webserver['mode']:
-    e=config.data.webserver['engine']
-    if e == 'cherrypy':
-        from advene.core.webcherry import AdveneWebServer
-    else:
-        from advene.core.webserver import AdveneWebServer
+    from advene.core.webcherry import AdveneWebServer
 
 import threading
 
