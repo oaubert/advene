@@ -255,7 +255,7 @@ class ZipPackage:
 
         for (dirpath, dirnames, filenames) in os.walk(self._tempdir):
             # Ignore .cvs, .svn path
-            for d in ('.svn', '.cvs'):
+            for d in ('.svn', 'CVS'):
                 if d in dirnames:
                     dirnames.remove(d)
 
