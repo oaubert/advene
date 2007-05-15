@@ -2278,6 +2278,7 @@ class OldAnnotationTypeWidget(gtk.Button):
         self.label.modify_font(self.container.annotation_type_font)
         self.add(self.label)
         self.set_size_request(-1, self.container.button_height)
+        self.width=self.window.get_size()[0]
 
     def set_color(self, color=None):
         self.local_color=color
@@ -2287,6 +2288,7 @@ class OldAnnotationTypeWidget(gtk.Button):
         if not self.window:
             return False
 
+        self.width=self.window.get_size()[0]
         if self.local_color is not None:
             color=self.local_color
         else:
