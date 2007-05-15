@@ -237,4 +237,4 @@ FCKConfig.SmileyWindowHeight	= 240 ;
 
 
 // advene plugin added.
-FCKConfig.Plugins.Add( 'AdveneIMG', 'en');
+FCKConfig.Plugins.Add( 'richedit_annotation', 'en');

@@ -1,0 +1,448 @@
+<!--
+ * AdveneIMG plugin for FCKEditor.
+ * 
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+
+<head>
+	<title>Advene IMG</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta content="noindex, nofollow" name="robots">
+	<script type='text/javascript' src='csseditor.js'></script>
+	<script type="text/javascript">
+
+var oEditor = window.parent.InnerDialogLoaded();
+var sContent="";
+
+function OnLoad()
+{
+	// First of all, translate the dialog box texts.
+	oEditor.FCKLanguageManager.TranslatePage( document );
+	window.parent.SetAutoSize( true );
+	loadCssEditor();
+}
+
+function Ok()
+{
+	sContent=document.getElementById('Code').value.replace(/\r|\n|(\r\n)/g, ' ');
+	var oSelection = oEditor.FCKSelection;
+
+	if (BrowserInfo.IsIE)
+	{
+		if ( oSelection.GetType() == 'Text' )
+		{
+			var oElement=oSelection.GetParentElement();
+
+			oSelection.GetParentElement().style.cssText=sContent;
+		}
+		else
+		{
+			oEditor.FCK.InsertHtml("<span style=\""+sContent+"\">Text</span>");
+		}
+	}
+	else
+	{
+		var oNode=oSelection.GetParentElement();
+		if (oNode.nodeName!="BODY")
+		{
+			oNode.style.cssText=sContent;
+		}
+		else
+		{
+			oEditor.FCK.InsertHtml("<span style=\""+sContent+"\">Text</span>");
+		}
+	}
+
+}
+
+	</script>
+
+</head>
+
+<body onload="OnLoad();" scroll="no" style="overflow: hidden;">
+<form name="frmMain" id="frmMain">
+		<div id="divType">
+<!-- Start: TYPE properties -->
+<table id="menuType" cellspacing="0" cellpadding="0" width="100%">
+	<tr>
+		<td class="property-name">Font family:</td>
+		<td>
+			<select id="fontFamily" name="fontFamily" class="input-select">
+				<option value=""></option>
+				<option value="Arial, Helvetica, sans-serif">Arial, Helvetica, sans-serif</option>
+				<option value="Times New Roman, Times, serif">Times New Roman, Times, serif</option>
+				<option value="Courier New, Courier, mono">Courier New, Courier, mono</option>
+				<option value="Georgia, Times New Roman, Times, serif">Georgia, Times New Roman, Times, serif</option>
+				<option value="Verdana, Arial, Helvetica, sans-serif">Verdana, Arial, Helvetica, sans-serif</option>
+				<option value="Geneva, Arial, Helvetica, sans-serif">Geneva, Arial, Helvetica, sans-serif</option>
+			</select>
+		</td>
+		<td class="property-text">
+			<input type="checkbox" id="fontFamily_other" name="fontFamily_other" value="other" onclick="Other.fontFamily(this);" > Other
+			<input type="text" id="fontFamily_value" name="fontFamily_value" class="input-text" disabled style="width: 120px;">
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Font size:</td>
+		<td>
+			<select id="fontSize" name="fontSize" class="input-select">
+				<option value=""></option>
+				<option value="9">9</option>
+				<option value="10">10</option>
+				<option value="12">12</option>
+				<option value="14">14</option>
+				<option value="16">16</option>
+				<option value="18">18</option>
+				<option value="24">24</option>
+				<option value="36">36</option>
+			</select>
+		</td>
+		<td class="property-text">
+			<input type="checkbox" id="fontSize_other" name="fontSize_other" value="other" onclick="Other.fontSize(this);" > Other
+			<input type="text" id="fontSize_value" name="fontSize_value" class="input-text" disabled>
+			<select id="fontSize_unit" name="fontSize_unit" class="input-select" disabled>
+				<option value="px">pixels</option>
+				<option value="pt">points</option>
+				<option value="cm">cm</option>
+				<option value="mm">mm</option>
+				<option value="in">in</option>
+				<option value="pc">picas</option>
+				<option value="em">ems</option>
+				<option value="ex">exs</option>
+				<option value="%">%</option>   
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Color:</td>
+		<td>
+			<input type="text" id="color" name="color" class="input-text" value="" onchange="Update.colorPreview(this);" onblur="Update.colorPreview(this);">
+			<span id="colorPreview" class="color-preview" onclick="Update.colorPreviewDialog(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Font style:</td>
+		<td>
+			<select id="fontStyle" name="fontStyle" class="input-select">
+				<option value=""></option>
+				<option value="normal">normal</option>
+				<option value="italic">italic</option>
+				<option value="oblique">oblique</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Font weight:</td>
+		<td>
+			<select id="fontWeight" name="fontWeight" class="input-select">
+				<option value=""></option>
+				<option value="normal">normal</option>
+				<option value="bold">bold</option>
+				<option value="bolder">bolder</option>
+				<option value="lighter">lighter</option>
+				<option value="100">100</option>
+				<option value="200">200</option>
+				<option value="300">300</option>
+				<option value="400">400</option>
+				<option value="500">500</option>
+				<option value="600">600</option>
+				<option value="700">700</option>
+				<option value="800">800</option>
+				<option value="900">900</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Font variant:</td>
+		<td>
+			<select id="fontVariant" name="fontVariant" class="input-select">
+				<option value=""></option>
+				<option value="normal">normal</option>
+				<option value="small-caps">small-caps</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Text transform:</td>
+		<td>
+			<select id="textTransform" name="textTransform" class="input-select">
+				<option value=""></option>
+				<option value="capitalize">capitalize</option>
+				<option value="uppercase">uppercase</option>
+				<option value="lowercase">lowercase</option>
+				<option value="none">none</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Text decoration:</td>
+		<td class="property-text">
+			<input type="checkbox" id="textDecoration_underline" name="textDecoration_underline" value="underline" onclick="Update.textDecorationChange(this);"> Underline<br>
+			<input type="checkbox" id="textDecoration_overline" name="textDecoration_overline" value="overline" onclick="Update.textDecorationChange(this);"> Overline<br>
+			<input type="checkbox" id="textDecoration_line_through" name="textDecoration_line_through" value="line-through" onclick="Update.textDecorationChange(this);"> Line Through<br>
+			<input type="checkbox" id="textDecoration_blink" name="textDecoration_blink" value="blink" onclick="Update.textDecorationChange(this);"> Blink<br>
+			<input type="checkbox" id="textDecoration_none" name="textDecoration_none" value="none" onclick="Update.textDecorationNone();"> None<br>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Line height:</td>
+		<td class="property-text">
+			<input type="checkbox" id="lineHeight_normal" name="lineHeight_normal" value="normal" > Normal
+		</td>
+		<td class="property-text">
+			<input type="checkbox" id="lineHeight_other" name="lineHeight_other" value="other" onclick="Other.lineHeight(this);" > Other
+			<input type="text" id="lineHeight_value" name="lineHeight_value" class="input-text" disabled>
+			<select id="lineHeight_unit" name="lineHeight_unit" class="input-select" disabled>
+				<option value="px">pixels</option>
+				<option value="pt">points</option>
+				<option value="cm">cm</option>
+				<option value="mm">mm</option>
+				<option value="in">in</option>
+				<option value="pc">picas</option>
+				<option value="em">ems</option>
+				<option value="ex">exs</option>
+				<option value="%">%</option>   
+			</select>
+		</td>
+	</tr>
+</table>
+<!-- End: TYPE properties -->
+		</div>
+<!-- Start: BACKGROUND properties -->
+<table id="menuBackground" cellspacing="0" cellpadding="0" width="100%">
+	<tr>
+		<td class="property-name">Background color:</td>
+		<td>
+			<input type="text" id="backgroundColor" name="backgroundColor" class="input-text" value="" onchange="Update.backgroundColorPreview(this);" onblur="Update.backgroundColorPreview(this);">
+			<span id="backgroundColorPreview" class="color-preview" onclick="Update.backgroundColorPreviewDialog(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Background image:</td>
+		<td class="property-text">
+			<input type="checkbox" id="backgroundImage_none" name="backgroundImage_none" value="none" >None
+		</td>
+		<td class="property-text">
+			<input type="checkbox" id="backgroundImage_other" name="backgroundImage_other" value="other" onclick="Other.backgroundImage(this);" > Other
+			URL: <input type="text" id="backgroundImage_value" name="backgroundImage_value" class="input-text" disabled style="width: 120px;">
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Background repeat:</td>
+		<td>
+			<select id="backgroundRepeat" name="backgroundRepeat" class="input-select">
+				<option value=""></option>
+				<option value="no-repeat">no-repeat</option>
+				<option value="repeat">repeat</option>
+				<option value="repeat-x">repeat-x</option>
+				<option value="repeat-y">repeat-y</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Background attachment:</td>
+		<td>
+			<select id="backgroundAttachment" name="backgroundAttachment" class="input-select">
+				<option value=""></option>
+				<option value="fixed">fixed</option>
+				<option value="scroll">scroll</option>
+			</select>
+		</td>
+	</tr>
+
+		<td class="property-name">Horizontal position:</td>
+		<td class="property-text">
+			<select id="horizontalPosition" name="horizontalPosition" class="input-select">
+				<option value=""></option>
+				<option value="left">left</option>
+				<option value="center">center</option>
+				<option value="right">right</option>
+			</select>
+		</td>
+		<td class="property-text">
+			<input type="checkbox" id="horizontalPosition_other" name="horizontalPosition_other" value="other" onclick="Other.horizontalPosition(this);" > Other
+			<input type="text" id="horizontalPosition_value" name="horizontalPosition_value" class="input-text" disabled>
+			<select id="horizontalPosition_unit" name="horizontalPosition_unit" class="input-select" disabled>
+				<option value="px">pixels</option>
+				<option value="pt">points</option>
+				<option value="cm">cm</option>
+				<option value="mm">mm</option>
+				<option value="in">in</option>
+				<option value="pc">picas</option>
+				<option value="em">ems</option>
+				<option value="ex">exs</option>
+				<option value="%">%</option>   
+			</select>			
+		</td>
+	</tr>
+
+
+
+</table>
+<!-- End: BACKGROUND properties -->
+		</div>
+<!-- Start: TARGET properties -->
+<table id="menuTarget" cellspacing="0" cellpadding="0" width="100%">
+	<tr>
+		<td class="property-name">Tag:</td>
+		<td class="property-text">
+			<select id="targetTag" name="targetTag" class="input-select">
+				<option value=""></option>
+				<option value="P">P</option>
+				<option value="DIV">DIV</option>
+				<option value="SPAN">SPAN</option>
+				<option value="BODY">BODY</option>
+				<option value="H1">H1</option>
+				<option value="H2">H2</option>
+				<option value="H3">H3</option>
+				<option value="H4">H4</option>
+				<option value="H5">H5</option>
+				<option value="H6">H6</option>
+				<option value="BDO">BDO</option>
+				<option value="EM">EM</option>
+				<option value="STRONG">STRONG</option>
+				<option value="CITE">CITE</option>
+				<option value="DFN">DFN</option>
+				<option value="CODE">CODE</option>
+				<option value="SAMP">SAMP</option>
+				<option value="KBD">KBD</option>
+				<option value="VAR">VAR</option>
+				<option value="ABBR">ABBR</option>
+				<option value="ACRONYM">ACRONYM</option>
+				<option value="SUP">SUP</option>
+				<option value="SUB">SUB</option>
+				<option value="BLOCKQUOTE">BLOCKQUOTE</option>
+				<option value="Q">Q</option>
+				<option value="BR">BR</option>
+				<option value="PRE">PRE</option>
+				<option value="INS">INS</option>
+				<option value="DEL">DEL</option>
+				<option value="UL">UL</option>
+				<option value="OL">OL</option>
+				<option value="LI">LI</option>
+				<option value="DL">DL</option>
+				<option value="DT">DT</option>
+				<option value="DD">DD</option>
+				<option value="DIR">DIR</option>
+				<option value="MENU">MENU</option>
+				<option value="TABLE">TABLE</option>
+				<option value="CAPTION">CAPTION</option>
+				<option value="THEAD">THEAD</option>
+				<option value="TFOOT">TFOOT</option>
+				<option value="TBODY">TBODY</option>
+				<option value="COLGROUP">COLGROUP</option>
+				<option value="TR">TR</option>
+				<option value="TH">TH</option>
+				<option value="TD">TD</option>
+				<option value="A">A</option>
+				<option value="IMG">IMG</option>
+				<option value="OBJECT">OBJECT</option>
+				<option value="APPLET">APPLET</option>
+				<option value="TT">TT</option>
+				<option value="I">I</option>
+				<option value="B">B</option>
+				<option value="BIG">BIG</option>
+				<option value="STRIKE">STRIKE</option>
+				<option value="S">S</option>
+				<option value="U">U</option>
+				<option value="FONT">FONT</option>
+				<option value="HR">HR</option>
+				<option value="FRAME">FRAME</option>
+				<option value="NOFRAMES">NOFRAMES</option>
+				<option value="IFRAME">IFRAME</option>
+				<option value="FORM">FORM</option>
+				<option value="INPUT">INPUT</option>
+				<option value="BUTTON">BUTTON</option>
+				<option value="SELECT">SELECT</option>
+				<option value="OPTION">OPTION</option>
+				<option value="OPTGROUP">OPTGROUP</option>
+				<option value="TEXTAREA">TEXTAREA</option>
+				<option value="ISINDEX">ISINDEX</option>
+				<option value="LABEL">LABEL</option>
+				<option value="FIELDSET">FIELDSET</option>
+				<option value="LEGEND">LEGEND</option>
+			</select>		
+		</td>
+		<td class="property-text">
+			<input type="checkbox" id="targetTag_other" name="targetTag_other" value="other" onclick="Other.targetTag(this);" > Other						
+			<input type="text" id="targetTag_value" name="targetTag_value" class="input-text" disabled>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Class:</td>
+		<td class="property-text">
+			<input type="text" id="targetClass" name="targetClass" class="input-text">
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">ID:</td>
+		<td class="property-text">
+			<input type="text" id="targetId" name="targetId" class="input-text">
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Element:</td>
+		<td class="property-text">
+			<select id="targetElement" name="targetElement" class="input-select">
+				<option value=""></option>
+				<option value="first-child">first-child</option>
+				<option value="first-line">first-line</option>
+				<option value="first-letter">first-letter</option>
+				<option value="before">before</option>
+				<option value="after">after</option>
+				<option value="link">link</option>
+				<option value="visited">visited</option>
+				<option value="active">active</option>
+				<option value="hover">hover</option>
+				<option value="focus">focus</option>
+			</select>
+		</td>
+	</tr>
+</table>
+<!-- End: TARGET properties -->
+		</div>
+<table width="100%">
+	<tr style="background-color: #E3E3C7;">
+		<td colspan="2">
+			<input type="button" value="Preview" onclick="Preview.change();" class="button" id="btnPreview">
+			<input type="button" value="Clear" onclick="Preview.clear();" class="button" id="btnClear">
+			<input type="button" value="Insert" onclick="Ok();" class="button" id="btnInsert" disabled>
+
+			<span class="property-text">Sample: </span>
+			<select id="sampleText" name="sampleText" class="input-select" onchange="Example.change(this);">
+				<option value="simpleText">Simple text</option>
+				<option value="longText">Long text</option>
+				<option value="simpleTable">Simple Table</option>
+				<option value="unorderedList">Unordered List</option>
+				<option value="image">Image</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="property-name">Preview:</td>
+		<td class="property-name">Code:</td>
+	</tr>
+	<tr>
+		<td class="preview-border">
+			<table>
+				<tr>
+					<td>
+						<div id="Preview">
+							Just sample<br>text
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+		<td>
+			<textarea id="Code" name="code" class="input-text" style="width: 350px; height: 100px;" readonly></textarea>
+		</td>
+	</tr>
+</table>
+</div>
+</form> 
+
+</body>
+</html>
