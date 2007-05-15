@@ -41,7 +41,7 @@ from advene.gui.edit.create import CreateElementPopup
 import advene.util.helper as helper
 import advene.gui.util
 try:
-    from advene.gui.widget import AnnotationWidget
+    from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget
 except:
     AnnotationWidget=None
 
@@ -821,19 +821,13 @@ class TimeLine(AdhocView):
         menu.popup()
         return True
 
-    def annotation_type_clicked_cb (self, widget):
-        """Display the popup menu when clicking on annotation type.
-        """
-        menu=advene.gui.popup.Menu(widget.annotationtype,
-                                   controller=self.controller)
-        menu.popup()
-        return True
-
     def annotation_type_key_press_cb(self, widget, event):
         """Display the popup menu when right-clicking on annotation type.
         """
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-            self.annotation_type_clicked_cb(widget)
+            menu=advene.gui.popup.Menu(widget.annotationtype,
+                                       controller=self.controller)
+            menu.popup()
             return True
         return False
 
@@ -1034,6 +1028,7 @@ class TimeLine(AdhocView):
             # The structure consists in 4 unsigned shorts: r, g, b, opacity
             (r, g, b, opacity)=struct.unpack('HHHH', selection.data)
             widget.annotationtype.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (r, g, b))
+            # FIXME: notify the change
             self.set_widget_background_color(widget)
         else:
             print "Unknown target type for drop: %d" % targetType
@@ -1700,6 +1695,7 @@ class TimeLine(AdhocView):
         """Recompute elements when the layout size changes
         """
         parent = self.layout.window
+
         if not parent:
             return False
         (w, h) = parent.get_size ()
@@ -1824,25 +1820,14 @@ class TimeLine(AdhocView):
             return False
 
         for t in self.annotationtypes:
-            b=gtk.Button()
-            l=gtk.Label(self.controller.get_title(t))
-            l.modify_font(self.annotation_type_font)
-            b.add(l)
+            b=AnnotationTypeWidget(t, self)
             self.tooltips.set_tip(b, _("From schema %s") % self.controller.get_title(t.schema))
-            b.set_size_request(-1, self.button_height)
             layout.put (b, 0, self.layer_position[t])
-            b.annotationtype=t
-
-            color=self.get_element_color(t)
-            if color:
-                b._default_color=color
-                self.set_widget_background_color(b)
-
+            b.update_widget()
             b.show()
-            b.connect("clicked", self.annotation_type_clicked_cb)
             b.connect("key_press_event", keypress_handler, t)
             b.connect("button_press_event", self.annotation_type_key_press_cb)
-            b.connect("enter", lambda b: b.grab_focus() and True)
+            b.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
             # The button can receive drops (to transmute annotations)
             b.connect("drag_data_received", self.annotation_type_drag_received_cb)
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -1859,13 +1844,17 @@ class TimeLine(AdhocView):
 
             # Does not work for the first time, since the layout itself is not realized,
             # thus its children cannot know their allocation.
-            a=b.get_allocation()
-            width=max(width, a.width)
+            width=max(width, b.width)
             height=max (height, self.layer_position[t] + 3 * self.button_height)
+
+        def resize(b, w):
+            b.width=w
+            b.update_widget()
+            return True
 
         # Resize all buttons to fit the largest
         if width > 1:
-            layout.foreach(lambda b: b.set_size_request(width, -1))
+            layout.foreach(resize, width)
 
         # Add the "New type" button at the end
         b=gtk.Button()
@@ -2270,6 +2259,50 @@ class OldAnnotationWidget(gtk.Button):
             self.label.set_text(title)
         return True
 
+class OldAnnotationTypeWidget(gtk.Button):
+    """Old method to render annotation type widgets (in order to be usable on
+       fink with gtk == 2.6 and no cairo is available)
+    """
+    def __init__(self, annotationtype=None, container=None):
+        gtk.Button.__init__(self)
+        self.annotationtype=annotationtype
+        # container is the Advene view instance that manages this instance
+        self.container=container
+        if container:
+            self.controller=container.controller
+        else:
+            self.controller=None
+
+        self.local_color=None
+        self.label=gtk.Label()
+        self.label.modify_font(self.container.annotation_type_font)
+        self.add(self.label)
+        self.set_size_request(-1, self.container.button_height)
+
+    def set_color(self, color=None):
+        self.local_color=color
+        self.update_widget()
+
+    def update_widget(self):
+        if not self.window:
+            return False
+
+        if self.local_color is not None:
+            color=self.local_color
+        else:
+            color=self.container.get_element_color(self.annotationtype)
+        if color:
+            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                          gtk.STATE_PRELIGHT):
+                self.modify_bg (style, color)
+
+        # Draw the text
+        title=self.controller.get_title(self.annotationtype)
+        self.label.set_text(title)
+        return True
+
 if AnnotationWidget is None:
     AnnotationWidget=OldAnnotationWidget
+    AnnotationTypeWidget=OldAnnotationTypeWidget
 
