@@ -121,7 +121,7 @@ FCKConfig.ToolbarSets["AdveneToolBar"] = [
  ['OrderedList','UnorderedList','-','Indent','Outdent'],
  ['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull'],
  ['Link','Unlink','Image','SpecialChar','PageBreak'],
- ['Table','Rule','SpecialChar'],['AdveneREP']
+ ['Table','Rule','SpecialChar'],['AdveneIMG']
 ] ;
 
 
