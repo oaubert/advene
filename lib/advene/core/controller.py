@@ -790,7 +790,7 @@ class AdveneController:
         color=None
         col=element.getMetaData(config.data.namespace, metadata)
         if col:
-            c=self.controller.build_context(here=element)
+            c=self.build_context(here=element)
             try:
                 color=c.evaluateValue(col)
             except:
@@ -807,7 +807,7 @@ class AdveneController:
             if container:
                 col=container.getMetaData(config.data.namespace, 'item_color')
                 if col:
-                    c=self.controller.build_context(here=element)
+                    c=self.build_context(here=element)
                     try:
                         color=c.evaluateValue(col)
                     except:
