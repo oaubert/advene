@@ -186,7 +186,7 @@ class Menu:
         return True
 
     def edit_element (self, widget, el):
-        self.controller.gui.edit_element(annotation)
+        self.controller.gui.edit_element(el)
         return True
 
     def display_transcription(self, widget, annotationtype):
