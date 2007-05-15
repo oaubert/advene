@@ -687,11 +687,14 @@ class TranscriptionEdit(AdhocView):
             return True
 
         if len(at.annotations):
-            if advene.gui.util.message_dialog(_("There already are annotations of type %s.\nDo you want to delete them before conversion?") % self.controller.get_title(at),
-                                              icon=gtk.MESSAGE_QUESTION):
+            ret=advene.gui.util.yes_no_cancel_popup(title=_('Transcription conversion'),
+                                                    text=_("There already are annotations of type %s.\nDo you want to delete them before conversion?") % self.controller.get_title(at))
+            if ret == gtk.RESPONSE_YES:
                 # Remove all annotations of at type
                 for a in at.annotations:
                     self.controller.delete_annotation(a)
+            elif ret == gtk.RESPONSE_CANCEL:
+                return True
 
         ti=TranscriptionImporter(package=self.controller.package,
                                  controller=self.controller,
