@@ -254,8 +254,8 @@ class ZipPackage:
         manifest=[]
 
         for (dirpath, dirnames, filenames) in os.walk(self._tempdir):
-            # Ignore .cvs, .svn path
-            for d in ('.svn', 'CVS'):
+            # Ignore RCS directory paths
+            for d in ('.svn', 'CVS', '_darcs', '.bzr'):
                 if d in dirnames:
                     dirnames.remove(d)
 
