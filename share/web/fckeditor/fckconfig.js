@@ -112,6 +112,19 @@ FCKConfig.ToolbarSets["Basic"] = [
 	['Bold','Italic','-','OrderedList','UnorderedList','-','Link','Unlink','-','About']
 ] ;
 
+// toolbar for Advene
+FCKConfig.ToolbarSets["AdveneToolBar"] = [
+ ['Source','DocProps','-','Save'],
+ ['Cut','Copy','Paste','PasteText'],
+ ['Undo','Redo'],
+ ['Bold', 'Italic', 'Underline', 'StrikeThrough', 'RemoveFormat'],
+ ['OrderedList','UnorderedList','-','Indent','Outdent'],
+ ['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull'],
+ ['Link','Unlink','Image','SpecialChar','PageBreak'],
+ ['Table','Rule','SpecialChar'],['AdveneREP']
+] ;
+
+
 FCKConfig.EnterMode = 'p' ;			// p | div | br
 FCKConfig.ShiftEnterMode = 'br' ;	// p | div | br
 
@@ -222,3 +235,7 @@ FCKConfig.SmileyImages	= ['regular_smile.gif','sad_smile.gif','wink_smile.gif','
 FCKConfig.SmileyColumns = 8 ;
 FCKConfig.SmileyWindowWidth		= 320 ;
 FCKConfig.SmileyWindowHeight	= 240 ;
+
+
+// advene plugin added.
+FCKConfig.Plugins.Add( 'AdveneIMG', 'en');
