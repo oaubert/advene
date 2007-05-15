@@ -617,8 +617,13 @@ class Application(Common):
         if view is None or c.gui is None:
             return self.current_adhoc()
 
+        try:
+            destination=query['destination']
+        except:
+            destination='popup'
+
         if view in ('tree', 'timeline', 'browser', 'history'):
-            c.queue_action(c.gui.open_adhoc_view, view)
+            c.queue_action(c.gui.open_adhoc_view, view, destination=destination)
             return self.send_no_content()
 
         if view == 'transcription':
@@ -638,7 +643,7 @@ class Application(Common):
                 except:
                     # No provided source. Use the whole package
                     source="here/annotations/sorted"
-            c.queue_action(c.gui.open_adhoc_view, view, source=source)
+            c.queue_action(c.gui.open_adhoc_view, view, source=source, destination=destination)
             return self.send_no_content()
 
         if view == 'transcribe':
@@ -647,7 +652,7 @@ class Application(Common):
                 url=query['url']
             except:
                 pass
-            c.queue_action(c.gui.open_adhoc_view, view, filename=url)
+            c.queue_action(c.gui.open_adhoc_view, view, filename=url, destination=destination)
             return self.send_no_content()
 
         if view == 'edit':
@@ -1898,7 +1903,6 @@ class AdveneWebServer:
             cherrypy.server.quickstart()
         except Exception, e:
             self.controller.log(_("Cannot start HTTP server: %s") % unicode(e))
-            return False
 
     def start(self):
         self.controller.queue_action(cherrypy.engine.start, False)
