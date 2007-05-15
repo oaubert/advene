@@ -29,24 +29,20 @@ http://laszlok2.blogspot.com/2006/05/prince-of-cairo_28.html
 """
 
 import gtk
-import gobject
 import cairo
-import pangocairo
-
-from gettext import gettext as _
 
 # Advene part
 import advene.core.config as config
 
 import advene.util.helper as helper
 
-class AnnotationWidget(gtk.DrawingArea):
-    """ Widget representing an annotation
+class GenericColorButtonWidget(gtk.DrawingArea):
+    """ Widget emulating a color button widget
     """
-    def __init__(self, annotation=None, container=None):
+    def __init__(self, element=None, container=None):
         gtk.DrawingArea.__init__(self)
         self.set_flags(self.flags() | gtk.CAN_FOCUS)
-        self.annotation=annotation
+        self.element=element
         
         # If not None, it should contain a gtk.gdk.Color
         # which will override the normal color
@@ -79,17 +75,12 @@ class AnnotationWidget(gtk.DrawingArea):
         #self.connect('event', self.debug_cb, "Event")
         #self.connect_after('event', self.debug_cb, "After")
 
-        self.annotation_surface = None
-        self.annotation_context = None
+        self.cached_surface = None
+        self.cached_context = None
 
-        w=self.container.unit2pixel(self.annotation.fragment.duration)
-        self.set_size_request(w, self.container.button_height)
+        # Initialize the size
+        self.set_size_request(*self.needed_size())
 
-    def debug_cb (self, widget, event=None, data=None):
-        if self.annotation.id == 'a3':
-            print "*********** Debug event.", event.type, data
-        return False
-    
     def reset_surface_size(self, width=None, height=None): 
         if not self.window:
             return False
@@ -98,19 +89,18 @@ class AnnotationWidget(gtk.DrawingArea):
             width=s[0]
         if height is None: 
             height=s[1]
-        if (self.annotation_surface 
-            and self.annotation_surface.get_width() == width
-            and self.annotation_surface.get_height() == height):
+        if (self.cached_surface 
+            and self.cached_surface.get_width() == width
+            and self.cached_surface.get_height() == height):
             return True
-        self.annotation_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
-        self.annotation_context = cairo.Context(self.annotation_surface)
+        self.cached_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+        self.cached_context = cairo.Context(self.cached_surface)
         self.set_size_request(width, height)
         self.window.lower()
         return True
 
     def realize_cb(self, widget):
-        if not self.reset_surface_size(self.container.unit2pixel(self.annotation.fragment.duration),
-                                       self.container.button_height):
+        if not self.reset_surface_size(*self.needed_size()):
             return True
         self.update_widget()
         return True
@@ -124,78 +114,54 @@ class AnnotationWidget(gtk.DrawingArea):
         self.update_widget()
         return True
 
-    def update_widget(self, *p):
-        if not self.window:
-            return False
-        if self.annotation_context is None:
-            return False
+    def needed_size(self):
+        """Return the needed size of the widget.
 
-        # First check width
-        w=self.container.unit2pixel(self.annotation.fragment.duration)
-        if w != self.annotation_surface.get_width():
-            self.reset_surface_size(w, self.container.button_height)
+        Method to be implemented by subclasses
+        """
+        return (40, 10)
 
-        bwidth=self.annotation_surface.get_width()
-        bheight=self.annotation_surface.get_height()
+    def draw(self, context, width, height):
+        """Draw the widget.
 
-        c=self.annotation_context
-        
-        # c.move_to(0, 0)
-        # c.rel_line_to(0, bheight)
-        # c.rel_line_to(bwidth, 0)
-        # c.rel_line_to(0, -bheight)
-        # if bwidth > 12:
-        #     c.rel_line_to(-4, 0)
-        #     c.rel_line_to(0, 4)
-        #     c.rel_line_to(-(bwidth-8), 0)
-        #     c.rel_line_to(0, -4)
-        #     c.close_path()
-        self.annotation_context.rectangle(0, 0, bwidth, bheight)
+        Method to be implemented by subclasses
+        """        
+        context.rectangle(0, 0, width, height)
         if self.local_color is not None:
             color=self.local_color
-        else:
-            color=self.container.get_element_color(self.annotation)
-        if color:
             rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
         else:
             rgba=(1.0, 1.0, 1.0, 1)
-        self.annotation_context.set_source_rgba(*rgba)
-        self.annotation_context.fill_preserve()
+        context.set_source_rgba(*rgba)
+        context.fill()
+
+    def update_widget(self, *p):
+        if not self.window:
+            return False
+        if self.cached_context is None:
+            return False
+
+        # First check width
+        w=self.needed_size()[0]
+        if w != self.cached_surface.get_width():
+            self.reset_surface_size(w, self.container.button_height)
+
+        bwidth=self.cached_surface.get_width()
+        bheight=self.cached_surface.get_height()
+
+        self.draw(self.cached_context, bwidth, bheight)
         
-        # Draw the border
-        if self.is_focus():
-            self.annotation_context.set_line_width(4)
-        else:
-            self.annotation_context.set_line_width(1)
-        self.annotation_context.set_source_rgba(0, 0, 0, 1)
-        self.annotation_context.stroke()
-        
-        # Draw the text
-        if self.annotation.relations:
-            weight=cairo.FONT_WEIGHT_BOLD
-        else:
-            weight=cairo.FONT_WEIGHT_NORMAL
-        self.annotation_context.select_font_face("Helvetica",
-                                                 cairo.FONT_SLANT_NORMAL, weight)
-        self.annotation_context.set_font_size(config.data.preferences['timeline']['font-size'])
-        
-        self.annotation_context.move_to(2, int(bheight * 0.7))
-        
-        self.annotation_context.set_source_rgba(0, 0, 0, 1)
-        title=self.controller.get_title(self.annotation)
-        self.annotation_context.show_text(title)
-        self.annotation_context.stroke()
         self.refresh()
         return True
 
     def refresh(self):
         if self.window:
-            width = self.annotation_surface.get_width()
-            height = self.annotation_surface.get_height()
+            width = self.cached_surface.get_width()
+            height = self.cached_surface.get_height()
             self.window.invalidate_rect(gtk.gdk.Rectangle(0, 0, width, height), False)
 
     def expose_cb(self, widget, event):
-        if self.annotation_surface is None:
+        if self.cached_surface is None:
             return False
 
         context = widget.window.cairo_create()
@@ -206,7 +172,120 @@ class AnnotationWidget(gtk.DrawingArea):
         context.clip()
 
         # copy the annotation_surface onto this context
-        context.set_source_surface(self.annotation_surface, 0, 0)
-        #context.paint_with_alpha(.9)
+        context.set_source_surface(self.cached_surface, 0, 0)
         context.paint()
         return False
+
+class AnnotationWidget(GenericColorButtonWidget):
+    """ Widget representing an annotation
+    """
+    def __init__(self, annotation=None, container=None):
+        self.annotation=annotation
+        GenericColorButtonWidget.__init__(self, element=annotation, container=container)
+
+    def needed_size(self):
+        """Return the needed size of the widget.
+
+        Method to be implemented by subclasses
+        """
+        return (self.container.unit2pixel(self.annotation.fragment.duration),
+                self.container.button_height)
+
+    def draw(self, context, width, height):
+        # c.move_to(0, 0)
+        # c.rel_line_to(0, bheight)
+        # c.rel_line_to(bwidth, 0)
+        # c.rel_line_to(0, -bheight)
+        # if bwidth > 12:
+        #     c.rel_line_to(-4, 0)
+        #     c.rel_line_to(0, 4)
+        #     c.rel_line_to(-(bwidth-8), 0)
+        #     c.rel_line_to(0, -4)
+        #     c.close_path()
+        context.rectangle(0, 0, width, height)
+        if self.local_color is not None:
+            color=self.local_color
+        else:
+            color=self.container.get_element_color(self.annotation)
+        if color:
+            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
+        else:
+            rgba=(1.0, 1.0, 1.0, 1)
+        context.set_source_rgba(*rgba)
+        context.fill_preserve()
+        
+        # Draw the border
+        if self.is_focus():
+            context.set_line_width(4)
+        else:
+            context.set_line_width(1)
+        context.set_source_rgba(0, 0, 0, 1)
+        context.stroke()
+        
+        # Draw the text
+        if self.annotation.relations:
+            weight=cairo.FONT_WEIGHT_BOLD
+        else:
+            weight=cairo.FONT_WEIGHT_NORMAL
+        context.select_font_face("Helvetica",
+                                 cairo.FONT_SLANT_NORMAL, weight)
+        context.set_font_size(config.data.preferences['timeline']['font-size'])
+        
+        context.move_to(2, int(height * 0.7))
+        
+        context.set_source_rgba(0, 0, 0, 1)
+        title=self.controller.get_title(self.annotation)
+        context.show_text(title)
+
+class AnnotationTypeWidget(GenericColorButtonWidget):
+    """ Widget representing an annotation type
+    """
+    def __init__(self, annotationtype=None, container=None):
+        self.annotationtype=annotationtype
+        self.width=None
+        GenericColorButtonWidget.__init__(self, element=annotationtype, container=container)
+
+    def needed_size(self):
+        """Return the needed size of the widget.
+
+        Method to be implemented by subclasses
+        """
+        w=self.width or 60
+        return (w, self.container.button_height)
+
+    def draw(self, context, width, height):
+        context.rectangle(0, 0, width, height)
+        if self.local_color is not None:
+            color=self.local_color
+        else:
+            color=self.container.get_element_color(self.annotationtype)
+        if color:
+            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
+        else:
+            rgba=(1.0, 1.0, 1.0, 1)
+        context.set_source_rgba(*rgba)
+        context.fill_preserve()
+        
+        # Draw the border
+        if self.is_focus():
+            context.set_line_width(4)
+        else:
+            context.set_line_width(1)
+        context.set_source_rgba(0, 0, 0, 1)
+        context.stroke()
+        
+        # Draw the text
+        context.select_font_face("Helvetica",
+                                 cairo.FONT_SLANT_ITALIC, cairo.FONT_WEIGHT_NORMAL)
+        context.set_font_size(config.data.preferences['timeline']['font-size'])
+        
+        context.move_to(2, int(height * 0.7))
+        
+        context.set_source_rgba(0, 0, 0, 1)
+        title=self.controller.get_title(self.annotationtype)
+        context.show_text(title)
+        if self.width is None:
+            ext=context.text_extents(title)
+            if ext[2] != self.width:
+                self.width=long(ext[2]) + 5
+                self.reset_surface_size(self.width, self.container.button_height)
