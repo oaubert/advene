@@ -186,15 +186,7 @@ class Menu:
         return True
 
     def edit_element (self, widget, el):
-        try:
-            pop = advene.gui.edit.elements.get_edit_popup (el, self.controller, 
-                                                           editable=not self.readonly)
-        except TypeError, e:
-            print _("Error: unable to find an edit popup for %(element)s:\n%(error)s") % {
-                'element': el,
-                'error': unicode(e)}
-        else:
-            pop.edit ()
+        self.controller.gui.edit_element(annotation)
         return True
 
     def display_transcription(self, widget, annotationtype):
