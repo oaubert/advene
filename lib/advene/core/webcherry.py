@@ -1425,8 +1425,7 @@ class Packages(Common):
         =============
 
         The update of an element of the object addressed by the POSTed
-        URL is done by giving the name of the object attribute that we
-        want to update, as the value of the C{key} parameter.
+        URL is done by giving the URL of the element to update.
 
         If an additional C{object} parameter is given, it indicates
         that the object is a list, and that we should access one of
@@ -1435,9 +1434,8 @@ class Packages(Common):
         For instance, the update of the content of the view C{foo} in
         the package C{bar} can be done through the following form::
 
-          <form method="POST" action="/packages/bar/views/foo/content">
+          <form method="POST" action="/packages/bar/views/foo/content/data">
           <textarea name="data">Contents</textarea>
-          <input type="hidden" name="key" value="data">
           <input type="hidden" name="action" value="update">
           <input type="submit" value="Submit" />
           </form>
@@ -1543,6 +1541,7 @@ class Packages(Common):
                 </pre>
                 """) % { 'path': "/".join([tales, attribute]),
                          'value': cgi.escape(query['data']) })
+                return "".join(res)
             else:
                 # Fallback mode : maybe we were in a dict, and
                 # attribute is the id of the object in the dict
