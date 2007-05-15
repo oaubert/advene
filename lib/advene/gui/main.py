@@ -1775,7 +1775,11 @@ class AdveneGUI (Connect):
             self.on_save_as1_activate (package=package)
         else:
             alias=self.controller.aliases[package]
-            self.controller.save_package (alias=alias)
+            try:
+                self.controller.save_package (alias=alias)
+            except IOError, e:
+                advene.gui.util.message_dialog(_("Could not save the package: %s") % unicode(e),
+                                               gtk.MESSAGE_ERROR)
         return True
 
     def on_save_as1_activate (self, button=None, package=None):
@@ -1815,7 +1819,11 @@ class AdveneGUI (Connect):
                     return True
 
             alias=self.controller.aliases[package]
-            self.controller.save_package(name=filename, alias=alias)
+            try:
+                self.controller.save_package(name=filename, alias=alias)
+            except IOError, e:
+                advene.gui.util.message_dialog(_("Could not save the package: %s") % unicode(e),
+                                               gtk.MESSAGE_ERROR)
         return True
 
     def on_save_session1_activate (self, button=None, data=None):
