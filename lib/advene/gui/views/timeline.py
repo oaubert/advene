@@ -1853,7 +1853,7 @@ class TimeLine(AdhocView):
             return True
 
         # Resize all buttons to fit the largest
-        if width > 1:
+        if width > 20:
             layout.foreach(resize, width)
 
         # Add the "New type" button at the end
@@ -2278,10 +2278,7 @@ class OldAnnotationTypeWidget(gtk.Button):
         self.label.modify_font(self.container.annotation_type_font)
         self.add(self.label)
         self.set_size_request(-1, self.container.button_height)
-        if self.window:
-           self.width=self.window.get_size()[0]
-        else:
-           self.width=40
+        self.width=None
 
     def set_color(self, color=None):
         self.local_color=color
@@ -2291,7 +2288,8 @@ class OldAnnotationTypeWidget(gtk.Button):
         if not self.window:
             return False
 
-        self.width=self.window.get_size()[0]
+        if self.width is not None:
+            self.set_size_request(self.width, -1)
         if self.local_color is not None:
             color=self.local_color
         else:
