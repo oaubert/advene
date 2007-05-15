@@ -770,6 +770,53 @@ class AdveneController:
     def get_timestamp(self):
 	return time.strftime("%Y-%m-%d")
 
+    def get_element_color(self, element, metadata='color'):
+        """Return the color for the given element.
+
+        Return None if no color is defined.
+
+        It will first check if a 'color' metadata is set on the
+        element, and try to evaluate is as a TALES expression. If no
+        color is defined, or if the result of evaluation is None, it
+        will then try to use the 'item_color' metadata from the container type
+        (annotation type for annotations, schema for types).
+
+        If not defined (or evaluating to None), it will try to use the
+        'color' metadata of the container (annotation-type for
+        annotations, schema for types).
+        """
+    
+        # First try the 'color' metadata from the element itself.
+        color=None
+        col=element.getMetaData(config.data.namespace, metadata)
+        if col:
+            c=self.controller.build_context(here=element)
+            try:
+                color=c.evaluateValue(col)
+            except:
+                color=None
+
+        if not color:
+            # Not found in element. Try item_color from the container.
+            if hasattr(element, 'type'):
+                container=element.type
+            elif hasattr(element, 'schema'):
+                container=element.schema
+            else: 
+                container=None
+            if container:
+                col=container.getMetaData(config.data.namespace, 'item_color')
+                if col:
+                    c=self.controller.build_context(here=element)
+                    try:
+                        color=c.evaluateValue(col)
+                    except:
+                        color=None
+                if not color:
+                    # Really not found. So use the container color.
+                    color=self.get_element_color(container)
+        return color
+
     def load_package (self, uri=None, alias=None, activate=True):
         """Load a package.
 
