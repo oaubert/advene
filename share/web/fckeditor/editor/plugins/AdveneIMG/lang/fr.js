@@ -1,3 +1,3 @@
-FCKLang['DlgAdveneIMGTitle']  		= 'Insert AdveneIMG' ;
-FCKLang['DlgAdveneIMGBtn']      	= 'AdveneIMG' ;
-FCKLang['DlgAdveneIMGInsertBtn']	= 'Insert AdveneIMG' ;
+FCKLang['DlgAdveneIMGTitle']  		= 'Insérer une annotation' ;
+FCKLang['DlgAdveneIMGBtn']      	= 'Editeur - annotation' ;
+FCKLang['DlgAdveneIMGInsertBtn']	= 'Insérer une annotation' ;

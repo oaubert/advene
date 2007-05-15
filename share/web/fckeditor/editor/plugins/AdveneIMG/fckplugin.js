@@ -1,17 +1,17 @@
 // Register the related commands.
 
-FCKCommands.RegisterCommand( 'AdveneIMG', new FCKDialogCommand( FCKLang['DlgAdveneIMGTitle'], FCKLang['DlgAdveneIMGBtn'], '/packages/advene/view/AdveneIMG', 700, 600 ) ) ;
+FCKCommands.RegisterCommand( 'richedit_annotation', new FCKDialogCommand( FCKLang['DlgAdveneIMGTitle'], FCKLang['DlgAdveneIMGBtn'], '/packages/advene/view/richedit_annotation', 700, 600 ) ) ;
 
 
 // Create the "AdveneIMG" toolbar button.
 
-var AdveneIMGItem	= new FCKToolbarButton( 'AdveneIMG', FCKLang['DlgAdveneIMGTitle'] ) ;
+var AdveneIMGItem	= new FCKToolbarButton( 'richedit_annotation', FCKLang['DlgAdveneIMGTitle'] ) ;
 
 AdveneIMGItem.IconPath	= FCKConfig.PluginsPath + 'AdveneIMG/adv.gif' ;
 
 
 
-FCKToolbarItems.RegisterItem( 'AdveneIMG', AdveneIMGItem ) ;
+FCKToolbarItems.RegisterItem( 'richedit_annotation', AdveneIMGItem ) ;
 
 
 // clique droit menu deroulant a debugger class du tag 
@@ -25,7 +25,7 @@ oMyContextMenuListener.AddItems = function( contextMenu, tag, tagName )
 	if ( tagName == 'SPAN' && tag.className == 'AdveneContent'  )
 	{
 		contextMenu.AddSeparator() ;
-		contextMenu.AddItem( 'AdveneIMG', FCKLang['DlgAdveneIMGTitle'], AdveneIMGItem.IconPath ) ;
+		contextMenu.AddItem( 'richedit_annotation', FCKLang['DlgAdveneIMGTitle'], AdveneIMGItem.IconPath ) ;
 	}
 }
 
