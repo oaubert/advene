@@ -33,6 +33,11 @@ import sre
 import os
 import struct
 
+try:
+    import gtksourceview
+except:
+    gtksourceview=None
+
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
@@ -1034,8 +1039,8 @@ class TextContentHandler (ContentHandler):
 
     def key_pressed_cb (self, win, event):
         # Process player shortcuts
-        if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
-            return True
+        #if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
+        #    return True
         if event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.s:
                 self.content_save()
@@ -1150,14 +1155,48 @@ class TextContentHandler (ContentHandler):
             b.connect("clicked", self.browser_open)
             tb.insert(b, -1)
 
-            tb.show_all()
             vbox.pack_start(tb, expand=False)
 
-        textview = gtk.TextView ()
-        textview.set_editable (self.editable)
-        textview.set_wrap_mode (gtk.WRAP_CHAR)
-        textview.get_buffer ().set_text (self.element.data)
-        textview.connect ("key-press-event", self.key_pressed_cb)
+        if gtksourceview is not None:
+            textview=gtksourceview.SourceView(gtksourceview.SourceBuffer())
+            b=textview.get_buffer()
+            m=gtksourceview.SourceLanguagesManager()
+            if m:
+                b.set_language(m.get_language_from_mime_type(self.element.mimetype))
+                b.set_highlight(True)
+            textview.set_editable (self.editable)
+            textview.set_wrap_mode (gtk.WRAP_CHAR)
+            textview.set_auto_indent(True)
+            b.set_text (self.element.data)
+            textview.connect ("key-press-event", self.key_pressed_cb)
+
+            def undo(b):
+                b=textview.get_buffer()
+                if b.can_undo():
+                    b.undo()
+                return True
+
+            def redo(b):
+                b=textview.get_buffer()
+                if b.can_redo():
+                    b.redo()
+                return True
+
+            b=gtk.ToolButton()
+            b.set_stock_id(gtk.STOCK_UNDO)
+            b.connect("clicked", undo)
+            tb.insert(b, -1)
+            b=gtk.ToolButton()
+            b.set_stock_id(gtk.STOCK_REDO)
+            b.connect("clicked", redo)
+            tb.insert(b, -1)
+
+        else:
+            textview = gtk.TextView ()
+            textview.set_editable (self.editable)
+            textview.set_wrap_mode (gtk.WRAP_CHAR)
+            textview.get_buffer ().set_text (self.element.data)
+            textview.connect ("key-press-event", self.key_pressed_cb)
         self.view = textview
 
         scroll_win = gtk.ScrolledWindow ()
