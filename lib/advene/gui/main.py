@@ -1042,10 +1042,10 @@ class AdveneGUI (Connect):
         def open_history_file(button, fname):
             try:
                 self.controller.load_package (uri=fname)
-            except Exception, e:
-                self.log(_("Cannot load package %(filename)s:\n%(error)s") % {
+            except IOError, e:
+                advene.gui.util.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
                         'filename': fname, 
-                        'error': unicode(e)})
+                        'error': unicode(e)}, gtk.MESSAGE_ERROR)
             return True
 
         # We cannot set the widget name to something more sensible (like
@@ -1760,10 +1760,10 @@ class AdveneGUI (Connect):
 
             try:
                 self.controller.load_package (uri=filename, alias=alias)
-            except Exception, e:
-                self.log(_("Cannot load package %(filename)s:\n%(error)s") % {
+            except IOError, e:
+                advene.gui.util.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
                         'filename': filename, 
-                        'error': unicode(e)})
+                        'error': unicode(e)}, gtk.MESSAGE_ERROR)
         return True
 
     def on_save1_activate (self, button=None, package=None):
