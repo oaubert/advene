@@ -189,8 +189,6 @@ class TimeLine(AdhocView):
             'relations': gtk.gdk.color_parse('orange'),
             'white': gtk.gdk.color_parse('white'),
             }
-        self.widget_colors = {
-            }
 
         def handle_toggle(b, option):
             self.options[option]=b.get_active()
@@ -666,20 +664,7 @@ class TimeLine(AdhocView):
         Return None if no color is defined.
         """
         color=self.controller.get_element_color(element)
-        if color:
-            # Found a color. Cache it.
-            try:
-                gtk_color=self.widget_colors[color]
-            except:
-                try:
-                    self.widget_colors[color]=gtk.gdk.color_parse(color)
-                except:
-                    print "Unable to parse ", color
-                    self.widget_colors[color]=self.colors['inactive']
-                gtk_color=self.widget_colors[color]
-        else:
-            gtk_color=None
-        return gtk_color
+        return advene.gui.util.name2color(color)
 
     def update_button (self, b):
         """Update the representation for button b.
@@ -781,16 +766,6 @@ class TimeLine(AdhocView):
         menu.popup()
         return True
 
-    def annotation_type_key_press_cb(self, widget, event):
-        """Display the popup menu when right-clicking on annotation type.
-        """
-        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-            menu=advene.gui.popup.Menu(widget.annotationtype,
-                                       controller=self.controller)
-            menu.popup()
-            return True
-        return False
-
     def dump_adjustment (self):
         a = self.adjustment
         print ("Lower: %.1f\tUpper: %.1f\tValue: %.1f\tPage size: %.1f"
@@ -834,28 +809,18 @@ class TimeLine(AdhocView):
         return False
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
-        #print "drag_sent event from %s" % widget.annotation.content.data
-        if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, widget.annotation.uri)
-        elif targetType == config.data.target_type['uri-list']:
-            c=self.controller.build_context(here=widget.annotation)
-            uri=c.evaluateValue('here/absolute_url')
-            selection.set(selection.target, 8, uri)
-        elif (targetType == config.data.target_type['text-plain']
-              or targetType == config.data.target_type['TEXT']
-              or targetType == config.data.target_type['STRING']):
-            selection.set(selection.target, 8, widget.annotation.content.data)
-        elif targetType == config.data.target_type['annotation-resize']:
+        if widget.drag_sent(widget, context, selection, targetType, eventTime):
+            return True
+        if targetType == config.data.target_type['annotation-resize']:
             selection.set(selection.target, 8,
                           cgi.urllib.urlencode( {
                         'uri': widget.annotation.uri,
                         'fraction': widget._drag_fraction,
                         } ))
-        elif targetType == config.data.target_type['timestamp']:
-            selection.set(selection.target, 8, str(widget.annotation.fragment.begin))
+            return True
         else:
             print "Unknown target type for drag: %d" % targetType
-        return True
+            return False
 
     def create_relation(self, source, dest, rt):
         """Create the reation of type rt between source and dest.
@@ -1174,19 +1139,10 @@ class TimeLine(AdhocView):
     def annotation_key_press_cb(self, widget, event, annotation):
         """Handle key presses on annotation widgets.
         """
-        if event.keyval == gtk.keysyms.e:
-            self.controller.gui.edit_element(annotation)
+        if widget.keypress(widget, event, annotation):
             return True
-        elif event.keyval == gtk.keysyms.space:
-            # Play the annotation
-            c=self.controller
-            pos = c.create_position (value=annotation.fragment.begin,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
-            c.gui.set_current_annotation(annotation)
-            return True
-        elif event.keyval == gtk.keysyms.p:
+
+        if event.keyval == gtk.keysyms.p:
             # Play
             f=self.annotation_fraction(widget)
             x, y = widget.get_pointer()
@@ -1268,9 +1224,7 @@ class TimeLine(AdhocView):
         b.show()
         self.update_button(b)
 
-        b.connect("button_press_event", self.annotation_button_press_cb, annotation)
         b.connect("key_press_event", self.annotation_key_press_cb, annotation)
-
         b.connect("enter_notify_event", self.rel_activate)
         b.connect("leave_notify_event", self.rel_deactivate)
 
@@ -1754,7 +1708,9 @@ class TimeLine(AdhocView):
             return True
     
         def keypress_handler(widget, event, at):
-            if event.keyval == gtk.keysyms.Return:
+            if widget.keypress(widget, event, at):
+                return True
+            elif event.keyval == gtk.keysyms.Return:
                 if (self.controller.player.status != self.controller.player.PlayingStatus
                     and self.controller.player.status != self.controller.player.PauseStatus):
                     return True
@@ -1774,9 +1730,6 @@ class TimeLine(AdhocView):
                 b=self.create_annotation_widget(el)
                 b.show()
                 self.quick_edit(el, button=widget, callback=set_end_time)
-            elif event.keyval == gtk.keysyms.e:
-                self.controller.gui.edit_element(at)
-                return True
             return False
 
         for t in self.annotationtypes:
@@ -1786,8 +1739,6 @@ class TimeLine(AdhocView):
             b.update_widget()
             b.show()
             b.connect("key_press_event", keypress_handler, t)
-            b.connect("button_press_event", self.annotation_type_key_press_cb)
-            b.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
             # The button can receive drops (to transmute annotations)
             b.connect("drag_data_received", self.annotation_type_drag_received_cb)
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
