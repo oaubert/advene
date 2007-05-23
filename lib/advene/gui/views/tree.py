@@ -37,6 +37,12 @@ import advene.util.helper as helper
 import gtk
 import gobject
 
+name="Tree view plugin"
+
+def register(controller):
+    controller.register_viewclass(TreeWidget)
+
+
 class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest):
     COLUMN_TITLE=0
     COLUMN_ELEMENT=1
@@ -388,7 +394,7 @@ class TreeWidget(AdhocView):
     view_name = _("Tree view")
     view_id = 'tree'
     tooltip=("Hierarchical view of an Advene package")
-    def __init__(self, package, modelclass=DetailedTreeModel, controller=None):
+    def __init__(self, controller=None, parameters=None, package=None, modelclass=DetailedTreeModel):
 	self.close_on_package_load = False
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
@@ -396,6 +402,8 @@ class TreeWidget(AdhocView):
         self.controller=controller
         self.options={}
 
+        if package is None:
+            package=controller.package
         self.package = package
         self.modelclass=modelclass
 
