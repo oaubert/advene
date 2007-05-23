@@ -340,7 +340,7 @@ def get_title(controller, element, representation=None):
         return unicode(cleanup(element.title))
     if hasattr(element, 'id') and element.id:
         return unicode(element.id)
-    return unicode(cleanup(element))
+    return cleanup(unicode(element))
 
 element_label = {
     Package: _("Package"),
