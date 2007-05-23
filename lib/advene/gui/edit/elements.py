@@ -1182,14 +1182,16 @@ class TextContentHandler (ContentHandler):
                     b.redo()
                 return True
 
-            b=gtk.ToolButton()
-            b.set_stock_id(gtk.STOCK_UNDO)
-            b.connect("clicked", undo)
-            tb.insert(b, -1)
-            b=gtk.ToolButton()
-            b.set_stock_id(gtk.STOCK_REDO)
-            b.connect("clicked", redo)
-            tb.insert(b, -1)
+            if not compact:
+                b=gtk.ToolButton()
+                b.set_stock_id(gtk.STOCK_UNDO)
+                b.connect("clicked", undo)
+                tb.insert(b, -1)
+
+                b=gtk.ToolButton()
+                b.set_stock_id(gtk.STOCK_REDO)
+                b.connect("clicked", redo)
+                tb.insert(b, -1)
 
         else:
             textview = gtk.TextView ()
