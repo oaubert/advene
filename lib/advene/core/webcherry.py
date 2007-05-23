@@ -573,8 +573,18 @@ class Application(Common):
         if not c.gui:
             res.append(_("""<p>No GUI is available."""))
         else:
-            res.append(_("""<p>Current adhoc views: %s</p>""") % ", ".join([ v.view_name for v in c.gui.adhoc_views]))
-            res.append(_("""<p>You can open a new <a href="/application/adhoc/tree">tree view</a>, a new <a href="/application/adhoc/timeline">timeline</a> or a new <a href="/application/adhoc/transcription">transcription</a>.</p>"""))
+            res.append(_("""<p>Opened adhoc views: %s</p>""") % ", ".join([ v.view_name for v in c.gui.adhoc_views]))
+            res.append(_("""<p>Available adhoc views:</p><ul>"""))
+            for name, view in c.gui.registered_adhoc_views.iteritems():
+                try:
+                    description=": " + view.tooltip
+                except AttributeError:
+                    description=""
+                res.append("""<li><a href="/application/adhoc/%(id)s">%(name)s</a>%(description)s</li>""" %
+                           { 'id': name,
+                             'name': view.view_name,
+                             'description': description })
+            res.append("</ul>")
         return "".join(res)
 
     def current_stbv(self):
@@ -622,10 +632,6 @@ class Application(Common):
         except:
             destination='popup'
 
-        if view in ('tree', 'timeline', 'browser', 'history'):
-            c.queue_action(c.gui.open_adhoc_view, view, destination=destination)
-            return self.send_no_content()
-
         if view == 'transcription':
             atid=arg
             if atid is None:
@@ -668,6 +674,10 @@ class Application(Common):
                 return self.send_error(400, _("No existing element with id %s") % elid)
 
             c.queue_action(c.gui.open_adhoc_view, view, element=el)
+            return self.send_no_content()
+
+        if view in c.gui.registered_adhoc_views:
+            c.queue_action(c.gui.open_adhoc_view, view, destination=destination)
             return self.send_no_content()
 
         return self.send_error(400, _("""<p>The GUI view %s does not exist.</p>""") % view)
