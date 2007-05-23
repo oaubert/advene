@@ -296,8 +296,15 @@ def matching_relationtypes(package, ann1, ann2):
     return r
 
 def get_title(controller, element, representation=None):
+    def cleanup(s):
+        i=s.find('\n')
+        if i > 0:
+            return s[:i]
+        else:
+            return s
+
     if element is None:
-        r=_("None")
+        return _("None")
     if isinstance(element, unicode) or isinstance(element, str):
         return element
     if (isinstance(element, Annotation) or isinstance(element, Relation)
@@ -311,14 +318,14 @@ def get_title(controller, element, representation=None):
                 r=element.content.data
             if not r:
                 r=element.id
-            return r
+            return cleanup(r)
 
         expr=element.type.getMetaData(config.data.namespace, "representation")
         if expr is None or expr == '' or re.match('^\s+', expr):
             r=element.content.data
             if not r:
                 r=element.id
-            return r
+            return cleanup(r)
 
         elif controller is not None:
             c=controller.event_handler.build_context(event='Display', here=element)
@@ -328,12 +335,12 @@ def get_title(controller, element, representation=None):
                 r=element.content.data
             if not r:
                 r=element.id
-            return r
+            return cleanup(r)
     if hasattr(element, 'title') and element.title:
-        return unicode(element.title)
+        return unicode(cleanup(element.title))
     if hasattr(element, 'id') and element.id:
         return unicode(element.id)
-    return unicode(element)
+    return unicode(cleanup(element))
 
 element_label = {
     Package: _("Package"),
