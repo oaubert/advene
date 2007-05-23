@@ -292,6 +292,7 @@ class Config(object):
             ('timestamp',         51, 'application/x-advene-timestamp'),
             ('tag',               52, None),
             ('color',             53, 'application/x-color'),
+	    ('adhoc-view-instance', 54, 'application/x-advene-adhoc-view-instance'),
 	    ('uri-list',          80, 'text/uri-list'),
 	    ):
 	    self.target_type[name] = type
