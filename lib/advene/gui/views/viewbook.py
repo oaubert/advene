@@ -135,6 +135,14 @@ class ViewBook(AdhocView):
                 return True
             return False
 
+        def label_drag_sent(widget, context, selection, targetType, eventTime, v):
+            if targetType == config.data.target_type['adhoc-view-instance']:
+                # This is not very robust, but allows to transmit a view instance reference
+                selection.set(selection.target, 8, repr(v))
+                self.detach_view(v)
+                return True
+            return False
+
         e=gtk.EventBox()
         if len(name) > 13:
             shortname=unicode(name[:12]) + u'\u2026'
@@ -145,7 +153,11 @@ class ViewBook(AdhocView):
             self.controller.gui.tooltips.set_tip(e, name)
         e.add(l)
         e.connect("button_press_event", popup_menu, v)
-
+        e.connect("drag_data_get", label_drag_sent, v)
+        # The widget can generate drags
+        e.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.drag_type['adhoc-view-instance'],
+                          gtk.gdk.ACTION_LINK)
         hb=gtk.HBox()
         hb.pack_start(e, expand=False, fill=False)
 
@@ -198,7 +210,19 @@ class ViewBook(AdhocView):
                 else:
                     print "Cannot open", name
             return True
-        return True
+        elif targetType == config.data.target_type['adhoc-view-instance']:
+            l=[v
+               for v in self.controller.gui.adhoc_views
+               if repr(v) == selection.data ]
+            if l:
+                v=l[0]
+                wid=v.widget
+                self.add_view(v)
+                #FIXME: should update v._destination
+            else:
+                print "Cannot find view ", selection.data
+            return True
+        return False
 
     def build_widget(self):
         notebook=gtk.Notebook()
@@ -211,7 +235,8 @@ class ViewBook(AdhocView):
                                gtk.DEST_DEFAULT_HIGHLIGHT |
                                gtk.DEST_DEFAULT_DROP |
                                gtk.DEST_DEFAULT_ALL,
-                               config.data.drag_type['adhoc-view'],
-                               gtk.gdk.ACTION_COPY)
+                               config.data.drag_type['adhoc-view'] +
+                               config.data.drag_type['adhoc-view-instance'],
+                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK )
 
         return notebook
