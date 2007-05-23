@@ -33,6 +33,11 @@ from gettext import gettext as _
 
 import gtk
 
+name="Package browser view plugin"
+
+def register(controller):
+    controller.register_viewclass(Browser)
+
 class BrowserColumn:
     def __init__(self, element=None, name="", callback=None, parent=None):
         self.model=element
@@ -135,14 +140,16 @@ class BrowserColumn:
         return vbox
 
 class Browser(AdhocView):
-    def __init__(self, element=None, controller=None, callback=None):
-        self.view_name = _("Package browser")
-        self.view_id = 'browserview'
+    view_name = _("Package browser")
+    view_id = 'browser'
+    def __init__(self, controller=None, parameters=None, callback=None, element=None):
         self.close_on_package_load = False
         self.contextual_actions = [
                     (_("Display annotations in timeline"), self.display_timeline),
                     ]
-
+        
+        if element is None:
+            element=controller.package
         self.element=element
         self.controller=controller
         self.callback = callback

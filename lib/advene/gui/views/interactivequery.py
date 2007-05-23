@@ -41,10 +41,17 @@ from advene.gui.views.table import AnnotationTable, GenericTable
 
 import advene.util.helper as helper
 
+name="Interactive query plugin"
+
+def register(controller):
+    controller.register_viewclass(InteractiveQuery)
+    controller.register_viewclass(InteractiveResult)
+
 class InteractiveQuery(AdhocView):
-    def __init__(self, here=None, controller=None, parameters=None, source="package/annotations"):
-        self.view_name = _("Interactive query")
-        self.view_id = 'interactive_query'
+    view_name = _("Interactive query")
+    view_id = 'interactivequery'
+    tooltip=_("Interactive query dialog")
+    def __init__(self, controller=None, parameters=None, source="package/annotations", here=None):
         self.close_on_package_load = False
         self.contextual_actions = (
             #(_("Refresh"), self.refresh),
@@ -211,9 +218,11 @@ class InteractiveResult(AdhocView):
 
     FIXME: we should be able to DND action buttons to viewbooks
     """
+    view_name = _("Interactive result")
+    view_id = 'interactiveresult'
+    tooltip=_("Interactive result display")
+
     def __init__(self, controller=None, parameters=None, query=None, result=None):
-        self.view_name = _("Interactive result")
-        self.view_id = 'interactive_result'
         self.close_on_package_load = False
         self.contextual_actions = (
             #(_("Refresh"), self.refresh),

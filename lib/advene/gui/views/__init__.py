@@ -35,9 +35,11 @@ class AdhocView(object):
 
     For details about the API of adhoc views, see gui.views.viewplugin.
     """
+    view_name = "Generic adhoc view"
+    view_id = 'generic'
+    tooltip = "This view is a generic abstract view that should be derived by real views."
+
     def __init__(self, controller=None, parameters=None):
-        self.view_name = "Generic adhoc view"
-        self.view_id = 'generic'
         # List of couples (label, action) that are use to
         # generate contextual actions
         self.contextual_actions = ()

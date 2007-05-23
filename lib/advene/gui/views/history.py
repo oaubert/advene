@@ -27,10 +27,16 @@ from gettext import gettext as _
 
 import gtk
 
+name="History view plugin"
+
+def register(controller):
+    controller.register_viewclass(HistoryNavigation)
+
 class HistoryNavigation(AdhocView):
-    def __init__(self, controller=None, history=None, vertical=True, ordered=False, closable=True, parameters=None):
-        self.view_name = _("History")
-        self.view_id = 'historyview'
+    view_name = _("History")
+    view_id = 'history'
+    def __init__(self, controller=None, parameters=None, 
+                 history=None, vertical=True, ordered=False, closable=True):
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Save view"), self.save_view),

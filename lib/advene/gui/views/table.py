@@ -40,10 +40,18 @@ COLUMN_DURATION=6
 COLUMN_BEGIN_FORMATTED=7
 COLUMN_END_FORMATTED=8
 
+name="Element tabular view plugin"
+
+def register(controller):
+    controller.register_viewclass(AnnotationTable)
+    controller.register_viewclass(GenericTable)
+
 class AnnotationTable(AdhocView):
+    view_name = _("Annotation table view")
+    view_id = 'table'
+    tooltip=_("Display annotations in a table")
+
     def __init__(self, controller=None, parameters=None, elements=None):
-        self.view_name = _("Annotation table view")
-	self.view_id = 'annotationtableview'
 	self.close_on_package_load = False
         self.contextual_actions = (
             )
@@ -225,9 +233,11 @@ class AnnotationTable(AdhocView):
         return True
 
 class GenericTable(AdhocView):
+    view_name = _("Generic table view")
+    view_id = 'generictable'
+    tooltip=_("Display Advene elements in a table.")
+
     def __init__(self, controller=None, parameters=None, elements=None):
-        self.view_name = _("Generic table view")
-	self.view_id = 'generictableview'
 	self.close_on_package_load = False
         self.contextual_actions = (
             )

@@ -385,9 +385,9 @@ class DetailedTreeModel(AdveneTreeModel):
         return (children is not None and children)
 
 class TreeWidget(AdhocView):
+    view_name = _("Tree view")
+    view_id = 'treeview'
     def __init__(self, package, modelclass=DetailedTreeModel, controller=None):
-        self.view_name = _("Tree view")
-	self.view_id = 'treeview'
 	self.close_on_package_load = False
         self.contextual_actions = (
             (_("Refresh"), self.refresh),

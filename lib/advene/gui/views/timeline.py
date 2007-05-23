@@ -47,6 +47,11 @@ except:
 
 import advene.gui.edit.elements
 
+name="Timeline view plugin"
+
+def register(controller):
+    controller.register_viewclass(TimeLine)
+
 parsed_representation = sre.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 
 class QuickviewBar(gtk.HBox):
@@ -80,8 +85,7 @@ class QuickviewBar(gtk.HBox):
         self.content.set_markup("<b>%s</b>" % c)
 
 class TimeLine(AdhocView):
-    """
-    Representation of a list of annotations placed on a timeline.
+    """Representation of a set of annotations placed on a timeline.
 
     If l is None, then use controller.package.annotations (and handle
     updates accordingly).
@@ -99,6 +103,10 @@ class TimeLine(AdhocView):
 
     and a 3rd one which controls the displayed area.
     """
+    view_name = _("Timeline")
+    view_id = 'timeline'
+    tooltip = _("Representation of a set of annotations placed on a timeline.")
+
     def __init__ (self, elements=None,
                   minimum=None,
                   maximum=None,
@@ -106,8 +114,6 @@ class TimeLine(AdhocView):
                   annotationtypes=None, 
                   parameters=None):
 
-        self.view_name = _("Timeline")
-        self.view_id = 'timeline'
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Refresh"), self.refresh),

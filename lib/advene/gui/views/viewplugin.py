@@ -29,7 +29,7 @@ class ViewPlugin(AdhocView):
     instance of it, then call the get_widget () method to get the
     corresponding Gtk widget.
 
-    In the advenetool framework, the view should be registered via
+    In the advene framework, the view should be registered via
     calls to register_view () so that it gets notified of the
     element's changes.
 
@@ -42,10 +42,12 @@ class ViewPlugin(AdhocView):
     the Content data, and return an options dictionary, and arguments
     as a list of (name, value) tuples.
 
-    @ivar view_name: the name of the view
+    @cvar view_name: the name of the view
     @type view_name: string
-    @ivar view_id: the id of the view
+    @cvar view_id: the id of the view
     @type view_id: string
+    @cvar tooltip: a description of the view
+    @type tooltip: string
     @ivar options: view options
     @type options: dict
     @ivar controller: the controller
@@ -53,9 +55,11 @@ class ViewPlugin(AdhocView):
     @ivar widget: the gtk widget representing the view
     @type widget: gkt.Widget
     """
+    view_name=_("Generic view plugin")
+    view_id='viewplugin'
+    tooltip=_("You should not ever see this tooltip...")
+
     def __init__(self, controller=None, parameters=None):
-        self.view_name = _("Generic view plugin")
-        self.view_id = 'viewplugin'
         self.controller=controller
         self.options={}
         opt, arg = self.load_parameters(parameters)
