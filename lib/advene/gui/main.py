@@ -221,7 +221,7 @@ class AdveneGUI (Connect):
         # Generate the adhoc view buttons
         hb=self.gui.get_widget('adhoc_hbox')
         for name, tip, pixmap in (
-            ('treeview', _('Tree view'), 'treeview.png'),
+            ('tree', _('Tree view'), 'treeview.png'),
             ('timeline', _('Timeline'), 'timeline.png'),
             ('transcription', _('Transcription of annotations'), 'transcription.png'),
             ('browser', _('Package browser'), 'browser.png'),
@@ -514,6 +514,7 @@ class AdveneGUI (Connect):
                   advene.gui.views.interactivequery,
                   advene.gui.views.table,
                   advene.gui.views.history,
+                  advene.gui.views.tree,
                   ):
             m.register(self.controller)
 
@@ -1112,10 +1113,7 @@ class AdveneGUI (Connect):
         else:
             parameters=None
 
-        if name == 'treeview' or name == 'tree':
-            view = advene.gui.views.tree.TreeWidget(self.controller.package,
-                                                    controller=self.controller)
-        elif name == 'tagbag' or name == 'tagbagview':
+        if name == 'tagbag' or name == 'tagbagview':
             tags=Set()
             if not parameters:
                 # Populate with annotations and relations tags
@@ -1973,7 +1971,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_adhoc_treeview_activate (self, button=None, data=None):
-        self.open_adhoc_view('treeview')
+        self.open_adhoc_view('tree')
         return True
 
     def on_adhoc_timeline_activate (self, button=None, data=None):
