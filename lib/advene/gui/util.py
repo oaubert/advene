@@ -709,3 +709,23 @@ def get_pixmap_button(pixmap, callback=None):
     if callback:
         b.connect('clicked', callback)
     return b
+
+color_cache={}
+
+def name2color(color):
+    """Return the gtk color for the given color name or code.
+    """
+    if color:
+        # Found a color. Cache it.
+        try:
+            gtk_color=color_cache[color]
+        except:
+            try:
+                color_cache[color]=gtk.gdk.color_parse(color)
+            except:
+                print "Unable to parse ", color
+                color_cache[color]=None
+            gtk_color=color_cache[color]
+    else:
+        gtk_color=None
+    return gtk_color
