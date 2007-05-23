@@ -386,7 +386,8 @@ class DetailedTreeModel(AdveneTreeModel):
 
 class TreeWidget(AdhocView):
     view_name = _("Tree view")
-    view_id = 'treeview'
+    view_id = 'tree'
+    tooltip=("Hierarchical view of an Advene package")
     def __init__(self, package, modelclass=DetailedTreeModel, controller=None):
 	self.close_on_package_load = False
         self.contextual_actions = (
