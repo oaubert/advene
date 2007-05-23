@@ -43,7 +43,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         gtk.DrawingArea.__init__(self)
         self.set_flags(self.flags() | gtk.CAN_FOCUS)
         self.element=element
-        
+
         # If not None, it should contain a gtk.gdk.Color
         # which will override the normal color
         self.local_color=None
@@ -81,15 +81,15 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         # Initialize the size
         self.set_size_request(*self.needed_size())
 
-    def reset_surface_size(self, width=None, height=None): 
+    def reset_surface_size(self, width=None, height=None):
         if not self.window:
             return False
         s=self.window.get_size()
         if width is None:
             width=s[0]
-        if height is None: 
+        if height is None:
             height=s[1]
-        if (self.cached_surface 
+        if (self.cached_surface
             and self.cached_surface.get_width() == width
             and self.cached_surface.get_height() == height):
             return True
@@ -125,7 +125,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         """Draw the widget.
 
         Method to be implemented by subclasses
-        """        
+        """
         context.rectangle(0, 0, width, height)
         if self.local_color is not None:
             color=self.local_color
@@ -150,7 +150,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         bheight=self.cached_surface.get_height()
 
         self.draw(self.cached_context, bwidth, bheight)
-        
+
         self.refresh()
         return True
 
@@ -182,6 +182,51 @@ class AnnotationWidget(GenericColorButtonWidget):
     def __init__(self, annotation=None, container=None):
         self.annotation=annotation
         GenericColorButtonWidget.__init__(self, element=annotation, container=container)
+        self.connect("key_press_event", self.keypress, self.annotation)
+        self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
+        self.connect("drag_data_get", self.drag_sent)
+        # The widget can generate drags
+        self.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                             config.data.drag_type['annotation']
+                             + config.data.drag_type['uri-list']
+                             + config.data.drag_type['text-plain']
+                             + config.data.drag_type['TEXT']
+                             + config.data.drag_type['STRING']
+                             + config.data.drag_type['timestamp']
+                             ,
+                             gtk.gdk.ACTION_LINK)
+
+    def drag_sent(self, widget, context, selection, targetType, eventTime):
+        if targetType == config.data.target_type['annotation']:
+            selection.set(selection.target, 8, widget.annotation.uri)
+        elif targetType == config.data.target_type['uri-list']:
+            c=self.controller.build_context(here=widget.annotation)
+            uri=c.evaluateValue('here/absolute_url')
+            selection.set(selection.target, 8, uri)
+        elif (targetType == config.data.target_type['text-plain']
+              or targetType == config.data.target_type['TEXT']
+              or targetType == config.data.target_type['STRING']):
+            selection.set(selection.target, 8, widget.annotation.content.data)
+        elif targetType == config.data.target_type['timestamp']:
+            selection.set(selection.target, 8, str(widget.annotation.fragment.begin))
+        else:
+            return False
+        return True
+
+    def keypress(self, widget, event, annotation):
+        if event.keyval == gtk.keysyms.e:
+            self.controller.gui.edit_element(annotation)
+            return True
+        elif event.keyval == gtk.keysyms.space:
+            # Play the annotation
+            c=self.controller
+            pos = c.create_position (value=annotation.fragment.begin,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)
+            c.gui.set_current_annotation(annotation)
+            return True
+        return False
 
     def needed_size(self):
         """Return the needed size of the widget.
@@ -213,7 +258,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             rgba=(1.0, 1.0, 1.0, 1)
         context.set_source_rgba(*rgba)
         context.fill_preserve()
-        
+
         # Draw the border
         if self.is_focus():
             context.set_line_width(4)
@@ -221,7 +266,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             context.set_line_width(1)
         context.set_source_rgba(0, 0, 0, 1)
         context.stroke()
-        
+
         # Draw the text
         if self.annotation.relations:
             weight=cairo.FONT_WEIGHT_BOLD
@@ -230,9 +275,9 @@ class AnnotationWidget(GenericColorButtonWidget):
         context.select_font_face("Helvetica",
                                  cairo.FONT_SLANT_NORMAL, weight)
         context.set_font_size(config.data.preferences['timeline']['font-size'])
-        
+
         context.move_to(2, int(height * 0.7))
-        
+
         context.set_source_rgba(0, 0, 0, 1)
         title=self.controller.get_title(self.annotation)
         context.show_text(title)
@@ -244,6 +289,25 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         self.annotationtype=annotationtype
         self.width=None
         GenericColorButtonWidget.__init__(self, element=annotationtype, container=container)
+        self.connect("key_press_event", self.keypress, self.annotationtype)
+        self.connect("button_press_event", self.buttonpress)
+        self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
+
+    def keypress(self, widget, event, annotationtype):
+        if event.keyval == gtk.keysyms.e:
+            self.controller.gui.edit_element(annotationtype)
+            return True
+        return False
+
+    def buttonpress(self, widget, event):
+        """Display the popup menu when right-clicking on annotation type.
+        """
+        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            menu=advene.gui.popup.Menu(widget.annotationtype,
+                                       controller=self.controller)
+            menu.popup()
+            return True
+        return False
 
     def needed_size(self):
         """Return the needed size of the widget.
@@ -265,7 +329,7 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
             rgba=(1.0, 1.0, 1.0, 1)
         context.set_source_rgba(*rgba)
         context.fill_preserve()
-        
+
         # Draw the border
         if self.is_focus():
             context.set_line_width(4)
@@ -273,14 +337,14 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
             context.set_line_width(1)
         context.set_source_rgba(0, 0, 0, 1)
         context.stroke()
-        
+
         # Draw the text
         context.select_font_face("Helvetica",
                                  cairo.FONT_SLANT_ITALIC, cairo.FONT_WEIGHT_NORMAL)
         context.set_font_size(config.data.preferences['timeline']['font-size'])
-        
+
         context.move_to(2, int(height * 0.7))
-        
+
         context.set_source_rgba(0, 0, 0, 1)
         title=self.controller.get_title(self.annotationtype)
         context.show_text(title)
