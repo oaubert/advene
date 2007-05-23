@@ -302,6 +302,9 @@ class AdveneGUI (Connect):
         
         self.current_annotation = None
 
+        # Dictionary of registered adhoc views
+        self.registered_adhoc_views={}
+
         # List of active annotation views (timeline, tree, ...)
         self.adhoc_views = []
         # List of active element edit popups
@@ -504,8 +507,15 @@ class AdveneGUI (Connect):
         # Register default GUI elements (actions, content_handlers, etc)
         # !! We cannot use controller.load_plugins, because it would make it impossible
         # to build one-file executables
-        advene.gui.plugins.actions.register(self.controller)
-        advene.gui.plugins.contenthandlers.register(self.controller)
+        for m in (advene.gui.plugins.actions,
+                  advene.gui.plugins.contenthandlers,
+                  advene.gui.views.timeline,
+                  advene.gui.views.browser,
+                  advene.gui.views.interactivequery,
+                  advene.gui.views.table,
+                  advene.gui.views.history,
+                  ):
+            m.register(self.controller)
 
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
@@ -1105,20 +1115,6 @@ class AdveneGUI (Connect):
         if name == 'treeview' or name == 'tree':
             view = advene.gui.views.tree.TreeWidget(self.controller.package,
                                                     controller=self.controller)
-        elif name == 'interactivequeryview' or name == 'interactivequery':
-            view = InteractiveQuery(here=self.controller.package,
-                                    controller=self.controller, **kw)
-        elif name == 'interactiveresultview' or name == 'interactiveresult':
-            view = InteractiveResult(controller=self.controller, parameters=parameters, **kw)
-        elif name == 'timeline' or name == 'timelineview':
-            view = advene.gui.views.timeline.TimeLine (controller=self.controller, 
-                                                       parameters=parameters, **kw)
-        elif name == 'table' or name == 'tableview':
-            view = advene.gui.views.table.AnnotationTable (controller=self.controller, 
-                                                          parameters=parameters, **kw)
-        elif name == 'history' or name == 'historyview':
-            view=advene.gui.views.history.HistoryNavigation(controller=self.controller, 
-                                                            parameters=parameters, **kw)
         elif name == 'tagbag' or name == 'tagbagview':
             tags=Set()
             if not parameters:
@@ -1143,9 +1139,6 @@ class AdveneGUI (Connect):
                         source="here/annotationTypes/%s/annotations/sorted" % at.id
             view = TranscriptionView(controller=self.controller,
                                      source=source, parameters=parameters)
-        elif name == 'browser' or name == 'browserview':
-            view = Browser(element=self.controller.package,
-                           controller=self.controller)
         elif name == 'webbrowser' or name == 'htmlview':
             if destination != 'popup' and HTMLView._engine is not None:
                 view = HTMLView(controller=self.controller)
@@ -1177,6 +1170,10 @@ class AdveneGUI (Connect):
                     self.edit_accumulator = None
                     return False 
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
+        elif name in self.registered_adhoc_views:
+            view=self.registered_adhoc_views[name](controller=self.controller,
+                                                   parameters=parameters, **kw)
+
         if view is None:
             return view
         # Store destination and label, used when moving the view
@@ -1310,8 +1307,24 @@ class AdveneGUI (Connect):
         box.add(gtk.Label(text))
         return box
 
+    def register_viewclass(self, viewclass, name=None):
+        """Register a ViewPlugin class.
+
+        @param viewclass: the viewclass to register
+        @type viewclass: a subclass of gui.views.AdhocView
+        @param name: the name of the class
+        @type name: string
+        """
+        if name is None:
+            name=viewclass.view_id
+        if name in self.registered_adhoc_views:
+            self.log('Cannot register the %s view, the name is already used.' % name)
+            return False
+        self.registered_adhoc_views[name]=viewclass
+        return True
+
     def register_view (self, view):
-        """Register a view plugin.
+        """Register a view plugin instance.
 
         @param view: the view to register
         @type view: a view plugin (cf advene.gui.views)
