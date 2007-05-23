@@ -35,6 +35,7 @@ def register(controller):
 class HistoryNavigation(AdhocView):
     view_name = _("History")
     view_id = 'history'
+    tooltip= _("Display timecodes with their corresponding screenshots")
     def __init__(self, controller=None, parameters=None, 
                  history=None, vertical=True, ordered=False, closable=True):
         self.close_on_package_load = False
