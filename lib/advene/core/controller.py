@@ -189,11 +189,6 @@ class AdveneController:
             defaults={'message': 'annotation/content/data'},
             category='gui',
             ))
-        try:
-            self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'),
-                                                prefix="advene_plugins_user")
-        except OSError:
-            pass
 
     def get_cached_duration(self):
         return self.package.cached_duration
@@ -298,6 +293,12 @@ class AdveneController:
         else:
             self.log(_("No available event handler"))
 
+    def register_viewclass(self, viewclass, name=None):
+        if self.gui:
+            self.gui.register_viewclass(viewclass, name)
+        else:
+            self.log(_("No available gui"))
+
     def register_videotime_action(self, t, action):
         """Register an action to be executed when reaching the given movie time.
 
@@ -369,6 +370,12 @@ class AdveneController:
     def init(self, args=None):
         if args is None:
             args=[]
+
+        try:
+            self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'),
+                                                prefix="advene_plugins_user")
+        except OSError:
+            pass
 
         # Read the default rules
         self.event_handler.read_ruleset_from_file(config.data.advenefile('default_rules.xml'),
