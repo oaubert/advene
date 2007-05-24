@@ -184,6 +184,7 @@ class Config(object):
                             'browser': (800, 600),
 			    'weblogview': (800, 600),
                             },
+            'remember-window-size': True,
             'gui': { 'popup-textwidth': 40 },
 	    # Scroll increment in ms
 	    'scroll-increment': 100,

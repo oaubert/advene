@@ -951,9 +951,10 @@ class AdveneGUI (Connect):
     def init_window_size(self, window, name):
         """Initialize window size according to stored values.
         """
-        s=config.data.preferences['windowsize'].setdefault(name, (640,480))
-        window.resize(*s)
-        window.connect ("size_allocate", self.resize_cb, name)
+        if config.data.preferences['remember-window-size']:
+            s=config.data.preferences['windowsize'].setdefault(name, (640,480))
+            window.resize(*s)
+            window.connect ("size_allocate", self.resize_cb, name)
         return True
 
     def resize_cb (self, widget, allocation, name):
@@ -2233,7 +2234,8 @@ class AdveneGUI (Connect):
     def on_preferences1_activate (self, button=None, data=None):
         direct_options=('history-size-limit', 'scroll-increment',
                         'adhoc-south', 'adhoc-west', 'adhoc-east', 'adhoc-fareast', 'adhoc-popup',
-                        'display-scroller', 'display-caption', 'imagecache-save-on-exit')
+                        'display-scroller', 'display-caption', 'imagecache-save-on-exit', 
+                        'remember-window-size')
         cache={
             'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
             'data': config.data.path['data'],
@@ -2252,15 +2254,7 @@ class AdveneGUI (Connect):
         ew.set_name(_("Preferences"))
         ew.add_title(_("General"))
         ew.add_checkbox(_("OSD"), "osdtext", _("Display captions on the video"))
-        ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
-                    -1, 20)
         ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 2000)
-        ew.add_option(_("Toolbar style"), "toolbarstyle", _("Toolbar style"),
-                      { _('Icons only'): gtk.TOOLBAR_ICONS,
-                        _('Text only'): gtk.TOOLBAR_TEXT,
-                        _('Both'): gtk.TOOLBAR_BOTH,
-                        }
-                     )
         ew.add_option(_("On exit,"), 'imagecache-save-on-exit', 
                       _("How to handle screenshots on exit"), 
                       {
@@ -2269,6 +2263,17 @@ class AdveneGUI (Connect):
                 _("ask before saving screenshots"): 'ask',
                 }
                       )
+
+        ew.add_title(_("GUI"))
+        ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
+                    -1, 20)
+        ew.add_checkbox(_("Remember window size"), "remember-window-size", _("Remember the size of opened windows"))
+        ew.add_option(_("Toolbar style"), "toolbarstyle", _("Toolbar style"),
+                      { _('Icons only'): gtk.TOOLBAR_ICONS,
+                        _('Text only'): gtk.TOOLBAR_TEXT,
+                        _('Both'): gtk.TOOLBAR_BOTH,
+                        }
+                     )
 
         ew.add_title(_("Default adhoc views"))
         ew.add_label(_("""List of adhoc views to open on application startup.
