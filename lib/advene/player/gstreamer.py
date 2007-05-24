@@ -127,6 +127,45 @@ class Player:
     def __init__(self):
 
         self.xid = None
+        self.build_converter()
+        self.build_pipeline()
+
+        self.caption=Caption()
+        self.caption.text=""
+        self.caption.begin=-1
+        self.caption.end=-1
+
+        self.videofile=None
+        self.status=Player.UndefinedStatus
+        self.current_position_value = 0
+        self.stream_duration = 0
+        self.relative_position=self.create_position(0,
+                                                    origin=self.RelativePosition)
+
+        self.position_update()
+
+    def build_converter(self):
+        """Build the snapshot converter pipeline.
+        """
+        # Snapshot format conversion infrastructure.
+        self.converter=gst.parse_launch('fakesrc name=src ! queue name=queue ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=%d ! pngenc ! fakesink name=sink signal-handoffs=true' % config.data.player['snapshot-dimensions'][0])
+        self.converter._lock = Condition()
+        
+        self.converter.queue=self.converter.get_by_name('queue')
+        self.converter.sink=self.converter.get_by_name('sink')
+
+        def converter_cb(element, buffer, pad):
+            c=self.converter
+            c._lock.acquire()
+            c._buffer=buffer
+            c._lock.notify()
+            c._lock.release()
+            return True
+        
+        self.converter.sink.connect('handoff', converter_cb)
+        self.converter.set_state(gst.STATE_PLAYING)
+        
+    def build_pipeline(self):
         sink='xvimagesink'
         if config.data.player['vout'] == 'x11':
             sink='ximagesink'
@@ -163,41 +202,9 @@ class Player:
 
         self.player.props.video_sink=self.video_sink
 
-        # Snapshot format conversion infrastructure.
-        self.converter=gst.parse_launch('fakesrc name=src ! queue name=queue ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=%d ! pngenc ! fakesink name=sink signal-handoffs=true' % config.data.player['snapshot-dimensions'][0])
-        self.converter._lock = Condition()
-        
-        self.converter.queue=self.converter.get_by_name('queue')
-        self.converter.sink=self.converter.get_by_name('sink')
-
-        def converter_cb(element, buffer, pad):
-            c=self.converter
-            c._lock.acquire()
-            c._buffer=buffer
-            c._lock.notify()
-            c._lock.release()
-            return True
-        
-        self.converter.sink.connect('handoff', converter_cb)
-        self.converter.set_state(gst.STATE_PLAYING)
-
         bus = self.player.get_bus()
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', self.on_sync_message)
-
-        self.caption=Caption()
-        self.caption.text=""
-        self.caption.begin=-1
-        self.caption.end=-1
-
-        self.videofile=None
-        self.status=Player.UndefinedStatus
-        self.current_position_value = 0
-        self.stream_duration = 0
-        self.relative_position=self.create_position(0,
-                                                    origin=self.RelativePosition)
-
-        self.position_update()
 
     def position2value(self, p):
         """Returns a position in ms.
@@ -477,8 +484,12 @@ class Player:
         return True
 
     def restart_player(self):
-        # FIXME
-        print "gstreamer: restart player"
+        # FIXME: destroy the previous player
+        self.player.set_state(gst.STATE_READY)
+        # Rebuilt the pipeline
+        self.build_pipeline()
+        self.playlist_add_item(self.videofile)
+        self.position_update()
         return True
 
     def on_sync_message(self, bus, message):
@@ -487,4 +498,3 @@ class Player:
         if message.structure.get_name() == 'prepare-xwindow-id':
             self.imagesink.set_xwindow_id(self.xid)
             message.src.set_property('force-aspect-ratio', True)
-
