@@ -24,6 +24,26 @@ See http://pygstdocs.berlios.de/pygst-reference/index.html for API
 FIXME:
 - fullscreen (reparent to its own gtk.Window and use gtk.Window.(un)fullscreen )
 - get/set_rate
+- Win32: directdrawsink implements the X Overlay interface then you
+  can use it to setup your video window or to receive a signal when
+  directdrawsink will create the default one.
+
+For set_rate:
+> If you only want to change the rate without changing the seek
+        > positions, use GST_SEEK_TYPE_NONE/GST_CLOCK_TIME_NONE for the start
+        > position also.
+        
+        Actually, this will generally cause some strangeness in the seeking,
+        because the fast-forward will begin from the position that the SOURCE of
+        the pipeline has reached. Due to buffering after the decoders, this is 
+        not the position that the user is seeing on the screen, so their
+        trick-mode operation will commence with a jump in the position.
+        
+        What you want to do is query the current position of the playback, and
+        use that with GST_SEEK_TYPE_SET to begin the trickmode from the exact 
+        position you want.
+        
+
 """
 
 import advene.core.config as config
@@ -123,10 +143,19 @@ class Player:
 
         if sink == 'ximagesink':
             print "Using ximagesink."
+            filter = gst.element_factory_make("capsfilter", "filter")
+            filter.set_property("caps", gst.Caps("video/x-raw-yuv, width=%d" % config.data.player['snapshot-dimensions'][0]))
+            self.filter=filter
+
             csp=gst.element_factory_make('ffmpegcolorspace')
-            self.video_sink.add(self.captioner, csp, self.imagesink)
-            self.captioner.link(csp)
-            csp.link(self.imagesink)
+            # Do not try to hard to solve the resize problem, before
+            # the gstreamer bug
+            # http://bugzilla.gnome.org/show_bug.cgi?id=339201 is
+            # solved...
+            #self.scale=gst.element_factory_make('videoscale')
+
+            self.video_sink.add(self.captioner, filter, csp, self.imagesink)
+            gst.element_link_many(self.captioner, filter, csp, self.imagesink)
         else:
             self.video_sink.add(self.captioner, self.imagesink)
             self.captioner.link(self.imagesink)
@@ -135,7 +164,7 @@ class Player:
         self.player.props.video_sink=self.video_sink
 
         # Snapshot format conversion infrastructure.
-        self.converter=gst.parse_launch('fakesrc name=src ! queue name=queue ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=160 ! pngenc ! fakesink name=sink signal-handoffs=true')
+        self.converter=gst.parse_launch('fakesrc name=src ! queue name=queue ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=%d ! pngenc ! fakesink name=sink signal-handoffs=true' % config.data.player['snapshot-dimensions'][0])
         self.converter._lock = Condition()
         
         self.converter.queue=self.converter.get_by_name('queue')
@@ -458,3 +487,4 @@ class Player:
         if message.structure.get_name() == 'prepare-xwindow-id':
             self.imagesink.set_xwindow_id(self.xid)
             message.src.set_property('force-aspect-ratio', True)
+
