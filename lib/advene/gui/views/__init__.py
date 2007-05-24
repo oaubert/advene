@@ -210,10 +210,11 @@ class AdhocView(object):
         def relocate_view(item, v, d):
             # Reference the widget so that it is not destroyed
             wid=v.widget
-            v.widget.get_parent().remove(self.widget)
+            wid.get_parent().remove(wid)
             if d in ('south', 'east', 'west', 'fareast'):
                 v._destination=d
                 self.controller.gui.viewbook[d].add_view(v, name=v._label)
+                window.disconnect(window.cleanup_id)
                 window.destroy()
             return True
 
@@ -268,8 +269,25 @@ class AdhocView(object):
         except AttributeError:
             pass
 
+        def drag_sent(widget, context, selection, targetType, eventTime ):
+            if targetType == config.data.target_type['adhoc-view-instance']:
+                # This is not very robust, but allows to transmit a view instance reference
+                selection.set(selection.target, 8, repr(self))
+                self.widget.get_parent().remove(self.widget)
+                # Do not trigger the close_view_cb handler
+                window.disconnect(window.cleanup_id)
+                window.destroy()
+                return True
+            return False
+
         b = gtk.Button(_("Reattach"))
         b.connect('clicked', self.attach_view, window)
+        b.connect("drag_data_get", drag_sent)
+        # The widget can generate drags
+        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.drag_type['adhoc-view-instance'],
+                          gtk.gdk.ACTION_LINK)
+        
         window.buttonbox.pack_start(b, expand=False)
 
         b = gtk.Button(stock=gtk.STOCK_CLOSE)
@@ -284,7 +302,7 @@ class AdhocView(object):
 
         if self.controller and self.controller.gui:
             self.controller.gui.register_view (self)
-            window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
+            window.cleanup_id=window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
             self.controller.gui.init_window_size(window, self.view_id)
 
         return window
