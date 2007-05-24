@@ -67,6 +67,8 @@ class AnnotationTable(AdhocView):
         
         """
         l=gtk.ListStore(object, str, str, str, long, long, long, str, str)
+        if not self.elements:
+            return l
         for a in self.elements:
             if isinstance(a, Annotation):
                 l.append( (a, 
