@@ -21,6 +21,7 @@ import sre
 from advene.gui.views.browser import Browser
 import advene.util.helper
 import advene.gui.util
+
 class TALESEntry:
     """TALES expression entry widget.
 
@@ -121,8 +122,8 @@ class TALESEntry:
                 self.entry.set_text(e)
             return True
 
-        browser = Browser(self.context, 
-                          controller=self.controller,
+        browser = Browser(controller=self.controller,
+                          element=self.context, 
                           callback=callback)
         browser.popup()
         return True
