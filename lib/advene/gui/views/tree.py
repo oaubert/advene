@@ -441,6 +441,12 @@ class TreeWidget(AdhocView):
 
         tree_view.connect("drag_data_get", self.drag_data_get_cb)
 
+        try:
+            # set_enable_tree_lines is available in gtk >= 2.10
+            tree_view.set_enable_tree_lines(True)
+        except AttributeError:
+            pass
+
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 	sw.add(tree_view)
