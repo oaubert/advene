@@ -108,7 +108,7 @@ class Montage(AdhocView):
         return True
 
     def clear(self, *p):
-        del self.contents
+        self.contents=[]
         self.refresh()
         return True
 
@@ -160,13 +160,22 @@ class Montage(AdhocView):
                 self.insert(ann)
                 self.refresh()
                 return True
+            elif targetType == config.data.target_type['annotation-type']:
+                print "drop atype"
+                at=self.controller.package.annotationTypes.get(selection.data)
+                for a in at.annotations:
+                    self.insert(a)
+                self.refresh()
+                return True
             else:
                 print "Unknown target type for drag: %d" % targetType
             return False
         self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+                                   gtk.DEST_DEFAULT_HIGHLIGHT |
+                                   gtk.DEST_DEFAULT_ALL,
+                                   config.data.drag_type['annotation']
+                                   + config.data.drag_type['annotation-type'], 
+                                   gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
         self.mainbox.connect("drag_data_received", mainbox_drag_received)
 
         sw=gtk.ScrolledWindow()
