@@ -35,6 +35,7 @@ import cairo
 import advene.core.config as config
 
 import advene.util.helper as helper
+import advene.gui.popup
 
 class GenericColorButtonWidget(gtk.DrawingArea):
     """ Widget emulating a color button widget
