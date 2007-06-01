@@ -1234,6 +1234,7 @@ class TimeLine(AdhocView):
         self.update_button(b)
 
         b.connect("key_press_event", self.annotation_key_press_cb, annotation)
+        b.connect("button_press_event", self.annotation_button_press_cb, annotation)
         b.connect("enter_notify_event", self.rel_activate)
         b.connect("leave_notify_event", self.rel_deactivate)
 
