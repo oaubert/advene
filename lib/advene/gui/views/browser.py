@@ -26,7 +26,6 @@ import advene.core.config as config
 import advene.gui.util
 from advene.model.annotation import Annotation
 from advene.gui.views import AdhocView
-from advene.gui.views.timeline import TimeLine
 import advene.util.helper as helper
 
 from gettext import gettext as _
@@ -146,7 +145,7 @@ class Browser(AdhocView):
     def __init__(self, controller=None, parameters=None, callback=None, element=None):
         self.close_on_package_load = False
         self.contextual_actions = [
-                    (_("Display annotations in timeline"), self.display_timeline),
+                    (_("Display result in table"), self.display_result),
                     ]
         
         if element is None:
@@ -274,31 +273,14 @@ class Browser(AdhocView):
         self.valuelabel.set_text(val)
         self.current_value=element
 
-    def display_timeline(self, *p):
+    def display_result(self, *p):
         """Display the results as annotations in a timeline.
         """
-        l=None
-        if (hasattr(self.current_value, 'viewableType')
-            and self.current_value.viewableType == 'annotation-list'):
-            l=self.current_value
-        elif isinstance(self.current_value, list):
-            l = [ i for i in self.current_value if isinstance(i, Annotation) ]
-
-        if not l:
-            self.log(_("Result is not a list of annotations"))
+        if not hasattr(self.current_value, '__iter__'):
+            self.log(_("Result is not a list"))
             return True
 
-        duration = self.controller.cached_duration
-        if duration <= 0:
-            if self.controller.package.annotations:
-                duration = max([a.fragment.end for a in self.controller.package.annotations])
-            else:
-                duration = 0
-        t=TimeLine(l,
-                   minimum=0,
-                   maximum=duration,
-                   controller=self.controller)
-        t.popup()
+        self.controller.gui.open_adhoc_view('interactiveresult', result=self.current_value)
         return True
 
     def scroll_event(self, widget=None, event=None):
