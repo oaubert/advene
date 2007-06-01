@@ -928,16 +928,19 @@ class TimeLine(AdhocView):
 
             # Popup a menu to propose the drop options
             menu=gtk.Menu()
-            for (title, action) in ( 
-                (_("Copy annotation"), 
-                 lambda i: self.controller.transmute_annotation(source,
-                                                                dest,
-                                                                delete=False)),
-                (_("Move annotation"), move_annotation)
-                 ):
-                item=gtk.MenuItem(title)
-                item.connect('activate', action)
-                menu.append(item)
+
+            item=gtk.MenuItem(_("Copy annotation"))
+            item.connect('activate', lambda i: self.controller.transmute_annotation(source,
+                                                                                    dest,
+                                                                                    delete=False))
+            menu.append(item)
+
+            item=gtk.MenuItem(_("Move annotation"))
+            item.connect('activate', move_annotation)
+            menu.append(item)
+            if source.relations:
+                item.set_sensitive(False)
+
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
 
