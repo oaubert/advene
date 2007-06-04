@@ -1751,11 +1751,11 @@ class TimeLine(AdhocView):
             return False
 
         for t in self.annotationtypes:
-            b=AnnotationTypeWidget(t, self)
+            b=AnnotationTypeWidget(annotationtype=t, container=self)
             self.tooltips.set_tip(b, _("From schema %s") % self.controller.get_title(t.schema))
             layout.put (b, 0, self.layer_position[t])
             b.update_widget()
-            b.show()
+            b.show_all()
             b.connect("key_press_event", keypress_handler, t)
             # The button can receive drops (to transmute annotations)
             b.connect("drag_data_received", self.annotation_type_drag_received_cb)
@@ -1782,7 +1782,7 @@ class TimeLine(AdhocView):
             return True
 
         # Resize all buttons to fit the largest
-        if width > 20:
+        if width > 30:
             layout.foreach(resize, width)
 
         # Add the "New type" button at the end
@@ -2208,12 +2208,9 @@ class OldAnnotationWidget(gtk.Button):
         return False
 
     def update_widget(self):
-        if not self.window:
-            return False
-
         # First check width
         w=self.container.unit2pixel(self.annotation.fragment.duration)
-        if w != self.window.get_size()[0]:
+        if self.window is None or w != self.window.get_size()[0]:
             self.set_size_request(w, self.container.button_height)
 
         if self.local_color is not None:
@@ -2280,9 +2277,6 @@ class OldAnnotationTypeWidget(gtk.Button):
         self.update_widget()
 
     def update_widget(self):
-        if not self.window:
-            return False
-
         if self.width is not None:
             self.set_size_request(self.width, -1)
         if self.local_color is not None:
