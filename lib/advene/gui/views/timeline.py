@@ -2153,6 +2153,20 @@ class OldAnnotationWidget(gtk.Button):
         self.label=gtk.Label()
         self.label.modify_font(self.container.annotation_font)
 
+        self.connect("key_press_event", self.keypress, self.annotation)
+        self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
+        self.connect("drag_data_get", self.drag_sent)
+        # The widget can generate drags
+        self.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                             config.data.drag_type['annotation']
+                             + config.data.drag_type['uri-list']
+                             + config.data.drag_type['text-plain']
+                             + config.data.drag_type['TEXT']
+                             + config.data.drag_type['STRING']
+                             + config.data.drag_type['timestamp']
+                             ,
+                             gtk.gdk.ACTION_LINK)
+
         self.add(self.label)
         w=self.container.unit2pixel(self.annotation.fragment.duration)
         self.set_size_request(w, self.container.button_height)
@@ -2160,6 +2174,38 @@ class OldAnnotationWidget(gtk.Button):
     def set_color(self, color=None):
         self.local_color=color
         self.update_widget()
+
+    def drag_sent(self, widget, context, selection, targetType, eventTime):
+        if targetType == config.data.target_type['annotation']:
+            selection.set(selection.target, 8, widget.annotation.uri)
+        elif targetType == config.data.target_type['uri-list']:
+            c=self.controller.build_context(here=widget.annotation)
+            uri=c.evaluateValue('here/absolute_url')
+            selection.set(selection.target, 8, uri)
+        elif (targetType == config.data.target_type['text-plain']
+              or targetType == config.data.target_type['TEXT']
+              or targetType == config.data.target_type['STRING']):
+            selection.set(selection.target, 8, widget.annotation.content.data)
+        elif targetType == config.data.target_type['timestamp']:
+            selection.set(selection.target, 8, str(widget.annotation.fragment.begin))
+        else:
+            return False
+        return True
+
+    def keypress(self, widget, event, annotation):
+        if event.keyval == gtk.keysyms.e:
+            self.controller.gui.edit_element(annotation)
+            return True
+        elif event.keyval == gtk.keysyms.space:
+            # Play the annotation
+            c=self.controller
+            pos = c.create_position (value=annotation.fragment.begin,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)
+            c.gui.set_current_annotation(annotation)
+            return True
+        return False
 
     def update_widget(self):
         if not self.window:
