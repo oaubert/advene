@@ -1963,6 +1963,10 @@ class TimeLine(AdhocView):
         i.add(self.zoom_combobox)
         tb.insert(i, -1)
 
+        i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_100)
+        i.connect('clicked', lambda i: self.fraction_adj.set_value(1.0))
+        tb.insert(i, -1)
+
         tb.insert(gtk.SeparatorToolItem(), -1)
 
         i=gtk.ToolItem()
