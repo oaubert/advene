@@ -307,6 +307,7 @@ class Config(object):
 	    '.mov',
 	    '.mpg', '.mpeg',  '.mp4', 
 	    '.ogm',
+	    '.ogg',
 	    '.rm', 
 	    '.vob',
             '.mkv',
