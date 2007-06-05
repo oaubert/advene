@@ -1243,6 +1243,10 @@ class TimeLine(AdhocView):
         b.connect("button_press_event", self.annotation_button_press_cb, annotation)
         b.connect("enter_notify_event", self.rel_activate)
         b.connect("leave_notify_event", self.rel_deactivate)
+        def annotation_focus(widget):
+            self.statusbar.set_annotation(widget.annotation)
+            return False
+        b.connect('grab-focus', annotation_focus)
 
         def focus_in(b, event):
             if (self.options['autoscroll'] and
