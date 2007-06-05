@@ -782,8 +782,8 @@ class AdveneGUI (Connect):
         left.add1(hpane1)
         left.add2(self.viewbook['south'].widget)
 
-        vis.add1(left)
-        vis.add2(self.viewbook['fareast'].widget)
+        vis.pack1(left, resize=True, shrink=False)
+        vis.pack2(self.viewbook['fareast'].widget, resize=True, shrink=True)
         # Set position to a huge value to ensure that by default, the
         # right pane is hidden
         vis.set_position(5000)
