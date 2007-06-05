@@ -64,9 +64,9 @@ class QuickviewBar(gtk.HBox):
 
         self.annotation=None
 
+        self.add(self.content)
         self.pack_start(self.begin, expand=False)
         self.pack_start(self.end, expand=False)
-        self.add(self.content)
 
     def set_annotation(self, a=None):
         if a is None:
@@ -74,15 +74,15 @@ class QuickviewBar(gtk.HBox):
             e=""
             c=""
         else:
-            b=helper.format_time(a.fragment.begin)
+            b="   " + helper.format_time(a.fragment.begin)
             e=" - " + helper.format_time(a.fragment.end) + ": "
             c=self.controller.get_title(a)
             if len(c) > 40:
-                c=c[:40]
+                c=unicode(c[:39])+u'\u2026'
         self.annotation=a
         self.begin.set_text(b)
         self.end.set_text(e)
-        self.content.set_markup("<b>%s</b>" % c)
+        self.content.set_markup(u"<b>%s</b>" % c)
 
 class TimeLine(AdhocView):
     """Representation of a set of annotations placed on a timeline.
@@ -1310,7 +1310,6 @@ class TimeLine(AdhocView):
                 f.end += incr
 
             self.controller.notify('AnnotationEditEnd', annotation=button.annotation)
-            # Update the tooltip
             self.statusbar.set_annotation(button.annotation)
             button.grab_focus()
             return True
@@ -1824,6 +1823,11 @@ class TimeLine(AdhocView):
         hb=gtk.HBox()
         toolbar = self.get_toolbar()
         hb.add(toolbar)
+
+        ti=gtk.SeparatorToolItem()
+        ti.set_expand(True)
+        ti.set_property('draw', False)
+        toolbar.insert(ti, -1)
 
         self.statusbar=QuickviewBar(self.controller)
         ti=gtk.ToolItem()
