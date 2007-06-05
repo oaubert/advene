@@ -345,10 +345,17 @@ class TranscriptionView(AdhocView):
         if self.currentannotation is None:
             return False
 
+        def play_annotation(i, a):
+            self.controller.update_status("start", a.fragment.begin)
+            return True
+
         item = gtk.MenuItem(_("Annotation %s") % self.currentannotation.id)
         menuc=advene.gui.popup.Menu(self.currentannotation,
                                     controller=self.controller)
         item.set_submenu(menuc.menu)
+        item.show_all()
+        item = gtk.MenuItem(_("Play"))
+        item.connect("activate", play_annotation, self.currentannotation)
         item.show_all()
         menu.append(item)
 
