@@ -480,7 +480,12 @@ class EditRelationPopup (EditElementPopup):
         f.set_editable(editable)
         t = f.get_view()
         self.register_form(f)
-        vbox.pack_start(self.expandable(t, _("Content"), expanded=False), expand=True)
+        # If there is content, expand the content widget
+        if self.element.content.data:
+            exp=True
+        else:
+            exp=False
+        vbox.pack_start(self.expandable(t, _("Content"), expanded=exp), expand=True)
 
         return vbox
 
