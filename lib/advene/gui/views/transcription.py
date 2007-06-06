@@ -353,10 +353,12 @@ class TranscriptionView(AdhocView):
         menuc=advene.gui.popup.Menu(self.currentannotation,
                                     controller=self.controller)
         item.set_submenu(menuc.menu)
-        item.show_all()
+        item.show()
+        menu.append(item)
+
         item = gtk.MenuItem(_("Play"))
         item.connect("activate", play_annotation, self.currentannotation)
-        item.show_all()
+        item.show()
         menu.append(item)
 
         return False
@@ -506,6 +508,7 @@ class TranscriptionView(AdhocView):
 
     def activate_annotation(self, a):
         if self.options['autoscroll']:
+            print "autoscroll"
             # Make sure that the annotation is visible
             m=self.textview.get_buffer().get_mark("b_%s" % a.id)
             self.textview.scroll_to_mark(m, 0.2)
