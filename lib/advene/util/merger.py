@@ -317,8 +317,8 @@ class Differ:
             ident=id_,
             type=at,
             author=s.author,
-            date=s.date,
             fragment=s.fragment.clone())
+        el.date=s.date
         el.content.data=s.content.data
         self.destination.annotations.append(el)
         self.translated_ids[s.id]=id_
@@ -360,8 +360,8 @@ class Differ:
             ident=s.id,
             type=at,
             author=s.author,
-            date=s.date,
             fragment=s.fragment.clone())
+        el.date=s.date
         el.content.data=s.content.data
         self.destination.annotations.append(el)
         return el
@@ -388,8 +388,8 @@ class Differ:
             ident=s.id,
             type=rt,
             author=s.author,
-            date=s.date,
             members=members)
+        el.date=s.date
         el.title=s.title
         el.content.data=s.content.data
         self.destination.relations.append(el)
@@ -398,8 +398,8 @@ class Differ:
     def copy_query(self, s):
         el=self.destination.createQuery(
             ident=s.id,
-            author=s.author,
-            date=s.date)
+            author=s.author)
+        el.data=s.date
         el.title=s.title
         el.content.data=s.content.data
         el.content.mimetype=s.content.mimetype
@@ -410,8 +410,8 @@ class Differ:
         el=self.destination.createView(
             ident=s.id,
             clazz=s.viewableClass,
-            author=s.author,
-            date=s.date)
+            author=s.author)
+        el.date=s.date
         el.title=s.title
         # FIXME: ideally, we should try to fix translated_ids in
         # views. Or at least try to signal possible occurrences.
