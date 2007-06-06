@@ -760,8 +760,7 @@ class TimeLine(AdhocView):
             self.fraction_adj.value=z
 
             # Center on annotation
-            pos = self.unit2pixel (ann.fragment.begin)
-            self.adjustment.set_value(pos)
+            self.center_on_position(ann.fragment.begin)
             return True
 
         p=self.pixel2unit(widget.allocation.x + x)
@@ -1204,7 +1203,6 @@ class TimeLine(AdhocView):
         return True
 
     def rel_deactivate(self, button, event):
-        self.statusbar.set_annotation(None)
         if self.options['display-relations']:
             self.relations_to_draw = []
             self.update_relation_lines()
@@ -1243,10 +1241,14 @@ class TimeLine(AdhocView):
         b.connect("button_press_event", self.annotation_button_press_cb, annotation)
         b.connect("enter_notify_event", self.rel_activate)
         b.connect("leave_notify_event", self.rel_deactivate)
-        def annotation_focus(widget):
+        def annotation_grab_focus(widget):
             self.statusbar.set_annotation(widget.annotation)
             return False
-        b.connect('grab-focus', annotation_focus)
+        b.connect('grab-focus', annotation_grab_focus)
+        def annotation_focus_out(widget, event):
+            self.statusbar.set_annotation(None)
+            return False
+        b.connect("focus-out-event", annotation_focus_out)
 
         def focus_in(b, event):
             if (self.options['autoscroll'] and
@@ -1464,7 +1466,10 @@ class TimeLine(AdhocView):
             else:
                 return False
         if event.keyval >= 49 and event.keyval <= 57:
-            pos=self.get_middle_position()
+            if self.statusbar.annotation is not None:
+                pos=self.statusbar.annotation.fragment.begin
+            else:
+                pos=self.get_middle_position()
             self.fraction_adj.value=1.0/pow(2, event.keyval-49)
             self.set_middle_position(pos)
             return True
@@ -1930,7 +1935,10 @@ class TimeLine(AdhocView):
                 f=int(i[0])/100.0
             else:
                 return True
-            pos=self.get_middle_position()
+            if self.statusbar.annotation is not None:
+                pos=self.statusbar.annotation.fragment.begin
+            else:
+                pos=self.get_middle_position()
             self.fraction_adj.value=f
             self.set_middle_position(pos)
             return True
@@ -1938,13 +1946,19 @@ class TimeLine(AdhocView):
         def zoom_change(combo):
             v=combo.get_current_element()
             if isinstance(v, float):
-                pos=self.get_middle_position()
+                if self.statusbar.annotation is not None:
+                    pos=self.statusbar.annotation.fragment.begin
+                else:
+                    pos=self.get_middle_position()
                 self.fraction_adj.value=v
                 self.set_middle_position(pos)
             return True
 
         def zoom(i, factor):
-            pos=self.get_middle_position()
+            if self.statusbar.annotation is not None:
+                pos=self.statusbar.annotation.fragment.begin
+            else:
+                pos=self.get_middle_position()
             self.fraction_adj.set_value(self.fraction_adj.value * factor)
             self.set_middle_position(pos)
             return True
@@ -2144,8 +2158,7 @@ class TimeLine(AdhocView):
     def set_middle_position(self, pos):
         """Set the current middle position, in ms.
         """
-        a=self.adjustment
-        a.value = max(0, self.unit2pixel(pos) - a.page_size / 2)
+        self.center_on_position(pos)
 
 class OldAnnotationWidget(gtk.Button):
     """Old method to render annotation widgets (in order to be usable on
