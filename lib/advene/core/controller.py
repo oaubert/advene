@@ -635,6 +635,8 @@ class AdveneController:
     def set_media(self, uri=None):
         if isinstance(uri, unicode):
             uri=uri.encode('utf8')
+        if self.player.status in (self.player.PlayingStatus, self.player.PauseStatus):
+            self.player.stop(0)
         self.player.playlist_clear()
         if uri is not None:
             self.player.playlist_add_item (uri)
