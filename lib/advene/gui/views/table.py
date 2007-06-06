@@ -198,7 +198,7 @@ class AnnotationTable(AdhocView):
             source=tv.get_model()
         w.writerow( (_("id"), _("type"), _("begin"), _("end"), _("content")) )
         for r in source:
-            w.writerow( (r[COLUMN_ID], r[COLUMN_TYPE], r[COLUMN_BEGIN], r[COLUMN_END], r[COLUMN_ELEMENT].content.data) )
+            w.writerow( (r[COLUMN_ID], unicode(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_BEGIN], r[COLUMN_END], unicode(r[COLUMN_ELEMENT].content.data).encode('utf-8') ) )
         f.close()
         self.controller.log(_("Data exported to %s") % name)
             
@@ -314,7 +314,7 @@ class GenericTable(AdhocView):
             source=tv.get_model()
         w.writerow( (_("Element title"), _("Element type"), _("Element id")) )
         for r in source:
-            w.writerow( (r[COLUMN_CONTENT], r[COLUMN_TYPE], r[COLUMN_ID]) )
+            w.writerow( (unicode(r[COLUMN_CONTENT]).encode('utf-8'), unicode(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_ID]) )
         f.close()
         self.controller.log(_("Data exported to %s") % name)
             
