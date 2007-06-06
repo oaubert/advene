@@ -317,16 +317,26 @@ class InteractiveResult(AdhocView):
                 b.highlight=True
                 b.connect('clicked', toggle_highlight, l)
                 hb.add(b)
+
+                b=advene.gui.util.get_small_stock_button(gtk.STOCK_CONVERT, lambda b: table.csv_export())
+                self.controller.gui.tooltips.set_tip(b, _("Export table"))
+                hb.add(b)
+
+                self.table=table
             else:
                 # Only Instanciate a generic table view
                 gtable=GenericTable(controller=self.controller, elements=self.result)
                 v.add(gtable.widget)
+                b=advene.gui.util.get_small_stock_button(gtk.STOCK_CONVERT, lambda b: gtable.csv_export())
+                self.controller.gui.tooltips.set_tip(b, _("Export table"))
+                hb.add(b)
+                self.table=gtable
 
-            b=advene.gui.util.get_pixmap_button('editaccumulator.png', lambda b: self.open_in_edit_accumulator(self.result))
+            b=advene.gui.util.get_pixmap_button('editaccumulator.png', lambda b: self.open_in_edit_accumulator(self.table.get_selected_nodes() or self.result))
             self.controller.gui.tooltips.set_tip(b, _("Edit elements"))
             hb.add(b)
 
-            b=advene.gui.util.get_pixmap_button('python.png', lambda b: self.open_in_evaluator(self.result))
+            b=advene.gui.util.get_pixmap_button('python.png', lambda b: self.open_in_evaluator(self.table.get_selected_nodes() or self.result))
             self.controller.gui.tooltips.set_tip(b, _("Open in python evaluator"))
             hb.add(b)
         else:
