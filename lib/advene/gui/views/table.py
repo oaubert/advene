@@ -15,20 +15,21 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import gtk
+import csv
+
+from gettext import gettext as _
 
 import advene.core.config as config
 
 from advene.model.annotation import Annotation
 from advene.gui.views import AdhocView
 
-from gettext import gettext as _
-
 import advene.gui.edit.elements
 import advene.gui.popup
 
 import advene.util.helper as helper
 
-import gtk
 
 COLUMN_ELEMENT=0
 COLUMN_CONTENT=1
@@ -87,8 +88,7 @@ class AnnotationTable(AdhocView):
         tree_view = gtk.TreeView(self.model)
 
         select = tree_view.get_selection()
-        # Set SELECTION_SINGLE to be able to use get_selected()
-        select.set_mode(gtk.SELECTION_SINGLE)
+        select.set_mode(gtk.SELECTION_MULTIPLE)
 
         tree_view.connect("button_press_event", self.tree_view_button_cb)
         tree_view.connect("row-activated", self.row_activated_cb)
@@ -159,30 +159,56 @@ class AnnotationTable(AdhocView):
             print "Unknown target type for drag: %d" % targetType
         return True
 
-    def get_selected_node (self, tree_view):
+    def get_selected_nodes (self, tree_view):
         """Return the currently selected node.
 
-        None if no node is selected.
+        None if no node is selected or multiple nodes are selected.
         """
         selection = tree_view.get_selection ()
-        if not selection:
-            return None
-        store, it = selection.get_selected()
-        node = None
-        if it is not None:
-            node = tree_view.get_model().get_value (it,
-                                                    COLUMN_ELEMENT)
-        return node
+        store, paths=selection.get_selected_rows()
+        return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
     def debug_cb (self, *p, **kw):
         print "Debug cb:\n"
         print "Parameters: %s" % str(p)
         print "KW: %s" % str(kw)
 
+    def csv_export(self, name=None):
+        if name is None:
+            name=advene.gui.util.get_filename(title=_("Export data to file..."),
+                                              default_file="advene_data.csv",
+                                              action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                              button=gtk.STOCK_SAVE)
+        if name is None:
+            return True
+        try:
+            f=open(name, 'w')
+        except IOError, e:
+            avene.gui.util.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
+                                                  % {
+                        'filename': name,
+                        'error': unicode(e),
+                        }),
+                                          icon=gtk.MESSAGE_ERROR)
+        w=csv.writer(f)
+        tv=self.widget.treeview
+        store, paths=tv.get_selection().get_selected_rows()
+        source=[ store.get_iter(p) for p in paths ]
+        if not source:
+            source=tv.get_model()
+        w.writerow( (_("id"), _("type"), _("begin"), _("end"), _("content")) )
+        for r in source:
+            w.writerow( (r[COLUMN_ID], r[COLUMN_TYPE], r[COLUMN_BEGIN], r[COLUMN_END], r[COLUMN_ELEMENT].content.data) )
+        f.close()
+        self.controller.log(_("Data exported to %s") % name)
+            
     def row_activated_cb(self, widget, path, view_column):
         """Edit the element on Return or double click
         """
-        node = self.get_selected_node (widget)
+        nodes = self.get_selected_nodes (widget)
+        if len(nodes) != 1:
+            return True
+        node=nodes[0]
         if node is not None:
             self.controller.gui.edit_element(node)
             return True
@@ -263,12 +289,40 @@ class GenericTable(AdhocView):
                        e.id) )
         return l
 
+    def csv_export(self, name=None):
+        if name is None:
+            name=advene.gui.util.get_filename(title=_("Export data to file..."),
+                                              default_file="advene_data.csv",
+                                              action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                              button=gtk.STOCK_SAVE)
+        if name is None:
+            return True
+        try:
+            f=open(name, 'w')
+        except IOError, e:
+            avene.gui.util.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
+                                                  % {
+                        'filename': name,
+                        'error': unicode(e),
+                        }),
+                                          icon=gtk.MESSAGE_ERROR)
+        w=csv.writer(f)
+        tv=self.widget.treeview
+        store, paths=tv.get_selection().get_selected_rows()
+        source=[ store.get_iter(p) for p in paths ]
+        if not source:
+            source=tv.get_model()
+        w.writerow( (_("Element title"), _("Element type"), _("Element id")) )
+        for r in source:
+            w.writerow( (r[COLUMN_CONTENT], r[COLUMN_TYPE], r[COLUMN_ID]) )
+        f.close()
+        self.controller.log(_("Data exported to %s") % name)
+            
     def build_widget(self):
         tree_view = gtk.TreeView(self.model)
 
         select = tree_view.get_selection()
-        # Set SELECTION_SINGLE to be able to use get_selected()
-        select.set_mode(gtk.SELECTION_SINGLE)
+        select.set_mode(gtk.SELECTION_MULTIPLE)
 
         tree_view.connect("button_press_event", self.tree_view_button_cb)
         tree_view.connect("row-activated", self.row_activated_cb)
@@ -308,20 +362,14 @@ class GenericTable(AdhocView):
 
         return sw
 
-    def get_selected_node (self, tree_view):
+    def get_selected_nodes (self, tree_view):
         """Return the currently selected node.
 
-        None if no node is selected.
+        None if no node is selected or multiple nodes are selected.
         """
         selection = tree_view.get_selection ()
-        if not selection:
-            return None
-        store, it = selection.get_selected()
-        node = None
-        if it is not None:
-            node = tree_view.get_model().get_value (it,
-                                                    COLUMN_ELEMENT)
-        return node
+        store, paths=selection.get_selected_rows()
+        return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
     def debug_cb (self, *p, **kw):
         print "Debug cb:\n"
@@ -331,7 +379,9 @@ class GenericTable(AdhocView):
     def row_activated_cb(self, widget, path, view_column):
         """Edit the element on Return or double click
         """
-        node = self.get_selected_node (widget)
+        nodes = self.get_selected_nodes (widget)
+        if len(nodes) != 1:
+            return True
         if node is not None:
             self.controller.gui.edit_element(node)
             return True
