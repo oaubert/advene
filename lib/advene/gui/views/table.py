@@ -159,12 +159,12 @@ class AnnotationTable(AdhocView):
             print "Unknown target type for drag: %d" % targetType
         return True
 
-    def get_selected_nodes (self, tree_view):
+    def get_selected_nodes (self):
         """Return the currently selected node.
 
         None if no node is selected or multiple nodes are selected.
         """
-        selection = tree_view.get_selection ()
+        selection = self.widget.treeview.get_selection ()
         store, paths=selection.get_selected_rows()
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
@@ -205,7 +205,7 @@ class AnnotationTable(AdhocView):
     def row_activated_cb(self, widget, path, view_column):
         """Edit the element on Return or double click
         """
-        nodes = self.get_selected_nodes (widget)
+        nodes = self.get_selected_nodes ()
         if len(nodes) != 1:
             return True
         node=nodes[0]
@@ -362,12 +362,12 @@ class GenericTable(AdhocView):
 
         return sw
 
-    def get_selected_nodes (self, tree_view):
+    def get_selected_nodes (self):
         """Return the currently selected node.
 
         None if no node is selected or multiple nodes are selected.
         """
-        selection = tree_view.get_selection ()
+        selection = self.widget.treeview.get_selection ()
         store, paths=selection.get_selected_rows()
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
@@ -379,7 +379,7 @@ class GenericTable(AdhocView):
     def row_activated_cb(self, widget, path, view_column):
         """Edit the element on Return or double click
         """
-        nodes = self.get_selected_nodes (widget)
+        nodes = self.get_selected_nodes ()
         if len(nodes) != 1:
             return True
         if node is not None:
