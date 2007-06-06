@@ -3,17 +3,21 @@ advene (0.23) unstable; urgency=low
   * Model: it is possible to open uncompressed .azp packages. The
     directory name must end with the .azp extension.
 
+  * The FCK editor, WYSISWYG browser-based HTML editor, has been
+    integrated.
+  
   * GUI:
     * Dialogs position is centered on the mouse cursor  
     * New layout: adhoc views can be put at the west, east and south
       of the video window, as well as the right side of the application
       window
+    * Allow to move adhoc views from one zone to another, through a popup
+      menu or drag and drop.
     * Quicksearch functionality (text entry at the top right hand corner),
       with options through right-click on the search icon
     * Search results are displayed in a table
     * Clicking on an adhoc-view icon will display a contextual menu to
       offer various display options (embed, popup...)
-    * Allow to move adhoc views from one zone to another
     * Element creation: ask for a title, and generate a valid id from it
     
   * Widget colors: 
