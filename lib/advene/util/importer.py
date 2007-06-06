@@ -1156,6 +1156,9 @@ class IRIImporter(GenericImporter):
         self.atypes={}
         self.duration=0
         self.multiple_types=False
+        self.optionparser.add_option("-m", "--multiple-types",
+                                     action="store_true", dest="multiple_types", default=False,
+                                     help=_("Generate one type per view"))
 
     def can_handle(fname):
         if fname.endswith('.iri'):
