@@ -542,12 +542,22 @@ class Menu:
         return
 
     def make_view_menu(self, element, menu):
+        def wysiwyg_edit(i, e):
+            c=self.controller.build_context(here=e)
+            url=c.evaluateValue('here/view/richedit/absolute_url')
+            self.controller.open_url(url)
+            return True
+
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
         if element.content.mimetype == 'application/x-advene-ruleset':
             add_item(_("Activate view"), self.activate_stbv, element)
         elif element.content.mimetype == 'application/x-advene-adhoc-view':
             add_item(_("Open adhoc view"), self.open_adhoc_view, element)
+        elif 'html' in element.content.mimetype:
+            if helper.get_id(element.rootPackage.views, 'richedit'):
+                # The richedit view is available. Propose to use it.
+                add_item(_("Edit in the WYSIWYG editor"), wysiwyg_edit, element)
         return
 
     def make_bundle_menu(self, element, menu):
