@@ -1,16 +1,17 @@
-Advene prototype
+How to install the Advene prototype
 
 * Requirements:
 
+** Video player
+
 The only supported cross-platform player for the moment is VLC through
-a native VLC plugin or a CORBA module. You have to install the
-python-vlc plugin or CORBA support for VLC (see
+a native VLC plugin. You have to install the python-vlc plugin (see
 http://liris.cnrs.fr/advene/download/) to access movies.
 
 Linux users may use the gstreamer framework, through the
 python-gstreamer module (>= 0.10).
 
-* Linux version
+** Linux version
 
 You will need the following python packages (the package names are from
 Debian, they may slightly vary on other distributions) :
@@ -18,7 +19,10 @@ Debian, they may slightly vary on other distributions) :
 python-gtk2 (>=2.10)
 python-glade2 (>=2.10)
 python-xml (>=0.8.0)
-python-cherrypy3 (>=3.0.0)
+python-cherrypy3 (>=3.0.0) [for convenience, a copy of cherrypy is included in
+this Advene distribution]
+python-simpletal (>=3.12) [for convenience, a copy of simpletal is included in
+this Advene distribution] 
 
 For the gstreamer plugin:
 python-gst0.10
@@ -26,11 +30,10 @@ gstreamer0.10-plugins-base
 gstreamer0.10-x
 + other gstreamer packages needed to decode various formats
 
-No more required:
-[ python-simpletal (>=3.9) -- included in the Advene distribution ]
-python-imaging [python-pil in some distributions]
+Note that all these dependencies are already available in Debian and
+in standard installations of the Ubuntu Feisty Fawn distribution.
 
-* Windows version
+** Windows version
 
 You should install in this order (note the version numbers) :
 
@@ -44,34 +47,56 @@ PyGtk for python2.4: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/ [ From http:
 PyXML 0.8 : http://prdownloads.sourceforge.net/pyxml/PyXML-0.8.4.win32-py2.4.exe?download
 [ From http://pyxml.sourceforge.net/ ]
 
-CherryPy: http://download.cherrypy.org/cherrypy/3.0.1/
+CherryPy: http://download.cherrypy.org/cherrypy/3.0.1/ [for
+convenience, a copy of cherrypy is included in this Advene
+distribution]
+
+SimpleTAL (>=3.12) :
+http://www.owlfish.com/software/simpleTAL/download.html [for
+convenience, a copy of simpletal is included in this Advene
+distribution]
 
 Optionally:
-Python Imaging Library : http://effbot.org/downloads/PIL-1.1.5.win32-py2.4.exe
-[ From http://www.pythonware.com/products/pil/ ]
 
-VLC [ From http://www.videolan.org/ ] + python-vlc mediacontrol
-extension (cf http://download.gna.org/advene/win32/ )
+VLC + python-vlc mediacontrol extension (cf
+http://download.gna.org/advene/win32/ )
+
+** Mac OS X version
+
+It is possible to run Advene on Mac OS X, using fink-provided
+packages. However, the hard step is to get the VLC video player
+running (through its python binding). Please contact us if you want to
+experiment with Advene on Mac OS X.
 
 * Testing
 
-You can run the script bin/advene directly from the source
+You can run the script ./bin/advene directly from the source
 directory. It will adapt its paths to its location.
 
 In a first step, you can try the Advene application without movie player
 support by using the "-pdummy" parameter :
 advene -pdummy
 
+To force the use of the gstreamer player, specify:
+advene -pgstreamer
+
+To force the use of the vlc player, specify:
+advene -pvlcnative
+
 * Installing
 
-To install the application, run the setup.py script with appropriate
-options. For a standard installation, run
+To install the application, you can run the setup.py script with
+appropriate options. For a standard installation, run
 
 python setup.py install
+
+Note that it is not necessary to install the application to run it. It
+can be used directly from its sources directory.
 
 * Documentation
 
 An (incomplete) user guide is in the public Advene wiki, feel free to contribute:
-http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneUserGuide
+http://liris.cnrs.fr/advene/wiki/index.php/Main_Page
 
-The changelog is in debian/changelog
+A summarized list of changes across versions is available in the
+changelog (debian/changelog file).
