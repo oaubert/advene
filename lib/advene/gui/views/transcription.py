@@ -349,6 +349,10 @@ class TranscriptionView(AdhocView):
             self.controller.update_status("start", a.fragment.begin)
             return True
 
+        item=gtk.SeparatorMenuItem()
+        item.show()
+        menu.append(item)
+        
         item = gtk.MenuItem(_("Annotation %s") % self.currentannotation.id)
         menuc=advene.gui.popup.Menu(self.currentannotation,
                                     controller=self.controller)
