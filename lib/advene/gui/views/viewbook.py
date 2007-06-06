@@ -153,11 +153,13 @@ class ViewBook(AdhocView):
             self.controller.gui.tooltips.set_tip(e, name)
         e.add(l)
         e.connect("button_press_event", popup_menu, v)
-        e.connect("drag_data_get", label_drag_sent, v)
-        # The widget can generate drags
-        e.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['adhoc-view-instance'],
-                          gtk.gdk.ACTION_LINK)
+
+        if not permanent:
+            e.connect("drag_data_get", label_drag_sent, v)
+            # The widget can generate drags
+            e.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                              config.data.drag_type['adhoc-view-instance'],
+                              gtk.gdk.ACTION_LINK)
         hb=gtk.HBox()
         hb.pack_start(e, expand=False, fill=False)
 
