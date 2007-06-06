@@ -229,11 +229,11 @@ class Differ:
                 yield ('new', s, None, lambda s, d: self.copy_query(s) )
 
     def diff_resources(self):
-        sdir=self.source.resources.dir_
-        ddir=self.destination.resources.dir_
-        if sdir is None or ddir is None:
+        if self.source.resources is None or self.destination.resources is None:
             # FIXME: warning message ?
             return
+        sdir=self.source.resources.dir_
+        ddir=self.destination.resources.dir_
 
         d=filecmp.dircmp(sdir, ddir)
 
