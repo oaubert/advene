@@ -1225,6 +1225,7 @@ class TimeLine(AdhocView):
         b.connect("focus-out-event", focus_out)
 
         def focus_in(button, event):
+            self.statusbar.set_annotation(button.annotation)
             if self.options['display-relations']:
                 a=button.annotation
                 for r in button.annotation.relations:
