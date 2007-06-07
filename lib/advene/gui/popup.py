@@ -275,7 +275,7 @@ class Menu:
                 advene.gui.util.message_dialog(
                     _("Cannot delete the schema %s:\nthere are still types in it.") % (el.title or el.id))
                 return True
-            p.remove(el)
+            p.schemas.remove(el)
             self.controller.notify('SchemaDelete', schema=el)
         elif isinstance(el, View):
             p.views.remove(el)
