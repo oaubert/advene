@@ -1183,31 +1183,6 @@ class TimeLine(AdhocView):
             return True
         return False
 
-    def rel_activate(self, button, event):
-        self.statusbar.set_annotation(button.annotation)
-        button.grab_focus()
-        if self.options['display-relations']:
-            a=button.annotation
-            for r in button.annotation.relations:
-                # FIXME: handle more-than-binary relations
-                if r.members[0] != a:
-                    b=self.get_widget_for_annotation(r.members[0])
-                    if b:
-                        # b may be None, if the related annotation is not displayed
-                        self.relations_to_draw.append( (b, button, r) )
-                elif r.members[1] != a:
-                    b=self.get_widget_for_annotation(r.members[1])
-                    if b:
-                        self.relations_to_draw.append( (button, b, r) )
-            self.update_relation_lines()
-        return True
-
-    def rel_deactivate(self, button, event):
-        if self.options['display-relations']:
-            self.relations_to_draw = []
-            self.update_relation_lines()
-        return True
-
     def deactivate_all(self):
         """Deactivate all annotations.
         """
@@ -1239,18 +1214,32 @@ class TimeLine(AdhocView):
 
         b.connect("key_press_event", self.annotation_key_press_cb, annotation)
         b.connect("button_press_event", self.annotation_button_press_cb, annotation)
-        b.connect("enter_notify_event", self.rel_activate)
-        b.connect("leave_notify_event", self.rel_deactivate)
-        def annotation_grab_focus(widget):
-            self.statusbar.set_annotation(widget.annotation)
-            return False
-        b.connect('grab-focus', annotation_grab_focus)
-        def annotation_focus_out(widget, event):
-            self.statusbar.set_annotation(None)
-            return False
-        b.connect("focus-out-event", annotation_focus_out)
+        b.connect("enter_notify_event", lambda b, e: b.grab_focus())
 
-        def focus_in(b, event):
+        def focus_out(widget, event):
+            self.statusbar.set_annotation(None)
+            if self.options['display-relations']:
+                self.relations_to_draw = []
+                self.update_relation_lines()
+            return False
+        b.connect("focus-out-event", focus_out)
+
+        def focus_in(button, event):
+            if self.options['display-relations']:
+                a=button.annotation
+                for r in button.annotation.relations:
+                    # FIXME: handle more-than-binary relations
+                    if r.members[0] != a:
+                        b=self.get_widget_for_annotation(r.members[0])
+                        if b:
+                            # b may be None, if the related annotation is not displayed
+                            self.relations_to_draw.append( (b, button, r) )
+                    elif r.members[1] != a:
+                        b=self.get_widget_for_annotation(r.members[1])
+                        if b:
+                            self.relations_to_draw.append( (button, b, r) )
+                self.update_relation_lines()
+
             if (self.options['autoscroll'] and
                 self.controller.player.status != self.controller.player.PlayingStatus):
                 # Check if the annotation is not already visible
@@ -1267,10 +1256,10 @@ class TimeLine(AdhocView):
                     # The annotation bounds are off-screen anyway. Do
                     # not move.
                     return False
-                self.scroll_to_annotation(b.annotation)
+                self.scroll_to_annotation(button.annotation)
             return False
+        b.connect("focus-in-event", focus_in)
 
-        b.connect("focus_in_event", focus_in)
         # The button can generate drags
         b.connect("drag_data_get", self.drag_sent)
         b.connect("drag_begin", self.drag_begin)
