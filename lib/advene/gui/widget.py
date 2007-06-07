@@ -153,7 +153,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         self.draw(self.cached_context, bwidth, bheight)
 
         self.refresh()
-        return True
+        return False
 
     def refresh(self):
         if self.window:
