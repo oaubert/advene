@@ -38,7 +38,11 @@ def png_to_pixbuf (png_data, width=None, height=None):
     loader = gtk.gdk.PixbufLoader ('png')
     if not isinstance(png_data, str):
         png_data=str(png_data)
-    loader.write (png_data, len (png_data))
+    try:
+        loader.write (png_data, len (png_data))
+    except gobject.GError:
+        # The PNG data was invalid.
+        return None
     pixbuf = loader.get_pixbuf ()
     loader.close ()
     if width and not height:
