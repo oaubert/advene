@@ -36,7 +36,6 @@ import advene.gui.util
 
 from advene.gui.views import AdhocView
 
-from advene.gui.views.timeline import TimeLine
 from advene.gui.views.table import AnnotationTable, GenericTable
 
 import advene.util.helper as helper
