@@ -356,6 +356,13 @@ class Config(object):
 	elif self.os == 'darwin':
 	    self.darwin_specific_config()
 
+    def check_settings_directory(self):
+        """Check if the settings directory is present, and create it if necessary.
+        """
+        if not os.path.isdir(self.path['settings']):
+            os.mkdir(self.path['settings'])
+        return True
+
     def parse_options(self):
 	parser=OptionParser(usage="""Advene - annotate digital videos, exchange on the Net.
     %prog [options] [file.azp|file.xml|alias=uri]""")
@@ -696,6 +703,7 @@ class Config(object):
       #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
 
 data = Config ()
+data.check_settings_directory()
 data.read_preferences()
 # Config file (advene.ini) may override settings from preferences
 data.read_config_file ()
