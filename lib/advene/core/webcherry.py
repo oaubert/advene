@@ -457,10 +457,7 @@ class Media(Common):
                 position=0
         position=long(position)
 
-        if self.controller.player.status != self.controller.player.PlayingStatus:
-            self.controller.queue_action( self.controller.update_status, "start", position )
-        else:
-            self.controller.queue_action( self.controller.update_status, "set", position )
+        self.controller.queue_action( self.controller.update_status, "start", position )
         return self.send_no_content()
     play.exposed=True
 
@@ -1803,7 +1800,7 @@ class Root(Common):
         self.media=Media(controller)
         self.packages=Packages(controller)
 
-    def data(self):
+    def data(self, *p):
         return _("Advene web resources")
     data.exposed=True
 
