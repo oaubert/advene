@@ -1412,7 +1412,7 @@ class Packages(Common):
             cherrypy.response.status=200
             return _("Value successfuly updated")
         except Exception, e:
-            return self.send_error(501, _("Unable to update the attribute %(attribute) for element %(element)s: %(error)s." ) % { 'attribute': attribute,
+            return self.send_error(501, _("Unable to update the attribute %(attribute)s for element %(element)s: %(error)s." ) % { 'attribute': attribute,
                                                                                                                                   'element': objet,
                                                                                                                                   'error': e })
 
