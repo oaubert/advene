@@ -413,6 +413,9 @@ class Differ:
             author=s.author)
         el.date=s.date
         el.title=s.title
+        d.matchFilter['class']=s.matchFilter['class']
+        if s.matchFilter.has_key('type'):
+            d.matchFilter['type']=s.matchFilter['type']
         # FIXME: ideally, we should try to fix translated_ids in
         # views. Or at least try to signal possible occurrences.
         el.content.data=s.content.data
