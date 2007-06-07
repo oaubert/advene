@@ -40,11 +40,12 @@ def png_to_pixbuf (png_data, width=None, height=None):
         png_data=str(png_data)
     try:
         loader.write (png_data, len (png_data))
+        pixbuf = loader.get_pixbuf ()
+        loader.close ()
     except gobject.GError:
         # The PNG data was invalid.
-        return None
-    pixbuf = loader.get_pixbuf ()
-    loader.close ()
+        pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+
     if width and not height:
         height = width * pixbuf.get_height() / pixbuf.get_width()
     if height and not width:
@@ -59,12 +60,9 @@ def image_from_position(controller, position=None, width=None, height=None):
     i=gtk.Image()
     if position is None:
         position=controller.player.current_position_value
-    try:
-        i.set_from_pixbuf(png_to_pixbuf (controller.package.imagecache[position],
-                                         width=width, height=height))
-    except:
-        # Some png_data corruption have been reported. Handle them here.
-        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+    pb=png_to_pixbuf (controller.package.imagecache[position],
+                                         width=width, height=height)
+    i.set_from_pixbuf(pb)
     return i
 
 def dialog_keypressed_cb(widget=None, event=None):
