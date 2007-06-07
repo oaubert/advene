@@ -27,7 +27,7 @@ from gettext import gettext as _
 
 import advene.core.config as config
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
-from advene.gui.edit.elements import EditFragmentForm, get_edit_popup
+from advene.gui.edit.elements import get_edit_popup
 
 class EditAccumulator(AccumulatorPopup):
     """View displaying a limited number of compact editing widgets.
@@ -38,6 +38,7 @@ class EditAccumulator(AccumulatorPopup):
         self.view_name = _("EditAccumulator")
         self.view_id = 'editaccumulator'
         self.close_on_package_load = False
+        self.edited_elements={}
 
     def edit(self, element):
         e=get_edit_popup(element, self.controller)
@@ -89,6 +90,7 @@ class EditAccumulator(AccumulatorPopup):
         self.controller.gui.tooltips.set_tip(b, _("Close"))
         hbox.pack_start(b, expand=False)
 
+        self.edited_elements[element]=w
         self.display(w, title=hbox)
 
     def edit_element_handler(self, context, parameters):
@@ -100,6 +102,19 @@ class EditAccumulator(AccumulatorPopup):
         self.edit(element)
         return True
 
+    def delete_element_handler(self, context, parameters):
+        event=context.evaluateValue('event')
+        if not event.endswith('Delete'):
+            return True
+        el=event.replace('Delete', '').lower()
+        element=context.evaluateValue(el)
+        try:
+            w=self.edited_elements[element]
+            self.undisplay(w)
+        except:
+            pass
+        return True
+
     def register_callback (self, controller=None):
         """Add the handler for annotation edit.
         """
@@ -107,6 +122,10 @@ class EditAccumulator(AccumulatorPopup):
         for e in ('Annotation', 'View', 'Relation'):
             r=controller.event_handler.internal_rule (event="%sCreate" % e,
                                                       method=self.edit_element_handler)
+            self.callbacks.append(r)
+        for e in ('Annotation', 'View', 'Relation'):
+            r=controller.event_handler.internal_rule (event="%sDelete" % e,
+                                                      method=self.delete_element_handler)
             self.callbacks.append(r)
 
     def unregister_callback (self, controller=None):
