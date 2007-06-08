@@ -79,6 +79,7 @@ class QuickviewBar(gtk.HBox):
             c=self.controller.get_title(a)
             if len(c) > 40:
                 c=unicode(c[:39])+u'\u2026'
+            c += " (" + a.id + ")"
         self.annotation=a
         self.begin.set_text(b)
         self.end.set_text(e)
