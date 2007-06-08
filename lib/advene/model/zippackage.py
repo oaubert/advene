@@ -250,6 +250,11 @@ class ZipPackage:
         if fname is None:
             fname=self.file_
 
+        if fname.endswith('/') and not os.path.exists(fname):
+            # We specified a directory that does not exist yet. Create
+            # it.
+            os.mkdir(fname)
+
         if os.path.isdir(fname):
             z=None
         else:
