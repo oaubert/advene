@@ -95,7 +95,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             if source is _get_from_uri:
                 # Determine the package format (plain XML or AZP)
                 # FIXME: should be done by content rather than extension
-                if abs_uri.lower().endswith('.azp'):
+                if abs_uri.lower().endswith('.azp') or abs_uri.endswith('/'):
                     # Advene Zip Package. Do some magic.
                     self.__zip = ZipPackage(abs_uri)
                     f=urllib.pathname2url(self.__zip.getContentsFile())
@@ -114,7 +114,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                      str(source)
                 )
 
-                if source_uri.lower().endswith('.azp'):
+                if source_uri.lower().endswith('.azp') or source_uri.endswith('/'):
                     # Advene Zip Package. Do some magic.
                     self.__zip = ZipPackage(source_uri)
                     f=urllib.pathname2url(self.__zip.getContentsFile())
@@ -291,8 +291,9 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         out=u"""<?xml version="1.0" encoding="UTF-8"?>
     <statistics:statistics xmlns:statistics="urn:advene:names:tc:opendocument:xmlns:manifest:1.0">
     """
-        out += """<statistics:title value="%s" />""" % urllib.quote(self.title or "")
-        out += """<statistics:description value="%s" />""" % (urllib.quote(self.getMetaData(config.data.namespace_prefix['dc'], 'description') or ""))
+        # Note: we do not use urllib.quote, since it chokes on non-ASCII characters (unicode)
+        out += u"""<statistics:title value="%s" />""" % (self.title.replace('"', '%22') or "")
+        out += u"""<statistics:description value="%s" />""" % (self.getMetaData(config.data.namespace_prefix['dc'], 'description').replace('"', '%22') or "")
         for n, l in ( ('schema', len(self.schemas)),
                       ('annotation', len(self.annotations)),
                       ('annotation_type', len(self.annotationTypes)),
@@ -300,8 +301,8 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                       ('relation_type', len(self.relationTypes)),
                       ('query', len(self.queries)),
                       ('view', len(self.views)) ):
-            out += """<statistics:item name="%s" value="%d" />""" % (n, l)
-        out += """</statistics:statistics>"""
+            out += u"""<statistics:item name="%s" value="%d" />""" % (n, l)
+        out += u"""</statistics:statistics>"""
         return out
     
     def serialize(self, stream=sys.stdout):
@@ -321,7 +322,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             name=urllib.url2pathname(name)
 	    
         # handle .azp files.
-        if name.endswith('.azp') or name.endswith('.AZP'):
+        if name.lower().endswith('.azp') or name.endswith('/'):
             # AZP format
             if self.__zip is None:
                 # Conversion necessary: we are saving to the new format.
