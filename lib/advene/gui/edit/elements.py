@@ -279,6 +279,17 @@ class EditElementPopup (object):
             b.connect ("clicked", self.apply_cb, callback)
             hbox.add (b)
 
+            if isinstance(self.element, View) and helper.get_view_type(self.element) == 'static':
+                def preview_cb(it, v):
+                    url="%s/view/%s" % (self.controller.get_default_url(root=True, alias='advene'),
+                                        v.id)
+                    self.controller.open_url(url)
+                    return True
+
+                b = gtk.Button (stock=gtk.STOCK_PRINT_PREVIEW)
+                b.connect ("clicked", preview_cb, self.element)
+                hbox.add (b)
+
             b = gtk.Button (stock=gtk.STOCK_CANCEL)
             b.connect ("clicked", self.close_cb)
             hbox.add (b)
