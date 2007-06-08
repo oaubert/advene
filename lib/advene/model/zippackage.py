@@ -186,6 +186,10 @@ class ZipPackage:
         # FIXME: check the portability (convert / to os.path.sep ?)
         for name in z.namelist():
             if name.endswith('/'):
+                # It is a directory name. Strip the trailing /, so
+                # that os.path.dirname(name) really returns the
+                # containing directory
+                name=name[:-1]
                 d=self.tempfile(name)
                 if not os.path.exists(d):
                     recursive_mkdir(d)
@@ -301,7 +305,7 @@ class ZipPackage:
         if not os.path.isdir(d):
             os.mkdir(d)
         f=open(self.tempfile(u'META-INF', u'statistics.xml'), 'w')
-        f.write(p.generate_statistics())
+        f.write(p.generate_statistics().encode('utf-8'))
         f.close()
         return True
         
