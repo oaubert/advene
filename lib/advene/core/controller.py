@@ -1151,7 +1151,7 @@ class AdveneController:
 
         for utbv in self.package.views:
             if (utbv.matchFilter['class'] == 'package'
-                and utbv.content.mimetype != 'application/x-advene-ruleset'):
+                and helper.get_view_type(utbv) == 'static'):
 		res.append( (self.get_title(utbv), "%s/view/%s" % (url, utbv.id)) )
 	return res
 
