@@ -1749,6 +1749,15 @@ class TimeLine(AdhocView):
                 self.quick_edit(el, button=widget, callback=set_end_time)
             return False
 
+        def buttonpress_handler(widget, event, t):
+            """Display the popup menu when right-clicking on annotation type.
+            """
+            if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+                menu=advene.gui.popup.Menu(t, controller=self.controller)
+                menu.popup()
+                return True
+            return False
+
         for t in self.annotationtypes:
             b=AnnotationTypeWidget(annotationtype=t, container=self)
             self.tooltips.set_tip(b, _("From schema %s") % self.controller.get_title(t.schema))
@@ -1756,6 +1765,7 @@ class TimeLine(AdhocView):
             b.update_widget()
             b.show_all()
             b.connect("key_press_event", keypress_handler, t)
+            b.connect("button_press_event", buttonpress_handler, t)
             # The button can receive drops (to transmute annotations)
             b.connect("drag_data_received", self.annotation_type_drag_received_cb)
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
