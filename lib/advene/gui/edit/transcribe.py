@@ -205,7 +205,7 @@ class TranscriptionEdit(AdhocView):
 
     def buffer_is_empty(self):
         b=self.textview.get_buffer()
-        return b.get_char_count() == 0
+        return len(b.get_text(*b.get_bounds())) == 0
 
     def set_color(self, button, color):
         for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
