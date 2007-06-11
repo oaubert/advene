@@ -1389,6 +1389,9 @@ class AdveneGUI (Connect):
                                        historyfile=config.data.advenefile('evaluator.log', 'settings')
                                        )
         ev.locals_['self']=ev
+        # Define variables referencing the opened views
+        for v in self.adhoc_views:
+            ev.locals_[v.view_id]=v
         w=ev.popup()
         b=gtk.Button(stock=gtk.STOCK_CLOSE)
 
