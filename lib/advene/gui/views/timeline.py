@@ -1368,6 +1368,7 @@ class TimeLine(AdhocView):
     def position_reset(self):
         # The position was reset. Deactive active annotations.
         self.deactivate_all()
+        self.update_current_mark(self.minimum)
         return True
 
     def mark_press_cb(self, eventbox, event, t):
