@@ -456,6 +456,18 @@ class AdveneGUI (Connect):
                 pass
         return True
 
+    def handle_element_delete(self, context, parameters):
+        event=context.evaluateValue('event')
+        if not event.endswith('Delete'):
+            return True
+        el=event.replace('Delete', '').lower()
+        element=context.evaluateValue(el)
+        w=[ e for e in self.edit_popups if e.element == element ]
+        if w:
+            for e in w:
+                e.close_cb()
+        return True
+
     def on_view_activation(self, context, parameters):
         """Handler used to update the STBV GUI.
         """
@@ -554,7 +566,11 @@ class AdveneGUI (Connect):
               self.relationtype_lifecycle),
             ("PlayerSet", self.updated_position_cb),
             ("PlayerStop", self.player_stop_cb),
-            ("ViewActivation", self.on_view_activation)
+            ("ViewActivation", self.on_view_activation),
+            ( [ '%sDelete' % v for v in ('Annotation', 'Relation', 'View',
+                                         'AnnotationType', 'RelationType', 'Schema',
+                                         'Resource') ],
+              self.handle_element_delete),
             ):
             if isinstance(events, basestring):
                 self.controller.event_handler.internal_rule (event=events,
