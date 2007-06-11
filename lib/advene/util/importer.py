@@ -1281,7 +1281,8 @@ class IRIImporter(GenericImporter):
         med=[ i for i in iri.body[0].medias[0].media  if i.id == 'video' ]
         if med:
             # Got a video file reference
-            self.package.setMetaData (config.data.namespace, "mediafile", med[0].video[0].src)
+            if not self.package.getMetaData(config.data.namespace, "mediafile"):
+                self.package.setMetaData (config.data.namespace, "mediafile", med[0].video[0].src)
 
         # Metadata extraction
         meta=dict([ (m.name, m.content) for m in iri.head[0].meta ])
@@ -1296,7 +1297,8 @@ class IRIImporter(GenericImporter):
             
         self.convert(self.iterator(iri))
         if self.duration != 0:
-            self.package.setMetaData (config.data.namespace, "duration", str(self.duration))
+            if not self.package.getMetaData(config.data.namespace, "duration"):
+                self.package.setMetaData (config.data.namespace, "duration", str(self.duration))
             
         self.progress(1.0)
         return self.package
