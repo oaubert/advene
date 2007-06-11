@@ -196,7 +196,9 @@ class HistoryNavigation(AdhocView):
 
         v.add(sw)
 
-        hb=gtk.HButtonBox()
+        hb=gtk.HBox()
+        hb.set_homogeneous(False)
+
         b=advene.gui.util.get_small_stock_button(gtk.STOCK_DELETE)
                                                  
         self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
@@ -206,6 +208,21 @@ class HistoryNavigation(AdhocView):
                         config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK)
         b.connect("drag_data_received", remove_drag_received)
         hb.pack_start(b, expand=False)
+
+        def bookmark_current_time(b):
+            p=self.controller.player
+            if p.status in (p.PlayingStatus, p.PauseStatus):
+                self.append(p.current_position_value)
+            return True
+
+        b=gtk.Button()
+        i=gtk.Image()
+        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
+        b.add(i)
+        self.controller.gui.tooltips.set_tip(b, _("Insert a bookmark for the current video time"))
+        b.connect('clicked', bookmark_current_time)
+        hb.pack_start(b, expand=False)
+
         v.pack_start(hb, expand=False)
 
         return v
