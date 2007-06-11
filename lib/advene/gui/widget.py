@@ -35,7 +35,6 @@ import cairo
 import advene.core.config as config
 
 import advene.util.helper as helper
-import advene.gui.popup
 
 class GenericColorButtonWidget(gtk.DrawingArea):
     """ Widget emulating a color button widget
@@ -291,22 +290,11 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         self.width=None
         GenericColorButtonWidget.__init__(self, element=annotationtype, container=container)
         self.connect("key_press_event", self.keypress, self.annotationtype)
-        self.connect("button_press_event", self.buttonpress)
         self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
 
     def keypress(self, widget, event, annotationtype):
         if event.keyval == gtk.keysyms.e:
             self.controller.gui.edit_element(annotationtype)
-            return True
-        return False
-
-    def buttonpress(self, widget, event):
-        """Display the popup menu when right-clicking on annotation type.
-        """
-        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-            menu=advene.gui.popup.Menu(widget.annotationtype,
-                                       controller=self.controller)
-            menu.popup()
             return True
         return False
 
