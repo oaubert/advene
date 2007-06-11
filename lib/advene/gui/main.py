@@ -1239,6 +1239,8 @@ class AdveneGUI (Connect):
                     v.update_model(self.controller.package)
                 except AttributeError:
                     pass
+        # Reset quicksearch source value
+        config.data.preferences['quicksearch-source']=None
         pass
 
     def manage_package_load (self, context, parameters):
