@@ -1836,6 +1836,8 @@ class EditTagForm(EditForm):
 
     def get_view(self, compact=False):
         self.view=TagBag(controller=self.controller, tags=self.element.tags, vertical=False)
+        self.view.register_callback(controller=self.controller)
+        self.view.widget.connect('destroy', lambda w: self.view.unregister_callback(self.controller))
         return self.view.widget
 
 if __name__ == "__main__":
