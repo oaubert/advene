@@ -50,6 +50,7 @@ from advene.gui.views.browser import Browser
 from advene.gui.views.tagbag import TagBag
 
 import advene.gui.util
+import advene.util.helper as helper
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
 
