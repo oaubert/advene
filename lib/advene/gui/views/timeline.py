@@ -2279,22 +2279,11 @@ class OldAnnotationTypeWidget(gtk.Button):
         self.width=None
 
         self.connect("key_press_event", self.keypress, self.annotationtype)
-        self.connect("button_press_event", self.buttonpress)
         self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
 
     def keypress(self, widget, event, annotationtype):
         if event.keyval == gtk.keysyms.e:
             self.controller.gui.edit_element(annotationtype)
-            return True
-        return False
-
-    def buttonpress(self, widget, event):
-        """Display the popup menu when right-clicking on annotation type.
-        """
-        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-            menu=advene.gui.popup.Menu(widget.annotationtype,
-                                       controller=self.controller)
-            menu.popup()
             return True
         return False
 
