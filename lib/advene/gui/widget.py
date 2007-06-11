@@ -342,3 +342,43 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
             if ext[2] != self.width:
                 self.width=long(ext[2]) + 5
                 self.reset_surface_size(self.width, self.container.button_height)
+
+class TagWidget(GenericColorButtonWidget):
+    """ Widget representing a tag
+    """
+    def __init__(self, tag=None, container=None):
+        self.tag=tag
+        self.width=60
+        GenericColorButtonWidget.__init__(self, element=tag, container=container)
+
+    def needed_size(self):
+        """Return the needed size of the widget.
+
+        Method to be implemented by subclasses
+        """
+        w=self.width or 50
+        return (w, self.container.button_height)
+
+    def draw(self, context, width, height):
+        context.rectangle(0, 0, width, height)
+        color=self.container.get_element_color(self.tag)
+        if color:
+            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
+        else:
+            rgba=(1.0, 1.0, 1.0, 1)
+        context.set_source_rgba(*rgba)
+        context.fill_preserve()
+
+        # Draw the text
+        context.select_font_face("Helvetica",
+                                 cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+
+        context.move_to(2, int(height * 0.7))
+
+        context.set_source_rgba(0, 0, 0, 1)
+        context.show_text(self.tag)
+        ext=context.text_extents(self.tag)
+        w=long(ext[2]) + 5
+        if self.width != w:
+            self.reset_surface_size(self.width, self.container.button_height)
+            #print "Resetting width", self.width
