@@ -39,6 +39,11 @@ from gettext import gettext as _
 import re
 import gtk
 
+try:
+    from advene.gui.widget import TagWidget
+except:
+    TagWidget=None
+
 class TagBag(AdhocView):
     def __init__(self, controller=None, parameters=None, tags=None, vertical=True):
         self.view_name = _("Tag Bag")
@@ -61,6 +66,7 @@ class TagBag(AdhocView):
                 tags=l
         self.tags=tags
 
+        self.button_height=24
         self.mainbox=None
         self.widget=self.build_widget()
         self.refresh()
@@ -77,9 +83,9 @@ class TagBag(AdhocView):
         except KeyError:
             return True
 
-        l=[ b for b in self.mainbox.get_children() if b.get_label() == tag ]
+        l=[ b for b in self.mainbox.get_children() if b.tag == tag ]
         for b in l:
-            self.set_widget_color(b, col)
+            b.update_widget()
         return True
 
     def register_callback (self, controller=None):
@@ -119,15 +125,15 @@ class TagBag(AdhocView):
         self.mainbox.show_all()
         return True
 
-    def set_widget_color(self, widget, color):
-        if isinstance(color, basestring):
-            color=gtk.gdk.color_parse (color)
-            
-        for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
-            widget.modify_bg (style, color)
-        return True
+    def get_element_color(self, tag):
+        """Return the gtk color for the given tag.
+        Return None if no color is defined.
+        """
+        try:
+            col=self.controller.package._tag_colors[tag]
+        except KeyError:
+            col=None
+        return advene.gui.util.name2color(col)
 
     def append_repr(self, t):
         def drag_sent(widget, context, selection, targetType, eventTime):
@@ -137,13 +143,8 @@ class TagBag(AdhocView):
                 self.log("Unknown target type for drag: %d" % targetType)
             return True
 
-        b=gtk.Button(t)
-        
-        try:
-            col=self.controller.package._tag_colors[t]
-            self.set_widget_color(b, col)
-        except KeyError:
-            pass
+        b=TagWidget(t, container=self)
+        b.update_widget()
 
         # The button can generate drags
         b.connect("drag_data_get", drag_sent)
@@ -162,8 +163,9 @@ class TagBag(AdhocView):
         def set_color(widget, tag):
             d=gtk.ColorSelectionDialog(_("Choose the color for tag %s") % tag)
             try:
-                col=self.controller.package._tag_colors[tag]
-                d.colorsel.set_current_color(gtk.gdk.color_parse(col))
+                color=self.get_element_color(tag)
+                if color:
+                    d.colorsel.set_current_color(color)
             except:
                 pass
 
@@ -252,10 +254,12 @@ class TagBag(AdhocView):
 
         v.add(sw)
 
-        hb=gtk.HButtonBox()
+        hb=gtk.HBox()
+        hb.set_homogeneous(False)
         v.pack_start(hb, expand=False)
 
-        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        b=advene.gui.util.get_small_stock_button(gtk.STOCK_DELETE)
+
         self.controller.gui.tooltips.set_tip(b, _("Drop a tag here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
@@ -264,9 +268,64 @@ class TagBag(AdhocView):
         b.connect("drag_data_received", remove_drag_received)
         hb.pack_start(b, expand=False)
 
-        b=gtk.Button(stock=gtk.STOCK_ADD)
+        b=advene.gui.util.get_small_stock_button(gtk.STOCK_ADD)
         b.connect("clicked", self.new_tag)
         hb.pack_start(b, expand=False)
 
         v.buttonbox=hb
         return v
+
+class OldTagWidget(gtk.Button):
+    """Old method to render tag widgets (in order to be usable on
+       fink with gtk == 2.6 and no cairo is available)
+    """
+    def __init__(self, tag=None, container=None):
+        gtk.Button.__init__(self)
+        self.tag=tag
+        self.local_color=None
+        # container is the Advene view instance that manages this instance
+        self.container=container
+        if container:
+            self.controller=container.controller
+        else:
+            self.controller=None
+
+        self.label=gtk.Label()
+        #self.label.modify_font(self.container.annotation_type_font)
+        self.add(self.label)
+        self.set_size_request(-1, self.container.button_height)
+        self.width=None
+
+        self.connect("button_press_event", self.buttonpress)
+
+    def buttonpress(self, widget, event):
+        """Display the popup menu when right-clicking on annotation type.
+        """
+        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            # FIXME: set_colro
+            return True
+        return False
+
+    def set_color(self, color=None):
+        self.local_color=color
+        self.update_widget()
+
+    def update_widget(self):
+        if self.width is not None:
+            self.set_size_request(self.width, -1)
+        if self.local_color is not None:
+            color=self.local_color
+        else:
+            color=self.container.get_element_color(self.tag)
+        if color:
+            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                          gtk.STATE_PRELIGHT):
+                self.modify_bg (style, color)
+
+        # Draw the text
+        self.label.set_text(self.tag)
+        return True
+
+if TagWidget is None:
+    TagWidget=OldTagWidget
