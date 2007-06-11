@@ -902,7 +902,7 @@ class ECACatalog:
         'ResourceCreate':         _("Creation of a new resource"),
         'ResourceEditEnd':        _("Ending editing of a resource"),
         'ResourceDelete':         _("Suppression of a resource"),
-        'TagUpdate':              _("Modification of the tags"),
+        'TagUpdate':              _("Modification of the tag"),
         'LinkActivation':         _("Activating a link"),
         'PlayerStart':            _("Player start"),
         'PlayerStop':             _("Player stop"),
