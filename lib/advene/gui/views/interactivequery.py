@@ -335,9 +335,10 @@ class InteractiveResult(AdhocView):
             self.controller.gui.tooltips.set_tip(b, _("Edit elements"))
             hb.add(b)
 
-            b=advene.gui.util.get_pixmap_button('python.png', lambda b: self.open_in_evaluator(self.table.get_selected_nodes() or self.result))
-            self.controller.gui.tooltips.set_tip(b, _("Open in python evaluator"))
-            hb.add(b)
+            if config.data.preferences['expert-mode']:
+                b=advene.gui.util.get_pixmap_button('python.png', lambda b: self.open_in_evaluator(self.table.get_selected_nodes() or self.result))
+                self.controller.gui.tooltips.set_tip(b, _("Open in python evaluator"))
+                hb.add(b)
         else:
             v.add(gtk.Label(_("Result:\n%s") % unicode(self.result)))
         v.show_all()
