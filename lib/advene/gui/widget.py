@@ -374,6 +374,14 @@ class TagWidget(GenericColorButtonWidget):
         context.set_source_rgba(*rgba)
         context.fill_preserve()
 
+        # Draw the border
+        if self.is_focus():
+            context.set_line_width(4)
+        else:
+            context.set_line_width(1)
+        context.set_source_rgba(0, 0, 0, 1)
+        context.stroke()
+
         # Draw the text
         context.select_font_face("Helvetica",
                                  cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
