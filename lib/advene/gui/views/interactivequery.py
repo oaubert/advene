@@ -31,7 +31,6 @@ from advene.model.bundle import AbstractBundle
 from advene.rules.elements import Query, Condition
 from advene.model.annotation import Annotation
 from advene.model.tal.context import AdveneTalesException
-from advene.gui.views.editaccumulator import EditAccumulator
 import advene.gui.util
 
 from advene.gui.views import AdhocView
@@ -354,18 +353,11 @@ class InteractiveResult(AdhocView):
         return True
 
     def open_in_edit_accumulator(self, l):
-        if self.controller.gui.edit_accumulator:
-            a=self.controller.gui.edit_accumulator
-        else:
-            a=EditAccumulator(controller=self.controller, scrollable=True)
-
+        if not self.controller.gui.edit_accumulator:
+            self.controller.gui.open_adhoc_view('editaccumulator')
+        a=self.controller.gui.edit_accumulator
         for e in l:
             a.edit(e)
-
-        if a != self.controller.gui.edit_accumulator:
-            window=a.popup()
-            window.set_title(_("Results of _interactive query"))
-        
         return True
 
     def open_in_evaluator(self, l):
