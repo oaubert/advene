@@ -32,6 +32,7 @@ the presented list of tags.
 # Advene part
 import advene.core.config as config
 from advene.gui.views import AdhocView
+from advene.gui.edit.properties import EditWidget
 import advene.gui.util
 
 from gettext import gettext as _
@@ -52,9 +53,12 @@ class TagBag(AdhocView):
         self.contextual_actions = (
             (_("New tag"), self.new_tag),
             (_("Clear"), self.clear),
+            (_("Preferences"), self.edit_options),
             (_("Save view"), self.save_view),
             )
-        self.options={}
+        self.options={
+            'display-new-tags': False
+            }
         self.controller=controller
         self.vertical=vertical
 
@@ -77,6 +81,13 @@ class TagBag(AdhocView):
 
     def tag_update(self, context, parameters):
         tag=context.evaluateValue('tag')
+        if not tag in self.tags:
+            # The tag is not present
+            if self.options['display-new-tags']:
+                self.tags.append(tag)
+                self.append_repr(tag)
+            return True
+
         # Is there an associated color ?
         try:
             col=self.controller.package._tag_colors[tag]
@@ -112,6 +123,18 @@ class TagBag(AdhocView):
             self.tags.append(tag)
             self.controller.notify('TagUpdate', tag=tag)
             self.refresh()
+        return True
+
+    def edit_options(self, *p):
+        cache=dict(self.options)
+
+        ew=EditWidget(cache.__setitem__, cache.get)
+        ew.set_name(_("Tag bag options"))
+        ew.add_checkbox(_("Update with new tags"), "display-new-tags", _("Automatically display new defined tags"))
+        res=ew.popup()
+
+        if res:
+            self.options.update(cache)
         return True
 
     def get_save_arguments(self):
@@ -200,6 +223,7 @@ class TagBag(AdhocView):
                           gtk.gdk.ACTION_LINK)
 
         b.connect("button_press_event", popup_menu)
+        b.show()
         self.mainbox.pack_start(b, expand=False)
 
     def build_widget(self):
