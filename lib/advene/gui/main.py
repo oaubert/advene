@@ -2256,7 +2256,7 @@ class AdveneGUI (Connect):
         direct_options=('history-size-limit', 'scroll-increment',
                         'adhoc-south', 'adhoc-west', 'adhoc-east', 'adhoc-fareast', 'adhoc-popup',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit', 
-                        'remember-window-size')
+                        'remember-window-size', 'expert-mode')
         cache={
             'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
             'data': config.data.path['data'],
@@ -2274,6 +2274,7 @@ class AdveneGUI (Connect):
         ew=advene.gui.edit.properties.EditNotebook(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
         ew.add_title(_("General"))
+        ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
         ew.add_checkbox(_("OSD"), "osdtext", _("Display captions on the video"))
         ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 2000)
         ew.add_option(_("On exit,"), 'imagecache-save-on-exit', 
