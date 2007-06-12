@@ -1263,8 +1263,8 @@ class IRIImporter(GenericImporter):
                                    }
                                 yield d
                             else:
-                                an[0].content.data += '\n%s=%s' % (view.id,
-                                                                   ref.type.encode('utf-8').replace('\n', '\\n'))
+                                an.content.data += '\n%s=%s' % (view.id,
+                                                                ref.type.encode('utf-8').replace('\n', '\\n'))
 
     def process_file(self, filename):
         iri=handyxml.xml(filename)
