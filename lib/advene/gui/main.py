@@ -260,7 +260,8 @@ class AdveneGUI (Connect):
                 (_("Annotations of type %s") % self.controller.get_title(at),
                  'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ] + [ (_("Views"), 'here/views') ]
             for (label, expression) in l:
-                i=gtk.MenuItem(label)
+                i=gtk.CheckMenuItem(label)
+                i.set_active(expression == config.data.preferences['quicksearch-source'])
                 i.connect('activate', lambda i, expr: config.data.preferences.__setitem__('quicksearch-source', expr), expression)
                 submenu.append(i)
             item.set_submenu(submenu)
