@@ -35,6 +35,7 @@ import cairo
 import advene.core.config as config
 
 import advene.util.helper as helper
+import advene.gui.popup
 
 class GenericColorButtonWidget(gtk.DrawingArea):
     """ Widget emulating a color button widget
@@ -216,6 +217,10 @@ class AnnotationWidget(GenericColorButtonWidget):
     def keypress(self, widget, event, annotation):
         if event.keyval == gtk.keysyms.e:
             self.controller.gui.edit_element(annotation)
+            return True
+        elif event.keyval == gtk.keysyms.F11:
+            menu=advene.gui.popup.Menu(annotation, controller=self.controller)
+            menu.popup()
             return True
         elif event.keyval == gtk.keysyms.space:
             # Play the annotation
