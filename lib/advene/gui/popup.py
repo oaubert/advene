@@ -40,7 +40,6 @@ from advene.gui.views.interactivequery import InteractiveQuery
 from advene.gui.views.transcription import TranscriptionView
 import advene.gui.util
 import advene.util.helper as helper
-import advene.gui.edit.elements
 
 class Menu:
     def __init__(self, element=None, controller=None, readonly=False):
