@@ -215,6 +215,8 @@ class Config(object):
             # quicksearch source. If None, it is all package's annotations.
             # Else it is a TALES expression applied to the current package
             'quicksearch-source': None,
+            # Display advanced options
+            'expert-mode': False,
             }
 
         # Player options
