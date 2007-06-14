@@ -42,7 +42,6 @@ name="Tree view plugin"
 def register(controller):
     controller.register_viewclass(TreeWidget)
 
-
 class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest):
     COLUMN_TITLE=0
     COLUMN_ELEMENT=1
@@ -190,11 +189,6 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
             title="%s (%s, %s)" % (title,
                                    helper.format_time(node.fragment.begin),
                                    helper.format_time(node.fragment.end))
-        if isinstance (node, View):
-            if node.content.mimetype == 'application/x-advene-ruleset':
-                title += ' [STBV]'
-            elif node.content.mimetype == 'application/x-advene-adhoc-view':
-                title += ' [AdHoc]'
         if ((hasattr(node, 'isImported') and node.isImported())
             or (hasattr(node, 'schema') and node.schema.isImported())):
             title += " (*)"
