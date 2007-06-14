@@ -183,6 +183,12 @@ class GenericImporter(object):
             at.setMetaData(config.data.namespace, "description", description)
         if representation:
             at.setMetaData(config.data.namespace, "representation", representation)
+        try:
+            color=self.package._color_palette.next()
+            at.setMetaData(config.data.namespace, "color", color)
+        except AttributeError:
+            # The package does not have a _color_palette
+            pass
         schema.annotationTypes.append(at)
         self.update_statistics('annotation-type')
         return at
