@@ -1245,7 +1245,7 @@ class AdveneController:
             self.cleanup_done = True
         return True
 
-    def move_position (self, value, relative=True):
+    def move_position (self, value, relative=True, notify=True):
         """Helper method : fast forward or rewind by value milliseconds.
 
         @param value: the offset in milliseconds
@@ -1254,11 +1254,13 @@ class AdveneController:
         if relative:
             self.update_status ("set", self.create_position (value=value,
                                                              key=self.player.MediaTime,
-                                                             origin=self.player.RelativePosition))
+                                                             origin=self.player.RelativePosition),
+                                notify=notify)
         else:
             self.update_status ("set", self.create_position (value=value,
                                                              key=self.player.MediaTime,
-                                                             origin=self.player.AbsolutePosition))
+                                                             origin=self.player.AbsolutePosition),
+                                notify=notify)
 
     def generate_sorted_lists (self, position):
         """Return two sorted lists valid for a given position.
