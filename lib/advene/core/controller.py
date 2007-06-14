@@ -892,6 +892,9 @@ class AdveneController:
         self.package._idgenerator = advene.core.idgenerator.Generator(self.package)
         self.package._modified = False
 
+        # Initialize the color palette for the package
+        self.package._color_palette=helper.CircularList(config.data.color_palette[:])
+
         # Parse tag_colors attribute
         cols = self.package.getMetaData (config.data.namespace, "tag_colors")
         if cols:
