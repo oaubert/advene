@@ -2270,12 +2270,10 @@ class AdveneGUI (Connect):
             }
         for k in direct_options:
             cache[k] = config.data.preferences[k]
-	cache['osdtext'] = config.data.player_preferences['osdtext']
         ew=advene.gui.edit.properties.EditNotebook(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
         ew.add_title(_("General"))
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
-        ew.add_checkbox(_("OSD"), "osdtext", _("Display captions on the video"))
         ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 2000)
         ew.add_option(_("On exit,"), 'imagecache-save-on-exit', 
                       _("How to handle screenshots on exit"), 
