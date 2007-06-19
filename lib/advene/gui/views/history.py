@@ -15,7 +15,7 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Module displaying navigation history."""
+"""Module displaying time bookmarks (for navigation history for instance)."""
 
 # Advene part
 import advene.core.config as config
@@ -33,9 +33,9 @@ def register(controller):
     controller.register_viewclass(HistoryNavigation)
 
 class HistoryNavigation(AdhocView):
-    view_name = _("History")
+    view_name = _("Bookmarks")
     view_id = 'history'
-    tooltip= _("Display timecodes with their corresponding screenshots")
+    tooltip= _("Bookmark timecodes with their corresponding screenshots")
     def __init__(self, controller=None, parameters=None, 
                  history=None, vertical=True, ordered=False, closable=True):
         self.close_on_package_load = False
