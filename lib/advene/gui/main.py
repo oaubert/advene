@@ -866,16 +866,16 @@ class AdveneGUI (Connect):
             return True
         elif event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.Up:
-                c.move_position (1000/25)
+                c.move_position (1000/25, notify=False)
                 return True
             elif event.keyval == gtk.keysyms.Down:
-                c.move_position (-1000/25)
+                c.move_position (-1000/25, notify=False)
                 return True
             elif event.keyval == gtk.keysyms.Right:
-                c.move_position (config.data.player_preferences['time_increment'])
+                c.move_position (config.data.player_preferences['time_increment'], notify=False)
                 return True
             elif event.keyval == gtk.keysyms.Left:
-                c.move_position (-config.data.player_preferences['time_increment'])
+                c.move_position (-config.data.player_preferences['time_increment'], notify=False)
                 return True
             elif event.keyval == gtk.keysyms.Home:
                 c.update_status ("set", self.controller.create_position (0))
@@ -2116,7 +2116,8 @@ class AdveneGUI (Connect):
 
     def on_b_rewind_clicked (self, button=None, data=None):
         if self.controller.player.status == self.controller.player.PlayingStatus:
-            self.controller.move_position (-config.data.player_preferences['time_increment'])
+            self.controller.move_position (-config.data.player_preferences['time_increment'],
+                                            notify=False)
         return True
 
     def on_b_play_clicked (self, button=None, data=None):
@@ -2136,7 +2137,8 @@ class AdveneGUI (Connect):
 
     def on_b_forward_clicked (self, button=None, data=None):
         if self.controller.player.status == self.controller.player.PlayingStatus:
-            self.controller.move_position (config.data.player_preferences['time_increment'])
+            self.controller.move_position (config.data.player_preferences['time_increment'],
+                                           notify=False)
         return True
 
     def on_b_addfile_clicked (self, button=None, data=None):
