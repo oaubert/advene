@@ -2110,6 +2110,7 @@ class AdveneGUI (Connect):
         d.set_website('http://liris.cnrs.fr/advene/')
         d.set_website_label('Visit the Advene web site for examples and documentation.')
         d.set_authors( [ 'Olivier Aubert', 'Pierre-Antoine Champin', 'Yannick Prie', 'Bertrand Richard', 'Frank Wagner' ] )
+        d.connect('response', lambda w, r: w.destroy())
         d.run()
 
         return True
