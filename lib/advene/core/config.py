@@ -421,6 +421,10 @@ class Config(object):
 	    self.player['plugin']=self.options.player
 	self.player['embedded']=self.options.embedded
 
+        h=self.preferences['history']
+        if len(h) > self.preferences['history-size-limit']:
+            self.preferences['history']=h[-self.preferences['history-size-limit']:]
+
 	return True
 
     def win32_specific_config(self):
