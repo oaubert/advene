@@ -212,7 +212,10 @@ class HistoryNavigation(AdhocView):
         def bookmark_current_time(b):
             p=self.controller.player
             if p.status in (p.PlayingStatus, p.PauseStatus):
-                self.append(p.current_position_value)
+                v=p.current_position_value
+                # Make a snapshot
+                self.controller.update_snapshot(v)
+                self.append(v)
             return True
 
         b=gtk.Button()
