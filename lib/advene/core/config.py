@@ -221,7 +221,6 @@ class Config(object):
 
         # Player options
         self.player_preferences = {
-            'osdtext': True,
             'default_caption_duration': 3000,
             'time_increment': 2000,
             }
