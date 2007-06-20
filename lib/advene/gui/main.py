@@ -719,17 +719,29 @@ class AdveneGUI (Connect):
         hb.pack_start(b, expand=False)
 
         # Append the volume control to the toolbar
-        b=gtk.ToolItem()
-        adj=gtk.Adjustment(value=50, lower=0, upper=100, step_incr=1, page_incr=10)
-        adj.set_value(self.controller.player.sound_get_volume())
-        volumeslider=gtk.SpinButton(adj, digits=0)
-        volumeslider.set_update_policy(gtk.UPDATE_IF_VALID)
-        volumeslider.set_numeric(True)
-        volumeslider.connect('value-changed', lambda b: self.controller.set_volume(int(b.get_value())))
-        b.add(volumeslider)
-        self.player_toolbar.volumeslider=volumeslider
-        b.set_tooltip(self.tooltips, _("Sound level (0..100)"))
-        self.player_toolbar.insert(b, -1)
+        self.audio_mute=gtk.ToggleToolButton()
+        audio_on=gtk.Image()
+        audio_on.set_from_file(config.data.advenefile( ( 'pixmaps', 'silk-sound.png') ))
+        audio_on.show()
+        audio_off=gtk.Image()
+        audio_off.set_from_file(config.data.advenefile( ( 'pixmaps', 'silk-sound-mute.png') ))
+        audio_off.show()
+
+        def toggle_audio_mute(b):
+            # Set the correct image
+            if b.get_active():
+                self.controller.player.sound_mute()
+                b.set_icon_widget(audio_off)
+            else:
+                self.controller.player.sound_unmute()
+                b.set_icon_widget(audio_on)
+            return False
+
+        self.audio_mute.set_icon_widget(audio_on)
+        self.audio_mute.connect('toggled', toggle_audio_mute)
+        self.audio_mute.set_active(self.controller.player.sound_is_muted())
+        self.audio_mute.set_tooltip(self.tooltips, _("Mute/unmute"))
+        self.player_toolbar.insert(self.audio_mute, -1)
         
         # Append the loop checkitem to the toolbar
         def loop_toggle_cb(b):
@@ -1502,10 +1514,10 @@ class AdveneGUI (Connect):
         This method is regularly called by the Gtk mainloop, and
         updates elements with a slower rate than update_display
         """
-        d=int(self.player_toolbar.volumeslider.get_value())
-        v=int(self.controller.get_volume())
-        if v != d:
-            self.player_toolbar.volumeslider.set_value(v)
+        mute=self.controller.player.sound_is_muted()
+        if self.audio_mute.get_active() != mute:
+            self.audio_mute.set_active(mute)
+
         # Update the loop toggle button, if the bookmark has been
         # reset by user interaction            
         if not self.controller.videotime_bookmarks and self.loop_toggle_button.get_active():
