@@ -43,7 +43,7 @@ For set_rate:
         use that with GST_SEEK_TYPE_SET to begin the trickmode from the exact 
         position you want.
         
-
+Caps negotiation: http://gstreamer.freedesktop.org/data/doc/gstreamer/head/pwg/html/section-nego-upstream.html
 """
 
 import advene.core.config as config
@@ -127,6 +127,8 @@ class Player:
     def __init__(self):
 
         self.xid = None
+        self.mute_volume=None
+
         self.build_converter()
         self.build_pipeline()
 
@@ -440,7 +442,7 @@ class Player:
 
         if status == "start" or status == "set":
             self.position_update()
-            if self.status in (self.EndStatus, self.UndefinedStatus):
+            if self.status not in (self.PlayingStatus, self.PauseStatus):
                 self.start(position)
             else:
                 self.set_media_position(position)
@@ -498,3 +500,18 @@ class Player:
         if message.structure.get_name() == 'prepare-xwindow-id':
             self.imagesink.set_xwindow_id(self.xid)
             message.src.set_property('force-aspect-ratio', True)
+
+    def sound_mute(self):
+        if self.mute_volume is None:
+            self.mute_volume=self.sound_get_volume()
+            self.sound_set_volume(0)
+        return
+
+    def sound_unmute(self):
+        if self.mute_volume is not None:
+            self.sound_set_volume(self.mute_volume)
+            self.mute_volume=None
+        return
+
+    def sound_is_muted(self):
+        return (self.mute_volume is not None)

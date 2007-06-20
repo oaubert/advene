@@ -144,6 +144,7 @@ class Player(object):
         """Wrapper initialization.
         """
         self.mc=None
+        self.mute_volume=None
         self.restart_player()
 
     def update_status (self, status=None, position=None):
@@ -296,3 +297,17 @@ class Player(object):
     def set_visual(self, xid):
         self.mc.set_visual(xid)
 
+    def sound_mute(self):
+        if self.mute_volume is None:
+            self.mute_volume=self.sound_get_volume()
+            self.sound_set_volume(0)
+        return
+
+    def sound_unmute(self):
+        if self.mute_volume is not None:
+            self.sound_set_volume(self.mute_volume)
+            self.mute_volume=None
+        return
+
+    def sound_is_muted(self):
+        return (self.mute_volume is not None)
