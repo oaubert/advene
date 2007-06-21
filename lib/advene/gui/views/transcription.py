@@ -245,6 +245,11 @@ class TranscriptionView(AdhocView):
             self.ignore_updates = False
         return True
 
+    def show_searchbox(self, *p):
+        self.searchbox.show_all()
+        self.searchbox.entry.grab_focus()
+        return True
+
     def build_widget(self):
         mainbox = gtk.VBox()
 
@@ -263,14 +268,10 @@ class TranscriptionView(AdhocView):
         self.textview.set_wrap_mode (gtk.WRAP_CHAR)
         b=self.textview.get_buffer()
 
-        activated_tag = b.create_tag("activated")
-        #activated_tag.set_property("weight", pango.WEIGHT_BOLD)
-        activated_tag.set_property("background", "skyblue")
-        # activated_tag.set_property("foreground", "white")
-
-        currenttag = b.create_tag("current")
-        currenttag.set_property("background", "lightblue")
-
+        # Create useful tags
+        b.create_tag("activated", background="skyblue")
+        b.create_tag("current", background="lightblue")
+        b.create_tag("searched_string", background="green")
 
         self.generate_buffer_content()
 
@@ -283,15 +284,59 @@ class TranscriptionView(AdhocView):
         sw.add_with_viewport (self.textview)
 
 
+        self.searchbox=gtk.HBox()
+
+        def hide_searchbox(*p):
+            # Clear the searched_string tags
+            b=self.textview.get_buffer()
+            b.remove_tag_by_name("searched_string", *b.get_bounds())
+            self.searchbox.hide()
+            return True
+
+        close_button=advene.gui.util.get_pixmap_button('small_close.png')
+        close_button.set_relief(gtk.RELIEF_NONE)
+        close_button.connect('clicked', hide_searchbox)
+        self.searchbox.pack_start(close_button, expand=False, fill=False)
+        
+        def search_entry_cb(e):
+            self.highlight_search_forward(e.get_text())
+            return True
+
+        def search_entry_key_press_cb(e, event):
+            if event.keyval == gtk.keysyms.Escape:
+                hide_searchbox()
+                return True
+            return False
+
+        self.searchbox.entry=gtk.Entry()
+        self.searchbox.entry.connect('activate', search_entry_cb)
+        self.searchbox.pack_start(self.searchbox.entry, expand=False, fill=False)
+        self.searchbox.entry.connect('key-press-event', search_entry_key_press_cb)
+
+#        def find_next(b):
+#            # FIXME
+#            return True
+#
+#        b=advene.gui.util.get_small_stock_button(gtk.STOCK_GO_FORWARD, find_next)
+#        b.set_relief(gtk.RELIEF_NONE)
+#        self.controller.gui.tooltips.set_tip(b, _("Find next occurrence"))
+#        self.searchbox.pack_start(b, expand=False, fill=False)
+        
+        fill=gtk.HBox()
+        self.searchbox.pack_start(fill, expand=True, fill=True)
+
+        mainbox.pack_start(self.searchbox, expand=False)
+
         hb=gtk.HButtonBox()
         hb.set_homogeneous(False)
 
-        b=gtk.Button(stock=gtk.STOCK_PREFERENCES)
-        b.connect("clicked", self.edit_options)
+        b=advene.gui.util.get_small_stock_button(gtk.STOCK_PREFERENCES, self.edit_options)
         hb.pack_start(b, expand=False)
 
-        b=gtk.Button(stock=gtk.STOCK_SAVE)
-        b.connect ("clicked", self.save_transcription)
+        b=advene.gui.util.get_small_stock_button(gtk.STOCK_FIND, self.show_searchbox)
+        hb.pack_start(b, expand=False)
+
+        b=advene.gui.util.get_small_stock_button(gtk.STOCK_SAVE, self.save_transcription)
         hb.pack_start(b, expand=False)
 
         mainbox.pack_start(hb, expand=False)
@@ -299,6 +344,10 @@ class TranscriptionView(AdhocView):
         mainbox.buttonbox = hb
 
         mainbox.show_all()
+
+        hide_searchbox()
+
+        mainbox.connect("key-press-event", self.key_press_event_cb)
 
         return mainbox
 
@@ -341,6 +390,26 @@ class TranscriptionView(AdhocView):
             b.insert_at_cursor(self.options['separator'])
         return
 
+    def highlight_search_forward(self, searched):
+        """Highlight with the searched_string tag the given string.
+        """
+        b=self.textview.get_buffer()
+        begin, end=b.get_bounds()
+        # Remove searched_string tag occurences that may be left from
+        # a previous invocation
+        b.remove_tag_by_name("searched_string", begin, end)
+
+        finished=False
+
+        while not finished:
+            res=begin.forward_search(searched, gtk.TEXT_SEARCH_TEXT_ONLY)
+            if not res:
+                finished=True
+            else:
+                matchStart, matchEnd = res
+                b.apply_tag_by_name("searched_string", matchStart, matchEnd)
+                begin=matchEnd
+
     def populate_popup_cb(self, textview, menu):
         if self.currentannotation is None:
             return False
@@ -365,6 +434,12 @@ class TranscriptionView(AdhocView):
         item.show()
         menu.append(item)
 
+        return False
+
+    def key_press_event_cb (self, textview, event):
+        if event.keyval == gtk.keysyms.F3:
+            self.searchbox.show_all()
+            return True
         return False
 
     def button_press_event_cb(self, textview, event):
