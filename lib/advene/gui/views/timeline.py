@@ -1098,6 +1098,12 @@ class TimeLine(AdhocView):
             button=self.get_widget_for_annotation(annotation)
         if button is None:
             return False
+
+        def close_editbox(*p):
+            e.destroy()
+            button.grab_focus()
+            return True
+
         e=gtk.Entry()
         # get_title will either return the content data, or the computed representation
         e.set_text(self.controller.get_title(annotation))
@@ -1132,23 +1138,22 @@ class TimeLine(AdhocView):
                 if callback:
                     callback(annotation)
                 self.controller.notify('AnnotationEditEnd', annotation=annotation)
-                e.destroy()
-                button.grab_focus()
+                close_editbox()
                 return True
             elif event.keyval == gtk.keysyms.Escape:
                 # Abort and close the entry
-                e.destroy()
-                button.grab_focus()
+                close_editbox()
                 return True
             return False
         e.connect("key_press_event", key_handler)
+        e.connect('enter-notify-event', lambda w, event: e.grab_focus())
 
+        e.show()
+        
         # Put the entry on the layout
         al=button.get_allocation()
         button.parent.put(e, al.x, al.y)
-        e.show()
         e.grab_focus()
-
         return
 
     def annotation_key_press_cb(self, widget, event, annotation):
