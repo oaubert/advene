@@ -164,17 +164,14 @@ class ViewBook(AdhocView):
         hb.pack_start(e, expand=False, fill=False)
 
         if not permanent:
-            b=gtk.Button()
-            i=gtk.Image()
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'small_close.png') ))
-            b.add(i)
+            b=advene.gui.util.get_pixmap_button('small_close.png')
             b.set_relief(gtk.RELIEF_NONE)
             b.connect('clicked', close_view, v)
             hb.pack_start(b, expand=False, fill=False)
         hb.show_all()
 
         self.widget.append_page(v.widget, hb)
-        v.widget.show_all()
+        v.widget.show()
         # Hide the player toolbar when the view is embedded
         try:
             v.player_toolbar.hide()
