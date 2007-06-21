@@ -347,6 +347,10 @@ class TranscriptionView(AdhocView):
 
         hide_searchbox()
 
+        # Ignore show_all method to keep the searchbar hidden, and
+        # we already did it anyway.
+        mainbox.set_no_show_all(True)
+
         mainbox.connect("key-press-event", self.key_press_event_cb)
 
         return mainbox
