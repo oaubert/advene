@@ -171,7 +171,7 @@ class ViewBook(AdhocView):
         hb.show_all()
 
         self.widget.append_page(v.widget, hb)
-        v.widget.show()
+        v.widget.show_all()
         # Hide the player toolbar when the view is embedded
         try:
             v.player_toolbar.hide()
