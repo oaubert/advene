@@ -607,7 +607,17 @@ class TranscriptionEdit(AdhocView):
             self.controller.log(_("Cannot open %(filename)s: %(error)s") % {'filename': filename, 
                                                                             'error': unicode(e) })
             return
-        data=unicode("".join(f.readlines()))
+        lines="".join(f.readlines())
+        try:
+            data=unicode(lines, 'utf8')
+        except UnicodeDecodeError:
+            # Try UTF-16, which is used in quicktime text format
+            try:
+                data=unicode(lines, 'utf16')
+            except UnicodeDecodeError:
+                # Fallback on latin1, which is very common, but may
+                # sometimes fail
+                data=unicode(lines, 'latin1')
 
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()
