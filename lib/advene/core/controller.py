@@ -58,6 +58,7 @@ from advene.model.fragment import MillisecondFragment
 import advene.model.tal.context
 
 import advene.util.helper as helper
+import advene.util.importer
 import advene.rules.importer
 
 if config.data.webserver['mode']:
@@ -298,6 +299,9 @@ class AdveneController:
             self.gui.register_viewclass(viewclass, name)
         else:
             self.log(_("No available gui"))
+
+    def register_importer(self, imp):
+        advene.util.importer.register(imp)
 
     def register_videotime_action(self, t, action):
         """Register an action to be executed when reaching the given movie time.
