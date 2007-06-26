@@ -146,7 +146,7 @@ class AbstractBundle (object):
 
     def get (self, id, default=None):
         return self._dict.get (id, default)
-    
+
     def has_key (self, key):
         return self._dict.has_key (key)
 
@@ -176,6 +176,19 @@ class AbstractBundle (object):
 
     def values (self):
         return self._dict.values ()
+
+    #
+    # helper method
+    #
+
+    def get_by_id(self, id_):
+        """Inefficient but helpful method.
+        """
+        l=[ e for e in self._dict.itervalues() if e.id == id_ ]
+        if len(l) == 1:
+            return l[0]
+        else:
+            return None
 
 
 class ListBundle (AbstractBundle):
