@@ -293,9 +293,8 @@ class TranscriptionView(AdhocView):
             self.searchbox.hide()
             return True
 
-        close_button=advene.gui.util.get_pixmap_button('small_close.png')
+        close_button=advene.gui.util.get_pixmap_button('small_close.png', hide_searchbox)
         close_button.set_relief(gtk.RELIEF_NONE)
-        close_button.connect('clicked', hide_searchbox)
         self.searchbox.pack_start(close_button, expand=False, fill=False)
         
         def search_entry_cb(e):
