@@ -399,8 +399,9 @@ class Window:
                                      for a in dir(res)
                                      if a.startswith(attr) ]
                     except Exception, e:
+                        print "Exception when trying to complete attribute for %s starting with %s" % (expr, attr)
                         pass
-                    if attr == '':
+                    if completion and attr == '':
                         # Do not display private elements by default.
                         # Display them when completion is invoked
                         # on element._ type string.
@@ -417,6 +418,8 @@ class Window:
                                          for k in o.keys()
                                          if k.startswith(key) ]
                         except Exception, e:
+                            print "Exception when trying to complete dict key for %s starting with %s" % (expr, attr)
+
                             pass
         self.clear_output()
         if completion is None:
