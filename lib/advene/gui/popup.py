@@ -380,8 +380,9 @@ class Menu:
                 add_item(_("Delete"), self.delete_element, element)
 
             ## Common to offsetable elements
-            #if type(element) in (Annotation, Schema, AnnotationType, Package):
-            #    add_item(_("Offset"), self.offset_element, element)
+            if (config.data.preferences['expert-mode'] 
+                and type(element) in (Annotation, Schema, AnnotationType, Package)):
+                add_item(_("Offset"), self.offset_element, element)
 
         submenu.show_all()
         return submenu
