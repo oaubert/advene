@@ -48,6 +48,9 @@ Caps negotiation: http://gstreamer.freedesktop.org/data/doc/gstreamer/head/pwg/h
 
 import advene.core.config as config
 
+import gobject
+gobject.threads_init()
+
 import pygst
 pygst.require('0.10')
 import gst
