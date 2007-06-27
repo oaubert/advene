@@ -46,6 +46,7 @@ class Montage(AdhocView):
         self.contextual_actions = (
 #            (_("Save view"), self.save_view),
             (_("Clear"), self.clear),
+            (_("Play"), self.play),
             )
         self.options={
             }
@@ -149,6 +150,34 @@ class Montage(AdhocView):
         w.update_widget()
         return w
 
+    def play(self, *p):
+        """Play the current montage.
+        """
+        annotation_queue=iter(self.contents)
+
+        def one_step(controller, position):
+            """Go to the beginning of the annotation, and program the next jump.
+            """
+            try:
+                w=annotation_queue.next()
+                a=w.annotation
+                print "Playing ", a.id
+            except StopIteration:
+                print "StopIteration"
+                self.controller.update_status('pause')
+                return False
+            # Go to the annotation
+            self.controller.update_status('set', a.fragment.begin)
+            self.controller.position_update()
+            # And program its end.
+            self.controller.register_videotime_action(a.fragment.end, one_step)
+            return True
+        
+        self.controller.update_status('start', notify=False)
+        self.controller.register_usertime_delayed_action(0, one_step)
+        
+        return True
+
     def build_widget(self):
         v=gtk.VBox()
 
@@ -201,13 +230,25 @@ class Montage(AdhocView):
 
         v.pack_start(sw, expand=False)
 
-        b=gtk.Button(stock=gtk.STOCK_REMOVE)
+        v.pack_start(gtk.VBox(), expand=True)
+
+        hb=gtk.HBox()
+
+        b=advene.gui.util.get_small_stock_button(gtk.STOCK_DELETE)
         self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['uri-list'], gtk.gdk.ACTION_LINK)
         b.connect("drag_data_received", remove_drag_received)
-        v.pack_start(b, expand=False)
+        hb.pack_start(b, expand=False)
+
+        b=advene.gui.util.get_small_stock_button(gtk.STOCK_MEDIA_PLAY)
+        self.controller.gui.tooltips.set_tip(b, _("Play the montage"))
+        b.connect("clicked", self.play)
+        hb.pack_start(b, expand=False)
+
+        
+        v.pack_start(hb, expand=False)
 
         return v
