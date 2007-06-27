@@ -1420,13 +1420,10 @@ class TimeLine(AdhocView):
             self.layout.put (a, u2p(t), a.pos)
             l = gtk.Label (helper.format_time (t))
             l.mark = t
-            l.pos = 10
-            e=gtk.EventBox()
-            e.connect("button_press_event", self.mark_press_cb, t)
-            e.add(l)
-            e.show_all()
+            l.pos = a.pos
+            l.show()
 
-            self.layout.put (e, u2p(t), l.pos)
+            self.layout.put (l, u2p(t) + 13, l.pos)
             t += step
 
     def bounds (self):
@@ -1491,11 +1488,20 @@ class TimeLine(AdhocView):
     def layout_button_press_cb(self, widget=None, event=None):
         """Handle right-mouse click in timeline window.
         """
-        retval = False
+        if event.button == 1:
+            # Left click button in the upper part of the layout
+            # (timescale) will directly move the player.
+            if event.y < self.button_height:
+                c=self.controller
+                pos = c.create_position (value=self.pixel2unit(event.x),
+                                         key=c.player.MediaTime,
+                                         origin=c.player.AbsolutePosition)
+                c.update_status (status="set", position=pos)
+                return True
         if event.button == 3:
             self.context_cb (timel=self, position=self.pixel2unit(event.x), height=event.y)
-            retval = True
-        return retval
+            return True
+        return False
 
     def context_cb (self, timel=None, position=None, height=None):
         """Display the context menu for a right-click in the timeline window.
