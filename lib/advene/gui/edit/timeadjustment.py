@@ -142,7 +142,8 @@ class TimeAdjustment:
         self.entry=gtk.Entry()
         # Default width of the entry field
         self.entry.set_width_chars(len(advene.util.helper.format_time(0.0)))
-        self.entry.connect("activate", self.convert_entered_value)
+        self.entry.connect('activate', self.convert_entered_value)
+        self.entry.connect('focus-out-event', self.convert_entered_value)
         self.entry.set_editable(self.editable)
 
         b=gtk.Button()
@@ -245,7 +246,7 @@ class TimeAdjustment:
             dt=int(1000 * (ss + (60 * mm) + (3600 * hh)))
         return dt
 
-    def convert_entered_value(self, dummy):
+    def convert_entered_value(self, *p):
         t=self.entry.get_text()
         v=self.numericTime(t)
         if v is not None and v != self.value:
@@ -253,7 +254,7 @@ class TimeAdjustment:
             if self.sync_video:
                 self.controller.move_position(self.value, relative=False)
             self.update_display()
-        return True
+        return False
 
     def check_bound_value(self, value):
         if value < 0:
