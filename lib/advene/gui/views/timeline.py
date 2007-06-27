@@ -1452,13 +1452,6 @@ class TimeLine(AdhocView):
         if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
             return True
 
-        if event.state & gtk.gdk.CONTROL_MASK:
-            # The Control-key is held. Special actions :
-            if event.keyval == gtk.keysyms.q:
-                win.emit('destroy')
-                return True
-            else:
-                return False
         if event.keyval >= 49 and event.keyval <= 57:
             if self.statusbar.annotation is not None:
                 pos=self.statusbar.annotation.fragment.begin
@@ -1486,7 +1479,7 @@ class TimeLine(AdhocView):
         return False
 
     def layout_button_press_cb(self, widget=None, event=None):
-        """Handle right-mouse click in timeline window.
+        """Handle mouse click in timeline window.
         """
         if event.button == 1:
             # Left click button in the upper part of the layout
