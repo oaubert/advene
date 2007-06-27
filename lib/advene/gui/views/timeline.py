@@ -1483,10 +1483,18 @@ class TimeLine(AdhocView):
         """
         if event.button == 1:
             # Left click button in the upper part of the layout
-            # (timescale) will directly move the player.
-            if event.y < self.button_height:
+            # (timescale) will directly move the player.  
+
+            # Note: event.(x|y) may be relative to a child widget, so
+            # we must determine the pointer position
+            x, y = widget.get_pointer()
+            # Convert x, y (relative to the layout allocation) into
+            # values relative to the whole layout size
+            x=long(self.adjustment.value + x)
+            y=long(widget.get_parent().get_vadjustment().value + y)
+            if y < self.button_height:
                 c=self.controller
-                pos = c.create_position (value=self.pixel2unit(event.x),
+                pos = c.create_position (value=self.pixel2unit(x),
                                          key=c.player.MediaTime,
                                          origin=c.player.AbsolutePosition)
                 c.update_status (status="set", position=pos)
