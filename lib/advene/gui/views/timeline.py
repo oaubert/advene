@@ -247,7 +247,7 @@ class TimeLine(AdhocView):
                                             lower=0.01,
                                             upper=1.0,
                                             step_incr=.01,
-                                            page_incr=.02)
+                                            page_incr=.1)
         self.fraction_adj.connect ("value-changed", self.fraction_event)
         self.fraction_adj.connect ("changed", self.fraction_event)
 
@@ -1664,7 +1664,7 @@ class TimeLine(AdhocView):
         """
         if event.state & gtk.gdk.CONTROL_MASK:
             a = self.fraction_adj
-            incr = a.step_increment
+            incr = a.page_increment
         else:
             a = self.adjustment
             incr = a.step_incr
