@@ -164,7 +164,7 @@ class AdhocView(object):
                 ET.SubElement(root, 'argument', name=n, value=unicode(v))
         return root
 
-    def save_default_options(self):
+    def save_default_options(self, *p):
         """Save the default options.
         """
         d=config.data.advenefile('defaults', 'settings')
