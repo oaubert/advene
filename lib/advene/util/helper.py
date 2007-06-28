@@ -22,6 +22,7 @@ import time
 import StringIO
 import inspect
 import md5
+import os
 import re
 import zipfile
 import urllib
@@ -693,3 +694,9 @@ def indent(elem, level=0):
     else:
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
+
+def recursive_mkdir(d):
+    parent=os.path.dirname(d)
+    if not os.path.exists(parent):
+        recursive_mkdir(parent)
+    os.mkdir(d)
