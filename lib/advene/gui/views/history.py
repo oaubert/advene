@@ -53,10 +53,9 @@ class HistoryNavigation(AdhocView):
         if history is None:
             self.history=[]
 
-        if parameters:
-            opt, arg = self.load_parameters(parameters)
-            self.options.update(opt)
-            self.history=[ long(v) for (n, v) in arg if n == 'timestamp' ]
+        opt, arg = self.load_parameters(parameters)
+        self.options.update(opt)
+        self.history=[ long(v) for (n, v) in arg if n == 'timestamp' ]
             
         self.closable=closable
         self.mainbox=None

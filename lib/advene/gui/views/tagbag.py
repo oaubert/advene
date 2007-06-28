@@ -55,6 +55,7 @@ class TagBag(AdhocView):
             (_("Clear"), self.clear),
             (_("Preferences"), self.edit_options),
             (_("Save view"), self.save_view),
+            (_("Save default options"), self.save_default_options),
             )
         self.options={
             'display-new-tags': False
@@ -62,12 +63,11 @@ class TagBag(AdhocView):
         self.controller=controller
         self.vertical=vertical
 
-        if parameters:
-            opt, arg = self.load_parameters()
-            self.options.update(opt)
-            l=[ v for (n, v) in arg if n == 'tag' ]
-            if l:
-                tags=l
+        opt, arg = self.load_parameters()
+        self.options.update(opt)
+        l=[ v for (n, v) in arg if n == 'tag' ]
+        if l:
+            tags=l
         self.tags=tags
 
         self.button_height=24

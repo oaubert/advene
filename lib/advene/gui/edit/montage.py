@@ -54,9 +54,8 @@ class Montage(AdhocView):
 
         self.scale=50.0
 
-        if parameters:
-            opt, arg = self.load_parameters(parameters)
-            self.options.update(opt)
+        opt, arg = self.load_parameters(parameters)
+        self.options.update(opt)
 
         # Needed by AnnotationWidget
         self.button_height = 20

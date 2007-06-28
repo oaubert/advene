@@ -40,7 +40,8 @@ class ViewPlugin(AdhocView):
     self.load_parameters() takes a Content object as parameter, that
     must be of application/x-advene-adhoc-view mimetype. It will read
     the Content data, and return an options dictionary, and arguments
-    as a list of (name, value) tuples.
+    as a list of (name, value) tuples. If None is passed, the view
+    will try to load default options (cf load_parameters docstring).
 
     @cvar view_name: the name of the view
     @type view_name: string

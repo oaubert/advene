@@ -50,6 +50,7 @@ class TranscriptionView(AdhocView):
             (_("Refresh"), self.refresh),
             (_("Validate"), self.validate),
             (_("Save view"), self.save_view),
+            (_("Save default options"), self.save_default_options),
             )
         self.controller=controller
         self.options = {
@@ -67,12 +68,11 @@ class TranscriptionView(AdhocView):
 
         self.package=controller.package
         
-        if parameters:
-            opt, arg = self.load_parameters(parameters)
-            self.options.update(opt)
-            a=dict(arg)
-            if source is None and a.has_key('source'):
-                source=a['source']
+        opt, arg = self.load_parameters(parameters)
+        self.options.update(opt)
+        a=dict(arg)
+        if source is None and a.has_key('source'):
+            source=a['source']
 
         if source is None:
             # Use whole package

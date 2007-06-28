@@ -54,6 +54,7 @@ class InteractiveQuery(AdhocView):
         self.contextual_actions = (
             #(_("Refresh"), self.refresh),
             (_("Save view"), self.save_view),
+            (_("Save default options"), self.save_default_options),
             )
         self.options = {
             'ignore-case': True,
@@ -64,12 +65,11 @@ class InteractiveQuery(AdhocView):
         self.here=here
         self.source=source
 
-        if parameters:
-            opt, arg = self.load_parameters(parameters)
-            self.options.update(opt)
-            for n, v in arg:
-                if n == 'source':
-                    self.source=v
+        opt, arg = self.load_parameters(parameters)
+        self.options.update(opt)
+        for n, v in arg:
+            if n == 'source':
+                self.source=v
 
         self.querycontainer, self.query = self.get_interactive_query()
 
