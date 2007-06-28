@@ -119,6 +119,7 @@ class TimeLine(AdhocView):
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
             (_("Save view"), self.save_view),
+            (_("Save default options"), self.save_default_options),
             )
         self.options = {
             'highlight': True,
@@ -130,24 +131,23 @@ class TimeLine(AdhocView):
             }
         self.controller=controller
 
-        if parameters:
-            opt, arg = self.load_parameters(parameters)
-            self.options.update(opt)
-            ats=[]
-            for n, v in arg:
-                if n == 'annotation-type':
-                    at=helper.get_id(self.controller.package.annotationTypes,
-                                     v)
-                    if at:
-                        ats.append(at)
-                    else:
-                        self.log(_("Cannot find annotation type %s") % v)
-                elif n == 'source':
-                    c=self.controller.build_context()
-                    # Override a potentially existing value of l
-                    l=c.evaluateValue(v)
-            if ats:
-                annotationtypes=ats
+        opt, arg = self.load_parameters(parameters)
+        self.options.update(opt)
+        ats=[]
+        for n, v in arg:
+            if n == 'annotation-type':
+                at=helper.get_id(self.controller.package.annotationTypes,
+                                 v)
+                if at:
+                    ats.append(at)
+                else:
+                    self.log(_("Cannot find annotation type %s") % v)
+            elif n == 'source':
+                c=self.controller.build_context()
+                # Override a potentially existing value of l
+                l=c.evaluateValue(v)
+        if ats:
+            annotationtypes=ats
 
         self.list = elements
         self.annotationtypes = annotationtypes
@@ -2325,4 +2325,3 @@ class OldAnnotationTypeWidget(gtk.Button):
 if AnnotationWidget is None:
     AnnotationWidget=OldAnnotationWidget
     AnnotationTypeWidget=OldAnnotationTypeWidget
-
