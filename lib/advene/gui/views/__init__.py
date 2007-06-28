@@ -17,9 +17,10 @@
 #
 import advene.core.config as config
 
-import sre
+import re
 import gtk
 import StringIO
+import os
 
 from gettext import gettext as _
 
@@ -29,7 +30,9 @@ from advene.model.content import Content
 from advene.model.view import View
 import advene.gui.util
 import advene.util.helper as helper
+
 import advene.util.ElementTree as ET
+ET._namespace_map[config.data.namespace]='advene'
 
 class AdhocView(object):
     """Implementation of the generic parts of AdhocViews.
@@ -144,6 +147,28 @@ class AdhocView(object):
             for n, v in arguments:
                 ET.SubElement(root, 'argument', name=n, value=unicode(v))
         return root
+
+    def save_default_options(self):
+        """Save the default options.
+        """
+        d=config.data.advenefile('defaults', 'settings')
+        if not os.path.isdir(d):
+            # Create it
+            try:
+                helper.recursive_mkdir(d)
+            except OSError, e:
+                self.controller.log(_("Cannot save default options: %s") % unicode(e))
+                return True
+        defaults=config.data.advenefile( ('defaults', self.view_id + '.xml'), 'settings')
+        
+        options, args=self.get_save_arguments()
+        # Do not save package-specific arguments.
+        root=self.parameters_to_element(options, [])
+        stream=open(defaults, 'w')
+        helper.indent(root)
+        ET.ElementTree(root).write(stream, encoding='utf-8')
+        stream.close()
+        return True
 
     def save_parameters(self, content, options=None, arguments=None):
         """Save the view parameters to a Content object.
