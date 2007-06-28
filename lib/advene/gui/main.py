@@ -1115,7 +1115,7 @@ class AdveneGUI (Connect):
         menu.show_all()
         return menu
 
-    def open_adhoc_view(self, name, label=None, destination='popup', **kw):
+    def open_adhoc_view(self, name, label=None, destination='popup', parameters=None, **kw):
         """Open the given adhoc view.
 
         Destination can be: 'popup', 'south', 'east', 'fareast' or None
@@ -1131,8 +1131,7 @@ class AdveneGUI (Connect):
                 return None
             # Parse the content, extract the view id
             parameters=name.content
-            p=AdhocViewParametersParser()
-            p.parse_file(name.content.stream)
+            p=AdhocViewParametersParser(name.content.stream)
             if p.view_id:
                 if label is None:
                     label=name.title
@@ -1141,6 +1140,8 @@ class AdveneGUI (Connect):
                 self.log(_("Cannot identify the adhoc view %s") % name.id)
                 return None
         else:
+            # FIXME: set view default options here
+            # parameters=default_options, None
             parameters=None
 
         if name == 'tagbag' or name == 'tagbagview':
