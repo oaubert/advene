@@ -29,6 +29,7 @@ from advene.model.content import Content
 from advene.model.view import View
 import advene.gui.util
 import advene.util.helper as helper
+import advene.util.ElementTree as ET
 
 class AdhocView(object):
     """Implementation of the generic parts of AdhocViews.
@@ -40,6 +41,8 @@ class AdhocView(object):
     tooltip = "This view is a generic abstract view that should be derived by real views."
 
     def __init__(self, controller=None, parameters=None):
+        """
+        """
         # List of couples (label, action) that are use to
         # generate contextual actions
         self.contextual_actions = ()
@@ -77,8 +80,8 @@ class AdhocView(object):
         else:
             print m
 
-    def load_parameters(self, content):
-        """Load the parameters from a Content object.
+    def load_parameters(self, param):
+        """Parse the parameters from a Content object, a tuple or an ElementTree.Element
  
         It will return a tuple (options, arguments) where options is a
         dictionary and arguments a list of tuples (name, value).
@@ -86,20 +89,29 @@ class AdhocView(object):
         In case of problem, it will simply return None, None.
         """
         opt, arg = {}, []
-        try:
-            m=content.mimetype
-        except:
-            return opt, arg
-        if  m != 'application/x-advene-adhoc-view':
-            return opt, arg
+        if isinstance(param, tuple):
+            # It is an already parsed tuple. Return it.
+            # FIXME: should we post-process it ?
+            return param
 
-        p=AdhocViewParametersParser()
-        p.parse_file(content.stream)
-        
+        if isinstance(param, Content):
+            try:
+                m=param.mimetype
+            except:
+                return opt, arg
+            if  m != 'application/x-advene-adhoc-view':
+                return opt, arg
+            p=AdhocViewParametersParser(param.stream)
+        elif isinstance(param, ET.Element):
+            p=AdhocViewParametersParser(param)
+        else:
+            raise Exception("Unknown parameter type " + str(param))
+
         if p.view_id != self.view_id:
             self.controller.log(_("Invalid view id"))
             return False
 
+        # Post-processing of options
         for name, value in p.options.iteritems():
             # If there is a self.options dictionary, try to guess
             # value types from its content.
@@ -120,6 +132,19 @@ class AdhocView(object):
             opt[name]=value
         return opt, p.arguments
 
+    def parameters_to_element(self, options=None, arguments=None):
+        """Generate an ET.Element representing the view and its parameters.
+        """
+        root=ET.Element(ET.QName(config.data.namespace, 'adhoc'), id=self.view_id)
+
+        if options:
+            for n, v in options.iteritems():
+                ET.SubElement(root, 'option', name=n, value=unicode(v))
+        if arguments:
+            for n, v in arguments:
+                ET.SubElement(root, 'argument', name=n, value=unicode(v))
+        return root
+
     def save_parameters(self, content, options=None, arguments=None):
         """Save the view parameters to a Content object.
         """
@@ -128,28 +153,12 @@ class AdhocView(object):
 
         content.mimetype='application/x-advene-adhoc-view'
 
-        di = xml.dom.DOMImplementation.DOMImplementation()
-        dom = di.createDocument(config.data.namespace, "adhoc", None)
-        node=dom._get_documentElement()
-        node.setAttribute('id', self.view_id)
-
-        if options:
-            for n, v in options.iteritems():
-                o=dom.createElement('option')
-                o.setAttribute('name', n)
-                o.setAttribute('value', unicode(v))
-                node.appendChild(o)
-        if arguments:
-            for n, v in arguments:
-                o=dom.createElement('argument')
-                o.setAttribute('name', n)
-                o.setAttribute('value', unicode(v))
-                node.appendChild(o)
+        root=self.parameters_to_element(options, arguments)
         stream=StringIO.StringIO()
-        xml.dom.ext.PrettyPrint(dom, stream)
+        helper.indent(root)
+        ET.ElementTree(root).write(stream, encoding='utf-8')
         content.setData(stream.getvalue())
         stream.close()
-
         return True
 
     def get_save_arguments(self):
@@ -307,33 +316,44 @@ class AdhocView(object):
 
         return window
 
-class AdhocViewParametersParser(xml.sax.handler.ContentHandler):
+class AdhocViewParametersParser:
     """Parse an AdhocView parameters content.
+
+    It can be a advene.model.Content or a elementtree.Element
     """
-    def __init__(self):
+    def __init__(self, source=None):
         self.view_id=None
         self.options={}
         # self.arguments will contain (name, value) tuples, in order
         # to preserve order.
         self.arguments=[]
- 
-    def startElement(self, name, attributes):
-        if name == 'adhoc':
-            self.view_id=attributes['id']
-        elif name == "option":
-            name=attributes['name']
-            value=attributes['value']
-            self.options[name]=value
-        elif name == 'argument':
-            name=attributes['name']
-            value=attributes['value']
-            self.arguments.append( (name, value) )
+        if ET.iselement(source):
+            self.parse_element(source)
+        elif hasattr(source, 'read'):
+            # File-like object
+            self.parse_file(source)
         else:
-            print "Unknown tag %s in AdhocViewParametersParser" % name
+            print "Do not know what to do with ", source
+ 
+    def parse_file(self, fd):
+        tree=ET.parse(fd)
+        self.parse_element(tree.getroot())
 
-    def parse_file(self, name):
-        p=xml.sax.make_parser()
-        p.setFeature(xml.sax.handler.feature_namespaces, False)
-        p.setContentHandler(self)
-        p.parse(name)
-        return self
+    def parse_element(self, root):
+        """Parse an ElementTree Element.
+        """
+        if root.tag != ET.QName(config.data.namespace, 'adhoc'):
+            raise Exception("Invalid adhoc view definition" + root.tag)
+        self.view_id=root.attrib['id']
+
+        for e in root:
+            if e.tag == ET.QName(config.data.namespace, 'option'):
+                name=e.attrib['name']
+                value=e.attrib['value']
+                self.options[name]=value
+            elif e.tag == ET.QName(config.data.namespace, 'argument'):
+                name=e.attrib['name']
+                value=e.attrib['value']
+                self.arguments.append( (name, value) )
+            else:
+                print "Unknown tag %s in AdhocViewParametersParser" % e.tag
