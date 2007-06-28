@@ -182,6 +182,7 @@ class AdhocView(object):
         helper.indent(root)
         ET.ElementTree(root).write(stream, encoding='utf-8')
         stream.close()
+        self.controller.log(_("Default options saved for view %s") % self.view_name)
         return True
 
     def save_parameters(self, content, options=None, arguments=None):
