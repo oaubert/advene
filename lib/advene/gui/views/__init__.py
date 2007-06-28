@@ -89,9 +89,25 @@ class AdhocView(object):
         It will return a tuple (options, arguments) where options is a
         dictionary and arguments a list of tuples (name, value).
 
+        If param is None, then try to load default options, if they
+        exist. They should be stored in 
+        config.data.advenefile( ('defaults', self.view_id + '.xml'), 'settings')
+
         In case of problem, it will simply return None, None.
         """
         opt, arg = {}, []
+        
+        if param is None:
+            # Load default options
+            n=config.data.advenefile( ('defaults', self.view_id + '.xml'), 'settings')
+            if os.path.exists(n):
+                stream=open(n)
+                p=AdhocViewParametersParser(stream)
+                stream.close()
+            else:
+                # No default options. Return empty values.
+                return opt, arg
+
         if isinstance(param, tuple):
             # It is an already parsed tuple. Return it.
             # FIXME: should we post-process it ?
