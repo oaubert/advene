@@ -678,3 +678,18 @@ class CircularList(list):
     def prev(self):
         self._index = (self._index - 1) % len(self)
         return self.current()
+
+# Element-tree indent function.
+# in-place prettyprint formatter
+def indent(elem, level=0):
+    i = "\n" + level*"  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+        for elem in elem:
+            indent(elem, level+1)
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i
