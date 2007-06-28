@@ -107,13 +107,11 @@ class AdhocView(object):
             else:
                 # No default options. Return empty values.
                 return opt, arg
-
-        if isinstance(param, tuple):
+        elif isinstance(param, tuple):
             # It is an already parsed tuple. Return it.
             # FIXME: should we post-process it ?
             return param
-
-        if isinstance(param, Content):
+        elif isinstance(param, Content):
             try:
                 m=param.mimetype
             except:
@@ -121,7 +119,7 @@ class AdhocView(object):
             if  m != 'application/x-advene-adhoc-view':
                 return opt, arg
             p=AdhocViewParametersParser(param.stream)
-        elif isinstance(param, ET.Element):
+        elif ET.iselement(param):
             p=AdhocViewParametersParser(param)
         else:
             raise Exception("Unknown parameter type " + str(param))
@@ -158,10 +156,10 @@ class AdhocView(object):
 
         if options:
             for n, v in options.iteritems():
-                ET.SubElement(root, 'option', name=n, value=unicode(v))
+                ET.SubElement(root, ET.QName(config.data.namespace, 'option'), name=n, value=unicode(v))
         if arguments:
             for n, v in arguments:
-                ET.SubElement(root, 'argument', name=n, value=unicode(v))
+                ET.SubElement(root, ET.QName(config.data.namespace, 'argument'), name=n, value=unicode(v))
         return root
 
     def save_default_options(self, *p):
