@@ -134,6 +134,9 @@ class TimeLine(AdhocView):
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         ats=[]
+        # Default position in ms.
+        default_position=None
+        default_zoom=1.0
         for n, v in arg:
             if n == 'annotation-type':
                 at=helper.get_id(self.controller.package.annotationTypes,
@@ -146,6 +149,10 @@ class TimeLine(AdhocView):
                 c=self.controller.build_context()
                 # Override a potentially existing value of l
                 l=c.evaluateValue(v)
+            elif n == 'position':
+                default_position=long(v)
+            elif n == 'zoom':
+                default_zoom=float(v)
         if ats:
             annotationtypes=ats
 
@@ -195,6 +202,9 @@ class TimeLine(AdhocView):
 
         if self.minimum > self.maximum:
             self.minimum, self.maximum = self.maximum, self.minimum
+
+        if default_position is None:
+            default_position=self.minimum
 
         self.colors = {
             'active': gtk.gdk.color_parse ('#fdfd4b'),
@@ -302,9 +312,19 @@ class TimeLine(AdhocView):
         self.draw_current_mark()
         self.widget = self.get_full_widget()
 
+        def set_default_parameters(widget):
+            self.fraction_adj.value=default_zoom
+            self.adjustment.set_value(u2p(default_position))
+            return False
+
+        self.widget.connect('realize', set_default_parameters)
+
+
     def get_save_arguments(self):
         # FIXME: add a dialog to ask for what elements to save
         arguments = [ ('annotation-type', at.id) for at in self.annotationtypes ]
+        arguments.append( ('position', self.pixel2unit(self.adjustment.value) ) )
+        arguments.append( ('zoom', self.fraction_adj.value) )
         return self.options, arguments
 
     def draw_background(self, layout, event):
