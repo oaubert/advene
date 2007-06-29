@@ -43,6 +43,8 @@ class LogWindow(AdhocView):
             (_("Clear"), self.clear_data),
             )
 
+        self.options={}
+
         self.controller=controller
         self.tooltips=gtk.Tooltips()
         # Timeout for messages in ms
