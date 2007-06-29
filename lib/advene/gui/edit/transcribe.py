@@ -19,7 +19,7 @@
 """
 
 import sys
-import sre
+import re
 
 import gtk
 
@@ -67,7 +67,7 @@ class TranscriptionEdit(AdhocView):
         self.tooltips=gtk.Tooltips()
 
         self.sourcefile=None
-        self.empty_re = sre.compile('^\s*$')
+        self.empty_re = re.compile('^\s*$')
 
         self.options = {
             'timestamp': True, # _("If checked, click inserts timestamp marks"))
@@ -596,7 +596,7 @@ class TranscriptionEdit(AdhocView):
 
     def load_transcription(self, filename=None):
         try:
-            if sre.match('[a-zA-Z]:', filename):
+            if re.match('[a-zA-Z]:', filename):
                 # Windows drive: notation. Convert it to
                 # a more URI-compatible syntax
                 fname=urllib.pathname2url(filename)
@@ -623,7 +623,7 @@ class TranscriptionEdit(AdhocView):
         begin,end=b.get_bounds()
         b.delete(begin, end)
 
-        mark_re=sre.compile('\[(I?)(\d+:\d+:\d+.?\d*)\]([^\[]*)')
+        mark_re=re.compile('\[(I?)(\d+:\d+:\d+.?\d*)\]([^\[]*)')
 
         # 0-mark at the beginning
         self.create_timestamp_mark(0, begin)

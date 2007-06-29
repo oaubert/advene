@@ -50,7 +50,7 @@ im.statistics hold a dictionary containing the creation statistics.
 
 import sys
 import time
-import sre
+import re
 import os
 import optparse
 
@@ -357,7 +357,7 @@ class TextImporter(GenericImporter):
         super(TextImporter, self).__init__(**kw)
         if regexp is None:
             regexp="(?P<begin>\d+)\s(?P<end>\d+)\s(?P<content>.+)"
-        self.regexp=sre.compile(regexp)
+        self.regexp=re.compile(regexp)
         if encoding is None:
             encoding='latin1'
         self.encoding=encoding
@@ -386,7 +386,7 @@ class TextImporter(GenericImporter):
                 yield m.groupdict()
 
     def set_regexp(self, r):
-        self.regexp=sre.compile(r)
+        self.regexp=re.compile(r)
 
     def process_file(self, filename):
         f=open(filename, 'r')
@@ -419,7 +419,7 @@ class LsDVDImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
-        reg=sre.compile(self.regexp)
+        reg=re.compile(self.regexp)
         begin=1
         incr=0.02
         progress=0.1
@@ -479,7 +479,7 @@ class ChaplinImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
-        reg=sre.compile(self.regexp)
+        reg=re.compile(self.regexp)
         begin=1
         end=1
         chapter=None
@@ -628,7 +628,7 @@ class ElanImporter(GenericImporter):
         return "".join(l)
 
     def iterator(self, elan):
-        valid_id_re = sre.compile('[^a-zA-Z_0-9]')
+        valid_id_re = re.compile('[^a-zA-Z_0-9]')
         # List of tuples (annotation-id, related-annotation-uri) of
         # forward referenced annotations
         self.forward_references = []
@@ -796,7 +796,7 @@ class SubtitleImporter(GenericImporter):
 
     def srt_iterator(self, f):
         base=r'\d+:\d+:\d+[,\.]\d+'
-        pattern=sre.compile('(' + base + ').+(' + base + ')')
+        pattern=re.compile('(' + base + ').+(' + base + ')')
         tc=None
         content=[]
         for line in f:
@@ -861,9 +861,9 @@ class PraatImporter(GenericImporter):
             print "Invalid PRAAT file"
             return
 
-        name_re=sre.compile('^(\s+)name\s*=\s*"(.+)"')
-        boundary_re=sre.compile('^(\s+)(xmin|xmax)\s*=\s*([\d\.]+)')
-        text_re=sre.compile('^(\s+)text\s*=\s*"(.*)"')
+        name_re=re.compile('^(\s+)name\s*=\s*"(.+)"')
+        boundary_re=re.compile('^(\s+)(xmin|xmax)\s*=\s*([\d\.]+)')
+        text_re=re.compile('^(\s+)text\s*=\s*"(.*)"')
 
         current_type=None
         type_align=0

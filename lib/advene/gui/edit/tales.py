@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 import gtk
-import sre
+import re
 
 from advene.gui.views.browser import Browser
 import advene.util.helper
@@ -43,8 +43,8 @@ class TALESEntry:
         self.context=context
         self.predefined=predefined
 
-        self.re_id = sre.compile('^([A-Za-z0-9_%]+/?)+$')
-        self.re_number = sre.compile('^\d+$')
+        self.re_id = re.compile('^([A-Za-z0-9_%]+/?)+$')
+        self.re_number = re.compile('^\d+$')
         
         self.widget=self.build_widget()
 

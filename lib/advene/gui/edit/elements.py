@@ -29,7 +29,7 @@ from gettext import gettext as _
 import gtk
 import gobject
 import pango
-import sre
+import re
 import os
 import struct
 
@@ -877,7 +877,7 @@ class EditForm(object):
             expr=element.getMetaData(namespace, data)
             if expr is None:
                 expr=""
-            if sre.match('^\s+$', expr):
+            if re.match('^\s+$', expr):
                 # The field can contain just a newline or whitespaces, which will be then ignored
                 try:
                     i=element.id
@@ -893,7 +893,7 @@ class EditForm(object):
         def set_method(value):
             if value is None or value == "":
                 value=""
-            if sre.match('^\s+', value):
+            if re.match('^\s+', value):
                 try:
                     i=element.id
                 except AttributeError:
@@ -1815,7 +1815,7 @@ class EditTagForm(EditForm):
 
     def check_validity(self):
         invalid=[ t for t in self.get_current_tags()
-                  if not sre.match('^[\w\d_]+$', t) ]
+                  if not re.match('^[\w\d_]+$', t) ]
         if invalid:
             advene.gui.util.message_dialog(_("Some tags contain invalid characters: %s") % ", ".join(invalid),
                                            icon=gtk.MESSAGE_ERROR)

@@ -36,7 +36,7 @@ import advene.core.version
 
 import sys
 import os
-import sre
+import re
 import urllib
 import cgi
 import socket
@@ -874,7 +874,7 @@ class Admin(Common):
         l.sort(lambda a, b: cmp(a.lower(), b.lower()))
         for uri in l:
             name, ext = os.path.splitext(uri)
-            alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+            alias = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
             res.append ("""
             <li><a href="/admin/load?alias=%(alias)s&uri=%(uri)s">%(uri)s</a></li>
             """ % {'alias':alias, 'uri':uri})

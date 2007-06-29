@@ -19,7 +19,7 @@
 
 import gtk
 
-import sre
+import re
 
 import advene.rules.elements
 from advene.rules.elements import Event, Condition, ConditionList, Action, ActionList
@@ -788,7 +788,7 @@ class EditAction(EditGeneric):
             return False
         ra=self.catalog.get_action(self.current_name)
         self.model = Action(registeredaction=ra, catalog=self.catalog)
-        regexp=sre.compile('^(\(.+\)|)$')
+        regexp=re.compile('^(\(.+\)|)$')
         for n, v in self.current_parameters.iteritems():
             # We ignore parameters fields that are empty or that match '^\(.+\)$'
             if not regexp.match(v):

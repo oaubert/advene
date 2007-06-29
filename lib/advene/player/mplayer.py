@@ -22,7 +22,7 @@ http://jdolan.dyndns.org/jaydolan/pymp.html
 """
 
 import os, fcntl, gobject
-import sre
+import re
 
 STATUS_TIMEOUT = 50
 
@@ -303,8 +303,8 @@ class Mplayer:
         def __init__(self, pymp):
                 
                 self.pymp = pymp
-                self.re_time=sre.compile("(A|V):\s*(\d+\.\d+)")
-                self.re_length=sre.compile("ANS_LENGTH=(\d+)")
+                self.re_time=re.compile("(A|V):\s*(\d+\.\d+)")
+                self.re_length=re.compile("ANS_LENGTH=(\d+)")
                 self.mplayerIn = None
                 self.mplayerOut = None
                 self.eofHandler = 0

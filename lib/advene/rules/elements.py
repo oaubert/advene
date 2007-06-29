@@ -20,7 +20,7 @@
 The event framework makes it possible to bind actions to specific
 events that match a condition."""
 
-import sre
+import re
 import sets
 import StringIO
 
@@ -161,7 +161,7 @@ class Condition:
                 rv=self.convert_value(right, 'begin')
                 return lv <= rv
             elif self.operator == 'matches':
-                return sre.search(rv, lv)
+                return re.search(rv, lv)
             elif self.operator == 'meets':
                 lv=self.convert_value(left, 'end')
                 rv=self.convert_value(right, 'begin')

@@ -21,7 +21,7 @@ Generic popup menu used by the various Advene views.
 """
 
 import gtk
-import sre
+import re
 import os
 
 from gettext import gettext as _
@@ -108,7 +108,7 @@ class Menu:
         if id_ is None:
             # Generate the id_
             basename = os.path.basename(filename)
-            id_=sre.sub('[^a-zA-Z0-9_.]', '_', basename)
+            id_=re.sub('[^a-zA-Z0-9_.]', '_', basename)
         size=os.stat(filename).st_size
         f=open(filename, 'r')
         parent[id_]=f.read(size + 2)
@@ -122,7 +122,7 @@ class Menu:
         if id_ is None:
             # Generate the id_
             basename = os.path.basename(dirname)
-            id_=sre.sub('[^a-zA-Z0-9_.]', '_', basename)
+            id_=re.sub('[^a-zA-Z0-9_.]', '_', basename)
         parent[id_] = parent.DIRECTORY_TYPE
         el=parent[id_]
         self.controller.notify('ResourceCreate',
@@ -162,7 +162,7 @@ class Menu:
         if filename is None:
             return True
         basename = os.path.basename(filename)
-        id_=sre.sub('[^a-zA-Z0-9_.]', '_', basename)
+        id_=re.sub('[^a-zA-Z0-9_.]', '_', basename)
         if id_ != basename:
             while True:
                 id_ = advene.gui.util.entry_dialog(title=_("Select a valid identifier"),
@@ -171,7 +171,7 @@ class Menu:
                 if id_ is None:
                     # Edition cancelled
                     return True
-                elif sre.match('^[a-zA-Z0-9_.]+$', id_):
+                elif re.match('^[a-zA-Z0-9_.]+$', id_):
                     break
         self.do_insert_resource_file(parent=parent, filename=filename, id_=id_)
         return True

@@ -31,7 +31,7 @@ import sys, time
 import os
 import cgi
 import socket
-import sre
+import re
 import webbrowser
 import urllib
 import StringIO
@@ -132,7 +132,7 @@ class AdveneController:
             args = []
 
         # Regexp to recognize DVD URIs
-        self.dvd_regexp = sre.compile("^dvd.*@(\d+):(\d+)")
+        self.dvd_regexp = re.compile("^dvd.*@(\d+):(\d+)")
 
         # List of active annotations
         self.active_annotations = []
@@ -405,7 +405,7 @@ class AdveneController:
 	    if '=' in uri:
 		# alias=uri syntax
 		alias, uri = uri.split('=', 2)
-		alias = sre.sub('[^a-zA-Z0-9_]', '_', alias)
+		alias = re.sub('[^a-zA-Z0-9_]', '_', alias)
                 try:
                     self.load_package (uri=uri, alias=alias)
                     self.log(_("Loaded %(uri)s as %(alias)s") % {'uri': uri, 'alias': alias})
@@ -416,7 +416,7 @@ class AdveneController:
 	    else:
 		name, ext = os.path.splitext(uri)
 		if ext.lower() in ('.xml', '.azp', '.apl'):
-		    alias = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+		    alias = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
 		    try:
 			self.load_package (uri=uri, alias=alias)
 			self.log(_("Loaded %(uri)s as %(alias)s") % {
@@ -688,7 +688,7 @@ class AdveneController:
             if annotation.type.mimetype == 'text/plain':
                 d={ 'name': annotation.content.data.replace('\n', '\\n') }
             elif annotation.type.mimetype == 'application/x-advene-structured':
-                r=sre.compile('^(\w+)=(.*)')
+                r=re.compile('^(\w+)=(.*)')
                 d=dict([ (r.findall(l) or [ ('_error', l) ])[0] for l in annotation.content.data.split('\n') ])
                 name="Unknown"
                 for n in ('name', 'title', 'content'):
@@ -890,7 +890,7 @@ class AdveneController:
 
         # Replace forbidden characters. The GUI is responsible for
         # letting the user specify a valid alias.
-        alias = sre.sub('[^a-zA-Z0-9_]', '_', alias)
+        alias = re.sub('[^a-zA-Z0-9_]', '_', alias)
 
         self.package.imagecache=ImageCache()
         self.package._idgenerator = advene.core.idgenerator.Generator(self.package)

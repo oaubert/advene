@@ -50,7 +50,7 @@ import zipfile
 import os
 import sys
 import tempfile
-import sre
+import re
 import shutil
 import urllib
 from advene.model.exception import AdveneException
@@ -102,12 +102,12 @@ class ZipPackage:
                 # It is a real filename
                 self.uri = uri
                 self.file_ = n
-            elif sre.match('^[a-zA-Z]:', n):
+            elif re.match('^[a-zA-Z]:', n):
                 # Windows drive: notation. Convert it to
                 # a more URI-compatible syntax
 	        self.uri=uri
                 self.file_ = urllib.pathname2url(n)
-            elif sre.search('/[a-zA-Z]|', n):
+            elif re.search('/[a-zA-Z]|', n):
                 # It is a pathname2url encoded path
                 self.uri = uri
                 self.file_ = urllib.url2pathname(n)

@@ -21,7 +21,7 @@
 import os
 import sys
 import urllib
-import sre
+import re
 
 import xml.dom.ext.reader.PyExpat
 import xml.sax
@@ -71,7 +71,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
            source parameter (a URL or a stream).
            Providing None for the source parameter creates a new Package.
         """
-        if sre.match('[a-zA-Z]:', uri):
+        if re.match('[a-zA-Z]:', uri):
             # Windows drive: notation. Convert it to
             # a more URI-compatible syntax
            uri=urllib.pathname2url(uri)
@@ -105,7 +105,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             elif hasattr(source, 'read'):
                 element = reader.fromStream(source)._get_documentElement()
             else:
-		if sre.match('[a-zA-Z]:', source):
+		if re.match('[a-zA-Z]:', source):
 		    # Windows drive: notation. Convert it to
 		    # a more URI-compatible syntax
 		    source=urllib.pathname2url(source)
@@ -316,7 +316,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if name.startswith('file:///'):
             name = name[7:]
 
-        if sre.match('|/', name):
+        if re.match('|/', name):
             # Windows drive: notation. Convert it from
             # a more URI-compatible syntax
             name=urllib.url2pathname(name)
@@ -387,7 +387,7 @@ class Import(modeled.Modeled, _impl.Ased):
             if uri is None:
                 raise TypeError("parameter 'uri' required")
 
-	    if sre.match('[a-zA-Z]:', uri):
+	    if re.match('[a-zA-Z]:', uri):
 		# Windows drive: notation. Convert it to
 		# a more URI-compatible syntax
 		uri=urllib.pathname2url(uri)
@@ -421,7 +421,7 @@ class Import(modeled.Modeled, _impl.Ased):
 
     def setUri(self, uri):
         """Set the URI of the element"""
-	if sre.match('[a-zA-Z]:', uri):
+	if re.match('[a-zA-Z]:', uri):
 	    # Windows drive: notation. Convert it to
 	    # a more URI-compatible syntax
 	    uri=urllib.pathname2url(uri)

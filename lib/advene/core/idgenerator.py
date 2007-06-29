@@ -17,7 +17,7 @@
 #
 """Id generator."""
 
-import sre
+import re
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
@@ -57,7 +57,7 @@ class Generator:
     def init(self, package):
         """Initialize the indexes for the given package."""
         prefixes=self.prefix.values()
-        re_id = sre.compile("^(" + "|".join(prefixes) + ")([0-9]+)")
+        re_id = re.compile("^(" + "|".join(prefixes) + ")([0-9]+)")
         last_id={}
         for k in prefixes:
             last_id[k]=0

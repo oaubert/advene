@@ -21,7 +21,7 @@ from gettext import gettext as _
 
 import gtk
 import gobject
-import sre
+import re
 import os
 import sys
 
@@ -424,7 +424,7 @@ def get_filename(title=_("Open a file"),
             preview.set_label(_("Press to\ndisplay\ninformation"))
             if alias:
                 name, ext = os.path.splitext(filename)
-                al = sre.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+                al = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
                 alias_entry.set_text(al)
             chooser.set_preview_widget_active(True)
         else:
@@ -492,7 +492,7 @@ def get_filename(title=_("Open a file"),
         filename=fs.get_filename()
         if alias:
             al=alias_entry.get_text()
-            al = sre.sub('[^a-zA-Z0-9_]', '_', al)
+            al = re.sub('[^a-zA-Z0-9_]', '_', al)
     fs.destroy()
 
     if filename is not None and not isinstance(filename, unicode):

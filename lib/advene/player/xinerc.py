@@ -19,7 +19,7 @@
 """
 
 import socket
-import sre
+import re
 import os
 import time
 
@@ -228,7 +228,7 @@ class Player:
 
     def get_media_position(self, origin, key):
         l=self.send_command('get position')
-        m=sre.search('(\d+)', l)
+        m=re.search('(\d+)', l)
         if m is not None:
             val=long(m.group(1))
         else:
@@ -265,7 +265,7 @@ class Player:
         
     def playlist_get_list(self):
         l=self.get_multiline_command('playlist show')
-        re=sre.compile('\s+\d+\s+(.+)$')
+        re=re.compile('\s+\d+\s+(.+)$')
         pl=[]
         for i in l:
             m=re.search(i)
@@ -275,7 +275,7 @@ class Player:
 
     def snapshot(self, position):
         l=self.get_command('snapshot')
-        m=sre.search("File '(.+?)' written.", l)
+        m=re.search("File '(.+?)' written.", l)
         if m is not None:
             sfile=m.group(1)
             print "Snapshot is in file %s" % sfile
@@ -308,7 +308,7 @@ class Player:
         s.streamstatus=Player.UndefinedStatus
 
         l=self.get_multiline_command('playlist show')
-        re=sre.compile('\*>\s+\d+\s+(.+)$')
+        re=re.compile('\*>\s+\d+\s+(.+)$')
         v=[ re.search(i).group(1)
             for i in l
             if re.search(i) ]
@@ -316,7 +316,7 @@ class Player:
             s.url=v[0]
             
         l=self.get_command('get length')
-        number=sre.compile('(\d+)')
+        number=re.compile('(\d+)')
         m=number.search(l)
         if m:
             s.length=long(m.group(1))
@@ -341,7 +341,7 @@ class Player:
         # FIXME: Normalize volume to be in [0..100]
         l=self.get_command('get audio volume')
         vol=0
-        m=sre.search('(\d+)', l)
+        m=re.search('(\d+)', l)
         if m is not None:
             vol=long(m.group(1))
         return vol

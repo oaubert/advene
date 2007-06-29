@@ -17,7 +17,7 @@
 #
 import sys
 import sets
-import sre
+import re
 import cgi
 import struct
 import gtk
@@ -52,7 +52,7 @@ name="Timeline view plugin"
 def register(controller):
     controller.register_viewclass(TimeLine)
 
-parsed_representation = sre.compile(r'^here/content/parsed/([\w\d_\.]+)$')
+parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 
 class QuickviewBar(gtk.HBox):
     def __init__(self, controller=None):
@@ -1132,7 +1132,7 @@ class TimeLine(AdhocView):
             if event.keyval == gtk.keysyms.Return:
                 # Validate the entry
                 repr=annotation.type.getMetaData(config.data.namespace, "representation")
-                if repr is None or repr == '' or sre.match('^\s+', repr):
+                if repr is None or repr == '' or re.match('^\s+', repr):
                     r=e.get_text()
                 else:
                     m=parsed_representation.match(repr)
@@ -1140,7 +1140,7 @@ class TimeLine(AdhocView):
                         # We have a simple representation (here/content/parsed/name)
                         # so we can update the name field.
                         name=m.group(1)
-                        reg = sre.compile('^' + name + '=(.+?)$', sre.MULTILINE)
+                        reg = re.compile('^' + name + '=(.+?)$', re.MULTILINE)
                         if reg.match(annotation.content.data):
                             r = reg.sub(name + '=' + e.get_text().replace('\n', '\\n'), annotation.content.data)
                         else:
@@ -1964,7 +1964,7 @@ class TimeLine(AdhocView):
         def zoom_entry(entry):
             f=entry.get_text()
 
-            i=sre.findall(r'\d+', f)
+            i=re.findall(r'\d+', f)
             if i:
                 f=int(i[0])/100.0
             else:

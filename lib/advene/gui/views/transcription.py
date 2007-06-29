@@ -19,7 +19,7 @@
 """
 
 import sys
-import sre
+import re
 import sets
 
 import gtk
@@ -38,8 +38,8 @@ from advene.gui.views import AdhocView
 import advene.gui.util
 import advene.gui.popup
 
-parsed_representation = sre.compile(r'^here/content/parsed/([\w\d_\.]+)$')
-empty_representation = sre.compile(r'^\s*$')
+parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
+empty_representation = re.compile(r'^\s*$')
 
 class TranscriptionView(AdhocView):
     def __init__ (self, controller=None, source=None, parameters=None):
@@ -103,7 +103,7 @@ class TranscriptionView(AdhocView):
             # annotation-type representation
             at=self.model[0].type
             repr=at.getMetaData(config.data.namespace, 'representation')
-            if repr is not None and not sre.match(r'^\s*$', repr):
+            if repr is not None and not re.match(r'^\s*$', repr):
                 # There is a standard representation for the type.
                 # But if the current value is != '', then it has been
                 # updated by the parameters, so keep it.
@@ -207,7 +207,7 @@ class TranscriptionView(AdhocView):
                 # We have a simple representation (here/content/parsed/name)
                 # so we can update the name field.
                 name=m.group(1)
-                reg = sre.compile('^' + name + '=(.+?)$', sre.MULTILINE)
+                reg = re.compile('^' + name + '=(.+?)$', re.MULTILINE)
                 a.content.data = reg.sub(name + '=' + text, a.content.data)
             else:
                 m=empty_representation.match(repr)

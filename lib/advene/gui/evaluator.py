@@ -24,7 +24,7 @@ import os
 import StringIO
 import traceback
 import gtk
-import sre
+import re
 import __builtin__
 import inspect
 
@@ -220,7 +220,7 @@ class Window:
         for c in ('.', '(', ' '):
             while expr.endswith(c):
                 expr=expr[:-1]
-        m=sre.match('(\w+)=(.+)', expr)
+        m=re.match('(\w+)=(.+)', expr)
         if m is not None:
             expr=m.group(2)
         try:
@@ -256,7 +256,7 @@ class Window:
             self.history.append(expr)
         symbol=None
 
-        m=sre.match('import\s+(\S+)', expr)
+        m=re.match('import\s+(\S+)', expr)
         if m is not None:
             modname=m.group(1)
             self.clear_output()
@@ -275,7 +275,7 @@ class Window:
         # Handle variable assignment only for restricted forms of
         # variable names (so that do not mistake named parameters in
         # function calls)
-        m=sre.match('([\[\]\'\"\w\.]+?)=(.+)', expr)
+        m=re.match('([\[\]\'\"\w\.]+?)=(.+)', expr)
         if m is not None:
             symbol=m.group(1)
             expr=m.group(2)
@@ -292,7 +292,7 @@ class Window:
                     self.log('\n\n[Value stored in %s]' % symbol)
                     self.locals_[symbol]=res
                 else:
-                    m=sre.match('(.+?)\[["\']([^\[\]]+)["\']\]$', symbol)
+                    m=re.match('(.+?)\[["\']([^\[\]]+)["\']\]$', symbol)
                     if m:
                         obj, attr = m.group(1, 2)
                         try:
@@ -306,7 +306,7 @@ class Window:
                         self.log('\n\n[Value stored in %s]' % symbol)
                         return True
 
-                    m=sre.match('(.+)\.(\w+)$', symbol)
+                    m=re.match('(.+)\.(\w+)$', symbol)
                     if m:
                         obj, attr = m.group(1, 2)
                         try:
@@ -363,7 +363,7 @@ class Window:
             p=expr.rfind(c)
             if p >= 0:
                 expr=expr[p+1:]
-        m=sre.match('(.+)=(.+)', expr)
+        m=re.match('(.+)=(.+)', expr)
         if m is not None:
             expr=m.group(2)
         completion=None
@@ -389,7 +389,7 @@ class Window:
                 attr=expr
             else:
                 # Maybe we have the beginning of an attribute.
-                m=sre.match('^(.+?)\.(\w*)$', expr)
+                m=re.match('^(.+?)\.(\w*)$', expr)
                 if m:
                     expr=m.group(1)
                     attr=m.group(2)
@@ -408,7 +408,7 @@ class Window:
                         completion=[ a for a in completion if not a.startswith('_') ]
                 else:
                     # Dict completion
-                    m=sre.match('^(.+)\[[\'"]([^\]]*)', expr)
+                    m=re.match('^(.+)\[[\'"]([^\]]*)', expr)
                     if m is not None:
                         obj, key=m.group(1, 2)
                         attr=key

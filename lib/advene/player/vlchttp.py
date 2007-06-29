@@ -24,7 +24,7 @@ vlc --intf http --http-src=${adveneshare}/vlc/http
 It is in fact too slow for Advene's needs.
 """
 
-import sre
+import re
 import httplib
 import urllib
 import thread
@@ -111,7 +111,7 @@ class Player:
 
     def get_media_position(self, origin, key):
         l=self.get_command('/get_media_position.html')
-        m=sre.search('(\d+)', l)
+        m=re.search('(\d+)', l)
         if m is not None:
             val=long(m.group(1))
         else:
@@ -187,7 +187,7 @@ class Player:
         # FIXME: Normalize volume to be in [0..100]
         l=self.get_command("/volume.html")
         vol=0
-        m=sre.search('(\d+)', l)
+        m=re.search('(\d+)', l)
         if m is not None:
             vol=long(m.group(1))
         return vol
