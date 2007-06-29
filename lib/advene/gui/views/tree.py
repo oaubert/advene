@@ -468,7 +468,7 @@ class TreeWidget(AdhocView):
         elif targetType == config.data.target_type['adhoc-view']:
             if not isinstance(el, View):
                 return False
-            if el.content.mimetype != 'application/x-advene-adhoc-view':
+            if helper.get_view_type(el) != 'adhoc':
                 return False
             selection.set(selection.target, 8, 'id:' + el.id)
             return True
