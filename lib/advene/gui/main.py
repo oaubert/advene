@@ -200,6 +200,12 @@ class AdveneGUI (Connect):
                 open_view(widget, name)
                 return True
 
+            if config.data.preferences['expert-mode']:
+                # In expert mode, directly open the view. Experts know
+                # how to use drag and drop anyway.
+                open_view(widget, name)
+                return True
+
             menu=gtk.Menu()
 
             for (label, destination) in (
