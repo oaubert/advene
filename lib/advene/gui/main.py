@@ -249,6 +249,13 @@ class AdveneGUI (Connect):
             hb.pack_start(b, expand=False)
         hb.show_all()
 
+        launcher=advene.gui.util.get_small_stock_button(gtk.STOCK_FIND,
+                                                        self.do_quicksearch)
+        def modify_source(i, expr, label):
+            config.data.preferences['quicksearch-source']=expr
+            self.tooltips.set_tip(launcher, _("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
+            return True
+
         # Generate the quick search entry
         def quicksearch_options(button, event):
             if event.button != 3 or event.type != gtk.gdk.BUTTON_PRESS:
@@ -268,7 +275,7 @@ class AdveneGUI (Connect):
             for (label, expression) in l:
                 i=gtk.CheckMenuItem(label)
                 i.set_active(expression == config.data.preferences['quicksearch-source'])
-                i.connect('activate', lambda i, expr: config.data.preferences.__setitem__('quicksearch-source', expr), expression)
+                i.connect('activate', modify_source, expression, label)
                 submenu.append(i)
             item.set_submenu(submenu)
             menu.append(item)
@@ -277,16 +284,15 @@ class AdveneGUI (Connect):
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
 
+        if config.data.preferences['quicksearch-source'] is None:
+            modify_source(None, None, _("All annotations"))
         hb=self.gui.get_widget('search_hbox')
-        self.quicksearch_entry=gtk.Entry()
-        self.tooltips.set_tip(self.quicksearch_entry, _('String to search in the annotation contents'))
+        self.quicksearch_entry=gtk.Entry()        
+        self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
         self.quicksearch_entry.connect('activate', self.do_quicksearch)
         hb.pack_start(self.quicksearch_entry, expand=False)
-        b=advene.gui.util.get_small_stock_button(gtk.STOCK_FIND,
-                                                 self.do_quicksearch)
-        b.connect('button-press-event', quicksearch_options)
-        self.tooltips.set_tip(b, _("Left click to launch the search, right-click to set the quicksearch options"))
-        hb.pack_start(b, expand=False, fill=False)
+        launcher.connect('button-press-event', quicksearch_options)
+        hb.pack_start(launcher, expand=False, fill=False)
         hb.show_all()
 
         # Player status
