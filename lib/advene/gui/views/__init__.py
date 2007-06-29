@@ -213,11 +213,13 @@ class AdhocView(object):
         return self.options, []
 
     def save_view(self, *p):
-        ident=advene.gui.util.entry_dialog(title=_("%s saving" % self.view_name),
-                                           text=_("Enter a view name to save this parametered view"),
-                                           default=self.controller.package._idgenerator.get_id(View))
+        name=self.controller.package._idgenerator.get_id(View)+'_'+self.view_id
+        title, ident=advene.gui.util.get_title_id(title=_("Saving %s" % self.view_name),
+                                                  element_title=name,
+                                                  element_id=name,
+                                                  text=_("Enter a view name to save this parametered view"))
         if ident is not None:
-            if not sre.match(r'^[a-zA-Z0-9_]+$', ident):
+            if not re.match(r'^[a-zA-Z0-9_]+$', ident):
                 advene.gui.util.message_dialog(_("Error: the identifier %s contains invalid characters.") % ident)
                 return True
 
@@ -230,13 +232,13 @@ class AdhocView(object):
             if v is None:
                 create=True
                 v=self.controller.package.createView(ident=ident, clazz='package')
-                v.title=ident
             else:
                 # Existing view. Check that it is already an adhoc-view
                 if v.content.mimetype != 'application/x-advene-adhoc-view':
                     advene.gui.util.message_dialog(_("Error: the view %s is not an adhoc view.") % ident)
                     return True
                 create=False
+            v.title=title
             v.author=config.data.userid
             v.date=self.controller.get_timestamp()
 
