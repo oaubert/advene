@@ -63,7 +63,7 @@ class TagBag(AdhocView):
         self.controller=controller
         self.vertical=vertical
 
-        opt, arg = self.load_parameters()
+        opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         l=[ v for (n, v) in arg if n == 'tag' ]
         if l:
