@@ -1,3 +1,20 @@
+advene (0.24) unstable; urgency=low
+
+  * An expert-mode toggle proposes more features in the GUI
+  
+  * Transcription view: text is now searchable
+  
+  * Timeline: left click in the upper part (timestamps) sets
+    the player position
+
+  * Default options for adhoc views can now be saved.
+  
+  * The workspace (GUI layout + opened views) can be saved, either as an
+    adhoc-view, or as a default workspace that will be presented on
+    application startup.
+  
+  --
+
 advene (0.23) unstable; urgency=low
   
   * Model: it is possible to open uncompressed .azp packages. The
