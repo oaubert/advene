@@ -273,6 +273,7 @@ class Config(object):
 	    'application/x-advene-sparql-query',
             'application/x-javascript',
             'application/x-advene-adhoc-view',
+            'application/x-advene-workspace-view',
 	    )
 
 	# Drag and drop parameters for URIed element and other elements
