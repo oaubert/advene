@@ -30,7 +30,7 @@ import advene.gui.util
 class ViewBook(AdhocView):
     """Notebook containing multiple views
     """
-    def __init__ (self, controller=None, views=None):
+    def __init__ (self, controller=None, views=None, location=None):
         self.view_name = _("ViewBook")
         self.view_id = 'viewbook'
 
@@ -39,6 +39,7 @@ class ViewBook(AdhocView):
             views = []
         self.views=[]
 
+        self.location=location
         # List of widgets that cannot be removed
         self.permanent_widgets = []
 
@@ -60,6 +61,13 @@ class ViewBook(AdhocView):
         self.views.remove(view)
         view.widget.get_parent().remove(view.widget)
         return True
+
+    def clear(self):
+        """Clear the viewbook.
+        """
+        for v in self.views:
+            if not v in self.permanent_widgets:
+                self.remove_view(v)
 
     def add_view(self, v, name=None, permanent=False):
         """Add a new view to the notebook.
@@ -110,6 +118,8 @@ class ViewBook(AdhocView):
                         (_("...embedded west of the video"), 'west'),
                         (_("...embedded south of the video"), 'south'),
                         (_("...embedded at the right of the window"), 'fareast')):
+                        if destination == self.location:
+                            continue
                         item = gtk.MenuItem(label)
                         item.connect('activate', relocate_view,  view, destination)
                         submenu.append(item)
@@ -199,15 +209,7 @@ class ViewBook(AdhocView):
                 label=v.title
 
             if self.controller.gui:
-                view=self.controller.gui.open_adhoc_view(name, destination=None)
-                if view is not None:
-                    if view.view_id == 'htmlview':
-                        permanent=True
-                    else:
-                        permanent=False
-                    self.add_view(view, permanent=permanent, name=label)
-                else:
-                    print "Cannot open", name
+                view=self.controller.gui.open_adhoc_view(name, label=label, destination=self.location)
             return True
         elif targetType == config.data.target_type['adhoc-view-instance']:
             l=[v
