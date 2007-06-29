@@ -550,9 +550,10 @@ class Menu:
 
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
-        if element.content.mimetype == 'application/x-advene-ruleset':
+        t=helper.get_view_type(element)
+        if t == 'dynamic':
             add_item(_("Activate view"), self.activate_stbv, element)
-        elif element.content.mimetype == 'application/x-advene-adhoc-view':
+        elif t == 'adhoc':
             add_item(_("Open adhoc view"), self.open_adhoc_view, element)
         elif 'html' in element.content.mimetype:
             if helper.get_id(element.rootPackage.views, 'richedit'):
