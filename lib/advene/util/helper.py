@@ -654,7 +654,8 @@ def get_view_type(v):
     """
     if v.content.mimetype == 'application/x-advene-ruleset':
         return 'dynamic'
-    elif v.content.mimetype == 'application/x-advene-adhoc-view':
+    elif (v.content.mimetype == 'application/x-advene-adhoc-view'
+          or v.content.mimetype == 'application/x-advene-workspace-view'):
         return 'adhoc'
     else:
         return 'static'
