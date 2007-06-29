@@ -602,17 +602,26 @@ class AdveneGUI (Connect):
         # Populate the file history menu
         for filename in config.data.preferences['history']:
             self.append_file_history_menu(filename)
-
-        # Open the default adhoc popup views
-        for dest in ('popup', 'west', 'east', 'south', 'fareast'):
-            for n in config.data.preferences['adhoc-%s' % dest].split(':'):
-                try:
-                    v=self.open_adhoc_view(n, destination=dest)
-                except Exception, e:
-                    self.log(_("Cannot open adhoc view %(viewname)s in %(destination)s: %(error)s") % {
-                            'viewname': n,
-                            'destination': dest,
-                            'error': unicode(e)})
+            
+        defaults=config.data.advenefile( ('defaults', 'workspace.xml'), 'settings')
+        if os.path.exists(defaults):
+            # a default workspace has been saved. Load it and
+            # ignore the default adhoc view specification.
+            stream=open(defaults)
+            tree=ET.parse(stream)
+            stream.close()
+            self.workspace_restore(tree.getroot())
+        else:
+            # Open the default adhoc popup views
+            for dest in ('popup', 'west', 'east', 'south', 'fareast'):
+                for n in config.data.preferences['adhoc-%s' % dest].split(':'):
+                    try:
+                        v=self.open_adhoc_view(n, destination=dest)
+                    except Exception, e:
+                        self.log(_("Cannot open adhoc view %(viewname)s in %(destination)s: %(error)s") % {
+                                'viewname': n,
+                                'destination': dest,
+                                'error': unicode(e)})
 
         # Use small toolbar button everywhere
         gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
@@ -1135,7 +1144,7 @@ class AdveneGUI (Connect):
                 print "Closing ", v
                 v.close()
 
-    def workspace_serialize(self):
+    def workspace_serialize(self, with_arguments=True):
         """Serialize the current workspace as an ElementTree element.
 
         Looks like this (+ advene namespace):
@@ -1182,7 +1191,13 @@ class AdveneGUI (Connect):
         for v in self.adhoc_views:
             if not hasattr(v, '_destination'):
                 continue
-            element=v.parameters_to_element(*v.get_save_arguments())
+            options, args = v.get_save_arguments()
+            if not with_arguments:
+                # If we save the default workspace, we do not want to
+                # get package-specific information (for instance,
+                # displayed types in the timeline).
+                args=[]
+            element=v.parameters_to_element(options, args)
             element.attrib['destination']=v._destination
             element.attrib['title']=v._label
             if v._destination == 'popup':
@@ -2690,8 +2705,23 @@ Available views: timeline, tree, browser, transcribe"""))
         return True
 
     def on_save_workspace_as_default1_activate (self, button=None, data=None):
-        self.log("Not implemented yet")
-        # FIXME
+        d=config.data.advenefile('defaults', 'settings')
+        if not os.path.isdir(d):
+            # Create it
+            try:
+                helper.recursive_mkdir(d)
+            except OSError, e:
+                self.controller.log(_("Cannot save default workspace: %s") % unicode(e))
+                return True
+        defaults=config.data.advenefile( ('defaults', 'workspace.xml'), 'settings')
+        
+        # Do not save package-specific arguments.
+        root=self.workspace_serialize(with_arguments=False)
+        stream=open(defaults, 'w')
+        helper.indent(root)
+        ET.ElementTree(root).write(stream, encoding='utf-8')
+        stream.close()
+        self.controller.log(_("Default workspace has been saved"))
         return True
 
 if __name__ == '__main__':
