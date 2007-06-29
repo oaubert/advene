@@ -46,6 +46,10 @@ import advene.model.zippackage
 from advene.model.tal.context import AdveneContext, AdveneTalesException
 from advene.model.exception import AdveneException
 
+# Initialize ElementTree namespace map with our own prefixes
+import advene.util.ElementTree as ET
+ET._namespace_map[config.data.namespace]='advene'
+
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
 
