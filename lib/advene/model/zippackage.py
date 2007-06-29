@@ -57,7 +57,7 @@ from advene.model.exception import AdveneException
 from advene.model.resources import Resources
 import mimetypes
 
-import xml.sax
+import advene.util.ElementTree as ET
 
 from gettext import gettext as _
 
@@ -66,6 +66,9 @@ _fs_encoding = sys.getfilesystemencoding() or 'ascii'
 
 # Some constants
 MIMETYPE='application/x-advene-zip-package'
+# OpenDocument manifest file
+MANIFEST="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0"
+ET._namespace_map[MANIFEST]='manifest'
 
 class ZipPackage:
     # Global method for cleaning up
@@ -289,19 +292,18 @@ class ZipPackage:
                     name=unicode(name, _fs_encoding)
                 manifest.append(name)
                 if z is not None:
-                    z.writestr( name.encode('utf-8'),
-                                open(os.path.join(dirpath, f)).read() )
+                    z.write( os.path.join(dirpath, f),
+                             name.encode('utf-8') )
 
+        # Generation of the manifest file
+        fname=self.tempfile(u"META-INF", u"manifest.xml")
+        tree=ET.ElementTree(self.list_to_manifest(manifest))
+        tree.write(fname)
         if z is not None:
             # Generation of the manifest file
-            z.writestr( "META-INF/manifest.xml", 
-                        self.list_to_manifest(manifest) )
+            z.write( fname,
+                     "META-INF/manifest.xml" )
             z.close()
-        else:
-            # Generation of the manifest file
-            f=open(self.tempfile(u"META-INF", u"manifest.xml"), 'w')
-            f.write(self.list_to_manifest(manifest))
-            f.close()
 
     def update_statistics(self, p):
         """Update the META-INF/statistics.xml file
@@ -322,22 +324,22 @@ class ZipPackage:
 	@return: the XML representation of the manifest
 	@rtype: string
         """
-        # FIXME: This is done in a hackish way. It should be rewritten
-        # using a proper XML binding
-        out=u"""<?xml version="1.0" encoding="UTF-8"?>
-<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0">
-"""
-        out += u"""<manifest:file-entry manifest:media-type="%s" manifest:full-path="/"/>\n""" % MIMETYPE
-
+        root=ET.Element(ET.QName(MANIFEST, 'manifest'))
+        ET.SubElement(root, ET.QName(MANIFEST, 'file-entry'),  { 
+                ET.QName(MANIFEST, 'full-path'): '/',
+                ET.QName(MANIFEST, 'media-type'): MIMETYPE,
+                })
         for f in manifest:
             if f == 'mimetype' or f == 'META-INF/manifest.xml':
                 continue
             (mimetype, encoding) = mimetypes.guess_type(f)
             if mimetype is None:
-                mimetype = "text/plain"
-            out += u"""<manifest:file-entry manifest:media-type="%s" manifest:full-path="%s"/>\n""" % (unicode(mimetype), unicode(f))
-        out += """</manifest:manifest>"""
-        return out
+                mimetype = 'text/plain'
+            ET.SubElement(root, ET.QName(MANIFEST, 'file-entry'),  { 
+                    ET.QName(MANIFEST, 'full-path'): unicode(f),
+                    ET.QName(MANIFEST, 'media-type'): unicode(mimetype),
+                    })
+        return root
 
     def manifest_to_list(self, name):
         """Convert the manifest.xml to a list.
@@ -348,8 +350,13 @@ class ZipPackage:
 	@type name: string
 	@return: a list of typles (name, mimetype)
         """
-        h=ManifestHandler()
-        return h.parse_file(name)
+        l=[]
+        tree=ET.parse(name)
+        for e in tree.getroot():
+            if e.tag == ET.QName(MANIFEST, 'file-entry'):
+                l.append( (e.attrib[ET.QName(MANIFEST, 'full-path')],
+                           e.attrib[ET.QName(MANIFEST, 'media-type')]) )
+        return l
         
     def close(self):
         """Close the package and remove temporary files.
@@ -365,22 +372,3 @@ class ZipPackage:
 	@rtype: Resources
 	"""
         return Resources( self, '', parent=package )
-
-class ManifestHandler(xml.sax.handler.ContentHandler):
-    """Parse a manifest.xml file.
-    """
-    def __init__(self):
-        self.filelist = []
- 
-    def startElement(self, name, attributes):
-        if name == "manifest:file-entry":
-            p=attributes['manifest:full-path']
-            t=attributes['manifest:media-type']
-            self.filelist.append( (p, t) )
-    
-    def parse_file(self, name):
-        p=xml.sax.make_parser()
-        p.setFeature(xml.sax.handler.feature_namespaces, False)
-        p.setContentHandler(self)
-        p.parse(name)
-        return self.filelist
