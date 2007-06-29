@@ -31,6 +31,7 @@ import os
 import StringIO
 import textwrap
 from sets import Set
+import re
 
 import advene.core.config as config
 
@@ -73,6 +74,7 @@ import advene.model.tal.context
 
 import advene.core.mediacontrol
 import advene.util.helper as helper
+import advene.util.ElementTree as ET
 
 import advene.util.importer
 
@@ -85,7 +87,6 @@ from advene.gui.views import AdhocViewParametersParser
 import advene.gui.views.timeline
 import advene.gui.views.table
 import advene.gui.views.logwindow
-from advene.gui.views.browser import Browser
 from advene.gui.views.history import HistoryNavigation
 from advene.gui.edit.rules import EditRuleSet
 from advene.gui.edit.dvdselect import DVDSelect
@@ -99,7 +100,6 @@ import advene.gui.edit.imports
 import advene.gui.edit.properties
 from advene.gui.views.transcription import TranscriptionView
 from advene.gui.edit.transcribe import TranscriptionEdit
-from advene.gui.views.interactivequery import InteractiveQuery, InteractiveResult
 from advene.gui.views.viewbook import ViewBook
 from advene.gui.views.html import HTMLView
 from advene.gui.views.scroller import ScrollerView
@@ -674,11 +674,12 @@ class AdveneGUI (Connect):
 
         It consists in the embedded video window plus the various views.
         """
+        # Viewbooks indexed by zone name (east, west, south, fareast)
         self.viewbook={}
+        # Panes indexed by zone name they relate to (east, west,
+        # south, fareast)
+        self.pane={}
         
-        vis=gtk.HPaned()
-        left=gtk.VPaned()
-
         if config.data.os == 'win32':
             # gtk.Socket is available on win32 only from gtk >= 2.8
             self.drawable=gtk.DrawingArea()
@@ -796,26 +797,29 @@ class AdveneGUI (Connect):
 
         # create the viewbooks
         for pos in ('east', 'west', 'south', 'fareast'):
-            self.viewbook[pos]=ViewBook(controller=self.controller)
+            self.viewbook[pos]=ViewBook(controller=self.controller, location=pos)
 
-        hpane1=gtk.HPaned()
-        hpane2=gtk.HPaned()
+        self.pane['west']=gtk.HPaned()
+        self.pane['east']=gtk.HPaned()
+        self.pane['south']=gtk.VPaned()
+        self.pane['fareast']=gtk.HPaned()
+        self.pane['main']=self.gui.get_widget('vpaned')
 
         # pack all together
-        hpane1.add1(self.viewbook['west'].widget)
-        hpane1.add2(hpane2)
+        self.pane['west'].add1(self.viewbook['west'].widget)
+        self.pane['west'].add2(self.pane['east'])
 
-        hpane2.pack1(v, shrink=False)
-        hpane2.add2(self.viewbook['east'].widget)
+        self.pane['east'].pack1(v, shrink=False)
+        self.pane['east'].add2(self.viewbook['east'].widget)
 
-        left.add1(hpane1)
-        left.add2(self.viewbook['south'].widget)
+        self.pane['south'].add1(self.pane['west'])
+        self.pane['south'].add2(self.viewbook['south'].widget)
 
-        vis.pack1(left, resize=True, shrink=False)
-        vis.pack2(self.viewbook['fareast'].widget, resize=True, shrink=True)
+        self.pane['fareast'].pack1(self.pane['south'], resize=True, shrink=False)
+        self.pane['fareast'].pack2(self.viewbook['fareast'].widget, resize=True, shrink=True)
         # Set position to a huge value to ensure that by default, the
         # right pane is hidden
-        vis.set_position(5000)
+        self.pane['fareast'].set_position(5000)
 
         # Open default views:
 
@@ -830,20 +834,20 @@ class AdveneGUI (Connect):
         self.gui.get_widget('navigationhistory1').set_property('visible', False)
         self.viewbook['west'].add_view(self.navigation_history, name=_("History"), permanent=True)
         # Make the history snapshots + border visible
-        hpane1.set_position (self.navigation_history.options['snapshot_width'] + 20)
+        self.pane['west'].set_position (self.navigation_history.options['snapshot_width'] + 20)
 
         # Popup widget
         self.popupwidget=AccumulatorPopup(controller=self.controller,
                                           autohide=False)
         self.viewbook['east'].add_view(self.popupwidget, _("Popups"), permanent=True)
 
-        vis.show_all()
+        self.pane['fareast'].show_all()
 
         # Information message
         l=gtk.Label(textwrap.fill(_("You can drag and drop view icons (timeline, treeview, transcription...) in this notebook to embed various views."), 50))
         self.popupwidget.display(l, timeout=10000, title=_("Information"))
 
-        return vis
+        return self.pane['fareast']
 
     def display_imagecache(self):
         """Debug method.
@@ -1115,21 +1119,152 @@ class AdveneGUI (Connect):
         menu.show_all()
         return menu
 
+    def workspace_clear(self):
+        for d in ('west', 'east', 'south', 'fareast'):
+            self.viewbook[d].clear()
+        # Also clear popup views
+        for v in self.adhoc_views:
+            dest=None
+            try:
+                dest=v._destination
+            except AttributeError:
+                # Some default views do not have this attribute,
+                # because they are not opened through open_adhoc_view
+                pass
+            if dest == 'popup':
+                print "Closing ", v
+                v.close()
+
+    def workspace_serialize(self):
+        """Serialize the current workspace as an ElementTree element.
+
+        Looks like this (+ advene namespace):
+        <workspace>
+         <!-- Application layout -->
+         <layout x="12" y="23" width="800" height="600">
+          <pane id="main" position="123" />
+          <pane id="west" position="123" />
+          <pane id="east" position="123" />
+          <pane id="south" position="123" />
+          <pane id="fareast" position="123" />
+         </layout>
+         <!-- Opened adhoc views. -->
+         <!-- We reuse the adhoc view syntax with additional attributes -->
+         <!-- destination + title attributes for embedded views -->
+         <advene:adhoc id="timeline" xmlns:advene="http://experience.univ-lyon1.fr/advene/ns/advenetool" destination="east" title="My embedded timeline">
+           <advene:option name="autoscroll" value="2" />
+           <advene:option name="highlight" value="True" />
+           <advene:option name="display-relations" value="True" />
+           <advene:option name="display-relation-type" value="True" />
+           <advene:option name="display-relation-content" value="True" />
+         </advene:adhoc>
+         <!-- destination (popup) + title + x,y,width,height attributes for popup views -->
+         <advene:adhoc id="history" xmlns:advene="http://experience.univ-lyon1.fr/advene/ns/advenetool" destination="popup" title="My popup timeline" x="12" y="20" width="640" height="480" >
+           <advene:option name="autoscroll" value="2" />
+           <advene:option name="highlight" value="True" />
+           <advene:option name="display-relations" value="True" />
+           <advene:option name="display-relation-type" value="True" />
+           <advene:option name="display-relation-content" value="True" />
+         </advene:adhoc>
+        </workspace>
+        """
+        workspace=ET.Element('workspace')
+        w=self.gui.get_widget('win')
+        d={}
+        d['x'], d['y']=w.get_position()
+        d['width'], d['height']=w.get_size()
+        for k,v in d.iteritems():
+            d[k]=unicode(v)
+        layout=ET.SubElement(workspace, 'layout', d)
+        for n in ('main', 'west', 'east', 'fareast', 'south'):
+            ET.SubElement(layout, 'pane', id=n, position=unicode(self.pane[n].get_position()))
+        # Now save adhoc views
+        for v in self.adhoc_views:
+            if not hasattr(v, '_destination'):
+                continue
+            element=v.parameters_to_element(*v.get_save_arguments())
+            element.attrib['destination']=v._destination
+            element.attrib['title']=v._label
+            if v._destination == 'popup':
+                # Additional parameters
+                w=v.window
+                d={}
+                d['x'], d['y']=w.get_position()
+                d['width'], d['height']=w.get_size()
+                for k, v in d.iteritems():
+                    element.attrib[k]=unicode(v)
+            workspace.append(element)
+        return workspace
+
+    def workspace_restore(self, workspace, preserve_layout=False):
+        """Restore the workspace from a given ElementTree element.
+
+        It is the responsibility of the caller to clear the workspace if needed.
+        """
+        if workspace.tag != 'workspace':
+            raise Exception('Invalid XML element for workspace: ' + workspace.tag)
+        layout=None
+        # Open adhoc views
+        for node in workspace:
+            if node.tag == ET.QName(config.data.namespace, 'adhoc'):
+                # It is a adhoc-view definition
+                v=self.open_adhoc_view(name=node.attrib['id'],
+                                       label=node.attrib['title'],
+                                       destination=node.attrib['destination'],
+                                       parameters=node)
+                if node.attrib['destination'] == 'popup':
+                    # Restore popup windows positions
+                    v.window.move(long(node.attrib['x']), long(node.attrib['y']))
+                    v.window.resize(long(node.attrib['width']), long(node.attrib['height']))
+            elif node.tag == 'layout':
+                layout=node
+        # Restore layout
+        if layout and not preserve_layout:
+            w=self.gui.get_widget('win')
+            w.move(long(layout.attrib['x']), long(layout.attrib['y']))
+            w.resize(long(layout.attrib['width']), long(layout.attrib['height']))
+            for pane in layout:
+                if pane.tag == 'pane':
+                    self.pane[pane.attrib['id']].set_position(long(pane.attrib['position']))
+
     def open_adhoc_view(self, name, label=None, destination='popup', parameters=None, **kw):
         """Open the given adhoc view.
 
-        Destination can be: 'popup', 'south', 'east', 'fareast' or None
+        Destination can be: 'popup', 'south', 'west', 'east', 'fareast' or None.
+        
+        In the last case (None), the view is returned initialized, but not
+        added to its destination, it is the responsibility of the
+        caller to display it and set the _destinaton attribute to the
+        correct value.
 
         If name is a 'view' object, then try to interpret it as a
+        application/x-advene-adhoc-view or
         application/x-advene-adhoc-view and open the appropriate view
         with the given parameters.
         """
         view=None
         if isinstance(name, View):
+            if name.content.mimetype == 'application/x-advene-workspace-view':
+                tree=ET.parse(name.content.stream)
+                d={}
+                d['clear']=True
+                d['resize']=True
+                ew=advene.gui.edit.properties.EditWidget(d.__setitem__, d.get)
+                ew.set_name(_("Restoring workspace..."))
+                ew.add_label(_("Do you wish to restore the %s workspace ?") % name.title)
+                ew.add_checkbox(_("Clear current workspace"), "clear", _("Clear the current workspace"))
+                ew.add_checkbox(_("Restore layout"), "resize", _("Restore the layout that was saved with the workspace"))
+                res=ew.popup()
+                if res:
+                    if d['clear']:
+                        self.workspace_clear()
+                    self.workspace_restore(tree.getroot(), preserve_layout=not d['resize'])
+                return None
             if name.content.mimetype != 'application/x-advene-adhoc-view':
                 self.log(_("View %s is not an adhoc view") % name.id)
                 return None
             # Parse the content, extract the view id
+            # Override parameters
             parameters=name.content
             p=AdhocViewParametersParser(name.content.stream)
             if p.view_id:
@@ -1139,10 +1274,6 @@ class AdveneGUI (Connect):
             else:
                 self.log(_("Cannot identify the adhoc view %s") % name.id)
                 return None
-        else:
-            # FIXME: set view default options here
-            # parameters=default_options, None
-            parameters=None
 
         if name == 'tagbag' or name == 'tagbagview':
             tags=Set()
@@ -1207,7 +1338,7 @@ class AdveneGUI (Connect):
             return view
         # Store destination and label, used when moving the view
         view._destination=destination
-        view._label=label
+        view._label=label or view.view_name
         if destination == 'popup':
             view.popup(label=label)
         elif destination in ('south', 'east', 'west', 'fareast'):
@@ -2514,6 +2645,53 @@ Available views: timeline, tree, browser, transcribe"""))
             return True
         m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
         m.popup()
+        return True
+
+    def on_save_workspace_as_package_view1_activate (self, button=None, data=None):
+        name=self.controller.package._idgenerator.get_id(View)+'_'+'workspace'
+        title, ident=advene.gui.util.get_title_id(title=_("Saving workspace"),
+                                                  element_title=name,
+                                                  element_id=name,
+                                                  text=_("Enter a view name to save the workspace"))
+        if ident is None:
+            return True
+
+        if not re.match(r'^[a-zA-Z0-9_]+$', ident):
+            advene.gui.util.message_dialog(_("Error: the identifier %s contains invalid characters.") % ident)
+            return True
+
+        v=helper.get_id(self.controller.package.views, ident)
+        if v is None:
+            create=True
+            v=self.controller.package.createView(ident=ident, clazz='package')
+            v.content.mimetype='application/x-advene-workspace-view'
+        else:
+            # Existing view. Check that it is already an workspace-view
+            if v.content.mimetype != 'application/x-advene-workspace-view':
+                advene.gui.util.message_dialog(_("Error: the view %s exists and is not a workspace view.") % ident)
+                return True
+            create=False
+        v.title=title
+        v.author=config.data.userid
+        v.date=self.controller.get_timestamp()
+
+        workspace=self.workspace_serialize()
+        stream=StringIO.StringIO()
+        helper.indent(workspace)
+        ET.ElementTree(workspace).write(stream, encoding='utf-8')
+        v.content.setData(stream.getvalue())
+        stream.close()
+
+        if create:
+            self.controller.package.views.append(v)
+            self.controller.notify("ViewCreate", view=v)
+        else:
+            self.controller.notify("ViewEditEnd", view=v)
+        return True
+
+    def on_save_workspace_as_default1_activate (self, button=None, data=None):
+        self.log("Not implemented yet")
+        # FIXME
         return True
 
 if __name__ == '__main__':
