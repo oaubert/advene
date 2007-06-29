@@ -32,7 +32,6 @@ import advene.gui.util
 import advene.util.helper as helper
 
 import advene.util.ElementTree as ET
-ET._namespace_map[config.data.namespace]='advene'
 
 class AdhocView(object):
     """Implementation of the generic parts of AdhocViews.
