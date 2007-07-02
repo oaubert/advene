@@ -422,7 +422,7 @@ class TranscriptionView(AdhocView):
             pos = c.create_position (value=a.fragment.begin,
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
-            c.update_status (status="start", position=pos)
+            c.update_status (status="set", position=pos)
             c.gui.set_current_annotation(a)
             return True
 
