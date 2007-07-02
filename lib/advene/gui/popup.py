@@ -64,7 +64,7 @@ class Menu:
         pos = c.create_position (value=ann.fragment.begin,
                                  key=c.player.MediaTime,
                                  origin=c.player.AbsolutePosition)
-        c.update_status (status="set", position=pos)
+        c.update_status (status="start", position=pos)
         c.gui.set_current_annotation(ann)
         return True
 
