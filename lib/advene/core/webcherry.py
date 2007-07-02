@@ -442,12 +442,13 @@ class Media(Common):
     snapshot.exposed=True
 
     def play(self, position=None, **params):
+        c=self.controller
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
         if params.has_key ('filename'):
-            self.controller.queue_action(self.controller.set_media, params['filename'])
+            c.queue_action(c.set_media, params['filename'])
 
-        if not self.controller.player.playlist_get_list():
+        if not c.player.playlist_get_list():
             return self.send_no_content()
 
         if position is None:
@@ -455,9 +456,10 @@ class Media(Common):
                 position=params['position']
             except KeyError:
                 position=0
-        position=long(position)
-
-        self.controller.queue_action( self.controller.update_status, "start", position )
+        pos=c.create_position (value=long(position),
+                               key=c.player.MediaTime,
+                               origin=c.player.AbsolutePosition)
+        c.queue_action( c.update_status, "start", pos )
         return self.send_no_content()
     play.exposed=True
 

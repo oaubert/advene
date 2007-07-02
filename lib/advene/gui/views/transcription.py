@@ -418,7 +418,12 @@ class TranscriptionView(AdhocView):
             return False
 
         def play_annotation(i, a):
-            self.controller.update_status("start", a.fragment.begin)
+            c=self.controller
+            pos = c.create_position (value=a.fragment.begin,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="start", position=pos)
+            c.gui.set_current_annotation(a)
             return True
 
         item=gtk.SeparatorMenuItem()
