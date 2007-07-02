@@ -1757,7 +1757,7 @@ class TimeLine(AdhocView):
             an.fragment.end=self.controller.player.current_position_value 
             return True
     
-        def keypress_handler(widget, event, at):
+        def annotationtype_keypress_handler(widget, event, at):
             if widget.keypress(widget, event, at):
                 return True
             elif event.keyval == gtk.keysyms.Return:
@@ -1782,7 +1782,7 @@ class TimeLine(AdhocView):
                 self.quick_edit(el, button=widget, callback=set_end_time)
             return False
 
-        def buttonpress_handler(widget, event, t):
+        def annotationtype_buttonpress_handler(widget, event, t):
             """Display the popup menu when right-clicking on annotation type.
             """
             if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
@@ -1797,8 +1797,8 @@ class TimeLine(AdhocView):
             layout.put (b, 0, self.layer_position[t])
             b.update_widget()
             b.show_all()
-            b.connect("key_press_event", keypress_handler, t)
-            b.connect("button_press_event", buttonpress_handler, t)
+            b.connect("key_press_event", annotationtype_keypress_handler, t)
+            b.connect("button_press_event", annotationtype_buttonpress_handler, t)
             # The button can receive drops (to transmute annotations)
             b.connect("drag_data_received", self.annotation_type_drag_received_cb)
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -1851,12 +1851,6 @@ class TimeLine(AdhocView):
         layout.set_size (width, height)
         return
 
-    def build_legend_widget (self):
-        """Return a Layout containing the legend widget."""
-        legend = gtk.Layout ()
-        self.update_legend_widget(legend)
-        return legend
-
     def get_full_widget(self):
         """Return the layout with its controllers.
         """
@@ -1897,7 +1891,9 @@ class TimeLine(AdhocView):
 
         hpaned = gtk.HPaned ()
 
-        self.legend = self.build_legend_widget ()
+        self.legend = gtk.Layout ()
+        self.update_legend_widget(self.legend)
+        self.legend.show_all()
 
         sw1 = gtk.ScrolledWindow ()
         sw1.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
