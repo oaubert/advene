@@ -1108,7 +1108,7 @@ class AdveneGUI (Connect):
         def open_history_file(button, fname):
             try:
                 self.controller.load_package (uri=fname)
-            except IOError, e:
+            except (OSError, IOError), e:
                 advene.gui.util.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
                         'filename': fname, 
                         'error': unicode(e)}, gtk.MESSAGE_ERROR)
@@ -1962,7 +1962,7 @@ class AdveneGUI (Connect):
 
             try:
                 self.controller.load_package (uri=filename, alias=alias)
-            except IOError, e:
+            except (OSError, IOError), e:
                 advene.gui.util.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
                         'filename': filename, 
                         'error': unicode(e)}, gtk.MESSAGE_ERROR)
@@ -1979,7 +1979,7 @@ class AdveneGUI (Connect):
             alias=self.controller.aliases[package]
             try:
                 self.controller.save_package (alias=alias)
-            except IOError, e:
+            except (OSError, IOError), e:
                 advene.gui.util.message_dialog(_("Could not save the package: %s") % unicode(e),
                                                gtk.MESSAGE_ERROR)
         return True
@@ -2023,7 +2023,7 @@ class AdveneGUI (Connect):
             alias=self.controller.aliases[package]
             try:
                 self.controller.save_package(name=filename, alias=alias)
-            except IOError, e:
+            except (OSError, IOError), e:
                 advene.gui.util.message_dialog(_("Could not save the package: %s") % unicode(e),
                                                gtk.MESSAGE_ERROR)
         return True
