@@ -85,6 +85,7 @@ class Player:
 	self.basetime=None
 	self.pausetime=None
 	self.volume=12
+        self.mute_volume=None
 	self.stream_duration = 0
         self.position_update()
 
@@ -297,3 +298,18 @@ class Player:
     def restart_player(self):
 	self.log("restart player")
 	return True
+
+    def sound_mute(self):
+        if self.mute_volume is None:
+            self.mute_volume=self.sound_get_volume()
+            self.sound_set_volume(0)
+        return
+
+    def sound_unmute(self):
+        if self.mute_volume is not None:
+            self.sound_set_volume(self.mute_volume)
+            self.mute_volume=None
+        return
+
+    def sound_is_muted(self):
+        return (self.mute_volume is not None)
