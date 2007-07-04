@@ -128,7 +128,8 @@
 			  <child>
 			    <widget class="GtkMenuItem" id="as_default1">
 			      <property name="visible">True</property>
-			      <property name="label" translatable="yes">...as default</property>
+			      <property name="tooltip" translatable="yes">Use the current layout as standard workspace in the future</property>
+			      <property name="label" translatable="yes">...as standard workspace</property>
 			      <property name="use_underline">True</property>
 			      <signal name="activate" handler="on_save_workspace_as_default1_activate" last_modification_time="Fri, 29 Jun 2007 09:36:01 GMT"/>
 			    </widget>
@@ -188,7 +189,7 @@
 		      <signal name="activate" handler="on_import_file1_activate" last_modification_time="Fri, 13 Aug 2004 13:52:46 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image44">
+			<widget class="GtkImage" id="image45">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-convert</property>
 			  <property name="icon_size">1</property>
@@ -220,7 +221,7 @@
 		      <signal name="activate" handler="on_import_dvd_chapters1_activate" last_modification_time="Fri, 13 Aug 2004 14:56:58 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image45">
+			<widget class="GtkImage" id="image46">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-cdrom</property>
 			  <property name="icon_size">1</property>
@@ -390,8 +391,8 @@
 		  <child>
 		    <widget class="GtkMenuItem" id="edit_ruleset1">
 		      <property name="visible">True</property>
-		      <property name="tooltip" translatable="yes">Edit the default ruleset</property>
-		      <property name="label" translatable="yes">_Default Ruleset</property>
+		      <property name="tooltip" translatable="yes">Edit the standard rules</property>
+		      <property name="label" translatable="yes">_Standard Ruleset</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_edit_ruleset1_activate" last_modification_time="Wed, 14 Jan 2004 01:04:45 GMT"/>
 		    </widget>

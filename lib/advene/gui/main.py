@@ -1197,7 +1197,7 @@ class AdveneGUI (Connect):
         for k,v in d.iteritems():
             d[k]=unicode(v)
         layout=ET.SubElement(workspace, 'layout', d)
-        for n in ('main', 'west', 'east', 'fareast', 'south'):
+        for n in ('west', 'east', 'fareast', 'south', 'main'):
             ET.SubElement(layout, 'pane', id=n, position=unicode(self.pane[n].get_position()))
         # Now save adhoc views
         for v in self.adhoc_views:
@@ -2101,7 +2101,7 @@ class AdveneGUI (Connect):
     def on_edit_ruleset1_activate (self, button=None, data=None):
         """Default ruleset editing."""
         w=gtk.Window(gtk.WINDOW_TOPLEVEL)
-        w.set_title(_("Default RuleSet"))
+        w.set_title(_("Standard RuleSet"))
         w.connect ("destroy", lambda e: w.destroy())
 
         vbox=gtk.VBox()
@@ -2467,7 +2467,7 @@ class AdveneGUI (Connect):
                         }
                      )
 
-        ew.add_title(_("Default adhoc views"))
+        ew.add_title(_("Standard adhoc views"))
         ew.add_label(_("""List of adhoc views to open on application startup.
 Multiple views can be separated by :
 Available views: timeline, tree, browser, transcribe"""))
@@ -2483,7 +2483,7 @@ Available views: timeline, tree, browser, transcribe"""))
 
         ew.add_title(_("Paths"))
 
-        ew.add_dir_selector(_("Data"), "data", _("Default directory for data files"))
+        ew.add_dir_selector(_("Data"), "data", _("Standard directory for data files"))
         ew.add_dir_selector(_("Movie path"), "moviepath", _("List of directories (separated by %s) to search for movie files (_ means package directory)") % os.path.pathsep)
         ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
         ew.add_dir_selector(_("Player"), "plugins", _("Directory of the video player"))
@@ -2533,7 +2533,7 @@ Available views: timeline, tree, browser, transcribe"""))
         ew.add_spin(_("Height"), "height", _("Snapshot height"), 0, 1280)
 
         ew.add_title(_("Video"))
-        options={_("Default"): 'default' }
+        options={_("Standard"): 'default' }
         if config.data.os == 'win32':
             ew.add_entry(_("DVD drive"), 'dvd-device', _("Drive letter for the DVD"))
             options[_("GDI")] = 'wingdi'
@@ -2733,7 +2733,7 @@ Available views: timeline, tree, browser, transcribe"""))
         helper.indent(root)
         ET.ElementTree(root).write(stream, encoding='utf-8')
         stream.close()
-        self.controller.log(_("Default workspace has been saved"))
+        self.controller.log(_("Standard workspace has been saved"))
         return True
 
 if __name__ == '__main__':
