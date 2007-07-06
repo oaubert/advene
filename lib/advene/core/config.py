@@ -209,7 +209,7 @@ class Config(object):
             'display-scroller': False,
             'display-caption': False,
 	    'record-actions': False,
-            # Imagecache save on exit: None (==never), 'ask' or 'always'
+            # Imagecache save on exit: 'never', 'ask' or 'always'
             'imagecache-save-on-exit': 'ask',
             'quicksearch-ignore-case': True,
             # quicksearch source. If None, it is all package's annotations.
@@ -217,6 +217,10 @@ class Config(object):
             'quicksearch-source': None,
             # Display advanced options
             'expert-mode': False,
+            # Package auto-save : 'never', 'ask' or 'always'
+            'package-auto-save': 'never',
+            # auto-save interval in ms. Every 5 minutes by default.
+            'package-auto-save-interval': 5 * 60 * 1000,
             }
 
         # Player options

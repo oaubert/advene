@@ -178,6 +178,9 @@ class AdveneGUI (Connect):
 
         self.tooltips = gtk.Tooltips()
 
+        # Last auto-save time (in ms)
+        self.last_auto_save=time.time()*1000
+
         # Frequently used GUI widgets
         self.gui.logmessages = self.gui.get_widget("logmessages")
         self.slider_move = False
@@ -1682,6 +1685,29 @@ class AdveneGUI (Connect):
         if not self.controller.videotime_bookmarks and self.loop_toggle_button.get_active():
             self.loop_toggle_button.set_active(False)
 
+        def do_save(aliases):
+            for alias in aliases:
+                print "Saving ", alias
+                #self.controller.queue_action(self.controller.save_package, None, alias)
+                self.controller.save_package(alias=alias)
+            return True
+
+        if config.data.preferences['package-auto-save'] != 'never':
+            t=time.time() * 1000
+            if t - self.last_auto_save > config.data.preferences['package-auto-save-interval']:
+                # Need to save
+                l=[ alias for (alias, p) in self.controller.packages.iteritems() if p._modified and alias != 'advene' ]
+                if l:
+                    if config.data.preferences['package-auto-save'] == 'always':
+                        self.controller.queue_action(do_save, l)
+                    else:
+                        # Ask before saving. Use the non-modal dialog
+                        # to avoid locking the interface
+                        advene.gui.util.message_dialog(label=_("""The package(s) %s are modified.\nSave them now?""") % ", ".join(l),
+                                                       icon=gtk.MESSAGE_QUESTION,
+                                                       callback=lambda: do_save(l))
+                self.last_auto_save=t
+
 	# Fix the webserver reaction time on win32
         if config.data.os == 'win32':
             if self.controller.player.status in self.active_player_status:
@@ -2428,7 +2454,8 @@ class AdveneGUI (Connect):
         direct_options=('history-size-limit', 'scroll-increment',
                         'adhoc-south', 'adhoc-west', 'adhoc-east', 'adhoc-fareast', 'adhoc-popup',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit', 
-                        'remember-window-size', 'expert-mode')
+                        'remember-window-size', 'expert-mode',
+                        'package-auto-save', 'package-auto-save-interval')
         cache={
             'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
             'data': config.data.path['data'],
@@ -2445,7 +2472,6 @@ class AdveneGUI (Connect):
         ew=advene.gui.edit.properties.EditNotebook(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
         ew.add_title(_("General"))
-        ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
         ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 2000)
         ew.add_option(_("On exit,"), 'imagecache-save-on-exit', 
                       _("How to handle screenshots on exit"), 
@@ -2453,8 +2479,15 @@ class AdveneGUI (Connect):
                 _("never save screenshots"): 'never',
                 _("always save screenshots"): 'always',
                 _("ask before saving screenshots"): 'ask',
-                }
-                      )
+                })
+        ew.add_option(_("Auto-save"), 'package-auto-save', 
+                      _("Data auto-save functionality"), 
+                      {
+                _("is desactivated"): 'never',
+                _("is done automatically"): 'always',
+                _("is done after confirmation"): 'ask',
+                })
+        ew.add_spin(_("Auto-save interval"), 'package-auto-save-interval', _("Interval (in ms) between package auto-saves"), 1000, 60 * 60 * 1000)
 
         ew.add_title(_("GUI"))
         ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
@@ -2466,6 +2499,7 @@ class AdveneGUI (Connect):
                         _('Both'): gtk.TOOLBAR_BOTH,
                         }
                      )
+        ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
 
         ew.add_title(_("Standard adhoc views"))
         ew.add_label(_("""List of adhoc views to open on application startup.
