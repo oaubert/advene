@@ -694,6 +694,7 @@ class EditCondition(EditGeneric):
             ('element/fragment', _('The annotation fragment') ),
             ('annotation/fragment/end', _('The annotation begin time') ),
             ('annotation/fragment/end', _('The annotation end time') ),
+            ('annotation/fragment/duration', _('The annotation duration') ),
             ('annotation/type/id', _('The id of the annotation type') ),
             ('annotation/incomingRelations', _("The annotation's incoming relations") ),
             ('annotation/outgoingRelations', _("The annotation's outgoing relations") ),
