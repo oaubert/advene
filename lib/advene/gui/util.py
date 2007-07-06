@@ -184,24 +184,44 @@ def list_selector(title=None,
     d.destroy()
     return retval
 
-def message_dialog(label="", icon=gtk.MESSAGE_INFO):
+def message_dialog(label="", icon=gtk.MESSAGE_INFO, callback=None):
+    """Message dialog.
+
+    If callback is not None, then the dialog will not be modal and
+    the callback function will be called upon validation.
+    """
     if icon == gtk.MESSAGE_QUESTION:
         button=gtk.BUTTONS_YES_NO
     else:
         button=gtk.BUTTONS_OK
-    dialog = gtk.MessageDialog(
-        None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-        icon, button, label)
+    if callback is not None:
+        flags=gtk.DIALOG_DESTROY_WITH_PARENT
+    else:
+        gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
+    dialog = gtk.MessageDialog(None, flags,
+                               icon, button, label)
     dialog.set_position(gtk.WIN_POS_CENTER_ALWAYS)
     dialog.connect("key_press_event", dialog_keypressed_cb)
     
     dialog.show()
     center_on_mouse(dialog)
-    res=dialog.run()
-    dialog.destroy()
-    if icon == gtk.MESSAGE_QUESTION:
-        return (res == gtk.RESPONSE_YES)
+
+    if callback is None:
+        res=dialog.run()
+        dialog.destroy()
+        if icon == gtk.MESSAGE_QUESTION:
+            return (res == gtk.RESPONSE_YES)
+        else:
+            return True
     else:
+        # Callback is defined, non-modal behaviour. 
+        # Connect the signal handler.
+        def handle_response(d, res):
+            d.destroy()
+            if res == gtk.RESPONSE_YES:
+                callback()
+            return True
+        dialog.connect('response', handle_response)
         return True
 
 def yes_no_cancel_popup(title=None,
