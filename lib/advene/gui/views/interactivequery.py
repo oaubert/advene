@@ -104,42 +104,26 @@ class InteractiveQuery(AdhocView):
             return el, q
 
     def validate(self, button=None):
-        # Check if we are doing a short search
-        if not self.advanced.get_expanded():
-            # The advanced query is not shown. Use the self.entry
-            s=self.entry.get_text()
-            query=s
-            label=_("'%s'") % s
-            try:
-                source=self.here.annotations
-            except AttributeError:
-                source=self.controller.package.annotations
-            if self.ignorecase.get_active():
-                s=s.lower()
-                res=[ a for a in source if s in a.content.data.lower() ]
-            else:
-                res=[ a for a in source if s in a.content.data ]
-        else:
-            # Get the query
-            l=self.eq.invalid_items()
-            if l:
-                self.controller.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
-                         % ", ".join(l))
-                return True
-            query=self
-            self.eq.update_value()
-            # Store the query itself in the _interactive query
-            self.querycontainer.content.data = self.eq.model.xml_repr()
+        # Get the query
+        l=self.eq.invalid_items()
+        if l:
+            self.controller.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
+                     % ", ".join(l))
+            return True
+        query=self
+        self.eq.update_value()
+        # Store the query itself in the _interactive query
+        self.querycontainer.content.data = self.eq.model.xml_repr()
 
-            label=_("Expert search")
-            c=self.controller.build_context(here=self.here)
-            try:
-                res=c.evaluateValue("here/query/_interactive")
-            except AdveneTalesException, e:
-                # Display a dialog with the value
-                advene.gui.util.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
-                    icon=gtk.MESSAGE_ERROR)
-                return True
+        label=_("Expert search")
+        c=self.controller.build_context(here=self.here)
+        try:
+            res=c.evaluateValue("here/query/_interactive")
+        except AdveneTalesException, e:
+            # Display a dialog with the value
+            advene.gui.util.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
+                icon=gtk.MESSAGE_ERROR)
+            return True
 
         # Close the search window
         self.close()
@@ -159,27 +143,10 @@ class InteractiveQuery(AdhocView):
     def build_widget(self):
         vbox = gtk.VBox()
 
-        l=gtk.Label(_("Search for text in the content of annotations"))
-        vbox.pack_start(l, expand=False)
-
-        self.entry=gtk.Entry()
-        self.entry.connect('activate', self.validate)
-        vbox.pack_start(self.entry, expand=False)
-
-        self.ignorecase=gtk.CheckButton(_("Ignore case"))
-        self.ignorecase.set_active(True)
-        vbox.pack_start(self.ignorecase, expand=False)
-        
-        self.advanced = gtk.Expander ()
-        self.advanced.set_label (_("Expert search"))
-        self.advanced.set_expanded(False)
-
-        vbox.add(self.advanced)
-
         self.eq=EditQuery(self.query,
                           editable=True,
                           controller=self.controller)
-        self.advanced.add(self.eq.widget)
+        vbox.add(self.eq.widget)
 
         hb=gtk.HButtonBox()
 
@@ -203,7 +170,6 @@ class InteractiveQuery(AdhocView):
             return False
 
         vbox.connect('key-press-event', handle_key_press_event)
-        self.entry.grab_focus()
 
         return vbox
 
