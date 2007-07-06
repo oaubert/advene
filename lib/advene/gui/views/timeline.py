@@ -1512,6 +1512,7 @@ class TimeLine(AdhocView):
         """
         if event.button == 1:
             # Left click button in the upper part of the layout
+            # or double-click anywhere in the background
             # (timescale) will directly move the player.  
 
             # Note: event.(x|y) may be relative to a child widget, so
@@ -1521,7 +1522,7 @@ class TimeLine(AdhocView):
             # values relative to the whole layout size
             x=long(self.adjustment.value + x)
             y=long(widget.get_parent().get_vadjustment().value + y)
-            if y < self.button_height:
+            if y < self.button_height or event.type == gtk.gdk._2BUTTON_PRESS:
                 c=self.controller
                 pos = c.create_position (value=self.pixel2unit(x),
                                          key=c.player.MediaTime,
