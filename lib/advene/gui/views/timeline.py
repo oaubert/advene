@@ -1689,10 +1689,17 @@ class TimeLine(AdhocView):
     def layout_scroll_cb(self, widget=None, event=None):
         """Handle mouse scrollwheel events.
         """
-        if event.state & gtk.gdk.CONTROL_MASK:
+        zoom=event.state & gtk.gdk.CONTROL_MASK
+        if zoom:
+            # Control+scroll: zoom in/out
             a = self.fraction_adj
             incr = a.page_increment
+            # Memorize mouse position (in units)
+            # Get x, y (relative to the layout allocation)
+            x,y=widget.get_pointer()
+            mouse_position=self.pixel2unit(event.x)
         else:
+            # Plain scroll: scroll the timeline
             a = self.adjustment
             incr = a.step_incr
 
@@ -1702,19 +1709,17 @@ class TimeLine(AdhocView):
                 val = a.upper - a.page_size
             if val != a.value:
                 a.value = val
-                a.changed()
-                #a.value_changed ()
-            return True
+
         elif event.direction == gtk.gdk.SCROLL_UP:
             val = a.value - incr
             if val < a.lower:
                 val = a.lower
             if val != a.value:
                 a.value = val
-                a.changed()
-                #a.value_changed ()
-            return True
 
+        # Try to preserve the mouse position when zooming
+        if zoom:
+            self.adjustment.value=self.unit2pixel(mouse_position) - x
         return False
 
     def move_widget (self, widget=None):
