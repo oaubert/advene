@@ -128,6 +128,8 @@ class TimeLine(AdhocView):
             'display-relations': True,
             'display-relation-type': True,
             'display-relation-content': True,
+            # If False, then double-click will go to the annotation position
+            'edit-on-double-click': True,
             }
         self.controller=controller
 
@@ -1092,7 +1094,14 @@ class TimeLine(AdhocView):
             self.annotation_cb(widget, annotation, event.x)
             return True
         elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-            self.quick_edit(annotation, button=widget)
+            if self.options['edit-on-double-click']:
+                self.quick_edit(annotation, button=widget)
+            else:
+                c=self.controller
+                pos = c.create_position (value=annotation.fragment.begin,
+                                         key=c.player.MediaTime,
+                                         origin=c.player.AbsolutePosition)
+                c.update_status (status="set", position=pos)
             return True
         elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS and event.state & gtk.gdk.CONTROL_MASK:
             # Control + click : set annotation begin/end time to current time
@@ -2179,6 +2188,13 @@ class TimeLine(AdhocView):
         ew.add_checkbox(_("Relation type"), "display-relation-type", _("Display relation types"))
         ew.add_checkbox(_("Relation content"), "display-relation-content", _("Display relation content"))
         ew.add_checkbox(_("Highlight"), "highlight", _("Highlight active annotations"))
+
+        ew.add_option(_("On double click on annotation,"), 'edit-on-double-click',
+                      _("How to handle double click on annotation"),
+                      {
+                _("edit the annotation content"): True,
+                _("move the player to the annotation"): False
+                })
         res=ew.popup()
         if res:
             self.options.update(cache)
