@@ -25,10 +25,10 @@ Source: c:\gtk\bin\bzip2.dll; DestDir: {app}
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.23
+AppVerName=Advene 0.24
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.23
+VersionInfoVersion=0.24
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -36,8 +36,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.23
-VersionInfoTextVersion=0.23
+OutputBaseFilename=setup_advene_0.24
+VersionInfoTextVersion=0.24
 [Registry]
 Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
 [Icons]
