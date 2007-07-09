@@ -199,7 +199,7 @@ class TranscriptionView(AdhocView):
             If the update is not possible (too complex representation), return False.
             """
             if self.options['default-representation']:
-                repr=a.type.getMetaData(config.data.namespace, 'representation')
+                repr=a.type.getMetaData(config.data.namespace, 'representation') or ''
             else:
                 repr=self.options['representation']
             m=parsed_representation.match(repr)
