@@ -197,7 +197,7 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, callback=None):
     if callback is not None:
         flags=gtk.DIALOG_DESTROY_WITH_PARENT
     else:
-        gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
+        flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
     dialog = gtk.MessageDialog(None, flags,
                                icon, button, label)
     dialog.set_position(gtk.WIN_POS_CENTER_ALWAYS)
