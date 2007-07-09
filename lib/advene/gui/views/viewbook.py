@@ -223,6 +223,11 @@ class ViewBook(AdhocView):
             else:
                 print "Cannot find view ", selection.data
             return True
+        elif targetType == config.data.target_type['annotation-type']:
+            # Open a transcription view
+            at=self.controller.package.annotationTypes.get(selection.data)
+            self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % at.id, destination=self.location)
+            return True
         return False
 
     def build_widget(self):
@@ -237,7 +242,8 @@ class ViewBook(AdhocView):
                                gtk.DEST_DEFAULT_DROP |
                                gtk.DEST_DEFAULT_ALL,
                                config.data.drag_type['adhoc-view'] +
-                               config.data.drag_type['adhoc-view-instance'],
-                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK )
+                               config.data.drag_type['adhoc-view-instance'] +
+                               config.data.drag_type['annotation-type'],
+                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
         return notebook
