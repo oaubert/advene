@@ -284,8 +284,8 @@ class AnnotationWidget(GenericColorButtonWidget):
         context.move_to(2, int(height * 0.7))
 
         context.set_source_rgba(0, 0, 0, 1)
-        title=self.controller.get_title(self.annotation)
-        context.show_text(title)
+        title=unicode(self.controller.get_title(self.annotation))
+        context.show_text(title.encode('utf8'))
 
 class AnnotationTypeWidget(GenericColorButtonWidget):
     """ Widget representing an annotation type
@@ -340,8 +340,8 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         context.move_to(2, int(height * 0.7))
 
         context.set_source_rgba(0, 0, 0, 1)
-        title=self.controller.get_title(self.annotationtype)
-        context.show_text(title)
+        title=unicode(self.controller.get_title(self.annotationtype))
+        context.show_text(title.encode('utf8'))
         if self.width is None:
             ext=context.text_extents(title)
             if ext[2] != self.width:
@@ -389,7 +389,7 @@ class TagWidget(GenericColorButtonWidget):
         context.move_to(2, int(height * 0.7))
 
         context.set_source_rgba(0, 0, 0, 1)
-        context.show_text(self.tag)
+        context.show_text(unicode(self.tag).encode('utf8'))
         ext=context.text_extents(self.tag)
         w=long(ext[2]) + 5
         if self.width != w:
