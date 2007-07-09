@@ -1826,7 +1826,7 @@ class TimeLine(AdhocView):
             # The button can generate drags (to change annotation type order)
             b.connect("drag_data_get", self.type_drag_sent)
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                              config.data.drag_type['annotation-type'], gtk.gdk.ACTION_MOVE)
+                              config.data.drag_type['annotation-type'], gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK)
 
             # Does not work for the first time, since the layout itself is not realized,
             # thus its children cannot know their allocation.
