@@ -59,7 +59,7 @@ class TranscriptionImporter(advene.util.importer.GenericImporter):
 class TranscriptionEdit(AdhocView):
     def __init__ (self, controller=None, filename=None):
         self.view_name = _("Note taking")
-        self.view_id = 'transcribeview'
+        self.view_id = 'transcribe'
         self.close_on_package_load = False
 
         self.controller=controller

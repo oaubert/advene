@@ -1307,7 +1307,7 @@ class AdveneGUI (Connect):
                 self.log(_("Cannot identify the adhoc view %s") % name.id)
                 return None
 
-        if name == 'tagbag' or name == 'tagbagview':
+        if name == 'tagbag':
             tags=Set()
             if not parameters:
                 # Populate with annotations and relations tags
@@ -1315,7 +1315,7 @@ class AdveneGUI (Connect):
                     for e in l:
                         tags.update(e.tags)
             view=TagBag(self.controller, parameters=parameters, tags=list(tags))
-        elif name == 'transcription' or name == 'transcriptionview':
+        elif name == 'transcription':
             try:
                 source=kw['source']
             except KeyError:
@@ -1340,7 +1340,7 @@ class AdveneGUI (Connect):
                 m.popup(None, None, None, 0, gtk.get_current_event_time())
             else:
                 self.log (("No current package"))
-        elif name == 'transcribe' or name == 'transcribeview':
+        elif name == 'transcribe':
             try:
                 filename=kw['filename']
             except KeyError:

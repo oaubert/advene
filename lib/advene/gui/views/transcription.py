@@ -44,7 +44,7 @@ empty_representation = re.compile(r'^\s*$')
 class TranscriptionView(AdhocView):
     def __init__ (self, controller=None, source=None, parameters=None):
         self.view_name = _("Transcription")
-        self.view_id = 'transcriptionview'
+        self.view_id = 'transcription'
         self.close_on_package_load = True
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
