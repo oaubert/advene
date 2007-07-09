@@ -72,6 +72,8 @@ if config.data.os == 'win32':
     import pygtk
     import gtk
     import gtk.glade
+else:
+  import gtk
 
 import advene.gui.main
 
@@ -107,5 +109,24 @@ if __name__ == '__main__':
     import traceback
     s=StringIO.StringIO()
     traceback.print_exc (file = s)
-    print s.getvalue()
+    err=s.getvalue()
+    print err
+    # Let's save the traceback in a file, so that it can be sent by
+    # e-mail
+    errorfile=config.data.advenefile('error.txt', 'settings')
+    f=open(errorfile, 'w')
+    f.write("Advene %s crash\n\n" % config.data.version_string)
+    f.write(err)
+    f.close()
+    
+    d=gtk.MessageDialog(None,
+                        gtk.DIALOG_MODAL,
+                        gtk.MESSAGE_ERROR,
+                        gtk.BUTTONS_OK,
+                        _("An error occurred."))
+    d.format_secondary_text(_("You can inform the Advene developers by sending the file\n %s\n to advene@liris.cnrs.fr, along with a description of how the bug occurred.") % errorfile)
+    d.connect('response', lambda d, r: gtk.main_quit())
+    d.show()
+    gtk.main()
 
+    
