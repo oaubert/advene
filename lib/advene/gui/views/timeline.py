@@ -61,10 +61,12 @@ class QuickviewBar(gtk.HBox):
         self.begin=gtk.Label()
         self.end=gtk.Label()
         self.content=gtk.Label()
+        self.content.set_single_line_mode(True)
+        self.content.set_ellipsize(pango.ELLIPSIZE_MIDDLE)
 
         self.annotation=None
 
-        self.add(self.content)
+        self.pack_start(self.content, expand=True)
         self.pack_start(self.begin, expand=False)
         self.pack_start(self.end, expand=False)
 
@@ -77,8 +79,6 @@ class QuickviewBar(gtk.HBox):
             b="   " + helper.format_time(a.fragment.begin)
             e=" - " + helper.format_time(a.fragment.end) + ": "
             c=self.controller.get_title(a)
-            if len(c) > 40:
-                c=unicode(c[:39])+u'\u2026'
             c += " (" + a.id + ")"
         self.annotation=a
         self.begin.set_text(b)
@@ -1884,6 +1884,7 @@ class TimeLine(AdhocView):
         self.statusbar=QuickviewBar(self.controller)
         ti=gtk.ToolItem()
         ti.add(self.statusbar)
+        ti.set_expand(True)
         toolbar.insert(ti, -1)
 
         if self.controller.gui:
