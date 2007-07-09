@@ -21,6 +21,7 @@ import re
 import gtk
 import StringIO
 import os
+import urllib
 
 from gettext import gettext as _
 
@@ -155,10 +156,10 @@ class AdhocView(object):
 
         if options:
             for n, v in options.iteritems():
-                ET.SubElement(root, ET.QName(config.data.namespace, 'option'), name=n, value=unicode(v))
+                ET.SubElement(root, ET.QName(config.data.namespace, 'option'), name=n, value=urllib.quote(unicode(v)))
         if arguments:
             for n, v in arguments:
-                ET.SubElement(root, ET.QName(config.data.namespace, 'argument'), name=n, value=unicode(v))
+                ET.SubElement(root, ET.QName(config.data.namespace, 'argument'), name=n, value=urllib.quote(unicode(v)))
         return root
 
     def save_default_options(self, *p):
@@ -390,11 +391,11 @@ class AdhocViewParametersParser:
         for e in root:
             if e.tag == ET.QName(config.data.namespace, 'option'):
                 name=e.attrib['name']
-                value=e.attrib['value']
+                value=urllib.unquote(e.attrib['value'])
                 self.options[name]=value
             elif e.tag == ET.QName(config.data.namespace, 'argument'):
                 name=e.attrib['name']
-                value=e.attrib['value']
+                value=urllib.unquote(e.attrib['value'])
                 self.arguments.append( (name, value) )
             else:
                 print "Unknown tag %s in AdhocViewParametersParser" % e.tag
