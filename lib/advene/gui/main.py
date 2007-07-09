@@ -772,7 +772,9 @@ class AdveneGUI (Connect):
         def loop_toggle_cb(b):
             if b.get_active():
                 if self.current_annotation:
-                    self.loop_on_annotation_gui(self.current_annotation, goto=True)
+                    # If we are already in the current annotation, do not goto
+                    goto=not (self.controller.player.current_position_value in self.current_annotation.fragment)
+                    self.loop_on_annotation_gui(self.current_annotation, goto=goto)
                 else:
                     # No annotation was previously defined, deactivate the button
                     b.set_active(False)
