@@ -1055,9 +1055,11 @@ class TextContentHandler (ContentHandler):
         return True
 
     def key_pressed_cb (self, win, event):
-        # Process player shortcuts
-        #if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
-        #    return True
+        # Process player shortcuts 
+        # Desactivated, since control+arrows navigation and tab
+        # insertion is common in text editing.
+        # if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
+        # return True
         if event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.s:
                 self.content_save()
@@ -1071,6 +1073,9 @@ class TextContentHandler (ContentHandler):
             elif event.keyval == gtk.keysyms.i:
                 self.browser_open()
                 return True
+            elif event.keyval == gtk.keysyms.Tab:
+                # Control-TAB -> play/pause
+                self.controller.gui.process_player_shortcuts(win, event)
         return False
 
     def browser_open(self, b=None):
