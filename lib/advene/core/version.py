@@ -17,6 +17,6 @@
 #
 
 
-version='0.23'
-date='20070607'
+version='0.24'
+date='20070709'
 major,minor=[ long(s) for s in version.split('.') ]
