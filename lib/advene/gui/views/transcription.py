@@ -594,7 +594,6 @@ class TranscriptionView(AdhocView):
 
     def activate_annotation(self, a):
         if self.options['autoscroll']:
-            print "autoscroll", a.id
             # Make sure that the annotation is visible
             m=self.textview.get_buffer().get_mark("b_%s" % a.id)
             if m:
