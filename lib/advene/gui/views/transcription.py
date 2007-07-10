@@ -281,8 +281,7 @@ class TranscriptionView(AdhocView):
 
         self.update_current_annotation(self.textview, None)
 
-        sw.add_with_viewport (self.textview)
-
+        sw.add(self.textview)
 
         self.searchbox=gtk.HBox()
 
@@ -595,10 +594,11 @@ class TranscriptionView(AdhocView):
 
     def activate_annotation(self, a):
         if self.options['autoscroll']:
-            print "autoscroll"
+            print "autoscroll", a.id
             # Make sure that the annotation is visible
             m=self.textview.get_buffer().get_mark("b_%s" % a.id)
-            self.textview.scroll_to_mark(m, 0.2)
+            if m:
+                self.textview.scroll_to_mark(m, 0.2)
 
         self.tag_annotation(a, "activated")
         return True
