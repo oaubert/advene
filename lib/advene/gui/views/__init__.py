@@ -289,38 +289,43 @@ class AdhocView(object):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.set_title (label)
 
-        w=self.get_widget()
-
         def close_popup(*p):
             window.destroy()
             return True
 
         # Close the popup window when the widget is destroyed
-        w.connect("destroy", close_popup)
+        self.widget.connect("destroy", close_popup)
+
+        # Buttons specific to the window, that should be removed from
+        # the buttonbox on window close (esp. when reparenting to the
+        # application)
+        window.own_buttons=[]
 
         # If the widget defines a buttonbox, we can use it and do not
         # have to define a enclosing VBox (which also solves a problem
         # with the timeline view not being embedable inside a VBox()
-        if hasattr(w, 'buttonbox') and w.buttonbox is not None:
-            window.add(w)
-            window.buttonbox = w.buttonbox
+        if hasattr(self.widget, 'buttonbox') and self.widget.buttonbox is not None:
+            window.add(self.widget)
+            window.buttonbox = self.widget.buttonbox
         else:
             vbox = gtk.VBox()
             window.add (vbox)
-            vbox.add (w)
+            vbox.add (self.widget)
             window.buttonbox = gtk.HButtonBox()
             vbox.pack_start(window.buttonbox, expand=False)
 
         # Insert contextual_actions in buttonbox
+        # FIXME: make this a submenu
         try:
             for label, action in self.contextual_actions:
                 b=gtk.Button(label)
                 b.connect("clicked", action)
                 window.buttonbox.pack_start(b, expand=False)
+                window.own_buttons.append(b)
         except AttributeError:
             pass
 
-        def drag_sent(widget, context, selection, targetType, eventTime ):
+        def drag_sent(widget_, context, selection, targetType, eventTime ):
             if targetType == config.data.target_type['adhoc-view-instance']:
                 # This is not very robust, but allows to transmit a view instance reference
                 selection.set(selection.target, 8, repr(self))
@@ -339,6 +344,7 @@ class AdhocView(object):
                           config.data.drag_type['adhoc-view-instance'],
                           gtk.gdk.ACTION_LINK)
         
+        window.own_buttons.append(b)
         window.buttonbox.pack_start(b, expand=False)
 
         b = gtk.Button(stock=gtk.STOCK_CLOSE)
@@ -347,8 +353,17 @@ class AdhocView(object):
             b.connect ("clicked", self.controller.gui.close_view_cb, window, self)
         else:
             b.connect ("clicked", lambda w: window.destroy())
+        window.own_buttons.append(b)
         window.buttonbox.pack_start (b, expand=False)
 
+        def remove_own_buttons(w):
+            for b in window.own_buttons:
+                b.destroy()
+            return False
+
+        window.connect('destroy', remove_own_buttons)
+
+        window.buttonbox.show_all()
         window.show_all()
 
         if self.controller and self.controller.gui:
