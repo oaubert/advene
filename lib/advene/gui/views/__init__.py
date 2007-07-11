@@ -315,15 +315,18 @@ class AdhocView(object):
             vbox.pack_start(window.buttonbox, expand=False)
 
         # Insert contextual_actions in buttonbox
-        # FIXME: make this a submenu
-        try:
+        if hasattr(self, 'contextual_actions') and self.contextual_actions:
+            menubar=gtk.MenuBar()
+            root=gtk.MenuItem(_("Actions"))
+            menubar.append(root)
+            menu=gtk.Menu()
+            root.set_submenu(menu)
             for label, action in self.contextual_actions:
-                b=gtk.Button(label)
-                b.connect("clicked", action)
-                window.buttonbox.pack_start(b, expand=False)
-                window.own_buttons.append(b)
-        except AttributeError:
-            pass
+                b=gtk.MenuItem(label)
+                b.connect("activate", action)
+                menu.append(b)
+            window.buttonbox.pack_start(menubar, expand=False)
+            window.own_buttons.append(menubar)
 
         def drag_sent(widget_, context, selection, targetType, eventTime ):
             if targetType == config.data.target_type['adhoc-view-instance']:
