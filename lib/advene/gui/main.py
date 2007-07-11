@@ -1093,10 +1093,10 @@ class AdveneGUI (Connect):
         stbv_combo = self.gui.stbv_combo
         if stbv_combo is None:
             return True
-        l=[ None ]
-        l.extend(self.controller.get_stbv_list())
-        st, i = advene.gui.util.generate_list_model([ (i, self.controller.get_title(i))
-                                                      for i in l ],
+        l=[ helper.TitledElement(value=None, title=_("No active dynamic view")) ]
+        l.extend( [ helper.TitledElement(value=i, title=self.controller.get_title(i))
+                    for i in self.controller.get_stbv_list() ] )
+        st, i = advene.gui.util.generate_list_model([ (i.value, i.title) for i in l ],
                                                     active_element=self.controller.current_stbv)
         stbv_combo.set_model(st)
         if i is None:
