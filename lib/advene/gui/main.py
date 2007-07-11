@@ -736,12 +736,42 @@ class AdveneGUI (Connect):
         cell = gtk.CellRendererText()
         self.gui.stbv_combo.pack_start(cell, True)
         self.gui.stbv_combo.add_attribute(cell, 'text', 0)
-        self.gui.stbv_combo.connect('changed', self.on_stbv_combo_changed)
         hb.pack_start(self.gui.stbv_combo, expand=True)
-        # BROKEN self.tooltips.set_tip(self.gui.stbv_combo, _("Current dynamic view"))
-        b=advene.gui.util.get_small_stock_button(gtk.STOCK_EDIT, 
-                                                 self.on_edit_current_stbv_clicked)
-        hb.pack_start(b, expand=False)
+
+        def on_edit_current_stbv_clicked(button):
+            combo=self.gui.stbv_combo
+            i=combo.get_active_iter()
+            stbv=combo.get_model().get_value(i, 1)
+            if stbv is None:
+                if not advene.gui.util.message_dialog(_("Do you want to create a new dynamic view?"),
+                                                  icon=gtk.MESSAGE_QUESTION):
+                    return True
+                cr = CreateElementPopup(type_=View,
+                                        parent=self.controller.package,
+                                        controller=self.controller)
+                cr.popup()
+                return True
+            self.edit_element(stbv)
+            return True
+
+        edit_stbv_button=advene.gui.util.get_small_stock_button(gtk.STOCK_EDIT, 
+                                                                on_edit_current_stbv_clicked)
+        hb.pack_start(edit_stbv_button, expand=False)
+
+        def on_stbv_combo_changed (combo=None):
+            """Callback used to select the current stbv.
+            """
+            i=combo.get_active_iter()
+            if i is None:
+                return False
+            stbv=combo.get_model().get_value(i, 1)
+            if stbv is None:
+                self.tooltips.set_tip(edit_stbv_button, _("Create a new dynamic view."))
+            else:
+                self.tooltips.set_tip(edit_stbv_button, _("Edit the current dynamic view."))
+            self.controller.activate_stbv(stbv)
+            return True
+        self.gui.stbv_combo.connect('changed', on_stbv_combo_changed)
 
         # Append the volume control to the toolbar
         self.audio_mute=gtk.ToggleToolButton()
@@ -1039,22 +1069,6 @@ class AdveneGUI (Connect):
         else:
                 
             pop.edit (modal)
-        return True
-
-    def on_edit_current_stbv_clicked(self, button):
-        combo=self.gui.stbv_combo
-        i=combo.get_active_iter()
-        stbv=combo.get_model().get_value(i, 1)
-        if stbv is None:
-            if not advene.gui.util.message_dialog(_("Do you want to create a new dynamic view?"),
-                                              icon=gtk.MESSAGE_QUESTION):
-                return True
-            cr = CreateElementPopup(type_=View,
-                                    parent=self.controller.package,
-                                    controller=self.controller)
-            cr.popup()
-            return True
-        self.edit_element(stbv)
         return True
 
     def update_package_list (self):
@@ -1830,16 +1844,6 @@ class AdveneGUI (Connect):
 
     def popup_edit_accumulator(self, *p):
         self.open_adhoc_view('editaccumulator')
-        return True
-
-    def on_stbv_combo_changed (self, combo=None):
-        """Callback used to select the current stbv.
-        """
-        i=combo.get_active_iter()
-        if i is None:
-            return False
-        stbv=combo.get_model().get_value(i, 1)
-        self.controller.activate_stbv(stbv)
         return True
 
     def on_exit(self, source=None, event=None):
