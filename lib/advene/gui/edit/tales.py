@@ -20,7 +20,7 @@ import re
 
 from advene.gui.views.browser import Browser
 import advene.util.helper
-import advene.gui.util
+from advene.gui.util import dialog
 
 class TALESEntry:
     """TALES expression entry widget.
@@ -101,7 +101,7 @@ class TALESEntry:
             preselect=self.predefined[0][0]
         else:
             preselect=None
-        self.combo=advene.gui.util.list_selector_widget(members=self.predefined,
+        self.combo=dialog.list_selector_widget(members=self.predefined,
                                                         preselect=preselect,
                                                         entry=True)
         self.entry=self.combo.child

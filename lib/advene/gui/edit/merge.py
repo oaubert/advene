@@ -17,8 +17,6 @@
 #
 """GUI to merge packages.
 """
-import sys
-
 import gtk
 import gobject
 import difflib
@@ -26,10 +24,7 @@ import pango
 
 from gettext import gettext as _
 
-import advene.core.config as config
-
 import advene.gui.popup
-import advene.gui.util
 import advene.util.helper as helper
 from advene.util.merger import Differ
 

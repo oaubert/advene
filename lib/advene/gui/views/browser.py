@@ -21,10 +21,7 @@
 import sys
 
 # Advene part
-import advene.core.config as config
-
-import advene.gui.util
-from advene.model.annotation import Annotation
+from advene.gui.util import dialog
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
 
@@ -226,7 +223,7 @@ class Browser(AdhocView):
                 columnbrowser.next=None
                 columnbrowser.listview.get_selection().unselect_all()
 
-            advene.gui.util.message_dialog(_("Exception: %s") % e,
+            dialog.message_dialog(_("Exception: %s") % e,
                                            icon=gtk.MESSAGE_WARNING)
             return
 

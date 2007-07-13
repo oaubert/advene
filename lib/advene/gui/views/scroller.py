@@ -18,9 +18,6 @@
 """Module displaying a text scroller below the video output."""
 
 # Advene part
-import advene.core.config as config
-import advene.util.helper as helper
-import advene.gui.util
 from advene.gui.views import AdhocView
 
 from gettext import gettext as _

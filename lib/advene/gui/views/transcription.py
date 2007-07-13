@@ -35,7 +35,7 @@ import advene.util.helper as helper
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-import advene.gui.util
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
 import advene.gui.popup
 
 parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
@@ -167,9 +167,9 @@ class TranscriptionView(AdhocView):
         l=self.check_modified()
         if l:
             if self.options['representation'] and not parsed_representation.match(self.options['representation']):
-                advene.gui.util.message_dialog(label=_("%d annotation(s) were modified\nbut we cannot propagate the modifications\nsince the representation parameter is used.") % len(l))
+                dialog.message_dialog(label=_("%d annotation(s) were modified\nbut we cannot propagate the modifications\nsince the representation parameter is used.") % len(l))
             else:
-                if advene.gui.util.message_dialog(label=_("%d annotations were modified.\nDo you want to update their content?") % len(l),
+                if dialog.message_dialog(label=_("%d annotations were modified.\nDo you want to update their content?") % len(l),
                                                   icon=gtk.MESSAGE_QUESTION):
                     self.ignore_updates = True
                     self.update_modified(l)
@@ -227,7 +227,7 @@ class TranscriptionView(AdhocView):
             else:
                 impossible.append(a)
         if impossible:
-                advene.gui.util.message_dialog(label=_("Cannot convert the following annotations,\nthe representation pattern is too complex.\n%s") % ",".join( [ a.id for a in impossible ] ))
+                dialog.message_dialog(label=_("Cannot convert the following annotations,\nthe representation pattern is too complex.\n%s") % ",".join( [ a.id for a in impossible ] ))
         return True
 
     def refresh(self, *p):
@@ -238,7 +238,7 @@ class TranscriptionView(AdhocView):
         l=self.check_modified()
         if l:
             if self.options['representation'] and not parsed_representation.match(self.options['representation']):
-                advene.gui.util.message_dialog(label=_("Cannot validate the update.\nThe representation pattern is too complex."))
+                dialog.message_dialog(label=_("Cannot validate the update.\nThe representation pattern is too complex."))
                 return True
             self.ignore_updates = True
             self.update_modified(l)
@@ -292,7 +292,7 @@ class TranscriptionView(AdhocView):
             self.searchbox.hide()
             return True
 
-        close_button=advene.gui.util.get_pixmap_button('small_close.png', hide_searchbox)
+        close_button=get_pixmap_button('small_close.png', hide_searchbox)
         close_button.set_relief(gtk.RELIEF_NONE)
         self.searchbox.pack_start(close_button, expand=False, fill=False)
         
@@ -315,7 +315,7 @@ class TranscriptionView(AdhocView):
 #            # FIXME
 #            return True
 #
-#        b=advene.gui.util.get_small_stock_button(gtk.STOCK_GO_FORWARD, find_next)
+#        b=get_small_stock_button(gtk.STOCK_GO_FORWARD, find_next)
 #        b.set_relief(gtk.RELIEF_NONE)
 #        self.controller.gui.tooltips.set_tip(b, _("Find next occurrence"))
 #        self.searchbox.pack_start(b, expand=False, fill=False)
@@ -328,13 +328,13 @@ class TranscriptionView(AdhocView):
         hb=gtk.HButtonBox()
         hb.set_homogeneous(False)
 
-        b=advene.gui.util.get_small_stock_button(gtk.STOCK_PREFERENCES, self.edit_options)
+        b=get_small_stock_button(gtk.STOCK_PREFERENCES, self.edit_options)
         hb.pack_start(b, expand=False)
 
-        b=advene.gui.util.get_small_stock_button(gtk.STOCK_FIND, self.show_searchbox)
+        b=get_small_stock_button(gtk.STOCK_FIND, self.show_searchbox)
         hb.pack_start(b, expand=False)
 
-        b=advene.gui.util.get_small_stock_button(gtk.STOCK_SAVE, self.save_transcription)
+        b=get_small_stock_button(gtk.STOCK_SAVE, self.save_transcription)
         hb.pack_start(b, expand=False)
 
         mainbox.pack_start(hb, expand=False)
@@ -630,7 +630,7 @@ class TranscriptionView(AdhocView):
         return True
 
     def save_transcription(self, button=None):
-        fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
+        fname=dialog.get_filename(title= ("Save transcription to..."),
                                            action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                            button=gtk.STOCK_SAVE)
         if fname is not None:

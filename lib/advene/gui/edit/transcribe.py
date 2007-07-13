@@ -37,7 +37,7 @@ import advene.util.helper as helper
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-import advene.gui.util
+from advene.gui.util import dialog, image_from_position
 import advene.gui.edit.properties
 
 class TranscriptionImporter(advene.util.importer.GenericImporter):
@@ -308,9 +308,9 @@ class TranscriptionEdit(AdhocView):
         item.connect("activate", popup_modify, 100)
 
         item = gtk.MenuItem()
-        item.add(advene.gui.util.image_from_position(self.controller,
-                                                     position=timestamp,
-                                                     height=60))
+        item.add(image_from_position(self.controller,
+                                     position=timestamp,
+                                     height=60))
         item.connect("activate", popup_goto, timestamp)
         menu.append(item)
 
@@ -546,7 +546,7 @@ class TranscriptionEdit(AdhocView):
         if self.sourcefile:
             fname=self.sourcefile
         else:
-            fname=advene.gui.util.get_filename(title= ("Save transcription to..."),
+            fname=dialog.get_filename(title= ("Save transcription to..."),
                                                action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                                button=gtk.STOCK_SAVE,
                                                default_dir=config.data.path['data'])
@@ -558,7 +558,7 @@ class TranscriptionEdit(AdhocView):
         try:
             f=open(filename, "w")
         except IOError, e:
-            advene.gui.util.message_dialog(
+            dialog.message_dialog(
                 _("Cannot save the file: %s") % unicode(e),
                 icon=gtk.MESSAGE_ERROR)
             return True
@@ -585,10 +585,10 @@ class TranscriptionEdit(AdhocView):
 
     def load_transcription_cb(self, button=None):
         if not self.buffer_is_empty():
-            if not advene.gui.util.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
+            if not dialog.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
                                                   icon=gtk.MESSAGE_QUESTION):
                 return True
-        fname=advene.gui.util.get_filename(title=_("Select transcription file to load"),
+        fname=dialog.get_filename(title=_("Select transcription file to load"),
                                            default_dir=config.data.path['data'])
         if fname is not None:
             self.load_transcription(filename=fname)
@@ -662,7 +662,7 @@ class TranscriptionEdit(AdhocView):
             return True
 
         if not self.buffer_is_empty():
-            if not advene.gui.util.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
+            if not dialog.message_dialog(_("This will overwrite the current textual content. Are you sure?"),
                                                   icon=gtk.MESSAGE_QUESTION):
                 return True
 
@@ -697,7 +697,7 @@ class TranscriptionEdit(AdhocView):
             return True
 
         if len(at.annotations):
-            ret=advene.gui.util.yes_no_cancel_popup(title=_('Transcription conversion'),
+            ret=dialog.yes_no_cancel_popup(title=_('Transcription conversion'),
                                                     text=_("There already are annotations of type %s.\nDo you want to delete them before conversion?") % self.controller.get_title(at))
             if ret == gtk.RESPONSE_YES:
                 # Remove all annotations of at type
@@ -717,7 +717,7 @@ class TranscriptionEdit(AdhocView):
         self.controller.log(_('Converted from file %s :') % self.sourcefile)
         self.controller.log(ti.statistics_formatted())
         # Feedback
-        advene.gui.util.message_dialog(
+        dialog.message_dialog(
             _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
         return True
 

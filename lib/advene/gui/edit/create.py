@@ -37,7 +37,7 @@ from advene.model.view import View
 from advene.model.query import Query
 from advene.rules.elements import RuleSet, Rule, Event, Action
 
-import advene.gui.util
+from advene.gui.util import dialog
 import advene.gui.edit.elements
 import advene.util.helper as helper
 
@@ -78,7 +78,7 @@ class CreateElementPopup(object):
         else:
             flags=gtk.DIALOG_DESTROY_WITH_PARENT
 
-        d=advene.gui.util.title_id_dialog(title=_("%s creation")  % element_label[self.type_],
+        d=dialog.title_id_dialog(title=_("%s creation")  % element_label[self.type_],
                                           text=_("To create a new element of type %s,\nyou must give the following information.") % element_label[self.type_],
                                           element_title=i,
                                           element_id=i,
@@ -126,7 +126,7 @@ class CreateElementPopup(object):
                 return None
 
             if not type_list:
-                advene.gui.util.message_dialog(_("No available type."))
+                dialog.message_dialog(_("No available type."))
                 return None
 
             # Check for self.mimetype
@@ -140,7 +140,7 @@ class CreateElementPopup(object):
                     # Insert self.mimetype in the list
                     preselect=ViewType(self.mimetype, self.mimetype)
                     type_list.insert(0, preselect)
-            d.type_combo = advene.gui.util.list_selector_widget(
+            d.type_combo = dialog.list_selector_widget(
                 members=[ (t, self.controller.get_title(t)) for t in type_list  ],
                 preselect=preselect)
             hbox.pack_start(d.type_combo)
@@ -169,12 +169,12 @@ class CreateElementPopup(object):
         title_ = self.dialog.title_entry.get_text()
         # Check validity of id.
         if not self.is_valid_id(id_):
-            advene.gui.util.message_dialog(
+            dialog.message_dialog(
                 _("The identifier %s is not valid.\nIt must be composed of non-accentuated alphabetic characters\nUnderscore is allowed.") % id_)
             return None
 
         if self.controller.package._idgenerator.exists(id_):
-            advene.gui.util.message_dialog(
+            dialog.message_dialog(
                 _("The identifier %s is already defined.") % id_)
             return None
         else:
@@ -312,11 +312,11 @@ class CreateElementPopup(object):
 
     def popup(self, modal=False):
         d=self.build_widget(modal)
-        d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
+        d.connect("key_press_event", dialog.dialog_keypressed_cb)
         self.dialog=d
         while True:
             d.show()
-            advene.gui.util.center_on_mouse(d)
+            dialog.center_on_mouse(d)
             res=d.run()
             retval=None
             if res == gtk.RESPONSE_OK:

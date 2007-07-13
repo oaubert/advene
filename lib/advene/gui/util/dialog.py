@@ -15,7 +15,8 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""GUI-related helper methods"""
+"""Dialog building facilities.
+"""
 
 from gettext import gettext as _
 
@@ -32,40 +33,9 @@ from advene.model.exception import AdveneException
 # In some cases, sys.getfilesystemencoding returns None
 _fs_encoding = sys.getfilesystemencoding() or 'ascii'
 
-def png_to_pixbuf (png_data, width=None, height=None):
-    """Load PNG data into a pixbuf
-    """
-    loader = gtk.gdk.PixbufLoader ('png')
-    if not isinstance(png_data, str):
-        png_data=str(png_data)
-    try:
-        loader.write (png_data, len (png_data))
-        pixbuf = loader.get_pixbuf ()
-        loader.close ()
-    except gobject.GError:
-        # The PNG data was invalid.
-        pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
-
-    if width and not height:
-        height = width * pixbuf.get_height() / pixbuf.get_width()
-    if height and not width:
-        width = height * pixbuf.get_width() / pixbuf.get_height()
-    if width and height:
-        p=pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
-        return p
-    else:
-        return pixbuf
-
-def image_from_position(controller, position=None, width=None, height=None):
-    i=gtk.Image()
-    if position is None:
-        position=controller.player.current_position_value
-    pb=png_to_pixbuf (controller.package.imagecache[position],
-                                         width=width, height=height)
-    i.set_from_pixbuf(pb)
-    return i
-
 def dialog_keypressed_cb(widget=None, event=None):
+    """Generic dialog keypress handler.
+    """
     if event.keyval == gtk.keysyms.Return:
         widget.response(gtk.RESPONSE_OK)
         return True
@@ -261,6 +231,15 @@ def entry_dialog(title=None,
                  text=None,
                  default=""):
     """Display a dialog to enter a short text.
+
+    @param title: title of the dialog
+    @type title: string
+    @param text: text of the dialog
+    @type text: string
+    @param default: default value for the entry
+    @type default: string
+    @return: the entry value or None if the dialog was cancelled
+    @rtype: string
     """
     d = gtk.Dialog(title=title,
                    parent=None,
@@ -299,15 +278,18 @@ def entry_dialog(title=None,
     return ret
 
 def build_optionmenu(elements, current, on_change_element, editable=True):
-    """Build an ComboBox.
+    """Build a ComboBox.
 
-    elements is a dict holding (key, values) where the values will be used as labels
-    current is the current activated element (i.e. one of the keys)
-    on_change_element is the method which will be called upon option modification.
-
-    Its signature is:
+    The `on_change_element` method signature is:
 
     ``def on_change_element([self,] element):``
+
+    @param elements: dict holding (key, values) where the values will be used as labels
+    @type elements: dict
+    @param current: current activated element (i.e. one of the keys)
+    @param on_change_element: method be called upon option modification
+    @type on_change_element: method
+    @return: the combobox widget
     """
     def change_cb(combobox, on_change_element):
         i=combobox.get_active_iter()
@@ -337,6 +319,20 @@ def title_id_dialog(title=_("Name the element"),
                     element_id=None,
                     text=_("Choose a name for the element"),
                     flags=None):
+    """Build a dialog to get title and id.
+
+    @param title: title of the dialog
+    @type title: string
+    @param text: text of the dialog
+    @type text: string
+    @param element_title: default title
+    @type element_title: string
+    @param element_id: default id
+    @type element_id: string
+    @param flags: optional gtk.Dialog flags (such as gtk.DIALOG_MODAL)
+    
+    @return: the dialog widget
+    """
     if flags is None:
         flags=gtk.DIALOG_DESTROY_WITH_PARENT
     d = gtk.Dialog(title=title,
@@ -388,9 +384,21 @@ def title_id_dialog(title=_("Name the element"),
     return d
 
 def get_title_id(title=_("Name the element"),
+                 text=_("Choose a name for the element"),
                  element_title=None,
-                 element_id=None,
-                 text=_("Choose a name for the element")):
+                 element_id=None):
+    """Get a title and id pair.
+
+    @param title: title of the dialog
+    @type title: string
+    @param text: text of the dialog
+    @type text: string
+    @param element_title: default title
+    @type element_title: string
+    @param element_id: default id
+    @type element_id: string
+    @return: a tuple (title, id). Both will be None if the dialog was cancelled
+    """
     d = title_id_dialog(title=title,
                         element_title=element_title,
                         element_id=element_id,
@@ -420,8 +428,24 @@ def get_filename(title=_("Open a file"),
                  button=gtk.STOCK_OPEN,
                  default_dir=None,
                  default_file=None,
-                 alias=None, 
+                 alias=False,
                  filter='any'):
+    """Get a filename.
+
+    @param title: the dialog title
+    @type title: string
+    @param action: the dialog action: gtk.FILE_CHOOSER_ACTION_OPEN (default) or gtk.FILE_CHOOSER_ACTION_SAVE
+    @param button: the validation button id: gtk.STOCK_OPEN (default) or gtk.STOCK_SAVE
+    @param default_dir: the default directory
+    @type default_dir: string
+    @param default_file: the default file
+    @type default_file: string
+    @param alias: wether to display the alias entry
+    @type alias: boolean
+    @param filter: the filename filter ('any', 'advene', 'session', 'video')
+    @type filter: string
+    @return: if alias, a tuple (filename, alias), else the filename
+    """
     preview_box = gtk.VBox()
 
     preview = gtk.Button(_("N/C"))
@@ -527,6 +551,16 @@ def get_dirname(title=_("Choose a directory"),
                  action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                  button=gtk.STOCK_OK,
                  default_dir=None):
+    """Get a directory name.
+
+    @param title: the dialog title
+    @type title: string
+    @param action: the dialog action: gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER (default)
+    @param button: the validation button id: gtk.STOCK_OK (default)
+    @param default_dir: the default directory
+    @type default_dir: string
+    @return: the directory name
+    """
 
     fs=gtk.FileChooserDialog(title=title,
                              parent=None,
@@ -715,39 +749,3 @@ def center_on_mouse(w):
     rw, rh = root.get_size()
     w.move( min( max(0, x - width/2), rw-width ),
             min( max(0, y - height/2), rh-height) )
-
-def get_small_stock_button(sid, callback=None):
-    b=gtk.Button()
-    b.add(gtk.image_new_from_stock(sid, gtk.ICON_SIZE_SMALL_TOOLBAR))
-    if callback:
-        b.connect('clicked', callback)
-    return b
-
-def get_pixmap_button(pixmap, callback=None):
-    b=gtk.Button()
-    i=gtk.Image()
-    i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-    b.add(i)
-    if callback:
-        b.connect('clicked', callback)
-    return b
-
-color_cache={}
-
-def name2color(color):
-    """Return the gtk color for the given color name or code.
-    """
-    if color:
-        # Found a color. Cache it.
-        try:
-            gtk_color=color_cache[color]
-        except:
-            try:
-                color_cache[color]=gtk.gdk.color_parse(color)
-            except:
-                print "Unable to parse ", color
-                color_cache[color]=None
-            gtk_color=color_cache[color]
-    else:
-        gtk_color=None
-    return gtk_color

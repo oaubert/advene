@@ -23,7 +23,6 @@ in a timestamped clickable list."""
 
 import time
 
-import advene.core.config as config
 from advene.gui.views import AdhocView
 
 import advene.util.helper as helper

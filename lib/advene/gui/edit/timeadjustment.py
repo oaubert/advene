@@ -25,7 +25,7 @@ import advene.core.config as config
 import re
 import gtk
 import advene.util.helper
-import advene.gui.util
+from advene.gui.util import png_to_pixbuf
 
 from gettext import gettext as _
 
@@ -117,7 +117,7 @@ class TimeAdjustment:
         hbox.pack_start(vb, expand=False)
 
         self.image = gtk.Image()
-        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value], width=100))
+        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache[self.value], width=100))
 
         b=gtk.Button()
         b.connect("button-press-event", handle_image_click)
@@ -268,7 +268,7 @@ class TimeAdjustment:
         """Updates the value displayed in the entry according to the current value."""
         self.entry.set_text(advene.util.helper.format_time(self.value))
         # Update the image
-        self.image.set_from_pixbuf(advene.gui.util.png_to_pixbuf (self.controller.package.imagecache[self.value],
+        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache[self.value],
                                                                   width=100))
 
     def update_value_cb(self, widget, increment):

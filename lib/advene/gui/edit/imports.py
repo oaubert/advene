@@ -27,7 +27,7 @@ from gettext import gettext as _
 import advene.core.config as config
 
 import advene.gui.popup
-import advene.gui.util
+from advene.gui.util import dialog
 import advene.util.helper as helper
 
 class TreeViewImporter:
@@ -356,7 +356,7 @@ class Importer:
             d=config.data.path['data']
         else:
             d=None
-        filename, alias=advene.gui.util.get_filename(title=_("Choose the package to import, and its alias"),
+        filename, alias=dialog.get_filename(title=_("Choose the package to import, and its alias"),
                                                      action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                                      button=gtk.STOCK_OPEN,
                                                      default_dir=d,

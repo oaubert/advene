@@ -18,8 +18,6 @@
 """Widget used to select the DVD chapter in Advene.
 """
 
-import advene.core.config as config
-
 import gtk
 import re
 

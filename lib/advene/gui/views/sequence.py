@@ -32,8 +32,6 @@ import gtk
 import gobject
 
 # Advene part
-import advene.core.config as config
-
 from advene.model.package import Package
 from advene.gui.views import AdhocView
 

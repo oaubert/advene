@@ -20,7 +20,7 @@
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
-import advene.gui.util
+from advene.gui.util import image_from_position, get_small_stock_button
 from advene.gui.views import AdhocView
 
 from gettext import gettext as _
@@ -124,9 +124,9 @@ class HistoryNavigation(AdhocView):
             return False
 
         vbox=gtk.VBox()
-        i=advene.gui.util.image_from_position(self.controller,
-                                              t,
-                                              width=self.options['snapshot_width'])
+        i=image_from_position(self.controller,
+                              t,
+                              width=self.options['snapshot_width'])
         e=gtk.Button()
         #e.connect("button-release-event", self.activate, t)
         e.connect("clicked", self.activate, t)
@@ -198,7 +198,7 @@ class HistoryNavigation(AdhocView):
         hb=gtk.HBox()
         hb.set_homogeneous(False)
 
-        b=advene.gui.util.get_small_stock_button(gtk.STOCK_DELETE)
+        b=get_small_stock_button(gtk.STOCK_DELETE)
                                                  
         self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |

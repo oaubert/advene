@@ -24,7 +24,7 @@ from gettext import gettext as _
 
 import advene.core.config as config
 import advene.gui.popup
-import advene.gui.util
+from advene.gui.util import dialog
 
 from advene.gui.views import AdhocView
 
@@ -77,7 +77,7 @@ class ExternalImporter(AdhocView):
         mes=_('Completed conversion from file %(filename)s :\n%(statistics)s') % {
             'filename': fname,
             'statistics': i.statistics_formatted() }
-        advene.gui.util.message_dialog(mes)
+        dialog.message_dialog(mes)
         self.log(mes)
         return True
 
@@ -104,7 +104,7 @@ class ExternalImporter(AdhocView):
                 d=config.data.path['data']
             else:
                 d=None
-            filename=advene.gui.util.get_filename(title=_("Choose the file to import"),
+            filename=dialog.get_filename(title=_("Choose the file to import"),
                                                   action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                                   button=gtk.STOCK_OPEN,
                                                   default_dir=d,
@@ -134,7 +134,7 @@ class ExternalImporter(AdhocView):
         vbox.pack_start(line, expand=False)
 
         line.pack_start(gtk.Label(_("Import filter")), expand=False)
-        self.importers=advene.gui.util.list_selector_widget([], None)
+        self.importers=dialog.list_selector_widget([], None)
         line.pack_start(self.importers, expand=False)
 
         bb=gtk.HButtonBox()

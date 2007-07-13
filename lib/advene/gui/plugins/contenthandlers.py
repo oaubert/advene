@@ -18,15 +18,11 @@
 
 from gettext import gettext as _
 
-import advene.core.config as config
-
 import gtk
 
 from advene.gui.edit.elements import ContentHandler
 from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle
-import advene.gui.util
-
-import advene.model.tal.global_methods as global_methods
+from advene.gui.util import image_from_position, dialog
 
 name="Default content handlers"
 
@@ -101,7 +97,7 @@ class ZoneContentHandler (ContentHandler):
         vbox=gtk.VBox()
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
-            i=advene.gui.util.image_from_position(self.controller, self.parent.fragment.begin, height=160)
+            i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
             self.view = ShapeDrawer(callback=self.callback, background=i)
         else:
             self.view = ShapeDrawer(callback=self.callback)
@@ -160,7 +156,7 @@ class RuleSetContentHandler (ContentHandler):
     def check_validity(self):
         iv=self.edit.invalid_items()
         if iv:
-            advene.gui.util.message_dialog(
+            dialog.message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
                 "\n".join(iv),
                 icon=gtk.MESSAGE_ERROR)
@@ -216,7 +212,7 @@ class SimpleQueryContentHandler (ContentHandler):
     def check_validity(self):
         iv=self.edit.invalid_items()
         if iv:
-            advene.gui.util.message_dialog(
+            dialog.message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
                 "\n".join(iv),
                 icon=gtk.MESSAGE_ERROR)

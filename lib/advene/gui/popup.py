@@ -34,11 +34,10 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
-from advene.model.bundle import StandardXmlBundle
 
 from advene.gui.views.interactivequery import InteractiveQuery
 from advene.gui.views.transcription import TranscriptionView
-import advene.gui.util
+from advene.gui.util import image_from_position, dialog
 import advene.util.helper as helper
 
 class Menu:
@@ -158,14 +157,14 @@ class Menu:
         return True
 
     def insert_resource_data(self, widget, parent=None):
-        filename=advene.gui.util.get_filename(title=_("Choose the file to insert"))
+        filename=dialog.get_filename(title=_("Choose the file to insert"))
         if filename is None:
             return True
         basename = os.path.basename(filename)
         id_=re.sub('[^a-zA-Z0-9_.]', '_', basename)
         if id_ != basename:
             while True:
-                id_ = advene.gui.util.entry_dialog(title=_("Select a valid identifier"),
+                id_ = dialog.entry_dialog(title=_("Select a valid identifier"),
                                                    text=_("The filename %s contains invalid characters\nthat have been replaced.\nYou can modify this identifier if necessary:") % filename,
                                                    default=id_)
                 if id_ is None:
@@ -177,7 +176,7 @@ class Menu:
         return True
 
     def insert_resource_directory(self, widget, parent=None):
-        dirname=advene.gui.util.get_dirname(title=_("Choose the directory to insert"))
+        dirname=dialog.get_dirname(title=_("Choose the directory to insert"))
         if dirname is None:
             return True
 
@@ -195,9 +194,9 @@ class Menu:
         return True
 
     def popup_get_offset(self):
-        offset=advene.gui.util.entry_dialog(title='Enter an offset',
-                                            text=_("Give the offset to use\non specified element.\nIt is in ms and can be\neither positive or negative."),
-                                            default="0")
+        offset=dialog.entry_dialog(title='Enter an offset',
+                                   text=_("Give the offset to use\non specified element.\nIt is in ms and can be\neither positive or negative."),
+                                   default="0")
         if offset is not None:
             return long(offset)
         else:
@@ -246,7 +245,7 @@ class Menu:
                    for r in el.rootPackage.relations
                    if el in r.members ]
             if rels:
-                advene.gui.util.message_dialog(
+                dialog.message_dialog(
                     _("Cannot delete the annotation %(annotation)s:\nThe following relation(s) use it:\n%(relations)s") % { 'annotation': helper.get_title(self.controller, el), 
                                                                                                                             'relations': ", ".join(rels)})
                 return True
@@ -257,21 +256,21 @@ class Menu:
             self.controller.notify('RelationDelete', relation=el)
         elif isinstance(el, AnnotationType):
             if len(el.annotations) > 0:
-                advene.gui.util.message_dialog(
+                dialog.message_dialog(
                     _("Cannot delete the annotation type %s:\nthere are still annotations of this type.") % (el.title or el.id))
                 return True
             el.schema.annotationTypes.remove(el)
             self.controller.notify('AnnotationTypeDelete', annotationtype=el)
         elif isinstance(el, RelationType):
             if len(el.relations) > 0:
-                advene.gui.util.message_dialog(
+                dialog.message_dialog(
                     _("Cannot delete the relation type %s:\nthere are still relations of this type.") % (el.title or el.id))
                 return True
             el.schema.relationTypes.remove(el)
             self.controller.notify('RelationTypeDelete', relationtype=el)
         elif isinstance(el, Schema):
             if len(el.annotationTypes) > 0 or len(el.relationTypes) > 0:
-                advene.gui.util.message_dialog(
+                dialog.message_dialog(
                     _("Cannot delete the schema %s:\nthere are still types in it.") % (el.title or el.id))
                 return True
             p.schemas.remove(el)
@@ -446,9 +445,9 @@ class Menu:
         add_item("")
 
         item = gtk.MenuItem()
-        item.add(advene.gui.util.image_from_position(self.controller,
-                                                     position=element.fragment.begin,
-                                                     height=60))
+        item.add(image_from_position(self.controller,
+                                     position=element.fragment.begin,
+                                     height=60))
         item.connect("activate", self.goto_annotation, element)
         menu.append(item)
 

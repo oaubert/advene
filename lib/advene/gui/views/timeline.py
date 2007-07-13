@@ -39,7 +39,7 @@ import advene.gui.edit.elements
 from advene.gui.edit.create import CreateElementPopup
 
 import advene.util.helper as helper
-import advene.gui.util
+from advene.gui.util import dialog, name2color
 try:
     from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget
 except:
@@ -225,7 +225,7 @@ class TimeLine(AdhocView):
             return True
 
         # Scroll the window to display the activated annotations
-        self.autoscroll_choice = advene.gui.util.list_selector_widget(
+        self.autoscroll_choice = dialog.list_selector_widget(
             members= ( ( 0, _("No scrolling") ),
                        ( 1, _("Continuous scrolling")),
                        ( 2, _("Discrete scrolling")) ),
@@ -699,7 +699,7 @@ class TimeLine(AdhocView):
         Return None if no color is defined.
         """
         color=self.controller.get_element_color(element)
-        return advene.gui.util.name2color(color)
+        return name2color(color)
 
     def update_button (self, b):
         """Update the representation for button b.
@@ -945,7 +945,7 @@ class TimeLine(AdhocView):
 
             def move_annotation(*p):
                 if source.relations:
-                    advene.gui.util.message_dialog(_("Cannot delete the annotation : it has relations."),
+                    dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
                                                    icon=gtk.MESSAGE_WARNING)
                     return True
 
@@ -1009,7 +1009,7 @@ class TimeLine(AdhocView):
             # FIXME: Duplicated code from previous method. Should factorize.a
             def move_annotation(*p):
                 if source.relations:
-                    advene.gui.util.message_dialog(_("Cannot delete the annotation : it has relations."),
+                    dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
                                                    icon=gtk.MESSAGE_WARNING)
                     return True
 
@@ -2017,7 +2017,7 @@ class TimeLine(AdhocView):
         i.connect('clicked', zoom, .7)
         tb.insert(i, -1)
 
-        self.zoom_combobox=advene.gui.util.list_selector_widget(members=[
+        self.zoom_combobox=dialog.list_selector_widget(members=[
                 ( f, "%d%%" % long(100*f) ) 
                 for f in [ 
                     (1.0 / pow(1.5, n)) for n in range(0, 10) 
@@ -2067,9 +2067,9 @@ class TimeLine(AdhocView):
         notselected = [ at
                         for at in self.controller.package.annotationTypes
                         if at not in l ]
-        selected_store, it = advene.gui.util.generate_list_model(
+        selected_store, it = dialog.generate_list_model(
             [ (at, self.controller.get_title(at)) for at in l ])
-        notselected_store, it = advene.gui.util.generate_list_model(
+        notselected_store, it = dialog.generate_list_model(
             [ (at, self.controller.get_title(at)) for at in notselected ])
 
         hbox = gtk.HBox()
@@ -2159,10 +2159,10 @@ class TimeLine(AdhocView):
 
         d.vbox.add(hbox)
 
-        d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
+        d.connect("key_press_event", dialog.dialog_keypressed_cb)
 
         d.show()
-        advene.gui.util.center_on_mouse(d)
+        dialog.center_on_mouse(d)
         res=d.run()
         if res == gtk.RESPONSE_OK:
             self.annotationtypes = [ at[1] for at in selected_store ]

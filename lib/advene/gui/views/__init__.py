@@ -25,11 +25,9 @@ import urllib
 
 from gettext import gettext as _
 
-import xml.dom.DOMImplementation
-
 from advene.model.content import Content
 from advene.model.view import View
-import advene.gui.util
+from advene.gui.util import dialog
 import advene.util.helper as helper
 
 import advene.util.ElementTree as ET
@@ -214,13 +212,13 @@ class AdhocView(object):
 
     def save_view(self, *p):
         name=self.controller.package._idgenerator.get_id(View)+'_'+self.view_id
-        title, ident=advene.gui.util.get_title_id(title=_("Saving %s" % self.view_name),
+        title, ident=dialog.get_title_id(title=_("Saving %s" % self.view_name),
                                                   element_title=name,
                                                   element_id=name,
                                                   text=_("Enter a view name to save this parametered view"))
         if ident is not None:
             if not re.match(r'^[a-zA-Z0-9_]+$', ident):
-                advene.gui.util.message_dialog(_("Error: the identifier %s contains invalid characters.") % ident)
+                dialog.message_dialog(_("Error: the identifier %s contains invalid characters.") % ident)
                 return True
 
             options, arguments = self.get_save_arguments()
@@ -235,7 +233,7 @@ class AdhocView(object):
             else:
                 # Existing view. Check that it is already an adhoc-view
                 if v.content.mimetype != 'application/x-advene-adhoc-view':
-                    advene.gui.util.message_dialog(_("Error: the view %s is not an adhoc view.") % ident)
+                    dialog.message_dialog(_("Error: the view %s is not an adhoc view.") % ident)
                     return True
                 create=False
             v.title=title

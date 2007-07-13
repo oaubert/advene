@@ -79,7 +79,7 @@ import advene.util.ElementTree as ET
 import advene.util.importer
 
 # GUI elements
-import advene.gui.util
+from advene.gui.util import get_small_stock_button, image_from_position, dialog
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
@@ -252,8 +252,7 @@ class AdveneGUI (Connect):
             hb.pack_start(b, expand=False)
         hb.show_all()
 
-        launcher=advene.gui.util.get_small_stock_button(gtk.STOCK_FIND,
-                                                        self.do_quicksearch)
+        launcher=get_small_stock_button(gtk.STOCK_FIND, self.do_quicksearch)
         def modify_source(i, expr, label):
             config.data.preferences['quicksearch-source']=expr
             self.tooltips.set_tip(launcher, _("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
@@ -743,8 +742,8 @@ class AdveneGUI (Connect):
             i=combo.get_active_iter()
             stbv=combo.get_model().get_value(i, 1)
             if stbv is None:
-                if not advene.gui.util.message_dialog(_("Do you want to create a new dynamic view?"),
-                                                  icon=gtk.MESSAGE_QUESTION):
+                if not dialog.message_dialog(_("Do you want to create a new dynamic view?"),
+                                             icon=gtk.MESSAGE_QUESTION):
                     return True
                 cr = CreateElementPopup(type_=View,
                                         parent=self.controller.package,
@@ -754,8 +753,7 @@ class AdveneGUI (Connect):
             self.edit_element(stbv)
             return True
 
-        edit_stbv_button=advene.gui.util.get_small_stock_button(gtk.STOCK_EDIT, 
-                                                                on_edit_current_stbv_clicked)
+        edit_stbv_button=get_small_stock_button(gtk.STOCK_EDIT, on_edit_current_stbv_clicked)
         hb.pack_start(edit_stbv_button, expand=False)
 
         def on_stbv_combo_changed (combo=None):
@@ -1110,8 +1108,8 @@ class AdveneGUI (Connect):
         l=[ helper.TitledElement(value=None, title=_("No active dynamic view")) ]
         l.extend( [ helper.TitledElement(value=i, title=u'\u25b8 %s \u25b8' % self.controller.get_title(i))
                     for i in self.controller.get_stbv_list() ] )
-        st, i = advene.gui.util.generate_list_model([ (i.value, i.title) for i in l ],
-                                                    active_element=self.controller.current_stbv)
+        st, i = dialog.generate_list_model([ (i.value, i.title) for i in l ],
+                                           active_element=self.controller.current_stbv)
         stbv_combo.set_model(st)
         if i is None:
             i=st.get_iter_first()
@@ -1128,7 +1126,7 @@ class AdveneGUI (Connect):
             try:
                 self.controller.load_package (uri=fname)
             except (OSError, IOError), e:
-                advene.gui.util.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
+                dialog.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
                         'filename': fname, 
                         'error': unicode(e)}, gtk.MESSAGE_ERROR)
             return True
@@ -1506,9 +1504,9 @@ class AdveneGUI (Connect):
             box=gtk.VBox()
         else:
             box=gtk.HBox()
-        box.add(advene.gui.util.image_from_position(self.controller,
-                                                    position=position,
-                                                    height=40))
+        box.add(image_from_position(self.controller,
+                                    position=position,
+                                    height=40))
         box.add(gtk.Label(text))
         return box
 
@@ -1719,9 +1717,9 @@ class AdveneGUI (Connect):
                     else:
                         # Ask before saving. Use the non-modal dialog
                         # to avoid locking the interface
-                        advene.gui.util.message_dialog(label=_("""The package(s) %s are modified.\nSave them now?""") % ", ".join(l),
-                                                       icon=gtk.MESSAGE_QUESTION,
-                                                       callback=lambda: do_save(l))
+                        dialog.message_dialog(label=_("""The package(s) %s are modified.\nSave them now?""") % ", ".join(l),
+                                              icon=gtk.MESSAGE_QUESTION,
+                                              callback=lambda: do_save(l))
                 self.last_auto_save=t
 
 	# Fix the webserver reaction time on win32
@@ -1778,13 +1776,13 @@ class AdveneGUI (Connect):
         if len(ats) == 1:
             at=ats[0]
         elif len(ats) > 1:
-            at=advene.gui.util.list_selector(title=_("Choose an annotation type"),
-                                             text=text,
-                                             members=[ (a, self.controller.get_title(a)) for a in ats],
-                                             controller=self.controller)
+            at=dialog.list_selector(title=_("Choose an annotation type"),
+                             text=text,
+                             members=[ (a, self.controller.get_title(a)) for a in ats],
+                             controller=self.controller)
         else:
-            advene.gui.util.message_dialog(_("No annotation type is defined."),
-                                           icon=gtk.MESSAGE_ERROR)
+            dialog.message_dialog(_("No annotation type is defined."),
+                                  icon=gtk.MESSAGE_ERROR)
             return None
 
         if create and at == newat:
@@ -1823,13 +1821,13 @@ class AdveneGUI (Connect):
         if len(schemas) == 1:
             schema=schemas[0]
         elif len(schemas) > 1:
-            schema=advene.gui.util.list_selector(title=_("Choose a schema"),
+            schema=dialog.list_selector(title=_("Choose a schema"),
                                                  text=text,
                                                  members=[ (s, self.controller.get_title(s)) for s in schemas],
                                                  controller=self.controller)
         else:
-            advene.gui.util.message_dialog(_("No schema is defined."),
-                                           icon=gtk.MESSAGE_ERROR)
+            dialog.message_dialog(_("No schema is defined."),
+                           icon=gtk.MESSAGE_ERROR)
             return None
 
         if create and schema == newschema:
@@ -1853,7 +1851,7 @@ class AdveneGUI (Connect):
                 continue
             if p._modified:
                 t = self.controller.get_title(p)
-                response=advene.gui.util.yes_no_cancel_popup(title=_("Package %s modified") % t,
+                response=dialog.yes_no_cancel_popup(title=_("Package %s modified") % t,
                                                              text=_("The package %s has been modified but not saved.\nSave it now?") % t)
                 if response == gtk.RESPONSE_CANCEL:
                     return True
@@ -1864,7 +1862,7 @@ class AdveneGUI (Connect):
             if p.imagecache._modified and config.data.preferences['imagecache-save-on-exit'] != 'never':
                 if config.data.preferences['imagecache-save-on-exit'] == 'ask':
                     media=self.controller.get_default_media(package=p)
-                    response=advene.gui.util.yes_no_cancel_popup(title=_("%s snapshots") % media,
+                    response=dialog.yes_no_cancel_popup(title=_("%s snapshots") % media,
                                                              text=_("Do you want to save the snapshots for media %s?") % media)
                     if response == gtk.RESPONSE_CANCEL:
                         return True
@@ -1923,8 +1921,7 @@ class AdveneGUI (Connect):
         if 'new_pkg' in self.controller.packages:
             # An unsaved template package already exists.
             # Ask to save it first.
-            advene.gui.util.message_dialog(
-                _("An unsaved template package exists\nSave it first."))
+            dialog.message_dialog(_("An unsaved template package exists\nSave it first."))
         else:
             self.controller.load_package ()
         return True
@@ -1932,8 +1929,8 @@ class AdveneGUI (Connect):
     def on_close1_activate (self, button=None, data=None):
         p=self.controller.package
         if p._modified:
-            response=advene.gui.util.yes_no_cancel_popup(title=_("Package modified"),
-                                                         text=_("Your package has been modified but not saved.\nSave it now?"))
+            response=dialog.yes_no_cancel_popup(title=_("Package modified"),
+                                         text=_("Your package has been modified but not saved.\nSave it now?"))
             if response == gtk.RESPONSE_CANCEL:
                 return True
             if response == gtk.RESPONSE_YES:
@@ -1964,12 +1961,12 @@ class AdveneGUI (Connect):
         else:
             d=None
 
-        filename, alias=advene.gui.util.get_filename(title=_("Load a package"),
-                                                     action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                                     button=gtk.STOCK_OPEN,
-                                                     default_dir=d,
-                                                     alias=True,
-                                                     filter='advene')
+        filename, alias=dialog.get_filename(title=_("Load a package"),
+                                            action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                            button=gtk.STOCK_OPEN,
+                                            default_dir=d,
+                                            alias=True,
+                                            filter='advene')
         if filename:
             name, ext = os.path.splitext(filename.lower())
             if ext in config.data.video_extensions:
@@ -1978,16 +1975,15 @@ class AdveneGUI (Connect):
                 return True
             if not ext in ('.xml', '.azp', '.apl'):
                 # Does not look like a valid package
-                if not advene.gui.util.message_dialog(
-                    _("The file %s does not look like a valid Advene package. It should have a .azp or .xml extension. Try to open anyway?") % filename,
-                    icon=gtk.MESSAGE_QUESTION):
+                if not dialog.message_dialog(_("The file %s does not look like a valid Advene package. It should have a .azp or .xml extension. Try to open anyway?") % filename,
+                                      icon=gtk.MESSAGE_QUESTION):
                     return True
             if ext == '.apl':
                 modif=[ (a, p) 
                         for (a, p) in self.controller.packages.iteritems() 
                         if p._modified ]
                 if modif:
-                    if not advene.gui.util.message_dialog(
+                    if not dialog.message_dialog(
                         _("You are trying to load a session file, but there are unsaved packages. Proceed anyway?"),
                         icon=gtk.MESSAGE_QUESTION):
                         return True
@@ -1995,7 +1991,7 @@ class AdveneGUI (Connect):
             try:
                 self.controller.load_package (uri=filename, alias=alias)
             except (OSError, IOError), e:
-                advene.gui.util.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
+                dialog.message_dialog(_("Cannot load package %(filename)s:\n%(error)s") % {
                         'filename': filename, 
                         'error': unicode(e)}, gtk.MESSAGE_ERROR)
         return True
@@ -2012,7 +2008,7 @@ class AdveneGUI (Connect):
             try:
                 self.controller.save_package (alias=alias)
             except (OSError, IOError), e:
-                advene.gui.util.message_dialog(_("Could not save the package: %s") % unicode(e),
+                dialog.message_dialog(_("Could not save the package: %s") % unicode(e),
                                                gtk.MESSAGE_ERROR)
         return True
 
@@ -2024,7 +2020,7 @@ class AdveneGUI (Connect):
             d=config.data.path['data']
         else:
             d=None
-        filename=advene.gui.util.get_filename(title=_("Save the package %s") % self.controller.get_title(package),
+        filename=dialog.get_filename(title=_("Save the package %s") % self.controller.get_title(package),
                                               action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                               button=gtk.STOCK_SAVE,
                                               default_dir=d,
@@ -2042,12 +2038,12 @@ class AdveneGUI (Connect):
 
             if (package.resources and package.resources.children()
                 and ext.lower() != '.azp'):
-                ret=advene.gui.util.yes_no_cancel_popup(title=_("Invalid file extension"),
+                ret=dialog.yes_no_cancel_popup(title=_("Invalid file extension"),
                                                         text=_("Your package contains resources,\nthe filename (%s) should have a .azp extension.\nShould I put the correct extension?") % filename)
                 if ret == gtk.RESPONSE_YES:
                     filename = p + '.azp'
                 elif ret == gtk.RESPONSE_NO:
-                    advene.gui.util.message_dialog(_("OK, the resources will be lost."))
+                    dialog.message_dialog(_("OK, the resources will be lost."))
                 else:
                     self.log(_("Aborting package saving"))
                     return True
@@ -2056,7 +2052,7 @@ class AdveneGUI (Connect):
             try:
                 self.controller.save_package(name=filename, alias=alias)
             except (OSError, IOError), e:
-                advene.gui.util.message_dialog(_("Could not save the package: %s") % unicode(e),
+                dialog.message_dialog(_("Could not save the package: %s") % unicode(e),
                                                gtk.MESSAGE_ERROR)
         return True
 
@@ -2067,7 +2063,7 @@ class AdveneGUI (Connect):
             d=config.data.path['data']
         else:
             d=None
-        filename=advene.gui.util.get_filename(title=_("Save the session in..."),
+        filename=dialog.get_filename(title=_("Save the session in..."),
                                               action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                               button=gtk.STOCK_SAVE,
                                               default_dir=d,
@@ -2086,7 +2082,7 @@ class AdveneGUI (Connect):
         # FIXME: loosy test
         if (self.controller.get_default_media() is None
             or 'dvd' in self.controller.get_default_media()):
-            if not advene.gui.util.message_dialog(
+            if not dialog.message_dialog(
                 _("Do you confirm the creation of annotations matching the DVD chapters?"),
                 icon=gtk.MESSAGE_QUESTION):
                 return True
@@ -2096,14 +2092,14 @@ class AdveneGUI (Connect):
             self.controller.package._modified = True
             self.controller.notify('PackageLoad')
         else:
-            advene.gui.util.message_dialog(_("The associated media is not a DVD."),
+            dialog.message_dialog(_("The associated media is not a DVD."),
                                            icon=gtk.MESSAGE_ERROR)
         return True
 
     def on_import_file1_activate (self, button=None, data=None):
         v=ExternalImporter(controller=self.controller)
         w=v.popup()
-        advene.gui.util.center_on_mouse(w)
+        dialog.center_on_mouse(w)
         return False
 
     def on_quit1_activate (self, button=None, data=None):
@@ -2352,11 +2348,11 @@ class AdveneGUI (Connect):
         else:
             d=None
 
-        filename=advene.gui.util.get_filename(title=_("Select a movie file"),
-                                              action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                                              button=gtk.STOCK_OPEN,
-                                              default_dir=d,
-                                              filter='video')
+        filename=dialog.get_filename(title=_("Select a movie file"),
+                                     action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                     button=gtk.STOCK_OPEN,
+                                     default_dir=d,
+                                     filter='video')
         if filename:
             self.controller.set_default_media(filename)
         return True
@@ -2406,13 +2402,13 @@ class AdveneGUI (Connect):
         return True
 
     def on_select_a_video_stream1_activate(self, button=None, data=None):
-        stream=advene.gui.util.entry_dialog(title=_("Select a video stream"),
-                                            text=_("Enter the address of a video stream"))
+        stream=dialog.entry_dialog(title=_("Select a video stream"),
+                                   text=_("Enter the address of a video stream"))
         if stream:
             s=helper.get_video_stream_from_website(stream)
             if s is not None:
-               advene.gui.util.message_dialog(_("Successfully extracted the video stream address from the given url"))
-               stream=s
+                dialog.message_dialog(_("Successfully extracted the video stream address from the given url"))
+                stream=s
             self.controller.set_default_media(stream)
         return True
     
@@ -2698,7 +2694,7 @@ Available views: timeline, tree, browser, transcribe"""))
             d=config.data.path['data']
         else:
             d=None
-        filename=advene.gui.util.get_filename(title=_("Select the package to merge"),
+        filename=dialog.get_filename(title=_("Select the package to merge"),
                                               action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                               button=gtk.STOCK_OPEN,
                                               default_dir=d,
@@ -2716,15 +2712,15 @@ Available views: timeline, tree, browser, transcribe"""))
 
     def on_save_workspace_as_package_view1_activate (self, button=None, data=None):
         name=self.controller.package._idgenerator.get_id(View)+'_'+'workspace'
-        title, ident=advene.gui.util.get_title_id(title=_("Saving workspace"),
-                                                  element_title=name,
-                                                  element_id=name,
-                                                  text=_("Enter a view name to save the workspace"))
+        title, ident=dialog.get_title_id(title=_("Saving workspace"),
+                                  element_title=name,
+                                  element_id=name,
+                                  text=_("Enter a view name to save the workspace"))
         if ident is None:
             return True
 
         if not re.match(r'^[a-zA-Z0-9_]+$', ident):
-            advene.gui.util.message_dialog(_("Error: the identifier %s contains invalid characters.") % ident)
+            dialog.message_dialog(_("Error: the identifier %s contains invalid characters.") % ident)
             return True
 
         v=helper.get_id(self.controller.package.views, ident)
@@ -2735,7 +2731,7 @@ Available views: timeline, tree, browser, transcribe"""))
         else:
             # Existing view. Check that it is already an workspace-view
             if v.content.mimetype != 'application/x-advene-workspace-view':
-                advene.gui.util.message_dialog(_("Error: the view %s exists and is not a workspace view.") % ident)
+                dialog.message_dialog(_("Error: the view %s exists and is not a workspace view.") % ident)
                 return True
             create=False
         v.title=title

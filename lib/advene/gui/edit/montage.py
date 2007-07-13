@@ -20,8 +20,7 @@
 
 # Advene part
 import advene.core.config as config
-import advene.util.helper as helper
-import advene.gui.util
+from advene.gui.util import get_small_stock_button, name2color
 from advene.gui.views import AdhocView
 from advene.gui.widget import AnnotationWidget
 import advene.gui.popup
@@ -29,7 +28,6 @@ import advene.gui.popup
 from gettext import gettext as _
 
 import gtk
-import pango
 import re
 
 name="Montage view plugin"
@@ -117,7 +115,7 @@ class Montage(AdhocView):
         Return None if no color is defined.
         """
         color=self.controller.get_element_color(element)
-        return advene.gui.util.name2color(color)
+        return name2color(color)
 
     def append_dropzone(self, i):
         """Append a dropzone for a given index.
@@ -233,7 +231,7 @@ class Montage(AdhocView):
 
         hb=gtk.HBox()
 
-        b=advene.gui.util.get_small_stock_button(gtk.STOCK_DELETE)
+        b=get_small_stock_button(gtk.STOCK_DELETE)
         self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
@@ -242,7 +240,7 @@ class Montage(AdhocView):
         b.connect("drag_data_received", remove_drag_received)
         hb.pack_start(b, expand=False)
 
-        b=advene.gui.util.get_small_stock_button(gtk.STOCK_MEDIA_PLAY)
+        b=get_small_stock_button(gtk.STOCK_MEDIA_PLAY)
         self.controller.gui.tooltips.set_tip(b, _("Play the montage"))
         b.connect("clicked", self.play)
         hb.pack_start(b, expand=False)

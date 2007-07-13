@@ -49,7 +49,7 @@ from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.browser import Browser
 from advene.gui.views.tagbag import TagBag
 
-import advene.gui.util
+from advene.gui.util import dialog
 import advene.util.helper as helper
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
@@ -244,11 +244,11 @@ class EditElementPopup (object):
             d.vbox.add(self.vbox)
             d.vbox.show_all()
 
-            d.connect("key_press_event", advene.gui.util.dialog_keypressed_cb)
+            d.connect("key_press_event", dialog.dialog_keypressed_cb)
 
             while True:
                 d.show()
-                advene.gui.util.center_on_mouse(d)
+                dialog.center_on_mouse(d)
                 res=d.run()
                 retval=False
                 if res == gtk.RESPONSE_OK:
@@ -308,7 +308,7 @@ class EditElementPopup (object):
             if self.controller.gui:
                 self.controller.gui.init_window_size(self.window, 'editpopup')
             self.window.show_all ()
-            advene.gui.util.center_on_mouse(self.window)
+            dialog.center_on_mouse(self.window)
             for f in self.forms:
                 try:
                     if f.get_focus():
@@ -1098,12 +1098,12 @@ class TextContentHandler (ContentHandler):
 
     def content_open(self, b=None, fname=None):
         if fname is None:
-            fname=advene.gui.util.get_filename(default_file=self.fname)
+            fname=dialog.get_filename(default_file=self.fname)
         if fname is not None:
             try:
                 f=open(fname, 'r')
             except IOError, e:
-                advene.gui.util.message_dialog(
+                dialog.message_dialog(
                     _("Cannot read the data:\n%s") % unicode(e),
                     icon=gtk.MESSAGE_ERROR)
                 return True
@@ -1123,7 +1123,7 @@ class TextContentHandler (ContentHandler):
                     default=self.parent.id + '.txt'
                 except AttributeError:
                     pass
-            fname=advene.gui.util.get_filename(title=_("Save content to..."),
+            fname=dialog.get_filename(title=_("Save content to..."),
                                                action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                                button=gtk.STOCK_SAVE,
                                                default_file=default)
@@ -1133,7 +1133,7 @@ class TextContentHandler (ContentHandler):
             try:
                 f=open(fname, 'w')
             except IOError, e:
-                advene.gui.util.message_dialog(
+                dialog.message_dialog(
                     _("Cannot save the data:\n%s") % unicode(e),
                     icon=gtk.MESSAGE_ERROR)
                 return True
@@ -1287,12 +1287,12 @@ class GenericContentHandler (ContentHandler):
 
     def content_open(self, b=None, fname=None):
         if fname is None:
-            fname=advene.gui.util.get_filename(default_file=self.fname)
+            fname=dialog.get_filename(default_file=self.fname)
         if fname is not None:
             try:
                 f=open(fname, 'r')
             except IOError, e:
-                advene.gui.util.message_dialog(
+                dialog.message_dialog(
                     _("Cannot read the data:\n%s") % unicode(e),
                     icon=gtk.MESSAGE_ERROR)
                 return True
@@ -1311,7 +1311,7 @@ class GenericContentHandler (ContentHandler):
                     default=self.parent.id + '.txt'
                 except AttributeError:
                     pass
-            fname=advene.gui.util.get_filename(title=_("Save content to..."),
+            fname=dialog.get_filename(title=_("Save content to..."),
                                                action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                                button=gtk.STOCK_SAVE,
                                                default_file=default)
@@ -1321,7 +1321,7 @@ class GenericContentHandler (ContentHandler):
             try:
                 f=open(fname, 'w')
             except IOError, e:
-                advene.gui.util.message_dialog(
+                dialog.message_dialog(
                     _("Cannot save the data:\n%s") % unicode(e),
                     icon=gtk.MESSAGE_ERROR)
                 return True
@@ -1374,7 +1374,7 @@ class EditFragmentForm(EditForm):
 
     def check_validity(self):
         if self.begin.value >= self.end.value:
-            advene.gui.util.message_dialog(_("Begin time is greater than end time"),
+            dialog.message_dialog(_("Begin time is greater than end time"),
                                            icon=gtk.MESSAGE_ERROR)
             return False
         else:
@@ -1578,7 +1578,7 @@ class EditAttributesForm (EditForm):
         try:
             val = self.repr_to_value (at, text)
         except ValueError, e:
-            advene.gui.util.message_dialog(
+            dialog.message_dialog(
                 _("The %(attribute)s attribute could not be updated:\n\n%(error)s\n\nResetting to the original value.")
                 % {'attribute': at, 'error': unicode(e)},
                 icon=gtk.MESSAGE_WARNING)
@@ -1605,7 +1605,7 @@ class EditAttributesForm (EditForm):
             iter = model.iter_next(iter)
         # Display list of invalid attributes
         if invalid:
-            advene.gui.util.message_dialog(
+            dialog.message_dialog(
                 _("The following attributes cannot be updated:\n\n%s")
                 % "\n".join ([ "%s: %s" % (at, str(e)) for (at, e) in invalid ]),
                 icon=gtk.MESSAGE_ERROR)
@@ -1639,7 +1639,7 @@ class EditAttributesForm (EditForm):
             iter = model.iter_next(iter)
         # Display list of invalid attributes
         if invalid:
-            advene.gui.util.message_dialog(
+            dialog.message_dialog(
                 _("The following attributes could not be updated:\n\n%s")
                 % "\n".join ([ "%s: %s" % (at, str(e)) for (at, e) in invalid ]),
                 icon=gtk.MESSAGE_ERROR)
@@ -1756,7 +1756,7 @@ class EditElementListForm(EditForm):
         return store
 
     def insert_new(self, button=None, treeview=None):
-        element=advene.gui.util.list_selector(title=_("Insert an element"),
+        element=dialog.list_selector(title=_("Insert an element"),
                                               text=_("Choose the element to insert."),
                                               members=self.members,
                                               controller=self.controller)
@@ -1822,7 +1822,7 @@ class EditTagForm(EditForm):
         invalid=[ t for t in self.get_current_tags()
                   if not re.match('^[\w\d_]+$', t) ]
         if invalid:
-            advene.gui.util.message_dialog(_("Some tags contain invalid characters: %s") % ", ".join(invalid),
+            dialog.message_dialog(_("Some tags contain invalid characters: %s") % ", ".join(invalid),
                                            icon=gtk.MESSAGE_ERROR)
             return False
         else:

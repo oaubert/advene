@@ -25,7 +25,7 @@ import advene.rules.elements
 from advene.rules.elements import Event, Condition, ConditionList, Action, ActionList
 from advene.rules.elements import Rule, RuleSet
 import advene.core.config as config
-from advene.gui.util import CategorizedSelector, build_optionmenu, message_dialog
+from advene.gui.util import dialog
 
 from advene.gui.edit.tales import TALESEntry
 
@@ -148,7 +148,7 @@ class EditRuleSet(EditGeneric):
             return False
         iv=self.invalid_items()
         if iv:
-            message_dialog(
+            dialog.message_dialog(
                 _("The following items seem to be\ninvalid TALES expressions:\n\n%s") %
                 "\n".join(iv),
                 icon=gtk.MESSAGE_ERROR)
@@ -622,8 +622,8 @@ class EditEvent(EditGeneric):
             # it is an expert-mode event. Add it manually.
             eventlist[self.current_event]=self.catalog.describe_event(self.current_event)
 
-        eventname=build_optionmenu(eventlist, self.current_event, self.on_change_event,
-                                   editable=self.editable)
+        eventname=dialog.build_optionmenu(eventlist, self.current_event, self.on_change_event,
+                                          editable=self.editable)
         hbox.add(eventname)
 
         label=gtk.Label(_(" occurs,"))
@@ -870,14 +870,14 @@ class EditAction(EditGeneric):
                 return self.catalog.action_categories[element]
 
         c=self.catalog
-        self.selector=CategorizedSelector(title=_("Select an action"),
-                                          elements=c.actions.values(),
-                                          categories=c.action_categories.keys(),
-                                          current=c.actions[self.current_name],
-                                          description_getter=description_getter,
-                                          category_getter=lambda e: e.category,
-                                          callback=self.on_change_name,
-                                          editable=self.editable)
+        self.selector=dialog.CategorizedSelector(title=_("Select an action"),
+                                                 elements=c.actions.values(),
+                                                 categories=c.action_categories.keys(),
+                                                 current=c.actions[self.current_name],
+                                                 description_getter=description_getter,
+                                                 category_getter=lambda e: e.category,
+                                                 callback=self.on_change_name,
+                                                 editable=self.editable)
         self.name=self.selector.get_button()
         vbox.add(self.name)
 
@@ -958,7 +958,7 @@ if __name__ == "__main__":
         edit.update_value()
         print "Saving model with %d rules" % len(edit.model)
         edit.model.to_xml(f)
-        message_dialog("The ruleset has been saved into %s." % f)
+        dialog.message_dialog("The ruleset has been saved into %s." % f)
         return True
 
     b=gtk.Button(stock=gtk.STOCK_SAVE)

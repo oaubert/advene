@@ -25,7 +25,7 @@ import gtk
 from gettext import gettext as _
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
-import advene.gui.util
+from advene.gui.util import get_pixmap_button
 
 class ViewBook(AdhocView):
     """Notebook containing multiple views
@@ -174,7 +174,7 @@ class ViewBook(AdhocView):
         hb.pack_start(e, expand=False, fill=False)
 
         if not permanent:
-            b=advene.gui.util.get_pixmap_button('small_close.png')
+            b=get_pixmap_button('small_close.png')
             b.set_relief(gtk.RELIEF_NONE)
             b.connect('clicked', close_view, v)
             hb.pack_start(b, expand=False, fill=False)

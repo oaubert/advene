@@ -29,7 +29,7 @@ import advene.gui.edit.elements
 import advene.gui.popup
 
 import advene.util.helper as helper
-
+from advene.gui.util import dialog
 
 COLUMN_ELEMENT=0
 COLUMN_CONTENT=1
@@ -175,7 +175,7 @@ class AnnotationTable(AdhocView):
 
     def csv_export(self, name=None):
         if name is None:
-            name=advene.gui.util.get_filename(title=_("Export data to file..."),
+            name=dialog.get_filename(title=_("Export data to file..."),
                                               default_file="advene_data.csv",
                                               action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                               button=gtk.STOCK_SAVE)
@@ -184,12 +184,11 @@ class AnnotationTable(AdhocView):
         try:
             f=open(name, 'w')
         except IOError, e:
-            avene.gui.util.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
-                                                  % {
+            dialog.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
+                                          % {
                         'filename': name,
                         'error': unicode(e),
-                        }),
-                                          icon=gtk.MESSAGE_ERROR)
+                        }), icon=gtk.MESSAGE_ERROR)
         w=csv.writer(f)
         tv=self.widget.treeview
         store, paths=tv.get_selection().get_selected_rows()
@@ -291,7 +290,7 @@ class GenericTable(AdhocView):
 
     def csv_export(self, name=None):
         if name is None:
-            name=advene.gui.util.get_filename(title=_("Export data to file..."),
+            name=dialog.get_filename(title=_("Export data to file..."),
                                               default_file="advene_data.csv",
                                               action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                               button=gtk.STOCK_SAVE)
@@ -300,12 +299,12 @@ class GenericTable(AdhocView):
         try:
             f=open(name, 'w')
         except IOError, e:
-            avene.gui.util.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
-                                                  % {
+            dialog.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
+                                          % {
                         'filename': name,
                         'error': unicode(e),
                         }),
-                                          icon=gtk.MESSAGE_ERROR)
+                                  icon=gtk.MESSAGE_ERROR)
         w=csv.writer(f)
         tv=self.widget.treeview
         store, paths=tv.get_selection().get_selected_rows()
@@ -382,8 +381,8 @@ class GenericTable(AdhocView):
         nodes = self.get_selected_nodes ()
         if len(nodes) != 1:
             return True
-        if node is not None:
-            self.controller.gui.edit_element(node)
+        if nodes[0] is not None:
+            self.controller.gui.edit_element(nodes[0])
             return True
         return False
 

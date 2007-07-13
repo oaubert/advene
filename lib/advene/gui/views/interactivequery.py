@@ -31,7 +31,7 @@ from advene.model.bundle import AbstractBundle
 from advene.rules.elements import Query, Condition
 from advene.model.annotation import Annotation
 from advene.model.tal.context import AdveneTalesException
-import advene.gui.util
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
 
 from advene.gui.views import AdhocView
 
@@ -121,7 +121,7 @@ class InteractiveQuery(AdhocView):
             res=c.evaluateValue("here/query/_interactive")
         except AdveneTalesException, e:
             # Display a dialog with the value
-            advene.gui.util.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
+            dialog.message_dialog(_("TALES error in interactive expression:\n%s" % str(e)),
                 icon=gtk.MESSAGE_ERROR)
             return True
 
@@ -273,16 +273,16 @@ class InteractiveResult(AdhocView):
                                                                                )
                     notebook.append_page(gtable.widget, gtk.Label(_("Other elements")))
 
-                b=advene.gui.util.get_pixmap_button('timeline.png', lambda b: self.open_in_timeline(l))
+                b=get_pixmap_button('timeline.png', lambda b: self.open_in_timeline(l))
                 self.controller.gui.tooltips.set_tip(b, _("Display annotations in timeline"))
                 hb.add(b)
 
-                b=advene.gui.util.get_pixmap_button('highlight.png')
+                b=get_pixmap_button('highlight.png')
                 b.highlight=True
                 b.connect('clicked', toggle_highlight, l)
                 hb.add(b)
 
-                b=advene.gui.util.get_small_stock_button(gtk.STOCK_CONVERT, lambda b: table.csv_export())
+                b=get_small_stock_button(gtk.STOCK_CONVERT, lambda b: table.csv_export())
                 self.controller.gui.tooltips.set_tip(b, _("Export table"))
                 hb.add(b)
 
@@ -291,17 +291,17 @@ class InteractiveResult(AdhocView):
                 # Only Instanciate a generic table view
                 gtable=GenericTable(controller=self.controller, elements=self.result)
                 v.add(gtable.widget)
-                b=advene.gui.util.get_small_stock_button(gtk.STOCK_CONVERT, lambda b: gtable.csv_export())
+                b=get_small_stock_button(gtk.STOCK_CONVERT, lambda b: gtable.csv_export())
                 self.controller.gui.tooltips.set_tip(b, _("Export table"))
                 hb.add(b)
                 self.table=gtable
 
-            b=advene.gui.util.get_pixmap_button('editaccumulator.png', lambda b: self.open_in_edit_accumulator(self.table.get_selected_nodes() or self.result))
+            b=get_pixmap_button('editaccumulator.png', lambda b: self.open_in_edit_accumulator(self.table.get_selected_nodes() or self.result))
             self.controller.gui.tooltips.set_tip(b, _("Edit elements"))
             hb.add(b)
 
             if config.data.preferences['expert-mode']:
-                b=advene.gui.util.get_pixmap_button('python.png', lambda b: self.open_in_evaluator(self.table.get_selected_nodes() or self.result))
+                b=get_pixmap_button('python.png', lambda b: self.open_in_evaluator(self.table.get_selected_nodes() or self.result))
                 self.controller.gui.tooltips.set_tip(b, _("Open in python evaluator"))
                 hb.add(b)
         else:

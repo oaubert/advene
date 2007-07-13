@@ -33,7 +33,7 @@ the presented list of tags.
 import advene.core.config as config
 from advene.gui.views import AdhocView
 from advene.gui.edit.properties import EditWidget
-import advene.gui.util
+from advene.gui.util import dialog, get_small_stock_button, name2color
 
 from gettext import gettext as _
 
@@ -113,11 +113,11 @@ class TagBag(AdhocView):
     def new_tag(self, *p):
         """Enter a new tag.
         """
-        tag=advene.gui.util.entry_dialog(title=_("New tag name"),
+        tag=dialog.entry_dialog(title=_("New tag name"),
                                          text=_("Enter a new tag name"))
         if tag and not tag in self.tags:
             if not re.match('^[\w\d_]+$', tag):
-                advene.gui.util.message_dialog(_("The tag contains invalid characters"),
+                dialog.message_dialog(_("The tag contains invalid characters"),
                                                icon=gtk.MESSAGE_ERROR)
                 return True            
             self.tags.append(tag)
@@ -156,7 +156,7 @@ class TagBag(AdhocView):
             col=self.controller.package._tag_colors[tag]
         except KeyError:
             col=None
-        return advene.gui.util.name2color(col)
+        return name2color(col)
 
     def append_repr(self, t):
         def drag_sent(widget, context, selection, targetType, eventTime):
@@ -282,7 +282,7 @@ class TagBag(AdhocView):
         hb.set_homogeneous(False)
         v.pack_start(hb, expand=False)
 
-        b=advene.gui.util.get_small_stock_button(gtk.STOCK_DELETE)
+        b=get_small_stock_button(gtk.STOCK_DELETE)
 
         self.controller.gui.tooltips.set_tip(b, _("Drop a tag here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -292,7 +292,7 @@ class TagBag(AdhocView):
         b.connect("drag_data_received", remove_drag_received)
         hb.pack_start(b, expand=False)
 
-        b=advene.gui.util.get_small_stock_button(gtk.STOCK_ADD)
+        b=get_small_stock_button(gtk.STOCK_ADD)
         b.connect("clicked", self.new_tag)
         hb.pack_start(b, expand=False)
 
