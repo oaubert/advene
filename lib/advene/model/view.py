@@ -206,11 +206,6 @@ class View(modeled.Importable, content.WithContent,
             if clazz is None:
                 raise TypeError("parameter 'clazz' required")
             if len(kw):
-                # FIXME: added in release 1.32 when deprecating param id
-                #        remove after some releases
-                if kw.has_key('id'):
-                    raise TypeError ('parameter "id" has been deprecated. '
-                                     +'Use "ident" instead.')
                 raise TypeError ('Unkown parameters: %s' % kw.keys ())
 
             doc = parent._getDocument()
@@ -298,8 +293,8 @@ class View(modeled.Importable, content.WithContent,
         if v_type1 is None:
             return False
         if v_class1 == 'content':
-            t1_a,t1_b = v_type1.split('/')
-            t2_a,t2_b = v_type2.split('/')
+            t1_a, t1_b = v_type1.split('/')
+            t2_a, t2_b = v_type2.split('/')
             if t1_a == '*':
                 return False
             if t2_a == '*':

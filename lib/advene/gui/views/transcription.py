@@ -102,13 +102,13 @@ class TranscriptionView(AdhocView):
             # Unique type, the model is homogeneous. Use the
             # annotation-type representation
             at=self.model[0].type
-            repr=at.getMetaData(config.data.namespace, 'representation')
-            if repr is not None and not re.match(r'^\s*$', repr):
+            rep=at.getMetaData(config.data.namespace, 'representation')
+            if rep is not None and not re.match(r'^\s*$', rep):
                 # There is a standard representation for the type.
                 # But if the current value is != '', then it has been
                 # updated by the parameters, so keep it.
                 if self.options['representation'] == '':
-                    self.options['representation'] = repr
+                    self.options['representation'] = rep
         self.widget=self.build_widget()
 
     def get_save_arguments(self):
@@ -163,7 +163,7 @@ class TranscriptionView(AdhocView):
             self.generate_buffer_content()
         return True
 
-    def close(self):
+    def close(self, *p):
         l=self.check_modified()
         if l:
             if self.options['representation'] and not parsed_representation.match(self.options['representation']):
@@ -199,10 +199,10 @@ class TranscriptionView(AdhocView):
             If the update is not possible (too complex representation), return False.
             """
             if self.options['default-representation']:
-                repr=a.type.getMetaData(config.data.namespace, 'representation') or ''
+                rep=a.type.getMetaData(config.data.namespace, 'representation') or ''
             else:
-                repr=self.options['representation']
-            m=parsed_representation.match(repr)
+                rep=self.options['representation']
+            m=parsed_representation.match(rep)
             if m:
                 # We have a simple representation (here/content/parsed/name)
                 # so we can update the name field.
@@ -210,7 +210,7 @@ class TranscriptionView(AdhocView):
                 reg = re.compile('^' + name + '=(.+?)$', re.MULTILINE)
                 a.content.data = reg.sub(name + '=' + text, a.content.data)
             else:
-                m=empty_representation.match(repr)
+                m=empty_representation.match(rep)
                 if m:
                     a.content.data = text
                 else:
@@ -227,7 +227,7 @@ class TranscriptionView(AdhocView):
             else:
                 impossible.append(a)
         if impossible:
-                dialog.message_dialog(label=_("Cannot convert the following annotations,\nthe representation pattern is too complex.\n%s") % ",".join( [ a.id for a in impossible ] ))
+            dialog.message_dialog(label=_("Cannot convert the following annotations,\nthe representation pattern is too complex.\n%s") % ",".join( [ a.id for a in impossible ] ))
         return True
 
     def refresh(self, *p):

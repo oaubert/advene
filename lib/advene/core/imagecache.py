@@ -33,7 +33,7 @@ class CachedString:
     def __str__(self):
         try:
             return open(self._filename).read()
-        except:
+        except (IOError, OSError):
             return ''
 
     def __repr__(self):
@@ -99,7 +99,7 @@ class ImageCache(dict):
         try:
             self.approximate(long(key))
             return True
-        except:
+        except ValueError:
             return False
         return False
     
@@ -141,7 +141,7 @@ class ImageCache(dict):
         valids = [ (pos, abs(pos-key))
                    for pos in self.keys()
                    if abs(pos - key) <= self.epsilon ]
-        valids.sort(lambda a,b: cmp(a[1], b[1]))
+        valids.sort(lambda a, b: cmp(a[1], b[1]))
         
         if valids:
             key = valids[0][0]
@@ -212,7 +212,7 @@ class ImageCache(dict):
         if not os.path.isdir (directory):
             if os.path.exists (directory):
                 # File exists, but is not a directory.
-                raise "Fatal error: %s should be a directory" % directory
+                raise Exception("Fatal error: %s should be a directory" % directory)
             else:
                 os.mkdir (directory)
 
@@ -221,7 +221,7 @@ class ImageCache(dict):
         if not os.path.isdir (d):
             if os.path.exists (d):
                 # File exists, but is not a directory.
-                raise "Fatal error: %s should be a directory" % d
+                raise Exception("Fatal error: %s should be a directory" % d)
             else:
                 os.mkdir (d)
 
@@ -269,6 +269,8 @@ class ImageCache(dict):
         self._modified=False
 
     def ids (self):
+        """Return the list of currents ids.
+        """
         return [ str(k) for k in self.keys () ]
 
     def __str__ (self):

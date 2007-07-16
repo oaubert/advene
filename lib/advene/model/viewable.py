@@ -20,7 +20,6 @@ import cStringIO
 import advene.model.modeled as modeled
 import advene.model.tal.context
 
-from advene.model.constants import *
 from advene.model.exception import AdveneException
 
 import advene.model.util as util
@@ -116,7 +115,7 @@ class Viewable(object):
         in dico."""        
 
         if context is None:
-            context = advene.model.tal.context.AdveneContext(self,{})
+            context = advene.model.tal.context.AdveneContext(self, {})
 
         view = None
         if view_id is None:
@@ -172,14 +171,14 @@ class Viewable(object):
         return None
 
     def _find_named_view (self, view_id, context):
-	res=None
+        res=None
         try:
             path =('view/ownerPackage/views/%s | '
                   +'here/ownerPackage/views/%s') % (view_id, view_id)
             res=context.evaluateValue (path)
         except AdveneException:
             pass
-	return res
+        return res
 
     def getValidViews (self):
         """
@@ -207,7 +206,7 @@ class Viewable(object):
                 views = self.getOwnerPackage().getViews()
                 for id_ in views.ids():
                     if views[id_] is value:
-                        self._getModel().setAttributeNS(None,'default-view', id_)
+                        self._getModel().setAttributeNS(None, 'default-view', id_)
                         return
                 raise AdveneException("%s not in owner package of %s" %
                                                                    (value,self))
@@ -236,42 +235,42 @@ class Viewable(object):
 
 class GenericViewable(Viewable.withClass('generic')):
     def __init__(self, o, stack):
-	self._o = o
-	self._root_package = None
-	self._owner_package = None
-	# Reverse-lookup of the resolved stack, to guess a 
-	# pertinent root/ownerPackage
-	for name, val in stack[::-1]:
-	    try:
-		self._owner_package = val.getOwnerPackage()
-		self._root_package = val.getRootPackage()
-		break
-	    except AttributeError:
-		pass
-	print "GenericViewable ", str(self._owner_package), str(self._root_package)
+        self._o = o
+        self._root_package = None
+        self._owner_package = None
+        # Reverse-lookup of the resolved stack, to guess a 
+        # pertinent root/ownerPackage
+        for name, val in stack[::-1]:
+            try:
+                self._owner_package = val.getOwnerPackage()
+                self._root_package = val.getRootPackage()
+                break
+            except AttributeError:
+                pass
+        print "GenericViewable ", str(self._owner_package), str(self._root_package)
 
     def getRootPackage(self):
-	return object.__getattribute__(self, '_root_package')
+        return object.__getattribute__(self, '_root_package')
 
     def getOwnerPackage(self):
-	return object.__getattribute__(self, '_owner_package')
+        return object.__getattribute__(self, '_owner_package')
 
     def __getattribute__ (self, name):
-	print "getattr", name
-	try:
-	    return object.__getattribute__ (self, name)
-	except AttributeError, e:
-	    return object.__getattribute__ (self, '_o').__getattribute__ (name)
+        print "getattr", name
+        try:
+            return object.__getattribute__ (self, name)
+        except AttributeError, e:
+            return object.__getattribute__ (self, '_o').__getattribute__ (name)
 
 class GenericViewableList(Viewable.withClass('list'), GenericViewable):
     def __iter__(self):
-	return object.__getattribute__(self, '_o').__iter__()
+        return object.__getattribute__(self, '_o').__iter__()
 
     def __len__(self):
-	return object.__getattribute__(self, '_o').__len__()
+        return object.__getattribute__(self, '_o').__len__()
 
     def __getitem__(self, n):
-	return object.__getattribute__(self, '_o').__getitem__(n)
+        return object.__getattribute__(self, '_o').__getitem__(n)
 
 __system_default_view = cStringIO.StringIO("""<!-- ADVENE DEFAULT VIEW-->
 <span tal:replace='here'>the object</span>""".encode('utf-8'))

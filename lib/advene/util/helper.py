@@ -62,12 +62,12 @@ def fourcc2rawcode (code):
     @rtype: string
     """
     if code == 'PNG' or code == 'png':
-	return 'PNG'
+        return 'PNG'
 
     if code == 'video/x-raw-rgb':
-	return 'BGRX'
+        return 'BGRX'
 
-    conv = { 
+    conv = {
         'RV32' : 'BGRX',
         'png ' : 'PNG',
         ' gnp' : 'PNG', # On PPC-MacOS X
@@ -126,31 +126,31 @@ def snapshot2png (image, output=None):
 
     code=fourcc2rawcode(image.type)
     if code == 'PNG':
-	png=TypedString(image.data)
+        png=TypedString(image.data)
         png.contenttype='image/png'
     elif code is not None:
-	try:
-	    i = Image.fromstring ("RGB", (image.width, image.height), image.data,
-				  "raw", code)
-	    ostream = StringIO.StringIO ()
-	    i.save(ostream, 'png')
-	    png=TypedString(ostream.getvalue())
-	    png.contenttype='image/png'
-	except NameError:
-	    print "snapshot: conversion module not available"
+        try:
+            i = Image.fromstring ("RGB", (image.width, image.height), image.data,
+                                  "raw", code)
+            ostream = StringIO.StringIO ()
+            i.save(ostream, 'png')
+            png=TypedString(ostream.getvalue())
+            png.contenttype='image/png'
+        except NameError:
+            print "snapshot: conversion module not available"
     else:
         print "snapshot: unknown image type ", repr(image.type)
-    
+
     if png is None:
-	f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
-	png=TypedString(f.read(10000))
+        f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
+        png=TypedString(f.read(10000))
         png.contenttype='image/png'
-	f.close()
+        f.close()
 
     if output is not None:
-	f=open(output, 'wb')
-	f.write(png)
-	f.close()
+        f=open(output, 'wb')
+        f.write(png)
+        f.close()
         return ""
     else:
         return png
@@ -266,15 +266,6 @@ def matching_relationtypes(package, ann1, ann2):
     # FIXME: works only on binary relations for the moment.
     r=[]
     for rt in package.relationTypes:
-        # Absolutize URIs
-        # FIXME: horrible hack. Does not even work on
-        # imported packages
-        def absolute_uri(package, uri):
-            if uri.startswith('#'):
-                return package.uri + uri
-            else:
-                return uri
-
         def get_id_from_fragment(uri):
             try:
                 i=uri[uri.index('#')+1:]
@@ -474,7 +465,7 @@ def get_statistics(fname):
         try:
             z=zipfile.ZipFile(fname, 'r')
         except Exception, e:
-            raise AdveneException(_("Cannot read %(filename)s: %(error)s") % {'filename': fname, 
+            raise AdveneException(_("Cannot read %(filename)s: %(error)s") % {'filename': fname,
                                                                               'error': unicode(e)})
 
         # Check the validity of mimetype
@@ -490,10 +481,7 @@ def get_statistics(fname):
         except KeyError:
             st=None
 
-        try:
-            z.close()
-        except:
-            pass
+        z.close()
 
     if not st:
         # If we are here, it is that we could not get the statistics.xml.
@@ -529,7 +517,7 @@ Description:
         'relation_type': format_element_name('relation_type', data['relation_type']),
         'query': format_element_name('query', data['query']),
         'view': format_element_name('view', data['view']),
-        'description': data['description'] 
+        'description': data['description']
         }
     return m
 
@@ -560,7 +548,7 @@ def format_element_name(name, count=None):
         return _("1 %s") % element_declinations[name][0]
     else:
         return _("%(count)d %(plural)s") % {
-            'count': count, 
+            'count': count,
             'plural': element_declinations[name][1]}
 
 def get_id(source, id_):
@@ -577,8 +565,8 @@ def get_id(source, id_):
 # Root elements
 root_elements = ('here', 'nothing', 'default', 'options', 'repeat', 'request',
                  # Root elements available in STBVs
-                 'package', 'packages', 'annotation', 'relation', 
-		 'activeAnnotations', 'player', 'event',
+                 'package', 'packages', 'annotation', 'relation',
+                 'activeAnnotations', 'player', 'event',
                  # Root elements available in queries
                  'element',
                  )
@@ -590,26 +578,26 @@ path_any_re = re.compile('^(string|python):')
 path_tales_re = re.compile('^(exists|not|nocall):(.+)')
 
 def is_valid_tales(expr):
-        """Return True if the expression looks like a valid TALES expression
+    """Return True if the expression looks like a valid TALES expression
 
-        @param expr: the expression to check.
-        @type expr: string
-        """
-        # Empty expressions are considered valid
-        if expr == "":
-            return True
-        if path_any_re.match(expr):
-            return True
-        m=path_tales_re.match(expr)
-        if m:
-            return is_valid_tales(expr=m.group(2))
-        # Check that the first element is a valid TALES root element
-        root=expr.split('/', 1)[0]
-        return root in root_elements
+    @param expr: the expression to check.
+    @type expr: string
+    """
+    # Empty expressions are considered valid
+    if expr == "":
+        return True
+    if path_any_re.match(expr):
+        return True
+    m=path_tales_re.match(expr)
+    if m:
+        return is_valid_tales(expr=m.group(2))
+    # Check that the first element is a valid TALES root element
+    root=expr.split('/', 1)[0]
+    return root in root_elements
 
 def get_video_stream_from_website(url):
     """Return the videostream embedded in the given website.
-    
+
     Return None if no stream can be found.
 
     Supports: dailymotion, youtube, googlevideo

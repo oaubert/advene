@@ -232,7 +232,8 @@ class TimeAdjustment:
         the corresponding value in milliseconds (float), else None
         """
 
-        if s is None: return None
+        if s is None:
+            return None
         dt = None
         match = TimeAdjustment._timeRE.search(s)
         if match is not None:

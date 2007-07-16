@@ -57,6 +57,9 @@ gettext.textdomain(APP)
 gettext.install(APP, localedir=config.data.path['locale'], unicode=True)
 gtk.glade.bindtextdomain(APP, config.data.path['locale'])
 gtk.glade.textdomain(APP)
+# The following line is useless, since gettext.install defines _ as a
+# builtin. However, code checking applications need to be explicitly
+# told that _ is imported.
 from gettext import gettext as _
 
 import advene.core.controller
@@ -119,13 +122,13 @@ class Connect:
         self.create_dictionary_for_class (self.__class__, d)
         return d
 
-    def create_dictionary_for_class (self, a_class, dict):
+    def create_dictionary_for_class (self, a_class, dic):
         """Create a (name, function) dictionary for the specified class."""
         bases = a_class.__bases__
         for iteration in bases:
-            self.create_dictionary_for_class (iteration, dict)
+            self.create_dictionary_for_class (iteration, dic)
         for iteration in dir(a_class):
-            dict[iteration] = getattr(self, iteration)
+            dic[iteration] = getattr(self, iteration)
 
     def connect (self, gui):
         """Connect the class methods with the UI."""
@@ -199,6 +202,12 @@ class AdveneGUI (Connect):
             return True
 
         def open_view_menu(widget, name):
+            """Open the view menu.
+
+            In expert mode, directly open the view. Else, display a
+            popup menu proposing the various places where the view can
+            be opened.
+            """
             if name == 'webbrowser':
                 open_view(widget, name)
                 return True
@@ -254,12 +263,15 @@ class AdveneGUI (Connect):
 
         launcher=get_small_stock_button(gtk.STOCK_FIND, self.do_quicksearch)
         def modify_source(i, expr, label):
+            """Modify the quicksearch source, and update the tooltip accordingly.
+            """
             config.data.preferences['quicksearch-source']=expr
             self.tooltips.set_tip(launcher, _("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
             return True
 
-        # Generate the quick search entry
         def quicksearch_options(button, event):
+            """Generate the quicksearch options menu.
+            """
             if event.button != 3 or event.type != gtk.gdk.BUTTON_PRESS:
                 return False
             menu=gtk.Menu()
@@ -472,6 +484,10 @@ class AdveneGUI (Connect):
         return True
 
     def handle_element_delete(self, context, parameters):
+        """Handle element deletion.
+
+        It notably closes all edit windows for the element.
+        """
         event=context.evaluateValue('event')
         if not event.endswith('Delete'):
             return True
@@ -498,6 +514,8 @@ class AdveneGUI (Connect):
         return True
 
     def updated_position_cb (self, context, parameters):
+        """Method called upon video player position change.
+        """
         position_before=context.evaluateValue('position_before')
         self.navigation_history.append(position_before)
         # Notify views that the position has been reset.
@@ -509,6 +527,8 @@ class AdveneGUI (Connect):
         return True
 
     def player_stop_cb (self, context, parameters):
+        """Method called upon video player stop.
+        """
         # Notify views that the position has been reset.
         for v in self.adhoc_views:
             try:
@@ -680,10 +700,14 @@ class AdveneGUI (Connect):
         return col
 
     def set_current_annotation(self, a):
+        """Set the current annotation.
+        """
         self.current_annotation=a
         self.update_loop_button()
 
     def update_loop_button(self):
+        """Update the loop button tooltip.
+        """
         b=self.loop_toggle_button
         if self.current_annotation is None:
             mes=_("Select an annotation to loop on it")
@@ -722,7 +746,7 @@ class AdveneGUI (Connect):
                       gtk.STATE_PRELIGHT):
             self.drawable.modify_bg (state, black)
 
-        self.drawable.set_size_request(320,200)
+        self.drawable.set_size_request(320, 200)
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
         self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
 
@@ -738,6 +762,8 @@ class AdveneGUI (Connect):
         hb.pack_start(self.gui.stbv_combo, expand=True)
 
         def on_edit_current_stbv_clicked(button):
+            """Handle current stbv edition.
+            """
             combo=self.gui.stbv_combo
             i=combo.get_active_iter()
             stbv=combo.get_model().get_value(i, 1)
@@ -781,6 +807,8 @@ class AdveneGUI (Connect):
         audio_off.show()
 
         def toggle_audio_mute(b):
+            """Toggle audio mute status.
+            """
             # Set the correct image
             if b.get_active():
                 self.controller.player.sound_mute()
@@ -798,6 +826,8 @@ class AdveneGUI (Connect):
         
         # Append the loop checkitem to the toolbar
         def loop_toggle_cb(b):
+            """Handle loop button action.
+            """
             if b.get_active():
                 if self.current_annotation:
                     # If we are already in the current annotation, do not goto
@@ -971,21 +1001,21 @@ class AdveneGUI (Connect):
         tb.set_style(gtk.TOOLBAR_ICONS)
 
         tb_list = (
-            (_("Rewind"), _("Rewind"), gtk.STOCK_MEDIA_REWIND,
+            (_("Rewind"), gtk.STOCK_MEDIA_REWIND,
              self.on_b_rewind_clicked),
-            (_("Play"), _("Play"), gtk.STOCK_MEDIA_PLAY,
+            (_("Play"), gtk.STOCK_MEDIA_PLAY,
              self.on_b_play_clicked),
-            (_("Pause"), _("Pause"), gtk.STOCK_MEDIA_PAUSE,
+            (_("Pause"), gtk.STOCK_MEDIA_PAUSE,
              self.on_b_pause_clicked),
-            (_("Stop"), _("Stop"), gtk.STOCK_MEDIA_STOP,
+            (_("Stop"), gtk.STOCK_MEDIA_STOP,
              self.on_b_stop_clicked),
-            (_("Forward"), _("Forward"), gtk.STOCK_MEDIA_FORWARD,
+            (_("Forward"), gtk.STOCK_MEDIA_FORWARD,
              self.on_b_forward_clicked),
             )
 
-        for text, tooltip, stock, callback in tb_list:
+        for text, stock, callback in tb_list:
             b=gtk.ToolButton(stock)
-            b.set_tooltip(self.tooltips, tooltip)
+            b.set_tooltip(self.tooltips, text)
             b.connect("clicked", callback)
             tb.insert(b, -1)
 
@@ -1053,6 +1083,8 @@ class AdveneGUI (Connect):
         return False
 
     def edit_element(self, element, modal=False):
+        """Edit the element.
+        """
         if self.edit_accumulator and (
             isinstance(element, Annotation) or isinstance(element, Relation)):
             self.edit_accumulator.edit(element)
@@ -1158,6 +1190,8 @@ class AdveneGUI (Connect):
         return menu
 
     def workspace_clear(self):
+        """Clear the workspace.
+        """
         for d in ('west', 'east', 'south', 'fareast'):
             self.viewbook[d].clear()
         # Also clear popup views
@@ -1211,7 +1245,7 @@ class AdveneGUI (Connect):
         d={}
         d['x'], d['y']=w.get_position()
         d['width'], d['height']=w.get_size()
-        for k,v in d.iteritems():
+        for k, v in d.iteritems():
             d[k]=unicode(v)
         layout=ET.SubElement(workspace, 'layout', d)
         for n in ('west', 'east', 'fareast', 'south', 'main'):
@@ -2234,8 +2268,7 @@ class AdveneGUI (Connect):
 
         def refresh(b, t):
             b=t.get_buffer()
-            begin,end = b.get_bounds ()
-            b.delete(begin, end)
+            b.delete(*b.get_bounds ())
             f=open(config.data.advenefile('webserver.log', 'settings'), 'r')
             b.set_text("".join(f.readlines()))
             f.close()

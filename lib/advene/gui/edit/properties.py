@@ -16,10 +16,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 """Generic properties editor widget.
+
+Code adapted from gDesklets.
 """
 
 import gtk
 import os
+
+from gettext import gettext as _
 
 class EditNotebook(object):
     def __init__(self, set_config, get_config):

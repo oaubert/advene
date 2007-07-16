@@ -15,7 +15,7 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Id generator."""
+"""Identifier generator module."""
 
 import re
 
@@ -27,6 +27,10 @@ from advene.model.view import View
 from advene.model.query import Query
 
 class Generator:
+    """Identifier generator.
+
+    It keeps a track of ids for all elements from the package.
+    """
     prefix = {
         Package: "p",
         Annotation: "a",
@@ -42,17 +46,21 @@ class Generator:
     
     def __init__(self, package=None):
         self.last_used={}
-	self.existing=[]
+        self.existing=[]
         for k in self.prefix.keys():
             self.last_used[k]=0
         if package is not None:
             self.init(package)
 
     def exists(self, id_):
-	return id_ in self.existing
+        """Check if an id already exists.
+        """
+        return id_ in self.existing
 
     def add(self, id_):
-	self.existing.append(id_)
+        """Add a new known id.
+        """
+        self.existing.append(id_)
 
     def init(self, package):
         """Initialize the indexes for the given package."""
@@ -68,7 +76,7 @@ class Generator:
                   package.annotationTypes, package.relationTypes,
                   package.views, package.queries):
             for i in l.ids():
-		self.existing.append(i)
+                self.existing.append(i)
                 m=re_id.match(i)
                 if m:
                     n=long(m.group(2))
@@ -79,10 +87,12 @@ class Generator:
         self.last_used = dict(last_id)
 
     def get_id(self, elementtype):
+        """Return a not-yet used id.
+        """
         prefix=self.prefix[elementtype]
         index=self.last_used[prefix] + 1
         self.last_used[prefix]=index
-	id_ = prefix + str(index)
-	# Do not append yet.
-	#self.existing.append(id_)
+        id_ = prefix + str(index)
+        # Do not append yet.
+        #self.existing.append(id_)
         return id_

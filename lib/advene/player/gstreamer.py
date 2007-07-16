@@ -159,10 +159,10 @@ class Player:
         self.converter.queue=self.converter.get_by_name('queue')
         self.converter.sink=self.converter.get_by_name('sink')
 
-        def converter_cb(element, buffer, pad):
+        def converter_cb(element, buf, pad):
             c=self.converter
             c._lock.acquire()
-            c._buffer=buffer
+            c._buffer=buf
             c._lock.notify()
             c._lock.release()
             return True
@@ -518,3 +518,10 @@ class Player:
 
     def sound_is_muted(self):
         return (self.mute_volume is not None)
+
+    def disp(self, e, indent="  "):
+        l=[str(e)]
+        if hasattr(e, 'elements'):
+            i=indent+"  "
+            l.extend( [ self.disp(c, i) for c in e.elements() ])
+        return ("\n"+indent).join(l)

@@ -27,7 +27,8 @@ import content
 import modeled
 import viewable
 
-from constants import *
+from advene.model.constants import adveneNS
+
 from exception import AdveneException
 from fragment import fragmentFactory, unknownFragment
 
@@ -168,7 +169,7 @@ class Annotation(modeled.Importable, content.WithContent,
         """Return the fragment associated to this annotation"""
         if self.__fragment is None:
             elt = self.__getFragmentElement()
-            self.__fragment = fragmentFactory.makeFragment(elt,self)
+            self.__fragment = fragmentFactory.makeFragment(elt, self)
         return self.__fragment
 
     def setFragment(self, fragment):

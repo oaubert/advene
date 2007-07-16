@@ -144,6 +144,7 @@ class SequenceEditor(AdhocView):
         self.view_id = 'sequenceview'
         self.close_on_package_load = True
 
+        self.annotationtype=None
         self.controller=controller
         self.package=controller.package
         self.model = SequenceModel(self.package.annotations)
@@ -154,8 +155,8 @@ class SequenceEditor(AdhocView):
         # the package's data, *or* creating an intermediate model in
         # order to be able to cancel actions
 
-    def set_type(self, type):
-        self.annotationtype=type
+    def set_type(self, typ):
+        self.annotationtype=typ
 
     def build_widget(self):
         tree_view = gtk.TreeView(self.model)
@@ -241,8 +242,8 @@ class SequenceEditor(AdhocView):
             t = widget.get_path_at_pos(x, y)
             if t is not None:
                 path, col, cx, cy = t
-                iter = model.get_iter(path)
-                node = model.get_value(iter,
+                it = model.get_iter(path)
+                node = model.get_value(it,
                                        SequenceModel.COLUMN_ELEMENT)
                 widget.get_selection().select_path (path)
                 if button == 3:

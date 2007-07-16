@@ -88,7 +88,7 @@ class _advene_context (simpleTALES.Context):
         # For compatibility with code using simpletal 3.6 (migration phase)
         # Pop the current locals onto the stack
         self.pushLocals()
-        for name,value in localVarList:
+        for name, value in localVarList:
                 self.setLocal(name, value)
 
     def traversePathPreHook(self, obj, path):
@@ -178,7 +178,7 @@ class _advene_context (simpleTALES.Context):
                                         elif (callable (path)):path = apply (path, ())
                                 #self.log.debug ("Dereferenced to %s" % path)
                         try:
-                                if (isinstance (val, simpleTALES.ContextVariable)): temp = val.value((index,pathList))
+                                if (isinstance (val, simpleTALES.ContextVariable)): temp = val.value((index, pathList))
                                 elif (callable (val)):temp = apply (val, ())
                                 else: temp = val
                         except simpleTALES.ContextVariable, e:
@@ -245,12 +245,14 @@ class AdveneContext(_advene_context):
                               for k, v in self.locals.iteritems() ]))
 
         
-    def __init__(self, here, options={}):
+    def __init__(self, here, options=None):
         """Creates a tales.AdveneContext object, having a global symbol 'here'
            with value 'here' and a global symbol 'options' where all the key-
            value pairs of parameter 'options' are copied. Of course, it also
            has all the standard TALES global symbols.
         """
+        if options is None:
+                options={}
         _advene_context.__init__(self, dict(options)) # *copy* dict 'options'
         self.methods = {}
         self.addGlobal('here', here)

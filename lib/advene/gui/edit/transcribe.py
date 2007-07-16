@@ -371,7 +371,7 @@ class TranscriptionEdit(AdhocView):
         self.textview.add_child_at_anchor(child, anchor)
 
         self.marks.append(child)
-        self.marks.sort(lambda a,b: cmp(a.timestamp, b.timestamp))
+        self.marks.sort(lambda a, b: cmp(a.timestamp, b.timestamp))
         return child
 
     def populate(self, annotations):
@@ -384,7 +384,7 @@ class TranscriptionEdit(AdhocView):
         # FIXME: check for conflicting bounds
         l=[ (a.fragment.begin, a.fragment.end, a)
             for a in annotations ]
-        l.sort(lambda a,b: cmp(a[0], b[0]))
+        l.sort(lambda a, b: cmp(a[0], b[0]))
         last_end=-1
         for (begin, end, a) in l:
             if begin < last_end or end < last_end:
@@ -472,7 +472,7 @@ class TranscriptionEdit(AdhocView):
                 self.current_mark = cm
         else:
             if self.current_mark is not None:
-                    self.update_mark(self.current_mark)
+                self.update_mark(self.current_mark)
             self.current_mark=None
         return True
 

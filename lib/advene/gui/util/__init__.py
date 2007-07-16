@@ -83,10 +83,10 @@ def name2color(color):
         # Found a color. Cache it.
         try:
             gtk_color=color_cache[color]
-        except:
+        except KeyError:
             try:
                 color_cache[color]=gtk.gdk.color_parse(color)
-            except:
+            except (TypeError, ValueError):
                 print "Unable to parse ", color
                 color_cache[color]=None
             gtk_color=color_cache[color]

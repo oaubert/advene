@@ -75,7 +75,8 @@ class Config(object):
 
     def __init__ (self):
 
-	self.parse_options()
+        self.config_file=''
+        self.parse_options()
 
         if os.sys.platform in ( 'win32', 'darwin' ):
             self.os=os.sys.platform
@@ -125,7 +126,7 @@ class Config(object):
                 # Movie files search path. _ is the
                 # current package path
                 'moviepath': '_',
-		# Locale dir FIXME
+                # Locale dir FIXME
                 'locale': '/Applications/Advene.app/locale',
                 }
         else:
@@ -165,8 +166,8 @@ class Config(object):
         self.gladefilename = "advene.glade"
 
         # Generic options
-	# They are automatically saved across sessions
-	# in ~/.advene/advene.prefs
+        # They are automatically saved across sessions
+        # in ~/.advene/advene.prefs
         self.preferences = {
             # Various sizes of windows.
             'windowsize': { 'main': (800, 600),
@@ -182,12 +183,12 @@ class Config(object):
                             'linksview': (640, 480),
                             'tree': (800, 600),
                             'browser': (800, 600),
-			    'weblogview': (800, 600),
+                            'weblogview': (800, 600),
                             },
             'remember-window-size': True,
             'gui': { 'popup-textwidth': 40 },
-	    # Scroll increment in ms
-	    'scroll-increment': 100,
+            # Scroll increment in ms
+            'scroll-increment': 100,
             'timeline': { 
                 'font-size': 8,
                 'button-height': 24,
@@ -196,19 +197,19 @@ class Config(object):
             # File history
             'history': [],
             'history-size-limit': 5,
-	    # User-defined paths. Will overwrite 
-	    # config.data.path items
-	    'path': {},
-	    # Default adhoc views to open.
-	    # Syntax: timeline:tree:transcribe
-	    'adhoc-south': 'timeline',
-	    'adhoc-west': '',
-	    'adhoc-east': 'tree',
-	    'adhoc-fareast': '',
-	    'adhoc-popup': '',
+            # User-defined paths. Will overwrite 
+            # config.data.path items
+            'path': {},
+            # Default adhoc views to open.
+            # Syntax: timeline:tree:transcribe
+            'adhoc-south': 'timeline',
+            'adhoc-west': '',
+            'adhoc-east': 'tree',
+            'adhoc-fareast': '',
+            'adhoc-popup': '',
             'display-scroller': False,
             'display-caption': False,
-	    'record-actions': False,
+            'record-actions': False,
             # Imagecache save on exit: 'never', 'ask' or 'always'
             'imagecache-save-on-exit': 'ask',
             'quicksearch-ignore-case': True,
@@ -235,7 +236,7 @@ class Config(object):
             'embedded': True,
             'name': 'vlc',
             'vout': 'default',
-	    'svg': False,
+            'svg': False,
             'osdfont': '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
             'verbose': None, # None, 0, 1, 2
             'snapshot': True,
@@ -273,17 +274,17 @@ class Config(object):
 
         # MIMEtypes that can be edited by the TextContentHandler
         self.text_mimetypes = ( 
-	    'application/x-advene-structured',
-	    'application/x-advene-sparql-query',
+            'application/x-advene-structured',
+            'application/x-advene-sparql-query',
             'application/x-javascript',
             'application/x-advene-adhoc-view',
             'application/x-advene-workspace-view',
-	    )
+            )
 
-	# Drag and drop parameters for URIed element and other elements
-	self.target_type = {}
-	self.drag_type = {}
-	for name, type, mime in (
+        # Drag and drop parameters for URIed element and other elements
+        self.target_type = {}
+        self.drag_type = {}
+        for name, typ, mime in (
             ('text-plain',         0, 'text/plain'),
             ('TEXT',               1, 'TEXT'),
             ('STRING',             2, 'UTF8_STRING'),
@@ -294,33 +295,33 @@ class Config(object):
             ('annotation-type',   46, None),
             ('relation-type',     47, None),
             ('relation',          48, None),
-	    ('adhoc-view',        49, 'application/x-advene-adhoc-view'),
-	    ('annotation-resize', 50, None),
+            ('adhoc-view',        49, 'application/x-advene-adhoc-view'),
+            ('annotation-resize', 50, None),
             ('timestamp',         51, 'application/x-advene-timestamp'),
             ('tag',               52, None),
             ('color',             53, 'application/x-color'),
-	    ('adhoc-view-instance', 54, 'application/x-advene-adhoc-view-instance'),
-	    ('uri-list',          80, 'text/uri-list'),
-	    ):
-	    self.target_type[name] = type
-	    if mime is None:
-		mime = "application/x-advene-%s-uri" % type
-	    self.drag_type[name] = [ ( mime, 0, type) ]
+            ('adhoc-view-instance', 54, 'application/x-advene-adhoc-view-instance'),
+            ('uri-list',          80, 'text/uri-list'),
+            ):
+            self.target_type[name] = typ
+            if mime is None:
+                mime = "application/x-advene-%s-uri" % typ
+            self.drag_type[name] = [ ( mime, 0, typ) ]
 
-	self.video_extensions = (
-	    '.asf', 
-	    '.avi', 
-	    '.mov',
-	    '.mpg', '.mpeg',  '.mp4', 
-	    '.ogm',
-	    '.ogg',
-	    '.rm', 
-	    '.vob',
+        self.video_extensions = (
+            '.asf', 
+            '.avi', 
+            '.mov',
+            '.mpg', '.mpeg',  '.mp4', 
+            '.ogm',
+            '.ogg',
+            '.rm', 
+            '.vob',
             '.mkv',
-	    '.wmv',
-	    )
+            '.wmv',
+            )
 
-	self.color_palette = (
+        self.color_palette = (
             u'string:#cccc99',
             u'string:#AAAAEE',
             u'string:#ccaaaa',
@@ -351,16 +352,16 @@ class Config(object):
             u'string:#D01F3C',
             )
 
-	# Content-handlers
-	self.content_handlers = []
+        # Content-handlers
+        self.content_handlers = []
 
-	# Global methods (user-defined)
-	self.global_methods = {}
+        # Global methods (user-defined)
+        self.global_methods = {}
 
         if self.os == 'win32':
             self.win32_specific_config()
-	elif self.os == 'darwin':
-	    self.darwin_specific_config()
+        elif self.os == 'darwin':
+            self.darwin_specific_config()
 
     def check_settings_directory(self):
         """Check if the settings directory is present, and create it if necessary.
@@ -370,23 +371,25 @@ class Config(object):
         return True
 
     def parse_options(self):
-	parser=OptionParser(usage="""Advene - annotate digital videos, exchange on the Net.
+        """Parse command-line options.
+        """
+        parser=OptionParser(usage="""Advene - annotate digital videos, exchange on the Net.
     %prog [options] [file.azp|file.xml|alias=uri]""")
 
-	parser.add_option("-v", "--version", dest="version", action="store_true",
-			  help="Display version number and exit.")
+        parser.add_option("-v", "--version", dest="version", action="store_true",
+                          help="Display version number and exit.")
 
-	parser.add_option("-s", "--settings-dir", dest="settings", action="store",
-			  type="string", default=None, metavar="SETTINGSDIR",
-			  help="Alternate configuration directory (default: ~/.advene).")
+        parser.add_option("-s", "--settings-dir", dest="settings", action="store",
+                          type="string", default=None, metavar="SETTINGSDIR",
+                          help="Alternate configuration directory (default: ~/.advene).")
 
-	parser.add_option("-u", "--user-id", dest="userid", action="store",
-			  type="string", default=None, metavar="LOGIN-NAME",
-			  help="User name (used to set the author field of elements).")
+        parser.add_option("-u", "--user-id", dest="userid", action="store",
+                          type="string", default=None, metavar="LOGIN-NAME",
+                          help="User name (used to set the author field of elements).")
 
-	parser.add_option("", "--no-embedded", 
-			  dest="embedded", action="store_false", default=True,
-			  help="Do not embed the video player.")
+        parser.add_option("", "--no-embedded", 
+                          dest="embedded", action="store_false", default=True,
+                          help="Do not embed the video player.")
 
         parser.add_option("-p", "--player",
                           dest="player",
@@ -397,42 +400,44 @@ class Config(object):
                           default=None,
                           help="Video player selection")
 
-	parser.add_option("-w", "--webserver-port", dest="port", action="store",
-			  type="int", default=None, metavar="PORT_NUMBER",
-			  help="Webserver port number (default 1234).")
+        parser.add_option("-w", "--webserver-port", dest="port", action="store",
+                          type="int", default=None, metavar="PORT_NUMBER",
+                          help="Webserver port number (default 1234).")
 
-	parser.add_option("-m", "--webserver-mode", dest="mode", action="store",
-			  type="int", default=None, metavar="WEBSERVER_MODE",
-			  help="0: deactivated ; 1: threaded mode.")
+        parser.add_option("-m", "--webserver-mode", dest="mode", action="store",
+                          type="int", default=None, metavar="WEBSERVER_MODE",
+                          help="0: deactivated ; 1: threaded mode.")
 
-	(self.options, self.args) = parser.parse_args()
-	if self.options.version:
-	    print self.get_version_string()
-	    sys.exit(0)
+        (self.options, self.args) = parser.parse_args()
+        if self.options.version:
+            print self.get_version_string()
+            sys.exit(0)
 
     def process_options(self):
-	"""Process command-line options.
+        """Process command-line options.
 
-	This method is called after read_preferences() and
-	read_config_file(), so that we can override from the command
-	line options set in configuration files.
-	"""
-	if self.options.port is not None:
-	    self.webserver['port'] = self.options.port
-	if self.options.mode is not None:
-	    self.webserver['mode'] = self.options.mode
+        This method is called after read_preferences() and
+        read_config_file(), so that we can override from the command
+        line options set in configuration files.
+        """
+        if self.options.port is not None:
+            self.webserver['port'] = self.options.port
+        if self.options.mode is not None:
+            self.webserver['mode'] = self.options.mode
 
-	if self.options.player is not None:
-	    self.player['plugin']=self.options.player
-	self.player['embedded']=self.options.embedded
+        if self.options.player is not None:
+            self.player['plugin']=self.options.player
+        self.player['embedded']=self.options.embedded
 
         h=self.preferences['history']
         if len(h) > self.preferences['history-size-limit']:
             self.preferences['history']=h[-self.preferences['history-size-limit']:]
 
-	return True
+        return True
 
     def win32_specific_config(self):
+        """Win32 specific configuration.
+        """
         if self.os != 'win32':
             return
 
@@ -453,22 +458,20 @@ class Config(object):
         self.path['web'] = os.path.sep.join( (advenehome, 'share', 'web') )
 
     def darwin_specific_config(self):
-	"""MacOS X specific tweaks.
-	"""
-	if self.os != 'darwin':
-	    return
-	# This one should go away sometime. But for the moment, the only way
-	# to embed vlc is to use the X11 video output
-	self.player['vout'] = 'x11'
-	
+        """MacOS X specific tweaks.
+        """
+        if self.os != 'darwin':
+            return
+        # This one should go away sometime. But for the moment, the only way
+        # to embed vlc is to use the X11 video output
+        self.player['vout'] = 'x11'
+        
     def get_registry_value (self, subkey, name):
+        """(win32) get a value from the registry.
+        """
         if self.os != 'win32':
             return None
-	import _winreg
-        try:
-            a=_winreg.HKEY_LOCAL_MACHINE
-        except NameError:
-            import _winreg
+        import _winreg
         value = None
         for hkey in _winreg.HKEY_LOCAL_MACHINE, _winreg.HKEY_CURRENT_USER:
             try:
@@ -476,44 +479,53 @@ class Config(object):
                 value, type_id = _winreg.QueryValueEx(reg, name)
                 _winreg.CloseKey(reg)
             except _winreg.error:
-                pass
+                value=None
         return value
 
     def register_content_handler(self, handler):
-	# FIXME: check signature ?
-	if not handler in self.content_handlers:
-	    self.content_handlers.append(handler)
-	return True
+        """Register a content handler.
+        """
+        # FIXME: check signature ?
+        if not handler in self.content_handlers:
+            self.content_handlers.append(handler)
+        return True
 
     def register_global_method(self, method, name=None):
-	# FIXME: check signature ?
-	if name is None:
-	    name=method.func_name
-	self.global_methods[name]=method
-	return True
+        """Register a global method.
+        """
+        # FIXME: check signature ?
+        if name is None:
+            name=method.func_name
+        self.global_methods[name]=method
+        return True
 
     def register_player_plugin(self, module):
+        """Register a player plugin.
+        """
         self.player_plugins[module.name] = module
         return True
 
     def get_content_handler(self, mimetype):
-	"""Return a valid content handler for the given mimetype.
-	
-	Return None if no content handler is valid (should not happen, as
-	TextContentHandler is builtin).
-	"""
-	l=[ (c, c.can_handle(mimetype)) for c in self.content_handlers ]
-	if not l:
-	    return None
-	else:
-	    l.sort(lambda a, b: cmp(b[1], a[1]))
-	    return l[0][0]
+        """Return a valid content handler for the given mimetype.
+        
+        Return None if no content handler is valid (should not happen, as
+        TextContentHandler is builtin).
+        """
+        l=[ (c, c.can_handle(mimetype)) for c in self.content_handlers ]
+        if not l:
+            return None
+        else:
+            l.sort(lambda a, b: cmp(b[1], a[1]))
+            return l[0][0]
 
     def get_homedir(self):
+        """Return the user's homedir.
+        """
         h=None
         try:
             h=os.path.expanduser('~')
         except:
+            # FIXME: find the appropriate exception to catch (on win32?)
             if os.environ.has_key('HOME'):
                 h=os.environ['HOME']
             elif os.environ.has_key('HOMEPATH'):
@@ -527,8 +539,8 @@ class Config(object):
     def get_settings_dir(self):
         """Return the directory used to store Advene settings.
         """
-	if self.options.settings is not None:
-	    return self.options.settings
+        if self.options.settings is not None:
+            return self.options.settings
 
         if self.os == 'win32':
             dirname='advene'
@@ -538,35 +550,43 @@ class Config(object):
         return os.path.join( self.get_homedir(), dirname )
 
     def read_preferences(self):
-	prefs=self.read_preferences_file(d=self.preferences, name='advene')
-	if prefs and prefs.has_key('path'):
-	    self.path.update(prefs['path'])
-	self.read_preferences_file(d=self.player, name='player')
-	return True
+        """Update self.preferences from the preferences file.
+        """
+        prefs=self.read_preferences_file(d=self.preferences, name='advene')
+        if prefs and prefs.has_key('path'):
+            self.path.update(prefs['path'])
+        self.read_preferences_file(d=self.player, name='player')
+        return True
 
     def save_preferences(self):
-	self.save_preferences_file(d=self.preferences, name='advene')
-	self.save_preferences_file(d=self.player, name='player')
-	return True
+        """Save self.preferences to the preferences file.
+        """
+        self.save_preferences_file(d=self.preferences, name='advene')
+        self.save_preferences_file(d=self.player, name='player')
+        return True
 
     def read_preferences_file(self, d=None, name='advene'):
-	if d is None:
-	    d=self.preferences
+        """Generic preferences reading.
+        """
+        if d is None:
+            d=self.preferences
         preffile=self.advenefile(name+'.prefs', 'settings')
         try:
             f = open(preffile, "r")
         except IOError:
-            return False
+            return None
         try:
             prefs=cPickle.load(f)
-        except:
-            return False
+        except (EOFError, cPickle.PickleError, cPickle.PicklingError):
+            return None
         d.update(prefs)
         return prefs
 
     def save_preferences_file(self, d=None, name='advene'):
-	if d is None:
-	    d=self.preferences
+        """Generic preferences saving.
+        """
+        if d is None:
+            d=self.preferences
         preffile=self.advenefile(name+'.prefs', 'settings')
         dp=os.path.dirname(preffile)
         if not os.path.isdir(dp):
@@ -581,47 +601,47 @@ class Config(object):
             return False
         try:
             cPickle.dump(d, f)
-        except:
+        except (EOFError, cPickle.PickleError, cPickle.PicklingError):
             return False
         return True
 
     def read_config_file (self):
         """Read the configuration file (advene.ini).
         """
-	conffile=self.advenefile('advene.ini', 'settings')
+        conffile=self.advenefile('advene.ini', 'settings')
 
         try:
-            file = open(conffile, "r")
+            fd=open(conffile, "r")
         except IOError:
             self.config_file=''
             return False
 
         print "Reading configuration from %s" % conffile
         config=sys.modules['advene.core.config']
-        for li in file:
+        for li in fd:
             if li.startswith ("#"):
                 continue
-            object = compile (li, conffile, 'single')
+            obj = compile (li, conffile, 'single')
             try:
-                exec object
+                exec obj
             except Exception, e:
                 print "Error in %s:\n%s" % (conffile, str(e))
-        file.close ()
+        fd.close ()
 
         self.config_file=conffile
 
     def get_player_args (self):
         """Build the VLC player argument list.
 
-	FIXME: this is valid for VLC only, so this should belong
-	to player.vlcnative.
+        FIXME: this is valid for VLC only, so this should belong
+        to player.vlcnative.
 
         @return: the list of arguments
         """
         args=[]
         filters=[]
 
-	args.extend( [ '--intf', 'dummy' ] )
+        args.extend( [ '--intf', 'dummy' ] )
 
         if os.path.isdir(self.path['plugins']):
             args.extend([ '--plugin-path', self.path['plugins'] ])
@@ -630,12 +650,12 @@ class Config(object):
             args.append (self.player['verbose'])
         if self.player['vout'] != 'default':
             args.extend( [ '--vout', self.player['vout'] ] )
-	if self.player['svg']:
-	    args.extend( [ '--text-renderer', 'svg' ] )
+        if self.player['svg']:
+            args.extend( [ '--text-renderer', 'svg' ] )
         if filters != []:
             # Some filters have been defined
             args.extend (['--vout-filter', ":".join(filters)])
-	#print "player args", args
+        #print "player args", args
         return [ str(i) for i in args ]
 
     def get_userid (self):
@@ -645,8 +665,8 @@ class Config(object):
         @rtype: string
         """
         # FIXME: allow override via advene.ini
-	if self.options.userid is not None:
-	    return self.options.userid
+        if self.options.userid is not None:
+            return self.options.userid
 
         id_ = "Undefined id"
         for name in ('USER', 'USERNAME', 'LOGIN'):
@@ -682,12 +702,14 @@ class Config(object):
         return os.path.join ( self.path[category], filename )
 
     def get_version_string(self):
-	try:
-	    import advene.core.version as version
-	    return "Advene v. %s release %s" % (version.version,
-						version.date)
-	except ImportError:
-	    return "Advene v. ??? (cannot get version number)"
+        """Return the version string.
+        """
+        try:
+            import advene.core.version as version
+            return "Advene v. %s release %s" % (version.version,
+                                                version.date)
+        except ImportError:
+            return "Advene v. ??? (cannot get version number)"
 
     userid = property (fget=get_userid,
                        doc="Login name of the user")
@@ -695,22 +717,26 @@ class Config(object):
                             doc="List of arguments for the VLC player")
 
     version_string = property(fget=get_version_string,
-			      doc="Version string")
+                              doc="Version string")
 
     def register_mimetype_file(self, fname):
+        """Register a mimetype for a given extension.
+        """
         for ext, t in mimetypes.read_mime_types(fname).iteritems():
             mimetypes.add_type(t, ext)
         
     def fix_paths(self, maindir):
-      # We override any modification that could have been made in
-      # .advenerc. Rationale: if the .advenerc was really correct, it
-      # would have set the correct package path in the first place.
-      print "Overriding 'resources', 'locale', 'advene' and 'web' config paths"
-      data.path['resources']=os.path.sep.join((maindir, 'share'))
-      data.path['locale']=os.path.sep.join( (maindir, 'locale') )
-      data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
-      data.path['advene']=maindir
-      #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
+        """Adjust paths according to the given main directory.
+        """
+        # We override any modification that could have been made in
+        # .advenerc. Rationale: if the .advenerc was really correct, it
+        # would have set the correct package path in the first place.
+        print "Overriding 'resources', 'locale', 'advene' and 'web' config paths"
+        data.path['resources']=os.path.sep.join((maindir, 'share'))
+        data.path['locale']=os.path.sep.join( (maindir, 'locale') )
+        data.path['web']=os.path.sep.join((maindir, 'share', 'web'))
+        data.path['advene']=maindir
+        #config.data.path['plugins']=os.path.sep.join( (maindir, 'vlc') )
 
 data = Config ()
 data.check_settings_directory()

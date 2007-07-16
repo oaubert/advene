@@ -41,6 +41,9 @@ import urllib
 import cgi
 import socket
 import imghdr
+
+from gettext import gettext as _
+
 import cherrypy
 
 if int(cherrypy.__version__.split('.')[0]) < 3:
@@ -51,7 +54,6 @@ from advene.model.fragment import MillisecondFragment
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 
-from gettext import gettext as _
 
 from advene.model.exception import AdveneException
 
@@ -62,10 +64,14 @@ import advene.util.helper as helper
 
 DEBUG=True
 class Common:
+    """Common functionalities for all cherrypy nodes.
+    """
     def __init__(self, controller=None):
         self.controller=controller
 
     def _cpOnError(self):
+        """Error message handling.
+        """
         err = sys.exc_info()
         if DEBUG:
             print "Error handling"
@@ -291,6 +297,8 @@ class Common:
         return "".join(res)
 
     def activate_stbvid(self, stbvid):
+        """Activate the given stbv id.
+        """
         if stbvid is not None:
             stbv=helper.get_id(self.controller.package.views, stbvid)
             if stbv is None:
@@ -374,24 +382,23 @@ class Media(Common):
     index.exposed=True
 
     def load(self, **params):
+        """Load a media file.
+        """
         if params.has_key ('filename'):
             name = params['filename']
             res=[]
             if name == 'dvd':
-                name = self.controller.player.dvd_uri(1,1)
-            try:
-                self.controller.queue_action(self.controller.set_media, name)
-                res.append(_("File added"))
-                res.append(_("""<p><strong>%s has been added to the playlist</strong></p>""") % name)
-                res.append(self.display_media_status ())
-            except:
-                res.append (_("""<p><strong>Error: cannot add %s to the playlist.</strong></p>""") % name)
-            else:
-                res.append(self.display_media_status ())
+                name=self.controller.player.dvd_uri(1, 1)
+            self.controller.queue_action(self.controller.set_media, name)
+            res.append(_("File added"))
+            res.append(_("""<p><strong>%s has been added to the playlist</strong></p>""") % name)
+            res.append(self.display_media_status ())
         return "".join(res)
     load.exposed=True
 
     def snapshot(self, *args, **params):
+        """Return the snapshot for the given position.
+        """
         # snapshot syntax: /media/snapshot/package_alias/NNNN
         res=[]
         if not args:
@@ -442,6 +449,8 @@ class Media(Common):
     snapshot.exposed=True
 
     def play(self, position=None, **params):
+        """Play the movie.
+        """
         c=self.controller
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
@@ -464,6 +473,8 @@ class Media(Common):
     play.exposed=True
 
     def pause(self, **params):
+        """Pause the movie.
+        """
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
         self.controller.queue_action(self.controller.update_status, 'pause')
@@ -471,6 +482,8 @@ class Media(Common):
     pause.exposed=True
 
     def stop(self, **params):
+        """Stop the movie.
+        """
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
         self.controller.queue_action(self.controller.update_status, 'stop')
@@ -478,6 +491,8 @@ class Media(Common):
     stop.exposed=True
 
     def resume(self, **params):
+        """Resume the movie.
+        """
         if params.has_key('stbv'):
             self.activate_stbvid(params['stbv'])
         self.controller.queue_action(self.controller.update_status, 'resume')
@@ -485,6 +500,8 @@ class Media(Common):
     resume.exposed=True
 
     def current(self):
+        """Return the currently playing movie file.
+        """
         cherrypy.response.headers['Content-type']='text/plain'
         l=self.controller.player.playlist_get_list()
         if l:
@@ -494,6 +511,8 @@ class Media(Common):
     current.exposed=True
 
     def stbv(self, *args, **query):
+        """Activate the given stbv.
+        """
         if not args and not query.has_key('id'):
             cherrypy.response.headers['Content-Type']='text/plain'
             return self.controller.current_stbv.id or 'None'
@@ -567,6 +586,8 @@ class Application(Common):
       information.
     """
     def current_adhoc(self):
+        """Display currently opened adhoc views.
+        """
         res=[]
         c=self.controller
         if not c.gui:
@@ -587,6 +608,8 @@ class Application(Common):
         return "".join(res)
 
     def current_stbv(self):
+        """Display currently active STBV.
+        """
         res=[]
         c=self.controller
         res.append(_("""<p>Current stbv: %s</p>""") % c.get_title(c.current_stbv))
@@ -597,7 +620,6 @@ class Application(Common):
         return "".join(res)
 
     def index(self):
-        c=self.controller
         return "".join( (
             self.start_html (_('Application information')),
             self.current_stbv(),
@@ -606,6 +628,8 @@ class Application(Common):
     index.exposed=True
 
     def stbv(self, *args, **query):
+        """Activate the given stbv.
+        """
         if not args:
             cherrypy.response.headers['Content-Type']='text/plain'
             return self.controller.current_stbv.id or 'None'
@@ -622,13 +646,15 @@ class Application(Common):
     stbv.exposed=True
 
     def adhoc(self, view=None, arg=None, **query):
+        """Open the given adhoc view.
+        """
         c=self.controller
         if view is None or c.gui is None:
             return self.current_adhoc()
 
         try:
             destination=query['destination']
-        except:
+        except KeyError:
             destination='popup'
 
         if view == 'transcription':
@@ -636,8 +662,8 @@ class Application(Common):
             if atid is None:
                 try:
                     atid=query['type']
-                except:
-                    pass
+                except KeyError:
+                    atid=None
 
             if atid is not None:
                 source="here/annotationTypes/%s/annotations/sorted" % atid
@@ -645,18 +671,17 @@ class Application(Common):
                 # Maybe there was a source parameter ?
                 try:
                     source=query['source']
-                except:
+                except KeyError:
                     # No provided source. Use the whole package
                     source="here/annotations/sorted"
             c.queue_action(c.gui.open_adhoc_view, view, source=source, destination=destination)
             return self.send_no_content()
 
         if view == 'transcribe':
-            url=None
             try:
                 url=query['url']
-            except:
-                pass
+            except KeyError:
+                url=None
             c.queue_action(c.gui.open_adhoc_view, view, filename=url, destination=destination)
             return self.send_no_content()
 
@@ -665,7 +690,7 @@ class Application(Common):
             if elid is None:
                 try:
                     elid=query['id']
-                except:
+                except KeyError:
                     return self.send_error(400, _("Missing element id parameter"))
 
             el=c.package.get_element_by_id(elid)
@@ -683,6 +708,8 @@ class Application(Common):
     adhoc.exposed=True
 
     def config(self, *args, **query):
+        """Set config variable value.
+        """
         if not args:
             return self.send_error(500, _("Invalid request"))
         name=args[0]
@@ -699,8 +726,8 @@ class Application(Common):
             # Convert the type.
             if isinstance(v, int) or isinstance(v, long):
                 try:
-                    data==long(data)
-                except ValueError, e:
+                    data=long(data)
+                except ValueError:
                     return self.send_error(500, _("Invalid value"))
             config.data.web[name]=data
             return self.send_no_content()
@@ -729,6 +756,8 @@ class Access(Common):
     displayed.
     """
     def display_access_list(self):
+        """Display the current access list.
+        """
         return _("""
         <h1>Authorized hosts</h1>
         <table border="1">
@@ -755,7 +784,7 @@ class Access(Common):
         else:
             try:
                 ip = socket.gethostbyname (hostname)
-            except:
+            except socket.error:
                 res.append (_("""<strong>Error: %s is an invalid hostname.</strong>""") % hostname)
         if ip is not None:
             self.controller.server.authorized_hosts[ip] = hostname
@@ -769,7 +798,7 @@ class Access(Common):
         ip=None
         try:
             ip = socket.gethostbyname (hostname)
-        except:
+        except socket.error:
             res.append (_("""<strong>Error: %s is an invalid hostname.</strong>""") % hostname)
 
         if ip == '127.0.0.1':
@@ -891,12 +920,12 @@ class Admin(Common):
         """
         try:
             alias = query['alias']
-        except:
+        except KeyError:
             return self.send_error (501,
                                     _("""You should specify an alias"""))
         try:
             uri = query['uri']
-        except:
+        except KeyError:
             return self.send_error (501,
                                     _("""You should specify an uri"""))
         try:
@@ -914,6 +943,8 @@ class Admin(Common):
     load.exposed=True
 
     def delete(self, alias):
+        """Unload a package.
+        """
         try:
             self.controller.unregister_package (alias)
             return "".join((
@@ -928,6 +959,8 @@ class Admin(Common):
     delete.exposed = True
 
     def save(self, alias=None):
+        """Save a package.
+        """
         try:
             if alias is not None:
                 # Save a specific package
@@ -954,6 +987,8 @@ class Admin(Common):
     reset.exposed=True
 
     def methods(self):
+        """Display available TALES methods.
+        """
         res=[ self.start_html (_('Available TALES methods'), duplicate_title=True) ]
         res.append('<ul>')
         c=self.controller.build_context(here=None)
@@ -969,6 +1004,8 @@ class Admin(Common):
     methods.exposed=True
 
     def display(self, mode=None):
+        """Set display mode.
+        """
         if mode:
             # Set default display mode
             if mode in ('raw', 'navigation'):
@@ -984,6 +1021,8 @@ class Admin(Common):
     display.exposed=True
 
 class Packages(Common):
+    """Node for packages access.
+    """
     def index(self):
         """Display currently available (loaded) packages.
 
@@ -1207,7 +1246,7 @@ class Packages(Common):
             try:
                 auto_views = objet.validViews
                 auto_views.sort()
-            except:
+            except AttributeError:
                 auto_views = []
 
             res.append (_("""
@@ -1281,7 +1320,7 @@ class Packages(Common):
 
         try:
             p = self.controller.packages[pkgid]
-        except:
+        except KeyError:
             return self.send_error (501, _("<p>Package <strong>%s</strong> not loaded</p>")
                                     % pkgid)
 
@@ -1335,6 +1374,7 @@ class Packages(Common):
             res.append(_("""<p>There was an error in the expression.</p>
             <pre>%s</pre>""") % cgi.escape(unicode(e.args[0]).encode('utf-8')))
         except:
+            # FIXME: should use standard Cherrypy error handling.
             t, v, tr = sys.exc_info()
             import code
             res=[ self.start_html(_("Error")) ]
@@ -1411,9 +1451,7 @@ class Packages(Common):
             cherrypy.response.status=200
             return _("Value successfuly updated")
         except Exception, e:
-            return self.send_error(501, _("Unable to update the attribute %(attribute)s for element %(element)s: %(error)s." ) % { 'attribute': attribute,
-                                                                                                                                  'element': objet,
-                                                                                                                                  'error': e })
+            return self.send_error(501, _("Unable to update the attribute %(attribute)s for element %(element)s: %(error)s." ) % { 'attribute': attribute, 'element': objet, 'error': e })
 
     def handle_post_request(self, *args, **query):
         """Handle POST requests (update, create or delete).
@@ -1568,142 +1606,140 @@ class Packages(Common):
                     """) % { 'path': "%s[%s]" % (tales, attribute),
                              'value': cgi.escape(query['data']) })
                     return "".join(res)
-                except:
+                except TypeError:
                     # Not a dict...
                     return self.send_error(500, _("Malformed request: cannot update the value of %(attribute)s in %(tales)s.") % locals())
 
         elif query['action'] == 'create':
-             # Create a new element. For the moment, only
-             # View, Relation, Annotation is supported
-             if not isinstance (objet, Package):
-                 return self.send_error(500, _("Cannot create an element in something else than a package."))
+            # Create a new element. For the moment, only
+            # View, Relation, Annotation is supported
+            if not isinstance (objet, Package):
+                return self.send_error(500, _("Cannot create an element in something else than a package."))
 
-             # Keyword parameters for each create* method
-             kw={}
-             def update_arg(formname, argname, default):
-                 try:
-                     kw[argname]=query[formname]
-                 except:
-                     kw[argname]=default
+            # Keyword parameters for each create* method
+            kw={}
+            def update_arg(formname, argname, default):
+                try:
+                    kw[argname]=query[formname]
+                except KeyError:
+                    kw[argname]=default
 
-             if query['type'] == 'view':
+            if query['type'] == 'view':
+                update_arg('id', 'ident', None)
+                if kw['ident'] is None:
+                    kw['ident']=objet._idgenerator.get_id(View)
+                    objet._idgenerator.add(kw['ident'])
+                elif objet._idgenerator.exists(kw['ident']):
+                    return self.send_error(500, _("The identifier %s already exists.") % kw['ident'])
 
-                 update_arg('id', 'ident', None)
-                 if kw['ident'] is None:
-                     kw['ident']=objet._idgenerator.get_id(View)
-                     objet._idgenerator.add(kw['ident'])
-                 elif objet._idgenerator.exists(kw['ident']):
-                     return self.send_error(500, _("The identifier %s already exists.") % kw['ident'])
-
-
-                 update_arg('mimetype', 'content_mimetype', 'text/html')
-                 update_arg('class', 'clazz', 'package')
-                 update_arg('content_data', 'data', '')
-                 update_arg('author', 'author', config.data.userid)
-                 kw['date']=self.controller.get_timestamp()
-                 try:
-                     v = objet.createView(**kw)
-                     objet.views.append(v)
-                 except Exception, e:
-                     return self.send_error(500,
-                            _("<p>Error while creating view %(id)s</p><pre>%(error)s</pre>") % {
-                                'id': kw['ident'],
-                                'error': unicode(e).encode('utf-8') })
-
-                 if query.has_key('redirect') and query['redirect']:
-                     return self.send_redirect(query['redirect'])
-                 return "".join( ( self.start_html(_("View created")),
-                                   _("""
+                update_arg('mimetype', 'content_mimetype', 'text/html')
+                update_arg('class', 'clazz', 'package')
+                update_arg('content_data', 'data', '')
+                update_arg('author', 'author', config.data.userid)
+                kw['date']=self.controller.get_timestamp()
+                try:
+                    v = objet.createView(**kw)
+                    objet.views.append(v)
+                except Exception, e:
+                    return self.send_error(500,
+                                           _("<p>Error while creating view %(id)s</p><pre>%(error)s</pre>") % {
+                            'id': kw['ident'],
+                            'error': unicode(e).encode('utf-8') })
+                
+                if query.has_key('redirect') and query['redirect']:
+                    return self.send_redirect(query['redirect'])
+                return "".join( ( self.start_html(_("View created")),
+                                  _("""
                  <h1>View <em>%(id)s</em> created</h1>
                  <p>The view <a href="%(url)s">%(id)s</a> was successfully created.</p>
                  """) % { 'id': v.id,
                           'url': "/packages/%s/views/%s" % (self.controller.aliases[objet],
                                                             v.id) }) )
+            
+            elif query['type'] == 'relation':
+                # Takes as parameters:
+                # id = identifier (optional)
+                # relationtype = relation type identifier
+                # member1 = first member (annotation id)
+                # member2 = second member (annotation id)
+                # data = content data (optional)
+                for k in ('relationtype', 'member1', 'member2'):
+                    if not query.has_key(k):
+                        return self.send_error(500, _("Missing %s parameter") % k)
+                rt = context.evaluateValue("here/relationTypes/%s" % query['relationtype'])
+                if rt is None:
+                    return self.send_error(500, _("Relation type %s does not exist") % query['relationtype'])
+                try:
+                    id_ = query['id']
+                except KeyError:
+                    id_ = objet._idgenerator.get_id(Relation)
+                m1 = context.evaluateValue('package/annotations/%s' % query['member1'])
+                if m1 is None:
+                    return self.send_error(500, _("Annotation %s does not exist") % query['member1'])
+                m2 = context.evaluateValue('package/annotations/%s' % query['member2'])
+                if m2 is None:
+                    return self.send_error(500, _("Annotation %s does not exist") % query['member2'])
 
-             elif query['type'] == 'relation':
-                 # Takes as parameters:
-                 # id = identifier (optional)
-                 # relationtype = relation type identifier
-                 # member1 = first member (annotation id)
-                 # member2 = second member (annotation id)
-                 # data = content data (optional)
-                 for k in ('relationtype', 'member1', 'member2'):
-                     if not query.has_key(k):
-                         return self.send_error(500, _("Missing %s parameter") % k)
-                 rt = context.evaluateValue("here/relationTypes/%s" % query['relationtype'])
-                 if rt is None:
-                     return self.send_error(500, _("Relation type %s does not exist") % query['relationtype'])
-                 try:
-                     id_ = query['id']
-                 except KeyError:
-                     id_ = objet._idgenerator.get_id(Relation)
-                 m1 = context.evaluateValue('package/annotations/%s' % query['member1'])
-                 if m1 is None:
-                     return self.send_error(500, _("Annotation %s does not exist") % query['member1'])
-                 m2 = context.evaluateValue('package/annotations/%s' % query['member2'])
-                 if m2 is None:
-                     return self.send_error(500, _("Annotation %s does not exist") % query['member2'])
+                if rt not in helper.matching_relationtypes(objet, m1, m2):
+                    return self.send_error(500, _("<p>Cannot create relation between %(member1)s and %(member2)s: invalid type</p>") % query)
 
-                 if rt not in helper.matching_relationtypes(objet, m1, m2):
-                     return self.send_error(500, _("<p>Cannot create relation between %(member1)s and %(member2)s: invalid type</p>") % query)
+                try:
+                    relation=objet.createRelation(ident=id_,
+                                                    members=(m1, m2),
+                                                    type=rt)
+                    objet._idgenerator.add(id_)
+                    objet.relations.append(relation)
+                    self.controller.notify("RelationCreate", relation=relation)
+                except Exception, e:
+                    query['error']=unicode(e).encode('utf-8')
+                    return self.send_error(500, _("<p>Error while creating relation between %(member1)s and %(member2)s :</p><pre>%(error)s</pre>") % query)
 
-                 try:
-                     relation=objet.createRelation(ident=id_,
-                                                     members=(m1, m2),
-                                                     type=rt)
-                     objet._idgenerator.add(id_)
-                     objet.relations.append(relation)
-                     self.controller.notify("RelationCreate", relation=relation)
-                 except Exception, e:
-                     query['error']=unicode(e).encode('utf-8')
-                     return self.send_error(500, _("<p>Error while creating relation between %(member1)s and %(member2)s :</p><pre>%(error)s</pre>") % query)
+                if query.has_key('redirect') and query['redirect']:
+                    return self.send_redirect(query['redirect'])
+                return "".join( ( self.start_html(_("Relation created")),
+                                  _("""<h1>Relation <em>%s</em> created</h1>""") % (relation.id)) )
 
-                 if query.has_key('redirect') and query['redirect']:
-                     return self.send_redirect(query['redirect'])
-                 return "".join( ( self.start_html(_("Relation created")),
-                                   _("""<h1>Relation <em>%s</em> created</h1>""") % (relation.id)) )
+            elif query['type'] == 'annotation':
+                # Takes as parameters:
+                # id = identifier (optional)
+                # annotationtype = relation type identifier
+                # begin, end = begin and end time (in ms)
+                # data = content data (optional)
+                at = context.evaluateValue("here/annotationTypes/%s" % query['annotationtype'])
+                if at is None:
+                    return self.send_error(500, _("Annotation type %s does not exist") % query['annotationtype'])
+                try:
+                    id_ = query['id']
+                except KeyError:
+                    id_ = objet._idgenerator.get_id(Annotation)
+                try:
+                    begin=long(query['begin'])
+                    end=long(query['end'])
+                    fragment=MillisecondFragment(begin=begin, end=end)
+                    a=objet.createAnnotation(ident=id_, type=at, fragment=fragment)
+                    objet._idgenerator.add(id_)
+                    a.content.data = query['data']
+                    objet.annotations.append(a)
+                    self.controller.notify("AnnotationCreate", annotation=a)
+                except Exception, e:
+                    t, v, tr = sys.exc_info()
+                    import code
+                    return self.send_error(500, _("""<p>Error while creating annotation of type %(type)s :<pre>
+                    %(errortype)s
+                    %(value)s
+                    %(traceback)s</pre>""") % {
+                            'type': query['annotationtype'],
+                            'errortype': unicode(t),
+                            'value': unicode(v),
+                            'traceback': "\n".join(code.traceback.format_tb (tr))
+                            })
 
-             elif query['type'] == 'annotation':
-                 # Takes as parameters:
-                 # id = identifier (optional)
-                 # annotationtype = relation type identifier
-                 # begin, end = begin and end time (in ms)
-                 # data = content data (optional)
-                 at = context.evaluateValue("here/annotationTypes/%s" % query['annotationtype'])
-                 if at is None:
-                     return self.send_error(500, _("Annotation type %s does not exist") % query['annotationtype'])
-                 try:
-                     id_ = query['id']
-                 except KeyError:
-                     id_ = objet._idgenerator.get_id(Annotation)
-                 try:
-                     begin=long(query['begin'])
-                     end=long(query['end'])
-                     fragment=MillisecondFragment(begin=begin, end=end)
-                     a=objet.createAnnotation(ident=id_, type=at, fragment=fragment)
-                     objet._idgenerator.add(id_)
-                     a.content.data = query['data']
-                     objet.annotations.append(a)
-                     self.controller.notify("AnnotationCreate", annotation=a)
-                 except Exception, e:
-                     t, v, tr = sys.exc_info()
-                     import code
-                     return self.send_error(500, _("""<p>Error while creating annotation of type %(type)s :<pre>
-                     %(errortype)s
-                     %(value)s
-                     %(traceback)s</pre>""") % {
-                             'type': query['annotationtype'],
-                             'errortype': unicode(t),
-                             'value': unicode(v),
-                             'traceback': "\n".join(code.traceback.format_tb (tr))
-                             })
+                if query.has_key('redirect') and query['redirect']:
+                    return self.send_redirect(query['redirect'])
 
-                 if query.has_key('redirect') and query['redirect']:
-                     return self.send_redirect(query['redirect'])
-
-                 return self.start_html(_("Annotation %s created") % a.id)
-             else:
-                 return self.send_error(500, _("Error: Cannot create an object of type %s.") % (query['type']))
+                return self.start_html(_("Annotation %s created") % a.id)
+            else:
+                return self.send_error(500, _("Error: Cannot create an object of type %s.") % (query['type']))
 
         else:
             return self.send_error(500, _("Error: Cannot perform the action <em>%(action)s</em> on <code>%(object)s</code></p>") % { 'action': query['action'], 'object': cgi.escape(unicode(objet)) })
@@ -1794,7 +1830,6 @@ class Root(Common):
       - C{/application} : control the application
     """
     def __init__(self, controller=None):
-        self.controller=controller
         self.admin=Admin(controller)
         self.admin.access=Access(controller)
         self.action=Action(controller)
@@ -1803,6 +1838,10 @@ class Root(Common):
         self.packages=Packages(controller)
 
     def data(self, *p):
+        """Placeholder for data static dir resource.
+
+        data is handled by cherrypy.staticdir tool.
+        """
         return _("Advene web resources")
     data.exposed=True
 
@@ -1913,9 +1952,13 @@ class AdveneWebServer:
             self.controller.log(_("Cannot start HTTP server: %s") % unicode(e))
 
     def start(self):
+        """Start the webserver.
+        """
         self.controller.queue_action(cherrypy.engine.start, False)
         return True
 
     def stop(self):
+        """Stop the webserver.
+        """
         cherrypy.engine.stop()
         cherrypy.server.stop()

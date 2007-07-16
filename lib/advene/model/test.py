@@ -77,7 +77,7 @@ class ModeledTestCase(unittest.TestCase):
         self.assert_(e)
         self.assertEqual(e._get_localName(),"d")
         e = self.modeled._getChild((None,"g"))
-        self.assertEqual(e,None)
+        self.assertEqual(e, None)
 
     def test_getChild__match_alone__element(self):
         elt = self.modeled._getChild((None,"d"))
@@ -85,14 +85,14 @@ class ModeledTestCase(unittest.TestCase):
         self.assert_(e)
         self.assert_(e==elt)
         e = self.modeled._getChild(self.element)
-        self.assertEqual(e,None)
+        self.assertEqual(e, None)
 
     def test_getChild__before_alone__qname(self):
         e = self.modeled._getChild(before=(None,"b"))
         self.assert_(e)
         self.assertEqual(e._get_localName(),"a")
         e = self.modeled._getChild(before=(None,"a"))
-        self.assertEqual(e,None)
+        self.assertEqual(e, None)
 
     def test_getChild__before_alone__element(self):
         elt = self.modeled._getChild((None,"b"))
@@ -101,14 +101,14 @@ class ModeledTestCase(unittest.TestCase):
         self.assertEqual(e._get_localName(),"a")
         elt = e
         e = self.modeled._getChild(before=elt)
-        self.assertEqual(e,None)
+        self.assertEqual(e, None)
 
     def test_getChild__after_alone__qname(self):
         e = self.modeled._getChild(after=(None,"e"))
         self.assert_(e)
         self.assertEqual(e._get_localName(),"f")
         e = self.modeled._getChild(after=(None,"f"))
-        self.assertEqual(e,None)
+        self.assertEqual(e, None)
 
     def test_getChild__after_alone__element(self):
         elt = self.modeled._getChild((None,"e"))
@@ -117,13 +117,13 @@ class ModeledTestCase(unittest.TestCase):
         self.assertEqual(e._get_localName(),"f")
         elt = e
         e = self.modeled._getChild(after=elt)
-        self.assertEqual(e,None)
+        self.assertEqual(e, None)
 
     def test_getChild__before_and_match(self):
-        e = self.modeled._getChild((None,"e"),before=(None,"f"))
+        e = self.modeled._getChild((None, "e"), before=(None,"f"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"e")
-        e = self.modeled._getChild((None,"d"),before=(None,"f"))
+        self.assertEqual(e._get_localName(), "e")
+        e = self.modeled._getChild((None, "d"), before=(None,"f"))
         self.assertEqual(e,None)
 
     def test_getChild__before_and_after(self):

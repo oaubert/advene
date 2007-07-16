@@ -29,6 +29,8 @@ import __builtin__
 import inspect
 
 class Window:
+    """Evaluator popup window.
+    """
     def __init__(self, globals_=None, locals_=None, historyfile=None):
         if globals_ is None:
             globals_ = {}
@@ -38,12 +40,15 @@ class Window:
         self.locals_ = locals_
         self.historyfile=historyfile
         self.history = []
+        self.current_entry=None
         self.history_index = None
         if self.historyfile:
             self.load_history ()
         self.widget=self.build_widget()
 
     def load_history(self, name=None):
+        """Load the command history.
+        """
         if name is None:
             name=self.historyfile
         if name is None:
@@ -59,6 +64,8 @@ class Window:
         return
 
     def save_history(self, name=None):
+        """Save the command history.
+        """
         if name is None:
             name=self.historyfile
         if name is None:
@@ -73,10 +80,12 @@ class Window:
         f.close()
         return
 
-    def get_widget(self):
-        return self.widget
-
     def close(self, *p):
+        """Close the window.
+
+        Closing the window will save the history, if a history file
+        was specified.
+        """
         self.save_history()
         if isinstance(self.widget.parent, gtk.Window):
             # Embedded in a toplevel window
@@ -87,15 +96,20 @@ class Window:
         return True
 
     def clear_output(self, *p, **kw):
+        """Clear the output window.
+        """
         b=self.output.get_buffer()
-        begin,end=b.get_bounds()
-        b.delete(begin, end)
+        b.delete(*b.get_bounds())
         return True
 
     def save_output_cb(self, *p, **kw):
+        """Callback for save output functionality.
+        """
         fs = gtk.FileSelection ("Save output to...")
 
         def close_and_save(button, fs):
+            """Save the output and close the fileselector dialog.
+            """
             self.save_output(filename=fs.get_filename())
             fs.destroy()
             return True
@@ -107,6 +121,8 @@ class Window:
         return True
 
     def save_output(self, filename=None):
+        """Save the output window content to the given filename.
+        """
         b=self.output.get_buffer()
         begin,end=b.get_bounds()
         out=b.get_text(begin, end)
@@ -117,11 +133,14 @@ class Window:
         return True
 
     def get_expression(self):
+        """Return the content of the expression window.
+        """
         b=self.source.get_buffer()
-        begin,end=b.get_bounds()
-        return b.get_text(begin, end)
+        return b.get_text(*b.get_bounds())
 
     def set_expression(self, e, clear=True):
+        """Set the content of the expression window.
+        """
         if clear:
             self.clear_expression()
         b=self.source.get_buffer()
@@ -131,12 +150,16 @@ class Window:
         return True
 
     def clear_expression(self, *p, **kw):
+        """Clear the expression window.
+        """
         b=self.source.get_buffer()
         begin,end=b.get_bounds()
         b.delete(begin, end)
         return True
 
     def log(self, *p):
+        """Log a message.
+        """
         b=self.output.get_buffer()
         begin,end=b.get_bounds()
         b.place_cursor(end)
@@ -145,6 +168,8 @@ class Window:
         return True
 
     def help(self, *p, **kw):
+        """Display the help message.
+        """
         self.clear_output()
         self.log("""Evaluator window help:
 
@@ -169,6 +194,8 @@ class Window:
         return True
 
     def previous_entry(self, *p, **kw):
+        """Display the previous entry from the history.
+        """
         if not self.history:
             return True
         e=self.get_expression()
@@ -185,6 +212,8 @@ class Window:
         return True
 
     def next_entry(self, *p, **kw):
+        """Display the next entry from the history.
+        """
         if not self.history:
             return True
         e=self.get_expression()
@@ -235,7 +264,7 @@ class Window:
                 self.log(unicode(d))
             else:
                 self.log("No available documentation for %s" % expr)
-        except Exception, e:
+        except Exception:
             f=StringIO.StringIO()
             traceback.print_exc(file=f)
             self.clear_output()
@@ -245,6 +274,11 @@ class Window:
         return True
 
     def evaluate_expression(self, *p, **kw):
+        """Evaluate the expression.
+
+        If a part of the expression is selected, then evaluate only
+        the selection.
+        """
         b=self.source.get_buffer()
         if b.get_selection_bounds():
             begin, end = b.get_selection_bounds()
@@ -264,7 +298,7 @@ class Window:
                 mod=__import__(modname)
                 self.globals_[modname]=mod
                 self.log("Successfully imported %s" % modname)
-            except ImportError, e:
+            except ImportError:
                 self.log("Cannot import module %s:" % modname)
                 f=StringIO.StringIO()
                 traceback.print_exc(file=f)
@@ -328,7 +362,8 @@ class Window:
 
     def commonprefix(self, m):
         "Given a list of strings, returns the longest common leading component"
-        if not m: return ''
+        if not m:
+            return ''
         a, b = min(m), max(m)
         lo, hi = 0, min(len(a), len(b))
         while lo < hi:
@@ -340,6 +375,8 @@ class Window:
         return a[:hi]
 
     def display_completion(self, completeprefix=True):
+        """Display the completion.
+        """
         b=self.source.get_buffer()
         if b.get_selection_bounds():
             begin, end = b.get_selection_bounds()
@@ -377,7 +414,7 @@ class Window:
             # Display them when completion is invoked
             # on element._ type string.
             completion=[ a for a in completion if not a.startswith('_') ]
-        except (Exception, SyntaxError), e:
+        except (Exception, SyntaxError):
             if not '.' in expr:
                 # Beginning of an element name (in global() or locals() or builtins)
                 v=dict(self.globals_)
@@ -464,6 +501,8 @@ class Window:
         return expr
 
     def make_window(self, widget=None):
+        """Built the application window.
+        """
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         vbox=gtk.VBox()
         window.add(vbox)
@@ -482,16 +521,20 @@ class Window:
         return window
 
     def popup(self):
+        """Popup the application window.
+        """
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.connect ("destroy", lambda e: window.destroy())
         window.set_title ("Python evaluation")
 
-        window.add (self.get_widget())
+        window.add (self.widget)
         window.show_all()
         self.help()
         return window
 
     def build_widget(self):
+        """Build the evaluator widget.
+        """
         vbox=gtk.VBox()
 
         self.source=gtk.TextView ()
@@ -541,12 +584,13 @@ class Window:
         vbox.pack_start(hb, expand=False)
 
         def key_pressed_cb (win, event):
-
+            """Handle key press event.
+            """
             if event.keyval == gtk.keysyms.F1:
                 self.help()
                 return True
             if event.keyval == gtk.keysyms.Tab:
-                item=self.display_completion()
+                self.display_completion()
                 return True
 
             if event.state & gtk.gdk.CONTROL_MASK:

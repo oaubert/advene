@@ -17,7 +17,7 @@
 #
 import time
 
-from advene.model.constants import *
+from advene.model.constants import adveneNS
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
 
@@ -61,9 +61,9 @@ class AbstractFragment(viewable.Viewable.withClass('fragment')):
             Iterator implementation
             """
             cls = self.__cls
-            iter = self.__iter
+            it = self.__iter
             while (True):
-                a = iter.next ()
+                a = it.next ()
                 if isinstance (a.getFragment (), cls):
                     return a
 

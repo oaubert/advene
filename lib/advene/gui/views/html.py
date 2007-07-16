@@ -30,8 +30,8 @@ try:
     engine='mozembed'
 except ImportError:
     try:
-	import gtkhtml2
-	engine='gtkhtml2'
+        import gtkhtml2
+        engine='gtkhtml2'
     except ImportError:
         pass
 
@@ -40,15 +40,15 @@ from advene.gui.views import AdhocView
 
 class gtkhtml_wrapper:
     def __init__(self, controller=None, notify=None):
-	self.controller=controller
-	self.notify=notify
+        self.controller=controller
+        self.notify=notify
         self.history = []
-	self.current = ""
-	self.widget = self.build_widget()
+        self.current = ""
+        self.widget = self.build_widget()
 
     def refresh(self, *p):
-	self.set_url(self.current)
-	return True
+        self.set_url(self.current)
+        return True
 
     def back(self, *p):
         if len(self.history) <= 1:
@@ -62,25 +62,25 @@ class gtkhtml_wrapper:
 
     def set_url(self, url):
         self.update_history(url)
-	d=self.component.document
-	d.clear()
+        d=self.component.document
+        d.clear()
 
-	u=urllib.urlopen(url)
+        u=urllib.urlopen(url)
 
-	d.open_stream(u.info().type)
-	for l in u:
-	    d.write_stream (l)
+        d.open_stream(u.info().type)
+        for l in u:
+            d.write_stream (l)
 
-	u.close()
-	d.close_stream()
+        u.close()
+        d.close_stream()
 
-	self.current=url
-	if self.notify:
-	    self.notify(url=url)
+        self.current=url
+        if self.notify:
+            self.notify(url=url)
         return True
 
     def get_url(self):
-	return self.current
+        return self.current
 
     def update_history(self, url):
         if not self.history:
@@ -90,78 +90,78 @@ class gtkhtml_wrapper:
         return
 
     def build_widget(self):
-	w=gtk.ScrolledWindow()
-	w.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        w=gtk.ScrolledWindow()
+        w.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-	c=gtkhtml2.View()
-	c.document=gtkhtml2.Document()
+        c=gtkhtml2.View()
+        c.document=gtkhtml2.Document()
 
-	def request_url(document, url, stream):
-	    print "request url", url, stream
-	    pass
+        def request_url(document, url, stream):
+            print "request url", url, stream
+            pass
 
-	def link_clicked(document, link):
-	    u=self.get_url()
-	    if u:
-		url=urllib.basejoin(u, link)
-	    else:
-		url=link
-	    self.set_url(url)
-	    return True
+        def link_clicked(document, link):
+            u=self.get_url()
+            if u:
+                url=urllib.basejoin(u, link)
+            else:
+                url=link
+            self.set_url(url)
+            return True
 
-	c.document.connect("link-clicked", link_clicked)
-	c.document.connect("request-url", request_url)
+        c.document.connect("link-clicked", link_clicked)
+        c.document.connect("request-url", request_url)
 
-	c.get_vadjustment().set_value(0)
-	w.set_hadjustment(c.get_hadjustment())
-	w.set_vadjustment(c.get_vadjustment())
-	c.document.clear()
-	c.set_document(c.document)
-	w.add(c)
-	self.component=c
-	return w
+        c.get_vadjustment().set_value(0)
+        w.set_hadjustment(c.get_hadjustment())
+        w.set_vadjustment(c.get_vadjustment())
+        c.document.clear()
+        c.set_document(c.document)
+        w.add(c)
+        self.component=c
+        return w
 
 class mozembed_wrapper:
     def __init__(self, controller=None, notify=None):
-	self.controller=controller
-	self.notify=notify
-	self.widget=self.build_widget()
+        self.controller=controller
+        self.notify=notify
+        self.widget=self.build_widget()
 
     def refresh(self, *p):
-	self.component.reload(0)
-	return True
+        self.component.reload(0)
+        return True
 
     def back(self, *p):
-	self.component.go_back()
-	return True
+        self.component.go_back()
+        return True
 
     def set_url(self, url):
-	self.component.load_url(url)
-	return True
+        self.component.load_url(url)
+        return True
 
     def get_url(self):
-	return self.component.get_location()
+        return self.component.get_location()
 
     def build_widget(self):
-	w=gtkmozembed.MozEmbed()
-	# A profile must be initialized, cf
-	# http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq19.018.htp
-	gtkmozembed.set_profile_path("/tmp", "foobar")
+        w=gtkmozembed.MozEmbed()
+        # A profile must be initialized, cf
+        # http://www.async.com.br/faq/pygtk/index.py?req=show&file=faq19.018.htp
+        gtkmozembed.set_profile_path("/tmp", "foobar")
 
-	def update_location(c):
-	    if self.notify:
-		self.notify(url=self.get_url())
-	    return False
+        def update_location(c):
+            if self.notify:
+                self.notify(url=self.get_url())
+            return False
 
-	def update_label(c):
-	    if self.notify:
-		self.notify(label=c.get_link_message())
-	    return False
+        def update_label(c):
+            if self.notify:
+                self.notify(label=c.get_link_message())
+            return False
 
-	w.connect("location", update_location)
-	w.connect("link-message", update_label)
-	self.component=w
-	return w
+        w.connect("location", update_location)
+        w.connect("link-message", update_label)
+        self.component=w
+        return w
 
 class HTMLView(AdhocView):
     _engine = engine
@@ -178,34 +178,34 @@ class HTMLView(AdhocView):
             self.open_url(url)
 
     def notify(self, url=None, label=None):
-	if url is not None:
-	    self.current_url(url)
-	if label is not None:
-	    self.url_label.set_text(label)
-	return True
+        if url is not None:
+            self.current_url(url)
+        if label is not None:
+            self.url_label.set_text(label)
+        return True
 
     def open_url(self, url=None):
-	self.component.set_url(url)
-	return True
+        self.component.set_url(url)
+        return True
 
     def build_widget(self):
         if engine is None:
             w=gtk.Label(_("No available HTML rendering component"))
             self.component=w
         elif engine == 'mozembed':
-	    self.component = mozembed_wrapper(controller=self.controller,
-					      notify=self.notify)
-	    w=self.component.widget
+            self.component = mozembed_wrapper(controller=self.controller,
+                                              notify=self.notify)
+            w=self.component.widget
         elif engine == 'gtkhtml2':
-	    self.component = gtkhtml_wrapper(controller=self.controller,
-					      notify=self.notify)
-	    w=self.component.widget
+            self.component = gtkhtml_wrapper(controller=self.controller,
+                                              notify=self.notify)
+            w=self.component.widget
 
-	def utbv_menu(*p):
-	    if self.controller and self.controller.gui:
-		m=self.controller.gui.build_utbv_menu(action=self.open_url)
+        def utbv_menu(*p):
+            if self.controller and self.controller.gui:
+                m=self.controller.gui.build_utbv_menu(action=self.open_url)
                 m.popup(None, None, None, 0, gtk.get_current_event_time())
-	    return True
+            return True
 
         buttonbox=gtk.HBox()
 
@@ -236,7 +236,7 @@ class HTMLView(AdhocView):
         vbox.add(w)
 
         self.url_label=gtk.Label('')
-	self.url_label.set_alignment(0, 0)
+        self.url_label.set_alignment(0, 0)
         vbox.pack_start(self.url_label, expand=False)
 
         vbox.buttonbox = buttonbox

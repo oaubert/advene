@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -135,7 +135,7 @@ class Condition:
             except ValueError:
                 rv=element
         return rv
-        
+
     def match(self, context):
         """Test if the condition matches the context."""
         if self.operator in self.binary_operators:
@@ -264,9 +264,9 @@ class Action:
     """The Action class.
 
     The associated method should have the following signature:
-    
+
     ``def method (context, parameters)``
-    
+
     where:
       - context is a advene.tal.AdveneContext holding various information
       - parameters is a dictionary with named parameters, whose values are
@@ -371,7 +371,7 @@ class Rule:
                   condition=None, action=None, origin=None, priority=0):
         self.name=name
         self.event=event
-	self.priority=priority
+        self.priority=priority
         self.condition=condition
         if self.condition is None:
             self.condition=self.default_condition
@@ -410,7 +410,7 @@ class Rule:
         rulenode=di._get_documentElement()
         self.from_dom(catalog=catalog, domelement=rulenode)
         s.close()
-            
+
     def from_dom(self, catalog=None, domelement=None, origin=None):
         """Read the rule from a DOM element.
 
@@ -513,7 +513,7 @@ class RuleSet(list):
     """Set of Rules.
     """
     def __init__(self, uri=None, catalog=None, priority=0):
-	self.priority=priority
+        self.priority=priority
         if uri is not None and catalog is not None:
             self.from_xml(catalog=catalog, uri=uri)
 
@@ -851,16 +851,16 @@ class RegisteredAction:
         return self.defaults[name]
 
     def as_html(self, action_url):
-	r="""<form method="GET" action="%s">""" % action_url
-	l=self.parameters.keys()
-	l.sort()
-	for k in l:
-	    r += """%s: <input name="%s" title="%s" value="%s"/>""" % (k,
-								       k,
-								       self.parameters[k],
-								       self.defaults[k])
-	r += """<input type="submit" name="Execute" /></form>"""
-	return r
+        r="""<form method="GET" action="%s">""" % action_url
+        l=self.parameters.keys()
+        l.sort()
+        for k in l:
+            r += """%s: <input name="%s" title="%s" value="%s"/>""" % (k,
+                                                                       k,
+                                                                       self.parameters[k],
+                                                                       self.defaults[k])
+        r += """<input type="submit" name="Execute" /></form>"""
+        return r
 
 class ECACatalog:
     """Class holding information about available elements (events, conditions, actions).
@@ -916,7 +916,7 @@ class ECACatalog:
         'ApplicationStart':       _("Start of the application"),
         'ApplicationEnd':         _("End of the application"),
         'UserEvent':              _("User-defined event"),
-	'MediaChange':            _("Modification of the associated media"),
+        'MediaChange':            _("Modification of the associated media"),
         }
 
     # Events that set the controller.modified state
@@ -959,7 +959,7 @@ class ECACatalog:
         'advanced': _("Advanced player control"),
         'gui': _("GUI actions")
         }
-               
+
     def __init__(self):
         # Dict of registered actions, indexed by name
         self.actions={}

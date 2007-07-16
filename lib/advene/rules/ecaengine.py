@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -35,7 +35,7 @@ class ECAEngine:
     """ECAEngine class.
 
     Event-Condition-Action engine. It features three ruleset classes:
-    
+
       - internal: for internal rules never exposed to the user
       - default: for default rules loaded from a configuration file
       - user: for user rules, defined in packages
@@ -67,8 +67,8 @@ class ECAEngine:
         """
         self.clear_state()
         self.ruledict = {}
-	# History of events
-	self.event_history = []
+        # History of events
+        self.event_history = []
         self.controller=controller
         self.catalog=advene.rules.elements.ECACatalog()
         self.scheduler=sched.scheduler(time.time, time.sleep)
@@ -136,7 +136,7 @@ class ECAEngine:
         """Set the specified ruleset.
 
         Note: a copy of the new set of rules is made.
-        
+
         @param rs: the new set of rules
         @type rs: RuleSet
         @param type_: the destination ruleset's class
@@ -144,10 +144,10 @@ class ECAEngine:
         """
         self.rulesets[type_] = copy.copy(rs)
         self.update_rulesets()
-        
+
     def read_ruleset_from_file(self, filename, type_='user', priority=0):
         """Read a ruleset from a file.
-        
+
         @param filename: the file from which the rules are read.
         @type filename: string
         @param type_: the ruleset's class
@@ -189,7 +189,7 @@ class ECAEngine:
             for a in action:
                 self.schedule(a, context, delay)
             return
-        
+
         if action.immediate:
             action.execute(context)
         else:
@@ -214,7 +214,7 @@ class ECAEngine:
         """
         for i in self.scheduler.queue:
             self.scheduler.cancel(i[0])
- 
+
     def build_context(self, event, **kw):
         """Build an AdveneContext.
 
@@ -226,23 +226,23 @@ class ECAEngine:
         @rtype: AdveneContext
         """
         controller=self.controller
-	try:
-	    here=kw['here']
-	except KeyError:
-	    here=None
-	context=controller.build_context(here=here)
+        try:
+            here=kw['here']
+        except KeyError:
+            here=None
+        context=controller.build_context(here=here)
 
-	# Rule-specific root elements
-        globals={
+        # Rule-specific root elements
+        globals_={
             'annotation': None,
             'relation': None,
             'activeAnnotations': controller.active_annotations,
             'context': None,
             'event': event
             }
-        globals.update(kw)
-        for k in globals:
-            context.addGlobal(k, globals[k])
+        globals_.update(kw)
+        for k, v in globals_.iteritems():
+            context.addGlobal(k, v)
         return context
 
     def register_action(self, registered_action):
@@ -271,21 +271,21 @@ class ECAEngine:
         if method is None or event is None:
             return
         rule=advene.rules.elements.Rule(name="internal",
-					priority=200,
-					event=event,
-					condition=condition,
-					action=advene.rules.elements.Action(method=method))
-	self.add_rule(rule, 'internal')
+                                        priority=200,
+                                        event=event,
+                                        condition=condition,
+                                        action=advene.rules.elements.Action(method=method))
+        self.add_rule(rule, 'internal')
         return rule
 
     def add_rule(self, rule, type_='user'):
-	"""Add a new rule in the ruleset.
+        """Add a new rule in the ruleset.
 
         @param rule: the rule to add.
         @type rule: elements.Rule
         @param type_: the ruleset's class
-        @type type_: string        
-	"""
+        @type type_: string
+        """
         self.rulesets[type_].append(rule)
         self.update_rulesets()
 
@@ -298,7 +298,7 @@ class ECAEngine:
         @param rule: the rule to be removed
         @type rule: elements.Rule
         @param type_: the ruleset's class
-        @type type_: string        
+        @type type_: string
         """
         try:
             self.rulesets[type_].remove(rule)
@@ -308,7 +308,7 @@ class ECAEngine:
             # but display a warning anyway (it should not happen)
             print "Trying to remove non-existant rule %s from %s ruleset" % (str(rule.name), type_)
             pass
-        
+
     def notify (self, event_name, *param, **kw):
         """Invoked by the application on the occurence of an event.
 
@@ -316,7 +316,7 @@ class ECAEngine:
         parameters. For instance, annotation-related events get a
         annotation= parameter.  See the ECA model documentation for
         more details and the parameters corresponding to each event.
-        
+
         @param event_name: the event name
         @type event_name: string
         @param param: additionnal anonymous parameters
@@ -329,19 +329,19 @@ class ECAEngine:
         """
         #print "notify %s for %s" % (event_name, str(kw))
 
-	if config.data.preferences['record-actions']:
-	    # FIXME: we should not store the whole element, it is too costly
-	    d=dict(kw)
-	    d['event_name'] = event_name
-	    d['parameters'] = param
-	    d['timestamp'] = time.time()
-	    self.event_history.append(d)
+        if config.data.preferences['record-actions']:
+            # FIXME: we should not store the whole element, it is too costly
+            d=dict(kw)
+            d['event_name'] = event_name
+            d['parameters'] = param
+            d['timestamp'] = time.time()
+            self.event_history.append(d)
         delay=0
         if kw.has_key('delay'):
             delay=long(kw['delay']) / 1000.0
             del kw['delay']
             print "Delay specified: %f" % delay
-            
+
         context=self.build_context(event_name, **kw)
         try:
             a=self.ruledict[event_name]
@@ -349,9 +349,9 @@ class ECAEngine:
             return
 
         rules=[ rule
-		for rule in a
-		if rule.condition.match(context) ]
-	rules.sort(lambda a, b: cmp(b.priority, a.priority))
+                for rule in a
+                if rule.condition.match(context) ]
+        rules.sort(lambda a, b: cmp(b.priority, a.priority))
 
         context.pushLocals()
         for rule in rules:
@@ -362,7 +362,7 @@ class ECAEngine:
             # This is a kind of a mess. We should clarify all that
             # (first, we should not have used the same name for different
             # things).
-            
+
             # It could already be set  (for instance, ViewCreate view=...)
             try:
                 v=context.locals['view']

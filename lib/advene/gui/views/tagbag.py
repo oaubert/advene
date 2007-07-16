@@ -42,7 +42,7 @@ import gtk
 
 try:
     from advene.gui.widget import TagWidget
-except:
+except ImportError:
     TagWidget=None
 
 class TagBag(AdhocView):
@@ -326,7 +326,7 @@ class OldTagWidget(gtk.Button):
         """Display the popup menu when right-clicking on annotation type.
         """
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-            # FIXME: set_colro
+            # FIXME: set_color
             return True
         return False
 

@@ -62,7 +62,7 @@ import advene.model.util.uri
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
 
-from advene.model.constants import *
+from advene.model.constants import xlinkNS
 from advene.model.exception import AdveneException
 
 from gettext import gettext as _
@@ -119,7 +119,7 @@ class AbstractBundle (object):
              or v in self._dict) 
 
     def __getitem__ (self, index):
-        if isinstance (index,int):
+        if isinstance (index, int):
             return self._list[index]
         else:
             return self._dict[index]
@@ -144,8 +144,8 @@ class AbstractBundle (object):
     # dict implementation
     #
 
-    def get (self, id, default=None):
-        return self._dict.get (id, default)
+    def get (self, id_, default=None):
+        return self._dict.get (id_, default)
 
     def has_key (self, key):
         return self._dict.has_key (key)

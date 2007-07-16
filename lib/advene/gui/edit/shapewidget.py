@@ -34,8 +34,7 @@ import gtk
 import pango
 from math import sqrt
 
-import gettext
-gettext.install('advene', unicode=True)
+from gettext import gettext as _
 
 COLORS = [ 'red', 'green', 'blue', 'black', 'white' ]
 
@@ -188,7 +187,7 @@ class Shape:
         # Linewidth
         linewidthsel = gtk.SpinButton()
         linewidthsel.set_range(1, 15)
-        linewidthsel.set_increments(1,1)
+        linewidthsel.set_increments(1, 1)
         linewidthsel.set_value(self.linewidth)
         vbox.pack_start(label_widget(_("Linewidth"), linewidthsel), expand=False)
 

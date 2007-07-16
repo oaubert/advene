@@ -20,7 +20,7 @@ import advene.model.modeled as modeled
 import advene.model.viewable as viewable
 import advene.model.content as content
 
-from advene.model.constants import *
+from advene.model.constants import adveneNS
 
 from advene.model.util.auto_properties import auto_properties
 

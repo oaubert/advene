@@ -36,7 +36,7 @@ def register(controller=None):
             defaults={'message': 'annotation/content/data'},
             category='gui',
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="PlayerStart",
             method=ac.PlayerStart,
@@ -45,7 +45,7 @@ def register(controller=None):
             defaults={'position': 'string:0'},
             category='player',
             )
-			       )
+                               )
 
     controller.register_action(RegisteredAction(
             name="PlayerGoto",
@@ -55,39 +55,39 @@ def register(controller=None):
             defaults={'position': 'annotation/fragment/begin'},
             category='player',
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="PlayerStop",
             method=ac.PlayerStop,
             description=_("Stop the player"),
             category='player',
-	    #            parameters={'position': _("Stop position (in ms)")}
+            #            parameters={'position': _("Stop position (in ms)")}
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="PlayerPause",
             method=ac.PlayerPause,
             description=_("Pause the player"),
-	    #            parameters={'position': _("Pause position (in ms)")}
+            #            parameters={'position': _("Pause position (in ms)")}
             category='player',
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="PlayerResume",
             method=ac.PlayerResume,
             description=_("Resume the player"),
-	    #            parameters={'position': _("Resume position (in ms)")}
+            #            parameters={'position': _("Resume position (in ms)")}
             category='player',
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="Snapshot",
             method=ac.Snapshot,
             description=_("Take a snapshot"),
-	    #            parameters={'position': _("Snapshot position (in ms)")}
+            #            parameters={'position': _("Snapshot position (in ms)")}
             category='advanced',
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="Caption",
             method=ac.Caption,
@@ -98,7 +98,7 @@ def register(controller=None):
                       'duration': 'annotation/fragment/duration'},
             category='advanced',
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="AnnotationCaption",
             method=ac.AnnotationCaption,
@@ -107,7 +107,7 @@ def register(controller=None):
             defaults={'message': 'annotation/content/data'},
             category='advanced',
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="DisplayMarker",
             method=ac.DisplayMarker,
@@ -126,28 +126,28 @@ def register(controller=None):
                       'duration': 'annotation/fragment/duration'},
             category='advanced',
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="AnnotationMute",
             method=ac.AnnotationMute,
             description=_("Zero the volume during the annotation"),
             category='player',
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="SoundOff",
             method=ac.SoundOff,
             description=_("Zero the volume"),
             category='player',
             )
-			       )
+                               )
     controller.register_action(RegisteredAction(
             name="SoundOn",
             method=ac.SoundOn,
             description=_("Restore the volume"),
             category='player',
             )
-			       )
+                               )
 
     controller.register_action(RegisteredAction(
             name="ActivateSTBV",
@@ -157,7 +157,7 @@ def register(controller=None):
             defaults={'viewid': 'string:stbv_id'},
             category='gui',
             )
-			       )
+                               )
 
     controller.register_action(RegisteredAction(
             name="SendUserEvent",
@@ -169,7 +169,7 @@ def register(controller=None):
                       'delay': 'string:2000'},
             category='generic',
             )
-			       )
+                               )
 
     controller.register_action(RegisteredAction(
             name="OpenURL",
@@ -179,7 +179,7 @@ def register(controller=None):
             defaults={'url': 'string:http://liris.cnrs.fr/advene/'},
             category='gui',
             )
-			       )
+                               )
 
     controller.register_action(RegisteredAction(
             name="SetVolume",
@@ -189,7 +189,7 @@ def register(controller=None):
             defaults={'volume': 'string:50'},
             category='player',
             )
-			       )
+                               )
 
     controller.register_action(RegisteredAction(
             name="SetRate",
@@ -199,7 +199,7 @@ def register(controller=None):
             defaults={'rate': 'string:100'},
             category='player',
             )
-			       )
+                               )
 
 class DefaultActionsRepository:
     def __init__(self, controller=None):
@@ -410,12 +410,12 @@ class DefaultActionsRepository:
             return True
         try:
             stbv=context.evaluateValue('package/views/%s' % stbvid)
-        except:
+        except ValueError:
             stbv=None
         if stbv is not None and stbv.content.mimetype == 'application/x-advene-ruleset':
             self.controller.activate_stbv(stbv)
-	else:
-	    self.controller.log(_("Cannot find the stbv %s") % stbvid)
+        else:
+            self.controller.log(_("Cannot find the stbv %s") % stbvid)
         return True
 
     def SendUserEvent(self, context, parameters):
@@ -469,7 +469,7 @@ class DefaultActionsRepository:
 
     def SetRate (self, context, parameters):
         """Set the playing rate.
-        
+
         The value is the percentage of frame display time, so
         100 means normal rate,
         200 means twice slower than normal
@@ -479,6 +479,6 @@ class DefaultActionsRepository:
             return True
         try:
             self.controller.player.set_rate(int(rate))
-        except:
+        except AttributeError:
             self.controller.log(_("The set_rate method is unavailable."))
         return True

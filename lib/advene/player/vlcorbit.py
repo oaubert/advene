@@ -437,11 +437,11 @@ class Player(object):
         return p
 
     def cleanup(self):
-	try:
-	    # Kill spurious vlc player
-	    os.system("/usr/bin/killall -9 vlc")
-	    if os.access(config.data.iorfile, os.R_OK):
-		os.unlink(config.data.iorfile)
-	except OSError:
-	    pass
+        try:
+            # Kill spurious vlc player
+            os.system("/usr/bin/killall -9 vlc")
+            if os.access(config.data.iorfile, os.R_OK):
+                os.unlink(config.data.iorfile)
+        except OSError:
+            pass
 

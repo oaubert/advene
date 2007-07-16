@@ -74,7 +74,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if re.match('[a-zA-Z]:', uri):
             # Windows drive: notation. Convert it to
             # a more URI-compatible syntax
-           uri=urllib.pathname2url(uri)
+            uri=urllib.pathname2url(uri)
         self.__uri = uri
         self.__importer = importer
         # Possible container
@@ -105,10 +105,10 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             elif hasattr(source, 'read'):
                 element = reader.fromStream(source)._get_documentElement()
             else:
-		if re.match('[a-zA-Z]:', source):
-		    # Windows drive: notation. Convert it to
-		    # a more URI-compatible syntax
-		    source=urllib.pathname2url(source)
+                if re.match('[a-zA-Z]:', source):
+                    # Windows drive: notation. Convert it to
+                    # a more URI-compatible syntax
+                    source=urllib.pathname2url(source)
                 source_uri = util.uri.urljoin (
                     'file:%s/' % urllib.pathname2url (os.getcwd ()),
                      str(source)
@@ -161,7 +161,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 
     def _get_cached(self, uri):
         """Return a cached version of the package designated by "uri" """
-        return self.__pkg_cache.get(uri,None)
+        return self.__pkg_cache.get(uri, None)
 
     def getOwnerPackage(self):
         """Return this package. Used for breaking recursivity in the parenthood tree."""
@@ -320,7 +320,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             # Windows drive: notation. Convert it from
             # a more URI-compatible syntax
             name=urllib.url2pathname(name)
-	    
+            
         # handle .azp files.
         if name.lower().endswith('.azp') or name.endswith('/'):
             # AZP format
@@ -348,25 +348,22 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 
     def _recursive_save (self):
         """Save recursively this packages with all its imported packages"""
-        try:
-            self.save ()
-        except:
-            pass
+        self.save ()
         for i in self.getImports ():
             i.getPackage ()._recursive_save ()
 
     def getQnamePrefix (self, item):
-	if self == item:
-	    return None
+        if self == item:
+            return None
         if isinstance (item, Package):
-	    try:
-		i=self.getImports()[item.uri]
-		return i.getAs()
-	    except KeyError:
-		raise AdveneException ("item %s has no QName prefix in %s" %
-				       (item, self))
-	else:
-	    return self.getQnamePrefix(item._getParent())
+            try:
+                i=self.getImports()[item.uri]
+                return i.getAs()
+            except KeyError:
+                raise AdveneException ("item %s has no QName prefix in %s" %
+                                       (item, self))
+        else:
+            return self.getQnamePrefix(item._getParent())
 
 
 class Import(modeled.Modeled, _impl.Ased):
@@ -387,10 +384,10 @@ class Import(modeled.Modeled, _impl.Ased):
             if uri is None:
                 raise TypeError("parameter 'uri' required")
 
-	    if re.match('[a-zA-Z]:', uri):
-		# Windows drive: notation. Convert it to
-		# a more URI-compatible syntax
-		uri=urllib.pathname2url(uri)
+            if re.match('[a-zA-Z]:', uri):
+                # Windows drive: notation. Convert it to
+                # a more URI-compatible syntax
+                uri=urllib.pathname2url(uri)
 
             # doc = self._getParent()._getDocument()
             doc = parent._getDocument()
@@ -421,10 +418,10 @@ class Import(modeled.Modeled, _impl.Ased):
 
     def setUri(self, uri):
         """Set the URI of the element"""
-	if re.match('[a-zA-Z]:', uri):
-	    # Windows drive: notation. Convert it to
-	    # a more URI-compatible syntax
-	    uri=urllib.pathname2url(uri)
+        if re.match('[a-zA-Z]:', uri):
+            # Windows drive: notation. Convert it to
+            # a more URI-compatible syntax
+            uri=urllib.pathname2url(uri)
         return self._getModel().setAttributeNS(xlinkNS, 'xlink:href', uri)
 
     def getSources(self):

@@ -33,10 +33,10 @@ class StreamInformation:
 
 class Position:
     def __init__(self, value=0):
-	self.value=value
-	# See Player attributes below...
-	self.origin=0
-	self.key=2
+        self.value=value
+        # See Player attributes below...
+        self.origin=0
+        self.key=2
 
 class PositionKeyNotSupported(Exception):
     pass
@@ -83,7 +83,7 @@ class Player:
         self.movie=qtmovie.Movie()
         self.relative_position=0
         self.status=Player.UndefinedStatus
-	self.stream_duration = 0
+        self.stream_duration = 0
         self.position_update()
 
         def update_movie():
@@ -96,18 +96,18 @@ class Player:
         print "quicktime plugin:", " ".join([str(i) for i in m])
 
     def position2value(self, p):
-	if isinstance(p, Position):
-	    v=p.value
-	    if p.key != self.MediaTime:
-		self.log("unsupported key ", p.key)
-		return 0
-	    if p.origin == self.AbsolutePosition:
-		v=p.value
-	    else:
-		v=self.current_position() + p.value
-	else:
-	    v=long(p)
-	return v
+        if isinstance(p, Position):
+            v=p.value
+            if p.key != self.MediaTime:
+                self.log("unsupported key ", p.key)
+                return 0
+            if p.origin == self.AbsolutePosition:
+                v=p.value
+            else:
+                v=self.current_position() + p.value
+        else:
+            v=long(p)
+        return v
 
     def current_position(self):
         # FIXME: if performance is too low, it could maybe help to shortcut
@@ -131,7 +131,7 @@ class Player:
     def get_media_position(self, origin=None, key=None):
         """FIXME: Handle origin, key values.
         """
-	return self.current_position()
+        return self.current_position()
 
     def set_media_position(self, position=0):
         if self.movie:
@@ -192,7 +192,7 @@ class Player:
         s.url=''
         if self.playlist:
             s.url=self.playlist[0]
-	s.length=self.stream_duration
+        s.length=self.stream_duration
         s.position=self.current_position()
         s.streamstatus=self.status
         return s
@@ -213,15 +213,15 @@ class Player:
     def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
         """
-	if key is None:
-	    key=self.MediaTime
-	if origin is None:
-	    origin=self.AbsolutePosition
-	
-	p=Position()
-	p.value = value
-	p.origin = origin
-	p.key = key
+        if key is None:
+            key=self.MediaTime
+        if origin is None:
+            origin=self.AbsolutePosition
+        
+        p=Position()
+        p.value = value
+        p.origin = origin
+        p.key = key
         return p
 
     def update_status (self, status=None, position=None):
@@ -247,10 +247,10 @@ class Player:
         """
         self.log("update_status %s" % status)
 
-	if position is None:
-	    position=0
-	else:
-	    position=self.position2value(position)
+        if position is None:
+            position=0
+        else:
+            position=self.position2value(position)
 
         if status == "start" or status == "set":
             self.position_update()
@@ -337,8 +337,8 @@ class Player:
         return True
 
     def restart_player(self):
-	self.log("restart player")
-	return True
+        self.log("restart player")
+        return True
 
 def test(fname):
     """Old code, for historical purpose.

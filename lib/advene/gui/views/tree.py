@@ -75,39 +75,39 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         The problem is that we do not know its previous path.
         """
         # FIXME: there is still a bug with ImportBundles (that are
-	# mutable and thus cannot be dict keys
-	print "Removing element ", str(e)
+        # mutable and thus cannot be dict keys
+        print "Removing element ", str(e)
 
-	if isinstance(e, View):
-	    # Remove the element from the list view and refresh list view
+        if isinstance(e, View):
+            # Remove the element from the list view and refresh list view
             parent=self.nodeParent(e)
-	    #parent=self.get_package().views
-	    path=self.on_get_path(parent)
+            #parent=self.get_package().views
+            path=self.on_get_path(parent)
             print "before row changed"
-	    self.row_changed(path, self.get_iter(path))
+            self.row_changed(path, self.get_iter(path))
             print "after row changed"
-	    return
+            return
 
-	parent=None
-	for p in self.childrencache:
-	    if e in self.childrencache[p]:
-		parent=p
-		print "Found parent ", str(parent)
-		break
-	if parent is None:
-	    # Could not find the element in the cache.
-	    # It was not yet displayed
-	    print "Parent not found"
-	else:
-	    # We can determine its path
-	    path=list(self.on_get_path(parent))
-	    path.append(self.childrencache[parent].index(e))
-	    path=tuple(path)
+        parent=None
+        for p in self.childrencache:
+            if e in self.childrencache[p]:
+                parent=p
+                print "Found parent ", str(parent)
+                break
+        if parent is None:
+            # Could not find the element in the cache.
+            # It was not yet displayed
+            print "Parent not found"
+        else:
+            # We can determine its path
+            path=list(self.on_get_path(parent))
+            path.append(self.childrencache[parent].index(e))
+            path=tuple(path)
 
-	    print "Path: ", str(path)
+            print "Path: ", str(path)
             self.row_deleted(path)
             del (self.childrencache[parent])
-	return True
+        return True
 
     def update_element(self, e, created=False):
         """Update an element.
@@ -345,9 +345,9 @@ class DetailedTreeModel(AdveneTreeModel):
                 self.childrencache[node] = node.relations
             children = self.childrencache[node]
         elif isinstance (node, Schema):
-	    # Do not cache these elements
-	    l=list(node.annotationTypes)
-	    l.extend(node.relationTypes)
+            # Do not cache these elements
+            l=list(node.annotationTypes)
+            l.extend(node.relationTypes)
             children = l
         elif isinstance (node, View):
             children = None
@@ -389,7 +389,7 @@ class TreeWidget(AdhocView):
     view_id = 'tree'
     tooltip=("Hierarchical view of an Advene package")
     def __init__(self, controller=None, parameters=None, package=None, modelclass=DetailedTreeModel):
-	self.close_on_package_load = False
+        self.close_on_package_load = False
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
             )
@@ -403,7 +403,7 @@ class TreeWidget(AdhocView):
 
         self.model = modelclass(controller=controller, package=package)
 
-	self.widget = self.build_widget()
+        self.widget = self.build_widget()
 
     def build_widget(self):
         tree_view = gtk.TreeView(self.model)
@@ -413,7 +413,7 @@ class TreeWidget(AdhocView):
 
         tree_view.connect("button_press_event", self.tree_view_button_cb)
         tree_view.connect("row-activated", self.row_activated_cb)
-	tree_view.set_search_column(AdveneTreeModel.COLUMN_TITLE)
+        tree_view.set_search_column(AdveneTreeModel.COLUMN_TITLE)
 
         #tree_view.connect("select-cursor-row", self.debug_cb)
         #select.connect ("changed", self.debug_cb)
@@ -443,17 +443,17 @@ class TreeWidget(AdhocView):
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-	sw.add(tree_view)
+        sw.add(tree_view)
 
-	sw.treeview = tree_view
+        sw.treeview = tree_view
 
         return sw
 
     def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
         treeselection = treeview.get_selection()
-        model, iter = treeselection.get_selected()
+        model, it = treeselection.get_selected()
 
-        el = model.get_value(iter, AdveneTreeModel.COLUMN_ELEMENT)
+        el = model.get_value(it, AdveneTreeModel.COLUMN_ELEMENT)
 
         if targetType == config.data.target_type['annotation']:
             if not isinstance(el, Annotation):
@@ -536,7 +536,7 @@ class TreeWidget(AdhocView):
         return True
 
     def update_element(self, element=None, event=None):
-	#print "Update element ", str(element), str(event)
+        #print "Update element ", str(element), str(event)
         if event.endswith('Create'):
             self.model.update_element(element, created=True)
         elif event.endswith('EditEnd'):
@@ -544,7 +544,7 @@ class TreeWidget(AdhocView):
         elif event.endswith('Delete'):
             # FIXME: remove_element is incorrect for the moment
             #        so do a global update
-	    #print "Remove element"
+            #print "Remove element"
             #self.model.remove_element (element)
             self.update_model(element.rootPackage)
         else:

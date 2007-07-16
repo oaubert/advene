@@ -99,7 +99,7 @@ def list_selector_widget(members=None,
         def get_current_element(combo):
             try:
                 return combo.get_model().get_value(combo.get_active_iter(), 1)
-            except:
+            except (TypeError, AttributeError):
                 return combo.child.get_text()
     else:
         def get_current_element(combo):
@@ -407,7 +407,6 @@ def get_title_id(title=_("Name the element"),
     center_on_mouse(d)
 
     res=d.run()
-    ret=None
     if res == gtk.RESPONSE_OK:
         try:
             t=unicode(d.title_entry.get_text())
@@ -429,7 +428,7 @@ def get_filename(title=_("Open a file"),
                  default_dir=None,
                  default_file=None,
                  alias=False,
-                 filter='any'):
+                 filter_='any'):
     """Get a filename.
 
     @param title: the dialog title
@@ -442,8 +441,8 @@ def get_filename(title=_("Open a file"),
     @type default_file: string
     @param alias: wether to display the alias entry
     @type alias: boolean
-    @param filter: the filename filter ('any', 'advene', 'session', 'video')
-    @type filter: string
+    @param filter_: the filename filter ('any', 'advene', 'session', 'video')
+    @type filter_: string
     @return: if alias, a tuple (filename, alias), else the filename
     """
     preview_box = gtk.VBox()
@@ -517,7 +516,7 @@ def get_filename(title=_("Open a file"),
             filters[name].add_pattern(e)
         fs.add_filter(filters[name])
 
-    fs.set_filter(filters[filter])
+    fs.set_filter(filters[filter_])
     fs.connect("selection_changed", update_preview)
     fs.connect("key_press_event", dialog_keypressed_cb)
 
@@ -725,7 +724,7 @@ class CategorizedSelector:
             # FIXME: hardcoded values are bad
             # but we do not have access to
             # advene.gui.main.init_window_size
-            w.set_default_size(240,300)
+            w.set_default_size(240, 300)
             self.popup=w
         self.popup.show_all()
         center_on_mouse(self.popup)

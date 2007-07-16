@@ -99,11 +99,12 @@ def isa (target, context):
     False: c2/isa/text/html.    
     """
     class my_dict (dict):
-        def __init__ (self, values={}, default=False):
+        def __init__ (self, values=None, default=False):
             dict.__init__(self)
             self.__default = default
-            for k,v in values.iteritems():
-                self[k]=v
+            if values:
+                for k, v in values.iteritems():
+                    self[k]=v
                 
         def has_key (self, key):
             return True
@@ -115,7 +116,7 @@ def isa (target, context):
                 return self.__default
             
         def merge (self, dico):
-            for k,v in dico.iteritems():
+            for k, v in dico.iteritems():
                 self[k]=v
 
     try:
@@ -254,10 +255,10 @@ def view(target, context):
             return self._target.getValidViews()
 
     if not isinstance (target, advene.model.viewable.Viewable):
-	if hasattr(target, '__len__'):
-	    target = advene.model.viewable.GenericViewableList(target, context.locals['__resolved_stack'])
-	else:
-	    target = advene.model.viewable.GenericViewable(target, context.locals['__resolved_stack'])
+        if hasattr(target, '__len__'):
+            target = advene.model.viewable.GenericViewableList(target, context.locals['__resolved_stack'])
+        else:
+            target = advene.model.viewable.GenericViewable(target, context.locals['__resolved_stack'])
     return context.wrap_nocall(ViewWrapper (target, context))
 
 def snapshot_url (target, context):
@@ -278,7 +279,7 @@ def snapshot_url (target, context):
         begin = target.begin
         p=target.rootPackage
     elif isinstance(target, int) or isinstance(target, long):
-	begin=target
+        begin=target
         # Use the current package
         p=context.evaluateValue('package')
     else:
@@ -307,7 +308,7 @@ def player_url (target, context):
         begin = target.begin
         p=target.rootPackage
     elif isinstance(target, int) or isinstance(target, long):
-	begin=target
+        begin=target
     else:
         return None
 
@@ -318,7 +319,7 @@ def player_url (target, context):
     else:
         c=context.evaluateValue('options/controller')
         return "/media/play/%s?%s" % (str(begin),
-				      urllib.urlencode( {'filename': c.get_default_media(p)} ) )
+                                      urllib.urlencode( {'filename': c.get_default_media(p)} ) )
 
 def formatted (target, context):
     """Return a formatted timestamp as hh:mm:ss.mmmm
@@ -408,9 +409,9 @@ def query(target, context):
 
         def __init__ (self, target, context):
             self._target = target
-	    # Note: we are in a wrapper. self._context is the context
-	    # of the query method target, i.e. package for instance, and not
-	    # of the query itself.
+            # Note: we are in a wrapper. self._context is the context
+            # of the query method target, i.e. package for instance, and not
+            # of the query itself.
             self._context = context
 
         def _get_query_by_id(self, key):
@@ -463,7 +464,7 @@ def query(target, context):
                     import os
                     r = []
                     cmd = os.environ.get("PELLET", "/usr/local/bin/pellet")
-		    queryfile = self._context.evaluateValue('here/queries/%s/content/data/absolute_url' % q.id)
+                    queryfile = self._context.evaluateValue('here/queries/%s/content/data/absolute_url' % q.id)
                     f = os.popen ("%s -qf %s" % (cmd, queryfile), "r", 0)
                     from advene.util.pellet import PelletResult
                     final_result = []
@@ -477,8 +478,8 @@ def query(target, context):
                             else:
                                 # FIXME: there should be a safer way to decide
                                 # whether this QName is an Advene URI
-                                id = i.split(":")[-1]
-                                if id.startswith ("-"):
+                                id_ = i.split(":")[-1]
+                                if id_.startswith ("-"):
                                     # FIXME: get rid of any row with a blank
                                     # node. A bit brutal. Any better idea ?
                                     # Pellet does not seem to understand isIRI
@@ -486,7 +487,7 @@ def query(target, context):
                                     t = None
                                     break
                                 for s in search:
-                                    j = s.get("%s#%s" % (p.uri, id))
+                                    j = s.get("%s#%s" % (p.uri, id_))
                                     if j is not None:
                                         i = j
                                         break
@@ -548,10 +549,10 @@ def randompick(target, context):
     """
     import random
     try:
-       e=random.choice(target)
+        e=random.choice(target)
     except IndexError:
-       # If list is empty, or target is not a list
-       e=None
+        # If list is empty, or target is not a list
+        e=None
     return e
 
 def old_related(target, context):
@@ -564,15 +565,15 @@ def old_related(target, context):
     incomingRelations.
     """
     try:
-	r=target.outgoingRelations
+        r=target.outgoingRelations
     except AttributeError:
-	# Not an annotation
-	return None
+        # Not an annotation
+        return None
     if r:
-	return r[0].members[-1]
+        return r[0].members[-1]
     r=target.incomingRelations
     if r:
-	return r[0].members[0]
+        return r[0].members[0]
     return None
 
 def tag_color(target, context):
@@ -580,16 +581,16 @@ def tag_color(target, context):
     """
     try:
         tags=target.tags
-    except:
+    except AttributeError:
         return None
     try:
         d=target.rootPackage._tag_colors
-    except:
+    except AttributeError:
         return None
     for t in tags:
         try:
             return d[t]
-        except:
+        except KeyError:
             pass
     return None
 

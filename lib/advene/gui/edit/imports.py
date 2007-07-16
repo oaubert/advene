@@ -240,67 +240,66 @@ class TreeViewImporter:
 
         element=model[path][self.COLUMN_ELEMENT]
         if model[path][column]:
-           # If True, it means that it was previously False and that
-           # we want to import the element
-           print "Importing %s" % model[path][self.COLUMN_LABEL]
-           # Depends on the type
-           if hasattr(element, 'viewableClass'):
-               if element.viewableClass == 'list':
-                   # The user selected a whole category.
-                   for e in element:
-                       if not self.is_imported(e):
-                           helper.import_element(self.controller.package,
-                                                 e,
-                                                 self.controller)
-                   for c in model[path].iterchildren():
-                       c[self.COLUMN_IMPORTED] = True
-               elif element.viewableClass == 'schema':
-                   helper.import_element(self.controller.package,
-                                         element,
-                                         self.controller)
-                   # The user selected a schema, it automatically
-                   # imports its types
-                   for c in model[path].iterchildren():
-                       c[self.COLUMN_IMPORTED] = True
-               elif element.viewableClass in ('annotation-type',
-                                              'relation-type'):
-                   # We should import the parent schema
-                   print "Annotation types and relation types are not directly importable.\nImport their schema instead."
-               else:
-                   helper.import_element(self.controller.package,
-                                         element,
-                                         self.controller)
-           else:
-               # Unimport the element
-               # FIXME: does not seem to work yet
-               if self.is_imported(element):
-                   # It was previously imported. Unimport it
-                   print "Removing %s" % model[path][self.COLUMN_LABEL]
-                   helper.unimport_element(self.controller.package,
-                                           element,
-                                           self.controller)
-                   if element.viewableClass == 'schema':
-                       # The user selected a schema,
-                       # show the types as non-imported
-                       for c in model[path].iterchildren():
-                           c[self.COLUMN_IMPORTED] = False
-               elif element.viewableClass == 'list':
-                   # The user selected a whole category.
-                   for e in element:
-                       if self.is_imported(e):
-                           helper.unimport_element(self.controller.package,
-                                                   e,
-                                                   self.controller)
-                   for c in model[path].iterchildren():
-                       c[self.COLUMN_IMPORTED] = False
-               elif element.viewableClass in ('annotation-type',
-                                              'relation-type'):
-                   # We should import the parent schema
-                   print "Annotation types and relation types are not directly importable.\nImport their schema instead."
-               else:
-                   # Package
-                   print "FIXME"
-
+            # If True, it means that it was previously False and that
+            # we want to import the element
+            print "Importing %s" % model[path][self.COLUMN_LABEL]
+            # Depends on the type
+            if hasattr(element, 'viewableClass'):
+                if element.viewableClass == 'list':
+                    # The user selected a whole category.
+                    for e in element:
+                        if not self.is_imported(e):
+                            helper.import_element(self.controller.package,
+                                                  e,
+                                                  self.controller)
+                    for c in model[path].iterchildren():
+                        c[self.COLUMN_IMPORTED] = True
+                elif element.viewableClass == 'schema':
+                    helper.import_element(self.controller.package,
+                                          element,
+                                          self.controller)
+                    # The user selected a schema, it automatically
+                    # imports its types
+                    for c in model[path].iterchildren():
+                        c[self.COLUMN_IMPORTED] = True
+                elif element.viewableClass in ('annotation-type',
+                                               'relation-type'):
+                    # We should import the parent schema
+                    print "Annotation types and relation types are not directly importable.\nImport their schema instead."
+                else:
+                    helper.import_element(self.controller.package,
+                                          element,
+                                          self.controller)
+            else:
+                # Unimport the element
+                # FIXME: does not seem to work yet
+                if self.is_imported(element):
+                    # It was previously imported. Unimport it
+                    print "Removing %s" % model[path][self.COLUMN_LABEL]
+                    helper.unimport_element(self.controller.package,
+                                            element,
+                                            self.controller)
+                    if element.viewableClass == 'schema':
+                        # The user selected a schema,
+                        # show the types as non-imported
+                        for c in model[path].iterchildren():
+                            c[self.COLUMN_IMPORTED] = False
+                elif element.viewableClass == 'list':
+                    # The user selected a whole category.
+                    for e in element:
+                        if self.is_imported(e):
+                            helper.unimport_element(self.controller.package,
+                                                    e,
+                                                    self.controller)
+                    for c in model[path].iterchildren():
+                        c[self.COLUMN_IMPORTED] = False
+                elif element.viewableClass in ('annotation-type',
+                                               'relation-type'):
+                    # We should import the parent schema
+                    print "Annotation types and relation types are not directly importable.\nImport their schema instead."
+                else:
+                    # Package
+                    print "FIXME"
         return False
 
     def build_widget(self):

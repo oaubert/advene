@@ -64,7 +64,7 @@ class AccumulatorPopup(AdhocView):
         # Lock on self.widgets
         self.lock=DummyLock()
 
-        # FIXME: find a way that the AdhocView.close() converts to hide()
+        # FIXME: find a way to make AdhocView.close() convert to hide()
         self.widget=self.build_widget()
 
     def undisplay_cb(self, button=None, widget=None):
@@ -109,7 +109,7 @@ class AccumulatorPopup(AdhocView):
         if hidetime:
             self.controller.register_usertime_action( hidetime,
                                                       lambda c, time: self.undisplay(widget))
-        self.widgets.sort(lambda a,b: cmp(a[1],b[1]))
+        self.widgets.sort(lambda a, b: cmp(a[1], b[1]))
         self.lock.release()
         self.contentbox.pack_start(f, expand=False, padding=2)
 

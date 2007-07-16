@@ -22,7 +22,7 @@ import advene.model.viewable as viewable
 
 import xml.dom.ext.reader.PyExpat
 
-from advene.model.constants import *
+from advene.model.constants import adveneNS, xlinkNS, TEXT_NODE, ELEMENT_NODE
 
 import advene.model.util.dom
 import advene.model.util.uri

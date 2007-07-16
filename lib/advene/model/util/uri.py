@@ -19,15 +19,14 @@
 from urlparse import urljoin
 from xml.dom.ext.reader import BASIC_RESOLVER
 
-
-def push(uri, id):
-    return "%s#%s" % (uri,id)
+def push(uri, id_):
+    return "%s#%s" % (uri, id_)
 
 def pop(uri):
     sharp = uri.rfind('#')
     slash = uri.rfind('/')
-    cut = max(sharp,slash)
-    return uri[:cut],uri[(cut+1):]
+    cut = max(sharp, slash)
+    return uri[:cut], uri[(cut+1):]
 
 def fragment(uri):
     sharp = uri.rfind('#')

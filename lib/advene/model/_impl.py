@@ -25,7 +25,7 @@ import advene.model.util.uri
 ELEMENT_NODE = xml.dom.Node.ELEMENT_NODE
 TEXT_NODE = xml.dom.Node.TEXT_NODE
 
-from constants import *
+from advene.model.constants import adveneNS, dcNS, xlinkNS, TEXT_NODE, ELEMENT_NODE
 
 # TODO: let in here only classes which have no __init__ methods
 #       (i.e. which can be inherited without further adaptation to the
@@ -47,7 +47,7 @@ class Metaed(object):
         if meta is None and create:
             doc = self._getModel()._get_ownerDocument()
             meta = doc.createElementNS(adveneNS,"meta")
-            self._getModel()._get_childNodes().insert(0,meta)
+            self._getModel()._get_childNodes().insert(0, meta)
         return meta
 
     def _getMetaElement(self, namespace_uri, name, create=False):
@@ -63,7 +63,7 @@ class Metaed(object):
         if create:
             doc = meta._get_ownerDocument()
             e = doc.createElementNS(namespace_uri, name)
-            meta._get_childNodes().insert(0,e)
+            meta._get_childNodes().insert(0, e)
             return e
         else:
             return None
@@ -72,7 +72,8 @@ class Metaed(object):
         """Return the text content of metadata with given NS and name
         """
         e = self._getMetaElement(namespace_uri, name)
-        if e is None: return None
+        if e is None: 
+            return None
 
         r = StringIO()
         advene.model.util.dom.printElementText(e, r)
@@ -396,7 +397,7 @@ class Uried(Ided):
     """
 
     class __dummy:
-        def __init__(self,uri):
+        def __init__(self, uri):
             self.__uri = uri
         def getUri(self, absolute=True, context=None):
             return self.__uri

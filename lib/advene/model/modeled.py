@@ -21,7 +21,8 @@ import util.uri
 
 import _impl
 
-from constants import *
+from advene.model.constants import xlinkNS, ELEMENT_NODE
+
 from exception import AdveneException
 
 from util.auto_properties import auto_properties
@@ -203,10 +204,10 @@ class Importable(Modeled, _impl.Ided):
             return plain_id
         else:
             prefix = self.getRootPackage ().getQnamePrefix(self)
-	    if prefix is None:
-		return plain_id
-	    else:
-		return "%s:%s" % (prefix, plain_id)
+            if prefix is None:
+                return plain_id
+            else:
+                return "%s:%s" % (prefix, plain_id)
 
     # pa: 030328
     # This method is not safe, since it does not update self.__importator
@@ -301,8 +302,8 @@ class Factory:
                 FIXME
                 """
                 if not isinstance (instance, theClass):
-                     raise AdveneException, ("%s is not an instance of %s" %
-                         (instance, theClass.__name__))
+                    raise AdveneException, ("%s is not an instance of %s" %
+                                            (instance, theClass.__name__))
                 e = self._make_import_element (instance) 
                 return theClass (parent=self, element=e)
 
@@ -312,8 +313,8 @@ class Factory:
                 """
                 # TODO: implement default id
                 if not isinstance (instance, theClass):
-                     raise AdveneException, ("%s is not an instance of %s" %
-                         (instance, theClass.__name__))
+                    raise AdveneException, ("%s is not an instance of %s" %
+                                            (instance, theClass.__name__))
                 e = self._make_copy_element (instance) 
                 e.setAttributeNS (None, 'id', id)
                 return theClass (parent=self, element=e)

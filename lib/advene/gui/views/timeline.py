@@ -42,10 +42,8 @@ import advene.util.helper as helper
 from advene.gui.util import dialog, name2color
 try:
     from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget
-except:
+except ImportError:
     AnnotationWidget=None
-
-import advene.gui.edit.elements
 
 name="Timeline view plugin"
 
@@ -149,8 +147,8 @@ class TimeLine(AdhocView):
                     self.log(_("Cannot find annotation type %s") % v)
             elif n == 'source':
                 c=self.controller.build_context()
-                # Override a potentially existing value of l
-                l=c.evaluateValue(v)
+                # Override a potentially existing value of elements
+                elements=c.evaluateValue(v)
             elif n == 'position':
                 default_position=long(v)
             elif n == 'zoom':
@@ -216,10 +214,6 @@ class TimeLine(AdhocView):
             'white': gtk.gdk.color_parse('white'),
             }
 
-        def handle_toggle(b, option):
-            self.options[option]=b.get_active()
-            return True
-
         def handle_autoscroll_combo(combo):
             self.options['autoscroll'] = combo.get_current_element()
             return True
@@ -266,9 +260,9 @@ class TimeLine(AdhocView):
         self.layout_size=(None, None)
 
         self.layout = gtk.Layout ()
-	if config.data.os == 'win32':
-		self.layout.add_events(gtk.gdk.BUTTON_PRESS_MASK)
-	#to catch mouse clics on win32
+        if config.data.os == 'win32':
+                self.layout.add_events(gtk.gdk.BUTTON_PRESS_MASK)
+        #to catch mouse clics on win32
         #self.layout.bin_window.get_colormap().alloc_color(self.colors['relations'])
         self.layout.connect('scroll_event', self.layout_scroll_cb)
         self.layout.connect('key_press_event', self.layout_key_press_cb)
@@ -646,7 +640,7 @@ class TimeLine(AdhocView):
         if color is None:
             try:
                 color=widget._default_color
-            except:
+            except AttributeError:
                 return True
         for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
                       gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
@@ -1140,11 +1134,11 @@ class TimeLine(AdhocView):
         def key_handler(widget, event):
             if event.keyval == gtk.keysyms.Return:
                 # Validate the entry
-                repr=annotation.type.getMetaData(config.data.namespace, "representation")
-                if repr is None or repr == '' or re.match('^\s+', repr):
+                rep=annotation.type.getMetaData(config.data.namespace, "representation")
+                if rep is None or rep == '' or re.match('^\s+', rep):
                     r=e.get_text()
                 else:
-                    m=parsed_representation.match(repr)
+                    m=parsed_representation.match(rep)
                     if m:
                         # We have a simple representation (here/content/parsed/name)
                         # so we can update the name field.
@@ -1233,13 +1227,10 @@ class TimeLine(AdhocView):
         return True
 
     def create_annotation_widget(self, annotation):
-        try:
-            pos = self.layer_position[annotation.type]
-        except KeyError:
+        if not annotation.type in self.layer_position:
             # The annotation is not displayed
             return None
 
-        u2p = self.unit2pixel
         b = AnnotationWidget(annotation=annotation, container=self)
         b.active = False
         # Put at a default position.
@@ -1297,7 +1288,6 @@ class TimeLine(AdhocView):
         b.connect("focus-in-event", focus_in)
 
         # The button can generate drags
-        b.connect("drag_data_get", self.drag_sent)
         b.connect("drag_begin", self.drag_begin)
 
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
@@ -1431,8 +1421,6 @@ class TimeLine(AdhocView):
             pos = a.upper - a.page_size
         a.set_value (pos)
         self.update_position (None)
-        return True
-
         return True
 
     def draw_marks (self):
@@ -2052,9 +2040,8 @@ class TimeLine(AdhocView):
         b.connect("clicked", center_on_current_position)
         tb.insert(b, -1)
 
-        for text, tooltip, icon, callback in ( 
-            (_("Preferences"), _("Preferences"), 
-             gtk.STOCK_PREFERENCES, self.edit_preferences), ):
+        for tooltip, icon, callback in ( 
+            (_("Preferences"), gtk.STOCK_PREFERENCES, self.edit_preferences), ):
             b=gtk.ToolButton(stock_id=icon)
             b.set_tooltip(self.tooltips, tooltip)
             b.connect("clicked", callback)
@@ -2254,6 +2241,8 @@ class OldAnnotationWidget(gtk.Button):
         self.update_widget()
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
+        """Handle the drag-sent event.
+        """
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.target, 8, widget.annotation.uri)
         elif targetType == config.data.target_type['uri-list']:
@@ -2271,8 +2260,14 @@ class OldAnnotationWidget(gtk.Button):
         return True
 
     def keypress(self, widget, event, annotation):
+        """Handle the key-press event.
+        """
         if event.keyval == gtk.keysyms.e:
             self.controller.gui.edit_element(annotation)
+            return True
+        elif event.keyval == gtk.keysyms.F11:
+            menu=advene.gui.popup.Menu(annotation, controller=self.controller)
+            menu.popup()
             return True
         elif event.keyval == gtk.keysyms.space:
             # Play the annotation

@@ -438,7 +438,7 @@ class Differ:
         source_name=os.path.join(self.source.resources.dir_, d)
         destination_name=os.path.join(self.destination.resources.dir_, d)
         for rep in (source_name, destination_name):
-            if not os.path.exists(source_name):
+            if not os.path.exists(rep):
                 print "Package integrity problem: %s does not exist" % source_name
                 return
         shutil.copyfile(source_name, destination_name)

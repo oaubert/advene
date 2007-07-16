@@ -30,8 +30,8 @@ class SingletonPopup(AdhocView):
     """
     def __init__ (self, controller=None, autohide=False):
         self.view_name = _("SingletonPopup")
-	self.view_id = 'singletonpopup'
-	self.close_on_package_load = False
+        self.view_id = 'singletonpopup'
+        self.close_on_package_load = False
 
         self.controller=controller
         # Hide the popup if there is no widget
@@ -42,7 +42,7 @@ class SingletonPopup(AdhocView):
         self.widget=self.build_widget()
 
     def close(self, *p):
-	return False
+        return False
 
     def display(self, widget=None, timeout=None, title=None):
         """Display the given widget.
@@ -52,7 +52,6 @@ class SingletonPopup(AdhocView):
         # Another widget is displayed.
         # Destroy it before going on.
         if self.widget is not None:
-            ah=self.autohide
             self.autohide=False
             self.undisplay()
             self.autohide=True

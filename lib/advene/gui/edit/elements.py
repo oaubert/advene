@@ -35,7 +35,7 @@ import struct
 
 try:
     import gtksourceview
-except:
+except ImportError:
     gtksourceview=None
 
 from advene.model.package import Package
@@ -83,10 +83,10 @@ def get_edit_popup (el, controller=None, editable=True):
     raise TypeError(_("No edit popup available for element %s") % el)
 
 class EditPopupClass (type):
-  def __init__ (cls, *args):
-    super (EditPopupClass, cls).__init__(*args)
-    if hasattr (cls, 'can_edit'):
-        _edit_popup_list.append(cls)
+    def __init__ (cls, *args):
+        super (EditPopupClass, cls).__init__(*args)
+        if hasattr (cls, 'can_edit'):
+            _edit_popup_list.append(cls)
 
 class EditElementPopup (object):
     """Abstract class for editing Advene elements.
@@ -105,7 +105,7 @@ class EditElementPopup (object):
         """Create an edit window for the given element."""
         self.view_name = _("Edit Window")
         self.view_id = 'editwindow'
-        
+
         self.element = el
         self.controller = controller
         self.window=None
@@ -1055,7 +1055,7 @@ class TextContentHandler (ContentHandler):
         return True
 
     def key_pressed_cb (self, win, event):
-        # Process player shortcuts 
+        # Process player shortcuts
         # Desactivated, since control+arrows navigation and tab
         # insertion is common in text editing.
         # if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
@@ -1108,8 +1108,7 @@ class TextContentHandler (ContentHandler):
                     icon=gtk.MESSAGE_ERROR)
                 return True
             b=self.view.get_buffer()
-            begin,end = b.get_bounds ()
-            b.delete(begin, end)
+            b.delete(*b.get_bounds ())
             b.set_text("".join(f.readlines()))
             f.close()
             self.fname=fname
@@ -1138,8 +1137,7 @@ class TextContentHandler (ContentHandler):
                     icon=gtk.MESSAGE_ERROR)
                 return True
             b=self.view.get_buffer()
-            begin,end = b.get_bounds ()
-            f.write(b.get_text(begin, end))
+            f.write(b.get_text(*b.get_bounds()))
             f.close()
             self.fname=fname
         return True
@@ -1411,7 +1409,7 @@ class EditFragmentForm(EditForm):
         return hbox
 
 class EditGenericForm(EditForm):
-    def __init__(self, title=None, getter=None, setter=None, 
+    def __init__(self, title=None, getter=None, setter=None,
                  controller=None, editable=True, tooltip=None, type=None):
         self.title=title
         self.getter=getter
@@ -1499,7 +1497,7 @@ class EditMetaForm(EditGenericForm):
                                            setter=setter,
                                            controller=controller,
                                            editable=editable,
-                                           tooltip=tooltip, 
+                                           tooltip=tooltip,
                                            type=type)
 
 class EditAttributesForm (EditForm):
@@ -1522,8 +1520,8 @@ class EditAttributesForm (EditForm):
     def set_attributes (self, attlist):
         self.attributes = attlist
 
-    def set_editable (self, list):
-        self.editable = list
+    def set_editable (self, attlist):
+        self.editable = attlist
 
     def set_labels (self, dic):
         self.labels = dic
@@ -1571,10 +1569,10 @@ class EditAttributesForm (EditForm):
             return None
 
     def cell_edited(self, cell, path_string, text, (model, column)):
-        iter = model.get_iter_from_string(path_string)
-        if not iter:
+        it = model.get_iter_from_string(path_string)
+        if not it:
             return
-        at = model.get_value (iter, self.COLUMN_NAME)
+        at = model.get_value (it, self.COLUMN_NAME)
         try:
             val = self.repr_to_value (at, text)
         except ValueError, e:
@@ -1585,24 +1583,24 @@ class EditAttributesForm (EditForm):
             # Invalid value -> we take the original value
             val = getattr(self.element, at)
 
-        model.set_value(iter, column, self.value_to_repr (at, val))
+        model.set_value(it, column, self.value_to_repr (at, val))
 
     def check_validity(self):
         invalid=[]
         model = self.view.get_model ()
-        iter = model.get_iter_first ()
-        while iter is not None:
-            at = model.get_value (iter, EditAttributesForm.COLUMN_NAME)
+        it = model.get_iter_first ()
+        while it is not None:
+            at = model.get_value (it, EditAttributesForm.COLUMN_NAME)
             #print "Updating value of %s.%s" % (str(self.element), at)
             if at in self.editable:
-                text = model.get_value (iter, EditAttributesForm.COLUMN_VALUE)
+                text = model.get_value (it, EditAttributesForm.COLUMN_VALUE)
                 v = None
                 try:
                     v = self.repr_to_value (at, text)
                 except ValueError, e:
                     v = None
                     invalid.append((at, e))
-            iter = model.iter_next(iter)
+            it = model.iter_next(it)
         # Display list of invalid attributes
         if invalid:
             dialog.message_dialog(
@@ -1617,12 +1615,12 @@ class EditAttributesForm (EditForm):
         """Update the element fields according to the values in the view."""
         invalid=[]
         model = self.view.get_model ()
-        iter = model.get_iter_first ()
-        while iter is not None:
-            at = model.get_value (iter, EditAttributesForm.COLUMN_NAME)
+        it = model.get_iter_first ()
+        while it is not None:
+            at = model.get_value (it, EditAttributesForm.COLUMN_NAME)
             #print "Updating value of %s.%s" % (str(self.element), at)
             if at in self.editable:
-                text = model.get_value (iter, EditAttributesForm.COLUMN_VALUE)
+                text = model.get_value (it, EditAttributesForm.COLUMN_VALUE)
                 v = None
                 try:
                     v = self.repr_to_value (at, text)
@@ -1636,7 +1634,7 @@ class EditAttributesForm (EditForm):
                         setattr (self.element, at, v)
                     except ValueError, e:
                         invalid.append((at, e))
-            iter = model.iter_next(iter)
+            it = model.iter_next(it)
         # Display list of invalid attributes
         if invalid:
             dialog.message_dialog(
@@ -1684,8 +1682,8 @@ class EditAttributesForm (EditForm):
             else:
                 label=at
 
-            iter = model.append ()
-            model.set(iter,
+            it = model.append ()
+            model.set(it,
                       self.COLUMN_LABEL, label,
                       self.COLUMN_VALUE, self.value_to_repr(at, getattr (el, at)),
                       self.COLUMN_NAME, at,
@@ -1766,9 +1764,9 @@ class EditElementListForm(EditForm):
         return True
 
     def delete_current(self, button=None, treeview=None):
-        model, iter=treeview.get_selection().get_selected()
-        if iter is not None:
-            model.remove(iter)
+        model, it=treeview.get_selection().get_selected()
+        if it is not None:
+            model.remove(it)
         return True
 
     def get_view(self, compact=False):

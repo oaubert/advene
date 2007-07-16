@@ -82,6 +82,8 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         self.set_size_request(*self.needed_size())
 
     def reset_surface_size(self, width=None, height=None):
+        """Redimension the cached widget content.
+        """
         if not self.window:
             return False
         s=self.window.get_size()
@@ -100,16 +102,25 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         return True
 
     def realize_cb(self, widget):
+        """Callback for the realize event.
+        """
         if not self.reset_surface_size(*self.needed_size()):
             return True
         self.update_widget()
         return True
 
     def size_request_cb(self, widget, requisition):
+        """Callback for the size-request event.
+        """
         self.refresh()
         return False
 
     def set_color(self, color=None):
+        """Set a local color for the widget.
+        
+        The local color will override the color that could be returned
+        by the container's get_element_color method.
+        """
         self.local_color=color
         self.update_widget()
         return True
@@ -136,6 +147,8 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         context.fill()
 
     def update_widget(self, *p):
+        """Update the widget.
+        """
         if not self.window:
             return False
         if self.cached_context is None:
@@ -155,12 +168,16 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         return False
 
     def refresh(self):
+        """Refresh the widget.
+        """
         if self.window:
             width = self.cached_surface.get_width()
             height = self.cached_surface.get_height()
             self.window.invalidate_rect(gtk.gdk.Rectangle(0, 0, width, height), False)
 
     def expose_cb(self, widget, event):
+        """Handle the expose event.
+        """
         if self.cached_surface is None:
             return False
 
@@ -197,6 +214,8 @@ class AnnotationWidget(GenericColorButtonWidget):
                              gtk.gdk.ACTION_LINK)
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
+        """Handle the drag-sent event.
+        """
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.target, 8, widget.annotation.uri)
         elif targetType == config.data.target_type['uri-list']:
@@ -214,6 +233,8 @@ class AnnotationWidget(GenericColorButtonWidget):
         return True
 
     def keypress(self, widget, event, annotation):
+        """Handle the key-press event.
+        """
         if event.keyval == gtk.keysyms.e:
             self.controller.gui.edit_element(annotation)
             return True
@@ -241,6 +262,8 @@ class AnnotationWidget(GenericColorButtonWidget):
                 self.container.button_height)
 
     def draw(self, context, width, height):
+        """Draw the widget in the cache pixmap.
+        """
         # c.move_to(0, 0)
         # c.rel_line_to(0, bheight)
         # c.rel_line_to(bwidth, 0)
@@ -297,6 +320,8 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
 
     def keypress(self, widget, event, annotationtype):
+        """Handle the key-press event.
+        """
         if event.keyval == gtk.keysyms.e:
             self.controller.gui.edit_element(annotationtype)
             return True
@@ -311,6 +336,8 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         return (w, self.container.button_height)
 
     def draw(self, context, width, height):
+        """Draw the widget in the cache pixmap.
+        """
         context.rectangle(0, 0, width, height)
         if self.local_color is not None:
             color=self.local_color
@@ -364,6 +391,8 @@ class TagWidget(GenericColorButtonWidget):
         return (w, self.container.button_height)
 
     def draw(self, context, width, height):
+        """Draw the widget in the cache pixmap.
+        """
         context.rectangle(0, 0, width, height)
         color=self.container.get_element_color(self.tag)
         if color:

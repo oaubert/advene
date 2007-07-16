@@ -919,7 +919,7 @@ if __name__ == "__main__":
     else:
         filename=sys.argv[1]
 
-    from advene.core.controller import Controller
+    from advene.core.controller import AdveneController
 
     controller=Controller()
 

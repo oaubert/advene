@@ -66,8 +66,8 @@ class RelationsBox:
     """
     def __init__ (self, package=None, controller=None):
         self.view_name = _("Relations view")
-	self.view_id = 'relationview'
-	self.close_on_package_load = True
+        self.view_id = 'relationview'
+        self.close_on_package_load = True
 
         self.package=package
         self.controller=controller
@@ -208,52 +208,3 @@ class RelationsBox:
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
-
-
-if __name__ == "__main__":
-    from advene.model.package import Package
-    if len(sys.argv) < 2:
-        print "Should provide a package name"
-        sys.exit(1)
-
-    package = Package (uri=sys.argv[1])
-
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    window.set_size_request (320, 200)
-
-    def key_pressed_cb (win, event):
-        if event.state & gtk.gdk.CONTROL_MASK:
-            # The Control-key is held. Special actions :
-            if event.keyval == gtk.keysyms.q:
-                gtk.main_quit ()
-                return True
-        return False
-
-
-    def validate_cb (win, package):
-        filename="/tmp/package.xml"
-        package.save (name=filename)
-        print "Package saved as %s" % filename
-        gtk.main_quit ()
-
-    window.connect ("key-press-event", key_pressed_cb)
-    window.connect ("destroy", lambda e: gtk.main_quit())
-    window.set_title (package.title or "None")
-    vbox = gtk.VBox()
-
-    window.add (vbox)
-
-    relbox=RelationsBox(package=package, controller=None)
-    vbox.add (relbox.get_widget())
-
-    hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=False)
-
-    b = gtk.Button (stock=gtk.STOCK_QUIT)
-    b.connect ("clicked", lambda w: window.destroy ())
-    hbox.add (b)
-
-    vbox.set_homogeneous (False)
-
-    window.show_all()
-    gtk.main ()

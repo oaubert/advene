@@ -28,6 +28,8 @@ class PlayerFactory:
         pass
 
     def get_player(self, p=None):
+        """Return an appropriate player instance.
+        """
         if p is None:
             p=config.data.player['plugin']
         print "mediacontrol: using %s" % p
@@ -45,12 +47,12 @@ class PlayerFactory:
                 import advene.player.vlcorbit as playermodule
             elif p == 'mplayer':
                 import advene.player.mplayer as playermodule
-	    elif p == 'gstreamer':
-		import advene.player.gstreamer as playermodule
-	    elif p == 'quicktime':
-		import advene.player.quicktime as playermodule
+            elif p == 'gstreamer':
+                import advene.player.gstreamer as playermodule
+            elif p == 'quicktime':
+                import advene.player.quicktime as playermodule
             else:
-		print "Fallback to dummy module"
+                print "Fallback to dummy module"
                 import advene.player.dummy as playermodule
         except ImportError, e:
             if config.data.os == 'linux' and p != 'gstreamer':
@@ -67,6 +69,8 @@ class PlayerFactory:
         return playermodule.Player()
 
     def nativevlc_win32_import(self):
+        """Specific importer for win32 vlc.
+        """
         # Try to determine wether VLC is installed or not
         vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','InstallDir')
         if vlcpath is None:
@@ -90,7 +94,7 @@ class PlayerFactory:
             # (find the interfaces)
             try:
                 os.chdir(vlcpath)
-            except:
+            except OSError:
                 print "Cannot cd to %s. The player certainly won't work." % vlcpath
             import advene.player.vlcnative as playermodule
 

@@ -31,11 +31,11 @@ class auto_properties(type):
     If a "getFoo" or "setFoo" method is defined, then so will be the
     correponding property "foo".  """
     
-    def __init__(self, name, bases, dict):
+    def __init__(self, name, bases, dic):
         cls=self
-        super(auto_properties, cls).__init__(name, bases, dict)
+        super(auto_properties, cls).__init__(name, bases, dic)
         props = {}
-        for name, f in dict.iteritems():
+        for name, f in dic.iteritems():
             try:
                 nb_args = (f.func_code.co_argcount
                            - len (f.func_defaults or ()))
@@ -64,14 +64,14 @@ if __name__ == "__main__":
 
         def getTheA(self): return self._a
 
-        def setTheB(self,v): self._b = v
+        def setTheB(self, v): self._b = v
 
         def getTheC(self): return self._c
-        def setTheC(self,v): self._c = v
+        def setTheC(self, v): self._c = v
 
         def getTheD(self): return self._d
-        def setTheD(self,v): self._d = v
-        def delTheD(self,v): del self._d
+        def setTheD(self, v): self._d = v
+        def delTheD(self, v): del self._d
 
         def delTheE(self, e): del self._e
 

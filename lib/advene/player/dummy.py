@@ -33,10 +33,10 @@ class StreamInformation:
 
 class Position:
     def __init__(self, value=0):
-	self.value=value
-	# See Player attributes below...
-	self.origin=0
-	self.key=2
+        self.value=value
+        # See Player attributes below...
+        self.origin=0
+        self.key=2
 
 class PositionKeyNotSupported(Exception):
     pass
@@ -82,35 +82,35 @@ class Player:
         self.playlist=[]
         self.relative_position=0
         self.status=Player.UndefinedStatus
-	self.basetime=None
-	self.pausetime=None
-	self.volume=12
+        self.basetime=None
+        self.pausetime=None
+        self.volume=12
         self.mute_volume=None
-	self.stream_duration = 0
+        self.stream_duration = 0
         self.position_update()
 
     def position2value(self, p):
-	if isinstance(p, Position):
-	    v=p.value
-	    if p.key != self.MediaTime:
-		self.log("unsupported key ", p.key)
-		return 0
-	    if p.origin == self.AbsolutePosition:
-		v=p.value
-	    else:
-		v=self.current_position() + p.value
-	else:
-	    v=long(p)
-	return v
+        if isinstance(p, Position):
+            v=p.value
+            if p.key != self.MediaTime:
+                self.log("unsupported key ", p.key)
+                return 0
+            if p.origin == self.AbsolutePosition:
+                v=p.value
+            else:
+                v=self.current_position() + p.value
+        else:
+            v=long(p)
+        return v
 
     def current_position(self):
-	if self.pausetime:
-	    return self.pausetime
-	elif self.basetime is None:
-	    return 0
-	else:
-	    return time() * 1000 - self.basetime
-	
+        if self.pausetime:
+            return self.pausetime
+        elif self.basetime is None:
+            return 0
+        else:
+            return time() * 1000 - self.basetime
+        
     def dvd_uri(self, title=None, chapter=None):
         return "dvd@%s:%s" % (str(title),
                               str(chapter))
@@ -120,58 +120,58 @@ class Player:
         
     def get_media_position(self, origin=None, key=None):
         self.log("get_media_position")
-	return self.current_position()
+        return self.current_position()
 
     def set_media_position(self, position=0):
-	position = self.position2value(position)
+        position = self.position2value(position)
         self.log("set_media_position %s" % str(position))
-	self.basetime = time() * 1000 - position
-	self.pausetime = None
+        self.basetime = time() * 1000 - position
+        self.pausetime = None
         return
     
     def start(self, position=0):
         self.log("start %s" % str(position))
         self.status=Player.PlayingStatus
-	self.basetime=time() * 1000 - position
-	self.pausetime=None
+        self.basetime=time() * 1000 - position
+        self.pausetime=None
 
     def pause(self, position=0): 
         self.log("pause %s" % str(position))
         if self.status == Player.PlayingStatus:
-	    self.pausetime=time() * 1000 - self.basetime
+            self.pausetime=time() * 1000 - self.basetime
             self.status=Player.PauseStatus
         else:
             self.status=Player.PlayingStatus
-	    self.basetime=time() * 1000 - self.pausetime
-	    self.pausetime=None
+            self.basetime=time() * 1000 - self.pausetime
+            self.pausetime=None
 
     def resume(self, position=0):
         self.log("resume %s" % str(position))
         if self.status == Player.PlayingStatus:
-	    self.pausetime=time() * 1000 - self.basetime
+            self.pausetime=time() * 1000 - self.basetime
             self.status=Player.PauseStatus
         else:
             self.status=Player.PlayingStatus
-	    self.basetime=time() * 1000 - self.pausetime
-	    self.pausetime=None
+            self.basetime=time() * 1000 - self.pausetime
+            self.pausetime=None
 
     def stop(self, position=0): 
         self.log("stop %s" % str(position))
         self.status=Player.UndefinedStatus
-	self.basetime=None
-	self.pausetime=None
+        self.basetime=None
+        self.pausetime=None
 
     def exit(self):
         self.log("exit")
     
     def playlist_add_item(self, item):
         self.playlist.append(item)
-	# Simulate a 30 minutes movie
-	self.stream_duration = 30 * 60000
+        # Simulate a 30 minutes movie
+        self.stream_duration = 30 * 60000
 
     def playlist_clear(self):
         del self.playlist[:]
-	self.stream_duration = 0
+        self.stream_duration = 0
 
     def playlist_get_list(self):
         return self.playlist[:]
@@ -192,13 +192,13 @@ class Player:
         s.url=''
         if self.playlist:
             s.url=self.playlist[0]
-	s.length=self.stream_duration
-	if self.pausetime:
-	    s.position=self.pausetime
-	elif self.basetime:
-	    s.position=time() * 1000 - self.basetime
-	else:
-	    s.position=0
+        s.length=self.stream_duration
+        if self.pausetime:
+            s.position=self.pausetime
+        elif self.basetime:
+            s.position=time() * 1000 - self.basetime
+        else:
+            s.position=0
         s.streamstatus=self.status
         return s
 
@@ -207,21 +207,21 @@ class Player:
 
     def sound_set_volume(self, v):
         self.log("sound_set_volume %s" % str(v))
-	self.volume = v
+        self.volume = v
 
     # Helper methods
     def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
         """
-	if key is None:
-	    key=self.MediaTime
-	if origin is None:
-	    origin=self.AbsolutePosition
-	
-	p=Position()
-	p.value = value
-	p.origin = origin
-	p.key = key
+        if key is None:
+            key=self.MediaTime
+        if origin is None:
+            origin=self.AbsolutePosition
+        
+        p=Position()
+        p.value = value
+        p.origin = origin
+        p.key = key
         return p
 
     def update_status (self, status=None, position=None):
@@ -247,10 +247,10 @@ class Player:
         """
         self.log("update_status %s" % status)
 
-	if position is None:
-	    position=0
-	else:
-	    position=self.position2value(position)
+        if position is None:
+            position=0
+        else:
+            position=self.position2value(position)
 
         if status == "start" or status == "set":
             self.position_update()
@@ -296,8 +296,8 @@ class Player:
         return True
 
     def restart_player(self):
-	self.log("restart player")
-	return True
+        self.log("restart player")
+        return True
 
     def sound_mute(self):
         if self.mute_volume is None:

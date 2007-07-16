@@ -94,7 +94,7 @@ class DVDSelect:
         hbox.add(gtk.Label(_("Title")))
         sp=gtk.SpinButton()
         sp.set_range(1, 15)
-        sp.set_increments(1,1)
+        sp.set_increments(1, 1)
         hbox.pack_start(sp, expand=False)
         self.titlewidget=sp
         vbox.add(hbox)
@@ -103,7 +103,7 @@ class DVDSelect:
         hbox.add(gtk.Label(_("Chapter")))
         sp=gtk.SpinButton()
         sp.set_range(1, 30)
-        sp.set_increments(1,1)
+        sp.set_increments(1, 1)
         hbox.pack_start(sp, expand=False)
         self.chapterwidget=sp
         vbox.add(hbox)

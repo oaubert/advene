@@ -108,7 +108,7 @@ class ZipPackage:
             elif re.match('^[a-zA-Z]:', n):
                 # Windows drive: notation. Convert it to
                 # a more URI-compatible syntax
-	        self.uri=uri
+                self.uri=uri
                 self.file_ = urllib.pathname2url(n)
             elif re.search('/[a-zA-Z]|', n):
                 # It is a pathname2url encoded path
@@ -130,11 +130,11 @@ class ZipPackage:
             self.open(self.file_)
 
     def getContentsFile(self):
-	"""Return the path to the real XML file.
+        """Return the path to the real XML file.
 
-	@return: the XML filename
-	@rtype: string
-	"""
+        @return: the XML filename
+        @rtype: string
+        """
         return self.tempfile(u'content.xml')
 
     def tempfile(self, *names):
@@ -213,13 +213,13 @@ class ZipPackage:
         return self._tempdir
 
     def open(self, fname=None):
-	"""Open the given AZP file.
-	
+        """Open the given AZP file.
+        
         It can also be a directory name containing an expanded AZP tree.
 
-	@param fname: the file name
-	@type fname: string
-	"""
+        @param fname: the file name
+        @type fname: string
+        """
         if fname is None:
             fname=self.file_
 
@@ -248,8 +248,8 @@ class ZipPackage:
         self.file_ = fname
 
     def save(self, fname=None):
-	"""Save the package.
-	"""
+        """Save the package.
+        """
         if fname is None:
             fname=self.file_
 
@@ -318,11 +318,11 @@ class ZipPackage:
         
     def list_to_manifest(self, manifest):
         """Generate the XML representation of the manifest.
-	
-	@param manifest: the list of files
-	@type manifest: list
-	@return: the XML representation of the manifest
-	@rtype: string
+        
+        @param manifest: the list of files
+        @type manifest: list
+        @return: the XML representation of the manifest
+        @rtype: string
         """
         root=ET.Element(ET.QName(MANIFEST, 'manifest'))
         ET.SubElement(root, ET.QName(MANIFEST, 'file-entry'),  { 
@@ -346,9 +346,9 @@ class ZipPackage:
 
         List of tuples : (name, mimetype)
 
-	@param name: the manifest filename
-	@type name: string
-	@return: a list of typles (name, mimetype)
+        @param name: the manifest filename
+        @type name: string
+        @return: a list of typles (name, mimetype)
         """
         l=[]
         tree=ET.parse(name)
@@ -366,9 +366,9 @@ class ZipPackage:
         return True
 
     def getResources(self, package=None):
-	"""Return the root resources object for the package.
-	
-	@return: the root Resources object
-	@rtype: Resources
-	"""
+        """Return the root resources object for the package.
+        
+        @return: the root Resources object
+        @rtype: Resources
+        """
         return Resources( self, '', parent=package )

@@ -111,7 +111,7 @@ class ViewPlugin(AdhocView):
         """
         return self.widget
 
-    def popup(self):
+    def popup(self, label=None):
         """Popup the view in a toplevel window.
         """
         pass

@@ -53,7 +53,7 @@ class AnnotationTable(AdhocView):
     tooltip=_("Display annotations in a table")
 
     def __init__(self, controller=None, parameters=None, elements=None):
-	self.close_on_package_load = False
+        self.close_on_package_load = False
         self.contextual_actions = (
             )
         self.controller=controller
@@ -61,7 +61,7 @@ class AnnotationTable(AdhocView):
         self.options={}
 
         self.model=self.build_model()
-	self.widget = self.build_widget()
+        self.widget = self.build_widget()
 
     def build_model(self):
         """Build the ListStore containing the data.
@@ -92,10 +92,10 @@ class AnnotationTable(AdhocView):
 
         tree_view.connect("button_press_event", self.tree_view_button_cb)
         tree_view.connect("row-activated", self.row_activated_cb)
-	#tree_view.set_search_column(COLUMN_CONTENT)
+        #tree_view.set_search_column(COLUMN_CONTENT)
 
-        def search_content(model, column, key, iter):
-            if key in model.get_value(iter, COLUMN_CONTENT):
+        def search_content(model, column, key, it):
+            if key in model.get_value(it, COLUMN_CONTENT):
                 return False
             return True
 
@@ -139,16 +139,16 @@ class AnnotationTable(AdhocView):
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-	sw.add(tree_view)
+        sw.add(tree_view)
 
-	sw.treeview = tree_view
+        sw.treeview = tree_view
 
         return sw
 
     def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
-        model, iter = treeview.get_selection().get_selected()
+        model, it = treeview.get_selection().get_selected()
 
-        el = model.get_value(iter, COLUMN_ELEMENT)
+        el = model.get_value(it, COLUMN_ELEMENT)
 
         if targetType == config.data.target_type['annotation']:
             if not isinstance(el, Annotation):
@@ -265,7 +265,7 @@ class GenericTable(AdhocView):
     tooltip=_("Display Advene elements in a table.")
 
     def __init__(self, controller=None, parameters=None, elements=None):
-	self.close_on_package_load = False
+        self.close_on_package_load = False
         self.contextual_actions = (
             )
         self.controller=controller
@@ -273,7 +273,7 @@ class GenericTable(AdhocView):
         self.options={}
 
         self.model=self.build_model()
-	self.widget = self.build_widget()
+        self.widget = self.build_widget()
 
     def build_model(self):
         """Build the ListStore containing the data.
@@ -325,10 +325,10 @@ class GenericTable(AdhocView):
 
         tree_view.connect("button_press_event", self.tree_view_button_cb)
         tree_view.connect("row-activated", self.row_activated_cb)
-	#tree_view.set_search_column(COLUMN_CONTENT)
+        #tree_view.set_search_column(COLUMN_CONTENT)
 
-        def search_content(model, column, key, iter):
-            if key in model.get_value(iter, COLUMN_CONTENT):
+        def search_content(model, column, key, it):
+            if key in model.get_value(it, COLUMN_CONTENT):
                 return False
             return True
 
@@ -355,9 +355,9 @@ class GenericTable(AdhocView):
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-	sw.add(tree_view)
+        sw.add(tree_view)
 
-	sw.treeview = tree_view
+        sw.treeview = tree_view
 
         return sw
 

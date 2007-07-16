@@ -403,13 +403,13 @@ class LsDVDImporter(GenericImporter):
     """
     name = _("lsdvd importer")
 
-    def __init__(self, regexp=None, encoding=None, **kw):
+    def __init__(self, regexp=None, encoding='latin1', **kw):
         super(LsDVDImporter, self).__init__(**kw)
         self.command="/usr/bin/lsdvd -c"
         # FIXME: handle Title- lines
         #Chapter: 01, Length: 00:01:16, Start Cell: 01
         self.regexp="^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<duration>[0-9:]+)"
-        self.encoding='latin1'
+        self.encoding=encoding
 
     def can_handle(fname):
         if 'dvd' in fname:
@@ -737,8 +737,6 @@ class ElanImporter(GenericImporter):
         if self.package is None:
             self.package=Package(uri='new_pkg', source=None)
 
-        p=self.package
-
         self.schema=self.create_schema(id_='elan', title="ELAN converted schema")
         try:
             self.schema.date=elan.DATE
@@ -753,7 +751,7 @@ class ElanImporter(GenericImporter):
         for a in elan.TIME_ORDER[0].TIME_SLOT:
             try:
                 self.anchors[a.TIME_SLOT_ID] = long(a.TIME_VALUE)
-            except AttributeError, e:
+            except AttributeError:
                 # FIXME: should not silently ignore error
                 self.anchors[a.TIME_SLOT_ID] = 0
 
@@ -824,7 +822,7 @@ class SubtitleImporter(GenericImporter):
     def process_file(self, filename):
         f=open(filename, 'r')
 
-        p,at=self.init_package(filename=filename,
+        p, at=self.init_package(filename=filename,
                                schemaid='subtitle-schema',
                                annotationtypeid='subtitle')
         if self.package is None:
@@ -870,7 +868,6 @@ class PraatImporter(GenericImporter):
 
         begin=None
         end=None
-        content=None
 
         while True:
             l=f.readline()
@@ -920,7 +917,6 @@ class PraatImporter(GenericImporter):
         if self.package is None:
             self.package=Package(uri='new_pkg', source=None)
 
-        p=self.package
         self.schema=self.create_schema('praat', 
                                        title="PRAAT converted schema")
         self.convert(self.iterator(f))

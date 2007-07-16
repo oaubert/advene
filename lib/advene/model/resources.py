@@ -105,7 +105,7 @@ class Resources:
         self.ownerPackage = parent.ownerPackage
         self.parent = parent
 
-	self._children_cache = {}
+        self._children_cache = {}
 
         # Resource path name
         self.resourcepath = resourcepath
@@ -147,16 +147,16 @@ class Resources:
         else:
             p='/'.join( (self.resourcepath, key) )
 
-	if p in self._children_cache:
-	    return self._children_cache[p]
+        if p in self._children_cache:
+            return self._children_cache[p]
 
         if os.path.isdir(fname):
             r=Resources(self.package, p, parent=self)
-	else:
-	    # It is a file. Return its ResourceData
-	    r=ResourceData(self.package, p, parent=self)
-	self._children_cache[p]=r
-	return r
+        else:
+            # It is a file. Return its ResourceData
+            r=ResourceData(self.package, p, parent=self)
+        self._children_cache[p]=r
+        return r
 
     def __setitem__(self, key, item):
         """Create a new item.
@@ -182,16 +182,16 @@ class Resources:
             p=key
         else:
             p='/'.join( (self.resourcepath, key) )
-	try:
-	    del self._children_cache[p]
-	except:
-	    pass
+        try:
+            del self._children_cache[p]
+        except KeyError:
+            pass
         self.filenames = None
         fname=os.path.join( self.dir_, key )
-	if os.path.isdir(fname):
-	    os.rmdir(fname)
-	else:
-	    os.unlink(fname)
+        if os.path.isdir(fname):
+            os.rmdir(fname)
+        else:
+            os.unlink(fname)
 
     def getUri (self):
         """Return the URI of the element.

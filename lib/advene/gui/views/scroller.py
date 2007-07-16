@@ -54,7 +54,6 @@ class ScrollerView(AdhocView):
 
         black=gtk.gdk.color_parse('black')
         white=gtk.gdk.color_parse('white')
-        grey=gtk.gdk.color_parse('grey')
 
         for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
                       gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,

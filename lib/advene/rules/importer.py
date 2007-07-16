@@ -19,6 +19,8 @@
 from advene.util.importer import GenericImporter, register
 import urllib
 
+from gettext import gettext as _
+
 class EventHistoryImporter(GenericImporter):
     """Event History importer.
     """

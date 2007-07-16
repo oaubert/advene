@@ -120,6 +120,10 @@ class AdveneController:
     def __init__ (self, args=None):
         """Initializes player and other attributes.
         """
+        # GUI (optional)
+        self.gui=None
+        # Webserver (optional)
+        self.server=None
 
         # Dictionaries indexed by alias
         self.packages = {}
@@ -145,8 +149,6 @@ class AdveneController:
         self.videotime_bookmarks = []
         self.usertime_bookmarks = []
 
-        # GUI (optional)
-        self.gui=None
         # Useful for debug in the evaluator window
         self.config=config.data
 
@@ -168,11 +170,11 @@ class AdveneController:
 
         # Event handler initialization
         self.event_handler = advene.rules.ecaengine.ECAEngine (controller=self)
-	self.modifying_events = self.event_handler.catalog.modifying_events
+        self.modifying_events = self.event_handler.catalog.modifying_events
         self.event_queue = []
 
-	# Load default actions
-	advene.rules.actions.register(self)	
+        # Load default actions
+        advene.rules.actions.register(self)     
 
         # Used in update_status to emit appropriate notifications
         self.status2eventname = {
@@ -203,19 +205,19 @@ class AdveneController:
                                doc="Cached duration for the current package")
 
     def self_loop(self):
-	"""Autonomous gobject loop for GUI-less controller.
-	"""
-	self.mainloop = gobject.MainLoop()
+        """Autonomous gobject loop for GUI-less controller.
+        """
+        self.mainloop = gobject.MainLoop()
 
-	def update_wrapper():
-	    """Wrapper for the application update.
+        def update_wrapper():
+            """Wrapper for the application update.
 
-	    This is necessary, since update() returns a position, that
-	    may be 0, thus interpreted as False by the loop handler if
-	    we directly invoke it.
-	    """
-	    self.update()
-	    return True
+            This is necessary, since update() returns a position, that
+            may be 0, thus interpreted as False by the loop handler if
+            we directly invoke it.
+            """
+            self.update()
+            return True
 
         gobject.timeout_add (100, update_wrapper)
         self.notify ("ApplicationStart")
@@ -236,6 +238,12 @@ class AdveneController:
         return l
 
     def queue_action(self, method, *args, **kw):
+        """Queue an action.
+
+        The method will be called in the application mainloop, i.e. in
+        the main application thread. This can prevent problems when
+        running in a GUI environment.
+        """
         self.event_queue.append( (method, args, kw) )
         return True
     
@@ -273,9 +281,13 @@ class AdveneController:
         return True
 
     def register_gui(self, gui):
+        """Register the GUI for the controller.
+        """
         self.gui=gui
 
     def register_view(self, view):
+        """Register a view.
+        """
         if self.gui:
             self.gui.register_view(view)
         else:
@@ -283,24 +295,34 @@ class AdveneController:
 
     # Register methods for user-defined plugins
     def register_content_handler(self, handler):
+        """Register a content-handler.
+        """
         config.data.register_content_handler(handler)
 
     def register_global_method(self, method, name=None):
+        """Register a global method.
+        """
         config.data.register_global_method(method, name)
 
     def register_action(self, action):
+        """Register an action.
+        """
         if self.event_handler:
             self.event_handler.register_action(action)
         else:
             self.log(_("No available event handler"))
 
     def register_viewclass(self, viewclass, name=None):
+        """Register an adhoc view.
+        """
         if self.gui:
             self.gui.register_viewclass(viewclass, name)
         else:
             self.log(_("No available gui"))
 
     def register_importer(self, imp):
+        """Register an importer.
+        """
         advene.util.importer.register(imp)
 
     def register_videotime_action(self, t, action):
@@ -328,7 +350,11 @@ class AdveneController:
         return True
 
     def loop_on_annotation(self, a):
+        """Activate the looping on the given annotation.
+        """
         def action_loop(controller, position):
+            """Transient action for annotation loop.
+            """
             self.queue_action(controller.update_status, 'set', a.fragment.begin, notify=False)
             self.queue_action(controller.loop_on_annotation, a)
             return True
@@ -336,25 +362,27 @@ class AdveneController:
         return True
 
     def build_context(self, here=None, alias=None, baseurl=None):
+        """Build a context object with additional information.
+        """
         if baseurl is None:
             baseurl=self.get_default_url(root=True, alias=alias)
         if here is None:
             here=self.package
         c=advene.model.tal.context.AdveneContext(here,
-						 options={
-		u'package_url': baseurl,
-		u'snapshot': self.package.imagecache,
-		u'namespace_prefix': config.data.namespace_prefix,
-		u'config': config.data.web,
+                                                 options={
+                u'package_url': baseurl,
+                u'snapshot': self.package.imagecache,
+                u'namespace_prefix': config.data.namespace_prefix,
+                u'config': config.data.web,
                 u'aliases': self.aliases,
                 u'controller': self,
-		})
-	c.addGlobal(u'package', self.package)
-	c.addGlobal(u'packages', self.packages)
-	c.addGlobal(u'player', self.player)
-	for name, method in config.data.global_methods.iteritems():
-	    c.addMethod(name, method)
-	return c
+                })
+        c.addGlobal(u'package', self.package)
+        c.addGlobal(u'packages', self.packages)
+        c.addGlobal(u'player', self.player)
+        for name, method in config.data.global_methods.iteritems():
+            c.addMethod(name, method)
+        return c
 
     def busy_port_info(self):
         """Display the processes using the webserver port.
@@ -372,6 +400,8 @@ class AdveneController:
                                                                                                                            'processes':  processes})
 
     def init(self, args=None):
+        """Initialize the controller.
+        """
         if args is None:
             args=[]
 
@@ -388,24 +418,23 @@ class AdveneController:
         self.event_handler.internal_rule (event="PackageLoad",
                                           method=self.manage_package_load)
 
-        self.server=None
         if config.data.webserver['mode']:
             try:
                 self.server = AdveneWebServer(controller=self, port=config.data.webserver['port'])
-                self.serverthread = threading.Thread (target=self.server.start)
-                self.serverthread.setName("Advene webserver")
-                self.serverthread.start ()
+                serverthread = threading.Thread (target=self.server.start)
+                serverthread.setName("Advene webserver")
+                serverthread.start ()
             except socket.error:
                 if config.data.os != 'win32':
                     self.busy_port_info()
                 self.log(_("Deactivating web server"))
-	media=None
+        media=None
         # Arguments handling
         for uri in args:
-	    if '=' in uri:
-		# alias=uri syntax
-		alias, uri = uri.split('=', 2)
-		alias = re.sub('[^a-zA-Z0-9_]', '_', alias)
+            if '=' in uri:
+                # alias=uri syntax
+                alias, uri = uri.split('=', 2)
+                alias = re.sub('[^a-zA-Z0-9_]', '_', alias)
                 try:
                     self.load_package (uri=uri, alias=alias)
                     self.log(_("Loaded %(uri)s as %(alias)s") % {'uri': uri, 'alias': alias})
@@ -413,29 +442,29 @@ class AdveneController:
                     self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
                             'uri': uri,
                             'error': unicode(e)})
-	    else:
-		name, ext = os.path.splitext(uri)
-		if ext.lower() in ('.xml', '.azp', '.apl'):
-		    alias = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
-		    try:
-			self.load_package (uri=uri, alias=alias)
-			self.log(_("Loaded %(uri)s as %(alias)s") % {
+            else:
+                name, ext = os.path.splitext(uri)
+                if ext.lower() in ('.xml', '.azp', '.apl'):
+                    alias = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+                    try:
+                        self.load_package (uri=uri, alias=alias)
+                        self.log(_("Loaded %(uri)s as %(alias)s") % {
                                 'uri': uri, 'alias':  alias})
-		    except Exception, e:
-			self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
+                    except Exception, e:
+                        self.log(_("Cannot load package from file %(uri)s: %(error)s") % {
                                 'uri': uri,
                                 'error': unicode(e)})
-		else:
-		    # Try to load the file as a video file
-		    if ('dvd' in name 
-			or ext.lower() in config.data.video_extensions):
-			media = uri
+                else:
+                    # Try to load the file as a video file
+                    if ('dvd' in name 
+                        or ext.lower() in config.data.video_extensions):
+                        media = uri
             
         # If no package is defined yet, load the template
         if self.package is None:
-           self.load_package ()
-	if media is not None:
-	    self.set_default_media(media)
+            self.load_package ()
+        if media is not None:
+            self.set_default_media(media)
 
         # Register private mime.types if necessary
         if config.data.os != 'linux':
@@ -446,9 +475,23 @@ class AdveneController:
         return True
 
     def create_position (self, value=0, key=None, origin=None):
+        """Create a new player-specific position.
+        """
+        if key is None:
+            key=self.player.MediaTime
+        if origin is None:
+            origin=self.player.AbsolutePosition
         return self.player.create_position(value=value, key=key, origin=origin)
 
     def notify (self, event_name, *param, **kw):
+        """Notify the occurence of an event.
+
+        This method will trigger the corresponding actions. If the
+        named parameter immediate=True is present, then execute the
+        actions in the same thread of execution. Else, the actions
+        will be triggered through queue_action in the application
+        mainloop (main thread).
+        """
         if False:
             print "Notify %s (%s): %s" % (
                 event_name,
@@ -459,13 +502,13 @@ class AdveneController:
         # This does not really belong here, but it is the more convenient and
         # maybe more effective way to implement it
         if event_name in self.modifying_events:
-	    # Find the element's package
-	    # Kind of hackish... This information should be clearly available somewhere
-	    el=event_name.lower().replace('create','').replace('editend','').replace('delete', '')
-	    p=kw[el].ownerPackage
+            # Find the element's package
+            # Kind of hackish... This information should be clearly available somewhere
+            el=event_name.lower().replace('create','').replace('editend','').replace('delete', '')
+            p=kw[el].ownerPackage
             p._modified = True
 
-        if kw.has_key('immediate'):
+        if kw.has_key('immediate') and kw['immediate']:
             del kw['immediate']
             self.event_handler.notify(event_name, *param, **kw)
         else:
@@ -479,6 +522,8 @@ class AdveneController:
         return
 
     def get_volume(self):
+        """Get the current audio volume.
+        """
         try:
             v=self.player.sound_get_volume()
         except Exception, e:
@@ -489,13 +534,13 @@ class AdveneController:
     def update_snapshot (self, position=None):
         """Event handler used to take a snapshot for the given position.
 
-	!!! For the moment, the position parameter is ignored, and the
+        !!! For the moment, the position parameter is ignored, and the
             snapshot is taken for the current position.
 
         @return: a boolean (~desactivation)
         """
         if (config.data.player['snapshot'] 
-	    and not self.package.imagecache.is_initialized (position)):
+            and not self.package.imagecache.is_initialized (position)):
             # FIXME: only 0-relative position for the moment
             # print "Update snapshot for %d" % position
             try:
@@ -559,12 +604,18 @@ class AdveneController:
         return True
 
     def get_url_for_alias (self, alias):
+        """Return the URL for the given alias.
+        """
+        # FIXME: it should be more integrated with the webserver, in
+        # order to use the same BaseURL as the calling context.
         if self.server:
             return urllib.basejoin(self.server.urlbase, "/packages/" + alias)
         else:
             return "/packages/" + alias
 
     def get_url_for_package (self, p):
+        """Return the URL for the given package.
+        """
         a=self.aliases[p]
         return self.get_url_for_alias(a)
 
@@ -591,9 +642,13 @@ class AdveneController:
         return url
 
     def get_title(self, element, representation=None):
+        """Return the title for the given element.
+        """
         return helper.get_title(self, element, representation)
 
     def get_default_media (self, package=None):
+        """Return the current media for the given package.
+        """
         if package is None:
             package=self.package
 
@@ -637,6 +692,8 @@ class AdveneController:
         return mediafile
 
     def set_media(self, uri=None):
+        """Set the current media in the video player.
+        """
         if isinstance(uri, unicode):
             uri=uri.encode('utf8')
         if self.player.status in (self.player.PlayingStatus, self.player.PauseStatus):
@@ -647,6 +704,8 @@ class AdveneController:
         self.notify("MediaChange", uri=uri)
 
     def set_default_media (self, uri, package=None):
+        """Set the default media for the package.
+        """
         if package is None:
             package=self.package
         m=self.dvd_regexp.match(uri)
@@ -661,7 +720,7 @@ class AdveneController:
         self.set_media(uri)
         # Reset the imagecache
         self.package.imagecache=ImageCache()
-	if uri is not None and uri != "":
+        if uri is not None and uri != "":
             id_ = helper.mediafile2id (uri)
             self.package.imagecache.load (id_)
 
@@ -703,7 +762,7 @@ class AdveneController:
             d.setdefault('width', 10)
             d.setdefault('height', 10)
             d.setdefault('shape', 'rect')
-            an.content.data="\n".join( [ "%s=%s" % (k, v) for k,v in d.iteritems() ] )
+            an.content.data="\n".join( [ "%s=%s" % (k, v) for k, v in d.iteritems() ] )
         elif an.type.mimetype == 'application/x-advene-structured':
             if annotation.type.mimetype == 'text/plain':
                 an.content.data = "title=" + annotation.content.data.replace('\n', '\\n')
@@ -714,9 +773,9 @@ class AdveneController:
                                                       an.type.mimetype))
                 an.content.data = annotation.content.data
         else:
-                self.log("Do not know how to convert %s to %s" % (annotation.type.mimetype,
-                                                      an.type.mimetype))
-                an.content.data = annotation.content.data
+            self.log("Do not know how to convert %s to %s" % (annotation.type.mimetype,
+                                                              an.type.mimetype))
+            an.content.data = annotation.content.data
         an.setDate(self.get_timestamp())
 
         self.notify("AnnotationCreate", annotation=an, comment="Transmute annotation")
@@ -734,10 +793,10 @@ class AdveneController:
         an = self.package.createAnnotation(type = annotation.type,
                                            ident=ident,
                                            fragment=annotation.fragment.clone())
-	an.fragment.begin = annotation.fragment.end
-	an.fragment.end = an.fragment.begin + annotation.fragment.duration
-	if an.fragment.end > self.cached_duration:
-	    an.fragment.end = self.cached_duration
+        an.fragment.begin = annotation.fragment.end
+        an.fragment.end = an.fragment.begin + annotation.fragment.duration
+        if an.fragment.end > self.cached_duration:
+            an.fragment.end = self.cached_duration
         self.package.annotations.append(an)
         an.author=config.data.userid
         an.content.data=annotation.content.data
@@ -753,18 +812,18 @@ class AdveneController:
             self.log(_("Cannot split the annotation: the given position is outside."))
             return annotation
 
-	# Create the new one
+        # Create the new one
         ident=self.package._idgenerator.get_id(Annotation)
         an = self.package.createAnnotation(type = annotation.type,
                                            ident=ident,
                                            fragment=annotation.fragment.clone())
 
-	# Shorten the first one.
-	annotation.fragment.end = position
-	self.notify("AnnotationEditEnd", annotation=annotation, comment="Duplicate annotation")
+        # Shorten the first one.
+        annotation.fragment.end = position
+        self.notify("AnnotationEditEnd", annotation=annotation, comment="Duplicate annotation")
 
-	# Shorten the second one
-	an.fragment.begin = position
+        # Shorten the second one
+        an.fragment.begin = position
 
         self.package.annotations.append(an)
         an.author=config.data.userid
@@ -781,7 +840,9 @@ class AdveneController:
             self.set_media(mediafile)
 
     def get_timestamp(self):
-	return time.strftime("%Y-%m-%d")
+        """Return a formatted timestamp for the current date.
+        """
+        return time.strftime("%Y-%m-%d")
 
     def get_element_color(self, element, metadata='color'):
         """Return the color for the given element.
@@ -806,7 +867,7 @@ class AdveneController:
             c=self.build_context(here=element)
             try:
                 color=c.evaluateValue(col)
-            except:
+            except Exception:
                 color=None
 
         if not color:
@@ -823,7 +884,7 @@ class AdveneController:
                     c=self.build_context(here=element)
                     try:
                         color=c.evaluateValue(col)
-                    except:
+                    except Exception:
                         color=None
                 if not color:
                     # Really not found. So use the container color.
@@ -848,16 +909,17 @@ class AdveneController:
                                         source=config.data.advenefile(config.data.templatefilename))
             except Exception, e:
                 self.log(_("Cannot find the template package %(filename)s: %(error)s") 
-			 % {'filename': config.data.advenefile(config.data.templatefilename),
+                         % {'filename': config.data.advenefile(config.data.templatefilename),
                             'error': unicode(e)})
                 alias='new_pkg'
                 self.package = Package (alias, source=None)
             self.package.author = config.data.userid
-	    self.package.date = self.get_timestamp()
+            self.package.date = self.get_timestamp()
         elif uri.lower().endswith('.apl'):
             # Advene package list. Parse it and call 'load_package' for each package
             package_list=PackageListHandler().parse_file(uri)
             default_alias=None
+            a=None
             for u, a, d in package_list:
                 self.load_package(u, a, activate=False)
                 if d:
@@ -920,6 +982,8 @@ class AdveneController:
             self.activate_package(alias)
 
     def remove_package(self, package=None):
+        """Unload the package.
+        """
         if package is None:
             package=self.package
         alias=self.aliases[package]
@@ -965,6 +1029,8 @@ class AdveneController:
                 #self.activate_package(None)
 
     def activate_package(self, alias=None):
+        """Activate the package.
+        """
         if alias:
             self.package = self.packages[alias]
             self.current_alias = alias
@@ -987,7 +1053,7 @@ class AdveneController:
                 if mediafile not in self.player.playlist_get_list ():
                     # Update the player playlist
                     self.set_media(mediafile)
-	else:
+        else:
             self.set_media(None)
 
         self.notify ("PackageActivate", package = self.package)
@@ -1089,7 +1155,7 @@ class AdveneController:
             self.log (", ".join(l))
             return True
 
-	self.package.imagecache.clear ()
+        self.package.imagecache.clear ()
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
             # Load the imagecache
@@ -1103,9 +1169,9 @@ class AdveneController:
         # Activate the default STBV
         default_stbv = self.package.getMetaData (config.data.namespace, "default_stbv")
         if default_stbv:
-	    view=helper.get_id( self.package.views, default_stbv )
-	    if view:
-		self.activate_stbv(view)
+            view=helper.get_id( self.package.views, default_stbv )
+            if view:
+                self.activate_stbv(view)
 
         # Handle 'auto-import' meta-attribute
         master_uri=self.package.getMetaData(config.data.namespace, 'auto-import')
@@ -1131,36 +1197,38 @@ class AdveneController:
         return True
 
     def get_stbv_list(self):
+        """Return the list of current dynamic views.
+        """
         if self.package:
             return [ v
                      for v in self.package.views
-                     if v.content.mimetype == 'application/x-advene-ruleset' ]
+                     if helper.get_view_type(v) == 'dynamic' ]
         else:
             return []
 
     def get_utbv_list(self):
-	"""Return the list of valid UTBV for the current package.
+        """Return the list of valid UTBV for the current package.
 
-	Returns a list of tuples (title, url) for each UTBV in the
-	current package that is appliable on the package.
-	"""
-	res=[]
-	if not self.package:
+        Returns a list of tuples (title, url) for each UTBV in the
+        current package that is appliable on the package.
+        """
+        res=[]
+        if not self.package:
             return res
 
         url=self.get_default_url(root=True, alias='advene')
 
         # Add defaultview first if it exists
         defaultview=self.package.getMetaData(config.data.namespace,
-					     'default_utbv')
+                                             'default_utbv')
         if defaultview:
-	    res.append( (_("Default view"), self.get_default_url(alias='advene')) )
+            res.append( (_("Default view"), self.get_default_url(alias='advene')) )
 
         for utbv in self.package.views:
             if (utbv.matchFilter['class'] == 'package'
                 and helper.get_view_type(utbv) == 'static'):
-		res.append( (self.get_title(utbv), "%s/view/%s" % (url, utbv.id)) )
-	return res
+                res.append( (self.get_title(utbv), "%s/view/%s" % (url, utbv.id)) )
+        return res
 
     def activate_stbv(self, view=None, force=False):
         """Activates a given STBV.
@@ -1217,13 +1285,13 @@ class AdveneController:
         self.log (message)
         return True
 
-    def on_exit (self, source=None, event=None):
+    def on_exit (self, *p, **kw):
         """General exit callback."""
         if not self.cleanup_done:
-	    # Stop the event handler
-	    self.event_handler.reset_queue()
-	    self.event_handler.clear_state()
-	    self.event_handler.update_rulesets()
+            # Stop the event handler
+            self.event_handler.reset_queue()
+            self.event_handler.clear_state()
+            self.event_handler.update_rulesets()
 
             # Save preferences
             config.data.save_preferences()
@@ -1234,7 +1302,7 @@ class AdveneController:
             # Terminate the web server
             try:
                 self.server.stop()
-            except:
+            except Exception:
                 pass
 
             # Terminate the VLC server
@@ -1384,7 +1452,7 @@ class AdveneController:
         Hence, it is a critical execution path and care should be
         taken with the code used here.
 
-	@return: the current position value
+        @return: the current position value
         """
         # Process the event queue
         self.process_queue()
@@ -1497,13 +1565,13 @@ class PackageListHandler(xml.sax.handler.ContentHandler):
         return self.data
 
 if __name__ == '__main__':
-    c = AdveneController()
+    cont = AdveneController()
     try:
-        c.main ()
+        cont.main ()
     except Exception, e:
         print _("Got exception %s. Stopping services...") % str(e)
         import code
         e, v, tb = sys.exc_info()
         code.traceback.print_exception (e, v, tb)
-        c.on_exit ()
+        cont.on_exit ()
         print _("*** Exception ***")

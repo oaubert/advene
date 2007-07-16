@@ -112,7 +112,7 @@ class AdhocView(object):
         elif isinstance(param, Content):
             try:
                 m=param.mimetype
-            except:
+            except AttributeError:
                 return opt, arg
             if  m != 'application/x-advene-adhoc-view':
                 return opt, arg
