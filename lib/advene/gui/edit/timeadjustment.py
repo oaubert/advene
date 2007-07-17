@@ -117,7 +117,11 @@ class TimeAdjustment:
         hbox.pack_start(vb, expand=False)
 
         self.image = gtk.Image()
-        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache[self.value], width=100))
+        if self.compact:
+            width=50
+        else:
+            width=100
+        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache[self.value], width=width))
 
         b=gtk.Button()
         b.connect("button-press-event", handle_image_click)
@@ -269,8 +273,12 @@ class TimeAdjustment:
         """Updates the value displayed in the entry according to the current value."""
         self.entry.set_text(advene.util.helper.format_time(self.value))
         # Update the image
+        if self.compact:
+            width=50
+        else:
+            width=100
         self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache[self.value],
-                                                                  width=100))
+                                                                  width=width))
 
     def update_value_cb(self, widget, increment):
         if not self.editable:
