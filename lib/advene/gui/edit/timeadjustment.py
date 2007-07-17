@@ -150,15 +150,21 @@ class TimeAdjustment:
         self.entry.connect('focus-out-event', self.convert_entered_value)
         self.entry.set_editable(self.editable)
 
-        b=gtk.Button()
+        current_pos=gtk.Button()
         i=gtk.Image()
         i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
-        self.tooltips.set_tip(b, _("Set to current player position"))
-        b.add(i)
-        b.connect("clicked", self.use_current_position)
+        self.tooltips.set_tip(current_pos, _("Set to current player position"))
+        current_pos.add(i)
+        current_pos.connect("clicked", self.use_current_position)
 
         hb.pack_start(self.entry, expand=False)
-        hb.pack_start(b, expand=False)
+        if self.compact:
+            # In compact mode, put the button at the right of the
+            # snapshot to save space.
+            hbox.pack_start(current_pos, expand=False)
+        else:
+            # In normal mode, put the button at the right of the entry
+            hb.pack_start(current_pos, expand=False)
 
         vbox.pack_start(hb, expand=False)
         vbox.pack_start(hbox, expand=False)
