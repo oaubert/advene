@@ -414,7 +414,7 @@ class EditAnnotationPopup (EditElementPopup):
 
         f = EditFragmentForm(element=self.element.fragment, controller=self.controller)
         self.register_form (f)
-        vbox.pack_start (f.get_view (), expand=False)
+        vbox.pack_start (f.get_view(compact=compact), expand=False)
 
         f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
         self.register_form(f)
@@ -1392,7 +1392,8 @@ class EditFragmentForm(EditForm):
 
         self.begin=TimeAdjustment(value=self.element.begin,
                                   controller=self.controller,
-                                  editable=self.editable)
+                                  editable=self.editable,
+                                  compact=compact)
         f=gtk.Frame()
         f.set_label(_("Begin"))
         f.add(self.begin.get_widget())
@@ -1400,7 +1401,8 @@ class EditFragmentForm(EditForm):
 
         self.end=TimeAdjustment(value=self.element.end,
                                 controller=self.controller,
-                                editable=self.editable)
+                                editable=self.editable,
+                                compact=compact)
         f=gtk.Frame()
         f.set_label(_("End"))
         f.add(self.end.get_widget())
