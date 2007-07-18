@@ -736,7 +736,7 @@ class EditCondition(EditGeneric):
             else:
                 return operators[element][0]
 
-        self.selector=CategorizedSelector(title=_("Select a condition"),
+        self.selector=dialog.CategorizedSelector(title=_("Select a condition"),
                                           elements=operators.keys(),
                                           categories=Condition.condition_categories.keys(),
                                           current=self.current_operator,
