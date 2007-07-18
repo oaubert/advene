@@ -23,6 +23,8 @@ import gtk
 from advene.gui.edit.elements import ContentHandler
 from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle
 from advene.gui.util import image_from_position, dialog
+from advene.gui.edit.rules import EditRuleSet, EditQuery
+from advene.rules.elements import RuleSet, Query
 
 name="Default content handlers"
 
@@ -176,14 +178,14 @@ class RuleSetContentHandler (ContentHandler):
 
     def get_view (self, compact=False):
         """Generate a view widget to edit the ruleset."""
-        rs=advene.rules.elements.RuleSet()
+        rs=RuleSet()
         rs.from_dom(catalog=self.controller.event_handler.catalog,
                     domelement=self.element.model)
 
-        self.edit=advene.gui.edit.rules.EditRuleSet(rs,
-                                                    catalog=self.controller.event_handler.catalog,
-                                                    editable=self.editable,
-                                                    controller=self.controller)
+        self.edit=EditRuleSet(rs,
+                              catalog=self.controller.event_handler.catalog,
+                              editable=self.editable,
+                              controller=self.controller)
         self.view = self.edit.get_packed_widget()
 
         scroll_win = gtk.ScrolledWindow ()
@@ -236,12 +238,12 @@ class SimpleQueryContentHandler (ContentHandler):
 
     def get_view (self, compact=False):
         """Generate a view widget to edit the ruleset."""
-        q=advene.rules.elements.Query()
+        q=Query()
         q.from_dom(domelement=self.element.model)
 
-        self.edit=advene.gui.edit.rules.EditQuery(q,
-                                                  controller=self.controller,
-                                                  editable=self.editable)
+        self.edit=EditQuery(q,
+                            controller=self.controller,
+                            editable=self.editable)
         self.view = self.edit.get_widget()
 
         scroll_win = gtk.ScrolledWindow ()
