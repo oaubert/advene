@@ -35,9 +35,8 @@ from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
 
-from advene.gui.views.interactivequery import InteractiveQuery
-from advene.gui.views.transcription import TranscriptionView
 from advene.gui.util import image_from_position, dialog
+from advene.gui.edit.create import CreateElementPopup
 import advene.util.helper as helper
 
 class Menu:
@@ -96,10 +95,10 @@ class Menu:
             mimetype='application/x-advene-ruleset'
         else:
             mimetype=None
-        cr = advene.gui.edit.create.CreateElementPopup(type_=elementtype,
-                                                       parent=parent,
-                                                       controller=self.controller,
-                                                       mimetype=mimetype)
+        cr = CreateElementPopup(type_=elementtype,
+                                parent=parent,
+                                controller=self.controller,
+                                mimetype=mimetype)
         cr.popup()
         return True
 
@@ -188,9 +187,8 @@ class Menu:
         return True
 
     def display_transcription(self, widget, annotationtype):
-        transcription = TranscriptionView(controller=self.controller,
-                                          source="here/annotationTypes/%s/annotations/sorted" % annotationtype.id)
-        transcription.popup()
+        self.controller.gui.open_adhoc_view('transcription', 
+                                            source="here/annotationTypes/%s/annotations/sorted" % annotationtype.id)
         return True
 
     def popup_get_offset(self):
@@ -229,13 +227,11 @@ class Menu:
         return True
 
     def browse_element (self, widget, el):
-        browser = advene.gui.views.browser.Browser(controller=self.controller, element=el)
-        browser.popup()
+        self.controller.gui.open_adhoc_view('browser', element=el)
         return True
 
     def query_element (self, widget, el):
-        iq = InteractiveQuery(here=el, controller=self.controller, source="here")
-        iq.popup()
+        self.controller.gui.open_adhoc_view('interactivequery', here=el, source="here")
         return True
 
     def delete_element (self, widget, el):
