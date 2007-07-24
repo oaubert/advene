@@ -424,14 +424,14 @@ class TreeWidget(AdhocView):
 
         # Drag and drop for annotations
         tree_view.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['adhoc-view']
-                          + config.data.drag_type['annotation-type']
-                          + config.data.drag_type['annotation']
-                          + config.data.drag_type['text-plain']
-                          + config.data.drag_type['TEXT']
-                          + config.data.drag_type['STRING']
-                          ,
-                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+                                  config.data.drag_type['annotation-type']
+                                  + config.data.drag_type['adhoc-view']
+                                  + config.data.drag_type['annotation']
+                                  + config.data.drag_type['text-plain']
+                                  + config.data.drag_type['TEXT']
+                                  + config.data.drag_type['STRING']
+                                  ,
+                                  gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
 
         tree_view.connect("drag_data_get", self.drag_data_get_cb)
 
