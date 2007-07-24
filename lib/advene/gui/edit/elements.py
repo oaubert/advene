@@ -50,7 +50,7 @@ from advene.gui.views.browser import Browser
 from advene.gui.views.tagbag import TagBag
 
 from advene.gui.util import dialog
-import advene.util.helper as helper
+from advene.gui.util.completer import Completer
 import advene.gui.popup
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
@@ -1210,6 +1210,9 @@ class TextContentHandler (ContentHandler):
             textview.get_buffer ().set_text (self.element.data)
             textview.connect ("key-press-event", self.key_pressed_cb)
         self.view = textview
+
+        # Hook the completer component
+        completer=Completer(textview=self.view, controller=self.controller, element=self.parent)
 
         scroll_win = gtk.ScrolledWindow ()
         scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
