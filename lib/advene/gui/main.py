@@ -80,6 +80,7 @@ import advene.util.helper as helper
 import advene.util.ElementTree as ET
 
 import advene.util.importer
+from advene.gui.util.completer import Indexer
 
 # GUI elements
 from advene.gui.util import get_small_stock_button, image_from_position, dialog
@@ -90,6 +91,7 @@ from advene.gui.views import AdhocViewParametersParser
 import advene.gui.views.timeline
 import advene.gui.views.table
 import advene.gui.views.logwindow
+import advene.gui.views.interactivequery
 from advene.gui.views.history import HistoryNavigation
 from advene.gui.edit.rules import EditRuleSet
 from advene.gui.edit.dvdselect import DVDSelect
@@ -356,6 +358,9 @@ class AdveneGUI (Connect):
                 v.update_annotation(annotation=annotation, event=event)
             except AttributeError:
                 pass
+        # Update the content indexer
+        if event.endswith('EditEnd'):
+            self.controller.package._indexer.element_update(annotation)
         return True
 
     def relation_lifecycle(self, context, parameters):
@@ -396,6 +401,11 @@ class AdveneGUI (Connect):
                 # We were editing the current STBV: take the changes
                 # into account
                 self.controller.activate_stbv(view, force=True)
+
+        # Update the content indexer
+        if event.endswith('EditEnd'):
+            self.controller.package._indexer.element_update(view)
+
         return True
 
     def query_lifecycle(self, context, parameters):
@@ -1489,23 +1499,27 @@ class AdveneGUI (Connect):
 
         @return: a boolean (~desactivation)
         """
+        p=self.controller.package
         self.log (_("Package %(uri)s loaded: %(annotations)s and %(relations)s.")
                   % {
-                'uri': self.controller.package.uri,
+                'uri': p.uri,
                 'annotations': helper.format_element_name('annotation',
-                                                          len(self.controller.package.annotations)),
+                                                          len(p.annotations)),
                 'relations': helper.format_element_name('relation',
-                                                        len(self.controller.package.relations))
+                                                        len(p.relations))
                 })
 
-        f=self.controller.package.uri
         h=config.data.preferences['history']
-        if not f in h and not f.endswith('new_pkg'):
-            h.append(f)
-            self.append_file_history_menu(f)
+        if not p.uri in h and not p.uri.endswith('new_pkg'):
+            h.append(p.uri)
+            self.append_file_history_menu(p.uri)
             # Keep the 5 last elements
             config.data.preferences['history']=h[-config.data.preferences['history-size-limit']:]
 
+        # Create the content indexer
+        p._indexer=Indexer(controller=self.controller, 
+                           package=p)
+        p._indexer.initialize()
         return True
 
     def update_window_title(self):
