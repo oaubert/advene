@@ -34,6 +34,7 @@ from advene.model.tal.context import AdveneTalesException
 from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
 
 from advene.gui.views import AdhocView
+import advene.gui.evaluator
 
 from advene.gui.views.table import AnnotationTable, GenericTable
 
