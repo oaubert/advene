@@ -224,9 +224,37 @@ class ViewBook(AdhocView):
                 print "Cannot find view ", selection.data
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            # Open a transcription view
             at=self.controller.package.annotationTypes.get(selection.data)
-            self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % at.id, destination=self.location)
+            # Propose a menu to open various views for the annotation-type:
+            menu=gtk.Menu()
+            i=gtk.MenuItem(_("Use annotation-type %s :") % self.controller.get_title(at))
+            menu.append(i)
+            for label, action in (
+                (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % at.id, destination=self.location)),
+                (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location)),
+                (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location)),
+                ):
+                i=gtk.MenuItem(label)
+                i.connect('activate', action)
+                menu.append(i)
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            return True
+        elif targetType == config.data.target_type['annotation']:
+            a=self.controller.package.annotations.get(selection.data)
+            # Propose a menu to open various views for the annotation:
+            menu=gtk.Menu()
+            i=gtk.MenuItem(_("Use annotation %s :") % self.controller.get_title(a))
+            menu.append(i)
+            for label, action in (
+                (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location)),
+                (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location)),
+                ):
+                i=gtk.MenuItem(label)
+                i.connect('activate', action)
+                menu.append(i)
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
         return False
 
@@ -243,7 +271,8 @@ class ViewBook(AdhocView):
                                gtk.DEST_DEFAULT_ALL,
                                config.data.drag_type['adhoc-view'] +
                                config.data.drag_type['adhoc-view-instance'] +
-                               config.data.drag_type['annotation-type'],
+                               config.data.drag_type['annotation-type'] +
+                               config.data.drag_type['annotation'],
                                gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
         return notebook
