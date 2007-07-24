@@ -23,7 +23,7 @@ import re
 
 import advene.rules.elements
 from advene.rules.elements import Event, Condition, ConditionList, Action, ActionList
-from advene.rules.elements import Rule, RuleSet
+from advene.rules.elements import Rule
 import advene.core.config as config
 from advene.gui.util import dialog
 
@@ -907,73 +907,3 @@ class EditAction(EditGeneric):
 
         vbox.show_all()
         return vbox
-
-if __name__ == "__main__":
-    default='default_rules.xml'
-
-    import sys
-
-    if len(sys.argv) < 2:
-        print "No name provided. Using %s." % default
-        filename=default
-    else:
-        filename=sys.argv[1]
-
-    from advene.core.controller import AdveneController
-
-    controller=Controller()
-
-    catalog=advene.rules.elements.ECACatalog()
-
-    ruleset=RuleSet()
-    if filename.endswith('.xml'):
-        ruleset.from_xml(catalog=catalog, uri=filename)
-    else:
-        ruleset.from_file(catalog=catalog, filename=filename)
-
-    w=gtk.Window(gtk.WINDOW_TOPLEVEL)
-    w.set_title("RuleSet %s" % filename)
-    w.connect ("destroy", lambda e: gtk.main_quit())
-
-    vbox=gtk.VBox()
-    vbox.set_homogeneous (False)
-    w.add(vbox)
-
-    edit=EditRuleSet(ruleset, catalog, controller=controller)
-    edit.get_widget().show()
-    vbox.add(edit.get_widget())
-
-    hb=gtk.HButtonBox()
-
-    b=gtk.Button(stock=gtk.STOCK_ADD)
-    b.connect("clicked", edit.add_rule_cb)
-    hb.pack_start(b, expand=False)
-
-    b=gtk.Button(stock=gtk.STOCK_REMOVE)
-    b.connect("clicked", edit.remove_rule_cb)
-    hb.pack_start(b, expand=False)
-
-    def save_ruleset(button):
-        f='test.xml'
-        edit.update_value()
-        print "Saving model with %d rules" % len(edit.model)
-        edit.model.to_xml(f)
-        dialog.message_dialog("The ruleset has been saved into %s." % f)
-        return True
-
-    b=gtk.Button(stock=gtk.STOCK_SAVE)
-    b.connect("clicked", save_ruleset)
-    hb.pack_start(b, expand=False)
-
-    b=gtk.Button(stock=gtk.STOCK_QUIT)
-    b.connect("clicked", lambda e: gtk.main_quit())
-    hb.pack_end(b, expand=False)
-
-    hb.show_all()
-
-    vbox.pack_start(hb, expand=False)
-    vbox.show()
-
-    w.show()
-
-    gtk.mainloop()
