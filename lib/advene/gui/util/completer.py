@@ -84,6 +84,7 @@ class Completer:
         self.widget.set_property("height-request", height)
         self.position_window(width, height)
         self.widget.show_all()
+        self.position_window(width, height)
         self.is_visible=True
         
     def get_cursor_rectangle(self):
@@ -135,10 +136,14 @@ class Completer:
         if position_y + height > window_y + window_height:
             position_y = (window_y + cursor_y) - height
         #if not_(self.__signals_are_blocked):
-        if position_y != self.widget.get_position()[1]:
-            position_x = self.widget.get_position()[0]
-        # Set the window's new position.
-        self.widget.move(position_x, position_y)
+        x, y = self.widget.get_position()
+
+        if position_y != y:
+            position_x = x
+
+        if position_x != x or position_y != y:
+            # Set the window's new position.
+            self.widget.move(position_x, position_y)
 
     def populate_model(self, completion_list):
         """Populate the view's data model.
