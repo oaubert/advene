@@ -16,30 +16,31 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 """Autocomplete feature for gtk.TextView
+
+This code is inspired and adapted from the Scribes project
+(http://scribes.sf.net/) - GPLv2
 """
 
 import gtk
 import re
 
-try:
-    from advene.model.annotation import Annotation
-    from advene.model.view import View
-except ImportError:
-    # To allow debug outside of the advene tree
-    class View: pass
-    class Annotation: pass
+from advene.model.annotation import Annotation
+from advene.model.schema import AnnotationType, RelationType
+from advene.model.query import Query
+from advene.model.view import View
 
 class Completer:
-    def __init__(self, textview=None, controller=None, element=None):
+    def __init__(self, textview=None, controller=None, element=None, indexer=None):
         self.textview=textview
         self.controller=controller
-
-        self.is_visible=False
-
+        self.indexer=indexer
         # If defined, element is the element being edited, which
         # allows to do a more precise completion search
         self.element=element
+
+        self.is_visible=False
         self.word_list=None
+
         self.widget=self.build_widget()
         self.connect()
 
@@ -183,8 +184,7 @@ class Completer:
         if word:
             if len(word) < 2:
                 return False
-            #matches=sorted(self.indexer.get_completions(word, element=self.textview.get_buffer()),
-            matches=sorted(self.element.rootPackage._indexer.get_completions(word, context=self.element),
+            matches=sorted(self.indexer.get_completions(word, context=self.element),
                            key=len)
             if matches:
                 self.populate_model(matches)
@@ -304,8 +304,7 @@ class Indexer:
         self.index={
             'views': set(),
             }
-        #self.regexp=re.compile(r'[ \n\r\t/\-\.\"\'\<\>,(){};]+')
-        self.regexp=re.compile(r'[^\w]+')
+        self.regexp=re.compile(r'[^\w\d_]+')
         self.size_limit=5
 
     def get_words(self, s):
@@ -321,6 +320,7 @@ class Indexer:
             s.update(self.get_words(v.content.data))
         s.update([ at.id for at in self.package.annotationTypes ])
         s.update([ rt.id for rt in self.package.relationTypes ])
+        s.update([ q.id for q in self.package.queries ])
         s.update([ v.id for v in self.package.views ])
 
         for at in self.package.annotationTypes:
@@ -340,6 +340,9 @@ class Indexer:
         elif isinstance(element, Annotation):
             atid=element.type.id
             s=self.index.get(atid, set())
+        elif isinstance(element, (AnnotationType, RelationType, Query)):
+            self.index['views'].add(element.id)
+            return True
         else:
             return True
         s.update(self.get_words(element.content.data))
@@ -393,8 +396,11 @@ if __name__ == "__main__":
         print "loading ", sys.argv[1]
         t.get_buffer().set_text(open(sys.argv[1]).read())
 
-    compl=Completer(t)
-    compl.indexer=Indexer()
+    i=Indexer()
+    compl=Completer(textview=t,
+                    controller=None,
+                    element=t.get_buffer(),
+                    indexer=i)
     
     window.add (t)
     window.show_all()
