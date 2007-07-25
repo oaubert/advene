@@ -422,6 +422,9 @@ class AdveneGUI (Connect):
                 v.update_query(query=query, event=event)
             except AttributeError:
                 pass
+        # Update the content indexer
+        if event.endswith('Create'):
+            self.controller.package._indexer.element_update(query)
         return True
 
     def resource_lifecycle(self, context, parameters):
@@ -475,6 +478,9 @@ class AdveneGUI (Connect):
                 pass
         # Update the current type menu
         self.update_gui()
+        # Update the content indexer
+        if event.endswith('Create'):
+            self.controller.package._indexer.element_update(at)
         return True
 
     def relationtype_lifecycle(self, context, parameters):
@@ -491,6 +497,9 @@ class AdveneGUI (Connect):
                 v.update_relationtype(relationtype=rt, event=event)
             except AttributeError:
                 pass
+        # Update the content indexer
+        if event.endswith('Create'):
+            self.controller.package._indexer.element_update(rt)
         return True
 
     def handle_element_delete(self, context, parameters):
