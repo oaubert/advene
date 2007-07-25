@@ -7,12 +7,25 @@ advene (0.24) unstable; urgency=low
   * Timeline: left click in the upper part (timestamps) sets
     the player position
 
-  * Default options for adhoc views can now be saved.
+  * Default options for adhoc views can now be saved (through the view
+    contextual menu, right-click on the view name in the tab).
   
   * The workspace (GUI layout + opened views) can be saved, either as an
     adhoc-view, or as a default workspace that will be presented on
     application startup.
   
+  * A periodic auto-save feature has been implemented. Refer to the
+    application preferences to activate it.
+  
+  * Timeline: the behaviour of double-click (goto annotation or edit
+    annotation content) can be tuned in the timeline options.
+  
+  * Drag and drop of annotations and annotation types to a viewbook
+    proposes to open appropriate views.
+  
+  * Text autocompletion is activated for textual content of annotations
+    and views.
+
   --
 
 advene (0.23) unstable; urgency=low
