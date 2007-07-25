@@ -460,15 +460,18 @@ def get_filename(title=_("Open a file"),
 
     preview_box.show_all()
 
+    def generate_alias(fname):
+        name, ext = os.path.splitext(filename)
+        al = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
+        return al
+
     def update_preview(chooser):
         filename=chooser.get_preview_filename()
         setattr(preview, '_filename', filename)
         if filename and (filename.endswith('.xml') or filename.endswith('.azp')):
             preview.set_label(_("Press to\ndisplay\ninformation"))
             if alias:
-                name, ext = os.path.splitext(filename)
-                al = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
-                alias_entry.set_text(al)
+                alias_entry.set_text(generate_alias(filename))
             chooser.set_preview_widget_active(True)
         else:
             preview.set_label(_("N/C"))
@@ -535,6 +538,10 @@ def get_filename(title=_("Open a file"),
         filename=fs.get_filename()
         if alias:
             al=alias_entry.get_text()
+            if not al:
+                # It may not have been updated, if the user typed the
+                # filename in the entry box.
+                al=generate_alias(filename)
             al = re.sub('[^a-zA-Z0-9_]', '_', al)
     fs.destroy()
 
