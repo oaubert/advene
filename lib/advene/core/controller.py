@@ -36,7 +36,6 @@ import webbrowser
 import urllib
 import StringIO
 import gobject
-import xml.sax
 
 import advene.core.config as config
 
@@ -59,6 +58,7 @@ import advene.model.tal.context
 
 import advene.util.helper as helper
 import advene.util.importer
+import advene.util.ElementTree as ET
 import advene.rules.importer
 
 if config.data.webserver['mode']:
@@ -917,16 +917,25 @@ class AdveneController:
             self.package.date = self.get_timestamp()
         elif uri.lower().endswith('.apl'):
             # Advene package list. Parse it and call 'load_package' for each package
-            package_list=PackageListHandler().parse_file(uri)
+            def tag(i):
+                return ET.QName(config.data.namespace, i)
+
+            tree=ET.parse(uri)
+            root=tree.getroot()
+            if root.tag != tag('package-list'):
+                raise Exception('Invalid XML element for session: ' + root.tag)
             default_alias=None
-            a=None
-            for u, a, d in package_list:
-                self.load_package(u, a, activate=False)
-                if d:
+            for node in root:
+                if node.tag == tag('package'):
+                    u=node.attrib['uri']
+                    a=node.attrib['alias']
+                    d=node.attrib.has_key('default')
+                    self.load_package(u, a, activate=False)
+                    if d:
+                        default_alias=a
+                if not default_alias:
+                    # If no default package was specified, use the last one
                     default_alias=a
-            if not default_alias:
-                # If no default package was specified, use the last one
-                default_alias=a
             if activate:
                 self.activate_package(default_alias)
             return
@@ -977,7 +986,7 @@ class AdveneController:
 
         self.register_package(alias, self.package)
 
-        self.notify ("PackageLoad")
+        self.notify("PackageLoad", package=self.package)
         if activate:
             self.activate_package(alias)
 
@@ -1056,7 +1065,14 @@ class AdveneController:
         else:
             self.set_media(None)
 
-        self.notify ("PackageActivate", package = self.package)
+        # Activate the default STBV
+        default_stbv = self.package.getMetaData (config.data.namespace, "default_stbv")
+        if default_stbv:
+            view=helper.get_id( self.package.views, default_stbv )
+            if view:
+                self.activate_stbv(view)
+
+        self.notify ("PackageActivate", package=self.package)
 
     def reset(self):
         """Reset all packages.
@@ -1073,22 +1089,22 @@ class AdveneController:
         Note: this does *not* save individual packages, only their
         list.
         """
-        f=open(name, 'w')
-        f.write(u"""<?xml version="1.0" encoding="UTF-8"?>
-    <advene:package-list xmlns:advene="http://liris.cnrs.fr/advene/1.0">
-    """)
+
+        def tag(i):
+            return ET.QName(config.data.namespace, i)
+
+        root=ET.Element(tag('package-list'))
         for a, p in self.packages.iteritems():
             if a == 'advene' or a == 'new_pkg':
                 # Do not write the default or template package
                 continue
+            n=ET.SubElement(root, tag('package'), uri=p.uri, alias=a)
             if a == self.current_alias:
-                default=u"""default=''"""
-            else:
-                default=u""
-            f.write(u"""<advene:package uri="%s" alias="%s" %s />
-""" % (p.uri, a, default))
-        f.write(u"""</advene:package-list>
-""")
+                n.attrib['default']=''
+
+        f=open(name, 'w')
+        helper.indent(root)
+        ET.ElementTree(root).write(f, encoding='utf-8')
         f.close()
         return True
 
@@ -1145,9 +1161,9 @@ class AdveneController:
 
         @return: a boolean (~desactivation)
         """
-
+        p=context.evaluateValue('package')
         # Check that all fragments are Millisecond fragments.
-        l = [a.id for a in self.package.annotations
+        l = [a.id for a in p.annotations
              if not isinstance (a.fragment, MillisecondFragment)]
         if l:
             self.package = None
@@ -1155,28 +1171,21 @@ class AdveneController:
             self.log (", ".join(l))
             return True
 
-        self.package.imagecache.clear ()
+        p.imagecache.clear ()
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
             # Load the imagecache
             id_ = helper.mediafile2id (mediafile)
-            self.package.imagecache.load (id_)
+            p.imagecache.load (id_)
             # Populate the missing keys
-            for a in self.package.annotations:
-                self.package.imagecache.init_value (a.fragment.begin)
-                self.package.imagecache.init_value (a.fragment.end)
-
-        # Activate the default STBV
-        default_stbv = self.package.getMetaData (config.data.namespace, "default_stbv")
-        if default_stbv:
-            view=helper.get_id( self.package.views, default_stbv )
-            if view:
-                self.activate_stbv(view)
+            for a in p.annotations:
+                p.imagecache.init_value (a.fragment.begin)
+                p.imagecache.init_value (a.fragment.end)
 
         # Handle 'auto-import' meta-attribute
-        master_uri=self.package.getMetaData(config.data.namespace, 'auto-import')
+        master_uri=p.getMetaData(config.data.namespace, 'auto-import')
         if master_uri:
-            i=[ p for p in self.package.imports if p.getUri(absolute=False) == master_uri ]
+            i=[ p for p in p.imports if p.getUri(absolute=False) == master_uri ]
             if not i:
                 self.log(_("Cannot handle master attribute, the package %s is not imported.") % master_uri)
             else:
@@ -1543,26 +1552,6 @@ class AdveneController:
         i.process_file(self.event_handler.event_history)
         self.notify("PackageActivate", package=self.package)
         return True
-
-class PackageListHandler(xml.sax.handler.ContentHandler):
-    """Parse an advene package list (.apl) file.
-    """
-    def __init__(self):
-        # self.data will contain (uri, alias, default) tuples
-        self.data=[]
- 
-    def startElement(self, name, attributes):
-        if name == "advene:package":
-            # Auto-generate the alias if needed ?
-            default=attributes.has_key('default')
-            self.data.append ( (attributes['uri'], attributes['alias'], default) )
-    
-    def parse_file(self, name):
-        p=xml.sax.make_parser()
-        p.setFeature(xml.sax.handler.feature_namespaces, False)
-        p.setContentHandler(self)
-        p.parse(name)
-        return self.data
 
 if __name__ == '__main__':
     cont = AdveneController()
