@@ -1508,7 +1508,7 @@ class AdveneGUI (Connect):
 
         @return: a boolean (~desactivation)
         """
-        p=self.controller.package
+        p=context.evaluateValue('package')
         self.log (_("Package %(uri)s loaded: %(annotations)s and %(relations)s.")
                   % {
                 'uri': p.uri,
@@ -2147,7 +2147,7 @@ class AdveneGUI (Connect):
             i.package=self.controller.package
             i.process_file('lsdvd')
             self.controller.package._modified = True
-            self.controller.notify('PackageLoad')
+            self.controller.notify('PackageLoad', package=self.controller.package)
         else:
             dialog.message_dialog(_("The associated media is not a DVD."),
                                            icon=gtk.MESSAGE_ERROR)
