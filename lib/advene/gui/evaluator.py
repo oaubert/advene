@@ -28,7 +28,7 @@ import re
 import __builtin__
 import inspect
 
-class Window:
+class Evaluator:
     """Evaluator popup window.
     """
     def __init__(self, globals_=None, locals_=None, historyfile=None):
@@ -645,10 +645,10 @@ class Window:
 
 if __name__ == "__main__":
 
-    ev=Window(globals_=globals(), locals_=locals(),
-              historyfile=os.path.join(os.getenv('HOME'),
-                                       '.pyeval.log'))
-
+    ev=Evaluator(globals_=globals(), locals_=locals(),
+                 historyfile=os.path.join(os.getenv('HOME'),
+                                          '.pyeval.log'))
+    
     ev.locals_['self']=ev
     window=ev.popup()
 

@@ -99,7 +99,7 @@ from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.merge import Merger
 from advene.gui.edit.importer import ExternalImporter
-import advene.gui.evaluator
+from advene.gui.evaluator import Evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
 import advene.gui.edit.properties
@@ -1638,15 +1638,15 @@ class AdveneGUI (Connect):
         except IndexError:
             a=None
 
-        ev=advene.gui.evaluator.Window(globals_=globals(),
-                                       locals_={'package': p,
-                                                'p': p,
-                                                'a': a,
-                                                'c': self.controller,
-                                                'gui': self,
-                                                'pp': pprint.pformat },
-                                       historyfile=config.data.advenefile('evaluator.log', 'settings')
-                                       )
+        ev=Evaluator(globals_=globals(),
+                     locals_={'package': p,
+                              'p': p,
+                              'a': a,
+                              'c': self.controller,
+                              'gui': self,
+                              'pp': pprint.pformat },
+                     historyfile=config.data.advenefile('evaluator.log', 'settings')
+                     )
         ev.locals_['self']=ev
         # Define variables referencing the opened views
         for v in self.adhoc_views:
