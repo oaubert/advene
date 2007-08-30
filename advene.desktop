@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Advene
+Comment=Annotate Digital Videos, Exchange on the Net
+Comment[fr]=Annotation de vidéos numériques
+Exec=advene
+Terminal=false
+Type=Application
+Icon=advene.png
+Categories=GTK;Application;AudioVideo
+StartupNotify=true
