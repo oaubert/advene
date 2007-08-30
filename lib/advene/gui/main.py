@@ -815,6 +815,7 @@ class AdveneGUI (Connect):
             self.controller.activate_stbv(stbv)
             return True
         self.gui.stbv_combo.connect('changed', on_stbv_combo_changed)
+        self.update_stbv_list()
 
         # Append the volume control to the toolbar
         self.audio_mute=gtk.ToggleToolButton()
