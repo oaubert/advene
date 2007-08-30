@@ -75,7 +75,7 @@ class QuickviewBar(gtk.HBox):
             c=""
         else:
             b="   " + helper.format_time(a.fragment.begin)
-            e=" - " + helper.format_time(a.fragment.end) + ": "
+            e=" - " + helper.format_time(a.fragment.end)
             c=self.controller.get_title(a)
             c += " (" + a.id + ")"
         self.annotation=a
@@ -128,6 +128,8 @@ class TimeLine(AdhocView):
             'display-relation-content': True,
             # If False, then double-click will go to the annotation position
             'edit-on-double-click': True,
+            # Put the quickview bar at the bottom of the screen
+            'quickview-at-bottom': False,
             }
         self.controller=controller
 
@@ -307,6 +309,7 @@ class TimeLine(AdhocView):
 
         self.draw_current_mark()
         self.widget = self.get_full_widget()
+        self.update_legend_widget(self.legend)
 
         def set_default_parameters(widget):
             self.fraction_adj.value=default_zoom
@@ -1870,10 +1873,11 @@ class TimeLine(AdhocView):
         toolbar.insert(ti, -1)
 
         self.statusbar=QuickviewBar(self.controller)
-        ti=gtk.ToolItem()
-        ti.add(self.statusbar)
-        ti.set_expand(True)
-        toolbar.insert(ti, -1)
+        if not self.options['quickview-at-bottom']:
+            ti=gtk.ToolItem()
+            ti.add(self.statusbar)
+            ti.set_expand(True)
+            toolbar.insert(ti, -1)
 
         if self.controller.gui:
             self.player_toolbar=self.controller.gui.get_player_control_toolbar()
@@ -1887,6 +1891,9 @@ class TimeLine(AdhocView):
         # fraction widget value
         self.fraction_event (vbox)
 
+        if self.options['quickview-at-bottom']:
+            vbox.pack_start(self.statusbar, expand=False)
+
         return vbox
 
     def get_packed_widget (self):
@@ -1896,8 +1903,6 @@ class TimeLine(AdhocView):
         hpaned = gtk.HPaned ()
 
         self.legend = gtk.Layout ()
-        self.update_legend_widget(self.legend)
-        self.legend.show_all()
 
         sw1 = gtk.ScrolledWindow ()
         sw1.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
@@ -2177,6 +2182,8 @@ class TimeLine(AdhocView):
         ew.add_checkbox(_("Relation type"), "display-relation-type", _("Display relation types"))
         ew.add_checkbox(_("Relation content"), "display-relation-content", _("Display relation content"))
         ew.add_checkbox(_("Highlight"), "highlight", _("Highlight active annotations"))
+
+        ew.add_checkbox(_("Statusbar at bottom"), "quickview-at-bottom", _("Put the status bar at the bottom of the screen"))
 
         ew.add_option(_("On double click on annotation,"), 'edit-on-double-click',
                       _("How to handle double click on annotation"),
