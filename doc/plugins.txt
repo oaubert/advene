@@ -5,6 +5,7 @@ Types of plugins
 ================
 
   * content-type handler (editor / viewer)
+  * adhoc views
   * actions
   * importers
   * global methods
@@ -32,9 +33,11 @@ components in the Advene infrastructure.
 For the moment, the following registration methods are available from
 the controller:
 
-register_content_handler(self, handler)
-register_global_method(self, method, name=None)
-register_action(self, action)
+register_content_handler(handler)
+register_global_method(method, name=None)
+register_action(action)
+register_viewclass(class)
+register_importer(importer)
 
 Example
 =======
@@ -50,3 +53,17 @@ Here is a minimal plugin to register a new global method (in TALES):
       return "TEST"
 
 You can find a real example in lib/advene/gui/plugins/actions.py
+
+Component-specific information
+==============================
+
+Adhoc-views have to inherit from advene.gui.views.AdhocView in order
+to be integrated in the Advene framework.
+
+Importers have to inherit from advene.util.importer.GenericImporter
+
+Content-type handlers have to inherit from advene.gui.edit.elements.ContentHandler
+
+Actions must be wrapped in a advene.rules.elements.RegisteredAction
+
+Global methods must respect the signature: function(context, target)
