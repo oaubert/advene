@@ -461,7 +461,7 @@ def get_filename(title=_("Open a file"),
     preview_box.show_all()
 
     def generate_alias(fname):
-        name, ext = os.path.splitext(filename)
+        name, ext = os.path.splitext(fname)
         al = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
         return al
 
