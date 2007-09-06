@@ -37,9 +37,10 @@ if subdir == 'bin' and  os.path.exists(os.path.join(maindir, "setup.py")):
 else:
   try:
     import advene.core.config as config
-  except ImportError:
+  except ImportError, e:
     print """Cannot guess a valid directory.
     Please check your installation or set the PYTHONPATH environment variable."""
+    print str(e)
     sys.exit(1)
 
 # Maybe we are running from a pyinstaller version
@@ -50,6 +51,36 @@ if not os.path.exists(config.data.path['resources']):
     # This can mean that we are in a pyinstaller version
     print "Seemingly running from a pyinstaller version in\n%s" % maindir
     config.data.fix_paths(maindir)
+  else:
+    # We can possibly be in a MacOSX .app bundle
+    d=os.path.dirname(os.path.abspath(sys.argv[0]))
+    if os.path.basename(d) == 'Resources':
+        print "Seemingly running from a .app bundle"
+        config.data.fix_paths(d)
+        executable_path_dot_dot=os.path.dirname(d)
+        print "Setting GTK_PATH to", d
+        os.environ['GTK_PATH']=d
+        os.environ['GDK_PIXBUF_MODULE_FILE']=os.path.join(d, 'gdk-pixbuf.loaders' )
+        os.environ['PANGO_RC_FILE']=os.path.join(d, 'pangorc' )
+        os.environ['FONTCONFIG_FILE']=os.path.join( d, 'fonts.conf' )
+        # Pango hack
+	os.environ['PANGO_SYSCONF_DIR']=d
+	os.environ['PANGO_LIB_DIR']=d
+        # The loader takes these environment variable into account on application load.
+        # Hence it cannot work here. This part is moved to a wrapper shell script.
+        #os.environ['DYLD_FORCE_FLAT_NAMESPACE']="1"
+        #os.environ['DYLD_INSERT_LIBRARIES']=os.path.join(d, 'libpangohack.dylib')
+
+        # Let us fix the pango.modules and pixbuf.loaders files if necessary
+        for n in ('pangorc', 'pango.modules', 'gdk-pixbuf.loaders'):
+             sname=os.path.join(d, n + '.in')
+             dname=os.path.join(d, n)
+             data=open(sname, 'r').readlines()
+             # Rewrite only if necessary
+             if [ l for l in data if '@executable_path' in l ]:
+                 print "Relocating ", n
+                 relocated=[ l.replace('@executable_path/..', executable_path_dot_dot) for l in data ]
+                 open(dname, 'w').writelines(relocated)
 
 if config.data.os == 'win32':
   import _winreg
