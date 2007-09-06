@@ -130,6 +130,9 @@ class TimeLine(AdhocView):
             'edit-on-double-click': True,
             # Put the quickview bar at the bottom of the screen
             'quickview-at-bottom': False,
+            # Delay before displaying the annotation tooltip, in ms.
+            'annotation-tooltip-delay': 2000,
+            'annotation-tooltip-activate': True,
             }
         self.controller=controller
 
@@ -161,6 +164,13 @@ class TimeLine(AdhocView):
         self.list = elements
         self.annotationtypes = annotationtypes
         self.tooltips = gtk.Tooltips()
+        # Annotation-specific tooltips, with a tunable delay
+        self.annotation_tips = gtk.Tooltips()
+        self.annotation_tips.set_delay(self.options['annotation-tooltip-delay'])
+        if self.options['annotation-tooltip-activate']:
+            self.annotation_tips.enable()
+        else:
+            self.annotation_tips.disable()
 
         self.current_marker = None
         # Now that self.list is initialized, we reuse the l variable
@@ -264,10 +274,25 @@ class TimeLine(AdhocView):
         self.layout = gtk.Layout ()
         if config.data.os == 'win32':
                 self.layout.add_events(gtk.gdk.BUTTON_PRESS_MASK)
-        #to catch mouse clics on win32
-        #self.layout.bin_window.get_colormap().alloc_color(self.colors['relations'])
+        #to catch mouse clicks on win32
         self.layout.connect('scroll_event', self.layout_scroll_cb)
         self.layout.connect('key_press_event', self.layout_key_press_cb)
+
+        # Activate/deactivate annotation tooltips on enter/leave
+        def layout_enter_cb(layout, event):
+            if self.options['annotation-tooltip-activate']:
+                self.annotation_tips.enable()
+            else:
+                self.annotation_tips.disable()
+            return False
+       
+        def layout_leave_cb(layout, event):
+            self.annotation_tips.disable()
+            return False
+        
+        self.layout.connect('enter_notify_event', layout_enter_cb)
+        self.layout.connect('leave_notify_event', layout_leave_cb)
+
         self.layout.connect('button_press_event', self.layout_button_press_cb)
         self.layout.connect('size_allocate', self.layout_resize_event)
         self.layout.connect('expose_event', self.draw_background)
@@ -703,6 +728,12 @@ class TimeLine(AdhocView):
         """
         b.update_widget()
         a=b.annotation
+        tip = _("%(id)s: %(begin)s - %(end)s\n%(content)s") % {
+            'content': a.content.data,
+            'id': a.id,
+            'begin': helper.format_time(a.fragment.begin),
+            'end': helper.format_time(a.fragment.end) }
+        self.annotation_tips.set_tip(b, tip)
         self.layout.move(b, self.unit2pixel(a.fragment.begin), self.layer_position[a.type])
         return True
 
@@ -1496,6 +1527,11 @@ class TimeLine(AdhocView):
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
             return True
+        elif event.keyval == gtk.keysyms.t:
+            # Toggle tooltips display
+            self.display_tooltips_toggle.set_active(not self.display_tooltips_toggle.get_active())
+            return True
+
         return False
 
     def layout_button_press_cb(self, widget=None, event=None):
@@ -1721,7 +1757,7 @@ class TimeLine(AdhocView):
         # Try to preserve the mouse position when zooming
         if zoom:
             self.adjustment.value=self.unit2pixel(mouse_position) - x
-        return False
+        return True
 
     def move_widget (self, widget=None):
         """Update the annotation widget position.
@@ -1932,6 +1968,7 @@ class TimeLine(AdhocView):
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
 
+        # Annotation-type selection button
         def trash_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation-type']:
                 source_uri=selection.data
@@ -1954,6 +1991,7 @@ class TimeLine(AdhocView):
                         gtk.gdk.ACTION_MOVE)
         tb.insert(b, -1)
 
+        # Relation display toggle
         def handle_toggle(b, option):
             self.options[option]=b.get_active()
             return True
@@ -1964,6 +2002,27 @@ class TimeLine(AdhocView):
         self.display_relations_toggle.connect('toggled', handle_toggle, 'display-relations')
         tb.insert(self.display_relations_toggle, -1)
 
+        # Annotation tooltip display toggle
+        def handle_tooltip_toggle(b):
+            v=b.get_active()
+            self.options['annotation-tooltip-activate']=v
+            if v:
+                self.annotation_tips.enable()
+            else:
+                self.annotation_tips.disable()
+            return True
+
+        try:
+            sid=gtk.STOCK_INFO
+        except:
+            sid=gtk.STOCK_HELP
+        self.display_tooltips_toggle=gtk.ToggleToolButton(stock_id=sid)
+        self.display_tooltips_toggle.set_tooltip(self.tooltips, _("Display tooltips for annotations (shortcut: t)"))
+        self.display_tooltips_toggle.connect('toggled', handle_tooltip_toggle)
+        self.display_tooltips_toggle.set_active(self.options['annotation-tooltip-activate'])
+        tb.insert(self.display_tooltips_toggle, -1)
+
+        # Separator
         tb.insert(gtk.SeparatorToolItem(), -1)
 
         def zoom_entry(entry):
@@ -2183,16 +2242,22 @@ class TimeLine(AdhocView):
         ew.add_checkbox(_("Relation content"), "display-relation-content", _("Display relation content"))
         ew.add_checkbox(_("Highlight"), "highlight", _("Highlight active annotations"))
 
-        ew.add_checkbox(_("Statusbar at bottom"), "quickview-at-bottom", _("Put the status bar at the bottom of the screen"))
-
         ew.add_option(_("On double click on annotation,"), 'edit-on-double-click',
                       _("How to handle double click on annotation"),
                       {
                 _("edit the annotation content"): True,
                 _("move the player to the annotation"): False
                 })
+        
+        ew.add_label(_("Annotation tooltips"))
+        ew.add_checkbox(_("Statusbar at bottom"), "quickview-at-bottom", _("Put the status bar at the bottom of the screen"))
+        ew.add_checkbox(_("Display annotation tooltips"), 'annotation-tooltip-activate', _("Display tooltips when the mouse gets over an annotation."))
+        ew.add_spin(_("Annotation tooltip delay"), "annotation-tooltip-delay", _("Delay before displaying the tooltip"), 10, 6000)
+
         res=ew.popup()
         if res:
+            self.display_tooltips_toggle.set_active(cache['annotation-tooltip-activate'])
+            self.annotation_tips.set_delay(cache['annotation-tooltip-delay'])
             self.options.update(cache)
         return True
 
