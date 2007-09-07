@@ -180,7 +180,9 @@ class AdveneGUI (Connect):
         # Resize the main window
         window=self.gui.get_widget('win')
         self.init_window_size(window, 'main')
-
+        window.set_icon_list(*[ gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'icon_advene%d.png' % size ) ))
+                                for size in (16, 32, 48, 64, 128) ])
+        
         self.tooltips = gtk.Tooltips()
 
         # Last auto-save time (in ms)
