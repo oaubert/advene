@@ -34,9 +34,19 @@ import gtk
 import pango
 from math import sqrt
 
+try:
+    import elementtree.ElementTree as ET
+except ImportError:
+    try:
+        import xml.etree.ElementTree as ET # python 2.5
+    except ImportError:
+        import advene.util.ElementTree as ET
+
 from gettext import gettext as _
 
 COLORS = [ 'red', 'green', 'blue', 'black', 'white' ]
+
+defined_shape_classes=[]
 
 class Shape:
     """The generic Shape class.
@@ -124,6 +134,20 @@ class Shape:
         @rtype: boolean
         """
         return False
+
+    def parse_svg(element, context):
+        """Parse a SVG representation.
+
+        The context object must implement a 'dimensions' method that
+        will return a (width, height) tuple corresponding to the
+        canvas size.
+
+        @param element: etree.Element to parse
+        @param context: the svg context
+        @return: an appropriate shape, or None if the class could not parse the element
+        """
+        return None
+    parse_svg=staticmethod(parse_svg)
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
@@ -316,6 +340,44 @@ class Rectangle(Shape):
                  and y >= self.y
                  and y <= self.y + self.height )
 
+    def parse_svg(element, context):
+        """Parse a SVG representation.
+
+        @param element: etree.Element to parse
+        @return: an appropriate shape, or None if the class could not parse the element
+        """
+        print "Rectangle trying to parse ", element.tag
+        if element.tag != 'rect':
+            return None
+        dimensions=None
+        # Convert numeric attributes (possibly percentage) to float
+        for n, dimindex in ( ('x', 0), 
+                             ('y', 1),
+                             ('width', 0),
+                             ('height', 1)):
+            v=element.attrib[n]
+            if v.endswith('%'):
+                # Convert it to absolute values
+                if dimensions is None:
+                    # Initialize dimensions only if necessary
+                    dimensions = context.dimensions()
+                v=float(v[:-1]) / 100 * dimensions[dimindex]
+            else:
+                v=float(v)
+            element.attrib[n]=int(v)
+
+
+        s=Rectangle(name=element.attrib.get('name', 'Rectangle'))
+        s.filled=(element.attrib['fill'] != 'none')
+        s.color=element.attrib['stroke']
+        style=element.attrib['style']
+        if style.startswith('stroke-width:'):
+            s.linewidth=int(style.replace('stroke-width:', ''))
+        for n in ('x', 'y', 'width', 'height'):
+            setattr(s, n, element.attrib[n])
+        return s
+    parse_svg=staticmethod(parse_svg)
+
     def get_svg(self, relative=False, size=None):
         if relative and size:
             pos="""x="%d%%" y="%d%%" width="%d%%" height="%d%%" """ % (
@@ -356,6 +418,39 @@ class Text(Rectangle):
                            self.y,
                            l)
         return
+
+    def parse_svg(element, context):
+        """Parse a SVG representation.
+
+        @param element: etree.Element to parse
+        @return: an appropriate shape, or None if the class could not parse the element
+        """
+        if element.tag != 'text':
+            return None
+        dimensions=None
+        # Convert numeric attributes (possibly percentage) to float
+        for n, dimindex in ( ('x', 0), 
+                             ('y', 1)):
+            v=element.attrib[n]
+            if v.endswith('%'):
+                # Convert it to absolute values
+                if dimensions is None:
+                    # Initialize dimensions only if necessary
+                    dimensions = context.dimensions()
+                v=float(v[:-1]) / 100 * dimensions[dimindex]
+            else:
+                v=float(v)
+            element.attrib[n]=int(v)
+
+        s=Text(name=element.attrib.get('name', 'Text'))
+        s.color=element.attrib['stroke']
+        style=element.attrib['style']
+        if style.startswith('stroke-width:'):
+            s.linewidth=int(style.replace('stroke-width:', ''))
+        for n in ('x', 'y'):
+            setattr(s, n, element.attrib[n])
+        return s
+    parse_svg=staticmethod(parse_svg)
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
@@ -413,9 +508,75 @@ class Line(Rectangle):
             shape.color = self.color
             shape.linewidth = self.linewidth
 
+    def control_point(self, point):
+        """If on a control point, return its coordinates (x, y) and those of the other bound, else None
+
+        This version is fitted for rectangular areas
+        """
+        x, y = point[0], point[1]
+        retval = [[None, None], [None, None]]
+        if abs(x - self.x1) <= self.tolerance:
+            retval[0][0] = self.x2
+            retval[1][0] = self.x1
+        elif abs(x - self.x2) <= self.tolerance:
+            retval[0][0] = self.x1
+            retval[1][0] = self.x2
+        else:
+            return None
+        if abs(y - self.y1) <= self.tolerance:
+            retval[0][1] = self.y2
+            retval[1][1] = self.y1
+        elif abs(y - self.y2) <= self.tolerance:
+            retval[0][1] = self.y1
+            retval[1][1] = self.y2
+        else:
+            return None
+        return retval
+
     def __contains__(self, point):
         x, y = point
-        return False
+        a=(self.y2 - self.y1) / (self.x2 - self.x1)
+        b=self.y1 - a * self.x1
+        return ( x > min(self.x1, self.x2)
+                 and x < max(self.x1, self.x2)
+                 and y > min(self.y1, self.y2)
+                 and y < max(self.y1, self.y2)
+                 and abs(y - (a * x + b)) < self.tolerance )
+
+    def parse_svg(element, context):
+        """Parse a SVG representation.
+
+        @param element: etree.Element to parse
+        @return: an appropriate shape, or None if the class could not parse the element
+        """
+        if element.tag != 'line':
+            return None
+        dimensions=None
+        # Convert numeric attributes (possibly percentage) to float
+        for n, dimindex in ( ('x1', 0), 
+                             ('y1', 1),
+                             ('x2', 0),
+                             ('y2', 1)):
+            v=element.attrib[n]
+            if v.endswith('%'):
+                # Convert it to absolute values
+                if dimensions is None:
+                    # Initialize dimensions only if necessary
+                    dimensions = context.dimensions()
+                v=float(v[:-1]) / 100 * dimensions[dimindex]
+            else:
+                v=float(v)
+            element.attrib[n]=int(v)
+
+        s=Line(name=element.attrib.get('name', 'Line'))
+        s.color=element.attrib['stroke']
+        style=element.attrib['style']
+        if style.startswith('stroke-width:'):
+            s.linewidth=int(style.replace('stroke-width:', ''))
+        for n in ('x1', 'y1', 'x2', 'y2'):
+            setattr(s, n, element.attrib[n])
+        return s
+    parse_svg=staticmethod(parse_svg)
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
@@ -472,6 +633,47 @@ class Circle(Rectangle):
         x, y = point
         d = (point[0] - self.centerx) ** 2 + (point[1] - self.centery) ** 2
         return d <= ( self.radius ** 2 )
+
+    def parse_svg(element, context):
+        """Parse a SVG representation.
+
+        @param element: etree.Element to parse
+        @return: an appropriate shape, or None if the class could not parse the element
+        """
+        if element.tag != 'circle':
+            return None
+        dimensions=None
+        # Convert numeric attributes (possibly percentage) to float
+        for n, dimindex in ( ('cx', 0), 
+                             ('cy', 1),
+                             ('r', 0) ):
+            v=element.attrib[n]
+            if v.endswith('%'):
+                # Convert it to absolute values
+                if dimensions is None:
+                    # Initialize dimensions only if necessary
+                    dimensions = context.dimensions()
+                v=float(v[:-1]) / 100 * dimensions[dimindex]
+            else:
+                v=float(v)
+            element.attrib[n]=int(v)
+
+        s=Circle(name=element.attrib.get('name', 'Circle'))
+        s.filled=(element.attrib['fill'] != 'none')
+        s.color=element.attrib['stroke']
+        style=element.attrib['style']
+        if style.startswith('stroke-width:'):
+            s.linewidth=int(style.replace('stroke-width:', ''))
+        s.centerx=element.attrib['cx']
+        s.centery=element.attrib['cy']
+        s.radius=element.attrib['r']
+        # Compute x, y, width, height values
+        s.x=s.centerx - s.radius
+        s.y=s.centery - s.radius
+        s.width=2 * s.radius
+        s.height=2 * s.radius
+        return s
+    parse_svg=staticmethod(parse_svg)
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
@@ -770,6 +972,36 @@ class ShapeDrawer:
 
         self.draw_drawable()
 
+    def get_svg(self, relative=False):
+        """Return a SVG representation.
+        """
+        # FIXME: should use ET here
+        r=[]
+        size=self.dimensions()
+        r.append( """<svg version='1' preserveAspectRatio="xMinYMin meet" viewBox='0 0 %d %d'>""" % size)
+        for o in self.objects:
+            r.append(o[0].get_svg(relative=True, size=size))
+        r.append('</svg>')
+        return "\n".join(r)
+
+    def parse_svg(self, et):
+        """Parse a SVG representation
+
+        et is an ET.Element with tag == 'svg'
+        """
+        if et.tag != 'svg':
+            print "Not a svg file"
+        for c in et:
+            print "Parsing ", c.tag
+            for clazz in defined_shape_classes:
+                o=clazz.parse_svg(c, self)
+                if o is not None:
+                    print "OK with ", clazz
+                    self.objects.append( (o, o.name) )
+                    break
+        self.plot()
+        return True
+        
 class ShapeEditor:
     """Shape Editor component.
 
@@ -879,14 +1111,25 @@ class ShapeEditor:
         control.pack_start(self.treeview, expand=False)
 
         def dump_svg(b):
-            size=(self.drawer.canvaswidth, self.drawer.canvasheight)
-            print """<svg version='1' preserveAspectRatio="xMinYMin meet" viewBox='0 0 %d %d'>""" % size
-            for o in self.drawer.objects:
-                print o[0].get_svg(relative=True, size=size)
-            print """</svg>"""
+            print self.drawer.get_svg(relative=True)
+
+        def load_svg(b):
+            fs=gtk.FileChooserDialog(title='Select a svg file',
+                                     buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK))
+            res=fs.run()
+            if res == gtk.RESPONSE_OK:
+                name=fs.get_filename()
+                root=ET.parse(name).getroot()
+                self.drawer.parse_svg(root)
+            fs.destroy()
+            return True
 
         b=gtk.Button(_("Dump SVG"))
         b.connect("clicked", dump_svg)
+        control.pack_start(b, expand=False)
+
+        b=gtk.Button(_("Load SVG"))
+        b.connect("clicked", load_svg)
         control.pack_start(b, expand=False)
 
         hbox.pack_start(control, expand=False)
@@ -915,6 +1158,10 @@ def main():
     win.show_all()
 
     gtk.main()
+
+
+# FIXME: should do some introspection ([ c for c in ??? if isinstance(c, Shape) ])
+defined_shape_classes=[ Rectangle, Circle, Text, Line ]
 
 
 # Start it all
