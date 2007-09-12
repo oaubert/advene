@@ -19,17 +19,21 @@
 from gettext import gettext as _
 
 import gtk
+import xml.parsers.expat
+import StringIO
 
 from advene.gui.edit.elements import ContentHandler
-from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle
+from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle, ShapeEditor
 from advene.gui.util import image_from_position, dialog
 from advene.gui.edit.rules import EditRuleSet, EditQuery
 from advene.rules.elements import RuleSet, Query
+import advene.util.ElementTree as ET
 
 name="Default content handlers"
 
 def register(controller=None):
-    for c in ZoneContentHandler, RuleSetContentHandler, SimpleQueryContentHandler:
+    for c in (ZoneContentHandler, SVGContentHandler, 
+              RuleSetContentHandler, SimpleQueryContentHandler):
         controller.register_content_handler(c)
 
 class ZoneContentHandler (ContentHandler):
@@ -134,6 +138,62 @@ class ZoneContentHandler (ContentHandler):
 
         return vbox
 
+class SVGContentHandler (ContentHandler):
+    """Create a SVG edit form for the given element."""
+    def can_handle(mimetype):
+        res=0
+        if mimetype == 'image/svg+xml':
+            res=80
+        return res
+    can_handle=staticmethod(can_handle)
+
+    def __init__ (self, element, controller=None, parent=None, **kw):
+        self.element = element
+        self.controller=controller
+        self.parent=parent
+        self.editable = True
+        self.fname=None
+        self.view = None
+        self.tooltips=gtk.Tooltips()
+
+    def set_editable (self, boolean):
+        self.editable = boolean
+
+    def update_element (self):
+        """Update the element fields according to the values in the view."""
+        if not self.editable:
+            return False
+        if self.view is None:
+            return True
+
+        tree=ET.ElementTree(self.view.drawer.get_svg(relative=True))
+        ET.dump(tree)
+        s=StringIO.StringIO()
+        tree.write(s, encoding='utf-8')
+        self.element.data = s.getvalue()
+        s.close()
+        return True
+
+    def get_view (self, compact=False):
+        """Generate a view widget for editing SVG."""
+        vbox=gtk.VBox()
+
+        if self.parent is not None and hasattr(self.parent, 'fragment'):
+            i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
+            self.view = ShapeEditor(background=i)
+        else:
+            self.view = ShapeEditor()
+
+        if self.element.data:
+            try:
+                root=ET.parse(self.element.stream).getroot()
+            except xml.parsers.expat.ExpatError:
+                root=None
+            if root:
+                self.view.drawer.parse_svg(root)
+
+        vbox.add(self.view.widget)
+        return vbox
 
 class RuleSetContentHandler (ContentHandler):
     """Create a RuleSet edit form for the given element (a view, presumably).
