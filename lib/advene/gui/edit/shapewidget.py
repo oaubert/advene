@@ -33,13 +33,13 @@ import pango
 from math import sqrt
 
 try:
-    import elementtree.ElementTree as ET
+    import advene.util.ElementTree as ET
 except ImportError:
     try:
-        import xml.etree.ElementTree as ET # python 2.5
+        import elementtree.ElementTree as ET
     except ImportError:
-        import advene.util.ElementTree as ET
-
+        import xml.etree.ElementTree as ET # python 2.5
+        
 from gettext import gettext as _
 
 COLORS = [ 'red', 'green', 'blue', 'black', 'white', 'gray', 'yellow' ]
@@ -1015,7 +1015,7 @@ class ShapeEditor:
 
         def load_svg(b):
             fs=gtk.FileChooserDialog(title='Select a svg file',
-                                     buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK))
+                                     buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
             res=fs.run()
             if res == gtk.RESPONSE_OK:
                 name=fs.get_filename()
