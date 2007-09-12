@@ -49,6 +49,7 @@ from advene.model.exception import AdveneException
 # Initialize ElementTree namespace map with our own prefixes
 import advene.util.ElementTree as ET
 ET._namespace_map[config.data.namespace]='advene'
+ET._namespace_map['http://www.w3.org/2000/svg']='svg'
 
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
@@ -319,6 +320,8 @@ def get_title(controller, element, representation=None):
         expr=element.type.getMetaData(config.data.namespace, "representation")
         if expr is None or expr == '' or re.match('^\s+', expr):
             r=element.content.data
+            if element.content.mimetype == 'image/svg+xml':
+                return "SVG graphics"
             if not r:
                 r=element.id
             return cleanup(r)
