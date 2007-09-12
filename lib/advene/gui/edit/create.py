@@ -106,6 +106,7 @@ class CreateElementPopup(object):
                 type_list = [ ViewType('text/plain', _("Plain text content")),
                               ViewType('application/x-advene-structured', _("Simple-structured content")),
                               ViewType('application/x-advene-zone', _("Rectangular zone content")),
+                              ViewType('image/svg+xml', _("SVG graphics content")),
                               ]
             elif self.type_ == View:
                 type_list = [ ViewType('application/x-advene-ruleset', _("Dynamic view")),
