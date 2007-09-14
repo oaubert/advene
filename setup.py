@@ -3,12 +3,26 @@
 import sys
 from distutils.core import setup
 from distutils.extension import Extension
+import os
+import string
+import re
+import sys
 
-if sys.platform == 'win32':
-    import py2exe
+# We define the main script name here (file in bin), since we have to change it for MacOS X
+SCRIPTNAME='advene'
 
-import os, string, re, sys
-
+def check_changelog(maindir, version):
+    """Check that the changelog for maindir matches the given version."""
+    f=open(os.path.join( maindir, "debian", "changelog" ), 'r')
+    l=f.readline()
+    f.close()
+    if not l.startswith('advene (' + version + ')'):
+        print "The changelog does not seem to correspond to version " + version
+        print l
+        print "Update either the changelog or the lib/advene/core/version.py file"
+        sys.exit(1)
+    return True
+           
 def get_version():
     """Get the version number of the package."""
     maindir = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -23,20 +37,47 @@ def get_version():
     check_changelog(maindir, version)
     return version
 
-def check_changelog(maindir, version):
-    """Check that the changelog for maindir matches the given version."""
-    f=open(os.path.join( maindir, "debian", "changelog" ), 'r')
-    l=f.readline()
-    f.close()
-    if not l.startswith('advene (' + version + ')'):
-        print "The changelog does not seem to correspond to version " + version
-        print l
-        print "Update either the changelog or the lib/advene/core/version.py file"
-        sys.exit(1)
-    return True
-           
-def build_doc():
-    print "Do not forget to get the user manual from the TWiki"
+_version=get_version()
+
+platform_options={}
+
+if sys.platform == 'win32':
+    import py2exe
+    platform_options['console'] = [ "bin/advene" ]
+    platform_options['options'] = {
+	"py2exe": {
+	    "includes": "pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be",
+	    "excludes": [ "Tkconstants","Tkinter","tcl" ],
+	    #         "dll_excludes": ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
+	    #                          "libgdk_pixbuf-2.0-0.dll","libgdk-win32-2.0-0.dll",
+	    #                          "libglib-2.0-0.dll","libgmodule-2.0-0.dll",
+	    #                          "libgobject-2.0-0.dll","libgthread-2.0-0.dll",
+	    #                          "libgtk-win32-2.0-0.dll","libpango-1.0-0.dll",
+	    #                          "libpangowin32-1.0-0.dll"],
+	    
+         }
+	}
+elif sys.platform == 'darwin':
+    import py2app
+    SCRIPTNAME='advene_gui.py'
+    platform_options['app'] = [ 'bin/%s' % SCRIPTNAME ]
+    platform_options['options'] = dict(py2app=dict( 
+                    iconfile='mac/Advene.icns',
+                    #includes=",".join( [ l.strip() for l in open('mac_includes.txt') ]),
+                    includes="pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be,cPickle,optparse,sets,pprint,cgi,webbrowser,xml.dom.ext.reader.PyExpat,sgmllib,zipfile,shutil,sched,imghdr,BaseHTTPServer,Cookie,ConfigParser,xmlrpclib,Queue,csv,filecmp",
+                    argv_emulation=True,
+                    site_packages=True,
+                    #resources=['resources/License.txt'],
+                    #frameworks='foo.framework',
+                    plist=dict(
+                       CFBundleName               = "Advene",
+                       CFBundleShortVersionString = _version,     # must be in X.X.X format
+                       CFBundleGetInfoString      = "Advene " + _version,
+                       CFBundleExecutable         = "Advene",
+                       CFBundleIdentifier         = "com.oaubert.advene",
+                   ),
+                 ) 
+               )
 
 def get_packages_list():
     """Recursively find packages in lib.
@@ -74,12 +115,12 @@ def generate_data_dir(dir_, prefix="", postfix=""):
     return l
 
 def generate_data_files():
-    build_doc()
     # On Win32, we will install data files in
     # \Program Files\Advene\share\...
+    # On MacOS X, it will be in Advene.app/Contents/Resources
     # On Unix, it will be
     # /usr/share/advene/...
-    if sys.platform == 'win32':
+    if sys.platform == 'win32' or sys.platform == 'darwin':
         prefix=''
         postfix=''
     else:
@@ -96,26 +137,8 @@ def generate_data_files():
 myname = "Olivier Aubert"
 myemail = "olivier.aubert@liris.cnrs.fr"
 
-if sys.platform == 'win32':
-    opts = {
-	"py2exe": {
-	    "includes": "pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be,PngImagePlugin",
-	    "excludes": [ "Tkconstants","Tkinter","tcl" ],
-	    #         "dll_excludes": ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
-	    #                          "libgdk_pixbuf-2.0-0.dll","libgdk-win32-2.0-0.dll",
-	    #                          "libglib-2.0-0.dll","libgmodule-2.0-0.dll",
-	    #                          "libgobject-2.0-0.dll","libgthread-2.0-0.dll",
-	    #                          "libgtk-win32-2.0-0.dll","libpango-1.0-0.dll",
-	    #                          "libpangowin32-1.0-0.dll"],
-	    
-         }
-	}
-else:
-    opts = {}
-
 setup (name = "advene",
-       version = get_version(),
-       options = opts,
+       version = _version,
        description = "Annotate DVds, Exchange on the NEt",
        keywords = "dvd,video,annotation",
        author = "Advene project team",
@@ -147,10 +170,8 @@ setup (name = "advene",
        
        packages = get_packages_list(),
 
-       scripts = ['bin/advene'],
+       scripts = [ 'bin/%s' % SCRIPTNAME ],
        
-       console = [ "bin/advene" ],
-
        data_files = generate_data_files(),
 
        classifiers = [
@@ -163,4 +184,6 @@ setup (name = "advene",
     'Operating System :: OS Independent',
     'Topic :: Multimedia :: Video :: Non-Linear Editor'
     ],
+ 
+    **platform_options
 )
