@@ -1,0 +1,107 @@
+#! /bin/sh
+
+# Ensure that we can access /opt
+sudo chmod 755 /opt
+
+# py2app's modulegraph uses file extensions to determine their nature. So, the fact
+# that the advene main script is without extension prevents it from determining it is python code.
+# There is a hack in the setup.py file that will use the alternate name advene_gui.py on MacOS X.
+# We cannot simply use bin/advene.py, since it would conflict with the advene/ package directory name
+# when importing
+cp bin/advene bin/advene_gui.py
+
+Basedir=./dist/Advene.app
+Frameworks=${Basedir}/Contents/Frameworks
+Resources=${Basedir}/Contents/Resources
+MacOS=${Basedir}/Contents/MacOS
+
+rm -rf build dist
+/opt/local/bin/python setup.py py2app
+
+# Add advene, simpletal and cherrypy, which do not seem to be taken into account automatically. Should investigate this...
+(cd lib ; zip -r ../dist/Advene.app/Contents/Resources/lib/python2.4/site-packages.zip  advene  simpletal cherrypy -i \*.pyc )
+# Now try to copy the necessary gtk/pango data files (etc, lib)
+
+# Let us put pango and pixbuf loader modules in the same modules directory
+mkdir -p ${Frameworks}/modules
+
+echo "Copying all Pango modules ..."
+cp -R /opt/local/lib/pango/1.6.0/modules/*.so $Frameworks/modules
+
+echo "Copying all GDK Pixbuf loaders ..."
+cp -R /opt/local/lib/gtk-2.0/2.10.0/loaders/*.so $Frameworks/modules
+
+# generate new pango.modules file
+cat > pangorc <<EOF 
+[Pango]
+ModulesPath=/opt/local/lib/pango/1.6.0/modules
+EOF
+env PANGO_RC_FILE=pangorc /opt/local/bin/pango-querymodules | sed "s?/opt/local/lib/pango/1.6.0/modules/?@executable_path/../Frameworks/modules/?" > $Resources/pango.modules.in
+rm pangorc
+
+# Generate a pangorc pointing to the relocated directory
+cat > $Resources/pangorc.in <<EOF 
+[Pango]
+ModulesPath=@executable_path/../Frameworks/modules
+EOF
+
+# Let's play with pango...
+# Compile libpangohack
+(cd mac ; gcc -o libpangohack.dylib -dynamiclib pangohack.c -Wl,-v -Wall )
+if [ ! -f mac/libpangohack.dylib ]
+then
+  echo "Problem while compiling pangohack"
+  exit 1
+fi
+cp mac/libpangohack.dylib $Resources
+
+# Copy the fonts.conf file
+cp /etc/fonts/fonts.conf $Resources/fonts.conf
+
+# Remove any reference to Verdana, since it makes Pango unusable
+perl -pi -e 's/.*verdana.*//i' $Resources/fonts.conf
+
+# generate a new GDK pixbufs loaders file
+sed "s?/opt/local/lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?" < /opt/local/etc/gtk-2.0/gdk-pixbuf.loaders > $Resources/gdk-pixbuf.loaders.in
+
+echo "Fixing library names ..."
+# fix the libraries we include
+for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so ; do
+    # skip symlinks
+    if test ! -L $dylib ; then
+	
+	# change all the dependencies
+
+	changes=""
+	for lib in `otool -L $dylib | egrep "(/opt/local|/local/|libs/)" | awk '{print $1}'` ; do
+	    base=`basename $lib`
+	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	done
+
+	if test "x$changes" != x ; then
+	    if  install_name_tool $changes $dylib ; then
+		:
+	    else
+                echo "Error for $dylib"
+		#exit 1
+	    fi
+	fi
+
+	# now the change what the library thinks its own name is
+
+	base=`basename $dylib`
+	install_name_tool -id @executable_path/../Frameworks/$base $dylib
+    fi
+done
+
+# Copy french gtk2.0 locale
+cp -r /opt/local/share/locale/fr/LC_MESSAGES/*.mo ${Resources}/locale/fr/LC_MESSAGES
+
+# Use the shell wrapper (for the pangohack)
+mv ${MacOS}/Advene ${MacOS}/Advene.bin
+cp mac/Advene.wrapper ${MacOS}/Advene
+chmod 755 ${MacOS}/Advene
+
+# Hide the /opt directory, to make sure that we do not reuse something from there inadvertently
+sudo chmod 000 /opt
+

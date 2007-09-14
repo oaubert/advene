@@ -1,0 +1,5 @@
+#! /bin/sh
+
+VERNUM=0.24.2
+
+/usr/bin/hdiutil create -fs HFS+ -format UDZO -imagekey zlib-level=9 -srcfolder dist/Advene.app  -volname Advene-${VERNUM} Advene-${VERNUM}.dmg

@@ -1,0 +1,3 @@
+* VLC: bien verifier que dans libtool, shrext_cmds n'a pas ete substitue par shrext (cf extra/contrib/src/Makefile, faad)
+
+* Suite a MAJ pango/cairo: pb avec la fonte Verdana. On supprime sa reference dans fonts.conf, mais faudrait verifier de temps a autre si c'est encore necessaire

@@ -1,0 +1,19 @@
+#! /bin/sh
+
+exec > /tmp/advene.log 2>&1
+
+echo "Advene.app started at "  `date` " on " `uname -a`
+X11APP=/Applications/Utilities/X11.app
+if [ ! -x $X11APP ]
+then
+   osascript -e 'tell application "Finder" to display dialog "No X11 server found. Please install it from the MacOS X install disc, package System/Installation/Packages/X11User.pkg"'
+   exit 0
+fi
+
+open $X11APP
+
+d=`dirname "$0"`
+parent=`dirname "$d"`
+# Ensure that we get an absolute path
+abspath=`(cd "$parent" ; pwd)`
+DISPLAY=localhost:0 DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_INSERT_LIBRARIES="${parent}/Resources/libpangohack.dylib" exec ${d}/Advene.bin $@
