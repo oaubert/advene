@@ -155,7 +155,7 @@ class TimeLine(AdhocView):
                 # Override a potentially existing value of elements
                 elements=c.evaluateValue(v)
             elif n == 'position':
-                default_position=long(v)
+                default_position=int(float(v))
             elif n == 'zoom':
                 default_zoom=float(v)
         if ats:
