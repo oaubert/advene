@@ -208,7 +208,7 @@ class EditElementPopup (object):
     def popup(self, *p, **kw):
         return self.edit(*p, **kw)
 
-    def edit (self, callback=None, modal=False):
+    def edit (self, callback=None, modal=False, label=None):
         """Display the edit window.
         """
         if hasattr(self, 'window') and self.window:
