@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-09-10 12:37+0200\n"
-"PO-Revision-Date: 2007-09-10 12:52+0200\n"
+"POT-Creation-Date: 2007-09-13 19:38+0200\n"
+"PO-Revision-Date: 2007-09-13 19:38+0200\n"
 "Last-Translator: Olivier Aubert <olivier.aubert@liris.cnrs.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
 "MIME-Version: 1.0\n"
@@ -97,24 +97,24 @@ msgstr "Édition"
 msgid "Create"
 msgstr "Créer"
 
-#: ../share/advene.glade:329 ../lib/advene/util/helper.py:345
+#: ../share/advene.glade:329 ../lib/advene/util/helper.py:348
 msgid "Schema"
 msgstr "Schéma"
 
-#: ../share/advene.glade:338 ../lib/advene/util/helper.py:348
+#: ../share/advene.glade:338 ../lib/advene/util/helper.py:351
 msgid "View"
 msgstr "Vue"
 
 #: ../share/advene.glade:347 ../lib/advene/gui/popup.py:369
-#: ../lib/advene/util/helper.py:349
+#: ../lib/advene/util/helper.py:352
 msgid "Query"
 msgstr "Requête"
 
-#: ../share/advene.glade:356 ../lib/advene/util/helper.py:346
+#: ../share/advene.glade:356 ../lib/advene/util/helper.py:349
 msgid "Annotation Type"
 msgstr "Type d'Annotation"
 
-#: ../share/advene.glade:365 ../lib/advene/util/helper.py:347
+#: ../share/advene.glade:365 ../lib/advene/util/helper.py:350
 msgid "Relation Type"
 msgstr "Type de Relation"
 
@@ -2403,12 +2403,12 @@ msgstr "Impossible d'écrire dans %(filename)s : %(error)s"
 msgid "Transcription saved to %s"
 msgstr "Transcription sauvegardée dans %s"
 
-#: ../lib/advene/gui/plugins/contenthandlers.py:125
+#: ../lib/advene/gui/plugins/contenthandlers.py:129
 msgid "Label"
 msgstr "Label"
 
-#: ../lib/advene/gui/plugins/contenthandlers.py:162
-#: ../lib/advene/gui/plugins/contenthandlers.py:218
+#: ../lib/advene/gui/plugins/contenthandlers.py:222
+#: ../lib/advene/gui/plugins/contenthandlers.py:278
 #: ../lib/advene/gui/edit/rules.py:152
 #, python-format
 msgid ""
@@ -2830,7 +2830,7 @@ msgid "No title"
 msgstr "Pas de titre"
 
 #: ../lib/advene/gui/edit/properties.py:30
-#: ../lib/advene/gui/edit/shapewidget.py:668
+#: ../lib/advene/gui/edit/shapewidget.py:773
 msgid "Properties"
 msgstr "Propriétés"
 
@@ -2867,62 +2867,66 @@ msgstr ""
 msgid "Chapter"
 msgstr "Chapître"
 
-#: ../lib/advene/gui/edit/shapewidget.py:58
+#: ../lib/advene/gui/edit/shapewidget.py:68
 msgid "Generic shape"
 msgstr "Forme générique"
 
-#: ../lib/advene/gui/edit/shapewidget.py:174
+#: ../lib/advene/gui/edit/shapewidget.py:257
 #: ../lib/advene/gui/util/dialog.py:682
 msgid "Name"
 msgstr "Nom"
 
-#: ../lib/advene/gui/edit/shapewidget.py:185
+#: ../lib/advene/gui/edit/shapewidget.py:268
 #: ../lib/advene/gui/edit/elements.py:664
 #: ../lib/advene/gui/edit/elements.py:728
 #: ../lib/advene/gui/edit/elements.py:795
 msgid "Color"
 msgstr "Couleur"
 
-#: ../lib/advene/gui/edit/shapewidget.py:192
+#: ../lib/advene/gui/edit/shapewidget.py:275
 msgid "Linewidth"
 msgstr "Largeur de trait"
 
-#: ../lib/advene/gui/edit/shapewidget.py:197
+#: ../lib/advene/gui/edit/shapewidget.py:280
 msgid "Filled"
 msgstr "Rempli"
 
-#: ../lib/advene/gui/edit/shapewidget.py:212
+#: ../lib/advene/gui/edit/shapewidget.py:295
 #, python-format
 msgid "Properties of %s"
 msgstr "Propriétés de %s"
 
-#: ../lib/advene/gui/edit/shapewidget.py:250
+#: ../lib/advene/gui/edit/shapewidget.py:333
 msgid "Rectangle"
 msgstr "Rectangle"
 
-#: ../lib/advene/gui/edit/shapewidget.py:344
+#: ../lib/advene/gui/edit/shapewidget.py:414
 msgid "Text"
 msgstr "Texte"
 
-#: ../lib/advene/gui/edit/shapewidget.py:378
+#: ../lib/advene/gui/edit/shapewidget.py:465
 msgid "Line"
 msgstr "Ligne"
 
-#: ../lib/advene/gui/edit/shapewidget.py:447
+#: ../lib/advene/gui/edit/shapewidget.py:553
 msgid "Circle"
 msgstr "Cercle"
 
-#: ../lib/advene/gui/edit/shapewidget.py:667 ../lib/advene/gui/popup.py:375
+#: ../lib/advene/gui/edit/shapewidget.py:772 ../lib/advene/gui/popup.py:375
 msgid "Delete"
 msgstr "Supprimer"
 
-#: ../lib/advene/gui/edit/shapewidget.py:669
+#: ../lib/advene/gui/edit/shapewidget.py:774
 msgid "SVG"
 msgstr "SVG"
 
-#: ../lib/advene/gui/edit/shapewidget.py:888
+#: ../lib/advene/gui/edit/shapewidget.py:1028
 msgid "Dump SVG"
 msgstr "Afficher le SVG"
+
+#: ../lib/advene/gui/edit/shapewidget.py:1032
+msgid "Load SVG"
+msgstr "Charger un fichier SVG"
 
 #: ../lib/advene/gui/edit/montage.py:38
 msgid "Montage"
@@ -3272,52 +3276,56 @@ msgstr "Contenu simplement structuré"
 msgid "Rectangular zone content"
 msgstr "Contenu de zone rectangulaire"
 
-#: ../lib/advene/gui/edit/create.py:111
+#: ../lib/advene/gui/edit/create.py:109
+msgid "SVG graphics content"
+msgstr "Contenu graphique SVG"
+
+#: ../lib/advene/gui/edit/create.py:112
 msgid "Dynamic view"
 msgstr "Vue dynamique"
 
-#: ../lib/advene/gui/edit/create.py:112
+#: ../lib/advene/gui/edit/create.py:113
 msgid "HTML template"
 msgstr "Modèle HTML"
 
-#: ../lib/advene/gui/edit/create.py:113
+#: ../lib/advene/gui/edit/create.py:114
 msgid "Plain XML"
 msgstr "Modèle XML"
 
-#: ../lib/advene/gui/edit/create.py:114
+#: ../lib/advene/gui/edit/create.py:115
 msgid "SVG template"
 msgstr "Modèle SVG"
 
-#: ../lib/advene/gui/edit/create.py:115
+#: ../lib/advene/gui/edit/create.py:116
 msgid "Plain text template"
 msgstr "Modèle de texte simple"
 
-#: ../lib/advene/gui/edit/create.py:118
+#: ../lib/advene/gui/edit/create.py:119
 msgid "Simple query"
 msgstr "Requête simple"
 
-#: ../lib/advene/gui/edit/create.py:119
+#: ../lib/advene/gui/edit/create.py:120
 msgid "SPARQL query"
 msgstr "Requête SPARQL"
 
-#: ../lib/advene/gui/edit/create.py:121
+#: ../lib/advene/gui/edit/create.py:122
 msgid "Directory"
 msgstr "Répertoire"
 
-#: ../lib/advene/gui/edit/create.py:123 ../lib/advene/util/helper.py:351
+#: ../lib/advene/gui/edit/create.py:124 ../lib/advene/util/helper.py:354
 msgid "Resource File"
 msgstr "Fichier de ressource"
 
-#: ../lib/advene/gui/edit/create.py:125
+#: ../lib/advene/gui/edit/create.py:126
 #, python-format
 msgid "Error in advene.gui.edit.create.build_widget: invalid type %s"
 msgstr "Erreur dans advene.gui.edit.create.build_widget: type non valide %s"
 
-#: ../lib/advene/gui/edit/create.py:129
+#: ../lib/advene/gui/edit/create.py:130
 msgid "No available type."
 msgstr "Pas de type disponible."
 
-#: ../lib/advene/gui/edit/create.py:173
+#: ../lib/advene/gui/edit/create.py:174
 #, python-format
 msgid ""
 "The identifier %s is not valid.\n"
@@ -3328,20 +3336,20 @@ msgstr ""
 "Il doit être composé de caractères alphabétiques non-accentués.\n"
 "Le souligné (_) est autorisé."
 
-#: ../lib/advene/gui/edit/create.py:178
+#: ../lib/advene/gui/edit/create.py:179
 #, python-format
 msgid "The identifier %s is already defined."
 msgstr "L'identificateur %s est déjà défini."
 
-#: ../lib/advene/gui/edit/create.py:247 ../lib/advene/gui/edit/rules.py:119
+#: ../lib/advene/gui/edit/create.py:248 ../lib/advene/gui/edit/rules.py:119
 msgid "New rule"
 msgstr "Nouvelle règle"
 
-#: ../lib/advene/gui/edit/create.py:266 ../lib/advene/gui/edit/create.py:281
+#: ../lib/advene/gui/edit/create.py:267 ../lib/advene/gui/edit/create.py:282
 msgid "Error: bad invocation of CreateElementPopup"
 msgstr "Erreur: mauvaise invocation de CreateElementPopup"
 
-#: ../lib/advene/gui/edit/create.py:303
+#: ../lib/advene/gui/edit/create.py:304
 msgid "New resource data"
 msgstr "Nouvelle ressource"
 
@@ -3429,7 +3437,7 @@ msgstr "Élément"
 msgid "All"
 msgstr "Tout"
 
-#: ../lib/advene/gui/edit/merge.py:275 ../lib/advene/util/helper.py:303
+#: ../lib/advene/gui/edit/merge.py:275 ../lib/advene/util/helper.py:304
 msgid "None"
 msgstr "Aucun"
 
@@ -3598,7 +3606,8 @@ msgid ""
 "Left click to launch the search, right-click to set the quicksearch options"
 msgstr ""
 "Recherche sur %s.\n"
-"Clic gauche pour lancer la recherche, click droit pour régler les options de recherche"
+"Clic gauche pour lancer la recherche, click droit pour régler les options de "
+"recherche"
 
 #: ../lib/advene/gui/main.py:282
 msgid "Ignore case"
@@ -4728,7 +4737,7 @@ msgid "List of elements of type %s"
 msgstr "Liste d'éléments du type %s"
 
 #: ../lib/advene/model/zippackage.py:179 ../lib/advene/model/zippackage.py:181
-#: ../lib/advene/util/helper.py:475 ../lib/advene/util/helper.py:477
+#: ../lib/advene/util/helper.py:478 ../lib/advene/util/helper.py:480
 #, python-format
 msgid "File %s is not an Advene zip package."
 msgstr "Le fichier %s n'est pas un recueil Advene compressé."
@@ -5162,40 +5171,40 @@ msgstr "Impossible de trouver la vue dynamique %s"
 msgid "The set_rate method is unavailable."
 msgstr "La méthode set_rate n'est pas disponible"
 
-#: ../lib/advene/util/helper.py:342
+#: ../lib/advene/util/helper.py:345
 msgid "Package"
 msgstr "Recueil"
 
-#: ../lib/advene/util/helper.py:343
+#: ../lib/advene/util/helper.py:346
 msgid "Annotation"
 msgstr "Annotation"
 
-#: ../lib/advene/util/helper.py:344
+#: ../lib/advene/util/helper.py:347
 msgid "Relation"
 msgstr "Relation"
 
-#: ../lib/advene/util/helper.py:350
+#: ../lib/advene/util/helper.py:353
 msgid "Resource Folder"
 msgstr "Répertoire de ressources"
 
-#: ../lib/advene/util/helper.py:386
+#: ../lib/advene/util/helper.py:389
 msgid "---- Elements ----"
 msgstr "---- Éléments ----"
 
-#: ../lib/advene/util/helper.py:392
+#: ../lib/advene/util/helper.py:395
 msgid "---- Attributes ----"
 msgstr "---- Attributs ----"
 
-#: ../lib/advene/util/helper.py:395
+#: ../lib/advene/util/helper.py:398
 msgid "---- Methods ----"
 msgstr "---- Méthodes ----"
 
-#: ../lib/advene/util/helper.py:468
+#: ../lib/advene/util/helper.py:471
 #, python-format
 msgid "Cannot read %(filename)s: %(error)s"
 msgstr "Impossible de lire %(filename)s : %(error)s"
 
-#: ../lib/advene/util/helper.py:492
+#: ../lib/advene/util/helper.py:495
 #, python-format
 msgid ""
 "Error:\n"
@@ -5204,7 +5213,7 @@ msgstr ""
 "Erreur :\n"
 "%s"
 
-#: ../lib/advene/util/helper.py:502
+#: ../lib/advene/util/helper.py:505
 #, python-format
 msgid ""
 "Package %(title)s:\n"
@@ -5227,81 +5236,81 @@ msgstr ""
 "Description:\n"
 "%(description)s\n"
 
-#: ../lib/advene/util/helper.py:525
+#: ../lib/advene/util/helper.py:528
 msgid "schema"
 msgstr "schéma"
 
-#: ../lib/advene/util/helper.py:525
+#: ../lib/advene/util/helper.py:528
 msgid "schemas"
 msgstr "schémas"
 
-#: ../lib/advene/util/helper.py:526
+#: ../lib/advene/util/helper.py:529
 msgid "annotation"
 msgstr "annotation"
 
-#: ../lib/advene/util/helper.py:526
+#: ../lib/advene/util/helper.py:529
 msgid "annotations"
 msgstr "annotations"
 
-#: ../lib/advene/util/helper.py:527 ../lib/advene/util/helper.py:528
+#: ../lib/advene/util/helper.py:530 ../lib/advene/util/helper.py:531
 msgid "annotation type"
 msgstr "type d'annotation"
 
-#: ../lib/advene/util/helper.py:527 ../lib/advene/util/helper.py:528
+#: ../lib/advene/util/helper.py:530 ../lib/advene/util/helper.py:531
 msgid "annotation types"
 msgstr "types d'annotation"
 
-#: ../lib/advene/util/helper.py:529
+#: ../lib/advene/util/helper.py:532
 msgid "relation"
 msgstr "relation"
 
-#: ../lib/advene/util/helper.py:529
+#: ../lib/advene/util/helper.py:532
 msgid "relations"
 msgstr "relations"
 
-#: ../lib/advene/util/helper.py:530 ../lib/advene/util/helper.py:531
+#: ../lib/advene/util/helper.py:533 ../lib/advene/util/helper.py:534
 msgid "relation type"
 msgstr "type de relation"
 
-#: ../lib/advene/util/helper.py:530 ../lib/advene/util/helper.py:531
+#: ../lib/advene/util/helper.py:533 ../lib/advene/util/helper.py:534
 msgid "relation types"
 msgstr "types de relation"
 
-#: ../lib/advene/util/helper.py:532
+#: ../lib/advene/util/helper.py:535
 msgid "query"
 msgstr "requête"
 
-#: ../lib/advene/util/helper.py:532
+#: ../lib/advene/util/helper.py:535
 msgid "queries"
 msgstr "requêtes"
 
-#: ../lib/advene/util/helper.py:533
+#: ../lib/advene/util/helper.py:536
 msgid "view"
 msgstr "vue"
 
-#: ../lib/advene/util/helper.py:533
+#: ../lib/advene/util/helper.py:536
 msgid "views"
 msgstr "vues"
 
-#: ../lib/advene/util/helper.py:534
+#: ../lib/advene/util/helper.py:537
 msgid "package"
 msgstr "recueil"
 
-#: ../lib/advene/util/helper.py:534
+#: ../lib/advene/util/helper.py:537
 msgid "packages"
 msgstr "recueils"
 
-#: ../lib/advene/util/helper.py:546
+#: ../lib/advene/util/helper.py:549
 #, python-format
 msgid "No %s"
 msgstr "Pas de %s"
 
-#: ../lib/advene/util/helper.py:548
+#: ../lib/advene/util/helper.py:551
 #, python-format
 msgid "1 %s"
 msgstr "1 %s"
 
-#: ../lib/advene/util/helper.py:550
+#: ../lib/advene/util/helper.py:553
 #, python-format
 msgid "%(count)d %(plural)s"
 msgstr "%(count)d %(plural)s"
