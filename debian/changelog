@@ -17,14 +17,21 @@ advene (0.24) unstable; urgency=low
   * A periodic auto-save feature has been implemented. Refer to the
     application preferences to activate it.
   
-  * Timeline: the behaviour of double-click (goto annotation or edit
-    annotation content) can be tuned in the timeline options.
+  * Timeline: 
+
+      * the behaviour of double-click (goto annotation or edit annotation
+        content) can be tuned in the timeline options.
+  
+      * annotations tooltips are re-enabled
   
   * Drag and drop of annotations and annotation types to a viewbook
     proposes to open appropriate views.
   
   * Text autocompletion is activated for textual content of annotations
     and views.
+
+  * New proposed mimetype for annotations: image/svg+xml. The graphical
+    editor has been extended to load/parse a subset of SVG.
 
   --
 
