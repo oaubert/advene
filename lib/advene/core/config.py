@@ -479,7 +479,8 @@ class Config(object):
                 value, type_id = _winreg.QueryValueEx(reg, name)
                 _winreg.CloseKey(reg)
             except _winreg.error:
-                value=None
+                #value=None
+		pass
         return value
 
     def register_content_handler(self, handler):
