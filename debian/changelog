@@ -33,7 +33,7 @@ advene (0.24) unstable; urgency=low
   * New proposed mimetype for annotations: image/svg+xml. The graphical
     editor has been extended to load/parse a subset of SVG.
 
-  --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 19 Sep 2007 15:21:00 +0200
 
 advene (0.23) unstable; urgency=low
   
