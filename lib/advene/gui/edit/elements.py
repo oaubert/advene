@@ -1082,6 +1082,12 @@ class TextContentHandler (ContentHandler):
         browser.popup()
         return True
 
+    def content_set(self, c):
+        b=self.view.get_buffer()
+        b.delete(*b.get_bounds ())
+        b.set_text(c)
+        return True
+        
     def content_reload(self, b=None):
         self.content_open(fname=self.fname)
         return True
@@ -1097,9 +1103,7 @@ class TextContentHandler (ContentHandler):
                     _("Cannot read the data:\n%s") % unicode(e),
                     icon=gtk.MESSAGE_ERROR)
                 return True
-            b=self.view.get_buffer()
-            b.delete(*b.get_bounds ())
-            b.set_text("".join(f.readlines()))
+            self.content_set("".join(f.readlines()))
             f.close()
             self.fname=fname
         return True
@@ -1207,7 +1211,7 @@ class TextContentHandler (ContentHandler):
             textview = gtk.TextView ()
             textview.set_editable (self.editable)
             textview.set_wrap_mode (gtk.WRAP_CHAR)
-            textview.get_buffer ().set_text (self.element.data)
+            self.content_set(self.element.data)
             textview.connect ("key-press-event", self.key_pressed_cb)
         self.view = textview
 
