@@ -26,6 +26,7 @@
 
 FIXME: correctly implement text shape
 FIXME: when parsing SVG, allow a relative option to scale absolute values wrt. SVG-specified canvas size/current canvas size
+FIXME: XML load/dump should try to preserve unhandled information (especially TAL instructions)
 """
 
 import gtk
@@ -663,9 +664,12 @@ class ShapeDrawer:
             p=self.background.get_pixbuf()
             w=p.get_width()
             h=p.get_height()
-            self.widget.set_size_request(w, h)
             self.canvaswidth=w
             self.canvasheight=h
+        else:
+            self.canvaswidth=320
+            self.canvasheight=200
+        self.widget.set_size_request(self.canvaswidth, self.canvasheight)
 
     def default_callback(self, rectangle):
         """Default callback.
@@ -699,6 +703,13 @@ class ShapeDrawer:
         if i is not None:
             self.objects.remove( i )
         self.plot()
+
+    def clear_objects(self):
+        """Remove all objects from the list.
+        """
+        self.objects.clear()
+        self.plot()
+        return True
 
     def dimensions(self):
         """Return the canvas dimensions.
@@ -849,6 +860,9 @@ class ShapeDrawer:
 
     def draw_drawable(self):
         """Render the pixmap in the drawingarea."""
+        if self.widget.window is None:
+            # The widget may not be realized, in which case simply return
+            return
         x, y, w, h = self.widget.get_allocation()
         self.widget.window.draw_drawable(self.widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, 0, 0, 0, 0, w, h)
 
