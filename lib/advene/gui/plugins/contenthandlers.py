@@ -22,7 +22,7 @@ import gtk
 import xml.parsers.expat
 import StringIO
 
-from advene.gui.edit.elements import ContentHandler
+from advene.gui.edit.elements import ContentHandler, TextContentHandler
 from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle, ShapeEditor
 from advene.gui.util import image_from_position, dialog
 from advene.gui.edit.rules import EditRuleSet, EditQuery
@@ -154,15 +154,34 @@ class SVGContentHandler (ContentHandler):
         self.editable = True
         self.fname=None
         self.view = None
+        self.sourceview=None
+        self.editing_source=False
         self.tooltips=gtk.Tooltips()
 
     def set_editable (self, boolean):
         self.editable = boolean
+        if self.sourceview:
+            self.sourceview.set_editable(boolean)
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if not self.editable:
             return False
+
+        if self.editing_source:
+            self.sourceview.update_element()
+            # We applied our modifications to the XML source, so
+            # parse the source again in the SVG editor
+            if self.element.data:
+                try:
+                    root=ET.parse(self.element.stream).getroot()
+                except xml.parsers.expat.ExpatError:
+                    root=None
+                if root:
+                    self.view.drawer.clear_objects()
+                    self.view.drawer.parse_svg(root)
+            return True
+
         if self.view is None:
             return True
 
@@ -172,6 +191,9 @@ class SVGContentHandler (ContentHandler):
         tree.write(s, encoding='utf-8')
         self.element.data = s.getvalue()
         s.close()
+        # Update the XML source representation
+        if self.sourceview is not None:
+            self.sourceview.content_set(self.element.data)
         return True
 
     def get_view (self, compact=False):
@@ -192,7 +214,35 @@ class SVGContentHandler (ContentHandler):
             if root:
                 self.view.drawer.parse_svg(root)
 
-        vbox.add(self.view.widget)
+        def edit_svg(b):
+            vbox.foreach(vbox.remove)
+            vbox.add(self.view.widget)
+
+            b=gtk.Button(_("Edit XML"))
+            b.connect('clicked', edit_xml)
+            vbox.pack_start(b, expand=False)
+            self.editing_source=False
+            vbox.show_all()
+            return True
+            
+        def edit_xml(b):
+            if self.sourceview is None:
+                self.sourceview=TextContentHandler(element=self.element,
+                                                   controller=self.controller,
+                                                   parent=self.parent)
+                self.sourceview.widget=self.sourceview.get_view()
+
+            vbox.foreach(vbox.remove)
+            vbox.add(self.sourceview.widget)
+
+            b=gtk.Button(_("Graphical editor"))
+            b.connect('clicked', edit_svg)
+            vbox.pack_start(b, expand=False)
+            self.editing_source=True
+            vbox.show_all()
+            return True
+
+        edit_svg(None)
         return vbox
 
 class RuleSetContentHandler (ContentHandler):
