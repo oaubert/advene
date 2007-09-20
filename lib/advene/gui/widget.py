@@ -274,7 +274,12 @@ class AnnotationWidget(GenericColorButtonWidget):
         #     c.rel_line_to(-(bwidth-8), 0)
         #     c.rel_line_to(0, -4)
         #     c.close_path()
-        context.rectangle(0, 0, width, height)
+        try:
+            context.rectangle(0, 0, width, height)
+        except MemoryError:
+            print "MemoryError when rendering rectangle for annotation ", self.annotation.id
+            return
+
         if self.local_color is not None:
             color=self.local_color
         else:
@@ -307,7 +312,10 @@ class AnnotationWidget(GenericColorButtonWidget):
 
         context.set_source_rgba(0, 0, 0, 1)
         title=unicode(self.controller.get_title(self.annotation))
-        context.show_text(title.encode('utf8'))
+        try:
+            context.show_text(title.encode('utf8'))
+        except MemoryError:
+            print "MemoryError while rendering title for annotation ", self.annotation.id
 
 class AnnotationTypeWidget(GenericColorButtonWidget):
     """ Widget representing an annotation type
