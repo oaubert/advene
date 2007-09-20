@@ -1211,7 +1211,7 @@ class TextContentHandler (ContentHandler):
             textview = gtk.TextView ()
             textview.set_editable (self.editable)
             textview.set_wrap_mode (gtk.WRAP_CHAR)
-            self.content_set(self.element.data)
+            textview.get_buffer().set_text(self.element.data)
             textview.connect ("key-press-event", self.key_pressed_cb)
         self.view = textview
 
