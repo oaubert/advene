@@ -19,5 +19,5 @@
 """
 
 version='0.24'
-date='20070917'
+date='20070920'
 major,minor=[ long(s) for s in version.split('.') ]
