@@ -533,6 +533,10 @@ class Line(Rectangle):
 
     def __contains__(self, point):
         x, y = point
+        if (self.x2 - self.x1) == 0:
+            return (y > min(self.y1, self.y2)
+                 and y < max(self.y1, self.y2)
+                 and abs(x - self.x1) < self.tolerance )
         a=1.0 * (self.y2 - self.y1) / (self.x2 - self.x1)
         b=self.y1 - a * self.x1
         return ( x > min(self.x1, self.x2)
@@ -932,6 +936,8 @@ class ShapeEditor:
         self.widget=self.build_widget()
 
     def callback(self, l):
+        if l[0][0] is None or l[1][0] is None:
+            return
         r = self.drawer.shape_class()
         r.name = r.SHAPENAME + str(l)
         r.color = self.defaultcolor
