@@ -39,6 +39,7 @@ from gettext import gettext as _
 from advene.gui.views import AdhocView
 from advene.gui.util import dialog, image_from_position
 import advene.gui.edit.properties
+from advene.gui.util.completer import Completer
 
 class TranscriptionImporter(advene.util.importer.GenericImporter):
     """Transcription importer.
@@ -139,6 +140,12 @@ class TranscriptionEdit(AdhocView):
         
         self.textview.connect("button-press-event", self.button_press_event_cb)
         self.textview.connect("key-press-event", self.key_pressed_cb)
+
+        # Hook the completer component
+        completer=Completer(textview=self.textview, 
+                            controller=self.controller, 
+                            element=self.textview.get_buffer(),
+                            indexer=self.controller.package._indexer)
 
         sw.add_with_viewport (self.textview)
 
