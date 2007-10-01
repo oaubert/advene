@@ -317,6 +317,9 @@ class TimeLine(AdhocView):
         self.selected_position = 0
         self.selection_marker = None
 
+        # Holds the ref. to a newly created annotation, so that its
+        # widget gets focus when it is created (cf  udpate_annotation)
+        self.transmuted_annotation = None
         # Adjustment corresponding to the Virtual display
         # The page_size is the really displayed area
         self.adjustment = gtk.Adjustment ()
@@ -757,6 +760,9 @@ class TimeLine(AdhocView):
                 # in update_legend_widget/create_annotation
                 return True
             b=self.create_annotation_widget(annotation)
+            if annotation == self.transmuted_annotation:
+                # Get the focus
+                b.grab_focus()
             self.layout.show_all()
             return True
 
@@ -977,18 +983,28 @@ class TimeLine(AdhocView):
                                                    icon=gtk.MESSAGE_WARNING)
                     return True
 
-                self.controller.transmute_annotation(source,
-                                                     dest,
-                                                     delete=True)
+                self.transmuted_annotation=self.controller.transmute_annotation(source,
+                                                                                dest,
+                                                                                delete=True)
+                return True
+
+            def copy_annotation(*p):
+                self.transmuted_annotation=self.controller.transmute_annotation(source,
+                                                                                dest,
+                                                                                delete=False)
+                # Widget creation is done by the event notification,
+                # which cannot (except by chance) have executed yet.
+                # So store the annotation ref in self.transmuted_annotation,
+                # and handle this code in update_annotation()
+                # b=self.get_widget_for_annotation(an) 
+                # b.grab_focus()
                 return True
 
             # Popup a menu to propose the drop options
             menu=gtk.Menu()
 
             item=gtk.MenuItem(_("Copy annotation"))
-            item.connect('activate', lambda i: self.controller.transmute_annotation(source,
-                                                                                    dest,
-                                                                                    delete=False))
+            item.connect('activate', copy_annotation)
             menu.append(item)
 
             item=gtk.MenuItem(_("Move annotation"))
