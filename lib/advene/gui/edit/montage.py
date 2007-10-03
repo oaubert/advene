@@ -24,6 +24,7 @@ FIXME: fix playing (broken when going backwards)
 
 # Advene part
 import advene.core.config as config
+import advene.util.helper as helper
 from advene.gui.util import get_small_stock_button, name2color
 from advene.gui.views import AdhocView
 from advene.gui.widget import AnnotationWidget
@@ -127,10 +128,14 @@ class Montage(AdhocView):
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
         self.append_dropzone(0)
+        duration=0
         for i, a in enumerate(self.contents):
             self.append_repr(a)
             self.append_dropzone(i+1)
+            duration += a.annotation.fragment.duration
         self.mainbox.show_all()
+        
+        self.duration_label.set_text(helper.format_time(duration))
         return True
 
     def clear(self, *p):
@@ -215,7 +220,6 @@ class Montage(AdhocView):
                 self.refresh()
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                print "drop atype"
                 at=self.controller.package.annotationTypes.get(selection.data)
                 for a in at.annotations:
                     self.insert(a)
@@ -258,9 +262,16 @@ class Montage(AdhocView):
         v.pack_start(gtk.VBox(), expand=True)
 
         hb=gtk.HBox()
+        l=gtk.Label(_("Total duration:"))
+        hb.pack_start(l, expand=False)
+        self.duration_label=gtk.Label('??')
+        hb.pack_start(self.duration_label, expand=False)
+        v.pack_start(hb, expand=False)
+
+        hb=gtk.HBox()
 
         b=get_small_stock_button(gtk.STOCK_DELETE)
-        self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
+        self.controller.gui.tooltips.set_tip(b, _("Drop an annotation here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
