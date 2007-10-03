@@ -313,6 +313,7 @@ class TranscriptionEdit(AdhocView):
         menu.append(item)
         item = gtk.MenuItem(_("+0.1 sec"))
         item.connect("activate", popup_modify, 100)
+        menu.append(item)
 
         item = gtk.MenuItem()
         item.add(image_from_position(self.controller,
