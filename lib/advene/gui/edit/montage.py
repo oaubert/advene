@@ -17,7 +17,8 @@
 #
 """Dynamic montage module
 
-FIXME: fix playing (broken when going backwards)
+FIXME: visual feedback when playing
+FIXME: loop option
 """
 
 # Advene part
@@ -210,10 +211,17 @@ class Montage(AdhocView):
                 self.controller.update_status('pause')
                 return False
             # Go to the annotation
-            self.controller.update_status('set', a.fragment.begin)
+            self.controller.update_status('set', a.fragment.begin, notify=False)
             self.controller.position_update()
             # And program its end.
-            self.controller.register_videotime_action(a.fragment.end, one_step)
+
+            # This is a bit convoluted, but it is needed to make sure
+            # that the videotime_action does not get removed before
+            # even being taken into account (when going backwards),
+            # because the controller videotime_action handling removes
+            # actions that are before the current time.
+            self.controller.register_usertime_delayed_action(0, 
+                                                             lambda c, b: self.controller.register_videotime_action(a.fragment.end, one_step))
             return True
         
         self.controller.update_status('start', notify=False)
