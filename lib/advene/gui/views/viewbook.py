@@ -232,6 +232,7 @@ class ViewBook(AdhocView):
             for label, action in (
                 (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % at.id, destination=self.location)),
                 (_("in a timeline"), lambda i: self.controller.gui.open_adhoc_view('timeline', elements=at.annotations, annotationtypes=[ at ], destination=self.location)),
+                (_("as a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=at.annotations, destination=self.location)),
                 (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location)),
                 (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location)),
                 ):
