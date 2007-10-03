@@ -17,7 +17,6 @@
 #
 """Dynamic montage module
 
-FIXME: implement save view
 FIXME: fix playing (broken when going backwards)
 """
 
@@ -47,7 +46,7 @@ class Montage(AdhocView):
     def __init__(self, controller=None, elements=None, parameters=None):
         self.close_on_package_load = False
         self.contextual_actions = (
-#            (_("Save view"), self.save_view),
+            (_("Save view"), self.save_view),
             (_("Clear"), self.clear),
             (_("Play"), self.play),
             )
@@ -60,6 +59,17 @@ class Montage(AdhocView):
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
+        if elements is None:
+            elements=[]
+            # Get args
+            for n, v in arg:
+                if n == 'id':
+                    try:
+                        a=self.controller.package.get_element_by_id(v)
+                    except KeyError:
+                        # FIXME: should we silently pass, or display missing ids ?
+                        pass
+                    elements.append(a)
 
         # Needed by AnnotationWidget
         self.button_height = 20
@@ -81,7 +91,7 @@ class Montage(AdhocView):
         self.refresh()
 
     def get_save_arguments(self):
-        return self.options, []
+        return self.options, [ ('id', w.annotation.id) for w in self.contents ]
 
     def insert(self, annotation=None, position=None):
         def drag_sent(widget, context, selection, targetType, eventTime):
