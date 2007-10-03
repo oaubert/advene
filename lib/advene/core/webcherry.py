@@ -1936,7 +1936,7 @@ class AdveneWebServer:
         app_config={             
             '/favicon.ico': {
                 'tools.staticfile.on': True,
-                'tools.staticfile.filename': config.data.advenefile( ( 'pixmaps', 'dvd.ico' ) ),
+                'tools.staticfile.filename': config.data.advenefile( ( 'pixmaps', 'advene.ico' ) ),
                 },
             '/data': {
                 'tools.staticdir.on': True,
