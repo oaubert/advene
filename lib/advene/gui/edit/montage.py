@@ -16,6 +16,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 """Dynamic montage module
+
+FIXME: implement save view
+FIXME: implement zoom
+FIXME: fix playing (broken when going backwards)
 """
 
 # Advene part
@@ -39,7 +43,7 @@ class Montage(AdhocView):
     view_name = _("Montage")
     view_id = 'montage'
     tooltip = _("Dynamic montage of annotations")
-    def __init__(self, controller=None, parameters=None):
+    def __init__(self, controller=None, elements=None, parameters=None):
         self.close_on_package_load = False
         self.contextual_actions = (
 #            (_("Save view"), self.save_view),
@@ -66,6 +70,11 @@ class Montage(AdhocView):
 
         self.mainbox=None
         self.widget=self.build_widget()
+
+        if elements is not None:
+            # Fill with default values
+            for a in elements:
+                self.insert(a)
         self.refresh()
 
     def get_save_arguments(self):
@@ -81,8 +90,27 @@ class Montage(AdhocView):
                 return True
             return False
 
+        def remove_cb(menuitem, widget):
+            self.contents.remove(widget)
+            self.refresh()
+            return True
+
+        def button_press(widget, event):
+            """Handle button presses on annotation widgets.
+            """
+            if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+                # Display the popup menu when clicking on annotation.
+                menu=advene.gui.popup.Menu(widget.annotation, controller=self.controller)
+                menu.add_menuitem(menu.menu, _("Remove from montage"), remove_cb, widget)
+                menu.menu.show_all()
+                menu.popup()
+                return True
+            return False
+        
         w=AnnotationWidget(annotation=annotation, container=self)
         w.connect("drag_data_get", drag_sent)
+        w.connect("button_press_event", button_press)
+
         if position is not None:
             self.contents.insert(position, w)
         else:
