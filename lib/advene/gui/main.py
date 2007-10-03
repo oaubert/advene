@@ -103,6 +103,7 @@ from advene.gui.evaluator import Evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
 import advene.gui.edit.properties
+import advene.gui.edit.montage
 from advene.gui.views.transcription import TranscriptionView
 from advene.gui.edit.transcribe import TranscriptionEdit
 from advene.gui.views.viewbook import ViewBook
@@ -252,6 +253,7 @@ class AdveneGUI (Connect):
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
             ('history', _('Entry points'), 'history.png'),
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
+            ('montage', _("Dynamic montage"), 'montage.png'),
             ):
             b=gtk.Button()
             i=gtk.Image()
@@ -583,6 +585,7 @@ class AdveneGUI (Connect):
                   advene.gui.views.table,
                   advene.gui.views.history,
                   advene.gui.views.tree,
+                  advene.gui.edit.montage,
                   ):
             m.register(self.controller)
 
