@@ -18,7 +18,6 @@
 """Dynamic montage module
 
 FIXME: implement save view
-FIXME: implement zoom
 FIXME: fix playing (broken when going backwards)
 """
 
@@ -26,6 +25,7 @@ FIXME: fix playing (broken when going backwards)
 import advene.core.config as config
 import advene.util.helper as helper
 from advene.gui.util import get_small_stock_button, name2color
+import advene.gui.util.dialog as dialog
 from advene.gui.views import AdhocView
 from advene.gui.widget import AnnotationWidget
 import advene.gui.popup
@@ -55,6 +55,7 @@ class Montage(AdhocView):
             }
         self.controller=controller
 
+        # How many units (ms) does a pixel represent ?
         self.scale=50.0
 
         opt, arg = self.load_parameters(parameters)
@@ -68,6 +69,7 @@ class Montage(AdhocView):
         # occurrences of the same annotations, and we need to
         # differenciate them.
         self.contents=[]
+        self.duration=0
 
         self.mainbox=None
         self.widget=self.build_widget()
@@ -135,6 +137,7 @@ class Montage(AdhocView):
             duration += a.annotation.fragment.duration
         self.mainbox.show_all()
         
+        self.duration=duration
         self.duration_label.set_text(helper.format_time(duration))
         return True
 
@@ -209,6 +212,26 @@ class Montage(AdhocView):
         return True
 
     def build_widget(self):
+        self.zoom_adjustment=gtk.Adjustment(value=1.0, lower=0.01, upper=2.0)        
+
+        def zoom_adj_change(adj):
+            # Update the value of self.scale accordingly
+            # Get the window size
+            if not self.mainbox.window:
+                # The widget is not yet realized
+                return True
+            display_size=self.mainbox.parent.window.get_size()[0]
+            # Dropzones are approximately 10 pixels wide, and should
+            # be taken into account, but it enforces handling the corner cases
+            self.scale = 1.0 * self.duration / (display_size / adj.value )
+
+            # Update the zoom combobox value
+            self.zoom_combobox.child.set_text('%d%%' % long(100 * adj.value))
+            self.refresh()
+            return True
+
+        self.zoom_adjustment.connect('value-changed', zoom_adj_change)
+
         v=gtk.VBox()
 
         self.mainbox=gtk.HBox()
@@ -268,6 +291,7 @@ class Montage(AdhocView):
         hb.pack_start(self.duration_label, expand=False)
         v.pack_start(hb, expand=False)
 
+        # Buttons bar
         hb=gtk.HBox()
 
         b=get_small_stock_button(gtk.STOCK_DELETE)
@@ -284,6 +308,47 @@ class Montage(AdhocView):
         b.connect("clicked", self.play)
         hb.pack_start(b, expand=False)
 
+        def zoom_entry(entry):
+            f=entry.get_text()
+
+            i=re.findall(r'\d+', f)
+            if i:
+                f=int(i[0])/100.0
+            else:
+                return True
+            self.zoom_adjustment.value=f
+            return True
+
+        def zoom_change(combo):
+            v=combo.get_current_element()
+            if isinstance(v, float):
+                self.zoom_adjustment.value=v
+            return True
+
+        def zoom(i, factor):
+            self.zoom_adjustment.value=self.zoom_adjustment.value * factor
+            return True
+
+        b=get_small_stock_button(gtk.STOCK_ZOOM_OUT)
+        hb.pack_start(b, expand=False)
+        b.connect('clicked', zoom, 1.3)
+
+        b=get_small_stock_button(gtk.STOCK_ZOOM_IN)
+        hb.pack_start(b, expand=False)
+        b.connect('clicked', zoom, .7)
+        
+        self.zoom_combobox=dialog.list_selector_widget(members=[
+                ( f, "%d%%" % long(100*f) ) 
+                for f in [ 
+                    (1.0 / pow(1.5, n)) for n in range(0, 10) 
+                    ] 
+                ],
+                                                       entry=True,
+                                                       callback=zoom_change)
+        self.zoom_combobox.child.connect('activate', zoom_entry)
+        self.zoom_combobox.child.set_width_chars(4)
+
+        hb.pack_start(self.zoom_combobox, expand=False)
         
         v.pack_start(hb, expand=False)
 
