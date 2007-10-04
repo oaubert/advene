@@ -1017,10 +1017,11 @@ class TimeLine(AdhocView):
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
 
         elif targetType == config.data.target_type['annotation-type']:
+            # Reorder annotation types
             source_uri=selection.data
             source=self.controller.package.annotationTypes.get(source_uri)
             dest=widget.annotationtype
-            if source in self.annotationtypes:
+            if source in self.annotationtypes and dest in self.annotationtypes:
                 self.annotationtypes.remove(source)
 
                 j=self.annotationtypes.index(dest)
