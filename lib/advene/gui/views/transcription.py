@@ -131,6 +131,7 @@ class TranscriptionView(AdhocView):
         cache=dict(self.options)
         for c in ('representation', 'separator'):
             cache[c] = cache[c].replace('\n', '\\n').replace('\t', '\\t')
+        old_representation=cache['representation']
         cache['user-separator']=cache['separator']
         if cache['separator'] not in (' ', '\\n', '\\t', ' - '):
             cache['separator']=user_defined
@@ -153,6 +154,12 @@ class TranscriptionView(AdhocView):
         res=ew.popup()
 
         if res:
+            if old_representation != cache['representation']:
+                # The user-defined representation was changed. In most
+                # cases, this means that the user wants to use it
+                # instead of the default representation, so force
+                # default-representation to False
+                cache['default-representation']=False
             if cache['separator'] == user_defined:
                 # User-defined has been selected. Use the user-separator value
                 cache['separator']=cache['user-separator']
