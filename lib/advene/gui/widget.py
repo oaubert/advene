@@ -81,6 +81,16 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         # Initialize the size
         self.set_size_request(*self.needed_size())
 
+    def _drag_begin(self, widget, context):
+        cm=gtk.gdk.colormap_get_system()
+        w,h=self.needed_size()
+        pixmap=gtk.gdk.Pixmap(None, w, h, cm.get_visual().depth)
+        cr=pixmap.cairo_create()
+        self.draw(cr, w, h)
+        cr.paint_with_alpha(0.0)
+        widget.drag_source_set_icon(cm, pixmap)
+        return True
+
     def reset_surface_size(self, width=None, height=None):
         """Redimension the cached widget content.
         """
@@ -202,6 +212,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         self.connect("key_press_event", self.keypress, self.annotation)
         self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
         self.connect("drag_data_get", self.drag_sent)
+        self.connect("drag_begin", self._drag_begin)
         # The widget can generate drags
         self.drag_source_set(gtk.gdk.BUTTON1_MASK,
                              config.data.drag_type['annotation']
@@ -326,6 +337,7 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         GenericColorButtonWidget.__init__(self, element=annotationtype, container=container)
         self.connect("key_press_event", self.keypress, self.annotationtype)
         self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
+        self.connect("drag_begin", self._drag_begin)
 
     def keypress(self, widget, event, annotationtype):
         """Handle the key-press event.
@@ -389,6 +401,7 @@ class TagWidget(GenericColorButtonWidget):
         self.tag=tag
         self.width=60
         GenericColorButtonWidget.__init__(self, element=tag, container=container)
+        self.connect("drag_begin", self._drag_begin)
 
     def needed_size(self):
         """Return the needed size of the widget.
