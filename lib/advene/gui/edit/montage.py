@@ -19,6 +19,7 @@
 
 FIXME: visual feedback when playing
 FIXME: loop option
+FIXME: replace button dropzone by EventBox 1pixel wide, with visual feedback
 """
 
 # Advene part
@@ -178,7 +179,7 @@ class Montage(AdhocView):
             return False
 
         b = gtk.Button()
-        b.set_size_request(-1, self.button_height)
+        b.set_size_request(2, self.button_height)
         b.index=i
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
@@ -205,13 +206,13 @@ class Montage(AdhocView):
             try:
                 w=annotation_queue.next()
                 a=w.annotation
-                print "Playing ", a.id
+                #print "Playing ", a.id
             except StopIteration:
-                print "StopIteration"
+                #print "StopIteration"
                 self.controller.update_status('pause')
                 return False
             # Go to the annotation
-            self.controller.update_status('set', a.fragment.begin, notify=False)
+            self.controller.queue_action(self.controller.update_status, 'set', a.fragment.begin, notify=False)
             self.controller.position_update()
             # And program its end.
 
@@ -367,6 +368,10 @@ class Montage(AdhocView):
         self.zoom_combobox.child.set_width_chars(4)
 
         hb.pack_start(self.zoom_combobox, expand=False)
+
+        b=get_small_stock_button(gtk.STOCK_ZOOM_100)
+        hb.pack_start(b, expand=False)
+        b.connect('clicked', lambda i: self.zoom_adjustment.set_value(1.0))
         
         v.pack_start(hb, expand=False)
 
