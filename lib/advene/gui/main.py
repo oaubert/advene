@@ -267,15 +267,16 @@ class AdveneGUI (Connect):
             hb.pack_start(b, expand=False)
         hb.show_all()
 
-        launcher=get_small_stock_button(gtk.STOCK_FIND, self.do_quicksearch)
+        self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND, self.do_quicksearch)
+
         def modify_source(i, expr, label):
             """Modify the quicksearch source, and update the tooltip accordingly.
             """
             config.data.preferences['quicksearch-source']=expr
-            self.tooltips.set_tip(launcher, _("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
+            self.tooltips.set_tip(self.quicksearch_button, _("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
             return True
 
-        def quicksearch_options(button, event):
+        def quicksearch_options(button, event, method):
             """Generate the quicksearch options menu.
             """
             if event.button != 3 or event.type != gtk.gdk.BUTTON_PRESS:
@@ -295,7 +296,7 @@ class AdveneGUI (Connect):
             for (label, expression) in l:
                 i=gtk.CheckMenuItem(label)
                 i.set_active(expression == config.data.preferences['quicksearch-source'])
-                i.connect('activate', modify_source, expression, label)
+                i.connect('activate', method, expression, label)
                 submenu.append(i)
             item.set_submenu(submenu)
             menu.append(item)
@@ -311,8 +312,8 @@ class AdveneGUI (Connect):
         self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
         self.quicksearch_entry.connect('activate', self.do_quicksearch)
         hb.pack_start(self.quicksearch_entry, expand=False)
-        launcher.connect('button-press-event', quicksearch_options)
-        hb.pack_start(launcher, expand=False, fill=False)
+        self.quicksearch_button.connect('button-press-event', quicksearch_options, modify_source)
+        hb.pack_start(self.quicksearch_button, expand=False, fill=False)
         hb.show_all()
 
         # Player status
@@ -1649,7 +1650,7 @@ class AdveneGUI (Connect):
                               'p': p,
                               'a': a,
                               'c': self.controller,
-                              'gui': self,
+                              'g': self,
                               'pp': pprint.pformat },
                      historyfile=config.data.advenefile('evaluator.log', 'settings')
                      )
