@@ -2,6 +2,11 @@ advene (0.25) unstable; urgency=low
 
   * New adhoc view: montage, proposing a dynamic montage of a sequence of
     annotations.
+  
+  * Completions are activated in the note-taking view
+  
+  * Error messages are now saved to ~/.advene/advene.log (for win32 users,
+    it is in \Documents and Settings\Username\Advene)
 
  --
 
