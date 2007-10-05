@@ -690,6 +690,7 @@ class TimeLine(AdhocView):
         if color is None:
             color=self.colors['active']
         for b in buttons:
+            b.active=True
             b.set_color(color)
         return True
 
@@ -1270,10 +1271,11 @@ class TimeLine(AdhocView):
             try:
                 if widget.active:
                     widget.active = False
+                    widget.set_color(None)
                     widget.update_widget()
             except AttributeError:
                 pass
-            return True
+            return False
         self.layout.foreach(desactivate)
         return True
 
