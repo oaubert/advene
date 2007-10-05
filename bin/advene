@@ -42,16 +42,16 @@ else:
     Please check your installation or set the PYTHONPATH environment variable."""
     print str(e)
     sys.exit(1)
-    # If running from a binary version, redirect stdout, stderr to a file
-    logfile=config.data.advenefile('advene.log', 'settings')
-    try:
-      f=open(logfile, 'w')
-      print "Advene output is stored into ", logfile
-      sys.stdout=f
-      sys.stderr=f
-    except IOError:
-      # The file cannot be written. Well, let us use the console...
-      pass
+  # If running from a binary version, redirect stdout, stderr to a file
+  logfile=config.data.advenefile('advene.log', 'settings')
+  try:
+    f=open(logfile, 'w')
+    print "Advene output is stored into ", logfile
+    sys.stdout=f
+    sys.stderr=f
+  except IOError:
+    # The file cannot be written. Well, let us use the console...
+    pass
 
 # Maybe we are running from a pyinstaller version
 if not os.path.exists(config.data.path['resources']):
