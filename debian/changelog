@@ -1,3 +1,10 @@
+advene (0.25) unstable; urgency=low
+
+  * New adhoc view: montage, proposing a dynamic montage of a sequence of
+    annotations.
+
+ --
+
 advene (0.24) unstable; urgency=low
 
   * An expert-mode toggle proposes more features in the GUI
