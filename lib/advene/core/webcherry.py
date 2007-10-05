@@ -158,7 +158,7 @@ class Common:
 
         res=[]
         if mode == "navigation":
-            res.append("<html><head><title>%s</title>" % title)
+            res.append("""<html><head><title>%s</title><link rel="stylesheet" type="text/css" href="/data/advene.css" />""" % title)
             if head_section is not None:
                 res.append(head_section)
 
@@ -1830,6 +1830,7 @@ class Root(Common):
       - C{/application} : control the application
     """
     def __init__(self, controller=None):
+        self.controller=controller
         self.admin=Admin(controller)
         self.admin.access=Access(controller)
         self.action=Action(controller)
