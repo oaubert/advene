@@ -56,7 +56,7 @@ else:
 # Maybe we are running from a pyinstaller version
 if not os.path.exists(config.data.path['resources']):
   maindir=os.path.abspath(os.path.dirname(sys.executable))
-  if os.path.exists(os.path.join( maindir, 'share' )):
+  if os.path.exists(os.path.join( maindir, 'share', 'web' )):
     # There is a 'share' directory at the same level as the executable
     # This can mean that we are in a pyinstaller version
     print "Seemingly running from a pyinstaller version in\n%s" % maindir
