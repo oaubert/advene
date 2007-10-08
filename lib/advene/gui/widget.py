@@ -312,11 +312,11 @@ class AnnotationWidget(GenericColorButtonWidget):
 
         # Draw the text
         if self.annotation.relations:
-            weight=cairo.FONT_WEIGHT_BOLD
+            slant=cairo.FONT_SLANT_ITALIC
         else:
-            weight=cairo.FONT_WEIGHT_NORMAL
+            slant=cairo.FONT_SLANT_NORMAL
         context.select_font_face("Helvetica",
-                                 cairo.FONT_SLANT_NORMAL, weight)
+                                 slant, cairo.FONT_WEIGHT_NORMAL)
         context.set_font_size(config.data.preferences['timeline']['font-size'])
 
         context.move_to(2, int(height * 0.7))
