@@ -310,6 +310,10 @@ class AnnotationWidget(GenericColorButtonWidget):
         context.set_source_rgba(0, 0, 0, 1)
         context.stroke()
 
+        # Do not draw text if the widget is too small anyway
+        if width < 10:
+            return
+
         # Draw the text
         if self.annotation.relations:
             slant=cairo.FONT_SLANT_ITALIC
