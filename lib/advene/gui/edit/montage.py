@@ -251,7 +251,9 @@ class Montage(AdhocView):
                     self.set_widget_active(w, False)
                 return False
             # Go to the annotation
-            self.controller.queue_action(self.controller.update_status, 'set', a.fragment.begin, notify=False)
+            # Change position only if we are not already at the right place
+            if abs(position - a.fragment.begin) > 100:
+                self.controller.queue_action(self.controller.update_status, 'set', a.fragment.begin, notify=False)
             self.controller.queue_action(self.set_widget_active, w, True)
             self.controller.position_update()
             # And program its end.
