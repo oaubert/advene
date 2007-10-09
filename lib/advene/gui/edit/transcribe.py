@@ -138,7 +138,7 @@ class TranscriptionEdit(AdhocView):
 
         # Memorize the last keypress time
         self.last_keypress_time = 0
-        
+
         self.textview.connect("button-press-event", self.button_press_event_cb)
         self.textview.connect("key-press-event", self.key_pressed_cb)
 
@@ -148,7 +148,7 @@ class TranscriptionEdit(AdhocView):
                             element=self.textview.get_buffer(),
                             indexer=self.controller.package._indexer)
 
-        sw.add_with_viewport (self.textview)
+        sw.add(self.textview)
 
         vbox.show_all()
         return vbox
