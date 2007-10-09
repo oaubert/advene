@@ -25,7 +25,7 @@ FIXME: replace button dropzone by EventBox 1pixel wide, with visual feedback
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
-from advene.gui.util import get_small_stock_button, name2color
+from advene.gui.util import get_small_stock_button, name2color, get_pixmap_button
 import advene.gui.util.dialog as dialog
 from advene.gui.views import AdhocView
 from advene.gui.widget import AnnotationWidget
@@ -179,7 +179,7 @@ class Montage(AdhocView):
             return False
 
         b = gtk.Button()
-        b.set_size_request(2, self.button_height)
+        b.set_size_request(4, self.button_height)
         b.index=i
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
@@ -372,6 +372,24 @@ class Montage(AdhocView):
         b=get_small_stock_button(gtk.STOCK_ZOOM_100)
         hb.pack_start(b, expand=False)
         b.connect('clicked', lambda i: self.zoom_adjustment.set_value(1.0))
+
+        def toggle_highlight(b):
+            if b.highlight:
+                event="AnnotationActivate"
+                label= _("Unhighlight annotations")
+                b.highlight=False
+            else:
+                event="AnnotationDeactivate"
+                label=_("Highlight annotations")
+                b.highlight=True
+            self.controller.gui.tooltips.set_tip(b, label)
+            for a in set( [ w.annotation for w in self.contents ] ):
+                self.controller.notify(event, annotation=a)
+            return True
+        b=get_pixmap_button('highlight.png')
+        b.highlight=True
+        b.connect('clicked', toggle_highlight)
+        hb.pack_start(b, expand=False)
         
         v.pack_start(hb, expand=False)
 
