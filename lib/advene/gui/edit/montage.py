@@ -75,6 +75,7 @@ class Montage(AdhocView):
 
         # Needed by AnnotationWidget
         self.button_height = 20
+        self.active_color=gtk.gdk.color_parse ('#fdfd4b')
 
         # In self.contents, we store the AnnotationWidgets We do not
         # store directly the annotations, since there may be multiple
@@ -165,15 +166,18 @@ class Montage(AdhocView):
         color=self.controller.get_element_color(element)
         return name2color(color)
 
-    def set_annotation_active(self, annotation, active):
+    def set_widget_active(self, w, active):
         color=None
         if active:
-            color=gtk.gdk.color_parse ('#fdfd4b')
+            color=self.active_color
+        w.active = active
+        w.set_color(color)
+        w.update_widget()
+        
+    def set_annotation_active(self, annotation, active):
         for w in self.contents:
             if w.annotation == annotation:
-                w.active = active
-                w.set_color(color)
-                w.update_widget()
+                self.set_widget_active(w)
 
     def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
@@ -243,9 +247,12 @@ class Montage(AdhocView):
             except StopIteration:
                 #print "StopIteration"
                 self.controller.update_status('pause')
+                for w in self.contents:
+                    self.set_widget_active(w, False)
                 return False
             # Go to the annotation
             self.controller.queue_action(self.controller.update_status, 'set', a.fragment.begin, notify=False)
+            self.controller.queue_action(self.set_widget_active, w, True)
             self.controller.position_update()
             # And program its end.
 
