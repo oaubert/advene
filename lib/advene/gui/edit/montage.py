@@ -46,6 +46,7 @@ class Montage(AdhocView):
     view_id = 'montage'
     tooltip = _("Dynamic montage of annotations")
     def __init__(self, controller=None, elements=None, parameters=None):
+        super(Montage, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Save view"), self.save_view),
@@ -55,7 +56,6 @@ class Montage(AdhocView):
         self.options={
             }
         self.controller=controller
-
 
         def scale_event(*p):
             self.refresh()
@@ -71,7 +71,6 @@ class Montage(AdhocView):
                                      step_incr=5,
                                      page_incr=1000)
         self.scale.connect ("value-changed", scale_event)
-        #self.scale.connect ("changed", self.scale_event)
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
@@ -91,6 +90,8 @@ class Montage(AdhocView):
         self.button_height = 20
         self.active_color=gtk.gdk.color_parse ('#fdfd4b')
 
+        self.master_view=None
+
         # In self.contents, we store the AnnotationWidgets We do not
         # store directly the annotations, since there may be multiple
         # occurrences of the same annotations, and we need to
@@ -106,6 +107,29 @@ class Montage(AdhocView):
             for a in elements:
                 self.insert(a)
         self.refresh()
+
+    def set_master_view(self, master):
+        def master_value_changed(sc):
+            self.scale.value=sc.value
+            return False
+        def master_changed(sc):
+            self.scale.set_all(self.scale.value,
+                               sc.lower, sc.upper, 
+                               sc.step_increment, sc.page_increment, 
+                               sc.page_size)
+            return False
+
+        self.safe_connect(master.scale, 'value-changed', master_value_changed)
+        self.safe_connect(master.scale, 'changed', master_changed)
+        master.register_slave_view(self)
+        self.master_view=master
+        return
+
+    def close(self, *p):
+        super(Montage, self).close(*p)
+        if self.master_view:
+            self.master_view.unregister_slave_view(self)
+        return True
 
     def get_save_arguments(self):
         return self.options, [ ('id', w.annotation.id) for w in self.contents ]
