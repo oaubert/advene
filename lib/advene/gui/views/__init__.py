@@ -62,15 +62,46 @@ class AdhocView(object):
         # can but the "Close" button in it:
         # self.buttonbox = gtk.HButtonBox()
 
-        if parameters is not None:
-            opt, arg = self.load_parameters(parameters)
-            self.options.update(opt)
+        self._label=self.view_name
 
-        self.widget=self.build_widget()
+        # List of slave views (to be closed on master view close)
+        self._slave_views=[]
+
+        # List of couples (object, signal handler id)
+        self._signal_ids=[]
+
+        #if parameters is not None:
+        #    opt, arg = self.load_parameters(parameters)
+        #    self.options.update(opt)
+        #
+        #self.widget=self.build_widget()
+
+    def register_slave_view(self, v):
+        self._slave_views.append(v)
+
+    def unregister_slave_view(self, v):
+        try:
+            self._slave_views.remove(v)
+        except ValueError:
+            pass
+
+    def safe_connect(self, obj, *p):
+        """Connect a signal handler to a gobject.
+
+        It memorizes the handler id so that it is properly
+        disconnected upon view closing.
+        """
+        i=obj.connect(*p)
+        self._signal_ids.append(( obj, i ))
+        return i
 
     def close(self, *p):
         if self.controller and self.controller.gui:
             self.controller.gui.unregister_view (self)
+        for v in self._slave_views:
+            v.close()
+        for o, i in self._signal_ids:
+            o.disconnect(i)
         self.widget.destroy()
         return True
 
