@@ -215,7 +215,7 @@ class Montage(AdhocView):
     def set_annotation_active(self, annotation, active):
         for w in self.contents:
             if w.annotation == annotation:
-                self.set_widget_active(w)
+                self.set_widget_active(w, active)
 
     def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
