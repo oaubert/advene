@@ -91,14 +91,14 @@ class TimeLine(AdhocView):
 
     There are 2 adjustments used to adjust the display scale: 
 
-       * self.ratio_adj stores how many units does a pixel
+       * self.scale stores how many units does a pixel
          represent. It is an absolute value (and generally integer:
          given that units are milliseconds, we should not need to
          display fractions of ms.
 
        * self.fraction_adj stores the fraction of the whole stream
          displayed in the window. It thus depends on both the
-         self.ratio_adj and the widget size.
+         self.scale and the widget size.
 
     and a 3rd one which controls the displayed area.
     """
@@ -250,15 +250,15 @@ class TimeLine(AdhocView):
         u2p = self.unit2pixel
 
         # How many units does a pixel represent ?
-        # ratio_adjustment.value = unit by pixel
+        # self.scale.value = unit by pixel
         # Unit = ms
-        self.ratio_adjustment = gtk.Adjustment (value=(self.maximum - self.minimum) / gtk.gdk.get_default_root_window().get_size()[0],
+        self.scale = gtk.Adjustment (value=(self.maximum - self.minimum) / gtk.gdk.get_default_root_window().get_size()[0],
                                                 lower=5,
                                                 upper=36000,
                                                 step_incr=5,
                                                 page_incr=1000)
-        self.ratio_adjustment.connect ("value-changed", self.ratio_event)
-        self.ratio_adjustment.connect ("changed", self.ratio_event)
+        self.scale.connect ("value-changed", self.scale_event)
+        self.scale.connect ("changed", self.scale_event)
 
         # The same value in relative form
         self.fraction_adj = gtk.Adjustment (value=1.0,
@@ -305,7 +305,7 @@ class TimeLine(AdhocView):
                                   gtk.DEST_DEFAULT_ALL,
                                   config.data.drag_type['annotation-resize'], gtk.gdk.ACTION_LINK)
 
-        self.old_ratio_value = self.ratio_adjustment.value
+        self.old_scale_value = self.scale.value
 
         # Lines to draw in order to indicate related annotations
         self.relations_to_draw = []
@@ -506,7 +506,7 @@ class TimeLine(AdhocView):
             if self.maximum != oldmax:
                 # Reset to display whole timeline
                 (w, h)=self.layout.window.get_size()
-                self.ratio_adjustment.set_value( (self.maximum - self.minimum) / float(w) )
+                self.scale.set_value( (self.maximum - self.minimum) / float(w) )
                                 
             if self.list is None:
                 # We display the whole package, so display also
@@ -715,10 +715,10 @@ class TimeLine(AdhocView):
                 self.activate_annotation (annotation, buttons=button)
 
     def unit2pixel (self, v):
-        return (long(v / self.ratio_adjustment.value)) or 1
+        return (long(v / self.scale.value)) or 1
 
     def pixel2unit (self, v):
-        return v * self.ratio_adjustment.value
+        return v * self.scale.value
 
     def get_element_color(self, element):
         """Return the gtk color for the given element.
@@ -1703,7 +1703,7 @@ class TimeLine(AdhocView):
         #print "Update: from %.2f to %.2f" % (a.lower, a.upper)
         a.changed ()
 
-    def ratio_event (self, widget=None, data=None):
+    def scale_event (self, widget=None, data=None):
         self.update_adjustment ()
         self.update_layout ()
         self.redraw_event ()
@@ -1717,7 +1717,7 @@ class TimeLine(AdhocView):
             return False
         (w, h) = parent.get_size ()
         if self.maximum != self.minimum:
-            fraction=self.ratio_adjustment.value * float(w) / (self.maximum - self.minimum)
+            fraction=self.scale.value * float(w) / (self.maximum - self.minimum)
             #print "Layout resize, reset fraction_adj to ", fraction, w
             self.fraction_adj.value=fraction
             self.zoom_combobox.child.set_text('%d%%' % long(100 * fraction))
@@ -1738,8 +1738,8 @@ class TimeLine(AdhocView):
         self.zoom_combobox.child.set_text('%d%%' % long(100 * fraction))
         v = (self.maximum - self.minimum) / float(w) * fraction
         # Is it worth redrawing the whole timeline ?
-        if abs(v - self.ratio_adjustment.value) / float(self.ratio_adjustment.value) > 0.01:
-            self.ratio_adjustment.set_value(v)
+        if abs(v - self.scale.value) / float(self.scale.value) > 0.01:
+            self.scale.set_value(v)
         return True
 
     def layout_scroll_cb(self, widget=None, event=None):
@@ -1792,9 +1792,8 @@ class TimeLine(AdhocView):
     def redraw_event(self, widget=None, data=None):
         """Redraw the layout according to the new ratio value.
         """
-        if self.old_ratio_value != self.ratio_adjustment.value:
-            self.ratio = self.ratio_adjustment.value
-            self.old_ratio_value = self.ratio
+        if self.old_scale_value != self.scale.value:
+            self.old_scale_value = self.scale.value
             # Remove old marks
             self.layout.foreach(self.remove_marks)
             # Reposition all buttons
