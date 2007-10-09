@@ -165,6 +165,33 @@ class Montage(AdhocView):
         color=self.controller.get_element_color(element)
         return name2color(color)
 
+    def set_annotation_active(self, annotation, active):
+        color=None
+        if active:
+            color=gtk.gdk.color_parse ('#fdfd4b')
+        for w in self.contents:
+            if w.annotation == annotation:
+                w.active = active
+                w.set_color(color)
+                w.update_widget()
+
+    def update_annotation (self, annotation=None, event=None):
+        """Update an annotation's representation."""
+        if event == 'AnnotationActivate':
+            self.set_annotation_active(annotation, True)
+        elif event == 'AnnotationDeactivate':
+            self.set_annotation_active(annotation, False)
+        elif event == 'AnnotationEditEnd':
+            # Update its representations
+            l=[ w.update_widget() for w in self.contents if w.annotation == annotation ]
+        elif event == 'AnnotationDelete':
+            l=[ w for w in self.contents if w.annotation == annotation ]
+            if l:
+                for w in l:
+                    self.contents.remove(w)
+                self.refresh()
+        return True
+
     def append_dropzone(self, i):
         """Append a dropzone for a given index.
         """
