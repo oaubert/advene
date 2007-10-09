@@ -180,7 +180,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
     def refresh(self):
         """Refresh the widget.
         """
-        if self.window:
+        if self.window and self.cached_surface:
             width = self.cached_surface.get_width()
             height = self.cached_surface.get_height()
             self.window.invalidate_rect(gtk.gdk.Rectangle(0, 0, width, height), False)
