@@ -172,6 +172,12 @@ class Montage(AdhocView):
             if targetType == config.data.target_type['annotation']:
                 ann=self.controller.package.annotations.get(selection.data)
                 self.insert(ann, i)
+                # If the origin is from the same montage, then
+                # consider it is a move and remove the origin
+                # annotation
+                w=context.get_source_widget()
+                if w in self.contents:
+                    self.contents.remove(w)
                 self.refresh()
                 return True
             else:
@@ -259,6 +265,12 @@ class Montage(AdhocView):
             if targetType == config.data.target_type['annotation']:
                 ann=self.controller.package.annotations.get(selection.data)
                 self.insert(ann)
+                # If the origin is from the same montage, then
+                # consider it is a move and remove the origin
+                # annotation
+                w=context.get_source_widget()
+                if w in self.contents:
+                    self.contents.remove(w)
                 self.refresh()
                 return True
             elif targetType == config.data.target_type['annotation-type']:
