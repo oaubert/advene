@@ -536,6 +536,12 @@ class TranscriptionView(AdhocView):
                 self.currentannotation=None
         return False
 
+    def position_reset(self):
+        # The position was reset. Deactivate active annotations.
+        b=self.textview.get_buffer()
+        b.remove_tag_by_name('activated', *b.get_bounds())
+        return True
+
     def update_annotation (self, annotation=None, event=None):
         """Update an annotation's representation."""
         if self.ignore_updates:
