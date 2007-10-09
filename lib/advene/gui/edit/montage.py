@@ -56,8 +56,22 @@ class Montage(AdhocView):
             }
         self.controller=controller
 
+
+        def scale_event(*p):
+            self.refresh()
+            return True
+
         # How many units (ms) does a pixel represent ?
-        self.scale=50.0
+        # How many units does a pixel represent ?
+        # self.scale.value = unit by pixel
+        # Unit = ms
+        self.scale = gtk.Adjustment (value=(self.controller.package.cached_duration or 60*60*1000) / gtk.gdk.get_default_root_window().get_size()[0],
+                                     lower=5,
+                                     upper=36000,
+                                     step_incr=5,
+                                     page_incr=1000)
+        self.scale.connect ("value-changed", scale_event)
+        #self.scale.connect ("changed", self.scale_event)
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
@@ -135,10 +149,10 @@ class Montage(AdhocView):
         return True
 
     def unit2pixel(self, u):
-        return long(u / self.scale)
+        return long(u / self.scale.value)
 
     def pixel2unit(self, p):
-        return long(p * self.scale)
+        return long(p * self.scale.value)
 
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
@@ -284,11 +298,10 @@ class Montage(AdhocView):
             display_size=self.mainbox.parent.window.get_size()[0]
             # Dropzones are approximately 10 pixels wide, and should
             # be taken into account, but it enforces handling the corner cases
-            self.scale = 1.0 * self.duration / (display_size / adj.value )
+            self.scale.value = 1.0 * self.duration / (display_size / adj.value )
 
             # Update the zoom combobox value
             self.zoom_combobox.child.set_text('%d%%' % long(100 * adj.value))
-            self.refresh()
             return True
 
         self.zoom_adjustment.connect('value-changed', zoom_adj_change)
