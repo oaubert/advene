@@ -208,6 +208,7 @@ class AnnotationWidget(GenericColorButtonWidget):
     """
     def __init__(self, annotation=None, container=None):
         self.annotation=annotation
+        self.active=False
         GenericColorButtonWidget.__init__(self, element=annotation, container=container)
         self.connect("key_press_event", self.keypress, self.annotation)
         self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
@@ -248,6 +249,14 @@ class AnnotationWidget(GenericColorButtonWidget):
         """
         if event.keyval == gtk.keysyms.e:
             self.controller.gui.edit_element(annotation)
+            return True
+        elif event.keyval == gtk.keysyms.h:
+            if self.active:
+                event="AnnotationDeactivate"
+            else:
+                event="AnnotationActivate"
+            self.active=not self.active
+            self.controller.notify(event, annotation=self.annotation)
             return True
         elif event.keyval == gtk.keysyms.F11:
             menu=advene.gui.popup.Menu(annotation, controller=self.controller)
