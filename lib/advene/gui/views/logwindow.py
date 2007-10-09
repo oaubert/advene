@@ -34,9 +34,10 @@ import gtk
 import advene.rules.elements
 
 class LogWindow(AdhocView):
+    view_name = _("Links")
+    view_id = 'linksview'
     def __init__ (self, controller=None):
-        self.view_name = _("Links")
-        self.view_id = 'linksview'
+        super(LogWindow, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Clear"), self.clear_data),

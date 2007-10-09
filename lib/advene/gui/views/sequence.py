@@ -137,11 +137,12 @@ class SequenceModel(gtk.GenericTreeModel):
         return None
 
 class SequenceEditor(AdhocView):
+    view_name = _("Sequence Editor")
+    view_id = 'sequenceview'
     def __init__ (self, controller=None):
         # FIXME: pass AnnotationType here, and (optionaly) an existing list of
         # annotations
-        self.view_name = _("Sequence Editor")
-        self.view_id = 'sequenceview'
+        super(SequenceEditor, self).__init__(controller=controller)
         self.close_on_package_load = True
 
         self.annotationtype=None

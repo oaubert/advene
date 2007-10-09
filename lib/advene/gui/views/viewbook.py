@@ -30,10 +30,10 @@ from advene.gui.util import get_pixmap_button
 class ViewBook(AdhocView):
     """Notebook containing multiple views
     """
+    view_name = _("ViewBook")
+    view_id = 'viewbook'
     def __init__ (self, controller=None, views=None, location=None):
-        self.view_name = _("ViewBook")
-        self.view_id = 'viewbook'
-
+        super(ViewBook, self).__init__(controller=controller)
         self.controller=controller
         if views is None:
             views = []

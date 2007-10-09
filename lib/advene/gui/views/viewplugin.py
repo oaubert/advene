@@ -61,6 +61,7 @@ class ViewPlugin(AdhocView):
     tooltip=_("You should not ever see this tooltip...")
 
     def __init__(self, controller=None, parameters=None):
+        super(ViewPlugin, self).__init__(controller=controller)
         self.controller=controller
         self.options={}
         opt, arg = self.load_parameters(parameters)

@@ -51,6 +51,7 @@ class InteractiveQuery(AdhocView):
     view_id = 'interactivequery'
     tooltip=_("Interactive query dialog")
     def __init__(self, controller=None, parameters=None, source="package/annotations", here=None):
+        super(InteractiveQuery, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             #(_("Refresh"), self.refresh),
@@ -188,6 +189,7 @@ class InteractiveResult(AdhocView):
     tooltip=_("Interactive result display")
 
     def __init__(self, controller=None, parameters=None, query=None, result=None):
+        super(InteractiveResult, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             #(_("Refresh"), self.refresh),

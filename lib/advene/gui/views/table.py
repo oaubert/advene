@@ -53,6 +53,7 @@ class AnnotationTable(AdhocView):
     tooltip=_("Display annotations in a table")
 
     def __init__(self, controller=None, parameters=None, elements=None):
+        super(AnnotationTable, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             )
@@ -265,6 +266,7 @@ class GenericTable(AdhocView):
     tooltip=_("Display Advene elements in a table.")
 
     def __init__(self, controller=None, parameters=None, elements=None):
+        super(GenericTable, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             )

@@ -43,10 +43,14 @@ class DummyLock:
 class AccumulatorPopup(AdhocView):
     """View displaying a limited number of popups.
     """
-    def __init__ (self, size=3, controller=None, autohide=False, 
+    view_name = _("PopupAccumulator")
+    view_id = 'popupaccumulator'
+    tooltip = ("Stack a limited number of popup widgets")
+
+    def __init__ (self, controller=None, autohide=False, size=3, 
                   vertical=False, scrollable=False):
-        self.view_name = _("PopupAccumulator")
-        self.view_id = 'popupaccumulator'
+        super(AccumulatorPopup, self).__init__(controller=controller)
+        
         self.close_on_package_load = False
 
         self.size=size

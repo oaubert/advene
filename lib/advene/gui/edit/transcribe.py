@@ -58,9 +58,11 @@ class TranscriptionImporter(advene.util.importer.GenericImporter):
         return self.package
 
 class TranscriptionEdit(AdhocView):
+    view_name = _("Note taking")
+    view_id = 'transcribe'
+    tooltips = _("Note taking facility")
     def __init__ (self, controller=None, filename=None):
-        self.view_name = _("Note taking")
-        self.view_id = 'transcribe'
+        super(TranscriptionEdit, self).__init__(controller=controller)
         self.close_on_package_load = False
 
         self.controller=controller

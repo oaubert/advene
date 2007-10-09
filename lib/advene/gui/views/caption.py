@@ -25,9 +25,12 @@ from gettext import gettext as _
 import gtk
 
 class CaptionView(AdhocView):
+    view_name = _("Caption")
+    view_id = 'caption'
+    tooltip = _("Display a text caption below the video output")
+
     def __init__(self, controller=None):
-        self.view_name = _("Caption")
-        self.view_id = 'caption'
+        super(CaptionView, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = ()
 

@@ -29,12 +29,14 @@ from advene.gui.util import dialog
 from advene.gui.views import AdhocView
 
 class ExternalImporter(AdhocView):
+    view_name = _("Importer")
+    view_id = 'importerview'
+
     def __init__(self, controller=None, parameters=None):
+        super(ExternalImporter, self).__init__(controller=controller)
         self.controller=controller
         self.parameters=parameters
 
-        self.view_name = _("Importer")
-        self.view_id = 'importerview'
         self.close_on_package_load = False
         self.contextual_actions = ()
         self.options={

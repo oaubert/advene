@@ -140,6 +140,7 @@ class Browser(AdhocView):
     view_id = 'browser'
     tooltip=_("Column-based package browser")
     def __init__(self, controller=None, parameters=None, callback=None, element=None):
+        super(Browser, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = [
                     (_("Display result in table"), self.display_result),

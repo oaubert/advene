@@ -389,6 +389,7 @@ class TreeWidget(AdhocView):
     view_id = 'tree'
     tooltip=("Hierarchical view of an Advene package")
     def __init__(self, controller=None, parameters=None, package=None, modelclass=DetailedTreeModel):
+        super(TreeWidget, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Refresh"), self.refresh),

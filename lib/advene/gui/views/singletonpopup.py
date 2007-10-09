@@ -28,9 +28,10 @@ from advene.gui.views import AdhocView
 class SingletonPopup(AdhocView):
     """View displaying a unique popup.
     """
+    view_name = _("SingletonPopup")
+    view_id = 'singletonpopup'
     def __init__ (self, controller=None, autohide=False):
-        self.view_name = _("SingletonPopup")
-        self.view_id = 'singletonpopup'
+        super(TimeLine, self).__init__(controller=controller)
         self.close_on_package_load = False
 
         self.controller=controller

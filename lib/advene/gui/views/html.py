@@ -165,9 +165,11 @@ class mozembed_wrapper:
 
 class HTMLView(AdhocView):
     _engine = engine
+    view_name = _("HTML Viewer")
+    view_id = 'htmlview'
+    tooltip = _("Embedded HTML widget")
     def __init__ (self, controller=None, url=None):
-        self.view_name = _("HTML Viewer")
-        self.view_id = 'htmlview'
+        super(HTMLView, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.component=None
         self.engine = engine

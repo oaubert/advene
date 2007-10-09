@@ -38,6 +38,7 @@ class HistoryNavigation(AdhocView):
     tooltip= _("Bookmark timecodes with their corresponding screenshots")
     def __init__(self, controller=None, parameters=None, 
                  history=None, vertical=True, ordered=False, closable=True):
+        super(HistoryNavigation, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Save view"), self.save_view),

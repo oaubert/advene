@@ -46,9 +46,10 @@ except ImportError:
     TagWidget=None
 
 class TagBag(AdhocView):
+    view_name = _("Tag Bag")
+    view_id = 'tagbag'
     def __init__(self, controller=None, parameters=None, tags=None, vertical=True):
-        self.view_name = _("Tag Bag")
-        self.view_id = 'tagbag'
+        super(TagBag, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("New tag"), self.new_tag),

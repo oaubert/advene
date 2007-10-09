@@ -25,9 +25,10 @@ from gettext import gettext as _
 import gtk
 
 class ScrollerView(AdhocView):
+    view_name = _("Scroller")
+    view_id = 'scroller'
     def __init__(self, controller=None):
-        self.view_name = _("Scroller")
-        self.view_id = 'scroller'
+        super(ScrollerView, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = ()
 

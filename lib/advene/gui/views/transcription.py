@@ -42,9 +42,11 @@ parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 empty_representation = re.compile(r'^\s*$')
 
 class TranscriptionView(AdhocView):
+    view_name = _("Transcription")
+    view_id = 'transcription'
+    tooltip = _("Representation of a set of annotation as a transcription")
     def __init__ (self, controller=None, source=None, parameters=None):
-        self.view_name = _("Transcription")
-        self.view_id = 'transcription'
+        super(Transcription, self).__init__(controller=controller)
         self.close_on_package_load = True
         self.contextual_actions = (
             (_("Refresh"), self.refresh),

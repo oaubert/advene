@@ -32,11 +32,12 @@ from advene.gui.edit.elements import get_edit_popup
 class EditAccumulator(AccumulatorPopup):
     """View displaying a limited number of compact editing widgets.
     """
+    view_name = _("EditAccumulator")
+    view_id = 'editaccumulator'
+
     def __init__ (self, *p, **kw):
         kw['vertical']=True
         super(EditAccumulator, self).__init__(self, *p, **kw)
-        self.view_name = _("EditAccumulator")
-        self.view_id = 'editaccumulator'
         self.close_on_package_load = False
         self.edited_elements={}
 

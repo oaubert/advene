@@ -112,7 +112,7 @@ class TimeLine(AdhocView):
                   controller=None,
                   annotationtypes=None, 
                   parameters=None):
-
+        super(TimeLine, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
