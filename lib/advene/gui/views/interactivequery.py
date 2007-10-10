@@ -134,10 +134,10 @@ class InteractiveQuery(AdhocView):
         self.result=res
 
         # And display the result in the same viewbook or window
-        self.controller.gui.open_adhoc_view('interactiveresult', destination=self._destination, 
+        self.controller.gui.open_adhoc_view('interactiveresult', destination=self._destination,
                                             label=label, query=query, result=res)
         return True
-        
+
     def cancel(self, button=None):
         self.close()
         return True
@@ -177,7 +177,7 @@ class InteractiveQuery(AdhocView):
 
 class InteractiveResult(AdhocView):
     """Interactive result display.
-    
+
     Either we give the query (whose .result attribute will be set), or
     we give a simple result (structure). In the first case, an option
     will be offered to edit the query again.
@@ -220,7 +220,7 @@ class InteractiveResult(AdhocView):
             b=gtk.Button(_("Edit query again"))
             b.connect('clicked', self.edit_query)
             hb.pack_start(b, expand=False)
-            
+
         # Present choices to display the result
         if not self.result:
             v.add(gtk.Label(_("Empty result")))
@@ -234,7 +234,7 @@ class InteractiveResult(AdhocView):
             if cr == cl:
                 t=_("Result is a list of %d annotations.") % cr
             else:
-                t=_("Result is a list of  %(number)d elements with %(elements)s.") % { 
+                t=_("Result is a list of  %(number)d elements with %(elements)s.") % {
                     'elements': helper.format_element_name("annotation", len(l)),
                     'number': len(self.result)}
 
@@ -270,7 +270,7 @@ class InteractiveResult(AdhocView):
 
                     notebook.append_page(table.widget, gtk.Label(_("Annotations")))
 
-                    gtable=GenericTable(controller=self.controller, elements=[ e 
+                    gtable=GenericTable(controller=self.controller, elements=[ e
                                                                                for e in self.result
                                                                                if not isinstance(e, Annotation) ]
                                                                                )
@@ -278,6 +278,15 @@ class InteractiveResult(AdhocView):
 
                 b=get_pixmap_button('timeline.png', lambda b: self.open_in_timeline(l))
                 self.controller.gui.tooltips.set_tip(b, _("Display annotations in timeline"))
+                hb.add(b)
+
+                b=get_pixmap_button('transcription.png',
+                                    lambda b:
+                                    self.controller.gui.open_adhoc_view('transcription',
+                                                                        label=self.label,
+                                                                        destination=self._destination,
+                                                                        elements=l))
+                self.controller.gui.tooltips.set_tip(b, _("Display annotations as transcription"))
                 hb.add(b)
 
                 b=get_pixmap_button('highlight.png')
@@ -359,7 +368,7 @@ class InteractiveResult(AdhocView):
         ev.hbox.add(b)
 
         self.controller.gui.init_window_size(w, 'evaluator')
-        
+
         w.set_title(_("Results of _interactive query"))
         ev.set_expression('result')
         return True
