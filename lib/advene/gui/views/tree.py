@@ -471,7 +471,10 @@ class TreeWidget(AdhocView):
                 return False
             if helper.get_view_type(el) != 'adhoc':
                 return False
-            selection.set(selection.target, 8, 'id:' + el.id)
+            selection.set(selection.target, 8,
+                          cgi.urllib.urlencode( {
+                        'id': el.id,
+                        } ))
             return True
         else:
             print "Unknown target type for drag: %d" % targetType
