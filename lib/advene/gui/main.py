@@ -32,6 +32,7 @@ import StringIO
 import textwrap
 from sets import Set
 import re
+import cgi
 
 import advene.core.config as config
 
@@ -112,6 +113,7 @@ from advene.gui.views.scroller import ScrollerView
 from advene.gui.views.caption import CaptionView
 from advene.gui.views.editaccumulator import EditAccumulator
 from advene.gui.views.tagbag import TagBag
+import advene.gui.views.annotationdisplay
 
 class Connect:
     """Glade XML interconnection with python class.
@@ -198,7 +200,10 @@ class AdveneGUI (Connect):
         # Adhoc view toolbuttons signal handling
         def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
             if targetType == config.data.target_type['adhoc-view']:
-                selection.set(selection.target, 8, name)
+                selection.set(selection.target, 8,
+                              cgi.urllib.urlencode( {
+                            'name': name,
+                            } ))
                 return True
             return False
 
@@ -587,6 +592,7 @@ class AdveneGUI (Connect):
                   advene.gui.views.history,
                   advene.gui.views.tree,
                   advene.gui.edit.montage,
+                  advene.gui.views.annotationdisplay,
                   ):
             m.register(self.controller)
 
@@ -1451,6 +1457,20 @@ class AdveneGUI (Connect):
         elif destination in ('south', 'east', 'west', 'fareast'):
             self.viewbook[destination].add_view(view, name=label)
         return view
+
+    def get_adhoc_view_instance_from_id(self, ident):
+        """Return the adhoc view instance matching the identifier.
+        """
+        l=[v for v in self.adhoc_views if repr(v) == ident ]
+        if l:
+            return l[0]
+        else:
+            return None
+
+    def get_adhoc_view_instance_id(self, view):
+        """Return the identifier for the adhoc view instance.
+        """
+        return repr(view)
 
     def open_url_embedded(self, url):
         """Open an URL in the embedded web browser.
