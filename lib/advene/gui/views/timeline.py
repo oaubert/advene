@@ -39,7 +39,7 @@ import advene.gui.edit.elements
 from advene.gui.edit.create import CreateElementPopup
 
 import advene.util.helper as helper
-from advene.gui.util import dialog, name2color
+from advene.gui.util import dialog, name2color, get_small_stock_button, get_pixmap_button
 try:
     from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget
 except ImportError:
@@ -89,7 +89,7 @@ class TimeLine(AdhocView):
     If l is None, then use controller.package.annotations (and handle
     updates accordingly).
 
-    There are 2 adjustments used to adjust the display scale: 
+    There are 2 adjustments used to adjust the display scale:
 
        * self.scale stores how many units does a pixel
          represent. It is an absolute value (and generally integer:
@@ -110,7 +110,7 @@ class TimeLine(AdhocView):
                   minimum=None,
                   maximum=None,
                   controller=None,
-                  annotationtypes=None, 
+                  annotationtypes=None,
                   parameters=None):
         super(TimeLine, self).__init__(controller=controller)
         self.close_on_package_load = False
@@ -285,11 +285,11 @@ class TimeLine(AdhocView):
             else:
                 self.annotation_tips.disable()
             return False
-       
+
         def layout_leave_cb(layout, event):
             self.annotation_tips.disable()
             return False
-        
+
         self.layout.connect('enter_notify_event', layout_enter_cb)
         self.layout.connect('leave_notify_event', layout_leave_cb)
 
@@ -384,7 +384,7 @@ class TimeLine(AdhocView):
             r2 = b2.get_allocation()
             x_start = r1.x + 3 * r1.width / 4
             y_start  = r1.y + r1.height / 4
-            drawable.draw_line(gc, 
+            drawable.draw_line(gc,
                                x_start, y_start,
                                r2.x + r2.width / 4, r2.y + 3 * r2.height / 4)
             # Display the starting mark
@@ -447,7 +447,7 @@ class TimeLine(AdhocView):
                         t = r.content.data
             if t:
                 context.select_font_face("Helvetica",
-                                         cairo.FONT_SLANT_NORMAL, 
+                                         cairo.FONT_SLANT_NORMAL,
                                          cairo.FONT_WEIGHT_NORMAL)
                 context.set_font_size(config.data.preferences['timeline']['font-size'])
                 ext=context.text_extents(t)
@@ -458,10 +458,10 @@ class TimeLine(AdhocView):
                 context.set_source_rgb(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0)
                 context.rectangle((x_start + x_end ) / 2,
                                   (y_start + y_end ) / 2 - ext[3] - 4,
-                                  ext[2] + 2, 
+                                  ext[2] + 2,
                                   ext[3] + 2)
                 context.fill()
-                
+
                 context.set_source_rgb(0, 0, 0)
                 context.move_to((x_start + x_end ) / 2,
                                 (y_start + y_end ) / 2)
@@ -507,7 +507,7 @@ class TimeLine(AdhocView):
                 # Reset to display whole timeline
                 (w, h)=self.layout.window.get_size()
                 self.scale.set_value( (self.maximum - self.minimum) / float(w) )
-                                
+
             if self.list is None:
                 # We display the whole package, so display also
                 # empty annotation types
@@ -579,6 +579,14 @@ class TimeLine(AdhocView):
         # Display a mark
         self.set_selection_marker(self.selected_position)
         return
+
+    def set_annotation(self, a=None):
+        self.statusbar.set_annotation(a)
+        for v in self._slave_views:
+            try:
+                v.set_annotation(a)
+            except AttributeError:
+                pass
 
     def debug_cb (self, widget, data=None):
         print "Debug event."
@@ -824,7 +832,7 @@ class TimeLine(AdhocView):
         p=self.pixel2unit(widget.allocation.x + x)
         menu=advene.gui.popup.Menu(ann, controller=self.controller)
         menu.add_menuitem(menu.menu,
-                          _("Split at %s") % helper.format_time(p), 
+                          _("Split at %s") % helper.format_time(p),
                           split_annotation, widget, ann, p)
 
         menu.add_menuitem(menu.menu,
@@ -939,7 +947,7 @@ class TimeLine(AdhocView):
                 self.align_annotations(s, d, m)
                 return True
 
-            for (title, mode) in ( 
+            for (title, mode) in (
                 (_("Align both begin times"), 'begin-begin'),
                 (_("Align both end times"), 'end-end'),
                 (_("Align end time to selected begin time"), 'end-begin'),
@@ -997,7 +1005,7 @@ class TimeLine(AdhocView):
                 # which cannot (except by chance) have executed yet.
                 # So store the annotation ref in self.transmuted_annotation,
                 # and handle this code in update_annotation()
-                # b=self.get_widget_for_annotation(an) 
+                # b=self.get_widget_for_annotation(an)
                 # b.grab_focus()
                 return True
 
@@ -1066,8 +1074,8 @@ class TimeLine(AdhocView):
 
             # Popup a menu to propose the drop options
             menu=gtk.Menu()
-            for (title, action) in ( 
-                (_("Copy annotation"), 
+            for (title, action) in (
+                (_("Copy annotation"),
                  lambda i: self.controller.transmute_annotation(source,
                                                                 dest,
                                                                 delete=False)),
@@ -1112,7 +1120,7 @@ class TimeLine(AdhocView):
                     f.begin, f.end = f.end, f.begin
                 self.controller.notify('AnnotationEditEnd', annotation=source)
                 return True
-                
+
             if fr < 0.25:
                 message=_("Set begin time to %s" % helper.format_time(pos))
             elif fr > 0.75:
@@ -1126,7 +1134,7 @@ class TimeLine(AdhocView):
             menu.append(item)
             item=gtk.MenuItem(_("Cancel"))
             menu.append(item)
-            
+
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
         else:
@@ -1224,7 +1232,7 @@ class TimeLine(AdhocView):
         e.connect('enter-notify-event', lambda w, event: e.grab_focus())
 
         e.show()
-        
+
         # Put the entry on the layout
         al=button.get_allocation()
         button.parent.put(e, al.x, al.y)
@@ -1296,7 +1304,7 @@ class TimeLine(AdhocView):
         b.connect("enter_notify_event", lambda b, e: b.grab_focus())
 
         def focus_out(widget, event):
-            self.statusbar.set_annotation(None)
+            self.set_annotation(None)
             if self.options['display-relations']:
                 self.relations_to_draw = []
                 self.update_relation_lines()
@@ -1304,7 +1312,7 @@ class TimeLine(AdhocView):
         b.connect("focus-out-event", focus_out)
 
         def focus_in(button, event):
-            self.statusbar.set_annotation(button.annotation)
+            self.set_annotation(button.annotation)
             if self.options['display-relations']:
                 a=button.annotation
                 for r in button.annotation.relations:
@@ -1384,7 +1392,7 @@ class TimeLine(AdhocView):
                 f.end += incr
 
             self.controller.notify('AnnotationEditEnd', annotation=button.annotation)
-            self.statusbar.set_annotation(button.annotation)
+            self.set_annotation(button.annotation)
             button.grab_focus()
             return True
 
@@ -1465,7 +1473,7 @@ class TimeLine(AdhocView):
         if f > 1.0:
             f = 1.0
         self.fraction_adj.value=f
-        
+
         # Center the view around the selected mark
         pos = self.unit2pixel (t) - ( w * rel )
         if pos < a.lower:
@@ -1559,7 +1567,7 @@ class TimeLine(AdhocView):
         if event.button == 1:
             # Left click button in the upper part of the layout
             # or double-click anywhere in the background
-            # (timescale) will directly move the player.  
+            # (timescale) will directly move the player.
 
             # Note: event.(x|y) may be relative to a child widget, so
             # we must determine the pointer position
@@ -1817,9 +1825,9 @@ class TimeLine(AdhocView):
         height=0
 
         def set_end_time(an):
-            an.fragment.end=self.controller.player.current_position_value 
+            an.fragment.end=self.controller.player.current_position_value
             return True
-    
+
         def annotationtype_keypress_handler(widget, event, at):
             if widget.keypress(widget, event, at):
                 return True
@@ -1910,7 +1918,7 @@ class TimeLine(AdhocView):
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['annotation'],
                         gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
-        
+
         layout.set_size (width, height)
         return
 
@@ -1935,6 +1943,42 @@ class TimeLine(AdhocView):
             ti.add(self.statusbar)
             ti.set_expand(True)
             toolbar.insert(ti, -1)
+
+        # The annotation view button should be placed in the toolbar,
+        # but this prevents DND from working correctly.
+        def drag_sent(widget, context, selection, targetType, eventTime, name):
+            if targetType == config.data.target_type['adhoc-view']:
+                selection.set(selection.target, 8,
+                              cgi.urllib.urlencode( {
+                            'name': name,
+                            'master': self.controller.gui.get_adhoc_view_instance_id(self),
+                            } ))
+                return True
+            return False
+
+        def open_annotation_display(b, *p):
+            v=self.controller.gui.open_adhoc_view('annotationdisplay')
+            v.set_master_view(self)
+            return True
+
+        def open_slave_montage(b, *p):
+            v=self.controller.gui.open_adhoc_view('montage')
+            v.set_master_view(self)
+            return True
+
+        b=get_small_stock_button(gtk.STOCK_FIND, open_annotation_display)
+        self.controller.gui.tooltips.set_tip(b, _("Open an annotation display view"))
+        b.connect("drag_data_get", drag_sent, 'annotationdisplay')
+        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
+        hb.pack_start(b, expand=False)
+
+        b=get_pixmap_button('montage.png', open_slave_montage)
+        self.controller.gui.tooltips.set_tip(b, _("Open a slave montage view (coordinated zoom level)"))
+        b.connect("drag_data_get", drag_sent, 'montage')
+        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
+        hb.pack_start(b, expand=False)
 
         if self.controller.gui:
             self.player_toolbar=self.controller.gui.get_player_control_toolbar()
@@ -2081,16 +2125,16 @@ class TimeLine(AdhocView):
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
         i.connect('clicked', zoom, 1.3)
         tb.insert(i, -1)
-        
+
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
         i.connect('clicked', zoom, .7)
         tb.insert(i, -1)
 
         self.zoom_combobox=dialog.list_selector_widget(members=[
-                ( f, "%d%%" % long(100*f) ) 
-                for f in [ 
-                    (1.0 / pow(1.5, n)) for n in range(0, 10) 
-                    ] 
+                ( f, "%d%%" % long(100*f) )
+                for f in [
+                    (1.0 / pow(1.5, n)) for n in range(0, 10)
+                    ]
                 ],
                                                                 entry=True,
                                                                 callback=zoom_change)
@@ -2116,17 +2160,15 @@ class TimeLine(AdhocView):
                 self.center_on_position(self.current_position)
             return True
 
-        b=gtk.ToolButton(stock_id=gtk.STOCK_JUSTIFY_CENTER)
-        b.set_tooltip(self.tooltips, _("Center on current player position."))
-        b.connect("clicked", center_on_current_position)
-        tb.insert(b, -1)
-
-        for tooltip, icon, callback in ( 
-            (_("Preferences"), gtk.STOCK_PREFERENCES, self.edit_preferences), ):
+        for tooltip, icon, callback in (
+            (_("Preferences"), gtk.STOCK_PREFERENCES, self.edit_preferences),
+            (_("Center on current player position."), gtk.STOCK_JUSTIFY_CENTER, center_on_current_position),
+            ):
             b=gtk.ToolButton(stock_id=icon)
             b.set_tooltip(self.tooltips, tooltip)
             b.connect("clicked", callback)
             tb.insert(b, -1)
+
         tb.show_all()
         return tb
 
@@ -2165,7 +2207,7 @@ class TimeLine(AdhocView):
             store, paths = selection.get_selected_rows()
 
             rows = [ gtk.TreeRowReference(store, path) for path in paths ]
-            
+
             m=dest.get_model()
             for r in rows:
                 path=r.get_path()
@@ -2265,7 +2307,7 @@ class TimeLine(AdhocView):
                 _("edit the annotation content"): True,
                 _("move the player to the annotation"): False
                 })
-        
+
         ew.add_label(_("Annotation tooltips"))
         ew.add_checkbox(_("Statusbar at bottom"), "quickview-at-bottom", _("Put the status bar at the bottom of the screen"))
         ew.add_checkbox(_("Display annotation tooltips"), 'annotation-tooltip-activate', _("Display tooltips when the mouse gets over an annotation."))
