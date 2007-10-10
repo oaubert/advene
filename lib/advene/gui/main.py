@@ -1388,21 +1388,24 @@ class AdveneGUI (Connect):
                         tags.update(e.tags)
             view=TagBag(self.controller, parameters=parameters, tags=list(tags))
         elif name == 'transcription':
-            try:
-                source=kw['source']
-            except KeyError:
-                if parameters:
-                    # source may be defined in parameters
-                    source=None
+            kwargs={ 'controller': self.controller,
+                     'parameters': parameters }
+            if 'source' in kw:
+                kwargs['source']=kw['source']
+            elif 'elements' in kw:
+                kwargs['elements']=kw['elements']
+            elif parameters is not None:
+                # source may be defined in parameters
+                kwargs['source']=None
+            else:
+                at=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."),
+                                                create=False)
+                if at is None:
+                    return None
                 else:
-                    at=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."),
-                                                    create=False)
-                    if at is None:
-                        return None
-                    else:
-                        source="here/annotationTypes/%s/annotations/sorted" % at.id
-            view = TranscriptionView(controller=self.controller,
-                                     source=source, parameters=parameters)
+                    kwargs['source']="here/annotationTypes/%s/annotations/sorted" % at.id
+
+            view = TranscriptionView(**kwargs)
         elif name == 'webbrowser' or name == 'htmlview':
             if destination != 'popup' and HTMLView._engine is not None:
                 view = HTMLView(controller=self.controller)
@@ -1430,7 +1433,7 @@ class AdveneGUI (Connect):
             if not self.edit_accumulator:
                 self.edit_accumulator=EditAccumulator(controller=self.controller, scrollable=True)
                 view=self.edit_accumulator
-                def handle_accumulator_close(w):
+                def handle_accumulator_close(w): 
                     self.edit_accumulator = None
                     return False 
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
