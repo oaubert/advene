@@ -37,7 +37,7 @@ class EditAccumulator(AccumulatorPopup):
 
     def __init__ (self, *p, **kw):
         kw['vertical']=True
-        super(EditAccumulator, self).__init__(self, *p, **kw)
+        super(EditAccumulator, self).__init__(*p, **kw)
         self.close_on_package_load = False
         self.edited_elements={}
 
