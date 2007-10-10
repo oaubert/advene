@@ -355,13 +355,13 @@ class Montage(AdhocView):
             else:
                 print "Unknown target type for drag: %d" % targetType
             return False
-        self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+        v.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                    gtk.DEST_DEFAULT_HIGHLIGHT |
                                    gtk.DEST_DEFAULT_ALL,
                                    config.data.drag_type['annotation']
                                    + config.data.drag_type['annotation-type'], 
                                    gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
-        self.mainbox.connect("drag_data_received", mainbox_drag_received)
+        v.connect("drag_data_received", mainbox_drag_received)
 
         sw=gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
