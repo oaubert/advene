@@ -1183,10 +1183,10 @@ class TimeLine(AdhocView):
         # get_title will either return the content data, or the computed representation
         e.set_text(self.controller.get_title(annotation))
         e.set_activates_default(True)
-        def key_handler(widget, event):
+        def key_handler(widget, event, ann):
             if event.keyval == gtk.keysyms.Return:
                 # Validate the entry
-                rep=annotation.type.getMetaData(config.data.namespace, "representation")
+                rep=ann.type.getMetaData(config.data.namespace, "representation")
                 if rep is None or rep == '' or re.match('^\s+', rep):
                     r=e.get_text()
                 else:
@@ -1196,23 +1196,23 @@ class TimeLine(AdhocView):
                         # so we can update the name field.
                         name=m.group(1)
                         reg = re.compile('^' + name + '=(.+?)$', re.MULTILINE)
-                        if reg.match(annotation.content.data):
-                            r = reg.sub(name + '=' + e.get_text().replace('\n', '\\n'), annotation.content.data)
+                        if reg.match(ann.content.data):
+                            r = reg.sub(name + '=' + e.get_text().replace('\n', '\\n'), ann.content.data)
                         else:
                             # The key is not present, add it
-                            if annotation.content.data:
-                                r = annotation.content.data + "\n%s=%s" % (name,
+                            if ann.content.data:
+                                r = ann.content.data + "\n%s=%s" % (name,
                                                                            e.get_text().replace('\n', '\\n'))
                             else:
                                 r = "%s=%s" % (name,
                                                e.get_text().replace('\n', '\\n'))
                     else:
                         self.log("Cannot update the annotation, its representation is too complex")
-                        r=annotation.content.data
-                annotation.content.data = r
+                        r=ann.content.data
+                ann.content.data = r
                 if callback:
-                    callback(annotation)
-                self.controller.notify('AnnotationEditEnd', annotation=annotation)
+                    callback(ann)
+                self.controller.notify('AnnotationEditEnd', annotation=ann)
                 close_editbox()
                 return True
             elif event.keyval == gtk.keysyms.Escape:
@@ -1220,7 +1220,7 @@ class TimeLine(AdhocView):
                 close_editbox()
                 return True
             return False
-        e.connect("key_press_event", key_handler)
+        e.connect("key_press_event", key_handler, annotation)
         e.connect('enter-notify-event', lambda w, event: e.grab_focus())
 
         e.show()
