@@ -66,6 +66,7 @@ class AdhocView(object):
 
         # List of slave views (to be closed on master view close)
         self._slave_views=[]
+        self.master_view=None
 
         # List of couples (object, signal handler id)
         self._signal_ids=[]
@@ -78,6 +79,7 @@ class AdhocView(object):
 
     def register_slave_view(self, v):
         self._slave_views.append(v)
+        v.master_view=self
 
     def unregister_slave_view(self, v):
         try:
@@ -98,6 +100,8 @@ class AdhocView(object):
     def close(self, *p):
         if self.controller and self.controller.gui:
             self.controller.gui.unregister_view (self)
+        if self.master_view is not None:
+            self.master_view.unregister_slave_view(self)
         for v in self._slave_views:
             v.close()
         for o, i in self._signal_ids:
