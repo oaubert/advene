@@ -21,6 +21,7 @@
 import advene.core.config as config
 
 import gtk
+import cgi
 
 from gettext import gettext as _
 from advene.gui.views import AdhocView
@@ -39,7 +40,9 @@ class ViewBook(AdhocView):
             views = []
         self.views=[]
 
+        # Record the viewbook location (south, west, east, fareast)
         self.location=location
+
         # List of widgets that cannot be removed
         self.permanent_widgets = []
 
@@ -81,6 +84,7 @@ class ViewBook(AdhocView):
                 name="FIXME"
         self.controller.gui.register_view (v)
         self.views.append(v)
+        v._destination=self.location
         if permanent:
             self.permanent_widgets.append(v)
 
@@ -148,7 +152,7 @@ class ViewBook(AdhocView):
         def label_drag_sent(widget, context, selection, targetType, eventTime, v):
             if targetType == config.data.target_type['adhoc-view-instance']:
                 # This is not very robust, but allows to transmit a view instance reference
-                selection.set(selection.target, 8, repr(v))
+                selection.set(selection.target, 8, self.controller.gui.get_adhoc_view_instance_id(v))
                 self.detach_view(v)
                 return True
             return False
@@ -195,11 +199,11 @@ class ViewBook(AdhocView):
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['adhoc-view']:
-            name=selection.data
+            data=dict(cgi.parse_qsl(selection.data))
             label=None
-            # Parametered view. Get the view itself.
-            if name.startswith('id:'):
-                ident=name[3:]
+            if 'id' in data:
+                # Saved parametered view. Get the view itself.
+                ident=data['id']
                 v=helper.get_id(self.controller.package.views, ident)
                 # Get the view_id
                 if v is None:
@@ -207,19 +211,26 @@ class ViewBook(AdhocView):
                     return True
                 name=v
                 label=v.title
+            elif 'name' in data:
+                name=data['name']
+            else:
+                # Bug
+                self.log("Cannot happen")
+                return True
 
             if self.controller.gui:
                 view=self.controller.gui.open_adhoc_view(name, label=label, destination=self.location)
+                if 'master' in data:
+                    # A master view has been specified. Connect it to
+                    # the created view.
+                    master=self.controller.gui.get_adhoc_view_instance_from_id(data['master'])
+                    view.set_master_view(master)
             return True
         elif targetType == config.data.target_type['adhoc-view-instance']:
-            l=[v
-               for v in self.controller.gui.adhoc_views
-               if repr(v) == selection.data ]
-            if l:
-                v=l[0]
+            v=self.controller.gui.get_adhoc_view_instance_from_id(selection.data)
+            if v is not None:
                 wid=v.widget
                 self.add_view(v)
-                #FIXME: should update v._destination
             else:
                 print "Cannot find view ", selection.data
             return True
