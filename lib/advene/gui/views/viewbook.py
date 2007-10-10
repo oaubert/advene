@@ -26,7 +26,7 @@ import cgi
 from gettext import gettext as _
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
-from advene.gui.util import get_pixmap_button
+from advene.gui.util import get_pixmap_button, dialog
 
 class ViewBook(AdhocView):
     """Notebook containing multiple views
@@ -85,6 +85,7 @@ class ViewBook(AdhocView):
         self.controller.gui.register_view (v)
         self.views.append(v)
         v._destination=self.location
+        v._label=name
         if permanent:
             self.permanent_widgets.append(v)
 
@@ -146,6 +147,16 @@ class ViewBook(AdhocView):
 
                 menu.show_all()
                 menu.popup(None, None, None, 0, gtk.get_current_event_time())
+                return True
+            elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+                # Double click: propose to rename the view
+                label_widget=button.get_children()[0]
+                lab=dialog.entry_dialog(title=_("Rename the view"),
+                                        text=_("Please enter the new name of the view"),
+                                        default=label_widget.get_text())
+                if lab is not None:
+                    label_widget.set_text(lab)
+                    view._label=lab
                 return True
             return False
 
@@ -230,7 +241,7 @@ class ViewBook(AdhocView):
             v=self.controller.gui.get_adhoc_view_instance_from_id(selection.data)
             if v is not None:
                 wid=v.widget
-                self.add_view(v)
+                self.add_view(v, name=v._label)
             else:
                 print "Cannot find view ", selection.data
             return True
