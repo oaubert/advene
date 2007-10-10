@@ -45,8 +45,8 @@ class TranscriptionView(AdhocView):
     view_name = _("Transcription")
     view_id = 'transcription'
     tooltip = _("Representation of a set of annotation as a transcription")
-    def __init__ (self, controller=None, source=None, parameters=None):
-        super(Transcription, self).__init__(controller=controller)
+    def __init__ (self, controller=None, source=None, elements=None, parameters=None):
+        super(TranscriptionView, self).__init__(controller=controller)
         self.close_on_package_load = True
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
@@ -76,13 +76,18 @@ class TranscriptionView(AdhocView):
         if source is None and a.has_key('source'):
             source=a['source']
 
-        if source is None:
+        if source is None and elements is None:
             # Use whole package
             source="here/annotations"
 
         # source is a TALES expression, which is evaluated in the
         # package context. It must return a list of annotations.
         self.source = source
+        # elements is a list of annotations (typically the output of
+        # an interactivequery). It is taken into account only if
+        # source is None
+        self.elements = elements
+        
         self.model=[]
         self.regenerate_model()
         
@@ -114,10 +119,16 @@ class TranscriptionView(AdhocView):
         self.widget=self.build_widget()
 
     def get_save_arguments(self):
-        arguments = [ ('source', self.source) ]
+        if self.source is not None:
+            arguments = [ ('source', self.source) ]
+        else:
+            arguments = []
         return self.options, arguments
 
     def regenerate_model(self):
+        if self.source is None:
+            self.model=self.elements[:]
+            return
         c=self.controller.build_context()
         try:
             self.model=c.evaluateValue(self.source)
