@@ -1733,6 +1733,9 @@ class TimeLine(AdhocView):
             return True
         (w, h) = parent.get_size ()
 
+        if w < 2:
+            return True
+
         fraction=self.fraction_adj.value
 
         self.zoom_combobox.child.set_text('%d%%' % long(100 * fraction))
@@ -1940,10 +1943,6 @@ class TimeLine(AdhocView):
         vbox.pack_start(hb, expand=False)
 
         vbox.add (self.get_packed_widget())
-
-        # Make sure that the timeline display is in sync with the
-        # fraction widget value
-        self.fraction_event (vbox)
 
         if self.options['quickview-at-bottom']:
             vbox.pack_start(self.statusbar, expand=False)
