@@ -339,12 +339,15 @@ class TimeLine(AdhocView):
         self.widget = self.get_full_widget()
         self.update_legend_widget(self.legend)
 
-        def set_default_parameters(widget):
+        # Set default parameters (zoom) and refresh the legend widget
+        # on the first expose signal
+        def set_default_parameters(widget, *p):
             self.fraction_adj.value=default_zoom
             self.adjustment.set_value(u2p(default_position))
+            self.resize_legend_widget(self.legend)
+            self.widget.disconnect(self.expose_signal)
             return False
-
-        self.widget.connect('realize', set_default_parameters)
+        self.expose_signal=self.widget.connect('expose-event', set_default_parameters)
 
 
     def get_save_arguments(self):
@@ -1816,6 +1819,24 @@ class TimeLine(AdhocView):
             return True
         return False
 
+    def resize_legend_widget(self, layout):
+        width=0
+        height=0
+        for c in layout.get_children():
+            if not isinstance(c, AnnotationTypeWidget):
+                continue
+            width=max(width, c.width)
+
+        def resize(b, w):
+            if isinstance(b, AnnotationTypeWidget):
+                b.width=w
+                b.update_widget()
+            return True
+
+        # Resize all buttons to fit the largest
+        if width > 10:
+            layout.foreach(resize, width)
+
     def update_legend_widget(self, layout):
         """Update the legend widget.
 
@@ -1884,19 +1905,7 @@ class TimeLine(AdhocView):
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['annotation-type'], gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK)
 
-            # Does not work for the first time, since the layout itself is not realized,
-            # thus its children cannot know their allocation.
-            width=max(width, b.width)
             height=max (height, self.layer_position[t] + 3 * self.button_height)
-
-        def resize(b, w):
-            b.width=w
-            b.update_widget()
-            return True
-
-        # Resize all buttons to fit the largest
-        if width > 30:
-            layout.foreach(resize, width)
 
         # Add the "New type" button at the end
         b=gtk.Button()
@@ -1920,6 +1929,7 @@ class TimeLine(AdhocView):
                         gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
 
         layout.set_size (width, height)
+        self.resize_legend_widget(layout)
         return
 
     def get_full_widget(self):
