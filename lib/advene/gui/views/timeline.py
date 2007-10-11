@@ -128,8 +128,6 @@ class TimeLine(AdhocView):
             'display-relation-content': True,
             # If False, then double-click will go to the annotation position
             'edit-on-double-click': True,
-            # Put the quickview bar at the bottom of the screen
-            'quickview-at-bottom': False,
             # Delay before displaying the annotation tooltip, in ms.
             'annotation-tooltip-delay': 2000,
             'annotation-tooltip-activate': True,
@@ -1948,11 +1946,6 @@ class TimeLine(AdhocView):
         toolbar.insert(ti, -1)
 
         self.statusbar=QuickviewBar(self.controller)
-        if not self.options['quickview-at-bottom']:
-            ti=gtk.ToolItem()
-            ti.add(self.statusbar)
-            ti.set_expand(True)
-            toolbar.insert(ti, -1)
 
         # The annotation view button should be placed in the toolbar,
         # but this prevents DND from working correctly.
@@ -1998,8 +1991,7 @@ class TimeLine(AdhocView):
 
         vbox.add (self.get_packed_widget())
 
-        if self.options['quickview-at-bottom']:
-            vbox.pack_start(self.statusbar, expand=False)
+        vbox.pack_start(self.statusbar, expand=False)
 
         return vbox
 
@@ -2319,7 +2311,6 @@ class TimeLine(AdhocView):
                 })
 
         ew.add_label(_("Annotation tooltips"))
-        ew.add_checkbox(_("Statusbar at bottom"), "quickview-at-bottom", _("Put the status bar at the bottom of the screen"))
         ew.add_checkbox(_("Display annotation tooltips"), 'annotation-tooltip-activate', _("Display tooltips when the mouse gets over an annotation."))
         ew.add_spin(_("Annotation tooltip delay"), "annotation-tooltip-delay", _("Delay before displaying the tooltip"), 10, 6000)
 
