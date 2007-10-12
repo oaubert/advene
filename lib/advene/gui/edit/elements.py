@@ -123,6 +123,12 @@ class EditElementPopup (object):
     def register_form (self, f):
         self.forms.append(f)
 
+    def refresh(self):
+        """Refresh the display if the element has changed.
+        """
+        for f in self.forms:
+            f.refresh()
+
     def can_edit (el):
         """Return True if the class can edit the given element.
 
@@ -856,6 +862,11 @@ class EditForm(object):
         """
         raise Exception ("This method should be implemented in subclasses.")
 
+    def refresh(self):
+        """Update the representation wrt. the element value.
+        """
+        pass
+
     def get_view (self, compact=False):
         """Return the view (gtk Widget) for this form.
         """
@@ -963,10 +974,15 @@ class EditContentForm(EditForm):
         """Update the element fields according to the values in the view."""
         if self.contentform is None:
             return True
-        if self.mimetypeeditable:
+        if self.mimetypeeditable and not compact:
             self.element.mimetype = self.mimetype.child.get_text()
         self.contentform.update_element()
         return True
+
+    def refresh(self):
+        if self.mimetype is not None:
+            self.mimetype.child.set_text(self.element.mimetype)
+        self.contentform.refresh()
 
     def get_view (self, compact=False):
         """Generate a view widget for editing content."""
@@ -987,6 +1003,8 @@ class EditContentForm(EditForm):
             hbox.pack_start(self.mimetype)
 
             vbox.pack_start(hbox, expand=False)
+        else:
+            self.mimetype=None
 
         handler = config.data.get_content_handler(self.element.mimetype)
         if handler is None:
@@ -1034,6 +1052,9 @@ class TextContentHandler (ContentHandler):
     def set_editable (self, boolean):
         self.editable = boolean
 
+    def refresh(self):
+        self.view.get_buffer().set_text(self.element.data)
+        
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if not self.editable:
@@ -1378,6 +1399,12 @@ class EditFragmentForm(EditForm):
         else:
             return True
 
+    def refresh(self):
+        self.begin.value=self.element.begin
+        self.begin.update_display()
+        self.end.value=self.element.end
+        self.end.update_display()
+        
     def update_element(self):
         if not self.editable:
             return False
@@ -1480,6 +1507,12 @@ class EditGenericForm(EditForm):
 
         hbox.show_all()
         return hbox
+
+    def refresh(self):
+        v=self.getter()
+        if v is None:
+            v=""
+        self.entry.set_text(v)
 
     def update_element(self):
         if not self.editable:
@@ -1612,6 +1645,12 @@ class EditAttributesForm (EditForm):
             return False
         else:
             return True
+
+    def refresh(self):
+        model=self.view.get_model()
+        for row in model:
+            at=row[self.COLUMN_NAME]
+            row[self.COLUMN_VALUE]=self.value_to_repr(at, getattr (self.element, at))
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
@@ -1778,6 +1817,7 @@ class EditElementListForm(EditForm):
         treeview=gtk.TreeView(model=self.store)
         treeview.set_reorderable(True)
         treeview.connect("button_press_event", self.tree_view_button_cb)
+        self.treeview=treeview
 
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn(self.title, renderer,
@@ -1800,6 +1840,10 @@ class EditElementListForm(EditForm):
         vbox.show_all()
 
         return vbox
+
+    def refresh(self):
+        self.store=self.create_store()
+        self.treeview.set_model(self.store)
 
     def update_element(self):
         if not self.editable:
@@ -1830,6 +1874,10 @@ class EditTagForm(EditForm):
 
     def get_current_tags(self):
         return self.view.tags
+
+    def refresh(self):
+        self.view.tag=self.element.tags
+        self.view.refresh()
 
     def update_element(self):
         if not self.editable:
