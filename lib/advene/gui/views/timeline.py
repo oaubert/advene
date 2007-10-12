@@ -1183,8 +1183,8 @@ class TimeLine(AdhocView):
         if button is None:
             return False
 
-        def close_editbox(*p):
-            e.destroy()
+        def close_editbox(widget, *p):
+            widget.destroy()
             button.grab_focus()
             return True
 
@@ -1192,12 +1192,13 @@ class TimeLine(AdhocView):
         # get_title will either return the content data, or the computed representation
         e.set_text(self.controller.get_title(annotation))
         e.set_activates_default(True)
-        def key_handler(widget, event, ann):
+
+        def key_handler(widget, event, ann, cb, controller, close_eb):
             if event.keyval == gtk.keysyms.Return:
                 # Validate the entry
                 rep=ann.type.getMetaData(config.data.namespace, "representation")
                 if rep is None or rep == '' or re.match('^\s+', rep):
-                    r=e.get_text()
+                    r=widget.get_text()
                 else:
                     m=parsed_representation.match(rep)
                     if m:
@@ -1206,30 +1207,30 @@ class TimeLine(AdhocView):
                         name=m.group(1)
                         reg = re.compile('^' + name + '=(.+?)$', re.MULTILINE)
                         if reg.match(ann.content.data):
-                            r = reg.sub(name + '=' + e.get_text().replace('\n', '\\n'), ann.content.data)
+                            r = reg.sub(name + '=' + widget.get_text().replace('\n', '\\n'), ann.content.data)
                         else:
                             # The key is not present, add it
                             if ann.content.data:
                                 r = ann.content.data + "\n%s=%s" % (name,
-                                                                           e.get_text().replace('\n', '\\n'))
+                                                                    widget.get_text().replace('\n', '\\n'))
                             else:
                                 r = "%s=%s" % (name,
                                                widget.get_text().replace('\n', '\\n'))
                     else:
-                        self.log("Cannot update the annotation, its representation is too complex")
+                        controller.log("Cannot update the annotation, its representation is too complex")
                         r=ann.content.data
                 ann.content.data = r
-                if callback:
-                    callback(ann)
-                self.controller.notify('AnnotationEditEnd', annotation=ann)
-                close_editbox()
+                if cb:
+                    cb(ann)
+                controller.notify('AnnotationEditEnd', annotation=ann)
+                close_eb(widget)
                 return True
             elif event.keyval == gtk.keysyms.Escape:
                 # Abort and close the entry
-                close_editbox()
+                close_eb(widget)
                 return True
             return False
-        e.connect("key_press_event", key_handler, annotation)
+        e.connect("key_press_event", key_handler, annotation, callback, self.controller, close_editbox)
         def grab_focus(widget, event):
             widget.grab_focus()
             return False
