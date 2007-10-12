@@ -788,7 +788,10 @@ class TranscriptionEdit(AdhocView):
         elif self.options['automatic-mark-insertion-delay']:
             if event.time - self.last_keypress_time >= self.options['automatic-mark-insertion-delay']:
                 # Insert a mark
-                self.insert_timestamp_mark()
+                # Is there any text after the cursor ? If so, do not insert the mark
+                b=self.textview.get_buffer()
+                if b.get_iter_at_mark(b.get_insert()).ends_line():
+                    self.insert_timestamp_mark()
             self.last_keypress_time = event.time
             return False
 
