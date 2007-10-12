@@ -22,6 +22,7 @@ import sys
 import re
 
 import gtk
+import gobject
 
 import urllib
 
@@ -152,8 +153,20 @@ class TranscriptionEdit(AdhocView):
 
         sw.add(self.textview)
 
+        self.statusbar=gtk.Statusbar()
+        vbox.pack_start(self.statusbar, expand=False)
         vbox.show_all()
         return vbox
+
+    def message(self, m):
+        context_id=self.statusbar.get_context_id('error')
+        message_id=self.statusbar.push(context_id, m)
+        self.controller.log('note-taking:' + m)
+        # Display the message only 1 second
+        def undisplay():
+            self.statusbar.pop(context_id)
+            return False
+        gobject.timeout_add(1000, undisplay)
 
     def remove_timestamp_mark(self, button, anchor, child):
         b=self.textview.get_buffer()
@@ -170,9 +183,17 @@ class TranscriptionEdit(AdhocView):
         """
         b=self.textview.get_buffer()
         it=b.get_iter_at_mark(b.get_insert())
-        self.create_timestamp_mark(self.controller.player.current_position_value,
-                                   it)
-        
+
+        t=self.controller.player.current_position_value - self.options['delay']
+        m, i=self.find_preceding_mark(it)
+        if m is not None and m.timestamp >= t:
+            self.message(_("Invalid timestamp mark"))
+            return False
+        m, i=self.find_following_mark(it)
+        if m is not None and m.timestamp <= t:
+            self.message(_("Invalid timestamp mark"))
+            return False
+        self.create_timestamp_mark(t, it)
 
     def button_press_event_cb(self, textview, event):
         if event.state & gtk.gdk.CONTROL_MASK:
@@ -201,11 +222,11 @@ class TranscriptionEdit(AdhocView):
             t=p.current_position_value - self.options['delay']
             m, i=self.find_preceding_mark(it)
             if m is not None and m.timestamp >= t:
-                self.controller.log(_("Invalid timestamp mark"))
+                self.message(_("Invalid timestamp mark"))
                 return False
             m, i=self.find_following_mark(it)
             if m is not None and m.timestamp <= t:
-                self.controller.log(_("Invalid timestamp mark"))
+                self.message(_("Invalid timestamp mark"))
                 return False
             # Make a snapshot
             self.controller.update_snapshot(t)
@@ -590,7 +611,7 @@ class TranscriptionEdit(AdhocView):
                                 '[%s]' % helper.format_time(d['end']) ) )
             last=d['end']
         f.close()
-        self.controller.log(_("Transcription saved to %s") % filename)
+        self.message(_("Transcription saved to %s") % filename)
         self.sourcefile=filename
         return True
 
@@ -615,8 +636,8 @@ class TranscriptionEdit(AdhocView):
                 fname=filename
             f=urllib.urlopen(fname)
         except IOError, e:
-            self.controller.log(_("Cannot open %(filename)s: %(error)s") % {'filename': filename, 
-                                                                            'error': unicode(e) })
+            self.message(_("Cannot open %(filename)s: %(error)s") % {'filename': filename, 
+                                                                     'error': unicode(e) })
             return
         lines="".join(f.readlines())
         try:
@@ -666,7 +687,7 @@ class TranscriptionEdit(AdhocView):
 
     def import_annotations_cb(self, button=None):
         if not self.controller.gui:
-            self.controller.log(_("Cannot import annotations: no existing interface"))
+            self.message(_("Cannot import annotations: no existing interface"))
             return True
         at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to import"), create=False)
         if at is None:
@@ -698,13 +719,13 @@ class TranscriptionEdit(AdhocView):
 
     def convert_transcription_cb(self, button=None):
         if not self.controller.gui:
-            self.controller.log(_("Cannot convert the data: no associated package"))
+            self.message(_("Cannot convert the data: no associated package"))
             return True
 
         at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to generate"), create=True)
 
         if at is None:
-            self.controller.log(_("Conversion cancelled"))
+            self.message(_("Conversion cancelled"))
             return True
 
         if len(at.annotations):
@@ -725,7 +746,7 @@ class TranscriptionEdit(AdhocView):
 
         self.controller.package._modified=True
         self.controller.notify("PackageLoad", package=ti.package)
-        self.controller.log(_('Converted from file %s :') % self.sourcefile)
+        self.message(_('Converted from file %s :') % self.sourcefile)
         self.controller.log(ti.statistics_formatted())
         # Feedback
         dialog.message_dialog(
@@ -790,8 +811,19 @@ class TranscriptionEdit(AdhocView):
                 # Insert a mark
                 # Is there any text after the cursor ? If so, do not insert the mark
                 b=self.textview.get_buffer()
-                if b.get_iter_at_mark(b.get_insert()).ends_line():
-                    self.insert_timestamp_mark()
+                it=b.get_iter_at_mark(b.get_insert())
+                if it.ends_line():
+                    # Check that we are in a valid position
+                    t=p.current_position_value - self.options['delay']
+                    m, i=self.find_preceding_mark(it)
+                    if m is not None and m.timestamp >= t:
+                        pass
+                    else:
+                        m, i=self.find_following_mark(it)
+                        if m is not None and m.timestamp <= t:
+                            pass
+                        else:
+                            self.insert_timestamp_mark()
             self.last_keypress_time = event.time
             return False
 
