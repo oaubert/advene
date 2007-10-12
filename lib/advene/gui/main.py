@@ -371,6 +371,9 @@ class AdveneGUI (Connect):
         # Update the content indexer
         if event.endswith('EditEnd'):
             self.controller.package._indexer.element_update(annotation)
+            # Refresh the edit popup
+            for e in [ e for e in self.edit_popups if e.element == annotation ]:
+                e.refresh()
         return True
 
     def relation_lifecycle(self, context, parameters):
@@ -387,6 +390,9 @@ class AdveneGUI (Connect):
                 v.update_relation(relation=relation, event=event)
             except AttributeError:
                 pass
+        # Refresh the edit popup
+        for e in [ e for e in self.edit_popups if e.element == relation ]:
+            e.refresh()
         return True
 
     def view_lifecycle(self, context, parameters):
@@ -415,6 +421,9 @@ class AdveneGUI (Connect):
         # Update the content indexer
         if event.endswith('EditEnd'):
             self.controller.package._indexer.element_update(view)
+            # Refresh the edit popup
+            for e in [ e for e in self.edit_popups if e.element == view ]:
+                e.refresh()
 
         return True
 
@@ -433,8 +442,11 @@ class AdveneGUI (Connect):
             except AttributeError:
                 pass
         # Update the content indexer
-        if event.endswith('Create'):
+        if event.endswith('EditEnd'):
             self.controller.package._indexer.element_update(query)
+            # Refresh the edit popup
+            for e in [ e for e in self.edit_popups if e.element == query ]:
+                e.refresh()
         return True
 
     def resource_lifecycle(self, context, parameters):
@@ -452,6 +464,10 @@ class AdveneGUI (Connect):
                 v.update_resource(resource=resource, event=event)
             except AttributeError:
                 pass
+        if event.endswith('EditEnd'):
+            # Refresh the edit popup
+            for e in [ e for e in self.edit_popups if e.element == resource ]:
+                e.refresh()
         return True
 
     def schema_lifecycle(self, context, parameters):
@@ -469,7 +485,10 @@ class AdveneGUI (Connect):
                 v.update_schema(schema=schema, event=event)
             except AttributeError:
                 pass
-
+        if event.endswith('EditEnd'):
+            # Refresh the edit popup
+            for e in [ e for e in self.edit_popups if e.element == schema ]:
+                e.refresh()
         return True
 
     def annotationtype_lifecycle(self, context, parameters):
@@ -491,6 +510,10 @@ class AdveneGUI (Connect):
         # Update the content indexer
         if event.endswith('Create'):
             self.controller.package._indexer.element_update(at)
+        if event.endswith('EditEnd'):
+            # Refresh the edit popup
+            for e in [ e for e in self.edit_popups if e.element == at ]:
+                e.refresh()
         return True
 
     def relationtype_lifecycle(self, context, parameters):
@@ -510,6 +533,11 @@ class AdveneGUI (Connect):
         # Update the content indexer
         if event.endswith('Create'):
             self.controller.package._indexer.element_update(rt)
+        if event.endswith('EditEnd'):
+            # Refresh the edit popup
+            for e in [ e for e in self.edit_popups if e.element == rt ]:
+                e.refresh()
+
         return True
 
     def handle_element_delete(self, context, parameters):
@@ -522,10 +550,8 @@ class AdveneGUI (Connect):
             return True
         el=event.replace('Delete', '').lower()
         element=context.evaluateValue(el)
-        w=[ e for e in self.edit_popups if e.element == element ]
-        if w:
-            for e in w:
-                e.close_cb()
+        for e in [ e for e in self.edit_popups if e.element == element ]:
+            e.close_cb()
         return True
 
     def on_view_activation(self, context, parameters):
