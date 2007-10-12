@@ -1214,7 +1214,7 @@ class TimeLine(AdhocView):
                                                                            e.get_text().replace('\n', '\\n'))
                             else:
                                 r = "%s=%s" % (name,
-                                               e.get_text().replace('\n', '\\n'))
+                                               widget.get_text().replace('\n', '\\n'))
                     else:
                         self.log("Cannot update the annotation, its representation is too complex")
                         r=ann.content.data
@@ -1230,7 +1230,10 @@ class TimeLine(AdhocView):
                 return True
             return False
         e.connect("key_press_event", key_handler, annotation)
-        e.connect('enter-notify-event', lambda w, event: e.grab_focus())
+        def grab_focus(widget, event):
+            widget.grab_focus()
+            return False
+        e.connect('enter-notify-event', grab_focus)
 
         e.show()
 
