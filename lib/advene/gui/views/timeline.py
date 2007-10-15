@@ -1031,9 +1031,8 @@ class TimeLine(AdhocView):
             source_uri=selection.data
             source=self.controller.package.annotationTypes.get(source_uri)
             dest=widget.annotationtype
-            if source in self.annotationtypes and dest in self.annotationtypes:
+            if source != dest and source in self.annotationtypes and dest in self.annotationtypes:
                 self.annotationtypes.remove(source)
-
                 j=self.annotationtypes.index(dest)
                 l= self.annotationtypes[:j+1]
                 l.append(source)
