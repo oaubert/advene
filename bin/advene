@@ -21,9 +21,12 @@ import sys
 import os
 import StringIO
 
+#import psyco; psyco.log(); psyco.profile()
+
 # Magic stuff before the instanciation of Advene : we set the
 # sys.path and the various config.data.path
 
+logfile=None
 # Try to find if we are in a development tree.
 (maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
 if subdir == 'bin' and  os.path.exists(os.path.join(maindir, "setup.py")):
@@ -152,22 +155,18 @@ if __name__ == '__main__':
     traceback.print_exc (file = s)
     err=s.getvalue()
     print err
-    # Let's save the traceback in a file, so that it can be sent by
-    # e-mail
-    errorfile=config.data.advenefile('error.txt', 'settings')
-    f=open(errorfile, 'w')
-    f.write("Advene %s crash\n\n" % config.data.version_string)
-    f.write(err)
-    f.close()
-    
-    d=gtk.MessageDialog(None,
-                        gtk.DIALOG_MODAL,
-                        gtk.MESSAGE_ERROR,
-                        gtk.BUTTONS_OK,
-                        _("An error occurred."))
-    d.format_secondary_text(_("You can inform the Advene developers by sending the file\n %s\n to advene@liris.cnrs.fr, along with a description of how the bug occurred.") % errorfile)
-    d.connect('response', lambda d, r: gtk.main_quit())
-    d.show()
-    gtk.main()
 
-    
+    if logfile is not None:
+      d=gtk.MessageDialog(None,
+                          gtk.DIALOG_MODAL,
+                          gtk.MESSAGE_ERROR,
+                          gtk.BUTTONS_OK,
+                          _("An error occurred."))
+      d.format_secondary_text(_("You can inform the Advene developers by sending the file\n %s\n to advene@liris.cnrs.fr, along with a description of how the bug occurred.") % logfile)
+      def q(*p):
+        gtk.main_quit()
+        return True
+
+      d.connect('response', q)
+      d.show()
+      gtk.main()
