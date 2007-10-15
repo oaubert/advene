@@ -311,6 +311,7 @@ class Config(object):
         self.video_extensions = (
             '.asf', 
             '.avi', 
+            '.flv',
             '.mov',
             '.mpg', '.mpeg',  '.mp4', 
             '.ogm',
@@ -396,7 +397,8 @@ class Config(object):
                           action="store",
                           type="choice",
                           # FIXME: we should register player plugins and use introspection
-                          choices=("vlcnative", "dummy", "vlcorbit", "xine", "gstreamer", "quicktime"),
+                          choices=("vlcnative", "dummy", "vlcorbit", 
+                                   "xine", "gstreamer", "quicktime", "gstrecorder"),
                           default=None,
                           help="Video player selection")
 
