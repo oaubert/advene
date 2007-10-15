@@ -154,6 +154,7 @@ class TranscriptionEdit(AdhocView):
         sw.add(self.textview)
 
         self.statusbar=gtk.Statusbar()
+        self.statusbar.set_has_resize_grip(False)
         vbox.pack_start(self.statusbar, expand=False)
         vbox.show_all()
         return vbox
