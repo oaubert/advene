@@ -2526,7 +2526,7 @@ class AdveneGUI (Connect):
         if stream:
             s=helper.get_video_stream_from_website(stream)
             if s is not None:
-                dialog.message_dialog(_("Successfully extracted the video stream address from the given url"))
+                dialog.message_dialog(_("Successfully extracted the video stream address (%s) from the url.\n") % s)
                 stream=s
             self.controller.set_default_media(stream)
         return True
