@@ -376,6 +376,18 @@ class EditWidget(gtk.VBox):
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
         d.vbox.add(self)
 
+        def dialog_keypressed_cb(widget=None, event=None):
+            """Generic dialog keypress handler.
+            """
+            if event.keyval == gtk.keysyms.Return:
+                widget.response(gtk.RESPONSE_OK)
+                return True
+            elif event.keyval == gtk.keysyms.Escape:
+                widget.response(gtk.RESPONSE_CANCEL)
+                return True
+            return False
+        d.connect('key_press_event', dialog_keypressed_cb)
+
         self.show_all()
         res=d.run()
         d.destroy()
