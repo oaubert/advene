@@ -19,6 +19,7 @@
 
 import sys
 import os
+import time
 import StringIO
 
 #import psyco; psyco.log(); psyco.profile()
@@ -66,6 +67,8 @@ else:
     except IOError:
       # The file cannot be written. Well, let us use the console...
       pass
+
+print config.data.version_string, "run at", time.strftime("%F %H:%M:%S %z"), "on", sys.platform
 
 # Maybe we are running from a pyinstaller version
 if not os.path.exists(config.data.path['resources']):
