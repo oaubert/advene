@@ -215,6 +215,35 @@ class EditWidget(gtk.VBox):
         entry.connect("changed", self.__on_change, property,
                       self.CHANGE_ENTRY)
 
+    def add_entry_button(self, label, property, help, button_label, callback):
+        """Text entry with an action button.
+        
+        The callback function has the following signature:
+        callback(button, entry)
+        """
+        lbl = gtk.Label(label)
+        lbl.show()
+        entry = gtk.Entry()
+        entry.show()
+        align = gtk.Alignment()
+        align.show()
+        align.add(lbl)
+
+        hbox = gtk.HBox()
+        hbox.show()
+        hbox.add(entry)
+        b = gtk.Button(button_label)
+        b.connect('clicked', callback, entry)
+        hbox.pack_start(b, expand=False)
+
+        self.__tooltips.set_tip(entry, help)
+        self.__add_line(1, align, hbox)
+
+        value = self.__get_config(property)
+        entry.set_text(value)
+        entry.connect("changed", self.__on_change, property,
+                      self.CHANGE_ENTRY)
+
 
 
     def add_spin(self, label, property, help, low, up):
