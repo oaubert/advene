@@ -2548,13 +2548,18 @@ class AdveneGUI (Connect):
             'duration': str(self.controller.package.cached_duration),
             'title': self.controller.package.title or ""
             }
+        def reset_duration(b, entry):
+            v=long(self.controller.player.stream_duration)
+            entry.set_text(str(v))
+            return True
+
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Package properties"))
         ew.add_entry(_("Author"), "author", _("Author name"))
         ew.add_entry(_("Date"), "date", _("Package creation date"))
         ew.add_entry(_("Title"), "title", _("Package title"))
         ew.add_file_selector(_("Associated media"), 'media', _("Select a movie file"))
-        ew.add_entry(_("Duration"), "duration", _("Media duration in ms"))
+        ew.add_entry_button(_("Duration"), "duration", _("Media duration in ms"), _("Reset"), reset_duration)
 
         res=ew.popup()
 
