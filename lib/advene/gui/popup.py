@@ -470,6 +470,7 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         if self.readonly:
             return
+        add_item(_("Edit package properties..."), self.controller.gui.on_package_properties1_activate)
         add_item(_("Create a new static view..."), self.create_element, 'staticview', element)
         add_item(_("Create a new dynamic view..."), self.create_element, 'dynamicview', element)
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
