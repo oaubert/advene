@@ -45,6 +45,7 @@ class TranscriptionView(AdhocView):
     view_name = _("Transcription")
     view_id = 'transcription'
     tooltip = _("Representation of a set of annotation as a transcription")
+
     def __init__ (self, controller=None, source=None, elements=None, parameters=None):
         super(TranscriptionView, self).__init__(controller=controller)
         self.close_on_package_load = True
@@ -99,6 +100,14 @@ class TranscriptionView(AdhocView):
         self.ignore_updates = False
 
         self.modified=False
+
+        self.quick_options=helper.CircularList( (
+            # (separator, display_time)
+            (" ", False),
+            ("\n", False),
+            ("\n", True),
+            (" ", True),
+            ) )
 
         # Try to determine a default representation
         try:
@@ -270,6 +279,13 @@ class TranscriptionView(AdhocView):
         self.searchbox.entry.grab_focus()
         return True
 
+    def quick_options_toggle(self, *p):
+        """Quickly toggle between different presentation options.
+        """
+        self.options['separator'], self.options['display-time']=self.quick_options.next()
+        self.refresh()
+        return True
+
     def build_widget(self):
         mainbox = gtk.VBox()
 
@@ -350,12 +366,19 @@ class TranscriptionView(AdhocView):
 
         b=get_small_stock_button(gtk.STOCK_PREFERENCES, self.edit_options)
         hb.pack_start(b, expand=False)
+        self.controller.gui.tooltips.set_tip(b, _("Edit preferences"))
+
+        b=get_small_stock_button(gtk.STOCK_REDO, self.quick_options_toggle)
+        hb.pack_start(b, expand=False)
+        self.controller.gui.tooltips.set_tip(b, _("Quickly switch display options"))
 
         b=get_small_stock_button(gtk.STOCK_FIND, self.show_searchbox)
         hb.pack_start(b, expand=False)
+        self.controller.gui.tooltips.set_tip(b, _("Find text"))
 
         b=get_small_stock_button(gtk.STOCK_SAVE, self.save_transcription)
         hb.pack_start(b, expand=False)
+        self.controller.gui.tooltips.set_tip(b, _("Save transcription"))
 
         mainbox.pack_start(hb, expand=False)
 
@@ -720,4 +743,3 @@ if __name__ == "__main__":
     window.connect ("destroy", lambda e: gtk.main_quit())
 
     gtk.main ()
-
