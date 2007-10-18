@@ -591,6 +591,11 @@ class EditPackagePopup (EditElementPopup):
     can_edit = staticmethod (can_edit)
 
     def notify(self, element):
+        # Side effect of the notify method: we use it to update the
+        # appropriate attributes of the package.
+        self.controller.set_default_media(element.getMetaData (config.data.namespace, "mediafile"), 
+                                          package=element)
+        element.cached_duration = long(element.getMetaData (config.data.namespace, "duration"))
         self.controller.notify("PackageEditEnd", package=element)
         return True
 
@@ -628,7 +633,24 @@ class EditPackagePopup (EditElementPopup):
         f = EditMetaForm(title=_("Default static view"),
                          element=self.element, name='default_utbv',
                          namespaceid='advenetool', controller=self.controller,
-                         editable=editable)
+                         editable=editable,
+                         tooltip=_("Static view to open on package load"))
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+
+        f = EditMetaForm(title=_("Cached duration"),
+                         element=self.element, name='duration',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable,
+                         tooltip=_("Cached duration in ms"))
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+
+        f = EditMetaForm(title=_("Mediafile"),
+                         element=self.element, name='mediafile',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable,
+                         tooltip=_("Location of associated media file"))
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -974,7 +996,7 @@ class EditContentForm(EditForm):
         """Update the element fields according to the values in the view."""
         if self.contentform is None:
             return True
-        if self.mimetypeeditable and not compact:
+        if self.mimetypeeditable and not hasattr(self, 'mimetype'):
             self.element.mimetype = self.mimetype.child.get_text()
         self.contentform.update_element()
         return True
