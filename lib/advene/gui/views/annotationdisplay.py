@@ -36,12 +36,12 @@ class AnnotationDisplay(AdhocView):
     view_id = 'annotationdisplay'
     tooltip = _("Display the contents of an annotation")
 
-    def __init__(self, controller=None, parameters=None):
+    def __init__(self, controller=None, parameters=None, annotation=None):
         super(AnnotationDisplay, self).__init__(controller=controller)
         self.close_on_package_load = True
         self.contextual_actions = ()
         self.controller=controller
-        self.annotation=None
+        self.annotation=annotation
         self.widget=self.build_widget()
 
     def set_annotation(self, a=None):
