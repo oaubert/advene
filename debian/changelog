@@ -2,43 +2,70 @@ advene (0.25) unstable; urgency=low
 
   * New adhoc view: montage, proposing a dynamic montage of a sequence of
     annotations.
-  
-  * Completions are activated in the note-taking view
-  
+
+  * Element edit popups: they now are updated if the edited element is
+    updated by another way (e.g. quick-edit for annotations).
+
+  * Timeline:
+
+    * fix display problem on MacOS X and annotation-types update bug
+
+    * new shortcut 'h' to un/highlight the annotation in all open
+      views
+
+    * slave views for the timeline (buttons in the top right-hand corner):
+      annotation display view that displays the currently focused
+      annotation, and montage view with coordinated zoom level
+
+  * Note-taking view
+
+    * improve the behaviour of the automatic mark insertion feature
+
+    * text auto-completion is activated
+
+  * Transcription view: new "quick switch" button to switch between
+    different representations.
+
+  * To rename a view, double-click on its tab.
+
   * Error messages are now saved to ~/.advene/advene.log (for win32 users,
     it is in \Documents and Settings\Username\Advene)
+
+  * New contextual actions for annotation types (display in table, use as
+    a montage...). Note that all actions are more readily accessible by
+    drag-and-dropping the annotation-type on an view zone.
 
  --
 
 advene (0.24) unstable; urgency=low
 
   * An expert-mode toggle proposes more features in the GUI
-  
+
   * Transcription view: text is now searchable
-  
+
   * Timeline: left click in the upper part (timestamps) sets
     the player position
 
   * Default options for adhoc views can now be saved (through the view
     contextual menu, right-click on the view name in the tab).
-  
+
   * The workspace (GUI layout + opened views) can be saved, either as an
     adhoc-view, or as a default workspace that will be presented on
     application startup.
-  
+
   * A periodic auto-save feature has been implemented. Refer to the
     application preferences to activate it.
-  
-  * Timeline: 
+
+  * Timeline:
 
       * the behaviour of double-click (goto annotation or edit annotation
         content) can be tuned in the timeline options.
-  
+
       * annotations tooltips are re-enabled
-  
+
   * Drag and drop of annotations and annotation types to a viewbook
     proposes to open appropriate views.
-  
+
   * Text autocompletion is activated for textual content of annotations
     and views.
 
@@ -48,15 +75,15 @@ advene (0.24) unstable; urgency=low
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 19 Sep 2007 15:21:00 +0200
 
 advene (0.23) unstable; urgency=low
-  
+
   * Model: it is possible to open uncompressed .azp packages. The
     directory name must end with the .azp extension.
 
   * The FCK editor, WYSISWYG browser-based HTML editor, has been
     integrated.
-  
+
   * GUI:
-    * Dialogs position is centered on the mouse cursor  
+    * Dialogs position is centered on the mouse cursor
     * New layout: adhoc views can be put at the west, east and south
       of the video window, as well as the right side of the application
       window
@@ -68,8 +95,8 @@ advene (0.23) unstable; urgency=low
     * Clicking on an adhoc-view icon will display a contextual menu to
       offer various display options (embed, popup...)
     * Element creation: ask for a title, and generate a valid id from it
-    
-  * Widget colors: 
+
+  * Widget colors:
     * container types (schema, annotation-type,
       relation-type) have a 'color' and 'item_color' metadata attribute,
       which hold TALES expressions returning color (names or code in the
@@ -103,12 +130,12 @@ advene (0.22) unstable; urgency=low
     specify the TALES expression "here/tag_color" as the "color" attribute
     of the annotation type, and set the tag color through the tag bag
     view.
-  
+
   * DVD device/drive: it can be configured from the Player preferences window
 
   * File import: allow to choose the desired import filter, and display a
     progress bar
- 
+
   * Adhoc-views (timeline, transcription...): parametered adhoc-views can
     be saved as Advene views (for instance, choosing the displayed
     annotation types in the timeline) and restored. To save them, use the
@@ -124,33 +151,33 @@ advene (0.22) unstable; urgency=low
           elements (mostly annotations), through drag-and-drop.
 
         * Timeline: new shortcut ('t') to toggle tooltips display
-        
+
         * Navigation history:
           * items from the history are removable (by drag and drop on the
           Remove button)
           * it is possible to open many history views. They can be populated
           by drag and drop from the other history views or the timeline, and
           act as a visual table of contents.
-  
+
         * Interactive query: offer to activate/desactivate result annotations
 
   * Web server:
-  
+
         * webserver logs are stored in ~/.advene/webserver.log
-  
+
         * the old mainloop-based mode (1) for webservers has been
         removed. The config.data.webserver['mode'] parameter is now a
         boolean.
-  
+
         * an experimental webcherry-based webserver has been
         implemented. To test it, install cherrypy 3.0 and add the
         following line to advene.ini:
         config.data.webserver['engine']='cherrypy'
-        
+
   * gstreamer plugin: it can display text subtitles, and make snapshots
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu,  5 Apr 2007 11:04:36 +0200
-        
+
 advene (0.21) unstable; urgency=low
 
   * New command line options. Do advene --help to see them. It is possible
@@ -159,7 +186,7 @@ advene (0.21) unstable; urgency=low
 
   * New file format: .apl (Advene package list). It is used to save a work
         session (list of opened packages), from the File/Save session menu.
-        
+
   * The default template is now template.azp, so that new packages have a
     Resources reference by default.
 
@@ -170,13 +197,13 @@ advene (0.21) unstable; urgency=low
   * preliminary tags support has been implemented for annotations and
     relations (based on Frank Wagner work)
 
-  * new annotation methods to deal with relations: 
+  * new annotation methods to deal with relations:
     * relatedOut and relatedIn return a list of related (outgoing or
       incoming) annotations.
     * typedRelatedOut and typedRelatedIn return a dictionary indexed by
       relation type id, which holds the list of related annotations.
     * typedIncomingRelations/typedOutgoingRelations: return categorized relations
-  
+
   * GUI:
 
     * it is possible to load multiple packages in the GUI. Only one
@@ -194,7 +221,7 @@ advene (0.21) unstable; urgency=low
 
     * merge functionality (menu File/Merge): elements from another package
       can be merged into the current package.
-  
+
     * the player control toolbar has been put beneath the video output,
       and is hidden in embedded adhoc views. The main player control
       toolbar presents a volume control widget.
@@ -206,12 +233,12 @@ advene (0.21) unstable; urgency=low
 
     * if the user tries to open a videofile through the Open package
       menuitem, do what is expected (select the videofile).
-  
+
     * default adhoc views to be opened/embedded on application startup can
       be specified through the Preferences menu
 
     * better drag and drop interaction with other applications
-  
+
     * optionally ask to save the imagecache on exit (cf preferences)
 
     * in interactive query (menu Edit/Find), propose multiple output modes
@@ -226,7 +253,7 @@ advene (0.21) unstable; urgency=low
 
     * snapshots can be invalidated from the annotation edition popup
      (right-click on the snapshot)
-  
+
     * in transcription view, annotations can be modified and update the
       content accordingly
 
@@ -239,7 +266,7 @@ advene (0.21) unstable; urgency=low
 
     * "Loop on annotation" feature, accessible from the context menu of
       annotations
-        
+
     * timeline:
 
       * it is possible to specify the ordered list of
@@ -250,38 +277,38 @@ advene (0.21) unstable; urgency=low
 
       * relations are represented by lines, with a dot as starting
         point. Annotations with relations are underlined (rather than bold)
-  
+
       * annotations can be split through their context menu
-  
+
       * annotations can be created from the popup menu (with a default
         duration of 1/20 of the media duration)
-  
+
       * control + scrollwheel on an annotation widget
         increments/decrements the value of the begin or
         end. Control+shift+scrollwheel moves the whole annotation.
 
       * control+click on the begin or end of the annotation sets the
         bound to the current player position value
-  
+
       * autoscroll can either scroll discontinuously, or keep the current
         mark centered and continuously scroll the widgets
 
       * annotation widget shortcuts: 'e' to edit, 'p' to play (begin or
         end, depending on the cursor position), 'Return' to quickly edit the
         content, space plays the active annotation (even it the cursor is
-        not on the annotation widget) 
-  
+        not on the annotation widget)
+
       * shortcut: 'p' in the timeline background plays the movie at the
-        cursor position. 
+        cursor position.
 
       * annotations can be colored according to a TALES expression from
         their type
-  
+
       * new button "Center on current position"
 
       * new contextual action "Center and zoom", to center and zoom on the
         given annotation
-  
+
       * some basic type checking and conversion is done when transmuting
         annotations
 
@@ -295,10 +322,10 @@ advene (0.21) unstable; urgency=low
       browser button will embed a HTML view in the GUI.
 
     * transcription:
-    
+
       * allow to get a transcription either for the whole package, or for
         a given annotation type
-  
+
     * note-taking widget:
 
       * it is possible to import existing annotations
@@ -308,8 +335,8 @@ advene (0.21) unstable; urgency=low
 
       * control+scroll on a timestamp mark updates the timestamp. If the
         play-on-scroll option is active, the player will play the new
-        timestamp when the control key is released. 
-  
+        timestamp when the control key is released.
+
       * control+click on a mark sets the timestamp to the current movie time
 
       * timestamps marks can be auto-inserted when starting to type, by
@@ -328,7 +355,7 @@ advene (0.21) unstable; urgency=low
     * Registered actions propose meaningful default values
 
   * Webserver
-  
+
     * /action displays links (with form if necessary for
         parameters) in the list of actions
 
