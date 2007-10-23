@@ -1146,8 +1146,16 @@ class TextContentHandler (ContentHandler):
                     _("Cannot read the data:\n%s") % unicode(e),
                     icon=gtk.MESSAGE_ERROR)
                 return True
-            self.content_set("".join(f.readlines()))
+            lines="".join(f.readlines())
             f.close()
+            try:
+                data=unicode(lines, 'utf8')
+            except UnicodeDecodeError:
+                # Fallback on latin1, which is very common, but may
+                # sometimes fail
+                data=unicode(lines, 'latin1')
+                
+            self.content_set(data.encode('utf-8'))
             self.fname=fname
         return True
 
@@ -1338,6 +1346,7 @@ class GenericContentHandler (ContentHandler):
                     icon=gtk.MESSAGE_ERROR)
                 return True
             self.set_filename(fname)
+            self.element.data=f.read()
         return True
 
     def content_reload(self, b=None):
