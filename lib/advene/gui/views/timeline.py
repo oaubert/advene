@@ -301,7 +301,8 @@ class TimeLine(AdhocView):
         self.layout.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
                                   gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['annotation-resize'], gtk.gdk.ACTION_LINK)
+                                  config.data.drag_type['annotation'], 
+                                  gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
         self.old_scale_value = self.scale.value
 
@@ -886,20 +887,6 @@ class TimeLine(AdhocView):
         widget._drag_fraction = self.annotation_fraction(widget)
         return False
 
-    def drag_sent(self, widget, context, selection, targetType, eventTime):
-        if widget.drag_sent(widget, context, selection, targetType, eventTime):
-            return True
-        if targetType == config.data.target_type['annotation-resize']:
-            selection.set(selection.target, 8,
-                          cgi.urllib.urlencode( {
-                        'uri': widget.annotation.uri,
-                        'fraction': widget._drag_fraction,
-                        } ))
-            return True
-        else:
-            print "Unknown target type for drag: %d" % targetType
-            return False
-
     def create_relation(self, source, dest, rt):
         """Create the reation of type rt between source and dest.
         """
@@ -981,51 +968,52 @@ class TimeLine(AdhocView):
             print "Unknown target type for drag: %d" % targetType
         return True
 
+    def move_or_copy_annotation(self, source, dest):
+        def move_annotation(*p):
+            if source.relations:
+                dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
+                                      icon=gtk.MESSAGE_WARNING)
+                return True
+            
+            self.transmuted_annotation=self.controller.transmute_annotation(source,
+                                                                            dest,
+                                                                            delete=True)
+            return True
+
+        def copy_annotation(*p):
+            self.transmuted_annotation=self.controller.transmute_annotation(source,
+                                                                            dest,
+                                                                            delete=False)
+            # Widget creation is done by the event notification,
+            # which cannot (except by chance) have executed yet.
+            # So store the annotation ref in self.transmuted_annotation,
+            # and handle this code in update_annotation()
+            # b=self.get_widget_for_annotation(an)
+            # b.grab_focus()
+            return True
+
+        # Popup a menu to propose the drop options
+        menu=gtk.Menu()
+
+        item=gtk.MenuItem(_("Copy annotation"))
+        item.connect('activate', copy_annotation)
+        menu.append(item)
+
+        item=gtk.MenuItem(_("Move annotation"))
+        item.connect('activate', move_annotation)
+        menu.append(item)
+        if source.relations:
+            item.set_sensitive(False)
+
+        menu.show_all()
+        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            
     def annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
             source=self.controller.package.annotations.get(source_uri)
             dest=widget.annotationtype
-
-            def move_annotation(*p):
-                if source.relations:
-                    dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
-                                                   icon=gtk.MESSAGE_WARNING)
-                    return True
-
-                self.transmuted_annotation=self.controller.transmute_annotation(source,
-                                                                                dest,
-                                                                                delete=True)
-                return True
-
-            def copy_annotation(*p):
-                self.transmuted_annotation=self.controller.transmute_annotation(source,
-                                                                                dest,
-                                                                                delete=False)
-                # Widget creation is done by the event notification,
-                # which cannot (except by chance) have executed yet.
-                # So store the annotation ref in self.transmuted_annotation,
-                # and handle this code in update_annotation()
-                # b=self.get_widget_for_annotation(an)
-                # b.grab_focus()
-                return True
-
-            # Popup a menu to propose the drop options
-            menu=gtk.Menu()
-
-            item=gtk.MenuItem(_("Copy annotation"))
-            item.connect('activate', copy_annotation)
-            menu.append(item)
-
-            item=gtk.MenuItem(_("Move annotation"))
-            item.connect('activate', move_annotation)
-            menu.append(item)
-            if source.relations:
-                item.set_sensitive(False)
-
-            menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
-
+            self.move_or_copy_annotation(source, dest)
         elif targetType == config.data.target_type['annotation-type']:
             # Reorder annotation types
             source_uri=selection.data
@@ -1060,86 +1048,34 @@ class TimeLine(AdhocView):
             if dest is None:
                 return True
 
-            # FIXME: Duplicated code from previous method. Should factorize.a
-            def move_annotation(*p):
-                if source.relations:
-                    dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
-                                                   icon=gtk.MESSAGE_WARNING)
-                    return True
-
-                self.controller.transmute_annotation(source,
-                                                     dest,
-                                                     delete=True)
-                return True
-
-            # Popup a menu to propose the drop options
-            menu=gtk.Menu()
-            for (title, action) in (
-                (_("Copy annotation"),
-                 lambda i: self.controller.transmute_annotation(source,
-                                                                dest,
-                                                                delete=False)),
-                (_("Move annotation"), move_annotation)
-                 ):
-                item=gtk.MenuItem(title)
-                item.connect('activate', action)
-                menu.append(item)
-            menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
-        return True
+            self.move_or_copy_annotation(source, dest)
+            return True
+        return False
 
     def layout_drag_received(self, widget, context, x, y, selection, targetType, time):
         """Handle the drop from an annotation to the layout.
         """
-        if targetType == config.data.target_type['annotation-resize']:
-            q=dict(cgi.parse_qsl(selection.data))
-            source=self.controller.package.annotations.get(q['uri'])
-            try:
-                fr = float(q['fraction'])
-            except:
-                fr = 0.0
-            pos=long(self.pixel2unit(self.adjustment.value + x))
-
-            def move_or_resize(*p):
-                #print "Resizing ", source.id, self.pixel2unit(x), fr
-                # Note: x is here relative to the visible portion of the window. Thus we must
-                # add self.adjustment.value
-                f=source.fragment
-                if fr < 0.25:
-                    # Modify begin
-                    f.begin=pos
-                elif fr > 0.75:
-                    # Modify end
-                    f.end = pos
-                else:
-                    d=f.duration
-                    # Move annotation
-                    f.begin = long(pos - fr * d)
-                    f.end = f.begin + d
-                if f.begin > f.end:
-                    f.begin, f.end = f.end, f.begin
-                self.controller.notify('AnnotationEditEnd', annotation=source)
-                return True
-
-            if fr < 0.25:
-                message=_("Set begin time to %s" % helper.format_time(pos))
-            elif fr > 0.75:
-                message=_("Set end time to %s" % helper.format_time(pos))
+        if targetType == config.data.target_type['annotation']:
+            source_uri=selection.data
+            source=self.controller.package.annotations.get(source_uri)
+            # We received a drop. Determine the location.
+            a=[ at 
+                for (at, p) in self.layer_position.iteritems()
+                if (y >= p and y <= p + self.button_height) ]
+            if a:
+                # Copy/Move to a[0]
+                self.move_or_copy_annotation(source, a[0])
             else:
-                message=_("Move annotation to %s" % helper.format_time(long(pos - fr * source.fragment.duration)))
-
-            menu=gtk.Menu()
-            item=gtk.MenuItem(message)
-            item.connect('activate', move_or_resize)
-            menu.append(item)
-            item=gtk.MenuItem(_("Cancel"))
-            menu.append(item)
-
-            menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+                # Maybe we should propose to create a new annotation-type ?
+                # Create a type
+                dest=self.create_annotation_type()
+                if dest is None:
+                    return True
+                self.move_or_copy_annotation(source, dest)
+            return True
         else:
             print "Unknown target type for drop: %d" % targetType
-        return True
+        return False
 
     def annotation_button_press_cb(self, widget, event, annotation):
         """Handle button presses on annotation widgets.
@@ -1357,7 +1293,6 @@ class TimeLine(AdhocView):
 
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['annotation']
-                          + config.data.drag_type['annotation-resize']
                           + config.data.drag_type['uri-list']
                           + config.data.drag_type['text-plain']
                           + config.data.drag_type['TEXT']
@@ -1365,7 +1300,7 @@ class TimeLine(AdhocView):
                           + config.data.drag_type['timestamp']
                           + config.data.drag_type['tag']
                           ,
-                          gtk.gdk.ACTION_LINK)
+                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
         # The button can receive drops (to create relations)
         b.connect("drag_data_received", self.drag_received)
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -1418,6 +1353,7 @@ class TimeLine(AdhocView):
         self.layout.set_size (u2p (self.maximum - self.minimum),
                               max(self.layer_position.values() or (0,))
                               + self.button_height + config.data.preferences['timeline']['interline-height'])
+
         #self.layout.show_all ()
 
     def remove_marks(self, widget=None, data=None):
@@ -2355,7 +2291,7 @@ class OldAnnotationWidget(gtk.Button):
 
         self.connect("key_press_event", self.keypress, self.annotation)
         self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
-        self.connect("drag_data_get", self.drag_sent)
+
         # The widget can generate drags
         self.drag_source_set(gtk.gdk.BUTTON1_MASK,
                              config.data.drag_type['annotation']
