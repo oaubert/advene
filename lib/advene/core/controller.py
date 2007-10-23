@@ -407,7 +407,13 @@ class AdveneController:
 
         try:
             self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'),
-                                                prefix="advene_plugins_user")
+                                                prefix="advene_user_plugins")
+        except OSError:
+            pass
+
+        try:
+            self.app_plugins=self.load_plugins(os.path.join(os.path.dirname(advene.__file__), 'plugins'),
+                                               prefix="advene_app_plugins")
         except OSError:
             pass
 
