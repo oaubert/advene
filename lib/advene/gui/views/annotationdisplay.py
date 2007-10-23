@@ -52,6 +52,20 @@ class AnnotationDisplay(AdhocView):
     def set_master_view(self, v):
         v.register_slave_view(self)
 
+    def update_annotation(self, annotation=None, event=None):
+        if annotation != self.annotation:
+            return True
+        if event == 'AnnotationEditEnd':
+            self.refresh()
+        elif event == 'AnnotationDelete':
+            if self.master_view is None:
+                # Autonomous view. We should close it.
+                self.close()
+            else:
+                # There is a master view, just empty the representation
+                self.set_annotation(None)
+        return True
+
     def refresh(self, *p):
         if self.annotation is None:
             d={ 'id': _("N/C"), 
