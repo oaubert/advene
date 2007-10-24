@@ -730,16 +730,23 @@ class AdveneController:
             id_ = helper.mediafile2id (uri)
             self.package.imagecache.load (id_)
 
-    def transmute_annotation(self, annotation, annotationType, delete=False):
+    def transmute_annotation(self, annotation, annotationType, delete=False, position=None):
         """Transmute an annotation to a new type.
+
+        If delete is True, then delete the source annotation.
+
+        If position is not None, then set the new annotation begin to position.
         """
-        if annotation.type == annotationType:
-            # Do not duplicate the annotation
-            return annotation
+        if annotation.type == annotationType and position is None:
+            # Do not just duplicate the annotation
+            return None
         ident=self.package._idgenerator.get_id(Annotation)
         an = self.package.createAnnotation(type = annotationType,
                                            ident=ident,
                                            fragment=annotation.fragment.clone())
+        if position is not None:
+            an.fragment.begin=position
+            an.fragment.end=position+annotation.fragment.duration
         self.package.annotations.append(an)
         an.author=config.data.userid
         # Check if types are compatible.
