@@ -296,7 +296,7 @@ class TimeLine(AdhocView):
         self.layout.connect('expose_event', self.draw_background)
         self.layout.connect_after('expose_event', self.draw_relation_lines)
 
-        # The layout can receive drops (to resize annotations)
+        # The layout can receive drops
         self.layout.connect("drag_data_received", self.layout_drag_received)
         self.layout.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
@@ -782,6 +782,8 @@ class TimeLine(AdhocView):
             self.update_button (b)
         elif event == 'AnnotationDelete':
             b.destroy()
+        elif event == 'AnnotationCreate':
+            pass
         else:
             print "Unknown event %s" % event
         return True
@@ -968,43 +970,62 @@ class TimeLine(AdhocView):
             print "Unknown target type for drag: %d" % targetType
         return True
 
-    def move_or_copy_annotation(self, source, dest):
-        def move_annotation(*p):
-            if source.relations:
+    def move_or_copy_annotation(self, source, dest, position=None):
+        """Display a popup menu to move or copy the source annotation to the dest annotation type.
+
+        If position is given (in ms), then the choice will also be
+        offered to move/copy the annotation and change its bounds.
+        """
+        def move_annotation(i, an, typ, position=None):
+            if an.relations:
                 dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
                                       icon=gtk.MESSAGE_WARNING)
                 return True
             
-            self.transmuted_annotation=self.controller.transmute_annotation(source,
-                                                                            dest,
-                                                                            delete=True)
-            return True
+            self.transmuted_annotation=self.controller.transmute_annotation(an,
+                                                                            typ,
+                                                                            delete=True,
+                                                                            position=position)
+            return self.transmuted_annotation
 
-        def copy_annotation(*p):
-            self.transmuted_annotation=self.controller.transmute_annotation(source,
-                                                                            dest,
-                                                                            delete=False)
+        def copy_annotation(i, an, typ, position=None):
+            self.transmuted_annotation=self.controller.transmute_annotation(an,
+                                                                            typ,
+                                                                            delete=False,
+                                                                            position=position)
             # Widget creation is done by the event notification,
             # which cannot (except by chance) have executed yet.
             # So store the annotation ref in self.transmuted_annotation,
             # and handle this code in update_annotation()
             # b=self.get_widget_for_annotation(an)
             # b.grab_focus()
-            return True
+            return self.transmuted_annotation
 
         # Popup a menu to propose the drop options
         menu=gtk.Menu()
 
-        item=gtk.MenuItem(_("Copy annotation"))
-        item.connect('activate', copy_annotation)
-        menu.append(item)
+        if source.type != dest:
+            item=gtk.MenuItem(_("Copy annotation to type %s") % self.controller.get_title(dest))
+            item.connect('activate', copy_annotation, source, dest)
+            menu.append(item)
 
-        item=gtk.MenuItem(_("Move annotation"))
-        item.connect('activate', move_annotation)
-        menu.append(item)
-        if source.relations:
-            item.set_sensitive(False)
+            item=gtk.MenuItem(_("Move annotation to type %s") % self.controller.get_title(dest))
+            item.connect('activate', move_annotation, source, dest)
+            menu.append(item)
+            if source.relations:
+                item.set_sensitive(False)
 
+        if abs(position-source.fragment.begin) > 1000:
+            item=gtk.MenuItem(_("Copy annotation and set position to %s") % helper.format_time(position))
+            item.connect('activate', copy_annotation, source, dest, position)
+            menu.append(item)
+
+            item=gtk.MenuItem(_("Move annotation and set position to %s") % helper.format_time(position))
+            item.connect('activate', move_annotation, source, dest, position)
+            menu.append(item)
+            if source.relations:
+                item.set_sensitive(False)
+            
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
             
@@ -1064,14 +1085,14 @@ class TimeLine(AdhocView):
                 if (y >= p and y <= p + self.button_height) ]
             if a:
                 # Copy/Move to a[0]
-                self.move_or_copy_annotation(source, a[0])
+                self.move_or_copy_annotation(source, a[0], position=self.pixel2unit(x))
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
                 dest=self.create_annotation_type()
                 if dest is None:
                     return True
-                self.move_or_copy_annotation(source, dest)
+                self.move_or_copy_annotation(source, dest, position=self.pixel2unit(x))
             return True
         else:
             print "Unknown target type for drop: %d" % targetType
