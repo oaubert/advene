@@ -1680,7 +1680,7 @@ class Packages(Common):
                 if m2 is None:
                     return self.send_error(500, _("Annotation %s does not exist") % query['member2'])
 
-                if rt not in helper.matching_relationtypes(objet, m1, m2):
+                if rt not in helper.matching_relationtypes(objet, m1.type, m2.type):
                     return self.send_error(500, _("<p>Cannot create relation between %(member1)s and %(member2)s: invalid type</p>") % query)
 
                 try:
