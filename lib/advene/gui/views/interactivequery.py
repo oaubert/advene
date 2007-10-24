@@ -192,6 +192,7 @@ class InteractiveResult(AdhocView):
         super(InteractiveResult, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
+            (_("Create annotation from the result"), self.create_annotations),
             #(_("Refresh"), self.refresh),
             #(_("Save view"), self.save_view),
             )
@@ -208,6 +209,19 @@ class InteractiveResult(AdhocView):
             self.label=_("""'%s'""") % self.query
 
         self.widget=self.build_widget()
+
+    def create_annotations(self, *p):
+        l=[ a for a in self.result if isinstance(a, Annotation) ]
+        if l:
+            at=self.controller.gui.ask_for_annotation_type(text=_("Choose the annotation type where annotations will be created."),
+                                                           create=True)
+            if at is None:
+                return False
+            at.setMetaData(config.data.namespace_prefix['dc'], 'description', _("Copied result of the '%s' query") % self.query)
+            self.controller.notify('AnnotationTypeEditEnd', annotationtype=at)
+            for a in l:
+                self.controller.transmute_annotation(a, at)
+        return True
 
     def redo_quicksearch(self, b, entry):
         s=entry.get_text()
