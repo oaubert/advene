@@ -260,10 +260,11 @@ def convert_time(s):
             raise Exception("Unknown time format for %s" % s)
     return val
 
-def matching_relationtypes(package, ann1, ann2):
-    """Return a list of relationtypes that can be used
-    to link ann1 and ann2. We use the id (i.e. the fragment part from the URI)
-    to match"""
+def matching_relationtypes(package, typ1, typ2):
+    """Return a list of relationtypes that can be used to link annotations of type typ1 and typ2. 
+
+    We use the id (i.e. the fragment part from the URI) to match.
+    """
     # FIXME: works only on binary relations for the moment.
     r=[]
     for rt in package.relationTypes:
@@ -276,13 +277,13 @@ def matching_relationtypes(package, ann1, ann2):
 
         # URI version
         # lat=[ absolute_uri(package, t) for t in rt.getHackedMemberTypes() ]
-        # t1=ann1.type.uri
-        # t2=ann2.type.uri
+        # t1=typ1.uri
+        # t2=typ2.uri
 
         # Id version
         lat= [ get_id_from_fragment(t) for t in rt.getHackedMemberTypes() ]
-        t1=get_id_from_fragment(ann1.type.uri)
-        t2=get_id_from_fragment(ann2.type.uri)
+        t1=get_id_from_fragment(typ1.uri)
+        t2=get_id_from_fragment(typ2.uri)
 
         #print "Testing (%s, %s) matching %s" % (t1, t2, lat)
         if len (lat) == 2 \
