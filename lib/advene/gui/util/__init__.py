@@ -58,20 +58,20 @@ def image_from_position(controller, position=None, width=None, height=None):
     i.set_from_pixbuf(pb)
     return i
 
-def get_small_stock_button(sid, callback=None):
+def get_small_stock_button(sid, callback=None, *p):
     b=gtk.Button()
     b.add(gtk.image_new_from_stock(sid, gtk.ICON_SIZE_SMALL_TOOLBAR))
     if callback:
-        b.connect('clicked', callback)
+        b.connect('clicked', callback, *p)
     return b
 
-def get_pixmap_button(pixmap, callback=None):
+def get_pixmap_button(pixmap, callback=None, *p):
     b=gtk.Button()
     i=gtk.Image()
     i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
     b.add(i)
     if callback:
-        b.connect('clicked', callback)
+        b.connect('clicked', callback, *p)
     return b
 
 color_cache={}
