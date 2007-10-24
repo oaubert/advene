@@ -209,18 +209,42 @@ class InteractiveResult(AdhocView):
 
         self.widget=self.build_widget()
 
+    def redo_quicksearch(self, b, entry):
+        s=entry.get_text()
+        if not s:
+            self.log(_("Empty quicksearch string"))
+            return True
+        res=self.controller.gui.search_string(s)
+        label="'%s'" % s
+        self.controller.gui.open_adhoc_view('interactiveresult', destination=self._destination, 
+                                            result=res, label=label, query=s)
+        self.close()
+        return True
+
     def build_widget(self):
         v=gtk.VBox()
 
         hb=gtk.HButtonBox()
         v.pack_end(hb, expand=False)
 
+        top_box=gtk.HBox()
+        v.pack_start(top_box, expand=False)
+
         # FIXME: if self.query: edit query again
         if self.query and isinstance(self.query, InteractiveQuery):
             b=gtk.Button(_("Edit query again"))
             b.connect('clicked', self.edit_query)
-            hb.pack_start(b, expand=False)
-
+            top_box.pack_start(b, expand=False)
+        elif self.query:
+            e=gtk.Entry()
+            e.set_text(self.query)
+            e.connect('activate', self.redo_quicksearch, e)
+            b=get_small_stock_button(gtk.STOCK_FIND, self.redo_quicksearch, e)
+            self.controller.gui.tooltips.set_tip(e, _('String to search'))
+            self.controller.gui.tooltips.set_tip(b, _('Search again'))
+            top_box.pack_start(e, expand=False)
+            top_box.pack_start(b, expand=False)
+                        
         # Present choices to display the result
         if not self.result:
             v.add(gtk.Label(_("Empty result")))
@@ -238,7 +262,9 @@ class InteractiveResult(AdhocView):
                     'elements': helper.format_element_name("annotation", len(l)),
                     'number': len(self.result)}
 
-            v.pack_start(gtk.Label(t), expand=False)
+            label=gtk.Label(t)
+            label.set_line_wrap(True)
+            top_box.pack_start(label, expand=False)
 
             def toggle_highlight(b, annotation_list):
                 if b.highlight:
