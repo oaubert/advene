@@ -1846,11 +1846,7 @@ class AdveneGUI (Connect):
         
         return True
 
-    def do_quicksearch(self, *p):
-        s=self.quicksearch_entry.get_text()
-        if not s:
-            self.log(_("Empty quicksearch string"))
-            return True
+    def search_string(self, s):
         expr=config.data.preferences['quicksearch-source']
         if expr is None:
             source=self.controller.package.annotations
@@ -1862,7 +1858,14 @@ class AdveneGUI (Connect):
             res=[ a for a in source if s in a.content.data.lower() ]
         else:
             res=[ a for a in source if s in a.content.data ]
-            
+        return res
+
+    def do_quicksearch(self, *p):
+        s=self.quicksearch_entry.get_text()
+        if not s:
+            self.log(_("Empty quicksearch string"))
+            return True
+        res=self.search_string(s)
         label=_("'%s'") % s
         self.open_adhoc_view('interactiveresult', destination='east', result=res, label=label, query=s)
         return True
