@@ -920,8 +920,8 @@ class TimeLine(AdhocView):
                 return True
 
             relationtypes=helper.matching_relationtypes(self.controller.package,
-                                                        source,
-                                                        dest)
+                                                        source.type,
+                                                        dest.type)
             if relationtypes:
                 item=gtk.MenuItem(_("Create a relation"))
                 # build a submenu
@@ -988,7 +988,7 @@ class TimeLine(AdhocView):
                                                                             position=position)
             return self.transmuted_annotation
 
-        def copy_annotation(i, an, typ, position=None):
+        def copy_annotation(i, an, typ, position=None, relationtype=None):
             self.transmuted_annotation=self.controller.transmute_annotation(an,
                                                                             typ,
                                                                             delete=False,
@@ -999,6 +999,9 @@ class TimeLine(AdhocView):
             # and handle this code in update_annotation()
             # b=self.get_widget_for_annotation(an)
             # b.grab_focus()
+            if relationtype is not None:
+                # Directly create a relation
+                self.create_relation(an, self.transmuted_annotation, relationtype)
             return self.transmuted_annotation
 
         # Popup a menu to propose the drop options
@@ -1016,16 +1019,41 @@ class TimeLine(AdhocView):
                 item.set_sensitive(False)
 
         if abs(position-source.fragment.begin) > 1000:
-            item=gtk.MenuItem(_("Copy annotation and set position to %s") % helper.format_time(position))
+            item=gtk.MenuItem(_("Copy annotation at %s") % helper.format_time(position))
             item.connect('activate', copy_annotation, source, dest, position)
             menu.append(item)
 
-            item=gtk.MenuItem(_("Move annotation and set position to %s") % helper.format_time(position))
+            item=gtk.MenuItem(_("Move annotation at %s") % helper.format_time(position))
             item.connect('activate', move_annotation, source, dest, position)
             menu.append(item)
             if source.relations:
                 item.set_sensitive(False)
             
+        # If there are compatible relation-types, propose to directly create a relation
+        relationtypes=helper.matching_relationtypes(self.controller.package,
+                                                    source.type,
+                                                    dest)
+        if relationtypes:
+            item=gtk.MenuItem(_("Copy and create a relation"))
+            # build a submenu
+            sm=gtk.Menu()
+            for rt in relationtypes:
+                sitem=gtk.MenuItem(self.controller.get_title(rt))
+                sitem.connect('activate', copy_annotation, source, dest, None, rt)
+                sm.append(sitem)
+            menu.append(item)
+            item.set_submenu(sm)
+
+            item=gtk.MenuItem(_("Copy at %s and create a relation") % helper.format_time(position))
+            # build a submenu
+            sm=gtk.Menu()
+            for rt in relationtypes:
+                sitem=gtk.MenuItem(self.controller.get_title(rt))
+                sitem.connect('activate', copy_annotation, source, dest, position, rt)
+                sm.append(sitem)
+            menu.append(item)
+            item.set_submenu(sm)
+
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
             
