@@ -153,7 +153,7 @@ class ViewBook(AdhocView):
                 label_widget=button.get_children()[0]
                 lab=dialog.entry_dialog(title=_("Rename the view"),
                                         text=_("Please enter the new name of the view"),
-                                        default=label_widget.get_text())
+                                        default=view._label)
                 if lab is not None:
                     label_widget.set_text(lab)
                     view._label=lab
