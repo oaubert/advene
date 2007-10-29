@@ -21,10 +21,7 @@ import re
 import cgi
 import struct
 import gtk
-try:
-    import cairo
-except ImportError:
-    pass
+import cairo
 import pango
 from gettext import gettext as _
 
@@ -40,10 +37,7 @@ from advene.gui.edit.create import CreateElementPopup
 
 import advene.util.helper as helper
 from advene.gui.util import dialog, name2color, get_small_stock_button, get_pixmap_button
-try:
-    from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget
-except ImportError:
-    AnnotationWidget=None
+from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget
 
 name="Timeline view plugin"
 
@@ -369,54 +363,7 @@ class TimeLine(AdhocView):
     def update_relation_lines(self):
         self.layout.queue_draw()
 
-    def draw_relation_lines_old(self, layout, event):
-        if not self.relations_to_draw:
-            return False
-        drawable=layout.bin_window
-        gc=drawable.new_gc(foreground=self.colors['relations'],
-                           background=self.colors['relations'],
-                           line_width=1,
-                           cap_style=gtk.gdk.CAP_ROUND)
-        c=layout.get_pango_context()
-        c.set_font_description(self.annotation_font)
-        l=pango.Layout(c)
-
-        for b1, b2, r in self.relations_to_draw:
-            r1 = b1.get_allocation()
-            r2 = b2.get_allocation()
-            x_start = r1.x + 3 * r1.width / 4
-            y_start  = r1.y + r1.height / 4
-            drawable.draw_line(gc,
-                               x_start, y_start,
-                               r2.x + r2.width / 4, r2.y + 3 * r2.height / 4)
-            # Display the starting mark
-            drawable.draw_rectangle(gc,
-                                    True,
-                                    x_start - 2, y_start - 2,
-                                    4, 4)
-            t=""
-            if self.options['display-relation-type']:
-                t = r.type.title
-            if self.options['display-relation-content']:
-                if r.content.data:
-                    if t:
-                        t += "\n" + r.content.data
-                    else:
-                        t = r.content.data
-            if t:
-                l.set_text(t)
-                # We draw the relation type on a white background by default,
-                # but this should depend on the active gtk theme
-                color=self.get_element_color(r) or self.colors['white']
-                drawable.draw_layout(gc,
-                                     (r1.x + r2.x ) / 2,
-                                     (r1.y + r2.y ) / 2,
-                                     l,
-                                     background=color
-                                     )
-        return False
-
-    def draw_relation_lines_cairo(self, layout, event):
+    def draw_relation_lines(self, layout, event):
         if not self.relations_to_draw:
             return False
         context=layout.bin_window.cairo_create()
@@ -471,11 +418,6 @@ class TimeLine(AdhocView):
             context.stroke()
 
         return False
-
-    if AnnotationWidget is not None:
-        draw_relation_lines=draw_relation_lines_cairo
-    else:
-        draw_relation_lines=draw_relation_lines_old
 
     def update_model(self, package=None, partial_update=False):
         """Update the whole model.
@@ -2319,163 +2261,3 @@ class TimeLine(AdhocView):
         """Set the current middle position, in ms.
         """
         self.center_on_position(pos)
-
-class OldAnnotationWidget(gtk.Button):
-    """Old method to render annotation widgets (in order to be usable on
-       fink with gtk == 2.6 and no cairo is available)
-    """
-    def __init__(self, annotation=None, container=None):
-        gtk.Button.__init__(self)
-        self.annotation=annotation
-        # container is the Advene view instance that manages this instance
-        self.container=container
-        if container:
-            self.controller=container.controller
-        else:
-            self.controller=None
-
-        self.local_color=None
-        self.label=gtk.Label()
-        self.label.modify_font(self.container.annotation_font)
-
-        self.connect("key_press_event", self.keypress, self.annotation)
-        self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
-
-        # The widget can generate drags
-        self.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                             config.data.drag_type['annotation']
-                             + config.data.drag_type['uri-list']
-                             + config.data.drag_type['text-plain']
-                             + config.data.drag_type['TEXT']
-                             + config.data.drag_type['STRING']
-                             + config.data.drag_type['timestamp']
-                             ,
-                             gtk.gdk.ACTION_LINK)
-
-        self.add(self.label)
-        w=self.container.unit2pixel(self.annotation.fragment.duration)
-        self.set_size_request(w, self.container.button_height)
-
-    def set_color(self, color=None):
-        self.local_color=color
-        self.update_widget()
-
-    def drag_sent(self, widget, context, selection, targetType, eventTime):
-        """Handle the drag-sent event.
-        """
-        if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, widget.annotation.uri)
-        elif targetType == config.data.target_type['uri-list']:
-            c=self.controller.build_context(here=widget.annotation)
-            uri=c.evaluateValue('here/absolute_url')
-            selection.set(selection.target, 8, uri)
-        elif (targetType == config.data.target_type['text-plain']
-              or targetType == config.data.target_type['TEXT']
-              or targetType == config.data.target_type['STRING']):
-            selection.set(selection.target, 8, widget.annotation.content.data)
-        elif targetType == config.data.target_type['timestamp']:
-            selection.set(selection.target, 8, str(widget.annotation.fragment.begin))
-        else:
-            return False
-        return True
-
-    def keypress(self, widget, event, annotation):
-        """Handle the key-press event.
-        """
-        if event.keyval == gtk.keysyms.e:
-            self.controller.gui.edit_element(annotation)
-            return True
-        elif event.keyval == gtk.keysyms.F11:
-            menu=advene.gui.popup.Menu(annotation, controller=self.controller)
-            menu.popup()
-            return True
-        elif event.keyval == gtk.keysyms.space:
-            # Play the annotation
-            c=self.controller
-            pos = c.create_position (value=annotation.fragment.begin,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
-            c.gui.set_current_annotation(annotation)
-            return True
-        return False
-
-    def update_widget(self):
-        # First check width
-        w=self.container.unit2pixel(self.annotation.fragment.duration)
-        if self.window is None or w != self.window.get_size()[0]:
-            self.set_size_request(w, self.container.button_height)
-
-        if self.local_color is not None:
-            color=self.local_color
-        else:
-            color=self.container.get_element_color(self.annotation)
-        if color:
-            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                          gtk.STATE_PRELIGHT):
-                self.modify_bg (style, color)
-
-        # Draw the text
-        title=self.controller.get_title(self.annotation)
-        if self.annotation.relations:
-            self.label.set_markup('<u>%s</u>' % title)
-        else:
-            self.label.set_text(title)
-        return True
-
-class OldAnnotationTypeWidget(gtk.Button):
-    """Old method to render annotation type widgets (in order to be usable on
-       fink with gtk == 2.6 and no cairo is available)
-    """
-    def __init__(self, annotationtype=None, container=None):
-        gtk.Button.__init__(self)
-        self.annotationtype=annotationtype
-        # container is the Advene view instance that manages this instance
-        self.container=container
-        if container:
-            self.controller=container.controller
-        else:
-            self.controller=None
-
-        self.local_color=None
-        self.label=gtk.Label()
-        self.label.modify_font(self.container.annotation_type_font)
-        self.add(self.label)
-        self.set_size_request(-1, self.container.button_height)
-        self.width=None
-
-        self.connect("key_press_event", self.keypress, self.annotationtype)
-        self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
-
-    def keypress(self, widget, event, annotationtype):
-        if event.keyval == gtk.keysyms.e:
-            self.controller.gui.edit_element(annotationtype)
-            return True
-        return False
-
-    def set_color(self, color=None):
-        self.local_color=color
-        self.update_widget()
-
-    def update_widget(self):
-        if self.width is not None:
-            self.set_size_request(self.width, -1)
-        if self.local_color is not None:
-            color=self.local_color
-        else:
-            color=self.container.get_element_color(self.annotationtype)
-        if color:
-            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                          gtk.STATE_PRELIGHT):
-                self.modify_bg (style, color)
-
-        # Draw the text
-        title=self.controller.get_title(self.annotationtype)
-        self.label.set_text(title)
-        return True
-
-if AnnotationWidget is None:
-    AnnotationWidget=OldAnnotationWidget
-    AnnotationTypeWidget=OldAnnotationTypeWidget
