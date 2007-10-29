@@ -23,6 +23,7 @@ from advene.gui.views import AdhocView
 
 from gettext import gettext as _
 import advene.util.helper as helper
+from advene.gui.util import png_to_pixbuf
 
 import gtk
 
@@ -42,6 +43,7 @@ class AnnotationDisplay(AdhocView):
         self.contextual_actions = ()
         self.controller=controller
         self.annotation=annotation
+        self.no_image_pixbuf=png_to_pixbuf(controller.package.imagecache.not_yet_available_image, width=50)
         self.widget=self.build_widget()
 
     def set_annotation(self, a=None):
@@ -79,6 +81,13 @@ class AnnotationDisplay(AdhocView):
                 'contents': self.annotation.content.data }
         for k, v in d.iteritems():
             self.label[k].set_text(v)
+        if self.annotation is not None:
+            b=self.annotation.fragment.begin
+            cache=self.controller.package.imagecache
+            if cache.is_initialized(b):
+                self.label['image'].set_from_pixbuf(png_to_pixbuf (cache[b], width=50))
+            elif self.label['image'].get_pixbuf() != self.no_image_pixbuf:
+                self.label['image'].set_from_pixbuf(self.no_image_pixbuf)
         return False
 
     def build_widget(self):
@@ -86,19 +95,28 @@ class AnnotationDisplay(AdhocView):
 
         self.label={}
 
-        for label, name in (
-            (_("Annotation "), 'id'),
-            (_("Begin"), 'begin'),
-            (_("End"), 'end'),
-            ):
-            h=gtk.HBox()
-            l=gtk.Label(label)
-            h.pack_start(l, expand=False)
-            s=gtk.HSeparator()
-            h.pack_start(s, expand=True)
-            self.label[name]=gtk.Label()
-            h.pack_start(self.label[name], expand=False)
-            v.pack_start(h, expand=False)
+        h=gtk.HBox()
+        l=gtk.Label(_("Annotation") + " ")
+        h.pack_start(l, expand=False)
+        self.label['id']=gtk.Label()
+        h.pack_start(self.label['id'], expand=False)
+        v.pack_start(h, expand=False)
+
+        h=gtk.HBox()
+        self.label['begin']=gtk.Label()
+        h.pack_start(self.label['begin'], expand=False)
+        l=gtk.Label(' - ')
+        h.pack_start(l, expand=False)
+        self.label['end']=gtk.Label()
+        h.pack_start(self.label['end'], expand=False)
+        v.pack_start(h, expand=False)
+
+        fr = gtk.Expander ()
+        fr.set_label(_("Screenshot"))
+        self.label['image'] = gtk.Image()
+        fr.add(self.label['image'])
+        fr.set_expanded(True)
+        v.pack_start(fr, expand=False)
 
         f=gtk.Frame(label=_("Contents"))
         c=self.label['contents']=gtk.Label()
