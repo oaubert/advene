@@ -295,7 +295,8 @@ class TimeLine(AdhocView):
         self.layout.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
                                   gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['annotation'], 
+                                  config.data.drag_type['annotation']
+                                  + config.data.drag_type['annotation-type'], 
                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
         self.old_scale_value = self.scale.value
@@ -999,6 +1000,27 @@ class TimeLine(AdhocView):
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
             
+    def copy_annotation_type(self, source, dest):
+        """Display a popup menu to copy the source annotation type to the dest annotation type.
+        """
+        def copy_annotations(i, at, typ, relationtype=None):
+            for an in at.annotations:
+                self.transmuted_annotation=self.controller.transmute_annotation(an,
+                                                                                typ,
+                                                                                delete=False)
+            return self.transmuted_annotation
+
+        # Popup a menu to propose the drop options
+        menu=gtk.Menu()
+
+        if source != dest:
+            item=gtk.MenuItem(_("Copy all annotations to type %s") % self.controller.get_title(dest))
+            item.connect('activate', copy_annotations, source, dest)
+            menu.append(item)
+
+        menu.show_all()
+        menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            
     def annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
@@ -1063,6 +1085,24 @@ class TimeLine(AdhocView):
                 if dest is None:
                     return True
                 self.move_or_copy_annotation(source, dest, position=self.pixel2unit(x))
+            return True
+        elif targetType == config.data.target_type['annotation-type']:
+            source_uri=selection.data
+            source=self.controller.package.annotationTypes.get(source_uri)
+            # We received a drop. Determine the location.
+            a=[ at 
+                for (at, p) in self.layer_position.iteritems()
+                if (y >= p and y <= p + self.button_height) ]
+            if a:
+                # Copy/Move to a[0]
+                self.copy_annotation_type(source, a[0])
+            else:
+                # Maybe we should propose to create a new annotation-type ?
+                # Create a type
+                dest=self.create_annotation_type()
+                if dest is None:
+                    return True
+                self.copy_annotation_type(source, dest)
             return True
         else:
             print "Unknown target type for drop: %d" % targetType
