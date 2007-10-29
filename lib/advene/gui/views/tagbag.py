@@ -40,10 +40,7 @@ from gettext import gettext as _
 import re
 import gtk
 
-try:
-    from advene.gui.widget import TagWidget
-except ImportError:
-    TagWidget=None
+from advene.gui.widget import TagWidget
 
 class TagBag(AdhocView):
     view_name = _("Tag Bag")
@@ -299,58 +296,3 @@ class TagBag(AdhocView):
 
         v.buttonbox=hb
         return v
-
-class OldTagWidget(gtk.Button):
-    """Old method to render tag widgets (in order to be usable on
-       fink with gtk == 2.6 and no cairo is available)
-    """
-    def __init__(self, tag=None, container=None):
-        gtk.Button.__init__(self)
-        self.tag=tag
-        self.local_color=None
-        # container is the Advene view instance that manages this instance
-        self.container=container
-        if container:
-            self.controller=container.controller
-        else:
-            self.controller=None
-
-        self.label=gtk.Label()
-        #self.label.modify_font(self.container.annotation_type_font)
-        self.add(self.label)
-        self.set_size_request(-1, self.container.button_height)
-        self.width=None
-
-        self.connect("button_press_event", self.buttonpress)
-
-    def buttonpress(self, widget, event):
-        """Display the popup menu when right-clicking on annotation type.
-        """
-        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-            # FIXME: set_color
-            return True
-        return False
-
-    def set_color(self, color=None):
-        self.local_color=color
-        self.update_widget()
-
-    def update_widget(self):
-        if self.width is not None:
-            self.set_size_request(self.width, -1)
-        if self.local_color is not None:
-            color=self.local_color
-        else:
-            color=self.container.get_element_color(self.tag)
-        if color:
-            for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                          gtk.STATE_PRELIGHT):
-                self.modify_bg (style, color)
-
-        # Draw the text
-        self.label.set_text(self.tag)
-        return True
-
-if TagWidget is None:
-    TagWidget=OldTagWidget
