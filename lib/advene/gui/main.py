@@ -260,6 +260,8 @@ class AdveneGUI (Connect):
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
             ('montage', _("Dynamic montage"), 'montage.png'),
             ):
+            if name in ('browser', ) and not config.data.preferences['expert-mode']:
+                continue
             b=gtk.Button()
             i=gtk.Image()
             i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
