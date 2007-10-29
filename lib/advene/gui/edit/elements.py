@@ -413,6 +413,7 @@ class EditAnnotationPopup (EditElementPopup):
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'type',
                                                'author', 'date'),
+                                       types={ 'type': 'advene' },
                                        editable=editable,
                                        editables=('author', 'date'),
                                        labels={'id':     _('Id'),
@@ -487,6 +488,7 @@ class EditRelationPopup (EditElementPopup):
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'type',
                                                'author', 'date'),
+                                       types={ 'type': 'advene' },
                                        editable=editable,
                                        editables=('author', 'date'),
                                        labels={'id':     _('Id'),
@@ -558,6 +560,7 @@ class EditViewPopup (EditElementPopup):
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uri', 'title',
                                                'author', 'date'),
+                                       types={ 'type': 'advene' },
                                        editable=editable,
                                        editables=('title', 'author', 'date'),
                                        labels={'id':     _('Id'),
@@ -1642,6 +1645,10 @@ class EditAttributesForm (EditForm):
         self.types = dic
 
     def attribute_type (self, at):
+        """Return the type of the attribute.
+        
+        Current values: 'int', 'advene' (advene element)
+        """
         typ = None
         if at in self.types:
             typ=self.types[at]
@@ -1664,6 +1671,9 @@ class EditAttributesForm (EditForm):
                 val = long(v)
             except ValueError:
                 raise ValueError (_('Expecting an integer.'))
+        elif typ == 'advene':
+            # We should not have writable Advene elements in attributes anyway
+            pass
         elif isinstance(v, str):
             val = unicode(v)
         else:
@@ -1675,7 +1685,10 @@ class EditAttributesForm (EditForm):
 
         Return None if the value could not be converted.
         """
-        if v is not None:
+        typ = self.attribute_type (at)
+        if typ == 'advene':
+            return self.controller.get_title(v)
+        elif v is not None:
             return unicode(v)
         else:
             return None
