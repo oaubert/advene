@@ -1065,6 +1065,51 @@ class TimeLine(AdhocView):
             return True
         return False
 
+    def legend_drag_received(self, widget, context, x, y, selection, targetType, time):
+        """Handle the drop from an annotation-type to the legend
+        """
+        if targetType == config.data.target_type['annotation-type']:
+            source_uri=selection.data
+            source=self.controller.package.annotationTypes.get(source_uri)
+            # We received a drop. Determine the location.
+            s = config.data.preferences['timeline']['interline-height']
+
+            f=[ at
+                for (at, p) in self.layer_position.iteritems()
+                if (y - s >= p and y - s <= p + self.button_height) ]
+            t=[ at
+                for (at, p) in self.layer_position.iteritems()
+                if (y + s >= p and y + s <= p + self.button_height) ]
+            if f and t and f[0] != source and t[0] != source:
+                if source in self.annotationtypes:
+                    self.annotationtypes.remove(source)
+                j=self.annotationtypes.index(f[0])
+                l=self.annotationtypes[:j+1]
+                l.append(source)
+                l.extend(self.annotationtypes[j+1:])
+                self.annotationtypes=l
+                self.update_model(partial_update=True)
+            elif y < self.button_height + s:
+                # Drop at the beginning of the list.
+                if source in self.annotationtypes:
+                    if self.annotationtypes.index(source) == 0:
+                        return True
+                    self.annotationtypes.remove(source)
+                l=[ source ]
+                l.extend(self.annotationtypes)
+                self.annotationtypes=l
+                self.update_model(partial_update=True)
+            elif y > max(self.layer_position.values() or (0,)):
+                # Drop at the end of the list
+                if source in self.annotationtypes:
+                    if self.annotationtypes.index(source) == len(self.annotationtypes) - 1:
+                        return True
+                    self.annotationtypes.remove(source)
+                self.annotationtypes.append(source)
+                self.update_model(partial_update=True)
+            return True
+        return False
+
     def layout_drag_received(self, widget, context, x, y, selection, targetType, time):
         """Handle the drop from an annotation to the layout.
         """
@@ -1972,6 +2017,13 @@ class TimeLine(AdhocView):
         hpaned = gtk.HPaned ()
 
         self.legend = gtk.Layout ()
+        # The layout can receive drops
+        self.legend.connect("drag_data_received", self.legend_drag_received)
+        self.legend.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                  gtk.DEST_DEFAULT_HIGHLIGHT |
+                                  gtk.DEST_DEFAULT_ALL,
+                                  config.data.drag_type['annotation-type'], 
+                                  gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
         sw1 = gtk.ScrolledWindow ()
         sw1.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
