@@ -193,6 +193,7 @@ class InteractiveResult(AdhocView):
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Create annotation from the result"), self.create_annotations),
+            (_("Define a montage with the result"), self.create_montage),
             #(_("Refresh"), self.refresh),
             #(_("Save view"), self.save_view),
             )
@@ -209,6 +210,13 @@ class InteractiveResult(AdhocView):
             self.label=_("""'%s'""") % self.query
 
         self.widget=self.build_widget()
+
+    def create_montage(self, *p):
+        if hasattr(self, 'table'):
+            # There are annotations
+            l=self.table.get_elements()
+        self.controller.gui.open_adhoc_view('montage', elements=l, destination=self._destination)
+        return True
 
     def create_annotations(self, *p):
         l=[ a for a in self.result if isinstance(a, Annotation) ]
