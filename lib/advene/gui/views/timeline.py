@@ -1028,18 +1028,11 @@ class TimeLine(AdhocView):
             dest=widget.annotationtype
             self.move_or_copy_annotation(source, dest)
         elif targetType == config.data.target_type['annotation-type']:
-            # Reorder annotation types
+            # Copy annotations
             source_uri=selection.data
             source=self.controller.package.annotationTypes.get(source_uri)
             dest=widget.annotationtype
-            if source != dest and source in self.annotationtypes and dest in self.annotationtypes:
-                self.annotationtypes.remove(source)
-                j=self.annotationtypes.index(dest)
-                l= self.annotationtypes[:j+1]
-                l.append(source)
-                l.extend(self.annotationtypes[j+1:])
-                self.annotationtypes = l
-                self.update_model(partial_update=True)
+            self.copy_annotation_type(source, dest)
         elif targetType == config.data.target_type['color']:
             # Got a color
             # The structure consists in 4 unsigned shorts: r, g, b, opacity
