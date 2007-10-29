@@ -227,6 +227,7 @@ class GenericImporter(object):
         a.content.data = data
         self.package.annotations.append(a)
         self.update_statistics('annotation')
+        return a
 
     def statistics_formatted(self):
         """Return a string representation of the statistics."""
@@ -287,6 +288,7 @@ class GenericImporter(object):
         The following keys are optional:
           - id
           - type (which must be a *type*, not a type-id)
+          - notify: if True, then each annotation creation will generate a AnnotationCreate signal
         """
         if self.package is None:
             self.package, self.defaulttype=self.init_package()
@@ -331,14 +333,17 @@ class GenericImporter(object):
             except KeyError:
                 timestamp=self.timestamp
 
-            self.create_annotation (type_=type_,
-                                    begin=begin,
-                                    end=end,
-                                    data=content,
-                                    ident=ident,
-                                    author=author,
-                                    title=title,
-                                    timestamp=timestamp)
+            a=self.create_annotation (type_=type_,
+                                      begin=begin,
+                                      end=end,
+                                      data=content,
+                                      ident=ident,
+                                      author=author,
+                                      title=title,
+                                      timestamp=timestamp)
+            if 'notify' in d and d['notify'] and self.controller is not None:
+                print "Notifying", a
+                self.controller.notify('AnnotationCreate', annotation=a)
 
 class TextImporter(GenericImporter):
     """Text importer.
