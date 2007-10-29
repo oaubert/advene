@@ -49,7 +49,7 @@ from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.browser import Browser
 from advene.gui.views.tagbag import TagBag
 
-from advene.gui.util import dialog
+from advene.gui.util import dialog, get_small_stock_button
 from advene.gui.util.completer import Completer
 import advene.gui.popup
 
@@ -389,6 +389,23 @@ class EditAnnotationPopup (EditElementPopup):
         self.controller.notify("AnnotationEditEnd", annotation=element)
         return True
 
+    def goto(self, button=None, direction=1):
+        # FIXME: cmp usually returns -1, 0, 1 but its definition only
+        # states that the value is positive or negative. Thus this may
+        # not work in all cases.
+        l=[a 
+           for a in self.element.type.annotations
+           if cmp(a.fragment.begin, self.element.fragment.begin) == direction ]
+        if l:
+            a=l[0]
+            new=self.controller.gui.edit_element(a)
+            # It is in a popup window. Use the same positioning
+            if hasattr(new, 'window') and hasattr(self, 'window'):
+                x, y=self.window.get_position()
+                new.window.move(x, y)
+            self.close_cb()
+        return True
+            
     def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
@@ -423,6 +440,18 @@ class EditAnnotationPopup (EditElementPopup):
         t = f.get_view(compact=compact)
         self.register_form(f)
         vbox.pack_start(t, expand=True)
+
+        hb=gtk.HBox()
+
+        b=get_small_stock_button(gtk.STOCK_GO_BACK, self.goto, -1)
+        self.controller.gui.tooltips.set_tip(b, _("Edit previous annotation of same type"))
+        hb.pack_start(b, expand=False)
+
+        b=get_small_stock_button(gtk.STOCK_GO_FORWARD, self.goto, +1)
+        self.controller.gui.tooltips.set_tip(b, _("Edit next annotation of same type"))
+        hb.pack_start(b, expand=False)
+
+        vbox.pack_start(hb, expand=False)
 
         return vbox
 
