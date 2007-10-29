@@ -20,6 +20,7 @@
 
 import sys
 import re
+import os
 
 import gtk
 import gobject
@@ -588,6 +589,9 @@ class TranscriptionEdit(AdhocView):
         return True
 
     def save_transcription(self, filename=None):
+        if os.path.splitext(filename)[1] == '':
+            # No extension was given. Add '.txt'
+            filename=filename+'.txt'
         try:
             f=open(filename, "w")
         except IOError, e:
