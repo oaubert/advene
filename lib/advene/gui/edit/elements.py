@@ -49,7 +49,7 @@ from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.browser import Browser
 from advene.gui.views.tagbag import TagBag
 
-from advene.gui.util import dialog, get_small_stock_button
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
 from advene.gui.util.completer import Completer
 import advene.gui.popup
 
@@ -449,6 +449,23 @@ class EditAnnotationPopup (EditElementPopup):
 
         b=get_small_stock_button(gtk.STOCK_GO_FORWARD, self.goto, +1)
         self.controller.gui.tooltips.set_tip(b, _("Edit next annotation of same type"))
+        hb.pack_start(b, expand=False)
+
+        def toggle_highlight(b, ann):
+            if b.highlight:
+                event="AnnotationActivate"
+                label= _("Unhighlight annotation")
+                b.highlight=False
+            else:
+                event="AnnotationDeactivate"
+                label=_("Highlight annotation")
+                b.highlight=True
+            self.controller.gui.tooltips.set_tip(b, label)
+            self.controller.notify(event, annotation=ann)
+            return True
+        
+        b=get_pixmap_button('highlight.png', toggle_highlight, self.element)
+        b.highlight=True
         hb.pack_start(b, expand=False)
 
         vbox.pack_start(hb, expand=False)
