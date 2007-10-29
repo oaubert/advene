@@ -22,7 +22,8 @@ import advene.core.config as config
 import advene.util.helper as helper
 from advene.gui.util import image_from_position, get_small_stock_button
 from advene.gui.views import AdhocView
-
+from advene.gui.util import dialog
+import advene.util.importer
 from gettext import gettext as _
 
 import gtk
@@ -31,6 +32,32 @@ name="History view plugin"
 
 def register(controller):
     controller.register_viewclass(HistoryNavigation)
+
+class HistoryImporter(advene.util.importer.GenericImporter):
+    """History importer.
+    """
+    def __init__(self, elements=None, duration=2000, **kw):
+        super(HistoryImporter, self).__init__(**kw)
+        self.elements=elements
+        self.duration=duration
+        self.name = _("History importer")
+
+    def iterator(self):
+        for b in self.elements:
+            yield {
+                'begin': b,
+                'end': b + self.duration,
+                'content': "Bookmark %s" % helper.format_time(b),
+                'notify': True,
+                }
+
+    def process_file(self, filename):
+        if filename != 'history':
+            return None
+        if self.package is None:
+            self.init_package()
+        self.convert(self.iterator())
+        return self.package
 
 class HistoryNavigation(AdhocView):
     view_name = _("Bookmarks")
@@ -43,6 +70,7 @@ class HistoryNavigation(AdhocView):
         self.contextual_actions = (
             (_("Save view"), self.save_view),
             (_("Clear"), self.clear),
+            (_("Convert to annotations"), self.convert_to_annotations),
             )
         self.options={
             'ordered': ordered,
@@ -81,6 +109,39 @@ class HistoryNavigation(AdhocView):
 
     def unregister_callback (self, controller=None):
         controller.event_handler.remove_rule(self.changerule, type_="internal")
+        return True
+
+    def convert_to_annotations(self, *p):
+        """Convert bookmarks to annotations with a fixed duration.
+        """        
+        at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to generate"), create=True)
+
+        if at is None:
+            return True
+
+        d=dialog.entry_dialog(title=_("Choose a duration"),
+                              text=_("Enter the standard duration (in ms) of created annotations."),
+                              default="2000")
+        if d is None:
+            return True
+
+        try:
+            d=long(d)
+        except ValueError:
+            # Use a default value
+            d=2000
+        ti=HistoryImporter(package=self.controller.package,
+                           controller=self.controller,
+                           defaulttype=at,
+                           elements=self.history,
+                           duration=d)
+        ti.process_file('history')
+        self.controller.package._modified=True
+        self.controller.log(_('Converted from bookmarks'))
+        self.controller.log(ti.statistics_formatted())
+        # Feedback
+        dialog.message_dialog(
+            _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
         return True
 
     def activate(self, widget=None, timestamp=None):
