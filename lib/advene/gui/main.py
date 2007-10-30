@@ -1590,10 +1590,11 @@ class AdveneGUI (Connect):
         p._indexer.initialize()
 
         media=self.controller.get_default_media(p)
-        if media == '':
-            dialog.message_dialog(_("No media association is defined in the package. Please use the 'File/Select a video file' menuitem to associate a media file."), callback=lambda: True)
-        elif not os.path.exists(media) and not media.startswith('http:'):
-            dialog.message_dialog(_("The associated media %s could not be found. Please use the 'File/Select a video file' menuitem to associate a media file."), callback=lambda: True)
+        if not config.data.preferences['expert-mode']:
+            if media == '':
+                dialog.message_dialog(_("No media association is defined in the package. Please use the 'File/Select a video file' menuitem to associate a media file."), callback=lambda: True)
+            elif not os.path.exists(media) and not media.startswith('http:'):
+                dialog.message_dialog(_("The associated media %s could not be found. Please use the 'File/Select a video file' menuitem to associate a media file."), callback=lambda: True)
         return True
 
     def update_window_title(self):
