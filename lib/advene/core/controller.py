@@ -52,8 +52,13 @@ import advene.rules.actions
 
 from advene.model.package import Package
 from advene.model.zippackage import ZipPackage
-from advene.model.annotation import Annotation
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.resources import Resources, ResourceData
+from advene.model.annotation import Annotation, Relation
 from advene.model.fragment import MillisecondFragment
+from advene.model.view import View
+from advene.model.query import Query
+
 import advene.model.tal.context
 
 import advene.util.helper as helper
@@ -729,6 +734,58 @@ class AdveneController:
         if uri is not None and uri != "":
             id_ = helper.mediafile2id (uri)
             self.package.imagecache.load (id_)
+
+    def delete_element (self, el):
+        """Delete an element from its package.
+        
+        Take care of all dependencies (for instance, annotations which
+        have relations.
+        """
+        p=el.ownerPackage
+        if isinstance(el, Annotation):
+            # We iterate on a copy of relations, since it may be
+            # modified during the loop
+            for r in el.relations[:]:
+                [ a.relations.remove(r) for a in r.members if r in a.relations ]
+                self.delete_element(r)
+            p.annotations.remove(el)
+            self.notify('AnnotationDelete', annotation=el)
+        elif isinstance(el, Relation):
+            for a in el.members:
+                if el in a.relations:
+                    a.relations.remove(el)
+            p.relations.remove(el)
+            self.notify('RelationDelete', relation=el)
+        elif isinstance(el, AnnotationType):
+            for a in el.annotations:
+                self.delete_element(a)
+            el.schema.annotationTypes.remove(el)
+            self.notify('AnnotationTypeDelete', annotationtype=el)
+        elif isinstance(el, RelationType):
+            for r in el.relations:
+                self.delete_element(r)
+            el.schema.relationTypes.remove(el)
+            self.notify('RelationTypeDelete', relationtype=el)
+        elif isinstance(el, Schema):
+            for at in el.annotationTypes:
+                self.delete_element(at)
+            for rt in el.relationTypes:
+                self.delete_element(rt)
+            p.schemas.remove(el)
+            self.notify('SchemaDelete', schema=el)
+        elif isinstance(el, View):
+            p.views.remove(el)
+            self.notify('ViewDelete', view=el)
+        elif isinstance(el, Query):
+            p.queries.remove(el)
+            self.notify('QueryDelete', query=el)
+        elif isinstance(el, Resources):
+            self.do_remove_resource_dir(el)
+            self.notify('ResourceDelete', resource=el)
+        elif isinstance(el, ResourceData):
+            self.do_remove_resource_file(el)
+            self.notify('ResourceDelete', resource=el)
+        return True
 
     def transmute_annotation(self, annotation, annotationType, delete=False, position=None):
         """Transmute an annotation to a new type.
