@@ -237,14 +237,11 @@ class Menu:
     def delete_element (self, widget, el):
         p=el.ownerPackage
         if isinstance(el, Annotation):
-            rels=[ helper.get_title(self.controller, r.id)
-                   for r in el.rootPackage.relations
-                   if el in r.members ]
-            if rels:
-                dialog.message_dialog(
-                    _("Cannot delete the annotation %(annotation)s:\nThe following relation(s) use it:\n%(relations)s") % { 'annotation': helper.get_title(self.controller, el), 
-                                                                                                                            'relations': ", ".join(rels)})
-                return True
+            # We iterate on a copy of relations, since it may be
+            # modified during the loop
+            for r in el.relations[:]:
+                [ a.relations.remove(r) for a in r.members if r in a.relations ]
+                self.delete_element(None, r)
             p.annotations.remove(el)
             self.controller.notify('AnnotationDelete', annotation=el)
         elif isinstance(el, Relation):
