@@ -235,56 +235,13 @@ class Menu:
         return True
 
     def delete_element (self, widget, el):
-        p=el.ownerPackage
-        if isinstance(el, Annotation):
-            # We iterate on a copy of relations, since it may be
-            # modified during the loop
-            for r in el.relations[:]:
-                [ a.relations.remove(r) for a in r.members if r in a.relations ]
-                self.delete_element(None, r)
-            p.annotations.remove(el)
-            self.controller.notify('AnnotationDelete', annotation=el)
-        elif isinstance(el, Relation):
-            p.relations.remove(el)
-            self.controller.notify('RelationDelete', relation=el)
-        elif isinstance(el, AnnotationType):
-            if len(el.annotations) > 0:
-                dialog.message_dialog(
-                    _("Cannot delete the annotation type %s:\nthere are still annotations of this type.") % (el.title or el.id))
-                return True
-            el.schema.annotationTypes.remove(el)
-            self.controller.notify('AnnotationTypeDelete', annotationtype=el)
-        elif isinstance(el, RelationType):
-            if len(el.relations) > 0:
-                dialog.message_dialog(
-                    _("Cannot delete the relation type %s:\nthere are still relations of this type.") % (el.title or el.id))
-                return True
-            el.schema.relationTypes.remove(el)
-            self.controller.notify('RelationTypeDelete', relationtype=el)
-        elif isinstance(el, Schema):
-            if len(el.annotationTypes) > 0 or len(el.relationTypes) > 0:
-                dialog.message_dialog(
-                    _("Cannot delete the schema %s:\nthere are still types in it.") % (el.title or el.id))
-                return True
-            p.schemas.remove(el)
-            self.controller.notify('SchemaDelete', schema=el)
-        elif isinstance(el, View):
-            p.views.remove(el)
-            self.controller.notify('ViewDelete', view=el)
-        elif isinstance(el, Query):
-            p.queries.remove(el)
-            self.controller.notify('QueryDelete', query=el)
-        elif isinstance(el, Resources):
-            self.do_remove_resource_dir(el)
-        elif isinstance(el, ResourceData):
-            self.do_remove_resource_file(el)
+        self.controller.delete_element(el)
         return True
 
     def delete_elements (self, widget, el, elements):
-        p=el.ownerPackage
         if isinstance(el, AnnotationType) or isinstance(el, RelationType):
             for e in elements:
-                self.delete_element(widget, e)
+                self.controller.delete_element(e)
         return True
 
     def pick_color(self, widget, element):
