@@ -133,28 +133,6 @@ class Menu:
                 self.do_insert_resource_file(parent=el, filename=filename)
         return el
 
-    def do_remove_resource_dir(self, r):
-        for c in r.children():
-            if isinstance(c, ResourceData):
-                self.do_remove_resource_file(c)
-            elif isinstance(c, Resources):
-                self.do_remove_resource_dir(c)
-            else:
-                print "Strange bug in do_remove_resource_dir"
-                return True
-        p=r.parent
-        del(p[r.id])
-        self.controller.notify('ResourceDelete',
-                               resource=r)
-        return True
-
-    def do_remove_resource_file(self, r):
-        p=r.parent
-        del(p[r.id])
-        self.controller.notify('ResourceDelete',
-                               resource=r)
-        return True
-
     def insert_resource_data(self, widget, parent=None):
         filename=dialog.get_filename(title=_("Choose the file to insert"))
         if filename is None:
@@ -325,7 +303,11 @@ class Menu:
         if not self.readonly:
             # Common to deletable elements
             if type(element) in (Annotation, Relation, View, Query,
-                                 Schema, AnnotationType, RelationType):
+                                 Schema, AnnotationType, RelationType, ResourceData):
+                add_item(_("Delete"), self.delete_element, element)
+
+            if type(element) == Resources and type(element.parent) == Resources:
+                # Add Delete item to Resources except for the root resources (with parent = package)
                 add_item(_("Delete"), self.delete_element, element)
 
             ## Common to offsetable elements
@@ -442,8 +424,6 @@ class Menu:
         add_item(_("Create a new resource file..."), self.create_element, ResourceData, element)
         add_item(_("Insert a new resource file..."), self.insert_resource_data, element)
         add_item(_("Insert a new resource directory..."), self.insert_resource_directory, element)
-        if isinstance(element.parent, Resources):
-            add_item(_("Delete the resource..."), self.delete_element, element)
         return
 
     def make_resourcedata_menu(self, element, menu):
@@ -451,7 +431,6 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         if self.readonly:
             return
-        add_item(_("Delete the resource..."), self.delete_element, element)
         return
 
     def make_schema_menu(self, element, menu):
