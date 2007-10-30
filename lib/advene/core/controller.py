@@ -779,11 +779,12 @@ class AdveneController:
         elif isinstance(el, Query):
             p.queries.remove(el)
             self.notify('QueryDelete', query=el)
-        elif isinstance(el, Resources):
-            self.do_remove_resource_dir(el)
-            self.notify('ResourceDelete', resource=el)
-        elif isinstance(el, ResourceData):
-            self.do_remove_resource_file(el)
+        elif isinstance(el, Resources) or isinstance(el, ResourceData):
+            if isinstance(el, Resources):
+                for c in el.children():
+                    self.delete_element(c)
+            p=el.parent
+            del(p[el.id])
             self.notify('ResourceDelete', resource=el)
         return True
 
