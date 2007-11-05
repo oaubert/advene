@@ -92,16 +92,19 @@ class EditRuleSet(EditGeneric):
         b.connect("drag_data_get", self.drag_sent)
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['rule'], gtk.gdk.ACTION_COPY)
+        self.controller.gui.tooltips.set_tip(b, _("Drag this button to the tab area (of this edit window or another dynamic view edit window) to copy the rule"))
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect("clicked", self.add_rule_cb)
         b.set_sensitive(self.editable)
+        self.controller.gui.tooltips.set_tip(b, _("Add a new rule"))
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
         b.connect("clicked", self.remove_rule_cb)
         b.set_sensitive(self.editable)
+        self.controller.gui.tooltips.set_tip(b, _("Remove the current rule"))
         hb.pack_start(b, expand=False)
 
         vbox.add(hb)
