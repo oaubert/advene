@@ -597,6 +597,32 @@ def tag_color(target, context):
 def representation(target, context):
     """Return a concise representation for the element.
     """
-    c=context.evaluateValue('options/controller')
+    #c=context.evaluateValue('options/controller')
+    c=context.globals['options']['controller']
     return c.get_title(target)
 
+def color(target, context):
+    """Return the color of the element.
+    """
+    from advene.model.annotation import Annotation, Relation
+    from advene.model.schema import Schema, AnnotationType, RelationType
+    import re
+
+    if (isinstance(target, Annotation) or isinstance(target, Relation) 
+        or isinstance(target, AnnotationType) or isinstance(target, RelationType)):
+        # The proper way would be
+        # c=context.evaluateValue('options/controller')
+        # but the following is a mediocre optimization
+        c=context.globals['options']['controller']
+        col=c.get_element_color(target)
+        if col is None:
+            return col
+        m=re.search('#(..)..(..)..(..)..', col)
+        if m:
+            # Approximate the color, since CSS specification only
+            # allows 24-bit color definition
+            return '#'+''.join(m.groups())
+        else:
+            return col
+    else:
+        return None
