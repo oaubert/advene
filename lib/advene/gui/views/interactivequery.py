@@ -209,6 +209,8 @@ class InteractiveResult(AdhocView):
             # Must be a string
             self.label=_("""'%s'""") % self.query
 
+        # Annotation-table view
+        self.table=None
         self.widget=self.build_widget()
 
     def create_montage(self, *p):
@@ -219,7 +221,11 @@ class InteractiveResult(AdhocView):
         return True
 
     def create_annotations(self, *p):
-        l=[ a for a in self.result if isinstance(a, Annotation) ]
+        if self.table is not None:
+            # There are annotations
+            l=self.table.get_elements()
+        else:
+            l=None
         if l:
             at=self.controller.gui.ask_for_annotation_type(text=_("Choose the annotation type where annotations will be created."),
                                                            create=True)
@@ -356,12 +362,12 @@ class InteractiveResult(AdhocView):
                 hb.add(b)
                 self.table=gtable
 
-            b=get_pixmap_button('editaccumulator.png', lambda b: self.open_in_edit_accumulator(self.table.get_selected_nodes() or self.result))
+            b=get_pixmap_button('editaccumulator.png', lambda b: self.open_in_edit_accumulator(self.table.get_elements()))
             self.controller.gui.tooltips.set_tip(b, _("Edit elements"))
             hb.add(b)
 
             if config.data.preferences['expert-mode']:
-                b=get_pixmap_button('python.png', lambda b: self.open_in_evaluator(self.table.get_selected_nodes() or self.result))
+                b=get_pixmap_button('python.png', lambda b: self.open_in_evaluator(self.table.get_elements()))
                 self.controller.gui.tooltips.set_tip(b, _("Open in python evaluator"))
                 hb.add(b)
         else:
