@@ -70,7 +70,8 @@ class AnnotationTable(AdhocView):
         If a selection is active, return only selected elements.
         """
         selection = self.widget.treeview.get_selection ()
-        if not selection.count_selected_rows():
+        r=selection.count_selected_rows()
+        if r == 0 or r == 1:
             selection.select_all()
         store, paths=selection.get_selected_rows()
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
@@ -287,6 +288,18 @@ class GenericTable(AdhocView):
 
         self.model=self.build_model()
         self.widget = self.build_widget()
+
+    def get_elements(self):
+        """Return the list of elements in their displayed order.
+
+        If a selection is active, return only selected elements.
+        """
+        selection = self.widget.treeview.get_selection ()
+        r=selection.count_selected_rows()
+        if r == 0 or r == 1:
+            selection.select_all()
+        store, paths=selection.get_selected_rows()
+        return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
     def build_model(self):
         """Build the ListStore containing the data.
