@@ -241,7 +241,9 @@ class Condition:
         return self
 
     def to_dom(self, dom):
-        """Creates a DOM representation of the condition.
+        """Create a DOM representation of the condition.
+
+        @return: a DOMElement
         """
         condnode=dom.createElement('condition')
         condnode.setAttribute('operator', self.operator)
@@ -338,6 +340,20 @@ class Action:
         else:
             return self.method(context, self.parameters)
 
+    def to_dom(self, dom):
+        """Create a DOM representation of the action.
+
+        @return: a DOMElement
+        """
+        node=dom.createElement('action')
+        node.setAttribute('name', self.name)
+        for pname, pvalue in self.parameters.iteritems():
+            paramnode=dom.createElement('param')
+            node.appendChild(paramnode)
+            paramnode.setAttribute('name', pname)
+            paramnode.setAttribute('value', pvalue)
+        return node
+
 class Rule:
     """Advene Rule, consisting in an Event, a Condition and an Action.
 
@@ -408,10 +424,10 @@ class Rule:
         s=StringIO.StringIO(xmlstring)
         di=reader.fromStream(s)
         rulenode=di._get_documentElement()
-        self.from_dom(catalog=catalog, domelement=rulenode)
+        self.from_dom(domelement=rulenode, catalog=catalog)
         s.close()
 
-    def from_dom(self, catalog=None, domelement=None, origin=None):
+    def from_dom(self, domelement=None, catalog=None, origin=None):
         """Read the rule from a DOM element.
 
         @param catalog: the ECAEngine catalog
@@ -462,9 +478,105 @@ class Rule:
 
     def to_xml(self, uri=None, stream=None):
         """Save the ruleset to the given URI or stream."""
-        di = xml.dom.DOMImplementation.DOMImplementation()
-        ruledom = di.createDocument(advene.core.config.data.namespace, "rule", None)
-        self.to_dom(ruledom)
+        dom=xml.dom.Document.Document(None)
+        dom.appendChild(self.to_dom(dom))
+        if stream is None:
+            stream=open(uri, 'w')
+            xml.dom.ext.PrettyPrint(dom, stream)
+            stream.close()
+        else:
+            xml.dom.ext.PrettyPrint(dom, stream)
+
+    def xml_repr(self):
+        """Return the XML representation of the rule."""
+        s=StringIO.StringIO()
+        self.to_xml(stream=s)
+        buf=s.getvalue()
+        s.close()
+        return buf
+
+    def to_dom(self, dom):
+        """Create a DOM representation of the rule.
+
+        @return: a DOMElement
+        """
+        rulenode=dom.createElement('rule')
+        rulenode.setAttribute('name', self.name)
+
+        eventnode=dom.createElement('event')
+        rulenode.appendChild(eventnode)
+        eventnode.setAttribute('name', self.event[:])
+
+        if self.condition != self.default_condition:
+            for cond in self.condition:
+                if cond == self.default_condition:
+                    continue
+                rulenode.appendChild(cond.to_dom(dom))
+
+        if isinstance(self.action, ActionList):
+            l=self.action
+        else:
+            l=[self.action]
+        for action in l:
+            rulenode.appendChild(action.to_dom(dom))
+        return rulenode
+
+class SubviewList(list):
+    """List of subview.
+
+    It contains a list of *view ids* that are considered as subviews for a
+    ruleset: their rule will be considered as part of the view.
+    
+    We could store views themselves, but then we would depend on a
+    controller when loading the XML representation.
+    """
+    def __init__ (self, name="N/C", elements=None, origin=None):
+        self.name=name
+        self.origin=origin
+        if elements is None:
+            elements=[]
+        self[:]=elements[:]
+
+    def clear(self):
+        self[:]=[]
+
+    def as_views(self, package):
+        """Return the Subview list as a list of views, interpreted in the context of package
+        """
+        return [ package.get_element_by_id(i) for i in self ]
+
+    def from_xml_string(self, xmlstring, catalog=None):
+        """Read the list from a XML string
+        """
+        reader=xml.dom.ext.reader.PyExpat.Reader()
+        s=StringIO.StringIO(xmlstring)
+        di=reader.fromStream(s)
+        rulenode=di._get_documentElement()
+        self.from_dom(domelement=rulenode, catalog=catalog)
+        s.close()
+
+    def from_dom(self, domelement=None, origin=None):
+        """Read the list from a DOM element.
+
+        @param catalog: the ECAEngine catalog
+        @type catalog: ECACatalog
+        @param domelement: the DOM element
+        @param origin: the source URI
+        @type origin: URI
+        """
+        self.origin=origin
+        rulenode=domelement
+        
+        # FIXME: check the the rulenode tagname is 'subviewlist'
+        self.name=rulenode.getAttribute('name')
+        self[:]=rulenode.getAttribute('value').split(',')
+        # Event
+        return self
+
+    def to_xml(self, uri=None, stream=None):
+        """Save the ruleset to the given URI or stream."""
+        dom=xml.dom.Document.Document(None)
+        dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
             xml.dom.ext.PrettyPrint(ruledom, stream)
@@ -481,36 +593,20 @@ class Rule:
         return buf
 
     def to_dom(self, dom):
-        """Save the ruleset in the given DOM element."""
-        rulenode=dom._get_documentElement()
-        #rulenode=dom.createElement('rule')
+        """Create a DOM representation of the subviewlist.
 
+        @return: a DOMElement
+        """
+        rulenode=dom.createElement("subviewlist")
         rulenode.setAttribute('name', self.name)
-        eventnode=dom.createElement('event')
-        rulenode.appendChild(eventnode)
-        eventnode.setAttribute('name', self.event[:])
-        if self.condition != self.default_condition:
-            for cond in self.condition:
-                if cond == self.default_condition:
-                    continue
-                rulenode.appendChild(cond.to_dom(dom))
-        if isinstance(self.action, ActionList):
-            l=self.action
-        else:
-            l=[self.action]
-        for action in l:
-            actionnode=dom.createElement('action')
-            rulenode.appendChild(actionnode)
-            actionnode.setAttribute('name', action.name)
-            for pname, pvalue in action.parameters.iteritems():
-                paramnode=dom.createElement('param')
-                actionnode.appendChild(paramnode)
-                paramnode.setAttribute('name', pname)
-                paramnode.setAttribute('value', pvalue)
-
+        rulenode.setAttribute('value', ','.join( self ) )
+        return rulenode
 
 class RuleSet(list):
     """Set of Rules.
+
+    It is a list of Rule and SubviewList instances. Usually, there is
+    only a single SubviewList.
     """
     def __init__(self, uri=None, catalog=None, priority=0):
         self.priority=priority
@@ -521,8 +617,6 @@ class RuleSet(list):
         """Add a new rule."""
         self.append(rule)
 
-    #### FIXME FIXME FIXME
-    #### FIXME: should use the from_dom/to_dom methods now defined in Rule
     def from_xml(self, catalog=None, uri=None):
         """Read the ruleset from a URI.
 
@@ -533,9 +627,9 @@ class RuleSet(list):
         reader=xml.dom.ext.reader.PyExpat.Reader()
         di=reader.fromStream(open(uri, 'r'))
         rulesetnode=di._get_documentElement()
-        self.from_dom(catalog=catalog, domelement=rulesetnode, origin=uri)
+        self.from_dom(domelement=rulesetnode, catalog=catalog, origin=uri)
 
-    def from_dom(self, catalog=None, domelement=None, origin=None):
+    def from_dom(self, domelement=None, catalog=None, origin=None):
         """Read the ruleset from a DOM element.
 
         @param catalog: the ECAEngine catalog
@@ -548,55 +642,25 @@ class RuleSet(list):
             catalog=ECACatalog()
         ruleset=domelement
         for rulenode in ruleset.getElementsByTagName('rule'):
-            rulename=rulenode.getAttribute('name')
-            rule=Rule(name=rulename, origin=origin, priority=self.priority)
-
-            # Event
-            eventnodes=rulenode.getElementsByTagName('event')
-            if len(eventnodes) == 1:
-                name=eventnodes[0].getAttribute('name')
-                if catalog.is_event(name):
-                    rule.event=Event(name)
-                else:
-                    raise Exception("Undefined Event name: %s" % name)
-            elif len(eventnodes) == 0:
-                raise Exception("No event associated to rule %s" % rulename)
-            else:
-                raise Exception("Multiple events are associated to rule %s" % rulename)
-
-            # Conditions
-            for condnode in rulenode.getElementsByTagName('condition'):
-                rule.add_condition(Condition().from_dom(condnode))
-
-            # Actions
-            for actionnode in rulenode.getElementsByTagName('action'):
-                name=actionnode.getAttribute('name')
-                if catalog.is_action(name):
-                    action=Action(registeredaction=catalog.get_action(name), catalog=catalog)
-                else:
-                    # FIXME: we should just display warnings if the action
-                    # is not defined ? Or maybe accept it in the case it is defined
-                    # in a module loaded later at runtime
-                    raise Exception("Undefined action in %s: %s" % (origin, name))
-                for paramnode in actionnode.getElementsByTagName('param'):
-                    p_name=paramnode.getAttribute('name')
-                    p_value=paramnode.getAttribute('value')
-                    action.add_parameter(p_name, p_value)
-                rule.add_action(action)
+            rule=Rule(origin=origin, priority=self.priority)
+            rule.from_dom(rulenode, catalog, origin=origin)
+            self.append(rule)
+        for rulenode in ruleset.getElementsByTagName('subviewlist'):
+            rule=SubviewList()
+            rule.from_dom(rulenode, origin=origin)
             self.append(rule)
         return self
 
     def to_xml(self, uri=None, stream=None):
         """Save the ruleset to the given URI or stream."""
-        di = xml.dom.DOMImplementation.DOMImplementation()
-        rulesetdom = di.createDocument(advene.core.config.data.namespace, "ruleset", None)
-        self.to_dom(rulesetdom)
+        dom=xml.dom.Document.Document(None)
+        dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            xml.dom.ext.PrettyPrint(rulesetdom, stream)
+            xml.dom.ext.PrettyPrint(dom, stream)
             stream.close()
         else:
-            xml.dom.ext.PrettyPrint(rulesetdom, stream)
+            xml.dom.ext.PrettyPrint(dom, stream)
 
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
@@ -607,33 +671,24 @@ class RuleSet(list):
         return buf
 
     def to_dom(self, dom):
-        """Save the ruleset in the given DOM element."""
-        rulesetnode=dom._get_documentElement()
+        """Create a DOM representation of the ruleset.
+
+        @return: a DOMElement
+        """
+        rulesetnode=dom.createElement('ruleset')
         for rule in self:
-            rulenode=dom.createElement('rule')
-            rulesetnode.appendChild(rulenode)
-            rulenode.setAttribute('name', rule.name)
-            eventnode=dom.createElement('event')
-            rulenode.appendChild(eventnode)
-            eventnode.setAttribute('name', rule.event[:])
-            if rule.condition != rule.default_condition:
-                for cond in rule.condition:
-                    if cond == rule.default_condition:
-                        continue
-                    rulenode.appendChild(cond.to_dom(dom))
-            if isinstance(rule.action, ActionList):
-                l=rule.action
-            else:
-                l=[rule.action]
-            for action in l:
-                actionnode=dom.createElement('action')
-                rulenode.appendChild(actionnode)
-                actionnode.setAttribute('name', action.name)
-                for pname, pvalue in action.parameters.iteritems():
-                    paramnode=dom.createElement('param')
-                    actionnode.appendChild(paramnode)
-                    paramnode.setAttribute('name', pname)
-                    paramnode.setAttribute('value', pvalue)
+            rulesetnode.appendChild(rule.to_dom(dom))
+        return rulesetnode
+
+    def filter_subviews(self):
+        """Remove subview instances from the RuleSet.
+        
+        @return: list of removed SubviewList instances.
+        """
+        subviews=[ r for r in self if isinstance(r, SubviewList) ]
+        for s in subviews:
+            self.remove(s)
+        return subviews
 
 class Query:
     """Simple Query component.
@@ -683,10 +738,8 @@ class Query:
 
     def to_xml(self, uri=None, stream=None):
         """Save the query to the given URI or stream."""
-        di = xml.dom.DOMImplementation.DOMImplementation()
-        # FIXME: hardcoded NS URI
-        querydom = di.createDocument("http://liris.cnrs.fr/advene/ruleset", "query", None)
-        self.to_dom(querydom)
+        dom=xml.dom.Document.Document(None)
+        dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
             xml.dom.ext.PrettyPrint(querydom, stream)
@@ -733,11 +786,15 @@ class Query:
         return self
 
     def to_dom(self, dom):
-        """Save the query in the given DOM element."""
-        qnode=dom._get_documentElement()
+        """Create a DOM representation of the query.
+
+        @return: a DOMElement
+        """
+        qnode=dom.createElement('query')
+
         sourcenode=dom.createElement('source')
-        qnode.appendChild(sourcenode)
         sourcenode.setAttribute('value', self.source)
+        qnode.appendChild(sourcenode)
 
         if self.condition is not None:
             if isinstance(self.condition, Condition):
@@ -751,8 +808,10 @@ class Query:
 
         if self.rvalue is not None:
             rnode=dom.createElement('return')
-            qnode.appendChild(rnode)
             rnode.setAttribute('value', self.rvalue)
+            qnode.appendChild(rnode)
+
+        return qnode
 
     def execute(self, context):
         """Execute the query.
@@ -913,6 +972,7 @@ class ECACatalog:
         'PackageActivate':        _("Activating a package"),
         'PackageSave':            _("Saving the package"),
         'ViewActivation':         _("Start of the dynamic view"),
+        'ViewDeactivation':       _("End of the dynamic view"),
         'ApplicationStart':       _("Start of the application"),
         'ApplicationEnd':         _("End of the application"),
         'UserEvent':              _("User-defined event"),
