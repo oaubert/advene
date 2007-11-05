@@ -46,7 +46,7 @@ from advene.core.mediacontrol import PlayerFactory
 from advene.core.imagecache import ImageCache
 import advene.core.idgenerator
 
-import advene.rules.elements
+from advene.rules.elements import RuleSet, SubviewList, RegisteredAction
 import advene.rules.ecaengine
 import advene.rules.actions
 
@@ -189,14 +189,14 @@ class AdveneController:
             'stop':   'PlayerStop',
             'set':    'PlayerSet',
             }
-        self.event_handler.register_action(advene.rules.elements.RegisteredAction(
-            name="Message",
-            method=self.message_log,
-            description=_("Display a message"),
-            parameters={'message': _("String to display.")},
-            defaults={'message': 'annotation/content/data'},
-            category='gui',
-            ))
+        self.event_handler.register_action(RegisteredAction(
+                name="Message",
+                method=self.message_log,
+                description=_("Display a message"),
+                parameters={'message': _("String to display.")},
+                defaults={'message': 'annotation/content/data'},
+                category='gui',
+                ))
 
     def get_cached_duration(self):
         return self.package.cached_duration
@@ -1325,11 +1325,37 @@ class AdveneController:
             self.event_handler.clear_ruleset(type_='user')
             self.notify("ViewActivation", view=None, comment="Deactivate STBV")
             return
-        rs=advene.rules.elements.RuleSet()
+
+        parsed_views=[]
+
+        rs=RuleSet()
         rs.from_dom(catalog=self.event_handler.catalog,
                     domelement=view.content.model,
                     origin=view.uri)
+
+        parsed_views.append(view)
+
+        # Handle subviews
+        subviews=rs.filter_subviews()
+        while subviews:
+            # Danger: possible infinite recursion.
+            for s in subviews:
+                for v in s.as_views(self.package):
+                    if v in parsed_views:
+                        # Already parsed view. In order to avoid an
+                        # infinite loop, ignore it.
+                        self.log(_("Infinite loop in STBV %(name)s: the %(imp)s view is invoked multiple times.") % { 'name': self.get_title(view),
+                                                                                                                      'imp': self.get_title(v) })
+                    else:
+                        rs.from_dom(catalog=self.event_handler.catalog,
+                                    domelement=v.content.model,
+                                    origin=v.uri)
+                        parsed_views.append(v)
+                subviews=rs.filter_subviews()
+
         self.event_handler.set_ruleset(rs, type_='user')
+        for v in parsed_views:
+            self.notify("ViewActivation", view=v, comment="Activate subview of %s" % view.id)
         self.notify("ViewActivation", view=view, comment="Activate STBV")
         return
 
