@@ -35,7 +35,7 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
-from advene.rules.elements import RuleSet, Rule, Event, Action
+from advene.rules.elements import RuleSet, Rule, Event, Action, SubviewList
 
 from advene.gui.util import dialog
 import advene.gui.edit.elements
@@ -239,6 +239,10 @@ class CreateElementPopup(object):
                 r=RuleSet()
 
                 # Create a new default Rule
+                rule=SubviewList(name=_("Subviews"),
+                                 elements=[])
+                r.add_rule(rule)
+
                 event=Event("AnnotationBegin")
                 catalog=self.controller.event_handler.catalog
                 ra=catalog.get_action("Message")
