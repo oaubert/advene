@@ -45,6 +45,7 @@ def register(controller):
 class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest):
     COLUMN_TITLE=0
     COLUMN_ELEMENT=1
+    COLUMN_COLOR=2
 
     def nodeParent (self, node):
         raise Exception("This has to be implemented in subclasses.")
@@ -131,10 +132,10 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         return 0
 
     def on_get_n_columns(self):
-        return 2
+        return 3
 
     def on_get_column_type(self, index):
-        types=(gobject.TYPE_STRING, gobject.TYPE_PYOBJECT)
+        types=(str, object, str)
         return types[index]
 
     # FIXME: maybe we could use TALES expressions as path
@@ -195,8 +196,16 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         return title
 
     def on_get_value(self, node, column):
+        def get_color(e):
+            if (isinstance(e, Annotation) or isinstance(e, Relation) 
+                or isinstance(e, AnnotationType) or isinstance(e, RelationType)):
+                return self.controller.get_element_color(e)
+            else:
+                return None
         if column == AdveneTreeModel.COLUMN_TITLE:
             return self.title(node)
+        elif column == AdveneTreeModel.COLUMN_COLOR:
+            return get_color(node)
         else:
             return node
 
@@ -420,7 +429,10 @@ class TreeWidget(AdhocView):
         #select.connect ("changed", self.debug_cb)
 
         cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_("Package View"), cell, text=0)
+        column = gtk.TreeViewColumn(_("Package View"), cell, 
+                                    text=AdveneTreeModel.COLUMN_TITLE,
+                                    cell_background=AdveneTreeModel.COLUMN_COLOR,
+                                    )
         tree_view.append_column(column)
 
         # Drag and drop for annotations
