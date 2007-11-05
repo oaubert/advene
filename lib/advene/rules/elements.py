@@ -26,8 +26,6 @@ import StringIO
 
 import xml.dom.ext.reader.PyExpat
 
-import advene.core.config
-
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 
@@ -579,10 +577,10 @@ class SubviewList(list):
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            xml.dom.ext.PrettyPrint(ruledom, stream)
+            xml.dom.ext.PrettyPrint(dom, stream)
             stream.close()
         else:
-            xml.dom.ext.PrettyPrint(ruledom, stream)
+            xml.dom.ext.PrettyPrint(dom, stream)
 
     def xml_repr(self):
         """Return the XML representation of the rule."""
@@ -742,10 +740,10 @@ class Query:
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            xml.dom.ext.PrettyPrint(querydom, stream)
+            xml.dom.ext.PrettyPrint(dom, stream)
             stream.close()
         else:
-            xml.dom.ext.PrettyPrint(querydom, stream)
+            xml.dom.ext.PrettyPrint(dom, stream)
 
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
