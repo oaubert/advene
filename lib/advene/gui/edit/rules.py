@@ -189,9 +189,12 @@ class EditRuleSet(EditGeneric):
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['rule']:
             xml=selection.data
-            #print "Should create the rule: %s" % xml
-            rule=Rule()
+            if 'subviewlist' in xml:
+                rule=SubviewList()
+            else:
+                rule=Rule()
             rule.from_xml_string(xml, catalog=self.catalog)
+
             name=rule.name
             l = [ r for r in self.model if r.name == name ]
             while l:
