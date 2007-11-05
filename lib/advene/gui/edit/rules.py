@@ -22,10 +22,10 @@ import gtk
 import re
 
 import advene.rules.elements
-from advene.rules.elements import Event, Condition, ConditionList, Action, ActionList
-from advene.rules.elements import Rule
+from advene.rules.elements import Event, Condition, ConditionList, Action, ActionList, Rule, SubviewList
 import advene.core.config as config
 from advene.gui.util import dialog
+import advene.util.helper as helper
 
 from advene.gui.edit.tales import TALESEntry
 
@@ -126,7 +126,10 @@ class EditRuleSet(EditGeneric):
         # Insert the given rule
         if not self.editable:
             return True
-        edit=EditRule(rule, self.catalog, controller=self.controller)
+        if isinstance(rule, Rule):
+            edit=EditRule(rule, self.catalog, controller=self.controller)
+        elif isinstance(rule, SubviewList):
+            edit=EditSubviewList(rule, controller=self.controller)
         l=gtk.Label(rule.name)
         edit.set_update_label(l)
         self.editlist.append(edit)
@@ -213,9 +216,12 @@ class EditRuleSet(EditGeneric):
                                gtk.gdk.ACTION_COPY)
 
         for rule in self.model:
-            edit=EditRule(rule, self.catalog,
-                          editable=self.editable,
-                          controller=self.controller)
+            if isinstance(rule, Rule):
+                edit=EditRule(rule, self.catalog,
+                              editable=self.editable,
+                              controller=self.controller)
+            elif isinstance(rule, SubviewList):
+                edit=EditSubviewList(rule, controller=self.controller)
             l=gtk.Label(rule.name)
             edit.set_update_label(l)
             self.editlist.append(edit)
@@ -372,7 +378,6 @@ class EditQuery(EditGeneric):
         frame.show()
 
         return frame
-
 
 class EditRule(EditGeneric):
     def __init__(self, rule, catalog=None, editable=True, controller=None):
@@ -907,3 +912,87 @@ class EditAction(EditGeneric):
 
         vbox.show_all()
         return vbox
+
+class EditSubviewList(EditGeneric):
+    """Edit a subview list.
+    """
+    COLUMN_ELEMENT=0
+    COLUMN_LABEL=1
+    COLUMN_ID=2
+    COLUMN_STATUS=3
+    def __init__(self, subviewlist, editable=True, controller=None):
+        # Original rule
+        # subviews is a list of view ids that are to be activated
+        self.model=subviewlist
+        self.editable=editable
+        self.controller=controller
+        self.editconditionlist=[]
+        self.namelabel=None
+        self.widget=self.build_widget()
+
+    def set_update_label(self, l):
+        """Specify a label to be updated when the rule name changes"""
+        self.namelabel=l
+
+    def update_name(self, entry):
+        if self.namelabel:
+            self.namelabel.set_label(entry.get_text())
+        return True
+
+    def refresh(self):
+        self.store.clear()
+        l=[ v 
+            for v in self.controller.package.views 
+            if helper.get_view_type(v) == 'dynamic' ]
+        for v in l:
+            
+            self.store.append([ v,
+                                self.controller.get_title(v),
+                                v.id,
+                                v.id in self.model ])
+        
+    def toggled_cb(self, renderer, path, model, column):
+        model[path][column] = not model[path][column]
+        return True
+
+    def build_widget(self):
+        vbox=gtk.VBox()
+
+        self.store=gtk.ListStore( object, str, str, bool )
+        self.refresh()
+
+        self.treeview=gtk.TreeView(model=self.store)
+
+        renderer = gtk.CellRendererToggle()
+        renderer.set_property('activatable', True)
+        renderer.connect('toggled', self.toggled_cb, self.store, self.COLUMN_STATUS)
+        column = gtk.TreeViewColumn(_('Activate?'), renderer, active=self.COLUMN_STATUS)
+        self.treeview.append_column(column)
+
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn(_('View'), renderer, text=self.COLUMN_LABEL)
+        column.set_resizable(True)
+        self.treeview.append_column(column)
+
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn(_('Id'), renderer, text=self.COLUMN_ID)
+        column.set_resizable(True)
+        self.treeview.append_column(column)
+
+        sw=gtk.ScrolledWindow()
+        sw.add(self.treeview)
+        vbox.pack_start(sw, expand=True)
+
+        vbox.show_all()
+        return vbox
+
+    def update_value(self):
+        """Updates the value of the represented element.
+
+        After that, the element can be accessed through get_model().
+        """
+        self.model.clear()
+        self.model.extend([ row[self.COLUMN_ID]
+                            for row in self.store
+                            if row[self.COLUMN_STATUS] ])
+        return True
