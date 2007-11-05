@@ -553,7 +553,7 @@ class SubviewList(list):
         self.from_dom(domelement=rulenode, catalog=catalog)
         s.close()
 
-    def from_dom(self, domelement=None, origin=None):
+    def from_dom(self, domelement=None, origin=None, catalog=None):
         """Read the list from a DOM element.
 
         @param catalog: the ECAEngine catalog
