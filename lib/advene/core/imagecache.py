@@ -116,6 +116,19 @@ class ImageCache(dict):
         key = self.approximate(long(key))
         return dict.__getitem__(self, key)
 
+    def get(self, key, epsilon=None):
+        """Return a snapshot for the image corresponding to the position pos.
+        
+        The snapshot can be ImageCache.not_yet_available_image.
+
+        @param key: the key
+        @type key: long
+        @return: an image
+        @rtype: PNG data
+        """
+        key = self.approximate(long(key), epsilon)
+        return dict.__getitem__(self, key)
+
     def __setitem__ (self, key, value):
         """Set the snapshot for the image corresponding to the position key.
         
@@ -129,7 +142,7 @@ class ImageCache(dict):
             self._modified=True
         return dict.__setitem__(self, key, value)
 
-    def approximate (self, key):
+    def approximate (self, key, epsilon=None):
         """Return an approximate key value for key.
 
         If there is an existing key no further than self.epsilon, then return it.
@@ -138,9 +151,11 @@ class ImageCache(dict):
         if dict.has_key(self, key):
             return key
         
+        if epsilon is None:
+            epsilon=self.epsilon
         valids = [ (pos, abs(pos-key))
                    for pos in self.keys()
-                   if abs(pos - key) <= self.epsilon ]
+                   if abs(pos - key) <= epsilon ]
         valids.sort(lambda a, b: cmp(a[1], b[1]))
         
         if valids:
