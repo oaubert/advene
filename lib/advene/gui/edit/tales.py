@@ -18,6 +18,7 @@
 import gtk
 import re
 
+import advene.core.config as config
 from advene.gui.views.browser import Browser
 import advene.util.helper
 from advene.gui.util import dialog
@@ -105,10 +106,13 @@ class TALESEntry:
                                                         preselect=preselect,
                                                         entry=True)
         self.entry=self.combo.child
-        b=gtk.Button(stock=gtk.STOCK_FIND)
-        b.connect("clicked", self.browse_expression)
+
         hbox.pack_start(self.combo, expand=True)
-        hbox.pack_start(b, expand=False)
+
+        if config.data.preferences['expert-mode']:
+            b=gtk.Button(stock=gtk.STOCK_FIND)
+            b.connect("clicked", self.browse_expression)
+            hbox.pack_start(b, expand=False)
         
         hbox.show_all()
         return hbox
