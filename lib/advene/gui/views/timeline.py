@@ -34,6 +34,7 @@ from advene.model.fragment import MillisecondFragment
 from advene.gui.views import AdhocView
 import advene.gui.edit.elements
 from advene.gui.edit.create import CreateElementPopup
+from advene.gui.util import png_to_pixbuf
 
 import advene.util.helper as helper
 from advene.gui.util import dialog, name2color, get_small_stock_button, get_pixmap_button
@@ -1497,20 +1498,29 @@ class TimeLine(AdhocView):
         """Draw marks for stream positioning"""
         u2p = self.unit2pixel
         # We want marks every 200 pixels
-        step = self.pixel2unit (200)
+        step = self.pixel2unit (100)
         t = self.minimum
         while t <= self.maximum:
+            x = u2p(t)
+
+            i=gtk.Image()
+            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(t, epsilon=1000), height=self.button_height))
+            i.mark = t
+            i.pos = 1
+            i.show()
+            self.layout.put(i, x, i.pos)
+
             a = gtk.Arrow (gtk.ARROW_DOWN, gtk.SHADOW_NONE)
             a.mark = t
             a.pos = 1
             a.show()
-            self.layout.put (a, u2p(t), a.pos)
+            self.layout.put (a, x, a.pos)
+
             l = gtk.Label (helper.format_time (t))
             l.mark = t
             l.pos = a.pos
             l.show()
-
-            self.layout.put (l, u2p(t) + 13, l.pos)
+            self.layout.put (l, x + 13, l.pos)
             t += step
 
     def bounds (self):
