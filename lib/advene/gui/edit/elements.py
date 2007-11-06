@@ -1262,12 +1262,13 @@ class TextContentHandler (ContentHandler):
             b.connect("clicked", self.content_reload)
             tb.insert(b, -1)
 
-            i=gtk.Image()
-            i.set_from_file(config.data.advenefile( ('pixmaps', 'browser.png') ))
-            b=gtk.ToolButton(icon_widget=i)
-            b.set_tooltip(self.tooltips, _("Insert a value from the browser (C-i)"))
-            b.connect("clicked", self.browser_open)
-            tb.insert(b, -1)
+            if config.data.preferences['expert-mode']:
+                i=gtk.Image()
+                i.set_from_file(config.data.advenefile( ('pixmaps', 'browser.png') ))
+                b=gtk.ToolButton(icon_widget=i)
+                b.set_tooltip(self.tooltips, _("Insert a value from the browser (C-i)"))
+                b.connect("clicked", self.browser_open)
+                tb.insert(b, -1)
 
             vbox.pack_start(tb, expand=False)
 
