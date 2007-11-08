@@ -448,7 +448,7 @@ class Menu:
     def make_annotationtype_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
-        add_item(_("Display as transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source="here/annotationTypes/%s/annotations/sorted" % annotationtype.id))
+        add_item(_("Display as transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source="here/annotationTypes/%s/annotations/sorted" % element.id))
         add_item(_("Display annotations in table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations))
         add_item(_("Use in a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=element.annotations))
         
