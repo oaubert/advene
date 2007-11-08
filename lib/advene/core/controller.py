@@ -154,6 +154,9 @@ class AdveneController:
         self.videotime_bookmarks = []
         self.usertime_bookmarks = []
 
+        self.restricted_annotation_type=None
+        self.restricted_rule=None
+
         # Useful for debug in the evaluator window
         self.config=config.data
 
@@ -364,6 +367,47 @@ class AdveneController:
             self.queue_action(controller.loop_on_annotation, a)
             return True
         self.register_videotime_action( a.fragment.end, action_loop )
+        return True
+
+    def restrict_playing(self, at=None):
+        """Restrict playing to the given annotation-type.
+
+        If no annotation-type is given, restore unrestricted playing.
+        """
+        if at == self.restricted_annotation_type:
+            return True
+        if at is None and self.restricted_annotation_type:
+            self.restricted_annotation_type=None
+            try:
+                self.event_handler.remove_rule(self.restricted_rule, type_='internal')
+            except KeyError:
+                pass
+            self.restricted_rule=None
+        else:
+            self.restricted_annotation_type=at
+            def restricted_play(context, parameters):
+                a=context.globals['annotation']
+                t=a.type
+                if a.type == self.restricted_annotation_type:
+                    # Find the next relevant position
+                    l=[an for an in self.active_annotations if an.type == a.type and an != a ]
+                    if l:
+                        # There is a least one other annotation of the
+                        # same type which is also active. We can just wait for its end.
+                        return True
+                    # future_ends holds a sorted list of (annotation, begin, end)
+                    l=[an
+                       for an in self.future_ends
+                       if an[0].type == t ]
+                    if l and l[0][1] > a.fragment.end:
+                        self.queue_action(self.update_status, 'set', l[0][1])
+                    else:
+                        # No next annotation. Pause the player.
+                        self.queue_action(self.update_status, 'pause')
+                return True
+            self.restricted_rule=self.event_handler.internal_rule(event="AnnotationEnd",
+                                                                  method=restricted_play)
+        self.notify('RestrictType', annotationtype=at)
         return True
 
     def build_context(self, here=None, alias=None, baseurl=None):
