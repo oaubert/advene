@@ -222,6 +222,8 @@ class Config(object):
             'package-auto-save': 'never',
             # auto-save interval in ms. Every 5 minutes by default.
             'package-auto-save-interval': 5 * 60 * 1000,
+            # Interface langugage. '' means system default.
+            'language': '',
             }
 
         # Player options
