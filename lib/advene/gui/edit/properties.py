@@ -167,6 +167,7 @@ class EditWidget(gtk.VBox):
 
         lbl = gtk.Label("")
         lbl.set_markup(label)
+        lbl.set_line_wrap(True)
         lbl.show()
         align = gtk.Alignment()
         align.show()
