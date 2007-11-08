@@ -134,7 +134,7 @@ class TranscriptionEdit(AdhocView):
         self.textview = gtk.TextView()
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
-        self.textview.set_wrap_mode (gtk.WRAP_CHAR)
+        self.textview.set_wrap_mode (gtk.WRAP_WORD)
 
         # 0-mark at the beginning
         zero=self.create_timestamp_mark(0, self.textview.get_buffer().get_start_iter())
