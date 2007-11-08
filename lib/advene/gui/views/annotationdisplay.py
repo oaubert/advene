@@ -53,6 +53,7 @@ class AnnotationDisplay(AdhocView):
 
     def set_master_view(self, v):
         v.register_slave_view(self)
+        self.close_on_package_load = False
 
     def update_annotation(self, annotation=None, event=None):
         if annotation != self.annotation:
