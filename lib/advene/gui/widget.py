@@ -347,10 +347,22 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
     def __init__(self, annotationtype=None, container=None):
         self.annotationtype=annotationtype
         self.width=None
+        # Highlight mark
+        self.highlight=False
+        # Playing mark (playing restricted to this type)
+        self.playing=False
         GenericColorButtonWidget.__init__(self, element=annotationtype, container=container)
         self.connect("key_press_event", self.keypress, self.annotationtype)
         self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
         self.connect("drag_begin", self._drag_begin)
+
+    def set_highlight(self, b):
+        self.highlight=b
+        self.update_widget()
+
+    def set_playing(self, b):
+        self.playing=b
+        self.update_widget()
 
     def keypress(self, widget, event, annotationtype):
         """Handle the key-press event.
@@ -391,7 +403,26 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         context.set_source_rgba(0, 0, 0, 1)
         context.stroke()
 
+        if self.highlight:
+            # Draw a highlight mark
+            context.rectangle(0, height - 2, width, height)
+            context.fill()
+            context.rectangle(0, 0, width, 2)
+            context.fill()
+            context.stroke()
+
+        if self.playing:
+            # Draw a highlight mark
+            context.set_source_rgba(0, 0, 0, .5)
+            context.set_line_width(1)
+            context.move_to(width / 2, 0)
+            context.line_to(width / 2 + 10, height / 2)
+            context.line_to(width / 2, height)
+            context.fill()
+            context.stroke()
+
         # Draw the text
+        context.set_source_rgba(0, 0, 0, 1)
         context.select_font_face("Helvetica",
                                  cairo.FONT_SLANT_ITALIC, cairo.FONT_WEIGHT_NORMAL)
         context.set_font_size(config.data.preferences['timeline']['font-size'])
