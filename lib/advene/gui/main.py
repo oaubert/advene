@@ -2164,12 +2164,7 @@ class AdveneGUI (Connect):
             (p, ext) = os.path.splitext(filename)
             if ext == '':
                 # Add a pertinent extension
-                if package.resources and package.resources.children():
-                    # There are resources -> save as an .azp package
-                    ext='.azp'
-                else:
-                    ext='.xml'
-                filename = filename + ext
+                filename = filename + '.azp'
 
             if (package.resources and package.resources.children()
                 and ext.lower() != '.azp'):
