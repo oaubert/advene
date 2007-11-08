@@ -705,6 +705,10 @@ class AdveneGUI (Connect):
             tree=ET.parse(stream)
             stream.close()
             self.workspace_restore(tree.getroot())
+        else:
+            # Open default views
+            self.open_adhoc_view('timeline', destination='south')
+            self.open_adhoc_view('treeview', destination='fareast')
 
         # Use small toolbar button everywhere
         gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
