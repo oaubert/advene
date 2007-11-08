@@ -1924,6 +1924,22 @@ class TimeLine(AdhocView):
             b.show_all()
             b.connect("key_press_event", annotationtype_keypress_handler, t)
             b.connect("button_press_event", annotationtype_buttonpress_handler, t)
+
+            def focus_in(button, event):
+                for w in layout.get_children():
+                    if isinstance(w, AnnotationTypeWidget) and w.annotationtype.schema == button.annotationtype.schema:
+                        w.set_highlight(True)
+                return False
+
+            def focus_out(button, event):
+                for w in layout.get_children():
+                    if isinstance(w, AnnotationTypeWidget) and w.highlight:
+                        w.set_highlight(False)
+                return False
+
+            b.connect("focus-in-event", focus_in)
+            b.connect("focus-out-event", focus_out)
+
             # The button can receive drops (to transmute annotations)
             b.connect("drag_data_received", self.annotation_type_drag_received_cb)
             b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
