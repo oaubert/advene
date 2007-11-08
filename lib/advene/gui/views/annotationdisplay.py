@@ -124,7 +124,10 @@ class AnnotationDisplay(AdhocView):
         c.set_line_wrap(True)
         c.set_single_line_mode(False)
         c.set_alignment(0.0, 0.0)
-        f.add(self.label['contents'])
+        sw=gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        sw.add_with_viewport(c)
+        f.add(sw)
         v.add(f)
 
         self.refresh()
