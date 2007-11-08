@@ -28,6 +28,7 @@ from gettext import gettext as _
 import advene.core.config as config
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 from advene.gui.edit.elements import get_edit_popup
+from advene.gui.util import get_small_stock_button
 
 class EditAccumulator(AccumulatorPopup):
     """View displaying a limited number of compact editing widgets.
@@ -51,6 +52,21 @@ class EditAccumulator(AccumulatorPopup):
         # Buttons hbox
         hbox=gtk.HBox()
 
+        def handle_ok(b, w):
+            e.apply_cb()
+            self.undisplay_cb(b, w)
+            return True
+
+        # OK button
+        b=get_small_stock_button(gtk.STOCK_OK, handle_ok, w)
+        self.controller.gui.tooltips.set_tip(b, _("Validate and close"))
+        hbox.pack_start(b, expand=False)
+
+        # Close button
+        b=get_small_stock_button(gtk.STOCK_CANCEL, self.undisplay_cb, w)
+        self.controller.gui.tooltips.set_tip(b, _("Close"))
+        hbox.pack_start(b, expand=False)
+
         # Title
         if hasattr(element, 'type'):
             t="%s (%s)" % (self.controller.get_title(element),
@@ -67,29 +83,6 @@ class EditAccumulator(AccumulatorPopup):
         # Right align (hackish)
         b=gtk.HBox()
         hbox.pack_start(b, expand=True)
-
-        def handle_ok(b, w):
-            e.apply_cb()
-            self.undisplay_cb(b, w)
-            return True
-
-        # Validate button
-        b=gtk.Button('V')
-        b.connect("clicked", lambda x: e.apply_cb())
-        self.controller.gui.tooltips.set_tip(b, _("Validate"))
-        hbox.pack_start(b, expand=False)
-
-        # OK button
-        b=gtk.Button('OK')
-        b.connect("clicked", handle_ok, w)
-        self.controller.gui.tooltips.set_tip(b, _("Validate and close"))
-        hbox.pack_start(b, expand=False)
-
-        # Close button
-        b=gtk.Button('X')
-        b.connect("clicked", self.undisplay_cb, w)
-        self.controller.gui.tooltips.set_tip(b, _("Close"))
-        hbox.pack_start(b, expand=False)
 
         self.edited_elements[element]=w
         self.display(w, title=hbox)
