@@ -1145,6 +1145,8 @@ class TimeLine(AdhocView):
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             self.controller.update_status (status="set", position=pos)
+            if self.loop_toggle_button.get_active():
+                self.controller.gui.loop_on_annotation_gui(annotation)
             return True
         return False
 
@@ -1990,6 +1992,19 @@ class TimeLine(AdhocView):
         hb=gtk.HBox()
         toolbar = self.get_toolbar()
         hb.add(toolbar)
+
+        def loop_toggle_cb(b):
+            if not b.get_active():
+                print "Deactive"
+                # If we deactivate the locked looping feature, then also
+                # disable the player loop toggle.
+                self.controller.gui.loop_toggle_button.set_active(False)
+            return True
+
+        self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
+        self.loop_toggle_button.connect("toggled", loop_toggle_cb)
+        self.controller.gui.tooltips.set_tip(self.loop_toggle_button, _("Automatically activate loop when clicking on an annotation"))
+        toolbar.insert(self.loop_toggle_button, -1)
 
         ti=gtk.SeparatorToolItem()
         ti.set_expand(True)
