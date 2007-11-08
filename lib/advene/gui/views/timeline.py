@@ -36,6 +36,7 @@ import advene.gui.edit.elements
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.util import png_to_pixbuf
 
+from advene.gui.views.annotationdisplay import AnnotationDisplay
 import advene.util.helper as helper
 from advene.gui.util import dialog, name2color, get_small_stock_button, get_pixmap_button
 from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget
@@ -2120,6 +2121,8 @@ class TimeLine(AdhocView):
 
     def get_packed_widget (self):
         """Return the widget packed into a scrolledwindow."""
+        pane=gtk.HPaned()
+
         vbox = gtk.VBox ()
 
         hpaned = gtk.HPaned ()
@@ -2155,7 +2158,15 @@ class TimeLine(AdhocView):
         #hgrade.set_size_request(400, 30)
         #vbox.pack_start (hgrade.widget, expand=False)
 
-        return vbox
+        pane.pack1(vbox, resize=True, shrink=True)
+        a=AnnotationDisplay(controller=self.controller)
+        pane.pack2(a.widget, resize=False, shrink=True)
+        self.controller.gui.register_view (a)        
+        a.set_master_view(self)
+        a.widget.show_all()
+
+        self.visualisation_pane=pane
+        return pane
 
     def get_toolbar(self):
         tb=gtk.Toolbar()
