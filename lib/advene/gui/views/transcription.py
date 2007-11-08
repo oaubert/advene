@@ -301,7 +301,7 @@ class TranscriptionView(AdhocView):
         self.textview = gtk.TextView()
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
-        self.textview.set_wrap_mode (gtk.WRAP_CHAR)
+        self.textview.set_wrap_mode (gtk.WRAP_WORD)
         b=self.textview.get_buffer()
 
         # Create useful tags
