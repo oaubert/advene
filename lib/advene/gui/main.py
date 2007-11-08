@@ -705,17 +705,6 @@ class AdveneGUI (Connect):
             tree=ET.parse(stream)
             stream.close()
             self.workspace_restore(tree.getroot())
-        else:
-            # Open the default adhoc popup views
-            for dest in ('popup', 'west', 'east', 'south', 'fareast'):
-                for n in config.data.preferences['adhoc-%s' % dest].split(':'):
-                    try:
-                        v=self.open_adhoc_view(n, destination=dest)
-                    except Exception, e:
-                        self.log(_("Cannot open adhoc view %(viewname)s in %(destination)s: %(error)s") % {
-                                'viewname': n,
-                                'destination': dest,
-                                'error': unicode(e)})
 
         # Use small toolbar button everywhere
         gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
@@ -2595,7 +2584,6 @@ class AdveneGUI (Connect):
 
     def on_preferences1_activate (self, button=None, data=None):
         direct_options=('history-size-limit', 'scroll-increment',
-                        'adhoc-south', 'adhoc-west', 'adhoc-east', 'adhoc-fareast', 'adhoc-popup',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit', 
                         'remember-window-size', 'expert-mode',
                         'package-auto-save', 'package-auto-save-interval')
@@ -2645,15 +2633,7 @@ class AdveneGUI (Connect):
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
 
         ew.add_title(_("Standard adhoc views"))
-        ew.add_label(_("""List of adhoc views to open on application startup.
-Multiple views can be separated by :
-Available views: timeline, tree, browser, transcribe"""))
-
-        ew.add_entry(_("South"), 'adhoc-south', _("Embedded below the video"))
-        ew.add_entry(_("West"), 'adhoc-west', _("Embedded at the left of the video"))
-        ew.add_entry(_("East"), 'adhoc-east', _("Embedded at the right of the video"))
-        ew.add_entry(_("Right"), 'adhoc-fareast', _("Embedded at the right of the window"))
-        ew.add_entry(_("Popup"), 'adhoc-popup', _("In their own window"))
+        ew.add_label(_("""This feature is now deprecated. To achieve the same result, open the desired views in the interface and use the File/Save workspace...as standard workspace menuitem."""))
 
         ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
         ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
