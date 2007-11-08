@@ -28,7 +28,7 @@ from gettext import gettext as _
 # Advene part
 import advene.core.config as config
 
-from advene.model.schema import AnnotationType
+from advene.model.schema import AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.fragment import MillisecondFragment
 from advene.gui.views import AdhocView
@@ -875,19 +875,39 @@ class TimeLine(AdhocView):
                 self.create_relation(s, d, t)
                 return True
 
+            def create_relation_type_and_relation(item, s, d):
+                if self.controller.gui:
+                    sc=self.controller.gui.ask_for_schema(text=_("Select the schema where you want to\ncreate the new relation type."), create=True)
+                    if sc is None:
+                        return None
+                    cr=CreateElementPopup(type_=RelationType,
+                                          parent=sc,
+                                          controller=self.controller)
+                    rt=cr.popup(modal=True)
+                    if not rt.hackedMemberTypes:
+                        # membertypes is empty, the user did not specify any member types.
+                        # Create a relationType specific for the 2 annotations.
+                        rt.hackedMemberTypes=( '#' + s.type.id, '#' + d.type.id )
+                    self.create_relation(s, d, rt)
+                return True
+
             relationtypes=helper.matching_relationtypes(self.controller.package,
                                                         source.type,
                                                         dest.type)
-            if relationtypes:
-                item=gtk.MenuItem(_("Create a relation"))
-                # build a submenu
-                sm=gtk.Menu()
-                for rt in relationtypes:
-                    sitem=gtk.MenuItem(self.controller.get_title(rt))
-                    sitem.connect('activate', create_relation, source, dest, rt)
-                    sm.append(sitem)
-                menu.append(item)
-                item.set_submenu(sm)
+            item=gtk.MenuItem(_("Create a relation"))
+            menu.append(item)
+
+            sm=gtk.Menu()
+            for rt in relationtypes:
+                sitem=gtk.MenuItem(self.controller.get_title(rt))
+                sitem.connect('activate', create_relation, source, dest, rt)
+                sm.append(sitem)
+            if True:
+                # Propose to create a new one
+                sitem=gtk.MenuItem(_("Create a new relation-type."))
+                sitem.connect('activate', create_relation_type_and_relation, source, dest)
+                sm.append(sitem)
+            item.set_submenu(sm)
 
             def align_annotations(item, s, d, m):
                 self.align_annotations(s, d, m)
