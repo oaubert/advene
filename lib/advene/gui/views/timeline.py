@@ -609,6 +609,13 @@ class TimeLine(AdhocView):
                                                         method=self.type_restricted_handler),
                 ))
 
+    def type_restricted_handler(self, context, parameters):
+        at=context.globals['annotationtype']
+        for w in self.legend.get_children():
+            if isinstance(w, AnnotationTypeWidget):
+                w.set_playing(w.annotationtype == at)
+        return True
+
     def tag_update(self, context, parameters):
         tag=context.evaluateValue('tag')
         bs = [ b
@@ -1864,6 +1871,7 @@ class TimeLine(AdhocView):
         # Resize all buttons to fit the largest
         if width > 10:
             layout.foreach(resize, width)
+        layout.get_parent().get_parent().set_position (width + 30)
 
     def create_annotation_and_quick_edit(self, annotationtype):
         """Create an annotation at the current position and quick-edit it.
@@ -1893,6 +1901,43 @@ class TimeLine(AdhocView):
         self.quick_edit(el, button=widget, callback=set_end_time)
         return True
 
+    def restrict_playing(self, at, widget=None):
+        """Restrict playing to the given annotation-type.
+        """
+        if widget is None:
+            l=[ w 
+                for w in self.legend.get_children()
+                if isinstance(w, AnnotationTypeWidget) and w.annotationtype == at ]
+            if l:
+                widget=l[0]
+        # Restrict playing to this annotation-type
+        if widget is not None and widget.playing:
+            # toggle the playing state
+            self.controller.restrict_playing(None)
+        else:
+            self.controller.restrict_playing(at)
+            p=self.controller.player
+            if p.status == p.PauseStatus:
+                if [ a for a in self.controller.active_annotations if a.type == at ]:
+                    # We are in an annotation of the right type. Do
+                    # not move the player, just play from here.
+                    pass
+                else:
+                    l=[ a.fragment.begin for a in at.annotations ]
+                    l.sort()
+                    if l:
+                        self.controller.update_status("set", position=l[0])
+                self.controller.update_status("resume")
+                return True
+
+            if p.status != p.PlayingStatus:
+                # If not playing, start to play
+                l=[ a.fragment.begin for a in at.annotations ]
+                l.sort()
+                if l:
+                    self.controller.update_status("start", position=l[0])
+        return True
+
     def update_legend_widget(self, layout):
         """Update the legend widget.
 
@@ -1901,11 +1946,18 @@ class TimeLine(AdhocView):
         width=0
         height=0
 
+        def restrict_playing(m, at, w):
+            self.restrict_playing(at, w)
+            return True
+
         def annotationtype_keypress_handler(widget, event, at):
             if widget.keypress(widget, event, at):
                 return True
             elif event.keyval == gtk.keysyms.Return:
                 self.create_annotation_and_quick_edit(at)
+                return True
+            elif event.keyval == gtk.keysyms.space:
+                self.restrict_playing(at, widget)
                 return True
             return False
 
@@ -1921,7 +1973,7 @@ class TimeLine(AdhocView):
         for t in self.annotationtypes:
             b=AnnotationTypeWidget(annotationtype=t, container=self)
             self.tooltips.set_tip(b, _("From schema %s") % self.controller.get_title(t.schema))
-            layout.put (b, 0, self.layer_position[t])
+            layout.put (b, 20, self.layer_position[t])
             b.update_widget()
             b.show_all()
             b.connect("key_press_event", annotationtype_keypress_handler, t)
@@ -1958,6 +2010,11 @@ class TimeLine(AdhocView):
 
             height=max (height, self.layer_position[t] + 3 * self.button_height)
 
+            p=get_small_stock_button(gtk.STOCK_MEDIA_PLAY, restrict_playing, t, b)
+            p.set_size_request(15, self.button_height)
+            self.tooltips.set_tip(p, _("Restrict playing to this annotation-type"))
+            layout.put (p, 0, self.layer_position[t])
+            
         # Add the "New type" button at the end
         b=gtk.Button()
         l=gtk.Label()
@@ -1979,7 +2036,7 @@ class TimeLine(AdhocView):
                         config.data.drag_type['annotation'],
                         gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
 
-        layout.set_size (width, height)
+        layout.set_size (width + 20, height)
         self.resize_legend_widget(layout)
         return
 
