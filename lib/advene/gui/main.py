@@ -1620,7 +1620,7 @@ class AdveneGUI (Connect):
         self.gui.logmessages.scroll_mark_onscreen (endmark)
         return
 
-    def get_illustrated_text(self, text, position=None, vertical=False):
+    def get_illustrated_text(self, text, position=None, vertical=False, height=40):
         """Return a HBox with the given text and a snapshot corresponding to position.
         """
         if vertical:
@@ -1629,7 +1629,7 @@ class AdveneGUI (Connect):
             box=gtk.HBox()
         box.add(image_from_position(self.controller,
                                     position=position,
-                                    height=40))
+                                    height=height))
         box.add(gtk.Label(text))
         return box
 
