@@ -121,8 +121,6 @@ class TimeLine(AdhocView):
             'display-relations': True,
             'display-relation-type': True,
             'display-relation-content': True,
-            # If False, then double-click will go to the annotation position
-            'edit-on-double-click': True,
             # Delay before displaying the annotation tooltip, in ms.
             'annotation-tooltip-delay': 2000,
             'annotation-tooltip-activate': True,
@@ -1154,14 +1152,7 @@ class TimeLine(AdhocView):
             self.annotation_cb(widget, annotation, event.x)
             return True
         elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-            if self.options['edit-on-double-click']:
-                self.quick_edit(annotation, button=widget)
-            else:
-                c=self.controller
-                pos = c.create_position (value=annotation.fragment.begin,
-                                         key=c.player.MediaTime,
-                                         origin=c.player.AbsolutePosition)
-                c.update_status (status="set", position=pos)
+            self.quick_edit(annotation, button=widget)
             return True
         elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS and event.state & gtk.gdk.CONTROL_MASK:
             # Control + click : set annotation begin/end time to current time
@@ -1177,6 +1168,20 @@ class TimeLine(AdhocView):
             if f.begin > f.end:
                 f.begin, f.end = f.end, f.begin
             self.controller.notify('AnnotationEditEnd', annotation=annotation)
+            return True
+        elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
+            # Goto annotation if not already playing it
+            p=self.controller.player.current_position_value
+            # We do not use 'p in annotation.fragment' since if we are
+            # at the end of the annotation, we may want to go back to its beginning
+            if p >= annotation.fragment.begin and p < annotation.fragment.end:
+                return True
+
+            c=self.controller
+            pos = c.create_position (value=annotation.fragment.begin,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            self.controller.update_status (status="set", position=pos)
             return True
         return False
 
@@ -2327,13 +2332,6 @@ class TimeLine(AdhocView):
         ew.add_checkbox(_("Relation type"), "display-relation-type", _("Display relation types"))
         ew.add_checkbox(_("Relation content"), "display-relation-content", _("Display relation content"))
         ew.add_checkbox(_("Highlight"), "highlight", _("Highlight active annotations"))
-
-        ew.add_option(_("On double click on annotation,"), 'edit-on-double-click',
-                      _("How to handle double click on annotation"),
-                      {
-                _("edit the annotation content"): True,
-                _("move the player to the annotation"): False
-                })
 
         ew.add_label(_("Annotation tooltips"))
         ew.add_checkbox(_("Display annotation tooltips"), 'annotation-tooltip-activate', _("Display tooltips when the mouse gets over an annotation."))
