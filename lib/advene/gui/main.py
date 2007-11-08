@@ -1595,7 +1595,7 @@ class AdveneGUI (Connect):
             if media == '':
                 dialog.message_dialog(_("No media association is defined in the package. Please use the 'File/Select a video file' menuitem to associate a media file."), callback=lambda: True)
             elif not os.path.exists(media) and not media.startswith('http:'):
-                dialog.message_dialog(_("The associated media %s could not be found. Please use the 'File/Select a video file' menuitem to associate a media file."), callback=lambda: True)
+                dialog.message_dialog(_("The associated media %s could not be found. Please use the 'File/Select a video file' menuitem to associate a media file.") % media, callback=lambda: True)
         return True
 
     def update_window_title(self):
