@@ -1,11 +1,17 @@
 advene (0.25) unstable; urgency=low
 
+  * Settings and logs are saved in $HOME/Library/Preferences/Advene on MacOS X
+
+  * The standard adhoc-view, opened at startup, now must be defined
+    through the File/Save worskpace as standard workspace menuitem. The
+    previous way (Edit/Preferences/GUI) has been removed.
+
   * New adhoc view: montage, proposing a dynamic montage of a sequence of
     annotations.
 
   * Dynamic views can now specify subviews (other views that should also
     be activated upon view activation)
-  
+
   * Element edit popups: they now are updated if the edited element is
     updated by another way (e.g. quick-edit for annotations). For
     annotations, Previous/Next buttons allow to edit the previous/next
@@ -20,11 +26,11 @@ advene (0.25) unstable; urgency=low
       views
 
     * a single left-click on an annotation will play it
-  
+
     * it is possible to restrict the playing to a specific annotation-type
       by clicking the play button at the left of the annotation title. Click
       again to deactivate it.
-  
+
     * transtyping annotations can be done by drag and dropping an
       annotation directly in the timeline (it was previously necessary to
       drop it on the annotation-type title). It is also possible to directly
@@ -32,21 +38,21 @@ advene (0.25) unstable; urgency=low
 
     * when creating relations by drag-and-drop of an annotation on another
       one, offer to create a new annotation-type
-  
+
     * drag and drop of an annotation-type on another one will propose to
       copy all annotations or annotations containing a search string.
 
     * an annotation preview is now displayed at the right of the timeline
-  
+
     * fix display problem on MacOS X and annotation-types update bug
 
     * a montage view opened from the timeline (button in the top
       right-hand corner) will have a zoom level coordinated with the
       timeline
-  
+
     * if the loop toggle button in the timeline toolbar is active, then
       playing an annotation (by left-click) will automatically loop on it.
-  
+
   * Note-taking view
 
     * improve the behaviour of the automatic mark insertion feature
@@ -66,12 +72,12 @@ advene (0.25) unstable; urgency=low
     drag-and-drop of the annotation-type into an view zone.
 
   * Quicksearch:
-  
+
     * A search result can be converted to new annotations, or into a montage
       of existing annotations (from the context menu on view tab)
-  
+
     * It is possible to search annotations and relations based on tags
-  
+
  --
 
 advene (0.24) unstable; urgency=low
