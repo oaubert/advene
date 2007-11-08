@@ -431,6 +431,11 @@ class EditAnnotationPopup (EditElementPopup):
         self.register_form (f)
         vbox.pack_start (f.get_view(compact=compact), expand=False)
 
+        f = EditRelationsForm(element=self.element, controller=self.controller)
+        self.register_form(f)
+        vbox.pack_start (self.expandable(f.get_view(), _("Relations"), expanded=not compact),
+                         expand=False)
+
         f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
         self.register_form(f)
         vbox.pack_start (f.get_view(compact=compact), expand=False)
@@ -497,7 +502,7 @@ class EditRelationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        ex=self.expandable(f.get_view(), _("Attributes"), expanded=not compact)
+        ex=self.expandable(f.get_view(), _("Attributes"), expanded=False)
         vbox.pack_start(ex, expand=False)
 
         def button_press_handler(widget, event, annotation):
@@ -511,17 +516,11 @@ class EditRelationPopup (EditElementPopup):
             return False
 
         # FIXME: make it possible to edit the members list (drag and drop ?)
-        hb = gtk.HButtonBox()
-        hb.set_layout(gtk.BUTTONBOX_START)
+        hb = gtk.HBox()
         for a in self.element.members:
-            b = gtk.Button()
-            b.add(self.controller.gui.get_illustrated_text(text=self.controller.get_title(a),
-                                                           position=a.fragment.begin,
-                                                           vertical=True))
-            b.connect("button_press_event", button_press_handler, a)
-            b.show()
+            b = AnnotationRepresentation(a, controller=self.controller)
             hb.add(b)
-
+        hb.show_all()
         vbox.pack_start(self.framed(hb, _("Members")), expand=True)
 
         # Tags
@@ -1139,8 +1138,8 @@ class TextContentHandler (ContentHandler):
         # Process player shortcuts
         # Desactivated, since control+arrows navigation and tab
         # insertion is common in text editing.
-        # if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
-        # return True
+        #if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
+        #    return True
         if event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.s:
                 self.content_save()
@@ -1154,9 +1153,6 @@ class TextContentHandler (ContentHandler):
             elif event.keyval == gtk.keysyms.i:
                 self.browser_open()
                 return True
-            elif event.keyval == gtk.keysyms.Tab:
-                # Control-TAB -> play/pause
-                self.controller.gui.process_player_shortcuts(win, event)
         return False
 
     def browser_open(self, b=None):
@@ -1985,6 +1981,94 @@ class EditTagForm(EditForm):
         self.view.widget.connect('destroy', lambda w: self.view.unregister_callback(self.controller))
         hb.add(self.view.widget)
         return hb
+
+class EditRelationsForm(EditForm):
+    """Edit form for relations.
+    """
+    def __init__(self, element=None, controller=None, editable=True):
+        self.element = element
+        self.controller = controller
+        self.view=None
+        self.editable=editable
+
+    def check_validity(self):
+        # FIXME
+        invalid=[]
+        if invalid:
+            dialog.message_dialog(_("Some tags contain invalid characters: %s") % ", ".join(invalid),
+                                           icon=gtk.MESSAGE_ERROR)
+            return False
+        else:
+            return True
+
+    def update_element(self):
+        if not self.editable:
+            return False
+        if not self.check_validity():
+            return False
+        #FIXME self.element.setTags( self.get_current_tags() )
+        return True
+
+    def get_view(self, compact=False):
+        t=gtk.Table()
+        for i, r in enumerate(self.element.relations):
+            # Determine the direction
+            if r.members[0] == self.element:
+                direction="to"
+                other=r.members[1]
+            else:
+                direction="from"
+                other=r.members[0]
+            b=RelationRepresentation(r, controller=self.controller, direction=direction)
+            t.attach(b, 0, 1, i, i + 1)
+            a=AnnotationRepresentation(other, controller=self.controller)
+            t.attach(a, 1, 2, i, i + 1)
+        return t
+
+class AnnotationRepresentation(gtk.Button):
+    """Representation for an annotation.
+    """
+    def __init__(self, annotation, controller):
+        super(AnnotationRepresentation, self).__init__()
+        self.annotation=annotation
+        self.controller=controller
+        self.add(self.controller.gui.get_illustrated_text(text=self.controller.get_title(annotation),
+                                                          position=annotation.fragment.begin,
+                                                          vertical=False,
+                                                          height=20))
+        self.connect("button_press_event", self.button_press_handler, annotation)
+
+    def button_press_handler(self, widget, event, annotation):
+        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            menu=advene.gui.popup.Menu(annotation, controller=self.controller)
+            menu.popup()
+            return True
+        elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            self.controller.gui.edit_element(annotation)
+            return True
+        return False
+
+class RelationRepresentation(gtk.Button):
+    """Representation for a relation.
+    """
+    arrow={ 'to': u'\u2192', 'from': u'\u2190' }
+
+    def __init__(self, relation, controller, direction='to'):
+        self.relation=relation
+        self.controller=controller
+        self.direction=direction
+        super(RelationRepresentation, self).__init__(u'%s %s %s' % (self.arrow[direction], controller.get_title(relation), self.arrow[direction]))
+        self.connect("button_press_event", self.button_press_handler, relation)
+
+    def button_press_handler(self, widget, event, relation):
+        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            menu=advene.gui.popup.Menu(relation, controller=self.controller)
+            menu.popup()
+            return True
+        elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            self.controller.gui.edit_element(relation)
+            return True
+        return False
 
 if __name__ == "__main__":
     class Foo:
