@@ -33,6 +33,7 @@ import textwrap
 from sets import Set
 import re
 import cgi
+import itertools
 
 import advene.core.config as config
 
@@ -299,7 +300,7 @@ class AdveneGUI (Connect):
             l=[ (_("All annotations"), 
                  None) ] + [
                 (_("Annotations of type %s") % self.controller.get_title(at),
-                 'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ] + [ (_("Views"), 'here/views') ]
+                 'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags') ]
             for (label, expression) in l:
                 i=gtk.CheckMenuItem(label)
                 i.set_active(expression == config.data.preferences['quicksearch-source'])
@@ -1417,10 +1418,10 @@ class AdveneGUI (Connect):
         if name == 'tagbag':
             tags=Set()
             if not parameters:
-                # Populate with annotations and relations tags
-                for l in self.controller.package.annotations, self.controller.package.relations:
-                    for e in l:
-                        tags.update(e.tags)
+                # Populate with annotations, relations and views tags
+                for e in itertools.chain(self.controller.package.annotations, 
+                                         self.controller.package.relations):
+                    tags.update(e.tags)
             view=TagBag(self.controller, parameters=parameters, tags=list(tags))
         elif name == 'transcription':
             kwargs={ 'controller': self.controller,
@@ -1858,8 +1859,16 @@ class AdveneGUI (Connect):
 
     def search_string(self, s):
         expr=config.data.preferences['quicksearch-source']
+        p=self.controller.package
         if expr is None:
-            source=self.controller.package.annotations
+            source=p.annotations
+        elif expr == 'tags':
+            # Search in annotations, relations, views matching tags
+            res=[ e 
+                  for e in itertools.chain( p.annotations,
+                                            p.relations )
+                  if s in e.tags ]
+            return res
         else:
             c=self.controller.build_context()
             source=c.evaluateValue(expr)
