@@ -423,7 +423,7 @@ class EditAnnotationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        ex=self.expandable(f.get_view(), _("Attributes"), expanded=not compact)
+        ex=self.expandable(f.get_view(), _("Attributes"), expanded=False)
 
         vbox.pack_start (ex, expand=False)
 
@@ -433,8 +433,7 @@ class EditAnnotationPopup (EditElementPopup):
 
         f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
         self.register_form(f)
-        ex=self.expandable(f.get_view(), _("Tags"), expanded=not compact)
-        vbox.pack_start (ex, expand=False)
+        vbox.pack_start (f.get_view(compact=compact), expand=False)
 
         f = EditContentForm(self.element.content, controller=self.controller,
                             mimetypeeditable=False, parent=self.element)
@@ -528,8 +527,7 @@ class EditRelationPopup (EditElementPopup):
         # Tags
         f = EditTagForm(element=self.element, controller=self.controller, editable=editable)
         self.register_form(f)
-        ex=self.expandable(f.get_view(), _("Tags"), expanded=not compact)
-        vbox.pack_start (ex, expand=False)
+        vbox.pack_start (f.get_view(), expand=False)
 
         # Relation content
         f = EditContentForm(self.element.content, controller=self.controller,
@@ -1980,10 +1978,13 @@ class EditTagForm(EditForm):
         return True
 
     def get_view(self, compact=False):
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Tags:") + " "), expand=False)
         self.view=TagBag(controller=self.controller, tags=self.element.tags, vertical=False)
         self.view.register_callback(controller=self.controller)
         self.view.widget.connect('destroy', lambda w: self.view.unregister_callback(self.controller))
-        return self.view.widget
+        hb.add(self.view.widget)
+        return hb
 
 if __name__ == "__main__":
     class Foo:
