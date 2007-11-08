@@ -2583,7 +2583,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_preferences1_activate (self, button=None, data=None):
-        direct_options=('history-size-limit', 'scroll-increment',
+        direct_options=('history-size-limit', 'scroll-increment', 'language',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit', 
                         'remember-window-size', 'expert-mode',
                         'package-auto-save', 'package-auto-save-interval')
@@ -2621,6 +2621,13 @@ class AdveneGUI (Connect):
         ew.add_spin(_("Auto-save interval"), 'package-auto-save-interval', _("Interval (in ms) between package auto-saves"), 1000, 60 * 60 * 1000)
 
         ew.add_title(_("GUI"))
+
+        ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"),
+                      {
+                "English": 'C',
+                "Francais": 'fr_FR',
+                _("System default"): '',
+                })
         ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
                     -1, 20)
         ew.add_checkbox(_("Remember window size"), "remember-window-size", _("Remember the size of opened windows"))
