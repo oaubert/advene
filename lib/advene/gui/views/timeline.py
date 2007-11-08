@@ -127,6 +127,8 @@ class TimeLine(AdhocView):
             }
         self.controller=controller
 
+        self.registered_rules=[]
+
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         ats=[]
@@ -595,12 +597,17 @@ class TimeLine(AdhocView):
     def register_callback (self, controller=None):
         """Add the activate handler for annotations.
         """
-        self.beginrule=controller.event_handler.internal_rule (event="AnnotationBegin",
-                                                method=self.activate_annotation_handler)
-        self.endrule=controller.event_handler.internal_rule (event="AnnotationEnd",
-                                                method=self.desactivate_annotation_handler)
-        self.tagrule=controller.event_handler.internal_rule (event="TagUpdate",
-                                                             method=self.tag_update)
+        self.registered_rules.extend(
+            (
+                controller.event_handler.internal_rule (event="AnnotationBegin",
+                                                        method=self.activate_annotation_handler),
+                controller.event_handler.internal_rule (event="AnnotationEnd",
+                                                        method=self.desactivate_annotation_handler),
+                controller.event_handler.internal_rule (event="TagUpdate",
+                                                        method=self.tag_update),
+                controller.event_handler.internal_rule (event="RestrictType",
+                                                        method=self.type_restricted_handler),
+                ))
 
     def tag_update(self, context, parameters):
         tag=context.evaluateValue('tag')
@@ -612,9 +619,8 @@ class TimeLine(AdhocView):
         return True
 
     def unregister_callback (self, controller=None):
-        controller.event_handler.remove_rule(self.beginrule, type_="internal")
-        controller.event_handler.remove_rule(self.endrule, type_="internal")
-        controller.event_handler.remove_rule(self.tagrule, type_="internal")
+        for r in self.registered_rules:
+            controller.event_handler.remove_rule(r, type_="internal")
 
     def set_widget_background_color(self, widget, color=None):
         if isinstance(widget, AnnotationWidget):
@@ -1102,49 +1108,6 @@ class TimeLine(AdhocView):
             return True
         return False
 
-    def layout_drag_received(self, widget, context, x, y, selection, targetType, time):
-        """Handle the drop from an annotation to the layout.
-        """
-        if targetType == config.data.target_type['annotation']:
-            source_uri=selection.data
-            source=self.controller.package.annotations.get(source_uri)
-            # We received a drop. Determine the location.
-            a=[ at 
-                for (at, p) in self.layer_position.iteritems()
-                if (y >= p and y <= p + self.button_height) ]
-            if a:
-                # Copy/Move to a[0]
-                self.move_or_copy_annotation(source, a[0], position=self.pixel2unit(x))
-            else:
-                # Maybe we should propose to create a new annotation-type ?
-                # Create a type
-                dest=self.create_annotation_type()
-                if dest is None:
-                    return True
-                self.move_or_copy_annotation(source, dest, position=self.pixel2unit(x))
-            return True
-        elif targetType == config.data.target_type['annotation-type']:
-            source_uri=selection.data
-            source=self.controller.package.annotationTypes.get(source_uri)
-            # We received a drop. Determine the location.
-            a=[ at 
-                for (at, p) in self.layer_position.iteritems()
-                if (y >= p and y <= p + self.button_height) ]
-            if a:
-                # Copy/Move to a[0]
-                self.copy_annotation_type(source, a[0])
-            else:
-                # Maybe we should propose to create a new annotation-type ?
-                # Create a type
-                dest=self.create_annotation_type()
-                if dest is None:
-                    return True
-                self.copy_annotation_type(source, dest)
-            return True
-        else:
-            print "Unknown target type for drop: %d" % targetType
-        return False
-
     def annotation_button_press_cb(self, widget, event, annotation):
         """Handle button presses on annotation widgets.
         """
@@ -1244,7 +1207,7 @@ class TimeLine(AdhocView):
         def grab_focus(widget, event):
             widget.grab_focus()
             return False
-        e.connect('enter-notify-event', grab_focus)
+        e.connect('enter_notify_event', grab_focus)
 
         e.show()
 
@@ -1582,7 +1545,49 @@ class TimeLine(AdhocView):
             # Toggle tooltips display
             self.display_tooltips_toggle.set_active(not self.display_tooltips_toggle.get_active())
             return True
+        return False
 
+    def layout_drag_received(self, widget, context, x, y, selection, targetType, time):
+        """Handle the drop from an annotation to the layout.
+        """
+        if targetType == config.data.target_type['annotation']:
+            source_uri=selection.data
+            source=self.controller.package.annotations.get(source_uri)
+            # We received a drop. Determine the location.
+            a=[ at 
+                for (at, p) in self.layer_position.iteritems()
+                if (y >= p and y <= p + self.button_height) ]
+            if a:
+                # Copy/Move to a[0]
+                self.move_or_copy_annotation(source, a[0], position=self.pixel2unit(x))
+            else:
+                # Maybe we should propose to create a new annotation-type ?
+                # Create a type
+                dest=self.create_annotation_type()
+                if dest is None:
+                    return True
+                self.move_or_copy_annotation(source, dest, position=self.pixel2unit(x))
+            return True
+        elif targetType == config.data.target_type['annotation-type']:
+            source_uri=selection.data
+            source=self.controller.package.annotationTypes.get(source_uri)
+            # We received a drop. Determine the location.
+            a=[ at 
+                for (at, p) in self.layer_position.iteritems()
+                if (y >= p and y <= p + self.button_height) ]
+            if a:
+                # Copy/Move to a[0]
+                self.copy_annotation_type(source, a[0])
+            else:
+                # Maybe we should propose to create a new annotation-type ?
+                # Create a type
+                dest=self.create_annotation_type()
+                if dest is None:
+                    return True
+                self.copy_annotation_type(source, dest)
+            return True
+        else:
+            print "Unknown target type for drop: %d" % targetType
         return False
 
     def layout_button_press_cb(self, widget=None, event=None):
@@ -1858,6 +1863,34 @@ class TimeLine(AdhocView):
         if width > 10:
             layout.foreach(resize, width)
 
+    def create_annotation_and_quick_edit(self, annotationtype):
+        """Create an annotation at the current position and quick-edit it.
+        """
+        def set_end_time(an):
+            an.fragment.end=self.controller.player.current_position_value
+            return True
+
+        if (self.controller.player.status != self.controller.player.PlayingStatus
+            and self.controller.player.status != self.controller.player.PauseStatus):
+            return True
+        # Create a new annotation
+        id_=self.controller.package._idgenerator.get_id(Annotation)
+
+        duration=3000
+        el=self.controller.package.createAnnotation(
+            ident=id_,
+            type=annotationtype,
+            author=config.data.userid,
+            date=self.controller.get_timestamp(),
+            fragment=MillisecondFragment(begin=long(self.controller.player.current_position_value),
+                                         duration=duration))
+        self.controller.package.annotations.append(el)
+        self.controller.notify('AnnotationCreate', annotation=el)
+        b=self.create_annotation_widget(el)
+        b.show()
+        self.quick_edit(el, button=widget, callback=set_end_time)
+        return True
+
     def update_legend_widget(self, layout):
         """Update the legend widget.
 
@@ -1866,33 +1899,12 @@ class TimeLine(AdhocView):
         width=0
         height=0
 
-        def set_end_time(an):
-            an.fragment.end=self.controller.player.current_position_value
-            return True
-
         def annotationtype_keypress_handler(widget, event, at):
             if widget.keypress(widget, event, at):
                 return True
             elif event.keyval == gtk.keysyms.Return:
-                if (self.controller.player.status != self.controller.player.PlayingStatus
-                    and self.controller.player.status != self.controller.player.PauseStatus):
-                    return True
-                # Create a new annotation
-                id_=self.controller.package._idgenerator.get_id(Annotation)
-
-                duration=0
-                el=self.controller.package.createAnnotation(
-                    ident=id_,
-                    type=at,
-                    author=config.data.userid,
-                    date=self.controller.get_timestamp(),
-                    fragment=MillisecondFragment(begin=long(self.controller.player.current_position_value),
-                                                 duration=duration))
-                self.controller.package.annotations.append(el)
-                self.controller.notify('AnnotationCreate', annotation=el)
-                b=self.create_annotation_widget(el)
-                b.show()
-                self.quick_edit(el, button=widget, callback=set_end_time)
+                self.create_annotation_and_quick_edit(at)
+                return True
             return False
 
         def annotationtype_buttonpress_handler(widget, event, t):
