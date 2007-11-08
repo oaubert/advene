@@ -1136,10 +1136,8 @@ class TextContentHandler (ContentHandler):
 
     def key_pressed_cb (self, win, event):
         # Process player shortcuts
-        # Desactivated, since control+arrows navigation and tab
-        # insertion is common in text editing.
-        #if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
-        #    return True
+        if self.controller.gui and self.controller.gui.process_player_shortcuts(win, event):
+            return True
         if event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.s:
                 self.content_save()
