@@ -68,6 +68,11 @@ else:
       # The file cannot be written. Well, let us use the console...
       pass
 
+# Locale selection
+if config.data.preferences['language']:
+  # A non-empty value overrides the system default
+  os.environ['LANG']=config.data.preferences['language']
+
 print config.data.version_string, "run at", time.strftime("%F %H:%M:%S %z"), "on", sys.platform
 
 # Maybe we are running from a pyinstaller version
