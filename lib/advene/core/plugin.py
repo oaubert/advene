@@ -95,6 +95,8 @@ class Plugin(object):
                 for n in dir(self._plugin) ]
             return [ c for c in l if inspect.isclass(c) ]
 
+        fullname = os.path.join( directory, fname )
+
         if directory.endswith('.zip'):
             zi=zipimport.zipimporter(directory)
             self._plugin=zi.load_module(fname)
@@ -104,7 +106,6 @@ class Plugin(object):
                 self._plugin = imp.load_source('_'.join( (prefix, name) ), fullname, open(fullname) )
             elif ext == '.pyc':
                 self._plugin = imp.load_compiled('_'.join( (prefix, name) ), fullname, open(fullname) )
-        fullname = os.path.join( directory, fname )
         self._filename = fullname
         self.name = self._plugin.name
         self._classes = get_classes()
