@@ -28,164 +28,163 @@ import StringIO
 # sys.path and the various config.data.path
 
 class AutoFlush(file):
-  """Auto-flushed file object.
-  """
-  def write(self, s):
-    super(AutoFlush, self).write(s)
-    self.flush()
-  
-  def writelines(self, l):
-    super(AutoFlush, self).writelines(l)
-    self.flush()
-  
+    """Auto-flushed file object.
+    """
+    def write(self, s):
+        super(AutoFlush, self).write(s)
+        self.flush()
+
+    def writelines(self, l):
+        super(AutoFlush, self).writelines(l)
+        self.flush()
+
 logfile=None
 # Try to find if we are in a development tree.
 (maindir, subdir) = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
 if subdir == 'bin' and  os.path.exists(os.path.join(maindir, "setup.py")):
-  # Chances are that we were in a development tree...
-  libpath=os.path.join(maindir, "lib")
-  print "You seem to have a development tree at:\n%s." % libpath
-  sys.path.insert (0, libpath)
+    # Chances are that we were in a development tree...
+    libpath=os.path.join(maindir, "lib")
+    print "You seem to have a development tree at:\n%s." % libpath
+    sys.path.insert (0, libpath)
 
-  import advene.core.config as config
-  config.data.fix_paths(maindir)
-else:
-  try:
     import advene.core.config as config
-  except ImportError, e:
-    print """Cannot guess a valid directory.
-    Please check your installation or set the PYTHONPATH environment variable."""
-    print str(e)
-    sys.exit(1)
-  # If running from a binary version, redirect stdout, stderr to a file
-  logfile=config.data.advenefile('advene.log', 'settings')
-  try:
-    f=AutoFlush(logfile, 'w')
-    print "Advene output is stored into ", logfile
-    sys.stdout=f
-    sys.stderr=f
-  except IOError:
-    # The file cannot be written. Well, let us use the console...
-    pass
+    config.data.fix_paths(maindir)
+else:
+    try:
+        import advene.core.config as config
+    except ImportError, e:
+        print """Cannot guess a valid directory.
+        Please check your installation or set the PYTHONPATH environment variable."""
+        print str(e)
+        sys.exit(1)
+    # If running from a binary version, redirect stdout, stderr to a file
+    logfile=config.data.advenefile('advene.log', 'settings')
+    try:
+        f=AutoFlush(logfile, 'w')
+        print "Advene output is stored into ", logfile
+        sys.stdout=f
+        sys.stderr=f
+    except IOError:
+        # The file cannot be written. Well, let us use the console...
+        pass
 
 # Locale selection
 if config.data.preferences['language']:
-  # A non-empty value overrides the system default
-  os.environ['LANG']=config.data.preferences['language']
+    # A non-empty value overrides the system default
+    os.environ['LANG']=config.data.preferences['language']
 
 print config.data.version_string, "run at", time.strftime("%F %H:%M:%S %z"), "on", sys.platform
 
 # Maybe we are running from a pyinstaller version
 if not os.path.exists(config.data.path['resources']):
-  maindir=os.path.abspath(os.path.dirname(sys.executable))
-  if os.path.exists(os.path.join( maindir, 'share', 'web' )):
-    # There is a 'share' directory at the same level as the executable
-    # This can mean that we are in a pyinstaller version
-    print "Seemingly running from a pyinstaller version in\n%s" % maindir
-    config.data.fix_paths(maindir)
-  else:
-    # We can possibly be in a MacOSX .app bundle
-    d=os.path.dirname(os.path.abspath(sys.argv[0]))
-    if os.path.basename(d) == 'Resources':
-        print "Seemingly running from a .app bundle"
-        config.data.fix_paths(d)
-        executable_path_dot_dot=os.path.dirname(d)
-        print "Setting GTK_PATH to", d
-        os.environ['GTK_PATH']=d
-        os.environ['GDK_PIXBUF_MODULE_FILE']=os.path.join(d, 'gdk-pixbuf.loaders' )
-        os.environ['PANGO_RC_FILE']=os.path.join(d, 'pangorc' )
-        os.environ['FONTCONFIG_FILE']=os.path.join( d, 'fonts.conf' )
-        # Pango hack
-	os.environ['PANGO_SYSCONF_DIR']=d
-	os.environ['PANGO_LIB_DIR']=d
-        # The loader takes these environment variable into account on application load.
-        # Hence it cannot work here. This part is moved to a wrapper shell script.
-        #os.environ['DYLD_FORCE_FLAT_NAMESPACE']="1"
-        #os.environ['DYLD_INSERT_LIBRARIES']=os.path.join(d, 'libpangohack.dylib')
+    maindir=os.path.abspath(os.path.dirname(sys.executable))
+    if os.path.exists(os.path.join( maindir, 'share', 'web' )):
+        # There is a 'share' directory at the same level as the executable
+        # This can mean that we are in a pyinstaller version
+        print "Seemingly running from a pyinstaller version in\n%s" % maindir
+        config.data.fix_paths(maindir)
+    else:
+        # We can possibly be in a MacOSX .app bundle
+        d=os.path.dirname(os.path.abspath(sys.argv[0]))
+        if os.path.basename(d) == 'Resources':
+            print "Seemingly running from a .app bundle"
+            config.data.fix_paths(d)
+            executable_path_dot_dot=os.path.dirname(d)
+            print "Setting GTK_PATH to", d
+            os.environ['GTK_PATH']=d
+            os.environ['GDK_PIXBUF_MODULE_FILE']=os.path.join(d, 'gdk-pixbuf.loaders' )
+            os.environ['PANGO_RC_FILE']=os.path.join(d, 'pangorc' )
+            os.environ['FONTCONFIG_FILE']=os.path.join( d, 'fonts.conf' )
+            # Pango hack
+            os.environ['PANGO_SYSCONF_DIR']=d
+            os.environ['PANGO_LIB_DIR']=d
+            # The loader takes these environment variable into account on application load.
+            # Hence it cannot work here. This part is moved to a wrapper shell script.
+            #os.environ['DYLD_FORCE_FLAT_NAMESPACE']="1"
+            #os.environ['DYLD_INSERT_LIBRARIES']=os.path.join(d, 'libpangohack.dylib')
 
-        # Let us fix the pango.modules and pixbuf.loaders files if necessary
-        for n in ('pangorc', 'pango.modules', 'gdk-pixbuf.loaders'):
-             sname=os.path.join(d, n + '.in')
-             dname=os.path.join(d, n)
-             data=open(sname, 'r').readlines()
-             # Rewrite only if necessary
-             if [ l for l in data if '@executable_path' in l ]:
-                 print "Relocating ", n
-                 relocated=[ l.replace('@executable_path/..', executable_path_dot_dot) for l in data ]
-                 open(dname, 'w').writelines(relocated)
+            # Let us fix the pango.modules and pixbuf.loaders files if necessary
+            for n in ('pangorc', 'pango.modules', 'gdk-pixbuf.loaders'):
+                sname=os.path.join(d, n + '.in')
+                dname=os.path.join(d, n)
+                data=open(sname, 'r').readlines()
+                # Rewrite only if necessary
+                if [ l for l in data if '@executable_path' in l ]:
+                    print "Relocating ", n
+                    relocated=[ l.replace('@executable_path/..', executable_path_dot_dot) for l in data ]
+                    open(dname, 'w').writelines(relocated)
 
 if config.data.os == 'win32':
-  import _winreg
+    import _winreg
 
-  #win32 platform, add the "lib" folder to the system path
-  os.environ['PATH'] += os.path.pathsep + "lib"
-  try:
-    import pygtk
-    import gtk
-    import gtk.glade
-  except ImportError:
-    # Gtk DLLs are not in the PATH. Try to get their directory
-    # from the registry
-    path=config.data.get_registry_value('Software\\GTK\\2.0', 'Path')
-    if path is None:
-      raise ImportError("Couldn't find GTK DLLs.")
-    os.environ['PATH'] += os.path.pathsep + path.encode('utf8')
-    os.environ['PATH'] += os.path.pathsep + os.path.join( path, 'bin' ).encode('utf8')
-    print "Using GTK DLLs at %s" % path
-    import pygtk
-    import gtk
-    import gtk.glade
-else:
-  import gtk
+    #win32 platform, add the "lib" folder to the system path
+    os.environ['PATH'] += os.path.pathsep + "lib"
+    try:
+        import pygtk
+        import gtk
+        import gtk.glade
+    except ImportError:
+        # Gtk DLLs are not in the PATH. Try to get their directory
+        # from the registry
+        path=config.data.get_registry_value('Software\\GTK\\2.0', 'Path')
+        if path is None:
+            raise ImportError("Couldn't find GTK DLLs.")
+        os.environ['PATH'] += os.path.pathsep + path.encode('utf8')
+        os.environ['PATH'] += os.path.pathsep + os.path.join( path, 'bin' ).encode('utf8')
+        print "Using GTK DLLs at %s" % path
+        import pygtk
+        import gtk
+        import gtk.glade
+    else:
+        import gtk
 
 import advene.gui.main
 
 if __name__ == '__main__':
 
-  # Check for directories
-  for d in ('resources', 'web'):
-    if not os.path.exists(config.data.path[d]):
-      print """Error: the %s directory does not exist.
-      Advene seems to be either badly installed or badly configured
-      (maybe both).
-      Aborting.""" % config.data.path[d]
-      sys.exit(1)
+    # Check for directories
+    for d in ('resources', 'web'):
+        if not os.path.exists(config.data.path[d]):
+            print """Error: the %s directory does not exist.
+Advene seems to be either badly installed or badly configured (maybe both).
+Aborting.""" % config.data.path[d]
+            sys.exit(1)
 
-  gladefile=config.data.advenefile (config.data.gladefilename)
-  if not os.path.exists(gladefile):
-    print """The %s file does not exist.
-    Either the Advene software is not installed or it is badly configured.
-    Check your .advenerc file.""" % gladefile
-    sys.exit(1)
+    gladefile=config.data.advenefile (config.data.gladefilename)
+    if not os.path.exists(gladefile):
+        print """The %s file does not exist.
+Either the Advene software is not installed or it is badly configured.
+Check your .advenerc file.""" % gladefile
+        sys.exit(1)
 
-  gui = advene.gui.main.AdveneGUI ()
-  try:
-    #import hotshot
-    #filename = "pythongrind.prof"
-    #prof = hotshot.Profile(filename, lineevents=1)
-    #prof.runcall(gui.main, config.data.args)
-    #prof.close()
-    gui.main (config.data.args)
-  except Exception, e:
-    print config.data.version_string
-    print _("Got exception\n\n%s\n\n. Stopping services...") % str(e)
-    import traceback
-    s=StringIO.StringIO()
-    traceback.print_exc (file = s)
-    err=s.getvalue()
-    print err
+    gui = advene.gui.main.AdveneGUI ()
+    try:
+        #import hotshot
+        #filename = "pythongrind.prof"
+        #prof = hotshot.Profile(filename, lineevents=1)
+        #prof.runcall(gui.main, config.data.args)
+        #prof.close()
+        gui.main (config.data.args)
+    except Exception, e:
+        print config.data.version_string
+        print _("Got exception\n\n%s\n\n. Stopping services...") % str(e)
+        import traceback
+        s=StringIO.StringIO()
+        traceback.print_exc (file = s)
+        err=s.getvalue()
+        print err
 
-    if logfile is not None:
-      d=gtk.MessageDialog(None,
-                          gtk.DIALOG_MODAL,
-                          gtk.MESSAGE_ERROR,
-                          gtk.BUTTONS_OK,
-                          _("An error occurred."))
-      d.format_secondary_text(_("You can inform the Advene developers by sending the file\n %s\n to advene@liris.cnrs.fr, along with a description of how the bug occurred.") % logfile)
-      def q(*p):
-        gtk.main_quit()
-        return True
+        if logfile is not None:
+            d=gtk.MessageDialog(None,
+                                gtk.DIALOG_MODAL,
+                                gtk.MESSAGE_ERROR,
+                                gtk.BUTTONS_OK,
+                                _("An error occurred."))
+            d.format_secondary_text(_("You can inform the Advene developers by sending the file\n %s\n to advene@liris.cnrs.fr, along with a description of how the bug occurred.") % logfile)
+            def q(*p):
+                gtk.main_quit()
+                return True
 
-      d.connect('response', q)
-      d.show()
-      gtk.main()
+            d.connect('response', q)
+            d.show()
+            gtk.main()
