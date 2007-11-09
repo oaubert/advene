@@ -41,6 +41,7 @@ class EditAccumulator(AccumulatorPopup):
         super(EditAccumulator, self).__init__(*p, **kw)
         self.close_on_package_load = False
         self.edited_elements={}
+        self.size = 0
 
     def edit(self, element):
         e=get_edit_popup(element, self.controller)
