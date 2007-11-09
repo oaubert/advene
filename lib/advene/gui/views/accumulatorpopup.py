@@ -83,7 +83,7 @@ class AccumulatorPopup(AdhocView):
         """
         if title is None:
             title="X"
-        if len(self.widgets) >= self.size:
+        if self.size and len(self.widgets) >= self.size:
             # Remove the last one
             self.undisplay(self.widgets[0][0])
         if timeout is not None and timeout != 0:
@@ -133,7 +133,10 @@ class AccumulatorPopup(AdhocView):
 
         According to the hbox size and the max number of popups.
         """
-        return self.contentbox.get_allocation().width / self.size
+        if self.size:
+            return self.contentbox.get_allocation().width / self.size
+        else:
+            return 120
 
     def undisplay(self, widget=None):
         # Find the associated frame
