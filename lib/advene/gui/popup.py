@@ -288,6 +288,60 @@ class Menu:
         menu.show_all()
         return menu
 
+    def renumber_annotations(self, m, at):
+        """Renumber all annotations of a given type.
+        """
+        d = gtk.Dialog(title=_("Renumbering annotations of type %s") % self.controller.get_title(at),
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                 ))
+        l=gtk.Label(_("Renumber all annotations according to their order.\n\nThis will replace the first numeric value of the annotation content with the new annotation number. If no numeric value is found and the annotation is structured, it will insert the number. *If no numeric value is found and the annotation is of type text/plain, it will overwrite the annotation content.*\nThe offset parameters allows you to skip the first offset annotations."))
+        l.set_line_wrap(True)
+        l.show()
+        d.vbox.add(l)
+
+        hb=gtk.HBox()
+        l=gtk.Label(_("Offset"))
+        hb.pack_start(l, expand=False)
+        s=gtk.SpinButton()
+        s.set_range(1, len(at.annotations))
+        s.set_value(1)
+        s.set_increments(1, 5)
+        hb.add(s)
+        d.vbox.pack_start(hb, expand=False)
+
+        d.connect("key_press_event", dialog.dialog_keypressed_cb)
+        d.show_all()
+        dialog.center_on_mouse(d)
+
+        res=d.run()
+        ret=None
+        if res == gtk.RESPONSE_OK:
+            re_number=re.compile('(\d+)')
+            offset=s.get_value_as_int()-1
+            l=at.annotations
+            l.sort(lambda a, b: cmp(a.fragment.begin, b.fragment.begin))
+            for i, a in enumerate(l[offset:]):
+                if re_number.search(a.content.data):
+                    # There is a number. Simply substitute the new one.
+                    a.content.data=re_number.sub(str(i+1), a.content.data)
+                elif a.type.mimetype == 'application/x-advene-structured':
+                    # No number, but it is structured. Insert the num field
+                    a.content.data=("num=%d\n" % (i+1)) + a.content.data
+                elif a.type.mimetype == 'text/plain':
+                    # Overwrite the contents
+                    a.content.data=str(i+1)
+                else:
+                    continue
+                self.controller.notify('AnnotationEditEnd', annotation=a)
+        else:
+            ret=None
+
+        d.destroy()
+        return True
+
     def common_submenu(self, element):
         """Build the common submenu for all elements.
         """
@@ -457,6 +511,7 @@ class Menu:
         add_item(_("Select a color"), self.pick_color, element)
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
         add_item(_("Delete all annotations..."), self.delete_elements, element, element.annotations)
+        add_item(_("Renumber annotations"), self.renumber_annotations, element)
         return
 
     def make_relationtype_menu(self, element, menu):
