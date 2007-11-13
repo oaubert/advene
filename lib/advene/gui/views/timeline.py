@@ -116,7 +116,7 @@ class TimeLine(AdhocView):
             (_("Save default options"), self.save_default_options),
             )
         self.options = {
-            'highlight': True,
+            'highlight': False,
             # Autoscroll: 0: None, 1: continuous, 2: discrete
             'autoscroll': 1,
             'display-relations': True,
