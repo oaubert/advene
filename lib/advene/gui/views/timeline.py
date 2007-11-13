@@ -1908,34 +1908,6 @@ class TimeLine(AdhocView):
             layout.foreach(resize, width)
         layout.get_parent().get_parent().set_position (width + 30)
 
-    def create_annotation_and_quick_edit(self, annotationtype):
-        """Create an annotation at the current position and quick-edit it.
-        """
-        def set_end_time(an):
-            an.fragment.end=self.controller.player.current_position_value
-            return True
-
-        if (self.controller.player.status != self.controller.player.PlayingStatus
-            and self.controller.player.status != self.controller.player.PauseStatus):
-            return True
-        # Create a new annotation
-        id_=self.controller.package._idgenerator.get_id(Annotation)
-
-        duration=3000
-        el=self.controller.package.createAnnotation(
-            ident=id_,
-            type=annotationtype,
-            author=config.data.userid,
-            date=self.controller.get_timestamp(),
-            fragment=MillisecondFragment(begin=long(self.controller.player.current_position_value),
-                                         duration=duration))
-        self.controller.package.annotations.append(el)
-        self.controller.notify('AnnotationCreate', annotation=el)
-        b=self.create_annotation_widget(el)
-        b.show()
-        self.quick_edit(el, button=widget, callback=set_end_time)
-        return True
-
     def restrict_playing(self, at, widget=None):
         """Restrict playing to the given annotation-type.
         """
@@ -1989,7 +1961,29 @@ class TimeLine(AdhocView):
             if widget.keypress(widget, event, at):
                 return True
             elif event.keyval == gtk.keysyms.Return:
-                self.create_annotation_and_quick_edit(at)
+                def set_end_time(an):
+                    an.fragment.end=self.controller.player.current_position_value
+                    return True
+
+                if (self.controller.player.status != self.controller.player.PlayingStatus
+                    and self.controller.player.status != self.controller.player.PauseStatus):
+                    return True
+                # Create a new annotation
+                id_=self.controller.package._idgenerator.get_id(Annotation)
+
+                duration=3000
+                el=self.controller.package.createAnnotation(
+                    ident=id_,
+                    type=widget.annotationtype,
+                    author=config.data.userid,
+                    date=self.controller.get_timestamp(),
+                    fragment=MillisecondFragment(begin=long(self.controller.player.current_position_value),
+                                                 duration=duration))
+                self.controller.package.annotations.append(el)
+                self.controller.notify('AnnotationCreate', annotation=el)
+                b=self.create_annotation_widget(el)
+                b.show()
+                self.quick_edit(el, button=widget, callback=set_end_time)
                 return True
             elif event.keyval == gtk.keysyms.space:
                 self.restrict_playing(at, widget)
