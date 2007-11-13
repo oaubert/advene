@@ -773,6 +773,8 @@ class EditAction(EditGeneric):
         self.editable=editable
         self.current_name=action.name
         self.current_parameters=dict(action.parameters)
+        # RegisteredAction matching the self.current_name
+        self.registeredaction=catalog.get_action(self.current_name)
 
         self.controller=controller
 
@@ -829,6 +831,7 @@ class EditAction(EditGeneric):
         self.paramlist={}
 
         ra=self.catalog.get_action(self.current_name)
+        self.registeredaction=ra
         if self.current_name in self.cached_parameters:
             self.current_parameters=self.cached_parameters[self.current_name]
         else:
@@ -856,7 +859,17 @@ class EditAction(EditGeneric):
         label=gtk.Label(name)
         hbox.pack_start(label, expand=False)
 
-        entry=TALESEntry(controller=self.controller)
+        ra=self.registeredaction
+        if ra:
+            # Get predefined values
+            if callable(ra.predefined):
+                predefined=ra.predefined(self.controller)[name]
+            elif ra.predefined is not None:
+                predefined=ra.predefined[name]
+            else:
+                predefined=None
+
+        entry=TALESEntry(controller=self.controller, predefined=predefined)
         entry.set_text(value)
         entry.set_editable(self.editable)
         entry.entry.connect("changed", self.on_change_parameter, name)
@@ -866,6 +879,7 @@ class EditAction(EditGeneric):
         hbox.entry=entry
 
         hbox.pack_start(entry.widget)
+        hbox.show_all()
         return hbox
 
     def build_widget(self):
