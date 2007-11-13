@@ -1573,6 +1573,9 @@ class TimeLine(AdhocView):
             if self.statusbar.annotation is not None:
                 self.controller.gui.edit_element(self.statusbar.annotation)
                 return True
+        elif event.keyval == gtk.keysyms.c:
+            self.center_on_position(self.current_position)
+            return True
         elif event.keyval == gtk.keysyms.p:
             # Play at the current position
             x, y = win.get_pointer()
