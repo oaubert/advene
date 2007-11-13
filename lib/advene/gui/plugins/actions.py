@@ -38,6 +38,9 @@ def register(controller=None):
             description=_("Display a message"),
             parameters={'message': _("String to display.")},
             defaults={'message': 'annotation/content/data'},
+            predefined={'message': (  
+                    ( 'annotation/content/data', _("The annotation content") ) 
+                    )},            
             category='gui',
             ))
 
@@ -49,6 +52,13 @@ def register(controller=None):
                         'duration': _("Display duration in ms. Ignored if empty.")},
             defaults={'message': 'annotation/content/data',
                       'duration': 'annotation/fragment/duration'},
+            predefined={'message': (  
+                    ( 'annotation/content/data', _("The annotation content") )
+                    ),
+                        'duration': (
+                    ( 'string:1000', _("1 second") ),
+                    ( 'annotation/fragment/duration',_("The annotation duration") )
+                    )},
             category='gui',
             ))
 
@@ -60,8 +70,9 @@ def register(controller=None):
                         'destination': _("Object where to store the answer (should have a content)"),
                         'duration': _("Display duration in ms. Ignored if empty.")},
             defaults={'message': 'annotation/content/data',
-                      'destination': 'annotation/related',
+                      'destination': 'annotation/related/first',
                       'duration': 'annotation/fragment/duration'},
+            predefined=ac.action_entry_predefined,
             category='gui',
             ))
 
@@ -74,9 +85,10 @@ def register(controller=None):
                         'position': _("New position"),
                         'duration': _("Display duration in ms. Ignored if empty.")},
             defaults={'description': 'annotation/content/data',
-                      'message': _('string:Go to related annotation'),
-                      'position': 'annotation/related/fragment/begin',
+                      'message': 'string:'+_('Go to related annotation'),
+                      'position': 'annotation/related/first/fragment/begin',
                       'duration': 'annotation/fragment/duration'},
+            predefined=ac.action_popup_goto_predefined,
             category='gui',
             ))
 
@@ -92,6 +104,21 @@ def register(controller=None):
                       'message': _('string:Display annotation in web browser'),
                       'url': 'annotation/absolute_url',
                       'duration': 'annotation/fragment/duration'},
+            predefined={'description': (
+                    ('annotation/content/data', _("The annotation content")),
+                    ),
+                        'message': (
+                    ('string:'+_('See the Advene website'), _('See the Advene website')),
+                    ('string:'+_('See the annotation'), _('See the annotation')),
+                    ),
+                        'url': (
+                    ('string:http://liris.cnrs.fr', _("The Advene website")),
+                    ('annotation/absolute_url', _("The annotation URL")),
+                        ),
+                        'duration': (
+                    ( 'string:1000', _("1 second") ),
+                    ( 'annotation/fragment/duration',_("The annotation duration") )
+                    )},
             category='gui',
             ))
 
@@ -105,6 +132,24 @@ def register(controller=None):
             defaults={'guiview': 'string:timeline',
                       'destination': 'string:south',
                       },
+            predefined={
+                'guiview': (
+                    ('tree', _('Tree view')),
+                    ('timeline', _('Timeline')),
+                    ('transcription', _('Transcription of annotations')),
+                    ('browser', _('Package browser')),
+                    ('transcribe', _('Note-taking editor')),
+                    ('history', _('Entry points')),
+                    ('tagbag', _("Bag of tags")),
+                    ('montage', _("Dynamic montage")),
+                    ),
+                'destination': (
+                    ('string:popup', _("...in its own window")),
+                    ('string:east', _("...embedded east of the video")),
+                    ('string:west', _("...embedded west of the video")),
+                    ('string:south', _("...embedded south of the video")),
+                    ('string:fareast', _("...embedded at the right of the window")),
+                    )},
             category='gui',
             ))
 
@@ -126,6 +171,7 @@ def register(controller=None):
                       'position2': 'annotation/fragment/end',
                       'duration': 'annotation/fragment/duration',
                       },
+            predefined=ac.action_popup_goto_predefined,
             category='gui',
             ))
 
@@ -151,6 +197,7 @@ def register(controller=None):
                       'position3': 'annotation/related/fragment/begin',
                       'duration': 'annotation/fragment/duration',
                       },
+            predefined=ac.action_popup_goto_predefined,
             category='gui',
             ))
 
@@ -177,6 +224,15 @@ class DefaultGUIActions:
         else:
             result=default_value
         return result
+
+    def related_annotation_expressions(self, controller):
+        p=[]
+        for t in controller.package.relationTypes:
+            p.append( ('annotation/typedRelatedOut/%s/first/fragment/begin' % t.id,
+                       _("The %s-related outgoing annotation") % controller.get_title(t)) )
+            p.append( ('annotation/typedRelatedIn/%s/first/fragment/begin' % t.id,
+                       _("The %s-related incoming annotation") % controller.get_title(t)) )
+        return p
 
     def action_message_log (self, context, parameters):
         """Event Handler for the message action.
@@ -267,6 +323,15 @@ class DefaultGUIActions:
         self.gui.popupwidget.display(widget=v, timeout=duration, title=_("Entry popup"))
         return True
 
+    def action_entry_predefined(self, controller):
+        d= {'message': (  
+                    ( 'annotation/content/data', _("The annotation content") )
+                    ),
+            'destination': self.related_annotation_expressions(controller),
+            'duration': (
+                ( 'string:1000', _("1 second") ),
+                ( 'annotation/fragment/duration',_("The annotation duration") )
+                )}
     def action_popup_url (self, context, parameters):
         """PopupURL action.
 
@@ -338,7 +403,7 @@ class DefaultGUIActions:
 
         self.gui.popupwidget.display(widget=vbox, timeout=duration, title=_("Navigation popup"))
         return True
-
+    
     def generate_action_popup_goton(self, size):
         def generate (context, parameters):
             """Display a popup with 'size' choices."""
@@ -377,3 +442,24 @@ class DefaultGUIActions:
             self.gui.popupwidget.display(widget=vbox, timeout=duration, title=_("Navigation popup"))
             return True
         return generate
+
+    def action_popup_goto_predefined(self, controller):
+        p=self.related_annotation_expressions(controller)
+        p.append( ('annotation/fragment/begin', _('Go to the beginning of the annotation')) )
+        p.append( ('annotation/fragment/end', _('Go to the end of the annotation')) )        
+        return {
+            'description': ( 
+                ('annotation/content/data', _("The annotation content")), 
+                ),
+            'message': (),
+            'position': p,
+            'message1': (),
+            'position1': p,
+            'message2': (),
+            'position2': p,
+            'message3': (),
+            'position3': p,
+            'duration': (
+                ( 'string:1000', _("1 second") ),
+                ( 'annotation/fragment/duration',_("The annotation duration") )
+                )}

@@ -34,6 +34,9 @@ def register(controller=None):
             description=_("Display a message"),
             parameters={'message': _("Message to display")},
             defaults={'message': 'annotation/content/data'},
+            predefined={'message': (  
+                    ( 'annotation/content/data', _("The annotation content") ) 
+                    )},
             category='gui',
             )
                                )
@@ -43,6 +46,11 @@ def register(controller=None):
             description=_("Start the player"),
             parameters={'position': _("Start position (in ms)")},
             defaults={'position': 'string:0'},
+            predefined={'position': (
+                    ( 'string:0', _("The movie start") ),
+                    ( 'annotation/fragment/begin', _("The annotation begin") ),
+                    ( 'annotation/fragment/end', _("The annotation end") ),
+                    )},
             category='player',
             )
                                )
@@ -53,6 +61,7 @@ def register(controller=None):
             description=_("Go to the given position"),
             parameters={'position': _("Goto position (in ms)")},
             defaults={'position': 'annotation/fragment/begin'},
+            predefined=ac.PlayerGoto_predefined,
             category='player',
             )
                                )
@@ -96,6 +105,13 @@ def register(controller=None):
                         'duration': _("Duration of the caption")},
             defaults={'message': 'annotation/content/data',
                       'duration': 'annotation/fragment/duration'},
+            predefined={'message': (
+                    ( 'annotation/content/data', _("The annotation content") ),
+                    ),
+                        'duration': (
+                    ( 'string:1000', _("1 second") ),
+                    ( 'annotation/fragment/duration',_("The annotation duration") )
+                    )},
             category='advanced',
             )
                                )
@@ -105,6 +121,9 @@ def register(controller=None):
             description=_("Caption the annotation"),
             parameters={'message': _("Message to display")},
             defaults={'message': 'annotation/content/data'},
+            predefined={'message': (
+                    ( 'annotation/content/data', _("The annotation content") ),
+                    )},
             category='advanced',
             )
                                )
@@ -124,6 +143,37 @@ def register(controller=None):
                       'y': 'string:10',
                       'size': 'string:5',
                       'duration': 'annotation/fragment/duration'},
+            predefined={'shape': (
+                    ( 'string:square', _("A square") ),
+                    ( 'string:circle', _("A circle") ),
+                    ( 'string:triangle', _("A triangle") ),
+                    ),
+                        'color': (
+                    ( 'string:white', _('White') ),
+                    ( 'string:black', _('Black') ),
+                    ( 'string:red', _('Red') ),
+                    ( 'string:green', _('Green') ),
+                    ( 'string:blue', _('Blue') ),
+                    ( 'string:yellow', _('Yellow') ),
+                    ),
+                        'x': (
+                    ( 'string:5', _('At the top of the screen') ),
+                    ( 'string:50', _('In the middle of the screen' ) ),
+                    ( 'string:95', _('At the bottom of the screen') ),
+                    ),
+                        'y': (
+                    ( 'string:5', _('At the left of the screen') ),
+                    ( 'string:50', _('In the middle of the screen') ),
+                    ),
+                        'size': (
+                    ( 'string:2', _("Small") ),
+                    ( 'string:4', _("Normal") ),
+                    ( 'string:10', _("Large") ),
+                    ),
+                        'duration': (
+                    ( 'string:1000', _("1 second") ),
+                    ( 'annotation/fragment/duration', _("The annotation duration") )
+                    )},
             category='advanced',
             )
                                )
@@ -155,6 +205,7 @@ def register(controller=None):
             description=_("Activate a STBV"),
             parameters={'viewid': _("STBV id")},
             defaults={'viewid': 'string:stbv_id'},
+            predefined=ac.ActivateSTBV_predefined,
             category='gui',
             )
                                )
@@ -248,6 +299,17 @@ class DefaultActionsRepository:
                                  origin=c.player.AbsolutePosition)
         self.controller.update_status ("set", pos)
         return True
+
+    def PlayerGoto_predefined(self, controller):
+        p=[ ( 'string:0', _("The movie start") ),
+            ( 'annotation/fragment/begin', _("The annotation begin") ),
+            ( 'annotation/fragment/end', _("The annotation end") ) ]
+        for t in controller.package.relationTypes:
+            p.append( ('annotation/typedRelatedOut/%s/first/fragment/begin' % t.id,
+                       _("The %s-related outgoing annotation") % controller.get_title(t)) )
+            p.append( ('annotation/typedRelatedIn/%s/first/fragment/begin' % t.id,
+                       _("The %s-related incoming annotation") % controller.get_title(t)) )
+        return { 'position': p }
 
     def PlayerStop (self, context, parameters):
         """Stop the player."""
@@ -417,6 +479,13 @@ class DefaultActionsRepository:
         else:
             self.controller.log(_("Cannot find the stbv %s") % stbvid)
         return True
+
+    def ActivateSTBV_predefined(self, controller, item):
+        """Return the predefined values.
+        """
+        return { 'viewid': [ ('string:%s' % v.id, controller.get_title(v)) 
+                             for v in controller.package.views
+                             if helper.get_view_type(v) == 'dynamic' ] }
 
     def SendUserEvent(self, context, parameters):
         """Send a user event.
