@@ -23,8 +23,16 @@ from advene.gui.views.browser import Browser
 import advene.util.helper
 from advene.gui.util import dialog
 
+re_tales=re.compile('^\$\{(.+)\}$')
+re_string=re.compile('^string:(.+)$')
+
 class TALESEntry:
     """TALES expression entry widget.
+
+    In order to hide complexity to the user, TALES expressions are
+    converted before display: TALES path expr will be represented as
+    ${expr}, and string expressions string:foobar will be represented
+    simply as foobar.
 
     @ivar default: the default text
     @type default: string
@@ -44,15 +52,34 @@ class TALESEntry:
         self.context=context
         self.predefined=predefined
 
-        self.re_id = re.compile('^([A-Za-z0-9_%]+/?)+$')
-        self.re_number = re.compile('^\d+$')
-        
         self.widget=self.build_widget()
+
+    def text2tales(self, t):
+        """Return the TALES expression corresponding to the given text.
+        """
+        l=re_string.findall(t)
+        if l:
+            return l[0]
+        l=re_tales.findall(t)
+        if l:
+            return l[0]
+        # Should not happen...
+        print "Strange bug in TALES representation conversion for |"+t+"|"
+        return t
+
+    def tales2text(self, t):
+        """Return the text representing the TALES expression.
+        """
+        if t.startswith('string:'):
+            return t[7:].strip()
+        else:
+            return "${"+t+"}"
 
     def set_context(self, el):
         self.context=el
 
     def set_text(self, t):
+        t=self.tales2text(t)
         # Check if the new value is in self.predefined. If so, use
         # set_active_iter, else use self.entry
         m=self.combo.get_model()
@@ -71,7 +98,7 @@ class TALESEntry:
         self.default=t
 
     def get_text(self):
-        return self.combo.get_current_element()
+        return self.text2tales(self.combo.get_current_element())
     
     def set_editable(self, b):
         self.editable=b
@@ -93,18 +120,18 @@ class TALESEntry:
         """
         if expr is None:
             expr=self.combo.get_current_element()
-        return advene.util.helper.is_valid_tales(expr)
+        return advene.util.helper.is_valid_tales(self.text2tales(expr))
     
     def build_widget(self):
         hbox=gtk.HBox()
 
         if self.predefined:
-            preselect=self.predefined[0][0]
+            preselect=self.tales2text(self.predefined[0][0])
         else:
             preselect=None
-        self.combo=dialog.list_selector_widget(members=self.predefined,
-                                                        preselect=preselect,
-                                                        entry=True)
+        self.combo=dialog.list_selector_widget(members=[ (self.tales2text(e), d) for (e, d) in self.predefined ],
+                                               preselect=preselect,
+                                               entry=True)
         self.entry=self.combo.child
 
         hbox.pack_start(self.combo, expand=True)
@@ -123,7 +150,7 @@ class TALESEntry:
         # FIXME: display initial value in browser        
         def callback(e):
             if e is not None:
-                self.entry.set_text(e)
+                self.entry.set_text(self.tales2text(e))
             return True
 
         browser = Browser(controller=self.controller,
