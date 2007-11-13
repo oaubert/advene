@@ -854,6 +854,11 @@ class Query:
 class RegisteredAction:
     """Registered action.
 
+    Some predefined values must be generated on-the-fly, depending on
+    the package's elements. If predefined is a method, it must be
+    called with (controller) as parameters, and will return the dict with values == list
+    of couples (expression, description).
+
     @ivar name: the action name
     @type name: string
     @ivar category: the category this action belongs to
@@ -862,6 +867,8 @@ class RegisteredAction:
     @ivar description: the action description
     @ivar parameters: the action parameters
     @type parameters: dict
+    @ivar predefined: predefined parameter values
+    @type: a dict whith list of couples as values or a method m(controller, item)
     @ivar immediate: if True, the action is immediately executed, else scheduled
     @type immediate: boolean
     """
@@ -872,6 +879,7 @@ class RegisteredAction:
                  parameters=None,
                  category="generic",
                  immediate=False,
+                 predefined=None,
                  defaults=None):
         self.name=name
         # The method attribute is in fact ignored, since we always lookup in the
@@ -894,6 +902,7 @@ class RegisteredAction:
         self.immediate=immediate
         # The available categories are described in Catalog
         self.category=category
+        self.predefined=predefined
 
     def add_parameter(self, name, description):
         """Add a new parameter to the action."""
