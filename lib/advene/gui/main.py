@@ -94,7 +94,7 @@ import advene.gui.views.timeline
 import advene.gui.views.table
 import advene.gui.views.logwindow
 import advene.gui.views.interactivequery
-from advene.gui.views.history import Bookmarks
+from advene.gui.views.bookmarks import Bookmarks
 from advene.gui.edit.rules import EditRuleSet
 from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
@@ -257,7 +257,7 @@ class AdveneGUI (Connect):
             ('webbrowser', _('Web browser'), 'web.png'),
             ('transcribe', _('Note-taking editor'), 'transcribe.png'),
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
-            ('history', _('Entry points'), 'history.png'),
+            ('bookmarks', _('Bookmarks'), 'bookmarks.png'),
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
             ('montage', _("Dynamic montage"), 'montage.png'),
             ):
@@ -618,7 +618,7 @@ class AdveneGUI (Connect):
                   advene.gui.views.browser,
                   advene.gui.views.interactivequery,
                   advene.gui.views.table,
-                  advene.gui.views.history,
+                  advene.gui.views.bookmarks,
                   advene.gui.views.tree,
                   advene.gui.edit.montage,
                   advene.gui.views.annotationdisplay,
@@ -996,8 +996,8 @@ class AdveneGUI (Connect):
         k=self.controller.package.imagecache.keys()
         k.sort()
         hn=Bookmarks(controller=self.controller,
-                             history=k,
-                             vertical=True)
+                     history=k,
+                     vertical=True)
         w=hn.popup()
         return hn, w
 

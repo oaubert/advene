@@ -562,7 +562,7 @@ class Application(Common):
       C{/application/adhoc} opens the given ad-hoc view. It takes
       the view name as next element in the path. Accessible views
       are: C{tree}, C{timeline}, C{transcription}, C{transcribe},
-      C{edit}, C{history}, C{browser}.
+      C{edit}, C{bookmarks}, C{browser}.
 
       The transcription view can take an optional C{type}
       parameter, either as next element in the URI or as a

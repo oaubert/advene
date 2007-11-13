@@ -139,7 +139,7 @@ def register(controller=None):
                     ('transcription', _('Transcription of annotations')),
                     ('browser', _('Package browser')),
                     ('transcribe', _('Note-taking editor')),
-                    ('history', _('Entry points')),
+                    ('bookmarks', _('Bookmarks')),
                     ('tagbag', _("Bag of tags")),
                     ('montage', _("Dynamic montage")),
                     ),

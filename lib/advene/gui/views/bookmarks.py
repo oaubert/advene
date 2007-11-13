@@ -61,7 +61,7 @@ class HistoryImporter(advene.util.importer.GenericImporter):
 
 class Bookmarks(AdhocView):
     view_name = _("Bookmarks")
-    view_id = 'history'
+    view_id = 'bookmarks'
     tooltip= _("Bookmark timecodes with their corresponding screenshots")
     def __init__(self, controller=None, parameters=None, 
                  history=None, vertical=True, ordered=False, closable=True):
