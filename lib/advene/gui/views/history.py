@@ -31,7 +31,7 @@ import gtk
 name="History view plugin"
 
 def register(controller):
-    controller.register_viewclass(HistoryNavigation)
+    controller.register_viewclass(Bookmarks)
 
 class HistoryImporter(advene.util.importer.GenericImporter):
     """History importer.
@@ -59,13 +59,13 @@ class HistoryImporter(advene.util.importer.GenericImporter):
         self.convert(self.iterator())
         return self.package
 
-class HistoryNavigation(AdhocView):
+class Bookmarks(AdhocView):
     view_name = _("Bookmarks")
     view_id = 'history'
     tooltip= _("Bookmark timecodes with their corresponding screenshots")
     def __init__(self, controller=None, parameters=None, 
                  history=None, vertical=True, ordered=False, closable=True):
-        super(HistoryNavigation, self).__init__(controller=controller)
+        super(Bookmarks, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Save view"), self.save_view),
@@ -190,7 +190,6 @@ class HistoryNavigation(AdhocView):
                               t,
                               width=self.options['snapshot_width'])
         e=gtk.Button()
-        #e.connect("button-release-event", self.activate, t)
         e.connect("clicked", self.activate, t)
         e.add(i)
 

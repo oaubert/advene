@@ -94,7 +94,7 @@ import advene.gui.views.timeline
 import advene.gui.views.table
 import advene.gui.views.logwindow
 import advene.gui.views.interactivequery
-from advene.gui.views.history import HistoryNavigation
+from advene.gui.views.history import Bookmarks
 from advene.gui.edit.rules import EditRuleSet
 from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
@@ -967,7 +967,7 @@ class AdveneGUI (Connect):
         self.gui.get_widget('urlstack1').set_property('visible', False)
 
         # Navigation history
-        self.navigation_history=HistoryNavigation(controller=self.controller, closable=True)
+        self.navigation_history=Bookmarks(controller=self.controller, closable=True)
         # Navigation history is embedded. The menu item is useless :
         self.gui.get_widget('navigationhistory1').set_property('visible', False)
         self.viewbook['west'].add_view(self.navigation_history, name=_("History"), permanent=True)
@@ -995,7 +995,7 @@ class AdveneGUI (Connect):
         """
         k=self.controller.package.imagecache.keys()
         k.sort()
-        hn=HistoryNavigation(controller=self.controller,
+        hn=Bookmarks(controller=self.controller,
                              history=k,
                              vertical=True)
         w=hn.popup()
@@ -2402,7 +2402,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_navigationhistory1_activate (self, button=None, data=None):
-        h=advene.gui.views.history.HistoryNavigation(self.controller, self.navigation_history, closable=False)
+        h=Bookmarks(self.controller, self.navigation_history, closable=False)
         h.popup()
         return True
 
