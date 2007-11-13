@@ -615,6 +615,8 @@ class TimeLine(AdhocView):
         for w in self.legend.get_children():
             if isinstance(w, AnnotationTypeWidget):
                 w.set_playing(w.annotationtype == at)
+            elif isinstance(w, gtk.ToggleButton):
+                w.set_active(w.annotationtype == at)
         return True
 
     def tag_update(self, context, parameters):
@@ -2033,7 +2035,10 @@ class TimeLine(AdhocView):
 
             height=max (height, self.layer_position[t] + 3 * self.button_height)
 
-            p=get_small_stock_button(gtk.STOCK_MEDIA_PLAY, restrict_playing, t, b)
+            p=gtk.ToggleButton()
+            p.annotationtype=t
+            p.add(gtk.image_new_from_stock(gtk.STOCK_MEDIA_PLAY, gtk.ICON_SIZE_SMALL_TOOLBAR))
+            p.connect('clicked', restrict_playing, t, b)
             p.set_size_request(15, self.button_height)
             self.tooltips.set_tip(p, _("Restrict playing to this annotation-type"))
             layout.put (p, 0, self.layer_position[t])
