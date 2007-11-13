@@ -2675,6 +2675,8 @@ class AdveneGUI (Connect):
                     config.data.preferences['path'][k]=cache[k]
                     if k == 'plugins':
                         self.controller.restart_player()
+            # Save preferences
+            config.data.save_preferences()
 
         return True
 
