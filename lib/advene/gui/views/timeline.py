@@ -2188,7 +2188,9 @@ class TimeLine(AdhocView):
 
         pane.pack1(vbox, resize=True, shrink=True)
         a=AnnotationDisplay(controller=self.controller)
-        pane.pack2(a.widget, resize=False, shrink=True)
+        f=gtk.Frame(_("Inspector"))
+        f.add(a.widget)
+        pane.pack2(f, resize=False, shrink=True)
         self.controller.gui.register_view (a)        
         a.set_master_view(self)
         a.widget.show_all()
