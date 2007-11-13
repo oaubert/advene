@@ -149,8 +149,18 @@ class LogWindow(AdhocView):
             name='PushURL',
             method=self.pushURL,
             description=_("Push a URL on the stack"),
-            parameters={'message': _("Associated message"),
+            parameters={'message': _("Description of the URL"),
                         'url': _("URL")},
+            defaults={'message': "string:"+_("See the Advene website"),
+                      'url': 'string:http://liris.cnrs.fr/'},
+            predefined={'message': (
+                        ('string:'+_('See the Advene website'), _('See the Advene website')),
+                        ('string:'+_('See the annotation'), _('See the annotation')),
+                        ),
+                        'url': (
+                        ('string:http://liris.cnrs.fr', _("The Advene website")),
+                        ('annotation/absolute_url', _("The annotation URL")),
+                        )},
             category='gui',
             ))
         self.callback=controller.event_handler.internal_rule (event="PackageActivate",
