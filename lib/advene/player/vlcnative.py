@@ -182,6 +182,8 @@ class Player(object):
                 position.value = p
             self.check_player ()
             self.mc.start (position)
+            # Workaround for the unstable position parameter handling by start
+            self.mc.set_media_position (position)
         else:
             if position is None:
                 position = self.relative_position
