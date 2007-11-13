@@ -341,6 +341,9 @@ class TimeLine(AdhocView):
             self.fraction_adj.value=default_zoom
             self.adjustment.set_value(u2p(default_position))
             self.resize_legend_widget(self.legend)
+            # Set annotation inspector width, so that it does not auto-resize
+            w, h = self.widget.window.get_size()
+            self.inspector_pane.set_position(w - 160)
             self.widget.disconnect(self.expose_signal)
             return False
         self.expose_signal=self.widget.connect('expose-event', set_default_parameters)
@@ -2148,7 +2151,7 @@ class TimeLine(AdhocView):
 
     def get_packed_widget (self):
         """Return the widget packed into a scrolledwindow."""
-        pane=gtk.HPaned()
+        self.inspector_pane=gtk.HPaned()
 
         vbox = gtk.VBox ()
 
@@ -2185,17 +2188,16 @@ class TimeLine(AdhocView):
         #hgrade.set_size_request(400, 30)
         #vbox.pack_start (hgrade.widget, expand=False)
 
-        pane.pack1(vbox, resize=True, shrink=True)
+        self.inspector_pane.pack1(vbox, resize=True, shrink=True)
         a=AnnotationDisplay(controller=self.controller)
         f=gtk.Frame(_("Inspector"))
         f.add(a.widget)
-        pane.pack2(f, resize=False, shrink=True)
+        self.inspector_pane.pack2(f, resize=False, shrink=True)
         self.controller.gui.register_view (a)        
         a.set_master_view(self)
         a.widget.show_all()
 
-        self.visualisation_pane=pane
-        return pane
+        return self.inspector_pane
 
     def get_toolbar(self):
         tb=gtk.Toolbar()
