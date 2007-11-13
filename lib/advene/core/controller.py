@@ -402,8 +402,11 @@ class AdveneController:
                     if l and l[0][1] > a.fragment.end:
                         self.queue_action(self.update_status, 'set', l[0][1])
                     else:
-                        # No next annotation. Pause the player.
-                        self.queue_action(self.update_status, 'pause')
+                        # No next annotation. Return to the start
+                        l=[ a.fragment.begin for a in at.annotations ]
+                        l.sort()
+                        self.queue_action(self.update_status, "set", position=l[0])
+
                 return True
             self.restricted_rule=self.event_handler.internal_rule(event="AnnotationEnd",
                                                                   method=restricted_play)
