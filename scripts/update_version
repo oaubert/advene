@@ -1,0 +1,7 @@
+#! /bin/sh
+
+svnrev=`svn info | awk '/Revision/{print $2}'`
+builddate=`date +%Y%m%d`
+
+perl -pi -e "s/date=.+/date='$builddate'/; s/svn=.+/svn='$svnrev'/" lib/advene/core/version.py
+
