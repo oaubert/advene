@@ -297,7 +297,7 @@ class Menu:
                        buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                                  gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  ))
-        l=gtk.Label(_("Renumber all annotations according to their order.\n\nThis will replace the first numeric value of the annotation content with the new annotation number. If no numeric value is found and the annotation is structured, it will insert the number. *If no numeric value is found and the annotation is of type text/plain, it will overwrite the annotation content.*\nThe offset parameters allows you to skip the first offset annotations."))
+        l=gtk.Label(_("Renumber all annotations according to their order.\n\nThis will replace the first numeric value of the annotation content with the new annotation number. If no numeric value is found and the annotation is structured, it will insert the number. *If no numeric value is found and the annotation is of type text/plain, it will overwrite the annotation content.*\nThe offset parameter allows you to renumber from the annotation number offset."))
         l.set_line_wrap(True)
         l.show()
         d.vbox.add(l)
