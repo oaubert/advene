@@ -247,7 +247,7 @@ class GenericImporter(object):
         Returns a tuple (package, annotationtype)
         """
         if self.package is None:
-            p=Package(uri=filename, source=None)
+            p=Package(uri='new_pkg', source=None)
             if filename is not None:
                 p.setMetaData(config.data.namespace_prefix['dc'],
                               'description',
