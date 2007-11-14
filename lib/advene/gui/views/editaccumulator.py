@@ -28,7 +28,7 @@ from gettext import gettext as _
 import advene.core.config as config
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 from advene.gui.edit.elements import get_edit_popup
-from advene.gui.util import get_small_stock_button
+from advene.gui.util import get_small_stock_button, get_pixmap_button
 
 class EditAccumulator(AccumulatorPopup):
     """View displaying a limited number of compact editing widgets.
@@ -59,12 +59,14 @@ class EditAccumulator(AccumulatorPopup):
             return True
 
         # OK button
-        b=get_small_stock_button(gtk.STOCK_OK, handle_ok, w)
+        b=get_pixmap_button('small_ok.png', handle_ok, w)
+        b.set_relief(gtk.RELIEF_NONE)
         self.controller.gui.tooltips.set_tip(b, _("Validate and close"))
         hbox.pack_start(b, expand=False)
 
         # Close button
-        b=get_small_stock_button(gtk.STOCK_CANCEL, self.undisplay_cb, w)
+        b=get_pixmap_button('small_close.png', self.undisplay_cb, w)
+        b.set_relief(gtk.RELIEF_NONE)
         self.controller.gui.tooltips.set_tip(b, _("Close"))
         hbox.pack_start(b, expand=False)
 
