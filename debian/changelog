@@ -1,5 +1,7 @@
 advene (0.25) unstable; urgency=low
 
+  * Interface language can be specified in the Edit/Preferences/GUI window
+  
   * Settings and logs are saved in $HOME/Library/Preferences/Advene on MacOS X
 
   * The standard adhoc-view, opened at startup, now must be defined
@@ -9,9 +11,17 @@ advene (0.25) unstable; urgency=low
   * New adhoc view: montage, proposing a dynamic montage of a sequence of
     annotations.
 
-  * Dynamic views can now specify subviews (other views that should also
-    be activated upon view activation)
+  * Dynamic views:
 
+    * The syntax for TALES expression input has changed: input fields are
+      considered as strings by default. The ${expr} syntax must be used to
+      enter TALES paths.
+  
+    * They can now specify subviews (other views that should also be
+      activated upon view activation)
+  
+    * Predefined values are proposed for action parameters
+  
   * Element edit popups: they now are updated if the edited element is
     updated by another way (e.g. quick-edit for annotations). For
     annotations, Previous/Next buttons allow to edit the previous/next
@@ -24,6 +34,8 @@ advene (0.25) unstable; urgency=low
 
     * new shortcut 'h' to un/highlight the annotation in all open
       views
+
+    * new shortcut 'c' to center the view on the current player position
 
     * a single left-click on an annotation will play it
 
@@ -78,7 +90,10 @@ advene (0.25) unstable; urgency=low
 
     * It is possible to search annotations and relations based on tags
 
- --
+  * Automatic numbering of annotations: available from the annotation-type
+    popup menu
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 14 Nov 2007 15:44:28 +0100
 
 advene (0.24) unstable; urgency=low
 
