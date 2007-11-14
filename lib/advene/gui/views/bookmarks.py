@@ -36,18 +36,23 @@ def register(controller):
 class HistoryImporter(advene.util.importer.GenericImporter):
     """History importer.
     """
-    def __init__(self, elements=None, duration=2000, **kw):
+    def __init__(self, elements=None, comments=None, duration=2000, **kw):
         super(HistoryImporter, self).__init__(**kw)
         self.elements=elements
+        self.comments=comments
         self.duration=duration
         self.name = _("History importer")
 
     def iterator(self):
         for b in self.elements:
+            if b in self.comments:
+                content=self.comments[b]
+            else:
+                content="Bookmark %s" % helper.format_time(b)
             yield {
                 'begin': b,
                 'end': b + self.duration,
-                'content': "Bookmark %s" % helper.format_time(b),
+                'content': content,
                 'notify': True,
                 }
 
@@ -64,7 +69,7 @@ class Bookmarks(AdhocView):
     view_id = 'bookmarks'
     tooltip= _("Bookmark timecodes with their corresponding screenshots")
     def __init__(self, controller=None, parameters=None, 
-                 history=None, vertical=True, ordered=False, closable=True):
+                 history=None, vertical=True, ordered=False, closable=True, display_comments=True):
         super(Bookmarks, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
@@ -79,13 +84,21 @@ class Bookmarks(AdhocView):
             }
         self.controller=controller
         self.history=history
+        self.display_comments=display_comments
+
         if history is None:
             self.history=[]
+        self.comments={}
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         self.history=[ long(v) for (n, v) in arg if n == 'timestamp' ]
-            
+
+        for n, v in arg:
+            if n == 'comment':
+                t, c = v.split(':', 1)
+                self.comments[long(t)]=c
+
         self.closable=closable
         self.mainbox=None
         self.scrollwindow=None
@@ -93,7 +106,8 @@ class Bookmarks(AdhocView):
         self.refresh()
 
     def get_save_arguments(self):
-        return self.options, [ ('timestamp', t) for t in self.history ]
+        return self.options, ([ ('timestamp', t) for t in self.history ] 
+                              + [ ('comment', '%d:%s' % (t, c)) for (t, c) in self.comments.iteritems() ])
 
     def close(self, *p):
         if self.closable:
@@ -201,8 +215,21 @@ class Bookmarks(AdhocView):
                           gtk.gdk.ACTION_LINK)
 
         vbox.pack_start(e, expand=False)
-        l = gtk.Label(helper.format_time(t))
-        vbox.pack_start(l, expand=False)
+
+        hbox=gtk.HBox()
+        l = gtk.Label(helper.format_time(t) + " - ")
+        hbox.pack_start(l, expand=False)
+        self.mainbox.comment=gtk.Entry()
+        if t in self.comments:
+            self.mainbox.comment.set_text(self.comments[t])
+        else:
+            self.mainbox.comment.set_text(_("No comment"))
+        def update_comment(ent, ti):
+            self.comments[ti]=ent.get_text()
+            return True
+        self.mainbox.comment.connect('changed', update_comment, t)
+        hbox.pack_start(self.mainbox.comment, expand=False)
+        vbox.pack_start(hbox, expand=False)
 
         vbox.show_all()
         if self.scrollwindow:
