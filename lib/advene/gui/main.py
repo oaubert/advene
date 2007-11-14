@@ -967,7 +967,7 @@ class AdveneGUI (Connect):
         self.gui.get_widget('urlstack1').set_property('visible', False)
 
         # Navigation history
-        self.navigation_history=Bookmarks(controller=self.controller, closable=True)
+        self.navigation_history=Bookmarks(controller=self.controller, closable=True, display_comments=False)
         # Navigation history is embedded. The menu item is useless :
         self.gui.get_widget('navigationhistory1').set_property('visible', False)
         self.viewbook['west'].add_view(self.navigation_history, name=_("History"), permanent=True)
