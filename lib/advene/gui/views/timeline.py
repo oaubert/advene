@@ -1180,6 +1180,8 @@ class TimeLine(AdhocView):
             self.controller.notify('AnnotationEditEnd', annotation=annotation)
             return True
         elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
+            if not self.goto_on_click_toggle.get_active():
+                return True
             # Goto annotation if not already playing it
             p=self.controller.player.current_position_value
             # We do not use 'p in annotation.fragment' since if we are
@@ -2093,6 +2095,11 @@ class TimeLine(AdhocView):
         self.loop_toggle_button.connect("toggled", loop_toggle_cb)
         self.controller.gui.tooltips.set_tip(self.loop_toggle_button, _("Automatically activate loop when clicking on an annotation"))
         toolbar.insert(self.loop_toggle_button, -1)
+
+        self.goto_on_click_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_GO_FORWARD)
+        self.goto_on_click_toggle.set_active(True)
+        self.controller.gui.tooltips.set_tip(self.goto_on_click_toggle, _("Goto annotation when clicking"))
+        toolbar.insert(self.goto_on_click_toggle, -1)
 
         ti=gtk.SeparatorToolItem()
         ti.set_expand(True)
