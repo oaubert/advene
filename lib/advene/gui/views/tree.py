@@ -16,6 +16,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 
+from gettext import gettext as _
+import gtk
+import cgi
+
 import advene.core.config as config
 
 from advene.model.package import Package
@@ -27,15 +31,10 @@ from advene.model.query import Query
 from advene.model.view import View
 from advene.gui.views import AdhocView
 
-from gettext import gettext as _
-
 import advene.gui.edit.elements
 import advene.gui.popup
 
 import advene.util.helper as helper
-
-import gtk
-import gobject
 
 name="Tree view plugin"
 
