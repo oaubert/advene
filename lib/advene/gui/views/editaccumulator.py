@@ -78,14 +78,14 @@ class EditAccumulator(AccumulatorPopup):
             t=self.controller.get_title(element)
 
         # Limit label size
-        if len(t) > 30:
-            t=unicode(t[:29])+u'\u2026'
-        l=gtk.Label(t)
-        hbox.pack_start(l, expand=False)
-        
-        # Right align (hackish)
-        b=gtk.HBox()
-        hbox.pack_start(b, expand=True)
+        if len(t) > 80:
+            t=unicode(t[:79])+u'\u2026'
+        # Ellipsize does not work well here, the label is always
+        # allocated too small a space
+        #l.set_ellipsize(pango.ELLIPSIZE_END)
+        l=gtk.Label()
+        l.set_markup('<b>%s</b>' % t)
+        hbox.pack_start(l, expand=True)
 
         self.edited_elements[element]=w
         self.display(w, title=hbox)
