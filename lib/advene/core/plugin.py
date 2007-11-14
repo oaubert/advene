@@ -57,7 +57,7 @@ class PluginCollection(list):
     def standard_plugins(self, d):
         for name in os.listdir(d):
             m, ext = os.path.splitext(name)
-            if ext == '.pyc' and not name.startswith('_'):
+            if ext == '.py' and not name.startswith('_'):
                 yield d, name
 
     def zip_plugins(self, d):
