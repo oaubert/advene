@@ -219,16 +219,17 @@ class Bookmarks(AdhocView):
         hbox=gtk.HBox()
         l = gtk.Label(helper.format_time(t) + " - ")
         hbox.pack_start(l, expand=False)
-        self.mainbox.comment=gtk.Entry()
-        if t in self.comments:
-            self.mainbox.comment.set_text(self.comments[t])
-        else:
-            self.mainbox.comment.set_text(_("No comment"))
-        def update_comment(ent, ti):
-            self.comments[ti]=ent.get_text()
-            return True
-        self.mainbox.comment.connect('changed', update_comment, t)
-        hbox.pack_start(self.mainbox.comment, expand=False)
+        if self.display_comments:
+            comment_entry=gtk.Entry()
+            if t in self.comments:
+                comment_entry.set_text(self.comments[t])
+            else:
+                comment_entry.set_text(_("No comment"))
+            def update_comment(ent, ti):
+                self.comments[ti]=ent.get_text()
+                return True
+            comment_entry.connect('changed', update_comment, t)
+            hbox.pack_start(comment_entry, expand=False)
         vbox.pack_start(hbox, expand=False)
 
         vbox.show_all()
