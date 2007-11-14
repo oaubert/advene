@@ -67,7 +67,7 @@ class AnvilImporter(GenericImporter):
         progress=0.01
         self.progress(progress)
         l=root.findall('.//track')
-        type_incr=1.0/len(l)
+        type_incr=0.98/len(l)
         for track in l:
             at=self.create_annotation_type (schema, track.attrib['name'])
             self.progress(value=progress, label="Converting " + at.id)
@@ -86,11 +86,13 @@ class AnvilImporter(GenericImporter):
                     'begin': long(float(el.attrib['start']) * 1000),
                     'end': long(float(el.attrib['end']) * 1000),
                     }
-                if len(attribnames) == 1:
-                    n=list(attribnames)[0]
-                    # Only 1 attribute name. Define an appropriate
-                    # representation for the type.
-                    at.setMetaData(config.data.namespace, 'representation', 'here/content/parsed/' + n)
+            if len(attribnames) == 1:
+                n=list(attribnames)[0]
+                # Only 1 attribute name. Define an appropriate
+                # representation for the type.
+                at.setMetaData(config.data.namespace, 'representation', 'here/content/parsed/' + n)
+                at.mimetype='application/x-advene-structured'
+                self.controller.notify('AnnotationTypeEditEnd', annotationtype=at)
         self.progress(1.0)
 
 if __name__ == "__main__":
