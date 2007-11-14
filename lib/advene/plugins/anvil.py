@@ -20,8 +20,9 @@
 
 name="Anvil importer"
 
-import re
 import sets
+
+from gettext import gettext as _
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
