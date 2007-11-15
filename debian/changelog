@@ -2,39 +2,12 @@ advene (0.25) unstable; urgency=low
 
   * Interface language can be specified in the Edit/Preferences/GUI window
   
-  * Settings and logs are saved in $HOME/Library/Preferences/Advene on MacOS X
-
-  * The standard adhoc-view, opened at startup, now must be defined
+  * The standard adhoc-views, opened at startup, now must be defined
     through the File/Save worskpace as standard workspace menuitem. The
     previous way (Edit/Preferences/GUI) has been removed.
 
   * New adhoc view: montage, proposing a dynamic montage of a sequence of
     annotations.
-
-  * Dynamic views:
-
-    * The syntax for TALES expression input has changed: input fields are
-      considered as strings by default. The ${expr} syntax must be used to
-      enter TALES paths.
-  
-    * They can now specify subviews (other views that should also be
-      activated upon view activation)
-  
-    * Predefined values are proposed for action parameters
-  
-  * Element edit popups: they now are updated if the edited element is
-    updated by another way (e.g. quick-edit for annotations). For
-    annotations, Previous/Next buttons allow to edit the previous/next
-    annotation of the same type. It also possible to highlight the edited
-    annotation in opened views.
-
-  * Importers: 
-   
-    * MPEG7 importer (handles FreeTextAnnotations only)
-  
-    * Anvil importer
-  
-    * AnnotationGraph importer
 
   * Timeline:
 
@@ -83,6 +56,23 @@ advene (0.25) unstable; urgency=low
   * Transcription view: new "quick switch" button to switch between
     different representations.
 
+  * Element edit popups: they now are updated if the edited element is
+    updated by another way (e.g. quick-edit for annotations). For
+    annotations, Previous/Next buttons allow to edit the previous/next
+    annotation of the same type. It also possible to highlight the edited
+    annotation in opened views.
+
+  * Dynamic views:
+
+    * The syntax for TALES expression input has changed: input fields are
+      considered as strings by default. The ${expr} syntax must be used to
+      enter TALES paths.
+  
+    * They can now specify subviews (other views that should also be
+      activated upon view activation)
+  
+    * Predefined values are proposed for action parameters
+  
   * To rename a view, double-click on its tab.
 
   * Error messages are now saved to ~/.advene/advene.log (for win32 users,
@@ -104,6 +94,16 @@ advene (0.25) unstable; urgency=low
     * New actions for annotation types (display in table, use as
       a montage...). Note that most actions are more readily accessible by
       drag-and-drop of the annotation-type into an view zone.
+  
+  * Settings and logs are saved in $HOME/Library/Preferences/Advene on MacOS X
+
+  * Importers: 
+   
+    * MPEG7 importer (handles FreeTextAnnotations only)
+  
+    * Anvil importer
+  
+    * AnnotationGraph importer
   
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 14 Nov 2007 15:44:28 +0100
 
