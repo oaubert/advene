@@ -10,6 +10,9 @@ sudo chmod 755 /opt
 # when importing
 cp bin/advene bin/advene_gui.py
 
+# Update the version date
+./scripts/update_version
+
 Basedir=./dist/Advene.app
 Frameworks=${Basedir}/Contents/Frameworks
 Resources=${Basedir}/Contents/Resources
@@ -17,6 +20,9 @@ MacOS=${Basedir}/Contents/MacOS
 
 rm -rf build dist
 /opt/local/bin/python setup.py py2app
+
+# Make sure that all .py files are compiled (esp. advene/plugins/__init__.py)
+/opt/local/bin/python -m compileall lib/advene
 
 # Add advene, simpletal and cherrypy, which do not seem to be taken into account automatically. Should investigate this...
 (cd lib ; zip -r ../dist/Advene.app/Contents/Resources/lib/python2.4/site-packages.zip  advene  simpletal cherrypy -i \*.pyc )
@@ -96,6 +102,9 @@ done
 
 # Copy french gtk2.0 locale
 cp -r /opt/local/share/locale/fr/LC_MESSAGES/*.mo ${Resources}/locale/fr/LC_MESSAGES
+
+# Copy the x11 vlc output module
+cp mac/libx11_plugin.dylib ${Resources}
 
 # Use the shell wrapper (for the pangohack)
 mv ${MacOS}/Advene ${MacOS}/Advene.bin
