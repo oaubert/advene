@@ -404,7 +404,8 @@ class EditAnnotationPopup (EditElementPopup):
             if hasattr(new, 'window') and hasattr(self, 'window'):
                 x, y=self.window.get_position()
                 new.window.move(x, y)
-            self.close_cb()
+            # Validate the current one
+            self.validate_cb()
         return True
             
     def make_widget (self, editable=True, compact=False):
