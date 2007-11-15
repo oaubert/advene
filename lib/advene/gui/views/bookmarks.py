@@ -22,7 +22,7 @@ import advene.core.config as config
 import advene.util.helper as helper
 from advene.gui.util import image_from_position, get_small_stock_button
 from advene.gui.views import AdhocView
-from advene.gui.util import dialog
+from advene.gui.util import dialog, get_pixmap_button, get_small_stock_button
 import advene.util.importer
 from gettext import gettext as _
 
@@ -45,7 +45,7 @@ class HistoryImporter(advene.util.importer.GenericImporter):
 
     def iterator(self):
         for b in self.elements:
-            if b in self.comments:
+            if self.comments is not None and b in self.comments:
                 content=self.comments[b]
             else:
                 content="Bookmark %s" % helper.format_time(b)
@@ -73,9 +73,9 @@ class Bookmarks(AdhocView):
         super(Bookmarks, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
-            (_("Save view"), self.save_view),
+            #(_("Save view"), self.save_view),
             (_("Clear"), self.clear),
-            (_("Convert to annotations"), self.convert_to_annotations),
+            #(_("Convert to annotations"), self.convert_to_annotations),
             )
         self.options={
             'ordered': ordered,
@@ -148,6 +148,7 @@ class Bookmarks(AdhocView):
                            controller=self.controller,
                            defaulttype=at,
                            elements=self.history,
+                           comments=self.comments,
                            duration=d)
         ti.process_file('history')
         self.controller.package._modified=True
@@ -312,12 +313,16 @@ class Bookmarks(AdhocView):
                 self.append(v)
             return True
 
-        b=gtk.Button()
-        i=gtk.Image()
-        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
-        b.add(i)
+        b=get_pixmap_button('set-to-now.png', bookmark_current_time)
         self.controller.gui.tooltips.set_tip(b, _("Insert a bookmark for the current video time"))
-        b.connect('clicked', bookmark_current_time)
+        hb.pack_start(b, expand=False)
+
+        b=get_small_stock_button(gtk.STOCK_CONVERT, self.convert_to_annotations)
+        self.controller.gui.tooltips.set_tip(b, _("Convert bookmarks to annotations"))
+        hb.pack_start(b, expand=False)
+
+        b=get_small_stock_button(gtk.STOCK_SAVE, self.save_view)
+        self.controller.gui.tooltips.set_tip(b, _("Save view"))
         hb.pack_start(b, expand=False)
 
         v.pack_start(hb, expand=False)
