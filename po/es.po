@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-11-14 11:17+0100\n"
+"POT-Creation-Date: 2007-11-15 10:36+0100\n"
 "PO-Revision-Date: 2005-05-24 14:22-0600\n"
 "Last-Translator: Emmanuel Ayala Mexicano <amarrextro@yahoo.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -104,255 +104,265 @@ msgstr "Importar capitulos del DVD"
 msgid "_Edit"
 msgstr "_Editar"
 
-#: ../share/advene.glade:325
-msgid "Edit imported element from other packages"
-msgstr "Editar elementos importados de otros paquetes"
-
-#: ../share/advene.glade:326
-msgid "Package _Imports"
-msgstr "Importar_Paquetes"
-
-#: ../share/advene.glade:335
-#, fuzzy
-msgid "Edit the standard rules"
-msgstr "Editar el set de reglas predefinido"
-
-#: ../share/advene.glade:336
-#, fuzzy
-msgid "_Standard Ruleset"
-msgstr "_Set de reglas predefinido"
-
-#: ../share/advene.glade:345
-msgid "Edit package properties"
-msgstr "Editar las propiedades del paquete"
-
-#: ../share/advene.glade:346
-msgid "P_ackage properties"
-msgstr "P_ropiedades del paquete"
-
-#: ../share/advene.glade:355
-msgid "Interface preferences"
-msgstr "Preferencias de interfaz"
-
-#: ../share/advene.glade:356
-msgid "P_references"
-msgstr "P_referencias"
-
-#: ../share/advene.glade:369
+#: ../share/advene.glade:319
 #, fuzzy
 msgid "Create"
 msgstr "Vista de arbol"
 
-#: ../share/advene.glade:379 ../lib/advene/util/helper.py:349
+#: ../share/advene.glade:329 ../lib/advene/util/helper.py:349
 msgid "Schema"
 msgstr "Esquema"
 
-#: ../share/advene.glade:388 ../lib/advene/gui/edit/rules.py:993
+#: ../share/advene.glade:338 ../lib/advene/gui/edit/rules.py:993
 #: ../lib/advene/util/helper.py:352
 msgid "View"
 msgstr "Vista"
 
-#: ../share/advene.glade:397 ../lib/advene/gui/popup.py:355
+#: ../share/advene.glade:347 ../lib/advene/gui/popup.py:355
 #: ../lib/advene/util/helper.py:353
 msgid "Query"
 msgstr "Busqueda"
 
-#: ../share/advene.glade:406 ../lib/advene/util/helper.py:350
+#: ../share/advene.glade:356 ../lib/advene/util/helper.py:350
 msgid "Annotation Type"
 msgstr "Tipo de anotacion"
 
-#: ../share/advene.glade:415 ../lib/advene/util/helper.py:351
+#: ../share/advene.glade:365 ../lib/advene/util/helper.py:351
 msgid "Relation Type"
 msgstr "Tipo de relacion"
 
-#: ../share/advene.glade:429
+#: ../share/advene.glade:384
+msgid "Edit imported element from other packages"
+msgstr "Editar elementos importados de otros paquetes"
+
+#: ../share/advene.glade:385
+msgid "Package _Imports"
+msgstr "Importar_Paquetes"
+
+#: ../share/advene.glade:394
+#, fuzzy
+msgid "Edit the standard rules"
+msgstr "Editar el set de reglas predefinido"
+
+#: ../share/advene.glade:395
+#, fuzzy
+msgid "_Standard Ruleset"
+msgstr "_Set de reglas predefinido"
+
+#: ../share/advene.glade:404
+msgid "Edit package properties"
+msgstr "Editar las propiedades del paquete"
+
+#: ../share/advene.glade:405
+msgid "P_ackage properties"
+msgstr "P_ropiedades del paquete"
+
+#: ../share/advene.glade:414
+msgid "Interface preferences"
+msgstr "Preferencias de interfaz"
+
+#: ../share/advene.glade:415
+msgid "P_references"
+msgstr "P_referencias"
+
+#: ../share/advene.glade:428
 msgid "_View"
 msgstr "_Vista"
 
-#: ../share/advene.glade:438
+#: ../share/advene.glade:437
 #, fuzzy
 msgid "Take notes on the fly as a timestamped transcription"
 msgstr "Importar anotaciones de una transcripcion timestamped"
 
-#: ../share/advene.glade:439
+#: ../share/advene.glade:438
 #, fuzzy
 msgid "Take notes on the fly"
 msgstr "Toma fotografias mientras reproduce"
 
-#: ../share/advene.glade:448
+#: ../share/advene.glade:447
 msgid "Display the package's content as a tree"
 msgstr "Muestra el contenido del paquete como un arbol"
 
-#: ../share/advene.glade:449
+#: ../share/advene.glade:448
 msgid "_TreeView"
 msgstr "_Vista de Arbol"
 
-#: ../share/advene.glade:458
+#: ../share/advene.glade:457
 msgid "Display annotations on a timeline"
 msgstr "Muestra las anotaciones en una linea de tiempo"
 
-#: ../share/advene.glade:459
+#: ../share/advene.glade:458
 msgid "T_imeline"
 msgstr "L_inea de tiempo"
 
-#: ../share/advene.glade:468
+#: ../share/advene.glade:467
 #, fuzzy
 msgid "_URL stack"
 msgstr "Apilado URL"
 
-#: ../share/advene.glade:477
+#: ../share/advene.glade:476
 msgid "Display the annotations as a transcription"
 msgstr "Muestra las anotaciones como transcripcion"
 
-#: ../share/advene.glade:478
+#: ../share/advene.glade:477
 msgid "T_ranscription"
 msgstr "T_ranscripcion"
 
-#: ../share/advene.glade:487
+#: ../share/advene.glade:486
 #, fuzzy
 msgid "Display the transcription for an annotation type"
 msgstr "Supresión de un tipo de anotacion"
 
-#: ../share/advene.glade:488
+#: ../share/advene.glade:487
 #, fuzzy
 msgid "of an annotation type"
 msgstr "Elige un tipo de anotacion"
 
-#: ../share/advene.glade:497
+#: ../share/advene.glade:496
 #, fuzzy
 msgid "Transcription of the whole package"
 msgstr "Transcripcion para %s"
 
-#: ../share/advene.glade:498
+#: ../share/advene.glade:497
 #, fuzzy
 msgid "of the whole package"
 msgstr "Guarda el paquete actual"
 
-#: ../share/advene.glade:511
+#: ../share/advene.glade:510
 msgid "Browse the package's data"
 msgstr "Explora la informacion del paquete"
 
-#: ../share/advene.glade:512
+#: ../share/advene.glade:511
 msgid "_Package Browser"
 msgstr "_Explorador de Paquetes"
 
-#: ../share/advene.glade:521
+#: ../share/advene.glade:520
 #, fuzzy
 msgid "Start the web browser"
 msgstr "_Inicia el explorador Web"
 
-#: ../share/advene.glade:522
+#: ../share/advene.glade:521
 msgid "_Start Web Browser"
 msgstr "_Inicia el explorador Web"
 
-#: ../share/advene.glade:537
+#: ../share/advene.glade:536
 msgid "Open python evaluator window"
 msgstr "Abre la ventana del evaluador de Python"
 
-#: ../share/advene.glade:538
+#: ../share/advene.glade:537
 msgid "Evaluator"
 msgstr "Evaluador"
 
-#: ../share/advene.glade:547
+#: ../share/advene.glade:546
 msgid "Webserver log"
 msgstr ""
 
-#: ../share/advene.glade:556
+#: ../share/advene.glade:555
 msgid "Display navigation history"
 msgstr "Muestra el historial de navegacion"
 
-#: ../share/advene.glade:557
+#: ../share/advene.glade:556
 msgid "Navigation _History"
 msgstr "Historial_de_navegacion"
 
-#: ../share/advene.glade:566
+#: ../share/advene.glade:565
 msgid "Display information about the media"
 msgstr "Muestra información acerca de la media"
 
-#: ../share/advene.glade:567
+#: ../share/advene.glade:566
 msgid "_MediaInformation"
 msgstr "_InformacionMedia"
 
-#: ../share/advene.glade:580
+#: ../share/advene.glade:579
 msgid "_Player"
 msgstr "_Reproductor"
 
-#: ../share/advene.glade:589
+#: ../share/advene.glade:588
 msgid "Save the contents of the ImageCache to disk"
 msgstr "Guarda los contenidos de la ImagenCache a disco"
 
-#: ../share/advene.glade:590
+#: ../share/advene.glade:589
 msgid "Save _ImageCache"
 msgstr "Guarda _ImagenCache"
 
-#: ../share/advene.glade:599
+#: ../share/advene.glade:598
 msgid "_Restart player"
 msgstr "_Reinicia reproductor"
 
-#: ../share/advene.glade:608
+#: ../share/advene.glade:607
 msgid "_Configure player"
 msgstr "_Configura reproductor"
 
-#: ../share/advene.glade:621
+#: ../share/advene.glade:620
 #, fuzzy
 msgid "Loaded packages"
 msgstr "Paquete(s) cargados"
 
-#: ../share/advene.glade:622
+#: ../share/advene.glade:621
 #, fuzzy
 msgid "Packages"
 msgstr "Paquete"
 
-#: ../share/advene.glade:632
+#: ../share/advene.glade:631
 #, fuzzy
 msgid "No package"
 msgstr "paquete"
 
-#: ../share/advene.glade:644
+#: ../share/advene.glade:643
 msgid "_Help"
 msgstr "_Ayuda"
 
-#: ../share/advene.glade:662
+#: ../share/advene.glade:661
 #, fuzzy
 msgid "Display shortcuts"
 msgstr "Muestra %s"
 
-#: ../share/advene.glade:671
+#: ../share/advene.glade:670
 msgid "_About"
 msgstr "_Acerca"
 
-#: ../share/advene.glade:712
+#: ../share/advene.glade:711
 msgid "Create a new package"
 msgstr "Crea un nuevo paquete"
 
-#: ../share/advene.glade:728
+#: ../share/advene.glade:727
 msgid "Open a package file"
 msgstr "Abre un archivo de paquete"
 
-#: ../share/advene.glade:744
+#: ../share/advene.glade:743
 msgid "Save the current package"
 msgstr "Guarda el paquete actual"
 
-#: ../share/advene.glade:760
+#: ../share/advene.glade:759
 msgid "Save the package with a new name"
 msgstr "Guarda el paquete actual con un nuevo nombre"
 
-#: ../share/advene.glade:776
+#: ../share/advene.glade:775
 msgid "Select movie file..."
 msgstr "Seleccionar archivo de pelicula"
 
-#: ../share/advene.glade:777
+#: ../share/advene.glade:776
 msgid "Add file..."
 msgstr "Anadir archivo"
 
-#: ../share/advene.glade:794
+#: ../share/advene.glade:793
 msgid "Select DVD"
 msgstr "Selecciona DVD"
 
-#: ../lib/advene/plugins/mpeg7.py:52
+#: ../lib/advene/plugins/anvil.py:37
+#, fuzzy
+msgid "Anvil importer"
+msgstr "Importador Xi"
+
+#: ../lib/advene/plugins/mpeg7.py:54
 #, fuzzy
 msgid "MPEG7 importer"
 msgstr "Importador ELAN"
+
+#: ../lib/advene/plugins/annotationgraph.py:41
+#, fuzzy
+msgid "AnnotationGraph importer"
+msgstr "Anotacion"
 
 #: ../lib/advene/core/webcherry.py:50
 msgid "The webserver requires version 3.0 of CherryPy at least."
@@ -1436,7 +1446,7 @@ msgstr "Valor"
 msgid "Close"
 msgstr "Cerrar"
 
-#: ../lib/advene/gui/views/sequence.py:120 ../lib/advene/gui/views/tree.py:235
+#: ../lib/advene/gui/views/sequence.py:120 ../lib/advene/gui/views/tree.py:234
 msgid "No children in on_iter_children()!"
 msgstr "No hay hijos en on_iter_children()!"
 
@@ -1483,21 +1493,21 @@ msgstr ""
 msgid "Error: unable to find an edit popup for %s"
 msgstr "Error: incapaz de encontrar un edit popup para %s"
 
-#: ../lib/advene/gui/views/bookmarks.py:43
+#: ../lib/advene/gui/views/bookmarks.py:44
 #, fuzzy
 msgid "History importer"
 msgstr "Importador generico"
 
-#: ../lib/advene/gui/views/bookmarks.py:63
+#: ../lib/advene/gui/views/bookmarks.py:68
 #: ../lib/advene/gui/plugins/actions.py:142 ../lib/advene/gui/main.py:260
 msgid "Bookmarks"
 msgstr ""
 
-#: ../lib/advene/gui/views/bookmarks.py:65
+#: ../lib/advene/gui/views/bookmarks.py:70
 msgid "Bookmark timecodes with their corresponding screenshots"
 msgstr ""
 
-#: ../lib/advene/gui/views/bookmarks.py:71
+#: ../lib/advene/gui/views/bookmarks.py:76
 #: ../lib/advene/gui/views/canvas.py:114
 #: ../lib/advene/gui/views/interactivequery.py:58
 #: ../lib/advene/gui/views/tagbag.py:55
@@ -1508,39 +1518,39 @@ msgstr ""
 msgid "Save view"
 msgstr "Vista de arbol"
 
-#: ../lib/advene/gui/views/bookmarks.py:72
+#: ../lib/advene/gui/views/bookmarks.py:77
 #: ../lib/advene/gui/views/logwindow.py:43
 #: ../lib/advene/gui/views/tagbag.py:53 ../lib/advene/gui/edit/montage.py:53
 #, fuzzy
 msgid "Clear"
 msgstr "Cerrar"
 
-#: ../lib/advene/gui/views/bookmarks.py:73
+#: ../lib/advene/gui/views/bookmarks.py:78
 #: ../lib/advene/gui/edit/transcribe.py:770
 #, fuzzy
 msgid "Convert to annotations"
 msgstr "Borrar todas las anotaciones..."
 
-#: ../lib/advene/gui/views/bookmarks.py:117
+#: ../lib/advene/gui/views/bookmarks.py:131
 #: ../lib/advene/gui/edit/transcribe.py:730
 msgid "Select the annotation type to generate"
 msgstr "Selecciona el tipo de anotacion para generar"
 
-#: ../lib/advene/gui/views/bookmarks.py:122
+#: ../lib/advene/gui/views/bookmarks.py:136
 #, fuzzy
 msgid "Choose a duration"
 msgstr "Crear relaciones"
 
-#: ../lib/advene/gui/views/bookmarks.py:123
+#: ../lib/advene/gui/views/bookmarks.py:137
 msgid "Enter the standard duration (in ms) of created annotations."
 msgstr ""
 
-#: ../lib/advene/gui/views/bookmarks.py:140
+#: ../lib/advene/gui/views/bookmarks.py:154
 #, fuzzy
 msgid "Converted from bookmarks"
 msgstr "Convertido de %s"
 
-#: ../lib/advene/gui/views/bookmarks.py:144
+#: ../lib/advene/gui/views/bookmarks.py:158
 #: ../lib/advene/gui/edit/transcribe.py:758
 #, python-format
 msgid ""
@@ -1550,11 +1560,16 @@ msgstr ""
 "Conversion completa.\n"
 "%s anotaciones generadas."
 
-#: ../lib/advene/gui/views/bookmarks.py:264
+#: ../lib/advene/gui/views/bookmarks.py:227
+#, fuzzy
+msgid "No comment"
+msgstr "Sin favicon"
+
+#: ../lib/advene/gui/views/bookmarks.py:292
 msgid "Drop a position here to remove it from the list"
 msgstr ""
 
-#: ../lib/advene/gui/views/bookmarks.py:285
+#: ../lib/advene/gui/views/bookmarks.py:313
 msgid "Insert a bookmark for the current video time"
 msgstr ""
 
@@ -1572,7 +1587,7 @@ msgstr ""
 msgid "Representation of a set of annotations placed on a timeline."
 msgstr "Muestra las anotaciones en una linea de tiempo"
 
-#: ../lib/advene/gui/views/canvas.py:113 ../lib/advene/gui/views/tree.py:404
+#: ../lib/advene/gui/views/canvas.py:113 ../lib/advene/gui/views/tree.py:403
 #: ../lib/advene/gui/views/timeline.py:114
 #: ../lib/advene/gui/views/transcription.py:53
 msgid "Refresh"
@@ -1587,28 +1602,28 @@ msgid "Save default options"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:145
-#: ../lib/advene/gui/views/timeline.py:146
+#: ../lib/advene/gui/views/timeline.py:147
 #, fuzzy, python-format
 msgid "Cannot find annotation type %s"
 msgstr "Elige un tipo de anotacion"
 
 #: ../lib/advene/gui/views/canvas.py:228
-#: ../lib/advene/gui/views/timeline.py:229
+#: ../lib/advene/gui/views/timeline.py:230
 msgid "No scrolling"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:229
-#: ../lib/advene/gui/views/timeline.py:230
+#: ../lib/advene/gui/views/timeline.py:231
 msgid "Continuous scrolling"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:230
-#: ../lib/advene/gui/views/timeline.py:231
+#: ../lib/advene/gui/views/timeline.py:232
 msgid "Discrete scrolling"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:739
-#: ../lib/advene/gui/views/timeline.py:706
+#: ../lib/advene/gui/views/timeline.py:707
 #, fuzzy, python-format
 msgid ""
 "%(id)s: %(begin)s - %(end)s\n"
@@ -1618,53 +1633,53 @@ msgstr ""
 "Inicio: %s\tFinal: %s"
 
 #: ../lib/advene/gui/views/canvas.py:831
-#: ../lib/advene/gui/views/timeline.py:800
+#: ../lib/advene/gui/views/timeline.py:801
 #, python-format
 msgid "Split at %s"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:835
-#: ../lib/advene/gui/views/timeline.py:804
+#: ../lib/advene/gui/views/timeline.py:805
 msgid "Center and zoom"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:932
-#: ../lib/advene/gui/views/timeline.py:902
+#: ../lib/advene/gui/views/timeline.py:903
 msgid "Create a relation"
 msgstr "Crear una relacion"
 
 #: ../lib/advene/gui/views/canvas.py:947
-#: ../lib/advene/gui/views/timeline.py:922
+#: ../lib/advene/gui/views/timeline.py:923
 #, fuzzy
 msgid "Align both begin times"
 msgstr "Alinea los limites"
 
 #: ../lib/advene/gui/views/canvas.py:948
-#: ../lib/advene/gui/views/timeline.py:923
+#: ../lib/advene/gui/views/timeline.py:924
 #, fuzzy
 msgid "Align both end times"
 msgstr "Alinea los limites"
 
 #: ../lib/advene/gui/views/canvas.py:949
-#: ../lib/advene/gui/views/timeline.py:924
+#: ../lib/advene/gui/views/timeline.py:925
 #, fuzzy
 msgid "Align end time to selected begin time"
 msgstr "Alinea el tiempo final al tiempo de inicio seleccionado"
 
 #: ../lib/advene/gui/views/canvas.py:950
-#: ../lib/advene/gui/views/timeline.py:925
+#: ../lib/advene/gui/views/timeline.py:926
 #, fuzzy
 msgid "Align begin time to selected end time"
 msgstr "Alinea el tiempo de inicio al tiempo final seleccionado"
 
 #: ../lib/advene/gui/views/canvas.py:951
-#: ../lib/advene/gui/views/timeline.py:926
+#: ../lib/advene/gui/views/timeline.py:927
 msgid "Align all times"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:987
 #: ../lib/advene/gui/views/canvas.py:1062
-#: ../lib/advene/gui/views/timeline.py:962
+#: ../lib/advene/gui/views/timeline.py:963
 msgid "Cannot delete the annotation : it has relations."
 msgstr "No puedo borrar la anotación: tiene relaciones."
 
@@ -1700,78 +1715,78 @@ msgid "Cancel"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:1640
-#: ../lib/advene/gui/views/timeline.py:1725
+#: ../lib/advene/gui/views/timeline.py:1728
 #: ../lib/advene/gui/edit/transcribe.py:302
 #, python-format
 msgid "Position %s"
 msgstr "Posicion %s"
 
 #: ../lib/advene/gui/views/canvas.py:1646
-#: ../lib/advene/gui/views/timeline.py:1731
+#: ../lib/advene/gui/views/timeline.py:1734
 #: ../lib/advene/gui/edit/transcribe.py:308 ../lib/advene/gui/popup.py:395
 msgid "Go to..."
 msgstr "Ir a..."
 
 #: ../lib/advene/gui/views/canvas.py:1650
-#: ../lib/advene/gui/views/timeline.py:1735
+#: ../lib/advene/gui/views/timeline.py:1738
 msgid "Copy value into clipboard"
 msgstr "Copia el valor en el portapapeles"
 
 #: ../lib/advene/gui/views/canvas.py:1654
-#: ../lib/advene/gui/views/timeline.py:1739
+#: ../lib/advene/gui/views/timeline.py:1742
 #, fuzzy
 msgid "Create a new annotation"
 msgstr "Crear una nueva anotacion"
 
 #: ../lib/advene/gui/views/canvas.py:1881
-#: ../lib/advene/gui/views/timeline.py:2003
+#: ../lib/advene/gui/views/timeline.py:2006
 #, fuzzy, python-format
 msgid "From schema %s"
 msgstr "esquemas"
 
 #: ../lib/advene/gui/views/canvas.py:1906
-#: ../lib/advene/gui/views/timeline.py:2052
+#: ../lib/advene/gui/views/timeline.py:2055
 msgid "+"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:1909
-#: ../lib/advene/gui/views/timeline.py:2055 ../lib/advene/gui/main.py:1901
+#: ../lib/advene/gui/views/timeline.py:2058 ../lib/advene/gui/main.py:1901
 msgid "Create a new annotation type"
 msgstr "Crea un nuevo tipo de anotacion"
 
 #: ../lib/advene/gui/views/canvas.py:1968
-#: ../lib/advene/gui/views/timeline.py:2127
+#: ../lib/advene/gui/views/timeline.py:2139
 #, fuzzy
 msgid "Open an annotation display view"
 msgstr "Elige un tipo de anotacion"
 
 #: ../lib/advene/gui/views/canvas.py:1975
-#: ../lib/advene/gui/views/timeline.py:2134
+#: ../lib/advene/gui/views/timeline.py:2146
 msgid "Open a slave montage view (coordinated zoom level)"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:2042
-#: ../lib/advene/gui/views/timeline.py:2219
+#: ../lib/advene/gui/views/timeline.py:2231
 msgid ""
 "Drag an annotation type here to remove it from display.\n"
 "Click to edit all displayed types"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:2058
-#: ../lib/advene/gui/views/timeline.py:2235
+#: ../lib/advene/gui/views/timeline.py:2247
 msgid "Display relations"
 msgstr "Muestra las relaciones"
 
 #: ../lib/advene/gui/views/canvas.py:2078
-#: ../lib/advene/gui/views/timeline.py:2255
+#: ../lib/advene/gui/views/timeline.py:2267
 #, fuzzy
 msgid "Display tooltips for annotations (shortcut: t)"
 msgstr "Supresión de un tipo de anotacion"
 
 #: ../lib/advene/gui/views/canvas.py:2161
 #: ../lib/advene/gui/views/canvas.py:2296 ../lib/advene/gui/views/tagbag.py:54
-#: ../lib/advene/gui/views/timeline.py:2338
-#: ../lib/advene/gui/views/timeline.py:2473
+#: ../lib/advene/gui/views/timeline.py:2350
+#: ../lib/advene/gui/views/timeline.py:2485
 #: ../lib/advene/gui/edit/transcribe.py:108
 #: ../lib/advene/gui/edit/transcribe.py:771
 #: ../lib/advene/gui/edit/properties.py:44 ../lib/advene/gui/main.py:2608
@@ -1779,41 +1794,41 @@ msgid "Preferences"
 msgstr "Preferencias"
 
 #: ../lib/advene/gui/views/canvas.py:2162
-#: ../lib/advene/gui/views/timeline.py:2339
+#: ../lib/advene/gui/views/timeline.py:2351
 #, fuzzy
 msgid "Center on current player position."
 msgstr "Utiliza el valor de la posicion actual"
 
 #: ../lib/advene/gui/views/canvas.py:2185
-#: ../lib/advene/gui/views/timeline.py:2362
+#: ../lib/advene/gui/views/timeline.py:2374
 #, fuzzy
 msgid "Displayed"
 msgstr "Muestra %s"
 
 #: ../lib/advene/gui/views/canvas.py:2193
-#: ../lib/advene/gui/views/timeline.py:2370
+#: ../lib/advene/gui/views/timeline.py:2382
 #, fuzzy
 msgid "Not displayed"
 msgstr "Sin mostrar"
 
 #: ../lib/advene/gui/views/canvas.py:2241
-#: ../lib/advene/gui/views/timeline.py:2418
+#: ../lib/advene/gui/views/timeline.py:2430
 msgid "< All <"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:2245
-#: ../lib/advene/gui/views/timeline.py:2422
+#: ../lib/advene/gui/views/timeline.py:2434
 msgid "> All >"
 msgstr ""
 
 #: ../lib/advene/gui/views/canvas.py:2261
-#: ../lib/advene/gui/views/timeline.py:2438
+#: ../lib/advene/gui/views/timeline.py:2450
 #, fuzzy
 msgid "Displayed annotation types"
 msgstr "Muestra los limites de la anotacion"
 
 #: ../lib/advene/gui/views/canvas.py:2283
-#: ../lib/advene/gui/views/timeline.py:2460 ../lib/advene/gui/main.py:1918
+#: ../lib/advene/gui/views/timeline.py:2472 ../lib/advene/gui/main.py:1918
 #: ../lib/advene/gui/main.py:2803
 msgid ""
 "Select the schema where you want to\n"
@@ -1823,36 +1838,36 @@ msgstr ""
 "el nuevo tipo de anotacion."
 
 #: ../lib/advene/gui/views/canvas.py:2297
-#: ../lib/advene/gui/views/timeline.py:2474
+#: ../lib/advene/gui/views/timeline.py:2486
 #, fuzzy
 msgid "Relation type"
 msgstr "Tipo de relacion"
 
 #: ../lib/advene/gui/views/canvas.py:2297
-#: ../lib/advene/gui/views/timeline.py:2474
+#: ../lib/advene/gui/views/timeline.py:2486
 #, fuzzy
 msgid "Display relation types"
 msgstr "Muestra las relaciones"
 
 #: ../lib/advene/gui/views/canvas.py:2298
-#: ../lib/advene/gui/views/timeline.py:2475
+#: ../lib/advene/gui/views/timeline.py:2487
 #, fuzzy
 msgid "Relation content"
 msgstr "Tiempo de reaccion"
 
 #: ../lib/advene/gui/views/canvas.py:2298
-#: ../lib/advene/gui/views/timeline.py:2475
+#: ../lib/advene/gui/views/timeline.py:2487
 #, fuzzy
 msgid "Display relation content"
 msgstr "Muestra las relaciones"
 
 #: ../lib/advene/gui/views/canvas.py:2299
-#: ../lib/advene/gui/views/timeline.py:2476 ../lib/advene/gui/popup.py:427
+#: ../lib/advene/gui/views/timeline.py:2488 ../lib/advene/gui/popup.py:398
 msgid "Highlight"
 msgstr "Marcar"
 
 #: ../lib/advene/gui/views/canvas.py:2299
-#: ../lib/advene/gui/views/timeline.py:2476
+#: ../lib/advene/gui/views/timeline.py:2488
 msgid "Highlight active annotations"
 msgstr "Realzar las anotaciones activas"
 
@@ -1876,31 +1891,31 @@ msgid "move the player to the annotation"
 msgstr "Volumen cero durante la anotacion"
 
 #: ../lib/advene/gui/views/canvas.py:2308
-#: ../lib/advene/gui/views/timeline.py:2478
+#: ../lib/advene/gui/views/timeline.py:2490
 #, fuzzy
 msgid "Annotation tooltips"
 msgstr "Anotación %s"
 
 #: ../lib/advene/gui/views/canvas.py:2309
-#: ../lib/advene/gui/views/timeline.py:2479
+#: ../lib/advene/gui/views/timeline.py:2491
 #, fuzzy
 msgid "Display annotation tooltips"
 msgstr "Muestra los limites de la anotacion"
 
 #: ../lib/advene/gui/views/canvas.py:2309
-#: ../lib/advene/gui/views/timeline.py:2479
+#: ../lib/advene/gui/views/timeline.py:2491
 #, fuzzy
 msgid "Display tooltips when the mouse gets over an annotation."
 msgstr "Supresión de un tipo de anotacion"
 
 #: ../lib/advene/gui/views/canvas.py:2310
-#: ../lib/advene/gui/views/timeline.py:2480
+#: ../lib/advene/gui/views/timeline.py:2492
 #, fuzzy
 msgid "Annotation tooltip delay"
 msgstr "Tipo de anotacion"
 
 #: ../lib/advene/gui/views/canvas.py:2310
-#: ../lib/advene/gui/views/timeline.py:2480
+#: ../lib/advene/gui/views/timeline.py:2492
 #, fuzzy
 msgid "Delay before displaying the tooltip"
 msgstr "Retraso en ms antes de enviar un evento."
@@ -2507,35 +2522,35 @@ msgstr "Fotografias actualizadas"
 msgid "Contents"
 msgstr "Contenido"
 
-#: ../lib/advene/gui/views/tree.py:250
+#: ../lib/advene/gui/views/tree.py:249
 msgid "No children in on_iter_nth_child()"
 msgstr "No hay hijos en on_iter_nth_child()"
 
-#: ../lib/advene/gui/views/tree.py:304
+#: ../lib/advene/gui/views/tree.py:303
 msgid "List of views"
 msgstr ""
 
-#: ../lib/advene/gui/views/tree.py:305
+#: ../lib/advene/gui/views/tree.py:304
 #, fuzzy
 msgid "Static views"
 msgstr "Vista de arbol"
 
-#: ../lib/advene/gui/views/tree.py:306
+#: ../lib/advene/gui/views/tree.py:305
 #, fuzzy
 msgid "Dynamic views"
 msgstr "Vista dinamica"
 
-#: ../lib/advene/gui/views/tree.py:307
+#: ../lib/advene/gui/views/tree.py:306
 #, fuzzy
 msgid "Adhoc views"
 msgstr "Abre una vista GUI"
 
-#: ../lib/advene/gui/views/tree.py:397
+#: ../lib/advene/gui/views/tree.py:396
 #: ../lib/advene/gui/plugins/actions.py:137 ../lib/advene/gui/main.py:253
 msgid "Tree view"
 msgstr "Vista de arbol"
 
-#: ../lib/advene/gui/views/tree.py:432
+#: ../lib/advene/gui/views/tree.py:431
 msgid "Package View"
 msgstr "VIsta de paquete"
 
@@ -2544,7 +2559,7 @@ msgstr "VIsta de paquete"
 msgid "Timeline"
 msgstr "Linea de tiempo"
 
-#: ../lib/advene/gui/views/timeline.py:885 ../lib/advene/gui/main.py:2813
+#: ../lib/advene/gui/views/timeline.py:886 ../lib/advene/gui/main.py:2813
 #, fuzzy
 msgid ""
 "Select the schema where you want to\n"
@@ -2553,70 +2568,75 @@ msgstr ""
 "Selecciona el esquema donde quieres crear\n"
 "el nuevo tipo de anotacion."
 
-#: ../lib/advene/gui/views/timeline.py:912
+#: ../lib/advene/gui/views/timeline.py:913
 #, fuzzy
 msgid "Create a new relation-type."
 msgstr "Crear un nuevo tipo de relacion..."
 
-#: ../lib/advene/gui/views/timeline.py:992
+#: ../lib/advene/gui/views/timeline.py:993
 #, fuzzy, python-format
 msgid "Copy annotation to type %s"
 msgstr "tipos de anotaciones"
 
-#: ../lib/advene/gui/views/timeline.py:996
+#: ../lib/advene/gui/views/timeline.py:997
 #, fuzzy, python-format
 msgid "Move annotation to type %s"
 msgstr "Nueva anotacion: %s"
 
-#: ../lib/advene/gui/views/timeline.py:1003
+#: ../lib/advene/gui/views/timeline.py:1004
 #, fuzzy, python-format
 msgid "Copy annotation at %s"
 msgstr "anotacion"
 
-#: ../lib/advene/gui/views/timeline.py:1007
+#: ../lib/advene/gui/views/timeline.py:1008
 #, fuzzy, python-format
 msgid "Move annotation at %s"
 msgstr "Nueva anotacion: %s"
 
-#: ../lib/advene/gui/views/timeline.py:1018
+#: ../lib/advene/gui/views/timeline.py:1019
 #, fuzzy
 msgid "Copy and create a relation"
 msgstr "Crear una relacion"
 
-#: ../lib/advene/gui/views/timeline.py:1028
+#: ../lib/advene/gui/views/timeline.py:1029
 #, fuzzy, python-format
 msgid "Copy at %s and create a relation"
 msgstr "Crear una relacion"
 
-#: ../lib/advene/gui/views/timeline.py:1052
+#: ../lib/advene/gui/views/timeline.py:1053
 #, fuzzy
 msgid "Annotation filter"
 msgstr "Anotacion"
 
-#: ../lib/advene/gui/views/timeline.py:1053
+#: ../lib/advene/gui/views/timeline.py:1054
 msgid "Enter the searched string"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:1066
+#: ../lib/advene/gui/views/timeline.py:1067
 #, fuzzy, python-format
 msgid "Copy all annotations to type %s"
 msgstr "tipos de anotaciones"
 
-#: ../lib/advene/gui/views/timeline.py:1069
+#: ../lib/advene/gui/views/timeline.py:1070
 #, python-format
 msgid "Copy all annotations matching a string to type %s"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:2046
+#: ../lib/advene/gui/views/timeline.py:2049
 #, fuzzy
 msgid "Restrict playing to this annotation-type"
 msgstr "Elige un tipo de anotacion"
 
-#: ../lib/advene/gui/views/timeline.py:2094
+#: ../lib/advene/gui/views/timeline.py:2097
 msgid "Automatically activate loop when clicking on an annotation"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:2193
+#: ../lib/advene/gui/views/timeline.py:2106
+#, fuzzy
+msgid "Goto annotation when clicking"
+msgstr "tipo de anotacion"
+
+#: ../lib/advene/gui/views/timeline.py:2205
 msgid "Inspector"
 msgstr ""
 
@@ -5305,127 +5325,142 @@ msgstr ""
 msgid "Duplicate"
 msgstr "Fecha"
 
-#: ../lib/advene/gui/popup.py:414
+#: ../lib/advene/gui/popup.py:431
+#, fuzzy
+msgid "Incoming"
+msgstr "Popup de informacion"
+
+#: ../lib/advene/gui/popup.py:447
+#, fuzzy
+msgid "Outgoing"
+msgstr "Relaciones Allen"
+
+#: ../lib/advene/gui/popup.py:462
+#, fuzzy
+msgid "Related annotations"
+msgstr "Scroll a la anotacion activa"
+
+#: ../lib/advene/gui/popup.py:469
 #, fuzzy
 msgid "Incoming relations"
 msgstr "Relaciones Allen"
 
-#: ../lib/advene/gui/popup.py:421
+#: ../lib/advene/gui/popup.py:476
 #, fuzzy
 msgid "Outgoing relations"
 msgstr "Relaciones Allen"
 
-#: ../lib/advene/gui/popup.py:441
+#: ../lib/advene/gui/popup.py:492
 #, python-format
 msgid "Begin: %s"
 msgstr "Inicio: %s"
 
-#: ../lib/advene/gui/popup.py:443
+#: ../lib/advene/gui/popup.py:494
 #, python-format
 msgid "End: %s"
 msgstr "Final: %s"
 
-#: ../lib/advene/gui/popup.py:450
+#: ../lib/advene/gui/popup.py:501
 msgid "Members:"
 msgstr "Miembros:"
 
-#: ../lib/advene/gui/popup.py:463
+#: ../lib/advene/gui/popup.py:514
 #, fuzzy
 msgid "Edit package properties..."
 msgstr "Editar las propiedades del paquete"
 
-#: ../lib/advene/gui/popup.py:464 ../lib/advene/gui/popup.py:559
+#: ../lib/advene/gui/popup.py:515 ../lib/advene/gui/popup.py:610
 #, fuzzy
 msgid "Create a new static view..."
 msgstr "Crear una nueva vista..."
 
-#: ../lib/advene/gui/popup.py:465 ../lib/advene/gui/popup.py:560
+#: ../lib/advene/gui/popup.py:516 ../lib/advene/gui/popup.py:611
 #, fuzzy
 msgid "Create a new dynamic view..."
 msgstr "Crear una nueva vista..."
 
-#: ../lib/advene/gui/popup.py:466 ../lib/advene/gui/popup.py:512
+#: ../lib/advene/gui/popup.py:517 ../lib/advene/gui/popup.py:563
 msgid "Create a new annotation..."
 msgstr "Crear una nueva anotacion"
 
-#: ../lib/advene/gui/popup.py:468 ../lib/advene/gui/popup.py:562
+#: ../lib/advene/gui/popup.py:519 ../lib/advene/gui/popup.py:613
 msgid "Create a new schema..."
 msgstr "Crear un nuevo esquema..."
 
-#: ../lib/advene/gui/popup.py:469 ../lib/advene/gui/popup.py:557
+#: ../lib/advene/gui/popup.py:520 ../lib/advene/gui/popup.py:608
 msgid "Create a new query..."
 msgstr "Crear una nueva busqueda..."
 
-#: ../lib/advene/gui/popup.py:477
+#: ../lib/advene/gui/popup.py:528
 #, fuzzy
 msgid "Create a new folder..."
 msgstr "Crear una nueva busqueda..."
 
-#: ../lib/advene/gui/popup.py:478
+#: ../lib/advene/gui/popup.py:529
 #, fuzzy
 msgid "Create a new resource file..."
 msgstr "Crear un nuevo esquema..."
 
-#: ../lib/advene/gui/popup.py:479
+#: ../lib/advene/gui/popup.py:530
 #, fuzzy
 msgid "Insert a new resource file..."
 msgstr "Crear un nuevo esquema..."
 
-#: ../lib/advene/gui/popup.py:480
+#: ../lib/advene/gui/popup.py:531
 #, fuzzy
 msgid "Insert a new resource directory..."
 msgstr "Crear un nuevo esquema..."
 
-#: ../lib/advene/gui/popup.py:495
+#: ../lib/advene/gui/popup.py:546
 msgid "Create a new annotation type..."
 msgstr "Crear un nuevo tipo de anotacion..."
 
-#: ../lib/advene/gui/popup.py:497
+#: ../lib/advene/gui/popup.py:548
 msgid "Create a new relation type..."
 msgstr "Crear un nuevo tipo de relacion..."
 
-#: ../lib/advene/gui/popup.py:499 ../lib/advene/gui/popup.py:511
-#: ../lib/advene/gui/popup.py:522
+#: ../lib/advene/gui/popup.py:550 ../lib/advene/gui/popup.py:562
+#: ../lib/advene/gui/popup.py:573
 #, fuzzy
 msgid "Select a color"
 msgstr "Color del marcador"
 
-#: ../lib/advene/gui/popup.py:505
+#: ../lib/advene/gui/popup.py:556
 msgid "Display as transcription"
 msgstr "Muestra como transcripcion"
 
-#: ../lib/advene/gui/popup.py:506
+#: ../lib/advene/gui/popup.py:557
 #, fuzzy
 msgid "Display annotations in table"
 msgstr "Muestra las anotaciones en una linea de tiempo"
 
-#: ../lib/advene/gui/popup.py:507
+#: ../lib/advene/gui/popup.py:558
 msgid "Use in a montage"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:513
+#: ../lib/advene/gui/popup.py:564
 msgid "Delete all annotations..."
 msgstr "Borrar todas las anotaciones..."
 
-#: ../lib/advene/gui/popup.py:514
+#: ../lib/advene/gui/popup.py:565
 #, fuzzy
 msgid "Renumber annotations"
 msgstr "Borrar todas las anotaciones..."
 
-#: ../lib/advene/gui/popup.py:523
+#: ../lib/advene/gui/popup.py:574
 msgid "Delete all relations..."
 msgstr "Borrar todas las relaciones..."
 
-#: ../lib/advene/gui/popup.py:542
+#: ../lib/advene/gui/popup.py:593
 msgid "Activate view"
 msgstr "Activar vista"
 
-#: ../lib/advene/gui/popup.py:544
+#: ../lib/advene/gui/popup.py:595
 #, fuzzy
 msgid "Open adhoc view"
 msgstr "Abre una vista GUI"
 
-#: ../lib/advene/gui/popup.py:548
+#: ../lib/advene/gui/popup.py:599
 msgid "Edit in the WYSIWYG editor"
 msgstr ""
 
@@ -6545,9 +6580,6 @@ msgstr "Hubo excpecion %s cuando se detenia la lanzadera. "
 
 #~ msgid "<p>Unknown admin command</p><pre>Command: %s</pre>"
 #~ msgstr "<p>Comando admin desconocido</p><pre>Comando: %s</pre>"
-
-#~ msgid "No favicon"
-#~ msgstr "Sin favicon"
 
 #~ msgid "<p>Invalid data request %s</p>"
 #~ msgstr "<p>Petición de informacion no valida %s</p>"
