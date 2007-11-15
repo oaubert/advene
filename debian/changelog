@@ -28,7 +28,13 @@ advene (0.25) unstable; urgency=low
     annotation of the same type. It also possible to highlight the edited
     annotation in opened views.
 
-  * Importers: simple MPEG7 importer (handles FreeTextAnnotations only)
+  * Importers: 
+   
+    * MPEG7 importer (handles FreeTextAnnotations only)
+  
+    * Anvil importer
+  
+    * AnnotationGraph importer
 
   * Timeline:
 
@@ -37,7 +43,8 @@ advene (0.25) unstable; urgency=low
 
     * new shortcut 'c' to center the view on the current player position
 
-    * a single left-click on an annotation will play it
+    * a single left-click on an annotation will play it. This feature can
+      be disabled by a toggle in the toolbar.
 
     * it is possible to restrict the playing to a specific annotation-type
       by clicking the play button at the left of the annotation title. Click
@@ -71,17 +78,16 @@ advene (0.25) unstable; urgency=low
 
     * text auto-completion is activated
 
+  * Bookmarks: it is possible to add comments to bookmarks
+
   * Transcription view: new "quick switch" button to switch between
     different representations.
 
   * To rename a view, double-click on its tab.
 
   * Error messages are now saved to ~/.advene/advene.log (for win32 users,
-    it is in \Documents and Settings\Username\Advene)
-
-  * New contextual actions for annotation types (display in table, use as
-    a montage...). Note that all actions are more readily accessible by
-    drag-and-drop of the annotation-type into an view zone.
+    it is in \Documents and Settings\Username\Advene, for MacOS X users,
+    it is in $HOME/Libray/Preferences/Advene)
 
   * Quicksearch:
 
@@ -90,9 +96,15 @@ advene (0.25) unstable; urgency=low
 
     * It is possible to search annotations and relations based on tags
 
-  * Automatic numbering of annotations: available from the annotation-type
-    popup menu
+  * Context menu for elements :
+  
+    * Automatic numbering of annotations: available from the annotation-type
+      popup menu
 
+    * New actions for annotation types (display in table, use as
+      a montage...). Note that most actions are more readily accessible by
+      drag-and-drop of the annotation-type into an view zone.
+  
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 14 Nov 2007 15:44:28 +0100
 
 advene (0.24) unstable; urgency=low
