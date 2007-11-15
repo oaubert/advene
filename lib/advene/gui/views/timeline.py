@@ -125,6 +125,7 @@ class TimeLine(AdhocView):
             # Delay before displaying the annotation tooltip, in ms.
             'annotation-tooltip-delay': 2000,
             'annotation-tooltip-activate': True,
+            'goto-on-click': True,
             }
         self.controller=controller
 
@@ -1180,7 +1181,7 @@ class TimeLine(AdhocView):
             self.controller.notify('AnnotationEditEnd', annotation=annotation)
             return True
         elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
-            if not self.goto_on_click_toggle.get_active():
+            if not self.options['goto-on-click']:
                 return True
             # Goto annotation if not already playing it
             p=self.controller.player.current_position_value
@@ -2096,8 +2097,13 @@ class TimeLine(AdhocView):
         self.controller.gui.tooltips.set_tip(self.loop_toggle_button, _("Automatically activate loop when clicking on an annotation"))
         toolbar.insert(self.loop_toggle_button, -1)
 
+        def goto_toggle_cb(b):
+            self.options['goto-on-click']=b.get_active()
+            return True
+
         self.goto_on_click_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_GO_FORWARD)
-        self.goto_on_click_toggle.set_active(True)
+        self.goto_on_click_toggle.set_active(self.options['goto-on-click'])
+        self.goto_on_click_toggle.connect('toggled', goto_toggle_cb)
         self.controller.gui.tooltips.set_tip(self.goto_on_click_toggle, _("Goto annotation when clicking"))
         toolbar.insert(self.goto_on_click_toggle, -1)
 
