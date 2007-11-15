@@ -199,7 +199,10 @@ class Bookmarks(AdhocView):
                 print "Unknown target type for drag: %d" % targetType
             return False
 
-        vbox=gtk.VBox()
+        if self.display_comments:
+            box=gtk.HBox()
+        else:
+            box=gtk.VBox()
         i=image_from_position(self.controller,
                               t,
                               width=self.options['snapshot_width'])
@@ -214,32 +217,35 @@ class Bookmarks(AdhocView):
                           config.data.drag_type['timestamp'],
                           gtk.gdk.ACTION_LINK)
 
-        vbox.pack_start(e, expand=False)
+        box.pack_start(e, expand=False)
 
-        hbox=gtk.HBox()
         l = gtk.Label(helper.format_time(t) + " - ")
-        hbox.pack_start(l, expand=False)
         if self.display_comments:
-            comment_entry=gtk.Entry()
+            vbox=gtk.VBox()
+            vbox.pack_start(l, expand=False)
+            comment_entry=gtk.TextView()
+            b=comment_entry.get_buffer()
             if t in self.comments:
-                comment_entry.set_text(self.comments[t])
+                b.set_text(self.comments[t])
             else:
-                comment_entry.set_text(_("No comment"))
-            def update_comment(ent, ti):
-                self.comments[ti]=ent.get_text()
+                b.set_text(_("No comment"))
+            def update_comment(buf, ti):
+                self.comments[ti]=buf.get_text(*buf.get_bounds())
                 return True
-            comment_entry.connect('changed', update_comment, t)
-            hbox.pack_start(comment_entry, expand=False)
-        vbox.pack_start(hbox, expand=False)
+            b.connect('changed', update_comment, t)
+            vbox.pack_start(comment_entry, expand=True)
+            box.pack_start(vbox, expand=False)
+        else:
+            box.pack_start(l)
 
-        vbox.show_all()
+        box.show_all()
         if self.scrollwindow:
             if self.options['vertical']:
                 adj=self.scrollwindow.get_vadjustment()
             else:
                 adj=self.scrollwindow.get_hadjustment()
             adj.set_value(adj.upper)
-        self.mainbox.add(vbox)
+        self.mainbox.pack_start(box, expand=False)
 
     def build_widget(self):
         v=gtk.VBox()
