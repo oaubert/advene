@@ -1,6 +1,11 @@
 #! /bin/sh
 
-exec > /tmp/advene.log 2>&1
+#exec > /tmp/advene.log 2>&1
+
+d=`dirname "$0"`
+parent=`dirname "$d"`
+# Ensure that we get an absolute path
+parent=`(cd "$parent" ; pwd)`
 
 echo "Advene.app started at "  `date` " on " `uname -a`
 X11APP=/Applications/Utilities/X11.app
@@ -10,10 +15,28 @@ then
    exit 0
 fi
 
-open $X11APP
+if [ ! -e /tmp/.X11-unix/* ]
+then
+   osascript -e 'tell application "Finder" to display dialog "Please start the X11 server before trying to run Advene"'
+   exit 0
+fi
 
-d=`dirname "$0"`
-parent=`dirname "$d"`
-# Ensure that we get an absolute path
-abspath=`(cd "$parent" ; pwd)`
+if [ ! -x /Applications/VLC.app ]
+then
+   osascript -e 'tell application "Finder" to display dialog "You should install VLC 0.8.6c (downloadable from http://www.videolan.org/ in /Applications, else Advene will run without video support."'
+   exit 0
+else
+  x11plugin=/Applications/VLC.app/Contents/MacOS/modules/libx11_plugin.dylib
+  if [ ! -e ${x11plugin} ]
+  then
+    # Try to copy it from our resources
+    cp ${parent}/Resources/libx11_plugin.dylib ${x11plugin}
+    if [ ! -e ${x11plugin}
+    then
+       osascript -e 'tell application "Finder" to display dialog "Unable to copy the x11 video output module. Maybe a permission problem.\nPlease try to copy ${parent}/Resources/libx11_plugin.dylib to ${x11plugin}"'
+       exit 0
+    fi
+  fi
+fi
+
 DISPLAY=localhost:0 DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_INSERT_LIBRARIES="${parent}/Resources/libpangohack.dylib" exec ${d}/Advene.bin $@
