@@ -64,7 +64,7 @@ class PluginCollection(list):
         """Extract the list of plugins from a .zip file import.
         """
         if not ('.zip' + os.sep) in d:
-            yield
+            return
         (zipname, plugins_dir) = d.split('.zip' + os.sep)
         zipname += '.zip'
         z=zipfile.ZipFile(zipname, 'r')
