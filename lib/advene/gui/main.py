@@ -1309,6 +1309,9 @@ class AdveneGUI (Connect):
         for v in self.adhoc_views:
             if not hasattr(v, '_destination'):
                 continue
+            # Do not save permanent widgets
+            if v in self.viewbook[v._destination].permanent_widgets:
+                continue
             options, args = v.get_save_arguments()
             if not with_arguments:
                 # If we save the default workspace, we do not want to
