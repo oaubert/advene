@@ -24,7 +24,6 @@ import advene.util.helper
 from advene.gui.util import dialog
 
 re_tales=re.compile('^\$\{(.+)\}$')
-re_string=re.compile('^string:(.+)$')
 
 class TALESEntry:
     """TALES expression entry widget.
@@ -59,15 +58,10 @@ class TALESEntry:
     def text2tales(self, t):
         """Return the TALES expression corresponding to the given text.
         """
-        l=re_string.findall(t)
-        if l:
-            return l[0]
         l=re_tales.findall(t)
         if l:
             return l[0]
-        # Should not happen...
-        print "Strange bug in TALES representation conversion for |"+t+"|"
-        return t
+        return 'string:' + t
 
     def tales2text(self, t):
         """Return the text representing the TALES expression.
