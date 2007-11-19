@@ -567,7 +567,11 @@ class SubviewList(list):
         
         # FIXME: check the the rulenode tagname is 'subviewlist'
         self.name=rulenode.getAttribute('name')
-        self[:]=rulenode.getAttribute('value').split(',')
+        v=rulenode.getAttribute('value')
+        if v:
+            self[:]=v.split(',')
+        else:
+            self[:]=[]
         # Event
         return self
 
