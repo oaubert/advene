@@ -34,8 +34,8 @@ def register(controller=None):
             description=_("Display a message"),
             parameters={'message': _("Message to display")},
             defaults={'message': 'annotation/content/data'},
-            predefined={'message': (  
-                    ( 'annotation/content/data', _("The annotation content") ) 
+            predefined={'message': (
+                    ( 'annotation/content/data', _("The annotation content") ),
                     )},
             category='gui',
             )
