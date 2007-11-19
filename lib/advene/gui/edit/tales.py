@@ -50,6 +50,8 @@ class TALESEntry:
         if context is None and controller is not None:
             context=controller.package
         self.context=context
+        if predefined is None:
+            predefined=[]
         self.predefined=predefined
 
         self.widget=self.build_widget()
