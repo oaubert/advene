@@ -39,7 +39,7 @@ def register(controller=None):
             parameters={'message': _("String to display.")},
             defaults={'message': 'annotation/content/data'},
             predefined={'message': (  
-                    ( 'annotation/content/data', _("The annotation content") ) 
+                    ( 'annotation/content/data', _("The annotation content") ),
                     )},            
             category='gui',
             ))
@@ -53,7 +53,7 @@ def register(controller=None):
             defaults={'message': 'annotation/content/data',
                       'duration': 'annotation/fragment/duration'},
             predefined={'message': (  
-                    ( 'annotation/content/data', _("The annotation content") )
+                    ( 'annotation/content/data', _("The annotation content") ),
                     ),
                         'duration': (
                     ( 'string:1000', _("1 second") ),
