@@ -48,7 +48,8 @@ if sys.platform == 'win32':
 	"py2exe": {
 	    "includes": "pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be",
 	    "excludes": [ "Tkconstants","Tkinter","tcl" ],
-	    #         "dll_excludes": ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
+	    "dll_excludes": ["libvlc.dll","libvlc-control.dll"],
+	    #         		 ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
 	    #                          "libgdk_pixbuf-2.0-0.dll","libgdk-win32-2.0-0.dll",
 	    #                          "libglib-2.0-0.dll","libgmodule-2.0-0.dll",
 	    #                          "libgobject-2.0-0.dll","libgthread-2.0-0.dll",
