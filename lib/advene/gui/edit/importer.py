@@ -64,7 +64,8 @@ class ExternalImporter(AdhocView):
 
         return True
 
-    def convert_file(self, *p):
+    def convert_file(self, b, *p):
+        b.set_sensitive(False)
         ic=self.importers.get_current_element()
         fname=self.filename_entry.get_text()
         if ic is None:
