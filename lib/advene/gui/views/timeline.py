@@ -1120,6 +1120,9 @@ class TimeLine(AdhocView):
             # We received a drop. Determine the location.
             s = config.data.preferences['timeline']['interline-height']
 
+            # Correct y value according to scrollbar position
+            y += widget.parent.get_vscrollbar().get_adjustment().get_value()
+
             f=[ at
                 for (at, p) in self.layer_position.iteritems()
                 if (y - s >= p and y - s <= p + self.button_height) ]
@@ -1610,6 +1613,10 @@ class TimeLine(AdhocView):
             source_uri=selection.data
             source=self.controller.package.annotations.get(source_uri)
             # We received a drop. Determine the location.
+
+            # Correct y value according to scrollbar position
+            y += widget.parent.get_vscrollbar().get_adjustment().get_value()
+
             a=[ at 
                 for (at, p) in self.layer_position.iteritems()
                 if (y >= p and y <= p + self.button_height) ]
