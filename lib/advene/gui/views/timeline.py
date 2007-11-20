@@ -1000,7 +1000,7 @@ class TimeLine(AdhocView):
             if source.relations:
                 item.set_sensitive(False)
 
-        if abs(position-source.fragment.begin) > 1000:
+        if position is not None and abs(position-source.fragment.begin) > 1000:
             item=gtk.MenuItem(_("Copy annotation at %s") % helper.format_time(position))
             item.connect('activate', copy_annotation, source, dest, position)
             menu.append(item)
@@ -1026,15 +1026,16 @@ class TimeLine(AdhocView):
             menu.append(item)
             item.set_submenu(sm)
 
-            item=gtk.MenuItem(_("Copy at %s and create a relation") % helper.format_time(position))
-            # build a submenu
-            sm=gtk.Menu()
-            for rt in relationtypes:
-                sitem=gtk.MenuItem(self.controller.get_title(rt))
-                sitem.connect('activate', copy_annotation, source, dest, position, rt)
-                sm.append(sitem)
-            menu.append(item)
-            item.set_submenu(sm)
+            if position is not None:
+                item=gtk.MenuItem(_("Copy at %s and create a relation") % helper.format_time(position))
+                # build a submenu
+                sm=gtk.Menu()
+                for rt in relationtypes:
+                    sitem=gtk.MenuItem(self.controller.get_title(rt))
+                    sitem.connect('activate', copy_annotation, source, dest, position, rt)
+                    sm.append(sitem)
+                menu.append(item)
+                item.set_submenu(sm)
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
