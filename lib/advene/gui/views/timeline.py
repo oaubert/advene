@@ -1276,7 +1276,11 @@ class TimeLine(AdhocView):
         if widget.keypress(widget, event, annotation):
             return True
 
-        if event.keyval == gtk.keysyms.p:
+        if event.keyval == gtk.keysyms.Return and event.state & gtk.gdk.CONTROL_MASK:
+            # Control-return: split at current player position
+            self.controller.split_annotation(annotation, self.controller.player.current_position_value)
+            return True
+        elif event.keyval == gtk.keysyms.p:
             # Play
             f=self.annotation_fraction(widget)
             x, y = widget.get_pointer()
