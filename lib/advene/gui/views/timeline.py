@@ -662,8 +662,7 @@ class TimeLine(AdhocView):
         if color is None:
             color=self.colors['active']
         for b in buttons:
-            b.active=True
-            b.set_color(color)
+            b.set_active(True)
         return True
 
     def desactivate_annotation (self, annotation, buttons=None):
@@ -675,7 +674,7 @@ class TimeLine(AdhocView):
             else:
                 return True
         for b in buttons:
-            b.set_color(None)
+            b.set_active(False)
         return True
 
     def toggle_annotation (self, annotation):
@@ -1313,9 +1312,7 @@ class TimeLine(AdhocView):
         def desactivate(widget):
             try:
                 if widget.active:
-                    widget.active = False
-                    widget.set_color(None)
-                    widget.update_widget()
+                    widget.set_active(False)
             except AttributeError:
                 pass
             return False
@@ -1328,7 +1325,6 @@ class TimeLine(AdhocView):
             return None
 
         b = AnnotationWidget(annotation=annotation, container=self)
-        b.active = False
         # Put at a default position.
         self.layout.put(b, 0, 0)
         b.show()
