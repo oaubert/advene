@@ -702,7 +702,7 @@ class EditCondition(EditGeneric):
         hbox=gtk.HBox()
         
         predefined=[ 
-            ('element/fragment', _('The annotation fragment') ),
+            ('annotation/fragment', _('The annotation fragment') ),
             ('annotation/fragment/end', _('The annotation begin time') ),
             ('annotation/fragment/end', _('The annotation end time') ),
             ('annotation/fragment/duration', _('The annotation duration') ),
@@ -710,6 +710,7 @@ class EditCondition(EditGeneric):
             ('annotation/incomingRelations', _("The annotation's incoming relations") ),
             ('annotation/outgoingRelations', _("The annotation's outgoing relations") ),
             ('element/content/data', _("The element's content") ),
+            ('element/fragment', _('The element fragment') ),
             ] + [
             ('annotation/typedRelatedIn/%s' % rt.id, 
              _("The %s-related incoming annotations") % self.controller.get_title(rt) ) 
@@ -730,7 +731,7 @@ class EditCondition(EditGeneric):
                  ] + [ ('string:%s' % at.id,
                         "id of relation-type %s" % self.controller.get_title(at) )
                        for at in self.controller.package.relationTypes
-                       ]
+                       ] + predefined
         self.rhs=TALESEntry(controller=self.controller,
                             predefined=predef)
         self.rhs.set_text(self.model.rhs or "")
