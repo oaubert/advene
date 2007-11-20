@@ -113,6 +113,9 @@ class Differ:
                 c=self.check_meta(s, d, 'advenetool', 'color')
                 if c:
                     yield c
+                c=self.check_meta(s, d, 'advenetool', 'item_color')
+                if c:
+                    yield c
             else:
                 yield ('new', s, None, lambda s, d: self.copy_annotation_type(s) )
 
@@ -128,6 +131,12 @@ class Differ:
                 if s.mimetype != d.mimetype:
                     yield ('update_mimetype', s, d, lambda s, d: d.setMimetype(s.mimetype) )
                 c=self.check_meta(s, d, 'dc', 'description')
+                if c:
+                    yield c
+                c=self.check_meta(s, d, 'advenetool', 'color')
+                if c:
+                    yield c
+                c=self.check_meta(s, d, 'advenetool', 'item_color')
                 if c:
                     yield c
                 if s.hackedMemberTypes != d.hackedMemberTypes:
@@ -281,7 +290,37 @@ class Differ:
         el.date=s.date
         el.title=s.title
         el.mimetype=s.mimetype
+        for n in ('color', 'item_color'):
+            el.setMetaData(config.data.namespace, n, s.getMetaData(config.data.namespace, n))
         sch.annotationTypes.append(el)
+        return el
+
+    def copy_relation_type(self, s):
+        # Find parent, and create it if necessary
+        sch=helper.get_id(self.destination.schemas, s.schema.id)
+        if not sch:
+            # Create it
+            sch=helper.get_id(self.source.schemas, s.schema.id)
+            sch=self.copy_schema(sch)
+        el=sch.createRelationType(ident=s.id)
+        el.author=s.author
+        el.date=s.date
+        el.title=s.title
+        el.mimetype=s.mimetype
+        for n in ('color', 'item_color'):
+            el.setMetaData(config.data.namespace, n, s.getMetaData(config.data.namespace, n))
+        sch.relationTypes.append(el)
+        # Handle membertypes, ensure that annotation types are defined
+        for m in s.hackedMemberTypes:
+            if not m.startswith('#'):
+                print "Cannot handle non-fragment membertypes"
+            at=helper.get_id(self.destination.annotationTypes, m[1:])
+            if not at:
+                # The annotation type does not exist. Create it.
+                at=helper.get_id(self.source.annotationTypes, m[1:])
+                at=self.copy_annotation_type(at)
+        # Now we can set member types
+        el.setHackedMemberTypes(s.getHackedMemberTypes())
         return el
 
     def update_members(self, s, d):
@@ -322,32 +361,6 @@ class Differ:
         el.content.data=s.content.data
         self.destination.annotations.append(el)
         self.translated_ids[s.id]=id_
-        return el
-
-    def copy_relation_type(self, s):
-        # Find parent, and create it if necessary
-        sch=helper.get_id(self.destination.schemas, s.schema.id)
-        if not sch:
-            # Create it
-            sch=helper.get_id(self.source.schemas, s.schema.id)
-            sch=self.copy_schema(sch)
-        el=sch.createRelationType(ident=s.id)
-        el.author=s.author
-        el.date=s.date
-        el.title=s.title
-        el.mimetype=s.mimetype
-        sch.relationTypes.append(el)
-        # Handle membertypes, ensure that annotation types are defined
-        for m in s.hackedMemberTypes:
-            if not s.startswith('#'):
-                print "Cannot handle non-fragment membertypes"
-            at=helper.get_id(self.destination.annotationTypes, m[1:])
-            if not at:
-                # The annotation type does not exist. Create it.
-                at=helper.get_id(self.source.annotationTypes, m[1:])
-                at=self.copy_annotation_type(at)
-        # Now we can set member types
-        el.setHackedMemberTypes(s.getHackedMemberTypes())
         return el
 
     def copy_annotation(self, s):
