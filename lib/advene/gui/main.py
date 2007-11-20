@@ -911,7 +911,7 @@ class AdveneGUI (Connect):
         # Create the slider
         adj = gtk.Adjustment(0, 0, 100, 1, 1, 10)
         self.gui.slider = gtk.HScale(adj)
-        self.gui.slider.set_draw_value(True)
+        self.gui.slider.set_draw_value(False)
         self.gui.slider.set_value_pos(gtk.POS_LEFT)
         self.gui.slider.connect ("format-value", self.format_slider_value)
         self.gui.slider.connect ("button-press-event", self.on_slider_button_press_event)
@@ -930,7 +930,14 @@ class AdveneGUI (Connect):
             v.pack_start(self.captionview.widget, expand=False)
         else:
             self.captionview=None
-        v.pack_start(self.gui.slider, expand=False)
+
+        h=gtk.HBox()
+        self.time_label=gtk.Label()
+        self.time_label.set_text(helper.format_time(None))
+        h.pack_start(self.time_label, expand=False)
+        h.pack_start(self.gui.slider, expand=False)
+        v.pack_start(h, expand=False)
+
         v.pack_start(self.player_toolbar, expand=False)
 
         # create the viewbooks
@@ -1745,6 +1752,7 @@ class AdveneGUI (Connect):
         #gtk.threads_enter()
         try:
             pos=self.controller.update()
+            self.time_label.set_text(helper.format_time(pos))
         except self.controller.player.InternalException:
             # FIXME: something sensible to do here ?
             print _("Internal error on video player")
@@ -1795,6 +1803,7 @@ class AdveneGUI (Connect):
 
         else:
             self.gui.slider.set_value (0)
+            self.time_label.set_text(helper.format_time(None))
             if self.controller.player.status != self.oldstatus:
                 self.oldstatus = self.controller.player.status
                 self.gui.player_status.set_text (self.statustext[self.controller.player.status])
