@@ -253,27 +253,15 @@ class GenericImporter(object):
                               'description',
                               _("Converted from %s") % filename)
             self.update_statistics('package')
+            self.package=p
         else:
             p=self.package
 
         at=None
         if schemaid:
-            s=p.createSchema(ident=schemaid)
-            s.author=self.author
-            s.date=self.timestamp
-            s.title=s.id
-            p.schemas.append(s)
-            self.update_statistics('schema')
-
+            s=self.create_schema(id_=schemaid, title=schemaid)
             if annotationtypeid:
-                at=s.createAnnotationType(ident=annotationtypeid)
-                at.author=self.author
-                at.date=self.timestamp
-                at.title=at.id
-                at.mimetype='text/plain'
-                s.annotationTypes.append(at)
-                self.update_statistics('annotation-type')
-
+                at=self.create_annotation_type(s, id_=annotationtypeid)
         return p, at
 
     def convert(self, source):
