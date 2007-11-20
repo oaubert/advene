@@ -218,7 +218,9 @@ def format_time (val=0):
     @return: the formatted string
     @rtype: string
     """
-    if val < 0:
+    if val is None:
+        return '--:--:--.---'
+    elif val < 0:
         val = 0
     (s, ms) = divmod(long(val), 1000)
     # Format: HH:MM:SS.mmm
