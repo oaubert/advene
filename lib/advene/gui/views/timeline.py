@@ -413,9 +413,9 @@ class TimeLine(AdhocView):
                 color=self.get_element_color(r) or self.colors['white']
                 context.set_source_rgb(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0)
                 context.rectangle((x_start + x_end ) / 2,
-                                  (y_start + y_end ) / 2 - ext[3] - 4,
+                                  (y_start + y_end ) / 2 - ext[3] - 2,
                                   ext[2] + 2,
-                                  ext[3] + 2)
+                                  ext[3] + 6)
                 context.fill()
 
                 context.set_source_rgb(0, 0, 0)
