@@ -36,6 +36,8 @@ import advene.core.config as config
 
 import advene.gui.popup
 
+active_color=gtk.gdk.color_parse ('#fdfd4b')
+
 class GenericColorButtonWidget(gtk.DrawingArea):
     """ Widget emulating a color button widget
     """
@@ -225,6 +227,10 @@ class AnnotationWidget(GenericColorButtonWidget):
                              ,
                              gtk.gdk.ACTION_LINK)
 
+    def set_active(self, b):
+        self.active=b
+        self.update_widget()
+        
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         """Handle the drag-sent event.
         """
@@ -268,7 +274,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             pos = c.create_position (value=annotation.fragment.begin,
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
+            c.queue_action(c.update_status, status="set", position=pos)
             c.gui.set_current_annotation(annotation)
             return True
         return False
@@ -300,11 +306,15 @@ class AnnotationWidget(GenericColorButtonWidget):
             print "MemoryError when rendering rectangle for annotation ", self.annotation.id
             return
 
-        if self.local_color is not None:
+        color=None
+        if self.active:
+            color=active_color
+        elif self.local_color is not None:
             color=self.local_color
         else:
             color=self.container.get_element_color(self.annotation)
-        if color:
+
+        if color is not None:
             rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
         else:
             rgba=(1.0, 1.0, 1.0, 1)
@@ -312,11 +322,11 @@ class AnnotationWidget(GenericColorButtonWidget):
         context.fill_preserve()
 
         # Draw the border
+        context.set_source_rgba(0, 0, 0, 1)
         if self.is_focus():
             context.set_line_width(4)
         else:
             context.set_line_width(1)
-        context.set_source_rgba(0, 0, 0, 1)
         context.stroke()
 
         # Do not draw text if the widget is too small anyway
