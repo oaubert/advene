@@ -23,7 +23,7 @@ from advene.gui.views.browser import Browser
 import advene.util.helper
 from advene.gui.util import dialog
 
-re_tales=re.compile('^\$\{(.+)\}$')
+re_tales=re.compile('^\$\{(.+)\}\s*$')
 
 class TALESEntry:
     """TALES expression entry widget.
@@ -75,6 +75,7 @@ class TALESEntry:
         self.context=el
 
     def set_text(self, t):
+        # Convert the value to its simplified representation
         t=self.tales2text(t)
         # Check if the new value is in self.predefined. If so, use
         # set_active_iter, else use self.entry
