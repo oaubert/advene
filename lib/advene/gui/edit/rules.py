@@ -849,8 +849,8 @@ class EditAction(EditGeneric):
 
         return True
 
-    def on_change_parameter(self, entry, name):
-        value=entry.get_text()
+    def on_change_parameter(self, entry, talesentry, name):
+        value=talesentry.get_text()
         self.current_parameters[name]=value
         return True
 
@@ -872,7 +872,7 @@ class EditAction(EditGeneric):
         entry=TALESEntry(controller=self.controller, predefined=predefined)
         entry.set_text(value)
         entry.set_editable(self.editable)
-        entry.entry.connect("changed", self.on_change_parameter, name)
+        entry.entry.connect("changed", self.on_change_parameter, entry, name)
 
         self.tooltips.set_tip(entry.entry, description)
 
