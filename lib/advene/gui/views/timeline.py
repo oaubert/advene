@@ -1015,15 +1015,16 @@ class TimeLine(AdhocView):
                                                     source.type,
                                                     dest)
         if relationtypes:
-            item=gtk.MenuItem(_("Duplicate and create a relation"))
-            # build a submenu
-            sm=gtk.Menu()
-            for rt in relationtypes:
-                sitem=gtk.MenuItem(self.controller.get_title(rt))
-                sitem.connect('activate', copy_annotation, source, dest, None, rt)
-                sm.append(sitem)
-            menu.append(item)
-            item.set_submenu(sm)
+            if source.type != dest:
+                item=gtk.MenuItem(_("Duplicate and create a relation"))
+                # build a submenu
+                sm=gtk.Menu()
+                for rt in relationtypes:
+                    sitem=gtk.MenuItem(self.controller.get_title(rt))
+                    sitem.connect('activate', copy_annotation, source, dest, None, rt)
+                    sm.append(sitem)
+                menu.append(item)
+                item.set_submenu(sm)
 
             if position is not None:
                 item=gtk.MenuItem(_("Duplicate at %s and create a relation") % helper.format_time(position))
