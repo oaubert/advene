@@ -989,7 +989,7 @@ class TimeLine(AdhocView):
         menu=gtk.Menu()
 
         if source.type != dest:
-            item=gtk.MenuItem(_("Copy annotation to type %s") % self.controller.get_title(dest))
+            item=gtk.MenuItem(_("Duplicate annotation to type %s") % self.controller.get_title(dest))
             item.connect('activate', copy_annotation, source, dest)
             menu.append(item)
 
@@ -1000,7 +1000,7 @@ class TimeLine(AdhocView):
                 item.set_sensitive(False)
 
         if position is not None and abs(position-source.fragment.begin) > 1000:
-            item=gtk.MenuItem(_("Copy annotation at %s") % helper.format_time(position))
+            item=gtk.MenuItem(_("Duplicate annotation at %s") % helper.format_time(position))
             item.connect('activate', copy_annotation, source, dest, position)
             menu.append(item)
 
@@ -1015,7 +1015,7 @@ class TimeLine(AdhocView):
                                                     source.type,
                                                     dest)
         if relationtypes:
-            item=gtk.MenuItem(_("Copy and create a relation"))
+            item=gtk.MenuItem(_("Duplicate and create a relation"))
             # build a submenu
             sm=gtk.Menu()
             for rt in relationtypes:
@@ -1026,7 +1026,7 @@ class TimeLine(AdhocView):
             item.set_submenu(sm)
 
             if position is not None:
-                item=gtk.MenuItem(_("Copy at %s and create a relation") % helper.format_time(position))
+                item=gtk.MenuItem(_("Duplicate at %s and create a relation") % helper.format_time(position))
                 # build a submenu
                 sm=gtk.Menu()
                 for rt in relationtypes:
