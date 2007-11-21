@@ -1,8 +1,18 @@
 advene (0.26) unstable; urgency=low
 
   * Stable release
+  
+  * When using next/previous navigation button in annotation edit widgets,
+    automatically validate the annotation
+  
+  * Bookmarks: use multiline comments
+  
+  * New shortcuts:
+    * Control-return: split annotation at the current player position
+    * Shift-delete: delete the annotation
+    * Control-k: select the quicksearch entry field
 
- -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 15 Nov 2007 10:43:20 +0100
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 21 Nov 2007 17:55:26 +0100
 
 advene (0.25) unstable; urgency=low
 
