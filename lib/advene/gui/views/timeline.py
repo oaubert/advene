@@ -958,7 +958,7 @@ class TimeLine(AdhocView):
         offered to move/copy the annotation and change its bounds.
         """
         def move_annotation(i, an, typ, position=None):
-            if an.relations:
+            if an.relations and an.type != typ:
                 dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
                                       icon=gtk.MESSAGE_WARNING)
                 return True
@@ -1007,7 +1007,7 @@ class TimeLine(AdhocView):
             item=gtk.MenuItem(_("Move annotation at %s") % helper.format_time(position))
             item.connect('activate', move_annotation, source, dest, position)
             menu.append(item)
-            if source.relations:
+            if source.relations and source.type != dest:
                 item.set_sensitive(False)
             
         # If there are compatible relation-types, propose to directly create a relation
