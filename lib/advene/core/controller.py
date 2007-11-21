@@ -202,7 +202,10 @@ class AdveneController:
                 ))
 
     def get_cached_duration(self):
-        return self.package.cached_duration
+        if self.package is not None:
+            return self.package.cached_duration
+        else:
+            return 0
 
     def set_cached_duration(self, value):
         if self.package is not None:
@@ -1098,7 +1101,11 @@ class AdveneController:
          
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
-            self.package.cached_duration = long(float(duration))
+            try:
+                v=long(float(duration))
+            except ValueError:
+                v=0
+            self.package.cached_duration = v
         else:
             self.package.cached_duration = 0
 
