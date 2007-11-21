@@ -277,6 +277,12 @@ class AnnotationWidget(GenericColorButtonWidget):
             c.queue_action(c.update_status, status="set", position=pos)
             c.gui.set_current_annotation(annotation)
             return True
+        elif event.keyval == gtk.keysyms.Delete and event.state & gtk.gdk.SHIFT_MASK:
+            # Delete annotation
+            p=annotation.ownerPackage
+            p.annotations.remove(annotation)
+            self.controller.notify('AnnotationDelete', annotation=annotation)
+            return True
         return False
 
     def needed_size(self):
