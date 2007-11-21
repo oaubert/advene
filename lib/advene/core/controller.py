@@ -845,9 +845,19 @@ class AdveneController:
 
         If position is not None, then set the new annotation begin to position.
         """
-        if annotation.type == annotationType and position is None:
-            # Do not just duplicate the annotation
-            return None
+        if annotation.type == annotationType:
+            # Tranmuting on the same type.
+            if position is None:
+                # Do not just duplicate the annotation
+                return None
+            elif delete:
+                # If delete, then we can simply move the annotation
+                # without deleting it.
+                d=annotation.fragment.duration
+                annotation.fragment.begin=position
+                annotation.fragment.end=position+d
+                self.notify("AnnotationEditEnd", annotation=annotation, comment="Transmute annotation")
+                return annotation
         ident=self.package._idgenerator.get_id(Annotation)
         an = self.package.createAnnotation(type = annotationType,
                                            ident=ident,
