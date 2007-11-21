@@ -219,7 +219,7 @@ class TranscriptionEdit(AdhocView):
             return False
 
         p=self.controller.player
-        if (p.status == p.PlayingStatus or p.status == p.PlayingStatus):
+        if (p.status == p.PlayingStatus or p.status == p.PauseStatus):
             # Check that preceding mark.timestamp is lower
             t=p.current_position_value - self.options['delay']
             m, i=self.find_preceding_mark(it)
