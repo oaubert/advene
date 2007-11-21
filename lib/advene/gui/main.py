@@ -912,8 +912,6 @@ class AdveneGUI (Connect):
         adj = gtk.Adjustment(0, 0, 100, 1, 1, 10)
         self.gui.slider = gtk.HScale(adj)
         self.gui.slider.set_draw_value(False)
-        self.gui.slider.set_value_pos(gtk.POS_LEFT)
-        self.gui.slider.connect ("format-value", self.format_slider_value)
         self.gui.slider.connect ("button-press-event", self.on_slider_button_press_event)
         self.gui.slider.connect ("button-release-event", self.on_slider_button_release_event)
 
@@ -935,8 +933,8 @@ class AdveneGUI (Connect):
         self.time_label=gtk.Label()
         self.time_label.set_text(helper.format_time(None))
         h.pack_start(self.time_label, expand=False)
-        h.pack_start(self.gui.slider, expand=False)
-        v.pack_start(h, expand=False)
+        h.pack_start(self.gui.slider, expand=True)
+        v.pack_start(h, expand=True)
 
         v.pack_start(self.player_toolbar, expand=False)
 
@@ -1114,17 +1112,6 @@ class AdveneGUI (Connect):
                                                       event.y,
                                                       str(window))
         return False
-
-    def format_slider_value (self, slider=None, val=0):
-        """Formats a value (in milliseconds) into a time string.
-
-        @param slider: a slider widget
-        @param val: the value
-        @type val: int
-        @return: the formatted string
-        @rtype: string
-        """
-        return helper.format_time (val)
 
     def init_window_size(self, window, name):
         """Initialize window size according to stored values.
@@ -2766,6 +2753,7 @@ class AdveneGUI (Connect):
 
     def on_slider_button_press_event (self, button=None, data=None):
         self.slider_move = True
+        return False
 
     def on_slider_button_release_event (self, button=None, data=None):
         if self.controller.player.playlist_get_list():
