@@ -1206,6 +1206,9 @@ class TimeLine(AdhocView):
 
     def quick_edit(self, annotation, button=None, callback=None):
         """Quickly edit a textual annotation
+        
+        If defined, the callback method will be called with 'validate'
+        or 'cancel' as first parameter and the annotation as second parameter.
         """
         if button is None:
             button=self.get_widget_for_annotation(annotation)
@@ -1250,12 +1253,14 @@ class TimeLine(AdhocView):
                         r=ann.content.data
                 ann.content.data = r
                 if cb:
-                    cb(ann)
+                    cb('validate', ann)
                 controller.notify('AnnotationEditEnd', annotation=ann)
                 close_eb(widget)
                 return True
             elif event.keyval == gtk.keysyms.Escape:
                 # Abort and close the entry
+                if cb:
+                    cb('cancel', ann)
                 close_eb(widget)
                 return True
             return False
@@ -1972,8 +1977,13 @@ class TimeLine(AdhocView):
             if widget.keypress(widget, event, at):
                 return True
             elif event.keyval == gtk.keysyms.Return:
-                def set_end_time(an):
-                    an.fragment.end=self.controller.player.current_position_value
+                def set_end_time(action, an):
+                    if action == 'validate':
+                        an.fragment.end=self.controller.player.current_position_value
+                    elif action == 'cancel':
+                        # Delete the annotation
+                        self.controller.package.annotations.remove(an)
+                        self.controller.notify('AnnotationDelete', annotation=an)
                     return True
 
                 if (self.controller.player.status != self.controller.player.PlayingStatus
