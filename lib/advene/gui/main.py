@@ -2039,7 +2039,11 @@ class AdveneGUI (Connect):
                 # EditAccumulator popup
                 self.popup_edit_accumulator()
                 return True
-
+            elif event.keyval == gtk.keysyms.k:
+                # Get the cursor in the quicksearch entry
+                self.quicksearch_entry.grab_focus()
+                self.quicksearch_entry.select_region(0, -1)
+                return True
         return False
 
     def on_new1_activate (self, button=None, data=None):
