@@ -1187,6 +1187,7 @@ class TimeLine(AdhocView):
         elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
             if not self.options['goto-on-click']:
                 return True
+            c.gui.set_current_annotation(annotation)
             # Goto annotation if not already playing it
             p=self.controller.player.current_position_value
             # We do not use 'p in annotation.fragment' since if we are
