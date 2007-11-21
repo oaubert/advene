@@ -376,8 +376,8 @@ class InteractiveResult(AdhocView):
         return v
 
     def edit_query(self, *p):
-        self.controller.log("Not implemented yet")
-        #FIXME
+        self.close()
+        self.controller.gui.open_adhoc_view('interactivequery', destination='east')
         return True
 
     def open_in_timeline(self, l):
