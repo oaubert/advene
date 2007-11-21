@@ -30,7 +30,7 @@ class Query(modeled.Importable, viewable.Viewable.withClass('query'),
     """Query object offering query capabilities on the model"""
     __metaclass__ = auto_properties
 
-    def __init__(self, parent=None, element=None, ident=None):
+    def __init__(self, parent=None, element=None, ident=None, author=None):
         _impl.Uried.__init__(self, parent=parent)
         if element is not None:
             modeled.Importable.__init__(self, element, parent,
@@ -49,6 +49,8 @@ class Query(modeled.Importable, viewable.Viewable.withClass('query'),
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
                 ident = u"q" + unicode(id(self)) + unicode(time.clock()).replace('.','')
             self.setId(ident)
+            if author is not None: 
+                self.setAuthor(author)
 
     # dom dependant methods
 
