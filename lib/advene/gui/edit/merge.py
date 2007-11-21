@@ -77,8 +77,6 @@ class TreeViewMerger:
         return store
 
     def build_widget(self):
-        vbox=gtk.VBox()
-
         def show_diff(item, l):
             name, s, d, action = l
 
@@ -110,7 +108,7 @@ class TreeViewMerger:
                     b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), l, plustag)
                 else:
                     b.insert_at_cursor(l)
-            sw.add_with_viewport(tv)
+            sw.add(tv)
 
             hb=gtk.HButtonBox()
             b=gtk.Button(stock=gtk.STOCK_CLOSE)
@@ -196,10 +194,7 @@ class TreeViewMerger:
         column.set_resizable(True)
         treeview.append_column(column)
 
-        vbox.add(treeview)
-        vbox.show_all()
-
-        return vbox
+        return treeview
 
 class Merger:
     def __init__(self, controller=None, sourcepackage=None, destpackage=None):
@@ -221,7 +216,7 @@ class Merger:
         vbox.add(scroll_win)
 
         self.mergerview=TreeViewMerger(controller=self.controller, differ=self.differ)
-        scroll_win.add_with_viewport(self.mergerview.widget)
+        scroll_win.add(self.mergerview.widget)
 
         return vbox
 
