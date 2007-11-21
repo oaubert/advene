@@ -645,7 +645,13 @@ class EditPackagePopup (EditElementPopup):
                                           package=element)
         d=element.getMetaData (config.data.namespace, "duration")
         if d:
-            element.cached_duration = long(d)
+            try:
+                d=long(d)
+            except ValueError:
+                d=0
+            element.cached_duration = d
+        else:
+            element.cached_duration = 0
         self.controller.notify("PackageEditEnd", package=element)
         return True
 
