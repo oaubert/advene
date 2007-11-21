@@ -338,6 +338,8 @@ def get_title(controller, element, representation=None):
             if not r:
                 r=element.id
             return cleanup(r)
+    if isinstance(element, RelationType):
+        return u'\u2192' + unicode(cleanup(element.title))
     if hasattr(element, 'title') and element.title:
         return unicode(cleanup(element.title))
     if hasattr(element, 'id') and element.id:
