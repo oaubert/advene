@@ -643,7 +643,9 @@ class EditPackagePopup (EditElementPopup):
         # appropriate attributes of the package.
         self.controller.set_default_media(element.getMetaData (config.data.namespace, "mediafile"), 
                                           package=element)
-        element.cached_duration = long(element.getMetaData (config.data.namespace, "duration"))
+        d=element.getMetaData (config.data.namespace, "duration")
+        if d:
+            element.cached_duration = long(d)
         self.controller.notify("PackageEditEnd", package=element)
         return True
 
