@@ -307,13 +307,17 @@ class Differ:
         el.date=s.date
         el.title=s.title
         el.mimetype=s.mimetype
-        for n in ('color', 'item_color'):
-            el.setMetaData(config.data.namespace, n, s.getMetaData(config.data.namespace, n))
         sch.relationTypes.append(el)
+        #for n in ('color', 'item_color'):
+        #    el.setMetaData(config.data.namespace, n, s.getMetaData(config.data.namespace, n))
         # Handle membertypes, ensure that annotation types are defined
         for m in s.hackedMemberTypes:
+            if m == '':
+                # Any type, no import necessary
+                continue
             if not m.startswith('#'):
-                print "Cannot handle non-fragment membertypes"
+                print "Cannot handle non-fragment membertypes", m
+                continue
             at=helper.get_id(self.destination.annotationTypes, m[1:])
             if not at:
                 # The annotation type does not exist. Create it.
@@ -403,7 +407,7 @@ class Differ:
             author=s.author,
             members=members)
         el.date=s.date
-        el.title=s.title
+        #el.title=s.title
         el.content.data=s.content.data
         self.destination.relations.append(el)
         return el
