@@ -1121,7 +1121,10 @@ class AdveneController:
 
         self.register_package(alias, self.package)
 
-        self.notify("PackageLoad", package=self.package)
+        # Notification must be immediate, since at application startup, package attributes
+        # (_indexer, imagecache) are initialized by events, and may be needed by
+        # default views
+        self.notify("PackageLoad", package=self.package, immediate=True)
         if activate:
             self.activate_package(alias)
 
