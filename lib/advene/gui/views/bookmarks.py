@@ -20,9 +20,8 @@
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
-from advene.gui.util import image_from_position, get_small_stock_button
+from advene.gui.util import image_from_position, get_small_stock_button, dialog, get_pixmap_button
 from advene.gui.views import AdhocView
-from advene.gui.util import dialog, get_pixmap_button, get_small_stock_button
 import advene.util.importer
 from gettext import gettext as _
 
