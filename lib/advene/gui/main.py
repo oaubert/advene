@@ -254,6 +254,7 @@ class AdveneGUI (Connect):
             ('timeline', _('Timeline'), 'timeline.png'),
             ('transcription', _('Transcription of annotations'), 'transcription.png'),
             ('browser', _('Package browser'), 'browser.png'),
+            ('finder', _('Package finder'), 'finder.png'),
             ('webbrowser', _('Web browser'), 'web.png'),
             ('transcribe', _('Note-taking editor'), 'transcribe.png'),
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
