@@ -571,7 +571,7 @@ class AdveneController:
         
         immediate=False
         if immediate in kw:
-            immediate=kw['immediate']:
+            immediate=kw['immediate']
             del kw['immediate']
         if immediate:
             self.event_handler.notify(event_name, *param, **kw)
