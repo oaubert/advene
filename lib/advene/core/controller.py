@@ -568,9 +568,12 @@ class AdveneController:
             el=event_name.lower().replace('create','').replace('editend','').replace('delete', '')
             p=kw[el].ownerPackage
             p._modified = True
-
-        if kw.has_key('immediate') and kw['immediate']:
+        
+        immediate=False
+        if immediate in kw:
+            immediate=kw['immediate']:
             del kw['immediate']
+        if immediate:
             self.event_handler.notify(event_name, *param, **kw)
         else:
             self.queue_action(self.event_handler.notify, event_name, *param, **kw)
@@ -1300,6 +1303,7 @@ class AdveneController:
         @return: a boolean (~desactivation)
         """
         p=context.evaluateValue('package')
+        print "Controller.manage_package_load ", p.uri
         # Check that all fragments are Millisecond fragments.
         l = [a.id for a in p.annotations
              if not isinstance (a.fragment, MillisecondFragment)]
