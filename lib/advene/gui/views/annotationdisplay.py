@@ -71,17 +71,25 @@ class AnnotationDisplay(AdhocView):
 
     def refresh(self, *p):
         if self.annotation is None:
-            d={ 'id': _("N/C"), 
+            d={ 'title': _("No annotation"), 
                 'begin': '--:--:--:--', 
                 'end': '--:--:--:--', 
                 'contents': '' }
         else:
-            d={ 'id': self.annotation.id,
+            col=self.controller.get_element_color(self.annotation)
+            if col:
+                title='<span background="%s">Annotation <b>%s</b></span>' % (col, self.annotation.id)
+            else:
+                title='Annotation <b>%s</b>' % self.annotation.id
+            d={ 'title': title,
                 'begin': helper.format_time(self.annotation.fragment.begin),
                 'end': helper.format_time(self.annotation.fragment.end),
                 'contents': self.annotation.content.data }
         for k, v in d.iteritems():
-            self.label[k].set_text(v)
+            if k == 'title':
+                self.label[k].set_markup(v)
+            else:
+                self.label[k].set_text(v)
         if self.annotation is not None:
             b=self.annotation.fragment.begin
             cache=self.controller.package.imagecache
@@ -97,10 +105,8 @@ class AnnotationDisplay(AdhocView):
         self.label={}
 
         h=gtk.HBox()
-        l=gtk.Label(_("Annotation") + " ")
-        h.pack_start(l, expand=False)
-        self.label['id']=gtk.Label()
-        h.pack_start(self.label['id'], expand=False)
+        self.label['title']=gtk.Label()
+        h.pack_start(self.label['title'], expand=False)
         v.pack_start(h, expand=False)
 
         h=gtk.HBox()
@@ -122,6 +128,7 @@ class AnnotationDisplay(AdhocView):
         f=gtk.Frame(label=_("Contents"))
         c=self.label['contents']=gtk.Label()
         c.set_line_wrap(True)
+        c.set_selectable(True)
         c.set_single_line_mode(False)
         c.set_alignment(0.0, 0.0)
         sw=gtk.ScrolledWindow()
