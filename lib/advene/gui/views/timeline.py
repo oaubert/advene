@@ -615,12 +615,12 @@ class TimeLine(AdhocView):
                 ))
 
     def type_restricted_handler(self, context, parameters):
+        """Update the display when playing is restricted to a type.
+        """
         at=context.globals['annotationtype']
         for w in self.legend.get_children():
-            if isinstance(w, AnnotationTypeWidget):
+            if hasattr(w, 'set_playing'):
                 w.set_playing(w.annotationtype == at)
-            elif isinstance(w, gtk.ToggleButton):
-                w.set_active(w.annotationtype == at)
         return True
 
     def tag_update(self, context, parameters):
@@ -1936,6 +1936,8 @@ class TimeLine(AdhocView):
 
     def restrict_playing(self, at, widget=None):
         """Restrict playing to the given annotation-type.
+
+        Widget should be the annotation-type widget for at.
         """
         if widget is None:
             l=[ w 
@@ -2061,11 +2063,18 @@ class TimeLine(AdhocView):
 
             height=max (height, self.layer_position[t] + 3 * self.button_height)
 
-            p=gtk.ToggleButton()
+            def set_playing(b, v):
+                if v:
+                    f='noplay.png'
+                else:
+                    f='play.png'
+                b.get_children()[0].set_from_file(config.data.advenefile( ( 'pixmaps', f) ))
+                return True
+
+            p=get_pixmap_button('play.png', restrict_playing, t, b)
+            p.set_playing = set_playing.__get__(p)
             p.annotationtype=t
-            p.add(gtk.image_new_from_stock(gtk.STOCK_MEDIA_PLAY, gtk.ICON_SIZE_SMALL_TOOLBAR))
-            p.connect('clicked', restrict_playing, t, b)
-            p.set_size_request(15, self.button_height)
+            p.set_size_request(20, self.button_height)
             self.tooltips.set_tip(p, _("Restrict playing to this annotation-type"))
             layout.put (p, 0, self.layer_position[t])
             
