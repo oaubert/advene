@@ -28,6 +28,8 @@ http://nzlinux.virtuozzo.co.nz/blogs/2005/08/18/using-pangocairo/
 http://laszlok2.blogspot.com/2006/05/prince-of-cairo_28.html
 """
 
+import struct
+
 import gtk
 import cairo
 
@@ -224,6 +226,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                              + config.data.drag_type['TEXT']
                              + config.data.drag_type['STRING']
                              + config.data.drag_type['timestamp']
+                             + config.data.drag_type['tag']
                              ,
                              gtk.gdk.ACTION_LINK)
 
@@ -462,6 +465,38 @@ class TagWidget(GenericColorButtonWidget):
         self.width=60
         GenericColorButtonWidget.__init__(self, element=tag, container=container)
         self.connect("drag_begin", self._drag_begin)
+        self.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                             config.data.drag_type['tag'],
+                             gtk.gdk.ACTION_LINK)
+        # The button can generate drags
+        self.connect("drag_data_get", self.drag_sent)
+
+        # Allow the entry to get drops of type application/x-color
+        self.connect("drag_data_received", self.drag_received)
+        self.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                 gtk.DEST_DEFAULT_HIGHLIGHT |
+                                 gtk.DEST_DEFAULT_ALL,
+                                 config.data.drag_type['color'], gtk.gdk.ACTION_COPY)
+        
+    def drag_sent(self, widget, context, selection, targetType, eventTime):
+        if targetType == config.data.target_type['tag']:
+            selection.set(selection.target, 8, unicode(self.tag))
+        else:
+            self.log("Unknown target type for drag: %d" % targetType)
+        return True
+
+    def drag_received(self, widget, context, x, y, selection, targetType, time):
+        """Handle the drop of a color.
+        """
+        if targetType == config.data.target_type['color']:
+            # The structure consists in 4 unsigned shorts: r, g, b, opacity
+            (r, g, b, opacity)=struct.unpack('HHHH', selection.data)
+            if self.container is not None and hasattr(self.container, 'controller'):
+                c=self.container.controller
+                c.package._tag_colors[self.tag]="#%04x%04x%04x" % (r, g, b)
+                c.notify('TagUpdate', tag=self.tag)
+            return True
+        return False
 
     def needed_size(self):
         """Return the needed size of the widget.
