@@ -307,7 +307,7 @@ class Config(object):
             ):
             self.target_type[name] = typ
             if mime is None:
-                mime = "application/x-advene-%s-uri" % typ
+                mime = "application/x-advene-%s-uri" % name
             self.drag_type[name] = [ ( mime, 0, typ) ]
 
         self.video_extensions = (
