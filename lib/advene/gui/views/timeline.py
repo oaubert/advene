@@ -1409,7 +1409,7 @@ class TimeLine(AdhocView):
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['annotation']
                         + config.data.drag_type['tag']
-                        , gtk.gdk.ACTION_LINK)
+                        , gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
 
         # Handle scroll actions
         def handle_scroll_event(button, event):
