@@ -243,9 +243,6 @@ class TranscriptionEdit(AdhocView):
         b=self.textview.get_buffer()
         return len(b.get_text(*b.get_bounds())) == 0
 
-    def set_color(self, button, color):
-        button.set_color(color)
-
     def toggle_ignore(self, button):
         button.ignore = not button.ignore
         self.update_mark(button)
@@ -253,9 +250,9 @@ class TranscriptionEdit(AdhocView):
 
     def update_mark(self, button):
         if button.ignore:
-            self.set_color(button, self.colors['ignore'])
+            button.set_color(self.colors['ignore'])
         else:
-            self.set_color(button, self.colors['default'])
+            button.set_color(self.colors['default'])
         return
 
     def mark_button_press_cb(self, button, event, anchor=None, child=None):
@@ -506,7 +503,7 @@ class TranscriptionEdit(AdhocView):
                 # Restore the properties of the previous current mark
                 if self.current_mark is not None:
                     self.update_mark(self.current_mark)
-                self.set_color(cm, self.colors['current'])
+                cm.set_color(self.colors['current'])
                 self.current_mark = cm
         else:
             if self.current_mark is not None:
