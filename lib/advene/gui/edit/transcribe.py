@@ -42,6 +42,7 @@ from advene.gui.views import AdhocView
 from advene.gui.util import dialog, image_from_position
 import advene.gui.edit.properties
 from advene.gui.util.completer import Completer
+from advene.gui.widget import GenericColorButtonWidget
 
 class TranscriptionImporter(advene.util.importer.GenericImporter):
     """Transcription importer.
@@ -92,6 +93,8 @@ class TranscriptionEdit(AdhocView):
         self.marks = []
 
         self.current_mark = None
+
+        self.button_height=24
 
         # When modifying an offset with Control+Scroll, store the last value.
         # If play-on-scroll, then set the destination upon Control release
@@ -241,10 +244,7 @@ class TranscriptionEdit(AdhocView):
         return len(b.get_text(*b.get_bounds())) == 0
 
     def set_color(self, button, color):
-        for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
-            button.modify_bg (style, color)
+        button.set_color(color)
 
     def toggle_ignore(self, button):
         button.ignore = not button.ignore
@@ -291,6 +291,9 @@ class TranscriptionEdit(AdhocView):
         if event.button == 1 and event.state & gtk.gdk.CONTROL_MASK:
             # Set current video time
             popup_modify(None, self.controller.player.current_position_value - timestamp)
+            return True
+        elif event.button == 1:
+            popup_goto(child, child.timestamp)
             return True
 
         if event.button != 3:
@@ -365,8 +368,9 @@ class TranscriptionEdit(AdhocView):
         b=self.textview.get_buffer()
         anchor=b.create_child_anchor(it)
         # Create the mark representation
-        child=gtk.Button("")
-        child.connect("clicked", popup_goto)
+        child=GenericColorButtonWidget(container=self)
+        child.default_size=(6, self.button_height)
+        #child.connect("clicked", popup_goto)
         child.connect("button-press-event", self.mark_button_press_cb, anchor, child)
 
         def handle_scroll_event(button, event):
