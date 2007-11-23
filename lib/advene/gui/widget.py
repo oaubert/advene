@@ -82,6 +82,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         self.cached_surface = None
         self.cached_context = None
 
+        self.default_size = (40, 10)
         # Initialize the size
         self.set_size_request(*self.needed_size())
 
@@ -144,7 +145,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
 
         Method to be implemented by subclasses
         """
-        return (40, 10)
+        return self.default_size
 
     def draw(self, context, width, height):
         """Draw the widget.
