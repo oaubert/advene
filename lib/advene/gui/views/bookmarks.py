@@ -215,7 +215,7 @@ class Bookmarks(AdhocView):
 
         e.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['timestamp'],
-                          gtk.gdk.ACTION_LINK)
+                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
 
         box.pack_start(e, expand=False)
 
@@ -274,7 +274,7 @@ class Bookmarks(AdhocView):
         self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
                                   gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK)
+                                  config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
         self.mainbox.connect("drag_data_received", mainbox_drag_received)
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
@@ -299,7 +299,7 @@ class Bookmarks(AdhocView):
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK)
+                        config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
         b.connect("drag_data_received", remove_drag_received)
         hb.pack_start(b, expand=False)
 
