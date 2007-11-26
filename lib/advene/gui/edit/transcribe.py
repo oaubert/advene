@@ -751,7 +751,7 @@ class TranscriptionEdit(AdhocView):
         ti.process_file('transcription')
 
         self.controller.package._modified=True
-        self.controller.notify("PackageLoad", package=ti.package)
+        self.controller.notify("PackageActivate", package=ti.package)
         self.message(_('Converted from file %s :') % self.sourcefile)
         self.controller.log(ti.statistics_formatted())
         # Feedback
