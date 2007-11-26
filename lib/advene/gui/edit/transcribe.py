@@ -83,6 +83,7 @@ class TranscriptionEdit(AdhocView):
             # Marks will be automatically inserted it no keypress occurred in the 3 previous seconds.
             'automatic-mark-insertion-delay': 1500,
             'insert-on-single-click': False,
+            'autoscroll': True,
             }
 
         self.colors = {
@@ -376,6 +377,7 @@ class TranscriptionEdit(AdhocView):
         # Create the mark representation
         child=GenericColorButtonWidget(container=self)
         child.default_size=(6, self.button_height)
+        child.anchor=anchor
         #child.connect("clicked", popup_goto)
         child.connect("button-press-event", self.mark_button_press_cb, anchor, child)
 
@@ -514,6 +516,11 @@ class TranscriptionEdit(AdhocView):
                     self.update_mark(self.current_mark)
                 cm.set_color(self.colors['current'])
                 self.current_mark = cm
+                if self.options['autoscroll']:
+                    # Make sure that the mark is visible
+                    it=self.textview.get_buffer().get_iter_at_child_anchor(cm.anchor)
+                    if it:
+                        self.textview.scroll_to_iter(it, 0.3)
         else:
             if self.current_mark is not None:
                 self.update_mark(self.current_mark)
@@ -787,6 +794,16 @@ class TranscriptionEdit(AdhocView):
             b.set_tooltip(self.tooltips, tooltip)
             b.connect("clicked", callback)
             tb.insert(b, -1)
+
+        def set_autoscroll(t):
+            self.options['autoscroll']=t.get_active()
+            return True
+            
+        b=gtk.ToggleToolButton(stock_id=gtk.STOCK_JUMP_TO)
+        b.set_active(self.options['autoscroll'])
+        b.set_tooltip(self.tooltips, _("Automatically scroll to the mark position when playing"))
+        b.connect('toggled', set_autoscroll)
+        tb.insert(b, -1)
 
         tb.show_all()
         return tb
