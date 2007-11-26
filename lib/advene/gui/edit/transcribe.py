@@ -151,6 +151,7 @@ class TranscriptionEdit(AdhocView):
 
         self.textview.connect("button-press-event", self.button_press_event_cb)
         self.textview.connect("key-press-event", self.key_pressed_cb)
+        self.textview.get_buffer().create_tag("past", background="#dddddd")
 
         # Hook the completer component
         completer=Completer(textview=self.textview, 
@@ -514,12 +515,15 @@ class TranscriptionEdit(AdhocView):
                 if self.current_mark is not None:
                     self.update_mark(self.current_mark)
                 cm.set_color(self.colors['current'])
+                b=self.textview.get_buffer()
+                it=b.get_iter_at_child_anchor(cm.anchor)
+                begin, end = b.get_bounds()
+                b.remove_tag_by_name('past', begin, end)
+                b.apply_tag_by_name('past', begin, it)
+
+                if self.options['autoscroll'] and it:
+                    self.textview.scroll_to_iter(it, 0.3)
                 self.current_mark = cm
-                if self.options['autoscroll']:
-                    # Make sure that the mark is visible
-                    it=self.textview.get_buffer().get_iter_at_child_anchor(cm.anchor)
-                    if it:
-                        self.textview.scroll_to_iter(it, 0.3)
         else:
             if self.current_mark is not None:
                 self.update_mark(self.current_mark)
