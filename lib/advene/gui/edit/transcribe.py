@@ -81,7 +81,7 @@ class TranscriptionEdit(AdhocView):
             'empty-annotations': True, # _("Do not generate annotations for empty text"))
             'delay': config.data.reaction_time,
             # Marks will be automatically inserted it no keypress occurred in the 3 previous seconds.
-            'automatic-mark-insertion-delay': 3000,
+            'automatic-mark-insertion-delay': 1500,
             }
 
         self.colors = {
