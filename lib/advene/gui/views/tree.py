@@ -228,8 +228,8 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
     def on_iter_children(self, node):
         """Return the first child of this node"""
         children = self.nodeChildren(node)
-        if children is None:
-            return children
+        if not children:
+            return None
         else:
             assert len(children), _("No children in on_iter_children()!")
             return children[0]
