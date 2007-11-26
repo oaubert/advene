@@ -152,6 +152,7 @@ class TranscriptionEdit(AdhocView):
         self.textview.connect("button-press-event", self.button_press_event_cb)
         self.textview.connect("key-press-event", self.key_pressed_cb)
         self.textview.get_buffer().create_tag("past", background="#dddddd")
+        self.textview.get_buffer().create_tag("ignored", strikethrough=True)
 
         # Hook the completer component
         completer=Completer(textview=self.textview, 
@@ -257,6 +258,17 @@ class TranscriptionEdit(AdhocView):
     def toggle_ignore(self, button):
         button.ignore = not button.ignore
         self.update_mark(button)
+        b=self.textview.get_buffer()
+        it=b.get_iter_at_child_anchor(button.anchor)
+        if it is None:
+            return button
+        next_anchor, next_it=self.find_following_mark(it)
+        if next_it is None:
+            next_it=b.get_bounds()[1]
+        if button.ignore:
+            b.apply_tag_by_name('ignored', it, next_it)
+        else:
+            b.remove_tag_by_name('ignored', it, next_it)
         return button
 
     def update_mark(self, button):
