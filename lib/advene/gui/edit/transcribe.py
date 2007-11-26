@@ -779,6 +779,14 @@ class TranscriptionEdit(AdhocView):
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
 
+        def center_on_current(*p):
+            # Make sure that the current mark is visible
+            if self.current_mark is not None:
+                it=self.textview.get_buffer().get_iter_at_child_anchor(self.current_mark.anchor)
+                if it:
+                    self.textview.scroll_to_iter(it, 0.2)
+            return True
+
         tb_list = (
             (_("Open"),    _("Open"), gtk.STOCK_OPEN, self.load_transcription_cb),
             (_("Save"),    _("Save"), gtk.STOCK_SAVE, self.save_transcription_cb),
@@ -786,6 +794,7 @@ class TranscriptionEdit(AdhocView):
             (_("Import"), _("Import from annotations"), gtk.STOCK_EXECUTE, self.import_annotations_cb),
             (_("Convert"), _("Convert to annotations"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
             (_("Preferences"), _("Preferences"), gtk.STOCK_PREFERENCES, self.edit_preferences),
+            (_("Center"), _("Shot the current mark"), gtk.STOCK_JUSTIFY_CENTER, center_on_current),
             )
 
         for text, tooltip, icon, callback in tb_list:
@@ -804,6 +813,7 @@ class TranscriptionEdit(AdhocView):
         b.set_tooltip(self.tooltips, _("Automatically scroll to the mark position when playing"))
         b.connect('toggled', set_autoscroll)
         tb.insert(b, -1)
+
 
         tb.show_all()
         return tb
