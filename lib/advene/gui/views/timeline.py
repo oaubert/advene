@@ -1167,7 +1167,7 @@ class TimeLine(AdhocView):
             self.annotation_cb(widget, annotation, event.x)
             return True
         elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-            self.quick_edit(annotation, button=widget)
+            self.controller.gui.edit_element(annotation)
             return True
         elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS and event.state & gtk.gdk.CONTROL_MASK:
             # Control + click : set annotation begin/end time to current time
