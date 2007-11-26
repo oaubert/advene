@@ -809,7 +809,7 @@ class TranscriptionEdit(AdhocView):
             (_("Import"), _("Import from annotations"), gtk.STOCK_EXECUTE, self.import_annotations_cb),
             (_("Convert"), _("Convert to annotations"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
             (_("Preferences"), _("Preferences"), gtk.STOCK_PREFERENCES, self.edit_preferences),
-            (_("Center"), _("Shot the current mark"), gtk.STOCK_JUSTIFY_CENTER, center_on_current),
+            (_("Center"), _("Center on the current mark"), gtk.STOCK_JUSTIFY_CENTER, center_on_current),
             )
 
         for text, tooltip, icon, callback in tb_list:
