@@ -540,3 +540,31 @@ class TagWidget(GenericColorButtonWidget):
         if self.width != w:
             self.reset_surface_size(self.width, self.container.button_height)
             #print "Resetting width", self.width
+
+class TimestampMarkWidget(GenericColorButtonWidget):
+    """ Widget representing an timestamp mark (for note-taking view)
+    """
+    def __init__(self, container=None):
+        GenericColorButtonWidget.__init__(self, container=container)
+        self.default_size=(8, self.container.button_height)
+
+    def draw(self, context, width, height):
+        """Draw the widget in the cache pixmap.
+        """
+        context.rectangle(0, 0, width, height)
+        if self.local_color is not None:
+            color=self.local_color
+            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
+        else:
+            rgba=(1.0, 1.0, 1.0, 1)
+        context.set_source_rgba(*rgba)
+        context.fill()
+        
+        # Draw a playing mark
+        context.set_source_rgba(0, 0, 0, .5)
+        context.set_line_width(1)
+        context.move_to(2, 0)
+        context.line_to(width - 2, height / 2)
+        context.line_to(2, height)
+        context.fill()
+        context.stroke()
