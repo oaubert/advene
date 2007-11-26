@@ -157,18 +157,8 @@ class TagBag(AdhocView):
         return name2color(col)
 
     def append_repr(self, t):
-        def drag_sent(widget, context, selection, targetType, eventTime):
-            if targetType == config.data.target_type['tag']:
-                selection.set(selection.target, 8, unicode(t))
-            else:
-                self.log("Unknown target type for drag: %d" % targetType)
-            return True
-
         b=TagWidget(t, container=self)
         b.update_widget()
-
-        # The button can generate drags
-        b.connect("drag_data_get", drag_sent)
 
         def remove(widget, tag):
             if tag in self.tags:
