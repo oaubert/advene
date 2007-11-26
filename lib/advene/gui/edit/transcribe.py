@@ -42,7 +42,7 @@ from advene.gui.views import AdhocView
 from advene.gui.util import dialog, image_from_position
 import advene.gui.edit.properties
 from advene.gui.util.completer import Completer
-from advene.gui.widget import GenericColorButtonWidget
+from advene.gui.widget import TimestampMarkWidget
 
 class TranscriptionImporter(advene.util.importer.GenericImporter):
     """Transcription importer.
@@ -96,7 +96,7 @@ class TranscriptionEdit(AdhocView):
 
         self.current_mark = None
 
-        self.button_height=24
+        self.button_height=20
 
         # When modifying an offset with Control+Scroll, store the last value.
         # If play-on-scroll, then set the destination upon Control release
@@ -375,8 +375,7 @@ class TranscriptionEdit(AdhocView):
         b=self.textview.get_buffer()
         anchor=b.create_child_anchor(it)
         # Create the mark representation
-        child=GenericColorButtonWidget(container=self)
-        child.default_size=(6, self.button_height)
+        child=TimestampMarkWidget(container=self)
         child.anchor=anchor
         #child.connect("clicked", popup_goto)
         child.connect("button-press-event", self.mark_button_press_cb, anchor, child)
