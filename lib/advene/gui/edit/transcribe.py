@@ -84,6 +84,7 @@ class TranscriptionEdit(AdhocView):
             'automatic-mark-insertion-delay': 1500,
             'insert-on-single-click': False,
             'autoscroll': True,
+            'autoinsert': True,
             }
 
         self.colors = {
@@ -116,7 +117,8 @@ class TranscriptionEdit(AdhocView):
         ew.add_checkbox(_("Play on scroll"), "play-on-scroll", _("Play the new position upon timestamp modification"))
         ew.add_checkbox(_("Generate empty annotations"), "empty-annotations", _("If checked, generate annotations for empty text"))
         ew.add_spin(_("Reaction time"), "delay", _("Reaction time (substracted from current player time)"), -5000, 5000)
-        ew.add_spin(_("Automatic insertion delay"), 'automatic-mark-insertion-delay', _("If not null, timestamp marks will be automatically inserted when text is entered after no interaction since this delay (in ms).\n1000 is typically a good value."), 0, 100000)
+        ew.add_checkbox(_("Auto-insert"), "autoinsert", _("Automatic timestamp mark insertion"))
+        ew.add_spin(_("Automatic insertion delay"), 'automatic-mark-insertion-delay', _("If autoinsert is active, timestamp marks will be automatically inserted when text is entered after no interaction since this delay (in ms).\n1000 is typically a good value."), 0, 100000)
 
         res=ew.popup()
         if res:
@@ -819,14 +821,25 @@ class TranscriptionEdit(AdhocView):
             b.connect("clicked", callback)
             tb.insert(b, -1)
 
-        def set_autoscroll(t):
-            self.options['autoscroll']=t.get_active()
+        def handle_toggle(t, option_name):
+            self.options[option_name]=t.get_active()
             return True
             
         b=gtk.ToggleToolButton(stock_id=gtk.STOCK_JUMP_TO)
         b.set_active(self.options['autoscroll'])
         b.set_tooltip(self.tooltips, _("Automatically scroll to the mark position when playing"))
-        b.connect('toggled', set_autoscroll)
+        b.connect('toggled', handle_toggle, 'autoscroll')
+        b.set_label(_("Autoscroll"))
+        tb.insert(b, -1)
+
+        b=gtk.ToggleToolButton()
+        i=gtk.Image()
+        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'clock.png') ))
+        b.set_icon_widget(i)
+        b.set_label(_("Autoinsert"))
+        b.set_active(self.options['autoinsert'])
+        b.set_tooltip(self.tooltips, _("Automatically insert marks"))
+        b.connect('toggled', handle_toggle, 'autoinsert')
         tb.insert(b, -1)
 
 
@@ -863,7 +876,7 @@ class TranscriptionEdit(AdhocView):
             elif event.keyval == gtk.keysyms.Page_Up:
                 self.goto_previous_mark()
                 return True
-        elif self.options['automatic-mark-insertion-delay']:
+        elif self.options['autoinsert'] and self.options['automatic-mark-insertion-delay']:
             if (gtk.gdk.keyval_to_unicode(event.keyval) and
                 (event.time - self.last_keypress_time >= self.options['automatic-mark-insertion-delay'])):
                 # Insert a mark if the user pressed a character key
