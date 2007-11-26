@@ -87,6 +87,8 @@ class Bookmarks(AdhocView):
 
         if history is None:
             self.history=[]
+        else:
+            self.history=history[:]
         self.comments={}
 
         opt, arg = self.load_parameters(parameters)
