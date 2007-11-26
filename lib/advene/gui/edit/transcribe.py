@@ -877,9 +877,10 @@ class TranscriptionEdit(AdhocView):
                 self.goto_previous_mark()
                 return True
         elif self.options['autoinsert'] and self.options['automatic-mark-insertion-delay']:
-            if (gtk.gdk.keyval_to_unicode(event.keyval) and
-                (event.time - self.last_keypress_time >= self.options['automatic-mark-insertion-delay'])):
-                # Insert a mark if the user pressed a character key
+            if (gtk.gdk.keyval_to_unicode(event.keyval) 
+                and event.keyval != gtk.keysyms.space
+                and (event.time - self.last_keypress_time >= self.options['automatic-mark-insertion-delay'])):
+                # Insert a mark if the user pressed a character key, except space
                 # Is there any text after the cursor ? If so, do not insert the mark
                 b=self.textview.get_buffer()
                 it=b.get_iter_at_mark(b.get_insert())
