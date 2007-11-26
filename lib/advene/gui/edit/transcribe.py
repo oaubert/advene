@@ -82,6 +82,7 @@ class TranscriptionEdit(AdhocView):
             'delay': config.data.reaction_time,
             # Marks will be automatically inserted it no keypress occurred in the 3 previous seconds.
             'automatic-mark-insertion-delay': 1500,
+            'insert-on-single-click': False,
             }
 
         self.colors = {
@@ -110,8 +111,9 @@ class TranscriptionEdit(AdhocView):
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
         ew.add_checkbox(_("Timestamp"), "timestamp", _("Click inserts timestamp marks"))
+        ew.add_checkbox(_("Insert on single-click"), 'insert-on-single-click', _("A single click will insert the mark (else a double click is needed)"))
         ew.add_checkbox(_("Play on scroll"), "play-on-scroll", _("Play the new position upon timestamp modification"))
-        ew.add_checkbox(_("Generate empty annotations"), "empty-annotations", _("Generate annotations for empty text"))
+        ew.add_checkbox(_("Generate empty annotations"), "empty-annotations", _("If checked, generate annotations for empty text"))
         ew.add_spin(_("Reaction time"), "delay", _("Reaction time (substracted from current player time)"), -5000, 5000)
         ew.add_spin(_("Automatic insertion delay"), 'automatic-mark-insertion-delay', _("If not null, timestamp marks will be automatically inserted when text is entered after no interaction since this delay (in ms).\n1000 is typically a good value."), 0, 100000)
 
@@ -201,13 +203,19 @@ class TranscriptionEdit(AdhocView):
         self.create_timestamp_mark(t, it)
 
     def button_press_event_cb(self, textview, event):
-        if event.state & gtk.gdk.CONTROL_MASK:
-            return False
-        if event.button != 1:
-            return False
         if not self.options['timestamp']:
             return False
+        if event.state & gtk.gdk.CONTROL_MASK:
+            return False
+
+        if self.options['insert-on-single-click']:
+            t=gtk.gdk.BUTTON_PRESS
+        else:
+            t=gtk.gdk._2BUTTON_PRESS
+        if not (event.button == 1 and event.type == t):
+            return False            
         textwin=textview.get_window(gtk.TEXT_WINDOW_TEXT)
+
         if event.window != textwin:
             print "Event.window: %s" % str(event.window)
             print "Textwin: %s" % str(textwin)
@@ -237,6 +245,7 @@ class TranscriptionEdit(AdhocView):
             self.controller.update_snapshot(t)
             # Create the timestamp
             self.create_timestamp_mark(t, it)
+            return True
         return False
 
     def buffer_is_empty(self):
