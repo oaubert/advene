@@ -1,3 +1,23 @@
+advene (0.27) unstable; urgency=low
+
+  * Win32 bugfixes (relation creation, timestamp mark colors...)
+  
+  * Timeline:
+  
+     * Double click on an annotation will open its edit window rather than
+       simply edit its content (always available with Return)
+  
+  * Note-taking:
+  
+     * Marks are inserted with double-click
+  
+     * Text automatically scrolls to the current timestamp mark
+  
+     * New buttons: "Center on current mark", "Activate automatic mark
+       insertion" (toggle)
+
+ --
+
 advene (0.26) unstable; urgency=low
 
   * Stable release
