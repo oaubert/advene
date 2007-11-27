@@ -263,21 +263,6 @@ class TimeLine(AdhocView):
         self.layout.connect('scroll_event', self.layout_scroll_cb)
         self.layout.connect('key_press_event', self.layout_key_press_cb)
 
-        # Activate/deactivate annotation tooltips on enter/leave
-        def layout_enter_cb(layout, event):
-            if self.options['annotation-tooltip-activate']:
-                self.annotation_tips.enable()
-            else:
-                self.annotation_tips.disable()
-            return False
-
-        def layout_leave_cb(layout, event):
-            self.annotation_tips.disable()
-            return False
-
-        self.layout.connect('enter_notify_event', layout_enter_cb)
-        self.layout.connect('leave_notify_event', layout_leave_cb)
-
         self.layout.connect('button_press_event', self.layout_button_press_cb)
         self.layout.connect('size_allocate', self.layout_resize_event)
         self.layout.connect('expose_event', self.draw_background)
