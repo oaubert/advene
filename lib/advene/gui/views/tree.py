@@ -166,7 +166,10 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         for i in xrange(1, len(path)):
             idx = path[i]
             children = self.nodeChildren(node)
-            node = children[idx]
+            try:
+                node = children[idx]
+            except IndexError:
+                node=None
         return node
 
     def on_get_tree_path(self, node):
