@@ -27,7 +27,7 @@ function sel(handler)
      }
      if (sch != "")
     {
-        var url = '../schemas/' + sch + '/view/xml_annotationTypes_view';
+        var url = '../schemas/' + sch + '/view/_xml_annotationTypes_view';
         loadXML(url, handler);
     }
 }
@@ -43,7 +43,7 @@ function sel2(handler)
      }
      if (at != "")
     {
-         var url = '../annotationTypes/' + at + '/view/xml_annotations_view';
+         var url = '../annotationTypes/' + at + '/view/_xml_annotations_view';
          loadXML(url, handler);
     }
 }

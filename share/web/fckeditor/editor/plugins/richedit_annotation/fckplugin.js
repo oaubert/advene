@@ -1,6 +1,6 @@
 // Register the related commands.
 
-FCKCommands.RegisterCommand( 'richedit_annotation', new FCKDialogCommand( FCKLang['DlgAdveneIMGTitle'], FCKLang['DlgAdveneIMGBtn'], '/packages/advene/view/richedit_annotation', 700, 600 ) ) ;
+FCKCommands.RegisterCommand( 'richedit_annotation', new FCKDialogCommand( FCKLang['DlgAdveneIMGTitle'], FCKLang['DlgAdveneIMGBtn'], '/packages/advene/view/_richedit_annotation', 700, 600 ) ) ;
 
 
 // Create the "AdveneIMG" toolbar button.
