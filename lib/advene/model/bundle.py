@@ -363,7 +363,7 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
             # Viewable-type should be of the form type-list
             if t.endswith("-list"):
                 t = t[:-5]
-            return _("List of elements of type %s") % t
+            return _("List of %s elements") % t
         
     def _update (self):
         """
