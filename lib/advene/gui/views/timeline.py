@@ -122,9 +122,6 @@ class TimeLine(AdhocView):
             'display-relations': True,
             'display-relation-type': True,
             'display-relation-content': True,
-            # Delay before displaying the annotation tooltip, in ms.
-            'annotation-tooltip-delay': 2000,
-            'annotation-tooltip-activate': True,
             'goto-on-click': True,
             }
         self.controller=controller
@@ -159,13 +156,6 @@ class TimeLine(AdhocView):
         self.list = elements
         self.annotationtypes = annotationtypes
         self.tooltips = gtk.Tooltips()
-        # Annotation-specific tooltips, with a tunable delay
-        self.annotation_tips = gtk.Tooltips()
-        self.annotation_tips.set_delay(self.options['annotation-tooltip-delay'])
-        if self.options['annotation-tooltip-activate']:
-            self.annotation_tips.enable()
-        else:
-            self.annotation_tips.disable()
 
         self.current_marker = None
         # Now that self.list is initialized, we reuse the l variable
@@ -708,7 +698,6 @@ class TimeLine(AdhocView):
             'id': a.id,
             'begin': helper.format_time(a.fragment.begin),
             'end': helper.format_time(a.fragment.end) }
-        self.annotation_tips.set_tip(b, tip)
         self.layout.move(b, self.unit2pixel(a.fragment.begin), self.layer_position[a.type])
         return True
 
@@ -2290,26 +2279,6 @@ class TimeLine(AdhocView):
         self.display_relations_toggle.connect('toggled', handle_toggle, 'display-relations')
         tb.insert(self.display_relations_toggle, -1)
 
-        # Annotation tooltip display toggle
-        def handle_tooltip_toggle(b):
-            v=b.get_active()
-            self.options['annotation-tooltip-activate']=v
-            if v:
-                self.annotation_tips.enable()
-            else:
-                self.annotation_tips.disable()
-            return True
-
-        try:
-            sid=gtk.STOCK_INFO
-        except:
-            sid=gtk.STOCK_HELP
-        self.display_tooltips_toggle=gtk.ToggleToolButton(stock_id=sid)
-        self.display_tooltips_toggle.set_tooltip(self.tooltips, _("Display tooltips for annotations (shortcut: t)"))
-        self.display_tooltips_toggle.connect('toggled', handle_tooltip_toggle)
-        self.display_tooltips_toggle.set_active(self.options['annotation-tooltip-activate'])
-        tb.insert(self.display_tooltips_toggle, -1)
-
         # Separator
         tb.insert(gtk.SeparatorToolItem(), -1)
 
@@ -2528,14 +2497,8 @@ class TimeLine(AdhocView):
         ew.add_checkbox(_("Relation content"), "display-relation-content", _("Display relation content"))
         ew.add_checkbox(_("Highlight"), "highlight", _("Highlight active annotations"))
 
-        ew.add_label(_("Annotation tooltips"))
-        ew.add_checkbox(_("Display annotation tooltips"), 'annotation-tooltip-activate', _("Display tooltips when the mouse gets over an annotation."))
-        ew.add_spin(_("Annotation tooltip delay"), "annotation-tooltip-delay", _("Delay before displaying the tooltip"), 10, 6000)
-
         res=ew.popup()
         if res:
-            self.display_tooltips_toggle.set_active(cache['annotation-tooltip-activate'])
-            self.annotation_tips.set_delay(cache['annotation-tooltip-delay'])
             self.options.update(cache)
         return True
 
