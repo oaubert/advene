@@ -1184,6 +1184,12 @@ class TimeLine(AdhocView):
                 f.begin, f.end = f.end, f.begin
             self.controller.notify('AnnotationEditEnd', annotation=annotation)
             return True
+        elif (event.button == 1 
+              and event.type == gtk.gdk.BUTTON_PRESS 
+              and event.state & gtk.gdk.SHIFT_MASK):
+            # Shift-click: activate annotation
+            self.activate_annotation(annotation, buttons=[ widget ])
+            return True
         elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
             if not self.options['goto-on-click']:
                 return True
@@ -2540,3 +2546,8 @@ class TimeLine(AdhocView):
         """Set the current middle position, in ms.
         """
         self.center_on_position(pos)
+
+    def get_active_annotation_widgets(self):
+        """Return the list of currently active annotation widgets.
+        """
+        return [ w for w in self.layout.get_children() if isinstance(w, AnnotationWidget) and w.active ]
