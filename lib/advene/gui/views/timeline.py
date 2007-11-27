@@ -2220,6 +2220,35 @@ class TimeLine(AdhocView):
 
         return vbox
 
+    def selection_menu(self, button):
+        """Display the menu for the selection.
+        """
+        m=gtk.Menu()
+        l=self.get_active_annotation_widgets()
+        n=len(l)
+        if n == 0:
+            i=gtk.MenuItem(_("No selected annotation"))
+            m.append(i)
+            i.set_sensitive(False)
+        else:
+            i=gtk.MenuItem(_("%d selected annotation(s)") % n)
+            m.append(i)
+            i.set_sensitive(False)
+            i=gtk.SeparatorMenuItem()
+            m.append(i)
+            i=gtk.MenuItem(_("Unselect all annotations"))
+            i.connect('activate', self.unselect_all, l)
+            m.append(i)
+            i=gtk.MenuItem(_("Delete selected annotation"))
+            i.connect('activate', self.selection_delete, l)
+            m.append(i)
+            i=gtk.MenuItem(_("Display selection in a table"))
+            i.connect('activate', self.selection_as_table, l)
+            m.append(i)
+        m.show_all()
+        m.popup(None, None, None, 0, gtk.get_current_event_time())
+        return True
+
     def get_packed_widget (self):
         """Return the widget packed into a scrolledwindow."""
         self.inspector_pane=gtk.HPaned()
@@ -2295,6 +2324,15 @@ class TimeLine(AdhocView):
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['annotation-type'],
                         gtk.gdk.ACTION_MOVE)
+        tb.insert(b, -1)
+        
+        # Selection menu
+        b=gtk.ToolButton()
+        i=gtk.Image()
+        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'selection.png') ))
+        b.set_icon_widget(i)
+        b.set_tooltip(self.tooltips, _("Selection actions"))
+        b.connect("clicked", self.selection_menu)
         tb.insert(b, -1)
 
         # Relation display toggle
@@ -2546,3 +2584,20 @@ class TimeLine(AdhocView):
         """Return the list of currently active annotation widgets.
         """
         return [ w for w in self.layout.get_children() if isinstance(w, AnnotationWidget) and w.active ]
+
+    def unselect_all(self, widget, selection):
+        """Unselect all annotations.
+        """
+        for w in selection:
+            self.desactivate_annotation(w.annotation, buttons=[w])
+        return True
+
+    def selection_delete(self, widget, selection):
+        for w in selection:
+            self.controller.delete_element(w.annotation)
+        return True
+
+    def selection_as_table(self, widget, selection):
+        self.controller.gui.open_adhoc_view('table', elements=[ w.annotation for w in selection ], destination='east')
+        return True
+
