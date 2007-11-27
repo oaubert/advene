@@ -1675,7 +1675,9 @@ class TimeLine(AdhocView):
             # values relative to the whole layout size
             x=long(self.adjustment.value + x)
             y=long(widget.get_parent().get_vadjustment().value + y)
-            if y < self.button_height or event.type == gtk.gdk._2BUTTON_PRESS:
+            if ((self.options['goto-on-click'] and event.type == gtk.gdk.BUTTON_PRESS)
+                or event.type == gtk.gdk._2BUTTON_PRESS
+                or y < self.button_height):
                 c=self.controller
                 pos = c.create_position (value=self.pixel2unit(x),
                                          key=c.player.MediaTime,
