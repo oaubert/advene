@@ -80,16 +80,30 @@ class FinderColumn:
             ls.append(row)
         return ls
 
+    def close(self):
+        """Close this column, and all following ones.
+        """
+        if self.next is not None:
+            self.next.close()
+        self.widget.destroy()
+
     def update(self, node=None):
         self.node=node
-        self.next=None
         self.liststore.clear()
         if self.node is None:
             return True
         self.label.set_label(self.name)
         for row in self.get_valid_members(node):
             self.liststore.append(row)
-        # Destroy all following columns
+
+        if self.next is not None:
+            # There is a next column. Should we still display it ?
+            if not [ r 
+                     for r in self.liststore
+                     if r[self.COLUMN_NODE] == self.next.node ]:
+                # The next node is no more in the current elements.
+                self.next.close()
+                self.next=None
         return True
 
     def on_column_activation(self, widget):
@@ -182,10 +196,83 @@ class Finder(AdhocView):
         self.controller=controller
 
         self.model=DetailedTreeModel(controller=controller, package=self.package)
-        # 640 / 4
-        self.column_width=160
+        # 640 / 3
+        self.column_width=210
         self.rootcolumn=None
         self.widget=self.build_widget()
+
+    def refresh(self):
+        c=self.rootcolumn
+        c.update(c.node)
+        while c.next is not None:
+            c=c.next
+            c.update(c.node)
+        return True
+
+    def update_element(self, element=None, event=None):
+        if event.endswith('Create'):
+            self.model.update_element(element, created=True)
+            self.refresh()
+        elif event.endswith('EditEnd'):
+            self.model.update_element(element, created=False)
+            self.refresh()
+        elif event.endswith('Delete'):
+            self.model.remove_element(element)
+            cb=self.rootcolumn.next
+            while cb is not None:
+                if [ r 
+                     for r in cb.liststore
+                     if r[FinderColumn.COLUMN_NODE][DetailedTreeModel.COLUMN_ELEMENT] == element ]:
+                    # The element is present in the list of
+                    # children. Remove the next column if necessary
+                    # and update the children list.
+                    cb.update(node=cb.node)
+                    if cb.next is not None and cb.next.node[DetailedTreeModel.COLUMN_ELEMENT] == element:
+                        cb.next.close()
+
+                cb=cb.next
+            #self.update_model(element.rootPackage)
+        else:
+            return "Unknown event %s" % event
+        return
+
+    def update_annotation(self, annotation=None, event=None):
+        """Update the annotation.
+        """
+        self.update_element(annotation, event)
+        return
+
+    def update_relation(self, relation=None, event=None):
+        """Update the relation.
+        """
+        self.update_element(relation, event)
+        return
+
+    def update_view(self, view=None, event=None):
+        self.update_element(view, event)
+        return
+
+    def update_query(self, query=None, event=None):
+        self.update_element(query, event)
+        return
+
+    def update_schema(self, schema=None, event=None):
+        self.update_element(schema, event)
+        return
+
+    def update_annotationtype(self, annotationtype=None, event=None):
+        self.update_element(annotationtype, event)
+        return
+
+    def update_relationtype(self, relationtype=None, event=None):
+        """Update the relationtype
+        """
+        self.update_element(relationtype, event)
+        return
+
+    def update_resource(self, resource=None, event=None):
+        self.update_element(resource, event)
+        return
 
     def update_model(self, package=None):
         if package is None:
@@ -216,6 +303,7 @@ class Finder(AdhocView):
         elif columnbrowser.next is None:
             if isinstance(node[DetailedTreeModel.COLUMN_ELEMENT], Annotation):
                 col=AnnotationDisplay(controller=self.controller, annotation=node[DetailedTreeModel.COLUMN_ELEMENT])
+                col.node=node
                 col.next=None
                 def update(c, node):
                     c.set_annotation(node[DetailedTreeModel.COLUMN_ELEMENT])
@@ -233,9 +321,8 @@ class Finder(AdhocView):
         else:
             # Delete all next+1 columns (we reuse the next one)
             cb=columnbrowser.next.next
-            while cb is not None:
-                cb.widget.destroy()
-                cb=cb.next
+            if cb is not None:
+                cb.close()
             columnbrowser.next.update(node)
 
         # Scroll the columns
