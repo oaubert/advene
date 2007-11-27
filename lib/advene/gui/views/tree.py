@@ -76,36 +76,46 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         """
         # FIXME: there is still a bug with ImportBundles (that are
         # mutable and thus cannot be dict keys
-        print "Removing element ", str(e)
+        #print "Removing element ", e.id
 
         if isinstance(e, View):
             # Remove the element from the list view and refresh list view
             parent=self.nodeParent(e)
             #parent=self.get_package().views
             path=self.on_get_path(parent)
-            print "before row changed"
+            #print "before row changed"
             self.row_changed(path, self.get_iter(path))
-            print "after row changed"
+            #print "after row changed"
             return
 
         parent=None
         for p in self.childrencache:
             if e in self.childrencache[p]:
                 parent=p
-                print "Found parent ", str(parent)
+                #print "Found parent ", str(parent)
                 break
         if parent is None:
             # Could not find the element in the cache.
             # It was not yet displayed
             print "Parent not found"
         else:
-            # We can determine its path
-            path=list(self.on_get_path(parent))
-            path.append(self.childrencache[parent].index(e))
-            path=tuple(path)
-
-            print "Path: ", str(path)
-            self.row_deleted(path)
+            # We can determine its path. Get the index for the deleted
+            # element from the childrencache.
+            path=self.on_get_path(parent)
+            if path is not None:
+                #print "Parent path", path
+                #print "cache", self.childrencache[parent]
+                try:
+                    idx=self.childrencache[parent].index(e)
+                except ValueError:
+                    # The children was not in the cache. Should not
+                    # normally happen, but who knows...
+                    idx=None
+                if idx is not None:
+                    path=path + (idx, )
+                    # Now that we have the old path for the deleted
+                    # element, we can notify the row_deleted signal.
+                    self.row_deleted(path)
             del (self.childrencache[parent])
         return True
 
