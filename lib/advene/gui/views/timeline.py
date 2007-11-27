@@ -255,15 +255,18 @@ class TimeLine(AdhocView):
         self.fraction_adj.connect ("changed", self.fraction_event)
 
         self.layout_size=(None, None)
+        self.layout_selection_corner=(None, None)
 
         self.layout = gtk.Layout ()
-        if config.data.os == 'win32':
-                self.layout.add_events(gtk.gdk.BUTTON_PRESS_MASK)
-        #to catch mouse clicks on win32
+
         self.layout.connect('scroll_event', self.layout_scroll_cb)
         self.layout.connect('key_press_event', self.layout_key_press_cb)
 
+        self.layout.add_events(gtk.gdk.BUTTON_PRESS_MASK)
+        self.layout.add_events(gtk.gdk.BUTTON_RELEASE_MASK)
         self.layout.connect('button_press_event', self.layout_button_press_cb)
+        self.layout.connect('button_release_event', self.layout_button_release_cb)
+
         self.layout.connect('size_allocate', self.layout_resize_event)
         self.layout.connect('expose_event', self.draw_background)
         self.layout.connect_after('expose_event', self.draw_relation_lines)
@@ -1646,6 +1649,26 @@ class TimeLine(AdhocView):
     def layout_button_press_cb(self, widget=None, event=None):
         """Handle mouse click in timeline window.
         """
+        if event.button == 3:
+            self.context_cb (timel=self, position=self.pixel2unit(event.x), height=event.y)
+            return True
+        elif event.button == 1:
+            # Store x, y coordinates, to be able to decide upon button release.
+
+            # Note: event.(x|y) may be relative to a child widget, so
+            # we must determine the pointer position
+            x, y = widget.get_pointer()
+            # Convert x, y (relative to the layout allocation) into
+            # values relative to the whole layout size
+            x=long(self.adjustment.value + x)
+            y=long(widget.get_parent().get_vadjustment().value + y)
+            self.layout_selection_corner=(x, y)
+            return True
+        return False
+
+    def layout_button_release_cb(self, widget=None, event=None):
+        """Handle mouse button release in timeline window.
+        """
         if event.button == 1:
             # Left click button in the upper part of the layout
             # or double-click anywhere in the background
@@ -1658,7 +1681,31 @@ class TimeLine(AdhocView):
             # values relative to the whole layout size
             x=long(self.adjustment.value + x)
             y=long(widget.get_parent().get_vadjustment().value + y)
-            if ((self.options['goto-on-click'] and event.type == gtk.gdk.BUTTON_PRESS)
+
+            if self.layout_selection_corner[0] is None:
+                # Some bug here, should not happen except in the case
+                # of random interaction.
+                return False
+            # Normalize x1,x2,y1,y2
+            x1=min(x, self.layout_selection_corner[0])
+            x2=max(x, self.layout_selection_corner[0])
+            y1=min(y, self.layout_selection_corner[1])
+            y2 = max(y, self.layout_selection_corner[1])
+            self.layout_selection_corner = (None, None)
+
+            if (abs(x2-x1) > 20 and abs(y2-y1) > 20):
+                # The cursor has been significantly moved. Consider it is a selection.
+                for widget in self.layout.get_children():
+                    if not isinstance(widget, AnnotationWidget):
+                        continue
+                    x=self.layout.child_get_property(widget, 'x')
+                    y=self.layout.child_get_property(widget, 'y')
+                    w,h=widget.window.get_size()
+                    if ( x >= x1 and x + w <= x2
+                         and y >= y1 and y + h <= y2):
+                        self.activate_annotation(widget.annotation, buttons=[ widget ])
+                return True
+            elif ((self.options['goto-on-click'] and event.type == gtk.gdk.BUTTON_PRESS)
                 or event.type == gtk.gdk._2BUTTON_PRESS
                 or y < self.button_height):
                 c=self.controller
@@ -1667,9 +1714,6 @@ class TimeLine(AdhocView):
                                          origin=c.player.AbsolutePosition)
                 c.update_status (status="set", position=pos)
                 return True
-        if event.button == 3:
-            self.context_cb (timel=self, position=self.pixel2unit(event.x), height=event.y)
-            return True
         return False
 
     def context_cb (self, timel=None, position=None, height=None):
