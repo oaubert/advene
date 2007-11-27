@@ -94,6 +94,7 @@ import advene.gui.views.timeline
 import advene.gui.views.table
 import advene.gui.views.logwindow
 import advene.gui.views.interactivequery
+import advene.gui.views.finder
 from advene.gui.views.bookmarks import Bookmarks
 from advene.gui.edit.rules import EditRuleSet
 from advene.gui.edit.dvdselect import DVDSelect
@@ -617,6 +618,7 @@ class AdveneGUI (Connect):
                   advene.gui.plugins.contenthandlers,
                   advene.gui.views.timeline,
                   advene.gui.views.browser,
+                  advene.gui.views.finder,
                   advene.gui.views.interactivequery,
                   advene.gui.views.table,
                   advene.gui.views.bookmarks,
