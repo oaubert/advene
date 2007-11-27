@@ -1187,8 +1187,11 @@ class TimeLine(AdhocView):
         elif (event.button == 1 
               and event.type == gtk.gdk.BUTTON_PRESS 
               and event.state & gtk.gdk.SHIFT_MASK):
-            # Shift-click: activate annotation
-            self.activate_annotation(annotation, buttons=[ widget ])
+            # Shift-click: toggle annotation selection/activation
+            if widget.active:
+                self.desactivate_annotation (annotation, buttons=[ widget ])
+            else:
+                self.activate_annotation (annotation, buttons=[ widget ])
             return True
         elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
             if not self.options['goto-on-click']:
