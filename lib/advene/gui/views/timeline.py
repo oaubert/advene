@@ -1527,9 +1527,17 @@ class TimeLine(AdhocView):
         while t <= self.maximum:
             x = u2p(t)
 
+            def display_image(widget, event):
+                """Lazy-loading of images
+                """
+                widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=1000), height=self.button_height))
+                widget.disconnect(widget.expose_signal)
+                widget.expose_signal=None
+                return False
+
             i=gtk.Image()
-            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(t, epsilon=1000), height=self.button_height))
             i.mark = t
+            i.expose_signal=i.connect('expose_event', display_image)
             i.pos = 1
             i.show()
             self.layout.put(i, x, i.pos)
