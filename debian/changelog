@@ -7,6 +7,11 @@ advene (0.27) unstable; urgency=low
      * Double click on an annotation will open its edit window rather than
        simply edit its content (always available with Return)
   
+     * It is possible to select multiple annotations, either with
+       shift-click on the annotation widget or by defining a region around the
+       annotations. It is then possible to edit, delete or zoom over selected 
+       annotations.
+  
   * Note-taking:
   
      * Marks are inserted with double-click
@@ -16,6 +21,9 @@ advene (0.27) unstable; urgency=low
      * New buttons: "Center on current mark", "Activate automatic mark
        insertion" (toggle)
 
+  * New action: Pronounce (through Text-To-Speech). Works on MacOS X and Linux 
+    (with festival).
+  
  --
 
 advene (0.26) unstable; urgency=low
