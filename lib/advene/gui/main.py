@@ -345,6 +345,8 @@ class AdveneGUI (Connect):
         self.last_slow_position = 0
         
         self.current_annotation = None
+        # Internal rule used for annotation loop
+        self.annotation_loop_rule=None
 
         # Dictionary of registered adhoc views
         self.registered_adhoc_views={}
@@ -889,10 +891,25 @@ class AdveneGUI (Connect):
                 if self.current_annotation:
                     # If we are already in the current annotation, do not goto
                     goto=not (self.controller.player.current_position_value in self.current_annotation.fragment)
-                    self.loop_on_annotation_gui(self.current_annotation, goto=goto)
+
+                    def action_loop(context, target):
+                        if (self.loop_toggle_button.get_active() 
+                            and context.globals['annotation'] == self.current_annotation):
+                            self.controller.update_status('set', self.current_annotation.fragment.begin)
+                        return True
+
+                    def reg():
+                        if not self.controller.player.current_position_value in self.current_annotation.fragment:
+                            self.controller.update_status('set', self.current_annotation.fragment.begin)
+                        self.annotation_loop_rule=self.controller.event_handler.internal_rule (event="AnnotationEnd",
+                                                                                               method=action_loop)
+                        return True
+                    self.controller.queue_action(reg)
                 else:
-                    # No annotation was previously defined, deactivate the button
+                    # No annotation was previously defined, deactivate the button, unset the rule
                     b.set_active(False)
+                    if self.annotation_loop_rule is not None:
+                        self.controller.event_handler.remove_rule(self.annotation_loop_rule, type_="internal")
             return True
 
         self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
@@ -1086,7 +1103,7 @@ class AdveneGUI (Connect):
         return tb
 
     def loop_on_annotation_gui(self, a, goto=False):
-        """GUI version of controller.loop_on_annotation
+        """Loop over an annotation
 
         If "goto" is True, then go to the beginning of the annotation
         In addition to the standard "Loop on annotation", it updates a
@@ -1094,21 +1111,6 @@ class AdveneGUI (Connect):
         """
         self.set_current_annotation(a)
         self.loop_toggle_button.set_active(True)
-        def action_loop(controller, position):
-            if self.loop_toggle_button.get_active() and self.current_annotation == a:
-                # Reactivate the loop.
-                self.loop_on_annotation_gui(a, goto=True)
-                return True
-            else:
-                return False
-        # Note: the goto action has to be done *before* registering the videotime action, since 
-        # setting a position resets the action queue.
-        def reg():
-            if goto:
-                self.controller.update_status('set', a.fragment.begin, notify=False)
-            self.controller.register_videotime_action(a.fragment.end, action_loop)
-            return True
-        self.controller.queue_action(reg)
         return True
     
     def debug_cb(self, window, event, *p):
@@ -1814,11 +1816,6 @@ class AdveneGUI (Connect):
         mute=self.controller.player.sound_is_muted()
         if self.audio_mute.get_active() != mute:
             self.audio_mute.set_active(mute)
-
-        # Update the loop toggle button, if the bookmark has been
-        # reset by user interaction            
-        if not self.controller.videotime_bookmarks and self.loop_toggle_button.get_active():
-            self.loop_toggle_button.set_active(False)
 
         def do_save(aliases):
             for alias in aliases:
