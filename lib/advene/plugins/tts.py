@@ -31,6 +31,8 @@ name="Text-To-Speech actions"
 def register(controller=None):
     if config.data.os == 'linux' and FestivalTTSEngine.can_run():
         engine=FestivalTTSEngine(controller)
+    elif config.data.os == 'darwin':
+        engine=MacOSXTTSEngine(controller)
     else:
         engine=TTSEngine(controller)
     controller.register_action(RegisteredAction(
@@ -123,6 +125,20 @@ class FestivalTTSEngine(TTSEngine):
         if self.festival_pipe is None:
             self.festival_pipe = subprocess.Popen([ self.festival_path, '--pipe' ], shell=False, stdin=subprocess.PIPE).stdin
         self.festival_pipe.write('(SayText "%s")' % sentence.replace('"', ''))
+        return True
+
+
+class MacOSXTTSEngine(TTSEngine):
+    """MacOSX TTSEngine.
+    """
+    def can_run():
+        """Can this engine run ?
+        """
+        return (config.data.os == 'darwin')
+    can_run=staticmethod(can_run)
+
+    def pronounce (self, sentence):
+        subprocess.call( [ '/usr/bin/say', sentence ] )
         return True
 
 """
