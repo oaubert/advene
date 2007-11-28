@@ -2004,8 +2004,9 @@ class TimeLine(AdhocView):
                 self.controller.update_status("resume")
             else:
                 l=[ a.fragment.begin for a in at.annotations ]
-                l.sort()
-                self.controller.update_status("start", position=l[0])
+                if l:
+                    l.sort()
+                    self.controller.update_status("start", position=l[0])
         return True
 
     def update_legend_widget(self, layout):
