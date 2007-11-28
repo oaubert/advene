@@ -190,8 +190,8 @@ class Config(object):
             # Scroll increment in ms
             'scroll-increment': 100,
             'timeline': { 
-                'font-size': 8,
-                'button-height': 24,
+                'font-size': 10,
+                'button-height': 20,
                 'interline-height': 6
                 },
             # File history
