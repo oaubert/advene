@@ -1178,9 +1178,7 @@ class TimeLine(AdhocView):
             else:
                 self.activate_annotation (annotation, buttons=[ widget ])
             return True
-        elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
-            if not self.options['goto-on-click']:
-                return True
+        elif self.options['goto-on-click'] and event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
             self.controller.gui.set_current_annotation(annotation)
             # Goto annotation if not already playing it
             p=self.controller.player.current_position_value
@@ -1732,7 +1730,7 @@ class TimeLine(AdhocView):
                          and y >= y1 and y + h <= y2):
                         self.activate_annotation(widget.annotation, buttons=[ widget ])
                 return True
-            elif (self.options['goto-on-click'] or y < self.button_height):
+            elif y < self.button_height:
                 c=self.controller
                 pos = c.create_position (value=self.pixel2unit(x),
                                          key=c.player.MediaTime,
