@@ -258,17 +258,18 @@ class TimeLine(AdhocView):
         self.fraction_adj.connect ("changed", self.fraction_event)
 
         self.layout_size=(None, None)
-        self.layout_selection_corner=(None, None)
+        # Coordinates of the selected region.
+        self.layout_selection=[ [None, None], [None, None] ]
 
         self.layout = gtk.Layout ()
 
         self.layout.connect('scroll_event', self.layout_scroll_cb)
         self.layout.connect('key_press_event', self.layout_key_press_cb)
 
-        self.layout.add_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self.layout.add_events(gtk.gdk.BUTTON_RELEASE_MASK)
+        self.layout.add_events( gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.BUTTON1_MOTION_MASK )
         self.layout.connect('button_press_event', self.layout_button_press_cb)
         self.layout.connect('button_release_event', self.layout_button_release_cb)
+        self.layout.connect('motion_notify_event', self.layout_motion_notify_cb)
 
         self.layout.connect('size_allocate', self.layout_resize_event)
         self.layout.connect('expose_event', self.draw_background)
@@ -1686,7 +1687,7 @@ class TimeLine(AdhocView):
                                          origin=c.player.AbsolutePosition)
                 c.update_status (status="set", position=pos)
             else:
-                self.layout_selection_corner=(x, y)
+                self.layout_selection=[ [x, y], [None, None] ]
             return True
         return False
 
@@ -1706,17 +1707,19 @@ class TimeLine(AdhocView):
             x=long(self.adjustment.value + x)
             y=long(widget.get_parent().get_vadjustment().value + y)
 
-            if self.layout_selection_corner[0] is None:
+            if self.layout_selection[0][0] is None:
                 # Some bug here, should not happen except in the case
                 # of random interaction. Just simulate it was a click.
-                self.layout_selection_corner=(x+1, y+1)
+                self.layout_selection=[ [x, y], [x+1, y+1] ]
             # Normalize x1,x2,y1,y2
-            x1=min(x, self.layout_selection_corner[0])
-            x2=max(x, self.layout_selection_corner[0])
-            y1=min(y, self.layout_selection_corner[1])
-            y2 = max(y, self.layout_selection_corner[1])
-            self.layout_selection_corner = (None, None)
-
+            x1=min(x, self.layout_selection[0][0])
+            x2=max(x, self.layout_selection[0][0])
+            y1=min(y, self.layout_selection[0][1])
+            y2=max(y, self.layout_selection[0][1])
+            # Remove the selection rectangle
+            self.draw_selection_rectangle(invert=True)
+            self.layout_selection=[ [None, None], [None, None] ]
+            
             if (abs(x2-x1) > 20 and abs(y2-y1) > 20):
                 # The cursor has been significantly moved. Consider it is a selection.
                 for widget in self.layout.get_children():
@@ -1737,6 +1740,48 @@ class TimeLine(AdhocView):
                 c.update_status (status="set", position=pos)
                 return True
         return False
+
+    def draw_selection_rectangle(self, invert=False):
+        drawable=self.layout.bin_window
+        gc=drawable.new_gc(line_width=1, line_style=gtk.gdk.LINE_ON_OFF_DASH)
+
+        if self.layout_selection[1][0] is not None:
+            # Invert the previous selection
+            #col=pixmap.get_colormap().alloc_color(self.color)
+            if invert:
+                gc.set_function(gtk.gdk.INVERT)
+            else:
+                gc.set_function(gtk.gdk.COPY)
+                
+            x1=min(self.layout_selection[0][0], self.layout_selection[1][0])
+            x2=max(self.layout_selection[0][0], self.layout_selection[1][0])
+            y1=min(self.layout_selection[0][1], self.layout_selection[1][1])
+            y2=max(self.layout_selection[0][1], self.layout_selection[1][1])
+
+            # Display the starting mark
+            drawable.draw_rectangle(gc, False, x1, y1, x2-x1, y2-y1)
+        return True
+        
+    # Draw rectangle during mouse movement
+    def layout_motion_notify_cb(self, widget, event):
+        if self.layout_selection[0][0] is None:
+            return False
+        if event.is_hint:
+            x, y, state = event.window.get_pointer()
+        else:
+            x = event.x
+            y = event.y
+            state = event.state
+
+        if state & gtk.gdk.BUTTON1_MASK:
+            if self.layout_selection[1][0] is not None:
+                # Invert the previous selection
+                self.draw_selection_rectangle(invert=True)
+            self.layout_selection[1][0] = int(x)
+            self.layout_selection[1][1] = int(y)
+            # Draw the new shape
+            self.draw_selection_rectangle(invert=False)
+        return True
 
     def context_cb (self, timel=None, position=None, height=None):
         """Display the context menu for a right-click in the timeline window.
