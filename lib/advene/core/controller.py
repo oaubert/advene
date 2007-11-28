@@ -362,6 +362,9 @@ class AdveneController:
 
     def loop_on_annotation(self, a):
         """Activate the looping on the given annotation.
+
+        Note that this does not have any way to stop the looping. See
+        gui.main.loop_on_annotation_gui for a better version.
         """
         def action_loop(controller, position):
             """Transient action for annotation loop.
