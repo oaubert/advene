@@ -351,7 +351,8 @@ class Menu:
 
         # Common to all other elements:
         add_item(_("Edit"), self.edit_element, element)
-        add_item(_("Browse"), self.browse_element, element)
+        if config.data.preferences['expert-mode']:
+            add_item(_("Browse"), self.browse_element, element)
         add_item(_("Query"), self.query_element, element)
 
         if not self.readonly:
