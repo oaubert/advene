@@ -134,6 +134,7 @@ class TimeLine(AdhocView):
         # Default position in ms.
         default_position=None
         default_zoom=1.0
+        pane_position=None
         for n, v in arg:
             if n == 'annotation-type':
                 at=helper.get_id(self.controller.package.annotationTypes,
@@ -150,6 +151,8 @@ class TimeLine(AdhocView):
                 default_position=int(float(v))
             elif n == 'zoom':
                 default_zoom=float(v)
+            elif n == 'pane-position':
+                pane_position=int(float(v))
         if ats:
             annotationtypes=ats
 
@@ -321,8 +324,11 @@ class TimeLine(AdhocView):
             self.adjustment.set_value(u2p(default_position))
             self.resize_legend_widget(self.legend)
             # Set annotation inspector width, so that it does not auto-resize
-            w, h = self.widget.window.get_size()
-            self.inspector_pane.set_position(w - 160)
+            if pane_position is None:
+                w, h = self.widget.window.get_size()
+                self.inspector_pane.set_position(w - 160)
+            else:
+                self.inspector_pane.set_position(pane_position)
             self.widget.disconnect(self.expose_signal)
             return False
         self.expose_signal=self.widget.connect('expose-event', set_default_parameters)
@@ -333,6 +339,7 @@ class TimeLine(AdhocView):
         arguments = [ ('annotation-type', at.id) for at in self.annotationtypes ]
         arguments.append( ('position', self.pixel2unit(self.adjustment.value) ) )
         arguments.append( ('zoom', self.fraction_adj.value) )
+        arguments.append( ('pane-position', self.inspector_pane.get_position()) )
         return self.options, arguments
 
     def draw_background(self, layout, event):
@@ -2239,7 +2246,7 @@ class TimeLine(AdhocView):
             i=gtk.MenuItem(_("Unselect all annotations"))
             i.connect('activate', self.unselect_all, l)
             m.append(i)
-            i=gtk.MenuItem(_("Delete selected annotation"))
+            i=gtk.MenuItem(_("Delete selected annotations"))
             i.connect('activate', self.selection_delete, l)
             m.append(i)
             i=gtk.MenuItem(_("Display selection in a table"))
