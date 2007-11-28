@@ -1677,7 +1677,16 @@ class TimeLine(AdhocView):
             # values relative to the whole layout size
             x=long(self.adjustment.value + x)
             y=long(widget.get_parent().get_vadjustment().value + y)
-            self.layout_selection_corner=(x, y)
+
+            if event.type == gtk.gdk._2BUTTON_PRESS:
+                # Double click in the layout: in all cases, goto the position
+                c=self.controller
+                pos = c.create_position (value=self.pixel2unit(x),
+                                         key=c.player.MediaTime,
+                                         origin=c.player.AbsolutePosition)
+                c.update_status (status="set", position=pos)
+            else:
+                self.layout_selection_corner=(x, y)
             return True
         return False
 
@@ -1699,8 +1708,8 @@ class TimeLine(AdhocView):
 
             if self.layout_selection_corner[0] is None:
                 # Some bug here, should not happen except in the case
-                # of random interaction.
-                return False
+                # of random interaction. Just simulate it was a click.
+                self.layout_selection_corner=(x+1, y+1)
             # Normalize x1,x2,y1,y2
             x1=min(x, self.layout_selection_corner[0])
             x2=max(x, self.layout_selection_corner[0])
@@ -1720,9 +1729,7 @@ class TimeLine(AdhocView):
                          and y >= y1 and y + h <= y2):
                         self.activate_annotation(widget.annotation, buttons=[ widget ])
                 return True
-            elif ((self.options['goto-on-click'] and event.type == gtk.gdk.BUTTON_PRESS)
-                or event.type == gtk.gdk._2BUTTON_PRESS
-                or y < self.button_height):
+            elif (self.options['goto-on-click'] or y < self.button_height):
                 c=self.controller
                 pos = c.create_position (value=self.pixel2unit(x),
                                          key=c.player.MediaTime,
