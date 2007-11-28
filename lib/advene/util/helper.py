@@ -701,3 +701,14 @@ def recursive_mkdir(d):
     if not os.path.exists(parent):
         recursive_mkdir(parent)
     os.mkdir(d)
+
+def find_in_path(name):
+    """Return the fullpath of the filename name if found in $PATH
+
+    Return None if name cannot be found.
+    """
+    for d in os.environ['PATH'].split(os.path.pathsep):
+        fullname=os.path.join(d, name)
+        if os.path.exists(fullname):
+            return fullname
+    return None
