@@ -275,6 +275,7 @@ class ViewBook(AdhocView):
                 (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location)),
                 (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location)),
                 (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location)),
+                (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('bookmarks', history=[ a.fragment.begin ], destination=self.location)),
                 ):
                 i=gtk.MenuItem(label)
                 i.connect('activate', action)
