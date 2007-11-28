@@ -2230,6 +2230,20 @@ class TimeLine(AdhocView):
     def selection_menu(self, button):
         """Display the menu for the selection.
         """
+        def center_and_zoom(m, sel):
+            begin=min( [ w.annotation.fragment.begin for w in sel ] )
+            end=max( [ w.annotation.fragment.begin for w in sel ] )
+
+            # Deactivate autoscroll...
+            self.set_autoscroll_mode(0)
+
+            (w, h) = self.layout.window.get_size ()        
+            self.scale.value=1.3 * (end - begin) / w
+
+            # Center on annotation
+            self.center_on_position( (begin + end) / 2 )
+            return True
+
         m=gtk.Menu()
         l=self.get_active_annotation_widgets()
         n=len(l)
@@ -2251,6 +2265,9 @@ class TimeLine(AdhocView):
             m.append(i)
             i=gtk.MenuItem(_("Display selection in a table"))
             i.connect('activate', self.selection_as_table, l)
+            m.append(i)
+            i=gtk.MenuItem(_("Center and zoom on selection"))
+            i.connect('activate', center_and_zoom, l)
             m.append(i)
         m.show_all()
         m.popup(None, None, None, 0, gtk.get_current_event_time())
