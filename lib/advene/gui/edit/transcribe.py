@@ -530,13 +530,13 @@ class TranscriptionEdit(AdhocView):
                     self.update_mark(self.current_mark)
                 cm.set_color(self.colors['current'])
                 b=self.textview.get_buffer()
-                it=b.get_iter_at_child_anchor(cm.anchor)
                 begin, end = b.get_bounds()
                 b.remove_tag_by_name('past', begin, end)
-                b.apply_tag_by_name('past', begin, it)
-
-                if self.options['autoscroll'] and it:
-                    self.textview.scroll_to_iter(it, 0.3)
+                it=b.get_iter_at_child_anchor(cm.anchor)
+                if it is not None:
+                    b.apply_tag_by_name('past', begin, it)
+                    if self.options['autoscroll']:
+                        self.textview.scroll_to_iter(it, 0.3)
                 self.current_mark = cm
         else:
             if self.current_mark is not None:
