@@ -2278,6 +2278,9 @@ class TimeLine(AdhocView):
             i=gtk.MenuItem(_("Center and zoom on selection"))
             i.connect('activate', center_and_zoom, l)
             m.append(i)
+            i=gtk.MenuItem(_("Edit selected annotations"))
+            i.connect('activate', self.selection_edit, l)
+            m.append(i)
         m.show_all()
         m.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
@@ -2634,3 +2637,10 @@ class TimeLine(AdhocView):
         self.controller.gui.open_adhoc_view('table', elements=[ w.annotation for w in selection ], destination='east')
         return True
 
+    def selection_edit(self, widget, selection):
+        if not self.controller.gui.edit_accumulator:
+            self.controller.gui.open_adhoc_view('editaccumulator', destination='fareast')
+        a=self.controller.gui.edit_accumulator
+        for w in selection:
+            a.edit(w.annotation)
+        return True
