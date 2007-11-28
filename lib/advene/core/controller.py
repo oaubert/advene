@@ -360,21 +360,6 @@ class AdveneController:
         self.usertime_bookmarks.append( (time.time() + delay / 1000.0, action) )
         return True
 
-    def loop_on_annotation(self, a):
-        """Activate the looping on the given annotation.
-
-        Note that this does not have any way to stop the looping. See
-        gui.main.loop_on_annotation_gui for a better version.
-        """
-        def action_loop(controller, position):
-            """Transient action for annotation loop.
-            """
-            self.queue_action(controller.update_status, 'set', a.fragment.begin, notify=False)
-            self.queue_action(controller.loop_on_annotation, a)
-            return True
-        self.register_videotime_action( a.fragment.end, action_loop )
-        return True
-
     def restrict_playing(self, at=None):
         """Restrict playing to the given annotation-type.
 
