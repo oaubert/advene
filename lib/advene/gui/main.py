@@ -1095,10 +1095,12 @@ class AdveneGUI (Connect):
         self.set_current_annotation(a)
         self.loop_toggle_button.set_active(True)
         def action_loop(controller, position):
-            if self.loop_toggle_button.get_active():
+            if self.loop_toggle_button.get_active() and self.current_annotation == a:
                 # Reactivate the loop.
                 self.loop_on_annotation_gui(a, goto=True)
-            return True
+                return True
+            else:
+                return False
         # Note: the goto action has to be done *before* registering the videotime action, since 
         # setting a position resets the action queue.
         def reg():
