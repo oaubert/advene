@@ -18,14 +18,14 @@
 """Module displaying the contents of an annotation.
 """
 
-# Advene part
-from advene.gui.views import AdhocView
-
+import gtk
+import gobject
 from gettext import gettext as _
+
+import advene.core.config as config
+from advene.gui.views import AdhocView
 import advene.util.helper as helper
 from advene.gui.util import png_to_pixbuf
-
-import gtk
 
 name="Annotation display plugin"
 
@@ -74,7 +74,8 @@ class AnnotationDisplay(AdhocView):
             d={ 'title': _("No annotation"), 
                 'begin': '--:--:--:--', 
                 'end': '--:--:--:--', 
-                'contents': '' }
+                'contents': '',
+                'imagecontents': None}
         else:
             col=self.controller.get_element_color(self.annotation)
             if col:
@@ -83,11 +84,40 @@ class AnnotationDisplay(AdhocView):
                 title='Annotation <b>%s</b>' % self.annotation.id
             d={ 'title': title,
                 'begin': helper.format_time(self.annotation.fragment.begin),
-                'end': helper.format_time(self.annotation.fragment.end),
-                'contents': self.annotation.content.data }
+                'end': helper.format_time(self.annotation.fragment.end) }
+            if self.annotation.content.mimetype.startswith('image/'):
+                # SVG autodetection does not seem to work too well. Let's help it.
+                if 'svg' in self.annotation.content.mimetype:
+                    loader = gtk.gdk.PixbufLoader('svg')
+                else:
+                    loader = gtk.gdk.PixbufLoader()
+                try:
+                    loader.write (self.annotation.content.data, len (self.annotation.content.data))
+                    loader.close ()
+                    pixbuf = loader.get_pixbuf ()                    
+                    #width = pixbuf.get_width()
+                    #height = long(100.0 * pixbuf.get_height() / pixbuf.get_width())
+                    #pixbuf=pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+                except gobject.GError:
+                    # The PNG data was invalid.
+                    pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+                d['contents']=''
+                d['imagecontents']=pixbuf
+            else:
+                d['contents']=self.annotation.content.data
+                d['imagecontents']=None
+
         for k, v in d.iteritems():
             if k == 'title':
                 self.label[k].set_markup(v)
+            elif k == 'imagecontents':
+                if v is None:
+                    self.sw['imagecontents'].hide()
+                    self.sw['contents'].show()
+                else:
+                    self.sw['imagecontents'].show_all()
+                    self.sw['contents'].hide()
+                    self.label['imagecontents'].set_from_pixbuf(d['imagecontents'])
             else:
                 self.label[k].set_text(v)
         if self.annotation is not None:
@@ -103,6 +133,7 @@ class AnnotationDisplay(AdhocView):
         v=gtk.VBox()
 
         self.label={}
+        self.sw={}
 
         h=gtk.HBox()
         self.label['title']=gtk.Label()
@@ -134,10 +165,23 @@ class AnnotationDisplay(AdhocView):
         sw=gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         sw.add_with_viewport(c)
-        f.add(sw)
+        self.sw['contents']=sw
+
+        image=self.label['imagecontents']=gtk.Image()
+
+        swi=gtk.ScrolledWindow()
+        swi.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        swi.add_with_viewport(image)
+        self.sw['imagecontents']=swi
+
+        vb=gtk.VBox()
+        vb.add(sw)
+        vb.add(swi)
+
+        f.add(vb)
         v.add(f)
 
         self.refresh()
         v.show_all()
-
+        image.hide()
         return v
