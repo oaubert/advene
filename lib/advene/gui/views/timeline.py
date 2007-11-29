@@ -1624,10 +1624,6 @@ class TimeLine(AdhocView):
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
             return True
-        elif event.keyval == gtk.keysyms.t:
-            # Toggle tooltips display
-            self.display_tooltips_toggle.set_active(not self.display_tooltips_toggle.get_active())
-            return True
         return False
 
     def layout_drag_received(self, widget, context, x, y, selection, targetType, time):
