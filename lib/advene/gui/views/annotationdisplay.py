@@ -94,10 +94,11 @@ class AnnotationDisplay(AdhocView):
                 try:
                     loader.write (self.annotation.content.data, len (self.annotation.content.data))
                     loader.close ()
-                    pixbuf = loader.get_pixbuf ()                    
-                    #width = pixbuf.get_width()
-                    #height = long(100.0 * pixbuf.get_height() / pixbuf.get_width())
-                    #pixbuf=pixbuf.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+                    p = loader.get_pixbuf ()
+                    width = p.get_width()
+                    height = p.get_height()
+                    pixbuf=png_to_pixbuf (self.controller.package.imagecache[self.annotation.fragment.begin]).scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+                    p.composite(pixbuf, 0, 0, width, height, 0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
                 except gobject.GError:
                     # The PNG data was invalid.
                     pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
