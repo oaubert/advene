@@ -970,6 +970,16 @@ class TimeLine(AdhocView):
                 self.create_relation(an, self.transmuted_annotation, relationtype)
             return self.transmuted_annotation
 
+        def copy_selection(i, sel, typ):
+            for an in sel:
+                self.transmuted_annotation=self.controller.transmute_annotation(an,
+                                                                                typ,
+                                                                                delete=False)
+            self.unselect_all()
+            return self.transmuted_annotation
+
+        selection=[ w.annotation for w in self.get_selected_annotation_widgets() ]
+
         # Popup a menu to propose the drop options
         menu=gtk.Menu()
 
@@ -1021,6 +1031,13 @@ class TimeLine(AdhocView):
                     sm.append(sitem)
                 menu.append(item)
                 item.set_submenu(sm)
+
+        if selection and source in selection:
+            item=gtk.SeparatorMenuItem()
+            menu.append(item)
+            item=gtk.MenuItem(_("Duplicate selection to type %s") % self.controller.get_title(dest))
+            item.connect('activate', copy_selection, selection, dest)
+            menu.append(item)
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -2304,7 +2321,7 @@ class TimeLine(AdhocView):
             return True
 
         m=gtk.Menu()
-        l=self.get_active_annotation_widgets()
+        l=self.get_selected_annotation_widgets()
         n=len(l)
         if n == 0:
             i=gtk.MenuItem(_("No selected annotation"))
@@ -2666,14 +2683,16 @@ class TimeLine(AdhocView):
         """
         self.center_on_position(pos)
 
-    def get_active_annotation_widgets(self):
+    def get_selected_annotation_widgets(self):
         """Return the list of currently active annotation widgets.
         """
         return [ w for w in self.layout.get_children() if isinstance(w, AnnotationWidget) and w.active ]
 
-    def unselect_all(self, widget, selection):
+    def unselect_all(self, widget=None, selection=None):
         """Unselect all annotations.
         """
+        if selection is None:
+            selection=self.get_selected_annotation_widgets()
         for w in selection:
             self.desactivate_annotation(w.annotation, buttons=[w])
         return True
