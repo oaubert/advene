@@ -889,9 +889,6 @@ class AdveneGUI (Connect):
             """
             if b.get_active():
                 if self.current_annotation:
-                    # If we are already in the current annotation, do not goto
-                    goto=not (self.controller.player.current_position_value in self.current_annotation.fragment)
-
                     def action_loop(context, target):
                         if (self.loop_toggle_button.get_active() 
                             and context.globals['annotation'] == self.current_annotation):
@@ -899,6 +896,7 @@ class AdveneGUI (Connect):
                         return True
 
                     def reg():
+                        # If we are already in the current annotation, do not goto it
                         if not self.controller.player.current_position_value in self.current_annotation.fragment:
                             self.controller.update_status('set', self.current_annotation.fragment.begin)
                         self.annotation_loop_rule=self.controller.event_handler.internal_rule (event="AnnotationEnd",
