@@ -334,6 +334,17 @@ class ResourceColumn(FinderColumn):
                 'type': helper.get_type(self.element),
                 'title': self.controller.get_title(self.element),
                 'id': self.element.id })        
+        self.update_preview()
+        return True
+
+    def update_preview(self):
+        self.preview.foreach(self.preview.remove)
+        if self.element.mimetype.startswith('image/'):
+            i=gtk.Image()
+            pixbuf=gtk.gdk.pixbuf_new_from_file(self.element.file_)
+            i.set_from_pixbuf(pixbuf)
+            self.preview.add(i)
+            i.show()
         return True
 
     def build_widget(self):
@@ -344,6 +355,8 @@ class ResourceColumn(FinderColumn):
         b=self.label['edit']=gtk.Button(_("Edit resource"))
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
         vbox.pack_start(b, expand=False)
+        self.preview=gtk.VBox()
+        vbox.add(self.preview)
         vbox.show_all()
         return vbox
 CLASS2COLUMN[ResourceData]=ResourceColumn
