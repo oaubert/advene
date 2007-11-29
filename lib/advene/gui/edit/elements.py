@@ -52,6 +52,7 @@ from advene.gui.views.tagbag import TagBag
 from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
 from advene.gui.util.completer import Completer
 import advene.gui.popup
+from advene.gui.widget import AnnotationRepresentation, RelationRepresentation
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
 
@@ -2031,51 +2032,6 @@ class EditRelationsForm(EditForm):
             a=AnnotationRepresentation(other, controller=self.controller)
             t.attach(a, 1, 2, i, i + 1)
         return t
-
-class AnnotationRepresentation(gtk.Button):
-    """Representation for an annotation.
-    """
-    def __init__(self, annotation, controller):
-        super(AnnotationRepresentation, self).__init__()
-        self.annotation=annotation
-        self.controller=controller
-        self.add(self.controller.gui.get_illustrated_text(text=self.controller.get_title(annotation),
-                                                          position=annotation.fragment.begin,
-                                                          vertical=False,
-                                                          height=20))
-        self.connect("button_press_event", self.button_press_handler, annotation)
-
-    def button_press_handler(self, widget, event, annotation):
-        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-            menu=advene.gui.popup.Menu(annotation, controller=self.controller)
-            menu.popup()
-            return True
-        elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-            self.controller.gui.edit_element(annotation)
-            return True
-        return False
-
-class RelationRepresentation(gtk.Button):
-    """Representation for a relation.
-    """
-    arrow={ 'to': u'\u2192', 'from': u'\u2190' }
-
-    def __init__(self, relation, controller, direction='to'):
-        self.relation=relation
-        self.controller=controller
-        self.direction=direction
-        super(RelationRepresentation, self).__init__(u'%s %s %s' % (self.arrow[direction], controller.get_title(relation), self.arrow[direction]))
-        self.connect("button_press_event", self.button_press_handler, relation)
-
-    def button_press_handler(self, widget, event, relation):
-        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
-            menu=advene.gui.popup.Menu(relation, controller=self.controller)
-            menu.popup()
-            return True
-        elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-            self.controller.gui.edit_element(relation)
-            return True
-        return False
 
 if __name__ == "__main__":
     class Foo:
