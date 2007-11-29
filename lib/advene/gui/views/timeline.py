@@ -983,23 +983,28 @@ class TimeLine(AdhocView):
         # Popup a menu to propose the drop options
         menu=gtk.Menu()
 
+        dest_title=self.controller.get_title(dest)
         if source.type != dest:
-            item=gtk.MenuItem(_("Duplicate annotation to type %s") % self.controller.get_title(dest))
+            item=gtk.MenuItem(_("Duplicate annotation to type %s") % dest_title)
             item.connect('activate', copy_annotation, source, dest)
             menu.append(item)
 
-            item=gtk.MenuItem(_("Move annotation to type %s") % self.controller.get_title(dest))
+            item=gtk.MenuItem(_("Move annotation to type %s") % dest_title)
             item.connect('activate', move_annotation, source, dest)
             menu.append(item)
             if source.relations:
                 item.set_sensitive(False)
 
         if position is not None and abs(position-source.fragment.begin) > 1000:
-            item=gtk.MenuItem(_("Duplicate annotation at %s") % helper.format_time(position))
+            item=gtk.MenuItem(_("Duplicate to type %(type)s at %(position)s") % { 
+                    'type': dest_title,
+                    'position': helper.format_time(position) })
             item.connect('activate', copy_annotation, source, dest, position)
             menu.append(item)
 
-            item=gtk.MenuItem(_("Move annotation at %s") % helper.format_time(position))
+            item=gtk.MenuItem(_("Move to type %(type)s at %(position)s") % { 
+                        'type': dest_title,
+                        'position': helper.format_time(position) })
             item.connect('activate', move_annotation, source, dest, position)
             menu.append(item)
             if source.relations and source.type != dest:
@@ -1035,7 +1040,7 @@ class TimeLine(AdhocView):
         if selection and source in selection:
             item=gtk.SeparatorMenuItem()
             menu.append(item)
-            item=gtk.MenuItem(_("Duplicate selection to type %s") % self.controller.get_title(dest))
+            item=gtk.MenuItem(_("Duplicate selection to type %s") % dest_title)
             item.connect('activate', copy_selection, selection, dest)
             menu.append(item)
 
