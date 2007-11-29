@@ -37,9 +37,8 @@ def register(controller):
     controller.register_viewclass(Finder)
 
 class FinderColumn:
-    COLUMN_TITLE=0
-    COLUMN_NODE=1
-    COLUMN_COLOR=2
+    """Abstract FinderColumn class.
+    """
     def __init__(self, controller=None, node=None, callback=None, parent=None):
         self.controller=controller
         self.node=node
@@ -48,14 +47,36 @@ class FinderColumn:
         self.next=None
         self.widget=self.build_widget()
 
+    def close(self):
+        """Close this column, and all following ones.
+        """
+        if self.next is not None:
+            self.next.close()
+        self.widget.destroy()
+
     def get_name(self):
         if self.node is None:
             return "FIXME"
         return self.node[self.COLUMN_TITLE]
     name=property(fget=get_name, doc="Displayed name for the element")
             
-    def get_widget(self):
-        return self.widget
+    def update(self, node=None):
+        self.node=node
+        return True
+
+    def get_name(self):
+        if self.node is None:
+            return "FIXME"
+        return self.node[self.COLUMN_TITLE]
+    name=property(fget=get_name, doc="Displayed name for the element")
+
+    def build_widget(self):
+        return gtk.Label("Generic finder column")
+
+class ModelColumn(FinderColumn):
+    COLUMN_TITLE=0
+    COLUMN_NODE=1
+    COLUMN_COLOR=2
 
     def get_valid_members(self, el):
         """Return the list of valid members for the element.
@@ -81,13 +102,6 @@ class FinderColumn:
             ls.append(row)
         return ls
 
-    def close(self):
-        """Close this column, and all following ones.
-        """
-        if self.next is not None:
-            self.next.close()
-        self.widget.destroy()
-
     def update(self, node=None):
         self.node=node
         self.liststore.clear()
@@ -110,9 +124,8 @@ class FinderColumn:
     def on_column_activation(self, widget):
         # Delete all next columns
         cb=self.next
-        while cb is not None:
-            cb.widget.destroy()
-            cb=cb.next
+        if cb:
+            cb.close()
         self.next=None
         return True
 
@@ -184,6 +197,26 @@ class FinderColumn:
         vbox.show_all()
         return vbox
 
+class AnnotationColumn(FinderColumn):
+    def update(self, node=None):
+        self.node=node
+        self.view.set_annotation(node[DetailedTreeModel.COLUMN_ELEMENT])
+        return True
+
+    def build_widget(self):
+        self.view=AnnotationDisplay(controller=self.controller, annotation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
+        return self.view.widget
+
+class RelationColumn(FinderColumn):
+    def update(self, node=None):
+        self.node=node
+        self.view.set_relation(node[DetailedTreeModel.COLUMN_ELEMENT])
+        return True
+
+    def build_widget(self):
+        self.view=RelationDisplay(controller=self.controller, relation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
+        return self.view.widget
+
 class Finder(AdhocView):
     view_name = _("Package finder")
     view_id = 'finder'
@@ -223,7 +256,7 @@ class Finder(AdhocView):
             while cb is not None:
                 if [ r 
                      for r in cb.liststore
-                     if r[FinderColumn.COLUMN_NODE][DetailedTreeModel.COLUMN_ELEMENT] == element ]:
+                     if r[ModelColumn.COLUMN_NODE][DetailedTreeModel.COLUMN_ELEMENT] == element ]:
                     # The element is present in the list of
                     # children. Remove the next column if necessary
                     # and update the children list.
@@ -303,29 +336,16 @@ class Finder(AdhocView):
             self.rootcolumn.next=None
         elif columnbrowser.next is None:
             if isinstance(node[DetailedTreeModel.COLUMN_ELEMENT], Annotation):
-                col=AnnotationDisplay(controller=self.controller, annotation=node[DetailedTreeModel.COLUMN_ELEMENT])
-                col.node=node
-                col.next=None
-                def update(c, node):
-                    c.node=node
-                    c.set_annotation(node[DetailedTreeModel.COLUMN_ELEMENT])
-                    return True
-                col.update = update.__get__(col)
+                clazz=AnnotationColumn
             elif isinstance(node[DetailedTreeModel.COLUMN_ELEMENT], Relation):
-                col=RelationDisplay(controller=self.controller, relation=node[DetailedTreeModel.COLUMN_ELEMENT])
-                col.node=node
-                col.next=None
-                def update(c, node):
-                    c.node=node
-                    c.set_relation(node[DetailedTreeModel.COLUMN_ELEMENT])
-                    return True
-                col.update = update.__get__(col)
+                clazz=RelationColumn
             else:
-                # Create a new columnbrowser
-                col=FinderColumn(controller=self.controller, 
-                                 node=node, 
-                                 callback=self.clicked_callback, 
-                                 parent=columnbrowser)
+                clazz=ModelColumn
+            # Create a new columnbrowser
+            col=clazz(controller=self.controller, 
+                      node=node, 
+                      callback=self.clicked_callback, 
+                      parent=columnbrowser)
             col.widget.set_property("width-request", self.column_width)
             self.hbox.pack_start(col.widget, expand=False)
             columnbrowser.next=col
@@ -373,12 +393,12 @@ class Finder(AdhocView):
 
         self.hbox = gtk.HBox()
 
-        self.rootcolumn=FinderColumn(controller=self.controller,
+        self.rootcolumn=ModelColumn(controller=self.controller,
                                      node=self.model[0],
                                      callback=self.clicked_callback,
                                      parent=None)
         self.rootcolumn.widget.set_property("width-request", self.column_width)
-        self.hbox.pack_start(self.rootcolumn.get_widget(), expand=False)
+        self.hbox.pack_start(self.rootcolumn.widget, expand=False)
 
         self.sw.add_with_viewport(self.hbox)
 
