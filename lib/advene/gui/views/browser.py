@@ -350,18 +350,3 @@ class Browser(AdhocView):
 
         #vbox.connect('destroy', debug)
         return vbox
-
-if __name__ == "__main__":
-    from advene.model.package import Package
-    if len(sys.argv) < 2:
-        print _("Should provide a package name")
-        sys.exit(1)
-
-    package = Package (uri=sys.argv[1])
-
-    browser = Browser(element=package)
-
-    p=browser.popup()
-    p.connect ("destroy", lambda e: gtk.main_quit())
-
-    gtk.main ()
