@@ -26,6 +26,8 @@ from advene.gui.views.relationdisplay import RelationDisplay
 from advene.model.schema import AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
+from advene.model.resources import ResourceData
+from advene.model.query import Query
 import advene.gui.popup
 import advene.util.helper as helper
 
@@ -58,6 +60,8 @@ class FinderColumn:
         if self.next is not None:
             self.next.close()
         self.widget.destroy()
+        if self.previous is not None:
+            self.previous.next=None
 
     def get_name(self):
         if self.node is None:
@@ -289,6 +293,61 @@ class ViewColumn(FinderColumn):
         return vbox
 CLASS2COLUMN[View]=ViewColumn
 
+class QueryColumn(FinderColumn):
+    def __init__(self, controller=None, node=None, callback=None, parent=None):
+        FinderColumn.__init__(self, controller, node, callback, parent)
+        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+        self.update(node)
+
+    def update(self, node=None):
+        self.node=node
+        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+
+        self.label['title'].set_markup(_("%(type)s <b>%(title)s</b>\nId: %(id)s") % {
+                'type': helper.get_type(self.element),
+                'title': self.controller.get_title(self.element),
+                'id': self.element.id })        
+        return True
+
+    def build_widget(self):
+        vbox=gtk.VBox()
+        self.label={}
+        self.label['title']=gtk.Label()
+        vbox.pack_start(self.label['title'], expand=False)
+        b=self.label['edit']=gtk.Button(_("Edit view"))
+        b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
+        vbox.pack_start(b, expand=False)
+        vbox.show_all()
+        return vbox
+CLASS2COLUMN[Query]=QueryColumn
+
+class ResourceColumn(FinderColumn):
+    def __init__(self, controller=None, node=None, callback=None, parent=None):
+        FinderColumn.__init__(self, controller, node, callback, parent)
+        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+        self.update(node)
+
+    def update(self, node=None):
+        self.node=node
+        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+        self.label['title'].set_markup(_("%(type)s <b>%(title)s</b>\nId: %(id)s") % {
+                'type': helper.get_type(self.element),
+                'title': self.controller.get_title(self.element),
+                'id': self.element.id })        
+        return True
+
+    def build_widget(self):
+        vbox=gtk.VBox()
+        self.label={}
+        self.label['title']=gtk.Label()
+        vbox.pack_start(self.label['title'], expand=False)
+        b=self.label['edit']=gtk.Button(_("Edit resource"))
+        b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
+        vbox.pack_start(b, expand=False)
+        vbox.show_all()
+        return vbox
+CLASS2COLUMN[ResourceData]=ResourceColumn
+
 class Finder(AdhocView):
     view_name = _("Package finder")
     view_id = 'finder'
@@ -422,7 +481,15 @@ class Finder(AdhocView):
             cb=columnbrowser.next.next
             if cb is not None:
                 cb.close()
-            columnbrowser.next.update(node)
+            # Check if the column is still appropriate for the node
+            clazz=CLASS2COLUMN.get(type(node[DetailedTreeModel.COLUMN_ELEMENT]), ModelColumn)
+            if not isinstance(columnbrowser.next, clazz):
+                # The column is not appropriate for the new node.
+                # Close it and reopen it.
+                columnbrowser.next.close()
+                self.clicked_callback(columnbrowser, node)
+            else:
+                columnbrowser.next.update(node)
 
         # Scroll the columns
         adj=self.sw.get_hadjustment()
