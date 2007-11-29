@@ -567,3 +567,81 @@ class TimestampMarkWidget(GenericColorButtonWidget):
         context.line_to(2, height)
         context.fill()
         context.stroke()
+
+class AnnotationRepresentation(gtk.Button):
+    """Representation for an annotation.
+    """
+    def __init__(self, annotation, controller):
+        super(AnnotationRepresentation, self).__init__()
+        self.annotation=annotation
+        self.controller=controller
+        self.add(self.controller.gui.get_illustrated_text(text=self.controller.get_title(annotation),
+                                                          position=annotation.fragment.begin,
+                                                          vertical=False,
+                                                          height=20))
+        self.connect("button_press_event", self.button_press_handler, annotation)
+        self.connect("drag_data_get", self.drag_sent)
+        # The widget can generate drags
+        self.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                             config.data.drag_type['annotation']
+                             + config.data.drag_type['uri-list']
+                             + config.data.drag_type['text-plain']
+                             + config.data.drag_type['TEXT']
+                             + config.data.drag_type['STRING']
+                             + config.data.drag_type['timestamp']
+                             + config.data.drag_type['tag']
+                             ,
+                             gtk.gdk.ACTION_LINK)
+
+    def drag_sent(self, widget, context, selection, targetType, eventTime):
+        """Handle the drag-sent event.
+        """
+        if targetType == config.data.target_type['annotation']:
+            selection.set(selection.target, 8, widget.annotation.uri)
+        elif targetType == config.data.target_type['uri-list']:
+            c=self.controller.build_context(here=widget.annotation)
+            uri=c.evaluateValue('here/absolute_url')
+            selection.set(selection.target, 8, uri)
+        elif (targetType == config.data.target_type['text-plain']
+              or targetType == config.data.target_type['TEXT']
+              or targetType == config.data.target_type['STRING']):
+            selection.set(selection.target, 8, widget.annotation.content.data)
+        elif targetType == config.data.target_type['timestamp']:
+            selection.set(selection.target, 8, str(widget.annotation.fragment.begin))
+        else:
+            return False
+        return True
+        
+
+    def button_press_handler(self, widget, event, annotation):
+        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            menu=advene.gui.popup.Menu(annotation, controller=self.controller)
+            menu.popup()
+            return True
+        elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            self.controller.gui.edit_element(annotation)
+            return True
+        return False
+
+class RelationRepresentation(gtk.Button):
+    """Representation for a relation.
+    """
+    arrow={ 'to': u'\u2192', 'from': u'\u2190' }
+
+    def __init__(self, relation, controller, direction='to'):
+        self.relation=relation
+        self.controller=controller
+        self.direction=direction
+        super(RelationRepresentation, self).__init__(u'%s %s %s' % (self.arrow[direction], controller.get_title(relation), self.arrow[direction]))
+        self.connect("button_press_event", self.button_press_handler, relation)
+
+    def button_press_handler(self, widget, event, relation):
+        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            menu=advene.gui.popup.Menu(relation, controller=self.controller)
+            menu.popup()
+            return True
+        elif event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            self.controller.gui.edit_element(relation)
+            return True
+        return False
+
