@@ -22,6 +22,7 @@
 from advene.gui.views.tree import DetailedTreeModel
 from advene.gui.views import AdhocView
 from advene.gui.views.annotationdisplay import AnnotationDisplay
+from advene.gui.views.relationdisplay import RelationDisplay
 from advene.model.schema import AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 import advene.gui.popup
@@ -306,7 +307,17 @@ class Finder(AdhocView):
                 col.node=node
                 col.next=None
                 def update(c, node):
+                    c.node=node
                     c.set_annotation(node[DetailedTreeModel.COLUMN_ELEMENT])
+                    return True
+                col.update = update.__get__(col)
+            elif isinstance(node[DetailedTreeModel.COLUMN_ELEMENT], Relation):
+                col=RelationDisplay(controller=self.controller, relation=node[DetailedTreeModel.COLUMN_ELEMENT])
+                col.node=node
+                col.next=None
+                def update(c, node):
+                    c.node=node
+                    c.set_relation(node[DetailedTreeModel.COLUMN_ELEMENT])
                     return True
                 col.update = update.__get__(col)
             else:
