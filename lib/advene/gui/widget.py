@@ -62,7 +62,6 @@ class GenericColorButtonWidget(gtk.DrawingArea):
                         gtk.gdk.BUTTON_PRESS_MASK |
                         gtk.gdk.BUTTON_RELEASE_MASK |
                         gtk.gdk.BUTTON1_MOTION_MASK |
-                        gtk.gdk.BUTTON3_MOTION_MASK |
                         gtk.gdk.KEY_PRESS_MASK |
                         gtk.gdk.KEY_RELEASE_MASK |
                         gtk.gdk.FOCUS_CHANGE_MASK |
