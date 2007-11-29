@@ -247,7 +247,7 @@ class ViewColumn(FinderColumn):
         if t == 'static':
             self.label['activate'].set_label(_("Open in webbrowser"))
             self.label['info'].set_markup(_("View applied to %s\n") % self.element.matchFilter['class'])
-            if not self.element.matchFilter['class'] ('package', '*'):
+            if not self.element.matchFilter['class'] in ('package', '*'):
                 self.label['activate'].set_sensitive(False)
         elif t == 'dynamic':
             self.label['info'].set_text('')
