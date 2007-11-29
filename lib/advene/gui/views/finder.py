@@ -314,7 +314,7 @@ class QueryColumn(FinderColumn):
         self.label={}
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
-        b=self.label['edit']=gtk.Button(_("Edit view"))
+        b=self.label['edit']=gtk.Button(_("Edit query"))
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
         vbox.pack_start(b, expand=False)
         vbox.show_all()
