@@ -1350,6 +1350,7 @@ class GenericContentHandler (ContentHandler):
         self.fname=None
         self.view = None
         self.parent=None
+        self.data=self.element.data
         self.tooltips=gtk.Tooltips()
 
     def set_editable (self, boolean):
@@ -1360,15 +1361,32 @@ class GenericContentHandler (ContentHandler):
         self.fname = fname
         return fname
 
+    def update_preview(self):
+        self.preview.foreach(self.preview.remove)
+        if self.element.mimetype.startswith('image/'):
+            i=gtk.Image()
+            if self.fname is None:
+                # Load the element content
+                loader = gtk.gdk.PixbufLoader()
+                try:
+                    loader.write (self.data, len (self.data))
+                    loader.close ()
+                    pixbuf = loader.get_pixbuf ()
+                except gobject.GError:
+                    # The PNG data was invalid.
+                    pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+            else:
+                pixbuf=gtk.gdk.pixbuf_new_from_file(self.fname)
+            i.set_from_pixbuf(pixbuf)
+            self.preview.add(i)
+            i.show()
+        return True
+
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if not self.editable:
             return False
-        if self.fname:
-            size=os.stat(self.fname).st_size
-            f=open(self.fname, 'rb')
-            self.element.data = f.read(size + 2)
-            f.close()
+        self.element.data=self.data
         return True
 
     def key_pressed_cb (self, win, event):
@@ -1392,18 +1410,25 @@ class GenericContentHandler (ContentHandler):
             fname=dialog.get_filename(default_file=self.fname)
         if fname is not None:
             try:
-                f=open(fname, 'rb')
+                f=open(fname, 'r')
             except IOError, e:
                 dialog.message_dialog(
                     _("Cannot read the data:\n%s") % unicode(e),
                     icon=gtk.MESSAGE_ERROR)
                 return True
             self.set_filename(fname)
-            self.element.data=f.read()
+
+            size=os.stat(self.fname).st_size
+            f=open(self.fname, 'rb')
+            self.data = f.read(size + 2)
+            f.close()
+
+            self.update_preview()
         return True
 
     def content_reload(self, b=None):
         self.content_open(fname=self.fname)
+        self.update_preview()
         return True
 
     def content_save(self, b=None, fname=None):
@@ -1432,7 +1457,7 @@ class GenericContentHandler (ContentHandler):
         return True
 
     def get_view (self, compact=False):
-        """Generate a view widget for editing text attribute."""
+        """Generate a view widget for editing any content (by saving/loading to/from a file)."""
         vbox=gtk.VBox()
 
         tb=gtk.Toolbar()
@@ -1464,6 +1489,9 @@ class GenericContentHandler (ContentHandler):
         vbox.connect ("key-press-event", self.key_pressed_cb)
 
         vbox.pack_start(self.filename_entry, expand=False)
+        self.preview=gtk.VBox()
+        vbox.pack_start(self.preview, expand=True)
+        self.update_preview()
         return vbox
 config.data.register_content_handler(GenericContentHandler)
 
