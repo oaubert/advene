@@ -25,7 +25,9 @@ from advene.gui.views.annotationdisplay import AnnotationDisplay
 from advene.gui.views.relationdisplay import RelationDisplay
 from advene.model.schema import AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
+from advene.model.view import View
 import advene.gui.popup
+import advene.util.helper as helper
 
 from gettext import gettext as _
 
@@ -35,6 +37,9 @@ name="Package finder view plugin"
 
 def register(controller):
     controller.register_viewclass(Finder)
+
+# Matching between element classes and the FinderColumn class
+CLASS2COLUMN={}
 
 class FinderColumn:
     """Abstract FinderColumn class.
@@ -206,6 +211,7 @@ class AnnotationColumn(FinderColumn):
     def build_widget(self):
         self.view=AnnotationDisplay(controller=self.controller, annotation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
         return self.view.widget
+CLASS2COLUMN[Annotation]=AnnotationColumn
 
 class RelationColumn(FinderColumn):
     def update(self, node=None):
@@ -216,6 +222,72 @@ class RelationColumn(FinderColumn):
     def build_widget(self):
         self.view=RelationDisplay(controller=self.controller, relation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
         return self.view.widget
+CLASS2COLUMN[Relation]=RelationColumn
+
+class ViewColumn(FinderColumn):
+    def __init__(self, controller=None, node=None, callback=None, parent=None):
+        FinderColumn.__init__(self, controller, node, callback, parent)
+        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+        self.update(node)
+
+    def update(self, node=None):
+        self.node=node
+        self.element=self.node[DetailedTreeModel.COLUMN_ELEMENT]
+
+        self.label['title'].set_markup(_("View <b>%(title)s</b>\nId: %(id)s") % {
+                'title': self.controller.get_title(self.element),
+                'id': self.element.id })
+        
+        t=helper.get_view_type(self.element)
+        self.label['activate'].set_sensitive(True)
+        if t == 'static':
+            self.label['activate'].set_label(_("Open in webbrowser"))
+            self.label['info'].set_markup(_("View applied to %s\n") % self.element.matchFilter['class'])
+            if not self.element.matchFilter['class'] ('package', '*'):
+                self.label['activate'].set_sensitive(False)
+        elif t == 'dynamic':
+            self.label['info'].set_text('')
+            self.label['activate'].set_label(_("Activate"))
+        elif t == 'adhoc':
+            self.label['info'].set_text('')
+            self.label['activate'].set_label(_("Open in GUI"))
+        else:
+            self.label['activate'].set_label(_("Unknown type of view??"))
+            self.label['activate'].set_sensitive(False)
+        return True
+
+    def activate(self, *p):
+        """Action to be executed.
+        """
+        t=helper.get_view_type(self.element)
+        if t == 'static':
+            c=self.controller.build_context()
+            url=c.evaluateValue('here/view/%s/absolute_url' % self.element.id)
+            self.controller.open_url(url)
+        elif t == 'dynamic':
+            self.controller.activate_stbv(self.element)
+        elif t == 'adhoc':
+            self.controller.gui.open_adhoc_view(self.element, destination='east')
+        return True
+
+    def build_widget(self):
+        vbox=gtk.VBox()
+        self.label={}
+        self.label['title']=gtk.Label()
+        vbox.pack_start(self.label['title'], expand=False)
+        self.label['info']=gtk.Label()
+        vbox.pack_start(self.label['info'], expand=False)
+        b=self.label['edit']=gtk.Button(_("Edit view"))
+        b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
+        vbox.pack_start(b, expand=False)
+
+        b=self.label['activate']=gtk.Button(_("Open view"))
+        b.connect('clicked', self.activate)
+        vbox.pack_start(b, expand=False)
+
+        vbox.show_all()
+        return vbox
+CLASS2COLUMN[View]=ViewColumn
 
 class Finder(AdhocView):
     view_name = _("Package finder")
@@ -335,12 +407,8 @@ class Finder(AdhocView):
                 cb=cb.next
             self.rootcolumn.next=None
         elif columnbrowser.next is None:
-            if isinstance(node[DetailedTreeModel.COLUMN_ELEMENT], Annotation):
-                clazz=AnnotationColumn
-            elif isinstance(node[DetailedTreeModel.COLUMN_ELEMENT], Relation):
-                clazz=RelationColumn
-            else:
-                clazz=ModelColumn
+            t=type(node[DetailedTreeModel.COLUMN_ELEMENT])
+            clazz=CLASS2COLUMN.get(t, ModelColumn)
             # Create a new columnbrowser
             col=clazz(controller=self.controller, 
                       node=node, 
