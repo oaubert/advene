@@ -29,7 +29,7 @@ from gettext import gettext as _
 
 import gtk
 
-name="Package browser view plugin"
+name="TALES browser view plugin"
 
 def register(controller):
     controller.register_viewclass(Browser)
@@ -136,9 +136,9 @@ class BrowserColumn:
         return vbox
 
 class Browser(AdhocView):
-    view_name = _("Package browser")
+    view_name = _("TALES browser")
     view_id = 'browser'
-    tooltip=_("Column-based package browser")
+    tooltip=_("TALES browser")
     def __init__(self, controller=None, parameters=None, callback=None, element=None):
         super(Browser, self).__init__(controller=controller)
         self.close_on_package_load = False

@@ -254,7 +254,7 @@ class AdveneGUI (Connect):
             ('tree', _('Tree view'), 'treeview.png'),
             ('timeline', _('Timeline'), 'timeline.png'),
             ('transcription', _('Transcription of annotations'), 'transcription.png'),
-            ('browser', _('Package browser'), 'browser.png'),
+            ('browser', _('TALES explorer'), 'browser.png'),
             ('finder', _('Package finder'), 'finder.png'),
             ('webbrowser', _('Web browser'), 'web.png'),
             ('transcribe', _('Note-taking editor'), 'transcribe.png'),
