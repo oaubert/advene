@@ -142,6 +142,8 @@ class MacOSXTTSEngine(TTSEngine):
         return True
 
 """
+Win32: install pytts + pywin32 (from sf.net) + mfc71.dll + spchapi.exe (from www.microsoft.com/reader/developer/downloads/tts.mspx 
+)
 On some flavors of Windows you can use:
 import pyTTS
 
