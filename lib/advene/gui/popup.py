@@ -587,6 +587,12 @@ class Menu:
             self.controller.open_url(url)
             return True
 
+        def open_in_browser(i, v):
+            c=self.controller.build_context()
+            url=c.evaluateValue('here/view/%s/absolute_url' % v.id)
+            self.controller.open_url(url)
+            return True
+
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
         t=helper.get_view_type(element)
@@ -594,10 +600,11 @@ class Menu:
             add_item(_("Activate view"), self.activate_stbv, element)
         elif t == 'adhoc':
             add_item(_("Open adhoc view"), self.open_adhoc_view, element)
-        elif 'html' in element.content.mimetype:
-            if helper.get_id(element.rootPackage.views, 'richedit'):
-                # The richedit view is available. Propose to use it.
-                add_item(_("Edit in the WYSIWYG editor"), wysiwyg_edit, element)
+        elif t == 'static' and element.matchFilter['class'] in ('package', '*'):
+            add_item(_("Open in web browser"), open_in_browser, element)
+        if 'html' in element.content.mimetype and helper.get_id(element.rootPackage.views, 'richedit'):
+            # The richedit view is available. Propose to use it.
+            add_item(_("Edit in the WYSIWYG editor"), wysiwyg_edit, element)
         return
 
     def make_bundle_menu(self, element, menu):
