@@ -1366,7 +1366,7 @@ class GenericContentHandler (ContentHandler):
             return False
         if self.fname:
             size=os.stat(self.fname).st_size
-            f=open(self.fname, 'r')
+            f=open(self.fname, 'rb')
             self.element.data = f.read(size + 2)
             f.close()
         return True
@@ -1392,7 +1392,7 @@ class GenericContentHandler (ContentHandler):
             fname=dialog.get_filename(default_file=self.fname)
         if fname is not None:
             try:
-                f=open(fname, 'r')
+                f=open(fname, 'rb')
             except IOError, e:
                 dialog.message_dialog(
                     _("Cannot read the data:\n%s") % unicode(e),
@@ -1422,7 +1422,7 @@ class GenericContentHandler (ContentHandler):
             if os.path.exists(fname):
                 os.rename(fname, fname + '~')
             try:
-                f=open(fname, 'w')
+                f=open(fname, 'wb')
             except IOError, e:
                 dialog.message_dialog(
                     _("Cannot save the data:\n%s") % unicode(e),
