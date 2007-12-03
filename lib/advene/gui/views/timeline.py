@@ -2226,34 +2226,6 @@ class TimeLine(AdhocView):
         toolbar = self.get_toolbar()
         hb.add(toolbar)
 
-        def loop_toggle_cb(b):
-            if not b.get_active():
-                print "Deactive"
-                # If we deactivate the locked looping feature, then also
-                # disable the player loop toggle.
-                self.controller.gui.loop_toggle_button.set_active(False)
-            return True
-
-        self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
-        self.loop_toggle_button.connect("toggled", loop_toggle_cb)
-        self.controller.gui.tooltips.set_tip(self.loop_toggle_button, _("Automatically activate loop when clicking on an annotation"))
-        toolbar.insert(self.loop_toggle_button, -1)
-
-        def goto_toggle_cb(b):
-            self.options['goto-on-click']=b.get_active()
-            return True
-
-        self.goto_on_click_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_GO_FORWARD)
-        self.goto_on_click_toggle.set_active(self.options['goto-on-click'])
-        self.goto_on_click_toggle.connect('toggled', goto_toggle_cb)
-        self.controller.gui.tooltips.set_tip(self.goto_on_click_toggle, _("Goto annotation when clicking"))
-        toolbar.insert(self.goto_on_click_toggle, -1)
-
-        ti=gtk.SeparatorToolItem()
-        ti.set_expand(True)
-        ti.set_property('draw', False)
-        toolbar.insert(ti, -1)
-
         self.statusbar=QuickviewBar(self.controller)
 
         # The annotation view button should be placed in the toolbar,
@@ -2491,10 +2463,12 @@ class TimeLine(AdhocView):
 
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
         i.connect('clicked', zoom, 1.3)
+        i.set_tooltip(self.tooltips, _("Zoom out"))
         tb.insert(i, -1)
 
         i=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
         i.connect('clicked', zoom, .7)
+        i.set_tooltip(self.tooltips, _("Zoom in"))
         tb.insert(i, -1)
 
         self.zoom_combobox=dialog.list_selector_widget(members=[
@@ -2535,6 +2509,34 @@ class TimeLine(AdhocView):
             b.set_tooltip(self.tooltips, tooltip)
             b.connect("clicked", callback)
             tb.insert(b, -1)
+
+        def loop_toggle_cb(b):
+            if not b.get_active():
+                # If we deactivate the locked looping feature, then also
+                # disable the player loop toggle.
+                self.controller.gui.loop_toggle_button.set_active(False)
+            return True
+
+        self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
+        self.loop_toggle_button.connect("toggled", loop_toggle_cb)
+        self.loop_toggle_button.set_tooltip(self.tooltips, _("Automatically activate loop when clicking on an annotation"))
+        tb.insert(self.loop_toggle_button, -1)
+
+        def goto_toggle_cb(b):
+            self.options['goto-on-click']=b.get_active()
+            return True
+
+        self.goto_on_click_toggle=gtk.ToggleToolButton(stock_id=gtk.STOCK_GO_FORWARD)
+        self.goto_on_click_toggle.set_active(self.options['goto-on-click'])
+        self.goto_on_click_toggle.connect('toggled', goto_toggle_cb)
+        self.goto_on_click_toggle.set_tooltip(self.tooltips, _("Goto annotation when clicking"))
+        tb.insert(self.goto_on_click_toggle, -1)
+
+        ti=gtk.SeparatorToolItem()
+        ti.set_expand(True)
+        ti.set_property('draw', False)
+        tb.insert(ti, -1)
+
 
         tb.show_all()
         return tb
