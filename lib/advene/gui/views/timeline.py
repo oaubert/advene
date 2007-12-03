@@ -257,19 +257,26 @@ class TimeLine(AdhocView):
         self.fraction_adj.connect ("value-changed", self.fraction_event)
         self.fraction_adj.connect ("changed", self.fraction_event)
 
-        self.layout_size=(None, None)
         # Coordinates of the selected region.
         self.layout_selection=[ [None, None], [None, None] ]
 
         self.layout = gtk.Layout ()
+        self.layout.add_events( gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.BUTTON1_MOTION_MASK )
+        self.scale_layout = gtk.Layout()
+        self.scale_layout.add_events( gtk.gdk.BUTTON_PRESS_MASK )
+        self.legend = gtk.Layout ()
+
+        self.layout.connect('key_press_event', self.layout_key_press_cb)
+        self.scale_layout.connect('key_press_event', self.layout_key_press_cb)
 
         self.layout.connect('scroll_event', self.layout_scroll_cb)
-        self.layout.connect('key_press_event', self.layout_key_press_cb)
+        self.scale_layout.connect('scroll_event', self.layout_scroll_cb)
 
-        self.layout.add_events( gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.BUTTON1_MOTION_MASK )
         self.layout.connect('button_press_event', self.layout_button_press_cb)
         self.layout.connect('button_release_event', self.layout_button_release_cb)
         self.layout.connect('motion_notify_event', self.layout_motion_notify_cb)
+
+        self.scale_layout.connect('button_press_event', self.scale_layout_button_press_cb)
 
         self.layout.connect('size_allocate', self.layout_resize_event)
         self.layout.connect('expose_event', self.draw_background)
@@ -454,13 +461,19 @@ class TimeLine(AdhocView):
                 # types for annotations present in the set
                 self.annotationtypes = list(sets.Set([ a.type for a in self.list ]))
 
+        # Clear the layouts
         self.layout.foreach(self.layout.remove)
+        self.scale_layout.foreach(self.scale_layout.remove)
+        self.legend.foreach(self.legend.remove)
+
         self.layer_position.clear()
         self.update_layer_position()
         self.populate()
+
         self.draw_marks()
+
         self.draw_current_mark()
-        self.legend.foreach(self.legend.remove)
+
         self.update_legend_widget(self.legend)
         self.legend.show_all()
         self.fraction_event(widget=None)
@@ -481,7 +494,7 @@ class TimeLine(AdhocView):
 
         """
         s = config.data.preferences['timeline']['interline-height']
-        h = self.button_height + s
+        h = 0
         for at in self.annotationtypes:
             self.layer_position[at] = h
             h += self.button_height + s
@@ -1469,11 +1482,7 @@ class TimeLine(AdhocView):
                               max(self.layer_position.values() or (0,))
                               + self.button_height + config.data.preferences['timeline']['interline-height'])
 
-        #self.layout.show_all ()
-
-    def remove_marks(self, widget=None, data=None):
-        if hasattr(widget, 'mark'):
-            self.layout.remove(widget)
+        self.scale_layout.set_size (u2p (self.maximum - self.minimum), 40)
 
     def draw_current_mark (self):
         u2p = self.unit2pixel
@@ -1542,39 +1551,47 @@ class TimeLine(AdhocView):
     def draw_marks (self):
         """Draw marks for stream positioning"""
         u2p = self.unit2pixel
-        # We want marks every 200 pixels
-        step = self.pixel2unit (100)
+        # We want marks every 120 pixels
+        step = self.pixel2unit (120)
         t = self.minimum
+
+        def display_image(widget, event):
+            """Lazy-loading of images
+            """
+            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=1000), width=50))
+            widget.disconnect(widget.expose_signal)
+            widget.expose_signal=None
+            return False
+
         while t <= self.maximum:
             x = u2p(t)
 
-            def display_image(widget, event):
-                """Lazy-loading of images
-                """
-                widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=1000), height=self.button_height))
-                widget.disconnect(widget.expose_signal)
-                widget.expose_signal=None
-                return False
-
-            i=gtk.Image()
-            i.mark = t
-            i.expose_signal=i.connect('expose_event', display_image)
-            i.pos = 1
-            i.show()
-            self.layout.put(i, x, i.pos)
-
+            # Draw mark (vertical arrow)
             a = gtk.Arrow (gtk.ARROW_DOWN, gtk.SHADOW_NONE)
             a.mark = t
             a.pos = 1
             a.show()
-            self.layout.put (a, x, a.pos)
+            self.scale_layout.put (a, x, a.pos)
 
+            # Draw label
             l = gtk.Label (helper.format_time (t))
             l.mark = t
             l.pos = a.pos
             l.show()
-            self.layout.put (l, x + 13, l.pos)
+            self.scale_layout.put (l, x + 13, l.pos)
+
+            # Draw screenshots
+            for off in (0, 1):
+                i=gtk.Image()
+                i.mark = long(t + off * step / 2.0)
+                i.expose_signal=i.connect('expose_event', display_image)
+                i.pos = 20
+                i.show()
+                self.scale_layout.put(i, u2p(i.mark), i.pos)
+
             t += step
+
+
 
     def bounds (self):
         """Bounds of the list.
@@ -1678,23 +1695,46 @@ class TimeLine(AdhocView):
             print "Unknown target type for drop: %d" % targetType
         return False
 
+    def scale_layout_button_press_cb(self, widget=None, event=None):
+        """Handle mouse click in scale window.
+        """
+        # Note: event.(x|y) may be relative to a child widget, so
+        # we must determine the pointer position
+        x, y = widget.get_pointer()
+        # Convert x, y (relative to the layout allocation) into
+        # values relative to the whole layout size
+        p=widget.get_parent()
+        x=long(p.get_hadjustment().value + x)
+        y=long(p.get_vadjustment().value + y)
+
+        if event.button == 3:
+            self.context_cb (timel=self, position=self.pixel2unit(x), height=y)
+            return True
+        elif event.button == 1:
+            c=self.controller
+            pos = c.create_position (value=self.pixel2unit(x),
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            c.update_status (status="set", position=pos)
+            return True
+        return False
+
     def layout_button_press_cb(self, widget=None, event=None):
         """Handle mouse click in timeline window.
         """
+        # Note: event.(x|y) may be relative to a child widget, so
+        # we must determine the pointer position
+        x, y = widget.get_pointer()
+        # Convert x, y (relative to the layout allocation) into
+        # values relative to the whole layout size
+        p=widget.get_parent()
+        x=long(p.get_hadjustment().value + x)
+        y=long(p.get_vadjustment().value + y)
+
         if event.button == 3:
-            self.context_cb (timel=self, position=self.pixel2unit(event.x), height=event.y)
+            self.context_cb (timel=self, position=self.pixel2unit(x), height=y)
             return True
         elif event.button == 1:
-            # Store x, y coordinates, to be able to decide upon button release.
-
-            # Note: event.(x|y) may be relative to a child widget, so
-            # we must determine the pointer position
-            x, y = widget.get_pointer()
-            # Convert x, y (relative to the layout allocation) into
-            # values relative to the whole layout size
-            x=long(self.adjustment.value + x)
-            y=long(widget.get_parent().get_vadjustment().value + y)
-
             if event.type == gtk.gdk._2BUTTON_PRESS:
                 # Double click in the layout: in all cases, goto the position
                 c=self.controller
@@ -1703,6 +1743,7 @@ class TimeLine(AdhocView):
                                          origin=c.player.AbsolutePosition)
                 c.update_status (status="set", position=pos)
             else:
+                # Store x, y coordinates, to be able to decide upon button release.
                 self.layout_selection=[ [x, y], [None, None] ]
             return True
         return False
@@ -1720,8 +1761,9 @@ class TimeLine(AdhocView):
             x, y = widget.get_pointer()
             # Convert x, y (relative to the layout allocation) into
             # values relative to the whole layout size
-            x=long(self.adjustment.value + x)
-            y=long(widget.get_parent().get_vadjustment().value + y)
+            p=widget.get_parent()
+            x=long(p.get_hadjustment().value + x)
+            y=long(p.get_vadjustment().value + y)
 
             if self.layout_selection[0][0] is None:
                 # Some bug here, should not happen except in the case
@@ -1900,11 +1942,6 @@ class TimeLine(AdhocView):
             pass
         return True
 
-    def update_layout (self):
-        (w, h) = self.layout.get_size ()
-        self.layout.set_size (self.unit2pixel(self.maximum - self.minimum), h)
-        return True
-
     def update_adjustment (self):
         """Update the adjustment values depending on the current aspect ratio.
         """
@@ -1924,7 +1961,16 @@ class TimeLine(AdhocView):
 
     def scale_event (self, widget=None, data=None):
         self.update_adjustment ()
-        self.update_layout ()
+
+        # Update the layout and scale_layout dimensions
+        width=self.unit2pixel(self.maximum - self.minimum)
+        (w, h) = self.layout.get_size ()
+        self.layout.set_size (width, h)
+        (w, h) = self.scale_layout.get_size ()
+        self.scale_layout.set_size (width, h)
+
+        # Update the scale legend
+        self.scale_label.set_text('1pic=%.02f s' % (self.pixel2unit(50) / 1000.0))
         self.redraw_event ()
         return True
 
@@ -2016,11 +2062,10 @@ class TimeLine(AdhocView):
         """
         if self.old_scale_value != self.scale.value:
             self.old_scale_value = self.scale.value
-            # Remove old marks
-            self.layout.foreach(self.remove_marks)
             # Reposition all buttons
             self.layout.foreach(self.move_widget)
             # Redraw marks
+            self.scale_layout.foreach(self.scale_layout.remove)
             self.draw_marks ()
             # Redraw current mark
             self.draw_current_mark ()
@@ -2327,13 +2372,10 @@ class TimeLine(AdhocView):
 
     def get_packed_widget (self):
         """Return the widget packed into a scrolledwindow."""
-        self.inspector_pane=gtk.HPaned()
-
         vbox = gtk.VBox ()
+        
+        content_pane = gtk.HPaned ()
 
-        hpaned = gtk.HPaned ()
-
-        self.legend = gtk.Layout ()
         # The layout can receive drops
         self.legend.connect("drag_data_received", self.legend_drag_received)
         self.legend.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -2342,28 +2384,49 @@ class TimeLine(AdhocView):
                                   config.data.drag_type['annotation-type'], 
                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
-        sw1 = gtk.ScrolledWindow ()
-        sw1.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
-        sw1.set_placement(gtk.CORNER_TOP_RIGHT)
-        sw1.add (self.legend)
-        hpaned.add1 (sw1)
+        sw_legend = gtk.ScrolledWindow ()
+        sw_legend.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
+        sw_legend.set_placement(gtk.CORNER_TOP_RIGHT)
+        sw_legend.add (self.legend)
+        content_pane.add1 (sw_legend)
 
-        sw = gtk.ScrolledWindow ()
-        sw.set_policy (gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
-        sw.set_hadjustment (self.adjustment)
-        sw.set_vadjustment (sw1.get_vadjustment())
-        sw.add (self.layout)
-        hpaned.add2 (sw)
+        sw_layout = gtk.ScrolledWindow ()
+        sw_layout.set_policy (gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
+        sw_layout.set_hadjustment (self.adjustment)
+        sw_layout.set_vadjustment (sw_legend.get_vadjustment())
+        sw_layout.add (self.layout)
+        content_pane.add2 (sw_layout)
+
+        # Now build the scale_pane
+        scale_pane = gtk.HPaned()
+        self.scale_label = gtk.Label('Scale')
+        scale_pane.add1(self.scale_label)
+
+        sw_scale=gtk.ScrolledWindow()
+        sw_scale.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        sw_scale.set_hadjustment (sw_layout.get_hadjustment())
+        sw_scale.add(self.scale_layout)
+        scale_pane.add2(sw_scale)
+
+        def synchronize_position(w, param):
+            scale_pane.set_position(w.props.position)
+            return False
+
+        content_pane.connect('notify::position', synchronize_position)
+
+        global_pane=gtk.VPaned()
+
+        global_pane.add1(scale_pane)
+        global_pane.add2(content_pane)
+        
+        global_pane.set_position(20)
+
+        vbox.add (global_pane)
 
         (w, h) = self.legend.get_size ()
-        hpaned.set_position (max(w, 100))
-        vbox.add (hpaned)
+        content_pane.set_position (max(w, 100))
 
-        #hgrade = stripchart.HGradeZoom()
-        #hgrade.adjustment = self.adjustment
-        #hgrade.set_size_request(400, 30)
-        #vbox.pack_start (hgrade.widget, expand=False)
-
+        self.inspector_pane=gtk.HPaned()
         self.inspector_pane.pack1(vbox, resize=True, shrink=True)
         a=AnnotationDisplay(controller=self.controller)
         f=gtk.Frame(_("Inspector"))
@@ -2536,7 +2599,6 @@ class TimeLine(AdhocView):
         ti.set_expand(True)
         ti.set_property('draw', False)
         tb.insert(ti, -1)
-
 
         tb.show_all()
         return tb
