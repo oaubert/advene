@@ -952,7 +952,7 @@ class AdveneGUI (Connect):
         self.time_label.set_text(helper.format_time(None))
         h.pack_start(self.time_label, expand=False)
         h.pack_start(self.gui.slider, expand=True)
-        v.pack_start(h, expand=True)
+        v.pack_start(h, expand=False)
 
         v.pack_start(self.player_toolbar, expand=False)
 
