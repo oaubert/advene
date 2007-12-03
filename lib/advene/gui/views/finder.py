@@ -183,7 +183,7 @@ class ModelColumn(FinderColumn):
         vbox.pack_start(self.label, expand=False)
 
         sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw.set_policy(gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
         vbox.add (sw)
 
         self.liststore = self.get_liststore()
