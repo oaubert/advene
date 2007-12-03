@@ -86,7 +86,7 @@ class RelationDisplay(AdhocView):
             if col:
                 title='<span background="%s">Relation <b>%s</b></span>' % (col, self.relation.id)
             else:
-                title='Relation <b>%s</b>' % self.annotation.id
+                title='Relation <b>%s</b>' % self.relation.id
             self.label['title'].set_markup(title)
             self.label['contents'].set_text('')
             for a in self.relation.members:
