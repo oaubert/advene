@@ -182,7 +182,7 @@ class AnnotationDisplay(AdhocView):
         f.add(vb)
         v.add(f)
 
-        self.refresh()
         v.show_all()
         image.hide()
+        self.refresh()
         return v
