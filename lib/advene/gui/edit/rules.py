@@ -298,13 +298,9 @@ class EditQuery(EditGeneric):
         hb=gtk.HBox()
         conditionsbox.add(hb)
 
-        try:
-            w=EditCondition(cond, editable=self.editable,
-                            controller=self.controller)
-        except Exception, e:
-            print str(e)
-            print "for a query"
-            w = gtk.Label("Error in query")
+        w=EditCondition(cond, editable=self.editable,
+                        controller=self.controller, 
+                        parent=self)
 
         self.editconditionlist.append(w)
 
@@ -331,7 +327,9 @@ class EditQuery(EditGeneric):
         # Event
         ef=gtk.Frame(_("For all elements in "))
         predef=[ ('package/annotations', _("All annotations of the package")),
-                 ('package/views', _("All views of the package")) ]
+                 ('package/views', _("All views of the package")),
+                 ('here/annotations', _("The context annotations")),
+                 ('here/type/annotations', _("The annotations of the context type"))]
         for at in self.controller.package.annotationTypes:
             predef.append( ('package/%s/annotations' % at.id,
                             _("Annotations of type %s") % self.controller.get_title(at) ) )
@@ -471,7 +469,7 @@ class EditRule(EditGeneric):
         hb=gtk.HBox()
         conditionsbox.add(hb)
 
-        w=EditCondition(cond, editable=self.editable, controller=self.controller)
+        w=EditCondition(cond, editable=self.editable, controller=self.controller, parent=self)
 
         self.editconditionlist.append(w)
 
@@ -644,12 +642,15 @@ class EditEvent(EditGeneric):
         return hbox
 
 class EditCondition(EditGeneric):
-    def __init__(self, condition, editable=True, controller=None):
+    def __init__(self, condition, editable=True, controller=None, parent=None):
         self.model=condition
 
         self.current_operator=self.model.operator
         self.editable=editable
         self.controller=controller
+        # We check if parent is a EditRuleSet or a EditQuery so that
+        # we can populate the TALES expressions with appropriate values.
+        self.parent=parent
 
         # Widgets:
         self.lhs=None # Entry
@@ -701,37 +702,55 @@ class EditCondition(EditGeneric):
     def build_widget(self):
         hbox=gtk.HBox()
         
-        predefined=[ 
-            ('annotation/fragment', _('The annotation fragment') ),
-            ('annotation/fragment/end', _('The annotation begin time') ),
-            ('annotation/fragment/end', _('The annotation end time') ),
-            ('annotation/fragment/duration', _('The annotation duration') ),
-            ('annotation/type/id', _('The id of the annotation type') ),
-            ('annotation/incomingRelations', _("The annotation's incoming relations") ),
-            ('annotation/outgoingRelations', _("The annotation's outgoing relations") ),
-            ('element/content/data', _("The element's content") ),
-            ('element/fragment', _('The element fragment') ),
-            ] + [
-            ('annotation/typedRelatedIn/%s' % rt.id, 
-             _("The %s-related incoming annotations") % self.controller.get_title(rt) ) 
-            for rt in self.controller.package.relationTypes
-            ] + [
-            ('annotation/typedRelatedOut/%s' % rt.id, 
-             _("The %s-related outgoing annotations") % self.controller.get_title(rt) )
-            for rt in self.controller.package.relationTypes  ]
-        
+        if self.parent is None or isinstance(self.parent, EditRule):
+            predefined=[
+                ('annotation/fragment', _('The annotation fragment') ),
+                ('annotation/fragment/end', _('The annotation begin time') ),
+                ('annotation/fragment/end', _('The annotation end time') ),
+                ('annotation/fragment/duration', _('The annotation duration') ),
+                ('annotation/type/id', _('The id of the annotation type') ),
+                ('annotation/content/mimetype', _('The annotation MIME-type') ),
+                ('annotation/incomingRelations', _("The annotation's incoming relations") ),
+                ('annotation/outgoingRelations', _("The annotation's outgoing relations") ),
+                ] + [
+                ('annotation/typedRelatedIn/%s' % rt.id, 
+                 _("The %s-related incoming annotations") % self.controller.get_title(rt) ) 
+                for rt in self.controller.package.relationTypes
+                ] + [
+                ('annotation/typedRelatedOut/%s' % rt.id, 
+                 _("The %s-related outgoing annotations") % self.controller.get_title(rt) )
+                for rt in self.controller.package.relationTypes  ]
+        elif isinstance(self.parent, EditQuery):
+            predefined=[ 
+                ('element', _('The element')),
+                ('element/content/data', _("The element's content") ),
+                ('element/fragment', _('The element fragment') ),
+                ('element/fragment/begin', _('The element begin time') ),
+                ('element/fragment/end', _('The element end time') ),
+                ('element/fragment/duration', _('The element duration') ),
+                ('element/type/id', _('The id of the element type') ),
+                ('element/incomingRelations', _("The element's incoming relations") ),
+                ('element/outgoingRelations', _("The element's outgoing relations") ),
+                ('here', _('The context')),
+                ('here/fragment', _('The context fragment') ),
+                ('here/annotations', _('The context annotations') ),
+                ('here/type/annotations', _('The annotations of the context type') ),
+                ]
         self.lhs=TALESEntry(controller=self.controller, predefined=predefined)
         self.lhs.set_text(self.model.lhs or "")
         self.lhs.set_editable(self.editable)
         self.lhs.show()
 
-        predef=[ ('string:%s' % at.id,
-                  "id of annotation-type %s" % self.controller.get_title(at) )
-                 for at in self.controller.package.annotationTypes
-                 ] + [ ('string:%s' % at.id,
-                        "id of relation-type %s" % self.controller.get_title(at) )
-                       for at in self.controller.package.relationTypes
-                       ] + predefined
+        if self.parent is None or isinstance(self.parent, EditRule):
+            predef=[ ('string:%s' % at.id,
+                      "id of annotation-type %s" % self.controller.get_title(at) )
+                     for at in self.controller.package.annotationTypes
+                     ] + [ ('string:%s' % at.id,
+                            "id of relation-type %s" % self.controller.get_title(at) )
+                           for at in self.controller.package.relationTypes
+                           ] + predefined
+        elif isinstance(self.parent, EditQuery):
+            predef=predefined
         self.rhs=TALESEntry(controller=self.controller,
                             predefined=predef)
         self.rhs.set_text(self.model.rhs or "")
