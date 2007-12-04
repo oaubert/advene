@@ -1970,7 +1970,8 @@ class TimeLine(AdhocView):
         self.scale_layout.set_size (width, h)
 
         # Update the scale legend
-        self.scale_label.set_text('1pic=%.02f s' % (self.pixel2unit(50) / 1000.0))
+        dur=self.pixel2unit(50) / 1000.0
+        self.scale_label.set_text('1pic=%dm%.02fs' % (int(dur / 60), dur % 60))
         self.redraw_event ()
         return True
 
