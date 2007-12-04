@@ -720,8 +720,8 @@ class AdveneGUI (Connect):
 
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
-        gobject.timeout_add (100, self.update_display)
-        gobject.timeout_add (1000, self.slow_update_display)
+        self.event_source_update_display=gobject.timeout_add (100, self.update_display)
+        self.event_source_slow_update_display=gobject.timeout_add (1000, self.slow_update_display)
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
@@ -2909,6 +2909,84 @@ class AdveneGUI (Connect):
         stream.close()
         self.controller.log(_("Standard workspace has been saved"))
         return True
+
+    def generate_screenshots(self, *p):
+        """Generate screenshots.
+        """
+        c=self.controller
+        p=c.player
+
+        def do_cancel(b, pb):
+            if pb.event_source_generate is not None:
+                gobject.source_remove(pb.event_source_generate)
+            # Restore standard update display methods
+            self.event_source_update_display=gobject.timeout_add (100, self.update_display)
+            self.event_source_slow_update_display=gobject.timeout_add (1000, self.slow_update_display)
+            pb._window.destroy()
+            return True
+
+        def take_screenshot(pb):
+            """Method called every second.
+            """
+            try:
+                p.position_update()
+                i = p.snapshot (p.relative_position)
+            except p.InternalException, e:
+                print "Exception in snapshot: %s" % e
+                return True
+            if i is not None and i.height != 0:
+                self.controller.package.imagecache[p.current_position_value] = helper.snapshot2png (i)
+                prg=1.0 * p.current_position_value / p.stream_duration
+                pb.set_fraction(prg)
+                pb.set_text(helper.format_time(p.current_position_value))
+                if prg > .99:
+                    do_cancel(None, pb)
+            return True
+
+        def do_generate(b, pb):
+            b.set_sensitive(False)
+            # Deactivate the GUI update method
+            gobject.source_remove(self.event_source_update_display)
+            gobject.source_remove(self.event_source_slow_update_display)
+
+            if p.status == p.PauseStatus:
+                # If we were paused, resume from this position
+                c.update_status('resume', position=p.relative_position)
+            elif p.status != p.PlayingStatus:
+                # If we were not already playing, capture from the start
+                c.update_status('start', position=0)
+            pb.event_source_generate=gobject.timeout_add(400, take_screenshot, pb)
+            return True
+
+        w=gtk.Window()
+        w.set_title(_("Generating screenshots"))
+        v=gtk.VBox()
+        w.add(v)
+
+        l=gtk.Label()
+        l.set_markup(_("<b>Screenshot generation</b>\n\nScreenshots will be captured approximately every 500ms.\n\nIf the movie was paused or playing, the capture will begin at the current position. Else, it will begin at the beginning of the movie.\nNote that the main interface will not be refreshed as long as this window is open."))
+        l.set_line_wrap(True)
+        v.pack_start(l, expand=False)
+
+        progressbar=gtk.ProgressBar()
+        progressbar.event_source_generate=None
+        v.pack_start(progressbar, expand=False)
+
+        progressbar._window=w
+        hb=gtk.HBox()
+
+        b=gtk.Button(stock=gtk.STOCK_MEDIA_RECORD)
+        b.connect('clicked', do_generate, progressbar)
+        hb.pack_start(b, expand=False)
+
+        b=gtk.Button(stock=gtk.STOCK_CANCEL)
+        b.connect('clicked', do_cancel, progressbar)
+        hb.pack_start(b, expand=False)
+        
+        v.pack_start(hb, expand=False)
+        print "Showing window"
+        w.show_all()
+        w.set_modal(True)
 
 if __name__ == '__main__':
     v = AdveneGUI ()
