@@ -264,6 +264,14 @@ class TimeLine(AdhocView):
         self.layout.add_events( gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.BUTTON1_MOTION_MASK )
         self.scale_layout = gtk.Layout()
         self.scale_layout.add_events( gtk.gdk.BUTTON_PRESS_MASK )
+
+        # Memorize the current scale height, so that we can refresh it
+        # when it is changed by a given amount (typically 10 or 16
+        # pixels)
+        self.current_scale_height=0
+        # Global pane is the VPaned holding the scale and the layout.
+        self.global_pane=None
+
         self.legend = gtk.Layout ()
 
         self.layout.connect('key_press_event', self.layout_key_press_cb)
@@ -1548,20 +1556,65 @@ class TimeLine(AdhocView):
         self.update_position (None)
         return True
 
+    def update_scale_screenshots(self, *p):
+        """Redraw scale screenshots in case of zoom change or global pane position change.
+        """
+        if self.global_pane is None:
+            return
+        # Approximate the available space for screenshots, plus a margin
+        height=self.global_pane.get_position() - 16
+
+        # Transform it in the closest power of 2, it should help the image scaling (?)
+        n=1
+        while n < height:
+            n = n << 1
+        height=n >> 1
+
+        def display_image(widget, event, h):
+            """Lazy-loading of images
+            """
+            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=1000), height=max(20, h)))
+            widget.disconnect(widget.expose_signal)
+            widget.expose_signal=None
+            return False
+
+        if abs(height - self.current_scale_height) > 10:
+            # The position changed significantly. Update the display.
+            self.current_scale_height=height
+
+            # Remove previous images
+            def remove_image(w):
+                if isinstance(w, gtk.Image):
+                    self.scale_layout.remove(w)
+                    return True
+            self.scale_layout.foreach(remove_image)
+            
+            if height >= 16:
+                # Big enough. Let's display screenshots.
+
+                # Evaluate screenshot width.
+                width=int(height * 4.0 / 3) + 5
+                step = long(self.pixel2unit (width))
+                t = self.minimum
+
+                u2p=self.unit2pixel
+                while t <= self.maximum:
+                    # Draw screenshots
+                    i=gtk.Image()
+                    i.mark = t
+                    i.expose_signal=i.connect('expose_event', display_image, height)
+                    i.pos = 20
+                    i.show()
+                    self.scale_layout.put(i, u2p(i.mark), i.pos)
+
+                    t += step
+
     def draw_marks (self):
         """Draw marks for stream positioning"""
         u2p = self.unit2pixel
         # We want marks every 110 pixels
         step = self.pixel2unit (110)
         t = self.minimum
-
-        def display_image(widget, event):
-            """Lazy-loading of images
-            """
-            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=1000), height=max(20, self.layout.get_parent().get_parent().get_parent().get_position() - 16)))
-            widget.disconnect(widget.expose_signal)
-            widget.expose_signal=None
-            return False
 
         while t <= self.maximum:
             x = u2p(t)
@@ -1572,25 +1625,10 @@ class TimeLine(AdhocView):
             l.pos = 1
             l.show()
             self.scale_layout.put (l, x, l.pos)
-
-            ## Draw screenshots
-            #for off in (0, 1):
-            #    i=gtk.Image()
-            #    i.mark = long(t + off * step / 2.0)
-            #    i.expose_signal=i.connect('expose_event', display_image)
-            #    i.pos = 20
-            #    i.show()
-            #    self.scale_layout.put(i, u2p(i.mark), i.pos)
-            i=gtk.Image()
-            i.mark = long(t)
-            i.expose_signal=i.connect('expose_event', display_image)
-            i.pos = 20
-            i.show()
-            self.scale_layout.put(i, u2p(i.mark), i.pos)
-
             t += step
-
-
+        # Reset current_scale_height to force screenshots redraw
+        self.current_scale_height=0
+        self.update_scale_screenshots()
 
     def bounds (self):
         """Bounds of the list.
@@ -2414,14 +2452,15 @@ class TimeLine(AdhocView):
 
         content_pane.connect('notify::position', synchronize_position)
 
-        global_pane=gtk.VPaned()
+        self.global_pane=gtk.VPaned()
 
-        global_pane.add1(scale_pane)
-        global_pane.add2(content_pane)
+        self.global_pane.add1(scale_pane)
+        self.global_pane.add2(content_pane)
         
-        global_pane.set_position(20)
+        self.global_pane.set_position(20)        
+        self.global_pane.connect('notify::position', self.update_scale_screenshots)
 
-        vbox.add (global_pane)
+        vbox.add (self.global_pane)
 
         (w, h) = self.legend.get_size ()
         content_pane.set_position (max(w, 100))
