@@ -1570,10 +1570,10 @@ class TimeLine(AdhocView):
             n = n << 1
         height=n >> 1
 
-        def display_image(widget, event, h):
+        def display_image(widget, event, h, step):
             """Lazy-loading of images
             """
-            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=1000), height=max(20, h)))
+            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=step/3), height=max(20, h)))
             widget.disconnect(widget.expose_signal)
             widget.expose_signal=None
             return False
@@ -1602,7 +1602,7 @@ class TimeLine(AdhocView):
                     # Draw screenshots
                     i=gtk.Image()
                     i.mark = t
-                    i.expose_signal=i.connect('expose_event', display_image, height)
+                    i.expose_signal=i.connect('expose_event', display_image, height, step)
                     i.pos = 20
                     i.show()
                     self.scale_layout.put(i, u2p(i.mark), i.pos)
