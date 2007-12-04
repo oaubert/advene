@@ -1558,7 +1558,7 @@ class TimeLine(AdhocView):
         def display_image(widget, event):
             """Lazy-loading of images
             """
-            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=1000), width=100))
+            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=1000), height=max(20, self.layout.get_parent().get_parent().get_parent().get_position() - 16)))
             widget.disconnect(widget.expose_signal)
             widget.expose_signal=None
             return False
@@ -1969,8 +1969,8 @@ class TimeLine(AdhocView):
         self.scale_layout.set_size (width, h)
 
         # Update the scale legend
-        dur=self.pixel2unit(50) / 1000.0
-        self.scale_label.set_text('1pic=%dm%.02fs' % (int(dur / 60), dur % 60))
+        dur=self.pixel2unit(110) / 1000.0
+        self.scale_label.set_text('1mark=%dm%.02fs' % (int(dur / 60), dur % 60))
         self.redraw_event ()
         return True
 
