@@ -1551,14 +1551,14 @@ class TimeLine(AdhocView):
     def draw_marks (self):
         """Draw marks for stream positioning"""
         u2p = self.unit2pixel
-        # We want marks every 120 pixels
-        step = self.pixel2unit (120)
+        # We want marks every 110 pixels
+        step = self.pixel2unit (110)
         t = self.minimum
 
         def display_image(widget, event):
             """Lazy-loading of images
             """
-            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=1000), width=50))
+            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=1000), width=100))
             widget.disconnect(widget.expose_signal)
             widget.expose_signal=None
             return False
@@ -1566,28 +1566,27 @@ class TimeLine(AdhocView):
         while t <= self.maximum:
             x = u2p(t)
 
-            # Draw mark (vertical arrow)
-            a = gtk.Arrow (gtk.ARROW_DOWN, gtk.SHADOW_NONE)
-            a.mark = t
-            a.pos = 1
-            a.show()
-            self.scale_layout.put (a, x, a.pos)
-
             # Draw label
-            l = gtk.Label (helper.format_time (t))
+            l = gtk.Label ("|" + helper.format_time (t))
             l.mark = t
-            l.pos = a.pos
+            l.pos = 1
             l.show()
-            self.scale_layout.put (l, x + 13, l.pos)
+            self.scale_layout.put (l, x, l.pos)
 
-            # Draw screenshots
-            for off in (0, 1):
-                i=gtk.Image()
-                i.mark = long(t + off * step / 2.0)
-                i.expose_signal=i.connect('expose_event', display_image)
-                i.pos = 20
-                i.show()
-                self.scale_layout.put(i, u2p(i.mark), i.pos)
+            ## Draw screenshots
+            #for off in (0, 1):
+            #    i=gtk.Image()
+            #    i.mark = long(t + off * step / 2.0)
+            #    i.expose_signal=i.connect('expose_event', display_image)
+            #    i.pos = 20
+            #    i.show()
+            #    self.scale_layout.put(i, u2p(i.mark), i.pos)
+            i=gtk.Image()
+            i.mark = long(t)
+            i.expose_signal=i.connect('expose_event', display_image)
+            i.pos = 20
+            i.show()
+            self.scale_layout.put(i, u2p(i.mark), i.pos)
 
             t += step
 
