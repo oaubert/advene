@@ -1293,7 +1293,6 @@ class AdveneController:
         @return: a boolean (~desactivation)
         """
         p=context.evaluateValue('package')
-        print "Controller.manage_package_load ", p.uri
         # Check that all fragments are Millisecond fragments.
         l = [a.id for a in p.annotations
              if not isinstance (a.fragment, MillisecondFragment)]
