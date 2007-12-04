@@ -1573,7 +1573,7 @@ class TimeLine(AdhocView):
         def display_image(widget, event, h, step):
             """Lazy-loading of images
             """
-            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=step/3), height=max(20, h)))
+            widget.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(widget.mark, epsilon=step/2), height=max(20, h)))
             widget.disconnect(widget.expose_signal)
             widget.expose_signal=None
             return False
