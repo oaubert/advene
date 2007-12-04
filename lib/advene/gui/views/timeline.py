@@ -2084,24 +2084,23 @@ class TimeLine(AdhocView):
             self.adjustment.value=self.unit2pixel(mouse_position) - x
         return True
 
-    def move_widget (self, widget=None):
-        """Update the annotation widget position.
-        """
-        if hasattr (widget, 'annotation'):
-            widget.update_widget()
-            self.layout.move (widget,
-                              self.unit2pixel(widget.annotation.fragment.begin),
-                              self.layer_position[widget.annotation.type])
-        return True
-
-
     def redraw_event(self, widget=None, data=None):
         """Redraw the layout according to the new ratio value.
         """
+        def move_widget (w=None):
+            """Update the annotation widget position.
+            """
+            if isinstance(w, AnnotationWidget):
+                w.update_widget()
+                self.layout.move (w,
+                                  self.unit2pixel(w.annotation.fragment.begin),
+                                  self.layer_position[w.annotation.type])
+            return True
+
         if self.old_scale_value != self.scale.value:
             self.old_scale_value = self.scale.value
             # Reposition all buttons
-            self.layout.foreach(self.move_widget)
+            self.layout.foreach(move_widget)
             # Redraw marks
             self.scale_layout.foreach(self.scale_layout.remove)
             self.draw_marks ()
@@ -2124,10 +2123,23 @@ class TimeLine(AdhocView):
                 b.update_widget()
             return True
 
+        def move_nav(b, w):
+            """Move next and prev navigation buttons.
+            """
+            y=layout.child_get_property(b, 'y')
+            if hasattr(b, 'next'):
+                layout.move(b, w + 30 , y)
+            elif hasattr(b, 'prev'):
+                layout.move(b, w + 22, y)
+            return True
+                
         # Resize all buttons to fit the largest
         if width > 10:
             layout.foreach(resize, width)
-        layout.get_parent().get_parent().set_position (width + 30)
+            # Reposition the next, prev buttons
+            layout.foreach(move_nav, width)
+
+        layout.get_parent().get_parent().set_position (width + 32)
 
     def restrict_playing(self, at, widget=None):
         """Restrict playing to the given annotation-type.
@@ -2167,6 +2179,24 @@ class TimeLine(AdhocView):
         """
         width=0
         height=0
+
+        def navigate(b, event, direction, typ):
+            p=self.controller.player.current_position_value
+            if direction == 'next':
+                l=[a
+                   for a in typ.annotations
+                   if a.fragment.begin > p ]
+                l.sort(lambda a, b: cmp(a.fragment.begin, b.fragment.begin))
+            else:
+                l=[a 
+                   for a in typ.annotations
+                   if a.fragment.end < p ]
+                # Sort in reverse order
+                l.sort(lambda b, a: cmp(a.fragment.begin, b.fragment.begin))
+            if l:
+                a=l[0]
+                self.controller.update_status("set", position=a.fragment.begin)
+            return True
 
         def restrict_playing(m, at, w):
             self.restrict_playing(at, w)
@@ -2267,13 +2297,37 @@ class TimeLine(AdhocView):
                 b.get_children()[0].set_from_file(config.data.advenefile( ( 'pixmaps', f) ))
                 return True
 
+            # At the left of the annotation type : restrict_playing button
             p=get_pixmap_button('play.png', restrict_playing, t, b)
             p.set_playing = set_playing.__get__(p)
             p.annotationtype=t
             p.set_size_request(20, self.button_height)
             self.tooltips.set_tip(p, _("Restrict playing to this annotation-type"))
             layout.put (p, 0, self.layer_position[t])
-            
+
+            # At the right of the annotation type : prev/next buttons
+            nav=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
+            nav.set_size_request(16, self.button_height)
+            nav.annotationtype=t
+            nav.prev=True
+            self.tooltips.set_tip(nav, _("Goto previous annotations"))
+            eb=gtk.EventBox()
+            eb.connect('button_press_event', navigate, 'prev', t)
+            eb.add(nav)
+            # Put it in an arbitrary location. It will be moved by resize_legend_widget
+            layout.put (eb, 102, self.layer_position[t])
+
+            nav=gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
+            nav.set_size_request(16, self.button_height)
+            nav.annotationtype=t
+            nav.next=True
+            self.tooltips.set_tip(nav, _("Goto next annotations"))
+            eb=gtk.EventBox()
+            eb.connect('button_press_event', navigate, 'next', t)
+            eb.add(nav)
+            # Put it in an arbitrary location. It will be moved by resize_legend_widget
+            layout.put (eb, 112, self.layer_position[t])
+
         # Add the "New type" button at the end
         b=gtk.Button()
         l=gtk.Label()
