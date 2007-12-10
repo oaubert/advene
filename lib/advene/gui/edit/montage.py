@@ -259,7 +259,7 @@ class Montage(AdhocView):
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+                        config.data.drag_type['annotation'], gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
         b.connect("drag_data_received", drag_received)
 
         self.mainbox.pack_start(b, expand=False, fill=False)
@@ -360,7 +360,7 @@ class Montage(AdhocView):
                                    gtk.DEST_DEFAULT_ALL,
                                    config.data.drag_type['annotation']
                                    + config.data.drag_type['annotation-type'], 
-                                   gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
+                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
         v.connect("drag_data_received", mainbox_drag_received)
 
         sw=gtk.ScrolledWindow()
@@ -403,7 +403,7 @@ class Montage(AdhocView):
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['uri-list'], gtk.gdk.ACTION_LINK)
+                        config.data.drag_type['uri-list'], gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
         b.connect("drag_data_received", remove_drag_received)
         hb.pack_start(b, expand=False)
 
