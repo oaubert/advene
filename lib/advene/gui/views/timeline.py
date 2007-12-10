@@ -1312,6 +1312,10 @@ class TimeLine(AdhocView):
         al=button.get_allocation()
         button.parent.put(e, al.x, al.y)
         e.grab_focus()
+
+        # Keep the inspector window open on the annotation
+        self.set_annotation(annotation)
+
         return
 
     def annotation_key_press_cb(self, widget, event, annotation):
