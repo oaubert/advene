@@ -1453,7 +1453,7 @@ class AdveneGUI (Connect):
                 filename=kw['filename']
             except KeyError:
                 filename=None
-            view=TranscriptionEdit(controller=self.controller, filename=filename)
+            view=TranscriptionEdit(controller=self.controller, filename=filename, parameters=parameters, **kw)
         elif name == 'edit':
             try:
                 element=kw['element']
@@ -1852,26 +1852,9 @@ class AdveneGUI (Connect):
         return True
 
     def search_string(self, s):
-        expr=config.data.preferences['quicksearch-source']
-        p=self.controller.package
-        if expr is None:
-            source=p.annotations
-        elif expr == 'tags':
-            # Search in annotations, relations, views matching tags
-            res=[ e 
-                  for e in itertools.chain( p.annotations,
-                                            p.relations )
-                  if s in e.tags ]
-            return res
-        else:
-            c=self.controller.build_context()
-            source=c.evaluateValue(expr)
-        if config.data.preferences['quicksearch-ignore-case']:
-            s=s.lower()        
-            res=[ a for a in source if s in a.content.data.lower() ]
-        else:
-            res=[ a for a in source if s in a.content.data ]
-        return res
+        return self.controller.search_string(searched=s, 
+                                             source=config.data.preferences['quicksearch-source'],
+                                             case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
 
     def do_quicksearch(self, *p):
         s=self.quicksearch_entry.get_text()
