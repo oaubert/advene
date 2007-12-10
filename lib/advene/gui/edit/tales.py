@@ -130,6 +130,8 @@ class TALESEntry:
                                                preselect=preselect,
                                                entry=True)
         self.entry=self.combo.child
+        self.entry.connect('changed', lambda e: self.controller.gui.tooltips.set_tip(self.entry, self.combo.get_current_element()))
+        self.controller.gui.tooltips.set_tip(self.entry, self.combo.get_current_element())
 
         hbox.pack_start(self.combo, expand=True)
 
