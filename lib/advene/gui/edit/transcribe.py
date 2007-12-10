@@ -64,9 +64,13 @@ class TranscriptionEdit(AdhocView):
     view_name = _("Note taking")
     view_id = 'transcribe'
     tooltips = _("Note taking facility")
-    def __init__ (self, controller=None, filename=None):
+    def __init__ (self, controller=None, parameters=None, filename=None):
         super(TranscriptionEdit, self).__init__(controller=controller)
         self.close_on_package_load = False
+        self.contextual_actions = (
+            (_("Save view"), self.save_view),
+            (_("Save default options"), self.save_default_options),
+            )
 
         self.controller=controller
         self.package=controller.package
@@ -97,6 +101,9 @@ class TranscriptionEdit(AdhocView):
 
         self.current_mark = None
 
+        opt, arg = self.load_parameters(parameters)
+        self.options.update(opt)
+
         self.button_height=20
 
         # When modifying an offset with Control+Scroll, store the last value.
@@ -105,7 +112,15 @@ class TranscriptionEdit(AdhocView):
 
         self.widget=self.build_widget()
         if filename is not None:
-            self.load_transcription(filename)
+            self.load_transcription(filename=filename)
+        for n, v in arg:
+            if n == 'text':
+                self.load_transcription(buffer=urllib.unquote(v))
+
+    def get_save_arguments(self):
+        b=self.textview.get_buffer()
+        arguments = [ ('text', urllib.quote_plus("".join(self.generate_transcription()))) ]
+        return self.options, arguments
 
     def edit_preferences(self, *p):
         cache=dict(self.options)
@@ -605,6 +620,24 @@ class TranscriptionEdit(AdhocView):
                     'content': text,
                     'ignored': False }
 
+    def generate_transcription(self):
+        last=None
+        for d in self.parse_transcription(show_ignored=True,
+                                          strip_blank=False):
+            if d['ignored']:
+                yield '[I%s]' % helper.format_time(d['begin'])
+                yield d['content']
+                yield '[%s]' % helper.format_time(d['end'])
+
+            elif last != d['begin']:
+                yield '[%s]' % helper.format_time(d['begin'])
+                yield d['content']
+                yield '[%s]' % helper.format_time(d['end'])
+            else:
+                yield d['content']
+                yield '[%s]' % helper.format_time(d['end'])
+            last=d['end']
+
     def save_as_cb(self, button=None):
         self.sourcefile=None
         self.save_transcription_cb()
@@ -633,22 +666,7 @@ class TranscriptionEdit(AdhocView):
                 _("Cannot save the file: %s") % unicode(e),
                 icon=gtk.MESSAGE_ERROR)
             return True
-        last=None
-        for d in self.parse_transcription(show_ignored=True,
-                                          strip_blank=False):
-            if d['ignored']:
-                f.writelines( ( '[I%s]' % helper.format_time(d['begin']),
-                                d['content'],
-                                '[%s]' % helper.format_time(d['end']) ) )
-
-            elif last != d['begin']:
-                f.writelines( ( '[%s]' % helper.format_time(d['begin']),
-                                d['content'],
-                                '[%s]' % helper.format_time(d['end']) ) )
-            else:
-                f.writelines( ( d['content'],
-                                '[%s]' % helper.format_time(d['end']) ) )
-            last=d['end']
+        f.writelines(self.generate_transcription())
         f.close()
         self.message(_("Transcription saved to %s") % filename)
         self.sourcefile=filename
@@ -665,20 +683,25 @@ class TranscriptionEdit(AdhocView):
             self.load_transcription(filename=fname)
         return True
 
-    def load_transcription(self, filename=None):
-        try:
-            if re.match('[a-zA-Z]:', filename):
-                # Windows drive: notation. Convert it to
-                # a more URI-compatible syntax
-                fname=urllib.pathname2url(filename)
-            else:
-                fname=filename
-            f=urllib.urlopen(fname)
-        except IOError, e:
-            self.message(_("Cannot open %(filename)s: %(error)s") % {'filename': filename, 
-                                                                     'error': unicode(e) })
-            return
-        lines="".join(f.readlines())
+    def load_transcription(self, filename=None, buffer=None):
+        if buffer is None:
+            try:
+                if re.match('[a-zA-Z]:', filename):
+                    # Windows drive: notation. Convert it to
+                    # a more URI-compatible syntax
+                    fname=urllib.pathname2url(filename)
+                else:
+                    fname=filename
+                f=urllib.urlopen(fname)
+            except IOError, e:
+                self.message(_("Cannot open %(filename)s: %(error)s") % {'filename': filename, 
+                                                                         'error': unicode(e) })
+                return
+            lines="".join(f.readlines())
+            f.close()
+        else:
+            lines=buffer
+
         try:
             data=unicode(lines, 'utf8')
         except UnicodeDecodeError:
