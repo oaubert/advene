@@ -116,6 +116,21 @@ class AdhocView(object):
         else:
             print m
 
+    def set_label(self, label):
+        self._label=label
+        p=self.widget.get_parent()
+        if isinstance(p, gtk.Notebook):
+            # We are in a notebook.
+            l=p.get_tab_label(self.widget)
+            if l is not None:
+                if isinstance(l, gtk.Label):
+                    l.set_text(label)
+                elif isinstance(l, gtk.HBox):
+                    # It may be a HBox with multiple elements. Find the label.
+                    # Normally (cf gui.viewbook), the label is in an EventBox
+                    l=l.get_children()[0].get_children()[0]
+                    l.set_text(label)
+            
     def load_parameters(self, param):
         """Parse the parameters from a Content object, a tuple or an ElementTree.Element
  
