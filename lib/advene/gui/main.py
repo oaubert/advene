@@ -1435,6 +1435,8 @@ class AdveneGUI (Connect):
                     return None
                 else:
                     kwargs['source']="here/annotationTypes/%s/annotations/sorted" % at.id
+                    if label is None:
+                        label=self.controller.get_title(at)
 
             view = TranscriptionView(**kwargs)
         elif name == 'webbrowser' or name == 'htmlview':
@@ -1476,7 +1478,7 @@ class AdveneGUI (Connect):
             return view
         # Store destination and label, used when moving the view
         view._destination=destination
-        view._label=label or view.view_name
+        view.set_label(label or view.view_name)
         if destination == 'popup':
             view.popup(label=label)
         elif destination in ('south', 'east', 'west', 'fareast'):
@@ -2939,7 +2941,7 @@ class AdveneGUI (Connect):
                 prg=1.0 * p.current_position_value / p.stream_duration
                 pb.set_fraction(prg)
                 pb.set_text(helper.format_time(p.current_position_value))
-                if prg > .99:
+                if prg > .999:
                     do_cancel(None, pb)
             return True
 
