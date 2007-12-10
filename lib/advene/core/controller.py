@@ -37,6 +37,7 @@ import urllib
 import StringIO
 import gobject
 import shlex
+import itertools
 
 import advene.core.config as config
 
