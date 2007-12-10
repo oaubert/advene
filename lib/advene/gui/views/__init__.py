@@ -130,6 +130,9 @@ class AdhocView(object):
                     # Normally (cf gui.viewbook), the label is in an EventBox
                     l=l.get_children()[0].get_children()[0]
                     l.set_text(label)
+        elif isinstance(p, gtk.VBox):
+            # It is a popup window. Set its title.
+            p.get_toplevel().set_title(label)
             
     def load_parameters(self, param):
         """Parse the parameters from a Content object, a tuple or an ElementTree.Element
