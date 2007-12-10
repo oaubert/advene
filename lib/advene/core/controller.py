@@ -36,6 +36,7 @@ import webbrowser
 import urllib
 import StringIO
 import gobject
+import shlex
 
 import advene.core.config as config
 
@@ -406,6 +407,64 @@ class AdveneController:
         self.notify('RestrictType', annotationtype=at)
         return True
 
+    def search_string(self, searched=None, source=None, case_sensitive=False):
+        """Search a string in the given source (TALES expression).
+        
+        A special source value is 'tags', which will then return the
+        elements that are tagged with the searched string.
+
+        The search string obeys the classical syntax: 
+        w1 w2 -> search objects containing w1 or w2
+        +w1 +w2 -> search objects containing w1 and w2
+        w1 -w2 -> search objects containing w1 and not w2
+        "foo bar" -> search objects containing the string "foo bar"
+        """
+        p=self.package
+
+        def normalize_case(s):
+            if case_sensitive:
+                return s
+            else:
+                return s.lower()
+
+        if case_sensitive:
+            data_func=lambda e: e.content.data
+        else:
+            data_func=lambda e: normalize_case(e.content.data)
+
+        if source is None:
+            source=p.annotations
+        elif source == 'tags':
+            source=itertools.chain( p.annotations, p.relations )
+            if case_sensitive:
+                data_func=lambda e: e.tags
+            else:
+                data_func=lambda e: [ normalize_case(t) for t in e.tags ]
+        else:
+            c=self.controller.build_context()
+            source=c.evaluateValue(source)
+        
+        words=shlex.split(searched)
+
+        mandatory=[ w[1:] for w in words if w.startswith('+') ]
+        exceptions=[ w[1:] for w in words if w.startswith('-') ]
+        normal=[ w for w in words if not w.startswith('+') and not w.startswith('-') ]
+
+        for w in mandatory:
+            w=normalize_case(w)
+            source=[ e for e in source if w in data_func(e) ]
+        for w in exceptions:
+            w=normalize_case(w)
+            source=[ e for e in source if w not in data_func(e) ]
+        res=[]
+        for e in source:
+            data=data_func(e)
+            for w in normal:
+                if w in data:
+                    res.append(e)
+                    break
+        return res
+        
     def build_context(self, here=None, alias=None, baseurl=None):
         """Build a context object with additional information.
         """
