@@ -85,7 +85,7 @@ class ViewBook(AdhocView):
         self.controller.gui.register_view (v)
         self.views.append(v)
         v._destination=self.location
-        v._label=name
+        v.set_label(name)
         if permanent:
             self.permanent_widgets.append(v)
 
@@ -155,8 +155,7 @@ class ViewBook(AdhocView):
                                         text=_("Please enter the new name of the view"),
                                         default=view._label)
                 if lab is not None:
-                    label_widget.set_text(lab)
-                    view._label=lab
+                    view.set_label(lab)
                 return True
             return False
 
@@ -249,15 +248,16 @@ class ViewBook(AdhocView):
             at=self.controller.package.annotationTypes.get(selection.data)
             # Propose a menu to open various views for the annotation-type:
             menu=gtk.Menu()
-            i=gtk.MenuItem(_("Use annotation-type %s :") % self.controller.get_title(at))
+            title=self.controller.get_title(at)
+            i=gtk.MenuItem(_("Use annotation-type %s :") % title)
             menu.append(i)
             for label, action in (
-                (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % at.id, destination=self.location)),
-                (_("in a timeline"), lambda i: self.controller.gui.open_adhoc_view('timeline', elements=at.annotations, annotationtypes=[ at ], destination=self.location)),
-                (_("as a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=at.annotations, destination=self.location)),
-                (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=at.annotations, destination=self.location)),
-                (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location)),
-                (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location)),
+                (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % at.id, destination=self.location, label=title)),
+                (_("in a timeline"), lambda i: self.controller.gui.open_adhoc_view('timeline', elements=at.annotations, annotationtypes=[ at ], destination=self.location, label=title)),
+                (_("as a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=at.annotations, destination=self.location, label=title)),
+                (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=at.annotations, destination=self.location, label=title)),
+                (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location, label=_("Query %s") % title)),
+                (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location, label=_("Browsing %s") % title)),
                 ):
                 i=gtk.MenuItem(label)
                 i.connect('activate', action)
@@ -269,12 +269,13 @@ class ViewBook(AdhocView):
             a=self.controller.package.annotations.get(selection.data)
             # Propose a menu to open various views for the annotation:
             menu=gtk.Menu()
-            i=gtk.MenuItem(_("Use annotation %s :") % self.controller.get_title(a))
+            title=self.controller.get_title(a)
+            i=gtk.MenuItem(_("Use annotation %s :") % title)
             menu.append(i)
             for label, action in (
-                (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location)),
-                (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location)),
-                (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location)),
+                (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
+                (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
+                (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
                 (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('bookmarks', history=[ a.fragment.begin ], destination=self.location)),
                 ):
                 i=gtk.MenuItem(label)
