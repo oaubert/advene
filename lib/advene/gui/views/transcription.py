@@ -455,18 +455,18 @@ class TranscriptionView(AdhocView):
                 b.apply_tag_by_name("searched_string", matchStart, matchEnd)
                 begin=matchEnd
 
+    def play_annotation(self, a):
+        c=self.controller
+        pos = c.create_position (value=a.fragment.begin,
+                                 key=c.player.MediaTime,
+                                 origin=c.player.AbsolutePosition)
+        c.update_status (status="set", position=pos)
+        c.gui.set_current_annotation(a)
+        return True
+
     def populate_popup_cb(self, textview, menu):
         if self.currentannotation is None:
             return False
-
-        def play_annotation(i, a):
-            c=self.controller
-            pos = c.create_position (value=a.fragment.begin,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            c.update_status (status="set", position=pos)
-            c.gui.set_current_annotation(a)
-            return True
 
         item=gtk.SeparatorMenuItem()
         item.show()
@@ -478,6 +478,10 @@ class TranscriptionView(AdhocView):
         item.set_submenu(menuc.menu)
         item.show()
         menu.append(item)
+
+        def play_annotation(i, a):
+            self.play_annotation(a)
+            return True
 
         item = gtk.MenuItem(_("Play"))
         item.connect("activate", play_annotation, self.currentannotation)
@@ -509,6 +513,9 @@ class TranscriptionView(AdhocView):
         textview.get_buffer().move_mark_by_name('insert', it)
         textview.get_buffer().move_mark_by_name('selection_bound', it)
         self.update_current_annotation()
+        if self.currentannotation is not None and event.type == gtk.gdk._2BUTTON_PRESS:
+            # Double click -> goto annotation
+            self.play_annotation(self.currentannotation)
         return False
 
     def move_cursor_cb(self, textview, step_size, count, extend_selection):
