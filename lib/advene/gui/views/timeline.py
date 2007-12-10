@@ -2285,11 +2285,11 @@ class TimeLine(AdhocView):
                             config.data.drag_type['annotation'] +
                             config.data.drag_type['annotation-type'] +
                             config.data.drag_type['color'],
-                            gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_COPY)
+                            gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
             # The button can generate drags (to change annotation type order)
             b.connect("drag_data_get", self.type_drag_sent)
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                              config.data.drag_type['annotation-type'], gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK)
+                              config.data.drag_type['annotation-type'], gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK)
 
             height=max (height, self.layer_position[t] + 3 * self.button_height)
 
