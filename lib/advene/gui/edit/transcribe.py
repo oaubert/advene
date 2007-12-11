@@ -21,6 +21,7 @@
 import sys
 import re
 import os
+import time
 
 import gtk
 import gobject
@@ -858,35 +859,100 @@ class TranscriptionEdit(AdhocView):
             self.message(_("Cannot convert the data: no associated package"))
             return True
 
-        at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to generate"), create=True)
+        d = gtk.Dialog(title=_("Converting transcription"),
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                 ))
+        l=gtk.Label(_("You can create annotations in an existing annotation type..."))
+        l.set_line_wrap(True)
+        l.show()
+        d.vbox.pack_start(l, expand=False)
 
-        if at is None:
-            self.message(_("Conversion cancelled"))
-            return True
+        ats=list(self.controller.package.annotationTypes)
+        type_selection=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in ats])
 
-        if len(at.annotations):
-            ret=dialog.yes_no_cancel_popup(title=_('Transcription conversion'),
-                                                    text=_("There already are annotations of type %s.\nDo you want to delete them before conversion?") % self.controller.get_title(at))
-            if ret == gtk.RESPONSE_YES:
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Existing type")), expand=False)
+        hb.pack_start(type_selection, expand=False)
+        d.vbox.pack_start(hb, expand=False)
+
+        delete_existing_toggle=gtk.CheckButton(_("Delete existing annotations in this type"))
+        delete_existing_toggle.set_active(False)
+        d.vbox.pack_start(delete_existing_toggle, expand=False)
+
+        l=gtk.Label(_("...or in a new type : specify its schema and title."))
+        l.set_line_wrap(True)
+        l.show()
+        d.vbox.pack_start(l, expand=False)
+
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Title")), expand=False)
+        new_title=gtk.Entry()
+        hb.pack_start(new_title)
+        d.vbox.pack_start(hb)
+
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Schema")), expand=False)
+        schemas=list(self.controller.package.schemas)
+        schema_selection=dialog.list_selector_widget(members=[ (s, self.controller.get_title(s)) for s in schemas])
+        hb.pack_start(schema_selection, expand=False)
+        d.vbox.pack_start(hb)
+
+        l=gtk.Label()
+        l.set_markup("<b>" + _("Export options") + "</b>")
+        d.vbox.pack_start(l, expand=False)
+
+        contiguous=gtk.CheckButton(_("Generate contiguous annotations"))
+        contiguous.set_active(not self.options['empty-annotations'])
+        d.vbox.pack_start(contiguous, expand=False)
+
+        
+        d.connect("key_press_event", dialog.dialog_keypressed_cb)
+
+        d.show_all()
+        dialog.center_on_mouse(d)
+        res=d.run()
+        retval=None
+        if res == gtk.RESPONSE_OK:
+            new_type_title=new_title.get_text()
+            if new_type_title:
+                # Creating a new type
+                s=schema_selection.get_current_element()
+                at=s.createAnnotationType(ident=helper.title2id(new_type_title))
+                at.author=config.data.userid
+                at.date=time.strftime("%Y-%m-%d")
+                at.title=new_type_title
+                at.mimetype='text/plain'
+                at.setMetaData(config.data.namespace, 'color', s.rootPackage._color_palette.next())
+                at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+                s.annotationTypes.append(at)
+                self.controller.notify('AnnotationTypeCreate', annotationtype=at)
+            else:
+                at=type_selection.get_current_element()
+            
+            if delete_existing_toggle.get_active():
                 # Remove all annotations of at type
                 for a in at.annotations:
                     self.controller.delete_annotation(a)
-            elif ret == gtk.RESPONSE_CANCEL:
-                return True
+            self.options['empty-annotations']=not contiguous.get_active()
 
-        ti=TranscriptionImporter(package=self.controller.package,
-                                 controller=self.controller,
-                                 defaulttype=at,
-                                 transcription_edit=self)
-        ti.process_file('transcription')
+            ti=TranscriptionImporter(package=self.controller.package,
+                                     controller=self.controller,
+                                     defaulttype=at,
+                                     transcription_edit=self)
+            ti.process_file('transcription')
 
-        self.controller.package._modified=True
-        self.controller.notify("PackageActivate", package=ti.package)
-        self.message(_('Converted from file %s :') % self.sourcefile)
-        self.controller.log(ti.statistics_formatted())
-        # Feedback
-        dialog.message_dialog(
-            _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
+            self.controller.package._modified=True
+            self.controller.notify("PackageActivate", package=ti.package)
+            self.message(_('Converted from file %s :') % self.sourcefile)
+            self.controller.log(ti.statistics_formatted())
+            # Feedback
+            dialog.message_dialog(
+                _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
+            
+        d.destroy()        
         return True
 
     def get_toolbar(self):
