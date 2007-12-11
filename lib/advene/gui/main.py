@@ -613,12 +613,17 @@ class AdveneGUI (Connect):
             except RuntimeError:
                 print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
 
+        try:
+            self.gui_plugins=self.controller.load_plugins(os.path.join(
+                    os.path.dirname(advene.__file__), 'gui', 'plugins'),
+                                                          prefix="advene_gui_plugins")
+        except OSError:
+            pass
+        
         # Register default GUI elements (actions, content_handlers, etc)
         # !! We cannot use controller.load_plugins, because it would make it impossible
         # to build one-file executables
-        for m in (advene.gui.plugins.actions,
-                  advene.gui.plugins.contenthandlers,
-                  advene.gui.views.timeline,
+        for m in (advene.gui.views.timeline,
                   advene.gui.views.browser,
                   advene.gui.views.finder,
                   advene.gui.views.interactivequery,
