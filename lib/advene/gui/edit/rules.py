@@ -247,6 +247,7 @@ class EditQuery(EditGeneric):
         self.valueentry=None
         self.controller=controller
         self.editconditionlist=[]
+        self.composition='and'
         self.editable=editable
         self.widget=self.build_widget()
 
@@ -280,6 +281,7 @@ class EditQuery(EditGeneric):
 
         if self.editconditionlist:
             self.model.condition=ConditionList([ e.model for e in self.editconditionlist ])
+            self.model.condition.composition=self.composition
         else:
             self.model.condition=None
         return True
@@ -378,6 +380,19 @@ class EditQuery(EditGeneric):
         b.set_sensitive(self.editable)
         hb.pack_start(b, expand=False)
         hb.set_homogeneous(False)
+
+        hb.add(gtk.HBox())
+
+        def change_composition(combo):
+            self.composition=combo.get_current_element()
+            return True
+
+        c=dialog.list_selector_widget( [ ('and', _("All conditions must be met") ),
+                                         ('or', _("Any condition can be met") ) ],
+                                       preselect=self.model.condition.composition,
+                                       callback=change_composition)
+        hb.pack_start(c, expand=False)
+
         conditionsbox.pack_start(hb, expand=False, fill=False)
 
         cf.show_all()
@@ -571,6 +586,18 @@ class EditRule(EditGeneric):
         b.set_sensitive(self.editable)
         hb.pack_start(b, expand=False)
         hb.set_homogeneous(False)
+
+        hb.add(gtk.HBox())
+
+        def change_composition(combo):
+            self.model.condition.composition=combo.get_current_element()
+            return True
+
+        c=dialog.list_selector_widget( [ ('and', _("All conditions must be met") ),
+                                         ('or', _("Any condition can be met") ) ],
+                                       preselect=self.model.condition.composition)
+        hb.pack_start(c, expand=False)
+
         conditionsbox.pack_start(hb, expand=False, fill=False)
 
         cf.show_all()
