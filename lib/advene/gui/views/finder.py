@@ -18,7 +18,12 @@
 
 # Advene finder, a la MacOS X
 
-# Advene part
+from gettext import gettext as _
+
+import gtk
+import cgi
+
+import advene.core.config as config
 from advene.gui.views.tree import DetailedTreeModel
 from advene.gui.views import AdhocView
 from advene.gui.views.annotationdisplay import AnnotationDisplay
@@ -30,10 +35,6 @@ from advene.model.resources import ResourceData
 from advene.model.query import Query
 import advene.gui.popup
 import advene.util.helper as helper
-
-from gettext import gettext as _
-
-import gtk
 
 name="Package finder view plugin"
 
@@ -287,6 +288,28 @@ class ViewColumn(FinderColumn):
 
         b=self.label['activate']=gtk.Button(_("Open view"))
         b.connect('clicked', self.activate)
+        # Drag and drop for adhoc views
+
+        def drag_data_get_cb(button, context, selection, targetType, timestamp):
+            if targetType == config.data.target_type['adhoc-view']:
+                if not isinstance(self.element, View):
+                    return False
+                if helper.get_view_type(self.element) != 'adhoc':
+                    return False
+                selection.set(selection.target, 8,
+                              cgi.urllib.urlencode( {
+                            'id': self.element.id,
+                            } ))
+                return True
+            else:
+                print "Unknown target type for drag: %d" % targetType
+            return True
+
+        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.drag_type['adhoc-view'],
+                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)        
+        b.connect("drag_data_get", drag_data_get_cb)
+        
         vbox.pack_start(b, expand=False)
 
         vbox.show_all()
