@@ -68,6 +68,7 @@ class ExternalImporter(AdhocView):
         b.set_sensitive(False)
         ic=self.importers.get_current_element()
         fname=self.filename_entry.get_text()
+        self.widget.get_toplevel().set_title(_('Importing %s') % os.path.basename(fname))
         if ic is None:
             return True
         i=ic(controller=self.controller, callback=self.progress_callback)
