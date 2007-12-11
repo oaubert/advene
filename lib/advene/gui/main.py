@@ -2895,6 +2895,10 @@ class AdveneGUI (Connect):
         self.controller.log(_("Standard workspace has been saved"))
         return True
 
+    def on_export_activate (self, button=None, data=None):
+        self.open_adhoc_view('exporter', destination='east')
+        return True
+
     def generate_screenshots(self, *p):
         """Generate screenshots.
         """
