@@ -1953,6 +1953,13 @@ class TimeLine(AdhocView):
         item.connect('activate', create_annotation, position)
         menu.append(item)
 
+        item = gtk.MenuItem(_("Selection"))
+        if self.get_selected_annotation_widgets():
+            item.set_submenu(self.selection_menu(popup=False))
+        else:
+            item.set_sensitive(False)
+        menu.append(item)
+
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
@@ -2417,12 +2424,12 @@ class TimeLine(AdhocView):
 
         return vbox
 
-    def selection_menu(self, button):
+    def selection_menu(self, button=None, popup=True):
         """Display the menu for the selection.
         """
         def center_and_zoom(m, sel):
             begin=min( [ w.annotation.fragment.begin for w in sel ] )
-            end=max( [ w.annotation.fragment.begin for w in sel ] )
+            end=max( [ w.annotation.fragment.end for w in sel ] )
 
             # Deactivate autoscroll...
             self.set_autoscroll_mode(0)
@@ -2463,8 +2470,9 @@ class TimeLine(AdhocView):
             i.connect('activate', self.selection_edit, l)
             m.append(i)
         m.show_all()
-        m.popup(None, None, None, 0, gtk.get_current_event_time())
-        return True
+        if popup:
+            m.popup(None, None, None, 0, gtk.get_current_event_time())
+        return m
 
     def get_packed_widget (self):
         """Return the widget packed into a scrolledwindow."""
