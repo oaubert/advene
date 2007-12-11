@@ -380,6 +380,7 @@ class Rule:
 
     default_condition=Condition()
     default_condition.match=default_condition.truematch
+    default_condition.composition='and'
 
     def __init__ (self, name="N/C", event=None,
                   condition=None, action=None, origin=None, priority=0):
@@ -457,6 +458,10 @@ class Rule:
         for condnode in rulenode.getElementsByTagName('condition'):
             self.add_condition(Condition().from_dom(condnode))
 
+        # Set the composition mode for the condition
+        for n in rulenode.getElementsByTagName('composition'):
+            self.condition.composition=n.getAttribute('value')
+
         # Actions
         for actionnode in rulenode.getElementsByTagName('action'):
             name=actionnode.getAttribute('name')
@@ -510,6 +515,10 @@ class Rule:
                 if cond == self.default_condition:
                     continue
                 rulenode.appendChild(cond.to_dom(dom))
+
+        compnode=dom.createElement('composition')
+        compnode.setAttribute('value', self.condition.composition)
+        rulenode.appendChild(compnode)
 
         if isinstance(self.action, ActionList):
             l=self.action
@@ -777,6 +786,10 @@ class Query:
         for condnode in domelement.getElementsByTagName('condition'):
             self.add_condition(Condition().from_dom(condnode))
 
+        # Set the composition mode for the condition
+        for n in domelement.getElementsByTagName('composition'):
+            self.condition.composition=n.getAttribute('value')
+
         rnodes=domelement.getElementsByTagName('return')
         if len(rnodes) == 1:
             self.rvalue=rnodes[0].getAttribute('value')
@@ -807,6 +820,10 @@ class Query:
                 if cond is None:
                     continue
                 qnode.appendChild(cond.to_dom(dom))
+
+            compnode=dom.createElement('composition')
+            compnode.setAttribute('value', self.condition.composition)
+            qnode.appendChild(compnode)
 
         if self.rvalue is not None:
             rnode=dom.createElement('return')
