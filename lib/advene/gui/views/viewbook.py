@@ -183,7 +183,7 @@ class ViewBook(AdhocView):
             # The widget can generate drags
             e.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['adhoc-view-instance'],
-                              gtk.gdk.ACTION_LINK)
+                              gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
         hb=gtk.HBox()
         hb.pack_start(e, expand=False, fill=False)
 
@@ -301,6 +301,6 @@ class ViewBook(AdhocView):
                                config.data.drag_type['adhoc-view-instance'] +
                                config.data.drag_type['annotation-type'] +
                                config.data.drag_type['annotation'],
-                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
+                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK)
 
         return notebook
