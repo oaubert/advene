@@ -192,8 +192,6 @@ class InteractiveResult(AdhocView):
         super(InteractiveResult, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
-            (_("Create annotation from the result"), self.create_annotations),
-            (_("Define a montage with the result"), self.create_montage),
             #(_("Refresh"), self.refresh),
             #(_("Save view"), self.save_view),
             )
@@ -343,13 +341,21 @@ class InteractiveResult(AdhocView):
                 self.controller.gui.tooltips.set_tip(b, _("Display annotations as transcription"))
                 hb.add(b)
 
-                b=get_pixmap_button('highlight.png')
+                b=get_pixmap_button('highlight.png', toggle_highlight, l)
                 b.highlight=True
-                b.connect('clicked', toggle_highlight, l)
+                self.controller.gui.tooltips.set_tip(b, _("Highlight annotations"))
                 hb.add(b)
 
                 b=get_small_stock_button(gtk.STOCK_CONVERT, lambda b: table.csv_export())
                 self.controller.gui.tooltips.set_tip(b, _("Export table"))
+                hb.add(b)
+
+                b=get_small_stock_button(gtk.STOCK_NEW, self.create_annotations)
+                self.controller.gui.tooltips.set_tip(b, _("Create annotations from the result"))
+                hb.add(b)
+
+                b=get_pixmap_button('montage.png', self.create_montage)
+                self.controller.gui.tooltips.set_tip(b, _("Define a montage with the result"))
                 hb.add(b)
 
                 self.table=table
