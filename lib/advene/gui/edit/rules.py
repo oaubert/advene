@@ -254,7 +254,7 @@ class EditQuery(EditGeneric):
         iv=[]
         if not self.sourceentry.is_valid():
             iv.append(_("Source expression"))
-        if not self.valueentry.is_valid():
+        if self.valueentry is not None and not self.valueentry.is_valid():
             iv.append(_("Return expression"))
 
         for ec in self.editconditionlist:
@@ -266,7 +266,10 @@ class EditQuery(EditGeneric):
         if not self.editable:
             return False
         self.model.source=self.sourceentry.get_text()
-        v=self.valueentry.get_text()
+        if self.valueentry is None:
+            v='element'
+        else:
+            v=self.valueentry.get_text()
         if v == '' or v == 'element':
             self.model.rvalue=None
         else:
@@ -342,23 +345,29 @@ class EditQuery(EditGeneric):
         ef.show_all()
         vbox.pack_start(ef, expand=False)
 
-        # Return value
-        vf=gtk.Frame(_("Return "))
-        self.valueentry=TALESEntry(context=self.model,
-                                   predefined=[ ('element', _("The element")),
-                                                ('element/content/data', _("The element's content")) ],
-                                   controller=self.controller)
-        v=self.model.rvalue
-        if v is None or v == '':
-            v='element'
-        self.valueentry.set_text(v)
-        self.valueentry.set_editable(self.editable)
-        vf.add(self.valueentry.widget)
-        vf.show_all()
-        vbox.pack_start(vf, expand=False)
+        if config.data.preferences['expert-mode']:
+            # Return value
+            vf=gtk.Frame(_("Return "))
+            self.valueentry=TALESEntry(context=self.model,
+                                       predefined=[ ('element', _("The element")),
+                                                    ('element/content/data', _("The element's content")) ],
+                                       controller=self.controller)
+            v=self.model.rvalue
+            if v is None or v == '':
+                v='element'
+            self.valueentry.set_text(v)
+            self.valueentry.set_editable(self.editable)
+            vf.add(self.valueentry.widget)
+            vf.show_all()
+            vbox.pack_start(vf, expand=False)
+        else:
+            self.valueentry=None
 
         # Conditions
-        cf=gtk.Frame(_("If the element matches "))
+        if config.data.preferences['expert-mode']:
+            cf=gtk.Frame(_("If the element matches "))
+        else:
+            cf=gtk.Frame(_("Return the element if it matches "))
         conditionsbox=gtk.VBox()
         cf.add(conditionsbox)
 
