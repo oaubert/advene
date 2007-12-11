@@ -39,7 +39,7 @@ import advene.util.helper as helper
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-from advene.gui.util import dialog, image_from_position
+from advene.gui.util import dialog, image_from_position, get_pixmap_button, get_small_stock_button
 import advene.gui.edit.properties
 from advene.gui.util.completer import Completer
 from advene.gui.widget import TimestampMarkWidget
@@ -140,6 +140,31 @@ class TranscriptionEdit(AdhocView):
             self.options.update(cache)
         return True
 
+    def show_searchbox(self, *p):
+        self.searchbox.show()
+        self.searchbox.entry.grab_focus()
+        return True
+
+    def highlight_search_forward(self, searched):
+        """Highlight with the searched_string tag the given string.
+        """
+        b=self.textview.get_buffer()
+        begin, end=b.get_bounds()
+        # Remove searched_string tag occurences that may be left from
+        # a previous invocation
+        b.remove_tag_by_name("searched_string", begin, end)
+
+        finished=False
+
+        while not finished:
+            res=begin.forward_search(searched, gtk.TEXT_SEARCH_TEXT_ONLY)
+            if not res:
+                finished=True
+            else:
+                matchStart, matchEnd = res
+                b.apply_tag_by_name("searched_string", matchStart, matchEnd)
+                begin=matchEnd
+
     def build_widget(self):
         vbox = gtk.VBox()
 
@@ -179,10 +204,59 @@ class TranscriptionEdit(AdhocView):
 
         sw.add(self.textview)
 
+        # Search box
+        b=self.textview.get_buffer()
+
+        # Create useful tags
+        b.create_tag("activated", background="skyblue")
+        b.create_tag("current", background="lightblue")
+        b.create_tag("searched_string", background="green")
+
+        self.searchbox=gtk.HBox()
+
+        def hide_searchbox(*p):
+            # Clear the searched_string tags
+            b=self.textview.get_buffer()
+            b.remove_tag_by_name("searched_string", *b.get_bounds())
+            self.searchbox.hide()
+            return True
+
+        close_button=get_pixmap_button('small_close.png', hide_searchbox)
+        close_button.set_relief(gtk.RELIEF_NONE)
+        self.searchbox.pack_start(close_button, expand=False, fill=False)
+        
+        def search_entry_cb(e):
+            self.highlight_search_forward(e.get_text())
+            return True
+
+        def search_entry_key_press_cb(e, event):
+            if event.keyval == gtk.keysyms.Escape:
+                hide_searchbox()
+                return True
+            return False
+
+        self.searchbox.entry=gtk.Entry()
+        self.searchbox.entry.connect('activate', search_entry_cb)
+        self.searchbox.pack_start(self.searchbox.entry, expand=False, fill=False)
+        self.searchbox.entry.connect('key-press-event', search_entry_key_press_cb)
+
+        b=get_small_stock_button(gtk.STOCK_FIND)
+        b.connect('clicked', lambda b: self.highlight_search_forward(self.searchbox.entry.get_text()))
+        self.searchbox.pack_start(b, expand=False)
+
+        fill=gtk.HBox()
+        self.searchbox.pack_start(fill, expand=True, fill=True)
+        self.searchbox.show_all()
+        self.searchbox.hide()
+
+        self.searchbox.set_no_show_all(True)
+        vbox.pack_start(self.searchbox, expand=False)
+        
         self.statusbar=gtk.Statusbar()
         self.statusbar.set_has_resize_grip(False)
         vbox.pack_start(self.statusbar, expand=False)
         vbox.show_all()
+
         return vbox
 
     def message(self, m):
@@ -835,6 +909,7 @@ class TranscriptionEdit(AdhocView):
             (_("Convert"), _("Convert to annotations"), gtk.STOCK_CONVERT, self.convert_transcription_cb),
             (_("Preferences"), _("Preferences"), gtk.STOCK_PREFERENCES, self.edit_preferences),
             (_("Center"), _("Center on the current mark"), gtk.STOCK_JUSTIFY_CENTER, center_on_current),
+            (_("Find"), _("Search a string"), gtk.STOCK_FIND, self.show_searchbox),
             )
 
         for text, tooltip, icon, callback in tb_list:
