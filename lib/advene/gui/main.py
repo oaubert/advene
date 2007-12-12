@@ -1052,16 +1052,16 @@ class AdveneGUI (Connect):
                 c.move_position (-1000/25, notify=False)
                 return True
             elif event.keyval == gtk.keysyms.Right:
-                c.move_position (config.data.player_preferences['time_increment'], notify=False)
+                c.move_position (config.data.preferences['time-increment'], notify=False)
                 return True
             elif event.keyval == gtk.keysyms.Left:
-                c.move_position (-config.data.player_preferences['time_increment'], notify=False)
+                c.move_position (-config.data.preferences['time-increment'], notify=False)
                 return True
             elif event.keyval == gtk.keysyms.Home:
                 c.update_status ("set", self.controller.create_position (0))
                 return True
             elif event.keyval == gtk.keysyms.End:
-                pos = c.create_position (value = -config.data.player_preferences['time_increment'],
+                pos = c.create_position (value = -config.data.preferences['time-increment'],
                                          key = c.player.MediaTime,
                                          origin = c.player.ModuloPosition)
                 c.update_status ("set", pos)
@@ -2444,7 +2444,7 @@ class AdveneGUI (Connect):
 
     def on_b_rewind_clicked (self, button=None, data=None):
         if self.controller.player.status == self.controller.player.PlayingStatus:
-            self.controller.move_position (-config.data.player_preferences['time_increment'],
+            self.controller.move_position (-config.data.preferences['time-increment'],
                                             notify=False)
         return True
 
@@ -2465,7 +2465,7 @@ class AdveneGUI (Connect):
 
     def on_b_forward_clicked (self, button=None, data=None):
         if self.controller.player.status == self.controller.player.PlayingStatus:
-            self.controller.move_position (config.data.player_preferences['time_increment'],
+            self.controller.move_position (config.data.preferences['time-increment'],
                                            notify=False)
         return True
 
@@ -2586,7 +2586,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_preferences1_activate (self, button=None, data=None):
-        direct_options=('history-size-limit', 'scroll-increment', 'language',
+        direct_options=('history-size-limit', 'scroll-increment', 'time-increment', 'language',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit', 
                         'remember-window-size', 'expert-mode',
                         'package-auto-save', 'package-auto-save-interval')
@@ -2605,26 +2605,8 @@ class AdveneGUI (Connect):
             cache[k] = config.data.preferences[k]
         ew=advene.gui.edit.properties.EditNotebook(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
-        ew.add_title(_("General"))
-        ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 2000)
-        ew.add_option(_("On exit,"), 'imagecache-save-on-exit', 
-                      _("How to handle screenshots on exit"), 
-                      {
-                _("never save screenshots"): 'never',
-                _("always save screenshots"): 'always',
-                _("ask before saving screenshots"): 'ask',
-                })
-        ew.add_option(_("Auto-save"), 'package-auto-save', 
-                      _("Data auto-save functionality"), 
-                      {
-                _("is desactivated"): 'never',
-                _("is done automatically"): 'always',
-                _("is done after confirmation"): 'ask',
-                })
-        ew.add_spin(_("Auto-save interval"), 'package-auto-save-interval', _("Interval (in ms) between package auto-saves"), 1000, 60 * 60 * 1000)
 
         ew.add_title(_("GUI"))
-
         ew.add_option(_("Interface language (after restart)"), 'language', _("Language used for the interface (necessitates to restart the application)"),
                       {
                 "English": 'C',
@@ -2641,6 +2623,27 @@ class AdveneGUI (Connect):
                         }
                      )
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
+
+        ew.add_title(_("Time-related"))
+        ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-arrow or forward/rewind buttons (in ms)."), 100, 30000)
+        ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 2000)
+
+        ew.add_title(_("General"))
+        ew.add_option(_("On exit,"), 'imagecache-save-on-exit', 
+                      _("How to handle screenshots on exit"), 
+                      {
+                _("never save screenshots"): 'never',
+                _("always save screenshots"): 'always',
+                _("ask before saving screenshots"): 'ask',
+                })
+        ew.add_option(_("Auto-save"), 'package-auto-save', 
+                      _("Data auto-save functionality"), 
+                      {
+                _("is desactivated"): 'never',
+                _("is done automatically"): 'always',
+                _("is done after confirmation"): 'ask',
+                })
+        ew.add_spin(_("Auto-save interval"), 'package-auto-save-interval', _("Interval (in ms) between package auto-saves"), 1000, 60 * 60 * 1000)
 
         ew.add_title(_("Standard adhoc views"))
         ew.add_label(_("""This feature is now deprecated. To achieve the same result, open the desired views in the interface and use the File/Save workspace...as standard workspace menuitem."""))
