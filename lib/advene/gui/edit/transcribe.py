@@ -32,6 +32,7 @@ import advene.core.config as config
 
 # Advene part
 from advene.model.package import Package
+from advene.model.schema import AnnotationType
 
 import advene.util.importer
 
@@ -865,79 +866,119 @@ class TranscriptionEdit(AdhocView):
                        buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                                  gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  ))
-        l=gtk.Label(_("You can create annotations in an existing annotation type..."))
+        l=gtk.Label(_("Choose the annotation-type where to create annotations.\n"))
         l.set_line_wrap(True)
         l.show()
         d.vbox.pack_start(l, expand=False)
 
+        new_type_dialog=gtk.VBox()
+
         ats=list(self.controller.package.annotationTypes)
-        type_selection=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in ats])
+        newat=helper.TitledElement(value=None,
+                                   title=_("Create a new annotation type"))
+        ats.append(newat)
+
+        def handle_new_type_selection(combo):
+            el=combo.get_current_element()
+            if el == newat:
+                new_type_dialog.show()
+            else:
+                new_type_dialog.hide()
+            return True
+
+        type_selection=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in ats],
+                                                   callback=handle_new_type_selection)
 
         hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Existing type")), expand=False)
+        hb.pack_start(gtk.Label(_("Select type") + " "), expand=False)
         hb.pack_start(type_selection, expand=False)
         d.vbox.pack_start(hb, expand=False)
 
-        delete_existing_toggle=gtk.CheckButton(_("Delete existing annotations in this type"))
-        delete_existing_toggle.set_active(False)
-        d.vbox.pack_start(delete_existing_toggle, expand=False)
-
-        l=gtk.Label(_("...or in a new type : specify its schema and title."))
+        l=gtk.Label(_("You want to create a new type. Please specify its schema and title."))
         l.set_line_wrap(True)
         l.show()
-        d.vbox.pack_start(l, expand=False)
+        new_type_dialog.pack_start(l, expand=False)
 
         hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Title")), expand=False)
+        hb.pack_start(gtk.Label(_("Title") + " "), expand=False)
         new_title=gtk.Entry()
         hb.pack_start(new_title)
-        d.vbox.pack_start(hb)
+        new_type_dialog.pack_start(hb, expand=False)
 
         hb=gtk.HBox()
-        hb.pack_start(gtk.Label(_("Schema")), expand=False)
+        hb.pack_start(gtk.Label(_("Containing schema") + " "), expand=False)
         schemas=list(self.controller.package.schemas)
         schema_selection=dialog.list_selector_widget(members=[ (s, self.controller.get_title(s)) for s in schemas])
         hb.pack_start(schema_selection, expand=False)
-        d.vbox.pack_start(hb)
+        new_type_dialog.pack_start(hb, expand=False)
+
+        new_type_dialog.show_all()
+        new_type_dialog.set_no_show_all(True)
+        new_type_dialog.hide()
+
+        d.vbox.pack_start(new_type_dialog)
 
         l=gtk.Label()
         l.set_markup("<b>" + _("Export options") + "</b>")
         d.vbox.pack_start(l, expand=False)
 
-        contiguous=gtk.CheckButton(_("Generate contiguous annotations"))
-        contiguous.set_active(not self.options['empty-annotations'])
-        d.vbox.pack_start(contiguous, expand=False)
+        delete_existing_toggle=gtk.CheckButton(_("Delete existing annotations in this type"))
+        delete_existing_toggle.set_active(False)
+        d.vbox.pack_start(delete_existing_toggle, expand=False)
 
+        empty_contents_toggle=gtk.CheckButton(_("Generate annotations for empty contents"))
+        empty_contents_toggle.set_active(self.options['empty-annotations'])
+        d.vbox.pack_start(empty_contents_toggle, expand=False)
         
         d.connect("key_press_event", dialog.dialog_keypressed_cb)
 
         d.show_all()
         dialog.center_on_mouse(d)
-        res=d.run()
-        retval=None
-        if res == gtk.RESPONSE_OK:
-            new_type_title=new_title.get_text()
-            if new_type_title:
-                # Creating a new type
-                s=schema_selection.get_current_element()
-                at=s.createAnnotationType(ident=helper.title2id(new_type_title))
-                at.author=config.data.userid
-                at.date=time.strftime("%Y-%m-%d")
-                at.title=new_type_title
-                at.mimetype='text/plain'
-                at.setMetaData(config.data.namespace, 'color', s.rootPackage._color_palette.next())
-                at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
-                s.annotationTypes.append(at)
-                self.controller.notify('AnnotationTypeCreate', annotationtype=at)
-            else:
-                at=type_selection.get_current_element()
-            
-            if delete_existing_toggle.get_active():
-                # Remove all annotations of at type
-                for a in at.annotations:
-                    self.controller.delete_annotation(a)
-            self.options['empty-annotations']=not contiguous.get_active()
 
+        finished=None
+        while not finished:
+            res=d.run()
+            if res == gtk.RESPONSE_OK:
+                at=type_selection.get_current_element()
+                if at == newat:                    
+                    new_type_title=new_title.get_text()
+                    if new_type_title == '':
+                        # Empty title. Generate one.
+                        id_=self.controller.package._idgenerator.get_id(AnnotationType)
+                    else:
+                        id_=helper.title2id(new_type_title)
+                        # Check that the id is available
+                        if self.controller.package._idgenerator.exists(id_):
+                            dialog.message_dialog(
+                                _("The %s identifier already exists. Choose another one.") % id_,
+                                icon=gtk.MESSAGE_WARNING)
+                            at=None
+                            continue
+                    # Creating a new type
+                    s=schema_selection.get_current_element()
+                    at=s.createAnnotationType(ident=id_)
+                    at.author=config.data.userid
+                    at.date=time.strftime("%Y-%m-%d")
+                    at.title=new_type_title
+                    at.mimetype='text/plain'
+                    at.setMetaData(config.data.namespace, 'color', s.rootPackage._color_palette.next())
+                    at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+                    s.annotationTypes.append(at)
+                    self.controller.notify('AnnotationTypeCreate', annotationtype=at)
+
+                if delete_existing_toggle.get_active():
+                    # Remove all annotations of at type
+                    for a in at.annotations:
+                        self.controller.delete_annotation(a)
+
+                self.options['empty-annotations']=empty_contents_toggle.get_active()
+                finished=True
+            else:
+                at=None
+                finished=True
+        d.destroy()
+
+        if at is not None:
             ti=TranscriptionImporter(package=self.controller.package,
                                      controller=self.controller,
                                      defaulttype=at,
@@ -946,13 +987,12 @@ class TranscriptionEdit(AdhocView):
 
             self.controller.package._modified=True
             self.controller.notify("PackageActivate", package=ti.package)
-            self.message(_('Converted from file %s :') % self.sourcefile)
+            self.message(_('Notes converted :'))
             self.controller.log(ti.statistics_formatted())
             # Feedback
             dialog.message_dialog(
                 _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
             
-        d.destroy()        
         return True
 
     def get_toolbar(self):
