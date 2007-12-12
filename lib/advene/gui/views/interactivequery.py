@@ -87,7 +87,7 @@ class InteractiveQuery(AdhocView):
             # Create the query
             el=self.controller.package.createQuery(ident='_interactive')
             el.author=config.data.userid
-            el.date=time.strftime("%Y-%m-%d")
+            el.date=self.controller.get_timestamp()
             el.title=_("Interactive query")
 
             # Create a basic query
