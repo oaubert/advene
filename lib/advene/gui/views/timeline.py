@@ -2507,7 +2507,7 @@ class TimeLine(AdhocView):
         scale_pane.add1(self.scale_label)
 
         sw_scale=gtk.ScrolledWindow()
-        sw_scale.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        sw_scale.set_policy(gtk.POLICY_NEVER, gtk.POLICY_NEVER)
         sw_scale.set_hadjustment (sw_layout.get_hadjustment())
         sw_scale.add(self.scale_layout)
         scale_pane.add2(sw_scale)
