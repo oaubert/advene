@@ -218,7 +218,7 @@ div.${a/id} {
       <content mime-type='application/xml'>&lt;?xml version="1.0" encoding="UTF-8"?>
 &lt;iri>
   &lt;head>
-    &lt;meta name="id" tal:attributes="content advene"/>
+    &lt;meta name="id" tal:attributes="content python:options['aliases'][package]"/>
     &lt;meta name="title" tal:attributes="content package/title"/>
     &lt;meta name="author" content=""/>
     &lt;meta name="contributor" tal:attributes="content package/author"/>
@@ -229,10 +229,10 @@ div.${a/id} {
   &lt;/head>
   &lt;body>
     &lt;ensembles>
-      &lt;ensemble tal:repeat="at package/annotationTypes" display="1"
-      tal:attributes="id string:en_${at/id} ; author at/author ; date
-      at/date ; title at/title ; abstract at/meta/dc/description">
-	&lt;decoupage display="1" tal:attributes="id at/id ; dur
+      &lt;ensemble tal:repeat="sch package/schemas"
+      tal:attributes="id sch/id ; author sch/author ; date
+      sch/date ; title sch/title ; abstract sch/meta/dc/description">
+	&lt;decoupage tal:repeat="at sch/annotationTypes" tal:attributes="display repeat/at/index ;  id at/id ; dur
       package/cached_duration ;  color at/color ;
       author at/author ; date at/date ;  title at/title ; label
       at/representation ; abstract at/meta/dc/description">
@@ -242,7 +242,7 @@ div.${a/id} {
 		     tal:attributes="id a/id ; begin a/fragment/begin
 		     ; dur a/fragment/duration ;  author a/author ;
 		     date a/date ; title a/representation ; abstract
-		     a/content/data ; src string:http://localhost:1234${a/snapshot_url}"/>
+		     a/content/data ; src string:http://localhost:1234${a/snapshot_url}" />
 	  &lt;/elements>
 	  &lt;views>
 	  &lt;/views>
