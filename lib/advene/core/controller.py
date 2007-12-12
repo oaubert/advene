@@ -442,7 +442,7 @@ class AdveneController:
             else:
                 data_func=lambda e: [ normalize_case(t) for t in e.tags ]
         else:
-            c=self.controller.build_context()
+            c=self.build_context()
             source=c.evaluateValue(source)
         
         words=shlex.split(searched)
