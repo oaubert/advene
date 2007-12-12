@@ -881,7 +881,11 @@ class TranscriptionEdit(AdhocView):
         l.show()
         d.vbox.pack_start(l, expand=False)
 
+        # Anticipated declaration of some widgets, which need to be
+        # updated in the handle_new_type_selection callback.
         new_type_dialog=gtk.VBox()
+        delete_existing_toggle=gtk.CheckButton(_("Delete existing annotations in this type"))
+        delete_existing_toggle.set_active(False)
 
         ats=list(self.controller.package.annotationTypes)
         newat=helper.TitledElement(value=None,
@@ -892,8 +896,10 @@ class TranscriptionEdit(AdhocView):
             el=combo.get_current_element()
             if el == newat:
                 new_type_dialog.show()
+                delete_existing_toggle.set_sensitive(False)
             else:
                 new_type_dialog.hide()
+                delete_existing_toggle.set_sensitive(True)
             return True
 
         type_selection=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in ats],
@@ -932,8 +938,6 @@ class TranscriptionEdit(AdhocView):
         l.set_markup("<b>" + _("Export options") + "</b>")
         d.vbox.pack_start(l, expand=False)
 
-        delete_existing_toggle=gtk.CheckButton(_("Delete existing annotations in this type"))
-        delete_existing_toggle.set_active(False)
         d.vbox.pack_start(delete_existing_toggle, expand=False)
 
         empty_contents_toggle=gtk.CheckButton(_("Generate annotations for empty contents"))
