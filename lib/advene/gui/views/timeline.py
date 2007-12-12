@@ -2321,7 +2321,7 @@ class TimeLine(AdhocView):
             nav.set_size_request(16, self.button_height)
             nav.annotationtype=t
             nav.prev=True
-            self.tooltips.set_tip(nav, _("Goto previous annotations"))
+            self.tooltips.set_tip(nav, _("Goto previous annotation"))
             eb=gtk.EventBox()
             eb.connect('button_press_event', navigate, 'prev', t)
             eb.add(nav)
@@ -2332,7 +2332,7 @@ class TimeLine(AdhocView):
             nav.set_size_request(16, self.button_height)
             nav.annotationtype=t
             nav.next=True
-            self.tooltips.set_tip(nav, _("Goto next annotations"))
+            self.tooltips.set_tip(nav, _("Goto next annotation"))
             eb=gtk.EventBox()
             eb.connect('button_press_event', navigate, 'next', t)
             eb.add(nav)
