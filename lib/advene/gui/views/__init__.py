@@ -425,9 +425,10 @@ class AdhocView(object):
             window.cleanup_id=window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
             self.controller.gui.init_window_size(window, self.view_id)
 	
-	# force resize for win32
-	window.set_resize_mode(gtk.RESIZE_IMMEDIATE)
-	window.resize_children()
+        if config.data.os == 'win32':
+            # Force resize for win32
+            window.set_resize_mode(gtk.RESIZE_IMMEDIATE)
+            window.resize_children()
         return window
 
 class AdhocViewParametersParser:
