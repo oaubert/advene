@@ -1855,6 +1855,14 @@ class AdveneGUI (Connect):
         return True
 
     def search_string(self, s):
+        if not ' ' in s:
+            # Single-word search. Forward to existing note-taking or
+            # transcription views.
+            # Note: it could maybe be better achieved through a new signal WordSearch
+            # which could be handled by the views
+            tr=[ v for v in self.adhoc_views if v.view_id in ('transcribe', 'transcription') ]
+            for v in tr:
+                v.highlight_search_forward(s)
         return self.controller.search_string(searched=s, 
                                              source=config.data.preferences['quicksearch-source'],
                                              case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
