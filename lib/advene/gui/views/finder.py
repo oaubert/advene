@@ -54,6 +54,41 @@ class FinderColumn:
         self.previous=parent
         self.next=None
         self.widget=self.build_widget()
+        self.widget.connect('key_press_event', self.key_pressed_cb)
+
+    def key_pressed_cb(self, col, event):
+        if event.keyval == gtk.keysyms.Right:
+            # Next column
+            if self.next is not None:
+                self.next.get_focus()
+            return True
+        elif event.keyval == gtk.keysyms.Left:
+            # Previous column
+            if self.previous is not None:
+                self.previous.get_focus()
+            return True
+        return False
+
+    def get_focus(self):
+        self.focus_on_first_button()
+        return True
+
+    def focus_on_first_button(self):
+        def get_button_child(w):
+            b=[ c for c in w.get_children() if isinstance(c, gtk.Button) ]
+            if b:
+                return b[0]
+            else:
+                for c in w.get_children():
+                    try:
+                        b=get_button_child(c)
+                        if b is not None:
+                            return b
+                    except AttributeError:
+                        continue
+            return None
+        get_button_child(self.widget).grab_focus()
+        return True
 
     def close(self):
         """Close this column, and all following ones.
@@ -103,6 +138,10 @@ class ModelColumn(FinderColumn):
         return [ (title(c),
                   c, 
                   c[DetailedTreeModel.COLUMN_COLOR]) for c in self.node.iterchildren() ]
+
+    def get_focus(self):
+        self.listview.grab_focus()
+        return True
 
     def get_liststore(self):
         ls=gtk.ListStore(str, object, str)
@@ -200,11 +239,13 @@ class ModelColumn(FinderColumn):
         selection.unselect_all()
         selection.connect('changed', self.on_changed_selection, self.liststore)
         self.listview.connect("button-press-event", self.on_button_press)
-
+        self.listview.connect('key_press_event', self.key_pressed_cb)
 
         sw.add_with_viewport(self.listview)
 
         vbox.show_all()
+        
+
         return vbox
 
 class AnnotationColumn(FinderColumn):
