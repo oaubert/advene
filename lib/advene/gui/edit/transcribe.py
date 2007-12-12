@@ -612,7 +612,7 @@ class TranscriptionEdit(AdhocView):
         return True
 
     def update_position(self, pos):
-        l=[ m for m in self.marks if m.timestamp <= pos ]
+        l=[ m for m in self.marks if m.timestamp <= pos and not m.anchor.get_deleted() ]
         if l:
             cm=l[-1]
             if cm != self.current_mark:
