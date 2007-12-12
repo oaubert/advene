@@ -670,10 +670,15 @@ class TranscriptionEdit(AdhocView):
                 # Found a TextAnchor
                 child=a.get_widgets()[0]
                 timestamp=child.timestamp
+                if timestamp < t:
+                    # Invalid timestamp mark.
+                    self.log(_('Invalid timestamp mark in conversion: %s') % helper.format_time(timestamp))
+                    t=timestamp
+                    continue
                 text=b.get_text(begin, end, include_hidden_chars=False)
                 if strip_blank:
                     text=text.rstrip().lstrip()
-                if self.options['empty-annotations'] and self.empty_re.match(text):
+                if self.empty_re.match(text) and not self.options['empty-annotations']:
                     pass
                 elif ignore_next:
                     if show_ignored:
@@ -690,16 +695,11 @@ class TranscriptionEdit(AdhocView):
                 t=timestamp
                 begin=end.copy()
         # End of buffer. Create the last annotation
-        timestamp=self.controller.player.stream_duration
+        timestamp=self.controller.cached_duration
         text=b.get_text(begin, end, include_hidden_chars=False)
-        if self.options['empty-annotations'] and self.empty_re.match(text):
+        if self.empty_re.match(text) or ignore_next:
+            # Last timestsamp mark
             pass
-        elif ignore_next:
-            if show_ignored:
-                yield { 'begin': t,
-                        'end':   timestamp,
-                        'content': text,
-                        'ignored': True }
         else:
             yield { 'begin': t,
                     'end': timestamp,
@@ -856,7 +856,7 @@ class TranscriptionEdit(AdhocView):
         last_time=None
 
         for a in al:
-            if a.fragment.begin != last_time:
+            if a.fragment.begin > last_time:
                 it=b.get_iter_at_mark(b.get_insert())
                 mark=self.create_timestamp_mark(a.fragment.begin, it)
             b.insert_at_cursor(a.content.data)
