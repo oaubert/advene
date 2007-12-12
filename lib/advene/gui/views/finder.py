@@ -70,25 +70,27 @@ class FinderColumn:
         return False
 
     def get_focus(self):
-        self.focus_on_first_button()
+        """Get the focus on the column.
+
+        As we use a gtk.Button at the top of every specialized
+        ViewColumn, we want to use the second button.
+        """
+        b=self.get_child_buttons(self.widget)
+        if len(b) >= 2:
+            b[1].grab_focus()
         return True
 
-    def focus_on_first_button(self):
-        def get_button_child(w):
+    def get_child_buttons(self, w):
+        """Return the buttons contained in the widget.
+        """
+        b=[]
+        try:
             b=[ c for c in w.get_children() if isinstance(c, gtk.Button) ]
-            if b:
-                return b[0]
-            else:
-                for c in w.get_children():
-                    try:
-                        b=get_button_child(c)
-                        if b is not None:
-                            return b
-                    except AttributeError:
-                        continue
-            return None
-        get_button_child(self.widget).grab_focus()
-        return True
+        except AttributeError:
+            return []
+        for c in w.get_children():
+            b.extend(self.get_child_buttons(c))
+        return b
 
     def close(self):
         """Close this column, and all following ones.
@@ -241,10 +243,9 @@ class ModelColumn(FinderColumn):
         self.listview.connect("button-press-event", self.on_button_press)
         self.listview.connect('key_press_event', self.key_pressed_cb)
 
-        sw.add_with_viewport(self.listview)
+        sw.add(self.listview)
 
         vbox.show_all()
-        
 
         return vbox
 
@@ -255,8 +256,14 @@ class AnnotationColumn(FinderColumn):
         return True
 
     def build_widget(self):
+        vbox=gtk.VBox()
+
+        l=gtk.Button(_("Annotation"))
+        vbox.pack_start(l, expand=False)
         self.view=AnnotationDisplay(controller=self.controller, annotation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
-        return self.view.widget
+        vbox.add(self.view.widget)
+        vbox.show_all()
+        return vbox
 CLASS2COLUMN[Annotation]=AnnotationColumn
 
 class RelationColumn(FinderColumn):
@@ -266,8 +273,14 @@ class RelationColumn(FinderColumn):
         return True
 
     def build_widget(self):
+        vbox=gtk.VBox()
+
+        l=gtk.Button(_("Relation"))
+        vbox.pack_start(l, expand=False)
         self.view=RelationDisplay(controller=self.controller, relation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
-        return self.view.widget
+        vbox.add(self.view.widget)
+        vbox.show_all()
+        return vbox
 CLASS2COLUMN[Relation]=RelationColumn
 
 class ViewColumn(FinderColumn):
@@ -318,6 +331,7 @@ class ViewColumn(FinderColumn):
 
     def build_widget(self):
         vbox=gtk.VBox()
+        vbox.pack_start(gtk.Button(_("View")), expand=False)
         self.label={}
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
@@ -375,6 +389,7 @@ class QueryColumn(FinderColumn):
 
     def build_widget(self):
         vbox=gtk.VBox()
+        vbox.pack_start(gtk.Button(_("Query")), expand=False)
         self.label={}
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
