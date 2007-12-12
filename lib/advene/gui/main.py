@@ -621,8 +621,6 @@ class AdveneGUI (Connect):
             pass
         
         # Register default GUI elements (actions, content_handlers, etc)
-        # !! We cannot use controller.load_plugins, because it would make it impossible
-        # to build one-file executables
         for m in (advene.gui.views.timeline,
                   advene.gui.views.browser,
                   advene.gui.views.finder,
