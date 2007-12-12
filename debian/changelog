@@ -1,6 +1,18 @@
 advene (0.27) unstable; urgency=low
 
-  * Win32 bugfixes (relation creation, timestamp mark colors...)
+  * Win32 bugfixes (relation creation, timestamp mark colors, montage...)
+
+  * Quicksearch: 
+  
+     * A Google-like syntax can be used: search for multiple word,
+       use +word and -word to include/exclude words from the search, use
+       quotes to specify "words with whitespaces"
+  
+     * When searching for a single word, it will also be highlighted in
+       opened transcription and note-taking views.
+
+  * Data can be exported to other formats through the File/Export
+    menuitem.
   
   * Timeline:
   
@@ -8,22 +20,52 @@ advene (0.27) unstable; urgency=low
        simply edit its content (always available with Return)
   
      * It is possible to select multiple annotations, either with
-       shift-click on the annotation widget or by defining a region around the
-       annotations. It is then possible to edit, delete or zoom over selected 
-       annotations.
+       shift-click on the annotation widget or by defining a region around
+       the annotations. It is then possible to edit, duplicate, delete or
+       zoom over selected annotations, through the selection toolbar item or
+       the timeline context menu.
+  
+     * Screenshots can be displayed in the timeline scale, by
+       redimensionning the scale vertical dimension. Screenshots are usually
+       generated on annotation bounds, but can also be generated every 500ms
+       through the Player/Generate Screenshots menuitem.
+
+     * Buttons for previous/next annotation are present at the right of
+       the annotation-type widget. The legend must be resized for them to
+       appear, in order not to take too much space by default.
   
   * Note-taking:
   
      * Marks are inserted with double-click
+  
+     * It is possible to search for a string
   
      * Text automatically scrolls to the current timestamp mark
   
      * New buttons: "Center on current mark", "Activate automatic mark
        insertion" (toggle)
 
-  * New action: Pronounce (through Text-To-Speech). Works on MacOS X and Linux 
-    (with festival).
+     * Note-taking views can be saved as adhoc-views
+
+     * The convert dialog has been revamped
+
+  * Transcription:
   
+     * Double-click in the text will play the corresponding annotation
+
+  * Dynamic views:
+  
+     * The TALES expression for the predefined values is displayed in the
+       tooltip.
+  
+     * The composition operator for conditions can be chosen (and/or)
+  
+  * New adhoc view : finder (column-based finder a la Mac OS X)
+
+  * New action: Pronounce (through Text-To-Speech). Works on MacOS X
+    (directly) and Linux (with festival configured to output through
+    ALSA, cf http://gentoo-wiki.com/HOWTO_speechd#Use_alsa_output_method ).
+
  --
 
 advene (0.26) unstable; urgency=low
