@@ -189,6 +189,8 @@ class Config(object):
             'gui': { 'popup-textwidth': 40 },
             # Scroll increment in ms
             'scroll-increment': 100,
+            # Time increment in ms
+            'time-increment': 2000,
             'timeline': { 
                 'font-size': 10,
                 'button-height': 20,
