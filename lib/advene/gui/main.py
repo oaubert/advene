@@ -277,7 +277,7 @@ class AdveneGUI (Connect):
             hb.pack_start(b, expand=False)
         hb.show_all()
 
-        self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND, self.do_quicksearch)
+        self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
 
         def modify_source(i, expr, label):
             """Modify the quicksearch source, and update the tooltip accordingly.
@@ -289,9 +289,14 @@ class AdveneGUI (Connect):
         def quicksearch_options(button, event, method):
             """Generate the quicksearch options menu.
             """
-            if event.button != 3 or event.type != gtk.gdk.BUTTON_PRESS:
+            if event.type != gtk.gdk.BUTTON_PRESS:
                 return False
             menu=gtk.Menu()
+            item=gtk.MenuItem(_("Launch search"))
+            item.connect('activate', self.do_quicksearch)
+            if not self.quicksearch_entry.get_text():
+                item.set_sensitive(False)
+            menu.append(item)
             item=gtk.CheckMenuItem(_("Ignore case"))
             item.set_active(config.data.preferences['quicksearch-ignore-case'])
             item.connect('toggled', lambda i: config.data.preferences.__setitem__('quicksearch-ignore-case', i.get_active()))
