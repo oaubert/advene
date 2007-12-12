@@ -649,10 +649,20 @@ class TranscriptionEdit(AdhocView):
         (compatible with advene.util.importer)
         """
 
-        t=0
         b=self.textview.get_buffer()
         begin=b.get_start_iter()
         end=begin.copy()
+
+        # Special case for the first mark: if the first item in the
+        # buffer is a mark, use its time. Else, initialize the time at 0
+        a=begin.get_child_anchor()
+        if a and a.get_widgets():
+            # Found a TextAnchor
+            child=a.get_widgets()[0]
+            t=child.timestamp
+        else:
+            t=0
+
         ignore_next=False
         while end.forward_char():
             a=end.get_child_anchor()
@@ -945,6 +955,7 @@ class TranscriptionEdit(AdhocView):
                     if new_type_title == '':
                         # Empty title. Generate one.
                         id_=self.controller.package._idgenerator.get_id(AnnotationType)
+                        new_type_title=id_
                     else:
                         id_=helper.title2id(new_type_title)
                         # Check that the id is available
