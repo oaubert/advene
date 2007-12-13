@@ -564,6 +564,12 @@ class Menu:
         add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
         add_item(_("Delete all annotations..."), self.delete_elements, element, element.annotations)
         add_item(_("Renumber annotations"), self.renumber_annotations, element)
+
+        add_item('')
+        i=gtk.MenuItem(_("%d annotations(s)") % len(element.annotations))
+        menu.append(i)
+        i.set_sensitive(False)
+
         return
 
     def make_relationtype_menu(self, element, menu):
