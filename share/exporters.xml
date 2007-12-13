@@ -232,7 +232,7 @@ div.${a/id} {
       &lt;ensemble tal:repeat="sch package/schemas"
       tal:attributes="id sch/id ; author sch/author ; date
       sch/date ; title sch/title ; abstract sch/meta/dc/description">
-	&lt;decoupage tal:repeat="at sch/annotationTypes" tal:attributes="display repeat/at/index ;  id at/id ; dur
+	&lt;decoupage tal:repeat="at sch/annotationTypes" tal:attributes="id at/id ; dur
       package/cached_duration ;  color at/color ;
       author at/author ; date at/date ;  title at/title ; label
       at/representation ; abstract at/meta/dc/description">
@@ -259,6 +259,9 @@ div.${a/id} {
 	package/meta/advenetool/mediafile ; dur package/cached_duration"/>
       &lt;/media>
     &lt;/medias>
+    &lt;display>
+    &lt;decoupage tal:repeat="at package/annotationTypes" tal:attributes="idensemble at/schema/id ; id at/id ; position repeat/at/index"/>
+    &lt;/display>
   &lt;/body>
 &lt;/iri>
 </content>
