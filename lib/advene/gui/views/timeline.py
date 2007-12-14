@@ -1120,8 +1120,7 @@ class TimeLine(AdhocView):
             # The structure consists in 4 unsigned shorts: r, g, b, opacity
             (r, g, b, opacity)=struct.unpack('HHHH', selection.data)
             widget.annotationtype.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (r, g, b))
-            # FIXME: notify the change
-            self.set_widget_background_color(widget)
+            self.controller.notify('AnnotationTypeEditEnd', annotationtype=widget.annotationtype)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
