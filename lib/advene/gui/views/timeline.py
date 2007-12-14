@@ -2167,19 +2167,12 @@ class TimeLine(AdhocView):
             # toggle the playing state
             self.controller.restrict_playing(None)
         else:
-            self.controller.restrict_playing(at)
-            p=self.controller.player
-            if p.status == p.PauseStatus or p == p.PlayingStatus:
-                if [ a for a in self.controller.active_annotations if a.type == at ]:
-                    # We are in an annotation of the right type. Do
-                    # not move the player, just play from here.
-                    pass
-                self.controller.update_status("resume")
+            if self.list is None:
+                # We are displaying the whole package. Do not further specify annotations.
+                self.controller.restrict_playing(at)
             else:
-                l=[ a.fragment.begin for a in at.annotations ]
-                if l:
-                    l.sort()
-                    self.controller.update_status("start", position=l[0])
+                # We are displaying a subset. Specify the desired annotations.
+                self.controller.restrict_playing(at, annotations=[ a for a in self.list if a.type == at ])
         return True
 
     def update_legend_widget(self, layout):
