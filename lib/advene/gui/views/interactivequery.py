@@ -55,7 +55,7 @@ class InteractiveQuery(AdhocView):
         self.close_on_package_load = False
         self.contextual_actions = (
             #(_("Refresh"), self.refresh),
-            (_("Save view"), self.save_view),
+            (_("Save query"), self.save_query),
             (_("Save default options"), self.save_default_options),
             )
         self.options = {
@@ -104,6 +104,47 @@ class InteractiveQuery(AdhocView):
 
             self.controller.notify('QueryCreate', query=el)
             return el, q
+
+    def save_query(self, *p):
+        """Saves the query in the package.
+        """
+        l=self.eq.invalid_items()
+        if l:
+            self.controller.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
+                     % ", ".join(l))
+            return True
+        # Update the query
+        self.eq.update_value()
+
+        t, i = dialog.get_title_id(title=_("Saving the query..."),
+                                   text=_("Give a title and identifier for saving the query"),
+                                   element_title=self._label,
+                                   element_id=helper.title2id(self._label))
+        if i is None:
+            return True
+
+        q=helper.get_id(self.controller.package.queries, i)
+        # Overwriting an existing query
+        if q:
+            create=False
+        else:
+            create=True
+            # Create the query
+            q=self.controller.package.createQuery(ident=i)
+            q.author=config.data.userid
+            q.date=self.controller.get_timestamp()
+            self.controller.package.queries.append(q)
+
+        q.title=t
+        q.content.mimetype='application/x-advene-simplequery'
+
+        # Store the query itself in the _interactive query
+        q.content.data = self.eq.model.xml_repr()
+        if create:
+            self.controller.notify('QueryCreate', query=q)
+        else:
+            self.controller.notify('QueryEditEnd', query=q)
+        return q
 
     def validate(self, button=None):
         # Get the query
