@@ -226,6 +226,8 @@ class Config(object):
             'package-auto-save-interval': 5 * 60 * 1000,
             # Interface langugage. '' means system default.
             'language': '',
+            'save-default-workspace': 'never',
+            'restore-default-workspace': 'never',
             }
 
         # Player options
