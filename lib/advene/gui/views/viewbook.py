@@ -27,6 +27,7 @@ from gettext import gettext as _
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
 from advene.gui.util import get_pixmap_button, dialog
+import advene.util.ElementTree as ET
 
 class ViewBook(AdhocView):
     """Notebook containing multiple views
@@ -211,6 +212,7 @@ class ViewBook(AdhocView):
         if targetType == config.data.target_type['adhoc-view']:
             data=dict(cgi.parse_qsl(selection.data))
             label=None
+            view=None
             if 'id' in data:
                 # Saved parametered view. Get the view itself.
                 ident=data['id']
@@ -221,20 +223,57 @@ class ViewBook(AdhocView):
                     return True
                 name=v
                 label=v.title
+                view=self.controller.gui.open_adhoc_view(name, label=label, destination=self.location)
             elif 'name' in data:
                 name=data['name']
+                saved=[ v
+                        for v in self.controller.package.views
+                        if v.content.mimetype == 'application/x-advene-adhoc-view'
+                        and ET.parse(v.content.stream).getroot().attrib['id'] == name ]
+                if name == 'transcription':
+                    menu=gtk.Menu()
+                    i=gtk.MenuItem(_("Open a new transcription for..."))
+                    menu.append(i)
+                    sm=gtk.Menu()
+                    i.set_submenu(sm)
+                    for at in self.controller.package.annotationTypes:
+                        title=self.controller.get_title(at)
+                        i=gtk.MenuItem(title)
+                        i.connect('activate', lambda i, s, t: self.controller.gui.open_adhoc_view(name, source=s, label=t, destination=self.location), "here/annotationTypes/%s/annotations/sorted" % at.id, title)
+                        sm.append(i)
+                elif saved:
+                    menu=gtk.Menu()
+                    i=gtk.MenuItem(_("Open a new view"))
+                    i.connect('activate', lambda i: self.controller.gui.open_adhoc_view(name, label=label, destination=self.location))
+                    menu.append(i)
+                else:
+                    menu=None
+                    
+                if menu is not None:
+                    if saved:
+                        i=gtk.MenuItem(_("Open a saved view"))
+                        menu.append(i)
+                        sm=gtk.Menu()
+                        i.set_submenu(sm)
+                        for v in saved:
+                            i=gtk.MenuItem(v.title)
+                            i.connect('activate', lambda i, vv: self.controller.gui.open_adhoc_view(vv, label=vv.title, destination=self.location), v)
+                            sm.append(i)
+                    menu.show_all()
+                    menu.popup(None, None, None, 0, gtk.get_current_event_time())
+                else:
+                    view=self.controller.gui.open_adhoc_view(name, label=label, destination=self.location)
             else:
                 # Bug
                 self.log("Cannot happen")
                 return True
 
-            if self.controller.gui:
-                view=self.controller.gui.open_adhoc_view(name, label=label, destination=self.location)
-                if 'master' in data:
-                    # A master view has been specified. Connect it to
-                    # the created view.
-                    master=self.controller.gui.get_adhoc_view_instance_from_id(data['master'])
-                    view.set_master_view(master)
+
+            if 'master' in data and view is not None:
+                # A master view has been specified. Connect it to
+                # the created view.
+                master=self.controller.gui.get_adhoc_view_instance_from_id(data['master'])
+                view.set_master_view(master)
             return True
         elif targetType == config.data.target_type['adhoc-view-instance']:
             v=self.controller.gui.get_adhoc_view_instance_from_id(selection.data)
