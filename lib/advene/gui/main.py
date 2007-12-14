@@ -1370,6 +1370,36 @@ class AdveneGUI (Connect):
                 if pane.tag == 'pane':
                     self.pane[pane.attrib['id']].set_position(long(pane.attrib['position']))
 
+    def workspace_save(self, viewid=None):
+        """Save the workspace in the given viewid.
+        """
+        title=_("Saved workspace")
+        v=helper.get_id(self.controller.package.views, viewid)
+        if v is None:
+            create=True
+            v=self.controller.package.createView(ident=viewid, clazz='package')
+            v.content.mimetype='application/x-advene-workspace-view'
+        else:
+            # Existing view. Overwrite it.
+            create=False
+        v.title=title
+        v.author=config.data.userid
+        v.date=self.controller.get_timestamp()
+
+        workspace=self.workspace_serialize()
+        stream=StringIO.StringIO()
+        helper.indent(workspace)
+        ET.ElementTree(workspace).write(stream, encoding='utf-8')
+        v.content.setData(stream.getvalue())
+        stream.close()
+
+        if create:
+            self.controller.package.views.append(v)
+            self.controller.notify("ViewCreate", view=v)
+        else:
+            self.controller.notify("ViewEditEnd", view=v)
+        return True
+
     def open_adhoc_view(self, name, label=None, destination='popup', parameters=None, **kw):
         """Open the given adhoc view.
 
@@ -1389,19 +1419,33 @@ class AdveneGUI (Connect):
         if isinstance(name, View):
             if name.content.mimetype == 'application/x-advene-workspace-view':
                 tree=ET.parse(name.content.stream)
-                d={}
-                d['clear']=True
-                d['resize']=True
-                ew=advene.gui.edit.properties.EditWidget(d.__setitem__, d.get)
-                ew.set_name(_("Restoring workspace..."))
-                ew.add_label(_("Do you wish to restore the %s workspace ?") % name.title)
-                ew.add_checkbox(_("Clear current workspace"), "clear", _("Clear the current workspace"))
-                ew.add_checkbox(_("Restore layout"), "resize", _("Restore the layout that was saved with the workspace"))
-                res=ew.popup()
-                if res:
-                    if d['clear']:
-                        self.workspace_clear()
-                    self.workspace_restore(tree.getroot(), preserve_layout=not d['resize'])
+
+                d = gtk.Dialog(title=_("Restoring workspace..."),
+                               parent=None,
+                               flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                               buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                         gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                         ))
+                l=gtk.Label(_("Do you wish to restore the %s workspace ?") % name.title)
+                l.set_line_wrap(True)
+                l.show()
+                d.vbox.pack_start(l, expand=False)
+
+                delete_existing_toggle=gtk.CheckButton(_("Clear the current workspace"))
+                delete_existing_toggle.set_active(True)
+                delete_existing_toggle.show()
+                d.vbox.pack_start(delete_existing_toggle, expand=False)
+
+                res=d.run()
+                clear=delete_existing_toggle.get_active()
+                d.destroy()
+                if res == gtk.RESPONSE_OK:
+                    def restore(clr):
+                        if clr:
+                            self.workspace_clear()
+                        self.workspace_restore(tree.getroot())
+                        return True
+                    self.controller.queue_action(restore, clear)
                 return None
             if name.content.mimetype != 'application/x-advene-adhoc-view':
                 self.log(_("View %s is not an adhoc view") % name.id)
@@ -1601,7 +1645,26 @@ class AdveneGUI (Connect):
                 dialog.message_dialog(_("No media association is defined in the package. Please use the 'File/Select a video file' menuitem to associate a media file."), callback=lambda: True)
             elif not os.path.exists(media) and not media.startswith('http:'):
                 dialog.message_dialog(_("The associated media %s could not be found. Please use the 'File/Select a video file' menuitem to associate a media file.") % media, callback=lambda: True)
+
+        # FIXME: deactivated for the moment, it freezes the GUI just
+        #after the confirmation dialog. To be investigated...
+        #self.check_for_default_adhoc_view(p)
         return True
+
+    def check_for_default_adhoc_view(self, package):
+        # Open the default adhoc view (which is commonly the _default_workspace)
+        default_adhoc = package.getMetaData (config.data.namespace, "default_adhoc")
+        view=helper.get_id(package.views, default_adhoc)
+        if view:
+            load=False
+            if config.data.preferences['restore-default-workspace'] == 'always':
+                load=True
+            elif config.data.preferences['restore-default-workspace'] == 'ask':
+                load=dialog.message_dialog(_("Do you want to restore the saved workspace ?"),
+                                           icon=gtk.MESSAGE_QUESTION)
+            if load:
+                self.controller.queue_action(self.open_adhoc_view, view)
+        return False
 
     def update_window_title(self):
         # Update the main window title
@@ -2136,6 +2199,18 @@ class AdveneGUI (Connect):
             or package.uri.endswith('new_pkg')):
             self.on_save_as1_activate (package=package)
         else:
+            # Save the current workspace
+            save=False
+            if config.data.preferences['save-default-workspace'] == 'always':
+                save=True
+            elif config.data.preferences['save-default-workspace'] == 'ask':
+                save=dialog.message_dialog(_("Do you want to save the current workspace ?"),
+                                           icon=gtk.MESSAGE_QUESTION)
+            if save:
+                self.workspace_save('_default_workspace')
+                default=self.controller.package.getMetaData (config.data.namespace, "default_adhoc")
+                if not default:
+                    self.controller.package.setMetaData (config.data.namespace, "default_adhoc", '_default_workspace')
             alias=self.controller.aliases[package]
             try:
                 self.controller.save_package (alias=alias)
@@ -2175,6 +2250,18 @@ class AdveneGUI (Connect):
                     self.log(_("Aborting package saving"))
                     return True
 
+            # Save the current workspace
+            save=False
+            if config.data.preferences['save-default-workspace'] == 'always':
+                save=True
+            elif config.data.preferences['save-default-workspace'] == 'ask':
+                save=dialog.message_dialog(_("Do you want to save the current workspace ?"),
+                                           icon=gtk.MESSAGE_QUESTION)
+            if save:
+                self.workspace_save('_default_workspace')
+                default=self.controller.package.getMetaData (config.data.namespace, "default_adhoc")
+                if not default:
+                    self.controller.package.setMetaData (config.data.namespace, "default_adhoc", '_default_workspace')
             alias=self.controller.aliases[package]
             try:
                 self.controller.save_package(name=filename, alias=alias)
@@ -2594,7 +2681,8 @@ class AdveneGUI (Connect):
         direct_options=('history-size-limit', 'scroll-increment', 'time-increment', 'language',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit', 
                         'remember-window-size', 'expert-mode',
-                        'package-auto-save', 'package-auto-save-interval')
+                        'package-auto-save', 'package-auto-save-interval',
+                        'save-default-workspace', 'restore-default-workspace')
         cache={
             'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
             'data': config.data.path['data'],
@@ -2650,8 +2738,23 @@ class AdveneGUI (Connect):
                 })
         ew.add_spin(_("Auto-save interval"), 'package-auto-save-interval', _("Interval (in ms) between package auto-saves"), 1000, 60 * 60 * 1000)
 
-        ew.add_title(_("Standard adhoc views"))
-        ew.add_label(_("""This feature is now deprecated. To achieve the same result, open the desired views in the interface and use the File/Save workspace...as standard workspace menuitem."""))
+        ew.add_title(_("Standard views"))
+
+        ew.add_option(_("On package saving,"), 'save-default-workspace', 
+                      _("Do you wish to save the default workspace with the package?"), 
+                      {
+                _("never save the current workspace"): 'never',
+                _("always save the current workspace"): 'always',
+                _("ask before saving the current workspace"): 'ask',
+                })
+        
+#        ew.add_option(_("On package load,"), 'restore-default-workspace', 
+#                      _("Do you wish to load the default workspace with the package?"), 
+#                      {
+#                _("never load the default workspace"): 'never',
+#                _("always load the default workspace"): 'always',
+#                _("ask before loading the default workspace"): 'ask',
+#                })
 
         ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
         ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
