@@ -623,10 +623,10 @@ class TranscriptionView(AdhocView):
             b.move_mark(endmark, beginiter)
         elif event == 'AnnotationDelete':
             b=self.textview.get_buffer()
-            # FIXME: handle the case where the annotation was not in
-            # this transcription (i.e. beginmark does not exist)
             beginmark=b.get_mark("b_%s" % annotation.id)
             endmark=b.get_mark("e_%s" % annotation.id)
+            if beginmark is None or endmark is None:
+                return True
             beginiter=b.get_iter_at_mark(beginmark)
             enditer  =b.get_iter_at_mark(endmark)
             b.delete(beginiter, enditer)
