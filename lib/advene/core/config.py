@@ -375,6 +375,9 @@ class Config(object):
         """
         if not os.path.isdir(self.path['settings']):
             os.mkdir(self.path['settings'])
+            self.first_run=True
+        else:
+            self.first_run=False
         return True
 
     def parse_options(self):
