@@ -695,6 +695,14 @@ class EditPackagePopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
+        f = EditMetaForm(title=_("Default adhoc view"),
+                         element=self.element, name='default_adhoc',
+                         namespaceid='advenetool', controller=self.controller,
+                         editable=editable,
+                         tooltip=_("Adhoc view to open on package load"))
+        self.register_form(f)
+        vbox.pack_start(f.get_view(), expand=False)
+
         f = EditMetaForm(title=_("Cached duration"),
                          element=self.element, name='duration',
                          namespaceid='advenetool', controller=self.controller,
