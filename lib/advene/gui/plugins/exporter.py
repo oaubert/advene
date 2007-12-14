@@ -73,6 +73,7 @@ class Exporter(AdhocView):
             compiler = simpleTAL.XMLTemplateCompiler ()
             compiler.parseTemplate (v.content.stream)
         compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8')
+        stream.close()
         self.log(_("Data exported to %s") % fname)
         self.close()
         return True
