@@ -157,6 +157,7 @@ class AdveneController:
         self.usertime_bookmarks = []
 
         self.restricted_annotation_type=None
+        self.restricted_annotations=None
         self.restricted_rule=None
 
         # Useful for debug in the evaluator window
@@ -362,7 +363,7 @@ class AdveneController:
         self.usertime_bookmarks.append( (time.time() + delay / 1000.0, action) )
         return True
 
-    def restrict_playing(self, at=None):
+    def restrict_playing(self, at=None, annotations=None):
         """Restrict playing to the given annotation-type.
 
         If no annotation-type is given, restore unrestricted playing.
@@ -376,27 +377,43 @@ class AdveneController:
             self.restricted_rule=None
 
         self.restricted_annotation_type=at
+        if annotations is None or at is None:
+            self.restricted_annotations=None
+        else:
+            self.restricted_annotations=sorted(annotations, key=lambda a: a.fragment.begin)
 
         def restricted_play(context, parameters):
             a=context.globals['annotation']
             t=a.type
             if a.type == self.restricted_annotation_type:
-                # Find the next relevant position
-                l=[an for an in self.active_annotations if an.type == a.type and an != a ]
+                # Find the next relevant position.
+                # First check the current annotations
+                if self.restricted_annotations:
+                    l=[an for an in self.active_annotations if an in self.restricted_annotations and an != a ]
+                else:
+                    l=[an for an in self.active_annotations if an.type == a.type and an != a ]
                 if l:
                     # There is a least one other annotation of the
                     # same type which is also active. We can just wait for its end.
                     return True
-                # future_ends holds a sorted list of (annotation, begin, end)
-                l=[an
-                   for an in self.future_ends
-                   if an[0].type == t ]
+                # future_begins holds a sorted list of (annotation, begin, end)
+                if self.restricted_annotations:
+                    l=[(an, an.fragment.begin, an.fragment.end) 
+                       for an in self.restricted_annotations 
+                       if an.fragment.begin > a.fragment.end ]
+                else:
+                    l=[an
+                       for an in self.future_begins
+                       if an[0].type == t ]
                 if l and l[0][1] > a.fragment.end:
                     self.queue_action(self.update_status, 'set', l[0][1])
                 else:
                     # No next annotation. Return to the start
-                    l=[ a.fragment.begin for a in at.annotations ]
-                    l.sort()
+                    if self.restricted_annotations:
+                        l=self.restricted_annotations
+                    else:
+                        l=[ a.fragment.begin for a in at.annotations ]
+                        l.sort()
                     self.queue_action(self.update_status, "set", position=l[0])
             return True
 
@@ -404,6 +421,18 @@ class AdveneController:
             # New annotation-type restriction
             self.restricted_rule=self.event_handler.internal_rule(event="AnnotationEnd",
                                                                   method=restricted_play)
+            p=self.player
+            if p.status == p.PauseStatus or p == p.PlayingStatus:
+                if [ a for a in self.active_annotations if a.type == at ]:
+                    # We are in an annotation of the right type. Do
+                    # not move the player, just play from here.
+                    pass
+                self.update_status("resume")
+            else:
+                l=[ a.fragment.begin for a in at.annotations ]
+                if l:
+                    l.sort()
+                    self.update_status("start", position=l[0])
 
         self.notify('RestrictType', annotationtype=at)
         return True
