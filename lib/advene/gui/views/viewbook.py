@@ -140,7 +140,7 @@ class ViewBook(AdhocView):
 
                 try:
                     for label, action in view.contextual_actions:
-                        item = gtk.MenuItem(label)
+                        item = gtk.MenuItem(label, use_underline=False)
                         item.connect("activate", action, view)
                         menu.append(item)
                 except AttributeError:
@@ -238,7 +238,7 @@ class ViewBook(AdhocView):
                     i.set_submenu(sm)
                     for at in self.controller.package.annotationTypes:
                         title=self.controller.get_title(at)
-                        i=gtk.MenuItem(title)
+                        i=gtk.MenuItem(title, use_underline=False)
                         i.connect('activate', lambda i, s, t: self.controller.gui.open_adhoc_view(name, source=s, label=t, destination=self.location), "here/annotationTypes/%s/annotations/sorted" % at.id, title)
                         sm.append(i)
                 elif saved:
@@ -256,7 +256,7 @@ class ViewBook(AdhocView):
                         sm=gtk.Menu()
                         i.set_submenu(sm)
                         for v in saved:
-                            i=gtk.MenuItem(v.title)
+                            i=gtk.MenuItem(v.title, use_underline=False)
                             i.connect('activate', lambda i, vv: self.controller.gui.open_adhoc_view(vv, label=vv.title, destination=self.location), v)
                             sm.append(i)
                     menu.show_all()
@@ -288,7 +288,7 @@ class ViewBook(AdhocView):
             # Propose a menu to open various views for the annotation-type:
             menu=gtk.Menu()
             title=self.controller.get_title(at)
-            i=gtk.MenuItem(_("Use annotation-type %s :") % title)
+            i=gtk.MenuItem(_("Use annotation-type %s :") % title, use_underline=False)
             menu.append(i)
             for label, action in (
                 (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % at.id, destination=self.location, label=title)),
@@ -298,7 +298,7 @@ class ViewBook(AdhocView):
                 (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location, label=_("Query %s") % title)),
                 (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location, label=_("Browsing %s") % title)),
                 ):
-                i=gtk.MenuItem(label)
+                i=gtk.MenuItem(label, use_underline=False)
                 i.connect('activate', action)
                 menu.append(i)
             menu.show_all()
@@ -309,7 +309,7 @@ class ViewBook(AdhocView):
             # Propose a menu to open various views for the annotation:
             menu=gtk.Menu()
             title=self.controller.get_title(a)
-            i=gtk.MenuItem(_("Use annotation %s :") % title)
+            i=gtk.MenuItem(_("Use annotation %s :") % title, use_underline=False)
             menu.append(i)
             for label, action in (
                 (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
@@ -317,7 +317,7 @@ class ViewBook(AdhocView):
                 (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
                 (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('bookmarks', history=[ a.fragment.begin ], destination=self.location)),
                 ):
-                i=gtk.MenuItem(label)
+                i=gtk.MenuItem(label, use_underline=False)
                 i.connect('activate', action)
                 menu.append(i)
             menu.show_all()
