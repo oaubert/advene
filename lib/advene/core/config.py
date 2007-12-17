@@ -33,6 +33,7 @@ import os
 import cPickle
 from optparse import OptionParser
 import mimetypes
+import operator
 
 class Config(object):
     """Configuration information, platform specific.
@@ -529,7 +530,7 @@ class Config(object):
         if not l:
             return None
         else:
-            l.sort(lambda a, b: cmp(b[1], a[1]))
+            l.sort(key=operator.itemgetter(1), reverse=True)
             return l[0][0]
 
     def get_homedir(self):

@@ -38,6 +38,7 @@ import StringIO
 import gobject
 import shlex
 import itertools
+import operator
 
 import advene.core.config as config
 
@@ -1614,8 +1615,8 @@ class AdveneController:
               if a.fragment.begin >= position or a.fragment.end >= position ]
         future_begins = list(l)
         future_ends = l
-        future_begins.sort(lambda a, b: cmp(a[1], b[1]))
-        future_ends.sort(lambda a, b: cmp(a[2], b[2]))
+        future_begins.sort(key=operator.itemgetter(1))
+        future_ends.sort(key=operator.itemgetter(1))
 
         #print "Position: %s" % helper.format_time(position)
         #print "Begins: %s\nEnds: %s" % ([ a[0].id for a in future_begins[:4] ],
