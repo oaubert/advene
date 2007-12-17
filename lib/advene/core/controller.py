@@ -1182,7 +1182,17 @@ class AdveneController:
         self.package._modified = False
 
         # Initialize the color palette for the package
-        self.package._color_palette=helper.CircularList(config.data.color_palette[:])
+        # Remove already used colors
+        l=list(config.data.color_palette)
+        for at in self.package.annotationTypes:
+            try:
+                l.remove(at.getMetaData(config.data.namespace, 'color'))
+            except ValueError:
+                pass
+        if not l:
+            # All colors were used.
+            l=list(config.data.color_palette)
+        self.package._color_palette=helper.CircularList(l)
 
         # Parse tag_colors attribute
         cols = self.package.getMetaData (config.data.namespace, "tag_colors")
