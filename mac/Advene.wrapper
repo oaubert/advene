@@ -39,4 +39,10 @@ else
   fi
 fi
 
-DISPLAY=localhost:0 DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_INSERT_LIBRARIES="${parent}/Resources/libpangohack.dylib" exec ${d}/Advene.bin $@
+export DISPLAY=localhost:0
+export DYLD_FORCE_FLAT_NAMESPACE=1
+export DYLD_INSERT_LIBRARIES="${parent}/Resources/libpangohack.dylib"
+themedir=${parent}/Resources/theme
+[ -e ${themedir} ] && export GTK2_RC_FILES="${themedir}/gtk-2.0/gtkrc"
+
+exec ${d}/Advene.bin $@
