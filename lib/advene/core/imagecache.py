@@ -20,6 +20,7 @@ Imagecache module for advene
 """
 
 import advene.core.config as config
+import operator
 
 import os
 
@@ -156,7 +157,7 @@ class ImageCache(dict):
         valids = [ (pos, abs(pos-key))
                    for pos in self.keys()
                    if abs(pos - key) <= epsilon ]
-        valids.sort(lambda a, b: cmp(a[1], b[1]))
+        valids.sort(key=operator.itemgetter(1))
         
         if valids:
             key = valids[0][0]
