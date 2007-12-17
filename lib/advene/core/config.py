@@ -327,6 +327,8 @@ class Config(object):
             '.vob',
             '.mkv',
             '.wmv',
+            '.mp3',
+            '.wav',
             )
 
         self.color_palette = (
