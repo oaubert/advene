@@ -2138,9 +2138,9 @@ class TimeLine(AdhocView):
             """
             y=layout.child_get_property(b, 'y')
             if hasattr(b, 'next'):
-                layout.move(b, w + 30 , y)
+                layout.move(b, w + 32 , y)
             elif hasattr(b, 'prev'):
-                layout.move(b, w + 22, y)
+                layout.move(b, w + 20, y)
             return True
                 
         # Resize all buttons to fit the largest
@@ -2149,7 +2149,7 @@ class TimeLine(AdhocView):
             # Reposition the next, prev buttons
             layout.foreach(move_nav, width)
 
-        layout.get_parent().get_parent().set_position (width + 32)
+        layout.get_parent().get_parent().set_position (width + 30)
 
     def restrict_playing(self, at, widget=None):
         """Restrict playing to the given annotation-type.
@@ -2312,22 +2312,22 @@ class TimeLine(AdhocView):
             nav=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_IN)
             nav.set_size_request(16, self.button_height)
             nav.annotationtype=t
-            nav.prev=True
             self.tooltips.set_tip(nav, _("Goto previous annotation"))
             eb=gtk.EventBox()
             eb.connect('button_press_event', navigate, 'prev', t)
             eb.add(nav)
+            eb.prev=True
             # Put it in an arbitrary location. It will be moved by resize_legend_widget
             layout.put (eb, 102, self.layer_position[t])
 
             nav=gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_IN)
             nav.set_size_request(16, self.button_height)
             nav.annotationtype=t
-            nav.next=True
             self.tooltips.set_tip(nav, _("Goto next annotation"))
             eb=gtk.EventBox()
             eb.connect('button_press_event', navigate, 'next', t)
             eb.add(nav)
+            eb.next=True
             # Put it in an arbitrary location. It will be moved by resize_legend_widget
             layout.put (eb, 112, self.layer_position[t])
 
