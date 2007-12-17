@@ -1,0 +1,103 @@
+style "alt_shadows" = "default"
+{
+}
+
+style "entry-r"
+{
+	GtkWidget::interior_focus	= 0
+	xthickness = 8
+	ythickness = 2
+  	engine "pixmap"
+	{
+
+		# Text-entry
+    image
+    {
+      function			= FOCUS
+      recolorable			= TRUE
+      file				= "text3.png"
+      border			= { 10,10,3,3 }
+      stretch			= TRUE
+    }	
+    image
+    {
+      function			= BOX
+      recolorable			= TRUE
+      state				= NORMAL
+      file				= "text3.png"
+      border			= { 10,10,3,3 }
+      stretch			= TRUE
+    }	
+		image
+		{
+			function		= SHADOW
+			detail			= "entry"
+			shadow			= IN
+			recolorable		= FALSE
+			file			= "text2.png"
+			border			= { 10,10,3,3 }
+			stretch			= TRUE
+		}
+
+	}
+}
+
+style "entry-s"
+{
+	GtkWidget::interior_focus	= 0
+	xthickness = 2
+	ythickness = 2
+  	engine "pixmap"
+	{
+
+		# Text-entry
+    image
+    {
+      function			= FOCUS
+      recolorable			= TRUE
+      file				= "text_entry2.png"
+      border			= { 6,6,6,6 }
+      stretch			= TRUE
+    }	
+    image
+    {
+      function			= BOX
+      recolorable			= TRUE
+      state				= NORMAL
+      file				= "text_entry2.png"
+      border			= { 6,6,6,6 }
+      stretch			= TRUE
+    }	
+		image
+		{
+			function		= SHADOW
+			detail			= "entry"
+			shadow			= IN
+			recolorable		= FALSE
+			file			= "text-entry.png"
+			border			= { 6,6,6,6 }
+			stretch			= TRUE
+		}
+
+	}
+}
+
+style "entry-f" = "entry-r"
+{
+  	engine "pixmap"
+	{
+		# Toolbar background
+		image
+		{
+			function	= BOX
+			file		= "toolbar.png"
+			border		= { 1, 1, 1, 1}
+			stretch		= TRUE
+
+    		}
+	}
+}
+class "*Ephy*" style "alt_shadows"
+widget_class "*Ephy*Toolbar*Entry"		style "entry-r"
+widget "*Ephy*Find*"			style "entry-f"
+widget "*EphyLocationEntry*"		style "entry-s"

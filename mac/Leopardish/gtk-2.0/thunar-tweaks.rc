@@ -1,0 +1,104 @@
+##########thunar tweaks############
+
+style "alt_shadows" = "default"
+{
+  bg[NORMAL]	   = "#b2b2b2"
+	xthickness = 0
+	ythickness = 0
+	GtkWidget::focus_padding = 0
+
+  engine "pixmap"
+  {
+    image
+    {
+      function			= SHADOW
+      shadow			= IN
+      recolorable		= FALSE
+      file				= "shadow-in.png"
+      border			= { 1, 1, 1, 1 }
+      stretch			= TRUE
+    }
+
+  }
+}
+
+style "toolbar-t" = "toolbar"
+{
+	xthickness = 6
+	ythickness = 2
+}
+
+
+style "entry-t" = "default"
+{
+	GtkWidget::interior_focus	= 1
+	xthickness = 10
+	ythickness = 3
+  	engine "pixmap"
+	{
+
+		# Text-entry
+		image
+		{
+			function		= SHADOW
+			detail			= "entry"
+			shadow			= IN
+			recolorable		= FALSE
+			file			= "text2.png"
+			border			= { 10,10,3,3 }
+			stretch			= TRUE
+		}
+
+	}
+
+}
+
+style "entry-right-t" = "default"
+{
+	xthickness = 6
+	ythickness = 3
+
+	GtkWidget::focus_padding = 0
+
+	engine "pixmap" 
+	{
+
+		# Toolbar arrow down (mouse over)
+		image
+             	{
+        		function		    = ARROW
+            		recolorable		    = TRUE
+            		state				= NORMAL
+            		overlay_file		= "arrow.png"
+            		overlay_stretch		= FALSE
+            		arrow_direction		= DOWN
+        	}
+
+		image
+             	{
+        		function		    = ARROW
+            		recolorable		    = TRUE
+            		state				= PRELIGHT
+            		overlay_file		= "arrow.png"
+            		overlay_stretch		= FALSE
+            		arrow_direction		= DOWN
+        	}
+
+		image
+             	{
+        		function		    = ARROW
+            		recolorable		    = TRUE
+            		state				= ACTIVE
+            		overlay_file		= "arrow.png"
+            		overlay_stretch		= FALSE
+            		arrow_direction		= DOWN
+        	}
+
+	}
+}
+
+
+class "*Thunar*" style "alt_shadows"
+class "ThunarPathEntry"		style "entry-t"
+widget_class "*Thunar*Button*"	style "toolbar-t"
+widget_class "*ThunarWindow*ThunarLocationEntry.GtkToggleButton*" style "entry-right-t"
