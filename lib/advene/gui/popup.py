@@ -322,7 +322,7 @@ class Menu:
             re_number=re.compile('(\d+)')
             offset=s.get_value_as_int()-1
             l=at.annotations
-            l.sort(lambda a, b: cmp(a.fragment.begin, b.fragment.begin))
+            l.sort(key=lambda a: a.fragment.begin)
             for i, a in enumerate(l[offset:]):
                 if re_number.search(a.content.data):
                     # There is a number. Simply substitute the new one.

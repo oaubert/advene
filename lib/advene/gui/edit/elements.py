@@ -397,7 +397,7 @@ class EditAnnotationPopup (EditElementPopup):
         l=[a 
            for a in self.element.type.annotations
            if cmp(a.fragment.begin, self.element.fragment.begin) == direction ]
-        l.sort(lambda a, b: cmp(a.fragment.begin, b.fragment.begin)*direction)
+        l.sort(key=lambda a: a.fragment.begin, reverse=(direction == -1))
         if l:
             a=l[0]
             new=self.controller.gui.edit_element(a)

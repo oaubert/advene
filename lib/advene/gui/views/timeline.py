@@ -2189,13 +2189,13 @@ class TimeLine(AdhocView):
                 l=[a
                    for a in typ.annotations
                    if a.fragment.begin > p ]
-                l.sort(lambda a, b: cmp(a.fragment.begin, b.fragment.begin))
+                l.sort(key=lambda a: a.fragment.begin)
             else:
                 l=[a 
                    for a in typ.annotations
                    if a.fragment.end < p ]
                 # Sort in reverse order
-                l.sort(lambda b, a: cmp(a.fragment.begin, b.fragment.begin))
+                l.sort(key=lambda a: a.fragment.begin, reverse=True)
             if l:
                 a=l[0]
                 self.controller.update_status("set", position=a.fragment.begin)

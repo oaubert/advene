@@ -19,6 +19,7 @@
 """
 
 import time
+import operator
 
 import gtk
 
@@ -113,7 +114,7 @@ class AccumulatorPopup(AdhocView):
         if hidetime:
             self.controller.register_usertime_action( hidetime,
                                                       lambda c, time: self.undisplay(widget))
-        self.widgets.sort(lambda a, b: cmp(a[1], b[1]))
+        self.widgets.sort(key=operator.itemgetter(1))
         self.lock.release()
         self.contentbox.pack_start(f, expand=False, padding=2)
 
