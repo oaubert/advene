@@ -1,5 +1,7 @@
 #! /bin/sh
 
+THEMENAME=Leopardish
+
 # Ensure that we can access /opt
 sudo chmod 755 /opt
 
@@ -34,8 +36,8 @@ mkdir -p ${Frameworks}/modules
 echo "Copying all Pango modules ..."
 cp -R /opt/local/lib/pango/1.6.0/modules/*.so $Frameworks/modules
 
-echo "Copying all GDK Pixbuf loaders ..."
-cp -R /opt/local/lib/gtk-2.0/2.10.0/loaders/*.so $Frameworks/modules
+echo "Copying GTK modules"
+cp -r /opt/local/lib/gtk-2.0 $Resources/lib
 
 # generate new pango.modules file
 cat > pangorc <<EOF 
@@ -68,11 +70,24 @@ cp /etc/fonts/fonts.conf $Resources/fonts.conf
 perl -pi -e 's/.*verdana.*//i' $Resources/fonts.conf
 
 # generate a new GDK pixbufs loaders file
-sed "s?/opt/local/lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?" < /opt/local/etc/gtk-2.0/gdk-pixbuf.loaders > $Resources/gdk-pixbuf.loaders.in
+sed "s?/opt/local/lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Resources/lib/gtk-2.0/2.10.0/loaders/?" < /opt/local/etc/gtk-2.0/gdk-pixbuf.loaders > $Resources/gdk-pixbuf.loaders.in
+
+# Copy the theme
+[ ! -z "$THEMENAME" ] && cp -r mac/${THEMENAME} ${Resources}/theme
+
+# Some libraries (pixbufloader-gif, pixbufloader-xpm, svg_loader) have too large dependencies. 
+# Use a workaround to shorten @executable_path/../Frameworks 
+ln -s ../Frameworks ${MacOS}/f
+
+# RSVG hack: include librsvg-2.2.dylib and its dependencies (last time I checked 2007/12/17, there was no need of recursively find dependencies from the dependencies)
+cp /opt/local/lib/librsvg-2.2.dylib ${MacOS}/f
+otool -L ${MacOS}/f/librsvg-2.2.dylib  | perl -lne 'print $1 if m!/opt/local/lib/(.+?) !' | while read a ; do if [ ! -e ${MacOS}/f/$a ]; then cp /opt/local/lib/$a ${MacOS}/f ; chmod 755 ${MacOS}/f/$a ; fi ; done
+
 
 echo "Fixing library names ..."
 # fix the libraries we include
-for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so ; do
+for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so $Resources/lib/gtk-2.0/2.10.0/*/*.so 
+do
     # skip symlinks
     if test ! -L $dylib ; then
 	
@@ -81,7 +96,8 @@ for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so ; do
 	changes=""
 	for lib in `otool -L $dylib | egrep "(/opt/local|/local/|libs/)" | awk '{print $1}'` ; do
 	    base=`basename $lib`
-	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	    #changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	    changes="$changes -change $lib @executable_path/f/$base"
 	done
 
 	if test "x$changes" != x ; then
@@ -96,7 +112,8 @@ for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so ; do
 	# now the change what the library thinks its own name is
 
 	base=`basename $dylib`
-	install_name_tool -id @executable_path/../Frameworks/$base $dylib
+	#install_name_tool -id @executable_path/../Frameworks/$base $dylib
+	install_name_tool -id @executable_path/f/$base $dylib
     fi
 done
 
