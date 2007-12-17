@@ -88,20 +88,27 @@ class AnnotationDisplay(AdhocView):
             if self.annotation.content.mimetype.startswith('image/'):
                 # SVG autodetection does not seem to work too well. Let's help it.
                 if 'svg' in self.annotation.content.mimetype:
-                    loader = gtk.gdk.PixbufLoader('svg')
+                    try:
+                        loader = gtk.gdk.PixbufLoader('svg')
+                    except Exception, e:
+                        print "Unable to load the SVG pixbuf loader: ", str(e)
+                        loader=None
                 else:
                     loader = gtk.gdk.PixbufLoader()
-                try:
-                    loader.write (self.annotation.content.data, len (self.annotation.content.data))
-                    loader.close ()
-                    p = loader.get_pixbuf ()
-                    width = p.get_width()
-                    height = p.get_height()
-                    pixbuf=png_to_pixbuf (self.controller.package.imagecache[self.annotation.fragment.begin]).scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
-                    p.composite(pixbuf, 0, 0, width, height, 0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
-                except gobject.GError:
-                    # The PNG data was invalid.
-                    pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+                if loader is not None:
+                    try:
+                        loader.write (self.annotation.content.data, len (self.annotation.content.data))
+                        loader.close ()
+                        p = loader.get_pixbuf ()
+                        width = p.get_width()
+                        height = p.get_height()
+                        pixbuf=png_to_pixbuf (self.controller.package.imagecache[self.annotation.fragment.begin]).scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+                        p.composite(pixbuf, 0, 0, width, height, 0, 0, 1.0, 1.0, gtk.gdk.INTERP_BILINEAR, 255)
+                    except gobject.GError:
+                        # The PNG data was invalid.
+                        pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+                    else:
+                        pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
                 d['contents']=''
                 d['imagecontents']=pixbuf
             else:
@@ -185,4 +192,5 @@ class AnnotationDisplay(AdhocView):
         v.show_all()
         image.hide()
         self.refresh()
+        v.set_no_show_all(True)
         return v
