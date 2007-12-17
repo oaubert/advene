@@ -16,6 +16,7 @@ python-gstreamer module (>= 0.10).
 You will need the following python packages (the package names are from
 Debian, they may slightly vary on other distributions) :
 
+python >= 2.4
 python-gtk2 (>=2.10)
 python-glade2 (>=2.10)
 python-xml (>=0.8.0)
@@ -56,17 +57,25 @@ http://www.owlfish.com/software/simpleTAL/download.html [for
 convenience, a copy of simpletal is included in this Advene
 distribution]
 
-Optionally:
-
 VLC + python-vlc mediacontrol extension (cf
 http://download.gna.org/advene/win32/ )
 
 ** Mac OS X version
 
-It is possible to run Advene on Mac OS X, using fink-provided
-packages. However, the hard step is to get the VLC video player
-running (through its python binding). Please contact us if you want to
-experiment with Advene on Mac OS X.
+From macports (http://www.macports.org/), install :
+
+    * python24 [Note: after its install, make sure that
+      /opt/local/bin/python exists, and that your path begins with
+      /opt/local/bin. Else, the installation of the other packages
+      could use the /usr/bin/python version]
+    * py-gtk2
+    * py-xml
+
+You will also need the vlc.so python module to control VLC. You can
+download a precompiled version for vlc0.8.6c/i3386 from
+http://liris.cnrs.fr/advene/download/mac/vlc-bindings/ or compile it
+by yourself (which is hard for vlc <= 0.8.6, and should work better
+for vlc >= 0.9.0).
 
 * Testing
 
