@@ -23,6 +23,7 @@ events that match a condition."""
 import re
 import sets
 import StringIO
+import urllib
 
 import xml.dom.ext.reader.PyExpat
 
@@ -871,6 +872,108 @@ class Query:
         else:
             # Not a list. What do we do in this case ?
             return s
+
+class Quicksearch:
+    """Quicksearch component.
+
+    This quicksearch component returns a set of data matching strings
+    from a given source (the source is a TALES expression).
+
+    @ivar source: the source of the data
+    @type source: a TALES expression
+    @ivar searched: the searched string
+    @type searched: a string
+    @ivar controller: the controller
+    """
+    def __init__(self, controller=None, source=None, searched=None, case_sensitive=False):
+        if source is None:
+            source='package/annotations'
+        self.source=source
+        self.searched=searched
+        self.case_sensitive=case_sensitive
+        self.controller=controller
+
+    def from_xml(self, uri=None):
+        """Read the query from a URI.
+
+        @param uri: the source URI
+        """
+        reader=xml.dom.ext.reader.PyExpat.Reader()
+        di=reader.fromStream(open(uri, 'r'))
+        querynode=di._get_documentElement()
+        self.from_dom(domelement=querynode)
+
+    def to_xml(self, uri=None, stream=None):
+        """Save the query to the given URI or stream."""
+        dom=xml.dom.Document.Document(None)
+        dom.appendChild(self.to_dom(dom))
+        if stream is None:
+            stream=open(uri, 'w')
+            xml.dom.ext.PrettyPrint(dom, stream)
+            stream.close()
+        else:
+            xml.dom.ext.PrettyPrint(dom, stream)
+
+    def xml_repr(self):
+        """Return the XML representation of the ruleset."""
+        s=StringIO.StringIO()
+        self.to_xml(stream=s)
+        buf=s.getvalue()
+        s.close()
+        return buf
+
+    def from_dom(self, domelement=None):
+        """Read the Query from a DOM element.
+
+        @param domelement: the DOM element
+        """
+        if domelement._get_nodeName() != 'quicksearch':
+            raise Exception("Invalid DOM element for Quicksearch")
+
+        sourcenodes=domelement.getElementsByTagName('source')
+        if len(sourcenodes) == 1:
+            self.source=sourcenodes[0].getAttribute('value')
+
+        # Searched string
+        s=domelement.getElementsByTagName('searched')
+        if len(s) == 1:
+            self.searched=urllib.unquote(s[0].getAttribute('value'))
+
+        # Case-sensitive
+        s=domelement.getElementsByTagName('case_sensitive')
+        if len(s) == 1:
+            self.case_sensitive=(s[0].getAttribute('value') == '1')
+        return self
+
+    def to_dom(self, dom):
+        """Create a DOM representation of the quicksearch.
+
+        @return: a DOMElement
+        """
+        qnode=dom.createElement('quicksearch')
+
+        n=dom.createElement('source')
+        n.setAttribute('value', self.source)
+        qnode.appendChild(n)
+
+        n=dom.createElement('searched')
+        n.setAttribute('value', urllib.quote(self.searched))
+        qnode.appendChild(n)
+
+        n=dom.createElement('case_sensitive')
+        n.setAttribute('value', str(int(self.case_sensitive)))
+        qnode.appendChild(n)
+
+        return qnode
+
+    def execute(self, context=None):
+        """Execute the query.
+
+        @return: the list of elements matching the query or a boolean
+        """
+        return self.controller.search_string(searched=self.searched, 
+                                             source=self.source,
+                                             case_sensitive=self.case_sensitive)
 
 class RegisteredAction:
     """Registered action.
