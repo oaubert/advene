@@ -29,7 +29,7 @@ import pango
 import advene.core.config as config
 from advene.gui.edit.rules import EditQuery
 from advene.model.bundle import AbstractBundle
-from advene.rules.elements import Query, Condition
+from advene.rules.elements import Query, Condition, Quicksearch
 from advene.model.annotation import Annotation
 from advene.model.tal.context import AdveneTalesException
 from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
@@ -233,7 +233,7 @@ class InteractiveResult(AdhocView):
         self.close_on_package_load = False
         self.contextual_actions = (
             #(_("Refresh"), self.refresh),
-            #(_("Save view"), self.save_view),
+            (_("Save query"), self.save_query),
             )
         self.controller=controller
         self.query=query
@@ -250,6 +250,45 @@ class InteractiveResult(AdhocView):
         # Annotation-table view
         self.table=None
         self.widget=self.build_widget()
+
+    def save_query(self, *p):
+        """Saves the query in the package.
+        """
+        t, i = dialog.get_title_id(title=_("Saving the query..."),
+                                   text=_("Give a title and identifier for saving the query"),
+                                   element_title=self._label,
+                                   element_id=helper.title2id(self._label))
+        if i is None:
+            return True
+
+        q=helper.get_id(self.controller.package.queries, i)
+        # Overwriting an existing query
+        if q:
+            create=False
+        else:
+            create=True
+            # Create the query
+            q=self.controller.package.createQuery(ident=i)
+            q.author=config.data.userid
+            q.date=self.controller.get_timestamp()
+            self.controller.package.queries.append(q)
+
+        q.title=t
+        if isinstance(self.query, InteractiveQuery):
+            q.content.mimetype='application/x-advene-simplequery'
+            # Store the query itself in the _interactive query
+            q.content.data = self.query.eq.xml_repr()
+        else:
+            q.content.mimetype='application/x-advene-quicksearch'
+            query=Quicksearch(searched=self.query, 
+                              source=config.data.preferences['quicksearch-source'],
+                              case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
+            q.content.data=query.xml_repr()
+        if create:
+            self.controller.notify('QueryCreate', query=q)
+        else:
+            self.controller.notify('QueryEditEnd', query=q)
+        return q
 
     def create_montage(self, *p):
         if hasattr(self, 'table'):
