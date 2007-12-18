@@ -33,8 +33,10 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
 from advene.model.resources import ResourceData
 from advene.model.query import Query
+import advene.rules.elements
 import advene.gui.popup
 import advene.util.helper as helper
+import advene.model.tal.context
 
 name="Package finder view plugin"
 
@@ -393,9 +395,50 @@ class QueryColumn(FinderColumn):
         self.label={}
         self.label['title']=gtk.Label()
         vbox.pack_start(self.label['title'], expand=False)
+
         b=self.label['edit']=gtk.Button(_("Edit query"))
         b.connect('clicked', lambda w: self.controller.gui.edit_element(self.element))
         vbox.pack_start(b, expand=False)
+
+        f=gtk.Frame(_("Try to apply the query on..."))
+        v=gtk.VBox()
+        f.add(v)
+        
+        def try_query(b, expr):
+            context=self.controller.build_context()
+            source=context.evaluateValue(expr)
+            context=self.controller.build_context(here=source)
+            if self.element.content.mimetype == 'application/x-advene-simplequery':
+                q=advene.rules.elements.SimpleQuery(controller=self.controller)
+                q.from_xml(self.element.content.stream)
+            elif self.element.content.mimetype == 'application/x-advene-quicksearch':
+                q=advene.rules.elements.Quicksearch(controller=self.controller)
+                q.from_xml(self.element.content.stream)
+                # Override the source... Is it a good idea ?
+                q.source=expr
+            try:
+                res=q.execute(context)
+                self.controller.gui.open_adhoc_view('interactiveresult',
+                                                    query=q,
+                                                    result=res,
+                                                    destination='east')
+            except Exception, e:
+                #print "********** Oops"
+                #import traceback
+                #traceback.print_exc()
+                b.set_sensitive(False)
+            return True
+
+        for (expr, label) in (
+             ('package', _("the package")),
+             ('package/annotations', _("all annotations of the package")),
+             ('package/annotations/first', _("the first annotation of the package")),
+            ):
+            b=gtk.Button(label)
+            b.connect('clicked', try_query, expr)
+            v.pack_start(b, expand=False)
+        
+        vbox.add(f)
         vbox.show_all()
         return vbox
 CLASS2COLUMN[Query]=QueryColumn
