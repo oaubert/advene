@@ -943,7 +943,7 @@ class Quicksearch:
         # Searched string
         s=domelement.getElementsByTagName('searched')
         if len(s) == 1:
-            self.searched=urllib.unquote(s[0].getAttribute('value'))
+            self.searched=urllib.unquote(unicode(s[0].getAttribute('value')).encode('utf-8'))
 
         # Case-sensitive
         s=domelement.getElementsByTagName('case_sensitive')
@@ -963,7 +963,7 @@ class Quicksearch:
         qnode.appendChild(n)
 
         n=dom.createElement('searched')
-        n.setAttribute('value', urllib.quote(self.searched))
+        n.setAttribute('value', urllib.quote(unicode(self.searched).encode('utf-8')))
         qnode.appendChild(n)
 
         n=dom.createElement('case_sensitive')
