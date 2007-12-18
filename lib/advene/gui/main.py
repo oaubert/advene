@@ -2084,20 +2084,9 @@ class AdveneGUI (Connect):
         # Control-shortcuts
         if event.state & gtk.gdk.CONTROL_MASK:
             # The Control-key is held. Special actions :
-            if event.keyval == gtk.keysyms.q:
-                # Quit
-                return self.on_exit (win, None)
-            elif event.keyval == gtk.keysyms.o:
-                # Open an annotation file
-                self.on_open1_activate (win, None)
-                return True
-            elif event.keyval == gtk.keysyms.e:
+            if event.keyval == gtk.keysyms.e:
                 # Popup the evaluator window
                 self.popup_evaluator()
-                return True
-            elif event.keyval == gtk.keysyms.s:
-                # Save the current annotation file
-                self.on_save1_activate (win, None)
                 return True
             elif event.keyval == gtk.keysyms.a:
                 # EditAccumulator popup
@@ -2315,10 +2304,6 @@ class AdveneGUI (Connect):
         w=v.popup()
         dialog.center_on_mouse(w)
         return False
-
-    def on_quit1_activate (self, button=None, data=None):
-        """Gtk callback to quit."""
-        return self.on_exit (button, data)
 
     def on_find1_activate (self, button=None, data=None):
         self.open_adhoc_view('interactivequery', destination='east')
@@ -2632,9 +2617,6 @@ class AdveneGUI (Connect):
             self.controller.set_default_media(stream)
         return True
     
-    def on_b_exit_clicked (self, button=None, data=None):
-        return self.on_exit (button, data)
-
     def on_package_imports1_activate (self, button=None, data=None):
         """Edit imported elements from other packages."""
         imp=advene.gui.edit.imports.Importer(controller=self.controller)
