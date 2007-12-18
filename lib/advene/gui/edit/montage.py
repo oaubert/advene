@@ -29,6 +29,7 @@ from advene.gui.util import get_small_stock_button, name2color, get_pixmap_butto
 import advene.gui.util.dialog as dialog
 from advene.gui.views import AdhocView
 from advene.gui.widget import AnnotationWidget
+from advene.gui.views.annotationdisplay import AnnotationDisplay
 import advene.gui.popup
 
 from gettext import gettext as _
@@ -125,6 +126,13 @@ class Montage(AdhocView):
         self.master_view=master
         return
 
+    def set_annotation(self, a=None):
+        for v in self._slave_views:
+            try:
+                v.set_annotation(a)
+            except AttributeError:
+                pass
+
     def close(self, *p):
         super(Montage, self).close(*p)
         if self.master_view:
@@ -164,6 +172,7 @@ class Montage(AdhocView):
         w=AnnotationWidget(annotation=annotation, container=self)
         w.connect("drag_data_get", drag_sent)
         w.connect("button_press_event", button_press)
+        w.connect("focus-in-event", lambda b, e: self.set_annotation(annotation))
 
         if position is not None:
             self.contents.insert(position, w)
@@ -385,6 +394,14 @@ class Montage(AdhocView):
             return False
 
         v.pack_start(sw, expand=False)
+
+        a=AnnotationDisplay(controller=self.controller)
+        f=gtk.Frame(_("Inspector"))
+        f.add(a.widget)
+        v.add(f)
+        self.controller.gui.register_view (a)        
+        a.set_master_view(self)
+        a.widget.show_all()
 
         v.pack_start(gtk.VBox(), expand=True)
 
