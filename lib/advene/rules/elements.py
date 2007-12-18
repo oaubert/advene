@@ -702,8 +702,8 @@ class RuleSet(list):
             self.remove(s)
         return subviews
 
-class Query:
-    """Simple Query component.
+class SimpleQuery:
+    """SimpleQuery component.
 
     This query component returns a set of data matching a condition
     from a given source. If the source is not a list, it will return a
@@ -741,10 +741,13 @@ class Query:
     def from_xml(self, uri=None):
         """Read the query from a URI.
 
-        @param uri: the source URI
+        @param uri: the source URI or a file-like object
         """
         reader=xml.dom.ext.reader.PyExpat.Reader()
-        di=reader.fromStream(open(uri, 'r'))
+        if hasattr(uri, 'read'):
+            di=reader.fromStream(uri)
+        else:
+            di=reader.fromStream(open(uri, 'r'))
         querynode=di._get_documentElement()
         self.from_dom(domelement=querynode)
 
@@ -768,12 +771,12 @@ class Query:
         return buf
 
     def from_dom(self, domelement=None):
-        """Read the Query from a DOM element.
+        """Read the SimpleQuery from a DOM element.
 
         @param domelement: the DOM element
         """
         if domelement._get_nodeName() != 'query':
-            raise Exception("Invalid DOM element for Query")
+            raise Exception("Invalid DOM element for SimpleQuery")
 
         sourcenodes=domelement.getElementsByTagName('source')
         if len(sourcenodes) == 1:
@@ -896,10 +899,13 @@ class Quicksearch:
     def from_xml(self, uri=None):
         """Read the query from a URI.
 
-        @param uri: the source URI
+        @param uri: the source URI or a file-like object.
         """
         reader=xml.dom.ext.reader.PyExpat.Reader()
-        di=reader.fromStream(open(uri, 'r'))
+        if hasattr(uri, 'read'):
+            di=reader.fromStream(uri)
+        else:
+            di=reader.fromStream(open(uri, 'r'))
         querynode=di._get_documentElement()
         self.from_dom(domelement=querynode)
 
@@ -923,7 +929,7 @@ class Quicksearch:
         return buf
 
     def from_dom(self, domelement=None):
-        """Read the Query from a DOM element.
+        """Read the SimpleQuery from a DOM element.
 
         @param domelement: the DOM element
         """

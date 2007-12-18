@@ -220,7 +220,7 @@ class CreateElementPopup(object):
             el.content.mimetype=t.id
             if t.id == 'application/x-advene-simplequery':
                 # Create a basic query
-                q=advene.rules.elements.Query(source="here")
+                q=advene.rules.elements.SimpleQuery(source="here")
                 el.content.data=q.xml_repr()
                 el.content.mimetype=t.id
             self.parent.queries.append(el)

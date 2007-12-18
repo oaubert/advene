@@ -26,7 +26,7 @@ from advene.gui.edit.elements import ContentHandler, TextContentHandler
 from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle, ShapeEditor
 from advene.gui.util import image_from_position, dialog
 from advene.gui.edit.rules import EditRuleSet, EditQuery
-from advene.rules.elements import RuleSet, Query
+from advene.rules.elements import RuleSet, SimpleQuery
 import advene.util.ElementTree as ET
 
 name="Default content handlers"
@@ -305,7 +305,7 @@ class RuleSetContentHandler (ContentHandler):
         return scroll_win
 
 class SimpleQueryContentHandler (ContentHandler):
-    """Create a Query edit form for the given element (a view, presumably).
+    """Create a SimpleQuery edit form for the given element (a view, presumably).
     """
     def can_handle(mimetype):
         res=0
@@ -348,7 +348,7 @@ class SimpleQueryContentHandler (ContentHandler):
 
     def get_view (self, compact=False):
         """Generate a view widget to edit the ruleset."""
-        q=Query()
+        q=SimpleQuery()
         q.from_dom(domelement=self.element.model)
 
         self.edit=EditQuery(q,

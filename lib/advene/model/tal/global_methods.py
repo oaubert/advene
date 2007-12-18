@@ -441,14 +441,19 @@ def query(target, context):
                     raise KeyError(_("The query %s cannot be found") % key)
 
                 if q.content.mimetype == 'application/x-advene-simplequery':
-                    qexpr=advene.rules.elements.Query()
+                    qexpr=advene.rules.elements.SimpleQuery()
                     qexpr.from_dom(q.content.model)
-                    #self._context.addLocals( [ ('here', self._target) ] )
                     self._context.pushLocals()
                     self._context.setLocal('here', self._target)
                     res=qexpr.execute(context=self._context)
                     self._context.popLocals()
                     return res
+                elif q.content.mimetype == 'application/x-advene-quicksearch':
+                    # Parse quicksearch query
+                    c=context.globals['options']['controller']
+                    qexpr=advene.rules.elements.Quicksearch(controller=c)
+                    qexpr.from_dom(q.content.model)
+                    return qexpr.execute(context=self._context)
                 elif q.content.mimetype == 'application/x-advene-sparql-query':
                     p = self._target.rootPackage
                     search = [
