@@ -19,13 +19,14 @@
 
 Display the query results in a view (timeline, tree, etc).
 """
-import advene.core.config as config
 import time
 from gettext import gettext as _
 import pprint
 
 import gtk
+import pango
 
+import advene.core.config as config
 from advene.gui.edit.rules import EditQuery
 from advene.model.bundle import AbstractBundle
 from advene.rules.elements import Query, Condition
@@ -296,7 +297,6 @@ class InteractiveResult(AdhocView):
         top_box=gtk.HBox()
         v.pack_start(top_box, expand=False)
 
-        # FIXME: if self.query: edit query again
         if self.query and isinstance(self.query, InteractiveQuery):
             b=gtk.Button(_("Edit query again"))
             b.connect('clicked', self.edit_query)
@@ -304,6 +304,7 @@ class InteractiveResult(AdhocView):
         elif self.query:
             e=gtk.Entry()
             e.set_text(self.query)
+            e.set_width_chars(12)
             e.connect('activate', self.redo_quicksearch, e)
             b=get_small_stock_button(gtk.STOCK_FIND, self.redo_quicksearch, e)
             self.controller.gui.tooltips.set_tip(e, _('String to search'))
@@ -329,8 +330,9 @@ class InteractiveResult(AdhocView):
                     'number': len(self.result)}
 
             label=gtk.Label(t)
+            label.set_ellipsize(pango.ELLIPSIZE_END)
             label.set_line_wrap(True)
-            top_box.pack_start(label, expand=False)
+            top_box.add(label)
 
             def toggle_highlight(b, annotation_list):
                 if not hasattr(b, 'highlight') or b.highlight:
