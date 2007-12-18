@@ -107,8 +107,8 @@ class AnnotationDisplay(AdhocView):
                     except gobject.GError:
                         # The PNG data was invalid.
                         pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
-                    else:
-                        pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+                else:
+                    pixbuf=gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
                 d['contents']=''
                 d['imagecontents']=pixbuf
             else:
