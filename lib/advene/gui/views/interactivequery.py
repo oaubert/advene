@@ -29,8 +29,9 @@ import pango
 import advene.core.config as config
 from advene.gui.edit.rules import EditQuery
 from advene.model.bundle import AbstractBundle
-from advene.rules.elements import Query, Condition, Quicksearch
+from advene.rules.elements import SimpleQuery, Condition, Quicksearch
 from advene.model.annotation import Annotation
+from advene.model.query import Query
 from advene.model.tal.context import AdveneTalesException
 from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
 
@@ -81,8 +82,9 @@ class InteractiveQuery(AdhocView):
     def get_interactive_query(self):
         l=helper.get_id(self.controller.package.queries, '_interactive')
         if l:
-            q=Query()
+            q=SimpleQuery()
             q.from_dom(l.content.model)
+            q.container=l
             return l, q
         else:
             # Create the query
@@ -92,7 +94,7 @@ class InteractiveQuery(AdhocView):
             el.title=_("Interactive query")
 
             # Create a basic query
-            q=Query(source=self.source,
+            q=SimpleQuery(source=self.source,
                     rvalue="element")
             q.add_condition(Condition(lhs="element/content/data",
                                       operator="contains",
@@ -104,6 +106,7 @@ class InteractiveQuery(AdhocView):
             self.controller.package.queries.append(el)
 
             self.controller.notify('QueryCreate', query=el)
+            q.container=el
             return el, q
 
     def save_query(self, *p):
@@ -117,10 +120,18 @@ class InteractiveQuery(AdhocView):
         # Update the query
         self.eq.update_value()
 
+        if hasattr(self.eq, 'container'):
+            default_id=self.eq.container.id
+            default_title=self.eq.container.title
+        else:
+            default_id=helper.title2id(self._label)
+            default_title=self._label
+
+
         t, i = dialog.get_title_id(title=_("Saving the query..."),
                                    text=_("Give a title and identifier for saving the query"),
-                                   element_title=self._label,
-                                   element_id=helper.title2id(self._label))
+                                   element_title=default_title,
+                                   element_id=default_id)
         if i is None:
             return True
 
@@ -154,10 +165,10 @@ class InteractiveQuery(AdhocView):
             self.controller.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
                      % ", ".join(l))
             return True
-        query=self
         self.eq.update_value()
+        query=self.eq.model
         # Store the query itself in the _interactive query
-        self.querycontainer.content.data = self.eq.model.xml_repr()
+        self.querycontainer.content.data = query.xml_repr()
 
         label=_("Expert search")
         c=self.controller.build_context(here=self.here)
@@ -220,9 +231,11 @@ class InteractiveQuery(AdhocView):
 class InteractiveResult(AdhocView):
     """Interactive result display.
 
-    Either we give the query (whose .result attribute will be set), or
-    we give a simple result (structure). In the first case, an option
-    will be offered to edit the query again.
+    Either we give a SimpleQuery (whose .result attribute will
+    possibly be set), or we give a Quicksearch result.  In both cases,
+    if the query was loaded from a saved Query, then .container will
+    hold a reference to the advene.model.query.Query object, so that
+    we can know its id, title, etc...
     """
     view_name = _("Interactive result")
     view_id = 'interactiveresult'
@@ -237,15 +250,27 @@ class InteractiveResult(AdhocView):
             )
         self.controller=controller
         self.query=query
-        if result is None and isinstance(query, InteractiveQuery):
+        if result is None and hasattr(query, 'result'):
             result=query.result
         self.result=result
 
-        if isinstance(self.query, InteractiveQuery):
-            self.label=_("Result of interactive query")
-        else:
-            # Must be a string
-            self.label=_("""'%s'""") % self.query
+        if isinstance(self.query, basestring):
+            # Quicksearch entry. Convert to Quicksearch class.
+            q=Quicksearch(controller=self.controller, 
+                          source=config.data.preferences['quicksearch-source'],
+                          searched=self.query,
+                          case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
+            self.query=q
+
+        if hasattr(self.query, 'container'):
+            if self.query.container.id == '_interactive':
+                self._label=_("Result of interactive query")
+            else:
+                self._label=self.query.container.title
+        elif isinstance(self.query, SimpleQuery):
+            self._label=_("Result of a query")
+        elif isinstance(self.query, Quicksearch):
+            self._label=_("""'%s'""") % self.query.searched
 
         # Annotation-table view
         self.table=None
@@ -254,10 +279,17 @@ class InteractiveResult(AdhocView):
     def save_query(self, *p):
         """Saves the query in the package.
         """
+        if hasattr(self.query, 'container'):
+            default_id=self.query.container.id
+            default_title=self.query.container.title
+        else:
+            default_id=helper.title2id(self._label)
+            default_title=self._label
+
         t, i = dialog.get_title_id(title=_("Saving the query..."),
                                    text=_("Give a title and identifier for saving the query"),
-                                   element_title=self._label,
-                                   element_id=helper.title2id(self._label))
+                                   element_title=default_title,
+                                   element_id=default_id)
         if i is None:
             return True
 
@@ -274,16 +306,11 @@ class InteractiveResult(AdhocView):
             self.controller.package.queries.append(q)
 
         q.title=t
-        if isinstance(self.query, InteractiveQuery):
+        if isinstance(self.query, SimpleQuery):
             q.content.mimetype='application/x-advene-simplequery'
-            # Store the query itself in the _interactive query
-            q.content.data = self.query.eq.xml_repr()
-        else:
+        elif isinstance(self.query, Quicksearch):
             q.content.mimetype='application/x-advene-quicksearch'
-            query=Quicksearch(searched=self.query, 
-                              source=config.data.preferences['quicksearch-source'],
-                              case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
-            q.content.data=query.xml_repr()
+        q.content.data = self.query.xml_repr()
         if create:
             self.controller.notify('QueryCreate', query=q)
         else:
@@ -319,10 +346,11 @@ class InteractiveResult(AdhocView):
         if not s:
             self.log(_("Empty quicksearch string"))
             return True
+        self.query.searched=s
         res=self.controller.gui.search_string(s)
         label="'%s'" % s
         self.controller.gui.open_adhoc_view('interactiveresult', destination=self._destination, 
-                                            result=res, label=label, query=s)
+                                            result=res, label=label, query=self.query)
         self.close()
         return True
 
@@ -336,13 +364,17 @@ class InteractiveResult(AdhocView):
         top_box=gtk.HBox()
         v.pack_start(top_box, expand=False)
 
-        if self.query and isinstance(self.query, InteractiveQuery):
+        if hasattr(self.query, 'container') and self.query.container.id == '_interactive':
             b=gtk.Button(_("Edit query again"))
             b.connect('clicked', self.edit_query)
             top_box.pack_start(b, expand=False)
-        elif self.query:
+        elif isinstance(self.query, SimpleQuery):
+            b=gtk.Button(_("Edit query"))
+            b.connect('clicked', lambda b: self.controller.gui.edit_element(self.query))
+            top_box.pack_start(b, expand=False)
+        elif isinstance(self.query, Quicksearch):
             e=gtk.Entry()
-            e.set_text(self.query)
+            e.set_text(self.query.searched)
             e.set_width_chars(12)
             e.connect('activate', self.redo_quicksearch, e)
             b=get_small_stock_button(gtk.STOCK_FIND, self.redo_quicksearch, e)
