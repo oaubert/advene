@@ -222,8 +222,6 @@ class InteractiveResult(AdhocView):
     Either we give the query (whose .result attribute will be set), or
     we give a simple result (structure). In the first case, an option
     will be offered to edit the query again.
-
-    FIXME: we should be able to DND action buttons to viewbooks
     """
     view_name = _("Interactive result")
     view_id = 'interactiveresult'
@@ -291,8 +289,9 @@ class InteractiveResult(AdhocView):
     def build_widget(self):
         v=gtk.VBox()
 
-        hb=gtk.HButtonBox()
-        v.pack_end(hb, expand=False)
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS)
+        v.pack_start(tb, expand=False)
 
         top_box=gtk.HBox()
         v.pack_start(top_box, expand=False)
@@ -334,7 +333,7 @@ class InteractiveResult(AdhocView):
             top_box.pack_start(label, expand=False)
 
             def toggle_highlight(b, annotation_list):
-                if b.highlight:
+                if not hasattr(b, 'highlight') or b.highlight:
                     event="AnnotationActivate"
                     label= _("Unhighlight annotations")
                     b.highlight=False
@@ -369,54 +368,56 @@ class InteractiveResult(AdhocView):
                                                                                )
                     notebook.append_page(gtable.widget, gtk.Label(_("Other elements")))
 
-                b=get_pixmap_button('timeline.png', lambda b: self.open_in_timeline(l))
-                self.controller.gui.tooltips.set_tip(b, _("Display annotations in timeline"))
-                hb.add(b)
 
-                b=get_pixmap_button('transcription.png',
-                                    lambda b:
-                                    self.controller.gui.open_adhoc_view('transcription',
-                                                                        label=self.label,
-                                                                        destination=self._destination,
-                                                                        elements=l))
-                self.controller.gui.tooltips.set_tip(b, _("Display annotations as transcription"))
-                hb.add(b)
-
-                b=get_pixmap_button('highlight.png', toggle_highlight, l)
-                b.highlight=True
-                self.controller.gui.tooltips.set_tip(b, _("Highlight annotations"))
-                hb.add(b)
-
-                b=get_small_stock_button(gtk.STOCK_CONVERT, lambda b: table.csv_export())
-                self.controller.gui.tooltips.set_tip(b, _("Export table"))
-                hb.add(b)
-
-                b=get_small_stock_button(gtk.STOCK_NEW, self.create_annotations)
-                self.controller.gui.tooltips.set_tip(b, _("Create annotations from the result"))
-                hb.add(b)
-
-                b=get_pixmap_button('montage.png', self.create_montage)
-                self.controller.gui.tooltips.set_tip(b, _("Define a montage with the result"))
-                hb.add(b)
+                for (icon, tip, action) in (
+                    ('timeline.png' , _("Display annotations in timeline"), lambda b: self.open_in_timeline(l)),
+                    ('transcription.png', _("Display annotations as transcription"), lambda b:
+                         self.controller.gui.open_adhoc_view('transcription',
+                                                             label=self.label,
+                                                             destination=self._destination,
+                                                             elements=l)),
+                    ('highlight.png', _("Highlight annotations"), lambda b: toggle_highlight(b, l)),
+                    (gtk.STOCK_CONVERT, _("Export table"), lambda b: table.csv_export()),
+                    (gtk.STOCK_NEW, _("Create annotations from the result"), self.create_annotations),
+                    ('montage.png', _("Define a montage with the result"), self.create_montage),
+                    ):
+                    if icon.endswith('.png'):
+                        i=gtk.Image()
+                        i.set_from_file(config.data.advenefile( ( 'pixmaps', icon) ))
+                        ti=gtk.ToolButton(icon_widget=i)
+                    else:
+                        ti=gtk.ToolButton(stock_id=icon)
+                    ti.connect('clicked', action)
+                    ti.set_tooltip(self.controller.gui.tooltips, tip)
+                    tb.insert(ti, -1)
 
                 self.table=table
             else:
                 # Only Instanciate a generic table view
                 gtable=GenericTable(controller=self.controller, elements=self.result)
                 v.add(gtable.widget)
-                b=get_small_stock_button(gtk.STOCK_CONVERT, lambda b: gtable.csv_export())
-                self.controller.gui.tooltips.set_tip(b, _("Export table"))
-                hb.add(b)
+                
+                ti=gtk.ToolButton(stock_id=gtk.STOCK_CONVERT)
+                ti.connect('clicked', lambda b: gtable.csv_export())
+                ti.set_tooltip(self.controller.gui.tooltips, _("Export table"))
+                tb.insert(ti, -1)
                 self.table=gtable
-
-            b=get_pixmap_button('editaccumulator.png', lambda b: self.open_in_edit_accumulator(self.table.get_elements()))
-            self.controller.gui.tooltips.set_tip(b, _("Edit elements"))
-            hb.add(b)
+            
+                
+            i=gtk.Image()
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'editaccumulator.png') ))
+            ti=gtk.ToolButton(icon_widget=i)
+            ti.connect('clicked', lambda b: self.open_in_edit_accumulator(self.table.get_elements()))
+            ti.set_tooltip(self.controller.gui.tooltips, _("Edit elements"))
+            tb.insert(ti, -1)
 
             if config.data.preferences['expert-mode']:
-                b=get_pixmap_button('python.png', lambda b: self.open_in_evaluator(self.table.get_elements()))
-                self.controller.gui.tooltips.set_tip(b, _("Open in python evaluator"))
-                hb.add(b)
+                i=gtk.Image()
+                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'python.png') ))
+                ti=gtk.ToolButton(icon_widget=i)
+                ti.connect('clicked', lambda b: self.open_in_evaluator(self.table.get_elements()))
+                ti.set_tooltip(self.controller.gui.tooltips, _("Open in python evaluator"))
+                tb.insert(ti, -1)
         else:
             v.add(gtk.Label(_("Result:\n%s") % unicode(self.result)))
         v.show_all()
