@@ -19,6 +19,7 @@ import advene.core.config as config
 
 import re
 import gtk
+import gobject
 import StringIO
 import os
 import urllib
@@ -108,6 +109,19 @@ class AdhocView(object):
             o.disconnect(i)
         self.widget.destroy()
         return True
+
+    def message(self, m):
+        """Display a message in the statusbar, if present.
+        """
+        self.log(m)
+        if hasattr(self, 'statusbar'):
+            context_id=self.statusbar.get_context_id('error')
+            message_id=self.statusbar.push(context_id, m)
+            # Display the message only 1.5 second
+            def undisplay():
+                self.statusbar.pop(context_id)
+                return False
+            gobject.timeout_add(1500, undisplay)
 
     def log(self, msg, level=None):
         m=": ".join( (self.view_name, msg) )
