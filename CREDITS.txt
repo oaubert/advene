@@ -1,0 +1,12 @@
+We are basing our code on existing software:
+- vlc and gstreamer for video rendering
+- simpletal for XHTML document generation
+- cherrypy for the embedded web server
+- python / pygtk for the GUI
+
+Some icons are copied or adapted from:
+- http://openclipart.org/
+- http://www.famfamfam.com/lab/icons/silk/
+
+The Mac OS X version embeds the Leopardish theme from
+http://linux.softpedia.com/progDownload/Leopardish-Download-32938.html
