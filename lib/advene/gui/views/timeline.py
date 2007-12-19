@@ -539,7 +539,7 @@ class TimeLine(AdhocView):
         return
 
     def set_annotation(self, a=None):
-        self.statusbar.set_annotation(a)
+        self.quickview.set_annotation(a)
         for v in self._slave_views:
             try:
                 v.set_annotation(a)
@@ -1660,16 +1660,16 @@ class TimeLine(AdhocView):
             return True
 
         if event.keyval >= 49 and event.keyval <= 57:
-            if self.statusbar.annotation is not None:
-                pos=self.statusbar.annotation.fragment.begin
+            if self.quickview.annotation is not None:
+                pos=self.quickview.annotation.fragment.begin
             else:
                 pos=self.get_middle_position()
             self.fraction_adj.value=1.0/pow(2, event.keyval-49)
             self.set_middle_position(pos)
             return True
         elif event.keyval == gtk.keysyms.e:
-            if self.statusbar.annotation is not None:
-                self.controller.gui.edit_element(self.statusbar.annotation)
+            if self.quickview.annotation is not None:
+                self.controller.gui.edit_element(self.quickview.annotation)
                 return True
         elif event.keyval == gtk.keysyms.c:
             self.center_on_position(self.current_position)
@@ -2366,7 +2366,7 @@ class TimeLine(AdhocView):
         toolbar = self.get_toolbar()
         hb.add(toolbar)
 
-        self.statusbar=QuickviewBar(self.controller)
+        self.quickview=QuickviewBar(self.controller)
 
         # The annotation view button should be placed in the toolbar,
         # but this prevents DND from working correctly.
@@ -2412,7 +2412,7 @@ class TimeLine(AdhocView):
 
         vbox.add (self.get_packed_widget())
 
-        vbox.pack_start(self.statusbar, expand=False)
+        vbox.pack_start(self.quickview, expand=False)
 
         return vbox
 
@@ -2593,8 +2593,8 @@ class TimeLine(AdhocView):
                 f=int(i[0])/100.0
             else:
                 return True
-            if self.statusbar.annotation is not None:
-                pos=self.statusbar.annotation.fragment.begin
+            if self.quickview.annotation is not None:
+                pos=self.quickview.annotation.fragment.begin
             else:
                 pos=self.get_middle_position()
             self.fraction_adj.value=f
@@ -2604,8 +2604,8 @@ class TimeLine(AdhocView):
         def zoom_change(combo):
             v=combo.get_current_element()
             if isinstance(v, float):
-                if self.statusbar.annotation is not None:
-                    pos=self.statusbar.annotation.fragment.begin
+                if self.quickview.annotation is not None:
+                    pos=self.quickview.annotation.fragment.begin
                 else:
                     pos=self.get_middle_position()
                 self.fraction_adj.value=v
@@ -2613,8 +2613,8 @@ class TimeLine(AdhocView):
             return True
 
         def zoom(i, factor):
-            if self.statusbar.annotation is not None:
-                pos=self.statusbar.annotation.fragment.begin
+            if self.quickview.annotation is not None:
+                pos=self.quickview.annotation.fragment.begin
             else:
                 pos=self.get_middle_position()
             self.fraction_adj.set_value(self.fraction_adj.value * factor)
