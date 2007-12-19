@@ -252,6 +252,57 @@ class Bookmarks(AdhocView):
     def build_widget(self):
         v=gtk.VBox()
 
+        hb=gtk.HBox()
+        hb.set_homogeneous(False)
+
+        def remove_drag_received(widget, context, x, y, selection, targetType, time):
+            if targetType == config.data.target_type['timestamp']:
+                position=long(selection.data)
+                if position in self.history:
+                    self.history.remove(position)
+                self.refresh()
+                return True
+            else:
+                print "Unknown target type for drop: %d" % targetType
+            return False
+
+        b=get_small_stock_button(gtk.STOCK_DELETE)                                                 
+        self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
+        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+        b.connect("drag_data_received", remove_drag_received)
+        hb.pack_start(b, expand=False)
+
+        def bookmark_current_time(b):
+            p=self.controller.player
+            if p.status in (p.PlayingStatus, p.PauseStatus):
+                v=p.current_position_value
+                # Make a snapshot
+                self.controller.update_snapshot(v)
+                self.append(v)
+            return True
+
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS)        
+        for icon, action, tip in (
+            ('set-to-now.png', bookmark_current_time, _("Insert a bookmark for the current video time")),
+            (gtk.STOCK_CONVERT, self.convert_to_annotations, _("Convert bookmarks to annotations")),
+            (gtk.STOCK_SAVE, self.save_view, _("Save view")),
+            ):
+            if icon.endswith('.png'):
+                i=gtk.Image()
+                i.set_from_file(config.data.advenefile( ( 'pixmaps', icon) ))
+                b=gtk.ToolButton(icon_widget=i)
+            else:
+                b=gtk.ToolButton(stock_id=icon)
+            b.set_tooltip(self.controller.gui.tooltips, tip)
+            b.connect("clicked", action)
+            tb.insert(b, -1)
+        hb.add(tb)
+        v.pack_start(hb, expand=False)
+
         if self.options['vertical']:
             mainbox=gtk.VBox()
         else:
@@ -279,53 +330,6 @@ class Bookmarks(AdhocView):
                                   config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
         self.mainbox.connect("drag_data_received", mainbox_drag_received)
 
-        def remove_drag_received(widget, context, x, y, selection, targetType, time):
-            if targetType == config.data.target_type['timestamp']:
-                position=long(selection.data)
-                if position in self.history:
-                    self.history.remove(position)
-                self.refresh()
-                return True
-            else:
-                print "Unknown target type for drop: %d" % targetType
-            return False
-
         v.add(sw)
-
-        hb=gtk.HBox()
-        hb.set_homogeneous(False)
-
-        b=get_small_stock_button(gtk.STOCK_DELETE)
-                                                 
-        self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
-        b.connect("drag_data_received", remove_drag_received)
-        hb.pack_start(b, expand=False)
-
-        def bookmark_current_time(b):
-            p=self.controller.player
-            if p.status in (p.PlayingStatus, p.PauseStatus):
-                v=p.current_position_value
-                # Make a snapshot
-                self.controller.update_snapshot(v)
-                self.append(v)
-            return True
-
-        b=get_pixmap_button('set-to-now.png', bookmark_current_time)
-        self.controller.gui.tooltips.set_tip(b, _("Insert a bookmark for the current video time"))
-        hb.pack_start(b, expand=False)
-
-        b=get_small_stock_button(gtk.STOCK_CONVERT, self.convert_to_annotations)
-        self.controller.gui.tooltips.set_tip(b, _("Convert bookmarks to annotations"))
-        hb.pack_start(b, expand=False)
-
-        b=get_small_stock_button(gtk.STOCK_SAVE, self.save_view)
-        self.controller.gui.tooltips.set_tip(b, _("Save view"))
-        hb.pack_start(b, expand=False)
-
-        v.pack_start(hb, expand=False)
 
         return v
