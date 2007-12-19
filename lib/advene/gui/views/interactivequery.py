@@ -490,7 +490,7 @@ class InteractiveResult(AdhocView):
                     ('timeline.png' , _("Display annotations in timeline"), lambda b: self.open_in_timeline(l)),
                     ('transcription.png', _("Display annotations as transcription"), lambda b:
                          self.controller.gui.open_adhoc_view('transcription',
-                                                             label=self.label,
+                                                             label=self._label,
                                                              destination=self._destination,
                                                              elements=l)),
                     ('highlight.png', _("Highlight annotations"), lambda b: toggle_highlight(b, l)),
@@ -547,7 +547,7 @@ class InteractiveResult(AdhocView):
         return True
 
     def open_in_timeline(self, l):
-        self.controller.gui.open_adhoc_view('timeline', label=self.label, destination=self._destination, elements=l)
+        self.controller.gui.open_adhoc_view('timeline', label=self._label, destination=self._destination, elements=l)
         return True
 
     def open_in_edit_accumulator(self, l):
