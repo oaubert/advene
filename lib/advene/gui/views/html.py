@@ -52,7 +52,7 @@ class gtkhtml_wrapper:
 
     def back(self, *p):
         if len(self.history) <= 1:
-            self.controller.log(_("Cannot go back: first item in history"))
+            self.log(_("Cannot go back: first item in history"))
         else:
             # Current URL
             u=self.history.pop()

@@ -114,7 +114,7 @@ class InteractiveQuery(AdhocView):
         """
         l=self.eq.invalid_items()
         if l:
-            self.controller.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
+            self.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
                      % ", ".join(l))
             return True
         # Update the query
@@ -162,7 +162,7 @@ class InteractiveQuery(AdhocView):
         # Get the query
         l=self.eq.invalid_items()
         if l:
-            self.controller.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
+            self.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
                      % ", ".join(l))
             return True
         self.eq.update_value()

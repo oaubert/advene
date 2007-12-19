@@ -153,8 +153,8 @@ class Bookmarks(AdhocView):
                            duration=d)
         ti.process_file('history')
         self.controller.package._modified=True
-        self.controller.log(_('Converted from bookmarks'))
-        self.controller.log(ti.statistics_formatted())
+        self.log(_('Converted from bookmarks'))
+        self.log(ti.statistics_formatted())
         # Feedback
         dialog.message_dialog(
             _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])

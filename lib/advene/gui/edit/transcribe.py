@@ -265,7 +265,7 @@ class TranscriptionEdit(AdhocView):
     def message(self, m):
         context_id=self.statusbar.get_context_id('error')
         message_id=self.statusbar.push(context_id, m)
-        self.controller.log('note-taking:' + m)
+        self.log(m)
         # Display the message only 1 second
         def undisplay():
             self.statusbar.pop(context_id)
@@ -540,7 +540,7 @@ class TranscriptionEdit(AdhocView):
         last_end=-1
         for (begin, end, a) in l:
             if begin < last_end or end < last_end:
-                self.controller.log(_("Invalid timestamp"))
+                self.log(_("Invalid timestamp"))
                 pass
             it=b.get_iter_at_mark(b.get_insert())
             self.create_timestamp_mark(begin, it)
@@ -1003,8 +1003,8 @@ class TranscriptionEdit(AdhocView):
 
             self.controller.package._modified=True
             self.controller.notify("PackageActivate", package=ti.package)
-            self.message(_('Notes converted :'))
-            self.controller.log(ti.statistics_formatted())
+            self.message(_('Notes converted'))
+            self.log(ti.statistics_formatted())
             # Feedback
             dialog.message_dialog(
                 _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
