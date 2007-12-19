@@ -243,7 +243,7 @@ class InteractiveResult(AdhocView):
 
     def __init__(self, controller=None, parameters=None, query=None, result=None):
         super(InteractiveResult, self).__init__(controller=controller)
-        self.close_on_package_load = False
+        self.close_on_package_load = True
         self.contextual_actions = (
             #(_("Refresh"), self.refresh),
             (_("Save query"), self.save_query),
