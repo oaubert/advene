@@ -209,19 +209,17 @@ class HTMLView(AdhocView):
                 m.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
 
-        buttonbox=gtk.HBox()
-
-        b=gtk.Button(stock=gtk.STOCK_GO_BACK)
-        b.connect("clicked", self.component.back)
-        buttonbox.pack_start(b, expand=False, fill=False)
-
-        b=gtk.Button(stock=gtk.STOCK_REFRESH)
-        b.connect("clicked", self.component.refresh)
-        buttonbox.pack_start(b, expand=False, fill=False)
-
-        b=gtk.Button(stock=gtk.STOCK_HOME)
-        b.connect("clicked", utbv_menu)
-        buttonbox.pack_start(b, expand=False, fill=False)
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS)
+        
+        for icon, action in (
+            (gtk.STOCK_GO_BACK, self.component.back),
+            (gtk.STOCK_REFRESH, self.component.refresh),
+            (gtk.STOCK_HOME, utbv_menu),
+            ):
+            b=gtk.ToolButton(stock_id=icon)
+            b.connect("clicked", action)
+            tb.insert(b, -1)
 
         def entry_validated(e):
             self.component.set_url(self.current_url())
@@ -229,11 +227,14 @@ class HTMLView(AdhocView):
 
         self.url_entry=gtk.Entry()
         self.url_entry.connect("activate", entry_validated)
-        buttonbox.add(self.url_entry)
-
+        ti=gtk.ToolItem()
+        ti.add(self.url_entry)
+        ti.set_expand(True)
+        tb.insert(ti, -1)
+            
         vbox=gtk.VBox()
 
-        vbox.pack_start(buttonbox, expand=False)
+        vbox.pack_start(tb, expand=False)
 
         vbox.add(w)
 
@@ -241,7 +242,6 @@ class HTMLView(AdhocView):
         self.url_label.set_alignment(0, 0)
         vbox.pack_start(self.url_label, expand=False)
 
-        vbox.buttonbox = buttonbox
         return vbox
 
     def current_url(self, url=None):
