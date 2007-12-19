@@ -262,16 +262,6 @@ class TranscriptionEdit(AdhocView):
 
         return vbox
 
-    def message(self, m):
-        context_id=self.statusbar.get_context_id('error')
-        message_id=self.statusbar.push(context_id, m)
-        self.log(m)
-        # Display the message only 1 second
-        def undisplay():
-            self.statusbar.pop(context_id)
-            return False
-        gobject.timeout_add(1000, undisplay)
-
     def remove_timestamp_mark(self, button, anchor, child):
         b=self.textview.get_buffer()
         self.marks.remove(child)
