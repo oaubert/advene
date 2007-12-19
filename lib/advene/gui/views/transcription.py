@@ -50,8 +50,6 @@ class TranscriptionView(AdhocView):
         super(TranscriptionView, self).__init__(controller=controller)
         self.close_on_package_load = True
         self.contextual_actions = (
-            (_("Refresh"), self.refresh),
-            (_("Validate"), self.validate),
             (_("Save view"), self.save_view),
             (_("Save default options"), self.save_default_options),
             )
@@ -289,9 +287,26 @@ class TranscriptionView(AdhocView):
     def build_widget(self):
         mainbox = gtk.VBox()
 
-        if self.controller.gui:
-            self.player_toolbar=self.controller.gui.get_player_control_toolbar()
-            mainbox.pack_start(self.player_toolbar, expand=False)
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS)
+        
+        for icon, action, tip in (
+            (gtk.STOCK_SAVE, self.save_transcription, _("Save transcription to a text file")),
+            (gtk.STOCK_APPLY, self.validate, _("Apply the modifications")),
+            (gtk.STOCK_FIND, self.show_searchbox, _("Find text")),
+            (gtk.STOCK_REDO, self.quick_options_toggle, _("Quickly switch display options")),
+            (gtk.STOCK_REFRESH, self.refresh, _("Refresh the transcription")),
+            (gtk.STOCK_PREFERENCES, self.edit_options, _("Edit preferences")),
+            ):
+            b=gtk.ToolButton(stock_id=icon)
+            b.set_tooltip(self.controller.gui.tooltips, tip)
+            b.connect("clicked", action)
+            tb.insert(b, -1)
+        mainbox.pack_start(tb, expand=False)
+
+        #if self.controller.gui:
+        #    self.player_toolbar=self.controller.gui.get_player_control_toolbar()
+        #    mainbox.pack_start(self.player_toolbar, expand=False)
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -361,28 +376,9 @@ class TranscriptionView(AdhocView):
 
         mainbox.pack_start(self.searchbox, expand=False)
 
-        hb=gtk.HButtonBox()
-        hb.set_homogeneous(False)
-
-        b=get_small_stock_button(gtk.STOCK_PREFERENCES, self.edit_options)
-        hb.pack_start(b, expand=False)
-        self.controller.gui.tooltips.set_tip(b, _("Edit preferences"))
-
-        b=get_small_stock_button(gtk.STOCK_REDO, self.quick_options_toggle)
-        hb.pack_start(b, expand=False)
-        self.controller.gui.tooltips.set_tip(b, _("Quickly switch display options"))
-
-        b=get_small_stock_button(gtk.STOCK_FIND, self.show_searchbox)
-        hb.pack_start(b, expand=False)
-        self.controller.gui.tooltips.set_tip(b, _("Find text"))
-
-        b=get_small_stock_button(gtk.STOCK_SAVE, self.save_transcription)
-        hb.pack_start(b, expand=False)
-        self.controller.gui.tooltips.set_tip(b, _("Save transcription"))
-
-        mainbox.pack_start(hb, expand=False)
-
-        mainbox.buttonbox = hb
+        self.statusbar=gtk.Statusbar()
+        self.statusbar.set_has_resize_grip(False)
+        mainbox.pack_start(self.statusbar, expand=False)
 
         mainbox.show_all()
 
@@ -701,11 +697,11 @@ class TranscriptionView(AdhocView):
         try:
             f=open(filename, "w")
         except Exception, e:
-            self.log(_("Cannot write to %(filename)s: %(error)s:") %
+            self.message(_("Cannot write to %(filename)s: %(error)s:") %
                      {'filename': filename, 
                       'error': unicode(e)})
             return True
         f.write(out)
         f.close()
-        self.log(_("Transcription saved to %s") % filename)
+        self.message(_("Transcription saved to %s") % filename)
         return True
