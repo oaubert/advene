@@ -1626,7 +1626,7 @@ class AdveneController:
         future_begins = list(l)
         future_ends = l
         future_begins.sort(key=operator.itemgetter(1))
-        future_ends.sort(key=operator.itemgetter(1))
+        future_ends.sort(key=operator.itemgetter(2))
 
         #print "Position: %s" % helper.format_time(position)
         #print "Begins: %s\nEnds: %s" % ([ a[0].id for a in future_begins[:4] ],
