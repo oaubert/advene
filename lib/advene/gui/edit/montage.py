@@ -337,9 +337,116 @@ class Montage(AdhocView):
             self.zoom_combobox.child.set_text('%d%%' % long(100 * adj.value))
             return True
 
+        def remove_drag_received(widget, context, x, y, selection, targetType, time):
+            if targetType == config.data.target_type['uri-list']:
+                m=re.match('advene:/adhoc/%d/(.+)' % hash(self),
+                           selection.data)
+                if m:
+                    h=long(m.group(1))
+                    l=[ w for w in self.contents if hash(w) == h ]
+                    if l:
+                        # Found the element. Remove it.
+                        self.contents.remove(l[0])
+                        self.refresh()
+                return True
+            else:
+                print "Unknown target type for drop: %d" % targetType
+            return False
+
         self.zoom_adjustment.connect('value-changed', zoom_adj_change)
 
         v=gtk.VBox()
+
+        # Toolbar
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS)
+
+        b=get_small_stock_button(gtk.STOCK_DELETE)
+        self.controller.gui.tooltips.set_tip(b, _("Drop an annotation here to remove it from the list"))
+        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.drag_type['uri-list'], gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
+        b.connect("drag_data_received", remove_drag_received)
+        ti=gtk.ToolItem()
+        ti.add(b)
+        tb.insert(ti, -1)
+
+        b=gtk.ToolButton(stock_id=gtk.STOCK_MEDIA_PLAY)
+        b.set_tooltip(self.controller.gui.tooltips, _("Play the montage"))
+        b.connect("clicked", self.play)
+        tb.insert(b, -1)
+
+        def zoom_entry(entry):
+            f=entry.get_text()
+
+            i=re.findall(r'\d+', f)
+            if i:
+                f=int(i[0])/100.0
+            else:
+                return True
+            self.zoom_adjustment.value=f
+            return True
+
+        def zoom_change(combo):
+            v=combo.get_current_element()
+            if isinstance(v, float):
+                self.zoom_adjustment.value=v
+            return True
+
+        def zoom(i, factor):
+            self.zoom_adjustment.value=self.zoom_adjustment.value * factor
+            return True
+
+        b=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_OUT)
+        b.connect('clicked', zoom, 1.3)
+        tb.insert(b, -1)
+
+        b=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
+        b.connect('clicked', zoom, .7)
+        tb.insert(b, -1)
+        
+        self.zoom_combobox=dialog.list_selector_widget(members=[
+                ( f, "%d%%" % long(100*f) ) 
+                for f in [ 
+                    (1.0 / pow(1.5, n)) for n in range(0, 10) 
+                    ] 
+                ],
+                                                       entry=True,
+                                                       callback=zoom_change)
+        self.zoom_combobox.child.connect('activate', zoom_entry)
+        self.zoom_combobox.child.set_width_chars(4)
+
+        ti=gtk.ToolItem()
+        ti.add(self.zoom_combobox)
+        tb.insert(ti, -1)
+
+        b=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_100)
+        b.connect('clicked', lambda i: self.zoom_adjustment.set_value(1.0))
+        tb.insert(b, -1)
+
+        def toggle_highlight(b):
+            if b.highlight:
+                event="AnnotationActivate"
+                label= _("Unhighlight annotations")
+                b.highlight=False
+            else:
+                event="AnnotationDeactivate"
+                label=_("Highlight annotations")
+                b.highlight=True
+            self.controller.gui.tooltips.set_tip(b, label)
+            for a in set( [ w.annotation for w in self.contents ] ):
+                self.controller.notify(event, annotation=a)
+            return True
+        b=gtk.ToggleToolButton()
+        i=gtk.Image()
+        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'highlight.png') ))
+        b.set_icon_widget(i)
+        b.highlight=True
+        b.connect('clicked', toggle_highlight)
+        tb.insert(b, -1)
+        
+        v.pack_start(tb, expand=False)
 
         self.mainbox=gtk.HBox()
 
@@ -377,22 +484,6 @@ class Montage(AdhocView):
         sw.add_with_viewport(self.mainbox)
         self.scrollwindow=sw
 
-        def remove_drag_received(widget, context, x, y, selection, targetType, time):
-            if targetType == config.data.target_type['uri-list']:
-                m=re.match('advene:/adhoc/%d/(.+)' % hash(self),
-                           selection.data)
-                if m:
-                    h=long(m.group(1))
-                    l=[ w for w in self.contents if hash(w) == h ]
-                    if l:
-                        # Found the element. Remove it.
-                        self.contents.remove(l[0])
-                        self.refresh()
-                return True
-            else:
-                print "Unknown target type for drop: %d" % targetType
-            return False
-
         v.pack_start(sw, expand=False)
 
         a=AnnotationDisplay(controller=self.controller)
@@ -410,89 +501,6 @@ class Montage(AdhocView):
         hb.pack_start(l, expand=False)
         self.duration_label=gtk.Label('??')
         hb.pack_start(self.duration_label, expand=False)
-        v.pack_start(hb, expand=False)
-
-        # Buttons bar
-        hb=gtk.HBox()
-
-        b=get_small_stock_button(gtk.STOCK_DELETE)
-        self.controller.gui.tooltips.set_tip(b, _("Drop an annotation here to remove it from the list"))
-        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                        gtk.DEST_DEFAULT_HIGHLIGHT |
-                        gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['uri-list'], gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
-        b.connect("drag_data_received", remove_drag_received)
-        hb.pack_start(b, expand=False)
-
-        b=get_small_stock_button(gtk.STOCK_MEDIA_PLAY)
-        self.controller.gui.tooltips.set_tip(b, _("Play the montage"))
-        b.connect("clicked", self.play)
-        hb.pack_start(b, expand=False)
-
-        def zoom_entry(entry):
-            f=entry.get_text()
-
-            i=re.findall(r'\d+', f)
-            if i:
-                f=int(i[0])/100.0
-            else:
-                return True
-            self.zoom_adjustment.value=f
-            return True
-
-        def zoom_change(combo):
-            v=combo.get_current_element()
-            if isinstance(v, float):
-                self.zoom_adjustment.value=v
-            return True
-
-        def zoom(i, factor):
-            self.zoom_adjustment.value=self.zoom_adjustment.value * factor
-            return True
-
-        b=get_small_stock_button(gtk.STOCK_ZOOM_OUT)
-        hb.pack_start(b, expand=False)
-        b.connect('clicked', zoom, 1.3)
-
-        b=get_small_stock_button(gtk.STOCK_ZOOM_IN)
-        hb.pack_start(b, expand=False)
-        b.connect('clicked', zoom, .7)
-        
-        self.zoom_combobox=dialog.list_selector_widget(members=[
-                ( f, "%d%%" % long(100*f) ) 
-                for f in [ 
-                    (1.0 / pow(1.5, n)) for n in range(0, 10) 
-                    ] 
-                ],
-                                                       entry=True,
-                                                       callback=zoom_change)
-        self.zoom_combobox.child.connect('activate', zoom_entry)
-        self.zoom_combobox.child.set_width_chars(4)
-
-        hb.pack_start(self.zoom_combobox, expand=False)
-
-        b=get_small_stock_button(gtk.STOCK_ZOOM_100)
-        hb.pack_start(b, expand=False)
-        b.connect('clicked', lambda i: self.zoom_adjustment.set_value(1.0))
-
-        def toggle_highlight(b):
-            if b.highlight:
-                event="AnnotationActivate"
-                label= _("Unhighlight annotations")
-                b.highlight=False
-            else:
-                event="AnnotationDeactivate"
-                label=_("Highlight annotations")
-                b.highlight=True
-            self.controller.gui.tooltips.set_tip(b, label)
-            for a in set( [ w.annotation for w in self.contents ] ):
-                self.controller.notify(event, annotation=a)
-            return True
-        b=get_pixmap_button('highlight.png')
-        b.highlight=True
-        b.connect('clicked', toggle_highlight)
-        hb.pack_start(b, expand=False)
-        
         v.pack_start(hb, expand=False)
 
         return v
