@@ -1187,9 +1187,31 @@ class TimeLine(AdhocView):
             return True
         return False
 
+    def annotation_button_release_cb(self, widget, event, annotation):
+        """Handle button release on annotation widgets.
+        """
+        if self.options['goto-on-click'] and event.button == 1 and widget._single_click_guard:
+            self.controller.gui.set_current_annotation(annotation)
+            # Goto annotation if not already playing it
+            p=self.controller.player.current_position_value
+            # We do not use 'p in annotation.fragment' since if we are
+            # at the end of the annotation, we may want to go back to its beginning
+            if p >= annotation.fragment.begin and p < annotation.fragment.end:
+                return True
+
+            c=self.controller
+            pos = c.create_position (value=annotation.fragment.begin,
+                                     key=c.player.MediaTime,
+                                     origin=c.player.AbsolutePosition)
+            self.controller.update_status (status="set", position=pos)
+            if self.loop_toggle_button.get_active():
+                self.controller.gui.loop_on_annotation_gui(annotation)
+            return True
+        
     def annotation_button_press_cb(self, widget, event, annotation):
         """Handle button presses on annotation widgets.
         """
+        widget._single_click_guard=False
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
             self.annotation_cb(widget, annotation, event.x)
             return True
@@ -1220,22 +1242,8 @@ class TimeLine(AdhocView):
             else:
                 self.activate_annotation (annotation, buttons=[ widget ])
             return True
-        elif self.options['goto-on-click'] and event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
-            self.controller.gui.set_current_annotation(annotation)
-            # Goto annotation if not already playing it
-            p=self.controller.player.current_position_value
-            # We do not use 'p in annotation.fragment' since if we are
-            # at the end of the annotation, we may want to go back to its beginning
-            if p >= annotation.fragment.begin and p < annotation.fragment.end:
-                return True
-
-            c=self.controller
-            pos = c.create_position (value=annotation.fragment.begin,
-                                     key=c.player.MediaTime,
-                                     origin=c.player.AbsolutePosition)
-            self.controller.update_status (status="set", position=pos)
-            if self.loop_toggle_button.get_active():
-                self.controller.gui.loop_on_annotation_gui(annotation)
+        elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
+            widget._single_click_guard=True
             return True
         return False
 
@@ -1380,6 +1388,14 @@ class TimeLine(AdhocView):
 
         b.connect("key_press_event", self.annotation_key_press_cb, annotation)
         b.connect("button_press_event", self.annotation_button_press_cb, annotation)
+        b.connect("button_release_event", self.annotation_button_release_cb, annotation)
+
+        def deactivate_single_click_guard(wid, ctx):
+            # Prevent a drag to generate a single-click event.
+            wid._single_click_guard=False
+            return False
+        b.connect("drag_begin", deactivate_single_click_guard)
+
         b.connect("enter_notify_event", lambda b, e: b.grab_focus())
 
         def focus_out(widget, event):
