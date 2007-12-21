@@ -323,7 +323,7 @@ class SchemaEditor (AdhocView):
                     yd2 = y2
         return xd1,yd1,xd2,yd2,d
 
-    def addRelationTypeGroup(self, canvas, schema, name=" ", type=None):
+    def addRelationTypeGroup(self, canvas, schema, name=" ", type=None, members=None):
 	# determiner ce que lie la ligne pour chopper les coordonnees des rects et la placer ou il faut
 	# si les 2 types sont le meme : fleche a 4 points pour faire demi tour
 	# si le type de dest n'est pas dans le schema : mettre en evidence
@@ -337,11 +337,14 @@ class SchemaEditor (AdhocView):
             rt=cr.popup(modal=True)
             if (rt==None):
 		return False
-            if rt:
+            if (members is None):
             	pop = get_edit_popup (rt, self.controller)
 		pop.edit(modal=True)
+	    else:
+		#a changer si plus de 2 types et a changer quand ca marchera avec autre chose que des URI ...
+		rt.hackedMemberTypes=( '#' + members[0].id, '#' + members[1].id )
 	    type=rt
-	    name=type.getTitle()
+	name=type.getTitle()
 	root = canvas.get_root_item ()
 	cvgroup = goocanvas.Group(parent = root)
 	color = "black"
@@ -637,15 +640,30 @@ class SchemaEditor (AdhocView):
 	    def menuRem(w, rect, schema):
                 self.removeAnnotationTypeGroup(rect, schema)
 		return True
-	    def menuNew(w, rect, schema):
-		#creation du type, ajout des types annots en membre
-		#self.addRelationTypeGroup()
+	    def menuNew(w, rect, schema, m2):
+		#creation du type, ajout des types annots en membre premier = celui du rect, 2eme = m2
+		mem = []
+		mem.append(self.controller.package.get_element_by_id(rect.get_child(2).props.text))
+		mem.append(m2)
+		print "%s" % mem
+		self.addRelationTypeGroup(rect.get_canvas(), schema, members=mem)
 		return True
             menu = gtk.Menu()
             itemM = gtk.MenuItem(_("Remove Annotation Type"))
             itemM.connect("activate", menuRem, item, schema )
             menu.append(itemM)
 	    itemM = gtk.MenuItem(_("Create Relation Type between this one and..."))
+	    ssmenu = gtk.Menu()
+	    itemM.set_submenu(ssmenu)
+	    for s in self.controller.package.getSchemas():
+		sssmenu = gtk.Menu()
+		itemSM = gtk.MenuItem(s.getTitle())
+		itemSM.set_submenu(sssmenu)
+	    	for a in s.getAnnotationTypes(): 
+	            itemSSM = gtk.MenuItem(a.getTitle())
+    	            itemSSM.connect("activate", menuNew, item, schema, a )
+	            sssmenu.append(itemSSM)
+		ssmenu.append(itemSM)
 	    #sous menu avec les types d'annots tries par schema, celui la en premier
 	    #
             #itemM.connect("activate", menuNew, item, schema )
