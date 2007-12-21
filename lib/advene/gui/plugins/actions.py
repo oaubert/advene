@@ -486,8 +486,8 @@ class DefaultGUIActions:
         annotation=context.evaluateValue('annotation')
         if annotation is None:
             return True
-        related=annotation.getRelatedOut()
-        if not related:
+        relations=annotation.outgoingRelations
+        if not relations:
             return True
 
         message=self.parse_parameter(context, parameters, 'message', _("Choose the related annotation you want to visualise."))
@@ -498,9 +498,17 @@ class DefaultGUIActions:
 
         vbox.pack_start(self.gui.get_illustrated_text(message), expand=False)
 
-        for a in related:
+        for r in relations:
+            a=r.members[-1]
             b=gtk.Button()
-            b.add(self.gui.get_illustrated_text(self.controller.get_title(a), a.fragment.begin))
+            t=''
+            if r.content.data:
+                t=' (%s)' % r.content.data
+            c=_("Through %(title)s%(relation_content)s:\n%(annotation_content)s") % {
+                'title': self.controller.get_title(r.type),
+                'relation_content': t,
+                'annotation_content': self.controller.get_title(a) }
+            b.add(self.gui.get_illustrated_text(c, a.fragment.begin))
             vbox.pack_start(b, expand=False)
             b.connect("clicked", handle_response, a.fragment.begin, vbox)
 
