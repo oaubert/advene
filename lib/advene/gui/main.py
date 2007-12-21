@@ -1643,7 +1643,7 @@ class AdveneGUI (Connect):
         if not config.data.preferences['expert-mode']:
             if media == '':
                 dialog.message_dialog(_("No media association is defined in the package. Please use the 'File/Select a video file' menuitem to associate a media file."), callback=lambda: True)
-            elif not os.path.exists(media) and not media.startswith('http:'):
+            elif not os.path.exists(unicode(media).encode(sys.getfilesystemencoding(), 'ignore')) and not media.startswith('http:'):
                 dialog.message_dialog(_("The associated media %s could not be found. Please use the 'File/Select a video file' menuitem to associate a media file.") % media, callback=lambda: True)
 
         # FIXME: deactivated for the moment, it freezes the GUI just
@@ -2114,7 +2114,7 @@ class AdveneGUI (Connect):
         p=self.controller.package
         if p._modified:
             response=dialog.yes_no_cancel_popup(title=_("Package modified"),
-                                         text=_("Your package has been modified but not saved.\nSave it now?"))
+                                         text=_("The package that you want to close has been modified but not saved.\nSave it now?"))
             if response == gtk.RESPONSE_CANCEL:
                 return True
             if response == gtk.RESPONSE_YES:
