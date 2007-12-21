@@ -26,6 +26,7 @@ import gtk
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
+from advene.gui.util import get_pixmap_button
 
 class DummyLock:
     def __init__(self):
@@ -95,11 +96,17 @@ class AccumulatorPopup(AdhocView):
         # Build a titled frame around the widget
         f=gtk.Frame()
         if isinstance(title, basestring):
-            b=gtk.Button(title)
+            hb=gtk.HBox()
+
+            l=gtk.Label(title)
+            hb.pack_start(l, expand=False)
+
+            b=get_pixmap_button('small_close.png')
+            b.set_relief(gtk.RELIEF_NONE)
             b.connect("clicked", self.undisplay_cb, widget)
-            self.set_color(b, self.new_color)
-            self.controller.gui.tooltips.set_tip(b, _("Click to close"))
-            f.set_label_widget(b)
+            hb.pack_start(b, expand=False, fill=False)
+
+            f.set_label_widget(hb)
         else:
             # Hopefully it is a gtk widget
             f.set_label_widget(title)
