@@ -165,9 +165,9 @@ def register(controller=None):
                         'duration': _("Display duration in ms. Ignored if empty.")
                         },
             defaults={'description': 'annotation/content/data',
-                      'message1': 'string:Go to the beginning',
+                      'message1': 'string:' + _('Go to the beginning'),
                       'position1': 'annotation/fragment/begin',
-                      'message2': 'string:Go to the end',
+                      'message2': 'string:' + _('Go to the end'),
                       'position2': 'annotation/fragment/end',
                       'duration': 'annotation/fragment/duration',
                       },
@@ -189,15 +189,24 @@ def register(controller=None):
                         'duration': _("Display duration in ms. Ignored if empty.")
                         },
             defaults={'description': 'annotation/content/data',
-                      'message1': 'string:Go to the beginning',
+                      'message1': 'string:' + _('Go to the beginning'),
                       'position1': 'annotation/fragment/begin',
-                      'message2': 'string:Go to the end',
+                      'message2': 'string:' + _('Go to the end'),
                       'position2': 'annotation/fragment/end',
-                      'message3': 'string:Go to related annotation',
+                      'message3': 'string:' + _('Go to related annotation'),
                       'position3': 'annotation/related/fragment/begin',
                       'duration': 'annotation/fragment/duration',
                       },
             predefined=ac.action_popup_goto_predefined,
+            category='gui',
+            ))
+
+    controller.register_action(RegisteredAction(
+            name="PopupGotoOutgoingRelated",
+            method=ac.action_popup_goto_outgoing_related,
+            description=_("Display a popup to navigate to related annotations"),
+            parameters={'message': _("String to display."), },
+            defaults={'message': 'string:'+_("Choose the related annotation you want to visualise."), },
             category='gui',
             ))
 
@@ -463,3 +472,38 @@ class DefaultGUIActions:
                 ( 'string:1000', _("1 second") ),
                 ( 'annotation/fragment/duration',_("The annotation duration") )
                 )}
+
+    def action_popup_goto_outgoing_related (self, context, parameters):
+        """PopupGotoOutgoingRelated action.
+
+        Displays a popup proposing to navigate to related outgoing annotations.
+        """
+        def handle_response(button, position, widget):
+            self.controller.update_status("set", position)
+            self.gui.popupwidget.undisplay(widget)
+            return True
+
+        annotation=context.evaluateValue('annotation')
+        if annotation is None:
+            return True
+        related=annotation.getRelatedOut()
+        if not related:
+            return True
+
+        message=self.parse_parameter(context, parameters, 'message', _("Choose the related annotation you want to visualise."))
+        message=message.replace('\\n', '\n')
+        message=textwrap.fill(message, config.data.preferences['gui']['popup-textwidth'])
+
+        vbox=gtk.VBox()
+
+        vbox.pack_start(self.gui.get_illustrated_text(message), expand=False)
+
+        for a in related:
+            b=gtk.Button()
+            b.add(self.gui.get_illustrated_text(self.controller.get_title(a), a.fragment.begin))
+            vbox.pack_start(b, expand=False)
+            b.connect("clicked", handle_response, a.fragment.begin, vbox)
+
+        self.gui.popupwidget.display(widget=vbox, timeout=annotation.fragment.duration, title=_("Relation navigation"))
+        return True
+    
