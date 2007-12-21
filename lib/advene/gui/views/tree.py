@@ -401,7 +401,6 @@ class DetailedTreeModel(AdveneTreeModel):
                                   for v in node.rootPackage.views
                                   if v.id.startswith('_') ],
                                 key=lambda e: (e.title or e.id).lower())
-                print "Admin children", [ v.id for v in children ]
             else:
                 for t in ('static', 'dynamic', 'adhoc'):
                     if node == self.virtual[t]:
@@ -410,7 +409,6 @@ class DetailedTreeModel(AdveneTreeModel):
                                           if not v.id.startswith('_')
                                           and helper.get_view_type(v) == t ],
                                         key=lambda e: (e.title or e.id).lower())
-                        print "%s children" % t, [ v.id for v in children ]
                         break
         return children
 
@@ -656,7 +654,6 @@ class TreeWidget(AdhocView):
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
-            print "Creating new relation (%s, %s)" % (source_uri, widget.annotation.uri)
             source=self.controller.package.annotations.get(source_uri)
             dest=widget.annotation
             self.create_relation_popup(source, dest)
