@@ -316,6 +316,7 @@ class DetailedTreeModel(AdveneTreeModel):
         self.virtual['views']=VirtualNode(_("List of views"), package, viewableType='view-list')
         self.virtual['static']=VirtualNode(_("Static views"), package, viewableType='view-list')
         self.virtual['dynamic']=VirtualNode(_("Dynamic views"), package, viewableType='view-list')
+        self.virtual['admin']=VirtualNode(_("Admin views"), package, viewableType='view-list')
         self.virtual['adhoc']=VirtualNode(_("Adhoc views"), package)
 
     def nodeParent (self, node):
@@ -331,8 +332,11 @@ class DetailedTreeModel(AdveneTreeModel):
         elif isinstance (node, Schema):
             parent = node.rootPackage.schemas
         elif isinstance (node, View):
-            t=helper.get_view_type(node)
-            parent=self.virtual[t]
+            if node.id.startswith('_'):
+                parent=self.virtual['admin']
+            else:
+                t=helper.get_view_type(node)
+                parent=self.virtual[t]
         elif isinstance (node, Query):
             parent = node.rootPackage.queries
         elif isinstance (node, Package):
@@ -343,7 +347,7 @@ class DetailedTreeModel(AdveneTreeModel):
             parent = node.parent
         elif isinstance (node, ResourceData):
             parent = node.parent
-        elif node in (self.virtual['static'], self.virtual['dynamic'], self.virtual['adhoc']):
+        elif node in (self.virtual['static'], self.virtual['dynamic'], self.virtual['adhoc'], self.virtual['admin']):
             parent = self.virtual['views']
         elif node == self.virtual['views']:
             parent=node.rootPackage
@@ -387,18 +391,27 @@ class DetailedTreeModel(AdveneTreeModel):
         elif isinstance (node, ResourceData):
             children = None
         elif node == self.virtual['views']:
-            children=[ self.virtual['static'], self.virtual['dynamic'], self.virtual['adhoc'] ]
+            children=[ self.virtual['static'], self.virtual['dynamic'], self.virtual['adhoc'], self.virtual['admin'] ]
         elif node is None:
             children = [ self.get_package() ]
         else:
             children = None
-            for t in ('static', 'dynamic', 'adhoc'):
-                if node == self.virtual[t]:
-                    children=sorted([ v 
-                                      for v in node.rootPackage.views
-                                      if helper.get_view_type(v) == t ],
-                                    key=lambda e: (e.title or e.id).lower())
-                    break
+            if node == self.virtual['admin']:
+                children=sorted([ v 
+                                  for v in node.rootPackage.views
+                                  if v.id.startswith('_') ],
+                                key=lambda e: (e.title or e.id).lower())
+                print "Admin children", [ v.id for v in children ]
+            else:
+                for t in ('static', 'dynamic', 'adhoc'):
+                    if node == self.virtual[t]:
+                        children=sorted([ v 
+                                          for v in node.rootPackage.views
+                                          if not v.id.startswith('_')
+                                          and helper.get_view_type(v) == t ],
+                                        key=lambda e: (e.title or e.id).lower())
+                        print "%s children" % t, [ v.id for v in children ]
+                        break
         return children
 
     def nodeHasChildren (self, node):
