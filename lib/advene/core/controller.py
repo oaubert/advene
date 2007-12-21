@@ -807,7 +807,7 @@ class AdveneController:
         elif mediafile.startswith('http:'):
             # FIXME: check for the existence of the file
             pass
-        elif not os.path.exists(mediafile):
+        elif not os.path.exists(mediafile.encode(sys.getfilesystemencoding(), 'ignore')):
             # It is a file. It should exist. Else check for a similar
             # one in moviepath
             # UNIX/Windows interoperability: convert pathnames
@@ -829,7 +829,7 @@ class AdveneController:
 
                 n=os.path.join(d, name)
                 # FIXME: if d is a URL, use appropriate method (urllib.??)
-                if os.path.exists(n):
+                if os.path.exists(n.encode(sys.getfilesystemencoding(), 'ignore')):
                     mediafile=n
                     self.log(_("Found matching video file in moviepath: %s") % n)
                     break
@@ -856,8 +856,7 @@ class AdveneController:
         if m:
             title,chapter=m.group(1,2)
             uri="dvd@%s:%s" % (title, chapter)
-        if isinstance(uri, unicode):
-            uri=uri.encode('utf8')
+        uri=unicode(uri).encode('utf8')
         package.setMetaData (config.data.namespace, "mediafile", uri)
         if m:
             uri=self.player.dvd_uri(title, chapter)
