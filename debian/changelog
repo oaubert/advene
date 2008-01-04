@@ -2,6 +2,17 @@ advene (0.27) unstable; urgency=low
 
   * Win32 bugfixes (relation creation, timestamp mark colors, montage...)
 
+  * New adhoc view : finder (column-based finder a la Mac OS X)
+
+  * New actions: 
+
+     * Pronounce (through Text-To-Speech). Works on MacOS X
+       (directly) and Linux (with festival configured to output through
+       ALSA, cf http://gentoo-wiki.com/HOWTO_speechd#Use_alsa_output_method ).
+  
+     * PopupGotoOutgoingRelated: displays a navigation popup based on
+       relations.
+
   * General:
   
      * Package data can be exported to other formats through the File/Export
@@ -22,10 +33,13 @@ advene (0.27) unstable; urgency=low
      * When searching for a single word, it will also be highlighted in
        opened transcription and note-taking views.
 
+     * It is possible to search/replace text in the content of the
+       annotations in a query result.
+
   * Timeline:
   
      * Double click on an annotation will open its edit window rather than
-       simply edit its content (always available with Return)
+       simply edit its content (which is always possible with Return)
   
      * It is possible to select multiple annotations, either with
        shift-click on the annotation widget or by defining a region around
@@ -72,12 +86,6 @@ advene (0.27) unstable; urgency=low
   
      * The composition operator for conditions can be chosen (and/or)
   
-  * New adhoc view : finder (column-based finder a la Mac OS X)
-
-  * New action: Pronounce (through Text-To-Speech). Works on MacOS X
-    (directly) and Linux (with festival configured to output through
-    ALSA, cf http://gentoo-wiki.com/HOWTO_speechd#Use_alsa_output_method ).
-
  --
 
 advene (0.26) unstable; urgency=low
