@@ -69,6 +69,11 @@ class QuickviewBar(gtk.HBox):
             b=""
             e=""
             c=""
+        elif isinstance(a, long) or isinstance(a, int):
+            # Only display a time
+            b="   " + helper.format_time(a)
+            e=""
+            c=_("Current time")
         else:
             b="   " + helper.format_time(a.fragment.begin)
             e=" - " + helper.format_time(a.fragment.end)
@@ -1882,8 +1887,6 @@ class TimeLine(AdhocView):
         
     # Draw rectangle during mouse movement
     def layout_motion_notify_cb(self, widget, event):
-        if self.layout_selection[0][0] is None:
-            return False
         if event.is_hint:
             x, y, state = event.window.get_pointer()
         else:
@@ -1892,6 +1895,10 @@ class TimeLine(AdhocView):
             state = event.state
 
         if state & gtk.gdk.BUTTON1_MASK:
+            # Display current time
+            self.quickview.set_annotation(long(self.pixel2unit(x)))
+            if self.layout_selection[0][0] is None:
+                return False
             if self.layout_selection[1][0] is not None:
                 # Invert the previous selection
                 self.draw_selection_rectangle(invert=True)
