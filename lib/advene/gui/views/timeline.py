@@ -1731,14 +1731,14 @@ class TimeLine(AdhocView):
                 if (y >= p and y <= p + self.button_height) ]
             if a:
                 # Copy/Move to a[0]
-                self.move_or_copy_annotation(source, a[0], position=self.pixel2unit(x))
+                self.move_or_copy_annotation(source, a[0], position=self.pixel2unit(self.adjustment.value + x))
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
                 dest=self.create_annotation_type()
                 if dest is None:
                     return True
-                self.move_or_copy_annotation(source, dest, position=self.pixel2unit(x))
+                self.move_or_copy_annotation(source, dest, position=self.pixel2unit(self.adjustment.value + x))
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source_uri=selection.data
