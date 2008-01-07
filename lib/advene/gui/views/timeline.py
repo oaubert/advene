@@ -101,7 +101,7 @@ class TimeLine(AdhocView):
          displayed in the window. It thus depends on both the
          self.scale and the widget size.
 
-    and a 3rd one which controls the displayed area.
+    and a 3rd one (self.adjustment) which controls the displayed area.
     """
     view_name = _("Timeline")
     view_id = 'timeline'
@@ -569,14 +569,7 @@ class TimeLine(AdhocView):
     def scroll_to_annotation(self, annotation):
         """Scroll the view to put the annotation in the middle.
         """
-        pos = self.unit2pixel (annotation.fragment.begin)
-        a = self.adjustment
-        if pos < a.lower:
-            pos = a.lower
-        elif pos > a.upper:
-            pos = a.upper
-        if pos < a.value or pos > (a.value + a.page_size):
-            a.set_value (pos)
+        self.center_on_position(annotation.fragment.begin)
         self.update_position (None)
         return True
 
