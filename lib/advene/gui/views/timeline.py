@@ -139,7 +139,7 @@ class TimeLine(AdhocView):
         # Default position in ms.
         default_position=None
         default_zoom=1.0
-        pane_position=None
+        pane_position=opt.get('pane-position', None)
         for n, v in arg:
             if n == 'annotation-type':
                 at=helper.get_id(self.controller.package.annotationTypes,
@@ -156,8 +156,6 @@ class TimeLine(AdhocView):
                 default_position=int(float(v))
             elif n == 'zoom':
                 default_zoom=float(v)
-            elif n == 'pane-position':
-                pane_position=int(float(v))
         if ats:
             annotationtypes=ats
 
@@ -340,25 +338,31 @@ class TimeLine(AdhocView):
 
         # Set default parameters (zoom) and refresh the legend widget
         # on the first expose signal
-        def set_default_parameters(widget, *p):
-            self.fraction_adj.value=default_zoom
-            self.adjustment.set_value(u2p(default_position))
+        def set_default_parameters(widget, event, zoom, pos, pane):
+            self.fraction_adj.value=zoom
+            self.adjustment.set_value(u2p(pos))
             self.resize_legend_widget(self.legend)
             # Set annotation inspector width, so that it does not auto-resize
-            if pane_position is None:
+            if pane is None:
                 w, h = self.widget.window.get_size()
-                self.inspector_pane.set_position(w - 160)
-            else:
-                self.inspector_pane.set_position(pane_position)
+                pane=w - 160
+            self.inspector_pane.set_position(pane)
             self.widget.disconnect(self.expose_signal)
             return False
-        self.expose_signal=self.widget.connect('expose-event', set_default_parameters)
+        # Convert values, that could be strings
+        if default_position is not None:
+            default_position=long(float(default_position))
+        if pane_position is not None:
+            pane_position=long(float(pane_position))
+
+        self.expose_signal=self.widget.connect('expose-event', set_default_parameters,
+                                               default_zoom, default_position, pane_position)
 
 
     def get_save_arguments(self):
         arguments = [ ('annotation-type', at.id) for at in self.annotationtypes ]
-        self.options['position']=self.pixel2unit(self.adjustment.value)
-        self.options['zoom']=self.fraction_adj.value
+        arguments.append( ('position', self.pixel2unit(self.adjustment.value) ) )
+        arguments.append( ('zoom', self.fraction_adj.value) )
         self.options['pane-position']=self.inspector_pane.get_position()
         return self.options, arguments
 
