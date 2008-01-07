@@ -834,9 +834,6 @@ class AdveneGUI (Connect):
             i=combo.get_active_iter()
             stbv=combo.get_model().get_value(i, 1)
             if stbv is None:
-                if not dialog.message_dialog(_("Do you want to create a new dynamic view?"),
-                                             icon=gtk.MESSAGE_QUESTION):
-                    return True
                 cr = CreateElementPopup(type_=View,
                                         parent=self.controller.package,
                                         controller=self.controller)
