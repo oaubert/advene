@@ -812,7 +812,7 @@ class TimeLine(AdhocView):
             # Widget is active, there is a selection. Display the selection menu
             item = gtk.MenuItem(_("Selection"))
             item.set_submenu(self.selection_menu(popup=False))
-            menu.menu.append(item)
+            menu.menu.insert(item, 0)
             
         menu.menu.show_all()
         menu.popup()
