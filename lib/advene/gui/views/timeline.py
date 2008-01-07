@@ -288,7 +288,7 @@ class TimeLine(AdhocView):
         self.layout.connect('button_press_event', self.layout_button_press_cb)
         self.layout.connect('button_release_event', self.layout_button_release_cb)
         self.layout.connect('motion_notify_event', self.layout_motion_notify_cb)
-
+        self.layout.connect('drag_motion', self.layout_drag_motion_cb)
         self.scale_layout.connect('button_press_event', self.scale_layout_button_press_cb)
 
         self.layout.connect('size_allocate', self.layout_resize_event)
@@ -1902,7 +1902,7 @@ class TimeLine(AdhocView):
 
         if state & gtk.gdk.BUTTON1_MASK:
             # Display current time
-            self.quickview.set_annotation(long(self.pixel2unit(x)))
+            self.quickview.set_annotation(long(self.pixel2unit(self.adjustment.value + x)))
             if self.layout_selection[0][0] is None:
                 return False
             if self.layout_selection[1][0] is not None:
@@ -1912,6 +1912,10 @@ class TimeLine(AdhocView):
             self.layout_selection[1][1] = int(y)
             # Draw the new shape
             self.draw_selection_rectangle(invert=False)
+        return True
+
+    def layout_drag_motion_cb(self, widget, drag_context, x, y, timestamp):
+        self.quickview.set_annotation(long(self.pixel2unit(self.adjustment.value +  x)))
         return True
 
     def context_cb (self, timel=None, position=None, height=None):
