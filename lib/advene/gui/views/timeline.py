@@ -2488,6 +2488,10 @@ class TimeLine(AdhocView):
             i=gtk.MenuItem(_("Edit selected annotations"))
             i.connect('activate', self.selection_edit, l)
             m.append(i)
+            i=gtk.MenuItem(_("Merge annotations"))
+            i.connect('activate', self.selection_merge, l)
+            m.append(i)
+
         m.show_all()
         if popup:
             m.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -2901,4 +2905,20 @@ class TimeLine(AdhocView):
         a=self.controller.gui.edit_accumulator
         for w in selection:
             a.edit(w.annotation)
+        return True
+
+    def selection_merge(self, widget, selection):
+        types=set( w.annotation.type for w in selection )
+        for t in list(types):
+            l=[ w.annotation for w in selection if w.annotation.type == t ]
+            if len(l) > 1: 
+                # We need at least 2 annotations
+                l.sort(key=lambda a: a.fragment.begin)
+                end=max( a.fragment.end for a in l )
+                # Resize the first annotation
+                l[0].fragment.end=end
+                self.controller.notify('AnnotationEditEnd', annotation=l[0])
+                # Remove all others
+                for a in l[1:]:
+                    self.controller.delete_annotation(a)
         return True
