@@ -3044,6 +3044,8 @@ class AdveneGUI (Connect):
             # Make the imagecache directly store data on disk
             pb.old_autosync=p.imagecache.autosync
             p.imagecache.autosync=True
+            if p.imagecache.name is None:
+                p.imagecache.name=helper.mediafile2id(self.controller.get_default_media())
             
             if p.status == p.PauseStatus:
                 # If we were paused, resume from this position
