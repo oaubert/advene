@@ -356,11 +356,10 @@ class TimeLine(AdhocView):
 
 
     def get_save_arguments(self):
-        # FIXME: add a dialog to ask for what elements to save
         arguments = [ ('annotation-type', at.id) for at in self.annotationtypes ]
-        arguments.append( ('position', self.pixel2unit(self.adjustment.value) ) )
-        arguments.append( ('zoom', self.fraction_adj.value) )
-        arguments.append( ('pane-position', self.inspector_pane.get_position()) )
+        self.options['position']=self.pixel2unit(self.adjustment.value)
+        self.options['zoom']=self.fraction_adj.value
+        self.options['pane-position']=self.inspector_pane.get_position()
         return self.options, arguments
 
     def draw_background(self, layout, event):
