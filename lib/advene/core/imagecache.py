@@ -57,13 +57,18 @@ class ImageCache(dict):
     @type not_yet_available_image: PNG data
     @ivar epsilon: the precision for key values
     @type epsilon: integer
+    @ivar _modified: the modified status of the cache
+    @type _modified: boolean
+    @ivar name: id of the ImageCache (used when saving)
+    @type name: string
+    @ivar autosync: if True, directly store snapshots on disk
+    @type autosync: boolean
     """
     def __init__ (self, name=None, epsilon=20):
         """Initialize the Imagecache
 
         @param name: id of a previously saved ImageCache.
         @type name: string
-
         @param epsilon: value of the precision
         @type epsilon: integer
         """
@@ -82,6 +87,11 @@ class ImageCache(dict):
         self.not_yet_available_image = s
 
         self._modified=False
+
+        self.name=None
+        # If autosync, then data will automatically be stored on disk
+        # (provided that self.name is properly initialized)
+        self.autosync=False
 
         self.epsilon = epsilon
         if name is not None:
@@ -141,6 +151,16 @@ class ImageCache(dict):
         key = self.approximate(long(key))
         if value != self.not_yet_available_image:
             self._modified=True
+            if self.autosync and self.name is not None:
+                d=os.path.join(config.data.path['imagecache'], self.name)
+                if not os.path.isdir(d):
+                    os.mkdir (d)
+                filename=os.path.join(d, "%010d.png" % key)
+                f = open(filename, 'wb')
+                f.write (value)
+                f.close ()
+                value=CachedString(filename)
+                value.contenttype='image/png'
         return dict.__setitem__(self, key, value)
 
     def approximate (self, key, epsilon=None):
@@ -266,6 +286,7 @@ class ImageCache(dict):
             # The cache directory does not exist
             return
         else:
+            self.name=name
             for name in os.listdir (d):
                 (n, ext) = os.path.splitext(name)
                 # We must do some checks, in case there are non-well
