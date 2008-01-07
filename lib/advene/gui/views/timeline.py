@@ -815,6 +815,12 @@ class TimeLine(AdhocView):
                           _("Center and zoom"),
                           center_and_zoom, widget, ann)
 
+        if widget.active:
+            # Widget is active, there is a selection. Display the selection menu
+            item = gtk.MenuItem(_("Selection"))
+            item.set_submenu(self.selection_menu(popup=False))
+            menu.menu.append(item)
+            
         menu.menu.show_all()
         menu.popup()
         return True
