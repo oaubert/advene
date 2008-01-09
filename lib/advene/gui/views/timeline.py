@@ -1857,13 +1857,6 @@ class TimeLine(AdhocView):
                          and y >= y1 and y + h <= y2):
                         self.activate_annotation(widget.annotation, buttons=[ widget ])
                 return True
-            elif y < self.button_height:
-                c=self.controller
-                pos = c.create_position (value=self.pixel2unit(x),
-                                         key=c.player.MediaTime,
-                                         origin=c.player.AbsolutePosition)
-                c.update_status (status="set", position=pos)
-                return True
         return False
 
     def draw_selection_rectangle(self, invert=False):
