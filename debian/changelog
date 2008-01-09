@@ -86,7 +86,7 @@ advene (0.27) unstable; urgency=low
   
      * The composition operator for conditions can be chosen (and/or)
   
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 09 Jan 2008 17:31:39 +0100
 
 advene (0.26) unstable; urgency=low
 
