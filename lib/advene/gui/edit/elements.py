@@ -121,6 +121,9 @@ class EditElementPopup (object):
         # Dictionary of callbacks according to keys
         self.key_cb = {}
 
+    def set_label(self, l):
+        self._label=l
+
     def register_form (self, f):
         self.forms.append(f)
 
