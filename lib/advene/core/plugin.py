@@ -66,11 +66,13 @@ class PluginCollection(list):
         if not ('.zip' + os.sep) in d:
             return
         (zipname, plugins_dir) = d.split('.zip' + os.sep)
+        # Zip files may use / as separator
+        plugins_dir=plugins_dir.replace(os.sep, '/')
         zipname += '.zip'
         z=zipfile.ZipFile(zipname, 'r')
         p=[ os.path.splitext(n)[0]
             for n in z.namelist()
-            if n.startswith(plugins_dir) and n.endswith('.pyc')
+            if n.replace(os.sep, '/').startswith(plugins_dir) and n.endswith('.pyc')
             and not os.path.basename(n).startswith('_') ]
         for name in p:
             yield zipname, name
