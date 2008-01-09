@@ -2853,11 +2853,11 @@ class AdveneGUI (Connect):
         return False
 
     def on_help1_activate (self, button=None, data=None):
-        helpfile=os.path.join( config.data.path['web'], 'user.html' )
-        if os.access(helpfile, os.R_OK):
-            self.controller.open_url ('file:///' + helpfile)
-        else:
-            self.log(_("Unable to find the help file at %s") % helpfile)
+        self.controller.open_url ('http://liris.cnrs.fr/advene/wiki/index.php/AdveneUserGuide')
+        return True
+
+    def on_support1_activate (self, button=None, data=None):
+        self.controller.open_url ('http://liris.cnrs.fr/advene/forum/')
         return True
 
     def on_helpshortcuts_activate (self, button=None, data=None):

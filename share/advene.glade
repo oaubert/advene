@@ -677,6 +677,14 @@
 		  </child>
 
 		  <child>
+		    <widget class="GtkImageMenuItem" id="support1">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">Get support</property>
+		      <signal name="activate" handler="on_support1_activate" last_modification_time="Wed, 16 Jun 2004 20:53:39 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
 		    <widget class="GtkMenuItem" id="helpshortcuts">
 		      <property name="visible">True</property>
 		      <property name="label" translatable="yes">Display shortcuts</property>
