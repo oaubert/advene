@@ -101,7 +101,7 @@ class Plugin(object):
 
         if directory.endswith('.zip'):
             zi=zipimport.zipimporter(directory)
-            self._plugin=zi.load_module(fname)
+            self._plugin=zi.load_module(fname.replace('/', os.sep))
         else:
             name, ext = os.path.splitext(fname)
             if ext == '.py':
