@@ -1210,9 +1210,9 @@ class IRIImporter(GenericImporter):
                        'author': el.author or self.author,
                        'date': el.date,
                        'content': "title=%s\nabstract=%s\nsrc=%s" % (
-                            el.title.encode('utf-8').replace('\n', '\\n'),
-                            el.abstract.encode('utf-8').replace('\n', '\\n'),
-                            el.src.encode('utf-8').replace('\n', '\\n'),
+                            unicode(el.title).encode('utf-8').replace('\n', '\\n'),
+                            unicode(el.abstract).encode('utf-8').replace('\n', '\\n'),
+                            unicode(el.src).encode('utf-8').replace('\n', '\\n'),
                             )
                        }
                     yield d
