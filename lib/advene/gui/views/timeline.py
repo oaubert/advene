@@ -1494,7 +1494,7 @@ class TimeLine(AdhocView):
         
         red=gtk.gdk.color_parse('red2')
         a = GenericColorButtonWidget('layout_current_mark', container=self)
-        a.default_size=(2, max(self.layer_position.values() or (0,)) + self.button_height)
+        a.default_size=(1, max(self.layer_position.values() or (0,)) + self.button_height)
         a.local_color=red
         a.alpha=.5
         self.current_marker = a
@@ -1504,7 +1504,7 @@ class TimeLine(AdhocView):
         a.show ()
 
         a = GenericColorButtonWidget('scale_layout_current_mark', container=self)
-        a.default_size=(2, self.button_height)
+        a.default_size=(1, self.button_height)
         a.local_color=red
         a.alpha=.5
         self.current_marker_scale = a
