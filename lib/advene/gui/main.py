@@ -3009,7 +3009,7 @@ class AdveneGUI (Connect):
         def do_cancel(b, pb):
             if pb.event_source_generate is not None:
                 gobject.source_remove(pb.event_source_generate)
-            p.imagecache.autosync=pb.old_autosync
+            c.package.imagecache.autosync=pb.old_autosync
 
             # Restore standard update display methods
             self.event_source_update_display=gobject.timeout_add (100, self.update_display)
@@ -3042,10 +3042,10 @@ class AdveneGUI (Connect):
             gobject.source_remove(self.event_source_slow_update_display)
 
             # Make the imagecache directly store data on disk
-            pb.old_autosync=p.imagecache.autosync
-            p.imagecache.autosync=True
-            if p.imagecache.name is None:
-                p.imagecache.name=helper.mediafile2id(self.controller.get_default_media())
+            pb.old_autosync=c.package.imagecache.autosync
+            c.package.imagecache.autosync=True
+            if c.package.imagecache.name is None:
+                c.package.imagecache.name=helper.mediafile2id(c.get_default_media())
             
             if p.status == p.PauseStatus:
                 # If we were paused, resume from this position
