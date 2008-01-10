@@ -39,7 +39,7 @@ from advene.gui.util import png_to_pixbuf
 from advene.gui.views.annotationdisplay import AnnotationDisplay
 import advene.util.helper as helper
 from advene.gui.util import dialog, name2color, get_small_stock_button, get_pixmap_button
-from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget
+from advene.gui.widget import AnnotationWidget, AnnotationTypeWidget, GenericColorButtonWidget
 
 name="Timeline view plugin"
 
@@ -1522,20 +1522,25 @@ class TimeLine(AdhocView):
 
     def draw_current_mark (self):
         u2p = self.unit2pixel
-        a = gtk.VSeparator()
-        a.set_size_request (2, max(self.layer_position.values() or (0,))
-                            + self.button_height)
+        
+        red=gtk.gdk.color_parse('red2')
+        a = GenericColorButtonWidget('layout_current_mark', container=self)
+        a.default_size=(2, max(self.layer_position.values() or (0,)) + self.button_height)
+        a.local_color=red
+        a.alpha=.5
         self.current_marker = a
         a.mark = self.current_position
-        a.pos = 5
+        a.pos = 0
         self.layout.put (a, u2p(a.mark), a.pos)
         a.show ()
 
-        a = gtk.VSeparator()
-        a.set_size_request (5, self.button_height)
+        a = GenericColorButtonWidget('scale_layout_current_mark', container=self)
+        a.default_size=(2, self.button_height)
+        a.local_color=red
+        a.alpha=.5
         self.current_marker_scale = a
         a.mark = self.current_position
-        a.pos = 5
+        a.pos = 0
         self.scale_layout.put (a, u2p(a.mark), a.pos)
         a.show ()
 
