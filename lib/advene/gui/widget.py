@@ -51,6 +51,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         # If not None, it should contain a gtk.gdk.Color
         # which will override the normal color
         self.local_color=None
+        self.alpha=1.0
 
         # container is the Advene view instance that manages this instance
         self.container=container
@@ -154,9 +155,9 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         context.rectangle(0, 0, width, height)
         if self.local_color is not None:
             color=self.local_color
-            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
+            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, self.alpha)
         else:
-            rgba=(1.0, 1.0, 1.0, 1)
+            rgba=(1.0, 1.0, 1.0, self.alpha)
         context.set_source_rgba(*rgba)
         context.fill()
 
@@ -171,7 +172,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         # First check width
         w=self.needed_size()[0]
         if w != self.cached_surface.get_width():
-            self.reset_surface_size(w, self.container.button_height)
+            self.reset_surface_size(w, self.needed_size()[1])
 
         bwidth=self.cached_surface.get_width()
         bheight=self.cached_surface.get_height()
@@ -324,9 +325,9 @@ class AnnotationWidget(GenericColorButtonWidget):
             color=self.container.get_element_color(self.annotation)
 
         if color is not None:
-            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
+            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, self.alpha)
         else:
-            rgba=(1.0, 1.0, 1.0, 1)
+            rgba=(1.0, 1.0, 1.0, self.alpha)
         context.set_source_rgba(*rgba)
         context.fill_preserve()
 
@@ -408,9 +409,9 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         else:
             color=self.container.get_element_color(self.annotationtype)
         if color:
-            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
+            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, self.alpha)
         else:
-            rgba=(1.0, 1.0, 1.0, 1)
+            rgba=(1.0, 1.0, 1.0, self.alpha)
         context.set_source_rgba(*rgba)
         context.fill_preserve()
 
@@ -512,9 +513,9 @@ class TagWidget(GenericColorButtonWidget):
         context.rectangle(0, 0, width, height)
         color=self.container.get_element_color(self.tag)
         if color:
-            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
+            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, self.alpha)
         else:
-            rgba=(1.0, 1.0, 1.0, 1)
+            rgba=(1.0, 1.0, 1.0, self.alpha)
         context.set_source_rgba(*rgba)
         context.fill_preserve()
 
@@ -553,9 +554,9 @@ class TimestampMarkWidget(GenericColorButtonWidget):
         context.rectangle(0, 0, width, height)
         if self.local_color is not None:
             color=self.local_color
-            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1)
+            rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, self.alpha)
         else:
-            rgba=(1.0, 1.0, 1.0, 1)
+            rgba=(1.0, 1.0, 1.0, self.alpha)
         context.set_source_rgba(*rgba)
         context.fill()
         
