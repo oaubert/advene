@@ -2089,6 +2089,7 @@ class TimeLine(AdhocView):
             self.old_scale_value = self.scale.value
             # Reposition all buttons
             self.layout.foreach(move_widget)
+            self.layout.remove(self.current_marker)
             # Redraw marks
             self.scale_layout.foreach(self.scale_layout.remove)
             self.draw_marks ()
