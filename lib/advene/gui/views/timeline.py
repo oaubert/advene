@@ -164,6 +164,8 @@ class TimeLine(AdhocView):
         self.tooltips = gtk.Tooltips()
 
         self.current_marker = None
+        self.current_marker_scale = None
+
         # Now that self.list is initialized, we reuse the l variable
         # for various checks.
         if elements is None:
@@ -1529,15 +1531,26 @@ class TimeLine(AdhocView):
         self.layout.put (a, u2p(a.mark), a.pos)
         a.show ()
 
+        a = gtk.VSeparator()
+        a.set_size_request (5, self.button_height)
+        self.current_marker_scale = a
+        a.mark = self.current_position
+        a.pos = 5
+        self.scale_layout.put (a, u2p(a.mark), a.pos)
+        a.show ()
+
     def update_current_mark (self, pos=None):
-        a = self.current_marker
         u2p = self.unit2pixel
         if pos is None:
             pos = self.current_position
         else:
             self.current_position = pos
+        a = self.current_marker
         a.mark = pos
         self.layout.move (a, u2p(pos), a.pos)
+        a = self.current_marker_scale
+        a.mark = pos
+        self.scale_layout.move (a, u2p(pos), a.pos)
 
     def update_position (self, pos):
         if pos is None:
