@@ -312,10 +312,6 @@ class TimeLine(AdhocView):
         # Current position in units
         self.current_position = minimum
 
-        # Used for paste operations
-        self.selected_position = 0
-        self.selection_marker = None
-
         # Holds the ref. to a newly created annotation, so that its
         # widget gets focus when it is created (cf  udpate_annotation)
         self.transmuted_annotation = None
@@ -520,33 +516,6 @@ class TimeLine(AdhocView):
     def refresh(self, *p):
         self.update_model(self.controller.package, partial_update=True)
         return True
-
-    def selection_handle(self, widget, selection_data, info, time_stamp):
-        p = str(self.selected_position)
-        selection_data.set_text (p, len(p))
-        return
-
-    def selection_clear(self, widget, event):
-        # Another application claimed the selection. Remove the marker.
-        self.selected_position = 0
-        self.remove_selection_marker()
-        return True
-
-    def set_selection(self, value):
-        self.selected_position = long(value)
-        return True
-
-    def activate_selection(self):
-        # Define which selections we can handle
-        self.layout.selection_add_target("CLIPBOARD", "STRING", 1)
-        self.layout.selection_add_target("CLIPBOARD", "COMPOUND_TEXT", 1)
-        # Define the selection handler
-        self.layout.connect("selection_get", self.selection_handle)
-        # Claim selection ownership
-        self.layout.selection_owner_set("CLIPBOARD")
-        # Display a mark
-        self.set_selection_marker(self.selected_position)
-        return
 
     def set_annotation(self, a=None):
         self.quickview.set_annotation(a)
@@ -1973,11 +1942,6 @@ class TimeLine(AdhocView):
             self.controller.notify('AnnotationCreate', annotation=el)
             return True
 
-        def copy_value(win, position):
-            timel.set_selection(position)
-            timel.activate_selection()
-            return True
-
         item = gtk.MenuItem(_("Position %s") % helper.format_time(position))
         menu.append(item)
 
@@ -1986,10 +1950,6 @@ class TimeLine(AdhocView):
 
         item = gtk.MenuItem(_("Go to..."))
         item.connect("activate", popup_goto, position)
-        menu.append(item)
-
-        item = gtk.MenuItem(_("Copy value into clipboard"))
-        item.connect("activate", copy_value, position)
         menu.append(item)
 
         item = gtk.MenuItem(_("Create a new annotation"))
@@ -2005,32 +1965,6 @@ class TimeLine(AdhocView):
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
-        return True
-
-    def set_selection_marker (self, position):
-        """Display the marker representing the position.
-        """
-        x=self.unit2pixel(position)
-        if self.selection_marker is None:
-            # Draw a marker
-            a = gtk.VSeparator()
-            a.set_size_request (2, max(self.layer_position.values() or (0,))
-                                + self.button_height)
-            self.selection_marker = a
-            a.modify_bg(gtk.STATE_NORMAL, self.colors['active'])
-        else:
-            a = self.selection_marker
-        a.mark = position
-        a.pos = 5
-        self.layout.put (a, x, a.pos)
-        a.show ()
-        return True
-
-    def remove_selection_marker (self):
-        try:
-            self.layout.remove(self.selection_marker)
-        except AttributeError:
-            pass
         return True
 
     def update_adjustment (self):
