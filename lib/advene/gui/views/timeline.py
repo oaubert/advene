@@ -1449,8 +1449,7 @@ class TimeLine(AdhocView):
                 return False
             if event.direction == gtk.gdk.SCROLL_DOWN:
                 incr=config.data.preferences['scroll-increment']
-            #elif event.direction == gtk.gdk.SCROLL_UP:
-            else:
+            elif event.direction == gtk.gdk.SCROLL_UP:
                 incr=-config.data.preferences['scroll-increment']
 
             fr=self.annotation_fraction(button)
