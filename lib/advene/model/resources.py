@@ -121,9 +121,9 @@ class Resources:
 
     def __str__(self):
         if self.resourcepath == "":
-            return "ResourceSet root"
+            return "ResourceFolder root"
         else:
-            return "ResourceSet %s" % self.resourcepath
+            return "ResourceFolder %s" % self.resourcepath
 
     def children (self):
         return [ self[n] for n in self.keys() ]
