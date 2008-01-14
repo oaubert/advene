@@ -7,7 +7,7 @@ FCKCommands.RegisterCommand( 'richedit_annotation', new FCKDialogCommand( FCKLan
 
 var AdveneIMGItem	= new FCKToolbarButton( 'richedit_annotation', FCKLang['DlgAdveneIMGTitle'] ) ;
 
-AdveneIMGItem.IconPath	= FCKConfig.PluginsPath + 'AdveneIMG/adv.gif' ;
+AdveneIMGItem.IconPath	= FCKConfig.PluginsPath + 'richedit_annotation/adv.gif' ;
 
 
 
