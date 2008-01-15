@@ -589,9 +589,7 @@ def get_dirname(title=_("Choose a directory"),
     return dirname
 
 class CategorizedSelector:
-    """Widget displaying items sorted along categories.
-
-    We use a treeview to display elements.
+    """Widget displaying a menu with items sorted along categories.
 
     @ivar elements: list of  elements
     @type elements: list
@@ -607,12 +605,7 @@ class CategorizedSelector:
     @type callback: method
     @ivar editable: indicates if the data is editable
     @type editable: boolean
-    @ivar button: a gtk.Button with a label matching the selected value
-    @type button: gtk.Button
     """
-    COLUMN_ELEMENT=0
-    COLUMN_LABEL=1
-    COLUMN_MODE=2
     def __init__(self, title=_("Select an element"),
                  elements=None, categories=None, current=None,
                  description_getter=None, category_getter=None, callback=None,
@@ -625,83 +618,30 @@ class CategorizedSelector:
         self.category_getter=category_getter
         self.callback=callback
         self.editable=editable
-        self.store=None
-        # A button representing the current element
         self.button=None
-        # The popup window
-        self.popup=None
-        self.widget=self.build_widget()
 
-    def build_liststore(self):
-        # We store the object itself and its representation
-        store=gtk.TreeStore(
-            gobject.TYPE_PYOBJECT,
-            gobject.TYPE_STRING,
-            gobject.TYPE_INT,
-            )
+    def popup_menu(self, *p):
+        m=gtk.Menu()
+        
+        i=gtk.MenuItem(self.title)
+        i.set_sensitive(False)
+        m.append(i)
+        i=gtk.SeparatorMenuItem()
+        m.append(i)
 
-        catrow={}
-        for i in self.categories:
-            catrow[i]=store.append(parent=None,
-                                   row=[i,
-                                        self.description_getter(i),
-                                        gtk.CELL_RENDERER_MODE_INERT])
-        currentrow=None
+        submenu={}
+        for c in self.categories:
+            i=gtk.MenuItem(self.description_getter(c))
+            m.append(i)
+            submenu[c]=gtk.Menu()
+            i.set_submenu(submenu[c])
         for e in self.elements:
-            row=store.append(parent=catrow[self.category_getter(e)],
-                             row=[e,
-                                  self.description_getter(e),
-                                  gtk.CELL_RENDERER_MODE_ACTIVATABLE])
-            if e == self.current:
-                currentrow=row
-        return store, currentrow
-
-    def row_activated_cb(self, treeview, path, column):
-        element=treeview.get_model()[path][self.COLUMN_ELEMENT]
-        if not element in self.elements:
-            # It is a category
-            return False
-        self.update_element(element)
-        # Hide the selection
-        self.popup_hide()
-        return True
-
-    def build_widget(self):
-        vbox=gtk.VBox()
-
-        self.store, currentrow=self.build_liststore()
-
-        treeview=gtk.TreeView(model=self.store)
-        #treeview.connect("button_press_event", self.tree_view_button_cb)
-        treeview.connect("row_activated", self.row_activated_cb)
-        path=self.store.get_path(currentrow)
-        treeview.expand_to_path(path)
-        treeview.scroll_to_cell(path)
-        treeview.set_cursor_on_cell(path)
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('Name'), renderer,
-                                    text=self.COLUMN_LABEL,
-                                    mode=self.COLUMN_MODE)
-        column.set_resizable(True)
-        treeview.append_column(column)
-
-        sw=gtk.ScrolledWindow()
-        sw.add(treeview)
-        vbox.pack_start(sw, expand=True)
-
-        hbox=gtk.HButtonBox()
-
-        b=gtk.Button(stock=gtk.STOCK_OK)
-        b.connect("clicked", lambda w: treeview.row_activated(*treeview.get_cursor()))
-        hbox.add(b)
-        b=gtk.Button(stock=gtk.STOCK_CANCEL)
-        b.connect("clicked", lambda w: self.popup_hide())
-        hbox.add(b)
-        vbox.pack_start(hbox, expand=False)
-
-        vbox.show_all()
-
-        return vbox
+            i=gtk.MenuItem(self.description_getter(e))
+            submenu[self.category_getter(e)].append(i)
+            i.connect('activate', lambda menuitem, element: self.update_element(element), e)
+        m.show_all()
+        m.popup(None, None, None, 0, gtk.get_current_event_time())
+        return m
 
     def get_button(self):
         """Return a button with the current element description as label.
@@ -710,7 +650,7 @@ class CategorizedSelector:
             return self.button
         b=gtk.Button(self.description_getter(self.current))
         if self.editable:
-            b.connect("clicked", lambda w: self.popup_show())
+            b.connect("clicked", lambda w: self.popup_menu())
         b.show()
         self.button=b
         return b
@@ -721,25 +661,6 @@ class CategorizedSelector:
             self.button.set_label(self.description_getter(element))
         if self.callback is not None:
             self.callback(element)
-        return True
-
-    def popup_show(self):
-        if self.popup is None:
-            w=gtk.Window()
-            w.set_title(self.title)
-            w.add(self.widget)
-            # FIXME: hardcoded values are bad
-            # but we do not have access to
-            # advene.gui.main.init_window_size
-            w.set_default_size(240, 300)
-            self.popup=w
-        self.popup.show_all()
-        center_on_mouse(self.popup)
-        return True
-
-    def popup_hide(self):
-        if self.popup is not None:
-            self.popup.hide()
         return True
 
 def center_on_mouse(w):
