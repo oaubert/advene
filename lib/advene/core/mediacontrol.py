@@ -86,6 +86,12 @@ class PlayerFactory:
                                              'vlc.exe' ))):
             print "Using local version of VLC from %s" % config.data.path['vlc']
             vlcpath = config.data.path['vlc']
+	
+	if (vlcpath is None 
+	    and os.path.exists(os.path.join('.','libvlc.dll'))):
+	    
+	    print "Using included version of VLC"
+	    vlcpath = '.'
 
         if vlcpath is None:
             print _("VLC does not seem to be installed. Using dummy player.")
