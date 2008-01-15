@@ -1154,7 +1154,8 @@ class ECACatalog:
         'generic': _("Generic actions"),
         'player': _("Basic player control"),
         'advanced': _("Advanced player control"),
-        'gui': _("GUI actions")
+        'gui': _("GUI actions"),
+        'popup': _("Popup actions"),
         }
 
     def __init__(self):

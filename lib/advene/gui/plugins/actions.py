@@ -41,7 +41,7 @@ def register(controller=None):
             predefined={'message': (  
                     ( 'annotation/content/data', _("The annotation content") ),
                     )},            
-            category='gui',
+            category='popup',
             ))
 
     controller.register_action(RegisteredAction(
@@ -59,7 +59,7 @@ def register(controller=None):
                     ( 'string:1000', _("1 second") ),
                     ( 'annotation/fragment/duration',_("The annotation duration") )
                     )},
-            category='gui',
+            category='popup',
             ))
 
     controller.register_action(RegisteredAction(
@@ -73,7 +73,7 @@ def register(controller=None):
                       'destination': 'annotation/related/first',
                       'duration': 'annotation/fragment/duration'},
             predefined=ac.action_entry_predefined,
-            category='gui',
+            category='popup',
             ))
 
     controller.register_action(RegisteredAction(
@@ -89,7 +89,7 @@ def register(controller=None):
                       'position': 'annotation/related/first/fragment/begin',
                       'duration': 'annotation/fragment/duration'},
             predefined=ac.action_popup_goto_predefined,
-            category='gui',
+            category='popup',
             ))
 
     controller.register_action(RegisteredAction(
@@ -172,7 +172,7 @@ def register(controller=None):
                       'duration': 'annotation/fragment/duration',
                       },
             predefined=ac.action_popup_goto_predefined,
-            category='gui',
+            category='popup',
             ))
 
     controller.register_action(RegisteredAction(
@@ -198,7 +198,7 @@ def register(controller=None):
                       'duration': 'annotation/fragment/duration',
                       },
             predefined=ac.action_popup_goto_predefined,
-            category='gui',
+            category='popup',
             ))
 
     controller.register_action(RegisteredAction(
@@ -207,7 +207,7 @@ def register(controller=None):
             description=_("Display a popup to navigate to related annotations"),
             parameters={'message': _("String to display."), },
             defaults={'message': 'string:'+_("Choose the related annotation you want to visualise."), },
-            category='gui',
+            category='popup',
             ))
 
 class DefaultGUIActions:
