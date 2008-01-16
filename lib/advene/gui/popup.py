@@ -435,7 +435,7 @@ class Menu:
                 submenu.append(i)
                 for t, l in el.typedRelatedIn.iteritems():
                     at=self.controller.package.get_element_by_id(t)
-                    m=gtk.MenuItem(self.controller.get_title(at))
+                    m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
                     amenu=gtk.Menu()
                     m.set_submenu(amenu)
                     amenu.connect("map", build_submenu, at, l)
@@ -451,7 +451,7 @@ class Menu:
                 submenu.append(i)
                 for t, l in el.typedRelatedOut.iteritems():
                     at=self.controller.package.get_element_by_id(t)
-                    m=gtk.MenuItem(self.controller.get_title(at))
+                    m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
                     amenu=gtk.Menu()
                     m.set_submenu(amenu)
                     amenu.connect("map", build_submenu, at, l)
