@@ -1877,7 +1877,7 @@ class TimeLine(AdhocView):
 
         if state & gtk.gdk.BUTTON1_MASK:
             # Display current time
-            self.quickview.set_annotation(long(self.pixel2unit(self.adjustment.value + x)))
+            self.set_annotation(long(self.pixel2unit(self.adjustment.value + x)))
             if self.layout_selection[0][0] is None:
                 return False
             if self.layout_selection[1][0] is not None:
@@ -1890,7 +1890,7 @@ class TimeLine(AdhocView):
         return True
 
     def layout_drag_motion_cb(self, widget, drag_context, x, y, timestamp):
-        self.quickview.set_annotation(long(self.pixel2unit(self.adjustment.value +  x)))
+        self.set_annotation(long(self.pixel2unit(self.adjustment.value +  x)))
         return True
 
     def context_cb (self, timel=None, position=None, height=None):
