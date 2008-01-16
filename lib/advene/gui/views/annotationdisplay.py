@@ -47,6 +47,8 @@ class AnnotationDisplay(AdhocView):
         self.widget=self.build_widget()
 
     def set_annotation(self, a=None):
+        """This method takes either an annotation, a time value or None as parameter.
+        """
         self.annotation=a
         self.refresh()
         return True
@@ -73,6 +75,12 @@ class AnnotationDisplay(AdhocView):
         if self.annotation is None:
             d={ 'title': _("No annotation"), 
                 'begin': '--:--:--:--', 
+                'end': '--:--:--:--', 
+                'contents': '',
+                'imagecontents': None}
+        elif isinstance(self.annotation, int) or isinstance(self.annotation, long):
+            d={ 'title': _("Current time"), 
+                'begin': helper.format_time(self.annotation),
                 'end': '--:--:--:--', 
                 'contents': '',
                 'imagecontents': None}
@@ -129,10 +137,13 @@ class AnnotationDisplay(AdhocView):
             else:
                 self.label[k].set_text(v)
         if self.annotation is not None:
-            b=self.annotation.fragment.begin
+            if isinstance(self.annotation, int) or isinstance(self.annotation, long):
+                b=self.annotation
+            else:
+                b=self.annotation.fragment.begin
             cache=self.controller.package.imagecache
-            if cache.is_initialized(b):
-                self.label['image'].set_from_pixbuf(png_to_pixbuf (cache[b], width=50))
+            if cache.is_initialized(b, epsilon=500):
+                self.label['image'].set_from_pixbuf(png_to_pixbuf (cache.get(b, epsilon=500), width=50))
             elif self.label['image'].get_pixbuf() != self.no_image_pixbuf:
                 self.label['image'].set_from_pixbuf(self.no_image_pixbuf)
         return False
