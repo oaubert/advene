@@ -888,12 +888,12 @@ class TimeLine(AdhocView):
 
             sm=gtk.Menu()
             for rt in relationtypes:
-                sitem=gtk.MenuItem(self.controller.get_title(rt))
+                sitem=gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
                 sitem.connect('activate', create_relation, source, dest, rt)
                 sm.append(sitem)
             if True:
                 # Propose to create a new one
-                sitem=gtk.MenuItem(_("Create a new relation-type."))
+                sitem=gtk.MenuItem(_("Create a new relation-type."), use_underline=False)
                 sitem.connect('activate', create_relation_type_and_relation, source, dest)
                 sm.append(sitem)
             item.set_submenu(sm)
@@ -984,11 +984,11 @@ class TimeLine(AdhocView):
 
         dest_title=self.controller.get_title(dest)
         if source.type != dest:
-            item=gtk.MenuItem(_("Duplicate annotation to type %s") % dest_title)
+            item=gtk.MenuItem(_("Duplicate annotation to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_annotation, source, dest)
             menu.append(item)
 
-            item=gtk.MenuItem(_("Move annotation to type %s") % dest_title)
+            item=gtk.MenuItem(_("Move annotation to type %s") % dest_title, use_underline=False)
             item.connect('activate', move_annotation, source, dest)
             menu.append(item)
             if source.relations:
@@ -997,13 +997,13 @@ class TimeLine(AdhocView):
         if position is not None and abs(position-source.fragment.begin) > 1000:
             item=gtk.MenuItem(_("Duplicate to type %(type)s at %(position)s") % { 
                     'type': dest_title,
-                    'position': helper.format_time(position) })
+                    'position': helper.format_time(position) }, use_underline=False)
             item.connect('activate', copy_annotation, source, dest, position)
             menu.append(item)
 
             item=gtk.MenuItem(_("Move to type %(type)s at %(position)s") % { 
                         'type': dest_title,
-                        'position': helper.format_time(position) })
+                        'position': helper.format_time(position) }, use_underline=False)
             item.connect('activate', move_annotation, source, dest, position)
             menu.append(item)
             if source.relations and source.type != dest:
@@ -1015,22 +1015,22 @@ class TimeLine(AdhocView):
                                                     dest)
         if relationtypes:
             if source.type != dest:
-                item=gtk.MenuItem(_("Duplicate and create a relation"))
+                item=gtk.MenuItem(_("Duplicate and create a relation"), use_underline=False)
                 # build a submenu
                 sm=gtk.Menu()
                 for rt in relationtypes:
-                    sitem=gtk.MenuItem(self.controller.get_title(rt))
+                    sitem=gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
                     sitem.connect('activate', copy_annotation, source, dest, None, rt)
                     sm.append(sitem)
                 menu.append(item)
                 item.set_submenu(sm)
 
             if position is not None:
-                item=gtk.MenuItem(_("Duplicate at %s and create a relation") % helper.format_time(position))
+                item=gtk.MenuItem(_("Duplicate at %s and create a relation") % helper.format_time(position), use_underline=False)
                 # build a submenu
                 sm=gtk.Menu()
                 for rt in relationtypes:
-                    sitem=gtk.MenuItem(self.controller.get_title(rt))
+                    sitem=gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
                     sitem.connect('activate', copy_annotation, source, dest, position, rt)
                     sm.append(sitem)
                 menu.append(item)
@@ -1039,7 +1039,7 @@ class TimeLine(AdhocView):
         if selection and source in selection:
             item=gtk.SeparatorMenuItem()
             menu.append(item)
-            item=gtk.MenuItem(_("Duplicate selection to type %s") % dest_title)
+            item=gtk.MenuItem(_("Duplicate selection to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_selection, selection, dest)
             menu.append(item)
 
@@ -1071,10 +1071,10 @@ class TimeLine(AdhocView):
         menu=gtk.Menu()
 
         if source != dest:
-            item=gtk.MenuItem(_("Copy all annotations to type %s") % self.controller.get_title(dest))
+            item=gtk.MenuItem(_("Copy all annotations to type %s") % self.controller.get_title(dest), use_underline=False)
             item.connect('activate', copy_annotations, source, dest)
             menu.append(item)
-            item=gtk.MenuItem(_("Copy all annotations matching a string to type %s") % self.controller.get_title(dest))
+            item=gtk.MenuItem(_("Copy all annotations matching a string to type %s") % self.controller.get_title(dest), use_underline=False)
             item.connect('activate', copy_annotations_filtered, source, dest)
             menu.append(item)
 
