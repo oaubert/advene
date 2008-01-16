@@ -623,7 +623,7 @@ class CategorizedSelector:
     def popup_menu(self, *p):
         m=gtk.Menu()
         
-        i=gtk.MenuItem(self.title)
+        i=gtk.MenuItem(self.title, use_underline=False)
         i.set_sensitive(False)
         m.append(i)
         i=gtk.SeparatorMenuItem()
@@ -631,12 +631,12 @@ class CategorizedSelector:
 
         submenu={}
         for c in self.categories:
-            i=gtk.MenuItem(self.description_getter(c))
+            i=gtk.MenuItem(self.description_getter(c), use_underline=False)
             m.append(i)
             submenu[c]=gtk.Menu()
             i.set_submenu(submenu[c])
         for e in self.elements:
-            i=gtk.MenuItem(self.description_getter(e))
+            i=gtk.MenuItem(self.description_getter(e), use_underline=False)
             submenu[self.category_getter(e)].append(i)
             i.connect('activate', lambda menuitem, element: self.update_element(element), e)
         m.show_all()

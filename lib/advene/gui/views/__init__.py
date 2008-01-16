@@ -340,7 +340,7 @@ class AdhocView(object):
             (_("...embedded west of the video"), 'west'),
             (_("...embedded south of the video"), 'south'),
             (_("...embedded at the right of the window"), 'fareast')):
-            item = gtk.MenuItem(label)
+            item = gtk.MenuItem(label, use_underline=False)
             item.connect('activate', relocate_view, self, destination)
             menu.append(item)
 
@@ -387,7 +387,7 @@ class AdhocView(object):
             menu=gtk.Menu()
             root.set_submenu(menu)
             for label, action in self.contextual_actions:
-                b=gtk.MenuItem(label)
+                b=gtk.MenuItem(label, use_underline=False)
                 b.connect("activate", action)
                 menu.append(b)
             window.buttonbox.pack_start(menubar, expand=False)

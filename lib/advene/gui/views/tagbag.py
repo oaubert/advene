@@ -199,7 +199,7 @@ class TagBag(AdhocView):
                 (_("Set color"), set_color),
                 (_("Remove"), remove)
                 ):
-                item = gtk.MenuItem(label)
+                item = gtk.MenuItem(label, use_underline=False)
                 item.connect("activate", action, t)
                 menu.append(item)
             menu.show_all()
