@@ -77,17 +77,19 @@ class PlayerFactory:
         # Try to determine wether VLC is installed or not
 	vlcversion = config.data.get_registry_value('Software\\VideoLAN\\VLC','Version')
 	# we should define a variable for vlcversion
-	if (vlcversion.startswith("0.9.0")):
+	if (vlcversion.startswith(config.data.player['version'])):
 	    vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','InstallDir')
+	    config.data.player['nocache']=False
             if vlcpath is None:
                 # Try the Path key
                 vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','Path')
-	
+		config.data.player['nocache']=False
 	if (vlcpath is None 
 	    and os.path.exists(os.path.join('.','libvlc.dll'))):
 	    
 	    #we need to clean vlc cache path
-	    # --no-plugins-cache ?
+	    # --no-plugins-cache
+	    config.data.player['nocache']=True
 	    print "Using included version of VLC"
 	    vlcpath = '.'
 	    
