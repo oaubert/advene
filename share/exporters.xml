@@ -266,5 +266,50 @@ div.${a/id} {
 &lt;/iri>
 </content>
     </view>
+    <view dc:date='2008-01-17' dc:creator='oaubert' id='Advene2' viewable-class='package'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>Advene2</title>
+      </meta>
+      <content mime-type='application/xml'>&lt;package xmlns="http://advene.liris.cnrs.fr/ns/advene-xml/0.1">
+  &lt;meta>
+    &lt;main_media id-ref="m1" xmlns="http://advene.liris.cnrs.fr/ns/meta/" />
+    &lt;creator xmlns="http://purl.org/dc/elements/1.1/" tal:content="package/author">author&lt;/creator>
+  &lt;/meta>
+  &lt;medias>
+    &lt;media frame-of-reference="http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0" id="m1" tal:attributes="url package/meta/advenetool/mediafile" />
+  &lt;/medias>
+  &lt;annotations>
+    &lt;annotation tal:repeat="a package/annotations" tal:attributes="begin a/fragment/begin ; end a/fragment/end ; id a/id" media="m1">
+      &lt;content tal:attributes="mimetype a/content/mimetype" tal:content="a/content/data" />
+     &lt;meta>
+        &lt;creator xmlns="http://purl.org/dc/elements/1.1/" tal:content="a/author">author&lt;/creator>
+        &lt;modified xmlns="http://purl.org/dc/elements/1.1/" tal:content="a/date">date&lt;/modified>
+      &lt;/meta>
+        &lt;/annotation>
+  &lt;/annotations>
+  &lt;relations>
+    &lt;relation tal:repeat="r package/relations" tal:attributes="id r/id">
+      &lt;members>
+        &lt;member tal:attributes="id-ref r/members/first/id" />
+        &lt;member tal:attributes="id-ref r/members/last/id" />
+      &lt;/members>
+      &lt;meta>
+        &lt;creator xmlns="http://purl.org/dc/elements/1.1/" tal:content="r/author">author&lt;/creator>
+        &lt;modified xmlns="http://purl.org/dc/elements/1.1/" tal:content="r/date">date&lt;/modified>
+      &lt;/meta>
+    &lt;/relation>
+  &lt;/relations>
+&lt;views>
+    &lt;view tal:repeat="v package/views" tal:attributes="id v/id">
+      &lt;content tal:attributes="mimetype v/content/mimetype" tal:content="v/content/data" />
+     &lt;meta>
+        &lt;creator xmlns="http://purl.org/dc/elements/1.1/" tal:content="v/author">author&lt;/creator>
+        &lt;modified xmlns="http://purl.org/dc/elements/1.1/" tal:content="v/date">date&lt;/modified>
+      &lt;/meta>
+        &lt;/view>
+  &lt;/views>
+
+&lt;/package></content>
+    </view>
   </views>
 </package>
