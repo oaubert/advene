@@ -73,12 +73,24 @@ class PlayerFactory:
     def nativevlc_win32_import(self):
         """Specific importer for win32 vlc.
         """
+	vlcpath=None
         # Try to determine wether VLC is installed or not
-        vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','InstallDir')
-        if vlcpath is None:
-            # Try the Path key
-            vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','Path')
-
+	vlcversion = config.data.get_registry_value('Software\\VideoLAN\\VLC','Version')
+	# we should define a variable for vlcversion
+	if (vlcversion.startswith("0.9.0")):
+	    vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','InstallDir')
+            if vlcpath is None:
+                # Try the Path key
+                vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','Path')
+	
+	if (vlcpath is None 
+	    and os.path.exists(os.path.join('.','libvlc.dll'))):
+	    
+	    #we need to clean vlc cache path
+	    # --no-plugins-cache ?
+	    print "Using included version of VLC"
+	    vlcpath = '.'
+	    
         # FIXME: Hack: for local versions of VLC (development tree)
         # You should define the correct path in advene.ini
         if (vlcpath is None
@@ -86,12 +98,6 @@ class PlayerFactory:
                                              'vlc.exe' ))):
             print "Using local version of VLC from %s" % config.data.path['vlc']
             vlcpath = config.data.path['vlc']
-	
-	if (vlcpath is None 
-	    and os.path.exists(os.path.join('.','libvlc.dll'))):
-	    
-	    print "Using included version of VLC"
-	    vlcpath = '.'
 
         if vlcpath is None:
             print _("VLC does not seem to be installed. Using dummy player.")
