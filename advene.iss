@@ -23,6 +23,7 @@ Source: c:\gtk\bin\libcroco-0.6-3.dll; DestDir: {app}
 Source: c:\gtk\bin\libgsf-1-114.dll; DestDir: {app}
 Source: c:\gtk\bin\bzip2.dll; DestDir: {app}
 
+
 [Setup]
 AppCopyright=GPL
 AppName=Advene
