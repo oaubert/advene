@@ -219,7 +219,7 @@ class ImageCache(dict):
                  for pos in self.keys()
                  if dict.__getitem__(self, pos) != self.not_yet_available_image ]
 
-    def is_initialized (self, key):
+    def is_initialized (self, key, epsilon=None):
         """Return True if the given key is initialized.
         
         @return: True if the given key is initialized.
@@ -227,7 +227,7 @@ class ImageCache(dict):
         """
         if key is None:
             return False
-        key = self.approximate(long(key))
+        key = self.approximate(long(key), epsilon)
         if dict.__getitem__(self, key) == self.not_yet_available_image:
             return False
         else:
