@@ -240,7 +240,7 @@ class Config(object):
         # Player options
         self.player = {
             'plugin': 'vlcnative',
-	    'version': '0.9.0',
+	    'bundled': True,
             'embedded': True,
             'name': 'vlc',
             'vout': 'default',
@@ -252,7 +252,6 @@ class Config(object):
             'snapshot-dimensions': (160,100),
             'snapshot-chroma': 'RV32',
             'dvd-device': '/dev/dvd',
-            'nocache': True,
             }
 
         self.webserver = {
@@ -674,7 +673,7 @@ class Config(object):
             args.extend( [ '--vout', self.player['vout'] ] )
         if self.player['svg']:
             args.extend( [ '--text-renderer', 'svg' ] )
-        if self.player['nocache']:
+        if self.player['bundled']:
             args.append( [ '--no-plugins-cache' ] )
         if filters != []:
             # Some filters have been defined
