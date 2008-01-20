@@ -3,13 +3,15 @@
 If you want to run Advene from sources on win32, you will need to
 install some additional packages:
 
-    * Gtk/win32 >= v. 2.8 (dev package) [ from http://gladewin32.sourceforge.net/ ]
+    * Gtk/win32: gtk-dev-2.10.6-win32-1.exe [ from http://gladewin32.sourceforge.net/ ]
 
-    * Python v. 2.3 or 2.4 [ From http://python.org/ ]
+    * Python v. 2.4: [ From http://python.org/ ]
 
-    * PyGtk for python2.3 or 2.4: http://www.pcpm.ucl.ac.be/~gustin/win32_ports/ [ From http://www.pygtk.org/ ]
+    * PyGtk for python2.4: pygtk-2.10.4-1.win32-py2.4.exe [ From http://ftp.gnome.org/pub/GNOME/binaries/win32/pygtk/2.10/ ]
 
-    * PyXML >= 0.8 : [ From http://pyxml.sourceforge.net/ ]
+    * PyXML: PyXML-0.8.4.win32-py2.4.exe [ From http://pyxml.sourceforge.net/ ]
+
+    * Pycairo: pycairo-1.2.2-2.win32-py2.4.exe [ From http://ftp.gnome.org/pub/GNOME/binaries/win32/pycairo/1.2/ ]
 
 And eventually the application sources, downloaded from
 http://liris.cnrs.fr/advene/download/index_en.html or from the
