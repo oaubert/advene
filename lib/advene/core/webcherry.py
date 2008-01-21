@@ -53,7 +53,7 @@ from advene.model.package import Package
 from advene.model.fragment import MillisecondFragment
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
-
+from advene.model.resources import Resources
 
 from advene.model.exception import AdveneException
 
@@ -722,7 +722,7 @@ class Application(Common):
             cherrypy.response.headers['Content-Type']='text/plain'
             return str(v)
         elif cherrypy.request.method == 'PUT':
-            data=cherrypy.request.body
+            data=cherrypy.request.rfile.read()
             # Convert the type.
             if isinstance(v, int) or isinstance(v, long):
                 try:
@@ -1441,18 +1441,64 @@ class Packages(Common):
         context.pushLocals()
         context.setLocal('request', query)
 
+        if tales.startswith('resources'):
+            # Resource creation
+            path=tales.split('/')[1:]
+            parent=self.controller.package.resources
+            if path:
+                # The resource is in a folder. Let's create the
+                # hierarchy first.
+                for i in range(1, len(path)+1):
+                    subpath=path[:i]
+                    try:
+                        r = context.evaluateValue("here/resources/%s" % "/".join(subpath))
+                    except AdveneException:
+                        # The resource folder does not exist. Create it.
+                        parent[subpath[-1]] = parent.DIRECTORY_TYPE
+                        el=parent[subpath[-1]]
+                        self.controller.notify('ResourceCreate',
+                                               resource=el)
+                        r=el
+                    if isinstance(r, Resources):
+                        parent=r
+                    else:
+                        return self.send_error(501, (_("<h1>Error</h1><p>When creating resource %(path)s, the resource folder %(folder)s could not be created.</p>") % { 
+                                    'path': '/'.join(path), 
+                                    'folder': subpath[-1] }).encode('utf-8'))
+            # We can create the resource in the parent ResourceFolder
+            if 'Content-Length'in cherrypy.request.headers and cherrypy.request.headers['Content-Length']:
+                clength = int(cherrypy.request.headers['Content-Length'])
+            else:
+                clength = None
+            if clength:
+                parent[attribute]=cherrypy.request.rfile.read(clength)
+                el=parent[attribute]
+                self.controller.notify('ResourceCreate',
+                                       resource=el)
+                cherrypy.response.status=200
+                return _("Resource successfuly created/updated")
+            else:
+                return self.send_error(501, _("<h1>Error<h1><p>Malformed request when creating %s: no Content-length header.</p>") % attribute )
+
         try:
             objet = context.evaluateValue (expr)
         except Exception, e:
             return self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
 
-        try:
-            objet.__setattr__(attribute, cherrypy.request.body)
-            cherrypy.response.status=200
-            return _("Value successfuly updated")
-        except Exception, e:
-            return self.send_error(501, _("Unable to update the attribute %(attribute)s for element %(element)s: %(error)s." ) % { 'attribute': attribute, 'element': objet, 'error': e })
-
+        if 'Content-Length'in cherrypy.request.headers and cherrypy.request.headers['Content-Length']:
+            clength = int(cherrypy.request.headers['Content-Length'])
+        else:
+            clength = None
+        if clength:
+            try:
+                objet.__setattr__(attribute, cherrypy.request.rfile.read(clength))
+                cherrypy.response.status=200
+                return _("Value successfuly updated")
+            except Exception, e:
+                return self.send_error(501, _("Unable to update the attribute %(attribute)s for element %(element)s: %(error)s." ) % { 'attribute': attribute, 'element': objet, 'error': e })
+        else:
+            return self.send_error(501, _("<h1>Error<h1><p>Malformed request when creating %s: no Content-length header.</p>") % attribute )
+        
     def handle_post_request(self, *args, **query):
         """Handle POST requests (update, create or delete).
 
@@ -1496,7 +1542,8 @@ class Packages(Common):
 
         The type of the created object is given through the C{type}
         parameter. For the moment, C{view}, C{annotationtype} and
-        C{relationtype} are valid.
+        C{relationtype} are valid. Note that resources can be created
+        through the PUT method.
 
         A view is created with the following data, specified with parameters:
 
@@ -1945,6 +1992,12 @@ class AdveneWebServer:
                 },
             }
         cherrypy.tree.mount(Root(controller), config=app_config)
+
+        def no_body_process():
+            # Do not let cherrypy try to process request body. Cf
+            # http://www.cherrypy.org/wiki/RequestObject 
+            cherrypy.request.process_request_body = False
+        cherrypy.request.hooks.attach('before_request_body', no_body_process)
 
         try:
             # server.quickstart *must* be started from the main thread.
