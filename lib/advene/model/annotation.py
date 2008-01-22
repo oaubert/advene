@@ -70,6 +70,8 @@ class Annotation(modeled.Importable, content.WithContent,
         self.__fragment = None
 
         self._relations = [] # backrefs cache for relations
+        
+        self._cached_type = type
 
         if element is not None:
             # should be mode 1, checking parameter consistency
@@ -145,10 +147,12 @@ class Annotation(modeled.Importable, content.WithContent,
 
     def getType(self):
         """Return the type of this annotation"""
-        type_uri = self._getModel().getAttributeNS(None, "type")
-        pkg_uri = self.getOwnerPackage ().getUri (absolute=True)
-        type_uri = util.uri.urljoin (pkg_uri, type_uri)
-        return self.getOwnerPackage().getAnnotationTypes()[type_uri]
+        if self._cached_type is None:
+            type_uri = self._getModel().getAttributeNS(None, "type")
+            pkg_uri = self.getOwnerPackage ().getUri (absolute=True)
+            type_uri = util.uri.urljoin (pkg_uri, type_uri)
+            self._cached_type=self.getOwnerPackage().getAnnotationTypes()[type_uri]
+        return self._cached_type
 
     def setType(self, type):
         """Set the type of this annotation"""
@@ -158,12 +162,14 @@ class Annotation(modeled.Importable, content.WithContent,
         elif type in op.getAnnotationTypes():
             type_uri = type.getUri (absolute=False, context=op)
             self._getModel().setAttributeNS(None, "type", type_uri)
+            self._cached_type=type
         else:
             raise AdveneException("%s is not imported" % type.getUri ())
 
     def delType(self):
         """Always raises an exception since type is a required attributes"""
         self.setType(None)
+        self._cached_type=None
 
     def getFragment(self):
         """Return the fragment associated to this annotation"""
