@@ -2497,7 +2497,7 @@ class TimeLine(AdhocView):
         self.global_pane.add1(scale_pane)
         self.global_pane.add2(content_pane)
         
-        self.global_pane.set_position(20)        
+        self.global_pane.set_position(50)        
         self.global_pane.connect('notify::position', self.update_scale_screenshots)
 
         vbox.add (self.global_pane)
