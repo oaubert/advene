@@ -22,6 +22,7 @@ import gtk
 import xml.parsers.expat
 import StringIO
 
+import advene.core.config as config
 from advene.gui.edit.elements import ContentHandler, TextContentHandler
 from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle, ShapeEditor
 from advene.gui.util import image_from_position, dialog
@@ -196,6 +197,29 @@ class SVGContentHandler (ContentHandler):
             self.sourceview.content_set(self.element.data)
         return True
 
+    def drawer_drag_received(self, widget, context, x, y, selection, targetType, time):
+        if targetType == config.data.target_type['annotation']:
+            here=self.controller.package.annotations.get(selection.data)
+        elif target_type == config.data.target_type['view']:
+            here=self.controller.package.views.get(selection.data)
+        else:
+            # Invalid drop target
+            return True
+        ctx=self.controller.build_context(here=here)
+        title=self.controller.get_title(here)
+        s=self.view.drawer.clicked_shape( (x, y) )
+        if s is None:
+            # Drop on no shape. Create one.
+            s = self.view.drawer.shape_class()
+            s.name = s.SHAPENAME + _(" created from ") + title
+            s.color = self.view.defaultcolor
+            s.set_bounds( ( (x, y), (x+20, y+20) ) )
+            self.view.drawer.add_object(s)
+        # Drop on an existing shape. Update its link attribute
+        s.link=ctx.evaluateValue('here/absolute_url')
+        s.link_label=title
+        return False
+
     def get_view (self, compact=False):
         """Generate a view widget for editing SVG."""
         vbox=gtk.VBox()
@@ -213,6 +237,14 @@ class SVGContentHandler (ContentHandler):
                 root=None
             if root:
                 self.view.drawer.parse_svg(root)
+
+        self.view.drawer.widget.connect("drag_data_received", self.drawer_drag_received)
+        self.view.drawer.widget.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                              gtk.DEST_DEFAULT_HIGHLIGHT |
+                                              gtk.DEST_DEFAULT_ALL,
+                                              config.data.drag_type['annotation']
+                                              + config.data.drag_type['view'],
+                                              gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
         def edit_svg(b):
             vbox.foreach(vbox.remove)
