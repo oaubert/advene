@@ -71,6 +71,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
            source parameter (a URL or a stream).
            Providing None for the source parameter creates a new Package.
         """
+        self.meta_cache={}
         if re.match('[a-zA-Z]:', uri):
             # Windows drive: notation. Convert it to
             # a more URI-compatible syntax
