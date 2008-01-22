@@ -71,18 +71,22 @@ class Metaed(object):
     def getMetaData(self, namespace_uri, name):
         """Return the text content of metadata with given NS and name
         """
+        n='{%s}%s' % (namespace_uri, name)
+        if n in self.meta_cache:
+            return self.meta_cache[n]
         e = self._getMetaElement(namespace_uri, name)
         if e is None: 
             return None
 
         r = StringIO()
         advene.model.util.dom.printElementText(e, r)
-        return r.getvalue().decode('utf-8')
-                
+        self.meta_cache[n]=r.getvalue().decode('utf-8')
+        return self.meta_cache[n]
 
     def setMetaData(self, namespace_uri, name, value):
         """Set the metadata with given NS and name
         """
+        n='{%s}%s' % (namespace_uri, name)
         create = (value is not None)
         e = self._getMetaElement(namespace_uri, name, create)
 
@@ -96,7 +100,7 @@ class Metaed(object):
         if value is not None:
             new = e._get_ownerDocument().createTextNode(value)
             e.appendChild(new)
-
+            self.meta_cache[n]=value
 
 class Authored(Metaed):
     """An implementation for the author property.
@@ -407,6 +411,7 @@ class Uried(Ided):
            or a parent object providing the base URI with a getURI method.
            If both are given, base_uri is ignored.
         """
+        self.meta_cache={}
         if parent is not None:
             self.__base = parent
         else:
