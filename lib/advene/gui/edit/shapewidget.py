@@ -61,6 +61,10 @@ class Shape:
     @type filled: boolean
     @ivar tolerance: pixel tolerance for control point selection
     @type tolerance: int
+    @ivar link: URL associated to the shape
+    @type link: string or None
+    @ivar link_label: label for the URL associated to the shape
+    @type link_label: string or None
     @cvar SHAPENAME: the name of the shape class
     @type SHAPENAME: translated string
     """
@@ -76,6 +80,8 @@ class Shape:
         self.filled = False
         # Pixel tolerance for control point selection
         self.tolerance = 6
+        self.link=None
+        self.link_label=None
         self.set_bounds( ( (0, 0), (10, 10) ) )
 
     def set_bounds(self, bounds):
@@ -182,7 +188,14 @@ class Shape:
         attrib['stroke']=self.color
         attrib['style']="stroke-width:%d" % self.linewidth
         attrib['name']=self.name
-        return ET.Element(ET.QName(SVGNS, self.SVGTAG), attrib=attrib)
+        e=ET.Element(ET.QName(SVGNS, self.SVGTAG), attrib=attrib)
+        if self.link:
+            a=ET.Element('a', attrib={ 'xlink:href': self.link,
+                                       'title': self.link_label or _("Link to %s") % self.link })
+            a.append(e)
+            return a
+        else:
+            return e
 
     def copy_from(self, shape, style=False):
         """Copy data from another shape.
@@ -256,6 +269,16 @@ class Shape:
         namesel.set_text(self.name)
         vbox.pack_start(label_widget(_("Name"), namesel), expand=False)
 
+        # Link
+        linksel = gtk.Entry()
+        linksel.set_text(self.link or '')
+        vbox.pack_start(label_widget(_("Link"), linksel), expand=False)
+
+        # Linklabel
+        linklabelsel = gtk.Entry()
+        linklabelsel.set_text(self.link_label or '')
+        vbox.pack_start(label_widget(_("Link label"), linklabelsel), expand=False)
+
         # Color
         colorsel = gtk.combo_box_new_text()
         for s in COLORS:
@@ -283,7 +306,9 @@ class Shape:
             'name': namesel,
             'color': colorsel,
             'linewidth': linewidthsel,
-            'filled': filledsel
+            'filled': filledsel,
+            'link': linksel,
+            'link_label': linklabelsel,
             }
         return vbox
 
@@ -316,7 +341,8 @@ class Shape:
 
         if res == gtk.RESPONSE_OK:
             # Get new values
-            self.name = edit.widgets['name'].get_text()
+            for n in ('name', 'link', 'link_label'):
+                setattr(self, n, edit.widgets[n].get_text())
             self.color = COLORS[edit.widgets['color'].get_active()]
             self.linewidth = int(edit.widgets['linewidth'].get_value())
             self.filled = edit.widgets['filled'].get_active()
@@ -457,7 +483,13 @@ class Text(Rectangle):
         attrib['style']="stroke-width:%d" % self.linewidth
         e=ET.Element('text', attrib=attrib)
         e.text=self.name
-        return e
+        if self.link is not None:
+            a=ET.Element('a', attrib={ 'xlink:href': self.link,
+                                       'title': self.link_label })
+            a.append(e)
+            return a
+        else:
+            return e
 
 class Line(Rectangle):
     """A simple Line.
@@ -603,6 +635,58 @@ class Circle(Rectangle):
         self.y=self.cy - self.r
         self.width=2 * self.r
         self.height=2 * self.r
+
+class Link(Shape):
+    """Link pseudo-shape.
+
+    Handles link attributes. Its parse_svg method will return the
+    enclosed concrete shape, with link and link_label fields
+    initialized with the appropriate values.
+    """
+    SHAPENAME=_("Link")
+    SVGTAG='a'
+
+    def parse_svg(cls, element, context):
+        """Parse a SVG representation.
+
+        The context object must implement a 'dimensions' method that
+        will return a (width, height) tuple corresponding to the
+        canvas size.
+
+        @param element: etree.Element to parse
+        @param context: the svg context
+        @return: an appropriate shape, or None if the class could not parse the element
+        """
+        if element.tag != cls.SVGTAG and element.tag != ET.QName(SVGNS, cls.SVGTAG):
+            return None
+        # Parse the element children. 
+        # FIXME: we only handle the first one ATM. Should use a generator here.
+        o=None
+        for c in element:
+            for clazz in defined_shape_classes:
+                o=clazz.parse_svg(c, context)
+                if o is not None:
+                    break
+        if o is None:
+            print "Invalid <a> content in SVG"
+            return None
+        o.link=element.attrib.get('xlink:href', '')
+        o.link_label=element.attrib.get('title', 'Link to ' + o.link)
+        return o
+    parse_svg=classmethod(parse_svg)
+
+    def get_svg(self, relative=False, size=None):
+        """Return a SVG representation of the shape.
+
+        @param relative: should dimensions be relative to the container size or absolute?
+        @type relative: boolean
+        @param size: the container size in pixels
+        @type size: a couple of int
+        @return: the SVG representation
+        @rtype: elementtree.Element
+        """
+        print "Should not happen..."
+        return None
 
 class ShapeDrawer:
     """Widget allowing to draw and edit shapes.
@@ -899,9 +983,16 @@ class ShapeDrawer:
         root=ET.Element(ET.QName(SVGNS, 'svg'), {
                 'version': '1',
                 'preserveAspectRatio': "xMinYMin meet" ,
-                'viewBox': '0 0 %d %d' % size })
+                'viewBox': '0 0 %d %d' % size,
+                'width': "%dpt" % size[0],
+                'height': "%dpt" % size[1],
+                'xmlns:xlink': "http://www.w3.org/1999/xlink",
+                # The following xmlns declaration is needed for a
+                # correct rendering in firefox
+                'xmlns': "http://www.w3.org/2000/svg",
+                })
         for o in self.objects:
-            root.append(o[0].get_svg(relative=True, size=size))
+            root.append(o[0].get_svg(relative=relative, size=size))
         return root
 
     def parse_svg(self, et):
@@ -1081,8 +1172,7 @@ def main():
 
 
 # FIXME: should do some introspection ([ c for c in ??? if isinstance(c, Shape) ])
-defined_shape_classes=[ Rectangle, Circle, Text, Line ]
-
+defined_shape_classes=[ Rectangle, Circle, Text, Line, Link ]
 
 # Start it all
 if __name__ == '__main__':
