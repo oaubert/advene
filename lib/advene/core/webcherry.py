@@ -1996,7 +1996,8 @@ class AdveneWebServer:
         def no_body_process():
             # Do not let cherrypy try to process request body. Cf
             # http://www.cherrypy.org/wiki/RequestObject 
-            cherrypy.request.process_request_body = False
+            if cherrypy.request.method == 'PUT':
+                cherrypy.request.process_request_body = False
         cherrypy.request.hooks.attach('before_request_body', no_body_process)
 
         try:
