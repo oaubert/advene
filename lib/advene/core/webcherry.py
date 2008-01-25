@@ -49,7 +49,6 @@ import cherrypy
 if int(cherrypy.__version__.split('.')[0]) < 3:
     raise _("The webserver requires version 3.0 of CherryPy at least.")
 
-from advene.model.package import Package
 from advene.model.fragment import MillisecondFragment
 from advene.model.annotation import Annotation, Relation
 from advene.model.view import View
@@ -1538,12 +1537,13 @@ class Packages(Common):
 
         The creation of new elements in a package is done by
         specifying the C{action=create} parameter. The TALES path must
-        be the path of the package (C{/packages/pkgid}).
+        be the path of the package (C{/packages/pkgid}), except for
+        resources where the TALES path is the path of the resource to
+        be created.
 
         The type of the created object is given through the C{type}
         parameter. For the moment, C{view}, C{annotationtype} and
-        C{relationtype} are valid. Note that resources can be created
-        through the PUT method.
+        C{relationtype} are valid.
 
         A view is created with the following data, specified with parameters:
 
@@ -1589,7 +1589,7 @@ class Packages(Common):
            <input type="submit" name="submit" />
            </form>
         """
-        if not query.has_key('action') or not query.has_key('data'):
+        if not 'action' in query or not ('data' in query or 'datapath' in query or 'datafile' in query):
             return self.send_error(500, _("<p>Invalid request</p>."))
 
         if not args:
@@ -1610,18 +1610,17 @@ class Packages(Common):
         else:
             expr = "here/%s" % tales
 
-        context = self.controller.build_context(here=self.controller.packages[alias],
-                                                alias=alias)
+        package=self.controller.packages[alias]
+        context = self.controller.build_context(here=package, alias=alias)
         context.pushLocals()
         context.setLocal('request', query)
 
-        try:
-            objet = context.evaluateValue (expr)
-        except Exception, e:
-            return self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
-
         # Different actions : update, create, delete
         if query['action'] == 'update':
+            try:
+                objet = context.evaluateValue (expr)
+            except Exception, e:
+                return self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
             if hasattr(objet, attribute):
                 objet.__setattr__(attribute, query['data'])
                 if query.has_key('redirect') and query['redirect']:
@@ -1658,10 +1657,68 @@ class Packages(Common):
                     return self.send_error(500, _("Malformed request: cannot update the value of %(attribute)s in %(tales)s.") % locals())
 
         elif query['action'] == 'create':
-            # Create a new element. For the moment, only
-            # View, Relation, Annotation is supported
-            if not isinstance (objet, Package):
+            # Creating an element. If it is a resource, its id is
+            # specified by its TALES path. For other types of elements
+            # (annotation, view, relation...), the TALES path must
+            # point to the package.
+            if query['type'] == 'resource':
+                if tales.startswith('resources'):
+                    # Resource creation
+                    path=tales.split('/')[1:]
+                    parent=package.resources
+                    if path:
+                        # The resource is in a folder. Let's create the
+                        # hierarchy first.
+                        for i in range(1, len(path)+1):
+                            subpath=path[:i]
+                            try:
+                                r = context.evaluateValue("here/resources/%s" % "/".join(subpath))
+                            except AdveneException:
+                                # The resource folder does not exist. Create it.
+                                parent[subpath[-1]] = parent.DIRECTORY_TYPE
+                                el=parent[subpath[-1]]
+                                self.controller.notify('ResourceCreate',
+                                                       resource=el)
+                                r=el
+                            if isinstance(r, Resources):
+                                parent=r
+                            else:
+                                return self.send_error(501, (_("<h1>Error</h1><p>When creating resource %(path)s, the resource folder %(folder)s could not be created.</p>") % { 
+                                            'path': '/'.join(path), 
+                                            'folder': subpath[-1] }).encode('utf-8'))
+                    # We can create the resource in the parent ResourceFolder
+                    if 'datapath' in query:
+                        # A file path was specified. This will put the
+                        # content of the path specified by 'datapath',
+                        # from the server filesystem. This is a
+                        # temporary and convenience hack to manage the
+                        # uploading of resource files from the WYSIWYG
+                        # editor.
+                        # FIXME FIXME FIXME
+                        # However it is a serious security issue, since:
+                        # - in the non-embedded case, users may get
+                        #   the content of any file from the server.
+                        # - in the embedded case (GUI embedding
+                        #   server), other users may access the files
+                        #   owned by the user running the application
+                        # This should be addressed at some time...
+                        parent[attribute]=open(query['datapath'], 'rb').read()
+                    elif 'datafile' in query:
+                        # File upload.
+                        print "file upload", query['datafile']
+                        parent[attribute]=query['datafile'].read()
+                    else:
+                        parent[attribute]=query['data']
+                    el=parent[attribute]
+                    self.controller.notify('ResourceCreate',
+                                           resource=el)
+                    cherrypy.response.status=200
+                    return _("Resource successfuly created/updated")
+
+            # A TALES path was specified. We cannot handle this case.
+            if expr:
                 return self.send_error(500, _("Cannot create an element in something else than a package."))
+            objet=package
 
             # Keyword parameters for each create* method
             kw={}
