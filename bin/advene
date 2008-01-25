@@ -138,8 +138,6 @@ if config.data.os == 'win32':
     else:
         import gtk
 
-import advene.gui.main
-
 if __name__ == '__main__':
 
     # Check for directories
@@ -157,10 +155,15 @@ Either the Advene software is not installed or it is badly configured.
 Check your .advenerc file.""" % gladefile
         sys.exit(1)
 
-    gui = advene.gui.main.AdveneGUI ()
+    if config.data.options.simple:
+        import advene.gui.simple
+        gui = advene.gui.simple.SimpleAdveneGUI ()
+    else:
+        import advene.gui.main
+        gui = advene.gui.main.AdveneGUI ()
     try:
         #import hotshot
-        #filename = "pythongrind.prof"
+        #filename = "/tmp/pythongrind.prof"
         #prof = hotshot.Profile(filename, lineevents=1)
         #prof.runcall(gui.main, config.data.args)
         #prof.close()

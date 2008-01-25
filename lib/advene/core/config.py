@@ -394,6 +394,9 @@ class Config(object):
         parser.add_option("-v", "--version", dest="version", action="store_true",
                           help="Display version number and exit.")
 
+        parser.add_option("", "--simple", dest="simple", action="store_true",
+                          help="Use the simplified GUI.")
+
         parser.add_option("-s", "--settings-dir", dest="settings", action="store",
                           type="string", default=None, metavar="SETTINGSDIR",
                           help="Alternate configuration directory (default: ~/.advene).")
