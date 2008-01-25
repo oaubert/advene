@@ -2,6 +2,8 @@ advene (0.27) unstable; urgency=low
 
   * Win32 bugfixes (relation creation, timestamp mark colors, montage...)
 
+  * Win32: VLC can be bundled in the Advene installer package
+
   * New adhoc view : finder (column-based finder a la Mac OS X)
 
   * New actions: 
@@ -15,8 +17,8 @@ advene (0.27) unstable; urgency=low
 
   * General:
   
-     * Package data can be exported to other formats through the File/Export
-       menuitem.
+     * Package data can be exported to other formats (SMIL, SVG, MPEG7...)
+       through the File/Export menuitem.
   
      * The package can automatically be saved when saving the package. This
        behaviour is tunable in Edit/Preferences/Standard views
