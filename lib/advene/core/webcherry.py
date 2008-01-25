@@ -1548,7 +1548,11 @@ class Packages(Common):
         To transmit the content from a file upload, use C{datafile} as
         field name.
 
-        Updating data
+        Moreover, if a C{redirect} field is present, it should contain
+        a URL which will be redirected to upon successful creation or
+        update.
+
+        Updating data 
         =============
 
         The update of an element of the object addressed by the POSTed
@@ -1565,6 +1569,7 @@ class Packages(Common):
           <textarea name="data">Contents</textarea>
           <input type="hidden" name="action" value="update">
           <input type="submit" value="Submit" />
+          <input name="redirect" type="hidden" value="http://foo/bar" /><br />
           </form>
 
         Creating new data
@@ -1577,8 +1582,8 @@ class Packages(Common):
         be created.
 
         The type of the created object is given through the C{type}
-        parameter. For the moment, C{view}, C{annotationtype} and
-        C{relationtype} are valid.
+        parameter. For the moment, C{view}, C{annotationtype},
+        C{relationtype} and C{resource} are valid.
 
         A view is created with the following data, specified with parameters:
 
@@ -1681,7 +1686,7 @@ class Packages(Common):
                 return self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
             if hasattr(objet, attribute):
                 objet.__setattr__(attribute, data)
-                if query.has_key('redirect') and query['redirect']:
+                if 'redirect' in query and query['redirect']:
                     return self.send_redirect(query['redirect'])
                 res=[ self.start_html(_("Value updated")) ]
                 res.append (_("""
@@ -1698,7 +1703,7 @@ class Packages(Common):
                 # attribute is the id of the object in the dict
                 try:
                     objet[attribute]=data
-                    if query.has_key('redirect') and query['redirect']:
+                    if 'redirect' in query and query['redirect']:
                         return self.send_redirect(query['redirect'])
                     res=[ self.start_html(_("Value updated")) ]
                     res.append (_("""
@@ -1749,6 +1754,8 @@ class Packages(Common):
                     self.controller.notify('ResourceCreate',
                                            resource=el)
                     cherrypy.response.status=200
+                    if 'redirect' in query and query['redirect']:
+                        return self.send_redirect(query['redirect'])
                     return _("Resource successfuly created/updated")
 
             # A TALES path was specified. We cannot handle this case.
@@ -1786,7 +1793,7 @@ class Packages(Common):
                             'id': kw['ident'],
                             'error': unicode(e).encode('utf-8') })
                 
-                if query.has_key('redirect') and query['redirect']:
+                if 'redirect' in query and query['redirect']:
                     return self.send_redirect(query['redirect'])
                 return "".join( ( self.start_html(_("View created")),
                                   _("""
@@ -1834,8 +1841,7 @@ class Packages(Common):
                 except Exception, e:
                     query['error']=unicode(e).encode('utf-8')
                     return self.send_error(500, _("<p>Error while creating relation between %(member1)s and %(member2)s :</p><pre>%(error)s</pre>") % query)
-
-                if query.has_key('redirect') and query['redirect']:
+                if 'redirect' in query and query['redirect']:
                     return self.send_redirect(query['redirect'])
                 return "".join( ( self.start_html(_("Relation created")),
                                   _("""<h1>Relation <em>%s</em> created</h1>""") % (relation.id)) )
@@ -1875,9 +1881,8 @@ class Packages(Common):
                             'traceback': "\n".join(code.traceback.format_tb (tr))
                             })
 
-                if query.has_key('redirect') and query['redirect']:
+                if 'redirect' in query and query['redirect']:
                     return self.send_redirect(query['redirect'])
-
                 return self.start_html(_("Annotation %s created") % a.id)
             else:
                 return self.send_error(500, _("Error: Cannot create an object of type %s.") % (query['type']))
