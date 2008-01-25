@@ -34,6 +34,7 @@ def absolute_url(target, context):
     import advene.model.query
     import advene.model.schema
     import advene.model.view
+    import advene.model.resources
 
     def _abs_url(target):
         if isinstance(target, advene.model.annotation.Annotation):
@@ -54,6 +55,9 @@ def absolute_url(target, context):
                                     (target.getSchema().getId(), target.getId())
         elif isinstance(target, advene.model.view.View):
             return '/views/%s' % target.getId()
+        elif isinstance(target, (advene.model.resources.ResourceData, 
+                                 advene.model.resources.Resources) ):
+            return '/resources/%s' % target.resourcepath
         else:
             return None
 
