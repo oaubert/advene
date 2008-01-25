@@ -1397,6 +1397,21 @@ class Packages(Common):
         A PUT request done on an Advene element will try to update it
         with the given content.
 
+        Data transmission
+        =================
+
+        Data can be transmitted either as a textual content (from a
+        <textarea> or an <input> field), or as a file upload.
+
+        To transmit the content of a textarea, use C{data} as field
+        name.
+
+        To transmit the content from a file upload, use C{datafile} as
+        field name.
+
+        Generic information
+        ===================
+
         The PUT method requests that the enclosed entity be stored
         under the supplied Request-URI. If the Request-URI refers to
         an already existing resource, the enclosed entity SHOULD be
@@ -1440,6 +1455,29 @@ class Packages(Common):
         context.pushLocals()
         context.setLocal('request', query)
 
+        # Handle the various ways to transmit data
+        if 'datafile' in query:
+            # File upload.
+            data=query['datafile'].value
+        elif 'datapath' in query:
+            # A file path was specified. This will put the
+            # content of the path specified by 'datapath',
+            # from the server filesystem. This is a
+            # temporary and convenience hack to manage the
+            # uploading of resource files from the WYSIWYG
+            # editor.
+            # FIXME FIXME FIXME
+            # However it is a serious security issue, since:
+            # - in the non-embedded case, users may get
+            #   the content of any file from the server.
+            # - in the embedded case (GUI embedding
+            #   server), other users may access the files
+            #   owned by the user running the application
+            # This should be addressed at some time...
+            data=open(query['datapath'], 'rb').read()
+        else:
+            data=query['data']
+
         if tales.startswith('resources'):
             # Resource creation
             path=tales.split('/')[1:]
@@ -1465,38 +1503,23 @@ class Packages(Common):
                                     'path': '/'.join(path), 
                                     'folder': subpath[-1] }).encode('utf-8'))
             # We can create the resource in the parent ResourceFolder
-            if 'Content-Length'in cherrypy.request.headers and cherrypy.request.headers['Content-Length']:
-                clength = int(cherrypy.request.headers['Content-Length'])
-            else:
-                clength = None
-            if clength:
-                parent[attribute]=cherrypy.request.rfile.read(clength)
-                el=parent[attribute]
-                self.controller.notify('ResourceCreate',
-                                       resource=el)
-                cherrypy.response.status=200
-                return _("Resource successfuly created/updated")
-            else:
-                return self.send_error(501, _("<h1>Error<h1><p>Malformed request when creating %s: no Content-length header.</p>") % attribute )
+            parent[attribute]=data
+            el=parent[attribute]
+            self.controller.notify('ResourceCreate',
+                                   resource=el)
+            cherrypy.response.status=200
+            return _("Resource successfuly created/updated")
 
         try:
             objet = context.evaluateValue (expr)
         except Exception, e:
             return self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
-
-        if 'Content-Length'in cherrypy.request.headers and cherrypy.request.headers['Content-Length']:
-            clength = int(cherrypy.request.headers['Content-Length'])
-        else:
-            clength = None
-        if clength:
-            try:
-                objet.__setattr__(attribute, cherrypy.request.rfile.read(clength))
-                cherrypy.response.status=200
-                return _("Value successfuly updated")
-            except Exception, e:
-                return self.send_error(501, _("Unable to update the attribute %(attribute)s for element %(element)s: %(error)s." ) % { 'attribute': attribute, 'element': objet, 'error': e })
-        else:
-            return self.send_error(501, _("<h1>Error<h1><p>Malformed request when creating %s: no Content-length header.</p>") % attribute )
+        try:
+            objet.__setattr__(attribute, data)
+            cherrypy.response.status=200
+            return _("Value successfuly updated")
+        except Exception, e:
+            return self.send_error(501, _("Unable to update the attribute %(attribute)s for element %(element)s: %(error)s." ) % { 'attribute': attribute, 'element': objet, 'error': e })
         
     def handle_post_request(self, *args, **query):
         """Handle POST requests (update, create or delete).
