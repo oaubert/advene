@@ -195,6 +195,10 @@ class Common:
         As this method generates headers, it must be called before other
         headers or content.
 
+        If the value of C{location} is C{no_content}, then a 204
+        response (No Content) will be sent. This can be useful in
+        cases where we want to keep on the same origin document.
+
         @param location: the URL to redirect to.
         @type location: string (URL)
         """
@@ -209,6 +213,8 @@ class Common:
         #<p>You should be redirected to %(location)s</p>
         #</body></html>
         #""") % {'location':location}
+        if location == 'no_content':
+            return self.send_no_content()
         raise cherrypy.HTTPRedirect(location)
 
     def send_error (self, status=404, message=None):
