@@ -1513,6 +1513,18 @@ class Packages(Common):
         parameter, which can be either C{update}, C{create} or
         C{delete}.
 
+        Data transmission
+        =================
+
+        Data can be transmitted either as a textual content (from a
+        <textarea> or an <input> field), or as a file upload.
+
+        To transmit the content of a textarea, use C{data} as field
+        name.
+
+        To transmit the content from a file upload, use C{datafile} as
+        field name.
+
         Updating data
         =============
 
@@ -1615,6 +1627,29 @@ class Packages(Common):
         context.pushLocals()
         context.setLocal('request', query)
 
+        # Handle the various ways to transmit data
+        if 'datafile' in query:
+            # File upload.
+            data=query['datafile'].value
+        elif 'datapath' in query:
+            # A file path was specified. This will put the
+            # content of the path specified by 'datapath',
+            # from the server filesystem. This is a
+            # temporary and convenience hack to manage the
+            # uploading of resource files from the WYSIWYG
+            # editor.
+            # FIXME FIXME FIXME
+            # However it is a serious security issue, since:
+            # - in the non-embedded case, users may get
+            #   the content of any file from the server.
+            # - in the embedded case (GUI embedding
+            #   server), other users may access the files
+            #   owned by the user running the application
+            # This should be addressed at some time...
+            data=open(query['datapath'], 'rb').read()
+        else:
+            data=query['data']
+
         # Different actions : update, create, delete
         if query['action'] == 'update':
             try:
@@ -1622,7 +1657,7 @@ class Packages(Common):
             except Exception, e:
                 return self.send_error(501, _("<h1>Error</h1>") + unicode(e.args[0]).encode('utf-8'))
             if hasattr(objet, attribute):
-                objet.__setattr__(attribute, query['data'])
+                objet.__setattr__(attribute, data)
                 if query.has_key('redirect') and query['redirect']:
                     return self.send_redirect(query['redirect'])
                 res=[ self.start_html(_("Value updated")) ]
@@ -1633,13 +1668,13 @@ class Packages(Common):
                 %(value)s
                 </pre>
                 """) % { 'path': "/".join([tales, attribute]),
-                         'value': cgi.escape(query['data']) })
+                         'value': cgi.escape(data) })
                 return "".join(res)
             else:
                 # Fallback mode : maybe we were in a dict, and
                 # attribute is the id of the object in the dict
                 try:
-                    objet[attribute]=query['data']
+                    objet[attribute]=data
                     if query.has_key('redirect') and query['redirect']:
                         return self.send_redirect(query['redirect'])
                     res=[ self.start_html(_("Value updated")) ]
@@ -1650,7 +1685,7 @@ class Packages(Common):
                     %(value)s
                     </pre>
                     """) % { 'path': "%s[%s]" % (tales, attribute),
-                             'value': cgi.escape(query['data']) })
+                             'value': cgi.escape(data) })
                     return "".join(res)
                 except TypeError:
                     # Not a dict...
@@ -1686,29 +1721,7 @@ class Packages(Common):
                                 return self.send_error(501, (_("<h1>Error</h1><p>When creating resource %(path)s, the resource folder %(folder)s could not be created.</p>") % { 
                                             'path': '/'.join(path), 
                                             'folder': subpath[-1] }).encode('utf-8'))
-                    # We can create the resource in the parent ResourceFolder
-                    if 'datapath' in query:
-                        # A file path was specified. This will put the
-                        # content of the path specified by 'datapath',
-                        # from the server filesystem. This is a
-                        # temporary and convenience hack to manage the
-                        # uploading of resource files from the WYSIWYG
-                        # editor.
-                        # FIXME FIXME FIXME
-                        # However it is a serious security issue, since:
-                        # - in the non-embedded case, users may get
-                        #   the content of any file from the server.
-                        # - in the embedded case (GUI embedding
-                        #   server), other users may access the files
-                        #   owned by the user running the application
-                        # This should be addressed at some time...
-                        parent[attribute]=open(query['datapath'], 'rb').read()
-                    elif 'datafile' in query:
-                        # File upload.
-                        print "file upload", query['datafile']
-                        parent[attribute]=query['datafile'].read()
-                    else:
-                        parent[attribute]=query['data']
+                    parent[attribute]=data
                     el=parent[attribute]
                     self.controller.notify('ResourceCreate',
                                            resource=el)
@@ -1738,8 +1751,8 @@ class Packages(Common):
 
                 update_arg('mimetype', 'content_mimetype', 'text/html')
                 update_arg('class', 'clazz', 'package')
-                update_arg('content_data', 'data', '')
                 update_arg('author', 'author', config.data.userid)
+                kw['content_data']=data
                 kw['date']=self.controller.get_timestamp()
                 try:
                     v = objet.createView(**kw)
@@ -1792,6 +1805,7 @@ class Packages(Common):
                                                     members=(m1, m2),
                                                     type=rt)
                     objet._idgenerator.add(id_)
+                    relation.content.data=data
                     objet.relations.append(relation)
                     self.controller.notify("RelationCreate", relation=relation)
                 except Exception, e:
@@ -1822,7 +1836,7 @@ class Packages(Common):
                     fragment=MillisecondFragment(begin=begin, end=end)
                     a=objet.createAnnotation(ident=id_, type=at, fragment=fragment)
                     objet._idgenerator.add(id_)
-                    a.content.data = query['data']
+                    a.content.data = data
                     objet.annotations.append(a)
                     self.controller.notify("AnnotationCreate", annotation=a)
                 except Exception, e:
@@ -2049,13 +2063,6 @@ class AdveneWebServer:
                 },
             }
         cherrypy.tree.mount(Root(controller), config=app_config)
-
-        def no_body_process():
-            # Do not let cherrypy try to process request body. Cf
-            # http://www.cherrypy.org/wiki/RequestObject 
-            if cherrypy.request.method == 'PUT':
-                cherrypy.request.process_request_body = False
-        cherrypy.request.hooks.attach('before_request_body', no_body_process)
 
         try:
             # server.quickstart *must* be started from the main thread.
