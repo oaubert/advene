@@ -51,7 +51,10 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         # If not None, it should contain a gtk.gdk.Color
         # which will override the normal color
         self.local_color=None
+        # Alpha will be used to draw features
         self.alpha=1.0
+        # expose_alpha will be used when rendering the surface on the widget
+        self.expose_alpha=1.0
 
         # container is the Advene view instance that manages this instance
         self.container=container
@@ -205,7 +208,8 @@ class GenericColorButtonWidget(gtk.DrawingArea):
 
         # copy the annotation_surface onto this context
         context.set_source_surface(self.cached_surface, 0, 0)
-        context.paint()
+        context.paint_with_alpha(self.expose_alpha)
+        #self.draw(context, *widget.window.get_size())
         return False
 
 class AnnotationWidget(GenericColorButtonWidget):
@@ -332,7 +336,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         context.fill_preserve()
 
         # Draw the border
-        context.set_source_rgba(0, 0, 0, 1)
+        context.set_source_rgba(0, 0, 0, self.alpha)
         if self.is_focus():
             context.set_line_width(4)
         else:
@@ -354,7 +358,7 @@ class AnnotationWidget(GenericColorButtonWidget):
 
         context.move_to(2, int(height * 0.7))
 
-        context.set_source_rgba(0, 0, 0, 1)
+        context.set_source_rgba(0, 0, 0, self.alpha)
         title=unicode(self.controller.get_title(self.annotation))
         try:
             context.show_text(title.encode('utf8'))
