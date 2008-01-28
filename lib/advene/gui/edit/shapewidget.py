@@ -30,8 +30,7 @@ FIXME: XML load/dump should try to preserve unhandled information (especially TA
 """
 
 import gtk
-import pango
-from math import sqrt
+import cairo
 
 try:
     import advene.util.ElementTree as ET
@@ -48,7 +47,7 @@ SVGNS = 'http://www.w3.org/2000/svg'
 
 defined_shape_classes=[]
 
-class Shape:
+class Shape(object):
     """The generic Shape class.
 
     @ivar name: the shape instance name
@@ -341,10 +340,13 @@ class Shape:
 
         if res == gtk.RESPONSE_OK:
             # Get new values
-            for n in ('name', 'link', 'link_label'):
-                setattr(self, n, edit.widgets[n].get_text())
+            for n in ('name', 'link', 'link_label', 'uri', 'text'):
+                if n in edit.widgets:
+                    setattr(self, n, edit.widgets[n].get_text())
             self.color = COLORS[edit.widgets['color'].get_active()]
-            self.linewidth = int(edit.widgets['linewidth'].get_value())
+            for n in ('linewidth', 'textsize'):
+                if n in edit.widgets:
+                    setattr(self, n, int(edit.widgets[n].get_value()))
             self.filled = edit.widgets['filled'].get_active()
             return True
 
@@ -438,58 +440,117 @@ class Text(Rectangle):
     """Experimental Text shape. Non-working for the moment.
     """
     SHAPENAME=_("Text")
+    SVGTAG='text'
 
     coords=( ('x', 0),
              ('y', 1) )
 
+    def __init__(self, name=SHAPENAME, color="green"):
+        super(Text, self).__init__(name, color)
+        self.text='Some text'
+        self.textsize=20
+
     def render(self, pixmap, invert=False):
-        col=pixmap.get_colormap().alloc_color(self.color)
-        gc=pixmap.new_gc(foreground=col, line_width=self.linewidth)
+        width, height=pixmap.get_size()
+        context=pixmap.cairo_create()
+        context.move_to(self.x, self.y)
+        context.select_font_face("Helvetica", cairo.FONT_SLANT_NORMAL,
+                                 cairo.FONT_WEIGHT_NORMAL)
+        context.set_font_size(self.textsize)
+
+        # FIXME: does not work correctly...
         if invert:
-            gc.set_function(gtk.gdk.INVERT)
-        l=pango.Layout(pango.Context())
-        l.set_text(self.name)
-        self.width, self.height = l.get_pixel_size()
-        pixmap.draw_layout(gc,
-                           self.x,
-                           self.y,
-                           l)
+            context.set_operator(cairo.OPERATOR_XOR)
+        color=gtk.gdk.color_parse(self.color)
+        rgba=(color.red / 65536.0, color.green / 65536.0, color.blue / 65536.0, 1.0)
+        context.set_source_rgba(*rgba)
+
+        try:
+            context.show_text(self.text)
+            self.width, self.height = context.text_extents(self.text)[2:4]
+        except MemoryError:
+            print "MemoryError while rendering text"
         return
 
-    def parse_svg(element, context):
+    def parse_svg(cls, element, context):
         """Parse a SVG representation.
 
+        The context object must implement a 'dimensions' method that
+        will return a (width, height) tuple corresponding to the
+        canvas size.
+
         @param element: etree.Element to parse
+        @param context: the svg context
         @return: an appropriate shape, or None if the class could not parse the element
         """
-        if element.tag != 'text':
+        if element.tag != cls.SVGTAG and element.tag != ET.QName(SVGNS, cls.SVGTAG):
             return None
-        s=Text(name=element.attrib.get('name', 'Text'))
+        s=cls(name=element.attrib.get('name', cls.SHAPENAME))
+        s.filled=( element.attrib.get('fill', 'none') != 'none' )
         s.color=element.attrib['stroke']
+        s.text=element.text
         style=element.attrib['style']
         if style.startswith('stroke-width:'):
             s.linewidth=int(style.replace('stroke-width:', ''))
-        c=Text.xml2coords(Text.coords, element.attrib, context.dimensions())
+        c=cls.xml2coords(cls.coords, element.attrib, context.dimensions())
         for n, v in c.iteritems():
             setattr(s, n, v)
+        if hasattr(s, 'post_parse'):
+            s.post_parse()
         return s
-    parse_svg=staticmethod(parse_svg)
+    parse_svg=classmethod(parse_svg)
 
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
         """
         attrib=self.coords2xml(relative, size)
+        attrib['name']=self.name
         attrib['stroke']=self.color
         attrib['style']="stroke-width:%d" % self.linewidth
         e=ET.Element('text', attrib=attrib)
-        e.text=self.name
-        if self.link is not None:
+        e.text=self.text
+        if self.link:
             a=ET.Element('a', attrib={ 'xlink:href': self.link,
                                        'title': self.link_label })
             a.append(e)
             return a
         else:
             return e
+
+    def __contains__(self, point):
+        # We cannot use the inherited method, since text is draw *above* x,y
+        x, y = point
+        return ( x >= self.x
+                 and x <= self.x + self.width
+                 and y >= self.y - self.height
+                 and y <= self.y )
+
+    def edit_properties_widget(self):
+        """Build a widget to edit the shape properties.
+        """
+        vbox=super(Text, self).edit_properties_widget()
+
+        def label_widget(label, widget):
+            hb=gtk.HBox()
+            hb.add(gtk.Label(label))
+            hb.pack_start(widget, expand=False)
+            return hb
+
+        # URI
+        textsel = gtk.Entry()
+        textsel.set_text(self.text)
+        vbox.pack_start(label_widget(_("Text"), textsel), expand=False)
+        vbox.widgets['text']=textsel
+
+        # Text size
+        textsizesel = gtk.SpinButton()
+        textsizesel.set_range(4, 80)
+        textsizesel.set_increments(1, 4)
+        textsizesel.set_value(self.textsize)
+        vbox.pack_start(label_widget(_("Textsize"), textsizesel), expand=False)
+        vbox.widgets['textsize']=textsizesel
+
+        return vbox
 
 class Line(Rectangle):
     """A simple Line.
@@ -862,7 +923,9 @@ class ShapeDrawer:
                     self.objects.set_value(i, 1, o.name)
 
         def dump_svg(i, o):
-            ET.dump(o.get_svg())
+            s=o.get_svg()
+            ET_indent(s)
+            ET.dump(s)
             return True
 
         add_item(shape.name)
@@ -979,6 +1042,8 @@ class ShapeDrawer:
     def get_svg(self, relative=False):
         """Return a SVG representation.
         """
+        # FIXME: add a new parameter "with_background", to generate
+        # the <image> code for the background
         size=self.dimensions()
         root=ET.Element(ET.QName(SVGNS, 'svg'), {
                 'version': '1',
@@ -1020,7 +1085,7 @@ class ShapeEditor:
         self.background=None
         self.drawer=ShapeDrawer(callback=self.callback,
                                 background=background)
-        self.shapes = [ Rectangle, Circle, Line ]
+        self.shapes = [ Rectangle, Circle, Line, Text ]
 
         self.colors = COLORS
         self.defaultcolor = self.colors[0]
@@ -1049,6 +1114,20 @@ class ShapeEditor:
         sel.connect("changed", callback)
         sel.set_active(0)
         return sel
+
+    def get_selected_node (self, tree_view):
+        """Return the currently selected node.
+
+        None if no node is selected.
+        """
+        selection = tree_view.get_selection ()
+        if not selection:
+            return None
+        store, it = selection.get_selected()
+        node = None
+        if it is not None:
+            node = tree_view.get_model().get_value (it, 0)
+        return node
 
     def tree_view_button_cb(self, widget=None, event=None):
         retval = False
@@ -1122,7 +1201,9 @@ class ShapeEditor:
         control.pack_start(self.treeview, expand=False)
 
         def dump_svg(b):
-            ET.dump(self.drawer.get_svg(relative=True))
+            s=self.drawer.get_svg(relative=True)
+            ET_indent(s)
+            ET.dump(s)
 
         def load_svg(b):
             fs=gtk.FileChooserDialog(title='Select a svg file',
@@ -1170,9 +1251,23 @@ def main():
 
     gtk.main()
 
+# Element-tree indent function.
+# in-place prettyprint formatter
+def ET_indent(elem, level=0):
+    i = "\n" + level*"  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+        for elem in elem:
+            ET_indent(elem, level+1)
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i
 
 # FIXME: should do some introspection ([ c for c in ??? if isinstance(c, Shape) ])
-defined_shape_classes=[ Rectangle, Circle, Text, Line, Link ]
+defined_shape_classes=[ Rectangle, Circle, Text, Line, Link, Text ]
 
 # Start it all
 if __name__ == '__main__':
