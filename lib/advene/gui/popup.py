@@ -355,6 +355,13 @@ class Menu:
             add_item(_("Browse"), self.browse_element, element)
         add_item(_("Query"), self.query_element, element)
 
+        def open_in_browser(i, v):
+            c=self.controller.build_context(here=element)
+            url=c.evaluateValue('here/absolute_url')
+            self.controller.open_url(url)
+            return True
+        add_item(_("Open in web browser"), open_in_browser, element)
+
         if not self.readonly:
             # Common to deletable elements
             if type(element) in (Annotation, Relation, View, Query,
@@ -535,15 +542,9 @@ class Menu:
     def make_resourcedata_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
-        def open_in_browser(i, v):
-            c=self.controller.build_context(here=element)
-            url=c.evaluateValue('here/absolute_url')
-            self.controller.open_url(url)
-            return True
 
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
-        add_item(_("Open in web browser"), open_in_browser, element)
         if self.readonly:
             return
         return
