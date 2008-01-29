@@ -1036,7 +1036,17 @@ class ShapeDrawer:
     def button_press_event(self, widget, event):
         x = int(event.x)
         y = int(event.y)
-        if event.button == 1:
+        if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            # Double-click. Open properties for the shape.
+            sel=self.clicked_shape( ( x, y ) )
+            if sel is not None and sel.edit_properties():
+                self.plot()
+                # Update liststore
+                i = self.find_object(sel)
+                if i is not None:
+                    self.objects.set_value(i, 1, sel.name)
+            return True
+        elif event.button == 1:
             self.selection[0][0], self.selection[0][1] = x, y
             self.selection[1][0], self.selection[1][1] = None, None
             sel=self.clicked_shape( ( x, y ) )
