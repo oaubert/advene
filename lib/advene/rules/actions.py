@@ -22,6 +22,9 @@ from gettext import gettext as _
 
 from advene.rules.elements import RegisteredAction, Condition
 from advene.model.tal.context import AdveneTalesException
+import advene.util.helper as helper
+import subprocess
+import os
 
 name="Default core actions"
 
@@ -209,7 +212,6 @@ def register(controller=None):
             category='gui',
             )
                                )
-
     controller.register_action(RegisteredAction(
             name="SendUserEvent",
             method=ac.SendUserEvent,
@@ -252,9 +254,33 @@ def register(controller=None):
             )
                                )
 
+    controller.register_action(RegisteredAction(
+            name="PlaySoundClip",
+            method=ac.PlaySoundClip,
+            description=_("Play a SoundClip"),
+            parameters={'clip': _("Clip id")},
+            defaults={'clip': 'string:'},
+            predefined=ac.PlaySoundClip_predefined,
+            category='player',
+            )
+                               )
+    controller.register_action(RegisteredAction(
+            name="PlaySound",
+            method=ac.PlaySound,
+            description=_("Play a sound"),
+            parameters={'filename': _("Sound filename")},
+            defaults={'filename': 'string:test.wav'},
+            category='player',
+            )
+                               )
 class DefaultActionsRepository:
     def __init__(self, controller=None):
         self.controller=controller
+        self.soundplayer=None
+
+    def init_soundplayer(self):
+        if self.soundplayer is None:
+            self.soundplayer=SoundPlayer()
 
     def parse_parameter(self, context, parameters, name, default_value):
         if parameters.has_key(name):
@@ -480,7 +506,7 @@ class DefaultActionsRepository:
             self.controller.log(_("Cannot find the stbv %s") % stbvid)
         return True
 
-    def ActivateSTBV_predefined(self, controller, item):
+    def ActivateSTBV_predefined(self, controller):
         """Return the predefined values.
         """
         return { 'viewid': [ ('string:%s' % v.id, controller.get_title(v)) 
@@ -551,3 +577,85 @@ class DefaultActionsRepository:
         except AttributeError:
             self.controller.log(_("The set_rate method is unavailable."))
         return True
+
+    def PlaySoundClip(self, context, parameters):
+        """Play a SoundClip.
+
+        The parameter is the name of a Resource that is stored in the
+        'soundclips' resource folder in the package.
+        """
+        if not ('soundclips' in self.controller.package.resources):
+            self.controller.log(_("No 'soundclips' resource folder in the package"))
+            print "No soundclips"
+            return True
+        clip=self.parse_parameter(context, parameters, 'clip', None)
+        if clip is None:
+            print "No clip"
+            return True
+        else:            
+            # Get the resource
+            d=self.controller.package.resources['soundclips']
+            if clip in d:
+                if self.soundplayer is None:
+                    self.init_soundplayer()
+                self.soundplayer.play(d[clip].file_)
+        return True
+
+    def PlaySoundClip_predefined(self, controller):
+        """Return the predefined values.
+        """
+        if not ('soundclips' in self.controller.package.resources):
+            predef = []
+        else:
+            predef = [ ('string:%s' % res.id, res.id)
+                       for res in self.controller.package.resources['soundclips'].children()
+                       if hasattr(res, 'data') ]
+        return { 'clip': predef }
+
+    def PlaySound(self, context, parameters):
+        """Play a Sound.
+
+        The parameter is a filename.
+        """
+        filename=self.parse_parameter(context, parameters, 'filename', None)
+        if filename is None:
+            return True
+        else:
+            if self.soundplayer is None:
+                self.init_soundplayer()
+            self.soundplayer.play(filename)
+        return True
+
+class SoundPlayer:
+    def linux_play(self, fname):
+        """Play the given file. Requires aplay.
+        """
+        print "Playing ", fname
+        subprocess.call( [ '/usr/bin/aplay', fname ] )
+        return True
+
+    def win32_play(self, fname):
+        PlaySound(fname, SND_FILENAME|SND_ASYNC)
+        return True
+
+    def macosx_play(self, fname):
+        """Play the given file.
+
+        Cf
+        http://developer.apple.com/documentation/Cocoa/Reference/ApplicationKit/Classes/NSSound_Class/Reference/Reference.html
+        """
+        sound = AppKit.NSSound.alloc().initWithContentsOfFile_byReference_(fname, True)
+        sound.play()
+        return True
+
+    if config.data.os == 'win32':
+        from winsound import PlaySound, SND_FILENAME, SND_ASYNC
+        play=win32_play
+    elif config.data.os == 'darwin':
+        import objc
+        import AppKit
+        play=macosx_play
+    else:
+        if not os.path.exists('/usr/bin/aplay'):
+            print "Error: aplay is not installed. Advene will be unable to play sounds."
+        play=linux_play
