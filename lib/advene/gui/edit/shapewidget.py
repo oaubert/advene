@@ -250,7 +250,7 @@ class Shape(object):
         res={}
         if relative:
             for n, dimindex in self.coords:
-                res[n]="%d%%" % (getattr(self, n) * 100 / dimensions[dimindex])
+                res[n]="%.03f%%" % (getattr(self, n) * 100.0 / dimensions[dimindex])
         else:
             res=dict( [ ( n, str(getattr(self, n)) ) for n, d in self.coords ] )
         return res
