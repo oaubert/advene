@@ -644,6 +644,8 @@ class SoundPlayer:
         Cf
         http://developer.apple.com/documentation/Cocoa/Reference/ApplicationKit/Classes/NSSound_Class/Reference/Reference.html
         """
+        import objc
+        import AppKit
         sound = AppKit.NSSound.alloc().initWithContentsOfFile_byReference_(fname, True)
         sound.play()
         return True
@@ -652,8 +654,6 @@ class SoundPlayer:
         from winsound import PlaySound, SND_FILENAME, SND_ASYNC
         play=win32_play
     elif config.data.os == 'darwin':
-        import objc
-        import AppKit
         play=macosx_play
     else:
         if not os.path.exists('/usr/bin/aplay'):
