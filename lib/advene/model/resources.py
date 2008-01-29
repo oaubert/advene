@@ -136,6 +136,10 @@ class Resources:
         self.init_filenames()
         return self.filenames
 
+    def __contains__(self, key):
+        fname=os.path.join( self.dir_, key )
+        return os.path.exists(fname)
+        
     def __getitem__(self, key):
         fname=os.path.join( self.dir_, key )
         if not os.path.exists(fname):
