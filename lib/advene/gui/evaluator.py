@@ -474,7 +474,7 @@ class Evaluator:
             if element != "":
                 # Got one completion. We can complete the buffer.
                 if attr is not None:
-                    element=element.replace(attr, "")
+                    element=element.replace(attr, "", 1)
                 else:
                     if not expr.endswith('.') and not trailingdot:
                         element='.'+element
