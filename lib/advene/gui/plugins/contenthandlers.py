@@ -18,6 +18,7 @@
 
 from gettext import gettext as _
 
+import os
 import gtk
 import xml.parsers.expat
 import StringIO
@@ -104,6 +105,7 @@ class ZoneContentHandler (ContentHandler):
         vbox=gtk.VBox()
 
         if self.parent is not None and hasattr(self.parent, 'fragment'):
+            # We are editing the content of an annotation. Use its snapshot as background.
             i=image_from_position(self.controller, self.parent.fragment.begin, height=160)
             self.view = ShapeDrawer(callback=self.callback, background=i)
         else:
@@ -164,6 +166,21 @@ class SVGContentHandler (ContentHandler):
         if self.sourceview:
             self.sourceview.set_editable(boolean)
 
+    def parse_svg(self):
+        if self.element.data:
+            try:
+                root=ET.parse(self.element.stream).getroot()
+            except xml.parsers.expat.ExpatError:
+                root=None
+            if root:
+                self.view.drawer.clear_objects()
+                path=''
+                if self.parent is not None and hasattr(self.parent, 'file_'):
+                    # We are in a resource. Pass its path as current path.
+                    path=os.path.dirname(self.parent.file_)
+                self.view.drawer.parse_svg(root, current_path=path)
+        return True
+
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if not self.editable:
@@ -173,21 +190,14 @@ class SVGContentHandler (ContentHandler):
             self.sourceview.update_element()
             # We applied our modifications to the XML source, so
             # parse the source again in the SVG editor
-            if self.element.data:
-                try:
-                    root=ET.parse(self.element.stream).getroot()
-                except xml.parsers.expat.ExpatError:
-                    root=None
-                if root:
-                    self.view.drawer.clear_objects()
-                    self.view.drawer.parse_svg(root)
+            self.parse_svg()
             return True
 
         if self.view is None:
             return True
 
-        tree=ET.ElementTree(self.view.drawer.get_svg(relative=True))
-        ET.dump(tree)
+        tree=ET.ElementTree(self.view.drawer.get_svg(relative=False))
+        #ET.dump(tree)
         s=StringIO.StringIO()
         tree.write(s, encoding='utf-8')
         self.element.data = s.getvalue()
@@ -230,13 +240,7 @@ class SVGContentHandler (ContentHandler):
         else:
             self.view = ShapeEditor()
 
-        if self.element.data:
-            try:
-                root=ET.parse(self.element.stream).getroot()
-            except xml.parsers.expat.ExpatError:
-                root=None
-            if root:
-                self.view.drawer.parse_svg(root)
+        self.parse_svg()
 
         self.view.drawer.widget.connect("drag_data_received", self.drawer_drag_received)
         self.view.drawer.widget.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
