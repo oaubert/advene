@@ -26,7 +26,9 @@ Source: c:\Program Files\VideoLAN\VLC\libvlc-control.dll; DestDir: {app}
 Source: c:\Program Files\VideoLAN\VLC\libvlc.dll; DestDir: {app}
 Source: c:\Program Files\VideoLAN\VLC\plugins\*; DestDir: {app}\plugins
 
-
+[Languages]
+Name: Fr; MessagesFile: "compiler:Languages\French.isl"
+Name: En; MessagesFile: "compiler:Default.isl"
 
 [Setup]
 AppCopyright=GPL
@@ -44,7 +46,27 @@ VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
 OutputBaseFilename=setup_advene_0.26_all_in_one_vlcsvn
 VersionInfoTextVersion=0.26
+
 [Registry]
 Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
+
 [Icons]
 Name: {group}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; IconIndex: 0
+
+[Code]
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ResultCode: Integer;
+  Uninstall: String;
+begin
+  if (CurStep = ssInstall) then begin
+    if RegQueryStringValue(HKLM, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall) then begin
+      if MsgBox('Warning: Old Version will be removed!', mbConfirmation, MB_OKCANCEL)=IDOK then begin
+          Exec(RemoveQuotes(Uninstall), ' /SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ResultCode);
+      end
+      else begin
+          Abort();
+      end;
+    end;
+  end;
+end;
