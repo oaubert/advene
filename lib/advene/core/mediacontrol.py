@@ -98,10 +98,10 @@ class PlayerFactory:
             vlcpath = config.data.path['vlc']
 
         if vlcpath is None:
-            print _("VLC does not seem to be installed. Using dummy player.")
+            print "VLC does not seem to be installed. Using dummy player."
             import advene.player.dummy as playermodule
         else:
-            print _("Using VLC player module")
+            print "Using VLC player module"
             # Hack needed to get the vlc module running correctly
             # (find the interfaces)
             try:

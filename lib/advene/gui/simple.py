@@ -212,7 +212,7 @@ class SimpleAdveneGUI(AdveneGUI):
             try:
                 gtk.gdk.threads_init ()
             except RuntimeError:
-                print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
+                print "*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour."
 
         try:
             self.gui_plugins=self.controller.load_plugins(os.path.join(

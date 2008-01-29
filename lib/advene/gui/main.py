@@ -616,7 +616,7 @@ class AdveneGUI (Connect):
             try:
                 gtk.gdk.threads_init ()
             except RuntimeError:
-                print _("*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour.")
+                print "*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour."
 
         try:
             self.gui_plugins=self.controller.load_plugins(os.path.join(
@@ -1151,9 +1151,9 @@ class AdveneGUI (Connect):
         try:
             pop = get_edit_popup (element, self.controller)
         except TypeError, e:
-            print _("Error: unable to find an edit popup for %(element)s:\n%(error)s") % {
-                'element': element, 
-                'error': unicode(e)}
+            print (_(u"Error: unable to find an edit popup for %(element)s:\n%(error)s") % {
+                'element': unicode(element), 
+                'error': unicode(e)}).encode('latin1')
             pop=None
         else:
                 
@@ -1822,7 +1822,7 @@ class AdveneGUI (Connect):
             self.time_label.set_text(helper.format_time(pos))
         except self.controller.player.InternalException:
             # FIXME: something sensible to do here ?
-            print _("Internal error on video player")
+            print "Internal error on video player"
             #gtk.threads_leave()
             return True
         except Exception, e:
@@ -3098,8 +3098,8 @@ if __name__ == '__main__':
     except Exception, e:
         e, v, tb = sys.exc_info()
         print config.data.version_string
-        print _("Got exception %s. Stopping services...") % str(e)
+        print "Got exception %s. Stopping services..." % str(e)
         v.on_exit ()
-        print _("*** Exception ***")
+        print "*** Exception ***"
         import code
         code.traceback.print_exception (e, v, tb)

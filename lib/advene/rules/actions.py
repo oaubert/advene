@@ -300,7 +300,7 @@ class DefaultActionsRepository:
         This method is overriden in the GUI by self.log
         """
         message=self.parse_parameter(context, parameters, 'message', "An event occurred.")
-        print _("** Message ** ") + message.encode('utf8')
+        print "** Message ** " + message.encode('utf8')
         return True
 
     def PlayerStart (self, context, parameters):

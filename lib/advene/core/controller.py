@@ -1700,7 +1700,7 @@ class AdveneController:
             self.player.position_update ()
         except self.player.InternalException:
             # The server is down. Restart it.
-            print _("Restarting player...")
+            print "Restarting player..."
             self.player_restarted += 1
             if self.player_restarted > 5:
                 raise Exception (_("Unable to start the player."))
@@ -1814,9 +1814,9 @@ if __name__ == '__main__':
     try:
         cont.main ()
     except Exception, e:
-        print _("Got exception %s. Stopping services...") % str(e)
+        print "Got exception %s. Stopping services..." % str(e)
         import code
         e, v, tb = sys.exc_info()
         code.traceback.print_exception (e, v, tb)
         cont.on_exit ()
-        print _("*** Exception ***")
+        print "*** Exception ***"

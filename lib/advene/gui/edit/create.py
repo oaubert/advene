@@ -123,7 +123,7 @@ class CreateElementPopup(object):
             elif self.type_ == ResourceData:
                 type_list = [ ViewType("file", _("Resource File")) ]
             else:
-                print _("Error in advene.gui.edit.create.build_widget: invalid type %s") % self.type_
+                print "Error in advene.gui.edit.create.build_widget: invalid type %s" % self.type_
                 return None
 
             if not type_list:
@@ -268,7 +268,7 @@ class CreateElementPopup(object):
             self.controller.notify('SchemaCreate', schema=el)
         elif self.type_ == AnnotationType:
             if not isinstance(self.parent, Schema):
-                print _("Error: bad invocation of CreateElementPopup")
+                print "Error: bad invocation of CreateElementPopup"
                 el=None
             else:
                 el=self.parent.createAnnotationType(
@@ -283,7 +283,7 @@ class CreateElementPopup(object):
             self.controller.notify('AnnotationTypeCreate', annotationtype=el)
         elif self.type_ == RelationType:
             if not isinstance(self.parent, Schema):
-                print _("Error: bad invocation of CreateElementPopup")
+                print "Error: bad invocation of CreateElementPopup"
                 el=None
             else:
                 el=self.parent.createRelationType(
