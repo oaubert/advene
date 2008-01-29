@@ -1190,6 +1190,9 @@ class AdveneGUI (Connect):
         menu.show_all()
         return True
 
+    arrow_list={ 'linux': u'\u25b8',
+                 'darwin': u'\u25b6',
+                 'win32': u'>' }
     def update_stbv_list (self):
         """Update the STBV list.
         """
@@ -1197,7 +1200,9 @@ class AdveneGUI (Connect):
         if stbv_combo is None:
             return True
         l=[ helper.TitledElement(value=None, title=_("No active dynamic view")) ]
-        l.extend( [ helper.TitledElement(value=i, title=u'\u25b8 %s \u25b8' % self.controller.get_title(i))
+        l.extend( [ helper.TitledElement(value=i, title=u'%s %s %s' % (self.arrow_list[config.data.os],
+                                                                       self.controller.get_title(i),
+                                                                       self.arrow_list[config.data.os]))
                     for i in self.controller.get_stbv_list() ] )
         st, i = dialog.generate_list_model([ (i.value, i.title) for i in l ],
                                            active_element=self.controller.current_stbv)
