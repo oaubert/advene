@@ -884,6 +884,13 @@ class ShapeDrawer:
 
         # Couples object - name
         self.objects = gtk.ListStore( object, str )
+        def handle_reorder(*p):
+            self.plot()
+            return True
+        self.objects.connect('rows-reordered', handle_reorder)
+        self.objects.connect('row-inserted', handle_reorder)
+        self.objects.connect('row-changed', handle_reorder)
+        self.objects.connect('row-deleted', handle_reorder)
 
         # Marked area point[0, 1][x, y]
         self.selection = [[None, None], [None, None]]
@@ -1135,7 +1142,10 @@ class ShapeDrawer:
                                     0, 0)
 
         for o in self.objects:
-            o[0].render(self.pixmap)
+            # o[0] may be None, if plot() is called from the callback
+            # of a ListStore signal
+            if o[0] is not None:
+                o[0].render(self.pixmap)
 
         if self.feedback_shape is not None:
             self.feedback_shape.render(self.pixmap, invert=True)
@@ -1314,6 +1324,8 @@ class ShapeEditor:
         hbox.pack_start(self.drawer.widget, True, True, 0)
 
         self.treeview = gtk.TreeView(self.drawer.objects)
+        self.treeview.set_reorderable(True)
+
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn('Name', renderer,
                                     text=1)
