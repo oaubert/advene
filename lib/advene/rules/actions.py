@@ -24,6 +24,7 @@ from advene.rules.elements import RegisteredAction, Condition
 from advene.model.tal.context import AdveneTalesException
 import advene.util.helper as helper
 import subprocess
+import signal
 import os
 
 name="Default core actions"
@@ -259,7 +260,7 @@ def register(controller=None):
             method=ac.PlaySoundClip,
             description=_("Play a SoundClip"),
             parameters={'clip': _("Clip id")},
-            defaults={'clip': 'string:'},
+            defaults={'clip': 'string:Please select a sound by clicking on the arrow'},
             predefined=ac.PlaySoundClip_predefined,
             category='sound',
             )
@@ -630,7 +631,8 @@ class SoundPlayer:
     def linux_play(self, fname):
         """Play the given file. Requires aplay.
         """
-        subprocess.call( [ '/usr/bin/aplay', fname ] )
+        pid=subprocess.Popen( [ '/usr/bin/aplay', '-q', fname ] )
+        signal.signal(signal.SIGCHLD, self.handle_sigchld)
         return True
 
     def win32_play(self, fname):
@@ -648,6 +650,10 @@ class SoundPlayer:
         import AppKit
         sound = AppKit.NSSound.alloc().initWithContentsOfFile_byReference_(fname, True)
         sound.play()
+        return True
+
+    def handle_sigchld(self, sig, frame):
+        os.waitpid(-1, os.WNOHANG)
         return True
 
     if config.data.os == 'win32':
