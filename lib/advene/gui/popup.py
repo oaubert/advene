@@ -535,6 +535,15 @@ class Menu:
     def make_resourcedata_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        def open_in_browser(i, v):
+            c=self.controller.build_context(here=element)
+            url=c.evaluateValue('here/absolute_url')
+            self.controller.open_url(url)
+            return True
+
+        def add_item(*p, **kw):
+            self.add_menuitem(menu, *p, **kw)
+        add_item(_("Open in web browser"), open_in_browser, element)
         if self.readonly:
             return
         return
