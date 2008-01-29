@@ -24,13 +24,15 @@
   This component should not have dependencies on Advene, so that it
   can be reused in other projects.
 
-FIXME: correctly implement text shape
 FIXME: when parsing SVG, allow a relative option to scale absolute values wrt. SVG-specified canvas size/current canvas size
 FIXME: XML load/dump should try to preserve unhandled information (especially TAL instructions)
+FIXME: find a way to pass search paths for xlink:href elements resolution
+FIXME: find a way to pass the background path
 """
 
 import gtk
 import cairo
+import urllib
 
 try:
     import advene.util.ElementTree as ET
@@ -549,8 +551,100 @@ class Text(Rectangle):
         textsizesel.set_value(self.textsize)
         vbox.pack_start(label_widget(_("Textsize"), textsizesel), expand=False)
         vbox.widgets['textsize']=textsizesel
-
+        
         return vbox
+
+class Image(Rectangle):
+    """Experimental Image shape.
+    
+    It serves as a placeholder for the background image for the
+    moment, which is handled in the ShapeDrawer class. So the render
+    method is not implemented.
+    """
+    SHAPENAME=_("Image")
+    SVGTAG='image'
+
+    # List of attributes holding the shape coordinates. The second
+    # element of the tuple is the index in the dimension tuple (width,
+    # height) used to compute relative sizes
+    coords=( ('x', 0),
+             ('y', 1),
+             ('width', 0),
+             ('height', 1) )        
+
+    def __init__(self, name=SHAPENAME, color="green"):
+        super(Image, self).__init__(name, color)
+        self.uri=''
+
+    def render(self, pixmap, invert=False):
+        # FIXME
+        return
+
+    def parse_svg(cls, element, context):
+        """Parse a SVG representation.
+
+        The context object must implement a 'dimensions' method that
+        will return a (width, height) tuple corresponding to the
+        canvas size.
+
+        @param element: etree.Element to parse
+        @param context: the svg context
+        @return: an appropriate shape, or None if the class could not parse the element
+        """
+        if element.tag != cls.SVGTAG and element.tag != ET.QName(SVGNS, cls.SVGTAG):
+            return None
+        s=cls(name=element.attrib.get('name', cls.SHAPENAME))
+        s.uri=element.attrib.get('xlink:href', element.attrib.get('{http://www.w3.org/1999/xlink}href', ''))
+        c=cls.xml2coords(cls.coords, element.attrib, context.dimensions())
+        for n, v in c.iteritems():
+            setattr(s, n, v)
+        if hasattr(s, 'post_parse'):
+            s.post_parse()
+        return s
+    parse_svg=classmethod(parse_svg)
+
+    def get_svg(self, relative=False, size=None):
+        """Return a SVG representation of the shape.
+
+        @param relative: should dimensions be relative to the container size or absolute?
+        @type relative: boolean
+        @param size: the container size in pixels
+        @type size: a couple of int
+        @return: the SVG representation
+        @rtype: elementtree.Element
+        """
+        attrib=self.coords2xml(relative, size)
+        attrib['name']=self.name
+        attrib['xlink:href']=self.uri
+        e=ET.Element(ET.QName(SVGNS, self.SVGTAG), attrib=attrib)
+        if self.link:
+            a=ET.Element('a', attrib={ 'xlink:href': self.link,
+                                       'title': self.link_label or _("Link to %s") % self.link })
+            a.append(e)
+            return a
+        else:
+            return e
+
+    def edit_properties_widget(self):
+        """Build a widget to edit the shape properties.
+        """
+        vbox=super(Image, self).edit_properties_widget()
+
+        def label_widget(label, widget):
+            hb=gtk.HBox()
+            hb.add(gtk.Label(label))
+            hb.pack_start(widget, expand=False)
+            return hb
+
+        # URI
+        urisel = gtk.Entry()
+        urisel.set_text(self.uri)
+        vbox.pack_start(label_widget(_("Href"), urisel), expand=False)
+        vbox.widgets['uri']=urisel
+        return vbox
+
+    def __contains__(self, point):
+        return False
 
 class Line(Rectangle):
     """A simple Line.
@@ -731,7 +825,7 @@ class Link(Shape):
         if o is None:
             print "Invalid <a> content in SVG"
             return None
-        o.link=element.attrib.get('xlink:href', '')
+        o.link=element.attrib.get('xlink:href', element.attrib.get('{http://www.w3.org/1999/xlink}href', ''))
         o.link_label=element.attrib.get('title', 'Link to ' + o.link)
         return o
     parse_svg=classmethod(parse_svg)
@@ -924,7 +1018,6 @@ class ShapeDrawer:
 
         def dump_svg(i, o):
             s=o.get_svg()
-            ET_indent(s)
             ET.dump(s)
             return True
 
@@ -1042,8 +1135,6 @@ class ShapeDrawer:
     def get_svg(self, relative=False):
         """Return a SVG representation.
         """
-        # FIXME: add a new parameter "with_background", to generate
-        # the <image> code for the background
         size=self.dimensions()
         root=ET.Element(ET.QName(SVGNS, 'svg'), {
                 'version': '1',
@@ -1056,8 +1147,19 @@ class ShapeDrawer:
                 # correct rendering in firefox
                 'xmlns': "http://www.w3.org/2000/svg",
                 })
+        bg=[ o[0] for o in self.objects if isinstance(o, Image) and o.name == 'background' ]
+        if bg:
+            # There is background. Put it first.
+            bg=bg[0]
+            root.append(bg.get_svg(relative=relative, size=size))
+        else:
+            bg=None
         for o in self.objects:
+            if o == bg:
+                # The background already has been added
+                continue
             root.append(o[0].get_svg(relative=relative, size=size))
+        ET_indent(root)
         return root
 
     def parse_svg(self, et):
@@ -1071,7 +1173,37 @@ class ShapeDrawer:
             for clazz in defined_shape_classes:
                 o=clazz.parse_svg(c, self)
                 if o is not None:
-                    self.objects.append( (o, o.name) )
+                    if isinstance(o, Image) and o.name == 'background':
+                        o.x=0
+                        o.y=0
+                        o.width, o.height=self.dimensions()
+                        # We have a background image.
+                        if o.uri.startswith('http:'):
+                            # http url, download the file
+                            (fname, header)=urllib.urlretrieve(o.uri)
+                            i=gtk.Image()
+                            print "Loaded background from ", o.uri, " copy in", fname
+                            i.set_from_file(fname)
+                        else:
+                            # Consider it as local.
+                            i=gtk.image_new_from_file(o.uri)
+                            if i.get_storage_type() != gtk.IMAGE_PIXBUF:
+                                p=gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB,
+                                                 True, 8, o.width, o.height)
+                                p.fill(0xdeadbeaf)
+                                i=gtk.image_new_from_pixbuf(p)
+                            print "Loaded background from ", o.uri, i, i.get_storage_type()
+                            self.background=i
+                        # We insert the background at the beginning of
+                        # the object stack, so that other shapes are
+                        # drawn over it.
+                        self.objects.insert(0, (o, o.name))
+                        # Update the size of the widget
+                        p=self.background.get_pixbuf()
+                        self.canvaswidth=p.get_width()
+                        self.canvasheight=p.get_height()
+                    else:
+                        self.objects.append( (o, o.name) )
                     break
         self.plot()
         return True
@@ -1085,7 +1217,7 @@ class ShapeEditor:
         self.background=None
         self.drawer=ShapeDrawer(callback=self.callback,
                                 background=background)
-        self.shapes = [ Rectangle, Circle, Line, Text ]
+        self.shapes = [ Rectangle, Circle, Line, Text, Image ]
 
         self.colors = COLORS
         self.defaultcolor = self.colors[0]
@@ -1201,8 +1333,7 @@ class ShapeEditor:
         control.pack_start(self.treeview, expand=False)
 
         def dump_svg(b):
-            s=self.drawer.get_svg(relative=True)
-            ET_indent(s)
+            s=self.drawer.get_svg(relative=False)
             ET.dump(s)
 
         def load_svg(b):
@@ -1241,10 +1372,15 @@ def main():
     #win.set_default_size(800, 600)
     win.connect("delete-event", lambda w, e: gtk.main_quit())
 
-    i=gtk.Image()
-    i.set_from_file(bg)
+    if bg.endswith('.svg'):
+        ed=ShapeEditor()
+        root=ET.parse(bg).getroot()
+        ed.drawer.parse_svg(root)
+    else:
+        i=gtk.Image()
+        i.set_from_file(bg)
 
-    ed=ShapeEditor(background=i)
+        ed=ShapeEditor(background=i)
     win.add(ed.widget)
 
     win.show_all()
@@ -1266,8 +1402,7 @@ def ET_indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
-# FIXME: should do some introspection ([ c for c in ??? if isinstance(c, Shape) ])
-defined_shape_classes=[ Rectangle, Circle, Text, Line, Link, Text ]
+defined_shape_classes=[ c for c in locals().values() if hasattr(c, 'SHAPENAME') ]
 
 # Start it all
 if __name__ == '__main__':
