@@ -50,6 +50,7 @@ from advene.model.exception import AdveneException
 import advene.util.ElementTree as ET
 ET._namespace_map[config.data.namespace]='advene'
 ET._namespace_map['http://www.w3.org/2000/svg']='svg'
+ET._namespace_map['http://www.w3.org/1999/xlink']='xlink'
 
 def fourcc2rawcode (code):
     """VideoLan to PIL code conversion.
