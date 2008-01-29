@@ -1694,8 +1694,14 @@ class Packages(Common):
                 objet.__setattr__(attribute, data)
                 if 'redirect' in query and query['redirect']:
                     return self.send_redirect(query['redirect'])
-                res=[ self.start_html(_("Value updated")) ]
-                res.append (_("""
+                if expr.endswith('/content'):
+                    # We have updated the content.data of an element
+                    element = context.evaluateValue(expr[:-8])
+                    if isinstance(element, View) and element.matchFilter['class'] in ('*', 'package'):
+                        return self.send_redirect('/packages/advene/view/' + element.id)
+                    else:
+                        res=[ self.start_html(_("Value updated")) ]
+                        res.append (_("""
                 <h1>Value updated</h1>
                 The value of %(path)s has been updated to
                 <pre>
@@ -1703,7 +1709,7 @@ class Packages(Common):
                 </pre>
                 """) % { 'path': "/".join([tales, attribute]),
                          'value': cgi.escape(data) })
-                return "".join(res)
+                        return "".join(res)
             else:
                 # Fallback mode : maybe we were in a dict, and
                 # attribute is the id of the object in the dict
