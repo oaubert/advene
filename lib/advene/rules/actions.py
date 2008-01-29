@@ -630,7 +630,6 @@ class SoundPlayer:
     def linux_play(self, fname):
         """Play the given file. Requires aplay.
         """
-        print "Playing ", fname
         subprocess.call( [ '/usr/bin/aplay', fname ] )
         return True
 
