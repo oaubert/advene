@@ -614,10 +614,10 @@ class Image(Rectangle):
         @return: the SVG representation
         @rtype: elementtree.Element
         """
-        e=ET.Element(ET.QName(SVGNS, self.SVGTAG), attrib=attrib)
         attrib=self.coords2xml(relative, size)
         attrib['name']=self.name
         attrib['xlink:href']=self.uri
+        e=ET.Element(ET.QName(SVGNS, self.SVGTAG), attrib=attrib)
         if self.link:
             a=ET.Element('a', attrib={ 'xlink:href': self.link,
                                        'title': self.link_label or _("Link to %s") % self.link })
@@ -1221,12 +1221,13 @@ class ShapeDrawer:
                                 uri=os.path.join( current_path, o.uri)
                             else:
                                 uri=o.uri
-                            i=gtk.image_new_from_file(uri)
+                            i=gtk.Image()
+                            i.set_from_file(uri)
                             if i.get_storage_type() != gtk.IMAGE_PIXBUF:
                                 p=gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB,
                                                  True, 8, o.width, o.height)
                                 p.fill(0xdeadbeaf)
-                                i=gtk.image_new_from_pixbuf(p)
+                                i.set_from_pixbuf(p)
                             print "Loaded background from ", uri
                             self.background=i
                         # We insert the background at the beginning of
