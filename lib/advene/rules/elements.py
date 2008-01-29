@@ -1156,6 +1156,7 @@ class ECACatalog:
         'advanced': _("Advanced player control"),
         'gui': _("GUI actions"),
         'popup': _("Popup actions"),
+        'sound': _("Sound actions"),
         }
 
     def __init__(self):

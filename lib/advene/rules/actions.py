@@ -261,7 +261,7 @@ def register(controller=None):
             parameters={'clip': _("Clip id")},
             defaults={'clip': 'string:'},
             predefined=ac.PlaySoundClip_predefined,
-            category='player',
+            category='sound',
             )
                                )
     controller.register_action(RegisteredAction(
@@ -270,7 +270,7 @@ def register(controller=None):
             description=_("Play a sound"),
             parameters={'filename': _("Sound filename")},
             defaults={'filename': 'string:test.wav'},
-            category='player',
+            category='sound',
             )
                                )
 class DefaultActionsRepository:
