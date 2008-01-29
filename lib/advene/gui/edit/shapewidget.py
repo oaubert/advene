@@ -30,6 +30,7 @@ FIXME: find a way to pass search paths for xlink:href elements resolution
 FIXME: find a way to pass the background path
 """
 
+import os
 import gtk
 import cairo
 import urllib
@@ -1182,10 +1183,13 @@ class ShapeDrawer:
         ET_indent(root)
         return root
 
-    def parse_svg(self, et):
+    def parse_svg(self, et, current_path=''):
         """Parse a SVG representation
 
         et is an ET.Element with tag == 'svg'
+        
+        path is the file path of the parsed element (so that relative
+        hrefs can be resolved)
         """
         if et.tag != 'svg' and et.tag != ET.QName(SVGNS, 'svg'):
             print "Not a svg file"
@@ -1206,13 +1210,19 @@ class ShapeDrawer:
                             i.set_from_file(fname)
                         else:
                             # Consider it as local.
-                            i=gtk.image_new_from_file(o.uri)
+                            if current_path and not os.path.exists(o.uri):
+                                # The file does not exist. Try to
+                                # prepend the context path.
+                                uri=os.path.join( current_path, o.uri)
+                            else:
+                                uri=o.uri
+                            i=gtk.image_new_from_file(uri)
                             if i.get_storage_type() != gtk.IMAGE_PIXBUF:
                                 p=gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB,
                                                  True, 8, o.width, o.height)
                                 p.fill(0xdeadbeaf)
                                 i=gtk.image_new_from_pixbuf(p)
-                            print "Loaded background from ", o.uri, i, i.get_storage_type()
+                            print "Loaded background from ", uri
                             self.background=i
                         # We insert the background at the beginning of
                         # the object stack, so that other shapes are
