@@ -614,10 +614,10 @@ class Image(Rectangle):
         @return: the SVG representation
         @rtype: elementtree.Element
         """
+        e=ET.Element(ET.QName(SVGNS, self.SVGTAG), attrib=attrib)
         attrib=self.coords2xml(relative, size)
         attrib['name']=self.name
         attrib['xlink:href']=self.uri
-        e=ET.Element(ET.QName(SVGNS, self.SVGTAG), attrib=attrib)
         if self.link:
             a=ET.Element('a', attrib={ 'xlink:href': self.link,
                                        'title': self.link_label or _("Link to %s") % self.link })
@@ -1172,6 +1172,14 @@ class ShapeDrawer:
         if bg:
             # There is background. Put it first.
             bg=bg[0]
+            # Force the background image dimension
+            bg.x=0
+            bg.y=0
+            # The background image has presumably been rendered. Get
+            # its dimensions.
+            if hasattr(bg, '_pixbuf'):
+                bg.width=bg._pixbuf.get_width()
+                bg.height=bg._pixbuf.get_height()
             root.append(bg.get_svg(relative=relative, size=size))
         else:
             bg=None
@@ -1198,9 +1206,6 @@ class ShapeDrawer:
                 o=clazz.parse_svg(c, self)
                 if o is not None:
                     if isinstance(o, Image) and o.name == 'background':
-                        o.x=0
-                        o.y=0
-                        o.width, o.height=self.dimensions()
                         # We have a background image.
                         if o.uri.startswith('http:'):
                             # http url, download the file
@@ -1228,10 +1233,13 @@ class ShapeDrawer:
                         # the object stack, so that other shapes are
                         # drawn over it.
                         self.objects.insert(0, (o, o.name))
-                        # Update the size of the widget
+                        # Update the size of the shape and the widget
                         p=self.background.get_pixbuf()
-                        self.canvaswidth=p.get_width()
-                        self.canvasheight=p.get_height()
+                        o._pixbuf=p
+                        o.x=0
+                        o.y=0
+                        o.width=self.canvaswidth=p.get_width()
+                        o.height=self.canvasheight=p.get_height()
                     else:
                         self.objects.append( (o, o.name) )
                     break
