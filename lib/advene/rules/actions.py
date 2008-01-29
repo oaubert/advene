@@ -635,6 +635,7 @@ class SoundPlayer:
         return True
 
     def win32_play(self, fname):
+        from winsound import PlaySound, SND_FILENAME, SND_ASYNC
         PlaySound(fname, SND_FILENAME|SND_ASYNC)
         return True
 
@@ -651,7 +652,6 @@ class SoundPlayer:
         return True
 
     if config.data.os == 'win32':
-        from winsound import PlaySound, SND_FILENAME, SND_ASYNC
         play=win32_play
     elif config.data.os == 'darwin':
         play=macosx_play
