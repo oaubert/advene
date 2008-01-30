@@ -565,7 +565,7 @@ class InteractiveResult(AdhocView):
         except IndexError:
             a=None
 
-        ev=advene.gui.evaluator.Window(globals_=globals(),
+        ev=advene.gui.evaluator.Evaluator(globals_=globals(),
                                        locals_={'package': p,
                                                 'result': l,
                                                 'p': p,
