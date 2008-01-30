@@ -291,7 +291,7 @@ class Differ:
         el.title=s.title
         el.mimetype=s.mimetype
         for n in ('color', 'item_color'):
-            el.setMetaData(config.data.namespace, n, s.getMetaData(config.data.namespace, n))
+            el.setMetaData(config.data.namespace, n, (s.getMetaData(config.data.namespace, n) or ''))
         sch.annotationTypes.append(el)
         return el
 
