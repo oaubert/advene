@@ -94,9 +94,9 @@ class Metaed(object):
             self._getMeta ().removeChild (e)
             return
 
-        for n in e._get_childNodes():
-            if n.nodeType in (TEXT_NODE, ELEMENT_NODE):
-                e.removeChild(n)
+        for c in e._get_childNodes():
+            if c.nodeType in (TEXT_NODE, ELEMENT_NODE):
+                e.removeChild(c)
         if value is not None:
             new = e._get_ownerDocument().createTextNode(value)
             e.appendChild(new)
