@@ -327,7 +327,13 @@ class AdveneGUI (Connect):
         self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
         self.quicksearch_entry.connect('activate', self.do_quicksearch)
         hb.pack_start(self.quicksearch_entry, expand=False)
-        self.quicksearch_button.connect('button-press-event', quicksearch_options, modify_source)
+        def modify_source_and_search(i, expr, label):
+            """Modify the search source and launch the search.
+            """
+            modify_source(i, expr, label)
+            self.do_quicksearch()
+            return True
+        self.quicksearch_button.connect('button-press-event', quicksearch_options, modify_source_and_search)
         hb.pack_start(self.quicksearch_button, expand=False, fill=False)
         hb.show_all()
 
