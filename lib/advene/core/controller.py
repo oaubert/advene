@@ -490,6 +490,7 @@ class AdveneController:
         if not normal:
             # No "normal" search terms. Return the result.
             return source
+        normal=[ normalize_case(w) for w in normal ]
         res=[]
         for e in source:
             data=data_func(e)
