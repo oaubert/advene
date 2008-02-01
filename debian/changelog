@@ -14,6 +14,11 @@ advene (0.27) unstable; urgency=low
   
      * PopupGotoOutgoingRelated: displays a navigation popup based on
        relations.
+  
+     * PlaySoundClip: plays a soundclip from the 'soundclips' resource
+       folder of the package
+  
+     * PlaySound: plays a sound file
 
   * General:
   
@@ -23,6 +28,9 @@ advene (0.27) unstable; urgency=low
      * The package can automatically be saved when saving the package. This
        behaviour is tunable in Edit/Preferences/Standard views
        
+     * The SVG-subset editor handles text shapes and links, and shapes can
+       be reordered
+
   * Quicksearch: 
 
      * Search-options are now displayed when left-clicking on the search
