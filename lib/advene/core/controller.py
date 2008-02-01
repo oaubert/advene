@@ -487,6 +487,9 @@ class AdveneController:
         for w in exceptions:
             w=normalize_case(w)
             source=[ e for e in source if w not in data_func(e) ]
+        if not normal:
+            # No "normal" search terms. Return the result.
+            return source
         res=[]
         for e in source:
             data=data_func(e)
