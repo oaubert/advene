@@ -320,16 +320,21 @@ class Menu:
         ret=None
         if res == gtk.RESPONSE_OK:
             re_number=re.compile('(\d+)')
+            re_struct=re.compile('^num=(\d+)$', re.MULTILINE)
             offset=s.get_value_as_int()-1
             l=at.annotations
             l.sort(key=lambda a: a.fragment.begin)
             for i, a in enumerate(l[offset:]):
-                if re_number.search(a.content.data):
+                if a.type.mimetype == 'application/x-advene-structured':
+                    if re_struct.search(a.content.data):
+                        # A 'num' field is present. Update it.
+                        a.content.data=re_struct.sub("num=%d" % (i+1), a.content.data)
+                    else:
+                        # Insert the num field
+                        a.content.data=("num=%d\n" % (i+1)) + a.content.data
+                elif re_number.search(a.content.data):
                     # There is a number. Simply substitute the new one.
                     a.content.data=re_number.sub(str(i+1), a.content.data)
-                elif a.type.mimetype == 'application/x-advene-structured':
-                    # No number, but it is structured. Insert the num field
-                    a.content.data=("num=%d\n" % (i+1)) + a.content.data
                 elif a.type.mimetype == 'text/plain':
                     # Overwrite the contents
                     a.content.data=str(i+1)
