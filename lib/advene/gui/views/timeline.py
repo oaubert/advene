@@ -2541,7 +2541,7 @@ class TimeLine(AdhocView):
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['annotation-type'],
-                        gtk.gdk.ACTION_MOVE)
+                        gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_COPY)
         tb.insert(b, -1)
         
         # Selection menu
