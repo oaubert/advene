@@ -747,7 +747,7 @@ class AdveneGUI (Connect):
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
-    def check_for_update(self):
+    def check_for_update(self, *p):
         timeout=socket.getdefaulttimeout()
         try:
             socket.setdefaulttimeout(1)
@@ -764,12 +764,11 @@ class AdveneGUI (Connect):
         minor=int(minor)
         if (1000 * major + minor) > (1000 * advene.core.version.major + advene.core.version.minor):
             # An update is available.
-            msg=textwrap.fill(_("<b>Advene %(version)s has been released</b> on %(date)s.\nYou can download the latest version from the Advene website: http://liris.cnrs.fr/advene/") % info, 50)
+            msg=textwrap.fill(_("""<span background="#ff8888" size="large"><b>Advene %(version)s has been released</b> on %(date)s.\nYou can download the latest version from the Advene website: http://liris.cnrs.fr/advene/</span>""") % info, 50)
             l=gtk.Label()
             l.set_markup(msg)
             l.set_line_wrap_mode(True)
             self.popupwidget.display(l, title=_("Advene release"))
-            dialog.message_dialog(msg)
         return False
         
     def update_color(self, element):
