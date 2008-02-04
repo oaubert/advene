@@ -762,10 +762,11 @@ class AdveneGUI (Connect):
         major, minor = info['version'].split('.')
         major=int(major)
         minor=int(minor)
+        info['current']=advene.core.version.version
         if (1000 * major + minor) > (1000 * advene.core.version.major + advene.core.version.minor):
             # An update is available.
             v=gtk.VBox()
-            msg=textwrap.fill(_("""<span background="#ff8888" size="large"><b>Advene %(version)s has been released</b> on %(date)s.\nYou can download the latest version from the Advene website: http://liris.cnrs.fr/advene/</span>""") % info, 55)
+            msg=textwrap.fill(_("""<span background="#ff8888" size="large"><b>Advene %(version)s has been released</b> on %(date)s, but you are running version %(current)s.\nYou can download the latest version from the Advene website: http://liris.cnrs.fr/advene/</span>""") % info, 55)
             l=gtk.Label()
             l.set_markup(msg)
             #l.set_line_wrap_mode(True)
