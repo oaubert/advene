@@ -548,6 +548,8 @@ class Config(object):
         """Return the user's homedir.
         """
         h=None
+        if self.os == 'win32' and os.environ.has_key('USERPROFILE'):
+            return os.environ['USERPROFILE']
         try:
             h=os.path.expanduser('~')
         except:
@@ -555,7 +557,7 @@ class Config(object):
             if os.environ.has_key('HOME'):
                 h=os.environ['HOME']
             elif os.environ.has_key('HOMEPATH'):
-                # Windows
+                # Fallback for Windows
                 h=os.path.join(os.environ['HOMEDRIVE'],
                                os.environ['HOMEPATH'])
             else:
