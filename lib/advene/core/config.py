@@ -229,6 +229,10 @@ class Config(object):
             'language': '',
             'save-default-workspace': 'never',
             'restore-default-workspace': 'never',
+            # Daily check for updates on the Advene website ?
+            'update-check': False,
+            # Last update time
+            'last-update': 0,
             }
 
         # Player options
