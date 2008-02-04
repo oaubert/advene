@@ -55,7 +55,7 @@ class Config:
     def build_widget(self):
         ew=EditWidget(self.options.__setitem__, self.options.get)
         ew.set_name(_("Initial Advene configuration"))
-        ew.add_label("""<b>Welcome in Advene</b>\nThis is the first time that you run Advene. Please answer some basic configuration questions. You will be able to modify these choices from the Advene interface, in the Edit/Preferences menu.""")
+        ew.add_label("""<span size="large"><b>Welcome in Advene</b>\nThis is the first time that you run Advene. Please answer some basic configuration questions. You will be able to modify these choices from the Advene interface, in the Edit/Preferences menu.</span>""")
         ew.add_option(_("Interface language"), 'language', _("Language used for the interface"),
                       {
                 "English": 'C',
@@ -64,7 +64,10 @@ class Config:
                 })
         ew.add_checkbox(_("Daily check for Advene updates on the Advene website"), 'update-check', _("Daily check for updates on the Advene website"))
 
-        ew.add_dir_selector(_("Standard directory for data files"), "data", _("Standard directory for data files"))
+        ew.add_dir_selector(_("Preferred directory for data files"), "data", _("Preferred directory for storing data files (Advene packages)"))
         #ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
-        ew.add_dir_selector(_("Movie path"), "moviepath", _("List of directories (separated by %s) to search for movie files (_ means package directory)") % os.path.pathsep)        
+        ew.add_dir_selector(_("Directories to search for movies"), "moviepath", _("List of directories (separated by %(pathsep)s) to search for movie files. _ means the same directory as the package referencing the movie file. For instance: _%(pathsep)s%(dir)s%(sep)sadvene") % { 
+                'pathsep': os.path.pathsep,
+                'sep': os.path.sep,
+                'dir': config.data.get_homedir() })
         return ew
