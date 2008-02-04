@@ -155,6 +155,12 @@ Either the Advene software is not installed or it is badly configured.
 Check your .advenerc file.""" % gladefile
         sys.exit(1)
 
+    # First time configuration
+    if config.data.first_run:
+        import advene.gui.util.initialconfig
+        c=advene.gui.util.initialconfig.Config()
+        c.main()
+
     if config.data.options.simple:
         import advene.gui.simple
         gui = advene.gui.simple.SimpleAdveneGUI ()
