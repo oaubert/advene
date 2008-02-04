@@ -764,11 +764,19 @@ class AdveneGUI (Connect):
         minor=int(minor)
         if (1000 * major + minor) > (1000 * advene.core.version.major + advene.core.version.minor):
             # An update is available.
-            msg=textwrap.fill(_("""<span background="#ff8888" size="large"><b>Advene %(version)s has been released</b> on %(date)s.\nYou can download the latest version from the Advene website: http://liris.cnrs.fr/advene/</span>""") % info, 50)
+            v=gtk.VBox()
+            msg=textwrap.fill(_("""<span background="#ff8888" size="large"><b>Advene %(version)s has been released</b> on %(date)s.\nYou can download the latest version from the Advene website: http://liris.cnrs.fr/advene/</span>""") % info, 55)
             l=gtk.Label()
             l.set_markup(msg)
-            l.set_line_wrap_mode(True)
-            self.popupwidget.display(l, title=_("Advene release"))
+            #l.set_line_wrap_mode(True)
+            v.add(l)
+            b=gtk.Button(_("Go to the website"))
+            def open_site(b):
+                self.controller.open_url('http://liris.cnrs.fr/advene/download.html')
+                return True
+            b.connect('clicked', open_site)
+            v.pack_start(b, expand=False)
+            self.popupwidget.display(v, title=_("Advene release"))
         return False
         
     def update_color(self, element):
