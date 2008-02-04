@@ -207,6 +207,8 @@ class Content(modeled.Modeled,
                     d['_error']=l
                     print "Syntax error in content: >%s<" % l
             return d
+        elif self.mimetype == 'application/x-advene-values':
+            return [ float(v) for v in self.data.split() ]
         #FIXME: we parse x-advene-ruleset as xml for the moment
         elif self.mimetype in ('text/xml',
                                'application/x-advene-ruleset',

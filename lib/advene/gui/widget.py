@@ -338,6 +338,31 @@ class AnnotationWidget(GenericColorButtonWidget):
         context.set_source_rgba(*rgba)
         context.fill_preserve()
 
+        # FIXME: if we have other specific renderings for different
+        # mimetypes, we will have to implement a plugin system
+        if self.annotation.content.mimetype == 'application/x-advene-values':
+            # Finalize the rectangle
+            context.stroke()
+            if width < 1:
+                return
+            # The annotation contains a list of space-separated values
+            # that should be treated as percentage (between 0.0 and
+            # 100.0) of the height (FIXME: define a scale somewhere)
+            l=[ (1 - v / 100.0) for v in self.annotation.content.parsed() ]
+            s=len(l)
+            if width < s:
+                # There are more samples than available pixels. Downsample the data
+                l=l[::(s/width)+1]
+                s=len(l)
+            w=1.0 * width / s
+            c=0
+            context.set_source_rgba(0, 0, 0, self.alpha)
+            for v in l:
+                context.rectangle(int(c), int(height * v), int(w), height)
+                context.fill()
+                c += w
+            return
+
         # Draw the border
         context.set_source_rgba(0, 0, 0, self.alpha)
         if self.is_focus():
