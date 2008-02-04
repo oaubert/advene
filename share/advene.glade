@@ -685,6 +685,14 @@
 		  </child>
 
 		  <child>
+		    <widget class="GtkImageMenuItem" id="updatecheck1">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">Check for updates</property>
+		      <signal name="activate" handler="check_for_update" last_modification_time="Mon, 04 Feb 2008 20:53:39 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
 		    <widget class="GtkMenuItem" id="helpshortcuts">
 		      <property name="visible">True</property>
 		      <property name="label" translatable="yes">Display shortcuts</property>
