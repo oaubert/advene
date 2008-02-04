@@ -169,7 +169,8 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, callback=None):
     else:
         flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
     dialog = gtk.MessageDialog(None, flags,
-                               icon, button, label)
+                               icon, button)
+    dialog.set_markup(label)
     dialog.set_position(gtk.WIN_POS_CENTER_ALWAYS)
     dialog.connect("key_press_event", dialog_keypressed_cb)
     
