@@ -34,8 +34,11 @@ from sets import Set
 import re
 import cgi
 import itertools
+import urllib2
+import socket
 
 import advene.core.config as config
+import advene.core.version
 
 import gtk
 import gtk.glade
@@ -732,13 +735,43 @@ class AdveneGUI (Connect):
         # Use small toolbar button everywhere
         gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
 
-        # Everything is ready. We can notify the ApplicationStart
-        self.controller.notify ("ApplicationStart")
         self.event_source_update_display=gobject.timeout_add (100, self.update_display)
         self.event_source_slow_update_display=gobject.timeout_add (1000, self.slow_update_display)
+        # Do we need to make an update check
+        if (config.data.preferences['update-check'] 
+            and time.time() - config.data.preferences['last-update'] >= 24 * 60 * 60):
+            config.data.preferences['last-update']=time.time()
+            self.check_for_update()
+        # Everything is ready. We can notify the ApplicationStart
+        self.controller.notify ("ApplicationStart")
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
 
+    def check_for_update(self):
+        timeout=socket.getdefaulttimeout()
+        try:
+            socket.setdefaulttimeout(1)
+            u=urllib2.urlopen('http://liris.cnrs.fr/advene/version.txt')
+        except Exception, e:
+            socket.setdefaulttimeout(timeout)
+            return
+        socket.setdefaulttimeout(timeout)
+        data=u.read()
+        u.close()
+        info=dict( [ l.split(':') for l in data.splitlines() ] )
+        major, minor = info['version'].split('.')
+        major=int(major)
+        minor=int(minor)
+        if (1000 * major + minor) > (1000 * advene.core.version.major + advene.core.version.minor):
+            # An update is available.
+            msg=textwrap.fill(_("<b>Advene %(version)s has been released</b> on %(date)s.\nYou can download the latest version from the Advene website: http://liris.cnrs.fr/advene/") % info, 50)
+            l=gtk.Label()
+            l.set_markup(msg)
+            l.set_line_wrap_mode(True)
+            self.popupwidget.display(l, title=_("Advene release"))
+            dialog.message_dialog(msg)
+        return False
+        
     def update_color(self, element):
         """Update the color for the given element.
 
@@ -2670,7 +2703,7 @@ class AdveneGUI (Connect):
     def on_preferences1_activate (self, button=None, data=None):
         direct_options=('history-size-limit', 'scroll-increment', 'time-increment', 'language',
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit', 
-                        'remember-window-size', 'expert-mode',
+                        'remember-window-size', 'expert-mode', 'update-check',
                         'package-auto-save', 'package-auto-save-interval',
                         'save-default-workspace', 'restore-default-workspace')
         cache={
@@ -2712,6 +2745,7 @@ class AdveneGUI (Connect):
         ew.add_spin(_("Scroll increment"), "scroll-increment", _("On most annotations, control+scrollwheel will increment/decrement their bounds by this value (in ms)."), 10, 2000)
 
         ew.add_title(_("General"))
+        ew.add_checkbox(_("Daily update check"), 'update-check', _("Daily check for updates on the Advene website"))
         ew.add_option(_("On exit,"), 'imagecache-save-on-exit', 
                       _("How to handle screenshots on exit"), 
                       {
