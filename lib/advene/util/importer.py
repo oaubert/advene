@@ -65,6 +65,7 @@ from advene.model.fragment import MillisecondFragment
 import advene.util.helper as helper
 import advene.util.handyxml as handyxml
 import xml.dom
+import advene.util.ElementTree as ET
 
 IMPORTERS=[]
 
@@ -172,8 +173,30 @@ class GenericImporter(object):
     def update_statistics(self, elementtype):
         self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
 
+    def ensure_new_type(self, prefix="at_converted"):
+        """Create a new type.
+        """
+        l=[ at.id for at in self.package.annotationTypes ]
+        i = 1
+        atid = None
+        while atid is None:
+            t=prefix + str(i)
+            if not t in l:
+                atid = t
+            else:
+                i += 1
+
+        s=self.package.get_element_by_id('s_converted')
+        if s is None:
+            s=self.create_schema(id_='s_converted', title='Converted types')
+        self.defaulttype=self.create_annotation_type(s, atid, title="Converted data")
+        return self.defaulttype
+            
     def create_annotation_type (self, schema, id_, author=None, date=None, title=None, 
                                 representation=None, description=None, mimetype=None):
+        l=[ t.id for t in schema.annotationTypes if t.id == id_ ]
+        if l:
+            return l[0]
         at=schema.createAnnotationType(ident=id_)
         at.author=author or schema.author
         at.date=date or self.timestamp
@@ -194,6 +217,9 @@ class GenericImporter(object):
         return at
 
     def create_schema (self, id_, author=None, date=None, title=None, description=None):
+        l=[ t.id for t in self.package.schemas if t.id == id_ ]
+        if l:
+            return l[0]
         schema=self.package.createSchema(ident=id_)
         schema.author=author or self.author
         schema.date=date or self.timestamp
@@ -385,6 +411,7 @@ class TextImporter(GenericImporter):
         f=open(filename, 'r')
         if self.package is None:
             self.init_package(filename=filename)
+        self.ensure_new_type()
         self.convert(self.iterator(f))
         self.progress(1.0)
         return self.package
@@ -1298,6 +1325,72 @@ class IRIImporter(GenericImporter):
         self.progress(1.0)
         return self.package
 register(IRIImporter)
+
+class IRIDataImporter(GenericImporter):
+    """IRIData importer.
+    """
+    name = _("IRIData importer")
+
+    def __init__(self, **kw):
+        super(IRIDataImporter, self).__init__(**kw)
+
+    def can_handle(fname):
+        if fname.endswith('.xml'):
+            return 60
+        else:
+            return 0
+    can_handle=staticmethod(can_handle)
+
+    def iterator(self, soundroot):
+        progress = .1
+        self.progress(progress, _("Parsing sound values"))
+        data=[ float(value.attrib['c1max']) 
+            for value in soundroot 
+            if value.tag == 'value' ]
+        m=max(data)
+        # sample is the length of each sample in ms
+        sample=int(float(soundroot.attrib['sampling']))
+        n=len(data)
+        # We store the values by packets of 50
+        size=50
+        incr = 1.0 / n
+        progress = .1
+        self.progress(progress, _("Creating annotations"))
+        for c in range(0, n / size):
+            progress += incr
+            self.progress(progress, '')
+            yield {
+                'begin': c * size * sample,
+                'end': (c + 1) * size * sample,
+                # We write space-separated normalized values
+                'content': " ".join([ str(v / m * 100.0) for v in data[c*size:(c+1)*size] ])
+                }
+        rest=data[(c+1)*size:]
+        if rest:
+            yield {
+                'begin': (c+1) * size * sample,
+                'duration': len(rest) * sample,
+                'content': " ".join([ str(v / m * 100.0) for v in rest ])
+                }
+
+    def process_file(self, filename):
+        root=ET.parse(filename).getroot()
+        sound=root.find('sound')
+        if root.tag != 'iri' or sound is None:
+            self.log("Invalid file")
+            return
+        self.progress(0.1, _("Initializing package"))
+        p, self.defaulttype=self.init_package(filename=filename,
+                                              schemaid='s_converted',
+                                              annotationtypeid='at_sound_sample')
+        if self.package is None:
+            self.package=p
+        self.defaulttype.mimetype='application/x-advene-values'
+
+        self.convert(self.iterator(sound))
+        self.progress(1.0)
+        return self.package
+register(IRIDataImporter)
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
