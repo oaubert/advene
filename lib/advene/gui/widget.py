@@ -356,7 +356,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                 s=len(l)
             w=1.0 * width / s
             c=0
-            context.set_source_rgba(0, 0, 0, self.alpha)
+            context.set_source_rgba(0, 0, 0, .5)
             for v in l:
                 context.rectangle(int(c), int(height * v), int(w), height)
                 context.fill()
