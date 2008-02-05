@@ -90,7 +90,7 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
         return "%s#data_%s" % (self.package.uri, p)
 
     def getStream(self):
-        return open(self.file_, 'r')
+        return open(self.file_, 'rb')
 
 class Resources:
     """Class accessing a resource dir.

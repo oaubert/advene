@@ -1421,7 +1421,7 @@ class GenericContentHandler (ContentHandler):
             fname=dialog.get_filename(default_file=self.fname)
         if fname is not None:
             try:
-                f=open(fname, 'r')
+                f=open(fname, 'rb')
             except IOError, e:
                 dialog.message_dialog(
                     _("Cannot read the data:\n%s") % unicode(e),
@@ -1430,7 +1430,6 @@ class GenericContentHandler (ContentHandler):
             self.set_filename(fname)
 
             size=os.stat(self.fname).st_size
-            f=open(self.fname, 'rb')
             self.data = f.read(size + 2)
             f.close()
 
