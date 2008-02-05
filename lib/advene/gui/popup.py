@@ -108,7 +108,7 @@ class Menu:
             basename = os.path.basename(filename)
             id_=re.sub('[^a-zA-Z0-9_.]', '_', basename)
         size=os.stat(filename).st_size
-        f=open(filename, 'r')
+        f=open(filename, 'rb')
         parent[id_]=f.read(size + 2)
         f.close()
         el=parent[id_]
