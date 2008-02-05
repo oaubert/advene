@@ -21,7 +21,10 @@
 
 name="MPEG7 importer"
 
+from gettext import gettext as _
+
 import re
+import time
 
 import advene.core.config as config
 from advene.util.importer import GenericImporter
@@ -30,9 +33,12 @@ import advene.util.ElementTree as ET
 def register(controller=None):
     print "Registering ", name
     controller.register_importer(MPEG7Importer)
+    # Also register time formatting global methods for MPEG7 export
+    controller.register_global_method(mpeg7_time)
+    controller.register_global_method(mpeg7_duration)
     return True
 
-# Should be handled by xml.utils.iso8601.parse(repr), but fails in
+# Should be handled by xml.utils.iso8601.parse(repr), but it fails with
 # some samples.
 # Cf http://www-nlpir.nist.gov/projects/tv2005/master.shot.boundaries/time.elements
 # T00:00:00:0F14112000
@@ -60,8 +66,7 @@ class MPEG7Importer(GenericImporter):
     can_handle=staticmethod(can_handle)
     
     def process_file(self, filename):
-        f=open(filename, 'r')
-        tree=ET.parse(f)
+        tree=ET.parse(filename)
         root=tree.getroot()
 
         p, at=self.init_package(filename=filename,
@@ -129,6 +134,16 @@ class MPEG7Importer(GenericImporter):
                 'duration': duration
                 }
 
+
+def mpeg7_time(target, context):
+    """Formats a time (in ms) into a MPEG7-compatible representation.
+    """
+    return "T%s:%03dF1000" % (time.strftime("%H:%M:%S", time.gmtime(target / 1000)), target % 1000)
+
+def mpeg7_duration(target, context):
+    """Formats a duration (in ms) into a MPEG7-compatible representation.
+    """
+    return "PT%s%03dN1000" % (time.strftime("%HH%MM%SS", time.gmtime(target / 1000)), target % 1000)
 
 if __name__ == "__main__":
     import sys

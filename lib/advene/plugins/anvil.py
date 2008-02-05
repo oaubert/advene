@@ -49,8 +49,7 @@ class AnvilImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
     
     def process_file(self, filename):
-        f=open(filename, 'r')
-        tree=ET.parse(f)
+        tree=ET.parse(filename)
         root=tree.getroot()
 
         p, at=self.init_package(filename=filename,

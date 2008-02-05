@@ -53,8 +53,7 @@ class AnnotationGraphImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
     
     def process_file(self, filename, dest=None):
-        f=open(filename, 'r')
-        tree=ET.parse(f)
+        tree=ET.parse(filename)
         root=tree.getroot()
 
         p, at=self.init_package(filename=dest,
