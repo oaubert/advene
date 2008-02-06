@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-05 11:37+0100\n"
-"PO-Revision-Date: 2008-02-05 11:45+0100\n"
+"POT-Creation-Date: 2008-02-06 15:16+0100\n"
+"PO-Revision-Date: 2008-02-06 15:18+0100\n"
 "Last-Translator: Olivier Aubert <olivier.aubert@liris.cnrs.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
 "MIME-Version: 1.0\n"
@@ -419,7 +419,7 @@ msgstr "Pas de message"
 msgid "Shotdetect importer"
 msgstr "Importateur Shotdetect"
 
-#: ../lib/advene/plugins/shotdetect.py:76
+#: ../lib/advene/plugins/shotdetect.py:75
 msgid "No shots"
 msgstr "Pas de plans"
 
@@ -2012,12 +2012,12 @@ msgid "Type"
 msgstr "Type"
 
 #: ../lib/advene/gui/views/table.py:121
-#: ../lib/advene/gui/edit/elements.py:1548
+#: ../lib/advene/gui/edit/elements.py:1547
 msgid "Begin"
 msgstr "Début"
 
 #: ../lib/advene/gui/views/table.py:122
-#: ../lib/advene/gui/edit/elements.py:1557 ../lib/advene/gui/simple.py:178
+#: ../lib/advene/gui/edit/elements.py:1556 ../lib/advene/gui/simple.py:178
 #: ../lib/advene/gui/main.py:353
 msgid "End"
 msgstr "Fin"
@@ -2757,7 +2757,7 @@ msgid "Path"
 msgstr "Chemin"
 
 #: ../lib/advene/gui/views/browser.py:342
-#: ../lib/advene/gui/edit/elements.py:1840
+#: ../lib/advene/gui/edit/elements.py:1839
 msgid "Value"
 msgstr "Valeur"
 
@@ -3966,12 +3966,12 @@ msgstr ""
 "%s"
 
 #: ../lib/advene/gui/edit/elements.py:1233
-#: ../lib/advene/gui/edit/elements.py:1453
+#: ../lib/advene/gui/edit/elements.py:1452
 msgid "Save content to..."
 msgstr "Sauver le contenu..."
 
 #: ../lib/advene/gui/edit/elements.py:1244
-#: ../lib/advene/gui/edit/elements.py:1464
+#: ../lib/advene/gui/edit/elements.py:1463
 #, python-format
 msgid ""
 "Cannot save the data:\n"
@@ -3981,17 +3981,17 @@ msgstr ""
 "%s"
 
 #: ../lib/advene/gui/edit/elements.py:1263
-#: ../lib/advene/gui/edit/elements.py:1479
+#: ../lib/advene/gui/edit/elements.py:1478
 msgid "Open a file (C-o)"
 msgstr "Ouvrir un fichier (C-o)"
 
 #: ../lib/advene/gui/edit/elements.py:1269
-#: ../lib/advene/gui/edit/elements.py:1485
+#: ../lib/advene/gui/edit/elements.py:1484
 msgid "Save to a file (C-s)"
 msgstr "Sauvegarder dans un fichier (C-s)"
 
 #: ../lib/advene/gui/edit/elements.py:1275
-#: ../lib/advene/gui/edit/elements.py:1491
+#: ../lib/advene/gui/edit/elements.py:1490
 msgid "Reload the file (C-r)"
 msgstr "Recharger le fichier (C-r)"
 
@@ -3999,15 +3999,15 @@ msgstr "Recharger le fichier (C-r)"
 msgid "Insert a value from the browser (C-i)"
 msgstr "Insérer une valeur depuis le browser (C-i)"
 
-#: ../lib/advene/gui/edit/elements.py:1519
+#: ../lib/advene/gui/edit/elements.py:1518
 msgid "Begin time is greater than end time"
 msgstr "Le moment de début est plus grand que celui de fin"
 
-#: ../lib/advene/gui/edit/elements.py:1716
+#: ../lib/advene/gui/edit/elements.py:1715
 msgid "Expecting an integer."
 msgstr "Un entier est attendu."
 
-#: ../lib/advene/gui/edit/elements.py:1748
+#: ../lib/advene/gui/edit/elements.py:1747
 #, python-format
 msgid ""
 "The %(attribute)s attribute could not be updated:\n"
@@ -4022,7 +4022,7 @@ msgstr ""
 "\n"
 "Il est remis à son ancienne valeur."
 
-#: ../lib/advene/gui/edit/elements.py:1775
+#: ../lib/advene/gui/edit/elements.py:1774
 #, python-format
 msgid ""
 "The following attributes cannot be updated:\n"
@@ -4033,7 +4033,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../lib/advene/gui/edit/elements.py:1815
+#: ../lib/advene/gui/edit/elements.py:1814
 #, python-format
 msgid ""
 "The following attributes could not be updated:\n"
@@ -4044,25 +4044,25 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../lib/advene/gui/edit/elements.py:1832
+#: ../lib/advene/gui/edit/elements.py:1831
 msgid "Attribute"
 msgstr "Attribut"
 
-#: ../lib/advene/gui/edit/elements.py:1931
+#: ../lib/advene/gui/edit/elements.py:1930
 msgid "Insert an element"
 msgstr "Insérer un élément"
 
-#: ../lib/advene/gui/edit/elements.py:1932
+#: ../lib/advene/gui/edit/elements.py:1931
 msgid "Choose the element to insert."
 msgstr "Choisissez l'élément à insérer."
 
-#: ../lib/advene/gui/edit/elements.py:2002
-#: ../lib/advene/gui/edit/elements.py:2045
+#: ../lib/advene/gui/edit/elements.py:2001
+#: ../lib/advene/gui/edit/elements.py:2044
 #, python-format
 msgid "Some tags contain invalid characters: %s"
 msgstr "Certains tags contiennent des caractères non-valides: %s"
 
-#: ../lib/advene/gui/edit/elements.py:2025
+#: ../lib/advene/gui/edit/elements.py:2024
 msgid "Tags:"
 msgstr "Tags :"
 
@@ -4545,8 +4545,11 @@ msgid ""
 "You can download the latest version from the Advene website: http://liris."
 "cnrs.fr/advene/</span>"
 msgstr ""
-"<span background=\"#ff8888\" size=\"large\"><b>Advene %(version)s est disponible</b> depuis le %(date)s, mais vous utilisez la version %(current)s.\n"
-"Vous pouvez télécharger la dernière version depuis le site web d'Advene: http://liris.cnrs.fr/advene/</span>"
+"<span background=\"#ff8888\" size=\"large\"><b>Advene %(version)s est "
+"disponible</b> depuis le %(date)s, mais vous utilisez la version %(current)"
+"s.\n"
+"Vous pouvez télécharger la dernière version depuis le site web d'Advene: "
+"http://liris.cnrs.fr/advene/</span>"
 
 #: ../lib/advene/gui/main.py:774
 msgid "Go to the website"
@@ -4982,7 +4985,7 @@ msgid ""
 msgstr ""
 "Langage utilisé pour l'interface (nécessite de redémarrer l'application)"
 
-#: ../lib/advene/gui/main.py:2738 ../lib/advene/gui/util/initialconfig.py:63
+#: ../lib/advene/gui/main.py:2738 ../lib/advene/gui/util/initialconfig.py:87
 msgid "System default"
 msgstr "La valeur du système"
 
@@ -5061,7 +5064,7 @@ msgstr "Générales"
 msgid "Daily update check"
 msgstr "Vérification des mises à jour"
 
-#: ../lib/advene/gui/main.py:2756 ../lib/advene/gui/util/initialconfig.py:65
+#: ../lib/advene/gui/main.py:2756 ../lib/advene/gui/util/initialconfig.py:89
 msgid "Daily check for updates on the Advene website"
 msgstr "Vérifier quotidiennement si des mises à jour d'Advene sont disponibles"
 
@@ -5394,41 +5397,63 @@ msgstr ""
 "Notez que l'interface d'Advene ne sera pas mise à jour tant que cette "
 "fenêtre est ouverte."
 
-#: ../lib/advene/gui/util/initialconfig.py:57
+#: ../lib/advene/gui/util/initialconfig.py:81
 msgid "Initial Advene configuration"
 msgstr "Configuration initiale d'Advene"
 
-#: ../lib/advene/gui/util/initialconfig.py:59
+#: ../lib/advene/gui/util/initialconfig.py:82
+msgid ""
+"<span size='large'><b>Welcome in Advene</b>\n"
+"This is the first time that you run Advene. Please answer some basic "
+"configuration questions. You will be able to modify these choices from the "
+"Advene interface, in the Edit/Preferences menu.</span>"
+msgstr ""
+"<span size='large'><b>Bienvenue dans Advene</b>\n"
+"C'est la première fois que vous utilisez Advene. Vous pouvez maintenant "
+"fixer certaines options de configuration essentielles. Vous pourrez modifier "
+"plus tard ces choix depuis l'interface d'Advene, dans le menu Edit/"
+"Préférences.</span>"
+
+#: ../lib/advene/gui/util/initialconfig.py:83
 msgid "Interface language"
 msgstr "Langue de l'interface"
 
-#: ../lib/advene/gui/util/initialconfig.py:59
+#: ../lib/advene/gui/util/initialconfig.py:83
 msgid "Language used for the interface"
 msgstr "Langue utilisée pour l'interface"
 
-#: ../lib/advene/gui/util/initialconfig.py:65
+#: ../lib/advene/gui/util/initialconfig.py:89
 msgid "Daily check for Advene updates on the Advene website"
 msgstr "Vérification quotidienne des mises à jour depuis le site web d'Advene"
 
-#: ../lib/advene/gui/util/initialconfig.py:67
+#: ../lib/advene/gui/util/initialconfig.py:91
 msgid "Preferred directory for data files"
 msgstr "Répertoire préféré pour les fichiers de données"
 
-#: ../lib/advene/gui/util/initialconfig.py:67
+#: ../lib/advene/gui/util/initialconfig.py:91
 msgid "Preferred directory for storing data files (Advene packages)"
-msgstr "Répertoire préféré pour stocker les fichiers de données (recueils Advene)"
+msgstr ""
+"Répertoire préféré pour stocker les fichiers de données (recueils Advene)"
 
-#: ../lib/advene/gui/util/initialconfig.py:69
+#: ../lib/advene/gui/util/initialconfig.py:93
 msgid "Directories to search for movies"
 msgstr "Répertoires où chercher les films référencés"
 
-#: ../lib/advene/gui/util/initialconfig.py:69
+#: ../lib/advene/gui/util/initialconfig.py:93
 #, python-format
 msgid ""
-"List of directories (separated by %(pathsep)s) to search for movie files. _ "
-"means the same directory as the package referencing the movie file. For "
-"instance: _%(pathsep)s%(dir)s%(sep)sadvene"
-msgstr "Liste de répertoires (séparés par %(pathsep)s) où chercher les fichiers vidéo. _ signifie le même répertoire que le recueil référençant le fichier vidéo. Par exemple : _%(pathsep)s%(dir)s%(sep)sadvene"
+"List of directories (separated by %(pathsep)s) to search for movie files."
+msgstr "Liste de répertoires (séparés par %(pathsep)s) où chercher les vidéos."
+
+#: ../lib/advene/gui/util/initialconfig.py:94
+msgid "First look for movie file in the same directory as the package"
+msgstr "Chercher d'abord le fichier vidéo dans le même répertoire que le recueil"
+
+#: ../lib/advene/gui/util/initialconfig.py:94
+msgid ""
+"If checked, the movie file will be searched for in the same directory as the "
+"referencing package."
+msgstr "Si cette case est cochée, les fichiers vidéos seront recherchés d'abord dans le même répertoire que le recueil qui les référence."
 
 #: ../lib/advene/gui/util/generate_imagecache.py:34
 msgid "Imagecache generator"
@@ -6643,6 +6668,15 @@ msgstr "Impossible d'obtenir un objet MediaControl"
 #, python-format
 msgid "Got exception %s when stopping launcher."
 msgstr "Reçu l'exception %s à l'arrêt du lanceur"
+
+#~ msgid ""
+#~ "List of directories (separated by %(pathsep)s) to search for movie files. "
+#~ "_ means the same directory as the package referencing the movie file. For "
+#~ "instance: _%(pathsep)s%(dir)s%(sep)sadvene"
+#~ msgstr ""
+#~ "Liste de répertoires (séparés par %(pathsep)s) où chercher les fichiers "
+#~ "vidéo. _ signifie le même répertoire que le recueil référençant le "
+#~ "fichier vidéo. Par exemple : _%(pathsep)s%(dir)s%(sep)sadvene"
 
 #~ msgid "VLC does not seem to be installed. Using dummy player."
 #~ msgstr "VLC ne semble pas installé. On utilisera un pseudo-lecteur."

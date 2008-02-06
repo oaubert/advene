@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-05 11:37+0100\n"
+"POT-Creation-Date: 2008-02-06 15:16+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -421,7 +421,7 @@ msgstr ""
 msgid "Shotdetect importer"
 msgstr ""
 
-#: ../lib/advene/plugins/shotdetect.py:76
+#: ../lib/advene/plugins/shotdetect.py:75
 msgid "No shots"
 msgstr ""
 
@@ -1809,12 +1809,12 @@ msgid "Type"
 msgstr ""
 
 #: ../lib/advene/gui/views/table.py:121
-#: ../lib/advene/gui/edit/elements.py:1548
+#: ../lib/advene/gui/edit/elements.py:1547
 msgid "Begin"
 msgstr ""
 
 #: ../lib/advene/gui/views/table.py:122
-#: ../lib/advene/gui/edit/elements.py:1557 ../lib/advene/gui/simple.py:178
+#: ../lib/advene/gui/edit/elements.py:1556 ../lib/advene/gui/simple.py:178
 #: ../lib/advene/gui/main.py:353
 msgid "End"
 msgstr ""
@@ -2538,7 +2538,7 @@ msgid "Path"
 msgstr ""
 
 #: ../lib/advene/gui/views/browser.py:342
-#: ../lib/advene/gui/edit/elements.py:1840
+#: ../lib/advene/gui/edit/elements.py:1839
 msgid "Value"
 msgstr ""
 
@@ -3703,12 +3703,12 @@ msgid ""
 msgstr ""
 
 #: ../lib/advene/gui/edit/elements.py:1233
-#: ../lib/advene/gui/edit/elements.py:1453
+#: ../lib/advene/gui/edit/elements.py:1452
 msgid "Save content to..."
 msgstr ""
 
 #: ../lib/advene/gui/edit/elements.py:1244
-#: ../lib/advene/gui/edit/elements.py:1464
+#: ../lib/advene/gui/edit/elements.py:1463
 #, python-format
 msgid ""
 "Cannot save the data:\n"
@@ -3716,17 +3716,17 @@ msgid ""
 msgstr ""
 
 #: ../lib/advene/gui/edit/elements.py:1263
-#: ../lib/advene/gui/edit/elements.py:1479
+#: ../lib/advene/gui/edit/elements.py:1478
 msgid "Open a file (C-o)"
 msgstr ""
 
 #: ../lib/advene/gui/edit/elements.py:1269
-#: ../lib/advene/gui/edit/elements.py:1485
+#: ../lib/advene/gui/edit/elements.py:1484
 msgid "Save to a file (C-s)"
 msgstr ""
 
 #: ../lib/advene/gui/edit/elements.py:1275
-#: ../lib/advene/gui/edit/elements.py:1491
+#: ../lib/advene/gui/edit/elements.py:1490
 msgid "Reload the file (C-r)"
 msgstr ""
 
@@ -3734,15 +3734,15 @@ msgstr ""
 msgid "Insert a value from the browser (C-i)"
 msgstr ""
 
-#: ../lib/advene/gui/edit/elements.py:1519
+#: ../lib/advene/gui/edit/elements.py:1518
 msgid "Begin time is greater than end time"
 msgstr ""
 
-#: ../lib/advene/gui/edit/elements.py:1716
+#: ../lib/advene/gui/edit/elements.py:1715
 msgid "Expecting an integer."
 msgstr ""
 
-#: ../lib/advene/gui/edit/elements.py:1748
+#: ../lib/advene/gui/edit/elements.py:1747
 #, python-format
 msgid ""
 "The %(attribute)s attribute could not be updated:\n"
@@ -3752,7 +3752,7 @@ msgid ""
 "Resetting to the original value."
 msgstr ""
 
-#: ../lib/advene/gui/edit/elements.py:1775
+#: ../lib/advene/gui/edit/elements.py:1774
 #, python-format
 msgid ""
 "The following attributes cannot be updated:\n"
@@ -3760,7 +3760,7 @@ msgid ""
 "%s"
 msgstr ""
 
-#: ../lib/advene/gui/edit/elements.py:1815
+#: ../lib/advene/gui/edit/elements.py:1814
 #, python-format
 msgid ""
 "The following attributes could not be updated:\n"
@@ -3768,25 +3768,25 @@ msgid ""
 "%s"
 msgstr ""
 
-#: ../lib/advene/gui/edit/elements.py:1832
+#: ../lib/advene/gui/edit/elements.py:1831
 msgid "Attribute"
 msgstr ""
 
-#: ../lib/advene/gui/edit/elements.py:1931
+#: ../lib/advene/gui/edit/elements.py:1930
 msgid "Insert an element"
 msgstr ""
 
-#: ../lib/advene/gui/edit/elements.py:1932
+#: ../lib/advene/gui/edit/elements.py:1931
 msgid "Choose the element to insert."
 msgstr ""
 
-#: ../lib/advene/gui/edit/elements.py:2002
-#: ../lib/advene/gui/edit/elements.py:2045
+#: ../lib/advene/gui/edit/elements.py:2001
+#: ../lib/advene/gui/edit/elements.py:2044
 #, python-format
 msgid "Some tags contain invalid characters: %s"
 msgstr ""
 
-#: ../lib/advene/gui/edit/elements.py:2025
+#: ../lib/advene/gui/edit/elements.py:2024
 msgid "Tags:"
 msgstr ""
 
@@ -4656,7 +4656,7 @@ msgid ""
 "Language used for the interface (necessitates to restart the application)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2738 ../lib/advene/gui/util/initialconfig.py:63
+#: ../lib/advene/gui/main.py:2738 ../lib/advene/gui/util/initialconfig.py:87
 msgid "System default"
 msgstr ""
 
@@ -4731,7 +4731,7 @@ msgstr ""
 msgid "Daily update check"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2756 ../lib/advene/gui/util/initialconfig.py:65
+#: ../lib/advene/gui/main.py:2756 ../lib/advene/gui/util/initialconfig.py:89
 msgid "Daily check for updates on the Advene website"
 msgstr ""
 
@@ -5054,40 +5054,56 @@ msgid ""
 "open."
 msgstr ""
 
-#: ../lib/advene/gui/util/initialconfig.py:57
+#: ../lib/advene/gui/util/initialconfig.py:81
 msgid "Initial Advene configuration"
 msgstr ""
 
-#: ../lib/advene/gui/util/initialconfig.py:59
+#: ../lib/advene/gui/util/initialconfig.py:82
+msgid ""
+"<span size='large'><b>Welcome in Advene</b>\n"
+"This is the first time that you run Advene. Please answer some basic "
+"configuration questions. You will be able to modify these choices from the "
+"Advene interface, in the Edit/Preferences menu.</span>"
+msgstr ""
+
+#: ../lib/advene/gui/util/initialconfig.py:83
 msgid "Interface language"
 msgstr ""
 
-#: ../lib/advene/gui/util/initialconfig.py:59
+#: ../lib/advene/gui/util/initialconfig.py:83
 msgid "Language used for the interface"
 msgstr ""
 
-#: ../lib/advene/gui/util/initialconfig.py:65
+#: ../lib/advene/gui/util/initialconfig.py:89
 msgid "Daily check for Advene updates on the Advene website"
 msgstr ""
 
-#: ../lib/advene/gui/util/initialconfig.py:67
+#: ../lib/advene/gui/util/initialconfig.py:91
 msgid "Preferred directory for data files"
 msgstr ""
 
-#: ../lib/advene/gui/util/initialconfig.py:67
+#: ../lib/advene/gui/util/initialconfig.py:91
 msgid "Preferred directory for storing data files (Advene packages)"
 msgstr ""
 
-#: ../lib/advene/gui/util/initialconfig.py:69
+#: ../lib/advene/gui/util/initialconfig.py:93
 msgid "Directories to search for movies"
 msgstr ""
 
-#: ../lib/advene/gui/util/initialconfig.py:69
+#: ../lib/advene/gui/util/initialconfig.py:93
 #, python-format
 msgid ""
-"List of directories (separated by %(pathsep)s) to search for movie files. _ "
-"means the same directory as the package referencing the movie file. For "
-"instance: _%(pathsep)s%(dir)s%(sep)sadvene"
+"List of directories (separated by %(pathsep)s) to search for movie files."
+msgstr ""
+
+#: ../lib/advene/gui/util/initialconfig.py:94
+msgid "First look for movie file in the same directory as the package"
+msgstr ""
+
+#: ../lib/advene/gui/util/initialconfig.py:94
+msgid ""
+"If checked, the movie file will be searched for in the same directory as the "
+"referencing package."
 msgstr ""
 
 #: ../lib/advene/gui/util/generate_imagecache.py:34
