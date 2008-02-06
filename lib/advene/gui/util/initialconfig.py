@@ -91,5 +91,5 @@ class Config:
         ew.add_dir_selector(_("Preferred directory for data files"), "data", _("Preferred directory for storing data files (Advene packages)"))
         #ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
         ew.add_dir_selector(_("Directories to search for movies"), "moviepath", _("List of directories (separated by %(pathsep)s) to search for movie files.") % { 'pathsep': os.path.pathsep })
-        ew.add_checkbox(_("Look for moviefile in the same directory as the package"), 'movie-in-package-dir', _("If checked, the movie file will be searched for in the same directory as the referencing package."))
+        ew.add_checkbox(_("First look for movie file in the same directory as the package"), 'movie-in-package-dir', _("If checked, the movie file will be searched for in the same directory as the referencing package."))
         return ew
