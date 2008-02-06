@@ -85,6 +85,8 @@ class Shape(object):
         self.link=None
         self.link_label=None
         self.set_bounds( ( (0, 0), (10, 10) ) )
+        # Extra SVG attributes to preserve (esp. tal: instructions)
+        self.svg_attrib={}
 
     def set_bounds(self, bounds):
         """Set the bounds of the shape.
@@ -167,6 +169,7 @@ class Shape(object):
         c=cls.xml2coords(cls.coords, element.attrib, context.dimensions())
         for n, v in c.iteritems():
             setattr(s, n, v)
+        s.svg_attrib=dict(element.attrib)
         if hasattr(s, 'post_parse'):
             s.post_parse()
         return s
@@ -182,7 +185,8 @@ class Shape(object):
         @return: the SVG representation
         @rtype: elementtree.Element
         """
-        attrib=self.coords2xml(relative, size)
+        attrib=dict(self.svg_attrib)
+        attrib.update(self.coords2xml(relative, size))
         if self.filled:
             attrib['fill']=self.color
         else:
@@ -304,6 +308,29 @@ class Shape(object):
         filledsel.set_active(self.filled)
         vbox.pack_start(label_widget(_("Filled"), filledsel), expand=False)
 
+        # svg_attrib
+        store=gtk.ListStore(str, str)
+        for k, v in self.svg_attrib.iteritems():
+            store.append([k, v])
+        treeview=gtk.TreeView(model=store)
+
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn("Attribute", renderer, text=0)
+        column.set_resizable(True)
+        treeview.append_column(column)
+
+        renderer = gtk.CellRendererText()
+        renderer.set_property('editable', True)
+        column = gtk.TreeViewColumn("Value", renderer, text=1)
+        column.set_resizable(True)
+        treeview.append_column(column)
+
+        treeview.show_all()
+        e=gtk.Expander('SVG attributes')
+        e.add(treeview)
+        e.set_expanded(False)
+        vbox.add(e)
+        
         vbox.widgets = {
             'name': namesel,
             'color': colorsel,
@@ -311,6 +338,7 @@ class Shape(object):
             'filled': filledsel,
             'link': linksel,
             'link_label': linklabelsel,
+            'attrib': treeview,
             }
         return vbox
 
@@ -498,6 +526,7 @@ class Text(Rectangle):
         c=cls.xml2coords(cls.coords, element.attrib, context.dimensions())
         for n, v in c.iteritems():
             setattr(s, n, v)
+        s.svg_attrib=dict(element.attrib)
         if hasattr(s, 'post_parse'):
             s.post_parse()
         return s
@@ -506,7 +535,8 @@ class Text(Rectangle):
     def get_svg(self, relative=False, size=None):
         """Return a SVG representation of the shape.
         """
-        attrib=self.coords2xml(relative, size)
+        attrib=dict(self.svg_attrib)
+        attrib.update(self.coords2xml(relative, size))
         attrib['name']=self.name
         attrib['stroke']=self.color
         attrib['style']="stroke-width:%d" % self.linewidth
@@ -599,6 +629,7 @@ class Image(Rectangle):
         c=cls.xml2coords(cls.coords, element.attrib, context.dimensions())
         for n, v in c.iteritems():
             setattr(s, n, v)
+        s.svg_attrib=dict(element.attrib)
         if hasattr(s, 'post_parse'):
             s.post_parse()
         return s
@@ -614,7 +645,8 @@ class Image(Rectangle):
         @return: the SVG representation
         @rtype: elementtree.Element
         """
-        attrib=self.coords2xml(relative, size)
+        attrib=dict(self.svg_attrib)
+        attrib.update(self.coords2xml(relative, size))
         attrib['name']=self.name
         attrib['xlink:href']=self.uri
         e=ET.Element(ET.QName(SVGNS, self.SVGTAG), attrib=attrib)
@@ -828,6 +860,7 @@ class Link(Shape):
             return None
         o.link=element.attrib.get('xlink:href', element.attrib.get('{http://www.w3.org/1999/xlink}href', ''))
         o.link_label=element.attrib.get('title', 'Link to ' + o.link)
+        #o.svg_attrib=dict(element.attrib)
         return o
     parse_svg=classmethod(parse_svg)
 
