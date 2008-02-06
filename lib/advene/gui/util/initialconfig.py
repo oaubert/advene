@@ -48,6 +48,14 @@ class Config:
             self.options[k]=config.data.preferences[k]
         for k in ('data', 'imagecache', 'moviepath'):
             self.options[k]=config.data.path[k]
+        # Remove the possible _ from moviepath, it is handled through a checkbox
+        mp=self.options['moviepath'].split(os.path.pathsep)
+        if '_' in mp:
+            mp.remove('_')
+            self.options['moviepath']=os.path.pathsep.join(mp)
+            self.options['movie-in-package-dir']=True
+        else:
+            self.options['movie-in-package-dir']=False
         self.widget=self.build_widget()
 
     def main(self):
@@ -60,6 +68,8 @@ class Config:
         if res:
             for k in ('language', 'update-check'):
                 config.data.preferences[k]=self.options[k]
+            if self.options['movie-in-package-dir']:
+                self.options['moviepath']=os.path.pathsep.join( ('_', self.options['moviepath'] ) )
             for k in ('data', 'imagecache', 'moviepath'):
                 config.data.path[k]=self.options[k]
             config.data.save_preferences()
@@ -80,8 +90,6 @@ class Config:
 
         ew.add_dir_selector(_("Preferred directory for data files"), "data", _("Preferred directory for storing data files (Advene packages)"))
         #ew.add_dir_selector(_("Imagecache"), "imagecache", _("Directory for storing the snapshot cache"))
-        ew.add_dir_selector(_("Directories to search for movies"), "moviepath", _("List of directories (separated by %(pathsep)s) to search for movie files. _ means the same directory as the package referencing the movie file. For instance: _%(pathsep)s%(dir)s%(sep)sadvene") % { 
-                'pathsep': os.path.pathsep,
-                'sep': os.path.sep,
-                'dir': config.data.get_homedir() })
+        ew.add_dir_selector(_("Directories to search for movies"), "moviepath", _("List of directories (separated by %(pathsep)s) to search for movie files.") % { 'pathsep': os.path.pathsep })
+        ew.add_checkbox(_("Look for moviefile in the same directory as the package"), 'movie-in-package-dir', _("If checked, the movie file will be searched for in the same directory as the referencing package."))
         return ew
