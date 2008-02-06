@@ -18,13 +18,27 @@
 """Initial configuration mini-application.
 """
 
+import advene.core.config as config
+
+import gettext
+import locale
+
+APP='advene'
+# Locale initialisation
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except locale.Error:
+    print "Error in locale initialization. Interface translation may be incorrect."
+    pass
+gettext.bindtextdomain(APP, config.data.path['locale'])
+gettext.textdomain(APP)
+gettext.install(APP, localedir=config.data.path['locale'], unicode=True)
 from gettext import gettext as _
 
 import gtk
 import gobject
 import os
 
-import advene.core.config as config
 from advene.gui.edit.properties import EditWidget
 
 class Config:
@@ -55,7 +69,7 @@ class Config:
     def build_widget(self):
         ew=EditWidget(self.options.__setitem__, self.options.get)
         ew.set_name(_("Initial Advene configuration"))
-        ew.add_label("""<span size="large"><b>Welcome in Advene</b>\nThis is the first time that you run Advene. Please answer some basic configuration questions. You will be able to modify these choices from the Advene interface, in the Edit/Preferences menu.</span>""")
+        ew.add_label(_("<span size='large'><b>Welcome in Advene</b>\nThis is the first time that you run Advene. Please answer some basic configuration questions. You will be able to modify these choices from the Advene interface, in the Edit/Preferences menu.</span>"))
         ew.add_option(_("Interface language"), 'language', _("Language used for the interface"),
                       {
                 "English": 'C',
