@@ -333,14 +333,16 @@ class DefaultGUIActions:
         return True
 
     def action_entry_predefined(self, controller):
-        d= {'message': (  
-                    ( 'annotation/content/data', _("The annotation content") )
-                    ),
+        d= {'message': [
+                    ( 'annotation/content/data', _("The annotation content") ),
+                    ],
             'destination': self.related_annotation_expressions(controller),
             'duration': (
                 ( 'string:1000', _("1 second") ),
                 ( 'annotation/fragment/duration',_("The annotation duration") )
                 )}
+        return d
+
     def action_popup_url (self, context, parameters):
         """PopupURL action.
 
