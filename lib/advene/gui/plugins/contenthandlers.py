@@ -212,11 +212,19 @@ class SVGContentHandler (ContentHandler):
             here=self.controller.package.annotations.get(selection.data)
         elif target_type == config.data.target_type['view']:
             here=self.controller.package.views.get(selection.data)
+        elif target_type == config.data.target_type['uri-list']:
+            here=None
+            url=selection.data
+            title=url
         else:
             # Invalid drop target
             return True
-        ctx=self.controller.build_context(here=here)
-        title=self.controller.get_title(here)
+
+        if here is not None:
+            ctx=self.controller.build_context(here=here)
+            title=self.controller.get_title(here)
+            url=ctx.evaluateValue('here/absolute_url')
+
         s=self.view.drawer.clicked_shape( (x, y) )
         if s is None:
             # Drop on no shape. Create one.
@@ -226,7 +234,7 @@ class SVGContentHandler (ContentHandler):
             s.set_bounds( ( (x, y), (x+20, y+20) ) )
             self.view.drawer.add_object(s)
         # Drop on an existing shape. Update its link attribute
-        s.link=ctx.evaluateValue('here/absolute_url')
+        s.link=url
         s.link_label=title
         return False
 
@@ -247,7 +255,8 @@ class SVGContentHandler (ContentHandler):
                                               gtk.DEST_DEFAULT_HIGHLIGHT |
                                               gtk.DEST_DEFAULT_ALL,
                                               config.data.drag_type['annotation']
-                                              + config.data.drag_type['view'],
+                                              + config.data.drag_type['view']
+                                              + config.data.drag_type['uri-list'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
         def edit_svg(b):
