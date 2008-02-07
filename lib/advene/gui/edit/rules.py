@@ -339,7 +339,7 @@ class EditQuery(EditGeneric):
                  ('here/annotations', _("The context annotations")),
                  ('here/type/annotations', _("The annotations of the context type"))]
         for at in self.controller.package.annotationTypes:
-            predef.append( ('package/%s/annotations' % at.id,
+            predef.append( ('package/annotationTypes/%s/annotations' % at.id,
                             _("Annotations of type %s") % self.controller.get_title(at) ) )
         self.sourceentry=TALESEntry(context=self.model,
                                     controller=self.controller,
