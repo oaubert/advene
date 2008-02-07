@@ -247,7 +247,10 @@ class EditQuery(EditGeneric):
         self.valueentry=None
         self.controller=controller
         self.editconditionlist=[]
-        self.composition='and'
+        if query.condition is not None:
+            self.composition=query.condition.composition
+        else:
+            self.composition='and'
         self.editable=editable
         self.widget=self.build_widget()
 
@@ -389,7 +392,7 @@ class EditQuery(EditGeneric):
 
         c=dialog.list_selector_widget( [ ('and', _("All conditions must be met") ),
                                          ('or', _("Any condition can be met") ) ],
-                                       preselect=self.model.condition.composition,
+                                       preselect=self.composition,
                                        callback=change_composition)
         hb.pack_start(c, expand=False)
 
