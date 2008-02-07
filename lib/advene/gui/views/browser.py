@@ -24,6 +24,7 @@ import sys
 from advene.gui.util import dialog
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
+from advene.model.exception import AdveneException
 
 from gettext import gettext as _
 
@@ -211,7 +212,7 @@ class Browser(AdhocView):
 
         try:
             el=context.evaluateValue("/".join(path))
-        except Exception, e:
+        except AdveneException, e:
             # Delete all next columns
             if columnbrowser is None:
                 cb=self.rootcolumn.next
@@ -223,9 +224,10 @@ class Browser(AdhocView):
             if columnbrowser is not None:
                 columnbrowser.next=None
                 columnbrowser.listview.get_selection().unselect_all()
-
-            dialog.message_dialog(_("Exception: %s") % e,
-                                           icon=gtk.MESSAGE_WARNING)
+                self._update_view(path, Exception(_("Expression returned None")))
+                print "Browser exception", str(e)
+                #dialog.message_dialog(_("Exception: %s") % e,
+                #                           icon=gtk.MESSAGE_WARNING)
             return
 
         self._update_view(path, el)
