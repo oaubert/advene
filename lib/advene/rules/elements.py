@@ -205,7 +205,7 @@ class Condition:
                 raise Exception("Unknown operator: %s" % self.operator)
         elif self.operator in self.unary_operators:
             # Unary operator
-            # Note: self.lhs should be None
+            # Note: self.rhs is ignored, whatever its value is.
             left=context.evaluateValue(self.lhs)
             if self.operator == 'not':
                 return not left
