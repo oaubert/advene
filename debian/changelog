@@ -1,5 +1,11 @@
 advene (0.27) unstable; urgency=low
 
+  * ! On Win32, the home directory (where the "advene" folder for
+    configuration files is stored) is now stored in the %USERPROFILE%
+    directory - usually something like C:\Documents and settings\Loginname
+    If you had a previous configuration file, please copy it to the new
+    directory.
+  
   * Win32 bugfixes (relation creation, timestamp mark colors, montage...)
 
   * Win32: VLC can be bundled in the Advene installer package
@@ -28,8 +34,17 @@ advene (0.27) unstable; urgency=low
      * The package can automatically be saved when saving the package. This
        behaviour is tunable in Edit/Preferences/Standard views
        
+     * A first-time simple configuration dialog is displayed for new users.
+  
+     * Advene can check daily if a new release exists, if the appropriate
+       option (menu Edit/Preferences/General) is turned on, or through the
+       Help/Check for updates menu.
+  
      * The SVG-subset editor handles text shapes and links, and shapes can
        be reordered
+
+     * A new content mimetype, application/x-advene-values, allows to
+       represent a series of values as a bargraph in annotation content
 
   * Quicksearch: 
 
