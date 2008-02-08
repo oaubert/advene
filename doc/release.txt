@@ -1,6 +1,7 @@
 Checklist for the release of a new version :
 
-    * Update lib/advene/core/version.py (version + date)
+    * Update lib/advene/core/version.py (version)
+    * Run ./scripts/update_version to update svn rev + date
     * Update README.win32 (dependencies) + README
     * Generate installers/packages
     * Test
