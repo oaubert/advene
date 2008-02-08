@@ -1894,13 +1894,13 @@ class TimeLine(AdhocView):
         t=long(self.pixel2unit(self.adjustment.value +  x))
         w=drag_context.get_source_widget()
         if w and hasattr(w, '_icon'):
-            w._icon.set_time(t)
+            w._icon.set_cursor(t)
         return True
 
     def layout_drag_leave_cb(self, widget, drag_context, timestamp):
         w=drag_context.get_source_widget()
         if w and hasattr(w, '_icon'):
-            w._icon.set_time(w.element)
+            w._icon.set_cursor(w.element)
         return True
 
     def context_cb (self, timel=None, position=None, height=None):
