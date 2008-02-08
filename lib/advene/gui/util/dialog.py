@@ -171,6 +171,10 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, callback=None):
     dialog = gtk.MessageDialog(None, flags,
                                icon, button)
     dialog.set_markup(label)
+    if not dialog.label.get_text():
+        # Hackish way of determining if there was an error while
+        # parsing the markup. In this case, fallback to simple text
+        dialog.label.set_text(label)
     dialog.set_position(gtk.WIN_POS_CENTER_ALWAYS)
     dialog.connect("key_press_event", dialog_keypressed_cb)
     
