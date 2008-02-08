@@ -255,20 +255,23 @@ class AnnotationWidget(GenericColorButtonWidget):
         v.pack_start(l, expand=False)
         def set_time(wid, t):
             cache=self.controller.package.imagecache
-            if isinstance(t, long) or isinstance(t, int):
-                if cache.is_initialized(t, epsilon=500):
-                    i.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=500), width=50))
-                elif i.get_pixbuf() != self.no_image_pixbuf:
-                    i.set_from_pixbuf(self.no_image_pixbuf)
-                l.set_text(helper.format_time(t))
-            elif isinstance(t, Annotation):
-                # It can be an annotation
-                i.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.begin), width=50))
-                l.set_text(self.controller.get_title(t))
+            if not t == w._current:
+                if isinstance(t, long) or isinstance(t, int):
+                    if cache.is_initialized(t, epsilon=500):
+                        i.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=500), width=50))
+                    elif i.get_pixbuf() != self.no_image_pixbuf:
+                        i.set_from_pixbuf(self.no_image_pixbuf)
+                    l.set_text(helper.format_time(t))
+                elif isinstance(t, Annotation):
+                    # It can be an annotation
+                    i.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.begin), width=50))
+                    l.set_text(self.controller.get_title(t))
+            wid._current=t
             return True
 
         w.add(v)
         w.show_all()
+        w._current=None
         w.set_time = set_time.__get__(w)
         w.set_time(self.element.fragment.begin)
         widget._icon=w
