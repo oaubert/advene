@@ -5,8 +5,8 @@
   <widget class="GtkWindow" id="win">
     <property name="visible">True</property>
     <property name="title" translatable="yes">Advene</property>
-    <property name="default_width">640</property>
-    <property name="default_height">480</property>
+    <property name="default_width">800</property>
+    <property name="default_height">600</property>
     <property name="icon">pixmaps/dvd.png</property>
     <signal name="key_press_event" handler="on_win_key_press_event"/>
     <signal name="delete_event" handler="on_exit" object="win"/>
@@ -82,8 +82,8 @@
                         <property name="visible">True</property>
                         <property name="tooltip" translatable="yes">Select movie file...</property>
                         <property name="is_important">True</property>
-                        <property name="label" translatable="yes">Add file...</property>
-                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-cdrom</property>
+                        <property name="label">Movie file</property>
                         <signal name="clicked" handler="on_b_addfile_clicked"/>
                       </widget>
                       <packing>
@@ -101,13 +101,24 @@
                         <property name="expand">False</property>
                       </packing>
                     </child>
+                    <child>
+                      <widget class="GtkToolButton" id="toolbutton11">
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Quit</property>
+                        <property name="stock_id">gtk-quit</property>
+                        <signal name="clicked" handler="on_exit"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                      </packing>
+                    </child>
                   </widget>
                 </child>
               </widget>
             </child>
             <child>
               <widget class="GtkHBox" id="adhoc_hbox">
-                <property name="visible">True</property>
+                <property name="visible">False</property>
                 <child>
                   <placeholder/>
                 </child>
