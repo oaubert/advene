@@ -11,6 +11,8 @@ that provides common methods.
 Parameters
 ==========
 
+The format for saving adhoc-views is the following.
+
 Mimetype: application/x-advene-adhoc-view
 
 Content:
@@ -22,7 +24,9 @@ Content:
 
 Options will directly update the self.options dictionary for each
 view. Arguments will be passed, preserving their order, as .arguments
-attribute of the view.
+attribute of the view. Options should be generic options, independent
+from the loaded package. Arguments are specific to the package data
+(displayed annotation types in a timeline for instance).
 
 Timeline:
 ---------
@@ -30,14 +34,12 @@ Timeline:
 id: timeline
 
 Arguments:
- annotation-type (id): id of an annotation type to display. May be put multiple tmes.
- source (tales expr.): TALES expression (applied to the package) used
- to get the elements to display.
+ annotation-type (id): id of an annotation type to display. May be put multiple times.
+ source (tales expr.): TALES expression (applied to the package) used to get the elements to display.
 
 Options:
  highlight (boolean)
  autoscroll (int)
  delete_transmuted (boolean)
- resize_by_dnd (boolean)
  display_relations_type (boolean)
  display_relation_content (boolean)
