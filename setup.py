@@ -92,7 +92,7 @@ def get_packages_list():
             # On linux (at least, Debian and Ubuntu), cherrypy and
             # simpletal are packaged. So do not consider them in the
             # packages list.
-            fnames=[:]
+            fnames=[]
         elif '__init__.py' in fnames:
             l.append(dirname)
     os.path.walk('lib', ispackage, l)
