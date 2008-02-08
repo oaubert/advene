@@ -30,9 +30,11 @@ python-gst0.10
 gstreamer0.10-plugins-base
 gstreamer0.10-x
 + other gstreamer packages needed to decode various formats
+(esp. gstreamer0.10-plugins-good and gstreamer0.10-plugins-ugly).
 
 Note that all these dependencies are already available in Debian and
-in standard installations of the Ubuntu Feisty Fawn distribution.
+in standard installations of the Ubuntu Feisty Fawn (and later)
+distribution.
 
 ** Windows version
 
