@@ -1809,9 +1809,7 @@ class AdveneController:
         """Import the event history in a new package.
         """
 	self.load_package(alias="Event history")
-        i=advene.rules.importer.EventHistoryImporter(package=self.package)
-        i.process_file(self.event_handler.event_history)
-        self.notify("PackageActivate", package=self.package)
+        self.import_event_history()
         return True
 
     def import_event_history(self):
