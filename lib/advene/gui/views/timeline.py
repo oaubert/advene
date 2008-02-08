@@ -289,6 +289,7 @@ class TimeLine(AdhocView):
         self.layout.connect('button_release_event', self.layout_button_release_cb)
         self.layout.connect('motion_notify_event', self.layout_motion_notify_cb)
         self.layout.connect('drag_motion', self.layout_drag_motion_cb)
+        self.layout.connect('drag_leave', self.layout_drag_leave_cb)
         self.scale_layout.connect('button_press_event', self.scale_layout_button_press_cb)
 
         self.layout.connect('size_allocate', self.layout_resize_event)
@@ -1891,10 +1892,15 @@ class TimeLine(AdhocView):
 
     def layout_drag_motion_cb(self, widget, drag_context, x, y, timestamp):
         t=long(self.pixel2unit(self.adjustment.value +  x))
-        self.set_annotation(t)
         w=drag_context.get_source_widget()
         if w and hasattr(w, '_icon'):
             w._icon.set_time(t)
+        return True
+
+    def layout_drag_leave_cb(self, widget, drag_context, timestamp):
+        w=drag_context.get_source_widget()
+        if w and hasattr(w, '_icon'):
+            w._icon.set_time(w.element)
         return True
 
     def context_cb (self, timel=None, position=None, height=None):
