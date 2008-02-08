@@ -1805,6 +1805,15 @@ class AdveneController:
         self.notify('AnnotationDelete', annotation=annotation)
         return True
 
+    def create_event_history_package(self):
+        """Import the event history in a new package.
+        """
+	self.load_package(alias="Event history")
+        i=advene.rules.importer.EventHistoryImporter(package=self.package)
+        i.process_file(self.event_handler.event_history)
+        self.notify("PackageActivate", package=self.package)
+        return True
+
     def import_event_history(self):
         """Import the event history in the current package.
         """
