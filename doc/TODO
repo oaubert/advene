@@ -1,59 +1,118 @@
+* video slider: update the time when moving the slider
+
+* timeline: memorize zoom level and position when changing package
+   (needs a timeline.zoom_level[package] structure)
+
+* generate a 'fields' metadata for structured annotation types
+
+* allow to change mimetype when editing resource
+
+* investigate svg plugin crashing after stop/play -> win32 only
+
+* Embed VLC:  http://code.revolunet.com/VLCobject/EN
+ http://code.revolunet.com/VLCcontrols/EN
+
+* Synchronise transcribe with annotations/timeline
+ * create new type. On view rename -> set new type title
+ * create/fusion/delete annotations when modifying timestamps
+
+* fix DND from treeview (view on SVG widget)
+
+* shapewidget: preserve TAL attributes
+
+* shapewidget: complete support for <image> element. How to deal with
+   images as resources ?
+
+* tts: send configure instructions for aplay to the pipe
+
+* shapewidget: handle DND of data to shapes, to associate an
+   annotation to a shape, then have it work as a link.
+
+* adhoc view: imagemap, with DND of annotation to the image
+
+* timeline: when DND an annotation, check if there is a selection and
+   act accordingly
+
+* fix timeline relation lines display
+
+* write a ContentHandler for x-advene-quicksearch
+
+* dedicated GUI for shot segmentation correction
+
+* shotdetect: allow to specify begin/end times, to allow to redo a segmentation with a new threshold
+
+* Redesign ask_for_annotation_type / ask_for_schema through reusable
+   widgets, put in dialog. Cf transcribe
+
+* Package: static export (to web site) of a set of views+resources/images
+
+* Assistant for generating HTML views from annotations (propose some
+   common layouts: plain TOC, illustrated TOC, etc)
+
+* view creation (static/dynamic): step by step wizard
+
+* bookmarks: add a second timestamp (?)
+
+* AdhocView: make self.log display messages in a gtkStatusBar
+
+* AdveneTypes a la XSD
+
+* default_workspace/default_adhoc_view (workspace) with option on
+   startup (open default workspace never/always/ask). Save package
+   will save default workspace -> OK for saving, PB when restoring.
+
+* Inspector: make editable (text at least)
+
+* gtk locale in win32
+
+* clearlook theme in win32 ?
+
+* Menu for initial configuration (GUI language [if not 'LANG' in
+   os.environ], paths)
+
+* transcription: option to display timestamp marks and allow to modify
+
+* slave view for edit popup (e.g. quick edit, to synchronize content) ?
+
+* Montage: extend with 2nd video (cf bout-a-bout) ?
+
+* make EditElementPopup an AdhocView
+
+* plugins/actions.py : TTS/win32
+
+* saved workspace: find out why log window pane position is not restored
+
+* history of selected annotations
+
+* package merge: group items by categories (views, annotations, schemas...)
+
 * main gui: add a "Edit subviews" direct button
 
-* exmeralda importer ?
-
-* annotation highlight: red thick border
+* annotation highlight: other representation (red thick border ?)
 
 * Investigate
 https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platform/osx/qt_extractor.py
 https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platform/osx/frontend/QuicktimeRenderer.py
 
-* Search/replace in annotations of a type (context menu)
-
-* imagecache generator: extract 1 image every second
-
 * Global shortcut Ctrl-b to add a bookmark
 
 * Thicker frame around widgets in editaccumulator -> not so simple
 
-* editaccumulator: distinguish incomplete annotations (missing endtime)
+* editaccumulator: distinguish incomplete annotations (missing entidtime)
 
 * import for transcriber (DGA), voir annotation dans audacity
 
-* TALES editor: directly display string values, and use ${} syntax for
-   tales expression. On-the-fly conversion when storing.
-
-* edit/rules: EditAction/build_parameter_widget: populate TALESEntry(predefined)
-
-* edit.elements.annotation: validate upon navigating to next/prev
-
 * edit.elements.annotation: next/prev should reuse the same window
-
-* Select multiple annotations in the timeline ?
-
-* Save current workspace when saving package ?
 
 * Convert event names from strings to objects (faster comparison)
 
-* propose to save adhoc-views when closing application
-
-* Allow to lock workspace modifications (to propose a read-only
-   version)
+* Allow to lock workspace modifications (to propose a read-only version)
 
 * interactive result: allow to DND the icon for new visualisations
    (timeline...) [hard because of the transmission of the parameters
-   in DND]
+   in DND and anyway buttons are now in a toolbar, which prevents DND]
 
-* Assistant for generating HTML views from annotations (propose some
-   common layouts: plain TOC, illustrated TOC, etc)
-
-* dynamic view creation: step by step wizard
-
-* Package: voir pour export statique (site web) des vues de base
-
-* annotationdisplay:  handle multiple data types (esp. SVG), source switch
-
-* website: put link associations (next, prev, up)
+* annotationdisplay:  handle multiple data types (esp. graphics and SVG), source switch
 
 * slave view: record master view id in options when saving
 
@@ -63,29 +122,7 @@ https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platfor
 
 * gstrecorder: save media file name + duration
 
-* New action: Pronounce (with flite on linux [but needs alsa patch], MacOS X API for mac)
-
 * Short version of shortcuts/tutorial for note taking
-
-* Shortcut "Split annotation at current player position"
-
-* MacOSX:
-http://gamera.svn.sourceforge.net/viewvc/gamera/trunk/gamera/gamera/mac/buildpkg.py?revision=467&view=markup
-http://mail.python.org/pipermail/pythonmac-sig/2004-June/011231.html
-DMG creation: hdiutil create -srcfolder $SOURCE $DESTNAME
-http://svn.berlios.de/wsvn/griffith/trunk/macsetup.py?op=file&rev=0&sc=0
-http://svn.berlios.de/wsvn/griffith/trunk/lib/?rev=0&sc=0
-Ardour:
-http://developer.imendio.com/node/145
-http://subversion.ardour.org/svn/ardour2/branches/2.0-ongoing/tools/osx_packaging/osx_build
-
-# Bundle pango
-http://developer.imendio.com/node/145
-
-Anatomy of a bundle:
-http://developer.apple.com/documentation/CoreFoundation/Conceptual/CFBundles/Concepts/BundleAnatomy.html
-
-* Reprendre le code de Yohann (segmentation video)
 
 * iMovie0.8-like movie exploration (skim through the paused movie through DND in the thumbnail)
 
@@ -97,19 +134,15 @@ http://developer.apple.com/documentation/CoreFoundation/Conceptual/CFBundles/Con
 
 * study psyco optimizer (cf scribes)
 
-* Fields containing defaults should come up selected, so users can replace the default contents with new material quickly and easily.
-
 * timeline
 
 ** Deactivate autoscroll when moving in the timeline
 
 ** timeline: reimplement with a proper canvas (goocanvas?)
 
-** ensure that timestamps are always displayed (->new timeline)
-
 ** annotation interpolation interface: create some "Aligned" annotations (that keep a ref to their original) and try to determine the transformation from them.
 
-** Make relation lines clickable
+** Make relation lines clickable (cf goocanvas)
 
 ** timeline: allow view-local tags/color to allow to define a specific color for various annotations for a given timeline (display a point of view, specific to the view)
 
@@ -123,8 +156,6 @@ http://developer.apple.com/documentation/CoreFoundation/Conceptual/CFBundles/Con
 
 ** timeline: Center on related annotation
 
-** timeline: select a region to fit to window (cf goocanvas)
-
 ** timeline: find a way to render overlapping buttons (cf goocanvas)
 
 ** timeline: cf http://www.jonobacon.org/gallery/main.php?g2_view=core.ShowItem&g2_itemId=3382&g2_GALLERYSID=8f6c485df08f046ac9658e6fe0928260
@@ -132,14 +163,13 @@ http://jokosher.python-hosting.com/wiki/GnonlinNotes
 http://jokosher.org/
 http://jokosher.python-hosting.com/file/JonoEdit/trunk/TimeLine.py?rev=389
 
-
 * Importers
 
 ** rewrite importers with ElementTree
 
-* Main GUI
+** exmeralda importer
 
-** On package loading, remove already used static colors from the palette
+* Main GUI
 
 ** Remove additional buttons from popup views that have been re-embedded
 
@@ -148,8 +178,6 @@ http://jokosher.python-hosting.com/file/JonoEdit/trunk/TimeLine.py?rev=389
 ** Make the play + pause button a unique button => not that easy
 
 ** Add the possibility to specify a time through a text entry HH:MM:SS
-
-** Check slider value update
 
 ** review gtk.Style for whole app (viewbook labels and comboboxes smaller, more separation...)
 
@@ -173,8 +201,6 @@ http://jokosher.python-hosting.com/file/JonoEdit/trunk/TimeLine.py?rev=389
 
 ** gstreamer: implement svgoverlay component
 
-** Implement a 'webcam' player/recorder plugin.
-
 ** VLC: convert svg module to use rgba blending (cf http://trac.videolan.org/vlc/changeset/19548 )
 
 ** VLC cf r16483: subpicture_t now has a b_pausable attribute. When set to VLC_TRUE (default value is VLC_FALSE), this will keep displaying the subpicture_t when the parent input is paused. This means that subtitles should now be paused when clicking on pause. (refs #29)
@@ -183,6 +209,9 @@ http://jokosher.python-hosting.com/file/JonoEdit/trunk/TimeLine.py?rev=389
 
 ** video plugin: ffmpeg
 
+** MacOS X: write a qtplayer using the Carbon.Qt functionalities (cf
+   /sw/lib/python2.3/plat-mac/videoreader.py)
+
 * TAL/TALES
 
 ** Rewrite admin templates with AJAX functionalities (cf
@@ -190,15 +219,13 @@ http://jokosher.python-hosting.com/file/JonoEdit/trunk/TimeLine.py?rev=389
    (GWT in python) http://mail.zope.org/pipermail/zpt/2006-April/006262.html
 http://pyworks.org/pipermail/py-gwt/2006-December/000283.html
 http://pyworks.org/pipermail/py-gwt/2006-December/000284.html
+http://www.zkoss.org/zkdemo/userguide/
 
 ** write advene helpers for pyjamas to write wysiwyg code
 
 * Interactive query 
 
 ** search result: if different types (or different than annotations), display a tree with the selected elements, one branch per type (annotation, schema, view...)
-
-** predefined sources (all annotations, annotations of type...) / condition (content / duration)
- / output
 
 * signal PlayerRestart event and use it in gui.main to reset the xid
 
@@ -208,8 +235,6 @@ http://pyworks.org/pipermail/py-gwt/2006-December/000284.html
   {'name': 'bar', 'type': 'str', 'constraints': { 'regexp': '^[a-z]+$' } },
  ] 
 Cf http://blog.hill-street.net/?p=7 for implementations comparison
-
-* EditAccumulator: filet plus gras autour des elements
 
 * add a progress bar for package loading -> need support in model
 
@@ -269,11 +294,7 @@ http://simile.mit.edu/timeline/
 
 * define a virtual "global" package that will iterate and forward methods (annotations, relation...) over all loaded packages
 
-* cloud representation of tag collection
-
 * UCK: http://sourceforge.net/forum/forum.php?forum_id=629763
-
-* content browser (nextstep-style) using the same structure as the treeview
 
 * transtyping: preserve/recreate relations
 
@@ -308,10 +329,6 @@ module wave, audioop
 * component "scroller" below the vout. Parameters: text, href (optional), past duration, current
   duration, future duration [ | past | current | future | ]  
 
-* implement a 'record' player, that would record from the mic and
-   allow to take notes on the fly while recording a speech
-   [http://divmod.org/projects/shtoom] -> gstrecord
-
 * Audio commentaries : add a "Record" button. While pressed, it
    records. Upon release, it creates an annotation with the correct
    bounds. Cf
@@ -321,20 +338,15 @@ module wave, audioop
    http://trans.sourceforge.net/en/download.php
    http://pymedia.org//tut/src/voice_recorder.py.html
 
-* allow to dynamically switch between different players
-
 * investigate https://pyplayer.helixcommunity.org/
 
-* strange error when a view import cannot be resolved (try copying
-   unicode.xml to ~)
+* strange error when a view import cannot be resolved (try copying unicode.xml to ~)
 
 * embed swfplayer
 
 * embedding advene in browser: see    http://savannah.nongnu.org/projects/genres/
 
-* package
-   http://www.fsfeurope.org/projects/gplv3/torino-rms-transcript.en.html
-See also http://filmlibre.org/ et http://media.april.org/
+* package http://filmlibre.org/ et http://media.april.org/
 
 * import fixer: allow to edit imports without loading the package
    (which fails if imported package is not present).
@@ -364,28 +376,14 @@ See also http://filmlibre.org/ et http://media.april.org/
 
 * allow i18n of template.xml
 
-* extend unit tests for the model (imports, add, del elements...) in model/test.py
-
 * Pb (QName related) when importing a package importing another one
    (try importing wrong-trousers):
 p.imports[0].package.views[1]._getParent().uri, p.imports[1].package.uri
 that should return the same URI. The proposed solution is to enforce the importing package to explicitly import the second level imported ones. Pb: namespace clash
 
-* Implement in controller.current_annotation which would allow
-   to loop on an annotation through an internal rule : on
-   current_annotation end goto currentannotation.fragment.begin
-  [or more generally offer the possibility to have some state
-   information in rules. A state root element (dict) that would be
-   reset on some events? ]
-
 * Store advene conf files in Application Data on win32
 
 * transcribe: make validity check on bounds only on demand or on export.
-
-* MacOS X: write a qtplayer using the Carbon.Qt functionalities (cf
-   /sw/lib/python2.3/plat-mac/videoreader.py)
-
-* Model: implement annotation types and relations types removal
 
 * treeview: model synchronisation pb when deleting queries
 
@@ -409,11 +407,6 @@ istanbul
 
 * exports.xml: define a CMML export view (cf www.annodex.net)
 
-* TTS on Win32: http://www.cs.unc.edu/~parente/tech/tr02.shtml
-
-* Transcribe: add an option "Cursor follows time" to set the cursor
-   according to movie time 
-
 * On-the-fly annotation: display as caption the edited content (for 1s)
 
 * Sound recording in python: http://www.johnnypops.demon.co.uk/python/ See also http://divmod.org/projects/shtoom/
@@ -424,17 +417,11 @@ istanbul
 
 * Main GUI: tooltips on STBVs (must use an EventBox)
 
-* STBV: add include facility, to include basic STBVs
-
 * webserver: implement a wiki-like syntax in views that dynamically generates links to Advene elements/TALES expressions (define a application/x-advene-wiki that will get converted into a TAL template)
 
 * handle wiki syntax in transcriptionedit, so that we can do simple notetaking with some markup easily.
 
 * Implement zeroconf support: http://www.amk.ca/python/zeroconf
-
-* Views: design a parent class with facilities to register views,
-   precise their parameters (usable from actions and webserver
-   invocation) -> half-done (AdhocView), no parameters yet
 
 * make navigation history accessible from TALES (/options/history ?)
 
@@ -449,18 +436,11 @@ istanbul
 * vlc: use picture+mosaic to implement video embedded inside video (to
   quickly preview a fragment)
 
-* Expand the notify action to add a "comment" parameter to specify the
-context of the action, in order to build an interaction history and
-maybe replay the hypervideo. Need to determine the context structure.
-
 * New action: display a fragment of a video then continue from the
 position where the link was activated. Parameters: fragment to play,
 return position, or display in a new video window
 
 * Model: maintain creation date + modification date for elements
-
-* EditElement: offer a combobox for the mimetype field, populated with
-common mime-types -> wait for gtk2.6 with CellRendererCombo
 
 * MediaControl.idl :
   * sound_[sg]et_volume: normalize volume in [0..100]
@@ -479,9 +459,6 @@ position of current marks in the video (with small lines) [cf linkmap
 
 * Popups: white on black background
 
-* Implement a generic VisualisationWidget that can be either embedded
-in the main Advene, either in its own window (video + views) -> cf gui.visualisationwidget
-
 * controller.update: implement a future_approaching and a
 future_leaving to implement a -2 seconds before / +2 seconds after
 annotation event.
@@ -492,12 +469,6 @@ annotation event.
   advene.iss
  + wget Twiki:AdveneUserGuide to doc/user.html (cf scripts/update_doc)
 
-* Correct bug when no type is present (cf export_views.xml)
-
-* Génération régulière d'annotations (toutes les XX secondes), pour
-alignement plus facile par la suite (couplé avec les fonctions
-d'alignement dans la timeline).
-
 * browser: select base element (annotation, package, ...)
 
 * Mandrake: need
@@ -506,16 +477,6 @@ pyxml
 python-imaging (warning: version 1.1.4-6 (from Mandrake 10.1) is broken, use version 1.1.4-3 (from Mandrake 10.0) instead)
 simpletal (install from source)
 vlc
-
-* Morphix image:
-Need to add :
-python-gtk2 (>=2.0)
-python-glade2 (>=2.0)
-vlc (>= 0.7.2) and depedencies
-python-vlc, vlc-plugin-svg
-python-xml (>=0.8.0)
-python-simpletal (>=3.9)
-python-imaging
 
 * Implement a action-history widget, that displays all events taking
 place with the previous and next states, so that we can know what took place
@@ -527,7 +488,7 @@ Also win32com (http://www.boddie.org.uk/python/COM.html)
 
 * Remove vlc references in advene.core.config
 
-* Item File->statistics : nombre d'elements (ann, rel, etc)
+* Item File->statistics : element count (ann, rel, etc)
 
 * subtitles.xml -> clean up
 
@@ -535,12 +496,8 @@ Also win32com (http://www.boddie.org.uk/python/COM.html)
 
 * A creuser: http://veejay.sourceforge.net/
 
-* Fonctionnalité de sauvegarde automatique reguliere en cas de plantage
-
 * Use transcode to extract screenshots (cf dvd:rip). Command line:
 transcode -H 10 -z -k -o snapshot -y jpg,null -i /dev/dvd -x dvd,null -T 21,1 -c 00:00:10.0-00:00:10.5
-
-* Save ad-hoc view parameters as another view
 
 * In Context (or the GUI), catch AdveneTalesException that happens
 when there is a syntax error in a TALES expression (missing string orbadly written symbol) and display a meaningful message
@@ -562,12 +519,8 @@ when there is a syntax error in a TALES expression (missing string orbadly writt
   be linked through a "snapshot-relation" relation with the
   corresponding annotations.
 
-* RelationType: impossible to delete from popup
-
 * Make the absolute time specification work for display_text (rather
   than relative positions)
-
-* UTBV: implement Undo in textview (cf gtksourceview)
 
 * Model related:
 
@@ -634,13 +587,6 @@ http://effbot.org/zone/celementtree.htm ? -> DONE (.azp)
 ** model: implement a data PATH variable to look for packages. Insert
 the current package's pwd first as default.
 
-* EditAnnotationPopup: implement Next and Previous
-
-* Implement in the standard lib the notion of previous/next
-annotation, of the same type or not.
-
-* Register all editing popup windows to close them upon package reload
-
 * Treeview: add the elements attributes as annotation/relation children.
 
 * MediaControl.idl: get_capabilities() returning a list of
@@ -650,18 +596,9 @@ annotation, of the same type or not.
 
 * VLC: zoom functionality (crop?)
 
-* Anvil converter
-
-* Bug: STBV menu not correctly updated
-
 * Query MPEG7: http://www.idealliance.org/papers/extreme03/html/2001/Liu01/EML2001Liu01.html
 
 * Try to remove the dependency on PIL by using pixbuf loader to convert snapshots to PNG.
-
-* Create a Sequential editor (to accomodate existing work)
-
-* In ECA elements, TALES expression could be prefixed by string: by
-default, using the ${} syntax to evaluate expressions ???
 
 * Content: how to represent structured data ? Cf MPEG7 DS ? (hackingly
   half DONE, grep source for application/x-advene-structured). Or
@@ -683,13 +620,6 @@ http://www.rexx.com/~dkuhlman/generateDS.html (XML-Schema) Or SOAPy
 * vlc-dev: use the new start-time and stop-time functionality in core VLC to correctly
   handle positions in start and stop.
 
-* Update EPOZ code to 1.0.2 / kupu
-http://article.gmane.org/gmane.comp.web.kupu.devel/10
-Transmit python data to javascript:
-http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/285099
-Cf basic tutorial
-http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
-
 * Display the data in the form of a graph (annotation=Nodes, relations=Arcs or nodes)
 
 * Style setting:
@@ -708,47 +638,6 @@ style "blue_text"
 widget "sendmail.*.mail" style "blue_text"
 """
 gtk.rc_parse_string(sendmail_styles)
-
-* Find a meaningful way to concisely display relations and annotations.
-
-* EPOZ: implement data templates according to the edited element,
-  by hacking around LinkTool
-  For packages
-   annotations (List of annotations)
-   relations   (List of all relations)
-   annotations/i... (Precise annotation)
-   annotations/i.../snapshot_url (Annotation for snapshot)
-   annotations/i.../content/data (Content of annotation)
-   annotations/i.../fragment/formatted/begin (Start time of the annotation)
-
-* EPOZ: strip http:... prefix from drag and drop results.
-* Create TALContext object: -> DONE
-     Constructor(selNode) : takes a node 
-     get_define(name): get the define for the given name
-     set_define(name, value): set the define
-     list_define(): get the list of defined names
-     get_repeat(name): get the repeat for the given name
-     list_repeat(): get the list of repeat loop items
-     get_content(): get the content
-     set_content(string): set the content
-
-* EPOZ: derive LinkTool into TALContentTool and TALImageTool, to be
-able to define content/replace (just replace with <span/> will be
-simpler) and snapshot integration.
-
-* bootstrap.xml : how to use properly ? Can a package exist with no view ?
-
-* Once bootstrap.xml works correctly, put it somewhere pertinent and
-use it as the template.xml file
-
-* Ruleset edit : add the possibility to order the rules
-
-* Global methods :
-  * isa : make more robust (work on non-advene elements ? at least, not throw
-    an exception and return 'unknown')
-  * formatted : make more robust
-  * first, last, rest, meta, snapshot_url, view : idem
-  * authorUrl on package ???
 
 * Use popup-menu signal (cf http://cvs.gnome.org/bonsai/cvsblame.cgi?file=gtk%2B%2Fdocs%2Freference%2Fgtk/migrating-checklist.sgml&rev=HEAD&root=/cvs/gnome)
 
@@ -1937,4 +1826,299 @@ http://svn.rdflib.net/trunk/rdflib/Literal.py
 * popup for annotations: Related annotations / Outgoing / Type / Annotation
 
 * timeline: save goto-no-click setting
+
+* TALES editor: directly display string values, and use ${} syntax for
+   tales expression. On-the-fly conversion when storing.
+
+* edit/rules: EditAction/build_parameter_widget: populate TALESEntry(predefined)
+
+* edit.elements.annotation: validate upon navigating to next/prev
+
+* Fields containing defaults should come up selected, so users can replace the default contents with new material quickly and easily.
+
+* timeline: bug in DND in background - bad type guess
+
+* importer Gui: deactivate convert button once launched
+
+* timeline: When creating an anntoation with enter on the type, make
+   Escape delete the relation
+
+* createQuery: add author= parameter
+
+* timeline: when DNDing an annotation on the same type, allow to move
+   (since relations are valid)
+
+* standard workspace: does not work on mac
+
+* views.browser: in non-expert mode, limit available choices (schemas,
+   annotation types, etc) -> views.finder
+
+* timeline: double-click -> edit popup
+
+* transcribe: notify UpdateModel on export
+
+* transcribe: double click to insert marks
+
+* transcribe: automatic scroll for marks
+
+* transcribe: center on current time
+
+* transcribe: display arrows in marks
+
+* transcribe: use tags in conjunction with marks so that text can be greyed out when ignored for instance.
+
+* timeline: goto on single click in background (button release)
+
+* pb with annotation DND on win32
+
+* transcribe: use GenericColorButton for marks so that color works on
+   win32
+
+* timeline: multiple selection (shift-click + DND)
+
+* transcribe: toolbar toggle to deactivate automatic insertion delay
+
+* template: prefix admin views with _
+
+* Select multiple annotations in the timeline ?
+
+* Shortcut "Split annotation at current player position"
+
+* timeline: save pane position
+
+* New action: Pronounce (with flite on linux [but needs alsa patch], MacOS X API for mac)
+
+** Check slider value update
+
+* gui.popup: add appropriate action (open in webbrowser, activate,
+   open in workspace) for views
+
+* timeline: display time marks in a separate layout
+
+** ensure that timestamps are always displayed
+
+** timeline: select a region to fit to window (cf goocanvas)
+
+* video widget: black background + expand for video + minimal size to
+   prevent resize artifacts
+
+* finder: implement visualisation components for views, queries, resources, relations
+
+* edit.tales: option to reveal tales expressions
+
+* gui.edit.rules: add context parameter in EditCondition (query,
+   rule...) to generate appropriate predefined values
+
+* transcription: name the view with the annotation type
+
+* quick-edit on annotation: preserve annotation inspector
+
+* note taking: implement save_view
+
+* quicksearch: multiple words -> and. Use "foo bar"  for whitespace in
+   word. Support +word -word syntax.
+
+* win32: check AT DND on view, Ann. DND to montage
+
+* IRI export view 
+
+* better export framework (cf model/tal/context, def interpret)
+
+* finder: viewcolumn -> DND of Open in GUI button
+
+* timeline: Unselect all in popup menu for timeline bg
+
+* note-taking: text search
+
+* Interactive search: in non-expert mode, do not display "Return" 
+
+* Interactive search: and/or support for conditions
+
+* search result: unhide context menu actions
+
+* note-taking: propose options (empty ann.) on export dialog
+
+* taking note/transcription: highlight searched word
+
+* finder: shortcuts -> left/right change column focus
+
+* finder: add title widget for leaf widgets
+
+* Resources of -> Set of resources
+
+* Quicksearch button: add a "Down button" image to popup menu OR make
+   the left-click a popup menu with Search + Options
+
+* Annotation-type tooltip: count number of annotations
+
+* Save view on interactive query -> should save the Query, not the view
+
+* Timeline: in search result display, limit restrict playing to
+   displayed annotations and/or selected annotations
+
+* View DND: if existing saved views, display a popup with them.
+
+* fix initial display for annotationdisplay
+
+** On package loading, remove already used static colors from the palette
+
+* imagecache generator: extract 1 image every second
+
+* interactiveresult: replace hbox.buttons by a toolbar (so that it
+   resizes gracefully)
+
+* rename rules.elements.Query to SimpleQuery to avoid nameclash with advene.model.query.Query
+ 
+* Finder Query button "Try to apply query on package/annotations/first annotations"
+
+* Allow to save the query from the interactiveresult view
+
+* Define a application/x-advene-quicksearch query object
+
+* Montage: add an AnnotationDisplay slave view
+
+* IRI export: replace video extension with .flv -> they should provide
+   a means to specify the video if not present
+
+* transcription: propose to choose the source type or a saved view
+   from the view itself -> cf DND menu when opening view
+
+* mac themes: 
+http://www.gnome-look.org/content/show.php?content=13548
+http://linux.softpedia.com/get/Desktop-Environment/Themes/MacOS-X-Aqua-Theme-23942.shtml
+http://linux.softpedia.com/progDownload/Leopardish-Download-32938.html
+
+* Search/replace in selection (context menu) or in interactiveresult ?
+
+* close interactiveresult view on package load
+
+* think about python-gtk-vnc / yatm when it is in testing
+
+* propose to save adhoc-views when closing application -> cf
+   save-default-workspace option
+
+* Save current workspace when saving package ?
+
+* MacOSX:
+http://gamera.svn.sourceforge.net/viewvc/gamera/trunk/gamera/gamera/mac/buildpkg.py?revision=467&view=markup
+http://mail.python.org/pipermail/pythonmac-sig/2004-June/011231.html
+DMG creation: hdiutil create -srcfolder $SOURCE $DESTNAME
+http://svn.berlios.de/wsvn/griffith/trunk/macsetup.py?op=file&rev=0&sc=0
+http://svn.berlios.de/wsvn/griffith/trunk/lib/?rev=0&sc=0
+Ardour:
+http://developer.imendio.com/node/145
+http://subversion.ardour.org/svn/ardour2/branches/2.0-ongoing/tools/osx_packaging/osx_build
+
+# Bundle pango
+http://developer.imendio.com/node/145
+
+Anatomy of a bundle:
+http://developer.apple.com/documentation/CoreFoundation/Conceptual/CFBundles/Concepts/BundleAnatomy.html
+
+** Implement a 'webcam' player/recorder plugin -> cf gstrecorder
+
+** predefined sources (all annotations, annotations of type...) / condition (content / duration)
+ / output
+
+* content browser (nextstep-style) using the same structure as the
+   treeview -> finder
+
+* implement a 'record' player, that would record from the mic and
+   allow to take notes on the fly while recording a speech
+   [http://divmod.org/projects/shtoom] -> gstrecord
+
+* Implement in controller.current_annotation which would allow
+   to loop on an annotation through an internal rule : on
+   current_annotation end goto currentannotation.fragment.begin
+  [or more generally offer the possibility to have some state
+   information in rules. A state root element (dict) that would be
+   reset on some events? ]
+
+* Model: implement annotation types and relations types removal
+
+* Transcribe: add an option "Cursor follows time" to set the cursor
+   according to movie time 
+
+* STBV: add include facility, to include basic STBVs
+
+* Views: design a parent class with facilities to register views,
+   precise their parameters (usable from actions and webserver
+   invocation) -> half-done (AdhocView), no parameters yet
+
+* Expand the notify action to add a "comment" parameter to specify the
+context of the action, in order to build an interaction history and
+maybe replay the hypervideo. Need to determine the context structure.
+
+* EditElement: offer a combobox for the mimetype field, populated with
+common mime-types -> wait for gtk2.6 with CellRendererCombo
+
+* Implement a generic VisualisationWidget that can be either embedded
+in the main Advene, either in its own window (video + views) -> cf gui.visualisationwidget
+
+* Correct bug when no type is present (cf export_views.xml)
+
+* Génération régulière d'annotations (toutes les XX secondes), pour
+alignement plus facile par la suite (couplé avec les fonctions
+d'alignement dans la timeline).
+
+* Fonctionnalité de sauvegarde automatique reguliere en cas de plantage
+
+* Save ad-hoc view parameters as another view
+
+* UTBV: implement Undo in textview (cf gtksourceview)
+
+* EditAnnotationPopup: implement Next and Previous
+
+* Implement in the standard lib the notion of previous/next
+annotation, of the same type or not.
+
+* Register all editing popup windows to close them upon package reload
+
+* Anvil converter
+
+* In ECA elements, TALES expression could be prefixed by string: by
+default, using the ${} syntax to evaluate expressions ???
+
+* Update EPOZ code to 1.0.2 / kupu
+http://article.gmane.org/gmane.comp.web.kupu.devel/10
+Transmit python data to javascript:
+http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/285099
+Cf basic tutorial
+http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
+-> fckeditor
+
+* Find a meaningful way to concisely display relations and annotations.
+
+* timeline: goto-on-click -> on button release
+
+* Bug when accents in mediafile name (cf montegrande.azp)
+
+* action: NavigateOutgoingRelation -> lien vers les relations
+   sortantes, avec contenu relation ou titre type
+
+* NavigationPopup -> display a close button like viewbook
+
+* timeline selection: control+selection to extend selection, click to deselect
+
+* Imagecache generation: autosync feature to create CachedString
+   instances to save memory. Need to specify the save dir.
+
+* timeline: display cursor time for DND operations
+
+* timeline autoscroll: put the annotation in the middle.
+
+* define a Popup category for popup actions
+
+* edit action: replace popup dialog by a hierarchical menu
+
+* webcherry: handle file upload in post method, cf http://www.cs.tut.fi/~jkorpela/forms/file.html
+
+* Fix absolute_url for ResourceData
+
+* bug in meta (item color for type)
+
+* in quicksearch, when selecting a new source, launch the search
+
+* gui.widget: representation for annotation valued data (sound
+   enveloppe), cf IRI data
 
