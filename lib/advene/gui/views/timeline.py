@@ -1890,7 +1890,11 @@ class TimeLine(AdhocView):
         return True
 
     def layout_drag_motion_cb(self, widget, drag_context, x, y, timestamp):
-        self.set_annotation(long(self.pixel2unit(self.adjustment.value +  x)))
+        t=long(self.pixel2unit(self.adjustment.value +  x))
+        self.set_annotation(t)
+        w=drag_context.get_source_widget()
+        if w and hasattr(w, '_icon'):
+            w._icon.set_time(t)
         return True
 
     def context_cb (self, timel=None, position=None, height=None):

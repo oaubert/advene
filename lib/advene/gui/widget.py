@@ -35,6 +35,9 @@ import cairo
 
 # Advene part
 import advene.core.config as config
+from advene.gui.util import png_to_pixbuf
+import advene.util.helper as helper
+from advene.model.annotation import Annotation
 
 import advene.gui.popup
 
@@ -226,6 +229,8 @@ class AnnotationWidget(GenericColorButtonWidget):
         self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
         self.connect("drag_data_get", self.drag_sent)
         self.connect("drag_begin", self._drag_begin)
+        self.connect("drag_end", self._drag_end)
+        self.connect("drag_motion", self._drag_motion)
         # The widget can generate drags
         self.drag_source_set(gtk.gdk.BUTTON1_MASK,
                              config.data.drag_type['annotation']
@@ -237,7 +242,50 @@ class AnnotationWidget(GenericColorButtonWidget):
                              + config.data.drag_type['tag']
                              ,
                              gtk.gdk.ACTION_LINK)
+        self.no_image_pixbuf=png_to_pixbuf(self.controller.package.imagecache.not_yet_available_image, width=50)
 
+    def _drag_begin(self, widget, context):
+        w=gtk.Window(gtk.WINDOW_POPUP)
+        w.set_decorated(False)
+
+        v=gtk.VBox()
+        i=gtk.Image()
+        v.pack_start(i, expand=False)
+        l=gtk.Label()
+        v.pack_start(l, expand=False)
+        def set_time(wid, t):
+            cache=self.controller.package.imagecache
+            if isinstance(t, long) or isinstance(t, int):
+                if cache.is_initialized(t, epsilon=500):
+                    i.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=500), width=50))
+                elif i.get_pixbuf() != self.no_image_pixbuf:
+                    i.set_from_pixbuf(self.no_image_pixbuf)
+                l.set_text(helper.format_time(t))
+            elif isinstance(t, Annotation):
+                # It can be an annotation
+                i.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.begin), width=50))
+                l.set_text(self.controller.get_title(t))
+            return True
+
+        w.add(v)
+        w.show_all()
+        w.set_time = set_time.__get__(w)
+        w.set_time(self.element.fragment.begin)
+        widget._icon=w
+        context._popup=w
+        context.set_icon_widget(w, 0, 0)
+        return True
+
+    def _drag_end(self, widget, context):
+        context._popup.destroy()
+        return True
+
+    def _drag_motion(self, widget, drag_context, x, y, timestamp):
+        w=drag_context.get_source_widget()
+        if w and hasattr(w, '_icon'):
+            w._icon.set_time(self.element)
+        return True
+    
     def set_active(self, b):
         self.active=b
         self.update_widget()
