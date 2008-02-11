@@ -253,6 +253,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         v.pack_start(i, expand=False)
         l=gtk.Label()
         v.pack_start(l, expand=False)
+
         def set_cursor(wid, t):
             cache=self.controller.package.imagecache
             if not t == w._current:
@@ -261,11 +262,11 @@ class AnnotationWidget(GenericColorButtonWidget):
                         i.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=500), width=50))
                     elif i.get_pixbuf() != self.no_image_pixbuf:
                         i.set_from_pixbuf(self.no_image_pixbuf)
-                    l.set_text(helper.format_time(t))
+                    l.set_text(helper.format_time(t)[:30])
                 elif isinstance(t, Annotation):
                     # It can be an annotation
                     i.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.begin), width=50))
-                    l.set_text(self.controller.get_title(t))
+                    l.set_text(self.controller.get_title(t)[:30])
             wid._current=t
             return True
 
@@ -285,8 +286,10 @@ class AnnotationWidget(GenericColorButtonWidget):
 
     def _drag_motion(self, widget, drag_context, x, y, timestamp):
         w=drag_context.get_source_widget()
-        if w and hasattr(w, '_icon'):
+        try:
             w._icon.set_cursor(self.element)
+        except AttributeError:
+            pass
         return True
     
     def set_active(self, b):
