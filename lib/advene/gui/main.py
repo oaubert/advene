@@ -110,6 +110,7 @@ from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
 import advene.gui.edit.properties
 import advene.gui.edit.montage
+from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.transcription import TranscriptionView
 from advene.gui.edit.transcribe import TranscriptionEdit
 from advene.gui.views.viewbook import ViewBook
@@ -1012,9 +1013,34 @@ class AdveneGUI (Connect):
             self.captionview=None
 
         h=gtk.HBox()
+        eb=gtk.EventBox()
         self.time_label=gtk.Label()
         self.time_label.set_text(helper.format_time(None))
-        h.pack_start(self.time_label, expand=False)
+        eb.add(self.time_label)
+
+        def time_pressed(w, event):
+            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+                d = gtk.Dialog(title=_("Enter the new time value"),
+                               parent=None,
+                               flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                               buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                         gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+
+                ta=TimeAdjustment(value=self.gui.slider.get_value(), controller=self.controller, videosync=False, editable=True, compact=False)
+                d.vbox.pack_start(ta.widget, expand=False)
+                d.show_all()
+                dialog.center_on_mouse(d)
+                res=d.run()
+                retval=None
+                if res == gtk.RESPONSE_OK:
+                    t=ta.get_value()
+                    self.controller.update_status ("set", self.controller.create_position (t))
+                d.destroy()
+                return True
+            return True
+
+        eb.connect('button_press_event', time_pressed)
+        h.pack_start(eb, expand=False)
         h.pack_start(self.gui.slider, expand=True)
         v.pack_start(h, expand=False)
 
