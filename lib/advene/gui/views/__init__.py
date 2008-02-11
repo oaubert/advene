@@ -441,9 +441,10 @@ class AdhocView(object):
 	
         if config.data.os == 'win32':
             # Force resize for win32
+            oldmode=window.get_resize_mode()
             window.set_resize_mode(gtk.RESIZE_IMMEDIATE)
             window.resize_children()
-	    window.set_resize_mode(gtk.RESIZE_QUEUE)
+	    window.set_resize_mode(oldmode)
         return window
 
 class AdhocViewParametersParser:
