@@ -1893,14 +1893,18 @@ class TimeLine(AdhocView):
     def layout_drag_motion_cb(self, widget, drag_context, x, y, timestamp):
         t=long(self.pixel2unit(self.adjustment.value +  x))
         w=drag_context.get_source_widget()
-        if w and hasattr(w, '_icon'):
+        try:
             w._icon.set_cursor(t)
+        except AttributeError:
+            pass
         return True
 
     def layout_drag_leave_cb(self, widget, drag_context, timestamp):
         w=drag_context.get_source_widget()
-        if w and hasattr(w, '_icon'):
+        try:
             w._icon.set_cursor(w.element)
+        except AttributeError:
+            pass
         return True
 
     def context_cb (self, timel=None, position=None, height=None):
