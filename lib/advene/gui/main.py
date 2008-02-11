@@ -393,8 +393,13 @@ class AdveneGUI (Connect):
         if event.endswith('EditEnd'):
             self.controller.package._indexer.element_update(annotation)
             # Refresh the edit popup
-            for e in [ e for e in self.edit_popups if e.element == annotation ]:
+            for e in [ e for e in self.edit_popups if e.element == annotation 
+                       or e.element in annotation.relations ]:
                 e.refresh()
+
+        # Refresh the edit popup for the associated relations
+        for e in [ e for e in self.edit_popups if e.element in annotation.relations ]:
+            e.refresh()
         return True
 
     def relation_lifecycle(self, context, parameters):
@@ -411,8 +416,11 @@ class AdveneGUI (Connect):
                 v.update_relation(relation=relation, event=event)
             except AttributeError:
                 pass
-        # Refresh the edit popup
-        for e in [ e for e in self.edit_popups if e.element == relation ]:
+        # Refresh the edit popup for the relation or its members
+        for e in [ e for e in self.edit_popups if e.element == relation or e.element in relation.members ]:
+            e.refresh()
+        # Refresh the edit popup for the members
+        for e in [ e for e in self.edit_popups if e.element in relation.members ]:
             e.refresh()
         return True
 
