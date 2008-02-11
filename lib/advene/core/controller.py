@@ -49,7 +49,7 @@ from advene.core.mediacontrol import PlayerFactory
 from advene.core.imagecache import ImageCache
 import advene.core.idgenerator
 
-from advene.rules.elements import RuleSet, RegisteredAction
+from advene.rules.elements import RuleSet, RegisteredAction, SimpleQuery, Quicksearch
 import advene.rules.ecaengine
 import advene.rules.actions
 
@@ -499,6 +499,69 @@ class AdveneController:
                     res.append(e)
                     break
         return res
+        
+    def evaluate_query(self, query=None, context=None):
+        """Evaluate a Query.
+        """
+        if context is None:
+            context=self.build_context()
+        if query.content.mimetype == 'application/x-advene-simplequery':
+            qexpr=SimpleQuery()
+            qexpr.from_dom(query.content.model)
+            res=qexpr.execute(context=context)
+            return res
+        elif query.content.mimetype == 'application/x-advene-quicksearch':
+            # Parse quicksearch query
+            qexpr=Quicksearch(controller=self)
+            qexpr.from_dom(query.content.model)
+            return qexpr.execute(context=context)
+        elif query.content.mimetype == 'application/x-advene-sparql-query':
+            p = self.package
+            search = [
+                p.getAnnotations(),
+                p.getRelations(),
+                p.getSchemas(),
+                p.getAnnotationTypes(),
+                p.getRelationTypes(),
+                p.getQueries(),
+                p.getViews(),
+            ]
+            # FIXME: this is alpha code !
+            r = []
+            cmd = os.environ.get("PELLET", "/usr/local/bin/pellet")
+            queryfile = context.evaluateValue('here/queries/%s/content/data/absolute_url' % query.id)
+            f = os.popen ("%s -qf %s" % (cmd, queryfile), "r", 0)
+            from advene.util.pellet import PelletResult
+            final_result = []
+            for r in PelletResult (f).results:
+                t = []
+                for i in r:
+                    if i.startswith ('"'):
+                        i = i[1:-1]
+                    elif i == "<<null>>":
+                        i = None
+                    else:
+                        # FIXME: there should be a safer way to decide
+                        # whether this QName is an Advene URI
+                        id_ = i.split(":")[-1]
+                        if id_.startswith ("-"):
+                            # FIXME: get rid of any row with a blank
+                            # node. A bit brutal. Any better idea ?
+                            # Pellet does not seem to understand isIRI
+                            # so we have to do it ourselves.
+                            t = None
+                            break
+                        for s in search:
+                            j = s.get("%s#%s" % (p.uri, id_))
+                            if j is not None:
+                                i = j
+                                break
+                    t.append (i)
+                if t:
+                    final_result.append (t)
+            return final_result
+        else:
+            raise Exception("Unsupported query type for %s" % query.id)
         
     def build_context(self, here=None, alias=None, baseurl=None):
         """Build a context object with additional information.

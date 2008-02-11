@@ -438,74 +438,16 @@ def query(target, context):
         def __getitem__ (self, key):
             #print "getitem %s" % key
             def render ():
-                import advene.rules.elements
                 # Key is the query id
                 q=self._get_query_by_id(key)
                 if not q:
-                    raise KeyError(_("The query %s cannot be found") % key)
-
-                if q.content.mimetype == 'application/x-advene-simplequery':
-                    qexpr=advene.rules.elements.SimpleQuery()
-                    qexpr.from_dom(q.content.model)
-                    self._context.pushLocals()
-                    self._context.setLocal('here', self._target)
-                    res=qexpr.execute(context=self._context)
-                    self._context.popLocals()
-                    return res
-                elif q.content.mimetype == 'application/x-advene-quicksearch':
-                    # Parse quicksearch query
-                    c=context.globals['options']['controller']
-                    qexpr=advene.rules.elements.Quicksearch(controller=c)
-                    qexpr.from_dom(q.content.model)
-                    return qexpr.execute(context=self._context)
-                elif q.content.mimetype == 'application/x-advene-sparql-query':
-                    p = self._target.rootPackage
-                    search = [
-                        p.getAnnotations(),
-                        p.getRelations(),
-                        p.getSchemas(),
-                        p.getAnnotationTypes(),
-                        p.getRelationTypes(),
-                        p.getQueries(),
-                        p.getViews(),
-                    ]
-                    # FIXME: this is alpha code !
-                    import os
-                    r = []
-                    cmd = os.environ.get("PELLET", "/usr/local/bin/pellet")
-                    queryfile = self._context.evaluateValue('here/queries/%s/content/data/absolute_url' % q.id)
-                    f = os.popen ("%s -qf %s" % (cmd, queryfile), "r", 0)
-                    from advene.util.pellet import PelletResult
-                    final_result = []
-                    for r in PelletResult (f).results:
-                        t = []
-                        for i in r:
-                            if i.startswith ('"'):
-                                i = i[1:-1]
-                            elif i == "<<null>>":
-                                i = None
-                            else:
-                                # FIXME: there should be a safer way to decide
-                                # whether this QName is an Advene URI
-                                id_ = i.split(":")[-1]
-                                if id_.startswith ("-"):
-                                    # FIXME: get rid of any row with a blank
-                                    # node. A bit brutal. Any better idea ?
-                                    # Pellet does not seem to understand isIRI
-                                    # so we have to do it ourselves.
-                                    t = None
-                                    break
-                                for s in search:
-                                    j = s.get("%s#%s" % (p.uri, id_))
-                                    if j is not None:
-                                        i = j
-                                        break
-                            t.append (i)
-                        if t: final_result.append (t)
-                    print "===", final_result
-                    return final_result
-                else:
-                    raise Exception("Unsupported query type for %s" % q.id)
+                    raise KeyError("The query %s cannot be found" % key)
+                c=context.globals['options']['controller']
+                self._context.pushLocals()
+                self._context.setLocal('here', self._target)
+                res=c.evaluate_query(q, self._context)
+                self._context.popLocals()
+                return res
             return render
 
         def ids (self):
@@ -614,7 +556,7 @@ def color(target, context):
     """Return the color of the element.
     """
     from advene.model.annotation import Annotation, Relation
-    from advene.model.schema import Schema, AnnotationType, RelationType
+    from advene.model.schema import AnnotationType, RelationType
     import re
 
     if (isinstance(target, Annotation) or isinstance(target, Relation) 
