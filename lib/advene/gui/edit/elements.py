@@ -2049,16 +2049,8 @@ class EditRelationsForm(EditForm):
         else:
             return True
 
-    def update_element(self):
-        if not self.editable:
-            return False
-        if not self.check_validity():
-            return False
-        #FIXME self.element.setTags( self.get_current_tags() )
-        return True
-
-    def get_view(self, compact=False):
-        t=gtk.Table()
+    def refresh(self):
+        self.view.foreach(self.view.remove)
         for i, r in enumerate(self.element.relations):
             # Determine the direction
             if r.members[0] == self.element:
@@ -2068,10 +2060,24 @@ class EditRelationsForm(EditForm):
                 direction="from"
                 other=r.members[0]
             b=RelationRepresentation(r, controller=self.controller, direction=direction)
-            t.attach(b, 0, 1, i, i + 1)
+            self.view.attach(b, 0, 1, i, i + 1)
             a=AnnotationRepresentation(other, controller=self.controller)
-            t.attach(a, 1, 2, i, i + 1)
-        return t
+            self.view.attach(a, 1, 2, i, i + 1)
+        self.view.show_all()
+        return 
+
+    def update_element(self):
+        if not self.editable:
+            return False
+        if not self.check_validity():
+            return False
+        #FIXME self.element.setTags( self.get_current_tags() )
+        return True
+
+    def get_view(self, compact=False):
+        self.view=gtk.Table()
+        self.refresh()
+        return self.view
 
 if __name__ == "__main__":
     class Foo:
