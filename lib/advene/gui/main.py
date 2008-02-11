@@ -992,6 +992,10 @@ class AdveneGUI (Connect):
         self.gui.slider.set_draw_value(False)
         self.gui.slider.connect ("button-press-event", self.on_slider_button_press_event)
         self.gui.slider.connect ("button-release-event", self.on_slider_button_release_event)
+        def update_timelabel(s):
+            self.time_label.set_text(helper.format_time(s.get_value()))
+            return False
+        self.gui.slider.connect ('value-changed', update_timelabel)
 
         # Stack the video components
         v=gtk.VBox()
@@ -1874,7 +1878,6 @@ class AdveneGUI (Connect):
         #gtk.threads_enter()
         try:
             pos=self.controller.update()
-            self.time_label.set_text(helper.format_time(pos))
         except self.controller.player.InternalException:
             # FIXME: something sensible to do here ?
             print "Internal error on video player"
@@ -1897,7 +1900,8 @@ class AdveneGUI (Connect):
             # snapshots, and display them to make the navigation in the
             # stream easier
             pass
-        elif self.controller.player.status in self.active_player_status:
+        elif self.controller.player.status in self.active_player_status:            
+            self.time_label.set_text(helper.format_time(pos))
             # Update the display
             d = self.controller.cached_duration
             if d > 0 and d != self.gui.slider.get_adjustment ().upper:
