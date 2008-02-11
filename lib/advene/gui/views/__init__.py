@@ -443,6 +443,7 @@ class AdhocView(object):
             # Force resize for win32
             window.set_resize_mode(gtk.RESIZE_IMMEDIATE)
             window.resize_children()
+	    window.set_resize_mode(gtk.RESIZE_QUEUE)
         return window
 
 class AdhocViewParametersParser:
