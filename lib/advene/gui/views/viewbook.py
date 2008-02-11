@@ -320,6 +320,22 @@ class ViewBook(AdhocView):
                 i=gtk.MenuItem(label, use_underline=False)
                 i.connect('activate', action)
                 menu.append(i)
+
+            def apply_query(m, q):
+                ctx=self.controller.build_context(here=a)
+                res=self.controller.evaluate_query(q, ctx)
+                self.controller.gui.open_adhoc_view('interactiveresult', query=q, result=res, destination=self.location)
+                return True
+
+            if self.controller.package.queries:
+                sm=gtk.Menu()
+                for q in self.controller.package.queries:
+                    i=gtk.MenuItem(self.controller.get_title(q))
+                    i.connect('activate', apply_query, q)
+                    sm.append(i)
+                i=gtk.MenuItem(_("as the context for the query..."), use_underline=False)
+                i.set_submenu(sm)
+                menu.append(i)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
