@@ -1,3 +1,6 @@
 ?package(advene):needs="X11" section="Applications/Viewers"\
-  title="Advene - Video Annotation" command="/usr/bin/advene" \
-  hints="Video" icon="/usr/share/advene/pixmaps/icon_advene32.png"
+  title="Advene - Video Annotation" \
+  command="/usr/bin/advene" \
+  hints="Video" \
+  icon32x32="/usr/share/advene/pixmaps/icon_advene32.xpm"\
+  icon16x16="/usr/share/advene/pixmaps/icon_advene16.xpm"
