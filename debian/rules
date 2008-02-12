@@ -16,6 +16,7 @@ binary-indep: build install
 	dh_installmenu
 	dh_installexamples
 	dh_install --sourcedir $(install_dir)
+	dh_desktop
 	dh_fixperms
 	dh_pycentral
 	dh_compress -X.py
