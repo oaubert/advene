@@ -53,7 +53,7 @@ the video...
 
 * Basic use
 
-Two sample packages are provided on the Advene website:
+Sample packages are provided on the Advene website:
 http://liris.cnrs.fr/advene/examples.html
 
 Both the Nosferatu analysis and the Ted Nelson speech analysis can be
@@ -61,4 +61,3 @@ used as tutorials to go through the Advene features.
 
 A user manual is also available:
 http://liris.cnrs.fr/advene/wiki/index.php/Main_Page
-
