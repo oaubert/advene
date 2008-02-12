@@ -110,8 +110,8 @@ class Player:
     def build_pipeline(self):
         if self.videofile is None:
             return
-        #self.pipeline=gst.parse_launch('v4l2src ! video/x-raw-yuv,width=352,height=288 ! tee name=tee ! ffmpegcolorspace ! ffenc_mpeg4 bitrate=400000 ! queue ! avimux name=mux ! filesink location=%s  alsasrc device=hw:1,0 ! lame ! mux.  tee. ! queue ! xvimagesink name=sink sync=false' % self.afilename)
-        self.pipeline=gst.parse_launch('alsasrc name=source device=hw:1,0 ! lame ! filesink location=%s' % self.videofile)
+        self.pipeline=gst.parse_launch('v4l2src queue-size=4 ! video/x-raw-yuv,width=352,height=288 ! tee name=tee ! ffmpegcolorspace ! ffenc_mpeg4 bitrate=400000 ! queue ! avimux name=mux ! filesink location=%s  alsasrc device=hw:1,0 ! lame ! mux.  tee. ! queue ! xvimagesink name=sink sync=false' % self.videofile)
+        #self.pipeline=gst.parse_launch('alsasrc name=source device=hw:1,0 ! lame ! filesink location=%s' % self.videofile)
         #self.player = self.pipeline.get_by_name('source')
         self.player=self.pipeline
 
