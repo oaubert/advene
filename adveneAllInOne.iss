@@ -33,10 +33,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.26
+AppVerName=Advene 0.28
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.26
+VersionInfoVersion=0.28
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -44,8 +44,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.26_all_in_one_vlcsvn
-VersionInfoTextVersion=0.26
+OutputBaseFilename=setup_advene_0.28_all_in_one_vlcsvn
+VersionInfoTextVersion=0.28
 
 [Registry]
 Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
