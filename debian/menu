@@ -1,2 +1,3 @@
-?package(advene):needs="X11" section="Apps/Viewers"\
-  title="Advene - DVD Annotation" command="/usr/bin/advene"
+?package(advene):needs="X11" section="Applications/Viewers"\
+  title="Advene - Video Annotation" command="/usr/bin/advene" \
+  hints="Video" icon="/usr/share/advene/pixmaps/icon_advene32.png"
