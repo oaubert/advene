@@ -27,6 +27,8 @@ FIXME:
 - Win32: directdrawsink implements the X Overlay interface then you
   can use it to setup your video window or to receive a signal when
   directdrawsink will create the default one.
+- TODO: investigate SVG support. Maybe through gdkpixbufdec: 
+gst-launch videotestsrc ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink filesrc location=/tmp/a.jpg ! gdkpixbufdec ! ffmpegcolorspace ! mix.
 
 For set_rate:
 > If you only want to change the rate without changing the seek
@@ -445,10 +447,12 @@ class Player:
 
         if status == "start" or status == "set":
             self.position_update()
-            if self.status not in (self.PlayingStatus, self.PauseStatus):
-                self.start(position)
-            else:
-                self.set_media_position(position)
+            if status == 'start':
+                if self.status == self.PauseStatus:
+                    self.resume (position)
+                elif self.status != self.PlayingStatus:
+                    self.start(position)
+            self.set_media_position(position)
         else:
             if status == "pause":
                 self.position_update()
