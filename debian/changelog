@@ -1,3 +1,9 @@
+advene (0.28) unstable; urgency=low
+
+  * Stable release
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 12 Feb 2008 11:56:11 +0100
+
 advene (0.27) unstable; urgency=low
 
   * ! On Win32, the home directory (where the "advene" folder for
