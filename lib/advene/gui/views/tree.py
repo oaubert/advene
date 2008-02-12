@@ -460,12 +460,13 @@ class TreeWidget(AdhocView):
 
         # Drag and drop for annotations
         tree_view.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                                  config.data.drag_type['annotation-type']
-                                  + config.data.drag_type['adhoc-view']
-                                  + config.data.drag_type['annotation']
-                                  + config.data.drag_type['text-plain']
+                                  config.data.drag_type['text-plain']
+                                  + config.data.drag_type['uri-list']
                                   + config.data.drag_type['TEXT']
                                   + config.data.drag_type['STRING']
+                                  + config.data.drag_type['annotation-type']
+                                  + config.data.drag_type['adhoc-view']
+                                  + config.data.drag_type['annotation']
                                   ,
                                   gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
 
@@ -489,19 +490,22 @@ class TreeWidget(AdhocView):
         treeselection = treeview.get_selection()
         model, it = treeselection.get_selected()
 
+        typ=config.data.target_type
         el = model.get_value(it, AdveneTreeModel.COLUMN_ELEMENT)
 
-        if targetType == config.data.target_type['annotation']:
+        #print "Drag data get ", targetType, "".join([ n for n in config.data.target_type if config.data.target_type[n] == targetType ])
+
+        if targetType == typ['annotation']:
             if not isinstance(el, Annotation):
                 return False
             selection.set(selection.target, 8, el.uri)
             return True
-        elif targetType == config.data.target_type['annotation-type']:
+        elif targetType == typ['annotation-type']:
             if not isinstance(el, AnnotationType):
                 return False
             selection.set(selection.target, 8, el.uri)
             return True
-        elif targetType == config.data.target_type['adhoc-view']:
+        elif targetType == typ['adhoc-view']:
             if not isinstance(el, View):
                 return False
             if helper.get_view_type(el) != 'adhoc':
@@ -511,6 +515,15 @@ class TreeWidget(AdhocView):
                         'id': el.id,
                         } ))
             return True
+        elif targetType == typ['uri-list']:
+            try:
+                ctx=self.controller.build_context(here=el)
+                uri=ctx.evaluateValue('here/absolute_url')
+            except:
+                uri="No URI for " + unicode(el)
+            selection.set(selection.target, 8, uri)
+        elif targetType in (typ['text-plain'], typ['STRING']):
+            selection.set(selection.target, 8, self.controller.get_title(el))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
