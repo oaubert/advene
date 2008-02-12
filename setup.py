@@ -137,7 +137,10 @@ def generate_data_files():
     if os.path.isdir("locale"):
         r.extend(generate_data_dir("locale", prefix=prefix))
     else:
-        print """**WARNING** You should generate the locales with "cd po; make mo"."""
+        raise Exception("""**WARNING** You should generate the locales with "cd po; make mo".""")
+    if sys.platform == 'linux2':
+        # Install specific data files
+        r.append( ( 'share/applications', [ 'debian/advene.desktop' ] ) )
     return r
 
 myname = "Olivier Aubert"
