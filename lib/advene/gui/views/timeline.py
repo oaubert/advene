@@ -1670,7 +1670,7 @@ class TimeLine(AdhocView):
             return True
 
         if event.keyval >= 49 and event.keyval <= 57:
-            if self.quickview.annotation is not None:
+            if isinstance(self.quickview.annotation, Annotation):
                 pos=self.quickview.annotation.fragment.begin
             else:
                 pos=self.get_middle_position()
@@ -1678,7 +1678,7 @@ class TimeLine(AdhocView):
             self.set_middle_position(pos)
             return True
         elif event.keyval == gtk.keysyms.e:
-            if self.quickview.annotation is not None:
+            if isinstance(self.quickview.annotation, Annotation):
                 self.controller.gui.edit_element(self.quickview.annotation)
                 return True
         elif event.keyval == gtk.keysyms.c:
@@ -2589,7 +2589,7 @@ class TimeLine(AdhocView):
                 f=int(i[0])/100.0
             else:
                 return True
-            if self.quickview.annotation is not None:
+            if isinstance(self.quickview.annotation, Annotation):
                 pos=self.quickview.annotation.fragment.begin
             else:
                 pos=self.get_middle_position()
@@ -2600,7 +2600,7 @@ class TimeLine(AdhocView):
         def zoom_change(combo):
             v=combo.get_current_element()
             if isinstance(v, float):
-                if self.quickview.annotation is not None:
+                if isinstance(self.quickview.annotation, Annotation):
                     pos=self.quickview.annotation.fragment.begin
                 else:
                     pos=self.get_middle_position()
