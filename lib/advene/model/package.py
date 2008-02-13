@@ -293,7 +293,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
     <statistics:statistics xmlns:statistics="urn:advene:names:tc:opendocument:xmlns:manifest:1.0">
     """
         # Note: we do not use urllib.quote, since it chokes on non-ASCII characters (unicode)
-        out += u"""<statistics:title value="%s" />""" % (self.title.replace('"', '%22') or "")
+        out += u"""<statistics:title value="%s" />""" % ((self.title or '').replace('"', '%22') or "")
         out += u"""<statistics:description value="%s" />""" % ((self.getMetaData(config.data.namespace_prefix['dc'], 'description') or "").replace('"', '%22') or "")
         for n, l in ( ('schema', len(self.schemas)),
                       ('annotation', len(self.annotations)),
