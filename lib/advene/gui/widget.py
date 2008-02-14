@@ -274,7 +274,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         w.show_all()
         w._current=None
         w.set_cursor = set_cursor.__get__(w)
-        w.set_cursor(self.element.fragment.begin)
+        w.set_cursor(self.element)
         widget._icon=w
         context._popup=w
         context.set_icon_widget(w, 0, 0)
