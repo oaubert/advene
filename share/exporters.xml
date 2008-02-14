@@ -311,5 +311,39 @@ div.${a/id} {
 
 &lt;/package></content>
     </view>
+    <view dc:date='2008-02-14' dc:creator='oaubert' id='CMML' viewable-class='package'>
+      <meta>
+        <title xmlns='http://purl.org/dc/elements/1.1/'>CMML</title>
+      </meta>
+      <content mime-type='text/xml'>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+&lt;!-- This view can be applied either to a package, or to an annotation-type -->
+
+&lt;cmml>
+
+&lt;stream timebase="npt:0">
+  &lt;import id="a1" contenttype="video/mpeg" tal:attributes="src package/meta/advenetool/mediafile" start="npt:0">&lt;/import>
+&lt;/stream>
+
+&lt;head>
+&lt;title tal:content="here/title | string:No title">Title (type or package's)&lt;/title>
+&lt;meta name="DC.audience" content="General">&lt;/meta>
+&lt;meta name="DC.author" tal:attributes="content here/author | string:No author">&lt;/meta>
+&lt;meta name="DC.description" tal:attributes="content here/description | string:No description">&lt;/meta>
+&lt;meta name="DC.format" content="video">&lt;/meta>
+&lt;meta name="DC.language" content="English">&lt;/meta>
+&lt;meta name="DC.publisher" tal:attributes="content here/author | string:No author">&lt;/meta>
+&lt;meta name="DESCRIPTION" tal:attributes="content here/description | string:No description">&lt;/meta>
+&lt;meta name="TYPE" content="video">&lt;/meta>
+&lt;/head>
+
+&lt;clip tal:repeat="a here/annotations/sorted" tal:attributes="id a/id ; start string:npt:${a/fragment/begin/formatted} ; end string:npt:${a/fragment/end/formatted}">
+&lt;a tal:attributes="href a/absolute_url" tal:content="a/representation">Annotation representation&lt;/a>
+&lt;img tal:attributes="src a/snapshot_url">&lt;/img>
+&lt;desc tal:content="a/content/data">Content&lt;/desc>
+&lt;/clip>
+&lt;/cmml>
+</content>
+    </view>
   </views>
 </package>
