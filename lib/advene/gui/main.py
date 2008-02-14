@@ -787,6 +787,18 @@ class AdveneGUI (Connect):
             b.connect('clicked', open_site)
             v.pack_start(b, expand=False)
             self.popupwidget.display(v, title=_("Advene release"))
+        elif p:
+            # There were parameters, then we were called from a menu
+            # item. In this case, display a dialog stating that there
+            # is no update.
+            # An update is available.
+            v=gtk.VBox()
+            msg=textwrap.fill(_("""<span background="#ff8888" size="large">You are using a up-to-date version of Advene (%(current)s).</span>""") % info, 55)
+            l=gtk.Label()
+            l.set_markup(msg)
+            #l.set_line_wrap_mode(True)
+            v.add(l)
+            self.popupwidget.display(v, title=_("Advene is up-to-date"))
         return False
         
     def update_color(self, element):
