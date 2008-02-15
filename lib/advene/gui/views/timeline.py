@@ -899,6 +899,36 @@ class TimeLine(AdhocView):
                 sm.append(sitem)
             item.set_submenu(sm)
 
+	    # Merges 2 annotations only if source as no relations
+	    if (len(source.getRelations())==0 and 
+	       ((source.getType() == dest.getType()) or 
+	       ((source.fragment.begin == dest.fragment.begin) and 
+	        (source.fragment.end == dest.fragment.end)))):
+		ok=True
+		if (source.getType() == dest.getType()):
+		    for a in source.getType().getAnnotations():
+		        if ((a.fragment.begin>source.fragment.begin and a.fragment.begin<dest.fragment.begin) or (a.fragment.begin>dest.fragment.begin and a.fragment.begin<source.fragment.begin)):
+			    ok=False
+		if ok:
+		    def merge_annotations(widget, source, dest):
+		        if (dest.fragment.end < source.fragment.end):
+	    	    	    dest.fragment.end=source.fragment.end
+		        else:
+	                    dest.fragment.begin=source.fragment.begin
+			mts=source.getType().getMimetype()
+			mtd=dest.getType().getMimetype()
+  		        if (mtd=='text/plain' or (mtd==mts and mtd=='application/x-advene-structured')):
+			    dest.content.data=dest.content.data+'\n'+source.content.data
+		    	elif (mtd=='application/x-advene-structured'):
+			    dest.content.data=dest.content.data+'\nmerged_content="'+source.content.data+'"'
+			# if content different from 
+		        self.controller.delete_element(source)
+		        self.controller.notify("AnnotationEditEnd", annotation=dest, comment="Merge annotations")
+	            item=gtk.MenuItem(_("Merge with this annotation"))
+	            item.connect('activate', merge_annotations, source, dest)
+                    menu.append(item)
+
+
             def align_annotations(item, s, d, m):
                 self.align_annotations(s, d, m)
                 return True
