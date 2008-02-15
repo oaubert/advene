@@ -18,6 +18,8 @@
 
 from advene.util.importer import GenericImporter, register
 import urllib
+import advene.core.config as config
+import time
 
 from gettext import gettext as _
 
@@ -34,16 +36,53 @@ class EventHistoryImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
-        start=f[0]['timestamp']
+        start=f[0]['timestamp']*1000
+	end=start
+	# bad timestamps : s instead of ms
+	id_="Traces"
+	title_="Traces"
+        schema=self.package.get_element_by_id(id_)
+	if (schema is None):
+	    #schema creation
+            self.package._idgenerator.add(id_)
+  	    schema=self.package.createSchema(ident=id_)
+            schema.author=config.data.userid
+            schema.date=time.strftime("%Y-%m-%d")
+            schema.title=title_
+            self.package.schemas.append(schema)
         for e in f:
-            d={
-                'begin': e['timestamp'] - start,
-                'duration': 10,
-                'timestamp': e['timestamp'],
-                'content': urllib.urlencode(e),
-                }
+	    type_ = e['event_name']
+	    type = self.package.get_element_by_id(type_)
+	    if (type is None):
+		#Annotation type creation
+		self.package._idgenerator.add(type_)
+                type=schema.createAnnotationType(
+                    ident=type_)
+                type.author=config.data.userid
+                type.date=time.strftime("%Y-%m-%d")
+                type.title=type_
+                type.mimetype='application/x-advene-structured'
+                type.setMetaData(config.data.namespace, 'color', self.package._color_palette.next())
+                type.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+            	schema.annotationTypes.append(type)		
+		
+	    d={
+	        'type': type,
+                'begin': e['timestamp']*1000 - start,
+                'duration': 50,
+                'timestamp': e['timestamp']*1000,
+                'content': '',
+            }
+	    if e.has_key('content'):
+		d['content']=e['content']+'position='+str(e['movietime'])+'\n'
+	    else:
+		d['content']='position='+str(e['movietime'])+'\n'
+	    if end<e['timestamp']*1000+50:
+		end=e['timestamp']*1000+50
             yield d
-
+        #fix package duration
+	self.package.cached_duration=end-start
+	
     def process_file(self, filename):
         if self.package is None:
             self.init_package(filename='event_history.xml', annotationtypeid='event')
