@@ -34,6 +34,7 @@ import cPickle
 from optparse import OptionParser
 import mimetypes
 import operator
+import time
 
 class Config(object):
     """Configuration information, platform specific.
@@ -75,6 +76,8 @@ class Config(object):
     """
 
     def __init__ (self):
+        
+        self.startup_time=time.time()
 
         self.config_file=''
         self.parse_options()
