@@ -331,11 +331,34 @@ class ECAEngine:
 
         if config.data.preferences['record-actions']:
             # FIXME: we should not store the whole element, it is too costly
+	    # bad timestamp...
             d=dict(kw)
             d['event_name'] = event_name
             d['parameters'] = param
             d['timestamp'] = time.time()
+	    d['movie'] = self.controller.player.get_default_media()
+	    d['movietime'] = self.controller.player.current_position_value
+	    # package uri annotation relation annotationtype relationtype schema
+	    # loging content depending on keys
+	    if (d.has_key('uri')):
+		d['content']='movie="'+str(d['uri'])+'"\n'
+	    if (d.has_key('annotation')):
+	        atype=d['annotation'].getType()
+		a=d['annotation']
+                d['content']= 'annotation='+a.getId()+'\ntype='+atype.getId()+'\nmimetype='+atype.getMimetype()+'\ncontent="'+a.getContent().getData()+'"\n'
+	    elif (d.has_key('relation')):
+		rtype=d['relation'].getType()
+		r=d['relation']
+		d['content']= 'relation='+r.getId()+'\ntype='+rtype.getId()+'\nmimetype='+rtype.getMimetype()+'\ncontent="'+r.getContent().getData()+'"\nsource='+r.getMembers()[0].getId()+'\ndest='+r.getMembers()[1].getId()+'\n'
+	    elif (d.has_key('annotationtype')):
+		at=d['annotationtype']
+		d['content']= 'annotation type='+at.getId()+'\nschema='+at.getSchema().getId()+'\nmimetype='+at.getMimetype()+'\ncolor='+'\nrepresentation='+'\ndescription='+'\n'
+	    elif (d.has_key('relationtype')):
+		rt=d['relationtype']
+		d['content']= 'relation type='+rt.getId()+'\nschema='+rt.getSchema().getId()+'\nmimetype='+rt.getMimetype()+'\ncolor='+'\ndescription='+'\n'
             self.event_history.append(d)
+
+	    
         delay=0
         if kw.has_key('delay'):
             delay=long(kw['delay']) / 1000.0
