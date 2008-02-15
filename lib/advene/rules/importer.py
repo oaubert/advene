@@ -36,13 +36,12 @@ class EventHistoryImporter(GenericImporter):
     can_handle=staticmethod(can_handle)
 
     def iterator(self, f):
-        start=f[0]['timestamp']*1000
+        start=f[0]['timestamp']
 	end=start
-	# bad timestamps : s instead of ms
 	id_="Traces"
 	title_="Traces"
         schema=self.package.get_element_by_id(id_)
-	if (schema is None):
+	if schema is None:
 	    #schema creation
             self.package._idgenerator.add(id_)
   	    schema=self.package.createSchema(ident=id_)
@@ -68,17 +67,17 @@ class EventHistoryImporter(GenericImporter):
 		
 	    d={
 	        'type': type,
-                'begin': e['timestamp']*1000 - start,
+                'begin': e['timestamp'] - start,
                 'duration': 50,
-                'timestamp': e['timestamp']*1000,
+                'timestamp': e['timestamp'],
                 'content': '',
             }
 	    if e.has_key('content'):
 		d['content']=e['content']+'position='+str(e['movietime'])+'\n'
 	    else:
 		d['content']='position='+str(e['movietime'])+'\n'
-	    if end<e['timestamp']*1000+50:
-		end=e['timestamp']*1000+50
+	    if end<e['timestamp']+50:
+		end=e['timestamp']+50
             yield d
         #fix package duration
 	self.package.cached_duration=end-start
