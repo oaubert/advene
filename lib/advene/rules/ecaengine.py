@@ -28,6 +28,7 @@ import sched
 import threading
 import copy
 import StringIO
+import urllib
 
 import advene.rules.elements
 
@@ -205,7 +206,7 @@ class ECAEngine:
                     import traceback
                     s=StringIO.StringIO()
                     traceback.print_exc (file = s)
-                    self.controller.queue_action(self.controller.log, _("Exception (traceback in console):") + unicode(e))
+                    self.controller.queue_action(self.controller.log, "Exception (traceback in console):" + unicode(e))
                     print str(e)
                     print s.getvalue()
 
@@ -331,33 +332,48 @@ class ECAEngine:
 
         if config.data.preferences['record-actions']:
             # FIXME: we should not store the whole element, it is too costly
-	    # bad timestamp...
             d=dict(kw)
             d['event_name'] = event_name
             d['parameters'] = param
-            d['timestamp'] = time.time()
+            d['timestamp'] = time.time() - config.data.startup_time
 	    d['movie'] = self.controller.player.get_default_media()
 	    d['movietime'] = self.controller.player.current_position_value
 	    # package uri annotation relation annotationtype relationtype schema
-	    # loging content depending on keys
-	    if (d.has_key('uri')):
-		d['content']='movie="'+str(d['uri'])+'"\n'
-	    if (d.has_key('annotation')):
-	        atype=d['annotation'].getType()
+	    # Logging content depending on keys
+	    if 'uri' in d:
+		d['content']='movie="'+str(d['uri'])
+	    if 'annotation' in d:
 		a=d['annotation']
-                d['content']= 'annotation='+a.getId()+'\ntype='+atype.getId()+'\nmimetype='+atype.getMimetype()+'\ncontent="'+a.getContent().getData()+'"\n'
-	    elif (d.has_key('relation')):
-		rtype=d['relation'].getType()
+                d['content']= "\n".join(
+                    ( 'annotation=' + a.id,
+                      'type=' + a.type.id,
+                      'mimetype=' + a.type.mimetype,
+                      'content="'+ urllib.quote(a.content.data) ) 
+                    )
+	    elif 'relation' in d:
 		r=d['relation']
-		d['content']= 'relation='+r.getId()+'\ntype='+rtype.getId()+'\nmimetype='+rtype.getMimetype()+'\ncontent="'+r.getContent().getData()+'"\nsource='+r.getMembers()[0].getId()+'\ndest='+r.getMembers()[1].getId()+'\n'
-	    elif (d.has_key('annotationtype')):
+                d['content']= "\n".join(
+                    ( 'relation=' + r.id,
+                      'type=' + r.type.id,
+                      'mimetype=' + r.type.mimetype,
+                      'source=' + r.members[0].id,
+                      'dest=' + r.members[1].id ) 
+                    )
+	    elif 'annotationtype' in d:
 		at=d['annotationtype']
-		d['content']= 'annotation type='+at.getId()+'\nschema='+at.getSchema().getId()+'\nmimetype='+at.getMimetype()+'\ncolor='+'\nrepresentation='+'\ndescription='+'\n'
-	    elif (d.has_key('relationtype')):
+		d['content']= "\n".join(
+                    ('annotationtype='+at.id,
+                     'schema=' + at.schema.id,
+                     'mimetype=' + at.mimetype)
+                    )
+	    elif 'relationtype' in d:
 		rt=d['relationtype']
-		d['content']= 'relation type='+rt.getId()+'\nschema='+rt.getSchema().getId()+'\nmimetype='+rt.getMimetype()+'\ncolor='+'\ndescription='+'\n'
+		d['content']= "\n".join(
+                    ('relationtype=' + rt.id,
+                     'schema=' + rt.schema.id,
+                     'mimetype=' + at.mimetype)
+                    )
             self.event_history.append(d)
-
 	    
         delay=0
         if kw.has_key('delay'):
