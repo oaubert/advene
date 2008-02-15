@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+	 <title>Advene IMG</title>
+	 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	 <meta content="noindex, nofollow" name="robots">
+	 <script type="text/javascript" src="/data/fckeditor/editor/plugins/adv_ima/script_ima.js"></script>
+  </head>
+
+  <body scroll="no" style="overflow:hidden;">
+    <h1>Resource creation via file upload</h1>
+    <form method="POST" id="frmMain" name="frmMain" enctype="multipart/form-data">
+      <input type="hidden" name="action" value="create" />
+      <input type="hidden" name="type"  value="resource" />
+      <input name="redirect" type="hidden" value="no_content" />
+      <input type="file" name="datafile" id="datafile" size="40" ACCEPT="text/html" onChange="donner_nom_ini();" /><br /><br />
+      Name Image<br />
+      <input type="text" size="30" name="nom_fich" id="nom_fich" />&nbsp;(Ne pas mettre l'extension du fichier)<br /><br />
+      
+      Height&nbsp;:&nbsp;<input type="text" size="10" name="hei_fich" id="hei_fich" />
+      &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+      Width&nbsp;:&nbsp;<input type="text" size="10" name="wid_fich" id="wid_fich" /><br /><br />
+      <input type="submit" value="Envoyer" onClick="envoyer_image();" />
+    </form>
+  </body>
+</html>
+
