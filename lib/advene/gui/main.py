@@ -3174,6 +3174,7 @@ class AdveneGUI (Connect):
         v.pack_start(progressbar, expand=False)
 
         progressbar._window=w
+        progressbar.old_autosync=c.package.imagecache.autosync
         hb=gtk.HBox()
 
         b=gtk.Button(stock=gtk.STOCK_MEDIA_RECORD)
