@@ -335,7 +335,8 @@ class ECAEngine:
             d=dict(kw)
             d['event_name'] = event_name
             d['parameters'] = param
-            d['timestamp'] = time.time() - config.data.startup_time
+            # Store timestamp in ms since the application start
+            d['timestamp'] = (time.time() - config.data.startup_time) * 1000
 	    d['movie'] = self.controller.player.get_default_media()
 	    d['movietime'] = self.controller.player.current_position_value
 	    # package uri annotation relation annotationtype relationtype schema
