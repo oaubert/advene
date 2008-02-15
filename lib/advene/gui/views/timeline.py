@@ -899,35 +899,42 @@ class TimeLine(AdhocView):
                 sm.append(sitem)
             item.set_submenu(sm)
 
-	    # Merges 2 annotations only if source as no relations
-	    if (len(source.getRelations())==0 and 
-	       ((source.getType() == dest.getType()) or 
-	       ((source.fragment.begin == dest.fragment.begin) and 
-	        (source.fragment.end == dest.fragment.end)))):
+	    # Propose to merge annotations of same type, or of
+	    # different types but with same fragments.
+            # In both cases, we will merge the data.
+	    if source.type == dest.type or source.fragment == dest.fragment:
 		ok=True
-		if (source.getType() == dest.getType()):
-		    for a in source.getType().getAnnotations():
-		        if ((a.fragment.begin>source.fragment.begin and a.fragment.begin<dest.fragment.begin) or (a.fragment.begin>dest.fragment.begin and a.fragment.begin<source.fragment.begin)):
+		if source.type == dest.type:
+                    b=min(source.fragment.begin, dest.fragment.begin)
+                    e=min(source.fragment.begin, dest.fragment.begin)
+		    for a in source.type.annotations:
+		        if a.fragment.begin > b and a.fragment.begin < e:
+                            # There is at least one annotation between
+                            # the merged annotations.
 			    ok=False
+                            break
 		if ok:
-		    def merge_annotations(widget, source, dest):
-		        if (dest.fragment.end < source.fragment.end):
-	    	    	    dest.fragment.end=source.fragment.end
-		        else:
-	                    dest.fragment.begin=source.fragment.begin
-			mts=source.getType().getMimetype()
-			mtd=dest.getType().getMimetype()
-  		        if (mtd=='text/plain' or (mtd==mts and mtd=='application/x-advene-structured')):
-			    dest.content.data=dest.content.data+'\n'+source.content.data
-		    	elif (mtd=='application/x-advene-structured'):
-			    dest.content.data=dest.content.data+'\nmerged_content="'+source.content.data+'"'
-			# if content different from 
+		    def merge_annotations(widget, s, d):
+                        if s.type == d.type:
+                            # Merging same-type annotations. Extend
+                            # the annotation bounds.
+                            begin=min(s.fragment.begin, d.fragment.begin)
+                            end=max(s.fragment.end, d.fragment.end)
+                            d.fragment.begin=begin
+                            d.fragment.end=end
+                        # Merging data
+			mts=source.type.mimetype
+			mtd=dest.type.mimetype
+  		        if mtd == 'text/plain' or ( mtd == mts and mtd == 'application/x-advene-structured' ):
+			    dest.content.data=dest.content.data + '\n' + source.content.data
+		    	elif mtd == 'application/x-advene-structured':
+                            # FIXME: should compare fields and merge identical fields
+			    dest.content.data=dest.content.data + '\nmerged_content="' + cgi.urllib.quote(source.content.data)+'"'
 		        self.controller.delete_element(source)
 		        self.controller.notify("AnnotationEditEnd", annotation=dest, comment="Merge annotations")
 	            item=gtk.MenuItem(_("Merge with this annotation"))
 	            item.connect('activate', merge_annotations, source, dest)
                     menu.append(item)
-
 
             def align_annotations(item, s, d, m):
                 self.align_annotations(s, d, m)
