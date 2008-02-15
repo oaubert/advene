@@ -923,15 +923,15 @@ class TimeLine(AdhocView):
                             d.fragment.begin=begin
                             d.fragment.end=end
                         # Merging data
-			mts=source.type.mimetype
-			mtd=dest.type.mimetype
+			mts=s.type.mimetype
+			mtd=d.type.mimetype
   		        if mtd == 'text/plain' or ( mtd == mts and mtd == 'application/x-advene-structured' ):
-			    dest.content.data=dest.content.data + '\n' + source.content.data
+			    d.content.data=d.content.data + '\n' + s.content.data
 		    	elif mtd == 'application/x-advene-structured':
                             # FIXME: should compare fields and merge identical fields
-			    dest.content.data=dest.content.data + '\nmerged_content="' + cgi.urllib.quote(source.content.data)+'"'
-		        self.controller.delete_element(source)
-		        self.controller.notify("AnnotationEditEnd", annotation=dest, comment="Merge annotations")
+			    d.content.data=d.content.data + '\nmerged_content="' + cgi.urllib.quote(s.content.data)+'"'
+		        self.controller.delete_element(s)
+		        self.controller.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations")
 	            item=gtk.MenuItem(_("Merge with this annotation"))
 	            item.connect('activate', merge_annotations, source, dest)
                     menu.append(item)
