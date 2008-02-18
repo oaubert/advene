@@ -26,6 +26,7 @@ import advene.util.helper as helper
 import subprocess
 import signal
 import os
+from threading import Thread
 
 name="Default core actions"
 
@@ -636,8 +637,12 @@ class SoundPlayer:
         return True
 
     def win32_play(self, fname):
-        from winsound import PlaySound, SND_FILENAME, SND_ASYNC
-        PlaySound(fname, SND_FILENAME|SND_ASYNC)
+        #from winsound import PlaySound, SND_FILENAME, SND_ASYNC
+        #PlaySound(fname, SND_FILENAME|SND_ASYNC)
+	spt = SpThread(fname)
+	spt.setDaemon(1)
+	# need to kill threads before closing app
+	spt.start()
         return True
 
     def macosx_play(self, fname):
@@ -664,3 +669,36 @@ class SoundPlayer:
         if not os.path.exists('/usr/bin/aplay'):
             print "Error: aplay is not installed. Advene will be unable to play sounds."
         play=linux_play
+
+class SpThread(Thread):
+    def __init__(self,name):
+	Thread.__init__(self)
+	self.fname = name
+    def run(self):
+	import pymedia.muxer as muxer, pymedia.audio.acodec as acodec, pymedia.audio.sound as sound
+  	import time
+	dm= muxer.Demuxer( str.split( self.fname, '.' )[ -1 ].lower() )
+	snds= sound.getODevices()
+	f= open( self.fname, 'rb' )
+ 	snd= dec= None
+  	s= f.read( 32000 )
+	card=0
+	rate=1
+  	t= 0
+ 	while len( s ):
+    	    frames= dm.parse( s )
+    	    if frames:
+      	        for fr in frames:
+        	    if dec== None:
+          		print dm.getHeaderInfo(), dm.streams
+          		dec= acodec.Decoder( dm.streams[ fr[ 0 ] ] )
+		    r= dec.decode( fr[ 1 ] )
+        	    if r and r.data:
+          	        if snd== None:
+            		    print 'Opening sound %s with %d channels -> %s' % ( self.fname, r.channels, snds[ card ][ 'name' ] )
+            		    snd= sound.Output( int( r.sample_rate* rate ), r.channels, sound.AFMT_S16_LE, card )
+		        data= r.data
+			snd.play( data )
+            s= f.read( 512 )
+	while snd.isPlaying():
+	    time.sleep( .05 )
