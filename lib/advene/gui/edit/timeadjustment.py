@@ -173,9 +173,11 @@ class TimeAdjustment:
         # The widget can receive drops from annotations
         vbox.connect("drag_data_received", self.drag_received)
         vbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                  gtk.DEST_DEFAULT_HIGHLIGHT |
-                                  gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['annotation'], gtk.gdk.ACTION_LINK)
+                           gtk.DEST_DEFAULT_HIGHLIGHT |
+                           gtk.DEST_DEFAULT_ALL,
+                           config.data.drag_type['annotation']
+                           + config.data.drag_type['timestamp'],
+                           gtk.gdk.ACTION_LINK)
 
         # Handle scroll actions
         def handle_scroll_event(button, event):
@@ -201,6 +203,9 @@ class TimeAdjustment:
             source_uri=selection.data
             source=self.controller.package.annotations.get(source_uri)
             self.value = source.fragment.begin
+            self.update_display()
+        elif targetType == config.data.target_type['timestamp']:
+            self.value=long(float(selection.data))
             self.update_display()
         else:
             print "Unknown target type for drop: %d" % targetType
@@ -274,6 +279,9 @@ class TimeAdjustment:
               and value > self.controller.cached_duration):
             value = self.controller.cached_duration
         return value
+
+    def update(self):
+        self.update_display()
 
     def update_display(self):
         """Updates the value displayed in the entry according to the current value."""
