@@ -342,15 +342,16 @@ class ECAEngine:
 	    # package uri annotation relation annotationtype relationtype schema
 	    # Logging content depending on keys
 	    if 'uri' in d:
-		d['content']='movie="'+str(d['uri'])
+		d['content']='movie="'+str(d['uri'])+'"'
 	    if 'annotation' in d:
 		a=d['annotation']
                 d['content']= "\n".join(
-                    ( 'annotation=' + a.id,
+		    ( 'annotation=' + a.id,
                       'type=' + a.type.id,
                       'mimetype=' + a.type.mimetype,
-                      'content="'+ urllib.quote(a.content.data) ) 
-                    )
+                      'content="'+ urllib.quote(a.content.data.encode('utf-8'))+'"'
+		    )
+		    )
 	    elif 'relation' in d:
 		r=d['relation']
                 d['content']= "\n".join(
