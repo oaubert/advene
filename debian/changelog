@@ -1,3 +1,11 @@
+advene (0.29) unstable; urgency=low
+
+  * New exporter: CMML
+
+  * Timeline view: annotations can be merged by DND
+
+ --
+
 advene (0.28) unstable; urgency=low
 
   * Stable release
