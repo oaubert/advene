@@ -22,15 +22,16 @@ Source: c:\gtk\bin\librsvg-2-2.dll; DestDir: {app}
 Source: c:\gtk\bin\libcroco-0.6-3.dll; DestDir: {app}
 Source: c:\gtk\bin\libgsf-1-114.dll; DestDir: {app}
 Source: c:\gtk\bin\bzip2.dll; DestDir: {app}
+Source: share\Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}
 
 
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.28
+AppVerName=Advene 0.29
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.28
+VersionInfoVersion=0.29
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -38,8 +39,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.28
-VersionInfoTextVersion=0.2_
+OutputBaseFilename=setup_advene_0.29
+VersionInfoTextVersion=0.29
 [Registry]
 Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
 [Icons]

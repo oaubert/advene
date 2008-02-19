@@ -25,6 +25,7 @@ Source: c:\gtk\bin\bzip2.dll; DestDir: {app}
 Source: c:\Program Files\VideoLAN\VLC\libvlc-control.dll; DestDir: {app}
 Source: c:\Program Files\VideoLAN\VLC\libvlc.dll; DestDir: {app}
 Source: c:\Program Files\VideoLAN\VLC\plugins\*; DestDir: {app}\plugins
+Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}
 
 [Languages]
 Name: Fr; MessagesFile: "compiler:Languages\French.isl"
@@ -33,10 +34,10 @@ Name: En; MessagesFile: "compiler:Default.isl"
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.28
+AppVerName=Advene 0.29
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.28
+VersionInfoVersion=0.29
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -44,8 +45,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.28_all_in_one_vlcsvn
-VersionInfoTextVersion=0.28
+OutputBaseFilename=setup_advene_0.29_all_in_one_vlcsvn
+VersionInfoTextVersion=0.29
 
 [Registry]
 Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
