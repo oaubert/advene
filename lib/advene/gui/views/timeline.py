@@ -2475,9 +2475,15 @@ class TimeLine(AdhocView):
             i.set_sensitive(False)
             i=gtk.SeparatorMenuItem()
             m.append(i)
+
             i=gtk.MenuItem(_("Unselect all annotations"))
             i.connect('activate', self.unselect_all, l)
             m.append(i)
+
+            i=gtk.MenuItem(_("Highlight selection in other views"))
+            i.connect('activate', self.selection_highlight, l)
+            m.append(i)
+
             i=gtk.MenuItem(_("Delete selected annotations"))
             i.connect('activate', self.selection_delete, l)
             m.append(i)
@@ -2899,6 +2905,11 @@ class TimeLine(AdhocView):
 
     def selection_as_table(self, widget, selection):
         self.controller.gui.open_adhoc_view('table', elements=[ w.annotation for w in selection ], destination='east')
+        return True
+
+    def selection_highlight(self, widget, selection):
+        for w in selection:
+            self.controller.notify("AnnotationActivate", annotation=w.annotation)
         return True
 
     def selection_edit(self, widget, selection):
