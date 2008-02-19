@@ -1186,8 +1186,8 @@ class AdveneGUI (Connect):
              self.on_b_play_clicked),
             (_("Pause"), gtk.STOCK_MEDIA_PAUSE,
              self.on_b_pause_clicked),
-            (_("Stop"), gtk.STOCK_MEDIA_STOP,
-             self.on_b_stop_clicked),
+            #(_("Stop"), gtk.STOCK_MEDIA_STOP,
+            # self.on_b_stop_clicked),
             (_("Forward"), gtk.STOCK_MEDIA_FORWARD,
              self.on_b_forward_clicked),
             )
