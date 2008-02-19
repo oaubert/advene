@@ -639,10 +639,15 @@ class SoundPlayer:
     def win32_play(self, fname):
         #from winsound import PlaySound, SND_FILENAME, SND_ASYNC
         #PlaySound(fname, SND_FILENAME|SND_ASYNC)
-	spt = SpThread(fname)
-	spt.setDaemon(1)
-	# need to kill threads before closing app
-	spt.start()
+	#spt = SpThread(fname)
+	#spt.setDaemon(True)
+	#spt.start()
+	pathsp = os.path.sep.join((config.data.path['advene'],'pySoundPlayer.exe'))
+	if not os.path.exists(pathsp):
+            pathsp = os.path.sep.join((config.data.path['advene'],'Win32SoundPlayer','pySoundPlayer.exe'))
+	if os.path.exists(pathsp):
+	    pid=subprocess.Popen( [ pathsp, fname ] )
+	    #no SIGCHLD handler for win32
         return True
 
     def macosx_play(self, fname):
