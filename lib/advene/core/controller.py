@@ -1597,7 +1597,7 @@ class AdveneController:
             self.gui.log(msg, level)
         else:
             # FIXME: handle the level parameter
-            print msg
+            print unicode(msg).encode('utf-8')
         return
 
     def message_log (self, context, parameters):
