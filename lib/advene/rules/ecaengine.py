@@ -373,7 +373,7 @@ class ECAEngine:
 		d['content']= "\n".join(
                     ('relationtype=' + rt.id,
                      'schema=' + rt.schema.id,
-                     'mimetype=' + at.mimetype)
+                     'mimetype=' + rt.mimetype)
                     )
             self.event_history.append(d)
 	    
