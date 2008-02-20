@@ -1928,8 +1928,8 @@ class TimeLine(AdhocView):
             
             if (abs(x2-x1) > 20 and abs(y2-y1) > 20):
                 # The cursor has been significantly moved. Consider it is a selection.
-                if not (event.state & gtk.gdk.CONTROL_MASK):
-                    # Control was not held: it is a new selection.
+                if not (event.state & gtk.gdk.CONTROL_MASK or event.state & gtk.gdk.SHIFT_MASK):
+                    # Control or shift was not held: it is a new selection.
                     self.unselect_all()
                 
                 for widget in self.layout.get_children():
