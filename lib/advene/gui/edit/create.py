@@ -249,7 +249,7 @@ class CreateElementPopup(object):
                 action=Action(registeredaction=ra, catalog=catalog)
                 for p in ra.parameters:
                     action.add_parameter(p, ra.defaults.get(p, ''))
-                rule=Rule(name=_("New rule"),
+                rule=Rule(name=_("Rule") + '1',
                           event=event,
                           action=action)
                 r.add_rule(rule)

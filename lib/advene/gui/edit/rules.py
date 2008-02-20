@@ -119,7 +119,12 @@ class EditRuleSet(EditGeneric):
         action=Action(registeredaction=ra, catalog=self.catalog)
         for p in ra.parameters:
             action.add_parameter(p, ra.defaults.get(p, ''))
-        rule=Rule(name=_("New rule"),
+        # Find the next rulename index
+        l=[ int(r.name.replace(_('Rule'), '')) 
+            for r in self.model
+            if re.match(_('Rule') + '(\d+)', r.name) ]
+        idx=max(l or [ 0 ] ) + 1
+        rule=Rule(name=_("Rule") + str(idx),
                   event=event,
                   action=action)
         self.add_rule(rule)
