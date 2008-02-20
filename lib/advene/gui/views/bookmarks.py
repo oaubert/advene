@@ -27,7 +27,7 @@ from gettext import gettext as _
 
 import gtk
 
-name="History view plugin"
+name="Bookmarks view plugin"
 
 def register(controller):
     controller.register_viewclass(Bookmarks)
@@ -40,7 +40,7 @@ class HistoryImporter(advene.util.importer.GenericImporter):
         self.elements=elements
         self.comments=comments
         self.duration=duration
-        self.name = _("History importer")
+        self.name = _("Bookmarks importer")
 
     def iterator(self):
         for b in self.elements:
