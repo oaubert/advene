@@ -755,6 +755,11 @@ class TimeLine(AdhocView):
     def annotation_cb (self, widget, ann, x):
         """Display the popup menu when clicking on annotation.
         """
+        if widget.active and len(self.get_selected_annotation_widgets()) > 1:
+            # Widget is active, there is a selection. Display the selection menu
+            self.selection_menu(popup=True)
+            return True
+
         def split_annotation(menu, widget, ann, p):
             self.controller.split_annotation(ann, p)
             return True
@@ -783,12 +788,6 @@ class TimeLine(AdhocView):
                           _("Center and zoom"),
                           center_and_zoom, widget, ann)
 
-        if widget.active:
-            # Widget is active, there is a selection. Display the selection menu
-            item = gtk.MenuItem(_("Selection"))
-            item.set_submenu(self.selection_menu(popup=False))
-            menu.menu.insert(item, 0)
-            
         menu.menu.show_all()
         menu.popup()
         return True
@@ -1015,12 +1014,23 @@ class TimeLine(AdhocView):
             self.unselect_all()
             return self.transmuted_annotation
 
-        selection=[ w.annotation for w in self.get_selected_annotation_widgets() ]
-
         # Popup a menu to propose the drop options
         menu=gtk.Menu()
 
         dest_title=self.controller.get_title(dest)
+
+        selection=[ w.annotation for w in self.get_selected_annotation_widgets() ]
+
+        if len(selection) > 1 and source in selection:
+            if source.type == dest:
+                return True
+            item=gtk.MenuItem(_("Duplicate selection to type %s") % dest_title, use_underline=False)
+            item.connect('activate', copy_selection, selection, dest)
+            menu.append(item)
+            menu.show_all()
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            return True
+
         if source.type != dest:
             item=gtk.MenuItem(_("Duplicate annotation to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_annotation, source, dest)
@@ -1073,13 +1083,6 @@ class TimeLine(AdhocView):
                     sm.append(sitem)
                 menu.append(item)
                 item.set_submenu(sm)
-
-        if selection and source in selection:
-            item=gtk.SeparatorMenuItem()
-            menu.append(item)
-            item=gtk.MenuItem(_("Duplicate selection to type %s") % dest_title, use_underline=False)
-            item.connect('activate', copy_selection, selection, dest)
-            menu.append(item)
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
