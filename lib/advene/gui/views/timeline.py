@@ -1175,6 +1175,10 @@ class TimeLine(AdhocView):
             (r, g, b, opacity)=struct.unpack('HHHH', selection.data)
             widget.annotationtype.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (r, g, b))
             self.controller.notify('AnnotationTypeEditEnd', annotationtype=widget.annotationtype)
+        elif targetType == config.data.target_type['timestamp']:
+            begin=long(float(selection.data))
+            # Create an annotation with the timestamp as begin
+            self.create_annotation(begin, widget.annotationtype)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -1191,6 +1195,12 @@ class TimeLine(AdhocView):
 
             self.move_or_copy_annotation(source, dest)
             return True
+        elif targetType == config.data.target_type['timestamp']:
+            typ=self.create_annotation_type()
+            if typ is not None:
+                begin=long(float(selection.data))
+                # Create an annotation of type typ with the timestamp as begin
+                self.create_annotation(begin, typ)
         return False
 
     def legend_drag_received(self, widget, context, x, y, selection, targetType, time):
@@ -2344,6 +2354,7 @@ class TimeLine(AdhocView):
                             gtk.DEST_DEFAULT_ALL,
                             config.data.drag_type['annotation'] +
                             config.data.drag_type['annotation-type'] +
+                            config.data.drag_type['timestamp'] +
                             config.data.drag_type['color'],
                             gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
             # The button can generate drags (to change annotation type order)
@@ -2410,7 +2421,8 @@ class TimeLine(AdhocView):
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'],
+                        config.data.drag_type['annotation'] 
+                        + config.data.drag_type['timestamp'],
                         gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
 
         layout.set_size (width + 20, height)
