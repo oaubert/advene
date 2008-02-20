@@ -895,6 +895,16 @@ class AdveneGUI (Connect):
         self.gui.stbv_combo.add_attribute(cell, 'text', 0)
         hb.pack_start(self.gui.stbv_combo, expand=True)
 
+        def new_stbv(*p):
+            cr = CreateElementPopup(type_=View,
+                                    parent=self.controller.package,
+                                    controller=self.controller)
+            cr.popup()
+            return True
+        b=get_small_stock_button(gtk.STOCK_ADD, new_stbv)
+        self.tooltips.set_tip(b, _("Create a new dynamic view."))
+        hb.pack_start(b, expand=False)
+        
         def on_edit_current_stbv_clicked(button):
             """Handle current stbv edition.
             """
