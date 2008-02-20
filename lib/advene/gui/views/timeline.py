@@ -302,7 +302,8 @@ class TimeLine(AdhocView):
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
                                   gtk.DEST_DEFAULT_ALL,
                                   config.data.drag_type['annotation']
-                                  + config.data.drag_type['annotation-type'], 
+                                  + config.data.drag_type['annotation-type']
+                                  + config.data.drag_type['timestamp'],
                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
         self.old_scale_value = self.scale.value
@@ -846,6 +847,40 @@ class TimeLine(AdhocView):
         p.relations.append(relation)
         self.controller.notify("RelationCreate", relation=relation)
         return True
+
+    def create_annotation_type(self, *p):
+        if self.controller.gui:
+            sc=self.controller.gui.ask_for_schema(text=_("Select the schema where you want to\ncreate the new annotation type."), create=True)
+            if sc is None:
+                return None
+            cr=CreateElementPopup(type_=AnnotationType,
+                                  parent=sc,
+                                  controller=self.controller)
+            at=cr.popup(modal=True)
+        return at
+
+    def create_annotation(self, position, type, duration=None, content=None):
+        id_=self.controller.package._idgenerator.get_id(Annotation)
+        if duration is None:
+            duration=self.controller.cached_duration / 20
+            # Make the end bound not override the screen
+            d=long(self.pixel2unit(self.adjustment.value + self.layout.window.get_size()[0]) - position)
+            if d > 0:
+                duration=min(d, duration)
+            else:
+                # Should not happen
+                print "Strange, click outside the timeline"
+
+        el=self.controller.package.createAnnotation(
+            ident=id_,
+            type=type,
+            author=config.data.userid,
+            date=self.controller.get_timestamp(),
+            fragment=MillisecondFragment(begin=long(position),
+                                         duration=duration))
+        self.controller.package.annotations.append(el)
+        self.controller.notify('AnnotationCreate', annotation=el)
+        return el
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
@@ -1781,6 +1816,19 @@ class TimeLine(AdhocView):
                     return True
                 self.copy_annotation_type(source, dest)
             return True
+        elif targetType == config.data.target_type['timestamp']:
+            # We received a drop. Create an annotation.
+            a=[ at 
+                for (at, p) in self.layer_position.iteritems()
+                if (y >= p and y <= p + self.button_height) ]
+            if a:
+                typ=a[0]
+            else:
+                typ=self.create_annotation_type()
+            if typ is not None:
+                begin=long(float(selection.data))
+                # Create an annotation of type typ with the timestamp as begin
+                self.create_annotation(begin, typ)
         else:
             print "Unknown target type for drop: %d" % targetType
         return False
@@ -1964,7 +2012,6 @@ class TimeLine(AdhocView):
             return True
 
         def create_annotation(win, position):
-            id_=self.controller.package._idgenerator.get_id(Annotation)
             # Determine annotation type
             at=None
             h=long(height)
@@ -1974,25 +2021,7 @@ class TimeLine(AdhocView):
                     break
             if at is None:
                 at=self.controller.package.annotationTypes[0]
-
-            duration=self.controller.cached_duration / 20
-            # Make the end bound not override the screen
-            d=long(self.pixel2unit(self.adjustment.value + self.layout.window.get_size()[0]) - position)
-            if d > 0:
-                duration=min(d, duration)
-            else:
-                # Should not happen
-                print "Strange, click outside the timeline"
-
-            el=self.controller.package.createAnnotation(
-                ident=id_,
-                type=at,
-                author=config.data.userid,
-                date=self.controller.get_timestamp(),
-                fragment=MillisecondFragment(begin=long(position),
-                                             duration=duration))
-            self.controller.package.annotations.append(el)
-            self.controller.notify('AnnotationCreate', annotation=el)
+            self.create_annotation(position, at)
             return True
 
         item = gtk.MenuItem(_("Position %s") % helper.format_time(position))
@@ -2850,17 +2879,6 @@ class TimeLine(AdhocView):
         d.destroy()
 
         return True
-
-    def create_annotation_type(self, *p):
-        if self.controller.gui:
-            sc=self.controller.gui.ask_for_schema(text=_("Select the schema where you want to\ncreate the new annotation type."), create=True)
-            if sc is None:
-                return None
-            cr=CreateElementPopup(type_=AnnotationType,
-                                  parent=sc,
-                                  controller=self.controller)
-            at=cr.popup(modal=True)
-        return at
 
     def edit_preferences(self, *p):
         cache=dict(self.options)
