@@ -61,6 +61,7 @@ from advene.model.annotation import Annotation, Relation
 from advene.model.fragment import MillisecondFragment
 from advene.model.view import View
 from advene.model.query import Query
+from advene.model.util.defaultdict import DefaultDict
 
 import advene.model.tal.context
 
@@ -1246,6 +1247,9 @@ class AdveneController:
         self.package.imagecache=ImageCache()
         self.package._idgenerator = advene.core.idgenerator.Generator(self.package)
         self.package._modified = False
+
+        # State dictionary
+        self.package.state=DefaultDict(default=0)
 
         # Initialize the color palette for the package
         # Remove already used colors

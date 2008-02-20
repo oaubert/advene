@@ -1157,6 +1157,7 @@ class ECACatalog:
         'gui': _("GUI actions"),
         'popup': _("Popup actions"),
         'sound': _("Sound actions"),
+        'state': _("State actions"),
         }
 
     def __init__(self):

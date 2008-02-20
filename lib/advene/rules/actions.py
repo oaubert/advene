@@ -275,6 +275,36 @@ def register(controller=None):
             category='sound',
             )
                                )
+    controller.register_action(RegisteredAction(
+            name="SetState",
+            method=ac.SetState,
+            description=_("Set a state variable"),
+            parameters={'name': _("State variable name"),
+                        'value': _("State value") },
+            defaults={'name': 'string:foo',
+                      'value': 'string:0' },
+            category='state',
+            )
+                               )
+
+    controller.register_action(RegisteredAction(
+            name="IncrState",
+            method=ac.IncrState,
+            description=_("Increment a state variable"),
+            parameters={'name': _("State variable name")},
+            defaults={'name': 'string:foo'},
+            category='state',
+            )
+                               )
+
+    controller.register_action(RegisteredAction(
+            name="ClearState",
+            method=ac.ClearState,
+            description=_("Clear all state variables"),
+            category='state',
+            )
+                               )
+
 class DefaultActionsRepository:
     def __init__(self, controller=None):
         self.controller=controller
@@ -626,6 +656,40 @@ class DefaultActionsRepository:
             if self.soundplayer is None:
                 self.init_soundplayer()
             self.soundplayer.play(filename)
+        return True
+
+    def SetState(self, context, parameters):
+        """Set the state of an attribute.
+        
+        The state is package-specific. It is like a dict with integer
+        values, which default to 0.
+        It is accessible in TALES expression with:
+        package/state/name
+        """
+        name=self.parse_parameter(context, parameters, 'name', None)
+        if filename is None:
+            return True
+        value=self.parse_parameter(context, parameters, 'value', 0)
+        if name is None:
+            return True
+        try:
+            value=int(float(value))
+        except ValueError:
+            value=0
+        self.controller.package.state[name]=value
+        return True
+
+    def IncrState(self, context, parameters):
+        name=self.parse_parameter(context, parameters, 'name', None)
+        if name is None:
+            return True
+        self.controller.package.state[name]=self.controller.package.state[name]+1
+        return True
+
+    def ClearState(self, context, parameters):
+        s=self.controller.package.state
+        for n in s:
+            s[n]=0
         return True
 
 class SoundPlayer:
