@@ -339,6 +339,11 @@ class ViewBook(AdhocView):
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
+        elif targetType == config.data.target_type['timestamp']:
+            t=long(float(selection.data))
+            print "Got timestamp",t
+            self.controller.gui.open_adhoc_view('bookmarks', history=[ t ], destination=self.location)
+            return True
         return False
 
     def build_widget(self):
@@ -355,7 +360,8 @@ class ViewBook(AdhocView):
                                config.data.drag_type['adhoc-view'] +
                                config.data.drag_type['adhoc-view-instance'] +
                                config.data.drag_type['annotation-type'] +
-                               config.data.drag_type['annotation'],
+                               config.data.drag_type['annotation'] +
+                               config.data.drag_type['timestamp'],
                                gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_LINK)
 
         return notebook
