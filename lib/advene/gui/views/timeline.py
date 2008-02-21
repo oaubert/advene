@@ -2527,7 +2527,9 @@ class TimeLine(AdhocView):
             i=gtk.MenuItem(_("Highlight selection in other views"))
             i.connect('activate', self.selection_highlight, l)
             m.append(i)
-
+            i=gtk.MenuItem(_("Tag selection"))
+            i.connect('activate', self.selection_tag, l)
+            m.append(i)
             i=gtk.MenuItem(_("Delete selected annotations"))
             i.connect('activate', self.selection_delete, l)
             m.append(i)
@@ -2967,4 +2969,20 @@ class TimeLine(AdhocView):
                 # Remove all others
                 for a in l[1:]:
                     self.controller.delete_annotation(a)
+        return True
+
+    def selection_tag(self, widget, selection):
+        tag=dialog.entry_dialog(title=_("Tag selection"),
+                                text=_("Enter the tag for the selection"),
+                                default="",
+                                completions=self.controller.get_defined_tags())
+        if tag is None:
+            return True
+        if not re.match('^[\w\d_]+$', tag):
+            dialog.message_dialog(_("The tag contains invalid characters"),
+                                  icon=gtk.MESSAGE_ERROR)
+            return True
+        for w in selection:
+            w.annotation.addTag(tag)
+            self.controller.notify('AnnotationEditEnd', annotation=w.annotation)
         return True
