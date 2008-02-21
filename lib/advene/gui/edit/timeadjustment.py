@@ -56,7 +56,16 @@ class TimeAdjustment:
             self.update_display()
             return True
 
-        def handle_image_click(button, event):
+        def image_button_clicked(button):
+            event=gtk.get_current_event()
+            if event.state & gtk.gdk.CONTROL_MASK:
+                self.use_current_position(button)
+                return True
+            else:
+                self.play_from_here(button)
+                return True
+
+        def image_button_press(button, event):
             if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
                 # Display the popup menu
                 menu = gtk.Menu()
@@ -65,14 +74,6 @@ class TimeAdjustment:
                 menu.append(item)
                 menu.show_all()
                 menu.popup(None, None, None, 0, gtk.get_current_event_time())
-                return True
-            if event.button != 1:
-                return False
-            if event.state & gtk.gdk.CONTROL_MASK:
-                self.use_current_position(button)
-                return True
-            else:
-                self.play_from_here(button)
                 return True
             return False
 
@@ -124,7 +125,16 @@ class TimeAdjustment:
         self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache[self.value], width=width))
 
         b=gtk.Button()
-        b.connect("button-press-event", handle_image_click)
+        b.connect("button-press-event", image_button_press)
+        b.connect("clicked", image_button_clicked)
+
+        # The widget can generate drags
+        b.connect("drag_data_get", self.drag_sent)
+        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.drag_type['annotation']
+                          + config.data.drag_type['timestamp']
+                          , gtk.gdk.ACTION_LINK)
+
         #b.set_image(self.image)
         al=gtk.Alignment()
         al.set_padding(0, 0, 0, 0)
@@ -210,6 +220,14 @@ class TimeAdjustment:
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
+
+    def drag_sent(self, widget, context, selection, targetType, eventTime):
+        """Handle the drag-sent event.
+        """
+        if targetType == config.data.target_type['timestamp']:
+            selection.set(selection.target, 8, str(self.value))
+            return True
+        return False
 
     def play_from_here(self, button):
         if self.controller.player.status == self.controller.player.PauseStatus:
