@@ -234,7 +234,8 @@ def yes_no_cancel_popup(title=None,
 
 def entry_dialog(title=None,
                  text=None,
-                 default=""):
+                 default="",
+                 completions=None):
     """Display a dialog to enter a short text.
 
     @param title: title of the dialog
@@ -243,6 +244,8 @@ def entry_dialog(title=None,
     @type text: string
     @param default: default value for the entry
     @type default: string
+    @param completions: a list of possible completions
+    @type completions: list of strings
     @return: the entry value or None if the dialog was cancelled
     @rtype: string
     """
@@ -261,6 +264,15 @@ def entry_dialog(title=None,
     e.show()
     if default:
         e.set_text(default)
+
+    if completions:
+        completion = gtk.EntryCompletion()
+        e.set_completion(completion)
+        liststore = gtk.ListStore(str)
+        completion.set_text_column(0)
+        completion.set_model(liststore)
+        for s in completions:
+            liststore.append([ s ])
 
     d.connect("key_press_event", dialog_keypressed_cb)
 
