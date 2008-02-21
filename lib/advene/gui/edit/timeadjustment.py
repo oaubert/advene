@@ -1,4 +1,4 @@
-#
+
 # This file is part of Advene.
 #
 # Advene is free software; you can redistribute it and/or modify
@@ -131,8 +131,7 @@ class TimeAdjustment:
         # The widget can generate drags
         b.connect("drag_data_get", self.drag_sent)
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['annotation']
-                          + config.data.drag_type['timestamp']
+                          config.data.drag_type['timestamp']
                           , gtk.gdk.ACTION_LINK)
 
         #b.set_image(self.image)
