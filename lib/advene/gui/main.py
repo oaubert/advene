@@ -1572,13 +1572,7 @@ class AdveneGUI (Connect):
                 return None
 
         if name == 'tagbag':
-            tags=Set()
-            if not parameters:
-                # Populate with annotations, relations and views tags
-                for e in itertools.chain(self.controller.package.annotations, 
-                                         self.controller.package.relations):
-                    tags.update(e.tags)
-            view=TagBag(self.controller, parameters=parameters, tags=list(tags))
+            view=TagBag(self.controller, parameters=parameters, tags=list(self.controller.get_defined_tags()))
         elif name == 'transcription':
             kwargs={ 'controller': self.controller,
                      'parameters': parameters }

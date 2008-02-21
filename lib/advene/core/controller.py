@@ -39,6 +39,7 @@ import gobject
 import shlex
 import itertools
 import operator
+from sets import Set
 
 import advene.core.config as config
 
@@ -902,6 +903,17 @@ class AdveneController:
                     self.log(_("Found matching video file in moviepath: %s") % n)
                     break
         return mediafile
+
+    def get_defined_tags(self, p=None):
+        """Return the set of existing tags.
+        """
+        if p is None:
+            p=self.package
+        tags=Set()
+        # Populate with annotations, relations tags
+        for e in itertools.chain(p.annotations, p.relations):
+            tags.update(e.tags)
+        return tags
 
     def set_media(self, uri=None):
         """Set the current media in the video player.
