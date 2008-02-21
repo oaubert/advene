@@ -20,7 +20,7 @@
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
-from advene.gui.util import image_from_position, get_small_stock_button, dialog, get_pixmap_button
+from advene.gui.util import image_from_position, get_small_stock_button, dialog, png_to_pixbuf
 from advene.gui.views import AdhocView
 import advene.util.importer
 from gettext import gettext as _
@@ -208,18 +208,46 @@ class Bookmarks(AdhocView):
         i=image_from_position(self.controller,
                               t,
                               width=self.options['snapshot_width'])
-        e=gtk.Button()
-        e.connect("clicked", self.activate, t)
-        e.add(i)
+        b=gtk.Button()
+        b.connect("clicked", self.activate, t)
+        b.add(i)
 
         # The button can generate drags
-        e.connect("drag_data_get", drag_sent)
+        b.connect("drag_data_get", drag_sent)
 
-        e.drag_source_set(gtk.gdk.BUTTON1_MASK,
+        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['timestamp'],
                           gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
 
-        box.pack_start(e, expand=False)
+        # Define drag cursor
+        def _drag_begin(widget, context):
+            w=gtk.Window(gtk.WINDOW_POPUP)
+            w.set_decorated(False)
+
+            v=gtk.VBox()
+            i=gtk.Image()
+            v.pack_start(i, expand=False)
+            l=gtk.Label()
+            v.pack_start(l, expand=False)
+            
+            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(t, epsilon=500), width=50))
+            l.set_text(helper.format_time(t))
+
+            w.add(v)
+            w.show_all()
+            widget._icon=w
+            context.set_icon_widget(w, 0, 0)
+            return True
+
+        def _drag_end(widget, context):
+            widget._icon.destroy()
+            widget._icon=None
+            return True
+
+        b.connect("drag_begin", _drag_begin)
+        b.connect("drag_end", _drag_end)
+
+        box.pack_start(b, expand=False)
 
         l = gtk.Label(helper.format_time(t) + " - ")
         if self.display_comments:
