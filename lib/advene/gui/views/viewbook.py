@@ -341,7 +341,6 @@ class ViewBook(AdhocView):
             return True
         elif targetType == config.data.target_type['timestamp']:
             t=long(float(selection.data))
-            print "Got timestamp",t
             self.controller.gui.open_adhoc_view('bookmarks', history=[ t ], destination=self.location)
             return True
         return False
