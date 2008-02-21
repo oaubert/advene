@@ -24,7 +24,7 @@ import advene.core.config as config
 
 import re
 import gtk
-import advene.util.helper
+import advene.util.helper as helper
 from advene.gui.util import png_to_pixbuf
 
 from gettext import gettext as _
@@ -134,7 +134,35 @@ class TimeAdjustment:
                           config.data.drag_type['timestamp']
                           , gtk.gdk.ACTION_LINK)
 
-        #b.set_image(self.image)
+        # Define drag cursor
+        def _drag_begin(widget, context):
+            w=gtk.Window(gtk.WINDOW_POPUP)
+            w.set_decorated(False)
+
+            v=gtk.VBox()
+            i=gtk.Image()
+            v.pack_start(i, expand=False)
+            l=gtk.Label()
+            v.pack_start(l, expand=False)
+            
+            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(self.value, epsilon=500), width=50))
+            l.set_text(helper.format_time(self.value))
+
+            w.add(v)
+            w.show_all()
+            widget._icon=w
+            context.set_icon_widget(w, 0, 0)
+            return True
+
+        def _drag_end(widget, context):
+            widget._icon.destroy()
+            widget._icon=None
+            return True
+
+        b.connect("drag_begin", _drag_begin)
+        b.connect("drag_end", _drag_end)
+
+
         al=gtk.Alignment()
         al.set_padding(0, 0, 0, 0)
         al.add(self.image)
@@ -154,7 +182,7 @@ class TimeAdjustment:
 
         self.entry=gtk.Entry()
         # Default width of the entry field
-        self.entry.set_width_chars(len(advene.util.helper.format_time(0.0)))
+        self.entry.set_width_chars(len(helper.format_time(0.0)))
         self.entry.connect('activate', self.convert_entered_value)
         self.entry.connect('focus-out-event', self.convert_entered_value)
         self.entry.set_editable(self.editable)
@@ -302,7 +330,7 @@ class TimeAdjustment:
 
     def update_display(self):
         """Updates the value displayed in the entry according to the current value."""
-        self.entry.set_text(advene.util.helper.format_time(self.value))
+        self.entry.set_text(helper.format_time(self.value))
         # Update the image
         if self.compact:
             width=50
