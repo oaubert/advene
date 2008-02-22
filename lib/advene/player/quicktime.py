@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -137,7 +137,7 @@ class Player:
         if self.movie:
             position = self.position2value(position)
             self.movie.SetMovieTime(position)
-    
+
     def start(self, position=0):
         if self.movie:
             self.movie.StartMovie()
@@ -164,7 +164,7 @@ class Player:
     def exit(self):
         # FIXME: cleanly exit the player (DisposeMovie + ExitMovies + TerminateQTML)
         self.log("exit")
-    
+
     def playlist_add_item(self, item):
         self.playlist=[item]
         self.movie.open(item)
@@ -217,7 +217,7 @@ class Player:
             key=self.MediaTime
         if origin is None:
             origin=self.AbsolutePosition
-        
+
         p=Position()
         p.value = value
         p.origin = origin
@@ -327,8 +327,8 @@ class Player:
                 else:
                     w=alloc.width
                     h=w * 100 / self.movie.aspect_ratio
-                self.movie.SetMovieBox( qtmovie.Rect(alloc.y + (alloc.height - h) / 2, 
-                                                     alloc.x + (alloc.width -w) / 2, 
+                self.movie.SetMovieBox( qtmovie.Rect(alloc.y + (alloc.height - h) / 2,
+                                                     alloc.x + (alloc.width -w) / 2,
                                                      alloc.y + h,
                                                      alloc.x + w))
                 return True

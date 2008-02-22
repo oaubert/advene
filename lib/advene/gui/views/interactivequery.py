@@ -256,7 +256,7 @@ class InteractiveResult(AdhocView):
 
         if isinstance(self.query, basestring):
             # Quicksearch entry. Convert to Quicksearch class.
-            q=Quicksearch(controller=self.controller, 
+            q=Quicksearch(controller=self.controller,
                           source=config.data.preferences['quicksearch-source'],
                           searched=self.query,
                           case_sensitive=not config.data.preferences['quicksearch-ignore-case'])
@@ -366,7 +366,7 @@ class InteractiveResult(AdhocView):
         replace_entry=gtk.Entry()
         hb.pack_start(replace_entry, expand=False)
         d.vbox.pack_start(hb, expand=False)
-        
+
         d.connect("key_press_event", dialog.dialog_keypressed_cb)
         d.show_all()
         dialog.center_on_mouse(d)
@@ -393,7 +393,7 @@ class InteractiveResult(AdhocView):
         self.query.searched=s
         res=self.controller.gui.search_string(s)
         label="'%s'" % s
-        self.controller.gui.open_adhoc_view('interactiveresult', destination=self._destination, 
+        self.controller.gui.open_adhoc_view('interactiveresult', destination=self._destination,
                                             result=res, label=label, query=self.query)
         self.close()
         return True
@@ -426,7 +426,7 @@ class InteractiveResult(AdhocView):
             self.controller.gui.tooltips.set_tip(b, _('Search again'))
             top_box.pack_start(e, expand=False)
             top_box.pack_start(b, expand=False)
-                        
+
         # Present choices to display the result
         if not self.result:
             v.add(gtk.Label(_("Empty result")))
@@ -514,14 +514,14 @@ class InteractiveResult(AdhocView):
                 # Only Instanciate a generic table view
                 gtable=GenericTable(controller=self.controller, elements=self.result)
                 v.add(gtable.widget)
-                
+
                 ti=gtk.ToolButton(stock_id=gtk.STOCK_CONVERT)
                 ti.connect('clicked', lambda b: gtable.csv_export())
                 ti.set_tooltip(self.controller.gui.tooltips, _("Export table"))
                 tb.insert(ti, -1)
                 self.table=gtable
-            
-                
+
+
             i=gtk.Image()
             i.set_from_file(config.data.advenefile( ( 'pixmaps', 'editaccumulator.png') ))
             ti=gtk.ToolButton(icon_widget=i)

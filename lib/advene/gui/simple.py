@@ -99,7 +99,7 @@ class SimpleAdveneGUI(AdveneGUI):
         self.init_window_size(window, 'main')
         window.set_icon_list(*[ gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'icon_advene%d.png' % size ) ))
                                 for size in (16, 32, 48, 64, 128) ])
-        
+
         self.tooltips = gtk.Tooltips()
 
         # Last auto-save time (in ms)
@@ -135,10 +135,10 @@ class SimpleAdveneGUI(AdveneGUI):
             item.set_active(config.data.preferences['quicksearch-ignore-case'])
             item.connect('toggled', lambda i: config.data.preferences.__setitem__('quicksearch-ignore-case', i.get_active()))
             menu.append(item)
-            
+
             item=gtk.MenuItem(_("Searched elements"))
             submenu=gtk.Menu()
-            l=[ (_("All annotations"), 
+            l=[ (_("All annotations"),
                  None) ] + [
                 (_("Annotations of type %s") % self.controller.get_title(at),
                  'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags') ]
@@ -157,7 +157,7 @@ class SimpleAdveneGUI(AdveneGUI):
         if config.data.preferences['quicksearch-source'] is None:
             modify_source(None, None, _("All annotations"))
         hb=self.gui.get_widget('search_hbox')
-        self.quicksearch_entry=gtk.Entry()        
+        self.quicksearch_entry=gtk.Entry()
         self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
         self.quicksearch_entry.connect('activate', self.do_quicksearch)
         hb.pack_start(self.quicksearch_entry, expand=False)
@@ -182,7 +182,7 @@ class SimpleAdveneGUI(AdveneGUI):
         self.oldstatus = "NotStarted"
 
         self.last_slow_position = 0
-        
+
         self.current_annotation = None
         # Internal rule used for annotation loop
         self.annotation_loop_rule=None
@@ -194,7 +194,7 @@ class SimpleAdveneGUI(AdveneGUI):
         self.adhoc_views = []
         # List of active element edit popups
         self.edit_popups = []
-        
+
         self.edit_accumulator = None
 
         # Populate default STBV and type lists
@@ -220,7 +220,7 @@ class SimpleAdveneGUI(AdveneGUI):
                                                           prefix="advene_gui_plugins")
         except OSError:
             pass
-        
+
         # Register default GUI elements (actions, content_handlers, etc)
         for m in (advene.gui.views.timeline,
                   advene.gui.views.browser,
@@ -300,7 +300,7 @@ class SimpleAdveneGUI(AdveneGUI):
         # Populate the file history menu
         for filename in config.data.preferences['history']:
             self.append_file_history_menu(filename)
-            
+
         # Open default views
         self.open_adhoc_view('timeline', destination='south')
         # FIXME: transcribe cannot be included if no package is loaded. Fix this.
@@ -326,7 +326,7 @@ class SimpleAdveneGUI(AdveneGUI):
         # Panes indexed by zone name they relate to (east, west,
         # south, fareast)
         self.pane={}
-        
+
         if config.data.os == 'win32':
             # gtk.Socket is available on win32 only from gtk >= 2.8
             self.drawable=gtk.DrawingArea()
@@ -378,7 +378,7 @@ class SimpleAdveneGUI(AdveneGUI):
         self.audio_mute.set_active(self.controller.player.sound_is_muted())
         self.audio_mute.set_tooltip(self.tooltips, _("Mute/unmute"))
         self.player_toolbar.insert(self.audio_mute, -1)
-        
+
         # Append the loop checkitem to the toolbar
         def loop_toggle_cb(b):
             """Handle loop button action.
@@ -386,7 +386,7 @@ class SimpleAdveneGUI(AdveneGUI):
             if b.get_active():
                 if self.current_annotation:
                     def action_loop(context, target):
-                        if (self.loop_toggle_button.get_active() 
+                        if (self.loop_toggle_button.get_active()
                             and context.globals['annotation'] == self.current_annotation):
                             self.controller.update_status('set', self.current_annotation.fragment.begin)
                         return True
@@ -410,7 +410,7 @@ class SimpleAdveneGUI(AdveneGUI):
         self.update_loop_button()
         self.loop_toggle_button.connect("toggled", loop_toggle_cb)
         self.player_toolbar.insert(self.loop_toggle_button, -1)
-        
+
         # Append the player status label to the toolbar
         ts=gtk.SeparatorToolItem()
         ts.set_draw(False)
@@ -464,7 +464,7 @@ class SimpleAdveneGUI(AdveneGUI):
         self.pane['south'].show_all()
 
         return self.pane['south']
-    
+
     def update_package_list (self):
         pass
 

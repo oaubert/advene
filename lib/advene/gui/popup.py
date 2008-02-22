@@ -165,7 +165,7 @@ class Menu:
         return True
 
     def display_transcription(self, widget, annotationtype):
-        self.controller.gui.open_adhoc_view('transcription', 
+        self.controller.gui.open_adhoc_view('transcription',
                                             source="here/annotationTypes/%s/annotations/sorted" % annotationtype.id)
         return True
 
@@ -251,7 +251,7 @@ class Menu:
             return self.add_menuitem(menu, *p, **kw)
 
         title=add_item(self.get_title(element))
-        
+
         if hasattr(element, 'id') or isinstance(element, Package):
             title.set_submenu(self.common_submenu(element))
 
@@ -378,7 +378,7 @@ class Menu:
                 add_item(_("Delete"), self.delete_element, element)
 
             ## Common to offsetable elements
-            if (config.data.preferences['expert-mode'] 
+            if (config.data.preferences['expert-mode']
                 and type(element) in (Annotation, Schema, AnnotationType, Package)):
                 add_item(_("Offset"), self.offset_element, element)
 
@@ -455,7 +455,7 @@ class Menu:
             if submenu.get_children():
                 # There were incoming annotations. Use a separator
                 i=gtk.SeparatorMenuItem()
-                submenu.append(i)                
+                submenu.append(i)
             if el.outgoingRelations:
                 i=gtk.MenuItem(_("Outgoing"))
                 submenu.append(i)
@@ -572,7 +572,7 @@ class Menu:
         add_item(_("Display as transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source="here/annotationTypes/%s/annotations/sorted" % element.id))
         add_item(_("Display annotations in table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations))
         add_item(_("Use in a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=element.annotations))
-        
+
         if self.readonly:
             return
         add_item(_("Select a color"), self.pick_color, element)

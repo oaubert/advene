@@ -112,7 +112,7 @@ class Exporter(AdhocView):
         vbox.pack_start(line, expand=False)
 
         line.pack_start(gtk.Label(_("Export filter")), expand=False)
-        self.exporters=dialog.list_selector_widget([ ( v, v.title ) 
+        self.exporters=dialog.list_selector_widget([ ( v, v.title )
                                                      for v in self.importer_package.views
                                                      if v.id != 'index' ], None)
         line.pack_start(self.exporters, expand=False)

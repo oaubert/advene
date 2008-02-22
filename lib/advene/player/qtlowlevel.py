@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -76,7 +76,7 @@ class TimeRecord(ctypes.Structure):
     value: time value (absolute or duration)
     scale: time scale (number of units of time that pass each second.)
     base: If the time structure defines a duration, set this field to nil. Otherwise, this field must refer to a valid time base.
-    
+
     doc: http://developer.apple.com/documentation/QuickTime/RM/MovieInternals/MTTimeSpace/B-Chapter/chapter_1000_section_4.html
     """
     _fields_ = [("value", ctypes.c_long),
@@ -139,7 +139,7 @@ if True:
     kQTNewMoviePropertyID_DefaultDataRef = FOUR_CHAR_CODE('ddrf') # DataReferenceRecord
     kQTNewMoviePropertyID_Active  = FOUR_CHAR_CODE('actv')
     kQTNewMoviePropertyID_DontInteractWithUser = FOUR_CHAR_CODE('intn')
-    
+
 class qtlowlevelError(RuntimeError):
     pass
 
@@ -155,7 +155,7 @@ def GetErrorString(value):
         return 'error value: %d'%value
     else:
         return 'noErr'
-    
+
 def CheckOSStatus(value):
     if value != noErr:
         raise qtlowlevelError(GetErrorString(value))
@@ -257,7 +257,7 @@ NewMovieController.restype = MovieController
 # http://developer.apple.com/documentation/QuickTime/RM/QTforWindows/QTforWindows/C-Chapter/chapter_1000_section_4.html
 CreatePortAssociation = QTMLClient.CreatePortAssociation
 CreatePortAssociation.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_long ]
-#        (void  *theWnd,          Ptr   storage (usually NULL),  long  flags); 
+#        (void  *theWnd,          Ptr   storage (usually NULL),  long  flags);
 
 SetMovieGWorld = QTMLClient.SetMovieGWorld
 SetMovieGWorld.argtypes = [ Movie, ctypes.c_void_p, ctypes.c_void_p ]
@@ -275,7 +275,7 @@ if 1:
     CFStringCreateWithCharacters.argtypes = [CFAllocatorRef,
                                              ctypes.c_wchar_p,
                                              CFIndex]
-    
+
     CFStringCreateWithCString = QTMLClient.CFStringCreateWithCString
     CFStringCreateWithCString.restype = CFStringRef
     CFStringCreateWithCString.argtypes = [CFAllocatorRef,
@@ -293,7 +293,7 @@ if 1:
                                        ctypes.c_long]
 
     OpenMovieFile = QTMLClient.OpenMovieFile
-    
+
 if 1:
     kCFAllocatorDefault = 0
     kCFStringEncodingMacRoman = 0 # CoreFoundation/CFString.h

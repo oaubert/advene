@@ -73,15 +73,15 @@ class AnnotationDisplay(AdhocView):
 
     def refresh(self, *p):
         if self.annotation is None:
-            d={ 'title': _("No annotation"), 
-                'begin': '--:--:--:--', 
-                'end': '--:--:--:--', 
+            d={ 'title': _("No annotation"),
+                'begin': '--:--:--:--',
+                'end': '--:--:--:--',
                 'contents': '',
                 'imagecontents': None}
         elif isinstance(self.annotation, int) or isinstance(self.annotation, long):
-            d={ 'title': _("Current time"), 
+            d={ 'title': _("Current time"),
                 'begin': helper.format_time(self.annotation),
-                'end': '--:--:--:--', 
+                'end': '--:--:--:--',
                 'contents': '',
                 'imagecontents': None}
         else:

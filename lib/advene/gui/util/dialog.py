@@ -177,7 +177,7 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, callback=None):
         dialog.label.set_text(label)
     dialog.set_position(gtk.WIN_POS_CENTER_ALWAYS)
     dialog.connect("key_press_event", dialog_keypressed_cb)
-    
+
     dialog.show()
     center_on_mouse(dialog)
 
@@ -189,7 +189,7 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, callback=None):
         else:
             return True
     else:
-        # Callback is defined, non-modal behaviour. 
+        # Callback is defined, non-modal behaviour.
         # Connect the signal handler.
         def handle_response(d, res):
             d.destroy()
@@ -347,7 +347,7 @@ def title_id_dialog(title=_("Name the element"),
     @param element_id: default id
     @type element_id: string
     @param flags: optional gtk.Dialog flags (such as gtk.DIALOG_MODAL)
-    
+
     @return: the dialog widget
     """
     if flags is None:
@@ -436,7 +436,7 @@ def get_title_id(title=_("Name the element"),
         i=None
 
     d.destroy()
-    
+
     return t, i
 
 def get_filename(title=_("Open a file"),
@@ -496,7 +496,7 @@ def get_filename(title=_("Open a file"),
                 alias_entry.set_text('')
             chooser.set_preview_widget_active(False)
         return True
-        
+
     def do_preview(button):
         if hasattr(button, '_filename') and button._filename:
             button.set_label(_("Wait..."))
@@ -524,8 +524,8 @@ def get_filename(title=_("Open a file"),
 
     for name, descr, exts in (
         ('any', _("Any type of file"), ( '*', ) ),
-        ('advene', 
-         _("Advene files (.xml, .azp, .apl)"), 
+        ('advene',
+         _("Advene files (.xml, .azp, .apl)"),
          ('*.xml', '*.azp', '*.apl')),
         ('session', _("Advene session (.apl)"), ( '*.apl', ) ),
         ('video', _("Video files"), [ "*%s" % e for e in config.data.video_extensions ])
@@ -639,7 +639,7 @@ class CategorizedSelector:
 
     def popup_menu(self, *p):
         m=gtk.Menu()
-        
+
         i=gtk.MenuItem(self.title, use_underline=False)
         i.set_sensitive(False)
         m.append(i)

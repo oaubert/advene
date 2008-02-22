@@ -211,7 +211,7 @@ class HTMLView(AdhocView):
 
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
-        
+
         for icon, action in (
             (gtk.STOCK_GO_BACK, self.component.back),
             (gtk.STOCK_REFRESH, self.component.refresh),
@@ -231,7 +231,7 @@ class HTMLView(AdhocView):
         ti.add(self.url_entry)
         ti.set_expand(True)
         tb.insert(ti, -1)
-            
+
         vbox=gtk.VBox()
 
         vbox.pack_start(tb, expand=False)

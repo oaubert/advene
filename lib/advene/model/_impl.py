@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -75,7 +75,7 @@ class Metaed(object):
         if n in self.meta_cache:
             return self.meta_cache[n]
         e = self._getMetaElement(namespace_uri, name)
-        if e is None: 
+        if e is None:
             return None
 
         r = StringIO()
@@ -135,12 +135,12 @@ class Authored(Metaed):
 
     def __setAuthorNode (self, author, authorUrl=None):
         attnode, eltnode = self.__prepareAuthorNodes ()
-    
+
         if author is None:
             assert authorUrl==None, "authorUrl without author is impossible"
             if attnode: self._getModel ().removeAttributeNode (attnode)
             if eltnode: self._getMeta ().removeChild (eltnode)
-        
+
         elif authorUrl is None:
             if eltnode is None:
                 self._getModel ().setAttributeNS (dcNS, 'dc:creator', author)
@@ -154,14 +154,14 @@ class Authored(Metaed):
         else: #authorUrl is not None
             if attnode:
                 self._getModel ().removeAttributeNode (attnode)
-            
+
             doc = self._getModel ()._get_ownerDocument ()
-        
+
             if eltnode is None:
                 eltnode = self._getMetaElement (dcNS, 'creator', create=True)
             else:
                 author = self.__cleanAuthorElementAndGetLayout (eltnode, author)
-            
+
             textnode = doc.createTextNode(author)
             eltnode.appendChild(textnode)
             eltnode.setAttributeNS(xlinkNS, "xlink:href", unicode(authorUrl))
@@ -389,7 +389,7 @@ class Ided(object):
             self._set_id (self._getModel(), value)
         else:
             raise AttributeError("id is a required attribute")
- 
+
     id = property(getId, setId)
 
     def _set_id (element, value):

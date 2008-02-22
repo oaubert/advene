@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -24,7 +24,7 @@ list is also indexed by its URI.  Hence the 'bundle[index]' notation can be
 used with integers or strings.
 
 Since bundle may list/dict views of complex underlying data, many operations
-which are usual with simple python lists, are just meaningless for bundles. 
+which are usual with simple python lists, are just meaningless for bundles.
 
 Permitted list operations are
  - len(b)
@@ -70,7 +70,7 @@ from gettext import gettext as _
 class AbstractBundle (object):
     """
     Base class of all Bundles.
-    
+
     Implements all the read-only methods.
     """
 
@@ -116,7 +116,7 @@ class AbstractBundle (object):
 
     def __contains__ (self, v):
         return (v is self._dict.get(v.getUri (absolute=True), None)
-             or v in self._dict) 
+             or v in self._dict)
 
     def __getitem__ (self, index):
         if isinstance (index, int):
@@ -126,7 +126,7 @@ class AbstractBundle (object):
 
     def index (self, element):
         return self._list.index (element)
-    
+
     def __getslice__ (self, begin, end):
         """
         b.__getslice__(i, j) <==> b[i:j]
@@ -164,7 +164,7 @@ class AbstractBundle (object):
 
     def ids (self):
         return [ e.id for e in self._dict.itervalues() ]
-    
+
     def keys (self):
         """
         Return the keys of this bundle.
@@ -229,14 +229,14 @@ class SumBundle (AbstractBundle):
         self._list += bundle._list
         self._dict.update (bundle._dict)
         return self
-        
+
 
 class WritableBundle (AbstractBundle):
     """
     Superclass of read-write bundles.
 
     When specializing this class, it is only necessary to override the following
-    methods: __delitem__ and insert. All other methods rely on these two 
+    methods: __delitem__ and insert. All other methods rely on these two
     methods.
     Note also that the method _assert_add_item is invoked whenever an item is to
     be added, and can therefore be overridden to add more checking.
@@ -278,7 +278,7 @@ class WritableBundle (AbstractBundle):
 
     def insert(self, index, item):
         assert self._assert_add_item (item)
-        
+
         length = len(self)
         if not (-length <= index <= length):
             raise IndexError, (index, self._list)
@@ -342,7 +342,7 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
     This abstract method requires a number of methods:
       - _get_namespace_uri : returning the NS URI of the elements to be included
       - _get_local_name : returning the local name of the elements to be included
-      - _make_item : a callable taking a parent and an element and returning an 
+      - _make_item : a callable taking a parent and an element and returning an
         item
       - _get_element : a callable taking an element and returning its item
       - _getViewableType : a method returning the viewable type
@@ -364,7 +364,7 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
             if t.endswith("-list"):
                 t = t[:-5]
             return _("List of %s elements") % t
-        
+
     def _update (self):
         """
         FIXME
@@ -376,7 +376,7 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
         ns = self._get_namespace_uri ()
         ln = self._get_local_name ()
         parent = self._getParent ()
-        make_item = self._make_item 
+        make_item = self._make_item
         list_append = self._list.append
         dict_append = self._dict.__setitem__
 
@@ -438,7 +438,7 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
             elt_list.insert (ref_index + 1, self._get_element (item))
 
         super (AbstractXmlBundle, self).insert (index, item)
-        
+
 
     def _assert_add_item (self, item):
         assert ( item._getParent ().getRootPackage ()
@@ -517,7 +517,7 @@ class ImportBundle (StandardXmlBundle):
 
 class RefBundle (AbstractXmlBundle):
     """
-    This kind of bundle is constructed with a Modeled class and the 
+    This kind of bundle is constructed with a Modeled class and the
     corresponding namespace URI and local name. Elements are expected to have a
     xlink:href attribute pointing to the references item inside the bundle's
     package.
@@ -605,7 +605,7 @@ class InverseDictBundle (StandardXmlBundle):
     def __delitem__ (self, index):
         item = self[index]
         super (InverseDictBundle, self).__delitem__ (index)
-        del self.__inverse_dict[self.__inverse_key (item)]        
+        del self.__inverse_dict[self.__inverse_key (item)]
 
     def insert (self, index, item):
         super (InverseDictBundle, self).insert (index, item)

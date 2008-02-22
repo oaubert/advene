@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -51,7 +51,7 @@ class AnnotationGraphImporter(GenericImporter):
             return 30
         return 0
     can_handle=staticmethod(can_handle)
-    
+
     def process_file(self, filename, dest=None):
         tree=ET.parse(filename)
         root=tree.getroot()
@@ -67,13 +67,13 @@ class AnnotationGraphImporter(GenericImporter):
         self.convert(self.iterator(root))
         self.progress(1.0)
         return self.package
-        
+
     def iterator(self, root):
         schema=self.package.get_element_by_id('ag')
         if root.tag != tag('AGSet'):
             print "Invalid AnnotationGraph file format: ", root.tag
             return
-        
+
         # Import anchors
         self.anchors={}
         for anchor in root.findall('%s/%s' % (tag('AG'), tag('Anchor'))):
@@ -95,12 +95,12 @@ class AnnotationGraphImporter(GenericImporter):
             if not t in ats:
                 ats[t]=self.create_annotation_type (schema, t)
             at=ats[t]
-            
+
             attribnames=attribs.setdefault(an.attrib['type'], sets.Set())
             content="\n".join( [ "%s=%s" % (f.attrib['name'], f.text)
                                  for f in an.findall(str(tag('Feature'))) ] )
             attribnames.update([ f.attrib['name'] for f in an.findall(tag('Feature')) ])
-            
+
             yield {
                 'id': an.attrib['id'],
                 'type': at,

@@ -41,9 +41,9 @@ def register(controller=None):
             description=_("Pronounce a text"),
             parameters={'message': _("String to pronounce.")},
             defaults={'message': 'annotation/content/data'},
-            predefined={'message': (  
+            predefined={'message': (
                     ( 'annotation/content/data', _("The annotation content") ),
-                    )},            
+                    )},
             category='generic',
             ))
 
@@ -72,7 +72,7 @@ class TTSEngine:
                     rulename=context.evaluateValue('rule')
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
-                self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename, 
+                self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
                                                                                                                           'parametername': name})
                 self.controller.log(unicode(e)[:160])
                 result=default_value
@@ -111,7 +111,7 @@ class FestivalTTSEngine(TTSEngine):
 
     """
     def __init__(self, controller=None):
-        TTSEngine.__init__(self, controller=controller) 
+        TTSEngine.__init__(self, controller=controller)
         self.festival_path=helper.find_in_path('festival')
         self.festival_pipe=None
 
@@ -142,7 +142,7 @@ class MacOSXTTSEngine(TTSEngine):
         return True
 
 """
-Win32: install pytts + pywin32 (from sf.net) + mfc71.dll + spchapi.exe (from www.microsoft.com/reader/developer/downloads/tts.mspx 
+Win32: install pytts + pywin32 (from sf.net) + mfc71.dll + spchapi.exe (from www.microsoft.com/reader/developer/downloads/tts.mspx
 )
 On some flavors of Windows you can use:
 import pyTTS
@@ -151,7 +151,7 @@ tts = pyTTS.Create()
 tts.Speak('This is the sound of my voice.')
 
 On Mac OS X you can use:
-import os 
+import os
 
 http://farm.tucows.com/blog/_archives/2005/1/19/266813.html
 

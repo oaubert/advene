@@ -70,7 +70,7 @@ class ViewPlugin(AdhocView):
 
     def get_save_arguments(self):
         """Method called when saving a parametered view.
-        
+
         It should return a tuple (options, arguments) where options is
         the options dictionary, and arguments is a list of (name,
         value) tuples).

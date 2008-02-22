@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -62,7 +62,7 @@ class NoCallVariable(simpleTALES.ContextVariable):
         be called only if final element in the path.
         """
         def value (self, currentPath=None):
-                return self.ourValue            
+                return self.ourValue
 
 class _advene_context (simpleTALES.Context):
     """Advene specific implementation of TALES.
@@ -73,7 +73,7 @@ class _advene_context (simpleTALES.Context):
 
     def __init__ (self, options):
         simpleTALES.Context.__init__(self, options, allowPythonPath=True)
-        
+
     def wrap_method(self, method):
         return simpleTALES.PathFunctionVariable(method)
 
@@ -136,7 +136,7 @@ class _advene_context (simpleTALES.Context):
                 elif (expr.endswith ('"') or expr.endswith ("'")):
                         expr = expr [0:-1]
                 pathList = expr.split ('/')
-                
+
                 path = pathList[0]
                 if path.startswith ('?'):
                         path = path[1:]
@@ -144,7 +144,7 @@ class _advene_context (simpleTALES.Context):
                                 path = self.locals[path]
                                 if (isinstance (path, simpleTALES.ContextVariable)): path = path.value()
                                 elif (callable (path)):path = apply (path, ())
-                        
+
                         elif self.globals.has_key(path):
                                 path = self.globals[path]
                                 if (isinstance (path, simpleTALES.ContextVariable)): path = path.value()
@@ -153,7 +153,7 @@ class _advene_context (simpleTALES.Context):
                 if self.locals.has_key(path):
                         val = self.locals[path]
                 elif self.globals.has_key(path):
-                        val = self.globals[path]  
+                        val = self.globals[path]
                 else:
                         # If we can't find it then raise an exception
                         raise simpleTALES.PATHNOTFOUNDEXCEPTION
@@ -201,10 +201,10 @@ class _advene_context (simpleTALES.Context):
                                 except:
                                         #self.log.debug ("Not found.")
                                         raise simpleTALES.PATHNOTFOUNDEXCEPTION
-                                
+
                         # Advene hook: stack resolution
                         resolved_stack.insert(0, (path, val) )
-                        
+
                         index = index + 1
                 #self.log.debug ("Found value %s" % str (val))
 
@@ -244,7 +244,7 @@ class AdveneContext(_advene_context):
                 "\n\t".join([ "%s: %s" % (k, unicode(v).replace("<", "&lt;"))
                               for k, v in self.locals.iteritems() ]))
 
-        
+
     def __init__(self, here, options=None):
         """Creates a tales.AdveneContext object, having a global symbol 'here'
            with value 'here' and a global symbol 'options' where all the key-
@@ -282,7 +282,7 @@ class AdveneContext(_advene_context):
 
         if isinstance (view_source, str) or isinstance (view_source, unicode):
             view_source = StringIO (unicode(view_source))
-           
+
         kw = {}
         if mimetype is None or mimetype == 'text/html':
             compiler = simpleTAL.HTMLTemplateCompiler ()

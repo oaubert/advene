@@ -42,7 +42,7 @@ except ImportError:
         import elementtree.ElementTree as ET
     except ImportError:
         import xml.etree.ElementTree as ET # python 2.5
-        
+
 from gettext import gettext as _
 
 COLORS = [ 'red', 'green', 'blue', 'black', 'white', 'gray', 'yellow' ]
@@ -330,7 +330,7 @@ class Shape(object):
         e.add(treeview)
         e.set_expanded(False)
         vbox.add(e)
-        
+
         vbox.widgets = {
             'name': namesel,
             'color': colorsel,
@@ -399,7 +399,7 @@ class Rectangle(Shape):
              ('y', 1),
              ('width', 0),
              ('height', 1) )
-        
+
     def set_bounds(self, bounds):
         self.x = int(min(bounds[0][0], bounds[1][0]))
         self.y = int(min(bounds[0][1], bounds[1][1]))
@@ -582,12 +582,12 @@ class Text(Rectangle):
         textsizesel.set_value(self.textsize)
         vbox.pack_start(label_widget(_("Textsize"), textsizesel), expand=False)
         vbox.widgets['textsize']=textsizesel
-        
+
         return vbox
 
 class Image(Rectangle):
     """Experimental Image shape.
-    
+
     It serves as a placeholder for the background image for the
     moment, which is handled in the ShapeDrawer class. So the render
     method is not implemented.
@@ -601,7 +601,7 @@ class Image(Rectangle):
     coords=( ('x', 0),
              ('y', 1),
              ('width', 0),
-             ('height', 1) )        
+             ('height', 1) )
 
     def __init__(self, name=SHAPENAME, color="green"):
         super(Image, self).__init__(name, color)
@@ -847,7 +847,7 @@ class Link(Shape):
         """
         if element.tag != cls.SVGTAG and element.tag != ET.QName(SVGNS, cls.SVGTAG):
             return None
-        # Parse the element children. 
+        # Parse the element children.
         # FIXME: we only handle the first one ATM. Should use a generator here.
         o=None
         for c in element:
@@ -1228,7 +1228,7 @@ class ShapeDrawer:
         """Parse a SVG representation
 
         et is an ET.Element with tag == 'svg'
-        
+
         path is the file path of the parsed element (so that relative
         hrefs can be resolved)
         """
@@ -1279,7 +1279,7 @@ class ShapeDrawer:
                     break
         self.plot()
         return True
-        
+
 class ShapeEditor:
     """Shape Editor component.
 

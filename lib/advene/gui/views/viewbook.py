@@ -248,7 +248,7 @@ class ViewBook(AdhocView):
                     menu.append(i)
                 else:
                     menu=None
-                    
+
                 if menu is not None:
                     if saved:
                         i=gtk.MenuItem(_("Open a saved view"))

@@ -78,14 +78,14 @@ class AnnotationTable(AdhocView):
 
     def build_model(self):
         """Build the ListStore containing the data.
-        
+
         """
         l=gtk.ListStore(object, str, str, str, long, long, long, str, str)
         if not self.elements:
             return l
         for a in self.elements:
             if isinstance(a, Annotation):
-                l.append( (a, 
+                l.append( (a,
                            self.controller.get_title(a),
                            self.controller.get_title(a.type),
                            a.id,
@@ -213,7 +213,7 @@ class AnnotationTable(AdhocView):
             w.writerow( (r[COLUMN_ID], unicode(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_BEGIN], r[COLUMN_END], unicode(r[COLUMN_ELEMENT].content.data).encode('utf-8') ) )
         f.close()
         self.log(_("Data exported to %s") % name)
-            
+
     def row_activated_cb(self, widget, path, view_column):
         """Edit the element on Return or double click
         """
@@ -303,7 +303,7 @@ class GenericTable(AdhocView):
 
     def build_model(self):
         """Build the ListStore containing the data.
-        
+
         Columns: element, content (title), type, id
         """
         l=gtk.ListStore(object, str, str, str)
@@ -342,7 +342,7 @@ class GenericTable(AdhocView):
             w.writerow( (unicode(r[COLUMN_CONTENT]).encode('utf-8'), unicode(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_ID]) )
         f.close()
         self.log(_("Data exported to %s") % name)
-            
+
     def build_widget(self):
         tree_view = gtk.TreeView(self.model)
 

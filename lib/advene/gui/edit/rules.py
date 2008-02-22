@@ -120,7 +120,7 @@ class EditRuleSet(EditGeneric):
         for p in ra.parameters:
             action.add_parameter(p, ra.defaults.get(p, ''))
         # Find the next rulename index
-        l=[ int(r.name.replace(_('Rule'), '')) 
+        l=[ int(r.name.replace(_('Rule'), ''))
             for r in self.model
             if re.match(_('Rule') + '(\d+)', r.name) ]
         idx=max(l or [ 0 ] ) + 1
@@ -312,7 +312,7 @@ class EditQuery(EditGeneric):
         conditionsbox.add(hb)
 
         w=EditCondition(cond, editable=self.editable,
-                        controller=self.controller, 
+                        controller=self.controller,
                         parent=self)
 
         self.editconditionlist.append(w)
@@ -745,7 +745,7 @@ class EditCondition(EditGeneric):
 
     def build_widget(self):
         hbox=gtk.HBox()
-        
+
         if self.parent is None or isinstance(self.parent, EditRule):
             predefined=[
                 ('annotation/fragment', _('The annotation fragment') ),
@@ -757,15 +757,15 @@ class EditCondition(EditGeneric):
                 ('annotation/incomingRelations', _("The annotation's incoming relations") ),
                 ('annotation/outgoingRelations', _("The annotation's outgoing relations") ),
                 ] + [
-                ('annotation/typedRelatedIn/%s' % rt.id, 
-                 _("The %s-related incoming annotations") % self.controller.get_title(rt) ) 
+                ('annotation/typedRelatedIn/%s' % rt.id,
+                 _("The %s-related incoming annotations") % self.controller.get_title(rt) )
                 for rt in self.controller.package.relationTypes
                 ] + [
-                ('annotation/typedRelatedOut/%s' % rt.id, 
+                ('annotation/typedRelatedOut/%s' % rt.id,
                  _("The %s-related outgoing annotations") % self.controller.get_title(rt) )
                 for rt in self.controller.package.relationTypes  ]
         elif isinstance(self.parent, EditQuery):
-            predefined=[ 
+            predefined=[
                 ('element', _('The element')),
                 ('element/content/data', _("The element's content") ),
                 ('element/fragment', _('The element fragment') ),
@@ -1025,16 +1025,16 @@ class EditSubviewList(EditGeneric):
 
     def refresh(self):
         self.store.clear()
-        l=[ v 
-            for v in self.controller.package.views 
+        l=[ v
+            for v in self.controller.package.views
             if helper.get_view_type(v) == 'dynamic' ]
         for v in l:
-            
+
             self.store.append([ v,
                                 self.controller.get_title(v),
                                 v.id,
                                 v.id in self.model ])
-        
+
     def toggled_cb(self, renderer, path, model, column):
         model[path][column] = not model[path][column]
         return True

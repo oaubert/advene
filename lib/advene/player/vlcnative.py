@@ -120,7 +120,7 @@ class Player(object):
         pos.value = 0
         self.relative_position = pos
 
-        
+
         self.dvd_device = config.data.player['dvd-device']
 
         # Attributes updated by self.position_update

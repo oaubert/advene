@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,7 +30,7 @@ class AbstractFragment(viewable.Viewable.withClass('fragment')):
     #
     # Static methods
     #
-    
+
     class filter(object):
         """
         Return an iterator over all the _annotations_ having a fragment from this class.
@@ -44,7 +44,7 @@ class AbstractFragment(viewable.Viewable.withClass('fragment')):
         def __init__ (self, cls, annotations):
             """
             Constructor.
-            xFragment.filter () takes only the _annotations_ argument, since it is a 
+            xFragment.filter () takes only the _annotations_ argument, since it is a
             classmethod.
             """
             self.__cls = cls
@@ -75,7 +75,7 @@ class AbstractFragment(viewable.Viewable.withClass('fragment')):
 
 class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
     """Abstract Numerical Begin-End fragment class.
-    
+
        Implements operators '==' and 'in' (for other ByteCountFragments and
        numbers).
     """
@@ -90,7 +90,7 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
                        begin=None, end=None, duration=None):
         """Create a new ByteCount fragment, with a required begin
         value and facultative end or duration values"""
-        
+
         AbstractFragment.__init__(self)
         if element is None:
             element = _PseudoElement()
@@ -122,13 +122,13 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
 
     def getBegin(self):
         return long(self._getModel().getAttributeNS(None, 'begin'))
-    
+
     def setBegin(self, value):
         return self._getModel().setAttributeNS(None, 'begin', unicode(long(value)))
 
     def getEnd(self):
         return long(self._getModel().getAttributeNS(None, 'end'))
-    
+
     def setEnd(self, value):
         return self._getModel().setAttributeNS(None, 'end', unicode(long(value)))
 
@@ -186,7 +186,7 @@ class ByteCountFragment(AbstractNbeFragment):
     #
     # Static methods
     #
-    
+
     def getNamespaceUri():
         return adveneNS
     getNamespaceUri = staticmethod(getNamespaceUri)
@@ -211,7 +211,7 @@ class MillisecondFragment(AbstractNbeFragment):
     #
     # Static methods
     #
-    
+
     def getNamespaceUri():
         return adveneNS
     getNamespaceUri = staticmethod(getNamespaceUri)
@@ -226,16 +226,16 @@ class MillisecondFragment(AbstractNbeFragment):
 
     def format_time(self, val):
         """Formats a value (in milliseconds) into a time string.
-        
+
         @param val: the value
         @type val: int
         @return: the formatted string
         @rtype: string
-        """ 
+        """
         (s, ms) = divmod(long(val), 1000)
         # Format: HH:MM:SS.mmm
         return "%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(s)), ms)
-        
+
     def __str__(self):
         """Return a string representation of the Millisecond fragment"""
         return "Milliseconds (%s,%s)" % (self.format_time(self.getBegin()),
@@ -251,7 +251,7 @@ class __UnknownFragment(AbstractFragment):
 
     def __init__(self):
         AbstractFragment.__init__(self)
-    
+
     def __new__(cls, *args, **kw):
         """ Singleton implementation
         """
@@ -262,7 +262,7 @@ class __UnknownFragment(AbstractFragment):
 
     def __eq__(self, other):
         return 0
-    
+
     def __contains__(self, other):
         return 0
 
@@ -270,12 +270,12 @@ unknownFragment = __UnknownFragment()
 
 class __FragmentFactory(dict):
     """A fragment class manager.
-    
+
        Fragment classes are registered with the 'register' method.
        They are retrieved with the dict [] operator.
-       
+
        Fragment classes must verify the following:
-       
+
          - have a getNamespaceUri() static or class method
          - have a getLocalName() static or class method
          - have a getAttributes() static method returning a dict
@@ -310,12 +310,12 @@ fragmentFactory.register(MillisecondFragment)
 
 class _PseudoElement(dict):
     """This class is used to make models for unbounded fragments.
-    """    
+    """
     def __init__(self):
         dict.__init__({})
 
     def _get_ownerDocument(self): return None
-    
+
     def getAttributeNS(self, namespaceURI, localName):
         return self[(namespaceURI, localName)]
 

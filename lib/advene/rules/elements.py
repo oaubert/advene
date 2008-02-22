@@ -534,7 +534,7 @@ class SubviewList(list):
 
     It contains a list of *view ids* that are considered as subviews for a
     ruleset: their rule will be considered as part of the view.
-    
+
     We could store views themselves, but then we would depend on a
     controller when loading the XML representation.
     """
@@ -574,7 +574,7 @@ class SubviewList(list):
         """
         self.origin=origin
         rulenode=domelement
-        
+
         # FIXME: check the the rulenode tagname is 'subviewlist'
         self.name=rulenode.getAttribute('name')
         v=rulenode.getAttribute('value')
@@ -694,7 +694,7 @@ class RuleSet(list):
 
     def filter_subviews(self):
         """Remove subview instances from the RuleSet.
-        
+
         @return: list of removed SubviewList instances.
         """
         subviews=[ r for r in self if isinstance(r, SubviewList) ]
@@ -977,7 +977,7 @@ class Quicksearch:
 
         @return: the list of elements matching the query or a boolean
         """
-        return self.controller.search_string(searched=self.searched, 
+        return self.controller.search_string(searched=self.searched,
                                              source=self.source,
                                              case_sensitive=self.case_sensitive)
 

@@ -67,7 +67,7 @@ class Bookmarks(AdhocView):
     view_name = _("Bookmarks")
     view_id = 'bookmarks'
     tooltip= _("Bookmark timecodes with their corresponding screenshots")
-    def __init__(self, controller=None, parameters=None, 
+    def __init__(self, controller=None, parameters=None,
                  history=None, vertical=True, ordered=False, closable=True, display_comments=True):
         super(Bookmarks, self).__init__(controller=controller)
         self.close_on_package_load = False
@@ -107,7 +107,7 @@ class Bookmarks(AdhocView):
         self.refresh()
 
     def get_save_arguments(self):
-        return self.options, ([ ('timestamp', t) for t in self.history ] 
+        return self.options, ([ ('timestamp', t) for t in self.history ]
                               + [ ('comment', '%d:%s' % (t, c)) for (t, c) in self.comments.iteritems() ])
 
     def close(self, *p):
@@ -128,7 +128,7 @@ class Bookmarks(AdhocView):
 
     def convert_to_annotations(self, *p):
         """Convert bookmarks to annotations with a fixed duration.
-        """        
+        """
         at=self.controller.gui.ask_for_annotation_type(text=_("Select the annotation type to generate"), create=True)
 
         if at is None:
@@ -229,7 +229,7 @@ class Bookmarks(AdhocView):
             v.pack_start(i, expand=False)
             l=gtk.Label()
             v.pack_start(l, expand=False)
-            
+
             i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(t, epsilon=500), width=50))
             l.set_text(helper.format_time(t))
 
@@ -294,7 +294,7 @@ class Bookmarks(AdhocView):
                 print "Unknown target type for drop: %d" % targetType
             return False
 
-        b=get_small_stock_button(gtk.STOCK_DELETE)                                                 
+        b=get_small_stock_button(gtk.STOCK_DELETE)
         self.controller.gui.tooltips.set_tip(b, _("Drop a position here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
@@ -313,7 +313,7 @@ class Bookmarks(AdhocView):
             return True
 
         tb=gtk.Toolbar()
-        tb.set_style(gtk.TOOLBAR_ICONS)        
+        tb.set_style(gtk.TOOLBAR_ICONS)
         for icon, action, tip in (
             ('set-to-now.png', bookmark_current_time, _("Insert a bookmark for the current video time")),
             (gtk.STOCK_CONVERT, self.convert_to_annotations, _("Convert bookmarks to annotations")),

@@ -536,7 +536,7 @@ class Media(Common):
             return self.send_redirect("/application/")
 
     stbv.exposed=True
-        
+
 class Application(Common):
     """Handles X{/application} access requests.
 
@@ -1505,8 +1505,8 @@ class Packages(Common):
                     if isinstance(r, Resources):
                         parent=r
                     else:
-                        return self.send_error(501, (_("<h1>Error</h1><p>When creating resource %(path)s, the resource folder %(folder)s could not be created.</p>") % { 
-                                    'path': '/'.join(path), 
+                        return self.send_error(501, (_("<h1>Error</h1><p>When creating resource %(path)s, the resource folder %(folder)s could not be created.</p>") % {
+                                    'path': '/'.join(path),
                                     'folder': subpath[-1] }).encode('utf-8'))
             # We can create the resource in the parent ResourceFolder
             parent[attribute]=data
@@ -1526,7 +1526,7 @@ class Packages(Common):
             return _("Value successfuly updated")
         except Exception, e:
             return self.send_error(501, _("Unable to update the attribute %(attribute)s for element %(element)s: %(error)s." ) % { 'attribute': attribute, 'element': objet, 'error': e })
-        
+
     def handle_post_request(self, *args, **query):
         """Handle POST requests (update, create or delete).
 
@@ -1558,7 +1558,7 @@ class Packages(Common):
         a URL which will be redirected to upon successful creation or
         update.
 
-        Updating data 
+        Updating data
         =============
 
         The update of an element of the object addressed by the POSTed
@@ -1758,8 +1758,8 @@ class Packages(Common):
                             if isinstance(r, Resources):
                                 parent=r
                             else:
-                                return self.send_error(501, (_("<h1>Error</h1><p>When creating resource %(path)s, the resource folder %(folder)s could not be created.</p>") % { 
-                                            'path': '/'.join(path), 
+                                return self.send_error(501, (_("<h1>Error</h1><p>When creating resource %(path)s, the resource folder %(folder)s could not be created.</p>") % {
+                                            'path': '/'.join(path),
                                             'folder': subpath[-1] }).encode('utf-8'))
                     parent[attribute]=data
                     el=parent[attribute]
@@ -1804,7 +1804,7 @@ class Packages(Common):
                                            _("<p>Error while creating view %(id)s</p><pre>%(error)s</pre>") % {
                             'id': kw['ident'],
                             'error': unicode(e).encode('utf-8') })
-                
+
                 if 'redirect' in query and query['redirect']:
                     return self.send_redirect(query['redirect'])
                 return "".join( ( self.start_html(_("View created")),
@@ -1814,7 +1814,7 @@ class Packages(Common):
                  """) % { 'id': v.id,
                           'url': "/packages/%s/views/%s" % (self.controller.aliases[objet],
                                                             v.id) }) )
-            
+
             elif query['type'] == 'relation':
                 # Takes as parameters:
                 # id = identifier (optional)
@@ -2092,7 +2092,7 @@ class AdveneWebServer:
 
         self.urlbase = u"http://localhost:%d/" % port
 
-        app_config={             
+        app_config={
             '/favicon.ico': {
                 'tools.staticfile.on': True,
                 'tools.staticfile.filename': config.data.advenefile( ( 'pixmaps', 'advene.ico' ) ),

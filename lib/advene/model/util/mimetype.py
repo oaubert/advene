@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -47,25 +47,25 @@ class MimeType (object):
 
     def __ge__ (self, other):
         if not isinstance (other, MimeType):
-            raise MimeTypeException ('Can not compare mime type to %s' % 
+            raise MimeTypeException ('Can not compare mime type to %s' %
                                      repr (other))
         return other.isMoreSpecificThan (self)
 
     def __le__ (self, other):
         if not isinstance (other, MimeType):
-            raise MimeTypeException ('Can not compare mime type to %s' % 
+            raise MimeTypeException ('Can not compare mime type to %s' %
                                      repr (other))
         return self.isMoreSpecificThan (other)
 
     def __gt__ (self, other):
         if not isinstance (other, MimeType):
-            raise MimeTypeException ('Can not compare mime type to %s' % 
+            raise MimeTypeException ('Can not compare mime type to %s' %
                                      repr (other))
         return other.isMoreSpecificThan (self, strictly=True)
 
     def __lt__ (self, other):
         if not isinstance (other, MimeType):
-            raise MimeTypeException ('Can not compare mime type to %s' % 
+            raise MimeTypeException ('Can not compare mime type to %s' %
                                      repr (other))
         return self.isMoreSpecificThan (other, strictly=True)
 
@@ -92,7 +92,7 @@ class MimeType (object):
 
     def isMoreSpecificThan (self, other, strictly=False):
         if not isinstance (other, MimeType):
-            raise MimeTypeException ('Can not compare mime type to %s' % 
+            raise MimeTypeException ('Can not compare mime type to %s' %
                                      repr (other))
         return (
             (
@@ -109,7 +109,7 @@ class MimeType (object):
             )
         )
 
-        
+
 
     def checkType (type, exception=False):
         r = (

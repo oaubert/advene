@@ -141,7 +141,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
 
     def set_color(self, color=None):
         """Set a local color for the widget.
-        
+
         The local color will override the color that could be returned
         by the container's get_element_color method.
         """
@@ -291,11 +291,11 @@ class AnnotationWidget(GenericColorButtonWidget):
         except AttributeError:
             pass
         return True
-    
+
     def set_active(self, b):
         self.active=b
         self.update_widget()
-        
+
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         """Handle the drag-sent event.
         """
@@ -564,7 +564,7 @@ class TagWidget(GenericColorButtonWidget):
                                  gtk.DEST_DEFAULT_HIGHLIGHT |
                                  gtk.DEST_DEFAULT_ALL,
                                  config.data.drag_type['color'], gtk.gdk.ACTION_COPY)
-        
+
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         if targetType == config.data.target_type['tag']:
             selection.set(selection.target, 8, unicode(self.tag))
@@ -645,7 +645,7 @@ class TimestampMarkWidget(GenericColorButtonWidget):
             rgba=(1.0, 1.0, 1.0, self.alpha)
         context.set_source_rgba(*rgba)
         context.fill()
-        
+
         # Draw a playing mark
         context.set_source_rgba(0, 0, 0, .5)
         context.set_line_width(1)
@@ -698,7 +698,7 @@ class AnnotationRepresentation(gtk.Button):
         else:
             return False
         return True
-        
+
 
     def button_press_handler(self, widget, event, annotation):
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:

@@ -115,8 +115,8 @@ class Montage(AdhocView):
             return False
         def master_changed(sc):
             self.scale.set_all(self.scale.value,
-                               sc.lower, sc.upper, 
-                               sc.step_increment, sc.page_increment, 
+                               sc.lower, sc.upper,
+                               sc.step_increment, sc.page_increment,
                                sc.page_size)
             return False
 
@@ -168,7 +168,7 @@ class Montage(AdhocView):
                 menu.popup()
                 return True
             return False
-        
+
         w=AnnotationWidget(annotation=annotation, container=self)
         w.connect("drag_data_get", drag_sent)
         w.connect("button_press_event", button_press)
@@ -196,7 +196,7 @@ class Montage(AdhocView):
             self.append_dropzone(i+1)
             duration += a.annotation.fragment.duration
         self.mainbox.show_all()
-        
+
         self.duration=duration
         self.duration_label.set_text(helper.format_time(duration))
         return True
@@ -220,7 +220,7 @@ class Montage(AdhocView):
         w.active = active
         w.set_color(color)
         w.update_widget()
-        
+
     def set_annotation_active(self, annotation, active):
         for w in self.contents:
             if w.annotation == annotation:
@@ -310,17 +310,17 @@ class Montage(AdhocView):
             # even being taken into account (when going backwards),
             # because the controller videotime_action handling removes
             # actions that are before the current time.
-            self.controller.register_usertime_delayed_action(0, 
+            self.controller.register_usertime_delayed_action(0,
                                                              lambda c, b: self.controller.register_videotime_action(a.fragment.end, one_step))
             return True
-        
+
         self.controller.update_status('start', notify=False)
         self.controller.register_usertime_delayed_action(0, one_step)
-        
+
         return True
 
     def build_widget(self):
-        self.zoom_adjustment=gtk.Adjustment(value=1.0, lower=0.01, upper=2.0)        
+        self.zoom_adjustment=gtk.Adjustment(value=1.0, lower=0.01, upper=2.0)
 
         def zoom_adj_change(adj):
             # Update the value of self.scale accordingly
@@ -405,12 +405,12 @@ class Montage(AdhocView):
         b=gtk.ToolButton(stock_id=gtk.STOCK_ZOOM_IN)
         b.connect('clicked', zoom, .7)
         tb.insert(b, -1)
-        
+
         self.zoom_combobox=dialog.list_selector_widget(members=[
-                ( f, "%d%%" % long(100*f) ) 
-                for f in [ 
-                    (1.0 / pow(1.5, n)) for n in range(0, 10) 
-                    ] 
+                ( f, "%d%%" % long(100*f) )
+                for f in [
+                    (1.0 / pow(1.5, n)) for n in range(0, 10)
+                    ]
                 ],
                                                        entry=True,
                                                        callback=zoom_change)
@@ -445,7 +445,7 @@ class Montage(AdhocView):
         b.highlight=True
         b.connect('clicked', toggle_highlight)
         tb.insert(b, -1)
-        
+
         v.pack_start(tb, expand=False)
 
         self.mainbox=gtk.HBox()
@@ -475,7 +475,7 @@ class Montage(AdhocView):
                                    gtk.DEST_DEFAULT_HIGHLIGHT |
                                    gtk.DEST_DEFAULT_ALL,
                                    config.data.drag_type['annotation']
-                                   + config.data.drag_type['annotation-type'], 
+                                   + config.data.drag_type['annotation-type'],
                                    gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
         v.connect("drag_data_received", mainbox_drag_received)
 
@@ -490,7 +490,7 @@ class Montage(AdhocView):
         f=gtk.Frame(_("Inspector"))
         f.add(a.widget)
         v.add(f)
-        self.controller.gui.register_view (a)        
+        self.controller.gui.register_view (a)
         a.set_master_view(self)
         a.widget.show_all()
 

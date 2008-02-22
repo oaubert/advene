@@ -209,7 +209,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
 
     def on_get_value(self, node, column):
         def get_color(e):
-            if (isinstance(e, Annotation) or isinstance(e, Relation) 
+            if (isinstance(e, Annotation) or isinstance(e, Relation)
                 or isinstance(e, AnnotationType) or isinstance(e, RelationType)):
                 return self.controller.get_element_color(e)
             else:
@@ -397,14 +397,14 @@ class DetailedTreeModel(AdveneTreeModel):
         else:
             children = None
             if node == self.virtual['admin']:
-                children=sorted([ v 
+                children=sorted([ v
                                   for v in node.rootPackage.views
                                   if v.id.startswith('_') ],
                                 key=lambda e: (e.title or e.id).lower())
             else:
                 for t in ('static', 'dynamic', 'adhoc'):
                     if node == self.virtual[t]:
-                        children=sorted([ v 
+                        children=sorted([ v
                                           for v in node.rootPackage.views
                                           if not v.id.startswith('_')
                                           and helper.get_view_type(v) == t ],
@@ -452,7 +452,7 @@ class TreeWidget(AdhocView):
         #select.connect ("changed", self.debug_cb)
 
         cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_("Package View"), cell, 
+        column = gtk.TreeViewColumn(_("Package View"), cell,
                                     text=AdveneTreeModel.COLUMN_TITLE,
                                     cell_background=AdveneTreeModel.COLUMN_COLOR,
                                     )

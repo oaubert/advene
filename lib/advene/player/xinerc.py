@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -40,7 +40,7 @@ class RGBPicture:
         self.type=0
         self.data=""
         self.date=0
-        
+
 class XineException(Exception):
     pass
 
@@ -67,7 +67,7 @@ class PlayerLauncher:
         if not self.launcher.start ():
             raise Exception(_("Cannot start the player"))
         return
-    
+
     def init (self):
         """Initialize the player.
         """
@@ -100,7 +100,7 @@ class Player:
     InternalException       = XineException
 
     statusmapping={}
-    
+
     def __init__(self):
         map={ 'STOP': self.EndStatus,
               'PLAY': self.PlayingStatus,
@@ -158,7 +158,7 @@ class Player:
         @type position: long
         """
         print "xine update_status %s" % status
-        
+
         if status == "start" or status == "set":
             if position is None:
                 position=0
@@ -204,12 +204,12 @@ class Player:
         self.status = s.streamstatus
         self.stream_duration = s.length
         self.current_position_value = s.position
-    
+
     def send_command(self, command):
         #print "sending command %s" % command
         self.socket.send(command+"\n")
         return None
-    
+
     def get_command(self, command):
         """Send a command and return the one-line result."""
         self.send_command(command)
@@ -238,7 +238,7 @@ class Player:
     def set_media_position(self, position):
         # FIXME: convert from Position to int.
         self.send_command('seek %d' % (long(position) / 1000))
-    
+
     def start(self, position):
         self.send_command('play')
 
@@ -254,7 +254,7 @@ class Player:
     def exit(self):
         self.send_command('halt')
         return
-    
+
     def playlist_add_item(self, item):
         # FIXME: convert from dvd://dev/dvd to dvd:/
         i=item.replace(' ', '%20')
@@ -262,7 +262,7 @@ class Player:
 
     def playlist_clear(self):
         self.send_command('playlist delete all')
-        
+
     def playlist_get_list(self):
         l=self.get_multiline_command('playlist show')
         re=re.compile('\s+\d+\s+(.+)$')
@@ -281,7 +281,7 @@ class Player:
             print "Snapshot is in file %s" % sfile
             p=RGBPicture()
             # Dummy values, are not used except to test
-            # that their are non-zero 
+            # that their are non-zero
             p.width=42
             p.heigh=42
             p.type="PNG"
@@ -289,13 +289,13 @@ class Player:
             f=open(sfile,'r')
             p.data=f.read()
             f.close()
-            os.unlink(sfile)            
+            os.unlink(sfile)
             return p
         return None
 
     def all_snapshots(self):
         return [ self.snapshot(None) ]
-    
+
     def display_text (self, message, begin, end):
         print "Should caption %s" % message
         pass
@@ -314,7 +314,7 @@ class Player:
             if re.search(i) ]
         if len(v) == 1:
             s.url=v[0]
-            
+
         l=self.get_command('get length')
         number=re.compile('(\d+)')
         m=number.search(l)
@@ -322,7 +322,7 @@ class Player:
             s.length=long(m.group(1))
         else:
             s.length=0
-            
+
         p=self.get_command('get position')
         m=number.search(p)
         if m:
@@ -334,7 +334,7 @@ class Player:
         # XINE_STATUS_STOP
         #s.streamstatus=self.statusmapping[self.get_command('get status').strip()]
         s.streamstatus=self.PlayingStatus
-        
+
         return s
 
     def sound_get_volume(self):

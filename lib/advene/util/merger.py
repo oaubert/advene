@@ -46,12 +46,12 @@ class Differ:
 
     def diff(self):
         """Iterator returning a changelist.
-        
+
         Structure of returned elements:
         (action_name, source_element, dest_element, action)
         """
         for m in (self.diff_schemas,
-                  self.diff_annotation_types, 
+                  self.diff_annotation_types,
                   self.diff_relation_types,
                   self.diff_annotations,
                   self.diff_relations,
@@ -65,11 +65,11 @@ class Differ:
         ns=config.data.namespace_prefix[namespaceid]
         if s.getMetaData(ns, name) != d.getMetaData(ns, name):
             return ('update_meta_%s' % name,
-                    s, d, 
+                    s, d,
                     lambda s, d: self.update_meta(s, d, namespaceid, name) )
         else:
             return None
-        
+
     def update_meta(self, s, d, namespaceid, name):
         """Update the meta attribute name from the given namespace.
         """
@@ -77,7 +77,7 @@ class Differ:
         d.setMetaData(ns, name,
                       s.getMetaData(ns, name))
 
-        
+
     def diff_schemas(self):
         ids = dict([ (s.id, s) for s in self.destination.schemas ])
         self.source_ids['schemas']=ids
@@ -254,12 +254,12 @@ class Differ:
 
         def handle_dircmp(dc):
             for n in dc.left_only:
-                yield ('create_resource', 
-                       relative_path(sdir, dc.left, n), 
+                yield ('create_resource',
+                       relative_path(sdir, dc.left, n),
                        relative_path(ddir, dc.right, n), self.create_resource)
             for n in dc.diff_files:
                 yield ('update_resource',
-                       relative_path(sdir, dc.left, n), 
+                       relative_path(sdir, dc.left, n),
                        relative_path(ddir, dc.right, n), self.update_resource)
 
         for t in handle_dircmp(d):
@@ -354,7 +354,7 @@ class Differ:
         at=helper.get_id(self.destination.annotationTypes, s.type.id)
         if not at:
             # The annotation type does not exist. Create it.
-            at=self.copy_annotation_type(helper.get_id(self.source.annotationTypes, 
+            at=self.copy_annotation_type(helper.get_id(self.source.annotationTypes,
                                                        s.type.id))
         el=self.destination.createAnnotation(
             ident=id_,
@@ -371,7 +371,7 @@ class Differ:
         at=helper.get_id(self.destination.annotationTypes, s.type.id)
         if not at:
             # The annotation type does not exist. Create it.
-            at=self.copy_annotation_type(helper.get_id(self.source.annotationTypes, 
+            at=self.copy_annotation_type(helper.get_id(self.source.annotationTypes,
                                                        s.type.id))
         el=self.destination.createAnnotation(
             ident=s.id,
@@ -387,7 +387,7 @@ class Differ:
         rt=helper.get_id(self.destination.relationTypes, s.type.id)
         if not rt:
             # The annotation type does not exist. Create it.
-            rt=self.copy_relation_type(helper.get_id(self.source.relationTypes, 
+            rt=self.copy_relation_type(helper.get_id(self.source.relationTypes,
                                                      s.type.id))
         # Ensure that annotations exist
         members=[]
@@ -396,7 +396,7 @@ class Differ:
             i=sa.id
             if i in self.translated_ids:
                 i=self.translated_ids[i]
-                
+
             a=helper.get_id(self.destination.annotations, i)
             if not a:
                 a=self.copy_annotation(sa)

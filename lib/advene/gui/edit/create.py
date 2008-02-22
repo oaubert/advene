@@ -145,7 +145,7 @@ class CreateElementPopup(object):
                 members=[ (t, self.controller.get_title(t)) for t in type_list  ],
                 preselect=preselect)
             hbox.pack_start(d.type_combo)
-            
+
             d.vbox.add(hbox)
 
         d.show_all()

@@ -49,7 +49,7 @@ class Query(modeled.Importable, viewable.Viewable.withClass('query'),
                 # http://mail.python.org/pipermail/python-dev/2001-January/011794.html
                 ident = u"q" + unicode(id(self)) + unicode(time.clock()).replace('.','')
             self.setId(ident)
-            if author is not None: 
+            if author is not None:
                 self.setAuthor(author)
 
     # dom dependant methods

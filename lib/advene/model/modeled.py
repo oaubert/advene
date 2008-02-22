@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -29,7 +29,7 @@ from util.auto_properties import auto_properties
 
 class Modeled(object):
     """An implementation for objects being _views_ of a DOM element.
-    
+
        This DOM element is called the _model_ of the object.
        Every Modeled instance can also have a _parent_, which is, when not None,
        a Modeled instance whose model is the parent element of 'element'.
@@ -82,22 +82,22 @@ class Modeled(object):
 
     def _getChild(self, match=None, before=None, after=None):
         """Looks for the first Element child matching the parameters.
-        
+
         The meaning of each parameter follows (note that qname must be
         represented by a pair (ns_uri, local_name)).
-        
+
            - match: the qname of the searched element
                      or the element itself
            - before: the qname of the element to be found just afterwards
                      or the element to be found just beforehand
-           - after : the qname of the element to be found just 
+           - after : the qname of the element to be found just
                      or the element to be found just afterwards
-                     
+
         If no element is found matching, None is returned.
         """
         list_ = self._getModelChildren()
         length = len(list_)
-        
+
         for index in range(length):
             if match:
                 if not self.__match(list_[index], match):
@@ -163,10 +163,10 @@ class Importable(Modeled, _impl.Ided):
             uri = util.uri.urljoin(base_uri, href)
             pkg_uri = util.uri.no_fragment(uri)
 
-            imports = parent.getOwnerPackage().getImports() 
+            imports = parent.getOwnerPackage().getImports()
             if not imports.has_key(pkg_uri):
                 raise AdveneException(
-                         "Tried to use element from non imported package: %s" % 
+                         "Tried to use element from non imported package: %s" %
                          pkg_uri)
             pkg = imports.get(pkg_uri).getPackage()
             self.__access_path.append(pkg)
@@ -199,7 +199,7 @@ class Importable(Modeled, _impl.Ided):
         return self.__access_path[0]
 
     def getId(self):
-        plain_id = super(Importable, self).getId() 
+        plain_id = super(Importable, self).getId()
         if not self.isImported ():
             return plain_id
         else:
@@ -241,7 +241,7 @@ class Factory:
     Modeled subclasses. An actual factory class is produced with the static
     method Factory.of(cls).
 
-    Subclasses of Factory must have a _getDocument method returning a DOM 
+    Subclasses of Factory must have a _getDocument method returning a DOM
     document.
 
     Factored classes must have
@@ -304,7 +304,7 @@ class Factory:
                 if not isinstance (instance, theClass):
                     raise AdveneException, ("%s is not an instance of %s" %
                                             (instance, theClass.__name__))
-                e = self._make_import_element (instance) 
+                e = self._make_import_element (instance)
                 return theClass (parent=self, element=e)
 
             def _copy (self, instance, id):
@@ -315,7 +315,7 @@ class Factory:
                 if not isinstance (instance, theClass):
                     raise AdveneException, ("%s is not an instance of %s" %
                                             (instance, theClass.__name__))
-                e = self._make_copy_element (instance) 
+                e = self._make_copy_element (instance)
                 e.setAttributeNS (None, 'id', id)
                 return theClass (parent=self, element=e)
 

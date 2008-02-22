@@ -648,7 +648,7 @@ if __name__ == "__main__":
     ev=Evaluator(globals_=globals(), locals_=locals(),
                  historyfile=os.path.join(os.getenv('HOME'),
                                           '.pyeval.log'))
-    
+
     ev.locals_['self']=ev
     window=ev.popup()
 

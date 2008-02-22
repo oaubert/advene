@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -52,7 +52,7 @@ class ImageCache(dict):
 
     It interacts with the player to return annotation snapshots. It approximates
     key values to a given precision (20 by default).
-    
+
     @ivar not_yet_available_image: the image returned for not-yet-captured images
     @type not_yet_available_image: PNG data
     @ivar epsilon: the precision for key values
@@ -105,7 +105,7 @@ class ImageCache(dict):
         """
         if not dict.has_key (self, key):
             dict.__setitem__(self, key, self.not_yet_available_image)
-        
+
     def has_key (self, key):
         try:
             self.approximate(long(key))
@@ -113,10 +113,10 @@ class ImageCache(dict):
         except ValueError:
             return False
         return False
-    
+
     def __getitem__ (self, key):
         """Return a snapshot for the image corresponding to the position pos.
-        
+
         The snapshot can be ImageCache.not_yet_available_image.
 
         @param key: the key
@@ -129,7 +129,7 @@ class ImageCache(dict):
 
     def get(self, key, epsilon=None):
         """Return a snapshot for the image corresponding to the position pos.
-        
+
         The snapshot can be ImageCache.not_yet_available_image.
 
         @param key: the key
@@ -142,7 +142,7 @@ class ImageCache(dict):
 
     def __setitem__ (self, key, value):
         """Set the snapshot for the image corresponding to the position key.
-        
+
         @param key: the key
         @type key: long
         @param value: an image
@@ -171,14 +171,14 @@ class ImageCache(dict):
         """
         if dict.has_key(self, key):
             return key
-        
+
         if epsilon is None:
             epsilon=self.epsilon
         valids = [ (pos, abs(pos-key))
                    for pos in self.keys()
                    if abs(pos - key) <= epsilon ]
         valids.sort(key=operator.itemgetter(1))
-        
+
         if valids:
             key = valids[0][0]
 #            print "Approximate key: %d (%d)" % valids[0]
@@ -221,7 +221,7 @@ class ImageCache(dict):
 
     def is_initialized (self, key, epsilon=None):
         """Return True if the given key is initialized.
-        
+
         @return: True if the given key is initialized.
         @rtype: boolean
         """
@@ -232,7 +232,7 @@ class ImageCache(dict):
             return False
         else:
             return True
-        
+
     def save (self, name):
         """Save the content of the cache under a specified name (id).
 
@@ -253,7 +253,7 @@ class ImageCache(dict):
                 os.mkdir (directory)
 
         d = os.path.join (directory, name)
-        
+
         if not os.path.isdir (d):
             if os.path.exists (d):
                 # File exists, but is not a directory.
@@ -281,7 +281,7 @@ class ImageCache(dict):
         @type name: string
         """
         d = os.path.join (config.data.path['imagecache'], name)
-        
+
         if not os.path.isdir (d):
             # The cache directory does not exist
             return
@@ -312,6 +312,6 @@ class ImageCache(dict):
 
     def __str__ (self):
         return "ImageCache object (%d images)" % len(self)
-    
+
     def __repr__ (self):
         return "ImageCache object (%d images)" % len(self)

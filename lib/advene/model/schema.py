@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -61,7 +61,7 @@ class AbstractType(modeled.Importable,
 
 
     # contentv type implementation
-    
+
     def __get_content_type_element (self):
         return self._getChild (match=(adveneNS, 'content-type'))
 
@@ -72,7 +72,7 @@ class AbstractType(modeled.Importable,
         if cte is not None:
             return cte.getAttributeNS (None, 'mime-type')
         return None
-    
+
     def setMimetype (self, value):
         """Set the mime-type of this type's content-type. Create the content
         type if necessary. If value is None, remove the content-type. """
@@ -86,7 +86,7 @@ class AbstractType(modeled.Importable,
         else:
             if cte is not None:
                 self._getModel ().removeChild (cte)
-    
+
     def delMimetype (self):
         """Remove this annotation-type's content-type."""
         self.setMimetype (None)
@@ -111,7 +111,7 @@ class AbstractType(modeled.Importable,
             if cse is not None:
                 self.__content_schema = content.Content (self, cse)
         return self.__content_schema
-    
+
     def delContentSchema (self):
         cte = self.__get_content_type_element ()
         if cte is None:
@@ -130,7 +130,7 @@ class AbstractType(modeled.Importable,
         cse = self._getDocument ().createElementNS (adveneNS, 'content-schema')
         cte.appendChild (cse)
         self.getContentSchema ().setMimetype (mimetype)
-            
+
 
 class AnnotationType(AbstractType,
                      viewable.Viewable.withClass('annotation-type')):
@@ -167,12 +167,12 @@ class AnnotationType(AbstractType,
             AbstractType.__init__(self, parent, element,
                             parent.getOwnerPackage().getAnnotationTypes.im_func)
             self.setId(ident)
-            
+
 
     def __str__(self):
         """Return a nice string representation of the element"""
         return "AnnotationType <%s>" % self.getUri()
-    
+
     def create (self, fragment, **kw):
         """
         FIXME
@@ -180,7 +180,7 @@ class AnnotationType(AbstractType,
         pkg = self.getRootPackage ()
         a = pkg.createAnnotation (type=self, fragment=fragment, **kw)
         return a
-        
+
     # dom dependant methods
 
     def getNamespaceUri(): return adveneNS
@@ -275,7 +275,7 @@ class RelationType(AbstractType,
 
     def setHackedMemberTypes (self, membertypes):
         """Update the membertypes of a relationtype.
-        
+
         membertypes is a list of URIs
         """
         e = self._getChild((adveneNS, "member-types"))
@@ -336,7 +336,7 @@ class Schema(modeled.Importable,
          - giving it a DOM element (constructing from XML)
          - giving it ident (constructing from scratch)
         """
-        
+
         if element is not None:
             # should be mode 1, checking parameter consistency
             if ident is not None:
@@ -350,12 +350,12 @@ class Schema(modeled.Importable,
             element = doc.createElementNS(self.getNamespaceUri(),
                                           self.getLocalName())
             _impl.Ided._set_id (element, ident)
-            
+
             e = doc.createElementNS(self.getNamespaceUri(), "annotation-types")
             element.appendChild(e)
             e = doc.createElementNS(self.getNamespaceUri(), "relation-types")
             element.appendChild(e)
-        
+
         # common to mode 1 and mode 2
         modeled.Importable.__init__(self, element, parent,
                                     locator=parent.getSchemas.im_func)

@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -35,7 +35,7 @@ class StreamInformation:
         self.url=""
         self.position=0
         self.length=0
-        
+
 
 class VLCException(Exception):
     pass
@@ -70,14 +70,14 @@ class Player:
         "paused": PauseStatus,
         "playing": PlayingStatus,
         }
-    
+
     def __init__(self, hostname="localhost", port=8080):
         self.http = httplib.HTTP()
         self.http.connect(host=hostname, port=port)
         print "Thread %s" % str(thread.get_ident())
         print self.sound_get_volume()
         #print self.playlist_get_list()
-        
+
     def send_command(self, command):
         print "Sending %s" % command
         self.http.putrequest('GET', command)
@@ -87,7 +87,7 @@ class Player:
         if status != 200:
             print "Error: %s" % reason
         return None
-    
+
     def get_command(self, command):
         """Send a command and return the one-line result."""
         print "Sending %s" % command
@@ -121,7 +121,7 @@ class Player:
     def set_media_position(self, position):
         # FIXME: convert from Position to int.
         self.send_command('/?seek_value=%ds&control=seek' % (long(position) / 1000))
-    
+
     def start(self, position):
         self.send_command('/?control=play&item=0')
 
@@ -138,7 +138,7 @@ class Player:
         # FIXME: todo
         #self.send_command('/?control=shutdown')
         return
-    
+
     def playlist_add_item(self, item):
         # FIXME: convert from dvd://dev/dvd to dvd:/
         self.send_command('/?mrl=%s&control=add&sout=' % urllib.quote(item, safe=''))
@@ -146,7 +146,7 @@ class Player:
     def playlist_clear(self):
         # FIXME: todo
         self.send_command('/?control=del')
-        
+
     def playlist_get_list(self):
         l=self.get_multiline_command('/playlist.html')
         if l is None:
@@ -163,7 +163,7 @@ class Player:
     def all_snapshots(self):
         # FIXME: todo
         return [ ]
-    
+
     def display_text (self, message, begin, end):
         # FIXME: todo
         print "Not implemented yet"
@@ -224,7 +224,7 @@ class Player:
         @type position: long
         """
         print "vlchttp update_status %s" % status
-        
+
         if status == "start" or status == "set":
             if position is None:
                 position=0

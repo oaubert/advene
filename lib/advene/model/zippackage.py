@@ -20,27 +20,27 @@
 
   This format is a transition from the plain xml Advene package format
   to a richer format inspired by OpenDocument (zip file with data + metadata).
-  
+
   It is intented as a temporary measure before the complete rewrite of
   the Advene package format.
-  
+
   File extension: .azp (Advene Zip Package) which will be followed by
   .aod (Advene OpenDocument)
-  
+
   General layout::
-  
+
     foo.azp/
             mimetype
             content.xml
             resources/
             meta.xml (optional)
             META-INF/manifest.xml
-  
+
   Contents::
-  
+
     mimetype: application/x-advene-zip-package
     content.xml: the previous package.xml format
-    resources/: associated resources, 
+    resources/: associated resources,
                 available through the TALES expression /package/resources/...
     meta.xml: metadata (cf OpenDocument specification)
     META-INF/manifest.xml : Manifest (package contents)
@@ -73,11 +73,11 @@ ET._namespace_map[MANIFEST]='manifest'
 class ZipPackage:
     # Global method for cleaning up
     tempdir_list = []
-    
+
     def cleanup():
         """Remove the temp. directories used during the session.
 
-        No check is done to see wether it is in use or not. This 
+        No check is done to see wether it is in use or not. This
         method is intended to be used at the end of the application,
         to clean up the mess.
         """
@@ -141,8 +141,8 @@ class ZipPackage:
         """Return a tempfile name in the filesystem encoding.
 
         Try to deal appropriately with filesystem encodings:
-        
-        self._tempdir is a unicode string.  
+
+        self._tempdir is a unicode string.
 
         tempfile takes unicode parameters, and returns a path encoded
         in sys.getfilesystemencoding()
@@ -185,7 +185,7 @@ class ZipPackage:
         self._tempdir=unicode(tempfile.mkdtemp('', 'adv'), _fs_encoding)
         os.mkdir(self.tempfile(u'resources'))
         self.tempdir_list.append(self._tempdir)
-        
+
         # FIXME: check the portability (convert / to os.path.sep ?)
         for name in z.namelist():
             if name.endswith('/'):
@@ -214,7 +214,7 @@ class ZipPackage:
 
     def open(self, fname=None):
         """Open the given AZP file.
-        
+
         It can also be a directory name containing an expanded AZP tree.
 
         @param fname: the file name
@@ -315,17 +315,17 @@ class ZipPackage:
         f.write(p.generate_statistics().encode('utf-8'))
         f.close()
         return True
-        
+
     def list_to_manifest(self, manifest):
         """Generate the XML representation of the manifest.
-        
+
         @param manifest: the list of files
         @type manifest: list
         @return: the XML representation of the manifest
         @rtype: string
         """
         root=ET.Element(ET.QName(MANIFEST, 'manifest'))
-        ET.SubElement(root, ET.QName(MANIFEST, 'file-entry'),  { 
+        ET.SubElement(root, ET.QName(MANIFEST, 'file-entry'),  {
                 ET.QName(MANIFEST, 'full-path'): '/',
                 ET.QName(MANIFEST, 'media-type'): MIMETYPE,
                 })
@@ -335,7 +335,7 @@ class ZipPackage:
             (mimetype, encoding) = mimetypes.guess_type(f)
             if mimetype is None:
                 mimetype = 'text/plain'
-            ET.SubElement(root, ET.QName(MANIFEST, 'file-entry'),  { 
+            ET.SubElement(root, ET.QName(MANIFEST, 'file-entry'),  {
                     ET.QName(MANIFEST, 'full-path'): unicode(f),
                     ET.QName(MANIFEST, 'media-type'): unicode(mimetype),
                     })
@@ -357,7 +357,7 @@ class ZipPackage:
                 l.append( (e.attrib[ET.QName(MANIFEST, 'full-path')],
                            e.attrib[ET.QName(MANIFEST, 'media-type')]) )
         return l
-        
+
     def close(self):
         """Close the package and remove temporary files.
         """
@@ -367,7 +367,7 @@ class ZipPackage:
 
     def getResources(self, package=None):
         """Return the root resources object for the package.
-        
+
         @return: the root Resources object
         @rtype: Resources
         """

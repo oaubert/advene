@@ -38,9 +38,9 @@ def register(controller=None):
             description=_("Display a message"),
             parameters={'message': _("String to display.")},
             defaults={'message': 'annotation/content/data'},
-            predefined={'message': (  
+            predefined={'message': (
                     ( 'annotation/content/data', _("The annotation content") ),
-                    )},            
+                    )},
             category='popup',
             ))
 
@@ -52,7 +52,7 @@ def register(controller=None):
                         'duration': _("Display duration in ms. Ignored if empty.")},
             defaults={'message': 'annotation/content/data',
                       'duration': 'annotation/fragment/duration'},
-            predefined={'message': (  
+            predefined={'message': (
                     ( 'annotation/content/data', _("The annotation content") ),
                     ),
                         'duration': (
@@ -226,7 +226,7 @@ class DefaultGUIActions:
                     rulename=context.evaluateValue('rule')
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
-                self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename, 
+                self.controller.log(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
                                                                                                                           'parametername': name})
                 self.controller.log(unicode(e)[:160])
                 result=default_value
@@ -414,7 +414,7 @@ class DefaultGUIActions:
 
         self.gui.popupwidget.display(widget=vbox, timeout=duration, title=_("Navigation popup"))
         return True
-    
+
     def generate_action_popup_goton(self, size):
         def generate (context, parameters):
             """Display a popup with 'size' choices."""
@@ -457,10 +457,10 @@ class DefaultGUIActions:
     def action_popup_goto_predefined(self, controller):
         p=self.related_annotation_expressions(controller)
         p.append( ('annotation/fragment/begin', _('The beginning of the annotation')) )
-        p.append( ('annotation/fragment/end', _('The end of the annotation')) )        
+        p.append( ('annotation/fragment/end', _('The end of the annotation')) )
         return {
-            'description': ( 
-                ('annotation/content/data', _("The annotation content")), 
+            'description': (
+                ('annotation/content/data', _("The annotation content")),
                 ),
             'message': (),
             'position': p,
@@ -516,4 +516,4 @@ class DefaultGUIActions:
 
         self.gui.popupwidget.display(widget=vbox, timeout=annotation.fragment.duration, title=_("Relation navigation"))
         return True
-    
+

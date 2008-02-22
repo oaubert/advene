@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -55,7 +55,7 @@ def absolute_url(target, context):
                                     (target.getSchema().getId(), target.getId())
         elif isinstance(target, advene.model.view.View):
             return '/views/%s' % target.getId()
-        elif isinstance(target, (advene.model.resources.ResourceData, 
+        elif isinstance(target, (advene.model.resources.ResourceData,
                                  advene.model.resources.Resources) ):
             return '/resources/%s' % target.resourcepath
         else:
@@ -79,7 +79,7 @@ def absolute_url(target, context):
             else:
                 suffix.insert (0, name)
         #print "Generated %s" % path
-       
+
     if path is not None and context is not None:
         options = context.globals['options']
         if options.has_key('package_url'):
@@ -99,8 +99,8 @@ def isa (target, context):
     to the usual mime-type writing. The star ('*') character, however, is not
     supported. For example, if c1 has type 'text/*' and c2 has type
     'text/plain', the following will evaluate to True: c1/isa/text,
-    c2/isa/text, c1/isa/text/html; the following will of course evaluate to 
-    False: c2/isa/text/html.    
+    c2/isa/text, c1/isa/text/html; the following will of course evaluate to
+    False: c2/isa/text/html.
     """
     class my_dict (dict):
         def __init__ (self, values=None, default=False):
@@ -109,16 +109,16 @@ def isa (target, context):
             if values:
                 for k, v in values.iteritems():
                     self[k]=v
-                
+
         def has_key (self, key):
             return True
-        
+
         def __getitem__ (self, key):
             if dict.has_key (self, key):
                 return dict.__getitem__ (self, key)
             else:
                 return self.__default
-            
+
         def merge (self, dico):
             for k, v in dico.iteritems():
                 self[k]=v
@@ -127,8 +127,8 @@ def isa (target, context):
         viewable_class = target.getViewableClass()
     except AttributeError:
         return my_dict({'unknown':True})
-    
-    r = my_dict ({viewable_class:True}) 
+
+    r = my_dict ({viewable_class:True})
     if viewable_class == 'content':
         t1, t2 = target.getMimetype ().split ('/')
         vt1 = my_dict ({t2:True})
@@ -147,7 +147,7 @@ def isa (target, context):
         r.merge (list_dict)
 
     return r
-        
+
 def meta(target, context):
     """Access to meta attributes.
 
@@ -160,20 +160,20 @@ def meta(target, context):
 
     The use of this function is (assuming that here is a Metaed object):
     here/meta/dc/version
-    for example (where prefix 'dc' has been mapped to the Dublin Core 
+    for example (where prefix 'dc' has been mapped to the Dublin Core
     namespace URI in 'namespace_prefix'.
     """
-    
+
     import advene.model._impl
-        
+
     class MetaNameWrapper(object):
         def __init__(self, target, namespace_uri):
             self.__target = target
             self.__namespace_uri = namespace_uri
-    
+
         def has_key(self, key):
             return (self[key] is not None)
-    
+
         def __getitem__(self, key):
             return self.__target.getMetaData(self.__namespace_uri, key)
 
@@ -182,10 +182,10 @@ def meta(target, context):
             self.__target = target
             options = context.globals['options']
             self.__ns_dict = options.get('namespace_prefix', {})
-    
+
         def has_key(self, key):
             return key in self.__ns_dict
-    
+
         def __getitem__(self, key):
             if self.has_key(key):
                 return MetaNameWrapper(self.__target, self.__ns_dict[key])
@@ -194,7 +194,7 @@ def meta(target, context):
 
         def keys(self):
             return self.__ns_dict.keys()
-        
+
     if isinstance (target, advene.model._impl.Metaed):
         r = MetaNSWrapper (target, context)
         return r
@@ -230,7 +230,7 @@ def view(target, context):
 
         def __call__ (self):
             return self._target.view (context=self._context)
-    
+
         def has_key (self, key):
             v = self._target._find_named_view (key, self._context)
             return v is not None
@@ -273,7 +273,7 @@ def snapshot_url (target, context):
     """
     import advene.model.annotation
     import advene.model.fragment
-    
+
     begin=""
     p=None
     if isinstance(target, advene.model.annotation.Annotation):
@@ -327,7 +327,7 @@ def player_url (target, context):
 
 def formatted (target, context):
     """Return a formatted timestamp as hh:mm:ss.mmmm
-    
+
     This method applies to either integers (in this case, it directly
     returns the formated string), or to fragments. It returns a
     dictionary with begin, end and duration keys.
@@ -338,10 +338,10 @@ def formatted (target, context):
     if isinstance(target, int) or isinstance(target, long):
         return u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(target / 1000)),
                              target % 1000)
-    
+
     if not isinstance(target, advene.model.fragment.MillisecondFragment):
         return None
-    
+
     res = {
         'begin': u'--:--:--.---',
         'end'  : u'--:--:--.---',
@@ -349,7 +349,7 @@ def formatted (target, context):
         }
     for k in res.keys():
         t=getattr(target, k)
-        res[k] = u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)    
+        res[k] = u"%s.%03d" % (time.strftime("%H:%M:%S", time.gmtime(t / 1000)), t % 1000)
     return res
 
 def first (target, context):
@@ -384,7 +384,7 @@ def last (target, context):
 
 def rest (target, context):
     """Return all but the first items of target.
-    
+
     Return all elements of target but the first. =target= must obvioulsly be a
     list-like, sliceable object.
     """
@@ -396,7 +396,7 @@ def rest (target, context):
 
 def query(target, context):
     """Apply a query on target.
-    
+
     """
     class QueryWrapper (object):
 
@@ -559,7 +559,7 @@ def color(target, context):
     from advene.model.schema import AnnotationType, RelationType
     import re
 
-    if (isinstance(target, Annotation) or isinstance(target, Relation) 
+    if (isinstance(target, Annotation) or isinstance(target, Relation)
         or isinstance(target, AnnotationType) or isinstance(target, RelationType)):
         # The proper way would be
         # c=context.evaluateValue('options/controller')

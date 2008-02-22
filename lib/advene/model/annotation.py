@@ -70,7 +70,7 @@ class Annotation(modeled.Importable, content.WithContent,
         self.__fragment = None
 
         self._relations = [] # backrefs cache for relations
-        
+
         self._cached_type = type
 
         if element is not None:

@@ -264,7 +264,7 @@ def convert_time(s):
     return val
 
 def matching_relationtypes(package, typ1, typ2):
-    """Return a list of relationtypes that can be used to link annotations of type typ1 and typ2. 
+    """Return a list of relationtypes that can be used to link annotations of type typ1 and typ2.
 
     We use the id (i.e. the fragment part from the URI) to match.
     """

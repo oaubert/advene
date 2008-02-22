@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -56,7 +56,7 @@ except ImportError:
 
 class HandyXmlWrapper:
     """This class wraps an XML element to give it convenient attribute access.
-       
+
        Example::
 
          <element attr1='foo' attr2='bar'>
@@ -72,7 +72,7 @@ class HandyXmlWrapper:
         if hasattr(self.node, attr):
             return getattr(self.node, attr)
 
-        if attr[0:2] != '__':        
+        if attr[0:2] != '__':
             #print "Looking for "+attr, self.node, dir(self.node)
             if hasattr(self.node, 'hasAttribute'):
                 if self.node.hasAttribute(attr):

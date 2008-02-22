@@ -60,7 +60,7 @@ class RelationDisplay(AdhocView):
         if event == 'AnnotationEditEnd' and annotation in self.relation.members:
             self.refresh()
         return True
-        
+
     def update_relation(self, relation=None, event=None):
         if relation != self.relation:
             return True

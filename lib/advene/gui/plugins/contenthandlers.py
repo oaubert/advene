@@ -34,7 +34,7 @@ import advene.util.ElementTree as ET
 name="Default content handlers"
 
 def register(controller=None):
-    for c in (ZoneContentHandler, SVGContentHandler, 
+    for c in (ZoneContentHandler, SVGContentHandler,
               RuleSetContentHandler, SimpleQueryContentHandler):
         controller.register_content_handler(c)
 
@@ -269,7 +269,7 @@ class SVGContentHandler (ContentHandler):
             self.editing_source=False
             vbox.show_all()
             return True
-            
+
         def edit_xml(b):
             if self.sourceview is None:
                 self.sourceview=TextContentHandler(element=self.element,

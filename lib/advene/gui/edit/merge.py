@@ -89,14 +89,14 @@ class TreeViewMerger:
             sw = gtk.ScrolledWindow()
             sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
             v.add(sw)
-            
+
             tv=gtk.TextView()
             f=pango.FontDescription("courier 12")
             tv.modify_font(f)
-            
+
             b=tv.get_buffer()
 
-            
+
             minustag=b.create_tag("minus", background="lightsalmon")
             plustag=b.create_tag("plus", background="palegreen1")
 
@@ -114,7 +114,7 @@ class TreeViewMerger:
             b=gtk.Button(stock=gtk.STOCK_CLOSE)
             b.connect('clicked', lambda b: w.destroy())
             hb.add(b)
-            
+
             v.pack_start(hb, expand=False)
             w.add(v)
 
@@ -124,7 +124,7 @@ class TreeViewMerger:
 
         def build_popup_menu(l):
             menu=gtk.Menu()
-            
+
             name, s, d, action = l
 
             if name != 'new':
@@ -142,7 +142,7 @@ class TreeViewMerger:
                 i=gtk.MenuItem(_("Show diff"))
                 i.connect("activate", show_diff, l)
                 menu.append(i)
-                
+
             menu.show_all()
             return menu
 
@@ -266,7 +266,7 @@ class Merger:
         b.connect("clicked", select_all)
         self.buttonbox.add (b)
 
-        
+
         b = gtk.Button(_("None"))
         b.connect("clicked", unselect_all)
         self.buttonbox.add (b)

@@ -146,7 +146,7 @@ class Browser(AdhocView):
         self.contextual_actions = [
                     (_("Display result in table"), self.display_result),
                     ]
-        
+
         if element is None:
             element=controller.package
         self.element=element

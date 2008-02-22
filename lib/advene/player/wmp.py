@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -27,7 +27,7 @@ class StreamInformation:
         self.url=""
         self.position=0
         self.length=0
-        
+
 class PositionKeyNotSupported(Exception):
     pass
 
@@ -84,15 +84,15 @@ class Player:
         #self.player.AutoSize=1
         #self.player.ShowControls=0
         #self.player.autostart=0
-        
-        # MediaPlayer9: 
+
+        # MediaPlayer9:
         self.player=win32com.client.Dispatch('{6BF52A52-394A-11d3-B153-00C04F79FAA6}')
 
         self.player.uimode='none'
         #self.player.switchToPlayerApplication()
         self.player.switchToControl()
         self.player.settings.autostart=False
-        
+
 
         # MediaPlayer Core:
         #w=win32com.client.Dispatch('{09428D37-E0B9-11D2-B147-00C04F79FAA6}')
@@ -104,13 +104,13 @@ class Player:
 
     def set_media_position(self, position):
         # FIXME: convert from Position to int.
-        # 
+        #
         # // Seek to a frame using SMPTE time code.
         # Player.controls.currentPositionTimecode = "[00000]01:00:30.05";
         # current position is in s
         self.player.controls.currentposition=position / 1000.0
         return
-    
+
     def start(self, position):
         self.player.controls.play()
 
@@ -126,7 +126,7 @@ class Player:
     def exit(self):
         # FIXME
         return
-    
+
     def playlist_add_item(self, item):
         # FIXME: we maybe can use .URL
         # Note: convert from dvd://dev/dvd to
@@ -138,7 +138,7 @@ class Player:
     def playlist_clear(self):
         self.player.url=""
         return
-        
+
     def playlist_get_list(self):
         # Could use self.player.playlist property
         return [ self.player.url ]
@@ -150,12 +150,12 @@ class Player:
     def all_snapshots(self):
         # FIXME
         pass
-    
+
     def display_text (self, message, begin, end):
         # Use self.closedCaption object and generate SAMI captions
         # http://msdn.microsoft.com/library/en-us/wmplay/mmp_sdk/playerclosedcaption.asp?frame=true
         # Maybe use a UTBV to generate SAMI because we must give a SMI URL
-        
+
         pass
 
     def get_stream_information(self):
@@ -172,7 +172,7 @@ class Player:
             # For status list:
             # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmplay/mmp_sdk/playercurrentplaylist.asp
             s.streamstatus=self.statusmapping[self.player.playstate]
-        
+
     def sound_get_volume(self):
         # FIXME: Normalize volume to be in [0..255]
         return self.player.settings.volume
@@ -181,5 +181,5 @@ class Player:
         # FIXME: Normalize volume to be in [0..255]
         self.player.settings.volume=v
 
-        
-        
+
+

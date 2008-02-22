@@ -86,7 +86,7 @@ class Completer:
         self.widget.show_all()
         self.position_window(width, height)
         self.is_visible=True
-        
+
     def get_cursor_rectangle(self):
         b=self.textview.get_buffer()
         cursor_iterator=b.get_iter_at_mark(b.get_insert())
@@ -165,7 +165,7 @@ class Completer:
         word_start=cursor_position.copy()
         word_start.backward_word_start()
         return word_start.get_text(cursor_position)
-        
+
     def insert_word_completion(self, path):
         """Insert item selected in the completion window into the text editor's
         buffer.
@@ -211,9 +211,9 @@ class Completer:
             return False
 
         if event.keyval in (gtk.keysyms.Tab, gtk.keysyms.Right, gtk.keysyms.Left,
-                            gtk.keysyms.Home, gtk.keysyms.End, gtk.keysyms.Insert, 
+                            gtk.keysyms.Home, gtk.keysyms.End, gtk.keysyms.Insert,
                             gtk.keysyms.Delete,
-                            gtk.keysyms.Page_Up, gtk.keysyms.Page_Down, 
+                            gtk.keysyms.Page_Up, gtk.keysyms.Page_Down,
                             gtk.keysyms.Escape):
             self.hide_completion_window()
             return True
@@ -287,7 +287,7 @@ class Completer:
 
         style = self.textview.get_style()
         color = style.base[gtk.STATE_SELECTED]
-        self.treeview.modify_base(gtk.STATE_ACTIVE, color)        
+        self.treeview.modify_base(gtk.STATE_ACTIVE, color)
 
         scroll=gtk.ScrolledWindow()
         scroll.add(self.treeview)
@@ -406,7 +406,7 @@ if __name__ == "__main__":
                     controller=None,
                     element=t.get_buffer(),
                     indexer=i)
-    
+
     window.add (t)
     window.show_all()
     gtk.main ()

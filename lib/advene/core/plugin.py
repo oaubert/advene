@@ -34,7 +34,7 @@ class PluginCollection(list):
     """
     def __init__(self, directory, prefix="plugins"):
         """Loads available plugins from directory.
-        
+
         @param directory: the plugins directory
         @type directory: string (path)
         """
@@ -93,7 +93,7 @@ class Plugin(object):
         def get_classes():
             """Return the classes defined in the module.
             """
-            l=[ getattr(self._plugin, n) 
+            l=[ getattr(self._plugin, n)
                 for n in dir(self._plugin) ]
             return [ c for c in l if inspect.isclass(c) ]
 

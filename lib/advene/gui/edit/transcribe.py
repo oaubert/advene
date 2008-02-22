@@ -200,8 +200,8 @@ class TranscriptionEdit(AdhocView):
         self.textview.get_buffer().create_tag("ignored", strikethrough=True)
 
         # Hook the completer component
-        completer=Completer(textview=self.textview, 
-                            controller=self.controller, 
+        completer=Completer(textview=self.textview,
+                            controller=self.controller,
                             element=self.textview.get_buffer(),
                             indexer=self.controller.package._indexer)
 
@@ -227,7 +227,7 @@ class TranscriptionEdit(AdhocView):
         close_button=get_pixmap_button('small_close.png', hide_searchbox)
         close_button.set_relief(gtk.RELIEF_NONE)
         self.searchbox.pack_start(close_button, expand=False, fill=False)
-        
+
         def search_entry_cb(e):
             self.highlight_search_forward(e.get_text())
             return True
@@ -254,7 +254,7 @@ class TranscriptionEdit(AdhocView):
 
         self.searchbox.set_no_show_all(True)
         vbox.pack_start(self.searchbox, expand=False)
-        
+
         self.statusbar=gtk.Statusbar()
         self.statusbar.set_has_resize_grip(False)
         vbox.pack_start(self.statusbar, expand=False)
@@ -300,7 +300,7 @@ class TranscriptionEdit(AdhocView):
         else:
             t=gtk.gdk._2BUTTON_PRESS
         if not (event.button == 1 and event.type == t):
-            return False            
+            return False
         textwin=textview.get_window(gtk.TEXT_WINDOW_TEXT)
 
         if event.window != textwin:
@@ -771,7 +771,7 @@ class TranscriptionEdit(AdhocView):
                     fname=filename
                 f=urllib.urlopen(fname)
             except IOError, e:
-                self.message(_("Cannot open %(filename)s: %(error)s") % {'filename': filename, 
+                self.message(_("Cannot open %(filename)s: %(error)s") % {'filename': filename,
                                                                          'error': unicode(e) })
                 return
             lines="".join(f.readlines())
@@ -934,7 +934,7 @@ class TranscriptionEdit(AdhocView):
         empty_contents_toggle=gtk.CheckButton(_("Generate annotations for empty contents"))
         empty_contents_toggle.set_active(self.options['empty-annotations'])
         d.vbox.pack_start(empty_contents_toggle, expand=False)
-        
+
         d.connect("key_press_event", dialog.dialog_keypressed_cb)
 
         d.show_all()
@@ -945,7 +945,7 @@ class TranscriptionEdit(AdhocView):
             res=d.run()
             if res == gtk.RESPONSE_OK:
                 at=type_selection.get_current_element()
-                if at == newat:                    
+                if at == newat:
                     new_type_title=new_title.get_text()
                     if new_type_title == '':
                         # Empty title. Generate one.
@@ -998,7 +998,7 @@ class TranscriptionEdit(AdhocView):
             # Feedback
             dialog.message_dialog(
                 _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
-            
+
         return True
 
     def get_toolbar(self):
@@ -1034,7 +1034,7 @@ class TranscriptionEdit(AdhocView):
         def handle_toggle(t, option_name):
             self.options[option_name]=t.get_active()
             return True
-            
+
         b=gtk.ToggleToolButton(stock_id=gtk.STOCK_JUMP_TO)
         b.set_active(self.options['autoscroll'])
         b.set_tooltip(self.tooltips, _("Automatically scroll to the mark position when playing"))
@@ -1087,7 +1087,7 @@ class TranscriptionEdit(AdhocView):
                 self.goto_previous_mark()
                 return True
         elif self.options['autoinsert'] and self.options['automatic-mark-insertion-delay']:
-            if (gtk.gdk.keyval_to_unicode(event.keyval) 
+            if (gtk.gdk.keyval_to_unicode(event.keyval)
                 and event.keyval != gtk.keysyms.space
                 and (event.time - self.last_keypress_time >= self.options['automatic-mark-insertion-delay'])):
                 # Insert a mark if the user pressed a character key, except space

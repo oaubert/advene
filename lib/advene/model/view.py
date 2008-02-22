@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -49,7 +49,7 @@ class _match_filter_dict (dict):
     __classes_w_types = (__classes_w_uri_types
                        + __classes_w_mime_types
                        + ('list',))
- 
+
     def __init__ (self, view):
         sup = super (_match_filter_dict, self)
         sup.__init__ ()
@@ -123,7 +123,7 @@ class _match_filter_dict (dict):
                 super (_match_filter_dict, self).__setitem__ ('type',v_type)
             # resolve relative URIs
             elif v_type != '*' and v_class in self.__classes_w_uri_types:
-                pkg_uri =self.view.getOwnerPackage ().getUri (absolute=True) 
+                pkg_uri =self.view.getOwnerPackage ().getUri (absolute=True)
                 v_type = util.uri.urljoin (pkg_uri, v_type)
                 super (_match_filter_dict, self).__setitem__ ('type', v_type)
 
@@ -147,7 +147,7 @@ class View(modeled.Importable, content.WithContent,
     """
     An advene View.
     """
-    
+
     __metaclass__ = auto_properties
 
     def __init__(self,                   # mode 1 & 2
@@ -235,7 +235,7 @@ class View(modeled.Importable, content.WithContent,
 
             if content_mimetype is None: content_mimetype = 'text/html'
             self.getContent().setMimetype(content_mimetype)
-            
+
 
     # dom dependant methods
 
@@ -274,12 +274,12 @@ class View(modeled.Importable, content.WithContent,
         return True
 
     def isMoreSpecificThan(self, view):
-        
-        mf1 = self.getMatchFilter() 
+
+        mf1 = self.getMatchFilter()
         v_class1 = mf1['class']
         v_type1 = mf1.get ('type', None)
 
-        mf2 = view.getMatchFilter() 
+        mf2 = view.getMatchFilter()
         v_class2 = mf2['class']
         v_type2 = mf2.get ('type', None)
 

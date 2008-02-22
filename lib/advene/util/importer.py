@@ -191,8 +191,8 @@ class GenericImporter(object):
             s=self.create_schema(id_='s_converted', title='Converted types')
         self.defaulttype=self.create_annotation_type(s, atid, title="Converted data")
         return self.defaulttype
-            
-    def create_annotation_type (self, schema, id_, author=None, date=None, title=None, 
+
+    def create_annotation_type (self, schema, id_, author=None, date=None, title=None,
                                 representation=None, description=None, mimetype=None):
         l=[ t.id for t in schema.annotationTypes if t.id == id_ ]
         if l:
@@ -937,7 +937,7 @@ class PraatImporter(GenericImporter):
         if self.package is None:
             self.package=Package(uri='new_pkg', source=None)
 
-        self.schema=self.create_schema('praat', 
+        self.schema=self.create_schema('praat',
                                        title="PRAAT converted schema")
         self.convert(self.iterator(f))
         self.progress(1.0)
@@ -1011,7 +1011,7 @@ class CmmlImporter(GenericImporter):
 
         progress=0.5
         incr=0.5 / len(cm.clip)
-        
+
         for clip in cm.clip:
             self.progress(progress, _("Parsing clip information"))
             progress += incr
@@ -1316,12 +1316,12 @@ class IRIImporter(GenericImporter):
             self.package.author = meta['contributor'] or self.author
         except KeyError:
             pass
-            
+
         self.convert(self.iterator(iri))
         if self.duration != 0:
             if not self.package.getMetaData(config.data.namespace, "duration"):
                 self.package.setMetaData (config.data.namespace, "duration", str(self.duration))
-            
+
         self.progress(1.0)
         return self.package
 register(IRIImporter)
@@ -1344,8 +1344,8 @@ class IRIDataImporter(GenericImporter):
     def iterator(self, soundroot):
         progress = .1
         self.progress(progress, _("Parsing sound values"))
-        data=[ float(value.attrib['c1max']) 
-            for value in soundroot 
+        data=[ float(value.attrib['c1max'])
+            for value in soundroot
             if value.tag == 'value' ]
         m=max(data)
         # sample is the length of each sample in ms

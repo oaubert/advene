@@ -66,7 +66,7 @@ class PelletResult (object):
                 l = l[cl+2:]
             r.append (row)
         return r
- 
+
 if __name__ == "__main__":
     import sys
     r = PelletResult (sys.stdin)

@@ -27,24 +27,24 @@ FIXME:
 - Win32: directdrawsink implements the X Overlay interface then you
   can use it to setup your video window or to receive a signal when
   directdrawsink will create the default one.
-- TODO: investigate SVG support. Maybe through gdkpixbufdec: 
+- TODO: investigate SVG support. Maybe through gdkpixbufdec:
 gst-launch videotestsrc ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink filesrc location=/tmp/a.jpg ! gdkpixbufdec ! ffmpegcolorspace ! mix.
 
 For set_rate:
 > If you only want to change the rate without changing the seek
         > positions, use GST_SEEK_TYPE_NONE/GST_CLOCK_TIME_NONE for the start
         > position also.
-        
+
         Actually, this will generally cause some strangeness in the seeking,
         because the fast-forward will begin from the position that the SOURCE of
-        the pipeline has reached. Due to buffering after the decoders, this is 
+        the pipeline has reached. Due to buffering after the decoders, this is
         not the position that the user is seeing on the screen, so their
         trick-mode operation will commence with a jump in the position.
-        
+
         What you want to do is query the current position of the playback, and
-        use that with GST_SEEK_TYPE_SET to begin the trickmode from the exact 
+        use that with GST_SEEK_TYPE_SET to begin the trickmode from the exact
         position you want.
-        
+
 Caps negotiation: http://gstreamer.freedesktop.org/data/doc/gstreamer/head/pwg/html/section-nego-upstream.html
 """
 
@@ -157,7 +157,7 @@ class Player:
         # Snapshot format conversion infrastructure.
         self.converter=gst.parse_launch('fakesrc name=src ! queue name=queue ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=%d ! pngenc ! fakesink name=sink signal-handoffs=true' % config.data.player['snapshot-dimensions'][0])
         self.converter._lock = Condition()
-        
+
         self.converter.queue=self.converter.get_by_name('queue')
         self.converter.sink=self.converter.get_by_name('sink')
 
@@ -168,10 +168,10 @@ class Player:
             c._lock.notify()
             c._lock.release()
             return True
-        
+
         self.converter.sink.connect('handoff', converter_cb)
         self.converter.set_state(gst.STATE_PLAYING)
-        
+
     def build_pipeline(self):
         sink='xvimagesink'
         if config.data.player['vout'] == 'x11':
@@ -343,7 +343,7 @@ class Player:
             b=self.player.props.frame.copy()
         except SystemError:
             return None
-        
+
         f=self.convert_snapshot(b)
         t=f.timestamp / gst.MSECOND
 

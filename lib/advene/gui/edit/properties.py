@@ -218,7 +218,7 @@ class EditWidget(gtk.VBox):
 
     def add_entry_button(self, label, property, help, button_label, callback):
         """Text entry with an action button.
-        
+
         The callback function has the following signature:
         callback(button, entry)
         """

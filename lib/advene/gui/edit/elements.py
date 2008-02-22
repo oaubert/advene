@@ -397,7 +397,7 @@ class EditAnnotationPopup (EditElementPopup):
         # FIXME: cmp usually returns -1, 0, 1 but its definition only
         # states that the value is positive or negative. Thus this may
         # not work in all cases.
-        l=[a 
+        l=[a
            for a in self.element.type.annotations
            if cmp(a.fragment.begin, self.element.fragment.begin) == direction ]
         l.sort(key=lambda a: a.fragment.begin, reverse=(direction == -1))
@@ -411,7 +411,7 @@ class EditAnnotationPopup (EditElementPopup):
             # Validate the current one
             self.validate_cb()
         return True
-            
+
     def make_widget (self, editable=True, compact=False):
         vbox = gtk.VBox ()
 
@@ -474,7 +474,7 @@ class EditAnnotationPopup (EditElementPopup):
             self.controller.gui.tooltips.set_tip(b, label)
             self.controller.notify(event, annotation=ann)
             return True
-        
+
         b=get_pixmap_button('highlight.png', toggle_highlight, self.element)
         b.highlight=True
         hb.pack_start(b, expand=False)
@@ -645,7 +645,7 @@ class EditPackagePopup (EditElementPopup):
     def notify(self, element):
         # Side effect of the notify method: we use it to update the
         # appropriate attributes of the package.
-        self.controller.set_default_media(element.getMetaData (config.data.namespace, "mediafile"), 
+        self.controller.set_default_media(element.getMetaData (config.data.namespace, "mediafile"),
                                           package=element)
         d=element.getMetaData (config.data.namespace, "duration")
         if d:
@@ -1144,7 +1144,7 @@ class TextContentHandler (ContentHandler):
 
     def refresh(self):
         self.view.get_buffer().set_text(self.element.data)
-        
+
     def update_element (self):
         """Update the element fields according to the values in the view."""
         if not self.editable:
@@ -1195,7 +1195,7 @@ class TextContentHandler (ContentHandler):
         b.delete(*b.get_bounds ())
         b.set_text(c)
         return True
-        
+
     def content_reload(self, b=None):
         self.content_open(fname=self.fname)
         return True
@@ -1219,7 +1219,7 @@ class TextContentHandler (ContentHandler):
                 # Fallback on latin1, which is very common, but may
                 # sometimes fail
                 data=unicode(lines, 'latin1')
-                
+
             self.content_set(data.encode('utf-8'))
             self.fname=fname
         return True
@@ -1333,8 +1333,8 @@ class TextContentHandler (ContentHandler):
         self.view = textview
 
         # Hook the completer component
-        completer=Completer(textview=self.view, 
-                            controller=self.controller, 
+        completer=Completer(textview=self.view,
+                            controller=self.controller,
                             element=self.parent,
                             indexer=self.parent.rootPackage._indexer)
 
@@ -1528,7 +1528,7 @@ class EditFragmentForm(EditForm):
         self.begin.update_display()
         self.end.value=self.element.end
         self.end.update_display()
-        
+
     def update_element(self):
         if not self.editable:
             return False
@@ -1690,7 +1690,7 @@ class EditAttributesForm (EditForm):
 
     def attribute_type (self, at):
         """Return the type of the attribute.
-        
+
         Current values: 'int', 'advene' (advene element)
         """
         typ = None
@@ -2064,7 +2064,7 @@ class EditRelationsForm(EditForm):
             a=AnnotationRepresentation(other, controller=self.controller)
             self.view.attach(a, 1, 2, i, i + 1)
         self.view.show_all()
-        return 
+        return
 
     def update_element(self):
         if not self.editable:

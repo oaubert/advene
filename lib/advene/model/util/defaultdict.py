@@ -8,7 +8,7 @@ class DefaultDict(dict):
         self.default = default
 
     def __getitem__(self, key):
-        if key in self: 
+        if key in self:
             return self.get(key)
         else:
             ## Need copy in case self.default is something like []

@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -96,7 +96,7 @@ class TALESEntry:
 
     def get_text(self):
         return self.text2tales(self.combo.get_current_element())
-    
+
     def set_editable(self, b):
         self.editable=b
         self.entry.set_editable(b)
@@ -118,7 +118,7 @@ class TALESEntry:
         if expr is None:
             expr=self.combo.get_current_element()
         return advene.util.helper.is_valid_tales(self.text2tales(expr))
-    
+
     def build_widget(self):
         hbox=gtk.HBox()
 
@@ -139,21 +139,21 @@ class TALESEntry:
             b=gtk.Button(stock=gtk.STOCK_FIND)
             b.connect("clicked", self.browse_expression)
             hbox.pack_start(b, expand=False)
-        
+
         hbox.show_all()
         return hbox
-        
+
     def browse_expression(self, b):
         """Launch the Browser.
         """
-        # FIXME: display initial value in browser        
+        # FIXME: display initial value in browser
         def callback(e):
             if e is not None:
                 self.entry.set_text(self.tales2text(e))
             return True
 
         browser = Browser(controller=self.controller,
-                          element=self.context, 
+                          element=self.context,
                           callback=callback)
         browser.popup()
         return True

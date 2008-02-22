@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -64,7 +64,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
     provides factory methods to create attached annotations, views, ..."""
 
     __metaclass__ = auto_properties
-    
+
     def __init__(self, uri, source=_get_from_uri, importer=None):
         """Calling the constructor with just a URI tries to read the package
            from this URI. This can be overidden by providing explicitly the
@@ -100,7 +100,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                     # Advene Zip Package. Do some magic.
                     self.__zip = ZipPackage(abs_uri)
                     f=urllib.pathname2url(self.__zip.getContentsFile())
-                    element = reader.fromUri("file://" + f)._get_documentElement()    
+                    element = reader.fromUri("file://" + f)._get_documentElement()
                 else:
                     element = reader.fromUri(abs_uri)._get_documentElement()
             elif hasattr(source, 'read'):
@@ -119,7 +119,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                     # Advene Zip Package. Do some magic.
                     self.__zip = ZipPackage(source_uri)
                     f=urllib.pathname2url(self.__zip.getContentsFile())
-                    element = reader.fromUri("file://" + f)._get_documentElement()    
+                    element = reader.fromUri("file://" + f)._get_documentElement()
                 else:
                     element = reader.fromUri(source_uri)._get_documentElement()
 
@@ -181,7 +181,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             return self.__importer.getRootPackage()
         else:
             return self
-           
+
     def getUri(self, absolute=True, context=None):
         """
         Return the URI of the package.
@@ -205,11 +205,11 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         importer = self.__importer
         if importer is not None:
             uri = util.uri.urljoin (importer.getUri (absolute, context), uri)
-            
+
         if absolute:
             base_uri = 'file:%s/' % urllib.pathname2url (os.getcwd ())
             uri = util.uri.urljoin(base_uri, uri)
-            
+
         return uri
 
     def getImports (self):
@@ -305,11 +305,11 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             out += u"""<statistics:item name="%s" value="%d" />""" % (n, l)
         out += u"""</statistics:statistics>"""
         return out
-    
+
     def serialize(self, stream=sys.stdout):
         """Serialize the Package on the specified stream"""
         xml.dom.ext.PrettyPrint(self._getModel(), stream)
-    
+
     def save(self, name=None):
         """Save the Package in the specified file"""
         if name is None:
@@ -321,7 +321,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             # Windows drive: notation. Convert it from
             # a more URI-compatible syntax
             name=urllib.url2pathname(name)
-            
+
         # handle .azp files.
         if name.lower().endswith('.azp') or name.endswith('/'):
             # AZP format
@@ -331,11 +331,11 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                 z.new()
                 self.__zip = z
 
-            # Save the content.xml 
+            # Save the content.xml
             stream = open (self.__zip.getContentsFile(), "w")
             self.serialize(stream)
             stream.close ()
-            
+
             # Generate the statistics
             self.__zip.update_statistics(self)
 
@@ -455,7 +455,7 @@ class Import(modeled.Modeled, _impl.Ased):
                     break
                 except:
                     pass
-                
+
             if cached is None:
                 cached = Package(uri, importer=self._getParent())
             # NB: creating the package with parameter 'importer' DOES put it
@@ -464,7 +464,7 @@ class Import(modeled.Modeled, _impl.Ased):
 
     def getId(self):
         """
-        The 'as' attribute is used as the import's ID, including when 
+        The 'as' attribute is used as the import's ID, including when
         populating bundle.
         """
         return self.getAs()
@@ -476,7 +476,7 @@ class StatisticsHandler(xml.sax.handler.ContentHandler):
         # Data will contain parsed elements:
         # title, description, view, schema...
         self.data={}
- 
+
     def startElement(self, name, attributes):
         if name == "statistics:title":
             self.data['title']=urllib.unquote(attributes['value'])
@@ -484,7 +484,7 @@ class StatisticsHandler(xml.sax.handler.ContentHandler):
             self.data['description']=urllib.unquote(attributes['value'])
         elif name == 'statistics:item':
             self.data[attributes['name']]=int(attributes['value'])
-    
+
     def parse_file(self, name):
         p=xml.sax.make_parser()
         p.setFeature(xml.sax.handler.feature_namespaces, False)

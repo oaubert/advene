@@ -108,7 +108,7 @@ class FinderColumn:
             return "FIXME"
         return self.node[self.COLUMN_TITLE]
     name=property(fget=get_name, doc="Displayed name for the element")
-            
+
     def update(self, node=None):
         self.node=node
         return True
@@ -138,9 +138,9 @@ class ModelColumn(FinderColumn):
                 return "(%d) %s" % (len(el.relations), c[DetailedTreeModel.COLUMN_TITLE])
             else:
                 return c[DetailedTreeModel.COLUMN_TITLE]
-            
+
         return [ (title(c),
-                  c, 
+                  c,
                   c[DetailedTreeModel.COLUMN_COLOR]) for c in self.node.iterchildren() ]
 
     def get_focus(self):
@@ -166,7 +166,7 @@ class ModelColumn(FinderColumn):
 
         if self.next is not None:
             # There is a next column. Should we still display it ?
-            if not [ r 
+            if not [ r
                      for r in self.liststore
                      if r[self.COLUMN_NODE] == self.next.node ]:
                 # The next node is no more in the current elements.
@@ -233,8 +233,8 @@ class ModelColumn(FinderColumn):
         self.liststore = self.get_liststore()
         self.listview = gtk.TreeView(self.liststore)
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Attributes", renderer, 
-                                    text=self.COLUMN_TITLE, 
+        column = gtk.TreeViewColumn("Attributes", renderer,
+                                    text=self.COLUMN_TITLE,
                                     cell_background=self.COLUMN_COLOR)
         column.set_widget(gtk.Label())
         self.listview.append_column(column)
@@ -298,7 +298,7 @@ class ViewColumn(FinderColumn):
         self.label['title'].set_markup(_("View <b>%(title)s</b>\nId: %(id)s") % {
                 'title': self.controller.get_title(self.element),
                 'id': self.element.id })
-        
+
         t=helper.get_view_type(self.element)
         self.label['activate'].set_sensitive(True)
         if t == 'static':
@@ -364,9 +364,9 @@ class ViewColumn(FinderColumn):
 
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['adhoc-view'],
-                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)        
+                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
         b.connect("drag_data_get", drag_data_get_cb)
-        
+
         vbox.pack_start(b, expand=False)
 
         vbox.show_all()
@@ -386,7 +386,7 @@ class QueryColumn(FinderColumn):
         self.label['title'].set_markup(_("%(type)s <b>%(title)s</b>\nId: %(id)s") % {
                 'type': helper.get_type(self.element),
                 'title': self.controller.get_title(self.element),
-                'id': self.element.id })        
+                'id': self.element.id })
         return True
 
     def build_widget(self):
@@ -403,7 +403,7 @@ class QueryColumn(FinderColumn):
         f=gtk.Frame(_("Try to apply the query on..."))
         v=gtk.VBox()
         f.add(v)
-        
+
         def try_query(b, expr):
             context=self.controller.build_context()
             source=context.evaluateValue(expr)
@@ -437,7 +437,7 @@ class QueryColumn(FinderColumn):
             b=gtk.Button(label)
             b.connect('clicked', try_query, expr)
             v.pack_start(b, expand=False)
-        
+
         vbox.add(f)
         vbox.show_all()
         return vbox
@@ -455,7 +455,7 @@ class ResourceColumn(FinderColumn):
         self.label['title'].set_markup(_("%(type)s <b>%(title)s</b>\nId: %(id)s") % {
                 'type': helper.get_type(self.element),
                 'title': self.controller.get_title(self.element),
-                'id': self.element.id })        
+                'id': self.element.id })
         self.update_preview()
         return True
 
@@ -491,7 +491,7 @@ class Finder(AdhocView):
         super(Finder, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = []
-        
+
         self.package=controller.package
         self.controller=controller
 
@@ -520,7 +520,7 @@ class Finder(AdhocView):
             self.model.remove_element(element)
             cb=self.rootcolumn.next
             while cb is not None:
-                if [ r 
+                if [ r
                      for r in cb.liststore
                      if r[ModelColumn.COLUMN_NODE][DetailedTreeModel.COLUMN_ELEMENT] == element ]:
                     # The element is present in the list of
@@ -604,9 +604,9 @@ class Finder(AdhocView):
             t=type(node[DetailedTreeModel.COLUMN_ELEMENT])
             clazz=CLASS2COLUMN.get(t, ModelColumn)
             # Create a new columnbrowser
-            col=clazz(controller=self.controller, 
-                      node=node, 
-                      callback=self.clicked_callback, 
+            col=clazz(controller=self.controller,
+                      node=node,
+                      callback=self.clicked_callback,
                       parent=columnbrowser)
             col.widget.set_property("width-request", self.column_width)
             self.hbox.pack_start(col.widget, expand=False)

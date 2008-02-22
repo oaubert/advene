@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -110,14 +110,14 @@ class Player:
             return 0
         else:
             return time() * 1000 - self.basetime
-        
+
     def dvd_uri(self, title=None, chapter=None):
         return "dvd@%s:%s" % (str(title),
                               str(chapter))
 
     def log(self, *m):
         print "dummy plugin:", " ".join([str(i) for i in m])
-        
+
     def get_media_position(self, origin=None, key=None):
         self.log("get_media_position")
         return self.current_position()
@@ -128,14 +128,14 @@ class Player:
         self.basetime = time() * 1000 - position
         self.pausetime = None
         return
-    
+
     def start(self, position=0):
         self.log("start %s" % str(position))
         self.status=Player.PlayingStatus
         self.basetime=time() * 1000 - position
         self.pausetime=None
 
-    def pause(self, position=0): 
+    def pause(self, position=0):
         self.log("pause %s" % str(position))
         if self.status == Player.PlayingStatus:
             self.pausetime=time() * 1000 - self.basetime
@@ -155,7 +155,7 @@ class Player:
             self.basetime=time() * 1000 - self.pausetime
             self.pausetime=None
 
-    def stop(self, position=0): 
+    def stop(self, position=0):
         self.log("stop %s" % str(position))
         self.status=Player.UndefinedStatus
         self.basetime=None
@@ -163,7 +163,7 @@ class Player:
 
     def exit(self):
         self.log("exit")
-    
+
     def playlist_add_item(self, item):
         self.playlist.append(item)
         # Simulate a 30 minutes movie
@@ -183,7 +183,7 @@ class Player:
     def all_snapshots(self):
         self.log("all_snapshots")
         return [ None ]
-    
+
     def display_text (self, message, begin, end):
         self.log("display_text %s" % str(message))
 
@@ -217,7 +217,7 @@ class Player:
             key=self.MediaTime
         if origin is None:
             origin=self.AbsolutePosition
-        
+
         p=Position()
         p.value = value
         p.origin = origin

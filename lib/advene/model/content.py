@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -38,7 +38,7 @@ class Content(modeled.Modeled,
 
     TODO: handle content types more complex than TEXT_NODE
     """
-    
+
     __metaclass__ = auto_properties
 
     def __init__(self, parent, element):
@@ -48,7 +48,7 @@ class Content(modeled.Modeled,
         """Return the DOM element representing this content."""
         # FIXME: is this what we need? is this what we want?
         return self._getModel ()
-        
+
     def getData(self):
         """Return the data associated to the Content"""
         data = StringIO()
@@ -77,7 +77,7 @@ class Content(modeled.Modeled,
         reader = xml.dom.ext.reader.PyExpat.Reader()
         element = reader.fromString(data)._get_documentElement()
         return element
-    
+
     def getUri (self, absolute=True):
         """
         Return the content's URI.
@@ -92,7 +92,7 @@ class Content(modeled.Modeled,
         if self._getModel().hasAttributeNS(xlinkNS, 'href'):
             r = self._getModel().getAttributeNS(xlinkNS, 'href')
             if absolute:
-                url_base =self._getParent().getOwnerPackage().getUri (absolute) 
+                url_base =self._getParent().getOwnerPackage().getUri (absolute)
                 return advene.model.util.uri.urljoin(url_base, r)
             else:
                 return r
@@ -234,7 +234,7 @@ class WithContent(object):
     __metaclass__ = auto_properties
 
     __content = None
-    
+
     def _createContent(self):
         elt = self._getDocument().createElementNS(adveneNS, 'content')
         self._getModel().appendChild(elt)
@@ -309,7 +309,7 @@ class ContentPlugin (object):
         return _content_plugin_class
 
     withType = staticmethod (withType)
-        
+
 
 class TestPlugin (ContentPlugin.withType ('text/*')):
     """

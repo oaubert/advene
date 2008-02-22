@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -31,7 +31,7 @@ class TypedUnicode(unicode):
     def __init__(self, *p, **kw):
         super(TypedUnicode, self).__init__(*p, **kw)
         self.contenttype='text/plain'
-        
+
 class TypedString(str):
     """String with a mimetype attribute.
     """
@@ -87,7 +87,7 @@ class Viewable(object):
                                          staticmethod(getViewableTypeGetterName)
 
                 def getViewableType(self):
-                    getter_name =self.getViewableTypeGetterName() 
+                    getter_name =self.getViewableTypeGetterName()
                     if getter_name is not None:
                         return getattr(self, getter_name)()
                     return None
@@ -112,7 +112,7 @@ class Viewable(object):
         """
         Apply the specified view (or the best appliable view, cf
         findDefaultView) on the object, with optional parameters given
-        in dico."""        
+        in dico."""
 
         if context is None:
             context = advene.model.tal.context.AdveneContext(self, {})
@@ -127,7 +127,7 @@ class Viewable(object):
         # if isinstance(self, ResourceData):
         # but it would break encapsulation
         if view is None and hasattr(self, 'data'):
-            if self.getMimetype().startswith('text'): 
+            if self.getMimetype().startswith('text'):
                 s=TypedUnicode(self.data)
             else:
                 s=TypedString(self.data)
@@ -189,7 +189,7 @@ class Viewable(object):
         """
         return [ v.getId () for v in self.getRootPackage ().getViews ()
                             if v.match (self)]
-        
+
     def getDefaultView(self):
         if isinstance(self, modeled.Modeled) \
                and self._getModel().hasAttributeNS(None,'default-view'):
@@ -238,7 +238,7 @@ class GenericViewable(Viewable.withClass('generic')):
         self._o = o
         self._root_package = None
         self._owner_package = None
-        # Reverse-lookup of the resolved stack, to guess a 
+        # Reverse-lookup of the resolved stack, to guess a
         # pertinent root/ownerPackage
         for name, val in stack[::-1]:
             try:

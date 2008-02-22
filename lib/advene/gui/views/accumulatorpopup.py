@@ -49,10 +49,10 @@ class AccumulatorPopup(AdhocView):
     view_id = 'popupaccumulator'
     tooltip = ("Stack a limited number of popup widgets")
 
-    def __init__ (self, controller=None, autohide=False, size=3, 
+    def __init__ (self, controller=None, autohide=False, size=3,
                   vertical=False, scrollable=False):
         super(AccumulatorPopup, self).__init__(controller=controller)
-        
+
         self.close_on_package_load = False
 
         self.size=size

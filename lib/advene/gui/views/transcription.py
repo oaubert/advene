@@ -68,7 +68,7 @@ class TranscriptionView(AdhocView):
             }
 
         self.package=controller.package
-        
+
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         a=dict(arg)
@@ -86,10 +86,10 @@ class TranscriptionView(AdhocView):
         # an interactivequery). It is taken into account only if
         # source is None
         self.elements = elements
-        
+
         self.model=[]
         self.regenerate_model()
-        
+
         # Annotation where the cursor is set
         self.currentannotation=None
 
@@ -160,7 +160,7 @@ class TranscriptionView(AdhocView):
         ew.set_name(_("Transcription options"))
         ew.add_checkbox(_("Default representation"), "default-representation", _("Use the default representation for annotations"))
         ew.add_entry(_("Representation"), "representation", _("If default representation is unchecked,\nthis TALES expression that will be used to format the annotations."))
-        ew.add_option(_("Separator"), "separator", 
+        ew.add_option(_("Separator"), "separator",
                       _("This separator will be inserted between the annotations."),
                       { _('Whitespace'): ' ',
                         _('Newline'): "\\n",
@@ -289,7 +289,7 @@ class TranscriptionView(AdhocView):
 
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
-        
+
         for icon, action, tip in (
             (gtk.STOCK_SAVE, self.save_transcription, _("Save transcription to a text file")),
             (gtk.STOCK_APPLY, self.validate, _("Apply the modifications")),
@@ -346,7 +346,7 @@ class TranscriptionView(AdhocView):
         close_button=get_pixmap_button('small_close.png', hide_searchbox)
         close_button.set_relief(gtk.RELIEF_NONE)
         self.searchbox.pack_start(close_button, expand=False, fill=False)
-        
+
         def search_entry_cb(e):
             self.highlight_search_forward(e.get_text())
             return True
@@ -370,7 +370,7 @@ class TranscriptionView(AdhocView):
 #        b.set_relief(gtk.RELIEF_NONE)
 #        self.controller.gui.tooltips.set_tip(b, _("Find next occurrence"))
 #        self.searchbox.pack_start(b, expand=False, fill=False)
-        
+
         fill=gtk.HBox()
         self.searchbox.pack_start(fill, expand=True, fill=True)
 
@@ -467,7 +467,7 @@ class TranscriptionView(AdhocView):
         item=gtk.SeparatorMenuItem()
         item.show()
         menu.append(item)
-        
+
         item = gtk.MenuItem(_("Annotation %s") % self.currentannotation.id)
         menuc=advene.gui.popup.Menu(self.currentannotation,
                                     controller=self.controller)
@@ -698,7 +698,7 @@ class TranscriptionView(AdhocView):
             f=open(filename, "w")
         except Exception, e:
             self.message(_("Cannot write to %(filename)s: %(error)s:") %
-                     {'filename': filename, 
+                     {'filename': filename,
                       'error': unicode(e)})
             return True
         f.write(out)

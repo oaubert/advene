@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -55,7 +55,7 @@ class PlayerLauncher:
     """
     # How many times do we try to read the iorfile before quitting ?
     orb_max_tries=7
-    
+
     def __init__ (self, config=None):
         """Initialize the player."""
         if config is None:
@@ -176,7 +176,7 @@ class PlayerLauncher:
                 os.unlink (iorfile)
             except:
                 pass
-            
+
             ior=self._start ()
 
             mc = self.orb.string_to_object(ior)
@@ -248,7 +248,7 @@ class Player(object):
     InitStatus=VLC.InitStatus
     EndStatus=VLC.EndStatus
     UndefinedStatus=VLC.UndefinedStatus
-    
+
     # Exceptions
     PositionKeyNotSupported=VLC.PositionKeyNotSupported
     PositionOriginNotSupported=VLC.PositionOriginNotSupported
@@ -410,10 +410,10 @@ class Player(object):
 
     def dvd_uri(self, title, chapter):
         return "dvdsimple:///dev/dvd@%s:%s" % (str(title), str(chapter))
-    
+
     def create_position (self, value=0, key=None, origin=None):
         """Create a Position.
-        
+
         Returns a Position object initialized to the right value, by
         default using a MediaTime in AbsolutePosition.
 

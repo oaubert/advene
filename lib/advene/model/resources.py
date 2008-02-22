@@ -20,7 +20,7 @@
 
     Resources are available when using a .azp package file::
 
-      resources/: associated resources, 
+      resources/: associated resources,
                   available through the TALES expression /package/advene/resources/...
 
 """
@@ -35,7 +35,7 @@ import advene.model.viewable as viewable
 
 class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
     """Class accessing a resource data (file).
-    
+
     FIXME: should fully implement advene.model.content.Content API
     """
     __metaclass__ = auto_properties
@@ -62,7 +62,7 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
 
     def getData(self):
         return open(self.file_, 'rb').read()
-    
+
     def setData(self, data):
         f=open(self.file_, 'wb')
         f.write(data)
@@ -82,7 +82,7 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
         reader = xml.dom.ext.reader.PyExpat.Reader()
         element = reader.fromString(data)._get_documentElement()
         return element
-        
+
     def getUri (self):
         """Return the URI of the element.
         """
@@ -127,7 +127,7 @@ class Resources:
 
     def children (self):
         return [ self[n] for n in self.keys() ]
-            
+
     def has_key(self, key):
         self.init_filenames()
         return (key in self.filenames)
@@ -139,7 +139,7 @@ class Resources:
     def __contains__(self, key):
         fname=os.path.join( self.dir_, key )
         return os.path.exists(fname)
-        
+
     def __getitem__(self, key):
         fname=os.path.join( self.dir_, key )
         if not os.path.exists(fname):

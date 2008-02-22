@@ -117,7 +117,7 @@ class TagBag(AdhocView):
             if not re.match('^[\w\d_]+$', tag):
                 dialog.message_dialog(_("The tag contains invalid characters"),
                                                icon=gtk.MESSAGE_ERROR)
-                return True            
+                return True
             self.tags.append(tag)
             self.controller.notify('TagUpdate', tag=tag)
             self.refresh()
@@ -138,7 +138,7 @@ class TagBag(AdhocView):
     def get_save_arguments(self):
         arguments = [ ('tag', t) for t in self.tags ]
         return self.options, arguments
-        
+
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
         for p in self.tags:
@@ -195,7 +195,7 @@ class TagBag(AdhocView):
 
             menu=gtk.Menu()
 
-            for label, action in ( 
+            for label, action in (
                 (_("Set color"), set_color),
                 (_("Remove"), remove)
                 ):
@@ -215,7 +215,7 @@ class TagBag(AdhocView):
         self.mainbox.pack_start(b, expand=False)
 
     def build_widget(self):
-        
+
         if self.vertical:
             v=gtk.VBox()
             mainbox=gtk.VBox()
