@@ -153,7 +153,7 @@ class AdveneController:
         self.future_begins = None
         self.future_ends = None
         self.last_position = -1
-        
+
         # List of (time, action) tuples, sorted along time
         # When the player or usertime reaches 'time', execute the action.
         self.videotime_bookmarks = []
@@ -188,7 +188,7 @@ class AdveneController:
         self.event_queue = []
 
         # Load default actions
-        advene.rules.actions.register(self)     
+        advene.rules.actions.register(self)
 
         # Used in update_status to emit appropriate notifications
         self.status2eventname = {
@@ -263,9 +263,9 @@ class AdveneController:
         """
         self.event_queue.append( (method, args, kw) )
         return True
-    
+
     def queue_registered_action(self, ra, parameters):
-        """Queue a registered action for execution.  
+        """Queue a registered action for execution.
         """
         c=self.build_context(here=self.package)
         self.queue_action(ra.method, c, parameters)
@@ -401,8 +401,8 @@ class AdveneController:
                     return True
                 # future_begins holds a sorted list of (annotation, begin, end)
                 if self.restricted_annotations:
-                    l=[(an, an.fragment.begin, an.fragment.end) 
-                       for an in self.restricted_annotations 
+                    l=[(an, an.fragment.begin, an.fragment.end)
+                       for an in self.restricted_annotations
                        if an.fragment.begin > a.fragment.end ]
                 else:
                     l=[an
@@ -442,11 +442,11 @@ class AdveneController:
 
     def search_string(self, searched=None, source=None, case_sensitive=False):
         """Search a string in the given source (TALES expression).
-        
+
         A special source value is 'tags', which will then return the
         elements that are tagged with the searched string.
 
-        The search string obeys the classical syntax: 
+        The search string obeys the classical syntax:
         w1 w2 -> search objects containing w1 or w2
         +w1 +w2 -> search objects containing w1 and w2
         w1 -w2 -> search objects containing w1 and not w2
@@ -476,7 +476,7 @@ class AdveneController:
         else:
             c=self.build_context()
             source=c.evaluateValue(source)
-        
+
         words=shlex.split(searched)
 
         mandatory=[ w[1:] for w in words if w.startswith('+') ]
@@ -501,7 +501,7 @@ class AdveneController:
                     res.append(e)
                     break
         return res
-        
+
     def evaluate_query(self, query=None, context=None):
         """Evaluate a Query.
         """
@@ -564,7 +564,7 @@ class AdveneController:
             return final_result
         else:
             raise Exception("Unsupported query type for %s" % query.id)
-        
+
     def build_context(self, here=None, alias=None, baseurl=None):
         """Build a context object with additional information.
         """
@@ -666,10 +666,10 @@ class AdveneController:
                                 'error': unicode(e)})
                 else:
                     # Try to load the file as a video file
-                    if ('dvd' in name 
+                    if ('dvd' in name
                         or ext.lower() in config.data.video_extensions):
                         media = uri
-            
+
         # If no package is defined yet, load the template
         if self.package is None:
             self.load_package ()
@@ -717,7 +717,7 @@ class AdveneController:
             el=event_name.lower().replace('create','').replace('editend','').replace('delete', '')
             p=kw[el].ownerPackage
             p._modified = True
-        
+
         immediate=False
         if immediate in kw:
             immediate=kw['immediate']
@@ -752,7 +752,7 @@ class AdveneController:
 
         @return: a boolean (~desactivation)
         """
-        if (config.data.player['snapshot'] 
+        if (config.data.player['snapshot']
             and not self.package.imagecache.is_initialized (position)):
             # FIXME: only 0-relative position for the moment
             # print "Update snapshot for %d" % position
@@ -949,7 +949,7 @@ class AdveneController:
 
     def delete_element (self, el):
         """Delete an element from its package.
-        
+
         Take care of all dependencies (for instance, annotations which
         have relations.
         """
@@ -1152,7 +1152,7 @@ class AdveneController:
         'color' metadata of the container (annotation-type for
         annotations, schema for types).
         """
-    
+
         # First try the 'color' metadata from the element itself.
         color=None
         col=element.getMetaData(config.data.namespace, metadata)
@@ -1169,7 +1169,7 @@ class AdveneController:
                 container=element.type
             elif hasattr(element, 'schema'):
                 container=element.schema
-            else: 
+            else:
                 container=None
             if container:
                 col=container.getMetaData(config.data.namespace, 'item_color')
@@ -1201,7 +1201,7 @@ class AdveneController:
                 self.package = Package (uri="new_pkg",
                                         source=config.data.advenefile(config.data.templatefilename))
             except Exception, e:
-                self.log(_("Cannot find the template package %(filename)s: %(error)s") 
+                self.log(_("Cannot find the template package %(filename)s: %(error)s")
                          % {'filename': config.data.advenefile(config.data.templatefilename),
                             'error': unicode(e)})
                 alias='new_pkg'
@@ -1283,7 +1283,7 @@ class AdveneController:
         else:
             d={}
         self.package._tag_colors=d
-         
+
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
             try:
@@ -1438,8 +1438,8 @@ class AdveneController:
 
         # Handle tag_colors
         # Parse tag_colors attribute.
-        self.package.setMetaData (config.data.namespace, 
-                                  "tag_colors", 
+        self.package.setMetaData (config.data.namespace,
+                                  "tag_colors",
                                   cgi.urllib.urlencode(self.package._tag_colors))
 
         # Check if we know the stream duration. If so, save it as
@@ -1740,7 +1740,7 @@ class AdveneController:
             if notify:
                 # Bit of a hack... In a loop context, setting the
                 # position is done with notify=False, so we do not
-                # want to remove videotime_bookmarks                
+                # want to remove videotime_bookmarks
                 self.videotime_bookmarks = []
 
             # It was defined in a rule, but this prevented the snapshot
@@ -1887,7 +1887,7 @@ class AdveneController:
     def create_event_history_package(self):
         """Import the event history in a new package.
         """
-	self.load_package(alias="Event history")
+        self.load_package(alias="Event history")
         self.import_event_history()
         return True
 

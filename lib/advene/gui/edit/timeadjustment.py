@@ -113,7 +113,7 @@ class TimeAdjustment:
             vb.pack_start(b, expand=False)
             b=make_button(-self.small_increment, "1leftarrow.png")
             vb.pack_start(b, expand=False)
-            
+
 
         hbox.pack_start(vb, expand=False)
 
@@ -144,7 +144,7 @@ class TimeAdjustment:
             v.pack_start(i, expand=False)
             l=gtk.Label()
             v.pack_start(l, expand=False)
-            
+
             i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(self.value, epsilon=500), width=50))
             l.set_text(helper.format_time(self.value))
 
@@ -161,7 +161,6 @@ class TimeAdjustment:
 
         b.connect("drag_begin", _drag_begin)
         b.connect("drag_end", _drag_end)
-
 
         al=gtk.Alignment()
         al.set_padding(0, 0, 0, 0)

@@ -541,7 +541,7 @@ class DefaultActionsRepository:
     def ActivateSTBV_predefined(self, controller):
         """Return the predefined values.
         """
-        return { 'viewid': [ ('string:%s' % v.id, controller.get_title(v)) 
+        return { 'viewid': [ ('string:%s' % v.id, controller.get_title(v))
                              for v in controller.package.views
                              if helper.get_view_type(v) == 'dynamic' ] }
 
@@ -624,7 +624,7 @@ class DefaultActionsRepository:
         if clip is None:
             print "No clip"
             return True
-        else:            
+        else:
             # Get the resource
             d=self.controller.package.resources['soundclips']
             if clip in d:
@@ -660,7 +660,7 @@ class DefaultActionsRepository:
 
     def SetState(self, context, parameters):
         """Set the state of an attribute.
-        
+
         The state is package-specific. It is like a dict with integer
         values, which default to 0.
         It is accessible in TALES expression with:
@@ -703,15 +703,15 @@ class SoundPlayer:
     def win32_play(self, fname):
         #from winsound import PlaySound, SND_FILENAME, SND_ASYNC
         #PlaySound(fname, SND_FILENAME|SND_ASYNC)
-	#spt = SpThread(fname)
-	#spt.setDaemon(True)
-	#spt.start()
-	pathsp = os.path.sep.join((config.data.path['advene'],'pySoundPlayer.exe'))
-	if not os.path.exists(pathsp):
+        #spt = SpThread(fname)
+        #spt.setDaemon(True)
+        #spt.start()
+        pathsp = os.path.sep.join((config.data.path['advene'],'pySoundPlayer.exe'))
+        if not os.path.exists(pathsp):
             pathsp = os.path.sep.join((config.data.path['advene'],'Win32SoundPlayer','pySoundPlayer.exe'))
-	if os.path.exists(pathsp):
-	    pid=subprocess.Popen( [ pathsp, fname ] )
-	    #no SIGCHLD handler for win32
+        if os.path.exists(pathsp):
+            pid=subprocess.Popen( [ pathsp, fname ] )
+            #no SIGCHLD handler for win32
         return True
 
     def macosx_play(self, fname):
@@ -741,33 +741,33 @@ class SoundPlayer:
 
 class SpThread(Thread):
     def __init__(self,name):
-	Thread.__init__(self)
-	self.fname = name
+        Thread.__init__(self)
+        self.fname = name
     def run(self):
-	import pymedia.muxer as muxer, pymedia.audio.acodec as acodec, pymedia.audio.sound as sound
-  	import time
-	dm= muxer.Demuxer( str.split( self.fname, '.' )[ -1 ].lower() )
-	snds= sound.getODevices()
-	f= open( self.fname, 'rb' )
- 	snd= dec= None
-  	s= f.read( 32000 )
-	card=0
-	rate=1
-  	t= 0
- 	while len( s ):
-    	    frames= dm.parse( s )
-    	    if frames:
-      	        for fr in frames:
-        	    if dec== None:
-          		print dm.getHeaderInfo(), dm.streams
-          		dec= acodec.Decoder( dm.streams[ fr[ 0 ] ] )
-		    r= dec.decode( fr[ 1 ] )
-        	    if r and r.data:
-          	        if snd== None:
-            		    print 'Opening sound %s with %d channels -> %s' % ( self.fname, r.channels, snds[ card ][ 'name' ] )
-            		    snd= sound.Output( int( r.sample_rate* rate ), r.channels, sound.AFMT_S16_LE, card )
-		        data= r.data
-			snd.play( data )
+        import pymedia.muxer as muxer, pymedia.audio.acodec as acodec, pymedia.audio.sound as sound
+        import time
+        dm= muxer.Demuxer( str.split( self.fname, '.' )[ -1 ].lower() )
+        snds= sound.getODevices()
+        f= open( self.fname, 'rb' )
+        snd= dec= None
+        s= f.read( 32000 )
+        card=0
+        rate=1
+        t= 0
+        while len( s ):
+            frames= dm.parse( s )
+            if frames:
+                for fr in frames:
+                    if dec== None:
+                        print dm.getHeaderInfo(), dm.streams
+                        dec= acodec.Decoder( dm.streams[ fr[ 0 ] ] )
+                    r= dec.decode( fr[ 1 ] )
+                    if r and r.data:
+                        if snd== None:
+                            print 'Opening sound %s with %d channels -> %s' % ( self.fname, r.channels, snds[ card ][ 'name' ] )
+                            snd= sound.Output( int( r.sample_rate* rate ), r.channels, sound.AFMT_S16_LE, card )
+                        data= r.data
+                        snd.play( data )
             s= f.read( 512 )
-	while snd.isPlaying():
-	    time.sleep( .05 )
+        while snd.isPlaying():
+            time.sleep( .05 )

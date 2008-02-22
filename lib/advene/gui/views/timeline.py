@@ -933,22 +933,22 @@ class TimeLine(AdhocView):
                 sm.append(sitem)
             item.set_submenu(sm)
 
-	    # Propose to merge annotations of same type, or of
-	    # different types but with same fragments.
+            # Propose to merge annotations of same type, or of
+            # different types but with same fragments.
             # In both cases, we will merge the data.
-	    if source.type == dest.type or source.fragment == dest.fragment:
-		ok=True
-		if source.type == dest.type:
+            if source.type == dest.type or source.fragment == dest.fragment:
+                ok=True
+                if source.type == dest.type:
                     b=min(source.fragment.begin, dest.fragment.begin)
                     e=min(source.fragment.begin, dest.fragment.begin)
-		    for a in source.type.annotations:
-		        if a.fragment.begin > b and a.fragment.begin < e:
+                    for a in source.type.annotations:
+                        if a.fragment.begin > b and a.fragment.begin < e:
                             # There is at least one annotation between
                             # the merged annotations.
-			    ok=False
+                            ok=False
                             break
-		if ok:
-		    def merge_annotations(widget, s, d):
+                if ok:
+                    def merge_annotations(widget, s, d):
                         if s.type == d.type:
                             # Merging same-type annotations. Extend
                             # the annotation bounds.
@@ -957,17 +957,17 @@ class TimeLine(AdhocView):
                             d.fragment.begin=begin
                             d.fragment.end=end
                         # Merging data
-			mts=s.type.mimetype
-			mtd=d.type.mimetype
-  		        if mtd == 'text/plain' or ( mtd == mts and mtd == 'application/x-advene-structured' ):
-			    d.content.data=d.content.data + '\n' + s.content.data
-		    	elif mtd == 'application/x-advene-structured':
+                        mts=s.type.mimetype
+                        mtd=d.type.mimetype
+                        if mtd == 'text/plain' or ( mtd == mts and mtd == 'application/x-advene-structured' ):
+                            d.content.data=d.content.data + '\n' + s.content.data
+                        elif mtd == 'application/x-advene-structured':
                             # FIXME: should compare fields and merge identical fields
-			    d.content.data=d.content.data + '\nmerged_content="' + cgi.urllib.quote(s.content.data)+'"'
-		        self.controller.delete_element(s)
-		        self.controller.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations")
-	            item=gtk.MenuItem(_("Merge with this annotation"))
-	            item.connect('activate', merge_annotations, source, dest)
+                            d.content.data=d.content.data + '\nmerged_content="' + cgi.urllib.quote(s.content.data)+'"'
+                        self.controller.delete_element(s)
+                        self.controller.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations")
+                    item=gtk.MenuItem(_("Merge with this annotation"))
+                    item.connect('activate', merge_annotations, source, dest)
                     menu.append(item)
 
             def align_annotations(item, s, d, m):
@@ -1018,7 +1018,7 @@ class TimeLine(AdhocView):
                 dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
                                       icon=gtk.MESSAGE_WARNING)
                 return True
-            
+
             self.transmuted_annotation=self.controller.transmute_annotation(an,
                                                                             typ,
                                                                             delete=True,
@@ -1078,20 +1078,20 @@ class TimeLine(AdhocView):
                 item.set_sensitive(False)
 
         if position is not None and abs(position-source.fragment.begin) > 1000:
-            item=gtk.MenuItem(_("Duplicate to type %(type)s at %(position)s") % { 
+            item=gtk.MenuItem(_("Duplicate to type %(type)s at %(position)s") % {
                     'type': dest_title,
                     'position': helper.format_time(position) }, use_underline=False)
             item.connect('activate', copy_annotation, source, dest, position)
             menu.append(item)
 
-            item=gtk.MenuItem(_("Move to type %(type)s at %(position)s") % { 
+            item=gtk.MenuItem(_("Move to type %(type)s at %(position)s") % {
                         'type': dest_title,
                         'position': helper.format_time(position) }, use_underline=False)
             item.connect('activate', move_annotation, source, dest, position)
             menu.append(item)
             if source.relations and source.type != dest:
                 item.set_sensitive(False)
-            
+
         # If there are compatible relation-types, propose to directly create a relation
         relationtypes=helper.matching_relationtypes(self.controller.package,
                                                     source.type,
@@ -1121,7 +1121,7 @@ class TimeLine(AdhocView):
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
-            
+
     def copy_annotation_type(self, source, dest):
         """Display a popup menu to copy the source annotation type to the dest annotation type.
         """
@@ -1156,7 +1156,7 @@ class TimeLine(AdhocView):
 
         menu.show_all()
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
-            
+
     def annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
@@ -1271,7 +1271,7 @@ class TimeLine(AdhocView):
             if self.loop_toggle_button.get_active():
                 self.controller.gui.loop_on_annotation_gui(annotation)
             return True
-        
+
     def annotation_button_press_cb(self, widget, event, annotation):
         """Handle button presses on annotation widgets.
         """
@@ -1297,8 +1297,8 @@ class TimeLine(AdhocView):
                 f.begin, f.end = f.end, f.begin
             self.controller.notify('AnnotationEditEnd', annotation=annotation)
             return True
-        elif (event.button == 1 
-              and event.type == gtk.gdk.BUTTON_PRESS 
+        elif (event.button == 1
+              and event.type == gtk.gdk.BUTTON_PRESS
               and event.state & gtk.gdk.SHIFT_MASK):
             # Shift-click: toggle annotation selection/activation
             if widget.active:
@@ -1313,7 +1313,7 @@ class TimeLine(AdhocView):
 
     def quick_edit(self, annotation, button=None, callback=None):
         """Quickly edit a textual annotation
-        
+
         If defined, the callback method will be called with 'validate'
         or 'cancel' as first parameter and the annotation as second parameter.
         """
@@ -1576,7 +1576,7 @@ class TimeLine(AdhocView):
 
     def draw_current_mark (self):
         u2p = self.unit2pixel
-        
+
         red=gtk.gdk.color_parse('red2')
         a = GenericColorButtonWidget('layout_current_mark', container=self)
         a.default_size=(1, max(self.layer_position.values() or (0,)) + self.button_height)
@@ -1686,7 +1686,7 @@ class TimeLine(AdhocView):
                     self.scale_layout.remove(w)
                     return True
             self.scale_layout.foreach(remove_image)
-            
+
             if height >= 16:
                 # Big enough. Let's display screenshots.
 
@@ -1794,7 +1794,7 @@ class TimeLine(AdhocView):
             # Correct y value according to scrollbar position
             y += widget.parent.get_vscrollbar().get_adjustment().get_value()
 
-            a=[ at 
+            a=[ at
                 for (at, p) in self.layer_position.iteritems()
                 if (y >= p and y <= p + self.button_height) ]
             if a:
@@ -1812,7 +1812,7 @@ class TimeLine(AdhocView):
             source_uri=selection.data
             source=self.controller.package.annotationTypes.get(source_uri)
             # We received a drop. Determine the location.
-            a=[ at 
+            a=[ at
                 for (at, p) in self.layer_position.iteritems()
                 if (y >= p and y <= p + self.button_height) ]
             if a:
@@ -1828,7 +1828,7 @@ class TimeLine(AdhocView):
             return True
         elif targetType == config.data.target_type['timestamp']:
             # We received a drop. Create an annotation.
-            a=[ at 
+            a=[ at
                 for (at, p) in self.layer_position.iteritems()
                 if (y >= p and y <= p + self.button_height) ]
             if a:
@@ -1925,13 +1925,13 @@ class TimeLine(AdhocView):
             # Remove the selection rectangle
             self.draw_selection_rectangle(invert=True)
             self.layout_selection=[ [None, None], [None, None] ]
-            
+
             if (abs(x2-x1) > 20 and abs(y2-y1) > 20):
                 # The cursor has been significantly moved. Consider it is a selection.
                 if not (event.state & gtk.gdk.CONTROL_MASK or event.state & gtk.gdk.SHIFT_MASK):
                     # Control or shift was not held: it is a new selection.
                     self.unselect_all()
-                
+
                 for widget in self.layout.get_children():
                     if not isinstance(widget, AnnotationWidget):
                         continue
@@ -1955,7 +1955,7 @@ class TimeLine(AdhocView):
                 gc.set_function(gtk.gdk.INVERT)
             else:
                 gc.set_function(gtk.gdk.COPY)
-                
+
             x1=min(self.layout_selection[0][0], self.layout_selection[1][0])
             x2=max(self.layout_selection[0][0], self.layout_selection[1][0])
             y1=min(self.layout_selection[0][1], self.layout_selection[1][1])
@@ -1964,7 +1964,7 @@ class TimeLine(AdhocView):
             # Display the starting mark
             drawable.draw_rectangle(gc, False, x1, y1, x2-x1, y2-y1)
         return True
-        
+
     # Draw rectangle during mouse movement
     def layout_motion_notify_cb(self, widget, event):
         if event.is_hint:
@@ -2213,7 +2213,7 @@ class TimeLine(AdhocView):
             elif hasattr(b, 'prev'):
                 layout.move(b, w + 20, y)
             return True
-                
+
         # Resize all buttons to fit the largest
         if width > 10:
             layout.foreach(resize, width)
@@ -2228,7 +2228,7 @@ class TimeLine(AdhocView):
         Widget should be the annotation-type widget for at.
         """
         if widget is None:
-            l=[ w 
+            l=[ w
                 for w in self.legend.get_children()
                 if isinstance(w, AnnotationTypeWidget) and w.annotationtype == at ]
             if l:
@@ -2262,7 +2262,7 @@ class TimeLine(AdhocView):
                    if a.fragment.begin > p ]
                 l.sort(key=lambda a: a.fragment.begin)
             else:
-                l=[a 
+                l=[a
                    for a in typ.annotations
                    if a.fragment.end < p ]
                 # Sort in reverse order
@@ -2421,7 +2421,7 @@ class TimeLine(AdhocView):
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'] 
+                        config.data.drag_type['annotation']
                         + config.data.drag_type['timestamp'],
                         gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
 
@@ -2499,7 +2499,7 @@ class TimeLine(AdhocView):
             # Deactivate autoscroll...
             self.set_autoscroll_mode(0)
 
-            (w, h) = self.layout.window.get_size ()        
+            (w, h) = self.layout.window.get_size ()
             self.scale.value=1.3 * (end - begin) / w
 
             # Center on annotation
@@ -2554,7 +2554,7 @@ class TimeLine(AdhocView):
     def get_packed_widget (self):
         """Return the widget packed into a scrolledwindow."""
         vbox = gtk.VBox ()
-        
+
         content_pane = gtk.HPaned ()
 
         # The layout can receive drops
@@ -2562,7 +2562,7 @@ class TimeLine(AdhocView):
         self.legend.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
                                   gtk.DEST_DEFAULT_ALL,
-                                  config.data.drag_type['annotation-type'], 
+                                  config.data.drag_type['annotation-type'],
                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
         sw_legend = gtk.ScrolledWindow ()
@@ -2599,8 +2599,8 @@ class TimeLine(AdhocView):
 
         self.global_pane.add1(scale_pane)
         self.global_pane.add2(content_pane)
-        
-        self.global_pane.set_position(50)        
+
+        self.global_pane.set_position(50)
         self.global_pane.connect('notify::position', self.update_scale_screenshots)
 
         vbox.add (self.global_pane)
@@ -2614,7 +2614,7 @@ class TimeLine(AdhocView):
         f=gtk.Frame(_("Inspector"))
         f.add(a.widget)
         self.inspector_pane.pack2(f, resize=False, shrink=True)
-        self.controller.gui.register_view (a)        
+        self.controller.gui.register_view (a)
         a.set_master_view(self)
         a.widget.show_all()
 
@@ -2646,7 +2646,7 @@ class TimeLine(AdhocView):
                         config.data.drag_type['annotation-type'],
                         gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_COPY)
         tb.insert(b, -1)
-        
+
         # Selection menu
         b=gtk.ToolButton()
         i=gtk.Image()
@@ -2959,7 +2959,7 @@ class TimeLine(AdhocView):
         types=set( w.annotation.type for w in selection )
         for t in list(types):
             l=[ w.annotation for w in selection if w.annotation.type == t ]
-            if len(l) > 1: 
+            if len(l) > 1:
                 # We need at least 2 annotations
                 l.sort(key=lambda a: a.fragment.begin)
                 end=max( a.fragment.end for a in l )

@@ -1,16 +1,16 @@
 #
 # This file is part of Advene.
-# 
+#
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # Advene is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -18,7 +18,7 @@
 """Player factory.
 """
 
-import advene.core.config as config                
+import advene.core.config as config
 import os
 
 from gettext import gettext as _
@@ -73,22 +73,22 @@ class PlayerFactory:
     def nativevlc_win32_import(self):
         """Specific importer for win32 vlc.
         """
-	vlcpath=None
-	if (config.data.player['bundled']==True
-	    and os.path.exists(os.path.join('.','libvlc.dll'))):
-	    
-	    #we need to clean vlc cache path
-	    # --no-plugins-cache
-	    print "Using included version of VLC"
-	    vlcpath = '.'
-	
-	if (vlcpath is None):
-	    vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','InstallDir')
+        vlcpath=None
+        if (config.data.player['bundled']==True
+            and os.path.exists(os.path.join('.','libvlc.dll'))):
+
+            #we need to clean vlc cache path
+            # --no-plugins-cache
+            print "Using included version of VLC"
+            vlcpath = '.'
+
+        if (vlcpath is None):
+            vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','InstallDir')
             if vlcpath is None:
                 # Try the Path key
                 vlcpath=config.data.get_registry_value('Software\\VideoLAN\\VLC','Path')
 
-	    
+
         # FIXME: Hack: for local versions of VLC (development tree)
         # You should define the correct path in advene.ini
         if (vlcpath is None

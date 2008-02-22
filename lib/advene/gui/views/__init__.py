@@ -147,21 +147,21 @@ class AdhocView(object):
         elif isinstance(p, gtk.VBox):
             # It is a popup window. Set its title.
             p.get_toplevel().set_title(label)
-            
+
     def load_parameters(self, param):
         """Parse the parameters from a Content object, a tuple or an ElementTree.Element
- 
+
         It will return a tuple (options, arguments) where options is a
         dictionary and arguments a list of tuples (name, value).
 
         If param is None, then try to load default options, if they
-        exist. They should be stored in 
+        exist. They should be stored in
         config.data.advenefile( ('defaults', self.view_id + '.xml'), 'settings')
 
         In case of problem, it will simply return None, None.
         """
         opt, arg = {}, []
-        
+
         if param is None:
             # Load default options
             n=config.data.advenefile( ('defaults', self.view_id + '.xml'), 'settings')
@@ -239,7 +239,7 @@ class AdhocView(object):
                 self.controller.log(_("Cannot save default options: %s") % unicode(e))
                 return True
         defaults=config.data.advenefile( ('defaults', self.view_id + '.xml'), 'settings')
-        
+
         options, args=self.get_save_arguments()
         # Do not save package-specific arguments.
         root=self.parameters_to_element(options, [])
@@ -268,7 +268,7 @@ class AdhocView(object):
 
     def get_save_arguments(self):
         """Method called when saving a parametered view.
-        
+
         It should return a tuple (options, arguments) where options is
         the options dictionary, and arguments is a list of (name,
         value) tuples).
@@ -411,7 +411,7 @@ class AdhocView(object):
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['adhoc-view-instance'],
                           gtk.gdk.ACTION_LINK)
-        
+
         window.own_buttons.append(b)
         window.buttonbox.pack_start(b, expand=False)
 
@@ -438,13 +438,13 @@ class AdhocView(object):
             self.controller.gui.register_view (self)
             window.cleanup_id=window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
             self.controller.gui.init_window_size(window, self.view_id)
-	
+
         if config.data.os == 'win32':
             # Force resize for win32
             oldmode=window.get_resize_mode()
             window.set_resize_mode(gtk.RESIZE_IMMEDIATE)
             window.resize_children()
-	    window.set_resize_mode(oldmode)
+            window.set_resize_mode(oldmode)
         return window
 
 class AdhocViewParametersParser:
@@ -465,7 +465,7 @@ class AdhocViewParametersParser:
             self.parse_file(source)
         else:
             print "Do not know what to do with ", source
- 
+
     def parse_file(self, fd):
         tree=ET.parse(fd)
         self.parse_element(tree.getroot())

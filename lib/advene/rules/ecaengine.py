@@ -337,46 +337,46 @@ class ECAEngine:
             d['parameters'] = param
             # Store timestamp in ms since the application start
             d['timestamp'] = (time.time() - config.data.startup_time) * 1000
-	    d['movie'] = self.controller.player.get_default_media()
-	    d['movietime'] = self.controller.player.current_position_value
-	    # package uri annotation relation annotationtype relationtype schema
-	    # Logging content depending on keys
-	    if 'uri' in d:
-		d['content']='movie="'+str(d['uri'])+'"'
-	    if 'annotation' in d:
-		a=d['annotation']
+            d['movie'] = self.controller.player.get_default_media()
+            d['movietime'] = self.controller.player.current_position_value
+            # package uri annotation relation annotationtype relationtype schema
+            # Logging content depending on keys
+            if 'uri' in d:
+                d['content']='movie="'+str(d['uri'])+'"'
+            if 'annotation' in d:
+                a=d['annotation']
                 d['content']= "\n".join(
-		    ( 'annotation=' + a.id,
+                    ( 'annotation=' + a.id,
                       'type=' + a.type.id,
                       'mimetype=' + a.type.mimetype,
                       'content="'+ urllib.quote(a.content.data.encode('utf-8'))+'"'
-		    )
-		    )
-	    elif 'relation' in d:
-		r=d['relation']
+                    )
+                    )
+            elif 'relation' in d:
+                r=d['relation']
                 d['content']= "\n".join(
                     ( 'relation=' + r.id,
                       'type=' + r.type.id,
                       'mimetype=' + r.type.mimetype,
                       'source=' + r.members[0].id,
-                      'dest=' + r.members[1].id ) 
+                      'dest=' + r.members[1].id )
                     )
-	    elif 'annotationtype' in d:
-		at=d['annotationtype']
-		d['content']= "\n".join(
+            elif 'annotationtype' in d:
+                at=d['annotationtype']
+                d['content']= "\n".join(
                     ('annotationtype='+at.id,
                      'schema=' + at.schema.id,
                      'mimetype=' + at.mimetype)
                     )
-	    elif 'relationtype' in d:
-		rt=d['relationtype']
-		d['content']= "\n".join(
+            elif 'relationtype' in d:
+                rt=d['relationtype']
+                d['content']= "\n".join(
                     ('relationtype=' + rt.id,
                      'schema=' + rt.schema.id,
                      'mimetype=' + rt.mimetype)
                     )
             self.event_history.append(d)
-	    
+
         delay=0
         if kw.has_key('delay'):
             delay=long(kw['delay']) / 1000.0

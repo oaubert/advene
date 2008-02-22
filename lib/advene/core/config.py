@@ -76,7 +76,7 @@ class Config(object):
     """
 
     def __init__ (self):
-        
+
         self.startup_time=time.time()
 
         self.config_file=''
@@ -195,7 +195,7 @@ class Config(object):
             'scroll-increment': 100,
             # Time increment in ms
             'time-increment': 2000,
-            'timeline': { 
+            'timeline': {
                 'font-size': 10,
                 'button-height': 20,
                 'interline-height': 6
@@ -203,7 +203,7 @@ class Config(object):
             # File history
             'history': [],
             'history-size-limit': 5,
-            # User-defined paths. Will overwrite 
+            # User-defined paths. Will overwrite
             # config.data.path items
             'path': {},
             # Default adhoc views to open.
@@ -247,7 +247,7 @@ class Config(object):
         # Player options
         self.player = {
             'plugin': 'vlcnative',
-	    'bundled': True,
+            'bundled': True,
             'embedded': True,
             'name': 'vlc',
             'vout': 'default',
@@ -288,7 +288,7 @@ class Config(object):
         self.reaction_time=200
 
         # MIMEtypes that can be edited by the TextContentHandler
-        self.text_mimetypes = ( 
+        self.text_mimetypes = (
             'application/x-advene-structured',
             'application/x-advene-sparql-query',
             'application/x-javascript',
@@ -325,14 +325,14 @@ class Config(object):
             self.drag_type[name] = [ ( mime, 0, typ) ]
 
         self.video_extensions = (
-            '.asf', 
-            '.avi', 
+            '.asf',
+            '.avi',
             '.flv',
             '.mov',
-            '.mpg', '.mpeg',  '.mp4', 
+            '.mpg', '.mpeg',  '.mp4',
             '.ogm',
             '.ogg',
-            '.rm', 
+            '.rm',
             '.vob',
             '.mkv',
             '.wmv',
@@ -412,7 +412,7 @@ class Config(object):
                           type="string", default=None, metavar="LOGIN-NAME",
                           help="User name (used to set the author field of elements).")
 
-        parser.add_option("", "--no-embedded", 
+        parser.add_option("", "--no-embedded",
                           dest="embedded", action="store_false", default=True,
                           help="Do not embed the video player.")
 
@@ -421,7 +421,7 @@ class Config(object):
                           action="store",
                           type="choice",
                           # FIXME: we should register player plugins and use introspection
-                          choices=("vlcnative", "dummy", "vlcorbit", 
+                          choices=("vlcnative", "dummy", "vlcorbit",
                                    "xine", "gstreamer", "quicktime", "gstrecorder"),
                           default=None,
                           help="Video player selection")
@@ -493,7 +493,7 @@ class Config(object):
         self.player['vout'] = 'x11'
         # There is still a pb with captioning, just use the workaround
         self.preferences['display-caption']=True
-        
+
     def get_registry_value (self, subkey, name):
         """(win32) get a value from the registry.
         """
@@ -508,7 +508,7 @@ class Config(object):
                 _winreg.CloseKey(reg)
             except _winreg.error:
                 #value=None
-		pass
+                pass
         return value
 
     def register_content_handler(self, handler):
@@ -536,7 +536,7 @@ class Config(object):
 
     def get_content_handler(self, mimetype):
         """Return a valid content handler for the given mimetype.
-        
+
         Return None if no content handler is valid (should not happen, as
         TextContentHandler is builtin).
         """
@@ -760,7 +760,7 @@ class Config(object):
         """
         for ext, t in mimetypes.read_mime_types(fname).iteritems():
             mimetypes.add_type(t, ext)
-        
+
     def fix_paths(self, maindir):
         """Adjust paths according to the given main directory.
         """
