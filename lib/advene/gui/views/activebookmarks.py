@@ -77,7 +77,7 @@ class ActiveBookmarks(AdhocView):
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
         for w in self.data:
-            self.mainbox.add(w.widget)
+            self.mainbox.pack_start(w.widget, expand=False)
         self.mainbox.show_all()
         return True
 
@@ -212,8 +212,25 @@ class ActiveBookmark(object):
         f.set_label_widget(b)
 
         box=gtk.HBox()
-        self.widgets['begin']=OptionalTimeAdjustment(value=None, controller=self.controller)
-        self.widgets['end']=OptionalTimeAdjustment(value=None, controller=self.controller)
+        def begin_cb(v):
+            if v is None:
+                return True
+            if ('end' in self.widgets 
+                and self.widgets['end'].value is not None 
+                and v > self.widgets['end'].value):
+                return False
+            return True
+        def end_cb(v):
+            if v is None:
+                return True
+            if ('begin' in self.widgets 
+                and self.widgets['begin'] is not None 
+                and v < self.widgets['begin'].value):
+                return False
+            return True
+
+        self.widgets['begin']=OptionalTimeAdjustment(value=None, controller=self.controller, callback=begin_cb)
+        self.widgets['end']=OptionalTimeAdjustment(value=None, controller=self.controller, callback=end_cb)
         self.widgets['content']=gtk.TextView()
         self.widgets['content'].widget=self.widgets['content']
         self.widgets['content'].set_size_request(120, -1)
@@ -228,13 +245,16 @@ class ActiveBookmark(object):
 class OptionalTimeAdjustment(object):
     """TimeAdjustment able to handle None values.
     """
-    def __init__(self, value=None, controller=None):
+    def __init__(self, value=None, controller=None, callback=None):
         self.controller=controller
+        self.callback=callback
         self.widgets={}
         self.widget=self.build_widget()
         self.value=value
 
     def set_value(self, v):
+        if self.callback is not None and not self.callback(v):
+            return True
         self._value=v
         if v is not None:
             self.widgets['nonempty'].value=v
@@ -285,7 +305,10 @@ class OptionalTimeAdjustment(object):
                             gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
         empty.connect('drag_data_received', drag_received)
 
-        ta=TimeAdjustment(value=0, controller=self.controller, compact=True)
+        def value_changed(v):
+            self.value=v
+            return True
+        ta=TimeAdjustment(value=0, controller=self.controller, compact=True, callback=value_changed)
         self.widgets['nonempty']=ta
         # Add a close() button
         hb=ta.widget.get_children()[-1]
@@ -298,7 +321,7 @@ class OptionalTimeAdjustment(object):
         hb.pack_start(b, expand=False)
 
         for n in ('empty', 'nonempty'):
-            box.add(self.widgets[n].widget)
+            box.pack_start(self.widgets[n].widget, expand=False)
             self.widgets[n].widget.hide()
         box.set_no_show_all(True)
         box.show()
