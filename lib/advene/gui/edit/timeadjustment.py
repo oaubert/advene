@@ -137,6 +137,9 @@ class TimeAdjustment:
         b.connect("drag_data_get", self.drag_sent)
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['timestamp']
+                          + config.data.drag_type['text-plain']
+                          + config.data.drag_type['TEXT']
+                          + config.data.drag_type['STRING']
                           , gtk.gdk.ACTION_LINK)
 
         # Define drag cursor
@@ -265,6 +268,11 @@ class TimeAdjustment:
         """
         if targetType == config.data.target_type['timestamp']:
             selection.set(selection.target, 8, str(self.value))
+            return True
+        elif targetType in ( config.data.target_type['text-plain'],
+                             config.data.target_type['TEXT'],
+                             config.data.target_type['STRING'] ):
+            selection.set(selection.target, 8, helper.format_time(self.value))
             return True
         return False
 
