@@ -35,7 +35,7 @@ class TimeAdjustment:
 
     Note: time values are integers in milliseconds.
     """
-    def __init__(self, value=0, controller=None, videosync=False, editable=True, compact=False):
+    def __init__(self, value=0, controller=None, videosync=False, editable=True, compact=False, callback=None):
         self.value=value
         self.controller=controller
         self.sync_video=videosync
@@ -46,6 +46,10 @@ class TimeAdjustment:
         self.image=None
         self.editable=editable
         self.compact=compact
+        # Callback is a method which will be called *before* setting
+        # the new value. If it returns False, then the new value will
+        # not be used.
+        self.callback=callback
         self.widget=self.make_widget()
         self.update_display()
 
@@ -226,7 +230,10 @@ class TimeAdjustment:
                 incr=-config.data.preferences['scroll-increment']
 
             v=self.value
-            self.value += incr
+            v += incr
+            if self.callback and not self.callback(v):
+                return True
+            self.value=v
             self.update_display()
             return True
 
@@ -239,10 +246,15 @@ class TimeAdjustment:
         if targetType == config.data.target_type['annotation']:
             source_uri=selection.data
             source=self.controller.package.annotations.get(source_uri)
+            if self.callback and not self.callback(source.fragment.begin):
+                return True
             self.value = source.fragment.begin
             self.update_display()
         elif targetType == config.data.target_type['timestamp']:
-            self.value=long(float(selection.data))
+            v=long(float(selection.data))
+            if self.callback and not self.callback(v):
+                return True
+            self.value=v
             self.update_display()
         else:
             print "Unknown target type for drop: %d" % targetType
@@ -265,7 +277,10 @@ class TimeAdjustment:
         return True
 
     def use_current_position(self, button):
-        self.value=self.controller.player.current_position_value
+        v=self.controller.player.current_position_value
+        if self.callback and not self.callback(v):
+            return True
+        self.value=v
         self.update_display()
         return True
 
@@ -311,7 +326,10 @@ class TimeAdjustment:
         t=self.entry.get_text()
         v=self.numericTime(t)
         if v is not None and v != self.value:
-            self.value = self.check_bound_value(v)
+            v=self.check_bound_value(v)
+            if self.callback and not self.callback(v):
+                return False
+            self.value = v
             if self.sync_video:
                 self.controller.move_position(self.value, relative=False)
             self.update_display()
@@ -342,8 +360,10 @@ class TimeAdjustment:
     def update_value_cb(self, widget, increment):
         if not self.editable:
             return True
-        self.value=self.value + increment
-        self.value=self.check_bound_value(self.value)
+        v=self.check_bound_value(self.value + increment)
+        if self.callback and not self.callback(v):
+            return True
+        self.value=v
         if self.sync_video:
             self.controller.move_position(self.value, relative=False)
         self.update_display()
