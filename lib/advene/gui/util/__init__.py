@@ -71,6 +71,7 @@ def get_pixmap_button(pixmap, callback=None, *p):
     i=gtk.Image()
     i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
     b.add(i)
+    i.show()
     if callback:
         b.connect('clicked', callback, *p)
     return b
