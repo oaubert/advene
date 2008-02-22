@@ -27,6 +27,7 @@
 import os
 import mimetypes
 import urllib
+import base64
 
 import xml.dom.ext.reader.PyExpat
 
@@ -91,6 +92,11 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
 
     def getStream(self):
         return open(self.file_, 'rb')
+
+    def getDataBase64(self):
+        data = self.getData()
+        data = base64.encodestring(data)
+        return data
 
 class Resources:
     """Class accessing a resource dir.
@@ -205,3 +211,13 @@ class Resources:
 
     def getId(self):
         return self.resourcepath.split('/')[-1]
+
+    def __iter__(self):
+        """Recursively iter over all non-directory descendants."""
+        for c in self.children():
+            if hasattr(c, "DIRECTORY_TYPE"):
+                for c2 in c:
+                    yield c2
+            else:
+                yield c
+

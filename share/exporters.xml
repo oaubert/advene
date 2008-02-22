@@ -270,44 +270,99 @@ div.${a/id} {
       <meta>
         <title xmlns='http://purl.org/dc/elements/1.1/'>Advene2</title>
       </meta>
-      <content mime-type='application/xml'>&lt;package xmlns="http://advene.liris.cnrs.fr/ns/advene-xml/0.1">
+      <content mime-type='application/xml'>&lt;!-- Cinelab Advene XML exporter - v0.1 -->
+&lt;package xmlns="http://advene.liris.cnrs.fr/ns/cinelab/0.1#"
+                xmlns:dc="http://purl.org/dc/elements/1.1/"
+                xmlns:adv="http://advene.liris.cnrs.fr/ns/meta/"
+                xmlns:trans="http://advene.liris.cnrs.fr/ns/transition/">
   &lt;meta>
-    &lt;main_media id-ref="m1" xmlns="http://advene.liris.cnrs.fr/ns/meta/" />
-    &lt;creator xmlns="http://purl.org/dc/elements/1.1/" tal:content="package/author">author&lt;/creator>
+    &lt;adv:main_media id-ref="m1"/>
+    &lt;dc:creator tal:content="package/author">author&lt;/dc:creator>
   &lt;/meta>
+  &lt;annotation-types>
+    &lt;annotation-type tal:repeat="a package/annotationTypes" tal:attributes="id a/id">
+      &lt;meta>
+        &lt;dc:creator tal:content="a/author">author&lt;/dc:creator>
+        &lt;dc:modified tal:content="a/date">date&lt;/dc:modified>
+        &lt;trans:mimetype tal:content="a/mimetype">date&lt;/trans:mimetype>
+      &lt;/meta>
+    &lt;/annotation-type>
+  &lt;/annotation-types>
+  &lt;relation-types>
+    &lt;relation-type tal:repeat="a package/relationTypes" tal:attributes="id a/id">
+      &lt;meta>
+        &lt;dc:creator tal:content="a/author">author&lt;/dc:creator>
+        &lt;dc:modified tal:content="a/date">date&lt;/dc:modified>
+        &lt;trans:mimetype tal:content="a/mimetype">date&lt;/trans:mimetype>
+      &lt;/meta>
+    &lt;/relation-type>
+  &lt;/relation-types>
   &lt;medias>
     &lt;media frame-of-reference="http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0" id="m1" tal:attributes="url package/meta/advenetool/mediafile" />
   &lt;/medias>
+  &lt;resources tal:condition="package/resources">
+    &lt;resource tal:repeat="r package/resources" tal:attributes="id string::userfile:${python:r.resourcepath.replace('/',':')}">
+      &lt;content tal:condition="python: r.mimetype.startswith('text') or r.mimetype.startswith('image/svg')"
+                     tal:attributes="mimetype r/mimetype" tal:content="r/data" />
+      &lt;content tal:condition="python: not(r.mimetype.startswith('text') or r.mimetype.startswith('image/svg'))"
+                     encoding="base64" tal:attributes="mimetype r/mimetype" tal:content="r/dataBase64" />
+      &lt;meta>
+        &lt;dc:creator tal:content="r/author">author&lt;/dc:creator>
+        &lt;dc:modified tal:content="r/date">date&lt;/dc:modified>
+      &lt;/meta>
+    &lt;/resource>
+  &lt;/resources>
   &lt;annotations>
     &lt;annotation tal:repeat="a package/annotations" tal:attributes="begin a/fragment/begin ; end a/fragment/end ; id a/id" media="m1">
       &lt;content tal:attributes="mimetype a/content/mimetype" tal:content="a/content/data" />
-     &lt;meta>
-        &lt;creator xmlns="http://purl.org/dc/elements/1.1/" tal:content="a/author">author&lt;/creator>
-        &lt;modified xmlns="http://purl.org/dc/elements/1.1/" tal:content="a/date">date&lt;/modified>
+      &lt;meta>
+        &lt;dc:creator tal:content="a/author">author&lt;/dc:creator>
+        &lt;dc:modified tal:content="a/date">date&lt;/dc:modified>
       &lt;/meta>
-        &lt;/annotation>
+    &lt;/annotation>
   &lt;/annotations>
   &lt;relations>
     &lt;relation tal:repeat="r package/relations" tal:attributes="id r/id">
       &lt;members>
-        &lt;member tal:attributes="id-ref r/members/first/id" />
-        &lt;member tal:attributes="id-ref r/members/last/id" />
+        &lt;member tal:repeat="m r/members" tal:attributes="id-ref m/id" />
       &lt;/members>
+      &lt;content tal:attributes="mimetype r/content/mimetype" tal:content="r/content/data" />
       &lt;meta>
-        &lt;creator xmlns="http://purl.org/dc/elements/1.1/" tal:content="r/author">author&lt;/creator>
-        &lt;modified xmlns="http://purl.org/dc/elements/1.1/" tal:content="r/date">date&lt;/modified>
+        &lt;dc:creator tal:content="r/author">author&lt;/dc:creator>
+        &lt;dc:modified tal:content="r/date">date&lt;/dc:modified>
       &lt;/meta>
     &lt;/relation>
   &lt;/relations>
-&lt;views>
+  &lt;views>
     &lt;view tal:repeat="v package/views" tal:attributes="id v/id">
       &lt;content tal:attributes="mimetype v/content/mimetype" tal:content="v/content/data" />
-     &lt;meta>
-        &lt;creator xmlns="http://purl.org/dc/elements/1.1/" tal:content="v/author">author&lt;/creator>
-        &lt;modified xmlns="http://purl.org/dc/elements/1.1/" tal:content="v/date">date&lt;/modified>
+      &lt;meta>
+        &lt;dc:creator tal:content="v/author">author&lt;/dc:creator>
+        &lt;dc:modified tal:content="v/date">date&lt;/dc:modified>
       &lt;/meta>
-        &lt;/view>
+    &lt;/view>
   &lt;/views>
+  &lt;queries>
+    &lt;query tal:repeat="q package/queries" tal:attributes="id q/id">
+      &lt;content tal:attributes="mimetype q/content/mimetype" tal:content="q/content/data" />
+      &lt;meta>
+        &lt;dc:creator tal:content="q/author">author&lt;/dc:creator>
+        &lt;dc:modified tal:content="q/date">date&lt;/dc:modified>
+      &lt;/meta>
+    &lt;/query>
+  &lt;/queries>
+  &lt;schemas>
+    &lt;schema tal:repeat="s package/schemas" tal:attributes="id s/id">
+      &lt;items>
+        &lt;item tal:repeat="i s/annotationTypes" tal:attributes="id-ref i/id" />
+        &lt;item tal:repeat="i s/relationTypes" tal:attributes="id-ref i/id" />
+      &lt;/items>
+      &lt;meta>
+        &lt;dc:creator tal:content="s/author">author&lt;/dc:creator>
+        &lt;dc:modified tal:content="s/date">date&lt;/dc:modified>
+      &lt;/meta>
+    &lt;/schema>
+  &lt;/schemas>
 
 &lt;/package></content>
     </view>
@@ -341,7 +396,8 @@ div.${a/id} {
 &lt;a tal:attributes="href a/absolute_url" tal:content="a/representation">Annotation representation&lt;/a>
 &lt;img tal:attributes="src a/snapshot_url">&lt;/img>
 &lt;desc tal:content="a/content/data">Content&lt;/desc>
-&lt;/clip>
+&lt;/clip>
+
 &lt;/cmml>
 </content>
     </view>
