@@ -261,9 +261,42 @@ class OptionalTimeAdjustment(object):
             self.value=self.controller.player.current_position_value
             return True
         box=gtk.HBox()
-        self.widgets['empty']=get_pixmap_button('set-to-now.png', set_time)
-        self.widgets['empty'].widget=self.widgets['empty']
-        self.widgets['nonempty']=TimeAdjustment(value=0, controller=self.controller, compact=True)
+
+        empty=get_pixmap_button('set-to-now.png', set_time)
+        self.widgets['empty']=empty
+        empty.widget=empty
+        
+        def drag_received(widget, context, x, y, selection, targetType, time):
+            if targetType == config.data.target_type['timestamp']:
+                self.value=long(selection.data)
+                return True
+            elif targetType == config.data.target_type['annotation']:
+                source_uri=selection.data
+                source=self.controller.package.annotations.get(source_uri)
+                self.value=source.fragment.begin
+            else:
+                print "Unknown target type for drop: %d" % targetType
+                return False
+        empty.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                            gtk.DEST_DEFAULT_HIGHLIGHT |
+                            gtk.DEST_DEFAULT_ALL,
+                            config.data.drag_type['annotation']
+                            + config.data.drag_type['timestamp'],
+                            gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+        empty.connect('drag_data_received', drag_received)
+
+        ta=TimeAdjustment(value=0, controller=self.controller, compact=True)
+        self.widgets['nonempty']=ta
+        # Add a close() button
+        hb=ta.widget.get_children()[-1]
+        def set_to_none(b):
+            self.value=None
+            return True
+        b=get_pixmap_button('small_close.png', set_to_none)
+        b.set_relief(gtk.RELIEF_NONE)
+        b.show_all()
+        hb.pack_start(b, expand=False)
+
         for n in ('empty', 'nonempty'):
             box.add(self.widgets[n].widget)
             self.widgets[n].widget.hide()
