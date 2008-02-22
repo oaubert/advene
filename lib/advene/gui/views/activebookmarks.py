@@ -28,6 +28,7 @@ from advene.model.fragment import MillisecondFragment
 from gettext import gettext as _
 
 import gtk
+import gobject
 
 name="ActiveBookmarks view plugin"
 
@@ -72,6 +73,12 @@ class ActiveBookmarks(AdhocView):
         self.widget=self.build_widget()
         self.refresh()
 
+    def register_callback (self, controller=None):
+        self.loop_id=gobject.timeout_add(1000, self.check_contents)
+
+    def unregister_callback(self, controller=None):
+        gobject.source_remove(self.loop_id)
+
     def get_save_arguments(self):
         # FIXME: save arguments
         #return self.options, ([ ('timestamp', t) for t in self.history ]
@@ -103,6 +110,16 @@ class ActiveBookmarks(AdhocView):
         b.widget.show_all()
         return True
 
+    def check_contents(self, *p):
+        """Check that annotation contents are in sync.
+        """
+        for wid in self.data:
+            if wid.annotation is not None and wid.content != wid.annotation.content.data:
+                # Mismatch in contents -> update the annotation
+                wid.annotation.content.data=wid.content
+                self.controller.notify('AnnotationEditEnd', annotation=wid.annotation)
+        return True
+                
     def update_annotation (self, annotation=None, event=None):
         l=[w for w in self.data if w.annotation == annotation ]
         if l:
@@ -175,7 +192,7 @@ class ActiveBookmarks(AdhocView):
                                    config.data.drag_type['timestamp'],
                                    gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
         self.mainbox.connect("drag_data_received", mainbox_drag_received)
-        v.add(sw)
+        v.add(sw)        
         return v
 
 class ActiveBookmark(object):
