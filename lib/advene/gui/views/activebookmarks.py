@@ -23,6 +23,8 @@ import advene.core.config as config
 from advene.gui.util import get_pixmap_button
 from advene.gui.views import AdhocView
 from advene.gui.edit.timeadjustment import TimeAdjustment
+from advene.model.annotation import Annotation
+from advene.model.fragment import MillisecondFragment
 from gettext import gettext as _
 
 import gtk
@@ -43,7 +45,7 @@ class ActiveBookmarks(AdhocView):
     view_name = _("ActiveBookmarks")
     view_id = 'activebookmarks'
     tooltip= _("ActiveBookmarks")
-    def __init__(self, controller=None, parameters=None, type_=None):
+    def __init__(self, controller=None, parameters=None, type=None):
         super(ActiveBookmarks, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
@@ -53,6 +55,7 @@ class ActiveBookmarks(AdhocView):
             'snapshot_width': 60,
             }
         self.controller=controller
+        self.type = type
         # self.data is a list of ActiveBookmark objects
         self.data=[]
         opt, arg = self.load_parameters(parameters)
@@ -94,13 +97,31 @@ class ActiveBookmarks(AdhocView):
         return True
 
     def append(self, t):
-        b=ActiveBookmark(controller=self.controller, begin=t, end=None, content=None, close_cb=self.remove)
+        b=ActiveBookmark(controller=self.controller, begin=t, end=None, content=None, close_cb=self.remove, type=self.type)
         self.data.append(b)
         self.mainbox.pack_start(b.widget, expand=False)
         b.widget.show_all()
         return True
 
     def update_annotation (self, annotation=None, event=None):
+        l=[w for w in self.data if w.annotation == annotation ]
+        if l:
+            wid=l[0]
+        else:
+            return True
+        if event == 'AnnotationEditEnd':
+            # The annotation was updated. Check if an update is necessary
+            if wid.begin != annotation.fragment.begin:
+                wid.begin=annotation.fragment.begin
+            if wid.end != annotation.fragment.end:
+                wid.end=annotation.fragment.end
+            if wid.content != annotation.content.data:
+                wid.content=annotation.content.data
+        elif event == 'AnnotationDelete':
+            if wid.begin is not None and wid.end is not None:
+                # Neither bound is None -> the annotation was deleted
+                # (not just invalidated)
+                self.remove(wid)
         return True
 
     def build_widget(self):
@@ -158,14 +179,15 @@ class ActiveBookmarks(AdhocView):
         return v
 
 class ActiveBookmark(object):
-    def __init__(self, controller=None, begin=None, end=None, content=None, close_cb=None):
-        self.controller=controller
+    def __init__(self, controller=None, begin=None, end=None, content=None, close_cb=None, type=None):
+        self.controller=controller 
+        self.annotation=None
+        self.type=type
         self.widgets={}
         self.widget=self.build_widget()
         self.content=content
         self.begin=begin
         self.end=end
-        self.annotation=None
         self.close_cb=close_cb
 
     def set_begin(self, v):
@@ -212,25 +234,48 @@ class ActiveBookmark(object):
         f.set_label_widget(b)
 
         box=gtk.HBox()
-        def begin_cb(v):
-            if v is None:
+
+        def check_annotation(v):
+            if 'end' not in self.widgets:
+                # We are initializing
                 return True
-            if ('end' in self.widgets 
-                and self.widgets['end'].value is not None 
-                and v > self.widgets['end'].value):
-                return False
-            return True
-        def end_cb(v):
-            if v is None:
-                return True
-            if ('begin' in self.widgets 
-                and self.widgets['begin'] is not None 
-                and v < self.widgets['begin'].value):
-                return False
+            if self.begin is None or self.end is None:
+                if self.annotation is not None:
+                    # Remove the annotation
+                    self.controller.delete_element(self.annotation)
+                    self.annotation=None
+            else:
+                # Both times are valid.
+                if self.annotation is None:
+                    # Create the annotation
+                    id_=self.controller.package._idgenerator.get_id(Annotation)
+                    # Check the type
+                    if self.type is None:
+                        at=self.controller.gui.ask_for_annotation_type(text=_("Choose the annotation type to use to create the annotation.\nAll other annotations will be of the same type"),
+                                                                       create=True)
+                        if at is None:
+                            return True
+                        self.type=at
+                    el=self.controller.package.createAnnotation(
+                        ident=id_,
+                        type=self.type,
+                        author=config.data.userid,
+                        date=self.controller.get_timestamp(),
+                        fragment=MillisecondFragment(begin=long(self.begin),
+                                                     end=long(self.end)))
+                    el.content.data=self.content
+                    self.controller.package.annotations.append(el)
+                    self.annotation=el
+                    self.controller.notify('AnnotationCreate', annotation=el)
+                else:
+                    # Update the annotation
+                    self.annotation.fragment.begin=self.begin
+                    self.annotation.fragment.end=self.end
+                    self.controller.notify('AnnotationEditEnd', annotation=self.annotation)
             return True
 
-        self.widgets['begin']=OptionalTimeAdjustment(value=None, controller=self.controller, callback=begin_cb)
-        self.widgets['end']=OptionalTimeAdjustment(value=None, controller=self.controller, callback=end_cb)
+        self.widgets['begin']=OptionalTimeAdjustment(value=None, controller=self.controller, callback=check_annotation)
+        self.widgets['end']=OptionalTimeAdjustment(value=None, controller=self.controller, callback=check_annotation)
         self.widgets['content']=gtk.TextView()
         self.widgets['content'].widget=self.widgets['content']
         self.widgets['content'].set_size_request(120, -1)
@@ -253,13 +298,12 @@ class OptionalTimeAdjustment(object):
         self.value=value
 
     def set_value(self, v):
-        if self.callback is not None and not self.callback(v):
-            return True
         self._value=v
         if v is not None:
             self.widgets['nonempty'].value=v
             self.widgets['nonempty'].update()
         self.update()
+        self.callback(v)
 
     def get_value(self):
         if self._value is not None:
