@@ -99,6 +99,7 @@ import advene.gui.views.table
 import advene.gui.views.logwindow
 import advene.gui.views.interactivequery
 import advene.gui.views.finder
+import advene.gui.views.activebookmarks
 from advene.gui.views.bookmarks import Bookmarks
 from advene.gui.edit.rules import EditRuleSet
 from advene.gui.edit.dvdselect import DVDSelect
@@ -265,6 +266,7 @@ class AdveneGUI (Connect):
             ('transcribe', _('Note-taking editor'), 'transcribe.png'),
             ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
             ('bookmarks', _('Bookmarks'), 'bookmarks.png'),
+            ('activebookmarks', _('Active bookmarks'), 'activebookmarks.png'),
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
             ('montage', _("Dynamic montage"), 'montage.png'),
             ):
@@ -648,6 +650,7 @@ class AdveneGUI (Connect):
         for m in (advene.gui.views.timeline,
                   advene.gui.views.browser,
                   advene.gui.views.finder,
+                  advene.gui.views.activebookmarks,
                   advene.gui.views.interactivequery,
                   advene.gui.views.table,
                   advene.gui.views.bookmarks,
