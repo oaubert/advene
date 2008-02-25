@@ -1,6 +1,5 @@
 #
-# Advene: Annotate Digital Videos, Exchange on the NEt
-# Copyright (C) 2008 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+# This file is part of Advene.
 #
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,7 +12,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Advene; if not, write to the Free Software
+# along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 """Helper GUI classes and methods.
@@ -87,9 +86,8 @@ class SchemaEditor (AdhocView):
         #print "%s" % self.widget.size_request()
         # 51/70 ...
 
-
     def refresh(self, *p):
-        return True
+        return True  
 
     def build_widget(self):
         vbox=gtk.VBox()
@@ -97,8 +95,7 @@ class SchemaEditor (AdhocView):
         #liste et boutons
         self.hboxEspaceSchema = gtk.HBox()
         self.listeSchemas = dialog.list_selector_widget(
-                members=[ (s, s.getTitle()) for s in self.controller.package.getSchemas()])
-
+            members=[ (s, s.getTitle()) for s in self.controller.package.getSchemas()])
         hboxMenu.pack_start(self.listeSchemas, expand=True)
         #penser a connecter le changed event.
         boutonSuppr = gtk.Button(label="Supprimer", stock=gtk.STOCK_DELETE)
@@ -110,12 +107,10 @@ class SchemaEditor (AdhocView):
         hboxMenu.pack_start(boutonSuppr, expand=False)
         hboxMenu.pack_start(boutonNew, expand=False)
         #fin du menu
-
         #onglets schemas
         self.books=[] # books = [[notebook,[schemaong1,schemaong2]],...]
         self.addNotebook()
         #fin onglets
-
         #menu pour faire les schemas
         vBoxExp = gtk.VBox()
         packExp = gtk.VBox()# sans doute un arbre pour le package voir treeview
@@ -138,7 +133,7 @@ class SchemaEditor (AdhocView):
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         #sw.add_events(gtk.gdk.BUTTON_PRESS_MASK)
         sw.add_with_viewport(vbox)
-        sw.set_size_request(640, 480)
+        #sw.set_size_request(640, 480)
         return sw
 
     def update_list_schemas(self, active_element):
@@ -169,26 +164,28 @@ class SchemaEditor (AdhocView):
                 book = self.books[lenB]
                 lrem=[]
                 for i in range(book[0].get_n_pages()):
-                    #FIXME need to find a way to find the good tab (new notebookclass ?
+                    #FIXME need to find a way to find the good tab (new notebookclass) ?
                     if (book[1][i]==sc):
                         lrem.append(book[0].get_nth_page(i))
                 for tab in lrem:
                     self.removeSchemaArea(w, tab, book)
                 lenB = lenB-1
             return True
-        return False
+        else:
+            return False
 
     def removeNoteBook(self, book):
         if (self.books[0]==book):
             return False
-        # un seul espace schema (le premier), on ne le supprime pas.
+            # un seul espace schema (le premier), on ne le supprime pas.
         indB =-1
         for i in range(len(self.books)):
             if (self.books[i]==book):
                 indB=i
                 break
         if (indB<0):
-            print "erreur remove book %s" % indB
+            print "Error removing book %s" % book
+            return False
         self.books.remove(self.books[indB])
         # on retire ensuite la zone correspondante
         vb = book[0].get_parent()
@@ -203,7 +200,7 @@ class SchemaEditor (AdhocView):
         win.remove(sep)
         win.remove(vb)
         return True
-
+		    
     def addNotebook(self):
         self.books.append([gtk.Notebook(),[]])
         i = len(self.books)-1
@@ -215,7 +212,7 @@ class SchemaEditor (AdhocView):
         hboxConExplorer.pack_start(labelConExplorer, expand=False)
         vbtemp = gtk.VBox()
         vbtemp.pack_start(self.books[i][0], expand=True, fill=True)
-        vbtemp.pack_start(gtk.HSeparator(), expand=False)
+        vbtemp.pack_start(gtk.HSeparator(), expand=False)	    
         vbtemp.pack_start(hboxConExplorer, expand=False)
         self.hboxEspaceSchema.pack_start(vbtemp, expand=True, fill=True)
         self.hboxEspaceSchema.pack_start(gtk.VSeparator(), expand=False)
@@ -225,7 +222,7 @@ class SchemaEditor (AdhocView):
     def openSchema(self, w, event):
         tsc, schema =self.listeSchemas.get_model()[self.listeSchemas.get_active()]
         if (schema==None):
-            print "error schema"
+            print "Error opening schema"
             return
         if (event.button==1):
             scArea = self.addSchemaArea(tsc, schema, self.books[0])
@@ -234,7 +231,7 @@ class SchemaEditor (AdhocView):
             bk = self.addNotebook()
             scArea = self.addSchemaArea(tsc, schema, bk)
             self.setup_canvas(scArea, schema)
-        return
+        return	
 
     def update_color(self, schema, color):
         if color is None:
@@ -244,7 +241,11 @@ class SchemaEditor (AdhocView):
                 #FIXME need to find a way to find the good tab (new notebookclass ?
                 if (book[1][i]==schema):
                     book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_NORMAL,color)
-
+                    book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_ACTIVE,color)
+                    book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_PRELIGHT,color)
+                    book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_SELECTED,color)
+                    book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_INSENSITIVE,color)
+	
     def addSchemaArea(self, nom, schema, book):
         ongLab = gtk.Label(nom)
         ong = self.create_canvas_primitives(nom, schema)
@@ -253,6 +254,10 @@ class SchemaEditor (AdhocView):
         e=gtk.EventBox()
         if (color is not None):
             e.modify_bg(gtk.STATE_NORMAL,gtk.gdk.color_parse(color))
+            e.modify_bg(gtk.STATE_ACTIVE,gtk.gdk.color_parse(color))
+            e.modify_bg(gtk.STATE_PRELIGHT,gtk.gdk.color_parse(color))
+            e.modify_bg(gtk.STATE_SELECTED,gtk.gdk.color_parse(color))
+            e.modify_bg(gtk.STATE_INSENSITIVE,gtk.gdk.color_parse(color))
         e.add(ongLab)
         e.connect("button-press-event", self.schemaAreaHandler, book)
         hb.pack_start(e, expand=False, fill=False)
@@ -272,7 +277,7 @@ class SchemaEditor (AdhocView):
         del book[1][npg]
         if (book[0].get_n_pages()==0):
             self.removeNoteBook(book)
-        # si plus de page on retire l'espace schema.
+            # si plus de page on retire l'espace schema.
 
     def schemaAreaHandler(self, w, event, book):
         if (event.button==3):
@@ -293,277 +298,44 @@ class SchemaEditor (AdhocView):
             # ajout d'un nouveau type
             self.addRelationTypeGroup(canvas, schema)
 
-    def getRelTypeFromGroup(self, grp):
-        typeid = grp.get_child(2).props.text
-        rtype = None
-        for Rt in self.controller.package.getRelationTypes():
-            if Rt.getId() == typeid:
-                rtype = Rt
-                break
-        return rtype
+### Functions to add remove modify RelationTypesGroup and redraw them when moving AnnotationTypeGroup
 
-    #hack pour recup l'id des types d'annotation lies a un type de relation
-    def getIdFromURI(self, uri):
-        return uri[1:]
-
-    def distMin(self,l1,l2):
-        d=-1
-        xd1=xd2=yd1=yd2=0
-        for i in range(len(l1)):
-            x1 = l1[i][0]
-            y1 = l1[i][1]
-            for j in range(len(l2)):
-                x2 = l2[j][0]
-                y2 = l2[j][1]
-                nd=sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
-                if ((d==-1) or (nd < d)):
-                    d = nd
-                    xd1 = x1
-                    xd2 = x2
-                    yd1 = y1
-                    yd2 = y2
-        return xd1,yd1,xd2,yd2,d
-
-    def addRelationTypeGroup(self, canvas, schema, name=" ", type=None):
-        # determiner ce que lie la ligne pour chopper les coordonnees des rects et la placer ou il faut
-        # si les 2 types sont le meme : fleche a 4 points pour faire demi tour
-        # si le type de dest n'est pas dans le schema : mettre en evidence
-        # sinon determiner les 2 faces les plus proches et tracer une ligne.
-        if type is None:
-            print "creation type rel"
-            # appeler la creation du type d'annotation
-            cr=CreateElementPopup(type_=RelationType,
-                                  parent=schema,
-                                  controller=self.controller)
-            rt=cr.popup(modal=True)
-            if (rt==None):
-                return False
-            if rt:
-                pop = get_edit_popup (rt, self.controller)
-                pop.edit(modal=True)
-            type=rt
-            name=type.getTitle()
-        root = canvas.get_root_item ()
-        cvgroup = goocanvas.Group(parent = root)
-        color = "black"
-        if (self.controller.get_element_color(type) is not None):
-            color = self.controller.get_element_color(type)
-        #ca renvoie les uri ...
-        linked = type.getHackedMemberTypes()
-        temp=[]
-        for i in linked:
-            # on recup le type d'A.
-            typeA = self.getIdFromURI(i)
-            # on cherche le groupe du type d'A.
-            gr = self.findAnnotationTypeGroup(typeA, canvas)
-            x=1
-            y=1
-            w=0
-            h=0
-            if gr is not None:
-                # on prend le rect
-                x = gr.get_child(0).get_bounds().x1
-                y = gr.get_child(0).get_bounds().y1
-                w = gr.get_child(0).props.width
-                h = gr.get_child(0).props.height
-                # on ajoute une reference au type pour que la relation soit redessinee si on bouge l'annotation.
-                goocanvas.Text (parent = gr,
-                                   text = type.getId(),
-                                   x = x,
-                                   y = y,
-                                   visibility=goocanvas.ITEM_HIDDEN)
-            # on stocke les 4 milieux de cotes et les 4 angles aussi
-            temp.append([[x+w/2,y],[x+w/2,y+h],[x,y+h/2],[x+w,y+h/2],[x,y],[x+w,y],[x+w,y+h],[x,y+h]])
-        # a modif si plus de 2 types lies.
-        it=0
-        x1,y1,x2,y2,d = self.distMin(temp[it],temp[it+1])
-
-        if d==0:
-            p = goocanvas.Points ([(x1, y1), (x1,y1-20), (x1+10, y1-20), (x2+10, y2)])
-        else:
-            p = goocanvas.Points ([(x1, y1), (x2, y2)])
-#ligne
-        item = goocanvas.Polyline (parent = cvgroup,
-                                        close_path = False,
-                                        points = p,
-                                        stroke_color = color,
-                                        line_width = 3.0,
-                                        start_arrow = True,
-                                        end_arrow = True)
-                                        #start_arrow = False,
-                                        #end_arrow = False,
-                                        #arrow_tip_length =3.0,
-                                        #arrow_length = 4.0,
-                                        #arrow_width = 3.5
-        if (d==0):
-            itemL = goocanvas.Text (parent = cvgroup,
-                               text = name,
-                               x = x1+5,
-                               y = y1-10,
-                               width = -1,
-                               anchor = gtk.ANCHOR_CENTER,
-                               font = "Sans Bold 10")
-        else:
-            itemL = goocanvas.Text (parent = cvgroup,
-                               text = name,
-                               x = (x1+x2)/2,
-                               y = (y1+y2)/2,
-                               width = -1,
-                               anchor = gtk.ANCHOR_CENTER,
-                               font = "Sans Bold 10")
-        #pour conserver la relation au type
-        if type is not None:
-                itemLC = goocanvas.Text (parent = cvgroup,
-                                   text = type.getId(),
-                                   x = x1,
-                                   y = y1,
-                                   visibility=goocanvas.ITEM_HIDDEN)
-        self.setup_rel_signals (cvgroup)
+    def addRelationTypeGroup(self, canvas, schema, name=" ", type=None, members=[]):
+        # FIXME : type out of schema
+        cvgroup = RelationTypeGroup(self.controller, canvas, schema, name, type, members)
+        if cvgroup is not None:
+            self.setup_rel_signals (cvgroup)
         return cvgroup
 
     def findRelationTypeGroup(self, typeId, canvas):
         #cherche le groupe correspondant a l'id
         root = canvas.get_root_item ()
         for i in range(0, root.get_n_children()):
-            if root.get_child(i).get_n_children()>=3: # sinon il est en construction...
-                ite=root.get_child(i).get_child(2)
-                if isinstance(ite,goocanvas.Text):
-                    if ite.props.text == typeId:
-                        return ite.get_parent()
+            if hasattr(root.get_child(i), 'type') and root.get_child(i).type.id== typeId:
+                return root.get_child(i)
         return None
-
 
     def rel_redraw(self, rtg):
-        #redessine la relation
-        rtype = self.getRelTypeFromGroup(rtg)
-        linked = rtype.getHackedMemberTypes()
-        temp=[]
-        for i in linked:
-            # on recup le type d'A.
-            typeA = self.getIdFromURI(i)
-            # on cherche le groupe du type d'A.
-            gr = self.findAnnotationTypeGroup(typeA, rtg.get_canvas())
-            x=1
-            y=1
-            w=0
-            h=0
-            if gr is not None:
-                # on prend le rect
-                x = gr.get_child(0).get_bounds().x1
-                y = gr.get_child(0).get_bounds().y1
-                w = gr.get_child(0).props.width
-                h = gr.get_child(0).props.height
-            # on stocke les 4 milieux de cotes (les 4 angles aussi ?)
-            temp.append([[x+w/2,y],[x+w/2,y+h],[x,y+h/2],[x+w,y+h/2],[x,y],[x+w,y],[x+w,y+h],[x,y+h]])
-        x1,y1,x2,y2,d = self.distMin(temp[0],temp[1])
-        if d==0:
-            p = goocanvas.Points ([(x1, y1), (x1,y1-20), (x1+10, y1-20), (x2+10, y2)])
-            rtg.get_child(1).translate(x1-10-rtg.get_child(1).get_bounds().x1, y1-15-rtg.get_child(1).get_bounds().y1)
-        else:
-            p = goocanvas.Points ([(x1, y1), (x2, y2)])
-            rtg.get_child(1).translate((x1+x2-20)/2-rtg.get_child(1).get_bounds().x1, (y1+y2-30)/2-rtg.get_child(1).get_bounds().y1)
-        rtg.get_child(0).props.points=p
+        rtg.redraw()
 
     def removeRelationTypeGroup(self, group):
-        #retire tout le groupe du schemaArea
-        # retire aussi ses references dans les annotations types
-        rtype = self.getRelTypeFromGroup(group)
-        typeId = rtype.getId()
-        linked = rtype.getHackedMemberTypes()
-        for i in linked:
-            # on recup le type d'A.
-            typeA = self.getIdFromURI(i)
-            # on cherche le groupe du type d'A.
-            gr = self.findAnnotationTypeGroup(typeA, group.get_canvas())
-            #on cherche la ref a la relation et on l'efface
-            if gr is not None:
-                for j in range(3,gr.get_n_children()):
-                    ite=gr.get_child(j)
-                    if isinstance(ite,goocanvas.Text):
-                        if ite.props.text == typeId:
-                            gr.remove_child(j)
-                            break
-            else:
-                #c'est une relation vers un type externe au schema, a supprimer dans adv2
-                print "%s n'est pas dans ce schema" % typeA
-        idRt = group.get_child(2).props.text
-        typ = self.controller.package.get_element_by_id(idRt)
-        self.controller.delete_element(typ)
-        parent = group.get_parent()
-        child_num = parent.find_child (group)
-        parent.remove_child (child_num)
+        group.remove()
+        ### FIXME : propagate to other canvas
 
+### Functions to add remove modify AnnotationTypesGroup
     def addAnnotationTypeGroup(self, canvas, schema, name=" ", type=None, rx =20, ry=30):
-        if type is None:
-            print "creation type annot"
-            # appeler la creation du type d'annotation
-            cr=CreateElementPopup(type_=AnnotationType,
-                                  parent=schema,
-                                  controller=self.controller)
-            at=cr.popup(modal=True)
-            if (at==None):
-                return False
-            type=at
-            name=type.getTitle()
-# appel edition nouveau type...
-        root = canvas.get_root_item ()
-        cvgroup = goocanvas.Group(parent = root)
-        color = "black"
-        nbannot = len(type.getAnnotations())
-        if (self.controller.get_element_color(type) is not None):
-            color = self.controller.get_element_color(type)
-        item = goocanvas.Rect (parent = cvgroup,
-                               x = rx,
-                               y = ry,
-                               width = 140,
-                               height = 80,
-                               fill_color_rgba = 0x3cb37150,
-                               stroke_color = color,
-                               line_width = 2.0)
-        itemL = goocanvas.Text (parent = cvgroup,
-                               text = name + " ("+str(nbannot)+")",
-                               x = rx+5,
-                               y = ry+10,
-                               width = -1,
-                               anchor = gtk.ANCHOR_W,
-                               font = "Sans Bold 10")
-        #lable invisible pour conserver la relation au type
-
-        itemLC = goocanvas.Text (parent = cvgroup,
-                                   text = type.getId(),
-                                   x = rx,
-                                   y = ry,
-                                   visibility=goocanvas.ITEM_HIDDEN)
-        self.setup_annot_signals(cvgroup, schema)
+        cvgroup = AnnotationGroup(self.controller, canvas, schema, name, type, rx, ry)
+        if cvgroup is not None:
+            self.setup_annot_signals(cvgroup, schema)
         return cvgroup
 
-    def findAnnotationTypeGroup(self, typeId, canvas):
-        #trouve le groupe correspondant a l'id
-        root = canvas.get_root_item ()
-        for i in range(0, root.get_n_children()):
-            if root.get_child(i).get_n_children()>=3: # sinon il est en construction...
-                ite=root.get_child(i).get_child(2)
-                if isinstance(ite,goocanvas.Text):
-                    if ite.props.text == typeId:
-                        return ite.get_parent()
-        return None
 
     def removeAnnotationTypeGroup(self, group, schema):
-        #retire tout le groupe du schemaArea
-        # on commence par efacer les types de relation lies
-        # ajouter un warning pour prevenir qu'on va effacer les rels associees ?
-        while (group.get_n_children()>3):
-            ite=group.get_child(3)
-            if isinstance(ite,goocanvas.Text):
-                rgr = self.findRelationTypeGroup(ite.props.text, group.get_canvas())
-                if rgr is not None:
-                    self.removeRelationTypeGroup(rgr)
-        idAt = group.get_child(2).props.text
-        typ = self.controller.package.get_element_by_id(idAt)
-        self.controller.delete_element(typ)
-        parent = group.get_parent()
-        child_num = parent.find_child (group)
-        parent.remove_child (child_num)
+        group.remove()
+        ### FIXME : propagate to other canvas
+        ### FIXME : delete relation types based on this annotation type in othe shcemas
+
+### Functions to handle notification signals
 
     def setup_rel_signals (self, item):
         #pour capter les events sur les relations du dessin
@@ -579,22 +351,22 @@ class SchemaEditor (AdhocView):
         item.connect ("button_release_event", self.annot_on_button_release)
 
     def rel_on_button_press (self, item, target, event):
+        #on remplit l'explo
+        self.TE.initWithType(item.type)
+        self.drawFocusOn(item.line)
         if event.button == 1:
-            #on remplit l'explo
-            self.TE.initWithType(item.get_child(2).props.text,"rt")# label du type
-            self.drawFocusOn(item.get_child(0))
             self.drag_x = event.x
             self.drag_y = event.y
             fleur = gtk.gdk.Cursor (gtk.gdk.FLEUR)
             canvas = item.get_canvas ()
             canvas.pointer_grab (item,
-                                     gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_RELEASE_MASK,
-                                     fleur,
-                                     event.time)
+                                gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_RELEASE_MASK,
+                                fleur,
+                                event.time)
             self.dragging = True
         elif event.button == 3:
-            def menuRem(item, line):
-                self.removeRelationTypeGroup(line)
+            def menuRem(w, item):
+                self.removeRelationTypeGroup(item)
                 return True
             menu = gtk.Menu()
             itemM = gtk.MenuItem(_("Remove Relation Type"))
@@ -609,47 +381,56 @@ class SchemaEditor (AdhocView):
         canvas.pointer_ungrab (item, event.time)
         self.dragging = False
 
+### events on annotationTypeGroup
 
     def annot_on_motion_notify (self, item, target, event):
         if (self.dragging == True) and (event.state & gtk.gdk.BUTTON1_MASK):
             new_x = event.x
             new_y = event.y
             item.translate (new_x - self.drag_x, new_y - self.drag_y)
-            # on check si des relations sont liees, auquel cas on les redessine
-            for i in range(3,item.get_n_children()):
-                rtg = self.findRelationTypeGroup(item.get_child(i).props.text, item.get_canvas())
+            for rtg in item.rels:
                 self.rel_redraw(rtg)
         return True
 
     def annot_on_button_press (self, item, target, event, schema):
+        self.TE.initWithType(item.type)
+        self.drawFocusOn(item.rect)
         if event.button == 1:
-            self.TE.initWithType(item.get_child(2).props.text,"at")# id du type
-            self.drawFocusOn(item.get_child(0))
             self.drag_x = event.x
             self.drag_y = event.y
             fleur = gtk.gdk.Cursor (gtk.gdk.FLEUR)
             canvas = item.get_canvas ()
             canvas.pointer_grab (item,
-                                     gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_RELEASE_MASK,
-                                     fleur,
-                                     event.time)
+                                    gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_RELEASE_MASK,
+                                    fleur,
+                                    event.time)
             self.dragging = True
         elif event.button == 3:
-            def menuRem(w, rect, schema):
-                self.removeAnnotationTypeGroup(rect, schema)
+            def menuRem(w, item, schema):
+                self.removeAnnotationTypeGroup(item, schema)
                 return True
-            def menuNew(w, rect, schema):
-                #creation du type, ajout des types annots en membre
-                #self.addRelationTypeGroup()
+            def menuNew(w, item, schema, member2):
+                mem = []
+                mem.append(item.type)
+                mem.append(member2)
+                self.addRelationTypeGroup(item.get_canvas(), schema, members=mem)
                 return True
             menu = gtk.Menu()
             itemM = gtk.MenuItem(_("Remove Annotation Type"))
             itemM.connect("activate", menuRem, item, schema )
             menu.append(itemM)
             itemM = gtk.MenuItem(_("Create Relation Type between this one and..."))
-            #sous menu avec les types d'annots tries par schema, celui la en premier
-            #
-            #itemM.connect("activate", menuNew, item, schema )
+            ssmenu = gtk.Menu()
+            itemM.set_submenu(ssmenu)
+            for s in self.controller.package.getSchemas():
+                sssmenu = gtk.Menu()
+                itemSM = gtk.MenuItem(s.title)
+                itemSM.set_submenu(sssmenu)
+                for a in s.getAnnotationTypes(): 
+                    itemSSM = gtk.MenuItem(a.title)
+                    itemSSM.connect("activate", menuNew, item, schema, a )
+                    sssmenu.append(itemSSM)
+                ssmenu.append(itemSM)
             menu.append(itemM)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -660,15 +441,14 @@ class SchemaEditor (AdhocView):
         canvas.pointer_ungrab (item, event.time)
         self.dragging = False
         # on check si des relations sont liees, auquel cas on les redessine
-        for i in range(3,item.get_n_children()):
-            rtg = self.findRelationTypeGroup(item.get_child(i).props.text, canvas)
-            if rtg is not None:
-                self.rel_redraw(rtg)
+        for rtg in item.rels:
+            self.rel_redraw(rtg)
+
+### events on background
 
     def on_background_button_press (self, item, target, event, schema):
-
         self.TE.initWithType(None)
-        canvas = item.get_canvas ()
+        canvas = item.get_canvas()
         self.drawFocusOn(canvas)
         if (event.button==3):
             def menuNew(w, canvas, schema):
@@ -684,7 +464,10 @@ class SchemaEditor (AdhocView):
             itemM = gtk.MenuItem(_("New Annotation Type"))
             itemM.connect("activate", menuNew, canvas, schema )
             menu.append(itemM)
-            itemM = gtk.MenuItem(_("Add Annotation Type"))
+            itemM = gtk.MenuItem(_("Copy Annotation Type from Schema..."))
+            #itemM.connect("activate", menuNew, canvas )
+            menu.append(itemM)
+            itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
             #itemM.connect("activate", menuNew, canvas )
             menu.append(itemM)
             menu.show_all()
@@ -697,18 +480,22 @@ class SchemaEditor (AdhocView):
             canvas=item
         else:
             canvas = item.get_canvas()
+            item.props.line_width = 4.0
         root = canvas.get_root_item()
         for i in range(root.get_n_children()):
-            ite=root.get_child(i).get_child(0)
-            if ite==item:
-                ite.props.line_width = 4.0
+            if hasattr(root.get_child(i), 'rect'):
+                ite=root.get_child(i).rect
+            elif hasattr(root.get_child(i), 'line'):
+                ite=root.get_child(i).line
             else:
+                ite=None
+            if ite is not None and ite != item:
                 ite.props.line_width = 2.0
-
+		    
     def create_canvas_primitives (self, nom, schema):
         #if (self.controller.get_element_color(schema) is not None):
-        #    bg_color = self.controller.get_element_color(schema)
-        #else:
+        #   bg_color = self.controller.get_element_color(schema)
+	    #else:
         bg_color = gtk.gdk.Color (55000, 55000, 65535, 0)
         vbox = gtk.VBox (False, 4)
         vbox.set_border_width (4)
@@ -716,7 +503,7 @@ class SchemaEditor (AdhocView):
         hbox = gtk.HBox (False, 4)
         vbox.pack_start (w, False, False, 0)
         vbox.pack_start (hbox, False, False, 0)
-        #Create the canvas
+        #Create the canvas   
         canvas = goocanvas.Canvas()
         canvas.modify_base (gtk.STATE_NORMAL, bg_color)
         canvas.set_bounds (0, 0, 8000, 6000)
@@ -743,7 +530,7 @@ class SchemaEditor (AdhocView):
 
     def zoom_changed (self, adj, canvas):
         canvas.set_scale (adj.get_value())
-
+    
     def center_toggled (self, button, data):
         pass
 
@@ -762,8 +549,7 @@ class SchemaEditor (AdhocView):
             self.addRelationTypeGroup(canvas,schema, j.getTitle(), j)
             r=r+1
 
-
-#classe pour l'explorateur de types
+### Type Explorer class
 class TypeExplorer (gtk.ScrolledWindow):
     def __init__ (self, controller=None, package=None):
         gtk.ScrolledWindow.__init__(self)
@@ -775,7 +561,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         hboxNom = gtk.HBox()
         labelNom = gtk.Label("Title : ")
         entryNom = gtk.Entry()
-        self.TName = entryNom
+        self.TName = entryNom 
         hboxNom.pack_start(labelNom)
         hboxNom.pack_start(entryNom)
         hboxAddAtt = gtk.HBox()
@@ -803,12 +589,12 @@ class TypeExplorer (gtk.ScrolledWindow):
         self.TAttsSpace = espaceAtt
         self.TAtts = []
         espaceBoutons = gtk.HBox()
-        boutonSave = gtk.Button("Save")
-        #boutonSave.connect("clicked", self.saveType )
-        boutonCancel = gtk.Button("Cancel")
-        #boutonCancel.connect("clicked", self.cancelType )
-        espaceBoutons.pack_end(boutonCancel, expand=False, fill=False)
-        espaceBoutons.pack_end(boutonSave, expand=False, fill=False)
+        self.boutonSave = gtk.Button("Save")
+        self.boutonSave.connect("clicked", self.saveType)
+        self.boutonCancel = gtk.Button("Cancel")
+        self.boutonCancel.connect("clicked", self.cancelType )
+        espaceBoutons.pack_end(self.boutonCancel, expand=False, fill=False)
+        espaceBoutons.pack_end(self.boutonSave, expand=False, fill=False)
         vbox.pack_start(labelTypeExplorer, expand=False)
         vbox.pack_start(gtk.HSeparator(), expand=False)
         vbox.pack_start(hboxId, expand=False)
@@ -817,18 +603,17 @@ class TypeExplorer (gtk.ScrolledWindow):
         vbox.pack_start(gtk.HSeparator(), expand=False)
         vbox.pack_start(hboxMime, expand=False, fill=False)
         vbox.pack_start(gtk.HSeparator(), expand=False)
-        vbox.pack_start(hboxAddAtt, expand=False, fill=False)
-        vbox.pack_start(gtk.HSeparator(), expand=False)
-        vbox.pack_start(labelAtt, expand=False, fill=False)
-        vbox.pack_start(espaceAtt, expand=False, fill=False)
-        vbox.pack_start(gtk.HSeparator(), expand=False)
-        vbox.pack_start(espaceBoutons, expand=False, fill=False)
-
+        #vbox.pack_start(hboxAddAtt, expand=False, fill=False)
+        #vbox.pack_start(gtk.HSeparator(), expand=False)
+        #vbox.pack_start(labelAtt, expand=False, fill=False)
+        #vbox.pack_start(espaceAtt, expand=False, fill=False)
+        #vbox.pack_start(gtk.HSeparator(), expand=False)
+        vbox.pack_start(espaceBoutons, expand=False, fill=False)	
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.add_with_viewport(vbox)
 
     def refresh(self, *p):
-        return True
+        return True  
 
     def getTypeId(self):
         return self.TId.get_text()
@@ -838,7 +623,7 @@ class TypeExplorer (gtk.ScrolledWindow):
             return False
         self.TId.set_text(name)
         return True
-
+    
     def getTypeName(self):
         return self.TName.get_text()
 
@@ -848,11 +633,11 @@ class TypeExplorer (gtk.ScrolledWindow):
         self.TName.set_text(name)
         return True
 
-#a faire evoluer en liste
+    #a faire evoluer en liste
     def getMimeType(self):
         return self.TMimeType.get_text()
 
-#a faire evoluer en liste
+    #a faire evoluer en liste
     def setMimeType(self, mimetype):
         self.TMimeType.set_text(mimetype)
         return True
@@ -878,32 +663,253 @@ class TypeExplorer (gtk.ScrolledWindow):
         self.TAtts.append(boxAtt)
         self.TAttsSpace.pack_start(boxAtt)
         self.TAttsSpace.show_all()
-        return True
+        return True	
 
-    def initWithType(self, typeid, rat="None"):
-        if typeid is None:
+    def initWithType(self, type):
+        if type is None:
             # tout remettre a vide
             self.type=None
             self.setTypeName("")
             self.setTypeId("")
             self.setMimeType("")
-            return False
-        if rat=="at":
-            self.type = helper.get_id(self.controller.package.getAnnotationTypes(), typeid)
-        elif rat=="rt":
-            self.type = helper.get_id(self.controller.package.getRelationTypes(), typeid)
-        else:
-            print "Not an annotation or relation Type"
-            return False
-        self.setTypeName(self.type.getTitle())
-        self.setTypeId(self.type.getId())
-        self.setMimeType(self.type.getMimetype())
+            return True
+        self.type = type
+        self.setTypeName(self.type.title)
+        self.setTypeId(self.type.id)
+        self.setMimeType(self.type.mimetype)
         #boucle sur les attributs pour creer et remplir les lignes
-        if (self.type.getMimetype()=='application/x-advene-relaxNG'):
+        #if (self.type.mimetype=='application/x-advene-relaxNG'):
             # appel de la fonction qui parse l'arbre
             # pour chaque element attribut, appel de la fonction qui ajoute une case aux attributs.
-            pass
-
+        #    pass
         return True
 
+    def saveType(self, button):
+        self.type.title=self.getTypeName()
+        self.type.mimetype=self.getMimeType()
+        #save attributes
+        # send controller an event
+        # redraw contents
 
+    def cancelType(self, button):
+        self.initWithType(self.type)
+
+# FIXME :
+# ajouter la gestion d'events 
+# sur ajout/modif/suppr de type, refresh les canvas
+# sur modifs schema, refresh les canvas
+# sur modif contenus, refresh l'explo
+# envoyer event sur modifs contenus
+
+class AnnotationGroup (goocanvas.Group):
+    def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, rx =0, ry=0):
+        goocanvas.Group.__init__(self, parent = canvas.get_root_item ())
+        self.controller=controller
+        self.schema=schema
+        self.name=name
+        self.type=type
+        self.color = "black"
+        self.rels=[] # rel groups
+        if type is None:
+            print "Annotation Type Creation"
+            # appeler la creation du type d'annotation
+            cr=CreateElementPopup(type_=AnnotationType,
+                                    parent=schema,
+                                    controller=self.controller)
+            at=cr.popup(modal=True)
+            if (at==None):
+                return None
+            self.type=at
+            self.name=self.type.title
+        nbannot = len(self.type.getAnnotations())
+        if (self.controller.get_element_color(self.type) is not None):
+            self.color = self.controller.get_element_color(self.type)
+
+        self.rect = goocanvas.Rect (parent = self,
+                                    x = rx,
+                                    y = ry,
+                                    width = 140,
+                                    height = 80,
+                                    fill_color_rgba = 0x3cb37150,
+                                    stroke_color = self.color,
+                                    line_width = 2.0)
+        self.text = goocanvas.Text (parent = self,
+                                    text = self.name + " ("+str(nbannot)+")",
+                                    x = rx+5, 
+                                    y = ry+10,
+                                    width = -1,
+                                    anchor = gtk.ANCHOR_W,
+                                    font = "Sans Bold 10")
+    def remove(self):
+        while (len(self.rels)>0):
+            self.rels[0].remove()
+        self.controller.delete_element(self.type)
+        parent = self.get_parent()
+        child_num = parent.find_child (self)
+        parent.remove_child (child_num)
+	
+class RelationTypeGroup (goocanvas.Group):
+    def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, members=[]):
+        goocanvas.Group.__init__(self, parent = canvas.get_root_item ())
+        self.controller=controller
+        self.schema=schema
+        self.name=name
+        self.type=type
+        self.color = "black"
+        self.members=members
+        if self.type is None:
+            print "Relation Type Creation"
+            # appeler la creation du type d'annotation
+            cr=CreateElementPopup(type_=RelationType,
+                                    parent=schema,
+                                    controller=self.controller)
+            rt=cr.popup(modal=True)
+            if (rt==None):
+                return None
+            self.type=rt
+            if (len(self.members)==0):
+                pop = get_edit_popup (self.type, self.controller)
+                pop.edit(modal=True)
+            else:
+                # FIXME if more than 2 members
+                self.type.hackedMemberTypes=( '#' + self.members[0].id, '#' + self.members[1].id )
+        linked = self.type.getHackedMemberTypes()
+        #print "%s %s %s %s %s" % (self.type, self.name, self.schema, self.members, linked)
+        for i in linked:
+            # Add annotations types to members
+            typeA = self.getIdFromURI(i)
+            typ = helper.get_id(self.controller.package.getAnnotationTypes(), typeA)
+            if typ is not None:
+                self.members.append(typ)
+                #print "%s %s %s %s" % (i, typeA, typ, self.members)
+        self.name=self.type.title
+        self.color = "black"
+        if (self.controller.get_element_color(self.type) is not None):
+            self.color = self.controller.get_element_color(self.type)
+        temp=[]
+        for i in members:
+            gr = self.findAnnotationTypeGroup(i.id, canvas)
+            x=1
+            y=1
+            w=0
+            h=0
+            if gr is not None:
+                x = gr.rect.get_bounds().x1
+                y = gr.rect.get_bounds().y1
+                w = gr.rect.props.width
+                h = gr.rect.props.height
+                gr.rels.append(self)
+            # 8 points of rect
+            temp.append([[x+w/2,y],[x+w/2,y+h],[x,y+h/2],[x+w,y+h/2],[x,y],[x+w,y],[x+w,y+h],[x,y+h]])
+        if len(temp)<2:
+            return None
+        # FIXME if more than 2 linked types
+        it=0
+        x1,y1,x2,y2,d = self.distMin(temp[it],temp[it+1])
+
+        if d==0:
+            # verify slot to attach the relation on annotation type before doing that
+            p = goocanvas.Points ([(x1, y1), (x1,y1-20), (x1+10, y1-20), (x2+10, y2)])
+        else:
+            p = goocanvas.Points ([(x1, y1), (x2, y2)])
+        #ligne
+        self.line = goocanvas.Polyline (parent = self,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = self.color,
+                                        line_width = 3.0,
+                                        start_arrow = False,
+                                        end_arrow = True,
+                                        arrow_tip_length =3.0,
+                                        arrow_length = 4.0,
+                                        arrow_width = 3.0
+                                        )
+                                        #start_arrow = False,
+                                        #end_arrow = True,
+        if (d==0):
+            self.text = goocanvas.Text (parent = self,
+                                        text = self.name,
+                                        x = x1+5,
+                                        y = y1-10,
+                                        width = -1,
+                                        anchor = gtk.ANCHOR_CENTER,
+                                        font = "Sans Bold 10")	
+        else:
+            self.text = goocanvas.Text (parent = self,
+                                        text = self.name,
+                                        x = (x1+x2)/2, 
+                                        y = (y1+y2)/2,
+                                        width = -1,
+                                        anchor = gtk.ANCHOR_CENTER,
+                                        font = "Sans Bold 10")
+
+    #FIXME : hack to find id from type's uri
+    def getIdFromURI(self, uri):
+        return uri[1:]
+
+    def findAnnotationTypeGroup(self, typeId, canvas):
+        root = canvas.get_root_item ()
+        for i in range(0, root.get_n_children()):
+            if hasattr(root.get_child(i), 'type') and root.get_child(i).type.id == typeId:
+                return root.get_child(i)
+        return None
+
+    # function to calculate min distance between x points
+    def distMin(self,l1,l2):
+        d=-1
+        xd1=xd2=yd1=yd2=0
+        for i in range(len(l1)):
+            x1 = l1[i][0]
+            y1 = l1[i][1]
+            for j in range(len(l2)):
+                x2 = l2[j][0]
+                y2 = l2[j][1]
+                nd=sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
+                if ((d==-1) or (nd < d)):
+                    d = nd
+                    xd1 = x1
+                    xd2 = x2
+                    yd1 = y1
+                    yd2 = y2
+        return xd1,yd1,xd2,yd2,d
+
+    def redraw(self):
+        #print self.members
+        temp=[] 
+        for i in self.members:
+            gr = self.findAnnotationTypeGroup(i.id, self.get_canvas())
+            x=1
+            y=1
+            w=0
+            h=0
+            if gr is not None:
+                x = gr.rect.get_bounds().x1
+                y = gr.rect.get_bounds().y1
+                w = gr.rect.props.width
+                h = gr.rect.props.height
+            # 8 points
+            temp.append([[x+w/2,y],[x+w/2,y+h],[x,y+h/2],[x+w,y+h/2],[x,y],[x+w,y],[x+w,y+h],[x,y+h]])
+        x1,y1,x2,y2,d = self.distMin(temp[0],temp[1])
+        if d==0:
+            # modifier en fonction du slot
+            p = goocanvas.Points ([(x1, y1), (x1,y1-20), (x1+10, y1-20), (x2+10, y2)])
+            self.text.translate(x1-10-self.text.get_bounds().x1, y1-15-self.text.get_bounds().y1)
+        else:
+            p = goocanvas.Points ([(x1, y1), (x2, y2)])
+            self.text.translate((x1+x2-20)/2-self.text.get_bounds().x1, (y1+y2-30)/2-self.text.get_bounds().y1)
+        self.line.props.points=p
+
+    def remove(self):
+        for i in self.members:
+            gr = self.findAnnotationTypeGroup(i.id, self.get_canvas())
+            if gr is not None:
+                gr.rels.remove(self)
+            else:
+                #Annotation group outside schema
+                #we don't remove the link because it doesn't have one
+                print "%s n'est pas dans ce schema" % i.id
+        #print "removing %s" % self.type
+        self.controller.delete_element(self.type)
+        parent = self.get_parent()
+        child_num = parent.find_child (self)
+        parent.remove_child(child_num)
