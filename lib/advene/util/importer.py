@@ -195,9 +195,9 @@ class GenericImporter(object):
 
     def create_annotation_type (self, schema, id_, author=None, date=None, title=None,
                                 representation=None, description=None, mimetype=None):
-        l=[ t.id for t in schema.annotationTypes if t.id == id_ ]
-        if l:
-            return l[0]
+        at=helper.get_id(self.package.annotationTypes, id_)
+        if at is not None:
+            return at
         at=schema.createAnnotationType(ident=id_)
         at.author=author or schema.author
         at.date=date or self.timestamp
@@ -218,9 +218,9 @@ class GenericImporter(object):
         return at
 
     def create_schema (self, id_, author=None, date=None, title=None, description=None):
-        l=[ t.id for t in self.package.schemas if t.id == id_ ]
-        if l:
-            return l[0]
+        s=helper.get_id(self.package.schemas, id_)
+        if s is not None:
+            return s
         schema=self.package.createSchema(ident=id_)
         schema.author=author or self.author
         schema.date=date or self.timestamp
@@ -844,8 +844,8 @@ class SubtitleImporter(GenericImporter):
         f=open(filename, 'r')
 
         p, at=self.init_package(filename=filename,
-                               schemaid='subtitle-schema',
-                               annotationtypeid='subtitle')
+                                schemaid='subtitle-schema',
+                                annotationtypeid='subtitle')
         if self.package is None:
             self.package=p
         self.defaulttype=at
