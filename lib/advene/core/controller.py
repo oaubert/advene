@@ -948,7 +948,7 @@ class AdveneController:
             id_ = helper.mediafile2id (uri)
             self.package.imagecache.load (id_)
 
-    def delete_element (self, el):
+    def delete_element (self, el, immediate_notify=False):
         """Delete an element from its package.
 
         Take care of all dependencies (for instance, annotations which
@@ -962,43 +962,43 @@ class AdveneController:
                 [ a.relations.remove(r) for a in r.members if r in a.relations ]
                 self.delete_element(r)
             p.annotations.remove(el)
-            self.notify('AnnotationDelete', annotation=el)
+            self.notify('AnnotationDelete', annotation=el, immediate=immediate_notify)
         elif isinstance(el, Relation):
             for a in el.members:
                 if el in a.relations:
                     a.relations.remove(el)
             p.relations.remove(el)
-            self.notify('RelationDelete', relation=el)
+            self.notify('RelationDelete', relation=el, immediate=immediate_notify)
         elif isinstance(el, AnnotationType):
             for a in el.annotations:
-                self.delete_element(a)
+                self.delete_element(a, immediate_notify=True)
             el.schema.annotationTypes.remove(el)
-            self.notify('AnnotationTypeDelete', annotationtype=el)
+            self.notify('AnnotationTypeDelete', annotationtype=el, immediate=immediate_notify)
         elif isinstance(el, RelationType):
             for r in el.relations:
-                self.delete_element(r)
+                self.delete_element(r, immediate_notify=True)
             el.schema.relationTypes.remove(el)
-            self.notify('RelationTypeDelete', relationtype=el)
+            self.notify('RelationTypeDelete', relationtype=el, immediate=immediate_notify)
         elif isinstance(el, Schema):
             for at in el.annotationTypes:
-                self.delete_element(at)
+                self.delete_element(at, immediate_notify=True)
             for rt in el.relationTypes:
-                self.delete_element(rt)
+                self.delete_element(rt, immediate_notify=True)
             p.schemas.remove(el)
-            self.notify('SchemaDelete', schema=el)
+            self.notify('SchemaDelete', schema=el, immediate=immediate_notify)
         elif isinstance(el, View):
             p.views.remove(el)
-            self.notify('ViewDelete', view=el)
+            self.notify('ViewDelete', view=el, immediate=immediate_notify)
         elif isinstance(el, Query):
             p.queries.remove(el)
-            self.notify('QueryDelete', query=el)
+            self.notify('QueryDelete', query=el, immediate=immediate_notify)
         elif isinstance(el, Resources) or isinstance(el, ResourceData):
             if isinstance(el, Resources):
                 for c in el.children():
-                    self.delete_element(c)
+                    self.delete_element(c, immediate_notify=True)
             p=el.parent
             del(p[el.id])
-            self.notify('ResourceDelete', resource=el)
+            self.notify('ResourceDelete', resource=el, immediate=immediate_notify)
         return True
 
     def transmute_annotation(self, annotation, annotationType, delete=False, position=None):
