@@ -802,8 +802,6 @@ class SubtitleImporter(GenericImporter):
     def __init__(self, encoding=None, **kw):
         super(SubtitleImporter, self).__init__(**kw)
 
-        if encoding is None:
-            encoding='latin1'
         self.encoding=encoding
 
     def can_handle(fname):
@@ -837,7 +835,17 @@ class SubtitleImporter(GenericImporter):
                 yield d
             else:
                 if tc is not None:
-                    content.append(unicode(line, self.encoding).encode('utf-8'))
+                    if self.encoding is not None:
+                        data=unicode(line, self.encoding)
+                    else:
+                        # We will try utf8 first, then fallback on latin1
+                        try:
+                            data=unicode(line, 'utf8')
+                        except UnicodeDecodeError:
+                            # Fallback on latin1, which is very common, but may
+                            # sometimes fail
+                            data=unicode(line, 'latin1')
+                    content.append(data.encode('utf-8'))
                     # else We could check line =~ /^\d+$/
 
     def process_file(self, filename):
