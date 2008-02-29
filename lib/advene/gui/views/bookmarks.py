@@ -161,10 +161,6 @@ class Bookmarks(AdhocView):
             _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
         return True
 
-    def activate(self, widget=None, timestamp=None):
-        self.controller.update_status("set", timestamp, notify=False)
-        return True
-
     def append(self, position):
         if position in self.history:
             return True
@@ -210,7 +206,19 @@ class Bookmarks(AdhocView):
                               t,
                               width=self.options['snapshot_width'])
         b=gtk.Button()
-        b.connect("clicked", self.activate, t)
+
+        def activate(widget=None, timestamp=None):
+            self.controller.update_status("set", timestamp, notify=False)
+            return True
+
+        def button_press(b, event, timestamp):
+            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+                self.controller.update_status("start", timestamp, notify=False)
+                return True
+            return False
+
+        b.connect("clicked", activate, t)
+        b.connect('button_press_event', button_press, t)
         b.add(i)
 
         # The button can generate drags
