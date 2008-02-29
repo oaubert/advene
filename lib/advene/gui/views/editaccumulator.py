@@ -71,24 +71,13 @@ class EditAccumulator(AccumulatorPopup):
         self.controller.gui.tooltips.set_tip(b, _("Close"))
         hbox.pack_start(b, expand=False)
 
-        # Title
-        if hasattr(element, 'type'):
-            t="%s (%s)" % (self.controller.get_title(element),
-                           self.controller.get_title(element.type))
-        else:
-            t=self.controller.get_title(element)
-
-        # Limit label size
-        if len(t) > 80:
-            t=unicode(t[:79])+u'\u2026'
-        # Ellipsize does not work well here, the label is always
-        # allocated too small a space
-        #l.set_ellipsize(pango.ELLIPSIZE_END)
+        t=self.get_short_title(element)
         l=gtk.Label()
         l.set_markup('<b>%s</b>' % t)
         hbox.pack_start(l, expand=True)
 
         self.edited_elements[element]=w
+        w._title_label=l
         self.display(w, title=hbox)
 
         def handle_destroy(*p):
@@ -102,6 +91,21 @@ class EditAccumulator(AccumulatorPopup):
         if self.controller and self.controller.gui:
             self.controller.gui.register_edit_popup(e)
 
+    def get_short_title(self, element):
+        # Title
+        if hasattr(element, 'type'):
+            t="%s (%s)" % (self.controller.get_title(element),
+                           self.controller.get_title(element.type))
+        else:
+            t=self.controller.get_title(element)
+
+        # Limit label size
+        # Ellipsize does not work well here, the label is always
+        # allocated too small a space
+        #l.set_ellipsize(pango.ELLIPSIZE_END)
+        if len(t) > 80:
+            t=unicode(t[:79])+u'\u2026'
+        return t
 
     def edit_element_handler(self, context, parameters):
         event=context.evaluateValue('event')
@@ -110,6 +114,26 @@ class EditAccumulator(AccumulatorPopup):
         el=event.replace('Create', '').lower()
         element=context.evaluateValue(el)
         self.edit(element)
+        return True
+
+    def update_element(self, element, event):
+        if not event.endswith('EditEnd') or not element in self.edited_elements:
+            return False
+        w=self.edited_elements[element]
+        l=w._title_label
+        l.set_markup('<b>%s</b>' % self.get_short_title(element))
+        return True
+            
+    def update_annotation(self, annotation, event):
+        self.update_element(annotation, event)
+        return True
+
+    def update_relation(self, relation, event):
+        self.update_element(relation, event)
+        return True
+
+    def update_view(self, view, event):
+        self.update_element(view, event)
         return True
 
     def register_callback (self, controller=None):
