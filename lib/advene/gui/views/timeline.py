@@ -1126,14 +1126,14 @@ class TimeLine(AdhocView):
     def copy_annotation_type(self, source, dest):
         """Display a popup menu to copy the source annotation type to the dest annotation type.
         """
-        def copy_annotations(i, at, typ, relationtype=None):
+        def copy_annotations(i, at, typ, delete=False):
             for an in at.annotations:
                 self.transmuted_annotation=self.controller.transmute_annotation(an,
                                                                                 typ,
-                                                                                delete=False)
+                                                                                delete=delete)
             return self.transmuted_annotation
 
-        def copy_annotations_filtered(i, at, typ, relationtype=None):
+        def copy_annotations_filtered(i, at, typ, delete=False):
             s=dialog.entry_dialog(title=_("Annotation filter"),
                                   text=_("Enter the searched string"))
             if s:
@@ -1141,7 +1141,7 @@ class TimeLine(AdhocView):
                     if s in an.content.data:
                         self.transmuted_annotation=self.controller.transmute_annotation(an,
                                                                                         typ,
-                                                                                        delete=False)
+                                                                                        delete=delete)
             return self.transmuted_annotation
 
         # Popup a menu to propose the drop options
@@ -1149,10 +1149,17 @@ class TimeLine(AdhocView):
 
         if source != dest:
             item=gtk.MenuItem(_("Copy all annotations to type %s") % self.controller.get_title(dest), use_underline=False)
-            item.connect('activate', copy_annotations, source, dest)
+            item.connect('activate', copy_annotations, source, dest, False)
             menu.append(item)
+            item=gtk.MenuItem(_("Move all annotations to type %s") % self.controller.get_title(dest), use_underline=False)
+            item.connect('activate', copy_annotations, source, dest, True)
+            menu.append(item)
+
             item=gtk.MenuItem(_("Copy all annotations matching a string to type %s") % self.controller.get_title(dest), use_underline=False)
-            item.connect('activate', copy_annotations_filtered, source, dest)
+            item.connect('activate', copy_annotations_filtered, source, dest, False)
+            menu.append(item)
+            item=gtk.MenuItem(_("Move all annotations matching a string to type %s") % self.controller.get_title(dest), use_underline=False)
+            item.connect('activate', copy_annotations_filtered, source, dest, True)
             menu.append(item)
 
         menu.show_all()
