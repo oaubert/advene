@@ -1148,14 +1148,14 @@ class TimeLine(AdhocView):
         menu=gtk.Menu()
 
         if source != dest:
-            item=gtk.MenuItem(_("Copy all annotations to type %s") % self.controller.get_title(dest), use_underline=False)
+            item=gtk.MenuItem(_("Duplicate all annotations to type %s") % self.controller.get_title(dest), use_underline=False)
             item.connect('activate', copy_annotations, source, dest, False)
             menu.append(item)
             item=gtk.MenuItem(_("Move all annotations to type %s") % self.controller.get_title(dest), use_underline=False)
             item.connect('activate', copy_annotations, source, dest, True)
             menu.append(item)
 
-            item=gtk.MenuItem(_("Copy all annotations matching a string to type %s") % self.controller.get_title(dest), use_underline=False)
+            item=gtk.MenuItem(_("Duplicate all annotations matching a string to type %s") % self.controller.get_title(dest), use_underline=False)
             item.connect('activate', copy_annotations_filtered, source, dest, False)
             menu.append(item)
             item=gtk.MenuItem(_("Move all annotations matching a string to type %s") % self.controller.get_title(dest), use_underline=False)
