@@ -237,6 +237,8 @@ class Config(object):
             'update-check': False,
             # Last update time
             'last-update': 0,
+            # Width of the image used to display the snapshot of a bookmark
+            'bookmark-snapshot-width': 80,
             }
 
         # Player options
