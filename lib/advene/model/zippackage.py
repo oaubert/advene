@@ -62,8 +62,12 @@ import advene.util.ElementTree as ET
 
 from gettext import gettext as _
 
-# In some cases, sys.getfilesystemencoding returns None
-_fs_encoding = sys.getfilesystemencoding() or 'ascii'
+_fs_encoding = sys.getfilesystemencoding()
+# In some cases, sys.getfilesystemencoding returns None. And if the
+# system is misconfigured, it will return ANSI_X3.4-1968
+# (apparently). In these cases, fallback to a sensible default value
+if _fs_encoding in ('ascii', 'ANSI_X3.4-1968', None):
+    _fs_encoding='utf8'
 
 # Some constants
 MIMETYPE='application/x-advene-zip-package'
@@ -96,7 +100,11 @@ class ZipPackage:
         # Temp. directory, a unicode string
         self._tempdir = None
         self.file_ = None
-
+        
+        # os.stat seems to not grok unicode pathnames with
+        # accents. Pass it an encoded string.
+        uri=uri.encode(_fs_encoding)
+        
         if uri is not None:
             if uri.startswith('file:///'):
                 n=uri[7:]

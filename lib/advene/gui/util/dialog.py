@@ -31,8 +31,12 @@ import advene.core.config as config
 import advene.util.helper as helper
 from advene.model.exception import AdveneException
 
-# In some cases, sys.getfilesystemencoding returns None
-_fs_encoding = sys.getfilesystemencoding() or 'ascii'
+_fs_encoding = sys.getfilesystemencoding()
+# In some cases, sys.getfilesystemencoding returns None. And if the
+# system is misconfigured, it will return ANSI_X3.4-1968
+# (apparently). In these cases, fallback to a sensible default value
+if _fs_encoding in ('ascii', 'ANSI_X3.4-1968', None):
+    _fs_encoding='utf8'
 
 def dialog_keypressed_cb(widget=None, event=None):
     """Generic dialog keypress handler.
