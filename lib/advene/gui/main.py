@@ -1111,7 +1111,7 @@ class AdveneGUI (Connect):
         self.gui.get_widget('navigationhistory1').set_property('visible', False)
         self.viewbook['west'].add_view(self.navigation_history, name=_("History"), permanent=True)
         # Make the history snapshots + border visible
-        self.pane['west'].set_position (self.navigation_history.options['snapshot_width'] + 20)
+        self.pane['west'].set_position (config.data.preferences['bookmark-snapshot-width'] + 20)
 
         # Popup widget
         self.popupwidget=AccumulatorPopup(controller=self.controller,
