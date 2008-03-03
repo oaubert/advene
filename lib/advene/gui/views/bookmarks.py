@@ -18,6 +18,9 @@
 #
 """Module displaying time bookmarks (for navigation history for instance)."""
 
+import gtk
+import urllib
+
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
@@ -25,8 +28,6 @@ from advene.gui.util import image_from_position, get_small_stock_button, dialog,
 from advene.gui.views import AdhocView
 import advene.util.importer
 from gettext import gettext as _
-
-import gtk
 
 name="Bookmarks view plugin"
 
@@ -36,23 +37,18 @@ def register(controller):
 class HistoryImporter(advene.util.importer.GenericImporter):
     """History importer.
     """
-    def __init__(self, elements=None, comments=None, duration=2000, **kw):
+    def __init__(self, elements=None, duration=2000, **kw):
         super(HistoryImporter, self).__init__(**kw)
         self.elements=elements
-        self.comments=comments
         self.duration=duration
         self.name = _("Bookmarks importer")
 
     def iterator(self):
         for b in self.elements:
-            if self.comments is not None and b in self.comments:
-                content=self.comments[b]
-            else:
-                content="Bookmark %s" % helper.format_time(b)
             yield {
-                'begin': b,
-                'end': b + self.duration,
-                'content': content,
+                'begin': b.timestamp,
+                'end': b.timestamp + self.duration,
+                'content': b.comment or  "Bookmark %s" % helper.format_time(b.timestamp),
                 'notify': True,
                 }
 
@@ -68,38 +64,40 @@ class Bookmarks(AdhocView):
     view_name = _("Bookmarks")
     view_id = 'bookmarks'
     tooltip= _("Bookmark timecodes with their corresponding screenshots")
-    def __init__(self, controller=None, parameters=None,
-                 history=None, vertical=True, ordered=False, closable=True, display_comments=True):
+
+    def __init__(self, controller=None, parameters=None, history=None, vertical=True, closable=True, display_comments=True): 
         super(Bookmarks, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
-            #(_("Save view"), self.save_view),
             (_("Clear"), self.clear),
-            #(_("Convert to annotations"), self.convert_to_annotations),
             )
         self.options={
-            'ordered': ordered,
-            'snapshot_width': 100,
             'vertical': vertical,
             }
         self.controller=controller
-        self.history=history
         self.display_comments=display_comments
+        self.bookmarks=[]
 
+        # History may be a list of timestamps.
         if history is None:
-            self.history=[]
-        self.comments={}
+            history=[]
+        # Convert the list of timestamps to a list of tuples (timestamp, empty comment)
+        history=[ (t, '') for t in history ]
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
-        h=[ long(v) for (n, v) in arg if n == 'timestamp' ]
-        if h:
-            self.history=h
 
+        h=[]
+        # Bookmark format: timestamp:url-encoded_comment
         for n, v in arg:
-            if n == 'comment':
+            if n == 'bookmark':
                 t, c = v.split(':', 1)
-                self.comments[long(t)]=c
+                h.append( (long(float(t)), urllib.unquote(c)) )
+        if h:
+            history=h
+
+        for (t, c) in history:
+            self.bookmarks.append( BookmarkWidget(self.controller, t, c, self.display_comments) )
 
         self.closable=closable
         self.mainbox=None
@@ -107,9 +105,15 @@ class Bookmarks(AdhocView):
         self.widget=self.build_widget()
         self.refresh()
 
+    def get_matching_bookmark(self, t):
+        l=[ w for w in self.bookmarks if w.timestamp == t ]
+        if l:
+            return l[0]
+        else:
+            return None
+
     def get_save_arguments(self):
-        return self.options, ([ ('timestamp', t) for t in self.history ]
-                              + [ ('comment', '%d:%s' % (t, c)) for (t, c) in self.comments.iteritems() ])
+        return self.options, ([ ('bookmark', '%d:%s' % (b.timestamp, urllib.quote(b.comment)) ) for b in self.bookmarks ])
 
     def close(self, *p):
         if self.closable:
@@ -149,8 +153,7 @@ class Bookmarks(AdhocView):
         ti=HistoryImporter(package=self.controller.package,
                            controller=self.controller,
                            defaulttype=at,
-                           elements=self.history,
-                           comments=self.comments,
+                           elements=self.bookmarks,
                            duration=d)
         ti.process_file('history')
         self.controller.package._modified=True
@@ -161,130 +164,35 @@ class Bookmarks(AdhocView):
             _("Conversion completed.\n%s annotations generated.") % ti.statistics['annotation'])
         return True
 
-    def append(self, position):
-        if position in self.history:
+    def append(self, position, comment=''):
+        if position in [ w.timestamp for w in self.bookmarks ]:
             return True
-        self.history.append(position)
-        if self.options['ordered']:
-            self.history.sort()
-            self.refresh()
-        else:
-            self.append_repr(position)
-        return True
-
-    def remove_widget(self, widget=None, container=None):
-        container.remove(widget)
+        b=BookmarkWidget(self.controller, position, comment, self.display_comments)
+        self.bookmarks.append(b)
+        self.mainbox.pack_start(b.widget, expand=False)
+        self.autoscroll()
         return True
 
     def refresh(self, *p):
-        self.mainbox.foreach(self.remove_widget, self.mainbox)
-        for p in self.history:
-            self.append_repr(p)
+        self.mainbox.foreach(self.mainbox.remove)
+        for b in self.bookmarks:
+            self.mainbox.pack_start(b.widget, expand=False)
         self.mainbox.show_all()
+        self.autoscroll()
         return True
 
     def clear(self, *p):
-        del self.history[:]
-        self.mainbox.foreach(self.remove_widget, self.mainbox)
+        self.mainbox.foreach(self.mainbox.remove)
+        del self.bookmarks[:]
         return True
 
-    def append_repr(self, t):
-
-        def drag_sent(widget, context, selection, targetType, eventTime):
-            if targetType == config.data.target_type['timestamp']:
-                selection.set(selection.target, 8, str(t))
-                return True
-            else:
-                print "Unknown target type for drag: %d" % targetType
-            return False
-
-        if self.display_comments:
-            box=gtk.HBox()
-        else:
-            box=gtk.VBox()
-        i=image_from_position(self.controller,
-                              t,
-                              width=self.options['snapshot_width'])
-        b=gtk.Button()
-
-        def activate(widget=None, timestamp=None):
-            self.controller.update_status("set", timestamp, notify=False)
-            return True
-
-        def button_press(b, event, timestamp):
-            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-                self.controller.update_status("start", timestamp, notify=False)
-                return True
-            return False
-
-        b.connect("clicked", activate, t)
-        b.connect('button_press_event', button_press, t)
-        b.add(i)
-
-        # The button can generate drags
-        b.connect("drag_data_get", drag_sent)
-
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['timestamp'],
-                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
-
-        # Define drag cursor
-        def _drag_begin(widget, context):
-            w=gtk.Window(gtk.WINDOW_POPUP)
-            w.set_decorated(False)
-
-            v=gtk.VBox()
-            i=gtk.Image()
-            v.pack_start(i, expand=False)
-            l=gtk.Label()
-            v.pack_start(l, expand=False)
-
-            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(t, epsilon=500), width=50))
-            l.set_text(helper.format_time(t))
-
-            w.add(v)
-            w.show_all()
-            widget._icon=w
-            context.set_icon_widget(w, 0, 0)
-            return True
-
-        def _drag_end(widget, context):
-            widget._icon.destroy()
-            widget._icon=None
-            return True
-
-        b.connect("drag_begin", _drag_begin)
-        b.connect("drag_end", _drag_end)
-
-        box.pack_start(b, expand=False)
-
-        l = gtk.Label(helper.format_time(t) + " - ")
-        if self.display_comments:
-            vbox=gtk.VBox()
-            vbox.pack_start(l, expand=False)
-            comment_entry=gtk.TextView()
-            b=comment_entry.get_buffer()
-            if t in self.comments:
-                b.set_text(self.comments[t])
-            else:
-                b.set_text(_("No comment"))
-            def update_comment(buf, ti):
-                self.comments[ti]=buf.get_text(*buf.get_bounds())
-                return True
-            b.connect('changed', update_comment, t)
-            vbox.pack_start(comment_entry, expand=True)
-            box.pack_start(vbox, expand=False)
-        else:
-            box.pack_start(l)
-
-        box.show_all()
+    def autoscroll(self):
         if self.scrollwindow:
             if self.options['vertical']:
                 adj=self.scrollwindow.get_vadjustment()
             else:
                 adj=self.scrollwindow.get_hadjustment()
             adj.set_value(adj.upper)
-        self.mainbox.pack_start(box, expand=False)
 
     def build_widget(self):
         v=gtk.VBox()
@@ -370,3 +278,99 @@ class Bookmarks(AdhocView):
         v.add(sw)
 
         return v
+
+class BookmarkWidget(object):
+    def __init__(self, controller=None, timestamp=0, comment=None, display_comments=False):
+        self.controller=controller
+        self.timestamp=timestamp
+        if comment is None:
+            comment=_("No comment")
+        self.comment=comment
+        self.display_comments=display_comments
+        self.widget=self.build_widget()
+        
+    def build_widget(self):
+        def drag_sent(widget, context, selection, targetType, eventTime):
+            if targetType == config.data.target_type['timestamp']:
+                selection.set(selection.target, 8, str(self.timestamp))
+                return True
+            else:
+                print "Unknown target type for drag: %d" % targetType
+            return False
+
+        if self.display_comments:
+            box=gtk.HBox()
+        else:
+            box=gtk.VBox()
+        i=image_from_position(self.controller, self.timestamp, width=config.data.preferences['bookmark-snapshot-width'])
+        b=gtk.Button()
+
+        def activate(widget=None, timestamp=None):
+            self.controller.update_status("set", timestamp, notify=False)
+            return True
+
+        def button_press(b, event, timestamp):
+            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+                self.controller.update_status("start", timestamp, notify=False)
+                return True
+            return False
+
+        b.connect("clicked", activate, self.timestamp)
+        b.connect('button_press_event', button_press, self.timestamp)
+        b.add(i)
+
+        # The button can generate drags
+        b.connect("drag_data_get", drag_sent)
+
+        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                          config.data.drag_type['timestamp'],
+                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+
+        # Define drag cursor
+        def _drag_begin(widget, context):
+            w=gtk.Window(gtk.WINDOW_POPUP)
+            w.set_decorated(False)
+
+            v=gtk.VBox()
+            i=gtk.Image()
+            v.pack_start(i, expand=False)
+            l=gtk.Label()
+            v.pack_start(l, expand=False)
+
+            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(self.timestamp, epsilon=500), width=50))
+            l.set_text(helper.format_time(self.timestamp))
+
+            w.add(v)
+            w.show_all()
+            widget._icon=w
+            context.set_icon_widget(w, 0, 0)
+            return True
+
+        def _drag_end(widget, context):
+            widget._icon.destroy()
+            widget._icon=None
+            return True
+
+        b.connect("drag_begin", _drag_begin)
+        b.connect("drag_end", _drag_end)
+
+        box.pack_start(b, expand=False)
+
+        l = gtk.Label(helper.format_time(self.timestamp) + " - ")
+        if self.display_comments:
+            vbox=gtk.VBox()
+            vbox.pack_start(l, expand=False)
+            comment_entry=gtk.TextView()
+            b=comment_entry.get_buffer()
+            b.set_text(self.comment)
+            def update_comment(buf, ti):
+                self.comment=buf.get_text(*buf.get_bounds())
+                return True
+            b.connect('changed', update_comment, self.timestamp)
+            vbox.pack_start(comment_entry, expand=True)
+            box.pack_start(vbox, expand=False)
+        else:
+            box.pack_start(l)
+
+        box.show_all()
+        return box
