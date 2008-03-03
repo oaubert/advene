@@ -154,8 +154,7 @@ class EditAccumulator(AccumulatorPopup):
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source_uri=selection.data
-            source=self.controller.package.annotations.get(source_uri)
+            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
             self.edit(source)
         else:
             print "Unknown target type for drop: %d" % targetType

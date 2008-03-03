@@ -375,8 +375,7 @@ class OptionalTimeAdjustment(object):
                 self.value=long(selection.data)
                 return True
             elif targetType == config.data.target_type['annotation']:
-                source_uri=selection.data
-                source=self.controller.package.annotations.get(source_uri)
+                source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
                 self.value=source.fragment.begin
             else:
                 print "Unknown target type for drop: %d" % targetType

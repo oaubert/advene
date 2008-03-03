@@ -211,7 +211,7 @@ class AdveneGUI (Connect):
                 selection.set(selection.target, 8,
                               cgi.urllib.urlencode( {
                             'name': name,
-                            } ))
+                            } ).encode('utf8'))
                 return True
             return False
 

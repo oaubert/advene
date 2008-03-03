@@ -211,7 +211,7 @@ class ViewBook(AdhocView):
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['adhoc-view']:
-            data=dict(cgi.parse_qsl(selection.data))
+            data=dict(cgi.parse_qsl(unicode(selection.data, 'utf8')))
             label=None
             view=None
             if 'id' in data:
@@ -285,7 +285,7 @@ class ViewBook(AdhocView):
                 print "Cannot find view ", selection.data
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            at=self.controller.package.annotationTypes.get(selection.data)
+            at=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
             # Propose a menu to open various views for the annotation-type:
             menu=gtk.Menu()
             title=self.controller.get_title(at)
@@ -306,7 +306,7 @@ class ViewBook(AdhocView):
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
         elif targetType == config.data.target_type['annotation']:
-            a=self.controller.package.annotations.get(selection.data)
+            a=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
             # Propose a menu to open various views for the annotation:
             menu=gtk.Menu()
             title=self.controller.get_title(a)

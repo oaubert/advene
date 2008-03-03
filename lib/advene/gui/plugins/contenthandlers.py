@@ -210,12 +210,12 @@ class SVGContentHandler (ContentHandler):
 
     def drawer_drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            here=self.controller.package.annotations.get(selection.data)
+            here=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
         elif target_type == config.data.target_type['view']:
-            here=self.controller.package.views.get(selection.data)
+            here=self.controller.package.views.get(unicode(selection.data, 'utf8'))
         elif target_type == config.data.target_type['uri-list']:
             here=None
-            url=selection.data
+            url=unicode(selection.data, 'utf8')
             title=url
         else:
             # Invalid drop target

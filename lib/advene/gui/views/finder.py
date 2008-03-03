@@ -357,7 +357,7 @@ class ViewColumn(FinderColumn):
                 selection.set(selection.target, 8,
                               cgi.urllib.urlencode( {
                             'id': self.element.id,
-                            } ))
+                            } ).encode('utf8'))
                 return True
             else:
                 print "Unknown target type for drag: %d" % targetType

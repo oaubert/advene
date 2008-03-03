@@ -301,15 +301,15 @@ class AnnotationWidget(GenericColorButtonWidget):
         """Handle the drag-sent event.
         """
         if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, widget.annotation.uri)
+            selection.set(selection.target, 8, widget.annotation.uri.encode('utf8'))
         elif targetType == config.data.target_type['uri-list']:
             c=self.controller.build_context(here=widget.annotation)
             uri=c.evaluateValue('here/absolute_url')
-            selection.set(selection.target, 8, uri)
+            selection.set(selection.target, 8, uri.encode('utf8'))
         elif (targetType == config.data.target_type['text-plain']
               or targetType == config.data.target_type['TEXT']
               or targetType == config.data.target_type['STRING']):
-            selection.set(selection.target, 8, widget.annotation.content.data)
+            selection.set(selection.target, 8, widget.annotation.content.data.encode('utf8'))
         elif targetType == config.data.target_type['timestamp']:
             selection.set(selection.target, 8, str(widget.annotation.fragment.begin))
         else:
@@ -568,7 +568,7 @@ class TagWidget(GenericColorButtonWidget):
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         if targetType == config.data.target_type['tag']:
-            selection.set(selection.target, 8, unicode(self.tag))
+            selection.set(selection.target, 8, unicode(self.tag).encode('utf8'))
         else:
             self.log("Unknown target type for drag: %d" % targetType)
         return True
@@ -685,15 +685,15 @@ class AnnotationRepresentation(gtk.Button):
         """Handle the drag-sent event.
         """
         if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, widget.annotation.uri)
+            selection.set(selection.target, 8, widget.annotation.uri.encode('utf8'))
         elif targetType == config.data.target_type['uri-list']:
             c=self.controller.build_context(here=widget.annotation)
             uri=c.evaluateValue('here/absolute_url')
-            selection.set(selection.target, 8, uri)
+            selection.set(selection.target, 8, uri.encode('utf8'))
         elif (targetType == config.data.target_type['text-plain']
               or targetType == config.data.target_type['TEXT']
               or targetType == config.data.target_type['STRING']):
-            selection.set(selection.target, 8, widget.annotation.content.data)
+            selection.set(selection.target, 8, widget.annotation.content.data.encode('utf8'))
         elif targetType == config.data.target_type['timestamp']:
             selection.set(selection.target, 8, str(widget.annotation.fragment.begin))
         else:

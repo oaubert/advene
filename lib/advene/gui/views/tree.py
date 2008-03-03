@@ -290,7 +290,7 @@ class AdveneTreeModel(gtk.GenericTreeModel, gtk.TreeDragSource, gtk.TreeDragDest
         node = self.on_get_iter(path)
         print "Got selection:\ntype=%s\ntarget=%s" % (str(selection.type),
                                                       str(selection.target))
-        selection.set(selection.target, 8, node.uri)
+        selection.set(selection.target, 8, node.uri.encode('utf8'))
         return True
 
 class VirtualNode:
@@ -499,12 +499,12 @@ class TreeWidget(AdhocView):
         if targetType == typ['annotation']:
             if not isinstance(el, Annotation):
                 return False
-            selection.set(selection.target, 8, el.uri)
+            selection.set(selection.target, 8, el.uri.encode('utf8'))
             return True
         elif targetType == typ['annotation-type']:
             if not isinstance(el, AnnotationType):
                 return False
-            selection.set(selection.target, 8, el.uri)
+            selection.set(selection.target, 8, el.uri.encode('utf8'))
             return True
         elif targetType == typ['adhoc-view']:
             if not isinstance(el, View):
@@ -514,7 +514,7 @@ class TreeWidget(AdhocView):
             selection.set(selection.target, 8,
                           cgi.urllib.urlencode( {
                         'id': el.id,
-                        } ))
+                        } ).encode('utf8'))
             return True
         elif targetType == typ['uri-list']:
             try:
@@ -522,9 +522,9 @@ class TreeWidget(AdhocView):
                 uri=ctx.evaluateValue('here/absolute_url')
             except:
                 uri="No URI for " + unicode(el)
-            selection.set(selection.target, 8, uri)
+            selection.set(selection.target, 8, uri.encode('utf8'))
         elif targetType in (typ['text-plain'], typ['STRING']):
-            selection.set(selection.target, 8, self.controller.get_title(el))
+            selection.set(selection.target, 8, self.controller.get_title(el).encode('utf8'))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
@@ -659,7 +659,7 @@ class TreeWidget(AdhocView):
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, widget.annotation.uri)
+            selection.set(selection.target, 8, widget.annotation.uri.encode('utf8'))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
@@ -667,8 +667,7 @@ class TreeWidget(AdhocView):
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
-            source_uri=selection.data
-            source=self.controller.package.annotations.get(source_uri)
+            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
             dest=widget.annotation
             self.create_relation_popup(source, dest)
         else:

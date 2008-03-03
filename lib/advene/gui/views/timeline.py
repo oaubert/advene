@@ -886,8 +886,7 @@ class TimeLine(AdhocView):
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
-            source_uri=selection.data
-            source=self.controller.package.annotations.get(source_uri)
+            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
             dest=widget.annotation
 
             if source == dest:
@@ -991,7 +990,7 @@ class TimeLine(AdhocView):
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
         elif targetType == config.data.target_type['tag']:
-            tags=selection.data.split(',')
+            tags=unicode(selection.data, 'utf8').split(',')
             a=widget.annotation
             l=[t for t in tags if not t in a.tags ]
             a.tags = a.tags + l
@@ -1003,7 +1002,7 @@ class TimeLine(AdhocView):
     def type_drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation-type']:
-            selection.set(selection.target, 8, widget.annotationtype.uri)
+            selection.set(selection.target, 8, widget.annotationtype.uri.encode('utf8'))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
@@ -1167,14 +1166,12 @@ class TimeLine(AdhocView):
 
     def annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source_uri=selection.data
-            source=self.controller.package.annotations.get(source_uri)
+            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
             dest=widget.annotationtype
             self.move_or_copy_annotation(source, dest)
         elif targetType == config.data.target_type['annotation-type']:
             # Copy annotations
-            source_uri=selection.data
-            source=self.controller.package.annotationTypes.get(source_uri)
+            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
             dest=widget.annotationtype
             self.copy_annotation_type(source, dest)
         elif targetType == config.data.target_type['color']:
@@ -1193,8 +1190,7 @@ class TimeLine(AdhocView):
 
     def new_annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source_uri=selection.data
-            source=self.controller.package.annotations.get(source_uri)
+            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
 
             # Create a type
             dest=self.create_annotation_type()
@@ -1215,8 +1211,7 @@ class TimeLine(AdhocView):
         """Handle the drop from an annotation-type to the legend
         """
         if targetType == config.data.target_type['annotation-type']:
-            source_uri=selection.data
-            source=self.controller.package.annotationTypes.get(source_uri)
+            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
             # We received a drop. Determine the location.
             s = config.data.preferences['timeline']['interline-height']
 
@@ -1795,8 +1790,7 @@ class TimeLine(AdhocView):
         """Handle the drop from an annotation to the layout.
         """
         if targetType == config.data.target_type['annotation']:
-            source_uri=selection.data
-            source=self.controller.package.annotations.get(source_uri)
+            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
             # We received a drop. Determine the location.
 
             # Correct y value according to scrollbar position
@@ -1817,8 +1811,7 @@ class TimeLine(AdhocView):
                 self.move_or_copy_annotation(source, dest, position=self.pixel2unit(self.adjustment.value + x))
             return True
         elif targetType == config.data.target_type['annotation-type']:
-            source_uri=selection.data
-            source=self.controller.package.annotationTypes.get(source_uri)
+            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
             # We received a drop. Determine the location.
             a=[ at
                 for (at, p) in self.layer_position.iteritems()
@@ -2457,7 +2450,7 @@ class TimeLine(AdhocView):
                               cgi.urllib.urlencode( {
                             'name': name,
                             'master': self.controller.gui.get_adhoc_view_instance_id(self),
-                            } ))
+                            } ).encode('utf8'))
                 return True
             return False
 
@@ -2635,8 +2628,7 @@ class TimeLine(AdhocView):
         # Annotation-type selection button
         def trash_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation-type']:
-                source_uri=selection.data
-                source=self.controller.package.annotationTypes.get(source_uri)
+                source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
                 if source in self.annotationtypes:
                     self.annotationtypes.remove(source)
                     self.update_model(partial_update=True)

@@ -182,7 +182,7 @@ class EditRuleSet(EditGeneric):
             if len(l) == 1:
                 edit=l[0]
                 # We have the model. Convert it to XML
-                selection.set(selection.target, 8, edit.model.xml_repr())
+                selection.set(selection.target, 8, edit.model.xml_repr().encode('utf8'))
             elif len(l) > 1:
                 print "Error in drag"
             return True
@@ -194,7 +194,7 @@ class EditRuleSet(EditGeneric):
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['rule']:
-            xml=selection.data
+            xml=unicode(selection.data, 'utf8')
             if 'subviewlist' in xml:
                 rule=SubviewList()
             else:
@@ -438,7 +438,7 @@ class EditRule(EditGeneric):
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         if targetType == config.data.target_type['rule']:
-            selection.set(selection.target, 8, self.model.xml_repr())
+            selection.set(selection.target, 8, self.model.xml_repr().encode('utf8'))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True

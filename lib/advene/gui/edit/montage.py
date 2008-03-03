@@ -149,7 +149,7 @@ class Montage(AdhocView):
             if targetType == config.data.target_type['uri-list']:
                 uri="advene:/adhoc/%d/%d" % (hash(self),
                                                   hash(widget))
-                selection.set(selection.target, 8, uri)
+                selection.set(selection.target, 8, uri.encode('utf8'))
                 return True
             return False
 
@@ -249,7 +249,7 @@ class Montage(AdhocView):
         """
         def drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                ann=self.controller.package.annotations.get(selection.data)
+                ann=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
                 self.insert(ann, i)
                 # If the origin is from the same montage, then
                 # consider it is a move and remove the origin
@@ -453,7 +453,7 @@ class Montage(AdhocView):
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                ann=self.controller.package.annotations.get(selection.data)
+                ann=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
                 self.insert(ann)
                 # If the origin is from the same montage, then
                 # consider it is a move and remove the origin
@@ -464,7 +464,7 @@ class Montage(AdhocView):
                 self.refresh()
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                at=self.controller.package.annotationTypes.get(selection.data)
+                at=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
                 for a in at.annotations:
                     self.insert(a)
                 self.refresh()

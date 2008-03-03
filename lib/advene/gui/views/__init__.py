@@ -397,7 +397,7 @@ class AdhocView(object):
         def drag_sent(widget_, context, selection, targetType, eventTime ):
             if targetType == config.data.target_type['adhoc-view-instance']:
                 # This is not very robust, but allows to transmit a view instance reference
-                selection.set(selection.target, 8, repr(self))
+                selection.set(selection.target, 8, repr(self).encode('utf8'))
                 self.widget.get_parent().remove(self.widget)
                 # Do not trigger the close_view_cb handler
                 window.disconnect(window.cleanup_id)

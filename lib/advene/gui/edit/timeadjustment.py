@@ -247,7 +247,7 @@ class TimeAdjustment:
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source_uri=selection.data
+            source_uri=unicode(selection.data, 'utf8')
             source=self.controller.package.annotations.get(source_uri)
             if self.callback and not self.callback(source.fragment.begin):
                 return True

@@ -167,7 +167,7 @@ class AnnotationTable(AdhocView):
         if targetType == config.data.target_type['annotation']:
             if not isinstance(el, Annotation):
                 return False
-            selection.set(selection.target, 8, el.uri)
+            selection.set(selection.target, 8, el.uri.encode('utf8'))
             return True
         else:
             print "Unknown target type for drag: %d" % targetType
@@ -256,7 +256,7 @@ class AnnotationTable(AdhocView):
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, widget.annotation.uri)
+            selection.set(selection.target, 8, widget.annotation.uri.encode('utf8'))
         else:
             print "Unknown target type for drag: %d" % targetType
         return True
@@ -264,9 +264,7 @@ class AnnotationTable(AdhocView):
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
-            source_uri=selection.data
-            print "Creating new relation (%s, %s)" % (source_uri, widget.annotation.uri)
-            source=self.controller.package.annotations.get(source_uri)
+            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
             dest=widget.annotation
             self.create_relation_popup(source, dest)
         else:
