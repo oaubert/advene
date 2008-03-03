@@ -75,6 +75,10 @@ if config.data.preferences['language']:
 
 print config.data.version_string, "run at", time.strftime("%F %H:%M:%S %z"), "on", sys.platform
 
+if config.data.os == 'darwin' or config.data.os == 'linux' and not 'DISPLAY' in os.environ:
+    print "The DISPLAY environment variable is not set. Cannot continue."
+    sys.exit(1)
+
 # Maybe we are running from a pyinstaller version
 if not os.path.exists(config.data.path['resources']):
     maindir=os.path.abspath(os.path.dirname(sys.executable))
@@ -91,6 +95,7 @@ if not os.path.exists(config.data.path['resources']):
             config.data.fix_paths(d)
             executable_path_dot_dot=os.path.dirname(d)
             print "Setting GTK_PATH to", d
+            os.environ['GTK_EXE_PREFIX']=d
             os.environ['GTK_PATH']=d
             os.environ['GDK_PIXBUF_MODULE_FILE']=os.path.join(d, 'gdk-pixbuf.loaders' )
             os.environ['PANGO_RC_FILE']=os.path.join(d, 'pangorc' )
