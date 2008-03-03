@@ -18,6 +18,10 @@
 
 #"""Module displaying active time bookmarks."""
 
+from gettext import gettext as _
+import gtk
+import gobject
+
 # Advene part
 import advene.core.config as config
 from advene.gui.util import get_pixmap_button
@@ -25,10 +29,7 @@ from advene.gui.views import AdhocView
 from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
-from gettext import gettext as _
-
-import gtk
-import gobject
+import advene.util.helper as helper
 
 name="ActiveBookmarks view plugin"
 
@@ -268,8 +269,30 @@ class ActiveBookmark(object):
                     id_=self.controller.package._idgenerator.get_id(Annotation)
                     # Check the type
                     if self.type is None:
-                        at=self.controller.gui.ask_for_annotation_type(text=_("Choose the annotation type to use to create the annotation.\nAll other annotations will be of the same type"),
-                                                                       create=True)
+                        # First try the Text-annotation type. If it
+                        # does not exist, create an appropriate type.
+                        at=helper.get_id(self.controller.package.annotationTypes, 'annotation')
+                        if at is None:
+                            at=helper.get_id(self.controller.package.annotationTypes, 'active_bookmark')
+                        if at is None:
+                            # Create a new 'active_bookmark' type
+                            schema=helper.get_id(self.controller.package.schemas, 'simple-text')
+                            if schema is None and self.controller.package.schemas:
+                                # Fallback on the first schema
+                                schema=self.controller.package.schemas[0]
+                            if schema is None:
+                                self.log(_("Error: cannot find an appropriate schema to create the Active-bookmark type."))
+                                return True
+                            at=schema.createAnnotationType(ident='active_bookmark')
+                            at.author=config.data.userid
+                            at.date=self.controller.get_timestamp()
+                            at.title=_("Active bookmark")
+                            at.mimetype='text/plain'
+                            at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
+                            at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+                            schema.annotationTypes.append(at)
+                            self.controller.notify('AnnotationTypeCreate', annotationtype=at)
+
                         if at is None:
                             return True
                         self.type=at
