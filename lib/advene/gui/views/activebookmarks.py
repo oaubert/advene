@@ -24,7 +24,7 @@ import gobject
 
 # Advene part
 import advene.core.config as config
-from advene.gui.util import get_pixmap_button
+from advene.gui.util import get_pixmap_button, dialog
 from advene.gui.views import AdhocView
 from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.model.annotation import Annotation
@@ -57,7 +57,6 @@ class ActiveBookmarks(AdhocView):
             'snapshot_width': 60,
             }
         self.controller=controller
-        self.type = type
         # self.data is a list of ActiveBookmark objects
         self.data=[]
         opt, arg = self.load_parameters(parameters)
@@ -72,7 +71,19 @@ class ActiveBookmarks(AdhocView):
         #       self.comments[long(t)]=c
         self.mainbox=gtk.VBox()
         self.widget=self.build_widget()
+        self.type = type
         self.refresh()
+
+    def get_type(self):
+        if hasattr(self, 'chosen_type_selector'):
+            return self.chosen_type_selector.get_current_element()
+        else:
+            return None
+
+    def set_type(self, t):
+        if hasattr(self, 'chosen_type_selector'):
+            self.chosen_type_selector.set_current_element(t)
+    type=property(get_type, set_type)
 
     def register_callback (self, controller=None):
         self.loop_id=gobject.timeout_add(1000, self.check_contents)
@@ -158,19 +169,22 @@ class ActiveBookmarks(AdhocView):
 
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
-        for icon, action, tip in (
-            ('set-to-now.png', bookmark_current_time, _("Insert a bookmark for the current video time")),
-            ):
-            if icon.endswith('.png'):
-                i=gtk.Image()
-                i.set_from_file(config.data.advenefile( ( 'pixmaps', icon) ))
-                b=gtk.ToolButton(icon_widget=i)
-            else:
-                b=gtk.ToolButton(stock_id=icon)
 
-            b.set_tooltip(self.controller.gui.tooltips, tip)
-            b.connect("clicked", action)
-            tb.insert(b, -1)
+        i=gtk.Image()
+        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
+        b=gtk.ToolButton(icon_widget=i)
+        b.set_tooltip(self.controller.gui.tooltips, _("Insert a bookmark for the current video time"))
+        b.connect("clicked", bookmark_current_time)
+        tb.insert(b, -1)
+
+        i=gtk.ToolItem()
+        types=[ (at, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
+        types.sort(key=lambda a: a[0])
+        sel=dialog.list_selector_widget(members=types)
+        i.add(sel)
+        self.chosen_type_selector=sel
+        tb.insert(i, -1)
+
         hb.add(tb)
         v.pack_start(hb, expand=False)
         sw=gtk.ScrolledWindow()
