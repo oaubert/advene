@@ -46,9 +46,9 @@ class HistoryImporter(advene.util.importer.GenericImporter):
     def iterator(self):
         for b in self.elements:
             yield {
-                'begin': b.timestamp,
-                'end': b.timestamp + self.duration,
-                'content': b.comment or  "Bookmark %s" % helper.format_time(b.timestamp),
+                'begin': b.value,
+                'end': b.value + self.duration,
+                'content': b.comment or  "Bookmark %s" % helper.format_time(b.value),
                 'notify': True,
                 }
 
@@ -65,7 +65,7 @@ class Bookmarks(AdhocView):
     view_id = 'bookmarks'
     tooltip= _("Bookmark timecodes with their corresponding screenshots")
 
-    def __init__(self, controller=None, parameters=None, history=None, vertical=True, closable=True, display_comments=True):
+    def __init__(self, controller=None, parameters=None, history=None, vertical=True, closable=True, display_comments=True): 
         super(Bookmarks, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
@@ -106,14 +106,14 @@ class Bookmarks(AdhocView):
         self.refresh()
 
     def get_matching_bookmark(self, t):
-        l=[ w for w in self.bookmarks if w.timestamp == t ]
+        l=[ w for w in self.bookmarks if w.value == t ]
         if l:
             return l[0]
         else:
             return None
 
     def get_save_arguments(self):
-        return self.options, ([ ('bookmark', '%d:%s' % (b.timestamp, urllib.quote(b.comment)) ) for b in self.bookmarks ])
+        return self.options, ([ ('bookmark', '%d:%s' % (b.value, urllib.quote(b.comment)) ) for b in self.bookmarks ])
 
     def close(self, *p):
         if self.closable:
@@ -165,7 +165,7 @@ class Bookmarks(AdhocView):
         return True
 
     def append(self, position, comment=''):
-        if position in [ w.timestamp for w in self.bookmarks ]:
+        if position in [ w.value for w in self.bookmarks ]:
             return True
         b=BookmarkWidget(self.controller, position, comment, self.display_comments)
         self.bookmarks.append(b)
@@ -283,17 +283,23 @@ class Bookmarks(AdhocView):
 class BookmarkWidget(object):
     def __init__(self, controller=None, timestamp=0, comment=None, display_comments=False):
         self.controller=controller
-        self.timestamp=timestamp
+        self.value=timestamp
         if comment is None:
             comment=_("No comment")
         self.comment=comment
         self.display_comments=display_comments
         self.widget=self.build_widget()
 
+    def update(self):
+        # self.image is in fact a gtk.Button, which contains the image
+        self.image.get_children()[0].set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(self.value, epsilon=500), width=config.data.preferences['bookmark-snapshot-width']))
+        self.label.set_text(helper.format_time(self.value))
+        return True
+
     def build_widget(self):
         def drag_sent(widget, context, selection, targetType, eventTime):
             if targetType == config.data.target_type['timestamp']:
-                selection.set(selection.target, 8, str(self.timestamp))
+                selection.set(selection.target, 8, str(self.value))
                 return True
             else:
                 print "Unknown target type for drag: %d" % targetType
@@ -303,21 +309,21 @@ class BookmarkWidget(object):
             box=gtk.HBox()
         else:
             box=gtk.VBox()
-        i=image_from_position(self.controller, self.timestamp, width=config.data.preferences['bookmark-snapshot-width'])
+        i=image_from_position(self.controller, self.value, width=config.data.preferences['bookmark-snapshot-width'])
         b=gtk.Button()
 
-        def activate(widget=None, timestamp=None):
-            self.controller.update_status("set", timestamp, notify=False)
+        def activate(widget=None):
+            self.controller.update_status("set", self.value, notify=False)
             return True
 
-        def button_press(b, event, timestamp):
+        def button_press(b, event):
             if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
-                self.controller.update_status("start", timestamp, notify=False)
+                self.controller.update_status("start", self.value, notify=False)
                 return True
             return False
 
-        b.connect("clicked", activate, self.timestamp)
-        b.connect('button_press_event', button_press, self.timestamp)
+        b.connect("clicked", activate)
+        b.connect('button_press_event', button_press)
         b.add(i)
 
         # The button can generate drags
@@ -338,8 +344,9 @@ class BookmarkWidget(object):
             l=gtk.Label()
             v.pack_start(l, expand=False)
 
-            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(self.timestamp, epsilon=500), width=50))
-            l.set_text(helper.format_time(self.timestamp))
+            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(self.value, epsilon=500), width=50))
+            l.set_text(helper.format_time(self.value))
+            self.label=l
 
             w.add(v)
             w.show_all()
@@ -357,7 +364,7 @@ class BookmarkWidget(object):
 
         box.pack_start(b, expand=False)
 
-        l = gtk.Label(helper.format_time(self.timestamp) + " - ")
+        l = gtk.Label(helper.format_time(self.value) + " - ")
         if self.display_comments:
             vbox=gtk.VBox()
             vbox.pack_start(l, expand=False)
@@ -367,11 +374,13 @@ class BookmarkWidget(object):
             def update_comment(buf, ti):
                 self.comment=buf.get_text(*buf.get_bounds())
                 return True
-            b.connect('changed', update_comment, self.timestamp)
+            b.connect('changed', update_comment, self.value)
             vbox.pack_start(comment_entry, expand=True)
             box.pack_start(vbox, expand=False)
         else:
             box.pack_start(l)
+
+        self.image=b
 
         box.show_all()
         return box
