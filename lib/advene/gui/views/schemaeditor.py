@@ -572,11 +572,20 @@ class TypeExplorer (gtk.ScrolledWindow):
         hboxAddAtt.pack_start(boutonAddAtt)
         hboxMime = gtk.HBox()
         labelMime = gtk.Label("Mime Type : ")
-        entryMime = gtk.Entry()
-        self.TMimeType = entryMime
+        #entryMime = gtk.Entry()
+        #self.TMimeType = entryMime
+        
+        self.hboxEspaceSchema = gtk.HBox()
+        
+        self.TMimeType = dialog.list_selector_widget(
+            members=[ ('text/plain', _("Plain text content")),
+                              ('application/x-advene-structured', _("Simple-structured content")),
+                              ('application/x-advene-zone', _("Rectangular zone content")),
+                              ('image/svg+xml', _("SVG graphics content")),
+                              ])
         # a remplacer par la selection de type Mime
         hboxMime.pack_start(labelMime)
-        hboxMime.pack_start(entryMime)
+        hboxMime.pack_start(self.TMimeType)
         hboxId = gtk.HBox()
         labelId1 = gtk.Label("Id :")
         labelId2 = gtk.Label("")
@@ -635,12 +644,25 @@ class TypeExplorer (gtk.ScrolledWindow):
 
     #a faire evoluer en liste
     def getMimeType(self):
-        return self.TMimeType.get_text()
+        tm, m=self.TMimeType.get_model()[self.TMimeType.get_active()]
+        return m
+        #return self.TMimeType.get_text()
 
     #a faire evoluer en liste
     def setMimeType(self, mimetype):
-        self.TMimeType.set_text(mimetype)
+        store, i = dialog.generate_list_model( elements = [ ('text/plain', _("Plain text content")),
+                              ('application/x-advene-structured', _("Simple-structured content")),
+                              ('application/x-advene-zone', _("Rectangular zone content")),
+                              ('image/svg+xml', _("SVG graphics content")),
+                              ],active_element=mimetype) 
+        self.TMimeType.set_model(store)
+        if i is None:
+            i = store.get_iter_first()
+        if i is not None:
+            self.TMimeType.set_active_iter(i) 
         return True
+        #self.TMimeType.set_text(mimetype)
+        #return True
 
     def addAtributeSpace(self, w, nom="New Attribute", type="None", con=""):
         #ajouter eventuellement un contenu directement avec x params
@@ -826,9 +848,10 @@ class RelationTypeGroup (goocanvas.Group):
                                         )
                                         #start_arrow = False,
                                         #end_arrow = True,
+        nbrel = len(self.type.getRelations())
         if (d==0):
             self.text = goocanvas.Text (parent = self,
-                                        text = self.name,
+                                        text = self.name + " ("+str(nbrel)+")",
                                         x = x1+5,
                                         y = y1-10,
                                         width = -1,
@@ -836,7 +859,7 @@ class RelationTypeGroup (goocanvas.Group):
                                         font = "Sans Bold 10")	
         else:
             self.text = goocanvas.Text (parent = self,
-                                        text = self.name,
+                                        text = self.name + " ("+str(nbrel)+")",
                                         x = (x1+x2)/2, 
                                         y = (y1+y2)/2,
                                         width = -1,
