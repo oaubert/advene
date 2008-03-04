@@ -82,6 +82,7 @@ def get_edit_popup (el, controller=None, editable=True):
                 return p
     for c in _edit_popup_list:
         if c.can_edit (el):
+            controller.notify('ElementEditBegin', element=el)
             return c(el, controller, editable)
     raise TypeError(_("No edit popup available for element %s") % el)
 
