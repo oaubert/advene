@@ -65,7 +65,7 @@ class Bookmarks(AdhocView):
     view_id = 'bookmarks'
     tooltip= _("Bookmark timecodes with their corresponding screenshots")
 
-    def __init__(self, controller=None, parameters=None, history=None, vertical=True, closable=True, display_comments=True): 
+    def __init__(self, controller=None, parameters=None, history=None, vertical=True, closable=True, display_comments=True):
         super(Bookmarks, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
@@ -203,9 +203,10 @@ class Bookmarks(AdhocView):
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['timestamp']:
                 position=long(selection.data)
-                if position in self.history:
-                    self.history.remove(position)
-                self.refresh()
+                w=self.get_matching_bookmark(position)
+                if position is not None:
+                    self.bookmarks.remove(w)
+                    self.refresh()
                 return True
             else:
                 print "Unknown target type for drop: %d" % targetType
@@ -288,7 +289,7 @@ class BookmarkWidget(object):
         self.comment=comment
         self.display_comments=display_comments
         self.widget=self.build_widget()
-        
+
     def build_widget(self):
         def drag_sent(widget, context, selection, targetType, eventTime):
             if targetType == config.data.target_type['timestamp']:
