@@ -1068,6 +1068,7 @@ class ECACatalog:
 
     # FIXME: Maybe this should be put in an external resource file
     event_names={
+        'ElementEditBegin':       _("Start of the editing of an element"),
         'PackageEditEnd':         _("Ending editing of a package"),
         'AnnotationBegin':        _("Beginning of an annotation"),
         'AnnotationEnd':          _("End of an annotation"),
