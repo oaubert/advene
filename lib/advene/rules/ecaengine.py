@@ -340,19 +340,29 @@ class ECAEngine:
             d['timestamp'] = (time.time() - config.data.startup_time) * 1000
             d['movie'] = self.controller.player.get_default_media()
             d['movietime'] = self.controller.player.current_position_value
-            # package uri annotation relation annotationtype relationtype schema
-            # Logging content depending on keys
+	        # package uri annotation relation annotationtype relationtype schema
+	        # Logging content depending on keys
             if 'uri' in d:
                 d['content']='movie="'+str(d['uri'])+'"'
+            if 'element' in d:
+                if isinstance(d['element'],advene.model.annotation.Annotation):
+                    #print "%s" % d['element']
+                    d['annotation']=d['element']
+                elif isinstance(d['element'],advene.model.annotation.Relation):
+                    d['relation']=d['element']
+                elif isinstance(d['element'],advene.model.schema.AnnotationType):
+                    d['annotationtype']=d['element']
+                elif isinstance(d['element'],advene.model.schema.RelationType):
+                    d['relationtype']=d['element']
             if 'annotation' in d:
                 a=d['annotation']
                 d['content']= "\n".join(
-                    ( 'annotation=' + a.id,
+		            ( 'annotation=' + a.id,
                       'type=' + a.type.id,
                       'mimetype=' + a.type.mimetype,
                       'content="'+ urllib.quote(a.content.data.encode('utf-8'))+'"'
-                    )
-                    )
+		            )
+		        )
             elif 'relation' in d:
                 r=d['relation']
                 d['content']= "\n".join(
@@ -360,7 +370,7 @@ class ECAEngine:
                       'type=' + r.type.id,
                       'mimetype=' + r.type.mimetype,
                       'source=' + r.members[0].id,
-                      'dest=' + r.members[1].id )
+                      'dest=' + r.members[1].id ) 
                     )
             elif 'annotationtype' in d:
                 at=d['annotationtype']
@@ -377,7 +387,6 @@ class ECAEngine:
                      'mimetype=' + rt.mimetype)
                     )
             self.event_history.append(d)
-
         delay=0
         if kw.has_key('delay'):
             delay=long(kw['delay']) / 1000.0
