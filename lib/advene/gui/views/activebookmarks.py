@@ -257,6 +257,7 @@ class ActiveBookmark(object):
                                            display_comments=False)
             parent=self.begin_widget.widget.get_parent()
             parent.pack_start(self.end_widget.widget, expand=False)
+            self.end_widget.widget.show_all()
         else:
             self.end_widget.value=v
             self.end_widget.update()
