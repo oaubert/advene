@@ -26,6 +26,7 @@ import advene.core.config as config
 import advene.util.helper as helper
 from advene.gui.util import image_from_position, get_small_stock_button, dialog, png_to_pixbuf
 from advene.gui.views import AdhocView
+from advene.gui.widget import TimestampRepresentation
 import advene.util.importer
 from gettext import gettext as _
 
@@ -291,95 +292,19 @@ class BookmarkWidget(object):
         self.widget=self.build_widget()
 
     def update(self):
-        if self.value is None:
-            v=-1
-        else:
-            v=self.value
-        # self.image is in fact a gtk.Button, which contains the image
-        self.image.get_children()[0].set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=500), width=config.data.preferences['bookmark-snapshot-width']))
-        self.label.set_text(helper.format_time(self.value))
+        self.image.value=self.value
         return True
 
     def build_widget(self):
-        def drag_sent(widget, context, selection, targetType, eventTime):
-            if targetType == config.data.target_type['timestamp']:
-                selection.set(selection.target, 8, str(self.value))
-                return True
-            else:
-                print "Unknown target type for drag: %d" % targetType
-            return False
-
-        if self.value is None:
-            v=-1
-        else:
-            v=self.value
-        i=image_from_position(self.controller, v, width=config.data.preferences['bookmark-snapshot-width'])
-        b=gtk.Button()
-        self.image=b
+        self.image=TimestampRepresentation(self.value, self.controller)
 
         def activate(widget=None):
             if self.value is not None:
                 self.controller.update_status("set", self.value, notify=False)
             return True
 
-        def button_press(b, event):
-            if (event.button == 1 
-                and event.type == gtk.gdk._2BUTTON_PRESS
-                and self.value is not None):
-                self.controller.update_status("start", self.value, notify=False)
-                return True
-            return False
+        self.image.connect("clicked", activate)
 
-        b.connect("clicked", activate)
-        b.connect('button_press_event', button_press)
-        b.add(i)
-
-        # The button can generate drags
-        b.connect("drag_data_get", drag_sent)
-
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['timestamp'],
-                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
-
-        # Define drag cursor
-        def _drag_begin(widget, context):
-            w=gtk.Window(gtk.WINDOW_POPUP)
-            w.set_decorated(False)
-
-            v=gtk.VBox()
-            i=gtk.Image()
-            v.pack_start(i, expand=False)
-            l=gtk.Label()
-            v.pack_start(l, expand=False)
-
-            if self.value is None:
-                val=-1
-            else:
-                val=self.value
-            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(val, epsilon=500), width=50))
-            l.set_text(helper.format_time(self.value))
-
-            w.add(v)
-            w.show_all()
-            widget._icon=w
-            context.set_icon_widget(w, 0, 0)
-            return True
-
-        def _drag_end(widget, context):
-            widget._icon.destroy()
-            widget._icon=None
-            return True
-
-        b.connect("drag_begin", _drag_begin)
-        b.connect("drag_end", _drag_end)
-
-        l = gtk.Label(helper.format_time(self.value) + " - ")
-        self.label=l
-
-        box=gtk.VBox()
-        box.pack_start(b, expand=False)
-        box.pack_start(l)
-        
         if self.display_comments:
             hbox=gtk.HBox()
             comment_entry=gtk.TextView()
@@ -391,9 +316,9 @@ class BookmarkWidget(object):
             b.connect('changed', update_comment)
             
             comment_entry.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
-            hbox.pack_start(box, expand=False)
+            hbox.pack_start(self.image, expand=False)
             hbox.pack_start(comment_entry, expand=False)
-            box=hbox
-
-        box.show_all()
-        return box
+            hbox.show_all()
+            return hbox
+        else:
+            return self.image
