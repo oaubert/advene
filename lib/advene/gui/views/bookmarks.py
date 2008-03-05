@@ -19,6 +19,7 @@
 """Module displaying time bookmarks (for navigation history for instance)."""
 
 import gtk
+import pango
 import urllib
 
 # Advene part
@@ -310,6 +311,8 @@ class BookmarkWidget(object):
             hbox=gtk.HBox()
             comment_entry=gtk.TextView()
             comment_entry.set_wrap_mode(gtk.WRAP_WORD)
+            fd=pango.FontDescription('sans %d' % config.data.preferences['timeline']['font-size'])
+            comment_entry.modify_font(fd)
             b=comment_entry.get_buffer()
             b.set_text(self.comment)
             def update_comment(buf):
