@@ -411,8 +411,20 @@ class ActiveBookmark(object):
 
         def begin_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['timestamp']:
+                e=long(selection.data)
                 if self.end is None:
-                    self.end=long(selection.data)
+                    if e < self.begin:
+                        # Invert begin and end.
+                        self.begin, self.end = e, self.begin
+                    else:
+                        self.end=e
+                else:
+                    # Reset the begin time.
+                    if e > self.end:
+                        # Invert new begin and end
+                        self.begin, self.end = self.end, e
+                    else:
+                        self.begin=e
                 return True
             return False
 
