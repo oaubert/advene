@@ -1126,10 +1126,17 @@ class TimeLine(AdhocView):
         """Display a popup menu to copy the source annotation type to the dest annotation type.
         """
         def copy_annotations(i, at, typ, delete=False):
+            # More than 50 annotations takes too much time to notify
+            # individually. In this case, deactive individual
+            # notifications and notify an UpdateModel at the end
+            notify=not len(at.annotations) > 50
             for an in at.annotations:
                 self.transmuted_annotation=self.controller.transmute_annotation(an,
                                                                                 typ,
-                                                                                delete=delete)
+                                                                                delete=delete,
+                                                                                notify=notify)
+            if not notify:
+                 self.controller.notify('PackageActivate', package=self.controller.package)
             return self.transmuted_annotation
 
         def copy_annotations_filtered(i, at, typ, delete=False):
