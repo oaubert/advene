@@ -272,10 +272,10 @@ class ActiveBookmark(object):
     def set_content(self, c):
         if c is None:
             c=''
-        self.begin_widget.content=c
+        self.begin_widget.comment=c
         self.begin_widget.update()
     def get_content(self):
-        return self.begin_widget.content
+        return self.begin_widget.comment
     content=property(get_content, set_content)
     
     def check_annotation(self):
