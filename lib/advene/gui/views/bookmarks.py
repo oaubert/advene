@@ -319,6 +319,7 @@ class BookmarkWidget(object):
             v=self.value
         i=image_from_position(self.controller, v, width=config.data.preferences['bookmark-snapshot-width'])
         b=gtk.Button()
+        self.image=b
 
         def activate(widget=None):
             if self.value is not None:
@@ -356,12 +357,11 @@ class BookmarkWidget(object):
             v.pack_start(l, expand=False)
 
             if self.value is None:
-                v=-1
+                val=-1
             else:
-                v=self.value
-            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=500), width=50))
+                val=self.value
+            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(val, epsilon=500), width=50))
             l.set_text(helper.format_time(self.value))
-            self.label=l
 
             w.add(v)
             w.show_all()
@@ -380,6 +380,8 @@ class BookmarkWidget(object):
         box.pack_start(b, expand=False)
 
         l = gtk.Label(helper.format_time(self.value) + " - ")
+        self.label=l
+
         if self.display_comments:
             vbox=gtk.VBox()
             vbox.pack_start(l, expand=False)
@@ -394,8 +396,6 @@ class BookmarkWidget(object):
             box.pack_start(vbox, expand=False)
         else:
             box.pack_start(l)
-
-        self.image=b
 
         box.show_all()
         return box
