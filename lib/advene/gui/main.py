@@ -2615,7 +2615,7 @@ class AdveneGUI (Connect):
         d=gtk.AboutDialog()
         d.set_name('Advene')
         d.set_version(config.data.version_string.replace('Advene ', ''))
-        d.set_copyright("Copyright 2002,2003,2004,2005,2006,2007 Olivier Aubert, Pierre-Antoine Champin")
+        d.set_copyright("Copyright 2002-2008 Olivier Aubert, Pierre-Antoine Champin")
         d.set_license(_('GNU General Public License\nSee http://www.gnu.org/copyleft/gpl.html for more details'))
         d.set_website('http://liris.cnrs.fr/advene/')
         d.set_website_label('Visit the Advene web site for examples and documentation.')
