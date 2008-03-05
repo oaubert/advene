@@ -309,6 +309,7 @@ class BookmarkWidget(object):
         if self.display_comments:
             hbox=gtk.HBox()
             comment_entry=gtk.TextView()
+            comment_entry.set_wrap_mode(gtk.WRAP_WORD)
             b=comment_entry.get_buffer()
             b.set_text(self.comment)
             def update_comment(buf):
@@ -317,8 +318,12 @@ class BookmarkWidget(object):
             b.connect('changed', update_comment)
             
             comment_entry.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
+
+            sw=gtk.ScrolledWindow()
+            sw.add(comment_entry)
+            sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
             hbox.pack_start(self.image, expand=False)
-            hbox.pack_start(comment_entry, expand=False)
+            hbox.pack_start(sw, expand=False)
             hbox.show_all()
             return hbox
         else:
