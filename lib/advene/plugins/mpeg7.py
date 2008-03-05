@@ -32,7 +32,6 @@ from advene.util.importer import GenericImporter
 import advene.util.ElementTree as ET
 
 def register(controller=None):
-    print "Registering ", name
     controller.register_importer(MPEG7Importer)
     # Also register time formatting global methods for MPEG7 export
     controller.register_global_method(mpeg7_time)

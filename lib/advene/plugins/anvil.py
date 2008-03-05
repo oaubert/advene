@@ -30,7 +30,6 @@ from advene.util.importer import GenericImporter
 import advene.util.ElementTree as ET
 
 def register(controller=None):
-    print "Registering AnvilImporter"
     controller.register_importer(AnvilImporter)
     return True
 

@@ -35,7 +35,6 @@ from simpletal import simpleTAL
 name="Exporter view"
 
 def register(controller):
-    print "Registering exporter"
     controller.register_viewclass(Exporter)
 
 class Exporter(AdhocView):
