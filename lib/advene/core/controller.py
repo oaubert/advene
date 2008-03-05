@@ -1001,7 +1001,7 @@ class AdveneController:
             self.notify('ResourceDelete', resource=el, immediate=immediate_notify)
         return True
 
-    def transmute_annotation(self, annotation, annotationType, delete=False, position=None):
+    def transmute_annotation(self, annotation, annotationType, delete=False, position=None, notify=True):
         """Transmute an annotation to a new type.
 
         If delete is True, then delete the source annotation.
@@ -1019,7 +1019,8 @@ class AdveneController:
                 d=annotation.fragment.duration
                 annotation.fragment.begin=position
                 annotation.fragment.end=position+d
-                self.notify("AnnotationEditEnd", annotation=annotation, comment="Transmute annotation")
+                if notify:
+                    self.notify("AnnotationEditEnd", annotation=annotation, comment="Transmute annotation")
                 return annotation
         ident=self.package._idgenerator.get_id(Annotation)
         an = self.package.createAnnotation(type = annotationType,
@@ -1072,11 +1073,13 @@ class AdveneController:
             an.content.data = annotation.content.data
         an.setDate(self.get_timestamp())
 
-        self.notify("AnnotationCreate", annotation=an, comment="Transmute annotation")
+        if notify:
+            self.notify("AnnotationCreate", annotation=an, comment="Transmute annotation")
 
         if delete and not annotation.relations:
             self.package.annotations.remove(annotation)
-            self.notify('AnnotationDelete', annotation=annotation, comment="Transmute annotation")
+            if notify:
+                self.notify('AnnotationDelete', annotation=annotation, comment="Transmute annotation")
 
         return an
 
