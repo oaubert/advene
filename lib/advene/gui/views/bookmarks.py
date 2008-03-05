@@ -291,8 +291,12 @@ class BookmarkWidget(object):
         self.widget=self.build_widget()
 
     def update(self):
+        if self.value is None:
+            v=-1
+        else:
+            v=self.value
         # self.image is in fact a gtk.Button, which contains the image
-        self.image.get_children()[0].set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(self.value, epsilon=500), width=config.data.preferences['bookmark-snapshot-width']))
+        self.image.get_children()[0].set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=500), width=config.data.preferences['bookmark-snapshot-width']))
         self.label.set_text(helper.format_time(self.value))
         return True
 
@@ -309,15 +313,22 @@ class BookmarkWidget(object):
             box=gtk.HBox()
         else:
             box=gtk.VBox()
-        i=image_from_position(self.controller, self.value, width=config.data.preferences['bookmark-snapshot-width'])
+        if self.value is None:
+            v=-1
+        else:
+            v=self.value
+        i=image_from_position(self.controller, v, width=config.data.preferences['bookmark-snapshot-width'])
         b=gtk.Button()
 
         def activate(widget=None):
-            self.controller.update_status("set", self.value, notify=False)
+            if self.value is not None:
+                self.controller.update_status("set", self.value, notify=False)
             return True
 
         def button_press(b, event):
-            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+            if (event.button == 1 
+                and event.type == gtk.gdk._2BUTTON_PRESS
+                and self.value is not None):
                 self.controller.update_status("start", self.value, notify=False)
                 return True
             return False
@@ -344,7 +355,11 @@ class BookmarkWidget(object):
             l=gtk.Label()
             v.pack_start(l, expand=False)
 
-            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(self.value, epsilon=500), width=50))
+            if self.value is None:
+                v=-1
+            else:
+                v=self.value
+            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=500), width=50))
             l.set_text(helper.format_time(self.value))
             self.label=l
 
@@ -371,10 +386,10 @@ class BookmarkWidget(object):
             comment_entry=gtk.TextView()
             b=comment_entry.get_buffer()
             b.set_text(self.comment)
-            def update_comment(buf, ti):
+            def update_comment(buf):
                 self.comment=buf.get_text(*buf.get_bounds())
                 return True
-            b.connect('changed', update_comment, self.value)
+            b.connect('changed', update_comment)
             vbox.pack_start(comment_entry, expand=True)
             box.pack_start(vbox, expand=False)
         else:
