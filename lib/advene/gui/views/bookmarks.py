@@ -309,10 +309,6 @@ class BookmarkWidget(object):
                 print "Unknown target type for drag: %d" % targetType
             return False
 
-        if self.display_comments:
-            box=gtk.HBox()
-        else:
-            box=gtk.VBox()
         if self.value is None:
             v=-1
         else:
@@ -377,14 +373,15 @@ class BookmarkWidget(object):
         b.connect("drag_begin", _drag_begin)
         b.connect("drag_end", _drag_end)
 
-        box.pack_start(b, expand=False)
-
         l = gtk.Label(helper.format_time(self.value) + " - ")
         self.label=l
 
+        box=gtk.VBox()
+        box.pack_start(b, expand=False)
+        box.pack_start(l)
+        
         if self.display_comments:
-            vbox=gtk.VBox()
-            vbox.pack_start(l, expand=False)
+            hbox=gtk.HBox()
             comment_entry=gtk.TextView()
             b=comment_entry.get_buffer()
             b.set_text(self.comment)
@@ -392,10 +389,11 @@ class BookmarkWidget(object):
                 self.comment=buf.get_text(*buf.get_bounds())
                 return True
             b.connect('changed', update_comment)
-            vbox.pack_start(comment_entry, expand=True)
-            box.pack_start(vbox, expand=False)
-        else:
-            box.pack_start(l)
+            
+            comment_entry.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
+            hbox.pack_start(box, expand=False)
+            hbox.pack_start(comment_entry, expand=False)
+            box=hbox
 
         box.show_all()
         return box
