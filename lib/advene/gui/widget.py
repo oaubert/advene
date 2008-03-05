@@ -761,10 +761,9 @@ class TimestampRepresentation(gtk.Button):
         self.image=gtk.Image()
         self.image.set_style(style)
         self.label=gtk.Label()
-        # FIXME: set font size
         self.label.set_style(style)
-        box.add(self.image)
-        box.add(self.label)
+        box.pack_start(self.image, expand=False)
+        box.pack_start(self.label, expand=False)
         self.add(box)
 
         self._update_display()
