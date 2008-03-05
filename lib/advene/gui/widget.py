@@ -733,3 +733,120 @@ class RelationRepresentation(gtk.Button):
             return True
         return False
 
+class TimestampRepresentation(gtk.Button):
+    """Representation of a timestamp.
+
+    It is a button with a representative image and the timestamp displayed under it.
+    """
+    def __init__(self, value, controller):
+        super(TimestampRepresentation, self).__init__()
+        self._value=value
+        self.controller=controller
+
+        style=self.get_style().copy()
+        black=gtk.gdk.color_parse('black')
+        white=gtk.gdk.color_parse('white')
+
+        for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                      gtk.STATE_PRELIGHT):
+            style.bg[state]=black
+            style.fg[state]=white
+            style.text[state]=white
+            #style.base[state]=white
+        self.set_style(style)
+
+        box=gtk.VBox()
+        box.set_style(style)
+        self.image=gtk.Image()
+        self.image.set_style(style)
+        self.label=gtk.Label()
+        # FIXME: set font size
+        self.label.set_style(style)
+        box.add(self.image)
+        box.add(self.label)
+        self.add(box)
+
+        self._update_display()
+
+        self.connect("button_press_event", self._button_press_handler)
+        self.connect("drag_data_get", self._drag_sent)
+        # The widget can generate drags
+        self.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                             config.data.drag_type['timestamp']
+                             + config.data.drag_type['text-plain']
+                             + config.data.drag_type['TEXT']
+                             + config.data.drag_type['STRING']
+                             ,
+                             gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+
+        # Define drag cursor
+        def _drag_begin(widget, context):
+            w=gtk.Window(gtk.WINDOW_POPUP)
+            w.set_decorated(False)
+            w.set_style(style)
+
+            v=gtk.VBox()
+            v.set_style(style)
+            i=gtk.Image()
+            v.pack_start(i, expand=False)
+            l=gtk.Label()
+            l.set_style(style)
+            v.pack_start(l, expand=False)
+
+            if self.value is None:
+                val=-1
+            else:
+                val=self.value
+            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(val, epsilon=500), width=50))
+            l.set_markup('<small>%s</small>' % helper.format_time(self.value))
+
+            w.add(v)
+            w.show_all()
+            widget._icon=w
+            context.set_icon_widget(w, 0, 0)
+            return True
+
+        def _drag_end(widget, context):
+            widget._icon.destroy()
+            widget._icon=None
+            return True
+        self.connect("drag_begin", _drag_begin)
+        self.connect("drag_end", _drag_end)
+
+    def _drag_sent(self, widget, context, selection, targetType, eventTime):
+        """Handle the drag-sent event.
+        """
+        if (targetType == config.data.target_type['text-plain']
+              or targetType == config.data.target_type['TEXT']
+              or targetType == config.data.target_type['STRING']):
+            selection.set(selection.target, 8, helper.format_time(self._value).encode('utf-8'))
+        elif targetType == config.data.target_type['timestamp']:
+            selection.set(selection.target, 8, str(self._value))
+        else:
+            return False
+        return True
+
+    def _button_press_handler(self, widget, event):
+        if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS and self._value is not None:
+            self.controller.update_status("start", self._value)
+            return True
+        return False
+
+    def _update_display(self):
+        """Update the display of the widget according to self._value.
+        """
+        if self._value is None:
+            v=-1
+        else:
+            v=self._value
+        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=500), width=config.data.preferences['bookmark-snapshot-width']))
+        self.label.set_markup('<small>%s</small>' % helper.format_time(self._value))
+        return True
+
+    def get_value(self):
+        return self._value
+    def set_value(self, v):
+        self._value=v
+        self._update_display()
+    value=property(get_value, set_value, doc="Timestamp value")
