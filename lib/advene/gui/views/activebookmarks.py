@@ -24,8 +24,9 @@ import gobject
 
 # Advene part
 import advene.core.config as config
-from advene.gui.util import get_pixmap_button, dialog
+from advene.gui.util import dialog
 from advene.gui.views import AdhocView
+from advene.gui.views.bookmarks import BookmarkWidget
 from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
@@ -57,8 +58,8 @@ class ActiveBookmarks(AdhocView):
             'snapshot_width': 60,
             }
         self.controller=controller
-        # self.data is a list of ActiveBookmark objects
-        self.data=[]
+        # self.bookmarks is a list of ActiveBookmark objects
+        self.bookmarks=[]
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
         # FIXME: think about serialization...
@@ -98,7 +99,7 @@ class ActiveBookmarks(AdhocView):
 
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
-        for w in self.data:
+        for w in self.bookmarks:
             self.mainbox.pack_start(w.widget, expand=False)
         self.mainbox.show_all()
         return True
@@ -106,18 +107,18 @@ class ActiveBookmarks(AdhocView):
     def remove(self, w):
         """Remove the given widget from mainbox.
         """
-        self.data.remove(w)
+        self.bookmarks.remove(w)
         w.widget.destroy()
         return True
 
     def clear(self, *p):
-        del self.data[:]
+        del self.bookmarks[:]
         self.mainbox.foreach(self.mainbox.remove)
         return True
 
     def append(self, t):
         b=ActiveBookmark(controller=self.controller, begin=t, end=None, content=None, close_cb=self.remove, type=self.type)
-        self.data.append(b)
+        self.bookmarks.append(b)
         self.mainbox.pack_start(b.widget, expand=False)
         b.widget.show_all()
         return True
@@ -125,7 +126,7 @@ class ActiveBookmarks(AdhocView):
     def check_contents(self, *p):
         """Check that annotation contents are in sync.
         """
-        for wid in self.data:
+        for wid in self.bookmarks:
             if wid.annotation is not None and wid.content != wid.annotation.content.data:
                 # Mismatch in contents -> update the annotation
                 wid.annotation.content.data=wid.content
@@ -133,7 +134,7 @@ class ActiveBookmarks(AdhocView):
         return True
                 
     def update_annotation (self, annotation=None, event=None):
-        l=[w for w in self.data if w.annotation == annotation ]
+        l=[w for w in self.bookmarks if w.annotation == annotation ]
         if l:
             wid=l[0]
         else:
@@ -211,40 +212,130 @@ class ActiveBookmarks(AdhocView):
         return v
 
 class ActiveBookmark(object):
+    """An ActiveBookmark can represent a simple bookmark (i.e. a single
+    time, with an optional content) or a completed annotation.
+
+    The begin time is mandatory. It can be associated with an optional content.
+
+    If the end time is None, then the widget is displayed as a simple
+    bookmark. DNDing a timestamp over the begin image will set the end
+    time.
+    
+    Once the end time is set, both times are displayed through a
+    TimeAdjustment widget, so that they are editable.
+    """
     def __init__(self, controller=None, begin=None, end=None, content=None, close_cb=None, type=None):
         self.controller=controller 
         self.annotation=None
         self.type=type
-        self.widgets={}
+        # begin_widget and end_widget are both instances of BookmarkWidget.
+        # end_widget may be None (if end is not initialized yet)
+        self.begin_widget=None
+        self.end_widget=None
         self.widget=self.build_widget()
-        self.content=content
         self.begin=begin
         self.end=end
+        self.content=content
         self.close_cb=close_cb
 
     def set_begin(self, v):
-        self.widgets['begin'].value=v
-        self.widgets['begin'].update()
+        if v is None:
+            v=0
+        self.begin_widget.value=v
+        self.begin_widget.update()
     def get_begin(self):
-        return self.widgets['begin'].value
+        return self.begin_widget.value
     begin=property(get_begin, set_begin)
 
     def set_end(self, v):
-        self.widgets['end'].value=v
-        self.widgets['end'].update()
+        if v is None:
+            return
+        if self.end_widget is None:
+            # end was not set. We need to create the proper time adjustment
+            self.end_widget=BookmarkWidget(controller=self.controller,
+                                           timestamp=v,
+                                           display_comments=False)
+            parent=self.begin_widget.widget.get_parent()
+            parent.pack_start(self.end_widget.widget, expand=False)
+        else:
+            self.end_widget.value=v
+            self.end_widget.update()
+        self.check_annotation()
     def get_end(self):
-        return self.widgets['end'].value
+        if self.end_widget is None:
+            return None
+        else:
+            return self.end_widget.value
     end=property(get_end, set_end)
 
-    def set_content(self, v):
-        if v is None:
-            v=''
-        self.widgets['content'].get_buffer().set_text(v)
+    def set_content(self, c):
+        if c is None:
+            c=''
+        self.begin_widget.content=c
+        self.begin_widget.update()
     def get_content(self):
-        b=self.widgets['content'].get_buffer()
-        return b.get_text(*b.get_bounds())
+        return self.begin_widget.content
     content=property(get_content, set_content)
     
+    def check_annotation(self):
+        if self.end is None:
+            if self.annotation is not None:
+                # Remove the annotation
+                self.controller.delete_element(self.annotation)
+                self.annotation=None
+        else:
+            # Both times are valid.
+            # FIXME: check begin < end ?
+            if self.annotation is None:
+                # Create the annotation
+                id_=self.controller.package._idgenerator.get_id(Annotation)
+                # Check the type
+                if self.type is None:
+                    # First try the Text-annotation type. If it
+                    # does not exist, create an appropriate type.
+                    at=helper.get_id(self.controller.package.annotationTypes, 'annotation')
+                    if at is None:
+                        at=helper.get_id(self.controller.package.annotationTypes, 'active_bookmark')
+                    if at is None:
+                        # Create a new 'active_bookmark' type
+                        schema=helper.get_id(self.controller.package.schemas, 'simple-text')
+                        if schema is None and self.controller.package.schemas:
+                            # Fallback on the first schema
+                            schema=self.controller.package.schemas[0]
+                        if schema is None:
+                            self.log(_("Error: cannot find an appropriate schema to create the Active-bookmark type."))
+                            return True
+                        at=schema.createAnnotationType(ident='active_bookmark')
+                        at.author=config.data.userid
+                        at.date=self.controller.get_timestamp()
+                        at.title=_("Active bookmark")
+                        at.mimetype='text/plain'
+                        at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
+                        at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+                        schema.annotationTypes.append(at)
+                        self.controller.notify('AnnotationTypeCreate', annotationtype=at)
+
+                    if at is None:
+                        return True
+                    self.type=at
+                el=self.controller.package.createAnnotation(
+                    ident=id_,
+                    type=self.type,
+                    author=config.data.userid,
+                    date=self.controller.get_timestamp(),
+                    fragment=MillisecondFragment(begin=long(self.begin),
+                                                 end=long(self.end)))
+                el.content.data=self.content
+                self.controller.package.annotations.append(el)
+                self.annotation=el
+                self.controller.notify('AnnotationCreate', annotation=el)
+            else:
+                # Update the annotation
+                self.annotation.fragment.begin=self.begin
+                self.annotation.fragment.end=self.end
+                self.controller.notify('AnnotationEditEnd', annotation=self.annotation)
+        return True
+
     def build_widget(self):
 
         def drag_sent(widget, context, selection, targetType, eventTime):
@@ -257,169 +348,25 @@ class ActiveBookmark(object):
 
         f=gtk.Frame()
 
-        def close(b):
-            if self.close_cb is not None:
-                self.close_cb(self)
-            return True
-        b=get_pixmap_button('small_close.png', close)
-        b.set_relief(gtk.RELIEF_NONE)
-        f.set_label_widget(b)
-
         box=gtk.HBox()
 
-        def check_annotation(v):
-            if 'end' not in self.widgets:
-                # We are initializing
+        def begin_drag_received(widget, context, x, y, selection, targetType, time):
+            if targetType == config.data.target_type['timestamp']:
+                if self.end is None:
+                    self.end=long(selection.data)
                 return True
-            if self.begin is None or self.end is None:
-                if self.annotation is not None:
-                    # Remove the annotation
-                    self.controller.delete_element(self.annotation)
-                    self.annotation=None
-            else:
-                # Both times are valid.
-                if self.annotation is None:
-                    # Create the annotation
-                    id_=self.controller.package._idgenerator.get_id(Annotation)
-                    # Check the type
-                    if self.type is None:
-                        # First try the Text-annotation type. If it
-                        # does not exist, create an appropriate type.
-                        at=helper.get_id(self.controller.package.annotationTypes, 'annotation')
-                        if at is None:
-                            at=helper.get_id(self.controller.package.annotationTypes, 'active_bookmark')
-                        if at is None:
-                            # Create a new 'active_bookmark' type
-                            schema=helper.get_id(self.controller.package.schemas, 'simple-text')
-                            if schema is None and self.controller.package.schemas:
-                                # Fallback on the first schema
-                                schema=self.controller.package.schemas[0]
-                            if schema is None:
-                                self.log(_("Error: cannot find an appropriate schema to create the Active-bookmark type."))
-                                return True
-                            at=schema.createAnnotationType(ident='active_bookmark')
-                            at.author=config.data.userid
-                            at.date=self.controller.get_timestamp()
-                            at.title=_("Active bookmark")
-                            at.mimetype='text/plain'
-                            at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
-                            at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
-                            schema.annotationTypes.append(at)
-                            self.controller.notify('AnnotationTypeCreate', annotationtype=at)
+            return False
 
-                        if at is None:
-                            return True
-                        self.type=at
-                    el=self.controller.package.createAnnotation(
-                        ident=id_,
-                        type=self.type,
-                        author=config.data.userid,
-                        date=self.controller.get_timestamp(),
-                        fragment=MillisecondFragment(begin=long(self.begin),
-                                                     end=long(self.end)))
-                    el.content.data=self.content
-                    self.controller.package.annotations.append(el)
-                    self.annotation=el
-                    self.controller.notify('AnnotationCreate', annotation=el)
-                else:
-                    # Update the annotation
-                    self.annotation.fragment.begin=self.begin
-                    self.annotation.fragment.end=self.end
-                    self.controller.notify('AnnotationEditEnd', annotation=self.annotation)
-            return True
+        self.begin_widget=BookmarkWidget(self.controller, display_comments=True)
+        self.begin_widget.image.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                              gtk.DEST_DEFAULT_HIGHLIGHT |
+                                              gtk.DEST_DEFAULT_ALL,
+                                              config.data.drag_type['timestamp'],
+                                              gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+        self.begin_widget.image.connect("drag_data_received", begin_drag_received)
 
-        self.widgets['begin']=OptionalTimeAdjustment(value=None, controller=self.controller, callback=check_annotation)
-        self.widgets['end']=OptionalTimeAdjustment(value=None, controller=self.controller, callback=check_annotation)
-        self.widgets['content']=gtk.TextView()
-        self.widgets['content'].widget=self.widgets['content']
-        self.widgets['content'].set_size_request(120, -1)
-        box.pack_start(self.widgets['begin'].widget, expand=True)
-        box.pack_start(self.widgets['content'].widget, expand=False)
-        box.pack_start(self.widgets['end'].widget, expand=True)
 
+        box.pack_start(self.begin_widget.widget, expand=False)
         f.add(box)
         f.show_all()
         return f
-
-class OptionalTimeAdjustment(object):
-    """TimeAdjustment able to handle None values.
-    """
-    def __init__(self, value=None, controller=None, callback=None):
-        self.controller=controller
-        self.callback=callback
-        self.widgets={}
-        self.widget=self.build_widget()
-        self.value=value
-
-    def set_value(self, v):
-        self._value=v
-        if v is not None:
-            self.widgets['nonempty'].value=v
-            self.widgets['nonempty'].update()
-        self.update()
-        self.callback(v)
-
-    def get_value(self):
-        if self._value is not None:
-            # Grab the value from TimeAdjustment
-            self._value=self.widgets['nonempty'].value
-        return self._value
-    value=property(get_value, set_value, doc="Current time value. May be None.")
-
-    def update(self):
-        if self.value is None:
-            self.widgets['empty'].widget.show()
-            self.widgets['nonempty'].widget.hide()
-        else:
-            self.widgets['empty'].widget.hide()
-            self.widgets['nonempty'].widget.show()
-
-    def build_widget(self):
-        def set_time(b):
-            self.value=self.controller.player.current_position_value
-            return True
-        box=gtk.HBox()
-
-        empty=get_pixmap_button('set-to-now.png', set_time)
-        self.widgets['empty']=empty
-        empty.widget=empty
-        
-        def drag_received(widget, context, x, y, selection, targetType, time):
-            if targetType == config.data.target_type['timestamp']:
-                self.value=long(selection.data)
-                return True
-            elif targetType == config.data.target_type['annotation']:
-                source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
-                self.value=source.fragment.begin
-            else:
-                print "Unknown target type for drop: %d" % targetType
-                return False
-        empty.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                            gtk.DEST_DEFAULT_HIGHLIGHT |
-                            gtk.DEST_DEFAULT_ALL,
-                            config.data.drag_type['annotation']
-                            + config.data.drag_type['timestamp'],
-                            gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
-        empty.connect('drag_data_received', drag_received)
-
-        def value_changed(v):
-            self.value=v
-            return True
-        ta=TimeAdjustment(value=0, controller=self.controller, compact=True, callback=value_changed)
-        self.widgets['nonempty']=ta
-        # Add a close() button
-        hb=ta.widget.get_children()[-1]
-        def set_to_none(b):
-            self.value=None
-            return True
-        b=get_pixmap_button('small_close.png', set_to_none)
-        b.set_relief(gtk.RELIEF_NONE)
-        b.show_all()
-        hb.pack_start(b, expand=False)
-
-        for n in ('empty', 'nonempty'):
-            box.pack_start(self.widgets[n].widget, expand=False)
-            self.widgets[n].widget.hide()
-        box.set_no_show_all(True)
-        box.show()
-        return box
