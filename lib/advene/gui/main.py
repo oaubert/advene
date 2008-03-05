@@ -2618,7 +2618,7 @@ class AdveneGUI (Connect):
         d.set_copyright("Copyright 2002-2008 Olivier Aubert, Pierre-Antoine Champin")
         d.set_license(_('GNU General Public License\nSee http://www.gnu.org/copyleft/gpl.html for more details'))
         d.set_website('http://liris.cnrs.fr/advene/')
-        d.set_website_label('Visit the Advene web site for examples and documentation.')
+        d.set_website_label(_('Visit the Advene web site for examples and documentation.'))
         d.set_authors( [ 'Olivier Aubert', 'Pierre-Antoine Champin', 'Yannick Prie', 'Bertrand Richard', 'Frank Wagner' ] )
         d.set_logo(gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'logo_advene.png') )))
         d.connect('response', lambda w, r: w.destroy())
