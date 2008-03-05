@@ -24,7 +24,7 @@ import gobject
 
 # Advene part
 import advene.core.config as config
-from advene.gui.util import dialog, get_small_stock_button
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
 from advene.gui.edit.timeadjustment import TimeAdjustment
@@ -333,9 +333,11 @@ class ActiveBookmark(object):
                 # Remove the annotation
                 self.controller.delete_element(self.annotation)
                 self.annotation=None
+                l=self.widget.get_label_widget()
+                if l is not None:
+                    l.destroy()
         else:
             # Both times are valid.
-            # FIXME: check begin < end ?
             if self.annotation is None:
                 # Create the annotation
                 id_=self.controller.package._idgenerator.get_id(Annotation)
@@ -379,6 +381,15 @@ class ActiveBookmark(object):
                 self.controller.package.annotations.append(el)
                 self.annotation=el
                 self.controller.notify('AnnotationCreate', annotation=el)
+                # Add a validate button to the frame
+                def handle_ok(b):
+                    self.close_cb(self)
+                    return True
+                b=get_pixmap_button('small_ok.png', handle_ok)
+                b.set_relief(gtk.RELIEF_NONE)
+                self.controller.gui.tooltips.set_tip(b, _("Validate the annotation"))
+                self.widget.set_label_widget(b)
+                b.show_all()
             else:
                 # Update the annotation
                 self.annotation.fragment.begin=self.begin
