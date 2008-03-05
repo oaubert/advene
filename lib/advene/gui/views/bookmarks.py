@@ -171,6 +171,7 @@ class Bookmarks(AdhocView):
         b=BookmarkWidget(self.controller, position, comment, self.display_comments)
         self.bookmarks.append(b)
         self.mainbox.pack_start(b.widget, expand=False)
+        b.widget.show_all()
         self.autoscroll()
         return True
 
