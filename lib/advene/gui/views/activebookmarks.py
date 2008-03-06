@@ -24,7 +24,7 @@ import gobject
 
 # Advene part
 import advene.core.config as config
-from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
 from advene.gui.edit.timeadjustment import TimeAdjustment
@@ -334,9 +334,11 @@ class ActiveBookmark(object):
                 # Remove the annotation
                 self.controller.delete_element(self.annotation)
                 self.annotation=None
-                l=self.widget.get_label_widget()
+                l=self.frame.get_label_widget()
                 if l is not None:
                     l.destroy()
+                # Reset the textview color
+                self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, self.default_background_color)
         else:
             # Both times are valid.
             if self.annotation is None:
@@ -381,7 +383,7 @@ class ActiveBookmark(object):
                 el.content.data=self.content
                 self.controller.package.annotations.append(el)
                 self.annotation=el
-                self.controller.notify('AnnotationCreate', annotation=el)
+                self.controller.notify('AnnotationCreate', annotation=el, immediate=True)
                 # Add a validate button to the frame
                 def handle_ok(b):
                     self.close_cb(self)
@@ -391,6 +393,11 @@ class ActiveBookmark(object):
                 self.controller.gui.tooltips.set_tip(b, _("Validate the annotation"))
                 self.frame.set_label_widget(b)
                 b.show_all()
+                # Update the textview color
+                col=self.controller.get_element_color(el)
+                if col is not None:
+                    color=name2color(col)
+                    self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, color)
             else:
                 # Update the annotation
                 self.annotation.fragment.begin=self.begin
@@ -471,5 +478,7 @@ class ActiveBookmark(object):
         padding=gtk.HBox()
         padding.pack_start(f, expand=False)
 
-        return padding
+        # Memorize the default textview color.
+        self.default_background_color=self.begin_widget.comment_entry.get_style().base[gtk.STATE_NORMAL]
 
+        return padding
