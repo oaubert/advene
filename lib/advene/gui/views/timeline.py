@@ -630,13 +630,13 @@ class TimeLine(AdhocView):
         return True
 
     def bookmark_highlight_handler(self, context, parameters):
-        position=long(context.evaluateValue('timestamp'))
+        position=long(context.globals['timestamp'])
         self.bookmarks_to_draw.append(position)
         self.update_bookmarks()
         return True
 
     def bookmark_unhighlight_handler(self, context, parameters):
-        position=long(context.evaluateValue('timestamp'))
+        position=long(context.globals['timestamp'])
         try:
             self.bookmarks_to_draw.remove(position)
             self.update_bookmarks()
