@@ -284,11 +284,14 @@ class Bookmarks(AdhocView):
         return v
 
 class BookmarkWidget(object):
+
+    default_comment=_("Comment here")
+
     def __init__(self, controller=None, timestamp=0, comment=None, display_comments=False):
         self.controller=controller
         self.value=timestamp
         if comment is None:
-            comment=_("No comment")
+            comment=self.default_comment
         self.comment=comment
         self.comment_entry=None
         self.display_comments=display_comments
@@ -318,6 +321,19 @@ class BookmarkWidget(object):
             self.comment_entry.modify_font(fd)
             b=self.comment_entry.get_buffer()
             b.set_text(self.comment)
+
+            def focus_in_event(wid, event):
+                if b.get_text(*b.get_bounds()) == self.default_comment:
+                    b.set_text('')
+                return False
+            self.comment_entry.connect('focus-in-event', focus_in_event)
+
+            def focus_out_event(wid, event):
+                if b.get_text(*b.get_bounds()) == '':
+                    b.set_text(self.default_comment)
+                return False
+            self.comment_entry.connect('focus-out-event', focus_out_event)
+
             def update_comment(buf):
                 self.comment=buf.get_text(*buf.get_bounds())
                 return True
