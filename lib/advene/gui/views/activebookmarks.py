@@ -131,7 +131,20 @@ class ActiveBookmarks(AdhocView):
                 wid.annotation.content.data=wid.content
                 self.controller.notify('AnnotationEditEnd', annotation=wid.annotation)
         return True
-                
+    
+    def update_annotationtype(self, annotationtype=None, event=None):
+        # Regenerate the annotation type list.
+        types=[ (at, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
+        types.sort(key=lambda a: a[1])
+        store, i=dialog.generate_list_model(types,
+                                            active_element=self.type)
+        self.chosen_type_selector.set_model(store)
+        if i is None:
+            i = store.get_iter_first()
+        if i is not None:
+            self.chosen_type_selector.set_active_iter(i)
+        return True
+
     def update_annotation (self, annotation=None, event=None):
         l=[w for w in self.bookmarks if w.annotation == annotation ]
         if l:
@@ -265,7 +278,7 @@ class ActiveBookmarks(AdhocView):
 
         i=gtk.ToolItem()
         types=[ (at, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
-        types.sort(key=lambda a: a[0])
+        types.sort(key=lambda a: a[1])
         sel=dialog.list_selector_widget(members=types)
         self.controller.gui.tooltips.set_tip(sel, _("Type of the annotations that will be created"))
         i.add(sel)
