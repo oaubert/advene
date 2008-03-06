@@ -113,7 +113,8 @@ class EditAccumulator(AccumulatorPopup):
             return True
         el=event.replace('Create', '').lower()
         element=context.evaluateValue(el)
-        self.edit(element)
+        if hasattr(element, 'complete') and not element.complete:
+            self.edit(element)
         return True
 
     def update_element(self, element, event):
