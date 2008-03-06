@@ -290,11 +290,13 @@ class BookmarkWidget(object):
         if comment is None:
             comment=_("No comment")
         self.comment=comment
+        self.comment_entry=None
         self.display_comments=display_comments
         self.widget=self.build_widget()
 
     def update(self):
         self.image.value=self.value
+        self.comment_entry.get_buffer().set_text(self.comment)
         return True
 
     def build_widget(self):
@@ -309,21 +311,21 @@ class BookmarkWidget(object):
 
         if self.display_comments:
             hbox=gtk.HBox()
-            comment_entry=gtk.TextView()
-            comment_entry.set_wrap_mode(gtk.WRAP_WORD)
+            self.comment_entry=gtk.TextView()
+            self.comment_entry.set_wrap_mode(gtk.WRAP_WORD)
             fd=pango.FontDescription('sans %d' % config.data.preferences['timeline']['font-size'])
-            comment_entry.modify_font(fd)
-            b=comment_entry.get_buffer()
+            self.comment_entry.modify_font(fd)
+            b=self.comment_entry.get_buffer()
             b.set_text(self.comment)
             def update_comment(buf):
                 self.comment=buf.get_text(*buf.get_bounds())
                 return True
             b.connect('changed', update_comment)
             
-            comment_entry.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
+            self.comment_entry.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
 
             sw=gtk.ScrolledWindow()
-            sw.add(comment_entry)
+            sw.add(self.comment_entry)
             sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
             hbox.pack_start(self.image, expand=False)
             hbox.pack_start(sw, expand=False)
