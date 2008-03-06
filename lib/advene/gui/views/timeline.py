@@ -296,6 +296,7 @@ class TimeLine(AdhocView):
         self.layout.connect('size_allocate', self.layout_resize_event)
         self.layout.connect('expose_event', self.draw_background)
         self.layout.connect_after('expose_event', self.draw_relation_lines)
+        self.scale_layout.connect_after('expose_event', self.draw_bookmarks)
 
         # The layout can receive drops
         self.layout.connect("drag_data_received", self.layout_drag_received)
@@ -311,6 +312,7 @@ class TimeLine(AdhocView):
 
         # Lines to draw in order to indicate related annotations
         self.relations_to_draw = []
+        self.bookmarks_to_draw = []
 
         # Current position in units
         self.current_position = minimum
@@ -379,7 +381,7 @@ class TimeLine(AdhocView):
 
     def update_relation_lines(self):
         self.layout.queue_draw()
-
+    
     def draw_relation_lines(self, layout, event):
         if not self.relations_to_draw:
             return False
@@ -434,6 +436,24 @@ class TimeLine(AdhocView):
                 context.show_text(t)
             context.stroke()
 
+        return False
+
+    def update_bookmarks(self):
+        self.scale_layout.queue_draw()
+
+    def draw_bookmarks(self, layout, event):
+        if not self.bookmarks_to_draw:
+            return False
+        context=layout.bin_window.cairo_create()
+        h=layout.get_size ()[1]
+
+        for t in self.bookmarks_to_draw:
+            x=self.unit2pixel(t)
+            context.set_source_rgb(1.0, 0, 0)
+            context.set_line_width(2)
+            context.move_to(x, 0)
+            context.line_to(x, h)
+            context.stroke()
         return False
 
     def update_model(self, package=None, partial_update=False):
@@ -594,6 +614,10 @@ class TimeLine(AdhocView):
                                                         method=self.tag_update),
                 controller.event_handler.internal_rule (event="RestrictType",
                                                         method=self.type_restricted_handler),
+                controller.event_handler.internal_rule (event="BookmarkHighlight",
+                                                        method=self.bookmark_highlight_handler),
+                controller.event_handler.internal_rule (event="BookmarkUnhighlight",
+                                                        method=self.bookmark_unhighlight_handler),
                 ))
 
     def type_restricted_handler(self, context, parameters):
@@ -603,6 +627,21 @@ class TimeLine(AdhocView):
         for w in self.legend.get_children():
             if hasattr(w, 'set_playing'):
                 w.set_playing(w.annotationtype == at)
+        return True
+
+    def bookmark_highlight_handler(self, context, parameters):
+        position=long(context.evaluateValue('timestamp'))
+        self.bookmarks_to_draw.append(position)
+        self.update_bookmarks()
+        return True
+
+    def bookmark_unhighlight_handler(self, context, parameters):
+        position=long(context.evaluateValue('timestamp'))
+        try:
+            self.bookmarks_to_draw.remove(position)
+            self.update_bookmarks()
+        except ValueError:
+            pass
         return True
 
     def tag_update(self, context, parameters):
