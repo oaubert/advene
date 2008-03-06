@@ -396,11 +396,17 @@ class ActiveBookmark(object):
                     # delete the origin widget.
                     self.container.delete_origin_timestamp(context.get_source_widget())
                     return True
+                elif targetType == config.data.target_type['annotation-type']:
+                    source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+                    if source is not None:
+                        self.transtype(source)
+                    return True
                 return False
             self.end_widget.image.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                                 gtk.DEST_DEFAULT_HIGHLIGHT |
                                                 gtk.DEST_DEFAULT_ALL,
-                                                config.data.drag_type['timestamp'],
+                                                config.data.drag_type['timestamp']
+                                                + config.data.drag_type['annotation-type'],
                                                 gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
             self.end_widget.image.connect("drag_data_received", end_drag_received)
         else:
@@ -413,6 +419,19 @@ class ActiveBookmark(object):
         else:
             return self.end_widget.value
     end=property(get_end, set_end)
+
+    def transtype(self, at):
+        if self.annotation is not None:
+            # There was an existing annotation. Transtype it to the
+            # new type.
+            a=self.controller.transmute_annotation(self.annotation, at, delete=True, notify=True)
+            self.annotation=a
+            # Update the textview color
+            col=self.controller.get_element_color(self.annotation)
+            if col is not None:
+                color=name2color(col)
+                self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, color)
+        return True
 
     def set_content(self, c):
         if c is None:
@@ -528,13 +547,19 @@ class ActiveBookmark(object):
                 # delete the origin widget.
                 self.container.delete_origin_timestamp(context.get_source_widget())
                 return True
+            elif targetType == config.data.target_type['annotation-type']:
+                source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+                if source is not None:
+                    self.transtype(source)
+                return True
             return False
 
         self.begin_widget=BookmarkWidget(self.controller, display_comments=True)
         self.begin_widget.image.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                               gtk.DEST_DEFAULT_HIGHLIGHT |
                                               gtk.DEST_DEFAULT_ALL,
-                                              config.data.drag_type['timestamp'],
+                                              config.data.drag_type['timestamp']
+                                              + config.data.drag_type['annotation-type'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.begin_widget.image.connect("drag_data_received", begin_drag_received)
 
