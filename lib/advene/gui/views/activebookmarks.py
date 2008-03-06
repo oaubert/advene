@@ -218,6 +218,7 @@ class ActiveBookmarks(AdhocView):
         types=[ (at, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
         types.sort(key=lambda a: a[0])
         sel=dialog.list_selector_widget(members=types)
+        self.controller.gui.tooltips.set_tip(sel, _("Type of the annotations that will be created"))
         i.add(sel)
         self.chosen_type_selector=sel
         tb.insert(i, -1)
