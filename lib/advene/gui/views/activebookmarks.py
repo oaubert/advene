@@ -172,14 +172,14 @@ class ActiveBookmarks(AdhocView):
         tb.set_style(gtk.TOOLBAR_ICONS)
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
-            if targetType == config.data.target_type['widget']:
+            if targetType == config.data.target_type['timestamp']:
                 # Check if we received the drag from one of our own widget.
-                wid=long(selection.data)
+                wid=context.get_source_widget()
                 # Look for the widget in all of our buttons.
                 l=[ b
                     for b in self.bookmarks
                     for w in (b.begin_widget.image, (b.end_widget is not None and b.end_widget.image))
-                    if id(w) == wid ]
+                    if w == wid ]
                 if l:
                     if b.end_widget is None:
                         # No end widget, then we have only a begin
@@ -187,12 +187,12 @@ class ActiveBookmarks(AdhocView):
                         b.widget.destroy()
                         self.bookmarks.remove(b)
                         self.refresh()
-                    elif wid == id(b.end_widget.image):
+                    elif wid == b.end_widget.image:
                         # We remove the end widget.
                         b.end_widget.widget.destroy()
                         b.end_widget=None
                         b.check_annotation()
-                    elif wid == id(b.begin_widget.image):
+                    elif wid == b.begin_widget.image:
                         # Copy the end as new begin, and remove end.
                         b.begin=b.end
                         b.end_widget.widget.destroy()
@@ -206,7 +206,7 @@ class ActiveBookmarks(AdhocView):
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['widget'], 
+                        config.data.drag_type['timestamp'], 
                         gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
         b.connect("drag_data_received", remove_drag_received)
         i=gtk.ToolItem()
@@ -298,19 +298,6 @@ class ActiveBookmark(object):
             self.end_widget=BookmarkWidget(controller=self.controller,
                                            timestamp=v,
                                            display_comments=False)
-
-            # We override the standard drag generation method, to be able
-            # to handle target_type['widget']
-            self.end_widget.image.connect("drag_data_get", self.image_drag_sent)
-            # The widget can generate drags
-            self.end_widget.image.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                                                  config.data.drag_type['widget']
-                                                  + config.data.drag_type['timestamp']
-                                                  + config.data.drag_type['text-plain']
-                                                  + config.data.drag_type['TEXT']
-                                                  + config.data.drag_type['STRING']
-                                                  ,
-                                                  gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
             parent=self.begin_widget.widget.get_parent()
             parent.pack_start(self.end_widget.widget, expand=False)
             self.end_widget.widget.show_all()
@@ -411,15 +398,6 @@ class ActiveBookmark(object):
                 self.controller.notify('AnnotationEditEnd', annotation=self.annotation)
         return True
 
-    def image_drag_sent(self, widget, context, selection, targetType, eventTime):
-        """Handle the drag-sent event.
-        """
-        if targetType == config.data.target_type['widget']:
-            selection.set(selection.target, 8, str(id(widget)))
-            return True
-        else:
-            return widget._drag_sent(widget, context, selection, targetType, eventTime)
-
     def build_widget(self):
 
         def drag_sent(widget, context, selection, targetType, eventTime):
@@ -460,19 +438,6 @@ class ActiveBookmark(object):
                                               config.data.drag_type['timestamp'],
                                               gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
         self.begin_widget.image.connect("drag_data_received", begin_drag_received)
-
-        # We override the standard drag generation method, to be able
-        # to handle target_type['widget']
-        self.begin_widget.image.connect("drag_data_get", self.image_drag_sent)
-        # The widget can generate drags
-        self.begin_widget.image.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                                                config.data.drag_type['widget']
-                                                + config.data.drag_type['timestamp']
-                                                + config.data.drag_type['text-plain']
-                                                + config.data.drag_type['TEXT']
-                                                + config.data.drag_type['STRING']
-                                                ,
-                                                gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
 
         box.pack_start(self.begin_widget.widget, expand=False)
         f.add(box)
