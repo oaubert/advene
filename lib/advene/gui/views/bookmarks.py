@@ -296,7 +296,8 @@ class BookmarkWidget(object):
 
     def update(self):
         self.image.value=self.value
-        self.comment_entry.get_buffer().set_text(self.comment)
+        if self.comment_entry is not None:
+            self.comment_entry.get_buffer().set_text(self.comment)
         return True
 
     def build_widget(self):
