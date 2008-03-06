@@ -303,6 +303,8 @@ class ActiveBookmark(object):
         self.widget=self.build_widget()
         self.begin=begin
         self.end=end
+        if content is None:
+            content=BookmarkWidget.default_comment
         self.content=content
 
     def set_begin(self, v):
