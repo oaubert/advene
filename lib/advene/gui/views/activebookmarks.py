@@ -244,7 +244,7 @@ class ActiveBookmarks(AdhocView):
                                    config.data.drag_type['timestamp'],
                                    gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
         self.mainbox.connect("drag_data_received", mainbox_drag_received)
-        v.add(sw)        
+        v.add(sw)
         return v
 
 class ActiveBookmark(object):
@@ -388,7 +388,7 @@ class ActiveBookmark(object):
                 b=get_pixmap_button('small_ok.png', handle_ok)
                 b.set_relief(gtk.RELIEF_NONE)
                 self.controller.gui.tooltips.set_tip(b, _("Validate the annotation"))
-                self.widget.set_label_widget(b)
+                self.frame.set_label_widget(b)
                 b.show_all()
             else:
                 # Update the annotation
@@ -463,4 +463,12 @@ class ActiveBookmark(object):
         box.pack_start(self.begin_widget.widget, expand=False)
         f.add(box)
         f.show_all()
-        return f
+
+        self.frame=f
+
+        # Add a padding widget so that the frame fits the displayed elements
+        padding=gtk.HBox()
+        padding.pack_start(f, expand=False)
+
+        return padding
+
