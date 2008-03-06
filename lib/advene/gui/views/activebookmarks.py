@@ -223,6 +223,27 @@ class ActiveBookmarks(AdhocView):
                 return True
             return False
 
+        def do_reorder(b, func):
+            self.bookmarks.sort(func)
+            self.refresh()
+            return True
+
+        def reorder(widget):
+            """Display a popup menu proposing various sort options.
+            """
+            m=gtk.Menu()
+            for t, func in (
+                (_("Chronological order"), lambda a, b: cmp(a.begin, b.begin)),
+                (_("Completeness and chronological order"), lambda a, b: cmp(a.end_widget is None, 
+                                                                             b.end_widget is None) or cmp(a.begin, b.begin)) 
+                ):
+                i=gtk.MenuItem(t)
+                i.connect('activate', do_reorder, func)
+                m.append(i)
+            m.show_all()
+            m.popup(None, widget, None, 0, gtk.get_current_event_time())
+            return True
+
         b=get_small_stock_button(gtk.STOCK_DELETE)
         self.controller.gui.tooltips.set_tip(b, _("Drop a bookmark here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -249,6 +270,13 @@ class ActiveBookmarks(AdhocView):
         self.controller.gui.tooltips.set_tip(sel, _("Type of the annotations that will be created"))
         i.add(sel)
         self.chosen_type_selector=sel
+        tb.insert(i, -1)
+
+        b=get_small_stock_button(gtk.STOCK_REDO)
+        self.controller.gui.tooltips.set_tip(b, _("Reorder active bookmarks"))
+        b.connect("clicked", reorder)
+        i=gtk.ToolItem()
+        i.add(b)
         tb.insert(i, -1)
 
         hb.add(tb)
