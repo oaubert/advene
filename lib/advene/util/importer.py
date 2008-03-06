@@ -304,6 +304,7 @@ class GenericImporter(object):
           - id
           - type (which must be a *type*, not a type-id)
           - notify: if True, then each annotation creation will generate a AnnotationCreate signal
+          - complete: boolean. Used to mark the completeness of the annotation.
         """
         if self.package is None:
             self.package, self.defaulttype=self.init_package()
@@ -356,6 +357,8 @@ class GenericImporter(object):
                                       author=author,
                                       title=title,
                                       timestamp=timestamp)
+            if 'complete' in d:
+                a.complete=d['complete']
             if 'notify' in d and d['notify'] and self.controller is not None:
                 print "Notifying", a
                 self.controller.notify('AnnotationCreate', annotation=a)
