@@ -27,7 +27,6 @@ import advene.core.config as config
 from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
-from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 import advene.util.helper as helper
@@ -117,7 +116,7 @@ class ActiveBookmarks(AdhocView):
         return True
 
     def append(self, t):
-        b=ActiveBookmark(controller=self.controller, begin=t, end=None, content=None, close_cb=self.remove, type=self.type)
+        b=ActiveBookmark(container=self, begin=t, end=None, content=None, type=self.type)
         self.bookmarks.append(b)
         self.mainbox.pack_start(b.widget, expand=False)
         b.widget.show_all()
@@ -154,6 +153,37 @@ class ActiveBookmarks(AdhocView):
                 self.remove(wid)
         return True
 
+    def get_matching_bookmark(self, wid):
+        """Return the bookmark whose begin or end image is wid.
+
+        Usually used in DND callbacks, with wid=context.get_source_widget()
+        """
+        l=[ b
+            for b in self.bookmarks
+            for w in (b.begin_widget.image, (b.end_widget is not None and b.end_widget.image))
+            if w == wid ]
+        if l:
+            return l[0]
+        else:
+            return None
+
+    def delete_origin_timestamp(self, wid):
+        """Delete the timestamp from the widget wid.
+        """
+        b=self.get_matching_bookmark(wid)
+        if b is None:
+            return
+        if wid == b.begin_widget.image:
+            if b.end_widget is None:
+                # The bookmark should be removed
+                self.remove(b)
+            else:
+                # There was an end.
+                b.begin=b.end
+                b.end=None
+        elif wid == b.end_widget.image:
+            b.end=None
+
     def build_widget(self):
         v=gtk.VBox()
         hb=gtk.HBox()
@@ -175,12 +205,8 @@ class ActiveBookmarks(AdhocView):
             if targetType == config.data.target_type['timestamp']:
                 # Check if we received the drag from one of our own widget.
                 wid=context.get_source_widget()
-                # Look for the widget in all of our buttons.
-                l=[ b
-                    for b in self.bookmarks
-                    for w in (b.begin_widget.image, (b.end_widget is not None and b.end_widget.image))
-                    if w == wid ]
-                if l:
+                b=self.get_matching_bookmark(wid)
+                if b is not None:
                     if b.end_widget is None:
                         # No end widget, then we have only a begin
                         # time. Thus remove the whole bookmark.
@@ -189,15 +215,11 @@ class ActiveBookmarks(AdhocView):
                         self.refresh()
                     elif wid == b.end_widget.image:
                         # We remove the end widget.
-                        b.end_widget.widget.destroy()
-                        b.end_widget=None
-                        b.check_annotation()
+                        b.end=None
                     elif wid == b.begin_widget.image:
                         # Copy the end as new begin, and remove end.
                         b.begin=b.end
-                        b.end_widget.widget.destroy()
-                        b.end_widget=None
-                        b.check_annotation()                        
+                        b.end=None
                 return True
             return False
 
@@ -207,7 +229,7 @@ class ActiveBookmarks(AdhocView):
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['timestamp'], 
-                        gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+                        gtk.gdk.ACTION_MOVE )
         b.connect("drag_data_received", remove_drag_received)
         i=gtk.ToolItem()
         i.add(b)
@@ -240,6 +262,8 @@ class ActiveBookmarks(AdhocView):
             if targetType == config.data.target_type['timestamp']:
                 position=long(selection.data)
                 self.append(position)
+                # If the drag originated from our own widgets, remove it.
+                self.delete_origin_timestamp(context.get_source_widget())
                 return True
             else:
                 print "Unknown target type for drop: %d" % targetType
@@ -249,7 +273,7 @@ class ActiveBookmarks(AdhocView):
                                    gtk.DEST_DEFAULT_HIGHLIGHT |
                                    gtk.DEST_DEFAULT_ALL,
                                    config.data.drag_type['timestamp'],
-                                   gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
         self.mainbox.connect("drag_data_received", mainbox_drag_received)
         v.add(sw)
         return v
@@ -267,8 +291,9 @@ class ActiveBookmark(object):
     Once the end time is set, both times are displayed through a
     TimeAdjustment widget, so that they are editable.
     """
-    def __init__(self, controller=None, begin=None, end=None, content=None, close_cb=None, type=None):
-        self.controller=controller 
+    def __init__(self, container=None, begin=None, end=None, content=None, type=None):
+        self.container=container
+        self.controller=container.controller
         self.annotation=None
         self.type=type
         # begin_widget and end_widget are both instances of BookmarkWidget.
@@ -279,7 +304,6 @@ class ActiveBookmark(object):
         self.begin=begin
         self.end=end
         self.content=content
-        self.close_cb=close_cb
 
     def set_begin(self, v):
         if v is None:
@@ -292,6 +316,11 @@ class ActiveBookmark(object):
 
     def set_end(self, v):
         if v is None:
+            if self.end_widget is not None:
+                # Remove the end widget
+                self.end_widget.widget.destroy()
+                self.end_widget=None
+                self.check_annotation()
             return
         if self.end_widget is None:
             # end was not set. We need to create the proper time adjustment
@@ -301,6 +330,27 @@ class ActiveBookmark(object):
             parent=self.begin_widget.widget.get_parent()
             parent.pack_start(self.end_widget.widget, expand=False)
             self.end_widget.widget.show_all()
+
+            def end_drag_received(widget, context, x, y, selection, targetType, time):
+                if targetType == config.data.target_type['timestamp']:
+                    e=long(selection.data)
+                    if e < self.begin:
+                        # Invert begin and end.
+                        self.begin, self.end = e, self.begin
+                    else:
+                        self.end=e
+                    # If the drag originated from our own widgets, remove it.
+                    # If the drop was done from within our view, then
+                    # delete the origin widget.
+                    self.container.delete_origin_timestamp(context.get_source_widget())
+                    return True
+                return False
+            self.end_widget.image.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                                gtk.DEST_DEFAULT_HIGHLIGHT |
+                                                gtk.DEST_DEFAULT_ALL,
+                                                config.data.drag_type['timestamp'],
+                                                gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+            self.end_widget.image.connect("drag_data_received", end_drag_received)
         else:
             self.end_widget.value=v
             self.end_widget.update()
@@ -379,7 +429,7 @@ class ActiveBookmark(object):
                 self.controller.notify('AnnotationCreate', annotation=el, immediate=True)
                 # Add a validate button to the frame
                 def handle_ok(b):
-                    self.close_cb(self)
+                    self.container.remove(self)
                     return True
                 b=get_pixmap_button('small_ok.png', handle_ok)
                 b.set_relief(gtk.RELIEF_NONE)
@@ -399,14 +449,6 @@ class ActiveBookmark(object):
         return True
 
     def build_widget(self):
-
-        def drag_sent(widget, context, selection, targetType, eventTime):
-            if targetType == config.data.target_type['timestamp']:
-                selection.set(selection.target, 8, str(self.begin))
-                return True
-            else:
-                print "Unknown target type for drag: %d" % targetType
-                return False
 
         f=gtk.Frame()
 
@@ -428,6 +470,11 @@ class ActiveBookmark(object):
                         self.begin, self.end = self.end, e
                     else:
                         self.begin=e
+
+                # If the drag originated from our own widgets, remove it.
+                # If the drop was done from within our view, then
+                # delete the origin widget.
+                self.container.delete_origin_timestamp(context.get_source_widget())
                 return True
             return False
 
@@ -436,7 +483,7 @@ class ActiveBookmark(object):
                                               gtk.DEST_DEFAULT_HIGHLIGHT |
                                               gtk.DEST_DEFAULT_ALL,
                                               config.data.drag_type['timestamp'],
-                                              gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+                                              gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.begin_widget.image.connect("drag_data_received", begin_drag_received)
 
         box.pack_start(self.begin_widget.widget, expand=False)
