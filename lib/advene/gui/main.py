@@ -2771,6 +2771,7 @@ class AdveneGUI (Connect):
                         'display-scroller', 'display-caption', 'imagecache-save-on-exit',
                         'remember-window-size', 'expert-mode', 'update-check',
                         'package-auto-save', 'package-auto-save-interval',
+                        'bookmark-snapshot-width',
                         'save-default-workspace', 'restore-default-workspace')
         cache={
             'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
@@ -2805,6 +2806,7 @@ class AdveneGUI (Connect):
                         }
                      )
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
+        ew.add_spin(_("Bookmark snapshot width"), 'bookmark-snapshot-width', _("Width of the snapshots representing bookmarks"), 50, 400)
 
         ew.add_title(_("Time-related"))
         ew.add_spin(_("Time increment"), "time-increment", _("Skip duration, when using control-arrow or forward/rewind buttons (in ms)."), 100, 30000)
