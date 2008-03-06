@@ -52,6 +52,7 @@ class HistoryImporter(advene.util.importer.GenericImporter):
                 'end': b.value + self.duration,
                 'content': b.comment or  "Bookmark %s" % helper.format_time(b.value),
                 'notify': True,
+                'complete': False,
                 }
 
     def process_file(self, filename):
