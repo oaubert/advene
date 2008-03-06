@@ -410,7 +410,7 @@ class ActiveBookmark(object):
                                                 + config.data.drag_type['annotation-type'],
                                                 gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
             self.end_widget.image.connect("drag_data_received", end_drag_received)
-            self.end_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_end, self.set_end)
+            self.end_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
         else:
             self.end_widget.value=v
             self.end_widget.update()
@@ -521,7 +521,7 @@ class ActiveBookmark(object):
                 self.controller.notify('AnnotationEditEnd', annotation=self.annotation)
         return True
 
-    def handle_scroll_event(self, button, event, get_value, set_value):
+    def handle_scroll_event(self, button, event, get_value, set_value, check_value):
         # Handle scroll actions
         if not (event.state & gtk.gdk.CONTROL_MASK):
             return True
@@ -532,7 +532,8 @@ class ActiveBookmark(object):
 
         v=get_value()
         v += incr
-        set_value(v)
+        if check_value(v):
+            set_value(v)
         return True
 
     def build_widget(self):
@@ -578,7 +579,7 @@ class ActiveBookmark(object):
                                               + config.data.drag_type['annotation-type'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.begin_widget.image.connect("drag_data_received", begin_drag_received)
-        self.begin_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_begin, self.set_begin)
+        self.begin_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_begin, self.set_begin, lambda v: self.end is None or v < self.end)
 
         box.pack_start(self.begin_widget.widget, expand=False)
         f.add(box)
