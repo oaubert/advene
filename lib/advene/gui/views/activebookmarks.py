@@ -250,7 +250,7 @@ class ActiveBookmarks(AdhocView):
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['timestamp'], 
-                        gtk.gdk.ACTION_MOVE )
+                        gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_COPY )
         b.connect("drag_data_received", remove_drag_received)
         i=gtk.ToolItem()
         i.add(b)
