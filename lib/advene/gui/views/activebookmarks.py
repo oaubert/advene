@@ -120,7 +120,7 @@ class ActiveBookmarks(AdhocView):
         self.bookmarks.append(b)
         self.mainbox.pack_start(b.widget, expand=False)
         b.widget.show_all()
-        return True
+        return b
 
     def check_contents(self, *p):
         """Check that annotation contents are in sync.
@@ -311,7 +311,8 @@ class ActiveBookmarks(AdhocView):
                 source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
                 if source is not None:
                     for a in source.annotations:
-                        self.append(a.fragment.begin)
+                        b=self.append(a.fragment.begin)
+                        b.content=self.controller.get_title(a)
                 return True
             else:
                 print "Unknown target type for drop: %d" % targetType
@@ -409,6 +410,7 @@ class ActiveBookmark(object):
                                                 + config.data.drag_type['annotation-type'],
                                                 gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
             self.end_widget.image.connect("drag_data_received", end_drag_received)
+            self.end_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_end, self.set_end)
         else:
             self.end_widget.value=v
             self.end_widget.update()
@@ -519,6 +521,20 @@ class ActiveBookmark(object):
                 self.controller.notify('AnnotationEditEnd', annotation=self.annotation)
         return True
 
+    def handle_scroll_event(self, button, event, get_value, set_value):
+        # Handle scroll actions
+        if not (event.state & gtk.gdk.CONTROL_MASK):
+            return True
+        if event.direction == gtk.gdk.SCROLL_DOWN:
+            incr=config.data.preferences['scroll-increment']
+        else:
+            incr=-config.data.preferences['scroll-increment']
+
+        v=get_value()
+        v += incr
+        set_value(v)
+        return True
+
     def build_widget(self):
 
         f=gtk.Frame()
@@ -562,6 +578,7 @@ class ActiveBookmark(object):
                                               + config.data.drag_type['annotation-type'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.begin_widget.image.connect("drag_data_received", begin_drag_received)
+        self.begin_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_begin, self.set_begin)
 
         box.pack_start(self.begin_widget.widget, expand=False)
         f.add(box)
