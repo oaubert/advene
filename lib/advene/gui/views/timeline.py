@@ -880,6 +880,7 @@ class TimeLine(AdhocView):
             fragment=MillisecondFragment(begin=long(position),
                                          duration=duration))
         self.controller.package.annotations.append(el)
+        el.complete=False
         self.controller.notify('AnnotationCreate', annotation=el)
         return el
 
