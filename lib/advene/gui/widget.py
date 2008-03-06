@@ -813,6 +813,15 @@ class TimestampRepresentation(gtk.Button):
         self.connect("drag_begin", _drag_begin)
         self.connect("drag_end", _drag_end)
 
+        def enter_bookmark(widget, event):
+            self.controller.notify('BookmarkHighlight', timestamp=self.value, immediate=True)
+            return False
+        def leave_bookmark(widget, event):
+            self.controller.notify('BookmarkUnhighlight', timestamp=self.value, immediate=True)
+            return False
+        self.connect('enter-notify-event', enter_bookmark)
+        self.connect('leave-notify-event', leave_bookmark)
+
     def _drag_sent(self, widget, context, selection, targetType, eventTime):
         """Handle the drag-sent event.
         """
