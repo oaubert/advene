@@ -1116,6 +1116,8 @@ class ECACatalog:
         'ApplicationEnd':         _("End of the application"),
         'UserEvent':              _("User-defined event"),
         'MediaChange':            _("Modification of the associated media"),
+        'BookmarkHighlight':      _("Highlight a bookmark"),
+        'BookmarkUnhighlight':    _("Unhighlight a bookmark"),
         }
 
     # Events that set the controller.modified state
