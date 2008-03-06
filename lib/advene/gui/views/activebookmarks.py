@@ -293,6 +293,13 @@ class ActiveBookmarks(AdhocView):
                 # If the drag originated from our own widgets, remove it.
                 self.delete_origin_timestamp(context.get_source_widget())
                 return True
+            elif targetType == config.data.target_type['annotation-type']:
+                # Populate the view with annotation begins
+                source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+                if source is not None:
+                    for a in source.annotations:
+                        self.append(a.fragment.begin)
+                return True
             else:
                 print "Unknown target type for drop: %d" % targetType
                 return False
@@ -300,7 +307,9 @@ class ActiveBookmarks(AdhocView):
         self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                    gtk.DEST_DEFAULT_HIGHLIGHT |
                                    gtk.DEST_DEFAULT_ALL,
-                                   config.data.drag_type['timestamp'],
+                                   config.data.drag_type['timestamp']
+                                   + config.data.drag_type['annotation-type']
+                                   ,
                                    gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
         self.mainbox.connect("drag_data_received", mainbox_drag_received)
         v.add(sw)
