@@ -320,7 +320,6 @@ class Config(object):
             ('tag',               52, None),
             ('color',             53, 'application/x-color'),
             ('adhoc-view-instance', 54, 'application/x-advene-adhoc-view-instance'),
-            ('widget',            55, None), # widget id
             ('uri-list',          80, 'text/uri-list'),
             ):
             self.target_type[name] = typ
