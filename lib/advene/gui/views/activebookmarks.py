@@ -192,6 +192,12 @@ class ActiveBookmarks(AdhocView):
                         b.end_widget.widget.destroy()
                         b.end_widget=None
                         b.check_annotation()
+                    elif wid == id(b.begin_widget.image):
+                        # Copy the end as new begin, and remove end.
+                        b.begin=b.end
+                        b.end_widget.widget.destroy()
+                        b.end_widget=None
+                        b.check_annotation()                        
                 return True
             return False
 
