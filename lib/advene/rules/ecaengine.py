@@ -356,16 +356,17 @@ class ECAEngine:
                     d['relationtype']=d['element']
             if 'annotation' in d:
                 a=d['annotation']
-                d['content']= "\n".join(
+                if a is not None:
+                    d['content']= "\n".join(
 		            ( 'annotation=' + a.id,
                       'type=' + a.type.id,
                       'mimetype=' + a.type.mimetype,
-                      'content="'+ urllib.quote(a.content.data.encode('utf-8'))+'"'
+                      'content="'+ urllib.quote(a.content.data.encode('utf-8'))+'"')
 		            )
-		        )
             elif 'relation' in d:
                 r=d['relation']
-                d['content']= "\n".join(
+                if r is not None:
+                    d['content']= "\n".join(
                     ( 'relation=' + r.id,
                       'type=' + r.type.id,
                       'mimetype=' + r.type.mimetype,
@@ -374,14 +375,16 @@ class ECAEngine:
                     )
             elif 'annotationtype' in d:
                 at=d['annotationtype']
-                d['content']= "\n".join(
+                if at is not None:
+                    d['content']= "\n".join(
                     ('annotationtype='+at.id,
                      'schema=' + at.schema.id,
                      'mimetype=' + at.mimetype)
                     )
             elif 'relationtype' in d:
                 rt=d['relationtype']
-                d['content']= "\n".join(
+                if rt is not None:
+                    d['content']= "\n".join(
                     ('relationtype=' + rt.id,
                      'schema=' + rt.schema.id,
                      'mimetype=' + rt.mimetype)

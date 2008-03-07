@@ -65,7 +65,7 @@ class EventHistoryImporter(GenericImporter):
                 'content': '',
             }
             if e.has_key('content'):
-                d['content']=e['content']+'position='+str(e['movietime'])+'\n'
+                d['content']=e['content']+'\nposition='+str(e['movietime'])+'\n'
             else:
                 d['content']='position='+str(e['movietime'])+'\n'
             if end<e['timestamp']+50:
