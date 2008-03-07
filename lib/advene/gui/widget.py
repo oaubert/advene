@@ -743,6 +743,8 @@ class TimestampRepresentation(gtk.Button):
         self._value=value
         self.controller=controller
 
+        self.highlight=False
+
         style=self.get_style().copy()
         black=gtk.gdk.color_parse('black')
         white=gtk.gdk.color_parse('white')
@@ -815,9 +817,11 @@ class TimestampRepresentation(gtk.Button):
 
         def enter_bookmark(widget, event):
             self.controller.notify('BookmarkHighlight', timestamp=self.value, immediate=True)
+            self.highlight=True
             return False
         def leave_bookmark(widget, event):
             self.controller.notify('BookmarkUnhighlight', timestamp=self.value, immediate=True)
+            self.highlight=False
             return False
         self.connect('enter-notify-event', enter_bookmark)
         self.connect('leave-notify-event', leave_bookmark)
@@ -855,6 +859,9 @@ class TimestampRepresentation(gtk.Button):
     def get_value(self):
         return self._value
     def set_value(self, v):
+        if self.highlight:
+            self.controller.notify('BookmarkUnhighlight', timestamp=self._value, immediate=True)
+            self.highlight=False
         self._value=v
         self._update_display()
     value=property(get_value, set_value, doc="Timestamp value")
