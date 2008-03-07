@@ -177,8 +177,7 @@ class ActiveBookmarks(AdhocView):
         """
         l=[ b
             for b in self.bookmarks
-            for w in (b.begin_widget.image, (b.end_widget is not None and b.end_widget.image))
-            if w == wid ]
+            if b.is_widget_in_bookmark(wid) ]
         if l:
             return l[0]
         else:
@@ -389,6 +388,8 @@ class ActiveBookmark(object):
             self.end_widget.widget.show_all()
 
             def end_drag_received(widget, context, x, y, selection, targetType, time):
+                if self.is_widget_in_bookmark(context.get_source_widget()):
+                    return False
                 if targetType == config.data.target_type['timestamp']:
                     e=long(selection.data)
                     if e < self.begin:
@@ -542,6 +543,14 @@ class ActiveBookmark(object):
             set_value(v)
         return True
 
+    def is_widget_in_bookmark(self, widget):
+        """Check if the widget is in the bookmark.
+
+        It checks the images, which are the source for DND.
+        """
+        return (widget == self.begin_widget.image 
+                or (self.end_widget is not None and widget == self.end_widget.image))
+
     def build_widget(self):
 
         f=gtk.Frame()
@@ -549,6 +558,8 @@ class ActiveBookmark(object):
         box=gtk.HBox()
 
         def begin_drag_received(widget, context, x, y, selection, targetType, time):
+            if self.is_widget_in_bookmark(context.get_source_widget()):
+                return False            
             if targetType == config.data.target_type['timestamp']:
                 e=long(selection.data)
                 if self.end is None:
