@@ -24,9 +24,10 @@ import gobject
 
 # Advene part
 import advene.core.config as config
-from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
+from advene.gui.widget import AnnotationWidget
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 import advene.util.helper as helper
@@ -360,6 +361,7 @@ class ActiveBookmark(object):
         if content is None:
             content=BookmarkWidget.default_comment
         self.content=content
+        self.no_image_pixbuf=None
 
     def set_begin(self, v):
         if v is None:
@@ -623,4 +625,101 @@ class ActiveBookmark(object):
         #padding=gtk.HBox()
         #padding.pack_start(f, expand=False)
 
-        return f
+        # Use an Event box to be able to drag the frame representing an annotation
+        eb=gtk.EventBox()
+        eb.add(f)
+
+        def drag_sent(widget, context, selection, targetType, eventTime):
+            """Handle the drag-sent event.
+            """
+            if targetType == config.data.target_type['annotation']:
+                if self.annotation is None:
+                    return False
+                else:
+                    selection.set(selection.target, 8, self.annotation.uri.encode('utf8'))
+            elif targetType == config.data.target_type['uri-list']:
+                if self.annotation is None:
+                    return False
+                c=self.controller.build_context(here=self.annotation)
+                uri=c.evaluateValue('here/absolute_url')
+                selection.set(selection.target, 8, uri.encode('utf8'))
+            elif (targetType == config.data.target_type['text-plain']
+                  or targetType == config.data.target_type['TEXT']
+                  or targetType == config.data.target_type['STRING']):
+                # Put the timecode + content
+                selection.set(selection.target, 8, ("%s : %s" % (helper.format_time(self.begin),
+                                                                 self.content)).encode('utf8'))
+            elif targetType == config.data.target_type['timestamp']:
+                selection.set(selection.target, 8, str(self.begin))
+            else:
+                return False
+            return True
+
+        eb.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                           config.data.drag_type['annotation']
+                           + config.data.drag_type['uri-list']
+                           + config.data.drag_type['text-plain']
+                           + config.data.drag_type['TEXT']
+                           + config.data.drag_type['STRING']
+                           + config.data.drag_type['timestamp']
+                           + config.data.drag_type['tag']
+                           ,
+                           gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+        eb.connect("drag_data_get", drag_sent)
+
+        # Drag cursor definition
+        def _drag_begin(widget, context):
+            w=gtk.Window(gtk.WINDOW_POPUP)
+            w.set_decorated(False)
+
+            v=gtk.VBox()
+            i=gtk.Image()
+            v.pack_start(i, expand=False)
+            l=gtk.Label()
+            v.pack_start(l, expand=False)
+
+            def set_cursor(wid, t):
+                cache=self.controller.package.imagecache
+                if self.no_image_pixbuf is None:
+                    self.no_image_pixbuf=png_to_pixbuf(cache.not_yet_available_image, width=50)
+                if not t == w._current:
+                    if isinstance(t, long) or isinstance(t, int):
+                        if cache.is_initialized(t, epsilon=500):
+                            i.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=500), width=50))
+                        elif i.get_pixbuf() != self.no_image_pixbuf:
+                            i.set_from_pixbuf(self.no_image_pixbuf)
+                        l.set_text(helper.format_time(t)[:30])
+                    elif isinstance(t, Annotation):
+                        # It can be an annotation
+                        i.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.begin), width=50))
+                        l.set_text(self.controller.get_title(t)[:30])
+                wid._current=t
+                return True
+
+            w.add(v)
+            w.show_all()
+            w._current=None
+            w.set_cursor = set_cursor.__get__(w)
+            w.set_cursor(self.annotation or self.begin)
+            widget._icon=w
+            context.set_icon_widget(w, 0, 0)
+            return True
+
+        def _drag_end(widget, context):
+            widget._icon.destroy()
+            widget._icon=None
+            return True
+
+        def _drag_motion(widget, drag_context, x, y, timestamp):
+            w=drag_context.get_source_widget()
+            try:
+                w._icon.set_cursor(self.annotation or self.begin)
+            except AttributeError:
+                pass
+            return True
+        
+        eb.connect("drag_begin", _drag_begin)
+        eb.connect("drag_end", _drag_end)
+        eb.connect("drag_motion", _drag_motion)
+        
+        return eb
