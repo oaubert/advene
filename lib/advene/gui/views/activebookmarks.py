@@ -581,17 +581,17 @@ class ActiveBookmark(object):
         self.begin_widget.image.connect("drag_data_received", begin_drag_received)
         self.begin_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_begin, self.set_begin, lambda v: self.end is None or v < self.end)
 
-        box.pack_start(self.begin_widget.widget, expand=False)
+        box.pack_start(self.begin_widget.widget, expand=True)
         f.add(box)
         f.show_all()
 
         self.frame=f
 
-        # Add a padding widget so that the frame fits the displayed elements
-        padding=gtk.HBox()
-        padding.pack_start(f, expand=False)
-
         # Memorize the default textview color.
         self.default_background_color=self.begin_widget.comment_entry.get_style().base[gtk.STATE_NORMAL]
 
-        return padding
+        # Add a padding widget so that the frame fits the displayed elements
+        #padding=gtk.HBox()
+        #padding.pack_start(f, expand=False)
+
+        return f

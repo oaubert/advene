@@ -340,13 +340,13 @@ class BookmarkWidget(object):
                 return True
             b.connect('changed', update_comment)
             
-            self.comment_entry.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
+            #self.comment_entry.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
 
             sw=gtk.ScrolledWindow()
             sw.add(self.comment_entry)
             sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
             hbox.pack_start(self.image, expand=False)
-            hbox.pack_start(sw, expand=False)
+            hbox.pack_start(sw, expand=True)
             hbox.show_all()
             return hbox
         else:
