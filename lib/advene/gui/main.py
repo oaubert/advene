@@ -796,13 +796,7 @@ class AdveneGUI (Connect):
             # item. In this case, display a dialog stating that there
             # is no update.
             # An update is available.
-            v=gtk.VBox()
-            msg=textwrap.fill(_("""<span background="#ff8888" size="large">You are using a up-to-date version of Advene (%(current)s).</span>""") % info, 55)
-            l=gtk.Label()
-            l.set_markup(msg)
-            #l.set_line_wrap_mode(True)
-            v.add(l)
-            self.popupwidget.display(v, title=_("Advene is up-to-date"))
+            self.popupwidget.display_message(_("You are using a up-to-date version of Advene (%(current)s).""") % info, timeout=10000, title=_("Advene is up-to-date"))
         return False
 
     def update_color(self, element):
@@ -1120,9 +1114,7 @@ class AdveneGUI (Connect):
 
         self.pane['fareast'].show_all()
 
-        # Information message
-        l=gtk.Label(textwrap.fill(_("You can drag and drop view icons (timeline, treeview, transcription...) in this notebook to embed various views."), 50))
-        self.popupwidget.display(l, timeout=10000, title=_("Information"))
+        self.popupwidget.display_message(_("You can drag and drop view icons (timeline, treeview, transcription...) in this notebook to embed various views."), timeout=10000, title=_("Information"))
 
         return self.pane['fareast']
 
