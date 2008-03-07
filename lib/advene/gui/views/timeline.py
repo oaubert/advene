@@ -2352,6 +2352,7 @@ class TimeLine(AdhocView):
                     fragment=MillisecondFragment(begin=long(self.controller.player.current_position_value),
                                                  duration=duration))
                 self.controller.package.annotations.append(el)
+                el.complete=False
                 self.controller.notify('AnnotationCreate', annotation=el)
                 b=self.create_annotation_widget(el)
                 b.show()
