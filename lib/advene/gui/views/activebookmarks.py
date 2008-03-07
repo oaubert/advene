@@ -530,7 +530,7 @@ class ActiveBookmark(object):
     def handle_scroll_event(self, button, event, get_value, set_value, check_value):
         # Handle scroll actions
         if not (event.state & gtk.gdk.CONTROL_MASK):
-            return True
+            return False
         if event.direction == gtk.gdk.SCROLL_DOWN:
             incr=config.data.preferences['scroll-increment']
         else:
