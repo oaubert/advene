@@ -427,6 +427,8 @@ class ActiveBookmark(object):
             # There was an existing annotation. Transtype it to the
             # new type.
             a=self.controller.transmute_annotation(self.annotation, at, delete=True, notify=True)
+            if a is None:
+                return True
             self.annotation=a
             # Update the textview color
             col=self.controller.get_element_color(self.annotation)
@@ -580,6 +582,14 @@ class ActiveBookmark(object):
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.begin_widget.image.connect("drag_data_received", begin_drag_received)
         self.begin_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_begin, self.set_begin, lambda v: self.end is None or v < self.end)
+
+        self.begin_widget.comment_entry.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                              gtk.DEST_DEFAULT_HIGHLIGHT |
+                                              gtk.DEST_DEFAULT_ALL,
+                                              config.data.drag_type['timestamp']
+                                              + config.data.drag_type['annotation-type'],
+                                              gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
+        self.begin_widget.comment_entry.connect('drag_data_received', begin_drag_received)
 
         box.pack_start(self.begin_widget.widget, expand=True)
         f.add(box)
