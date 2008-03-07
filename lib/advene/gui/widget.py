@@ -243,7 +243,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                              + config.data.drag_type['tag']
                              ,
                              gtk.gdk.ACTION_LINK)
-        self.no_image_pixbuf=png_to_pixbuf(self.controller.package.imagecache.not_yet_available_image, width=50)
+        self.no_image_pixbuf=None
 
     def _drag_begin(self, widget, context):
         w=gtk.Window(gtk.WINDOW_POPUP)
@@ -257,6 +257,8 @@ class AnnotationWidget(GenericColorButtonWidget):
 
         def set_cursor(wid, t):
             cache=self.controller.package.imagecache
+            if self.no_image_pixbuf is None:
+                self.no_image_pixbuf=png_to_pixbuf(cache.not_yet_available_image, width=50)
             if not t == w._current:
                 if isinstance(t, long) or isinstance(t, int):
                     if cache.is_initialized(t, epsilon=500):
@@ -275,7 +277,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         w.show_all()
         w._current=None
         w.set_cursor = set_cursor.__get__(w)
-        w.set_cursor(self.element)
+        w.set_cursor(self.annotation)
         widget._icon=w
         context.set_icon_widget(w, 0, 0)
         return True
@@ -288,7 +290,7 @@ class AnnotationWidget(GenericColorButtonWidget):
     def _drag_motion(self, widget, drag_context, x, y, timestamp):
         w=drag_context.get_source_widget()
         try:
-            w._icon.set_cursor(self.element)
+            w._icon.set_cursor(self.annotation)
         except AttributeError:
             pass
         return True
