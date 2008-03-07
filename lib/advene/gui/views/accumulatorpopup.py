@@ -78,6 +78,17 @@ class AccumulatorPopup(AdhocView):
         self.undisplay(widget)
         return True
 
+    def display_message(self, message='', timeout=None, title=None):
+        """Convenience method.
+        """
+        t=gtk.TextView()
+        t.set_editable(False)
+        t.set_cursor_visible(False)
+        t.set_wrap_mode(gtk.WRAP_WORD)
+        t.set_justification(gtk.JUSTIFY_LEFT)
+        t.get_buffer().set_text(message)
+        self.display(t, timeout, title)
+
     def display(self, widget=None, timeout=None, title=None):
         """Display the given widget.
 
