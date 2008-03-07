@@ -584,7 +584,7 @@ class EditViewPopup (EditElementPopup):
                                        labels={'class': _('Class'),
                                                'type':  _('Type')}
                                        )
-        vbox.pack_start (self.framed(f.get_view (), _("Match Filter")),
+        vbox.pack_start (self.expandable(f.get_view (), _("Match Filter")),
                          expand=False)
 
         # Tags (not tags in view)
@@ -1079,6 +1079,9 @@ class EditContentForm(EditForm):
     def get_view (self, compact=False):
         """Generate a view widget for editing content."""
         vbox = gtk.VBox()
+
+        if self.element.mimetype == 'application/x-advene-ruleset':
+            compact=True
 
         if not compact:
             hbox = gtk.HBox()
