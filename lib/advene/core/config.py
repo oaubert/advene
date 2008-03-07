@@ -239,6 +239,8 @@ class Config(object):
             'last-update': 0,
             # Width of the image used to display the snapshot of a bookmark
             'bookmark-snapshot-width': 80,
+            # Precision in ms of the snapshot used for bookmarks.
+            'bookmark-snapshot-precision': 150,
             }
 
         # Player options

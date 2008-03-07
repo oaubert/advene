@@ -848,7 +848,7 @@ class TimestampRepresentation(gtk.Button):
             v=-1
         else:
             v=self._value
-        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=500), width=config.data.preferences['bookmark-snapshot-width']))
+        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['bookmark-snapshot-width']))
         self.label.set_markup('<small>%s</small>' % helper.format_time(self._value))
         return True
 
