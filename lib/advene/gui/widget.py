@@ -277,12 +277,12 @@ class AnnotationWidget(GenericColorButtonWidget):
         w.set_cursor = set_cursor.__get__(w)
         w.set_cursor(self.element)
         widget._icon=w
-        context._popup=w
         context.set_icon_widget(w, 0, 0)
         return True
 
     def _drag_end(self, widget, context):
-        context._popup.destroy()
+        widget._icon.destroy()
+        widget._icon=None
         return True
 
     def _drag_motion(self, widget, drag_context, x, y, timestamp):
