@@ -392,6 +392,8 @@ class ActiveBookmark(object):
                     return False
                 if targetType == config.data.target_type['timestamp']:
                     e=long(selection.data)
+                    if self.end is not None and context.action == gtk.gdk.ACTION_COPY:
+                        self.container.append(self.end)
                     if e < self.begin:
                         # Invert begin and end.
                         self.begin, self.end = e, self.begin
@@ -569,6 +571,8 @@ class ActiveBookmark(object):
                     else:
                         self.end=e
                 else:
+                    if context.action == gtk.gdk.ACTION_COPY:
+                        self.container.append(self.begin)
                     # Reset the begin time.
                     if e > self.end:
                         # Invert new begin and end
