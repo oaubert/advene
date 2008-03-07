@@ -779,7 +779,7 @@ class TimestampRepresentation(gtk.Button):
                              + config.data.drag_type['TEXT']
                              + config.data.drag_type['STRING']
                              ,
-                             gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+                             gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
 
         # Define drag cursor
         def _drag_begin(widget, context):
