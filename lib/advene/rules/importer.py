@@ -40,16 +40,7 @@ class EventHistoryImporter(GenericImporter):
         start=f[0]['timestamp']
         end=start
         id_="Traces"
-        title_="Traces"
         schema=self.package.get_element_by_id(id_)
-        if schema is None:
-            #schema creation
-            self.package._idgenerator.add(id_)
-            schema=self.package.createSchema(ident=id_)
-            schema.author=config.data.userid
-            schema.date=time.strftime("%Y-%m-%d")
-            schema.title=title_
-            self.package.schemas.append(schema)
         for e in f:
             type_ = e['event_name']
             type = self.package.get_element_by_id(type_)
@@ -86,6 +77,16 @@ class EventHistoryImporter(GenericImporter):
     def process_file(self, filename):
         if self.package is None:
             self.init_package(filename='event_history.xml', annotationtypeid='event')
+        id_="Traces"
+        title_="Traces"
+        schema=self.package.get_element_by_id(id_)
+        if schema is None:
+            self.package._idgenerator.add(id_)
+            schema=self.package.createSchema(ident=id_)
+            schema.author=config.data.userid
+            schema.date=time.strftime("%Y-%m-%d")
+            schema.title=title_
+            self.package.schemas.append(schema)
         self.convert(self.iterator(filename))
         return self.package
 
