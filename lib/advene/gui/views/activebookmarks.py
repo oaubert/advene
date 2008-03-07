@@ -132,6 +132,10 @@ class ActiveBookmarks(AdhocView):
                 self.controller.notify('AnnotationEditEnd', annotation=wid.annotation)
         return True
     
+    def update_model(self, package=None, partial_update=False):
+        self.update_annotationtype(None, None)
+        return True
+
     def update_annotationtype(self, annotationtype=None, event=None):
         # Regenerate the annotation type list.
         types=[ (at, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
