@@ -2410,19 +2410,19 @@ class AdveneGUI (Connect):
 
     def on_cut1_activate (self, button=None, data=None):
         print "Cut: Not implemented yet."
-        return True
+        return False
 
     def on_copy1_activate (self, button=None, data=None):
         print "Copy: Not implemented yet."
-        return True
+        return False
 
     def on_paste1_activate (self, button=None, data=None):
         print "Paste: Not implemented yet."
-        return True
+        return False
 
     def on_delete1_activate (self, button=None, data=None):
         print "Delete: Not implemented yet (cf popup menu)."
-        return True
+        return False
 
     def on_edit_ruleset1_activate (self, button=None, data=None):
         """Default ruleset editing."""
