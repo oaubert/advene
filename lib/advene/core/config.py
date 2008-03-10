@@ -241,6 +241,8 @@ class Config(object):
             'bookmark-snapshot-width': 80,
             # Precision in ms of the snapshot used for bookmarks.
             'bookmark-snapshot-precision': 150,
+            # Width of the image used to display the snapshot drag icon
+            'drag-snapshot-width': 50,
             }
 
         # Player options
