@@ -33,6 +33,7 @@ import struct
 
 import gtk
 import cairo
+import pango
 
 # Advene part
 import advene.core.config as config
@@ -250,25 +251,38 @@ class AnnotationWidget(GenericColorButtonWidget):
         w.set_decorated(False)
 
         v=gtk.VBox()
-        i=gtk.Image()
-        v.pack_start(i, expand=False)
+        
+        h=gtk.HBox()
+        begin=gtk.Image()
+        h.pack_start(begin, expand=False)
+        padding=gtk.HBox()
+        # Padding
+        h.pack_start(padding, expand=True)
+        end=gtk.Image()
+        h.pack_start(end, expand=False)
+        v.pack_start(h, expand=False)
         l=gtk.Label()
         v.pack_start(l, expand=False)
 
         def set_cursor(wid, t):
             cache=self.controller.package.imagecache
             if self.no_image_pixbuf is None:
-                self.no_image_pixbuf=png_to_pixbuf(cache.not_yet_available_image, width=50)
+                self.no_image_pixbuf=png_to_pixbuf(cache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
             if not t == w._current:
                 if isinstance(t, long) or isinstance(t, int):
-                    if cache.is_initialized(t, epsilon=500):
-                        i.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=500), width=50))
-                    elif i.get_pixbuf() != self.no_image_pixbuf:
-                        i.set_from_pixbuf(self.no_image_pixbuf)
+                    if cache.is_initialized(t, epsilon=config.data.preferences['bookmark-snapshot-precision']):
+                        begin.set_from_pixbuf(png_to_pixbuf (cache.get(t, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
+                    elif begin.get_pixbuf() != self.no_image_pixbuf:
+                        begin.set_from_pixbuf(self.no_image_pixbuf)
+                    end.hide()
+                    padding.hide()
                     l.set_text(helper.format_time(t)[:30])
                 elif isinstance(t, Annotation):
                     # It can be an annotation
-                    i.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.begin), width=50))
+                    begin.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
+                    end.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.end), width=config.data.preferences['drag-snapshot-width']))
+                    end.show()
+                    padding.show()
                     l.set_text(self.controller.get_title(t)[:30])
             wid._current=t
             return True
@@ -795,17 +809,19 @@ class TimestampRepresentation(gtk.Button):
             v.pack_start(i, expand=False)
             l=gtk.Label()
             l.set_style(style)
+            l.set_ellipsize(pango.ELLIPSIZE_END)
             v.pack_start(l, expand=False)
 
             if self.value is None:
                 val=-1
             else:
                 val=self.value
-            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(val, epsilon=500), width=50))
+            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(val, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
             l.set_markup('<small>%s</small>' % helper.format_time(self.value))
 
             w.add(v)
             w.show_all()
+            w.set_default_size(3 * config.data.preferences['drag-snapshot-width'], config.data.preferences['drag-snapshot-width'])
             widget._icon=w
             context.set_icon_widget(w, 0, 0)
             return True
