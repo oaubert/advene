@@ -338,6 +338,24 @@ class ActiveBookmarks(AdhocView):
                         b=self.append(a.fragment.begin)
                         b.content=self.controller.get_title(a)
                 return True
+            elif targetType == config.data.target_type['annotation']:
+                source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+                l=[ b for b in self.bookmarks if b.annotation == source ]
+                if l:
+                    # We are dropping from the same view. Reorder
+                    b=l[0]
+                    i=self.bookmarks.index(b)
+                    self.bookmarks.remove(b)
+                    if i < index:
+                        self.bookmarks.insert(index - 1, b)
+                    else:
+                        self.bookmarks.insert(index, b)
+                    self.refresh()
+                else:
+                    # Dropping from another view. Create a bookmark
+                    b=self.append(source.fragment.begin, index)
+                    b.content=self.controller.get_title(source)
+                return True
             else:
                 print "Unknown target type for drop: %d" % targetType
                 return False
@@ -345,7 +363,8 @@ class ActiveBookmarks(AdhocView):
         self.mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                    gtk.DEST_DEFAULT_HIGHLIGHT |
                                    gtk.DEST_DEFAULT_ALL,
-                                   config.data.drag_type['timestamp']
+                                   config.data.drag_type['annotation']
+                                   + config.data.drag_type['timestamp']
                                    + config.data.drag_type['annotation-type']
                                    ,
                                    gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
