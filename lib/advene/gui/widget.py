@@ -869,6 +869,16 @@ class TimestampRepresentation(gtk.Button):
         self.connect('enter-notify-event', enter_bookmark)
         self.connect('leave-notify-event', leave_bookmark)
 
+    def get_value(self):
+        return self._value
+    def set_value(self, v):
+        if self.highlight:
+            self.controller.notify('BookmarkUnhighlight', timestamp=self._value, immediate=True)
+            self.highlight=False
+        self._value=v
+        self._update_display()
+    value=property(get_value, set_value, doc="Timestamp value")
+
     def _drag_sent(self, widget, context, selection, targetType, eventTime):
         """Handle the drag-sent event.
         """
@@ -886,6 +896,9 @@ class TimestampRepresentation(gtk.Button):
         if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS and self._value is not None:
             self.controller.update_status("start", self._value)
             return True
+        elif event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+            self.popup_menu()
+            return True
         return False
 
     def _update_display(self):
@@ -899,12 +912,20 @@ class TimestampRepresentation(gtk.Button):
         self.label.set_markup('<small>%s</small>' % helper.format_time(self._value))
         return True
 
-    def get_value(self):
-        return self._value
-    def set_value(self, v):
-        if self.highlight:
-            self.controller.notify('BookmarkUnhighlight', timestamp=self._value, immediate=True)
-            self.highlight=False
-        self._value=v
-        self._update_display()
-    value=property(get_value, set_value, doc="Timestamp value")
+    def popup_menu(self, popup=True):
+        def invalidate_snapshot(item, value):
+            # Invalidate the image
+            self.controller.package.imagecache.invalidate(value, self.epsilon)
+            self._update_display()
+            return True
+
+        # Display the popup menu
+        menu = gtk.Menu()
+        item = gtk.MenuItem(_("Invalidate snapshot"))
+        item.connect('activate', invalidate_snapshot, self.value)
+        menu.append(item)
+        menu.show_all()
+        
+        if popup:
+            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        return menu
