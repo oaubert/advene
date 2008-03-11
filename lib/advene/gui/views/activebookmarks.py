@@ -143,11 +143,16 @@ class ActiveBookmarks(AdhocView):
         return True
 
     def update_annotationtype(self, annotationtype=None, event=None):
+        atlist=self.controller.package.annotationTypes
         # Regenerate the annotation type list.
-        types=[ (at, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
+        types=[ (at, self.controller.get_title(at)) for at in atlist ]
         types.sort(key=lambda a: a[1])
+
+        at=helper.get_id(atlist, 'annotation')
+        if at is None:
+            at=helper.get_id(atlist, 'active_bookmark')
         store, i=dialog.generate_list_model(types,
-                                            active_element=self.type)
+                                            active_element=at)
         self.chosen_type_selector.set_model(store)
         if i is None:
             i = store.get_iter_first()
