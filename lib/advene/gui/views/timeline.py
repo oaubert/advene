@@ -384,6 +384,8 @@ class TimeLine(AdhocView):
         self.layout.queue_draw()
     
     def draw_relation_lines(self, layout, event):
+        if self.bookmarks_to_draw:
+            self.draw_bookmarks(layout, event)
         if not self.relations_to_draw:
             return False
         context=layout.bin_window.cairo_create()
@@ -441,6 +443,7 @@ class TimeLine(AdhocView):
 
     def update_bookmarks(self):
         self.scale_layout.queue_draw()
+        self.layout.queue_draw()
 
     def draw_bookmarks(self, layout, event):
         if not self.bookmarks_to_draw:
