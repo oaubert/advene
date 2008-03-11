@@ -22,11 +22,9 @@
 import sys
 import re
 import os
-import time
 import operator
 
 import gtk
-import gobject
 
 import urllib
 
@@ -44,9 +42,9 @@ from gettext import gettext as _
 
 from advene.gui.views import AdhocView
 from advene.gui.util import dialog, image_from_position, get_pixmap_button, get_small_stock_button
-import advene.gui.edit.properties
+from advene.gui.edit.properties import EditWidget
 from advene.gui.util.completer import Completer
-from advene.gui.widget import TimestampMarkWidget
+from advene.gui.widget import TimestampRepresentation
 
 class TranscriptionImporter(advene.util.importer.GenericImporter):
     """Transcription importer.
@@ -129,7 +127,7 @@ class TranscriptionEdit(AdhocView):
     def edit_preferences(self, *p):
         cache=dict(self.options)
 
-        ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
+        ew=EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Preferences"))
         ew.add_checkbox(_("Timestamp"), "timestamp", _("Click inserts timestamp marks"))
         ew.add_checkbox(_("Insert on single-click"), 'insert-on-single-click', _("A single click will insert the mark (else a double click is needed)"))
@@ -281,11 +279,11 @@ class TranscriptionEdit(AdhocView):
 
         t=self.controller.player.current_position_value - self.options['delay']
         m, i=self.find_preceding_mark(it)
-        if m is not None and m.timestamp >= t:
+        if m is not None and m.value >= t:
             self.message(_("Invalid timestamp mark"))
             return False
         m, i=self.find_following_mark(it)
-        if m is not None and m.timestamp <= t:
+        if m is not None and m.value <= t:
             self.message(_("Invalid timestamp mark"))
             return False
         self.create_timestamp_mark(t, it)
@@ -319,14 +317,14 @@ class TranscriptionEdit(AdhocView):
 
         p=self.controller.player
         if (p.status == p.PlayingStatus or p.status == p.PauseStatus):
-            # Check that preceding mark.timestamp is lower
+            # Check that preceding mark.value is lower
             t=p.current_position_value - self.options['delay']
             m, i=self.find_preceding_mark(it)
-            if m is not None and m.timestamp >= t:
+            if m is not None and m.value >= t:
                 self.message(_("Invalid timestamp mark"))
                 return False
             m, i=self.find_following_mark(it)
-            if m is not None and m.timestamp <= t:
+            if m is not None and m.value <= t:
                 self.message(_("Invalid timestamp mark"))
                 return False
             # Make a snapshot
@@ -366,7 +364,7 @@ class TranscriptionEdit(AdhocView):
     def mark_button_press_cb(self, button, event, anchor=None, child=None):
         """Handler for right-button click on timestamp mark.
         """
-        timestamp=button.timestamp
+        timestamp=button.value
         def popup_goto (win, position):
             c=self.controller
             pos = c.create_position (value=position,
@@ -384,11 +382,11 @@ class TranscriptionEdit(AdhocView):
             return True
 
         def popup_modify(win, t):
-            timestamp=child.timestamp + t
+            timestamp=child.value + t
             self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
             if self.tooltips.active_tips_data is None:
                 button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
-            child.timestamp=timestamp
+            child.value=timestamp
             if self.options['play-on-scroll']:
                 popup_goto(child, timestamp)
             return True
@@ -396,9 +394,6 @@ class TranscriptionEdit(AdhocView):
         if event.button == 1 and event.state & gtk.gdk.CONTROL_MASK:
             # Set current video time
             popup_modify(None, self.controller.player.current_position_value - timestamp)
-            return True
-        elif event.button == 1:
-            popup_goto(child, child.timestamp)
             return True
 
         if event.button != 3:
@@ -462,9 +457,10 @@ class TranscriptionEdit(AdhocView):
         return True
 
     def create_timestamp_mark(self, timestamp, it):
+        self.controller.update_snapshot(timestamp)
         def popup_goto (b):
             c=self.controller
-            pos = c.create_position (value=b.timestamp,
+            pos = c.create_position (value=b.value,
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
@@ -473,22 +469,23 @@ class TranscriptionEdit(AdhocView):
         b=self.textview.get_buffer()
         anchor=b.create_child_anchor(it)
         # Create the mark representation
-        child=TimestampMarkWidget(container=self)
+        child=TimestampRepresentation(timestamp, self.controller, width=50)
         child.anchor=anchor
-        #child.connect("clicked", popup_goto)
+        child.connect('clicked', popup_goto)
+        child.popup_menu=None
         child.connect("button-press-event", self.mark_button_press_cb, anchor, child)
 
         def handle_scroll_event(button, event):
             if not (event.state & gtk.gdk.CONTROL_MASK):
                 return True
             if event.direction == gtk.gdk.SCROLL_DOWN:
-                button.timestamp += config.data.preferences['scroll-increment']
+                button.value += config.data.preferences['scroll-increment']
             elif event.direction == gtk.gdk.SCROLL_UP:
-                button.timestamp -= config.data.preferences['scroll-increment']
-            self.tooltips.set_tip(button, "%s" % helper.format_time(button.timestamp))
+                button.value -= config.data.preferences['scroll-increment']
+            self.tooltips.set_tip(button, "%s" % helper.format_time(button.value))
             if self.tooltips.active_tips_data is None:
                 button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)
-            self.timestamp_play = button.timestamp
+            self.timestamp_play = button.value
             button.grab_focus()
             return True
 
@@ -507,14 +504,16 @@ class TranscriptionEdit(AdhocView):
         child.connect("scroll-event", handle_scroll_event)
         child.connect("key-release-event", mark_key_release_cb, anchor, child)
         self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
-        child.timestamp=timestamp
+        child.value=timestamp
         child.ignore=False
         self.update_mark(child)
-        child.show()
+        child.show_all()
+        child.label.set_no_show_all(True)
+        child.label.hide()
         self.textview.add_child_at_anchor(child, anchor)
 
         self.marks.append(child)
-        self.marks.sort(key=lambda a: a.timestamp)
+        self.marks.sort(key=lambda a: a.value)
         return child
 
     def populate(self, annotations):
@@ -573,14 +572,14 @@ class TranscriptionEdit(AdhocView):
         c=self.controller
         if self.current_mark is None:
             if self.marks:
-                pos = c.create_position (value=self.marks[0].timestamp,
+                pos = c.create_position (value=self.marks[0].value,
                                          key=c.player.MediaTime,
                                          origin=c.player.AbsolutePosition)
                 c.update_status (status="set", position=pos)
         else:
             i=self.marks.index(self.current_mark) - 1
             m=self.marks[i]
-            pos = c.create_position (value=m.timestamp,
+            pos = c.create_position (value=m.value,
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
@@ -590,21 +589,21 @@ class TranscriptionEdit(AdhocView):
         c=self.controller
         if self.current_mark is None:
             if self.marks:
-                pos = c.create_position (value=self.marks[-1].timestamp,
+                pos = c.create_position (value=self.marks[-1].value,
                                          key=c.player.MediaTime,
                                          origin=c.player.AbsolutePosition)
                 c.update_status (status="set", position=pos)
         else:
             i=(self.marks.index(self.current_mark) + 1) % len(self.marks)
             m=self.marks[i]
-            pos = c.create_position (value=m.timestamp,
+            pos = c.create_position (value=m.value,
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
         return True
 
     def update_position(self, pos):
-        l=[ m for m in self.marks if m.timestamp <= pos and not m.anchor.get_deleted() ]
+        l=[ m for m in self.marks if m.value <= pos and not m.anchor.get_deleted() ]
         if l:
             cm=l[-1]
             if cm != self.current_mark:
@@ -651,7 +650,7 @@ class TranscriptionEdit(AdhocView):
         if a and a.get_widgets():
             # Found a TextAnchor
             child=a.get_widgets()[0]
-            t=child.timestamp
+            t=child.value
         else:
             t=0
 
@@ -661,7 +660,7 @@ class TranscriptionEdit(AdhocView):
             if a and a.get_widgets():
                 # Found a TextAnchor
                 child=a.get_widgets()[0]
-                timestamp=child.timestamp
+                timestamp=child.value
                 if timestamp < t:
                     # Invalid timestamp mark.
                     self.log(_('Invalid timestamp mark in conversion: %s') % helper.format_time(timestamp))
@@ -1099,11 +1098,11 @@ class TranscriptionEdit(AdhocView):
                     # Check that we are in a valid position
                     t=p.current_position_value - self.options['delay']
                     m, i=self.find_preceding_mark(it)
-                    if m is not None and m.timestamp >= t:
+                    if m is not None and m.value >= t:
                         pass
                     else:
                         m, i=self.find_following_mark(it)
-                        if m is not None and m.timestamp <= t:
+                        if m is not None and m.value <= t:
                             pass
                         else:
                             self.insert_timestamp_mark()
