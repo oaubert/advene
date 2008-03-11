@@ -912,17 +912,17 @@ class TimestampRepresentation(gtk.Button):
         self.label.set_markup('<small>%s</small>' % helper.format_time(self._value))
         return True
 
-    def popup_menu(self, popup=True):
-        def invalidate_snapshot(item, value):
-            # Invalidate the image
-            self.controller.package.imagecache.invalidate(value, self.epsilon)
-            self._update_display()
-            return True
+    def invalidate_snapshot(self, *p):
+        # Invalidate the image
+        self.controller.package.imagecache.invalidate(self.value, self.epsilon)
+        self._update_display()
+        return True
 
+    def popup_menu(self, popup=True):
         # Display the popup menu
         menu = gtk.Menu()
         item = gtk.MenuItem(_("Invalidate snapshot"))
-        item.connect('activate', invalidate_snapshot, self.value)
+        item.connect('activate', self.invalidate_snapshot)
         menu.append(item)
         menu.show_all()
         
