@@ -27,7 +27,7 @@ import cgi
 from gettext import gettext as _
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
-from advene.gui.util import get_pixmap_button, dialog
+from advene.gui.util import get_pixmap_button, dialog, decode_drop_parameters
 import advene.util.ElementTree as ET
 
 class ViewBook(AdhocView):
@@ -211,7 +211,7 @@ class ViewBook(AdhocView):
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['adhoc-view']:
-            data=dict(cgi.parse_qsl(unicode(selection.data, 'utf8')))
+            data=decode_drop_parameters(selection.data)
             label=None
             view=None
             if 'id' in data:

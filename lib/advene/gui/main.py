@@ -89,7 +89,7 @@ import advene.util.importer
 from advene.gui.util.completer import Indexer
 
 # GUI elements
-from advene.gui.util import get_small_stock_button, image_from_position, dialog
+from advene.gui.util import get_small_stock_button, image_from_position, dialog, encode_drop_parameters
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
 import advene.gui.views.tree
@@ -208,10 +208,7 @@ class AdveneGUI (Connect):
         # Adhoc view toolbuttons signal handling
         def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
             if targetType == config.data.target_type['adhoc-view']:
-                selection.set(selection.target, 8,
-                              cgi.urllib.urlencode( {
-                            'name': name,
-                            } ).encode('utf8'))
+                selection.set(selection.target, 8, encode_drop_parameters(name=name))
                 return True
             return False
 
