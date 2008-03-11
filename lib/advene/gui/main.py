@@ -1149,7 +1149,9 @@ class AdveneGUI (Connect):
             else:
                 c.update_status("start")
             return True
-        elif event.keyval == gtk.keysyms.Insert:
+        elif (event.keyval == gtk.keysyms.Insert
+              or (event.state & gtk.gdk.MOD1_MASK 
+                  and event.keyval == gtk.keysyms.space)):
             if p.status in (p.PlayingStatus, p.PauseStatus):
                 # Insert an active bookmark
                 l=[ w for w in self.adhoc_views if w.view_id == 'activebookmarks' ]
