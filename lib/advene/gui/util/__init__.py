@@ -23,6 +23,7 @@ from gettext import gettext as _
 
 import gtk
 import gobject
+import cgi
 
 import advene.core.config as config
 
@@ -95,3 +96,17 @@ def name2color(color):
     else:
         gtk_color=None
     return gtk_color
+
+def encode_drop_parameters(**kw):
+    """Encode the given parameters as drop parameters.
+    
+    @return: a string
+    """
+    return cgi.urllib.urlencode(kw).encode('utf8')
+
+def decode_drop_parameters(data):
+    """Decode the drop parameters.
+
+    @return: a dict.
+    """
+    return dict(cgi.parse_qsl(unicode(data, 'utf8')))
