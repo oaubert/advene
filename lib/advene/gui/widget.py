@@ -244,7 +244,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                              + config.data.drag_type['timestamp']
                              + config.data.drag_type['tag']
                              ,
-                             gtk.gdk.ACTION_LINK)
+                             gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.no_image_pixbuf=None
 
     def _drag_begin(self, widget, context):
