@@ -191,13 +191,15 @@ class ImageCache(dict):
 
         return key
 
-    def invalidate(self, key):
+    def invalidate(self, key, epsilon=None):
         """Invalidate the given key.
 
         This method is used when the player has some trouble getting
         an accurate screenshot.
         """
-        key = self.approximate(long(key))
+        if epsilon is None:
+            epsilon=self.epsilon
+        key = self.approximate(long(key), epsilon)
         if dict.__getitem__(self, key) != self.not_yet_available_image:
             dict.__setitem__(self, key, self.not_yet_available_image)
         return
