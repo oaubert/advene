@@ -102,6 +102,9 @@ def encode_drop_parameters(**kw):
     
     @return: a string
     """
+    for k in kw:
+        if not isinstance(kw[k], basestring):
+            kw[k]=str(kw[k])
     return cgi.urllib.urlencode(kw).encode('utf8')
 
 def decode_drop_parameters(data):

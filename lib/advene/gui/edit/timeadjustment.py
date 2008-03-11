@@ -27,6 +27,7 @@ import re
 import gtk
 import advene.util.helper as helper
 from advene.gui.widget import TimestampRepresentation
+from advene.gui.util import encode_drop_parameters, decode_drop_parameters
 from gettext import gettext as _
 
 class TimeAdjustment:
@@ -230,7 +231,8 @@ class TimeAdjustment:
             self.value = source.fragment.begin
             self.update_display()
         elif targetType == config.data.target_type['timestamp']:
-            v=long(float(selection.data))
+            data=decode_drop_parameters(selection.data)
+            v=long(float(data['timestamp']))
             if self.callback and not self.callback(v):
                 return True
             self.value=v
@@ -243,7 +245,7 @@ class TimeAdjustment:
         """Handle the drag-sent event.
         """
         if targetType == config.data.target_type['timestamp']:
-            selection.set(selection.target, 8, str(self.value))
+            selection.set(selection.target, 8, encode_drop_parameters(timestamp=self.value))
             return True
         elif targetType in ( config.data.target_type['text-plain'],
                              config.data.target_type['TEXT'],

@@ -26,6 +26,7 @@ import pango
 # Advene part
 import advene.core.config as config
 from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf
+from advene.gui.util import encode_drop_parameters, decode_drop_parameters
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
 from advene.model.annotation import Annotation
@@ -316,8 +317,11 @@ class ActiveBookmarks(AdhocView):
                 if l:
                     index=self.bookmarks.index(l[0])
             if targetType == config.data.target_type['timestamp']:
-                position=long(selection.data)
-                self.append(position, index)
+                data=decode_drop_parameters(selection.data)
+                position=long(data['timestamp'])
+                b=self.append(position, index)
+                if 'comment' in data:
+                    b.content=data['comment']
                 # If the drag originated from our own widgets, remove it.
                 self.delete_origin_timestamp(context.get_source_widget())
                 return True
@@ -420,7 +424,8 @@ class ActiveBookmark(object):
                 if self.is_widget_in_bookmark(context.get_source_widget()):
                     return False
                 if targetType == config.data.target_type['timestamp']:
-                    e=long(selection.data)
+                    data=decode_drop_parameters(selection.data)
+                    e=long(data['timestamp'])
                     if self.end is not None and context.action == gtk.gdk.ACTION_COPY:
                         self.container.append(self.end)
                     if e < self.begin:
@@ -615,7 +620,8 @@ class ActiveBookmark(object):
             if self.is_widget_in_bookmark(context.get_source_widget()):
                 return False            
             if targetType == config.data.target_type['timestamp']:
-                e=long(selection.data)
+                data=decode_drop_parameters(selection.data)
+                e=long(data['timestamp'])
                 if self.end is None:
                     if e < self.begin:
                         # Invert begin and end.
@@ -701,7 +707,7 @@ class ActiveBookmark(object):
                 selection.set(selection.target, 8, ("%s : %s" % (helper.format_time(self.begin),
                                                                  self.content)).encode('utf8'))
             elif targetType == config.data.target_type['timestamp']:
-                selection.set(selection.target, 8, str(self.begin))
+                selection.set(selection.target, 8, encode_drop_parameters(timestamp=self.begin))
             else:
                 return False
             return True

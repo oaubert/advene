@@ -341,8 +341,9 @@ class ViewBook(AdhocView):
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
         elif targetType == config.data.target_type['timestamp']:
-            t=long(float(selection.data))
-            self.controller.gui.open_adhoc_view('bookmarks', history=[ t ], destination=self.location)
+            data=decode_drop_parameters(selection.data)
+            v=self.controller.gui.open_adhoc_view('bookmarks', destination=self.location)
+            v.append(long(data['timestamp']), data.get('comment', ''))
             return True
         return False
 

@@ -38,6 +38,7 @@ import pango
 # Advene part
 import advene.core.config as config
 from advene.gui.util import png_to_pixbuf
+from advene.gui.util import encode_drop_parameters
 import advene.util.helper as helper
 from advene.model.annotation import Annotation
 
@@ -344,7 +345,8 @@ class AnnotationWidget(GenericColorButtonWidget):
               or targetType == config.data.target_type['STRING']):
             selection.set(selection.target, 8, widget.annotation.content.data.encode('utf8'))
         elif targetType == config.data.target_type['timestamp']:
-            selection.set(selection.target, 8, str(widget.annotation.fragment.begin))
+            selection.set(selection.target, 8, encode_drop_parameters(timestamp=widget.annotation.fragment.begin,
+                                                                      comment=self.controller.get_title(self.annotation)))
         else:
             return False
         return True
@@ -728,7 +730,8 @@ class AnnotationRepresentation(gtk.Button):
               or targetType == config.data.target_type['STRING']):
             selection.set(selection.target, 8, widget.annotation.content.data.encode('utf8'))
         elif targetType == config.data.target_type['timestamp']:
-            selection.set(selection.target, 8, str(widget.annotation.fragment.begin))
+            selection.set(selection.target, 8, encode_drop_parameters(timestamp=widget.annotation.fragment.begin,
+                                                                      comment=self.controller.get_title(widget.annotation)))
         else:
             return False
         return True
@@ -771,7 +774,7 @@ class TimestampRepresentation(gtk.Button):
 
     It is a button with a representative image and the timestamp displayed under it.
     """
-    def __init__(self, value, controller, width=None, epsilon=None):
+    def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None):
         super(TimestampRepresentation, self).__init__()
         self._value=value
         self.controller=controller
@@ -781,7 +784,9 @@ class TimestampRepresentation(gtk.Button):
         if epsilon is None:
             epsilon=config.data.preferences['bookmark-snapshot-precision']
         self.epsilon=epsilon
-
+        # comment_getter is a method which returns the comment
+        # associated to this timestamp
+        self.comment_getter=comment_getter
         self.highlight=False
 
         style=self.get_style().copy()
@@ -887,7 +892,11 @@ class TimestampRepresentation(gtk.Button):
               or targetType == config.data.target_type['STRING']):
             selection.set(selection.target, 8, helper.format_time(self._value).encode('utf-8'))
         elif targetType == config.data.target_type['timestamp']:
-            selection.set(selection.target, 8, str(self._value))
+            if self.comment_getter is not None:
+                    selection.set(selection.target, 8, encode_drop_parameters(timestamp=self._value,
+                                                                              comment=self.comment_getter()))
+            else:
+                    selection.set(selection.target, 8, encode_drop_parameters(timestamp=self._value))
         else:
             return False
         return True

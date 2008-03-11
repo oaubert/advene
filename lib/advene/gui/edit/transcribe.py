@@ -42,6 +42,7 @@ from gettext import gettext as _
 
 from advene.gui.views import AdhocView
 from advene.gui.util import dialog, get_pixmap_button, get_small_stock_button
+from advene.gui.util import encode_drop_parameters, decode_drop_parameters
 from advene.gui.edit.properties import EditWidget
 from advene.gui.util.completer import Completer
 from advene.gui.widget import TimestampRepresentation
@@ -169,7 +170,8 @@ class TranscriptionEdit(AdhocView):
 
     def textview_drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['timestamp']:
-            position=long(selection.data)
+            data=decode_drop_parameters(selection.data)
+            position=long(data['timestamp'])
             #(x, y) = self.textview.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
             #                                               int(x),
             #                                               int(y))

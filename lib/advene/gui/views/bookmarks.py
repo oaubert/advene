@@ -26,6 +26,7 @@ import urllib
 import advene.core.config as config
 import advene.util.helper as helper
 from advene.gui.util import get_small_stock_button, dialog
+from advene.gui.util import encode_drop_parameters, decode_drop_parameters
 from advene.gui.views import AdhocView
 from advene.gui.widget import TimestampRepresentation
 import advene.util.importer
@@ -206,7 +207,8 @@ class Bookmarks(AdhocView):
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['timestamp']:
-                position=long(selection.data)
+                data=decode_drop_parameters(selection.data)
+                position=long(data['timestamp'])
                 w=self.get_matching_bookmark(position)
                 if position is not None:
                     self.bookmarks.remove(w)
@@ -267,8 +269,10 @@ class Bookmarks(AdhocView):
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['timestamp']:
-                position=long(selection.data)
-                self.append(position)
+                data=decode_drop_parameters(selection.data)
+                position=long(data['timestamp'])
+                comment=data.get('comment', '')
+                self.append(position, comment=comment)
                 return True
             else:
                 print "Unknown target type for drop: %d" % targetType
@@ -305,7 +309,7 @@ class BookmarkWidget(object):
         return True
 
     def build_widget(self):
-        self.image=TimestampRepresentation(self.value, self.controller)
+        self.image=TimestampRepresentation(self.value, self.controller, comment_getter=lambda: self.comment)
 
         def activate(widget=None):
             if self.value is not None:

@@ -36,6 +36,7 @@ from advene.gui.views import AdhocView
 import advene.gui.edit.elements
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.util import png_to_pixbuf
+from advene.gui.util import decode_drop_parameters
 
 from advene.gui.views.annotationdisplay import AnnotationDisplay
 import advene.util.helper as helper
@@ -918,6 +919,8 @@ class TimeLine(AdhocView):
             date=self.controller.get_timestamp(),
             fragment=MillisecondFragment(begin=long(position),
                                          duration=duration))
+        if content is not None:
+            el.content.data=content
         self.controller.package.annotations.append(el)
         el.complete=False
         self.controller.notify('AnnotationCreate', annotation=el)
@@ -1228,9 +1231,11 @@ class TimeLine(AdhocView):
             widget.annotationtype.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (r, g, b))
             self.controller.notify('AnnotationTypeEditEnd', annotationtype=widget.annotationtype)
         elif targetType == config.data.target_type['timestamp']:
-            begin=long(float(selection.data))
+            data=decode_drop_parameters(selection.data)
+            begin=long(data['timestamp'])
+            content=data.get('comment', None)
             # Create an annotation with the timestamp as begin
-            self.create_annotation(begin, widget.annotationtype)
+            self.create_annotation(begin, widget.annotationtype, content=content)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -1249,9 +1254,11 @@ class TimeLine(AdhocView):
         elif targetType == config.data.target_type['timestamp']:
             typ=self.create_annotation_type()
             if typ is not None:
-                begin=long(float(selection.data))
+                data=decode_drop_parameters(selection.data)
+                begin=long(data['timestamp'])
+                content=data.get('comment', None)
                 # Create an annotation of type typ with the timestamp as begin
-                self.create_annotation(begin, typ)
+                self.create_annotation(begin, typ, content=content)
         return False
 
     def legend_drag_received(self, widget, context, x, y, selection, targetType, time):
@@ -1884,9 +1891,11 @@ class TimeLine(AdhocView):
             else:
                 typ=self.create_annotation_type()
             if typ is not None:
-                begin=long(float(selection.data))
+                data=decode_drop_parameters(selection.data)
+                begin=long(data['timestamp'])
+                content=data.get('comment', None)
                 # Create an annotation of type typ with the timestamp as begin
-                self.create_annotation(begin, typ)
+                self.create_annotation(begin, typ, content=content)
         else:
             print "Unknown target type for drop: %d" % targetType
         return False
