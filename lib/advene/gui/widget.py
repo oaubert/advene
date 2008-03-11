@@ -896,7 +896,7 @@ class TimestampRepresentation(gtk.Button):
         if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS and self._value is not None:
             self.controller.update_status("start", self._value)
             return True
-        elif event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+        elif event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS and self.popup_menu is not None:
             self.popup_menu()
             return True
         return False
@@ -929,3 +929,8 @@ class TimestampRepresentation(gtk.Button):
         if popup:
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return menu
+    
+    def set_color(self, color):
+        # FIXME: does not work ATM
+        self.modify_bg(gtk.STATE_NORMAL, color)
+        self.modify_base(gtk.STATE_NORMAL, color)
