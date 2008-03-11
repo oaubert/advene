@@ -420,6 +420,7 @@ class ActiveBookmark(object):
                                                 gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
             self.end_widget.image.connect("drag_data_received", end_drag_received)
             self.end_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
+            self.end_widget.image.connect('key-press-event', self.timestamp_key_press, 'end')
         else:
             self.end_widget.value=v
             self.end_widget.update()
@@ -555,6 +556,28 @@ class ActiveBookmark(object):
         return (widget == self.begin_widget.image 
                 or (self.end_widget is not None and widget == self.end_widget.image))
 
+    def delete_timestamp(self, position):
+        """Delete a timestamp. 
+
+        position is either 'begin' or 'end'.
+        """
+        if position == 'begin':
+            self.controller.notify('BookmarkUnhighlight', timestamp=self.begin, immediate=True)
+            if self.end is None:
+                self.container.remove(self)
+            else:
+                self.begin = self.end
+                self.end = None
+        elif position == 'end':
+            self.controller.notify('BookmarkUnhighlight', timestamp=self.end, immediate=True)
+            self.end = None
+
+    def timestamp_key_press(self, widget, event, source):
+        if event.keyval == gtk.keysyms.Delete:
+            self.delete_timestamp(source)
+            return True
+        return False
+
     def build_widget(self):
 
         f=gtk.Frame()
@@ -611,6 +634,7 @@ class ActiveBookmark(object):
                                               + config.data.drag_type['annotation-type'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.begin_widget.comment_entry.connect('drag_data_received', begin_drag_received)
+        self.begin_widget.image.connect('key-press-event', self.timestamp_key_press, 'begin')
 
         box.pack_start(self.begin_widget.widget, expand=True)
         f.add(box)
