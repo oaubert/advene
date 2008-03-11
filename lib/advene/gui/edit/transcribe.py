@@ -41,7 +41,7 @@ import advene.util.helper as helper
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-from advene.gui.util import dialog, image_from_position, get_pixmap_button, get_small_stock_button
+from advene.gui.util import dialog, get_pixmap_button, get_small_stock_button
 from advene.gui.edit.properties import EditWidget
 from advene.gui.util.completer import Completer
 from advene.gui.widget import TimestampRepresentation
@@ -307,13 +307,18 @@ class TranscriptionEdit(AdhocView):
         mark.destroy()
         return True
 
-    def insert_timestamp_mark(self):
-        """Insert a timestamp mark with the current player position, at the current cursor position.
+    def insert_timestamp_mark(self, it=None):
+        """Insert a timestamp mark with the current player position.
+        
+        If iter is not specified, insert at the current cursor position.
         """
-        b=self.textview.get_buffer()
-        it=b.get_iter_at_mark(b.get_insert())
-
         t=self.controller.player.current_position_value - self.options['delay']
+        self.controller.update_snapshot(t)
+
+        if it is None:
+            b=self.textview.get_buffer()
+            it=b.get_iter_at_mark(b.get_insert())
+
         m, i=self.find_preceding_mark(it)
         if m is not None and m.value >= t:
             self.message(_("Invalid timestamp mark"))
@@ -322,6 +327,7 @@ class TranscriptionEdit(AdhocView):
         if m is not None and m.value <= t:
             self.message(_("Invalid timestamp mark"))
             return False
+
         self.create_timestamp_mark(t, it)
 
     def button_press_event_cb(self, textview, event):
@@ -353,20 +359,7 @@ class TranscriptionEdit(AdhocView):
 
         p=self.controller.player
         if (p.status == p.PlayingStatus or p.status == p.PauseStatus):
-            # Check that preceding mark.value is lower
-            t=p.current_position_value - self.options['delay']
-            m, i=self.find_preceding_mark(it)
-            if m is not None and m.value >= t:
-                self.message(_("Invalid timestamp mark"))
-                return False
-            m, i=self.find_following_mark(it)
-            if m is not None and m.value <= t:
-                self.message(_("Invalid timestamp mark"))
-                return False
-            # Make a snapshot
-            self.controller.update_snapshot(t)
-            # Create the timestamp
-            self.create_timestamp_mark(t, it)
+            self.insert_timestamp_mark(it=it)
             return True
         return False
 
@@ -480,20 +473,12 @@ class TranscriptionEdit(AdhocView):
         item.connect("activate", popup_modify, 100)
         menu.append(item)
 
-        item = gtk.MenuItem()
-        item.add(image_from_position(self.controller,
-                                     position=timestamp,
-                                     height=60))
-        item.connect("activate", popup_goto, timestamp)
-        menu.append(item)
-
         menu.show_all()
 
         menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
 
     def create_timestamp_mark(self, timestamp, it):
-        self.controller.update_snapshot(timestamp)
         def popup_goto (b):
             c=self.controller
             pos = c.create_position (value=b.value,

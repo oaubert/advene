@@ -25,7 +25,7 @@ import urllib
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
-from advene.gui.util import image_from_position, get_small_stock_button, dialog, png_to_pixbuf
+from advene.gui.util import get_small_stock_button, dialog
 from advene.gui.views import AdhocView
 from advene.gui.widget import TimestampRepresentation
 import advene.util.importer
