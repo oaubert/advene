@@ -771,10 +771,16 @@ class TimestampRepresentation(gtk.Button):
 
     It is a button with a representative image and the timestamp displayed under it.
     """
-    def __init__(self, value, controller):
+    def __init__(self, value, controller, width=None, epsilon=None):
         super(TimestampRepresentation, self).__init__()
         self._value=value
         self.controller=controller
+        if width is None:
+            width=config.data.preferences['bookmark-snapshot-width']
+        self.width=width
+        if epsilon is None:
+            epsilon=config.data.preferences['bookmark-snapshot-precision']
+        self.epsilon=epsilon
 
         self.highlight=False
 
@@ -786,6 +792,7 @@ class TimestampRepresentation(gtk.Button):
                       gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
                       gtk.STATE_PRELIGHT):
             style.bg[state]=black
+            style.base[state]=black
             style.fg[state]=white
             style.text[state]=white
             #style.base[state]=white
@@ -800,6 +807,7 @@ class TimestampRepresentation(gtk.Button):
         box.pack_start(self.image, expand=False)
         box.pack_start(self.label, expand=False)
         self.add(box)
+        self.box=box
 
         self._update_display()
 
@@ -833,7 +841,7 @@ class TimestampRepresentation(gtk.Button):
                 val=-1
             else:
                 val=self.value
-            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(val, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
+            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(val, epsilon=self.epsilon), width=config.data.preferences['drag-snapshot-width']))
             l.set_markup('<small>%s</small>' % helper.format_time(self.value))
 
             w.add(v)
@@ -887,7 +895,7 @@ class TimestampRepresentation(gtk.Button):
             v=-1
         else:
             v=self._value
-        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['bookmark-snapshot-width']))
+        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=self.epsilon), width=self.width))
         self.label.set_markup('<small>%s</small>' % helper.format_time(self._value))
         return True
 
