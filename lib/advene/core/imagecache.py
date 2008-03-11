@@ -109,7 +109,7 @@ class ImageCache(dict):
 
     def has_key (self, key):
         try:
-            self.approximate(long(key))
+            self.approximate(key)
             return True
         except ValueError:
             return False
@@ -125,7 +125,9 @@ class ImageCache(dict):
         @return: an image
         @rtype: PNG data
         """
-        key = self.approximate(long(key))
+        if key is None:
+            return self.not_yet_available_image
+        key = self.approximate(key)
         return dict.__getitem__(self, key)
 
     def get(self, key, epsilon=None):
@@ -138,7 +140,9 @@ class ImageCache(dict):
         @return: an image
         @rtype: PNG data
         """
-        key = self.approximate(long(key), epsilon)
+        if key is None:
+            return self.not_yet_available_image
+        key = self.approximate(key, epsilon)
         return dict.__getitem__(self, key)
 
     def __setitem__ (self, key, value):
@@ -149,7 +153,7 @@ class ImageCache(dict):
         @param value: an image
         @type value: PNG data
         """
-        key = self.approximate(long(key))
+        key = self.approximate(key)
         if value != self.not_yet_available_image:
             self._modified=True
             if self.autosync and self.name is not None:
@@ -170,6 +174,9 @@ class ImageCache(dict):
         If there is an existing key no further than self.epsilon, then return it.
         Else, initialize data for key and return key.
         """
+        if key is None:
+            return None
+        key=long(key)
         if dict.has_key(self, key):
             return key
 
@@ -199,7 +206,7 @@ class ImageCache(dict):
         """
         if epsilon is None:
             epsilon=self.epsilon
-        key = self.approximate(long(key), epsilon)
+        key = self.approximate(key, epsilon)
         if dict.__getitem__(self, key) != self.not_yet_available_image:
             dict.__setitem__(self, key, self.not_yet_available_image)
         return
@@ -230,7 +237,7 @@ class ImageCache(dict):
         """
         if key is None:
             return False
-        key = self.approximate(long(key), epsilon)
+        key = self.approximate(key, epsilon)
         if dict.__getitem__(self, key) == self.not_yet_available_image:
             return False
         else:
