@@ -21,13 +21,13 @@
 from gettext import gettext as _
 import gtk
 import gobject
+import pango
 
 # Advene part
 import advene.core.config as config
 from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color, png_to_pixbuf
 from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
-from advene.gui.widget import AnnotationWidget
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 import advene.util.helper as helper
@@ -671,9 +671,23 @@ class ActiveBookmark(object):
             w=gtk.Window(gtk.WINDOW_POPUP)
             w.set_decorated(False)
 
-            v=gtk.VBox()
+            style=w.get_style().copy()
+            black=gtk.gdk.color_parse('black')
+            white=gtk.gdk.color_parse('white')
 
+            for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                          gtk.STATE_PRELIGHT):
+                style.bg[state]=black
+                style.fg[state]=white
+                style.text[state]=white
+                #style.base[state]=white
+            w.set_style(style)
+
+            v=gtk.VBox()
+            v.set_style(style)
             h=gtk.HBox()
+            h.set_style(style)
             begin=gtk.Image()
             h.pack_start(begin, expand=False)
             padding=gtk.HBox()
@@ -683,6 +697,8 @@ class ActiveBookmark(object):
             h.pack_start(end, expand=False)
             v.pack_start(h, expand=False)
             l=gtk.Label()
+            l.set_ellipsize(pango.ELLIPSIZE_END)
+            l.set_style(style)
             v.pack_start(l, expand=False)
 
             def set_cursor(wid, t):
@@ -697,14 +713,14 @@ class ActiveBookmark(object):
                             begin.set_from_pixbuf(self.no_image_pixbuf)
                         end.hide()
                         padding.hide()
-                        l.set_text(helper.format_time(t)[:30])
+                        l.set_text(helper.format_time(t))
                     elif isinstance(t, Annotation):
                         # It can be an annotation
                         begin.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.begin), width=config.data.preferences['drag-snapshot-width']))
                         end.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.end), width=config.data.preferences['drag-snapshot-width']))
                         end.show()
                         padding.show()
-                        l.set_text(self.controller.get_title(t)[:30])
+                        l.set_text(self.controller.get_title(t))
                 wid._current=t
                 return True
 
@@ -713,10 +729,11 @@ class ActiveBookmark(object):
             w._current=None
             w.set_cursor = set_cursor.__get__(w)
             w.set_cursor(self.annotation or self.begin)
+            w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
             widget._icon=w
             context.set_icon_widget(w, 0, 0)
             return True
-
+ 
         def _drag_end(widget, context):
             widget._icon.destroy()
             widget._icon=None
