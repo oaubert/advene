@@ -116,11 +116,15 @@ class ActiveBookmarks(AdhocView):
         self.mainbox.foreach(self.mainbox.remove)
         return True
 
-    def append(self, t):
+    def append(self, t, index=None):
         b=ActiveBookmark(container=self, begin=t, end=None, content=None, type=self.type)
-        self.bookmarks.append(b)
-        self.mainbox.pack_start(b.widget, expand=False)
         b.widget.show_all()
+        if index is None:
+            self.bookmarks.append(b)
+            self.mainbox.pack_start(b.widget, expand=False)
+        else:
+            self.bookmarks.insert(index, b)
+            self.refresh()
         return b
 
     def check_contents(self, *p):
@@ -304,9 +308,16 @@ class ActiveBookmarks(AdhocView):
         self.scrollwindow=sw
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
+            index=None
+            if widget == self.mainbox:
+                l=[ b 
+                    for b in self.bookmarks 
+                    if y < b.widget.get_allocation().y + b.widget.get_allocation().height  ]
+                if l:
+                    index=self.bookmarks.index(l[0])
             if targetType == config.data.target_type['timestamp']:
                 position=long(selection.data)
-                self.append(position)
+                self.append(position, index)
                 # If the drag originated from our own widgets, remove it.
                 self.delete_origin_timestamp(context.get_source_widget())
                 return True
@@ -330,6 +341,7 @@ class ActiveBookmarks(AdhocView):
                                    ,
                                    gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
         self.mainbox.connect("drag_data_received", mainbox_drag_received)
+        self.mainbox.set_spacing(8)
 
         dropbox=gtk.HBox()
         dropbox.add(gtk.Label(_("Drop timestamps here")))
