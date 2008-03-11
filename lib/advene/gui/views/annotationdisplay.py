@@ -143,8 +143,8 @@ class AnnotationDisplay(AdhocView):
             else:
                 b=self.annotation.fragment.begin
             cache=self.controller.package.imagecache
-            if cache.is_initialized(b, epsilon=500):
-                self.label['image'].set_from_pixbuf(png_to_pixbuf (cache.get(b, epsilon=500), width=50))
+            if cache.is_initialized(b, epsilon=config.data.preferences['bookmark-snapshot-precision']):
+                self.label['image'].set_from_pixbuf(png_to_pixbuf (cache.get(b, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
             elif self.label['image'].get_pixbuf() != self.no_image_pixbuf:
                 self.label['image'].set_from_pixbuf(self.no_image_pixbuf)
         return False
