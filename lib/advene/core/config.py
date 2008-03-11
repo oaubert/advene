@@ -302,6 +302,7 @@ class Config(object):
             'application/x-advene-adhoc-view',
             'application/x-advene-workspace-view',
             'application/x-advene-quicksearch',
+            'application/x-advene-values',
             )
 
         # Drag and drop parameters for URIed element and other elements
