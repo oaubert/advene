@@ -1149,6 +1149,20 @@ class AdveneGUI (Connect):
             else:
                 c.update_status("start")
             return True
+        elif event.keyval == gtk.keysyms.Insert:
+            if p.status in (p.PlayingStatus, p.PauseStatus):
+                # Insert an active bookmark
+                l=[ w for w in self.adhoc_views if w.view_id == 'activebookmarks' ]
+                if l:
+                    # There is at least one open view. Use the latest.
+                    a=l[-1]
+                    a.append(p.current_position_value)
+                else:
+                    # No existing view. Create one.
+                    a=self.open_adhoc_view('activebookmarks', destination='fareast')
+                    if a is not None:
+                        a.append(p.current_position_value)
+                return True
         elif event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.Up:
                 c.move_position (1000/25, notify=False)
