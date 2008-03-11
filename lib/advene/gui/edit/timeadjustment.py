@@ -26,8 +26,7 @@ import advene.core.config as config
 import re
 import gtk
 import advene.util.helper as helper
-from advene.gui.util import png_to_pixbuf
-
+from advene.gui.widget import TimestampRepresentation
 from gettext import gettext as _
 
 class TimeAdjustment:
@@ -112,118 +111,82 @@ class TimeAdjustment:
         hbox=gtk.HBox()
         hbox.set_homogeneous(False)
 
-        vb=gtk.VBox()
         if self.editable and not self.compact:
+            vb=gtk.VBox()
             b=make_button(-self.large_increment, "2leftarrow.png")
             vb.pack_start(b, expand=False)
             b=make_button(-self.small_increment, "1leftarrow.png")
             vb.pack_start(b, expand=False)
+            hbox.pack_start(vb, expand=False)
 
-
-        hbox.pack_start(vb, expand=False)
-
-        self.image = gtk.Image()
         if self.compact:
             width=50
         else:
             width=100
-        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache[self.value], width=width))
+        self.image=TimestampRepresentation(self.value, self.controller, width, epsilon=1000/25)
+        self.image.connect("button-press-event", image_button_press)
+        self.image.connect("clicked", image_button_clicked)
+        self.tooltips.set_tip(self.image, _("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value\nright-click to invalidate screenshot"))
+        hbox.pack_start(self.image, expand=False)
 
-        b=gtk.Button()
-        b.connect("button-press-event", image_button_press)
-        b.connect("clicked", image_button_clicked)
-
-        # The widget can generate drags
-        b.connect("drag_data_get", self.drag_sent)
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['timestamp']
-                          + config.data.drag_type['text-plain']
-                          + config.data.drag_type['TEXT']
-                          + config.data.drag_type['STRING']
-                          , gtk.gdk.ACTION_LINK)
-
-        # Define drag cursor
-        def _drag_begin(widget, context):
-            w=gtk.Window(gtk.WINDOW_POPUP)
-            w.set_decorated(False)
-
-            v=gtk.VBox()
-            i=gtk.Image()
-            v.pack_start(i, expand=False)
-            l=gtk.Label()
-            v.pack_start(l, expand=False)
-
-            i.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(self.value, epsilon=500), width=50))
-            l.set_text(helper.format_time(self.value))
-
-            w.add(v)
-            w.show_all()
-            widget._icon=w
-            context.set_icon_widget(w, 0, 0)
-            return True
-
-        def _drag_end(widget, context):
-            widget._icon.destroy()
-            widget._icon=None
-            return True
-
-        b.connect("drag_begin", _drag_begin)
-        b.connect("drag_end", _drag_end)
-
-        al=gtk.Alignment()
-        al.set_padding(0, 0, 0, 0)
-        al.add(self.image)
-        b.add(al)
-        self.tooltips.set_tip(b, _("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value\nright-click to invalidate screenshot"))
-        hbox.pack_start(b, expand=False)
-
-        vb=gtk.VBox()
         if self.editable and not self.compact:
+            vb=gtk.VBox()
             b=make_button(self.large_increment, "2rightarrow.png")
             vb.pack_start(b, expand=False)
             b=make_button(self.small_increment, "1rightarrow.png")
             vb.pack_start(b, expand=False)
-        hbox.pack_start(vb, expand=False)
+            hbox.pack_start(vb, expand=False)
 
         hb = gtk.HBox()
 
-        self.entry=gtk.Entry()
-        # Default width of the entry field
-        self.entry.set_width_chars(len(helper.format_time(0.0)))
-        self.entry.connect('activate', self.convert_entered_value)
-        self.entry.connect('focus-out-event', self.convert_entered_value)
-        self.entry.set_editable(self.editable)
-
-        current_pos=gtk.Button()
-        i=gtk.Image()
-        i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
-        self.tooltips.set_tip(current_pos, _("Set to current player position"))
-        current_pos.add(i)
-        current_pos.connect("clicked", self.use_current_position)
-
-        hb.pack_start(self.entry, expand=False)
-        if self.compact:
-            # In compact mode, put the button at the right of the
-            # snapshot to save space.
-            hbox.pack_start(current_pos, expand=False)
+        if self.editable:
+            self.entry=gtk.Entry()
+            # Default width of the entry field
+            self.entry.set_width_chars(len(helper.format_time(0.0)))
+            self.entry.connect('activate', self.convert_entered_value)
+            self.entry.connect('focus-out-event', self.convert_entered_value)
+            self.entry.set_editable(self.editable)
+            hb.pack_start(self.entry, expand=False)
         else:
-            # In normal mode, put the button at the right of the entry
+            self.entry=None
+
+        if self.editable:
+            current_pos=gtk.Button()
+            i=gtk.Image()
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
+            self.tooltips.set_tip(current_pos, _("Set to current player position"))
+            current_pos.add(i)
+            current_pos.connect("clicked", self.use_current_position)
             hb.pack_start(current_pos, expand=False)
 
-        vbox.pack_start(hb, expand=False)
         vbox.pack_start(hbox, expand=False)
+        #vbox.pack_start(hb, expand=False)
+        self.image.box.pack_start(hb, expand=False)
+        hb.set_style(self.image.box.get_style())
+        #self.entry.set_style(self.image.box.get_style())
         vbox.show_all()
 
-        # The widget can receive drops from annotations
-        vbox.connect("drag_data_received", self.drag_received)
-        vbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                           gtk.DEST_DEFAULT_HIGHLIGHT |
-                           gtk.DEST_DEFAULT_ALL,
-                           config.data.drag_type['annotation']
-                           + config.data.drag_type['timestamp'],
-                           gtk.gdk.ACTION_LINK)
+        hb.set_no_show_all(True)
+        hbox.set_no_show_all(True)
+        hb.hide()
 
-        # Handle scroll actions
+        def show_entry(b, *p):
+            self.image.label.hide()
+            hb.show()
+            return False
+        def hide_entry(b, event):
+            # Since the entry is embedded in the butotn, entering the
+            # entry will generate a leave event.  Check the pointer
+            # coordinates to determine if we really left the button
+            # area.
+            a=b.get_allocation()
+            x, y = b.get_pointer()
+            if x > 0 and y > 0 and x < a.width and y < a.height:
+                return False
+            self.image.label.show()
+            hb.hide()
+            return False
+
         def handle_scroll_event(button, event):
             if not (event.state & gtk.gdk.CONTROL_MASK):
                 return True
@@ -240,7 +203,20 @@ class TimeAdjustment:
             self.update_display()
             return True
 
-        vbox.connect("scroll-event", handle_scroll_event)
+        if self.editable:
+            self.image.connect('enter-notify-event', show_entry)
+            self.image.connect('leave-notify-event', hide_entry)
+
+            # The widget can receive drops from annotations
+            vbox.connect("drag_data_received", self.drag_received)
+            vbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                               gtk.DEST_DEFAULT_HIGHLIGHT |
+                               gtk.DEST_DEFAULT_ALL,
+                               config.data.drag_type['annotation']
+                               + config.data.drag_type['timestamp'],
+                               gtk.gdk.ACTION_LINK)
+            
+            vbox.connect("scroll-event", handle_scroll_event)
 
         vbox.show_all()
         return vbox
@@ -357,13 +333,7 @@ class TimeAdjustment:
     def update_display(self):
         """Updates the value displayed in the entry according to the current value."""
         self.entry.set_text(helper.format_time(self.value))
-        # Update the image
-        if self.compact:
-            width=50
-        else:
-            width=100
-        self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache[self.value],
-                                                                  width=width))
+        self.image.value=self.value
 
     def update_value_cb(self, widget, increment):
         if not self.editable:
