@@ -103,6 +103,8 @@ def encode_drop_parameters(**kw):
     @return: a string
     """
     for k in kw:
+        if isinstance(kw[k], unicode):
+            kw[k]=kw[k].encode('utf8')
         if not isinstance(kw[k], basestring):
             kw[k]=str(kw[k])
     return cgi.urllib.urlencode(kw).encode('utf8')
@@ -112,4 +114,5 @@ def decode_drop_parameters(data):
 
     @return: a dict.
     """
-    return dict(cgi.parse_qsl(unicode(data, 'utf8')))
+    return dict( (k, unicode(v, 'utf8')) 
+                 for (k, v) in cgi.parse_qsl(unicode(data, 'utf8').encode('utf8')) )
