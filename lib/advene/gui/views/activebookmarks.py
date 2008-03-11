@@ -570,6 +570,12 @@ class ActiveBookmark(object):
                 self.controller.notify('AnnotationEditEnd', annotation=self.annotation)
         return True
 
+    def grab_focus(self, *p):
+        """Set the focus on the comment edition widget.
+        """
+        self.begin_widget.comment_entry.grab_focus()
+        return True
+
     def handle_scroll_event(self, button, event, get_value, set_value, check_value):
         # Handle scroll actions
         if not (event.state & gtk.gdk.CONTROL_MASK):

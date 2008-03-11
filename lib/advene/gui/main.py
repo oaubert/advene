@@ -1158,12 +1158,14 @@ class AdveneGUI (Connect):
                 if l:
                     # There is at least one open view. Use the latest.
                     a=l[-1]
-                    a.append(pos)
+                    b=a.append(pos)
+                    b.grab_focus()
                 else:
                     # No existing view. Create one.
                     a=self.open_adhoc_view('activebookmarks', destination='fareast')
                     if a is not None:
-                        a.append(pos)
+                        b=a.append(pos)
+                        b.grab_focus()
                 return True
         elif event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.Up:
