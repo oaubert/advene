@@ -167,6 +167,34 @@ class TranscriptionEdit(AdhocView):
                 b.apply_tag_by_name("searched_string", matchStart, matchEnd)
                 begin=matchEnd
 
+    def textview_drag_received(self, widget, context, x, y, selection, targetType, time):
+        if targetType == config.data.target_type['timestamp']:
+            position=long(selection.data)
+            #(x, y) = self.textview.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
+            #                                               int(x),
+            #                                               int(y))
+            it=self.textview.get_iter_at_location(x, y)
+            if it is None:
+                return False
+            # Check that preceding mark.value is lower
+            m, i=self.find_preceding_mark(it)
+            if m is not None and m.value > position:
+                self.message(_("Invalid timestamp mark"))
+                return False
+            m, i=self.find_following_mark(it)
+            if m is not None and m.value < position:
+                self.message(_("Invalid timestamp mark"))
+                return False
+            # Create the timestamp
+            self.create_timestamp_mark(position, it)
+
+            # If the drag originated from our own widgets, remove it.
+            source=context.get_source_widget()
+            if source in self.marks:
+                self.remove_timestamp_mark(source)
+            return True
+        return False
+
     def build_widget(self):
         vbox = gtk.VBox()
 
@@ -198,6 +226,14 @@ class TranscriptionEdit(AdhocView):
         self.textview.get_buffer().create_tag("past", background="#dddddd")
         self.textview.get_buffer().create_tag("ignored", strikethrough=True)
 
+        self.textview.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                    gtk.DEST_DEFAULT_HIGHLIGHT |
+                                    gtk.DEST_DEFAULT_ALL,
+                                    config.data.drag_type['timestamp']
+                                    ,
+                                    gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        self.textview.connect("drag_data_received", self.textview_drag_received)
+        
         # Hook the completer component
         completer=Completer(textview=self.textview,
                             controller=self.controller,
@@ -261,14 +297,14 @@ class TranscriptionEdit(AdhocView):
 
         return vbox
 
-    def remove_timestamp_mark(self, button, anchor, child):
+    def remove_timestamp_mark(self, mark):
         b=self.textview.get_buffer()
-        self.marks.remove(child)
-        begin=b.get_iter_at_child_anchor(anchor)
+        self.marks.remove(mark)
+        begin=b.get_iter_at_child_anchor(mark.anchor)
         end=begin.copy()
         end.forward_char()
         b.delete_interactive(begin, end, True)
-        button.destroy()
+        mark.destroy()
         return True
 
     def insert_timestamp_mark(self):
@@ -378,7 +414,7 @@ class TranscriptionEdit(AdhocView):
             return True
 
         def popup_remove(win):
-            self.remove_timestamp_mark(button, anchor, child)
+            self.remove_timestamp_mark(child)
             return True
 
         def popup_modify(win, t):
