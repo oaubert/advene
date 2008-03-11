@@ -330,7 +330,22 @@ class ActiveBookmarks(AdhocView):
                                    ,
                                    gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
         self.mainbox.connect("drag_data_received", mainbox_drag_received)
+
+        dropbox=gtk.HBox()
+        dropbox.add(gtk.Label(_("Drop timestamps here")))
+        dropbox.set_size_request(-1, 32)
+        dropbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                   gtk.DEST_DEFAULT_HIGHLIGHT |
+                                   gtk.DEST_DEFAULT_ALL,
+                                   config.data.drag_type['timestamp']
+                                   + config.data.drag_type['annotation-type']
+                                   ,
+                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        dropbox.connect("drag_data_received", mainbox_drag_received)
+        dropbox.show()
+
         v.add(sw)
+        v.pack_start(dropbox, expand=False)
         return v
 
 class ActiveBookmark(object):
