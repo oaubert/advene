@@ -1579,7 +1579,7 @@ class TimeLine(AdhocView):
                           + config.data.drag_type['timestamp']
                           + config.data.drag_type['tag']
                           ,
-                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         # The button can receive drops (to create relations)
         b.connect("drag_data_received", self.drag_received)
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -2685,8 +2685,26 @@ class TimeLine(AdhocView):
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
 
+        def remove_drag_received(widget, context, x, y, selection, targetType, time):
+            if targetType == config.data.target_type['annotation']:
+                source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+                if source is not None:
+                    self.controller.delete_element(source)
+                return True
+            return False
+
+        b=gtk.ToolButton(stock_id=gtk.STOCK_DELETE)
+        self.controller.gui.tooltips.set_tip(b, _("Drop an annotation here to delete it."))
+        b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                        gtk.DEST_DEFAULT_HIGHLIGHT |
+                        gtk.DEST_DEFAULT_ALL,
+                        config.data.drag_type['annotation'], 
+                        gtk.gdk.ACTION_MOVE )
+        b.connect("drag_data_received", remove_drag_received)
+        tb.insert(b, -1)
+
         # Annotation-type selection button
-        def trash_drag_received(widget, context, x, y, selection, targetType, time):
+        def annotationtype_selection_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation-type']:
                 source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
                 if source in self.annotationtypes:
@@ -2699,7 +2717,7 @@ class TimeLine(AdhocView):
         b=gtk.ToolButton(stock_id=gtk.STOCK_SELECT_COLOR)
         b.set_tooltip(self.tooltips, _("Drag an annotation type here to remove it from display.\nClick to edit all displayed types"))
         b.connect("clicked", self.edit_annotation_types)
-        b.connect("drag_data_received", trash_drag_received)
+        b.connect("drag_data_received", annotationtype_selection_drag_received)
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
