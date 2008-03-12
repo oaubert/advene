@@ -448,16 +448,33 @@ class TimeLine(AdhocView):
     def draw_bookmarks(self, layout, event):
         if not self.bookmarks_to_draw:
             return False
+        a=self.adjustment
+        begin=long(a.value)
+        end=long(a.value + a.page_size)
         context=layout.bin_window.cairo_create()
         h=layout.get_size ()[1]
 
+        context.set_source_rgb(1.0, 0, 0)
+        context.set_line_width(2)
+
         for t in self.bookmarks_to_draw:
             x=self.unit2pixel(t)
-            context.set_source_rgb(1.0, 0, 0)
-            context.set_line_width(2)
-            context.move_to(x, 0)
-            context.line_to(x, h)
-            context.stroke()
+            if x < begin:
+                # The bookmark is outside. Draw an arrow.
+                context.move_to(begin + 16, 2)
+                context.line_to(begin + 16, 16)
+                context.line_to(begin + 2, 9)
+                context.fill()
+            elif x > end:
+                # The bookmark is outside. Draw an arrow.
+                context.move_to(end - 16, 2)
+                context.line_to(end - 16, 16)
+                context.line_to(end - 2, 9)
+                context.fill()
+            else:
+                context.move_to(x, 0)
+                context.line_to(x, h)
+                context.stroke()
         return False
 
     def update_model(self, package=None, partial_update=False):
