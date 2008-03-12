@@ -409,9 +409,21 @@ class ActiveBookmark(object):
         self.annotation=None
         self.type=type
         # begin_widget and end_widget are both instances of BookmarkWidget.
-        # end_widget may be None (if end is not initialized yet)
+        # end_widget may be self.dropbox (if end is not initialized yet)
+        self.dropbox=gtk.EventBox()
+        self.dropbox.image=None
+        self.dropbox.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
+        self.dropbox.show()
+        self.dropbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                            gtk.DEST_DEFAULT_HIGHLIGHT |
+                                            gtk.DEST_DEFAULT_ALL,
+                                            config.data.drag_type['timestamp']
+                                            + config.data.drag_type['annotation-type'],
+                                            gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        self.dropbox.connect("drag_data_received", self.end_drag_received)
+
         self.begin_widget=None
-        self.end_widget=None
+        self.end_widget=self.dropbox
         self.widget=self.build_widget()
         self.begin=begin
         self.end=end
@@ -431,13 +443,15 @@ class ActiveBookmark(object):
 
     def set_end(self, v):
         if v is None:
-            if self.end_widget is not None:
+            if self.end_widget != self.dropbox:
                 # Remove the end widget
                 self.end_widget.widget.destroy()
-                self.end_widget=None
+                self.end_widget=self.dropbox
+                self.dropbox.show()
                 self.check_annotation()
             return
-        if self.end_widget is None:
+        if self.end_widget == self.dropbox:
+            self.dropbox.hide()
             # end was not set. We need to create the proper time adjustment
             self.end_widget=BookmarkWidget(controller=self.controller,
                                            timestamp=v,
@@ -446,37 +460,13 @@ class ActiveBookmark(object):
             parent.pack_start(self.end_widget.widget, expand=False)
             self.end_widget.widget.show_all()
 
-            def end_drag_received(widget, context, x, y, selection, targetType, time):
-                if self.is_widget_in_bookmark(context.get_source_widget()):
-                    return False
-                if targetType == config.data.target_type['timestamp']:
-                    data=decode_drop_parameters(selection.data)
-                    e=long(data['timestamp'])
-                    if self.end is not None and context.action == gtk.gdk.ACTION_COPY:
-                        self.container.append(self.end)
-                    if e < self.begin:
-                        # Invert begin and end.
-                        self.begin, self.end = e, self.begin
-                    else:
-                        self.end=e
-                    # If the drag originated from our own widgets, remove it.
-                    # If the drop was done from within our view, then
-                    # delete the origin widget.
-                    self.container.delete_origin_timestamp(context.get_source_widget())
-                    return True
-                elif targetType == config.data.target_type['annotation-type']:
-                    source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
-                    if source is not None:
-                        self.transtype(source)
-                    return True
-                return False
             self.end_widget.image.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                                 gtk.DEST_DEFAULT_HIGHLIGHT |
                                                 gtk.DEST_DEFAULT_ALL,
                                                 config.data.drag_type['timestamp']
                                                 + config.data.drag_type['annotation-type'],
                                                 gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
-            self.end_widget.image.connect("drag_data_received", end_drag_received)
+            self.end_widget.image.connect("drag_data_received", self.end_drag_received)
             self.end_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
             self.end_widget.image.connect('key-press-event', self.timestamp_key_press, 'end')
         else:
@@ -484,11 +474,36 @@ class ActiveBookmark(object):
             self.end_widget.update()
         self.check_annotation()
     def get_end(self):
-        if self.end_widget is None:
+        if self.end_widget == self.dropbox:
             return None
         else:
             return self.end_widget.value
     end=property(get_end, set_end)
+
+    def end_drag_received(self, widget, context, x, y, selection, targetType, time):
+        if self.is_widget_in_bookmark(context.get_source_widget()):
+            return False
+        if targetType == config.data.target_type['timestamp']:
+            data=decode_drop_parameters(selection.data)
+            e=long(data['timestamp'])
+            if self.end is not None and context.action == gtk.gdk.ACTION_COPY:
+                self.container.append(self.end)
+            if e < self.begin:
+                # Invert begin and end.
+                self.begin, self.end = e, self.begin
+            else:
+                self.end=e
+            # If the drag originated from our own widgets, remove it.
+            # If the drop was done from within our view, then
+            # delete the origin widget.
+            self.container.delete_origin_timestamp(context.get_source_widget())
+            return True
+        elif targetType == config.data.target_type['annotation-type']:
+            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+            if source is not None:
+                self.transtype(source)
+            return True
+        return False
 
     def transtype(self, at):
         if self.annotation is not None:
@@ -617,8 +632,7 @@ class ActiveBookmark(object):
 
         It checks the images, which are the source for DND.
         """
-        return (widget == self.begin_widget.image 
-                or (self.end_widget is not None and widget == self.end_widget.image))
+        return (widget == self.begin_widget.image or  widget == self.end_widget.image)
 
     def delete_timestamp(self, position):
         """Delete a timestamp. 
@@ -702,6 +716,7 @@ class ActiveBookmark(object):
         self.begin_widget.image.connect('key-press-event', self.timestamp_key_press, 'begin')
 
         box.pack_start(self.begin_widget.widget, expand=True)
+        box.pack_start(self.end_widget, expand=False)
         f.add(box)
         f.show_all()
 
