@@ -374,8 +374,10 @@ class Indexer:
             s=self.index.get(context.type.id, [])
         elif isinstance(context, gtk.TextBuffer):
             s=set(self.get_words(context.get_text(*context.get_bounds())))
+            s=self.index['views']
         else:
-            return []
+            s=self.index['views']
+
         res=[ w for w in s if w.startswith(prefix) and w != prefix ]
         return res
 
