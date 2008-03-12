@@ -201,7 +201,7 @@ class ActiveBookmarks(AdhocView):
         if b is None:
             return
         if wid == b.begin_widget.image:
-            if b.end_widget is None:
+            if b.end_widget == b.dropbox:
                 # The bookmark should be removed
                 self.remove(b)
             else:
@@ -234,7 +234,7 @@ class ActiveBookmarks(AdhocView):
                 wid=context.get_source_widget()
                 b=self.get_matching_bookmark(wid)
                 if b is not None:
-                    if b.end_widget is None:
+                    if b.end_widget == b.dropbox:
                         # No end widget, then we have only a begin
                         # time. Thus remove the whole bookmark.
                         b.widget.destroy()
@@ -261,8 +261,8 @@ class ActiveBookmarks(AdhocView):
             m=gtk.Menu()
             for t, func in (
                 (_("Chronological order"), lambda a, b: cmp(a.begin, b.begin)),
-                (_("Completeness and chronological order"), lambda a, b: cmp(a.end_widget is None, 
-                                                                             b.end_widget is None) or cmp(a.begin, b.begin)) 
+                (_("Completeness and chronological order"), lambda a, b: cmp(a.end_widget == a.dropbox,
+                                                                             b.end_widget == b.dropbox) or cmp(a.begin, b.begin)) 
                 ):
                 i=gtk.MenuItem(t)
                 i.connect('activate', do_reorder, func)
@@ -487,6 +487,7 @@ class ActiveBookmark(object):
             data=decode_drop_parameters(selection.data)
             e=long(data['timestamp'])
             if self.end is not None and context.action == gtk.gdk.ACTION_COPY:
+                # Save a copy of the deleted timestamp
                 self.container.append(self.end)
             if e < self.begin:
                 # Invert begin and end.
