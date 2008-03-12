@@ -1756,6 +1756,7 @@ class TimeLine(AdhocView):
         if abs(height - self.current_scale_height) > 10:
             # The position changed significantly. Update the display.
             self.current_scale_height=height
+            self.scale_layout.set_size (self.unit2pixel(self.maximum - self.minimum), 25 + height)
 
             # Remove previous images
             def remove_image(w):
