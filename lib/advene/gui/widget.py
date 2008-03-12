@@ -233,7 +233,6 @@ class AnnotationWidget(GenericColorButtonWidget):
         self.connect("drag_data_get", self.drag_sent)
         self.connect("drag_begin", self._drag_begin)
         self.connect("drag_end", self._drag_end)
-        self.connect("drag_motion", self._drag_motion)
         # The widget can generate drags
         self.drag_source_set(gtk.gdk.BUTTON1_MASK,
                              config.data.drag_type['annotation']
@@ -317,14 +316,6 @@ class AnnotationWidget(GenericColorButtonWidget):
     def _drag_end(self, widget, context):
         widget._icon.destroy()
         widget._icon=None
-        return True
-
-    def _drag_motion(self, widget, drag_context, x, y, timestamp):
-        w=drag_context.get_source_widget()
-        try:
-            w._icon.set_cursor(self.annotation)
-        except AttributeError:
-            pass
         return True
 
     def set_active(self, b):
