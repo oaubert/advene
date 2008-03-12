@@ -348,8 +348,10 @@ class ActiveBookmarks(AdhocView):
                     self.bookmarks.remove(b)
                     if i < index:
                         self.bookmarks.insert(index - 1, b)
-                    else:
+                    elif index is not None:
                         self.bookmarks.insert(index, b)
+                    else:
+                        self.bookmarks.append(b)
                     self.refresh()
                 else:
                     # Dropping from another view. Create a bookmark
