@@ -27,6 +27,7 @@ import advene.core.config as config
 import advene.util.helper as helper
 from advene.gui.util import get_small_stock_button, dialog
 from advene.gui.util import encode_drop_parameters, decode_drop_parameters
+from advene.gui.util.completer import Completer
 from advene.gui.views import AdhocView
 from advene.gui.widget import TimestampRepresentation
 import advene.util.importer
@@ -321,6 +322,11 @@ class BookmarkWidget(object):
         if self.display_comments:
             hbox=gtk.HBox()
             self.comment_entry=gtk.TextView()
+            # Hook the completer component
+            completer=Completer(textview=self.comment_entry,
+                                controller=self.controller,
+                                element=self.comment_entry.get_buffer(),
+                                indexer=self.controller.package._indexer)
             self.comment_entry.set_wrap_mode(gtk.WRAP_WORD)
             fd=pango.FontDescription('sans %d' % config.data.preferences['timeline']['font-size'])
             self.comment_entry.modify_font(fd)
