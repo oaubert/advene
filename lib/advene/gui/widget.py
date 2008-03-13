@@ -280,7 +280,9 @@ class AnnotationWidget(GenericColorButtonWidget):
         l.set_style(style)
         v.pack_start(l, expand=False)
 
-        def set_cursor(wid, t):
+        def set_cursor(wid, t=None):
+            if t is None:
+                t=self.annotation
             cache=self.controller.package.imagecache
             if self.no_image_pixbuf is None:
                 self.no_image_pixbuf=png_to_pixbuf(cache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
@@ -307,7 +309,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         w.show_all()
         w._current=None
         w.set_cursor = set_cursor.__get__(w)
-        w.set_cursor(self.annotation)
+        w.set_cursor()
         w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
         widget._icon=w
         context.set_icon_widget(w, 0, 0)

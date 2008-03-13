@@ -2078,7 +2078,7 @@ class TimeLine(AdhocView):
     def layout_drag_leave_cb(self, widget, drag_context, timestamp):
         w=drag_context.get_source_widget()
         try:
-            w._icon.set_cursor(w.element)
+            w._icon.set_cursor()
         except AttributeError:
             pass
         return True

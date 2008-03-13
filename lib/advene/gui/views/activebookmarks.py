@@ -807,7 +807,9 @@ class ActiveBookmark(object):
             l.set_style(style)
             v.pack_start(l, expand=False)
 
-            def set_cursor(wid, t):
+            def set_cursor(wid, t=None):
+                if t is None:
+                    t=self.annotation or self.begin
                 cache=self.controller.package.imagecache
                 if self.no_image_pixbuf is None:
                     self.no_image_pixbuf=png_to_pixbuf(cache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
@@ -834,7 +836,7 @@ class ActiveBookmark(object):
             w.show_all()
             w._current=None
             w.set_cursor = set_cursor.__get__(w)
-            w.set_cursor(self.annotation or self.begin)
+            w.set_cursor()
             w.set_size_request(long(2.5 * config.data.preferences['drag-snapshot-width']), -1)
             widget._icon=w
             context.set_icon_widget(w, 0, 0)
@@ -848,7 +850,7 @@ class ActiveBookmark(object):
         def _drag_motion(widget, drag_context, x, y, timestamp):
             w=drag_context.get_source_widget()
             try:
-                w._icon.set_cursor(self.annotation or self.begin)
+                w._icon.set_cursor()
             except AttributeError:
                 pass
             return True
