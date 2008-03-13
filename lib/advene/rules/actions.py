@@ -238,6 +238,17 @@ def register(controller=None):
                                )
 
     controller.register_action(RegisteredAction(
+            name="OpenStaticView",
+            method=ac.OpenStaticView,
+            description=_("Open a static view"),
+            parameters={'viewid': _("View")},
+            defaults={'viewid': 'string:Specify a view here'},
+            predefined=ac.OpenStaticView_predefined,
+            category='gui',
+            )
+                               )
+
+    controller.register_action(RegisteredAction(
             name="SetVolume",
             method=ac.SetVolume,
             description=_("Set the audio volume"),
@@ -586,6 +597,30 @@ class DefaultActionsRepository:
             return True
         self.controller.open_url(url)
         return True
+
+    def OpenStaticView (self, context, parameters):
+        """Open a static view in the web browser."""
+        viewid=self.parse_parameter(context, parameters, 'viewid', None)
+        if not viewid:
+            return True
+        try:
+            url=context.evaluateValue('package/view/%s/absolute_url' % viewid)
+        except ValueError:
+            url=None
+        
+        if url is not None:
+            self.controller.open_url(url)
+        else:
+            self.controller.log(_("Cannot find the view %s") % viewid)
+        return True
+
+    def OpenStaticView_predefined(self, controller):
+        """Return the predefined values.
+        """
+        return { 'viewid': [ ('string:%s' % v.id, controller.get_title(v))
+                             for v in controller.package.views
+                             if helper.get_view_type(v) == 'static'
+                             and v.matchFilter['class'] in ('package', '*') ] }
 
     def SetVolume (self, context, parameters):
         """Set the video volume."""
