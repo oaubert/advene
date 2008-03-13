@@ -1024,6 +1024,32 @@ class TranscriptionEdit(AdhocView):
 
         return True
 
+    def set_snapshot_scale(self, size):
+        for m in self.marks:
+            m.width=size
+            m.refresh()
+            
+    def scale_snaphots_menu(self, i):
+        def set_scale(i, s):
+            self.set_snapshot_scale(s)
+            return True
+
+        m=gtk.Menu()
+        for size, label in (
+            ( 8, _("Smallish")),
+            (16, _("Small")),
+            (32, _("Normal")),
+            (48, _("Large")),
+            (64, _("Larger")),
+            (128, _("Huge")),
+            ):
+            i=gtk.MenuItem(label)
+            i.connect("activate", set_scale, size)
+            m.append(i)
+        m.show_all()
+        m.popup(None, None, None, 0, gtk.get_current_event_time())
+        return True
+
     def get_toolbar(self):
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
@@ -1045,6 +1071,7 @@ class TranscriptionEdit(AdhocView):
             (_("Preferences"), _("Preferences"), gtk.STOCK_PREFERENCES, self.edit_preferences),
             (_("Center"), _("Center on the current mark"), gtk.STOCK_JUSTIFY_CENTER, center_on_current),
             (_("Find"), _("Search a string"), gtk.STOCK_FIND, self.show_searchbox),
+            (_("Scale"), _("Set the size of snaphots"), gtk.STOCK_FULLSCREEN, self.scale_snaphots_menu),
             )
 
         for text, tooltip, icon, callback in tb_list:
