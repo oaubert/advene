@@ -414,6 +414,7 @@ class ActiveBookmark(object):
         self.dropbox.image=None
         self.dropbox.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
         self.dropbox.show()
+        self.dropbox.set_no_show_all(True)
         self.dropbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                             gtk.DEST_DEFAULT_HIGHLIGHT |
                                             gtk.DEST_DEFAULT_ALL,
