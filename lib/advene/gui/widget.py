@@ -807,7 +807,7 @@ class TimestampRepresentation(gtk.Button):
         self.add(box)
         self.box=box
 
-        self._update_display()
+        self.refresh()
 
         self.connect("button_press_event", self._button_press_handler)
         self.connect("drag_data_get", self._drag_sent)
@@ -874,7 +874,7 @@ class TimestampRepresentation(gtk.Button):
             self.controller.notify('BookmarkUnhighlight', timestamp=self._value, immediate=True)
             self.highlight=False
         self._value=v
-        self._update_display()
+        self.refresh()
     value=property(get_value, set_value, doc="Timestamp value")
 
     def _drag_sent(self, widget, context, selection, targetType, eventTime):
@@ -903,7 +903,7 @@ class TimestampRepresentation(gtk.Button):
             return True
         return False
 
-    def _update_display(self):
+    def refresh(self):
         """Update the display of the widget according to self._value.
         """
         if self._value is None:
@@ -917,7 +917,7 @@ class TimestampRepresentation(gtk.Button):
     def invalidate_snapshot(self, *p):
         # Invalidate the image
         self.controller.package.imagecache.invalidate(self.value, self.epsilon)
-        self._update_display()
+        self.refresh()
         return True
 
     def popup_menu(self, popup=True):
