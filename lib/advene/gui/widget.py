@@ -438,12 +438,15 @@ class AnnotationWidget(GenericColorButtonWidget):
                 l=l[::(s/width)+1]
                 s=len(l)
             w=1.0 * width / s
-            c=0
+            c=w
             context.set_source_rgba(0, 0, 0, .5)
+            context.move_to(0, height)
+            context.line_to(0, int(height * v))
             for v in l:
-                context.rectangle(int(c), int(height * v), int(w), height)
-                context.fill()
+                context.line_to(int(c), int(height * v))
                 c += w
+            context.line_to(int(c), height)
+            context.fill()
             return
 
         # Draw the border
