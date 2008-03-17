@@ -118,7 +118,7 @@ class ActiveBookmarks(AdhocView):
         return True
 
     def append(self, t, index=None):
-        b=ActiveBookmark(container=self, begin=t, end=None, content=None, type=self.type)
+        b=ActiveBookmark(container=self, begin=t, end=None, content=None)
         b.widget.show_all()
         if index is None:
             self.bookmarks.append(b)
@@ -403,11 +403,10 @@ class ActiveBookmark(object):
     Once the end time is set, both times are displayed through a
     TimeAdjustment widget, so that they are editable.
     """
-    def __init__(self, container=None, begin=None, end=None, content=None, type=None):
+    def __init__(self, container=None, begin=None, end=None, content=None):
         self.container=container
         self.controller=container.controller
         self.annotation=None
-        self.type=type
         # begin_widget and end_widget are both instances of BookmarkWidget.
         # end_widget may be self.dropbox (if end is not initialized yet)
         self.dropbox=gtk.EventBox()
@@ -548,7 +547,8 @@ class ActiveBookmark(object):
                 # Create the annotation
                 id_=self.controller.package._idgenerator.get_id(Annotation)
                 # Check the type
-                if self.type is None:
+                at=self.container.type
+                if at is None:
                     # First try the Text-annotation type. If it
                     # does not exist, create an appropriate type.
                     at=helper.get_id(self.controller.package.annotationTypes, 'annotation')
@@ -572,13 +572,11 @@ class ActiveBookmark(object):
                         at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
                         schema.annotationTypes.append(at)
                         self.controller.notify('AnnotationTypeCreate', annotationtype=at)
-
                     if at is None:
                         return True
-                    self.type=at
                 el=self.controller.package.createAnnotation(
                     ident=id_,
-                    type=self.type,
+                    type=at,
                     author=config.data.userid,
                     date=self.controller.get_timestamp(),
                     fragment=MillisecondFragment(begin=long(self.begin),
