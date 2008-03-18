@@ -1037,13 +1037,15 @@ class TimeLine(AdhocView):
                 self.align_annotations(s, d, m)
                 return True
 
-            for (title, mode) in (
-                (_("Align both begin times"), 'begin-begin'),
-                (_("Align both end times"), 'end-end'),
-                (_("Align end time to selected begin time"), 'end-begin'),
-                (_("Align begin time to selected end time"), 'begin-end'),
-                (_("Align all times"), 'align'),
+            for (title, mode, condition) in (
+                (_("Align both begin times"), 'begin-begin', dest.fragment.begin <= source.fragment.end),
+                (_("Align both end times"), 'end-end', dest.fragment.end >= source.fragment.begin),
+                (_("Align end time to selected begin time"), 'end-begin', dest.fragment.begin >= source.fragment.begin),
+                (_("Align begin time to selected end time"), 'begin-end', dest.fragment.end <= source.fragment.end),
+                (_("Align all times"), 'align', True),
                 ):
+                if not condition:
+                    continue
                 item=gtk.ImageMenuItem(title)
                 im=gtk.Image()
                 im.set_from_file(config.data.advenefile( ( 'pixmaps', mode + '.png') ))
