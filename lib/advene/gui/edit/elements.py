@@ -175,12 +175,14 @@ class EditElementPopup (object):
         """Method called when validating a form."""
         if self.apply_cb(button, event, callback):
             if self.window is not None:
+                self.controller.notify("ElementEditEnd", element=self.element, comment="Window closed")
                 self.window.destroy ()
         return True
 
     def close_cb (self, button=None, data=None):
         """Method called when closing a form."""
         if self.window is not None:
+            self.controller.notify("ElementEditCancel", element=self.element, comment="Window closed")
             self.window.destroy ()
         return True
 
@@ -303,6 +305,7 @@ class EditElementPopup (object):
 
             def destroy_cb(*p):
                 if self.controller and self.controller.gui:
+                    self.controller.notify("ElementEditDestroy", element=self.element, comment="Window destroyed")
                     self.controller.gui.unregister_edit_popup(self)
                 return True
             self.window.connect("destroy", destroy_cb)
