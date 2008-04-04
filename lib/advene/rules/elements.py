@@ -1069,6 +1069,9 @@ class ECACatalog:
     # FIXME: Maybe this should be put in an external resource file
     event_names={
         'ElementEditBegin':       _("Start of the editing of an element"),
+        'ElementEditCancel':      _("Cancel of the editing of an element"),
+        'ElementEditDestroy':     _("Destruction of the edit window of an element"),
+        'ElementEditEnd':         _("Validation of the editing of an element"),
         'PackageEditEnd':         _("Ending editing of a package"),
         'AnnotationBegin':        _("Beginning of an annotation"),
         'AnnotationEnd':          _("End of an annotation"),
@@ -1077,6 +1080,7 @@ class ECACatalog:
         'AnnotationDelete':       _("Suppression of an annotation"),
         'AnnotationActivate':     _("Activation of an annotation"),
         'AnnotationDeactivate':   _("Deactivation of an annotation"),
+        'AnnotationMerge':        _("Merging of two annotations"),
         'RelationActivate':       _("Activation of a relation"),
         'RelationDeactivate':     _("Deactivation of a relation"),
         'RelationCreate':         _("Creation of a new relation"),
