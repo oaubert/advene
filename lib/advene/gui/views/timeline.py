@@ -1027,6 +1027,7 @@ class TimeLine(AdhocView):
                         elif mtd == 'application/x-advene-structured':
                             # FIXME: should compare fields and merge identical fields
                             d.content.data=d.content.data + '\nmerged_content="' + cgi.urllib.quote(s.content.data)+'"'
+                        self.controller.notify("AnnotationMerge", package=self.controller.package,comment="")
                         self.controller.delete_element(s)
                         self.controller.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations")
                     item=gtk.MenuItem(_("Merge with this annotation"))
