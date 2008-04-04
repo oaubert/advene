@@ -1874,6 +1874,7 @@ class AdveneGUI (Connect):
         """Unregister an edit popup.
         """
         if e in self.edit_popups:
+            self.controller.notify("ElementEditDestroy", element=e.element, comment="Window destroyed")
             self.edit_popups.remove (e)
         return True
 
