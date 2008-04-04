@@ -304,8 +304,7 @@ class EditElementPopup (object):
             self.window.add(self.vbox)
 
             def destroy_cb(*p):
-                if self.controller and self.controller.gui:
-                    self.controller.notify("ElementEditDestroy", element=self.element, comment="Window destroyed")
+                if self.controller and self.controller.gui: 
                     self.controller.gui.unregister_edit_popup(self)
                 return True
             self.window.connect("destroy", destroy_cb)
