@@ -1001,7 +1001,10 @@ class TimeLine(AdhocView):
             # In both cases, we will merge the data.
             if source.type == dest.type or source.fragment == dest.fragment:
                 ok=True
-                if source.type == dest.type:
+                if source.relations:
+                    ok=False
+                    #we should maybe accept it and delete relations.
+                elif source.type == dest.type:
                     b=min(source.fragment.begin, dest.fragment.begin)
                     e=min(source.fragment.begin, dest.fragment.begin)
                     for a in source.type.annotations:
