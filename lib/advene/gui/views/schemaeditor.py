@@ -15,7 +15,7 @@
 # along with Foobar; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Helper GUI classes and methods.
+"""SchemaEditor GUI classes and methods.
 
 This module provides a schema editor form
 
@@ -53,10 +53,10 @@ import xml.dom
 ELEMENT_NODE = xml.dom.Node.ELEMENT_NODE
 
 
-name="Schema editor view plugin"
+name="Schema editor view"
 
 def register(controller):
-    print "Registering SchemaEditor"
+    #print "Registering plugin SchemaEditor"
     controller.register_viewclass(SchemaEditor)
 
 class SchemaEditor (AdhocView):
@@ -238,7 +238,7 @@ class SchemaEditor (AdhocView):
             return
         for book in self.books:
             for i in range(len(book[1])):
-                #FIXME need to find a way to find the good tab (new notebookclass ?
+                #FIXME need to find a way to find the good tab (new notebookclass ?)
                 if (book[1][i]==schema):
                     book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_NORMAL,color)
                     book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_ACTIVE,color)
@@ -797,20 +797,25 @@ class RelationTypeGroup (goocanvas.Group):
                 self.type.hackedMemberTypes=( '#' + self.members[0].id, '#' + self.members[1].id )
         linked = self.type.getHackedMemberTypes()
         #print "%s %s %s %s %s" % (self.type, self.name, self.schema, self.members, linked)
+        #print "%s" % self.members
+        self.members=[]
         for i in linked:
             # Add annotations types to members
             typeA = self.getIdFromURI(i)
             typ = helper.get_id(self.controller.package.getAnnotationTypes(), typeA)
+            #print "%s" % typ
             if typ is not None:
                 self.members.append(typ)
                 #print "%s %s %s %s" % (i, typeA, typ, self.members)
+        #print "%s" % self.members
         self.name=self.type.title
         self.color = "black"
         if (self.controller.get_element_color(self.type) is not None):
             self.color = self.controller.get_element_color(self.type)
         temp=[]
-        for i in members:
+        for i in self.members:
             gr = self.findAnnotationTypeGroup(i.id, canvas)
+            #print "%s %s" % i.id, gr
             x=1
             y=1
             w=0
