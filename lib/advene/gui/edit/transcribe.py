@@ -92,6 +92,7 @@ class TranscriptionEdit(AdhocView):
             'insert-on-single-click': False,
             'autoscroll': True,
             'autoinsert': True,
+            'snapshot-size': 32,
             }
 
         self.colors = {
@@ -492,7 +493,7 @@ class TranscriptionEdit(AdhocView):
         b=self.textview.get_buffer()
         anchor=b.create_child_anchor(it)
         # Create the mark representation
-        child=TimestampRepresentation(timestamp, self.controller, width=50)
+        child=TimestampRepresentation(timestamp, self.controller, width=self.options['snapshot-size'])
         child.anchor=anchor
         child.connect('clicked', popup_goto)
         child.popup_menu=None
@@ -1025,6 +1026,7 @@ class TranscriptionEdit(AdhocView):
         return True
 
     def set_snapshot_scale(self, size):
+        self.options['snapshot-size']=size
         for m in self.marks:
             m.width=size
             m.refresh()
