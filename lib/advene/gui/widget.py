@@ -774,9 +774,7 @@ class TimestampRepresentation(gtk.Button):
         super(TimestampRepresentation, self).__init__()
         self._value=value
         self.controller=controller
-        if width is None:
-            width=config.data.preferences['bookmark-snapshot-width']
-        self.width=width
+        self.width=width or config.data.preferences['bookmark-snapshot-width']
         if epsilon is None:
             epsilon=config.data.preferences['bookmark-snapshot-precision']
         self.epsilon=epsilon
