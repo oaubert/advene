@@ -293,7 +293,7 @@ class BookmarkWidget(object):
 
     default_comment=_("Comment here")
 
-    def __init__(self, controller=None, timestamp=0, comment=None, display_comments=False):
+    def __init__(self, controller=None, timestamp=0, comment=None, display_comments=False, width=None):
         self.controller=controller
         self.value=timestamp
         if comment is None:
@@ -301,6 +301,7 @@ class BookmarkWidget(object):
         self.comment=comment
         self.comment_entry=None
         self.display_comments=display_comments
+        self.width=width
         self.widget=self.build_widget()
 
     def update(self):
@@ -310,7 +311,7 @@ class BookmarkWidget(object):
         return True
 
     def build_widget(self):
-        self.image=TimestampRepresentation(self.value, self.controller, comment_getter=lambda: self.comment)
+        self.image=TimestampRepresentation(self.value, self.controller, comment_getter=lambda: self.comment, width=self.width)
 
         def activate(widget=None):
             if self.value is not None:
