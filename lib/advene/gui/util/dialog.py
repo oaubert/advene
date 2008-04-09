@@ -488,7 +488,6 @@ def get_filename(title=_("Open a file"),
         alias_entry = gtk.Entry()
         h.add(alias_entry)
         preview_box.add(h)
-
     preview_box.show_all()
 
     def generate_alias(fname):
@@ -504,6 +503,12 @@ def get_filename(title=_("Open a file"),
             if alias:
                 alias_entry.set_text(generate_alias(filename))
             chooser.set_preview_widget_active(True)
+            if config.data.os == 'win32':
+                # Force resize for win32
+                oldmode=chooser.get_resize_mode()
+                chooser.set_resize_mode(gtk.RESIZE_IMMEDIATE)
+                chooser.resize_children()
+                chooser.set_resize_mode(oldmode)
         else:
             preview.set_label(_("N/C"))
             if alias:
