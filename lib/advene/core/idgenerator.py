@@ -63,6 +63,14 @@ class Generator:
         """
         self.existing.append(id_)
 
+    def remove(self, id_):
+        """Remove an id from the existing set.
+        """
+        try:
+            self.existing.remove(id_)
+        except ValueError:
+            pass
+
     def init(self, package):
         """Initialize the indexes for the given package."""
         prefixes=self.prefix.values()

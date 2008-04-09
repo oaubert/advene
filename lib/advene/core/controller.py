@@ -718,6 +718,9 @@ class AdveneController:
             el=event_name.lower().replace('create','').replace('editend','').replace('delete', '')
             p=kw[el].ownerPackage
             p._modified = True
+            if event_name.endswith('Delete'):
+                # We removed an element, so remove its id from the _idgenerator set
+                p._idgenerator.remove(kw[el].id)
 
         immediate=False
         if immediate in kw:
