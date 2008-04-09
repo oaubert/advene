@@ -503,22 +503,47 @@ class AdveneController:
                     break
         return res
 
-    def evaluate_query(self, query=None, context=None):
-        """Evaluate a Query.
+    def evaluate_query(self, query=None, context=None, expr=None):
+        """Evaluate a Query in a given context.
+
+        If context is None and expr is not None, then expr will be
+        evaluated as a TALES expression and the result will be used to
+        build a new context. This way, passing 
+        context=None, expr='package/annotations' 
+        will evaluate the query on all package's annotations.
+        
+        @param query: the query
+        @type query: advene.model.queries.Query (hence with a content)
+        @param context: the query context
+        @type context: advene.model.tal.context.AdveneContext
+        @param expr: an expression used to build the context
+        @type expr: a TALES expression (string)
+        @return: a tuple (result, query_object)
+        @type: result may be None, query_object is a SimpleQuery or a Quicksearch or None
         """
         if context is None:
-            context=self.build_context()
+            if expr is None:
+                context=self.build_context()
+            else:
+                context=self.build_context()
+                source=context.evaluateValue(expr)
+                context=self.build_context(here=source)
+                
+        result=None
         if query.content.mimetype == 'application/x-advene-simplequery':
             qexpr=SimpleQuery()
             qexpr.from_dom(query.content.model)
-            res=qexpr.execute(context=context)
-            return res
+            result=qexpr.execute(context=context)
         elif query.content.mimetype == 'application/x-advene-quicksearch':
             # Parse quicksearch query
             qexpr=Quicksearch(controller=self)
             qexpr.from_dom(query.content.model)
-            return qexpr.execute(context=context)
+            if expr is not None:
+                # Override the source... Is it a good idea ?
+                qexpr.source=expr
+            result=qexpr.execute(context=context)
         elif query.content.mimetype == 'application/x-advene-sparql-query':
+            # FIXME: this should go into an appropriate PelletQuery class
             p = self.package
             search = [
                 p.getAnnotations(),
@@ -562,9 +587,11 @@ class AdveneController:
                     t.append (i)
                 if t:
                     final_result.append (t)
-            return final_result
+            qexpr=None
+            result=final_result
         else:
             raise Exception("Unsupported query type for %s" % query.id)
+        return result, qexpr
 
     def build_context(self, here=None, alias=None, baseurl=None):
         """Build a context object with additional information.
