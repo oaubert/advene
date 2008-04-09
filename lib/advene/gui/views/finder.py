@@ -409,21 +409,10 @@ class QueryColumn(FinderColumn):
         f.add(v)
 
         def try_query(b, expr):
-            context=self.controller.build_context()
-            source=context.evaluateValue(expr)
-            context=self.controller.build_context(here=source)
-            if self.element.content.mimetype == 'application/x-advene-simplequery':
-                q=advene.rules.elements.SimpleQuery(controller=self.controller)
-                q.from_xml(self.element.content.stream)
-            elif self.element.content.mimetype == 'application/x-advene-quicksearch':
-                q=advene.rules.elements.Quicksearch(controller=self.controller)
-                q.from_xml(self.element.content.stream)
-                # Override the source... Is it a good idea ?
-                q.source=expr
             try:
-                res=q.execute(context)
+                res, q = self.controller.evaluate_query(self.element, expr=expr)
                 self.controller.gui.open_adhoc_view('interactiveresult',
-                                                    query=q,
+                                                    query=self.element,
                                                     result=res,
                                                     destination='east')
             except Exception, e:
