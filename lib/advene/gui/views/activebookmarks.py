@@ -194,6 +194,27 @@ class ActiveBookmarks(AdhocView):
         else:
             return None
 
+    def scroll_to_end(self):
+        """Scroll to the bottom of the view.
+        """
+        adj=self.mainbox.get_parent().get_vadjustment()
+        adj.value = adj.upper
+        return True
+        
+    def scroll_to_bookmark(self, b):
+        """Ensure that the given bookmark is visible.
+        """
+        y=b.widget.window.get_position()[1]
+        parent=self.mainbox.get_parent()
+        pos=parent.get_vadjustment().value
+        height=parent.window.get_geometry()[3]
+
+        print "Scroll to bookmark", y, pos, pos + height
+        if y < pos or y > pos + height:
+            parent.get_vadjustment().value = y
+        
+        return True
+
     def delete_origin_timestamp(self, wid):
         """Delete the timestamp from the widget wid.
         """
