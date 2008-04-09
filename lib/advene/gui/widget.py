@@ -769,6 +769,11 @@ class TimestampRepresentation(gtk.Button):
     """Representation of a timestamp.
 
     It is a button with a representative image and the timestamp displayed under it.
+
+    @ivar image: the image widget
+    @type image: gtk.Image
+    @ivar label: the label (timestamp) widget
+    @type label: gtk.Label
     """
     def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None):
         super(TimestampRepresentation, self).__init__()
