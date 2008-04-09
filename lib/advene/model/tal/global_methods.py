@@ -446,7 +446,7 @@ def query(target, context):
                 c=context.globals['options']['controller']
                 self._context.pushLocals()
                 self._context.setLocal('here', self._target)
-                res=c.evaluate_query(q, self._context)
+                res, qexpr=c.evaluate_query(q, context=self._context)
                 self._context.popLocals()
                 return res
             return render

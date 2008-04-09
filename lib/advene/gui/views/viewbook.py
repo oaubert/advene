@@ -324,7 +324,7 @@ class ViewBook(AdhocView):
 
             def apply_query(m, q):
                 ctx=self.controller.build_context(here=a)
-                res=self.controller.evaluate_query(q, ctx)
+                res, qexpr=self.controller.evaluate_query(q, context=ctx)
                 self.controller.gui.open_adhoc_view('interactiveresult', query=q, result=res, destination=self.location)
                 return True
 
