@@ -388,6 +388,9 @@ class QueryColumn(FinderColumn):
                 'type': helper.get_type(self.element),
                 'title': self.controller.get_title(self.element),
                 'id': self.element.id })
+        # Reset the sensitive state on apply buttons
+        for b in self.apply_buttons:
+            b.set_sensitive(True)
         return True
 
     def build_widget(self):
@@ -430,6 +433,7 @@ class QueryColumn(FinderColumn):
                 b.set_sensitive(False)
             return True
 
+        self.apply_buttons=[]
         for (expr, label) in (
              ('package', _("the package")),
              ('package/annotations', _("all annotations of the package")),
@@ -438,6 +442,7 @@ class QueryColumn(FinderColumn):
             b=gtk.Button(label)
             b.connect('clicked', try_query, expr)
             v.pack_start(b, expand=False)
+            self.apply_buttons.append(b)
 
         vbox.add(f)
         vbox.show_all()
