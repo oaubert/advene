@@ -1166,6 +1166,8 @@ class AdveneGUI (Connect):
                     if a is not None:
                         b=a.append(pos)
                         b.grab_focus()
+                if a is not None:
+                    a.scroll_to_end()
                 return True
         elif event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.Up:
