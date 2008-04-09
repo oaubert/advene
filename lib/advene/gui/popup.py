@@ -600,6 +600,30 @@ class Menu:
     def make_query_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+
+        def try_query(item, expr):
+            try:
+                res, q = self.controller.evaluate_query(element, expr=expr)
+                self.controller.gui.open_adhoc_view('interactiveresult',
+                                                    query=element,
+                                                    result=res,
+                                                    destination='east')
+            except Exception, e:
+                self.controller.log(_("Exception in query: %s") % unicode(e))
+            return True
+
+        m=gtk.MenuItem(_("Apply query on..."))
+        menu.append(m)
+        sm=gtk.Menu()
+        m.set_submenu(sm)
+        for (expr, label) in (
+             ('package', _("the package")),
+             ('package/annotations', _("all annotations of the package")),
+             ('package/annotations/first', _("the first annotation of the package")),
+            ):
+            i=gtk.MenuItem(label)
+            i.connect('activate', try_query, expr)
+            sm.append(i)
         return
 
     def make_view_menu(self, element, menu):
