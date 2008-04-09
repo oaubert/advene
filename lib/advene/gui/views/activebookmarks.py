@@ -22,6 +22,7 @@ from gettext import gettext as _
 import gtk
 import gobject
 import pango
+import urllib
 
 # Advene part
 import advene.core.config as config
@@ -54,6 +55,7 @@ class ActiveBookmarks(AdhocView):
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Clear"), self.clear),
+            (_("Save view"), self.save_view),
             )
         self.options={
             'snapshot_width': 60,
@@ -63,14 +65,23 @@ class ActiveBookmarks(AdhocView):
         self.bookmarks=[]
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
-        # FIXME: think about serialization...
-        #h=[ long(v) for (n, v) in arg if n == 'timestamp' ]
-        #if h:
-        #    self.history=h
-        #for n, v in arg:
-        #    if n == 'comment':
-        #       t, c = v.split(':', 1)
-        #       self.comments[long(t)]=c
+        for n, v in arg:
+            if n == 'bookmark':
+                ident, b, e, c = v.split(':')
+                if ident != 'None':
+                    a=helper.get_id(self.controller.package.annotations, ident)
+                else:
+                    a=None
+                begin=long(b)
+                if e == 'None':
+                    end=None
+                else:
+                    end=long(e)
+                content=urllib.unquote(c)
+                b=ActiveBookmark(container=self, begin=begin, end=end, content=content, annotation=a)
+                b.widget.show_all()
+                self.bookmarks.append(b)
+
         self.mainbox=gtk.VBox()
         self.widget=self.build_widget()
         self.type = type
@@ -94,9 +105,10 @@ class ActiveBookmarks(AdhocView):
         gobject.source_remove(self.loop_id)
 
     def get_save_arguments(self):
-        # FIXME: save arguments
-        #return self.options, ([ ('timestamp', t) for t in self.history ]
-        return self.options, []
+        # Serialisation format: annotationid:begin:end:content where
+        # annotationid and end may be "None" and content is
+        # url-encoded
+        return self.options, ([ ('bookmark', b.serialize()) for b in self.bookmarks ])
 
     def refresh(self, *p):
         self.mainbox.foreach(self.mainbox.remove)
@@ -415,19 +427,22 @@ class ActiveBookmark(object):
     """An ActiveBookmark can represent a simple bookmark (i.e. a single
     time, with an optional content) or a completed annotation.
 
-    The begin time is mandatory. It can be associated with an optional content.
+    If the annotation parameter is present, it is used as the source of information.
+    Else the begin time is mandatory. It can be associated with an optional content.
 
     If the end time is None, then the widget is displayed as a simple
     bookmark. DNDing a timestamp over the begin image will set the end
-    time.
-    
-    Once the end time is set, both times are displayed through a
-    TimeAdjustment widget, so that they are editable.
+    time.    
     """
-    def __init__(self, container=None, begin=None, end=None, content=None):
+    def __init__(self, container=None, begin=None, end=None, content=None, annotation=None):
         self.container=container
         self.controller=container.controller
-        self.annotation=None
+        self.annotation=annotation
+        if annotation is not None:
+            # Set the attributes
+            begin=annotation.fragment.begin
+            end=annotation.fragment.end
+            content=annotation.content.data
         # begin_widget and end_widget are both instances of BookmarkWidget.
         # end_widget may be self.dropbox (if end is not initialized yet)
         self.dropbox=gtk.EventBox()
@@ -500,6 +515,23 @@ class ActiveBookmark(object):
         else:
             return self.end_widget.value
     end=property(get_end, set_end)
+
+    def serialize(self):
+        """Return a serialized form of the bookmark.
+
+        It is used when saving the view.
+        """
+        # Serialisation format: annotationid:begin:end:content where
+        # annotationid and end may be "None" and content is
+        # url-encoded
+        if self.annotation is None:
+            ident='None'
+        else:
+            ident=self.annotation.id
+        return ":".join( (ident,
+                          str(self.begin),
+                          str(self.end),
+                          urllib.quote(self.content) ) )
 
     def end_drag_received(self, widget, context, x, y, selection, targetType, time):
         if self.is_widget_in_bookmark(context.get_source_widget()):
@@ -745,6 +777,13 @@ class ActiveBookmark(object):
 
         # Memorize the default textview color.
         self.default_background_color=self.begin_widget.comment_entry.get_style().base[gtk.STATE_NORMAL]
+
+        if self.annotation is not None:
+            # Update the textview color
+            col=self.controller.get_element_color(self.annotation)
+            if col is not None:
+                color=name2color(col)
+                self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, color)
 
         # Add a padding widget so that the frame fits the displayed elements
         #padding=gtk.HBox()
