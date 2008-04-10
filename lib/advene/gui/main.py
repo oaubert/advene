@@ -31,10 +31,7 @@ import time
 import os
 import StringIO
 import textwrap
-from sets import Set
 import re
-import cgi
-import itertools
 import urllib2
 import socket
 
@@ -2065,49 +2062,157 @@ class AdveneGUI (Connect):
         self.open_adhoc_view('interactiveresult', destination='east', result=res, label=label, query=s)
         return True
 
-    def ask_for_annotation_type(self, text=None, create=False):
+    def ask_for_annotation_type(self, text=None, create=False, force_create=False):
         """Display a popup asking to choose an annotation type.
 
-        If create then offer the possibility to create a new one.
+        If create, then offer the possibility to create a new one.
 
-        Return: the AnnotationType, or None if the action was cancelled.
+        @param text: the displayed text
+        @type text: str
+        @param create: offer to create a new type ?
+        @type create: boolean
+        @return: the AnnotationType, or None if the action was cancelled.
         """
-        at=None
-
         if text is None:
             text=_("Choose an annotation type.")
+        d = gtk.Dialog(title=text,
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                 ))
+        l=gtk.Label(text)
+        l.set_line_wrap(True)
+        l.show()
+        d.vbox.pack_start(l, expand=False)
 
-        ats=list(self.controller.package.annotationTypes)
-
+        if create and force_create:
+            ats=[]
+        else:
+            ats=list(self.controller.package.annotationTypes)
         if create:
             newat=helper.TitledElement(value=None,
                                        title=_("Create a new annotation type"))
             ats.append(newat)
 
-        if len(ats) == 1:
-            at=ats[0]
-        elif len(ats) > 1:
-            at=dialog.list_selector(title=_("Choose an annotation type"),
-                             text=text,
-                             members=[ (a, self.controller.get_title(a)) for a in ats],
-                             controller=self.controller)
+        # Anticipated declaration of some widgets, which need to be
+        # updated in the handle_new_type/schema_selection callback.            
+        new_type_dialog=gtk.VBox()
+        new_schema_dialog=gtk.VBox()
+
+        def handle_new_type_selection(combo):
+            el=combo.get_current_element()
+            if el == newat:
+                new_type_dialog.show()
+            else:
+                new_type_dialog.hide()
+            return True
+
+        if len(ats) > 0:
+            if create and force_create:
+                preselect=newat
+            else:
+                preselect=None
+            type_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in ats],
+                                                      preselect=preselect,
+                                                      callback=handle_new_type_selection)
         else:
             dialog.message_dialog(_("No annotation type is defined."),
                                   icon=gtk.MESSAGE_ERROR)
             return None
 
-        if create and at == newat:
-            # Create a new annotation type
-            sc=self.ask_for_schema(text=_("Select the schema where you want to\ncreate the new annotation type."), create=True)
-            if sc is None:
-                return None
+        d.vbox.pack_start(type_selector, expand=False)
+        type_selector.show_all()
 
-            cr=CreateElementPopup(type_=AnnotationType,
-                                  parent=sc,
-                                  controller=self.controller)
-            at=cr.popup(modal=True)
-            if at:
+        if create:
+            d.vbox.pack_start(new_type_dialog, expand=False)
+            new_type_dialog.pack_start(gtk.Label(_("Creating a new type.")))
+            ident=self.controller.package._idgenerator.get_id(AnnotationType)
+            new_type_title_dialog=dialog.title_id_widget(element_title=ident,
+                                                         element_id=ident)
+            new_type_dialog.pack_start(new_type_title_dialog, expand=False)
+            
+            # Mimetype                
+            type_list=(
+                ('text/plain', _("Plain text content")),
+                ('application/x-advene-structured', _("Simple-structured content")),
+                ('application/x-advene-zone', _("Rectangular zone content")),
+                ('image/svg+xml', _("SVG graphics content")),
+                )
+
+            mimetype_selector = dialog.list_selector_widget(members=type_list, entry=True)
+
+            new_type_title_dialog.attach(gtk.Label(_("Content type")), 0, 1, 2, 3)
+            new_type_title_dialog.attach(mimetype_selector, 1, 2, 2, 3)
+            
+            new_type_title_dialog.attach(gtk.Label(_("Schema")), 0, 1, 3, 4)
+
+            schemas=list(self.controller.package.schemas)
+            newschema=helper.TitledElement(value=None,
+                                           title=_("Create a new schema"))
+            schemas.append(newschema)
+
+            def handle_new_schema_selection(combo):
+                el=combo.get_current_element()
+                if el == newschema:
+                    new_schema_dialog.show()
+                else:
+                    new_schema_dialog.hide()
+                return True
+
+            schema_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in schemas],
+                                                        callback=handle_new_schema_selection)
+            new_type_title_dialog.attach(schema_selector, 1, 2, 3, 4)
+            new_type_dialog.pack_start(new_schema_dialog, expand=False)
+            new_schema_dialog.pack_start(gtk.Label(_("Specify the schema title")), expand=False)
+            ident=self.controller.package._idgenerator.get_id(Schema)
+            new_schema_title_dialog=dialog.title_id_widget(element_title=ident,
+                                                           element_id=ident)
+            new_schema_dialog.pack_start(new_schema_title_dialog, expand=False)
+
+        d.vbox.show_all()
+        if force_create:
+            new_type_title_dialog.title_entry.grab_focus()
+            type_selector.hide()
+        else:
+            new_type_dialog.hide()
+        new_schema_dialog.hide()
+
+        d.show()
+        dialog.center_on_mouse(d)
+        res=d.run()
+        if res == gtk.RESPONSE_OK:
+            at=type_selector.get_current_element()
+            if at == newat:
+                # Creation of a new type.
+                attitle=new_type_title_dialog.title_entry.get_text()
+                atid=new_type_title_dialog.id_entry.get_text()
+                sc=schema_selector.get_current_element()
+                if sc == newschema:
+                    sctitle=new_schema_title_dialog.title_entry.get_text()
+                    scid=new_schema_title_dialog.id_entry.get_text()
+                    # FIXME: check for existing id
+                    # Create the schema
+                    sc=self.controller.package.createSchema(ident=scid)
+                    sc.author=config.data.userid
+                    sc.date=self.controller.get_timestamp()
+                    sc.title=sctitle
+                    self.controller.package.schemas.append(sc)
+                    self.controller.notify('SchemaCreate', schema=sc)
+                # Create the type
+                at=sc.createAnnotationType(ident=atid)
+                at.author=config.data.userid
+                at.date=self.controller.get_timestamp()
+                at.title=attitle
+                at.mimetype=mimetype_selector.get_current_element()
+                at.setMetaData(config.data.namespace, 'color', self.controller.package._color_palette.next())
+                at.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+                sc.annotationTypes.append(at)
+                self.controller.notify('AnnotationTypeCreate', annotationtype=at)
                 self.edit_element(at, modal=True)
+        else:
+            at=None
+        d.destroy()
         return at
 
     def ask_for_schema(self, text=None, create=False):
@@ -2117,39 +2222,70 @@ class AdveneGUI (Connect):
 
         Return: the Schema, or None if the action was cancelled.
         """
-        schema=None
-
         if text is None:
             text=_("Choose a schema.")
+        d = gtk.Dialog(title=text,
+                       parent=None,
+                       flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                       buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                 gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                 ))
+        l=gtk.Label(text)
+        l.set_line_wrap(True)
+        l.show()
+        d.vbox.pack_start(l, expand=False)
+        
+        # Anticipated declaration of some widgets, which need to be
+        # updated in the handle_new_type/schema_selection callback.            
+        new_schema_dialog=gtk.VBox()
 
         schemas=list(self.controller.package.schemas)
+        newschema=helper.TitledElement(value=None,
+                                       title=_("Create a new schema"))
+        schemas.append(newschema)
 
-        if create:
-            newschema=helper.TitledElement(value=None,
-                                           title=_("Create a new schema"))
-            schemas.append(newschema)
+        def handle_new_schema_selection(combo):
+            el=combo.get_current_element()
+            if el == newschema:
+                new_schema_dialog.show()
+            else:
+                new_schema_dialog.hide()
+            return True
 
-        if len(schemas) == 1:
-            schema=schemas[0]
-        elif len(schemas) > 1:
-            schema=dialog.list_selector(title=_("Choose a schema"),
-                                                 text=text,
-                                                 members=[ (s, self.controller.get_title(s)) for s in schemas],
-                                                 controller=self.controller)
+        schema_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in schemas],
+                                                    callback=handle_new_schema_selection)
+        d.vbox.pack_start(schema_selector, expand=False)
+        d.vbox.pack_start(new_schema_dialog, expand=False)
+        new_schema_dialog.pack_start(gtk.Label(_("Specify the schema title")), expand=False)
+        ident=self.controller.package._idgenerator.get_id(Schema)
+        new_schema_title_dialog=dialog.title_id_widget(element_title=ident,
+                                                       element_id=ident)
+        new_schema_dialog.pack_start(new_schema_title_dialog, expand=False)
+
+        d.vbox.show_all()
+        new_schema_dialog.hide()
+
+        d.show()
+        dialog.center_on_mouse(d)
+        res=d.run()
+        if res == gtk.RESPONSE_OK:
+            sc=schema_selector.get_current_element()
+            if sc == newschema:
+                sctitle=new_schema_title_dialog.title_entry.get_text()
+                scid=new_schema_title_dialog.id_entry.get_text()
+                # FIXME: check for existing id
+                # Create the schema
+                sc=self.controller.package.createSchema(ident=scid)
+                sc.author=config.data.userid
+                sc.date=self.controller.get_timestamp()
+                sc.title=sctitle
+                self.controller.package.schemas.append(sc)
+                self.controller.notify('SchemaCreate', schema=sc)
+                self.edit_element(sc, modal=True)
         else:
-            dialog.message_dialog(_("No schema is defined."),
-                           icon=gtk.MESSAGE_ERROR)
-            return None
-
-        if create and schema == newschema:
-            cr = CreateElementPopup(type_=Schema,
-                                    parent=self.controller.package,
-                                    controller=self.controller)
-            schema=cr.popup(modal=True)
-            if schema:
-                self.edit_element(schema, modal=True)
-
-        return schema
+            sc=None
+        d.destroy()
+        return sc
 
     def popup_edit_accumulator(self, *p):
         self.open_adhoc_view('editaccumulator')
@@ -3017,14 +3153,13 @@ class AdveneGUI (Connect):
         return True
 
     def on_create_annotation_type_activate (self, button=None, data=None):
-        sc=self.ask_for_schema(text=_("Select the schema where you want to\ncreate the new annotation type."), create=True)
-        if sc is None:
+        at=self.ask_for_annotation_type(text=_("Creation of a new annotation type"),
+                                        create=True,
+                                        force_create=True)
+        if at is None:
             return None
-        cr=CreateElementPopup(type_=AnnotationType,
-                              parent=sc,
-                              controller=self.controller)
-        cr.popup()
-        return True
+        self.edit_element(at, modal=True)
+        return at
 
     def on_create_relation_type_activate (self, button=None, data=None):
         sc=self.ask_for_schema(text=_("Select the schema where you want to\ncreate the new relation type."), create=True)
@@ -3034,7 +3169,7 @@ class AdveneGUI (Connect):
                               parent=sc,
                               controller=self.controller)
         cr.popup()
-        return True
+        return at
 
     def on_package_list_activate(self, menu=None):
         self.update_package_list()
