@@ -392,8 +392,12 @@ class ActiveBookmarks(AdhocView):
                     self.refresh()
                 else:
                     # Dropping from another view. Create a bookmark
-                    b=self.append(source.fragment.begin, index)
-                    b.content=self.controller.get_title(source)
+                    b=ActiveBookmark(container=self, annotation=source)
+                    if index is None:
+                        self.bookmark.append(b)
+                    else:
+                        self.bookmarks.insert(index, b)
+                    self.refresh()
                 return True
             else:
                 print "Unknown target type for drop: %d" % targetType
