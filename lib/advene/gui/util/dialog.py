@@ -345,6 +345,46 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
     optionmenu.show_all()
     return optionmenu
 
+def title_id_widget(element_title=None,
+                    element_id=None):
+    """Build a widget to get title and id.
+
+    @param element_title: default title
+    @type element_title: string
+    @param element_id: default id
+    @type element_id: string
+    @return: the widget
+    """
+    v=gtk.Table(rows=2, columns=2)
+
+    l=gtk.Label(_("Title"))
+    v.attach(l, 0, 1, 0, 1)
+
+    title_entry=gtk.Entry()
+    title_entry.show()
+    if element_title:
+        title_entry.set_text(element_title)
+    v.attach(title_entry, 1, 2, 0, 1)
+
+    l=gtk.Label(_("Id"))
+    v.attach(l, 0, 1, 1, 2)
+
+    id_entry=gtk.Entry()
+    id_entry.show()
+    if element_id:
+        id_entry.set_text(element_id)
+    v.attach(id_entry, 1, 2, 1, 2)
+
+    def update_id(entry):
+        id_entry.set_text(helper.title2id(unicode(entry.get_text())))
+        return True
+
+    title_entry.connect("changed", update_id)
+
+    v.id_entry=id_entry
+    v.title_entry=title_entry
+    return v
+
 def title_id_dialog(title=_("Name the element"),
                     element_title=None,
                     element_id=None,
@@ -377,41 +417,11 @@ def title_id_dialog(title=_("Name the element"),
         l.show()
         d.vbox.add(l)
 
-    hb=gtk.HBox()
-    l=gtk.Label(_("Title"))
-    hb.pack_start(l, expand=False)
-
-    title_entry=gtk.Entry()
-    title_entry.show()
-    if element_title:
-        title_entry.set_text(element_title)
-
-    hb.pack_start(title_entry)
-    d.vbox.pack_start(hb, expand=False)
-
-    hb=gtk.HBox()
-
-    l=gtk.Label(_("Id"))
-    hb.pack_start(l, expand=False)
-
-    id_entry=gtk.Entry()
-    id_entry.show()
-    if element_id:
-        id_entry.set_text(element_id)
-    hb.pack_start(id_entry)
-
-    def update_id(entry):
-        id_entry.set_text(helper.title2id(unicode(entry.get_text())))
-        return True
-
-    title_entry.connect("changed", update_id)
-
-    d.vbox.pack_start(hb, expand=False)
-
+    v=title_id_widget(element_title, element_id)
+    d.vbox.pack_start(v, expand=False)
     d.connect("key_press_event", dialog_keypressed_cb)
-
-    d.id_entry=id_entry
-    d.title_entry=title_entry
+    d.id_entry=v.id_entry
+    d.title_entry=v.title_entry
     return d
 
 def get_title_id(title=_("Name the element"),
