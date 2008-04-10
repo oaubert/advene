@@ -55,7 +55,6 @@ class ActiveBookmarks(AdhocView):
         self.close_on_package_load = False
         self.contextual_actions = (
             (_("Clear"), self.clear),
-            (_("Save view"), self.save_view),
             )
         self.options={
             'snapshot_width': 60,
@@ -149,7 +148,7 @@ class ActiveBookmarks(AdhocView):
                 wid.annotation.content.data=wid.content
                 self.controller.notify('AnnotationEditEnd', annotation=wid.annotation)
         return True
-    
+
     def update_model(self, package=None, partial_update=False):
         self.update_annotationtype(None, None)
         return True
@@ -212,7 +211,7 @@ class ActiveBookmarks(AdhocView):
         adj=self.mainbox.get_parent().get_vadjustment()
         adj.value = adj.upper
         return True
-        
+
     def scroll_to_bookmark(self, b):
         """Ensure that the given bookmark is visible.
         """
@@ -224,7 +223,7 @@ class ActiveBookmarks(AdhocView):
         print "Scroll to bookmark", y, pos, pos + height
         if y < pos or y > pos + height:
             parent.get_vadjustment().value = y
-        
+
         return True
 
     def delete_origin_timestamp(self, wid):
@@ -295,7 +294,7 @@ class ActiveBookmarks(AdhocView):
             for t, func in (
                 (_("Chronological order"), lambda a, b: cmp(a.begin, b.begin)),
                 (_("Completeness and chronological order"), lambda a, b: cmp(a.end_widget == a.dropbox,
-                                                                             b.end_widget == b.dropbox) or cmp(a.begin, b.begin)) 
+                                                                             b.end_widget == b.dropbox) or cmp(a.begin, b.begin))
                 ):
                 i=gtk.MenuItem(t)
                 i.connect('activate', do_reorder, func)
@@ -309,7 +308,7 @@ class ActiveBookmarks(AdhocView):
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['timestamp'], 
+                        config.data.drag_type['timestamp'],
                         gtk.gdk.ACTION_MOVE )
         b.connect("drag_data_received", remove_drag_received)
         i=gtk.ToolItem()
@@ -332,12 +331,17 @@ class ActiveBookmarks(AdhocView):
         self.chosen_type_selector=sel
         tb.insert(i, -1)
 
-        b=get_small_stock_button(gtk.STOCK_REDO)
-        self.controller.gui.tooltips.set_tip(b, _("Reorder active bookmarks"))
-        b.connect("clicked", reorder)
-        i=gtk.ToolItem()
-        i.add(b)
-        tb.insert(i, -1)
+        for (icon, tip, method) in (
+            (gtk.STOCK_REDO, _("Reorder active bookmarks"), reorder),
+            (gtk.STOCK_SAVE, _("Save the current state"), self.save_view),
+            ):
+            b=get_small_stock_button(icon)
+            self.controller.gui.tooltips.set_tip(b, tip)
+            b.connect("clicked", method)
+            i=gtk.ToolItem()
+            i.add(b)
+            tb.insert(i, -1)
+
 
         hb.add(tb)
         v.pack_start(hb, expand=False)
@@ -349,8 +353,8 @@ class ActiveBookmarks(AdhocView):
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             index=None
             if widget == self.mainbox:
-                l=[ b 
-                    for b in self.bookmarks 
+                l=[ b
+                    for b in self.bookmarks
                     if y < b.widget.get_allocation().y + b.widget.get_allocation().height  ]
                 if l:
                     index=self.bookmarks.index(l[0])
@@ -432,7 +436,7 @@ class ActiveBookmark(object):
 
     If the end time is None, then the widget is displayed as a simple
     bookmark. DNDing a timestamp over the begin image will set the end
-    time.    
+    time.
     """
     def __init__(self, container=None, begin=None, end=None, content=None, annotation=None):
         self.container=container
@@ -582,7 +586,7 @@ class ActiveBookmark(object):
     def get_content(self):
         return self.begin_widget.comment
     content=property(get_content, set_content)
-    
+
     def check_annotation(self):
         if self.end is None:
             if self.annotation is not None:
@@ -688,7 +692,7 @@ class ActiveBookmark(object):
         return (widget == self.begin_widget.image or  widget == self.end_widget.image)
 
     def delete_timestamp(self, position):
-        """Delete a timestamp. 
+        """Delete a timestamp.
 
         position is either 'begin' or 'end'.
         """
@@ -717,7 +721,7 @@ class ActiveBookmark(object):
 
         def begin_drag_received(widget, context, x, y, selection, targetType, time):
             if self.is_widget_in_bookmark(context.get_source_widget()):
-                return False            
+                return False
             if targetType == config.data.target_type['timestamp']:
                 data=decode_drop_parameters(selection.data)
                 e=long(data['timestamp'])
@@ -899,7 +903,7 @@ class ActiveBookmark(object):
             widget._icon=w
             context.set_icon_widget(w, 0, 0)
             return True
- 
+
         def _drag_end(widget, context):
             widget._icon.destroy()
             widget._icon=None
@@ -912,9 +916,9 @@ class ActiveBookmark(object):
             except AttributeError:
                 pass
             return True
-        
+
         eb.connect("drag_begin", _drag_begin)
         eb.connect("drag_end", _drag_end)
         eb.connect("drag_motion", _drag_motion)
-        
+
         return eb
