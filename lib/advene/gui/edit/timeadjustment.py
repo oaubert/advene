@@ -161,32 +161,16 @@ class TimeAdjustment:
             hb.pack_start(current_pos, expand=False)
 
         vbox.pack_start(hbox, expand=False)
-        #vbox.pack_start(hb, expand=False)
-        self.image.box.pack_start(hb, expand=False)
+        vbox.pack_start(hb, expand=False)
         hb.set_style(self.image.box.get_style())
         #self.entry.set_style(self.image.box.get_style())
+        vbox.set_style(self.image.box.get_style())
         vbox.show_all()
 
         hb.set_no_show_all(True)
         hbox.set_no_show_all(True)
-        hb.hide()
-
-        def show_entry(b, *p):
-            self.image.label.hide()
-            hb.show()
-            return False
-        def hide_entry(b, event):
-            # Since the entry is embedded in the butotn, entering the
-            # entry will generate a leave event.  Check the pointer
-            # coordinates to determine if we really left the button
-            # area.
-            a=b.get_allocation()
-            x, y = b.get_pointer()
-            if x > 0 and y > 0 and x < a.width and y < a.height:
-                return False
-            self.image.label.show()
-            hb.hide()
-            return False
+        self.image.label.hide()
+        hb.show()
 
         def handle_scroll_event(button, event):
             if not (event.state & gtk.gdk.CONTROL_MASK):
@@ -205,9 +189,6 @@ class TimeAdjustment:
             return True
 
         if self.editable:
-            self.image.connect('enter-notify-event', show_entry)
-            self.image.connect('leave-notify-event', hide_entry)
-
             # The widget can receive drops from annotations
             vbox.connect("drag_data_received", self.drag_received)
             vbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
