@@ -86,6 +86,33 @@ class SchemaEditor (AdhocView):
         #print "%s" % self.widget.size_request()
         # 51/70 ...
 
+    def update_annotationtype(self, annotationtype=None, event=None):
+        print "Updating AT : %s" % event
+        # event AnnotationTypeDelete
+        # event AnnotationTypeEditEnd
+        # event AnnotationTypeCreate
+        return True
+
+    def update_relationtype(self, relationtype=None, event=None):
+        print "Updating RT : %s" % event
+        # sca.get_children()[2].get_children()[0] = canvas du notebook
+        # event EditEnd
+        # event Create
+        schema = relationtype.getSchema()
+        lbooks = self.findSchemaAreas(schema)
+        if event == 'RelationTypeCreate':
+            print "rtc"
+        elif event == 'RelationTypeDelete':
+            for lb in lbooks:
+                sca = lb[0]
+                rt = self.findRelationTypeGroup(relationtype.getId(),sca.get_children()[2].get_children()[0])
+                rt.remove_drawing_only()
+        elif event == 'RelationTypeEditEnd':
+            print "rte"
+        
+        return True
+
+
     def refresh(self, *p):
         return True  
 
@@ -159,21 +186,27 @@ class SchemaEditor (AdhocView):
         if (dialog.message_dialog(label="Voulez-vous effacer ce schema ?", icon=gtk.MESSAGE_QUESTION, callback=None)):
             self.controller.delete_element(sc)
             self.update_list_schemas(None)
-            lenB = len(self.books)-1
-            while (lenB>=0):
-                book = self.books[lenB]
-                lrem=[]
-                for i in range(book[0].get_n_pages()):
-                    #FIXME need to find a way to find the good tab (new notebookclass) ?
-                    if (book[1][i]==sc):
-                        lrem.append(book[0].get_nth_page(i))
-                for tab in lrem:
-                    self.removeSchemaArea(w, tab, book)
-                lenB = lenB-1
+            lrem = self.findSchemaAreas(sc)
+            for tab, book in lrem:
+                self.removeSchemaArea(w, tab, book)
             return True
         else:
             return False
 
+    # book [0] : Notebook widget, [1] : list of schemas
+    # schema : an advene schema
+    # lsca : a list of [notebookpage,book]
+    def findSchemaAreas(self, schema):
+        lenB = len(self.books)-1
+        while (lenB>=0):
+            book = self.books[lenB]
+            lsca=[]
+            for i in range(book[0].get_n_pages()):
+                if (book[1][i]==schema):
+                    lsca.append([book[0].get_nth_page(i),book])
+            lenB = lenB-1
+        return lsca
+    
     def removeNoteBook(self, book):
         if (self.books[0]==book):
             return False
@@ -269,7 +302,7 @@ class SchemaEditor (AdhocView):
         book[0].append_page(ong, hb)
         book[0].show_all()
         book[1].append(schema)
-        return ong.get_children()[3].get_children()[0]
+        return ong.get_children()[2].get_children()[0]
 
     def removeSchemaArea(self, w, ong, book):
         npg = book[0].page_num(ong)
@@ -499,14 +532,14 @@ class SchemaEditor (AdhocView):
         bg_color = gtk.gdk.Color (55000, 55000, 65535, 0)
         vbox = gtk.VBox (False, 4)
         vbox.set_border_width (4)
-        w = gtk.Label(nom)
+        #w = gtk.Label(nom)
         hbox = gtk.HBox (False, 4)
-        vbox.pack_start (w, False, False, 0)
+        #vbox.pack_start (w, False, False, 0)
         vbox.pack_start (hbox, False, False, 0)
         #Create the canvas   
         canvas = goocanvas.Canvas()
         canvas.modify_base (gtk.STATE_NORMAL, bg_color)
-        canvas.set_bounds (0, 0, 8000, 6000)
+        canvas.set_bounds (0, 0, 4000, 3000)
         #Zoom
         w = gtk.Label ("Zoom:")
         hbox.pack_start (w, False, False, 0)
@@ -567,7 +600,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         hboxAddAtt = gtk.HBox()
         labelAddAtt = gtk.Label("Add attribute")
         boutonAddAtt = gtk.Button("Add")
-        boutonAddAtt.connect("clicked", self.addAtributeSpace )
+        boutonAddAtt.connect("clicked", self.addAttributeSpace )
         hboxAddAtt.pack_start(labelAddAtt)
         hboxAddAtt.pack_start(boutonAddAtt)
         hboxMime = gtk.HBox()
@@ -664,7 +697,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         #self.TMimeType.set_text(mimetype)
         #return True
 
-    def addAtributeSpace(self, w, nom="New Attribute", type="None", con=""):
+    def addAttributeSpace(self, w, nom="New Attribute", type="None", con=""):
         #ajouter eventuellement un contenu directement avec x params
         #print "%s" % len(self.get_children()[0].get_children()[0].get_children())
         boxAtt = gtk.HBox()
@@ -928,6 +961,11 @@ class RelationTypeGroup (goocanvas.Group):
         self.line.props.points=p
 
     def remove(self):
+        #print "removing %s" % self.type
+        self.controller.delete_element(self.type)
+        self.remove_drawing_only()
+        
+    def remove_drawing_only(self):
         for i in self.members:
             gr = self.findAnnotationTypeGroup(i.id, self.get_canvas())
             if gr is not None:
@@ -936,8 +974,6 @@ class RelationTypeGroup (goocanvas.Group):
                 #Annotation group outside schema
                 #we don't remove the link because it doesn't have one
                 print "%s n'est pas dans ce schema" % i.id
-        #print "removing %s" % self.type
-        self.controller.delete_element(self.type)
         parent = self.get_parent()
         child_num = parent.find_child (self)
         parent.remove_child(child_num)
