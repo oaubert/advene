@@ -910,14 +910,9 @@ class TimeLine(AdhocView):
         return True
 
     def create_annotation_type(self, *p):
+        at=None
         if self.controller.gui:
-            sc=self.controller.gui.ask_for_schema(text=_("Select the schema where you want to\ncreate the new annotation type."), create=True)
-            if sc is None:
-                return None
-            cr=CreateElementPopup(type_=AnnotationType,
-                                  parent=sc,
-                                  controller=self.controller)
-            at=cr.popup(modal=True)
+            at=self.controller.gui.on_create_annotation_type_activate()
         return at
 
     def create_annotation(self, position, type, duration=None, content=None):
