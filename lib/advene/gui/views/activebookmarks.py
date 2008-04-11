@@ -627,11 +627,7 @@ class ActiveBookmark(object):
                 # Remove the annotation
                 self.controller.delete_element(self.annotation)
                 self.annotation=None
-                l=self.frame.get_label_widget()
-                if l is not None:
-                    l.destroy()
-                # Reset the textview color
-                self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, self.default_background_color)
+                self.set_frame_attributes()
         else:
             # Both times are valid.
             if self.annotation is None:
@@ -676,26 +672,38 @@ class ActiveBookmark(object):
                 self.controller.package.annotations.append(el)
                 self.annotation=el
                 self.controller.notify('AnnotationCreate', annotation=el, immediate=True)
-                # Add a validate button to the frame
-                def handle_ok(b):
-                    self.container.remove(self)
-                    return True
-                b=get_pixmap_button('small_ok.png', handle_ok)
-                b.set_relief(gtk.RELIEF_NONE)
-                self.controller.gui.tooltips.set_tip(b, _("Validate the annotation"))
-                self.frame.set_label_widget(b)
-                b.show_all()
-                # Update the textview color
-                col=self.controller.get_element_color(el)
-                if col is not None:
-                    color=name2color(col)
-                    self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, color)
+
+                self.set_frame_attributes()
             else:
                 # Update the annotation
                 self.annotation.fragment.begin=self.begin
                 self.annotation.fragment.end=self.end
                 self.controller.notify('AnnotationEditEnd', annotation=self.annotation)
         return True
+
+    def set_frame_attributes(self):
+        if self.annotation is not None:
+            # Add a validate button to the frame
+            def handle_ok(b):
+                self.container.remove(self)
+                return True
+            b=get_pixmap_button('small_ok.png', handle_ok)
+            b.set_relief(gtk.RELIEF_NONE)
+            self.controller.gui.tooltips.set_tip(b, _("Validate the annotation"))
+            self.frame.set_label_widget(b)
+            b.show_all()
+            # Update the textview color
+            col=self.controller.get_element_color(self.annotation)
+            if col is not None:
+                color=name2color(col)
+                self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, color)
+        else:
+            # Reset the color and the label widget
+            l=self.frame.get_label_widget()
+            if l is not None:
+                l.destroy()
+            # Reset the textview color
+            self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, self.default_background_color)
 
     def grab_focus(self, *p):
         """Set the focus on the comment edition widget.
@@ -816,12 +824,8 @@ class ActiveBookmark(object):
         # Memorize the default textview color.
         self.default_background_color=self.begin_widget.comment_entry.get_style().base[gtk.STATE_NORMAL]
 
-        if self.annotation is not None:
-            # Update the textview color
-            col=self.controller.get_element_color(self.annotation)
-            if col is not None:
-                color=name2color(col)
-                self.begin_widget.comment_entry.modify_base(gtk.STATE_NORMAL, color)
+        #if self.annotation is not None:
+        self.set_frame_attributes()
 
         # Add a padding widget so that the frame fits the displayed elements
         #padding=gtk.HBox()
