@@ -163,7 +163,8 @@ def shaped_window_from_xpm(xpm):
 
     gtk.widget_push_colormap(gtk.gdk.rgb_get_colormap())
     win = gtk.Window(gtk.WINDOW_POPUP)
-    pix = gtk.image_new_from_pixmap(pixmap, bitmap)
+    pix = gtk.Image()
+    pix.set_from_pixmap(pixmap, bitmap)
     win.realize()
     win.add(pix)
     win.shape_combine_mask(bitmap, 0, 0)
