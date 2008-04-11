@@ -79,6 +79,7 @@ class SchemaEditor (AdhocView):
         self.dragging = False
         self.drag_x = 0
         self.drag_y = 0
+        self.timer_motion=5
         if package is None and controller is not None:
             package=controller.package
         self.__package=package
@@ -96,20 +97,28 @@ class SchemaEditor (AdhocView):
     def update_relationtype(self, relationtype=None, event=None):
         print "Updating RT : %s" % event
         # sca.get_children()[2].get_children()[0] = canvas du notebook
+        # Need to modify notebook.
         # event EditEnd
         # event Create
         schema = relationtype.getSchema()
         lbooks = self.findSchemaAreas(schema)
+        #print "members : %s" % relationtype.getHackedMemberTypes()
         if event == 'RelationTypeCreate':
-            print "rtc"
+            for lb in lbooks:
+                sca = lb[0]
+                self.addRelationTypeGroup(canvas=sca.get_children()[2].get_children()[0], schema=schema, type=relationtype)
         elif event == 'RelationTypeDelete':
             for lb in lbooks:
                 sca = lb[0]
                 rt = self.findRelationTypeGroup(relationtype.getId(),sca.get_children()[2].get_children()[0])
-                rt.remove_drawing_only()
+                if rt is not None:
+                    rt.remove_drawing_only()
         elif event == 'RelationTypeEditEnd':
-            print "rte"
-        
+            for lb in lbooks:
+                sca = lb[0]
+                rt = self.findRelationTypeGroup(relationtype.getId(),sca.get_children()[2].get_children()[0])
+                if rt is not None:
+                    rt.update()    
         return True
 
 
@@ -341,7 +350,7 @@ class SchemaEditor (AdhocView):
         return cvgroup
 
     def findRelationTypeGroup(self, typeId, canvas):
-        #cherche le groupe correspondant a l'id
+        #Find relationGroup from typ id
         root = canvas.get_root_item ()
         for i in range(0, root.get_n_children()):
             if hasattr(root.get_child(i), 'type') and root.get_child(i).type.id== typeId:
@@ -421,8 +430,12 @@ class SchemaEditor (AdhocView):
             new_x = event.x
             new_y = event.y
             item.translate (new_x - self.drag_x, new_y - self.drag_y)
-            for rtg in item.rels:
-                self.rel_redraw(rtg)
+            # Hack not to redraw at every step
+            self.timer_motion= self.timer_motion-1
+            if self.timer_motion<=0:
+                self.timer_motion=5
+                for rtg in item.rels:
+                    self.rel_redraw(rtg)
         return True
 
     def annot_on_button_press (self, item, target, event, schema):
@@ -431,6 +444,7 @@ class SchemaEditor (AdhocView):
         if event.button == 1:
             self.drag_x = event.x
             self.drag_y = event.y
+            self.timer_motion=5
             fleur = gtk.gdk.Cursor (gtk.gdk.FLEUR)
             canvas = item.get_canvas ()
             canvas.pointer_grab (item,
@@ -858,10 +872,13 @@ class RelationTypeGroup (goocanvas.Group):
                 y = gr.rect.get_bounds().y1
                 w = gr.rect.props.width
                 h = gr.rect.props.height
-                gr.rels.append(self)
+                if self not in gr.rels:
+                    gr.rels.append(self)
             # 8 points of rect
             temp.append([[x+w/2,y],[x+w/2,y+h],[x,y+h/2],[x+w,y+h/2],[x,y],[x+w,y],[x+w,y+h],[x,y+h]])
         if len(temp)<2:
+            self.line=None
+            self.text=None
             return None
         # FIXME if more than 2 linked types
         it=0
@@ -873,10 +890,27 @@ class RelationTypeGroup (goocanvas.Group):
         else:
             p = goocanvas.Points ([(x1, y1), (x2, y2)])
         #ligne
-        self.line = goocanvas.Polyline (parent = self,
+        self.line = self.newLine (p,self.color)
+
+        nbrel = len(self.type.getRelations())
+        if (d==0):
+            self.text = self.newText (self.name + " ("+str(nbrel)+")",x1+5,y1-10)	
+        else:
+            self.text = self.newText (self.name + " ("+str(nbrel)+")",(x1+x2)/2, (y1+y2)/2)
+
+    def newText(self, txt, xx, yy):
+        return goocanvas.Text (parent = self,
+                                        text = txt,
+                                        x = xx, 
+                                        y = yy,
+                                        width = -1,
+                                        anchor = gtk.ANCHOR_CENTER,
+                                        font = "Sans Bold 10")
+    def newLine(self, p, color):
+        return goocanvas.Polyline (parent = self,
                                         close_path = False,
                                         points = p,
-                                        stroke_color = self.color,
+                                        stroke_color = color,
                                         line_width = 3.0,
                                         start_arrow = False,
                                         end_arrow = True,
@@ -884,26 +918,7 @@ class RelationTypeGroup (goocanvas.Group):
                                         arrow_length = 4.0,
                                         arrow_width = 3.0
                                         )
-                                        #start_arrow = False,
-                                        #end_arrow = True,
-        nbrel = len(self.type.getRelations())
-        if (d==0):
-            self.text = goocanvas.Text (parent = self,
-                                        text = self.name + " ("+str(nbrel)+")",
-                                        x = x1+5,
-                                        y = y1-10,
-                                        width = -1,
-                                        anchor = gtk.ANCHOR_CENTER,
-                                        font = "Sans Bold 10")	
-        else:
-            self.text = goocanvas.Text (parent = self,
-                                        text = self.name + " ("+str(nbrel)+")",
-                                        x = (x1+x2)/2, 
-                                        y = (y1+y2)/2,
-                                        width = -1,
-                                        anchor = gtk.ANCHOR_CENTER,
-                                        font = "Sans Bold 10")
-
+    
     #FIXME : hack to find id from type's uri
     def getIdFromURI(self, uri):
         return uri[1:]
@@ -948,16 +963,29 @@ class RelationTypeGroup (goocanvas.Group):
                 y = gr.rect.get_bounds().y1
                 w = gr.rect.props.width
                 h = gr.rect.props.height
+                if self not in gr.rels:
+                    gr.rels.append(self)
             # 8 points
             temp.append([[x+w/2,y],[x+w/2,y+h],[x,y+h/2],[x+w,y+h/2],[x,y],[x+w,y],[x+w,y+h],[x,y+h]])
+        if len(temp)<2:
+            self.line=None
+            self.text=None
+            return None
         x1,y1,x2,y2,d = self.distMin(temp[0],temp[1])
+        nbrel = len(self.type.getRelations())
         if d==0:
             # modifier en fonction du slot
             p = goocanvas.Points ([(x1, y1), (x1,y1-20), (x1+10, y1-20), (x2+10, y2)])
-            self.text.translate(x1-10-self.text.get_bounds().x1, y1-15-self.text.get_bounds().y1)
+            if self.text is None:
+                self.text = self.newText (self.name + " ("+str(nbrel)+")",x1+5,y1-10)	
+            self.text.translate(x1-15-self.text.get_bounds().x1, y1-20-self.text.get_bounds().y1)
         else:
             p = goocanvas.Points ([(x1, y1), (x2, y2)])
+            if self.text is None:
+                self.text = self.newText (self.name + " ("+str(nbrel)+")",(x1+x2)/2, (y1+y2)/2)
             self.text.translate((x1+x2-20)/2-self.text.get_bounds().x1, (y1+y2-30)/2-self.text.get_bounds().y1)
+        if self.line  is None:
+            self.line = self.newLine (p,self.color)
         self.line.props.points=p
 
     def remove(self):
@@ -968,7 +996,7 @@ class RelationTypeGroup (goocanvas.Group):
     def remove_drawing_only(self):
         for i in self.members:
             gr = self.findAnnotationTypeGroup(i.id, self.get_canvas())
-            if gr is not None:
+            if gr is not None and self in gr.rels:
                 gr.rels.remove(self)
             else:
                 #Annotation group outside schema
@@ -977,3 +1005,21 @@ class RelationTypeGroup (goocanvas.Group):
         parent = self.get_parent()
         child_num = parent.find_child (self)
         parent.remove_child(child_num)
+
+    def update(self):
+        linked = self.type.getHackedMemberTypes()
+        self.members=[]
+        for i in linked:
+            # Add annotations types to members
+            typeA = self.getIdFromURI(i)
+            typ = helper.get_id(self.controller.package.getAnnotationTypes(), typeA)
+            if typ is not None:
+                self.members.append(typ)
+        self.name=self.type.title
+        self.color = "black"
+        if (self.controller.get_element_color(self.type) is not None):
+            self.color = self.controller.get_element_color(self.type)
+        if self.text is not None:
+            nbrel = len(self.type.getRelations())
+            self.text.props.text = self.name + " ("+str(nbrel)+")"
+        self.redraw()
