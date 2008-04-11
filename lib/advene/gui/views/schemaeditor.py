@@ -87,22 +87,69 @@ class SchemaEditor (AdhocView):
         #print "%s" % self.widget.size_request()
         # 51/70 ...
 
+###
+#
+# Functions to update the gui when an event occurs
+#
+###
+    def update_schema(self, schema=None, event=None):
+        print "Updating S : %s" % event
+        return True
+
+    def update_relation(self, relation=None, event=None):
+        if event == 'RelationCreate' or event == 'RelationDelete':
+            rt = relation.getType()
+            sc = rt.getSchema()
+            locs = self.findSchemaAreas(sc)
+            for l in locs:
+                rtg = self.findRelationTypeGroup(rt.getId(),l[0].get_children()[2].get_children()[0])
+                rtg.update()
+        return True
+    
+    def update_annotation (self, annotation=None, event=None):
+        if event == 'AnnotationCreate' or event == 'AnnotationDelete':
+            at = annotation.getType()
+            sc = at.getSchema()
+            locs = self.findSchemaAreas(sc)
+            for l in locs:
+                atg = self.findAnnotationTypeGroup(at.getId(),l[0].get_children()[2].get_children()[0])
+                atg.update()
+        return True
+    
     def update_annotationtype(self, annotationtype=None, event=None):
         print "Updating AT : %s" % event
         # event AnnotationTypeDelete
         # event AnnotationTypeEditEnd
         # event AnnotationTypeCreate
+        schema = annotationtype.getSchema()
+        lbooks = self.findSchemaAreas(schema)
+        if event == 'AnnotationTypeCreate':
+            for lb in lbooks:
+                sca = lb[0]
+                self.addAnnotationTypeGroup(canvas=sca.get_children()[2].get_children()[0], schema=schema, type=annotationtype)
+        elif event == 'AnnotationTypeDelete':
+            for lb in lbooks:
+                sca = lb[0]
+                atg = self.findAnnotationTypeGroup(annotationtype.getId(),sca.get_children()[2].get_children()[0])
+                if atg is not None:
+                    atg.remove_drawing_only()
+            if self.TE is not None and self.TE.type == annotationtype:
+                self.TE.initWithType(None)
+        elif event == 'AnnotationTypeEditEnd':
+            for lb in lbooks:
+                sca = lb[0]
+                atg = self.findAnnotationTypeGroup(annotationtype.getId(),sca.get_children()[2].get_children()[0])
+                if atg is not None:
+                    atg.update() 
+            if self.TE is not None and self.TE.type == annotationtype:
+                self.TE.initWithType(annotationtype)
         return True
 
     def update_relationtype(self, relationtype=None, event=None):
-        print "Updating RT : %s" % event
         # sca.get_children()[2].get_children()[0] = canvas du notebook
         # Need to modify notebook.
-        # event EditEnd
-        # event Create
         schema = relationtype.getSchema()
         lbooks = self.findSchemaAreas(schema)
-        #print "members : %s" % relationtype.getHackedMemberTypes()
         if event == 'RelationTypeCreate':
             for lb in lbooks:
                 sca = lb[0]
@@ -110,15 +157,19 @@ class SchemaEditor (AdhocView):
         elif event == 'RelationTypeDelete':
             for lb in lbooks:
                 sca = lb[0]
-                rt = self.findRelationTypeGroup(relationtype.getId(),sca.get_children()[2].get_children()[0])
-                if rt is not None:
-                    rt.remove_drawing_only()
+                rtg = self.findRelationTypeGroup(relationtype.getId(),sca.get_children()[2].get_children()[0])
+                if rtg is not None:
+                    rtg.remove_drawing_only()
+            if self.TE is not None and self.TE.type == relationtype:
+                self.TE.initWithType(None)
         elif event == 'RelationTypeEditEnd':
             for lb in lbooks:
                 sca = lb[0]
-                rt = self.findRelationTypeGroup(relationtype.getId(),sca.get_children()[2].get_children()[0])
-                if rt is not None:
-                    rt.update()    
+                rtg = self.findRelationTypeGroup(relationtype.getId(),sca.get_children()[2].get_children()[0])
+                if rtg is not None:
+                    rtg.update() 
+            if self.TE is not None and self.TE.type == relationtype:
+                self.TE.initWithType(relationtype)
         return True
 
 
@@ -350,10 +401,17 @@ class SchemaEditor (AdhocView):
         return cvgroup
 
     def findRelationTypeGroup(self, typeId, canvas):
-        #Find relationGroup from typ id
+        #Find relationGroup from type id
         root = canvas.get_root_item ()
         for i in range(0, root.get_n_children()):
             if hasattr(root.get_child(i), 'type') and root.get_child(i).type.id== typeId:
+                return root.get_child(i)
+        return None
+
+    def findAnnotationTypeGroup(self, typeId, canvas):
+        root = canvas.get_root_item ()
+        for i in range(0, root.get_n_children()):
+            if hasattr(root.get_child(i), 'type') and root.get_child(i).type.id == typeId:
                 return root.get_child(i)
         return None
 
@@ -557,7 +615,7 @@ class SchemaEditor (AdhocView):
         #Zoom
         w = gtk.Label ("Zoom:")
         hbox.pack_start (w, False, False, 0)
-        adj = gtk.Adjustment (1.00, 0.05, 100.00, 0.05, 0.50, 0.50)
+        adj = gtk.Adjustment (0.65, 0.05, 1.00, 0.05, 0.50, 0.50)
         adj.connect("value_changed", self.zoom_changed, canvas)
         w = gtk.SpinButton (adj, 0.0, 2)
         w.set_size_request (50, -1)
@@ -794,28 +852,50 @@ class AnnotationGroup (goocanvas.Group):
         if (self.controller.get_element_color(self.type) is not None):
             self.color = self.controller.get_element_color(self.type)
 
-        self.rect = goocanvas.Rect (parent = self,
-                                    x = rx,
-                                    y = ry,
+        self.rect = self.newRect (rx,ry,self.color)
+        self.text = self.newText (self.name + " ("+str(nbannot)+")",rx+5,ry+10)
+
+    def newRect(self, xx, yy, color):
+        return goocanvas.Rect (parent = self,
+                                    x = xx,
+                                    y = yy,
                                     width = 140,
-                                    height = 80,
+                                    height = 40,
                                     fill_color_rgba = 0x3cb37150,
-                                    stroke_color = self.color,
+                                    stroke_color = color,
                                     line_width = 2.0)
-        self.text = goocanvas.Text (parent = self,
-                                    text = self.name + " ("+str(nbannot)+")",
-                                    x = rx+5, 
-                                    y = ry+10,
-                                    width = -1,
-                                    anchor = gtk.ANCHOR_W,
-                                    font = "Sans Bold 10")
+
+    def newText(self, txt, xx, yy):
+        return goocanvas.Text (parent = self,
+                                        text = txt,
+                                        x = xx, 
+                                        y = yy,
+                                        width = -1,
+                                        anchor = gtk.ANCHOR_W,
+                                        font = "Sans Bold 10")
+    
+
     def remove(self):
         while (len(self.rels)>0):
             self.rels[0].remove()
         self.controller.delete_element(self.type)
+        self.remove_drawing_only()
+
+    def remove_drawing_only(self):
+        for rel in self.rels:
+            rel.remove_drawing_only()
         parent = self.get_parent()
         child_num = parent.find_child (self)
         parent.remove_child (child_num)
+    
+    def update(self):
+        self.name=self.type.title
+        self.color = "black"
+        if (self.controller.get_element_color(self.type) is not None):
+            self.color = self.controller.get_element_color(self.type)
+        if self.text is not None:
+            nbannot = len(self.type.getAnnotations())
+            self.text.props.text = self.name + " ("+str(nbannot)+")"
 	
 class RelationTypeGroup (goocanvas.Group):
     def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, members=[]):
@@ -842,6 +922,9 @@ class RelationTypeGroup (goocanvas.Group):
             else:
                 # FIXME if more than 2 members
                 self.type.hackedMemberTypes=( '#' + self.members[0].id, '#' + self.members[1].id )
+                self.update()
+                #need to propagate edition event
+            return True 
         linked = self.type.getHackedMemberTypes()
         #print "%s %s %s %s %s" % (self.type, self.name, self.schema, self.members, linked)
         #print "%s" % self.members
@@ -891,7 +974,6 @@ class RelationTypeGroup (goocanvas.Group):
             p = goocanvas.Points ([(x1, y1), (x2, y2)])
         #ligne
         self.line = self.newLine (p,self.color)
-
         nbrel = len(self.type.getRelations())
         if (d==0):
             self.text = self.newText (self.name + " ("+str(nbrel)+")",x1+5,y1-10)	
@@ -989,7 +1071,6 @@ class RelationTypeGroup (goocanvas.Group):
         self.line.props.points=p
 
     def remove(self):
-        #print "removing %s" % self.type
         self.controller.delete_element(self.type)
         self.remove_drawing_only()
         
