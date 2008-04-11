@@ -990,7 +990,7 @@ class AdveneController:
             # modified during the loop
             for r in el.relations[:]:
                 [ a.relations.remove(r) for a in r.members if r in a.relations ]
-                self.delete_element(r)
+                self.delete_element(r, immediate=immediate_notify)
             p.annotations.remove(el)
             self.notify('AnnotationDelete', annotation=el, immediate=immediate_notify)
         elif isinstance(el, Relation):
