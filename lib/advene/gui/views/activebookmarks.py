@@ -392,10 +392,10 @@ class ActiveBookmarks(AdhocView):
                 self.arrow_mark.move(long(rx), long(ry + y))
                 self.arrow_mark.show_all()
 
-
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             index=None
-            self.arrow_mark.hide()
+            if self.arrow_mark is not None:
+                self.arrow_mark.hide()
             if widget == self.mainbox:
                 l=[ b
                     for b in self.bookmarks
