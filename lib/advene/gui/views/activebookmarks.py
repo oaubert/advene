@@ -389,7 +389,6 @@ class ActiveBookmarks(AdhocView):
                     a=self.bookmarks[-1].widget.get_allocation()
                     y=a.y + a.height
                 rx, ry = widget.window.get_origin()
-                ry -= widget.get_parent().get_vadjustment().value
                 self.arrow_mark.move(long(rx), long(ry + y))
                 self.arrow_mark.show_all()
 
