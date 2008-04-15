@@ -571,6 +571,12 @@ class ActiveBookmark(object):
             return self.end_widget.value
     end=property(get_end, set_end)
 
+    def set_current(self, is_current=True):
+        if is_current:
+            self.frame.modify_bg(gtk.STATE_NORMAL, self.current_frame_color)
+        else:
+            self.frame.modify_bg(gtk.STATE_NORMAL, self.default_frame_color)
+
     def serialize(self):
         """Return a serialized form of the bookmark.
 
@@ -843,6 +849,8 @@ class ActiveBookmark(object):
 
         # Memorize the default textview color.
         self.default_background_color=self.begin_widget.comment_entry.get_style().base[gtk.STATE_NORMAL]
+        self.default_frame_color=self.frame.get_style().bg[gtk.STATE_NORMAL]
+        self.current_frame_color=gtk.gdk.color_parse('red')
 
         #if self.annotation is not None:
         self.set_frame_attributes()
