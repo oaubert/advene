@@ -2130,6 +2130,8 @@ class AdveneGUI (Connect):
             ident=self.controller.package._idgenerator.get_id(AnnotationType)
             new_type_title_dialog=dialog.title_id_widget(element_title=ident,
                                                          element_id=ident)
+            self.tooltips.set_tip(new_type_title_dialog.title_entry, _("Title of the new type"))
+            self.tooltips.set_tip(new_type_title_dialog.id_entry, _("Id of the new type. It is generated from the title, but you may change it if necessary."))
             new_type_dialog.pack_start(new_type_title_dialog, expand=False)
             
             # Mimetype                
@@ -2141,6 +2143,7 @@ class AdveneGUI (Connect):
                 )
 
             mimetype_selector = dialog.list_selector_widget(members=type_list, entry=True)
+            self.tooltips.set_tip(mimetype_selector, _("Specify the content-type for the annotation type"))
 
             new_type_title_dialog.attach(gtk.Label(_("Content type")), 0, 1, 2, 3)
             new_type_title_dialog.attach(mimetype_selector, 1, 2, 2, 3)
@@ -2162,12 +2165,15 @@ class AdveneGUI (Connect):
 
             schema_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in schemas],
                                                         callback=handle_new_schema_selection)
+            self.tooltips.set_tip(schema_selector, _("Choose an existing schema for the new type, or create a new one"))
             new_type_title_dialog.attach(schema_selector, 1, 2, 3, 4)
-            new_type_dialog.pack_start(new_schema_dialog, expand=False)
+            new_type_title_dialog.attach(new_schema_dialog, 1, 2, 4, 5)
             new_schema_dialog.pack_start(gtk.Label(_("Specify the schema title")), expand=False)
             ident=self.controller.package._idgenerator.get_id(Schema)
             new_schema_title_dialog=dialog.title_id_widget(element_title=ident,
                                                            element_id=ident)
+            self.tooltips.set_tip(new_schema_title_dialog.title_entry, _("Title of the new schema"))
+            self.tooltips.set_tip(new_schema_title_dialog.id_entry, _("Id of the new schema. It is generated from the title, but you may change it if necessary."))
             new_schema_dialog.pack_start(new_schema_title_dialog, expand=False)
 
         d.vbox.show_all()
