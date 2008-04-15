@@ -767,7 +767,7 @@ class ActiveBookmark(object):
             self.end = None
 
     def timestamp_key_press(self, widget, event, source):
-        if event.keyval == gtk.keysyms.Delete:
+        if event.keyval == gtk.keysyms.Delete or event.keyval == gtk.keysyms.BackSpace:
             self.delete_timestamp(source)
             return True
         return False
