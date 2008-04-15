@@ -1135,15 +1135,7 @@ class AdveneGUI (Connect):
         """
         c=self.controller
         p=self.controller.player
-        if event.keyval == gtk.keysyms.Tab:
-            if p.status == p.PlayingStatus:
-                c.update_status("pause")
-            elif p.status == p.PauseStatus:
-                c.update_status("resume")
-            else:
-                c.update_status("start")
-            return True
-        elif (event.keyval == gtk.keysyms.Insert
+        if (event.keyval == gtk.keysyms.Insert
               or (event.state & gtk.gdk.MOD1_MASK 
                   and event.keyval == gtk.keysyms.space)):
             if p.status in (p.PlayingStatus, p.PauseStatus):
@@ -1167,7 +1159,15 @@ class AdveneGUI (Connect):
                     a.scroll_to_end()
                 return True
         elif event.state & gtk.gdk.CONTROL_MASK:
-            if event.keyval == gtk.keysyms.Up:
+            if event.keyval == gtk.keysyms.Tab:
+                if p.status == p.PlayingStatus:
+                    c.update_status("pause")
+                elif p.status == p.PauseStatus:
+                    c.update_status("resume")
+                else:
+                    c.update_status("start")
+                return True
+            elif event.keyval == gtk.keysyms.Up:
                 c.move_position (1000/25, notify=False)
                 return True
             elif event.keyval == gtk.keysyms.Down:
