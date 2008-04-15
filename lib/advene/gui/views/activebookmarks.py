@@ -118,6 +118,7 @@ class ActiveBookmarks(AdhocView):
         for w in self.bookmarks:
             self.mainbox.pack_start(w.widget, expand=False)
         self.mainbox.show_all()
+        self.generate_focus_chain()
         return True
 
     def remove(self, w):
@@ -125,12 +126,31 @@ class ActiveBookmarks(AdhocView):
         """
         self.bookmarks.remove(w)
         w.widget.destroy()
+        self.generate_focus_chain()
         return True
 
     def clear(self, *p):
         del self.bookmarks[:]
         self.mainbox.foreach(self.mainbox.remove)
+        self.set_focus_chain([])
         return True
+
+    def get_current_bookmark(self):
+        l=[ b for b in self.bookmarks if b.is_current ]
+        if l:
+            return l[0]
+        else:
+            return None
+
+    def set_current_bookmark(self, cur=None):
+        b=self.get_current_bookmark()
+        if b is not None:
+            b.set_current(False)
+        if cur is not None:
+            cur.set_current(True)
+        
+    def generate_focus_chain(self, *p):
+        self.mainbox.set_focus_chain([ w for b in self.bookmarks  for w in (b.widget, b.begin_widget.comment_entry) ])
 
     def append(self, t, index=None):
         b=ActiveBookmark(container=self, begin=t, end=None, content=None)
@@ -138,9 +158,11 @@ class ActiveBookmarks(AdhocView):
         if index is None:
             self.bookmarks.append(b)
             self.mainbox.pack_start(b.widget, expand=False)
+            self.generate_focus_chain()
         else:
             self.bookmarks.insert(index, b)
             self.refresh()
+
         return b
 
     def check_contents(self, *p):
@@ -476,6 +498,7 @@ class ActiveBookmarks(AdhocView):
 
         v.add(sw)
         v.pack_start(dropbox, expand=False)
+
         return v
 
 class ActiveBookmark(object):
@@ -498,6 +521,9 @@ class ActiveBookmark(object):
             begin=annotation.fragment.begin
             end=annotation.fragment.end
             content=annotation.content.data
+
+        self.is_current=False
+
         # begin_widget and end_widget are both instances of BookmarkWidget.
         # end_widget may be self.dropbox (if end is not initialized yet)
         self.dropbox=gtk.EventBox()
@@ -560,6 +586,10 @@ class ActiveBookmark(object):
             self.end_widget.image.connect("drag_data_received", self.end_drag_received)
             self.end_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
             self.end_widget.image.connect('key-press-event', self.timestamp_key_press, 'end')
+            def focus_bookmark(widget, event):
+                self.container.set_current_bookmark(self)
+                return False
+            self.end_widget.image.connect('focus-in-event', focus_bookmark)
         else:
             self.end_widget.value=v
             self.end_widget.update()
@@ -572,10 +602,14 @@ class ActiveBookmark(object):
     end=property(get_end, set_end)
 
     def set_current(self, is_current=True):
+        if is_current == self.is_current:
+            # Nothing to do
+            return
         if is_current:
             self.frame.modify_bg(gtk.STATE_NORMAL, self.current_frame_color)
         else:
             self.frame.modify_bg(gtk.STATE_NORMAL, self.default_frame_color)
+        self.is_current=is_current
 
     def serialize(self):
         """Return a serialized form of the bookmark.
@@ -839,6 +873,14 @@ class ActiveBookmark(object):
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.begin_widget.comment_entry.connect('drag_data_received', begin_drag_received)
         self.begin_widget.image.connect('key-press-event', self.timestamp_key_press, 'begin')
+
+        def focus_bookmark(widget, event):
+            self.container.set_current_bookmark(self)
+            return False
+        self.begin_widget.comment_entry.connect('focus-in-event', focus_bookmark)
+        self.begin_widget.image.connect('focus-in-event', focus_bookmark)
+
+        self.begin_widget.comment_entry.set_accepts_tab(False)
 
         box.pack_start(self.begin_widget.widget, expand=True)
         box.pack_start(self.end_widget, expand=False)
