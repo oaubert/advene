@@ -50,7 +50,7 @@ from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.browser import Browser
 from advene.gui.views.tagbag import TagBag
 
-from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
+from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color
 from advene.gui.util.completer import Completer
 import advene.gui.popup
 from advene.gui.widget import AnnotationRepresentation, RelationRepresentation
@@ -1339,6 +1339,11 @@ class TextContentHandler (ContentHandler):
             textview.connect ("key-press-event", self.key_pressed_cb)
         self.view = textview
 
+        col=self.controller.get_element_color(self.parent)
+        if col is not None:
+            color=name2color(col)
+            self.view.modify_base(gtk.STATE_NORMAL, color)
+            
         # Hook the completer component
         completer=Completer(textview=self.view,
                             controller=self.controller,
