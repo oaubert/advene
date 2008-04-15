@@ -595,8 +595,9 @@ class ActiveBookmark(object):
             data=decode_drop_parameters(selection.data)
             e=long(data['timestamp'])
             if self.end is not None and context.action == gtk.gdk.ACTION_COPY:
-                # Save a copy of the deleted timestamp
-                self.container.append(self.end)
+                # Save a copy of the deleted timestamp next to the current bookmark
+                i=self.container.bookmarks.index(self)
+                self.container.append(self.end, index=i+1)
             if e < self.begin:
                 # Invert begin and end.
                 self.begin, self.end = e, self.begin
@@ -792,7 +793,9 @@ class ActiveBookmark(object):
                         self.end=e
                 else:
                     if context.action == gtk.gdk.ACTION_COPY:
-                        self.container.append(self.begin)
+                        # Save a copy of the deleted timestamp next to the current bookmark
+                        i=self.container.bookmarks.index(self)
+                        self.container.append(self.begin, index=i+1)
                     # Reset the begin time.
                     if e > self.end:
                         # Invert new begin and end
