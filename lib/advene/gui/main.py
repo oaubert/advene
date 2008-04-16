@@ -3156,7 +3156,7 @@ class AdveneGUI (Connect):
                                 parent=self.controller.package,
                                 controller=self.controller)
         sc=cr.popup()
-        return True
+        return sc
 
     def on_create_annotation_type_activate (self, button=None, data=None):
         at=self.ask_for_annotation_type(text=_("Creation of a new annotation type"),
@@ -3174,8 +3174,8 @@ class AdveneGUI (Connect):
         cr=CreateElementPopup(type_=RelationType,
                               parent=sc,
                               controller=self.controller)
-        cr.popup()
-        return at
+        rt=cr.popup()
+        return rt
 
     def on_package_list_activate(self, menu=None):
         self.update_package_list()
