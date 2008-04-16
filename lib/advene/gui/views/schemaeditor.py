@@ -182,13 +182,14 @@ class SchemaEditor (AdhocView):
 
 
     def refresh(self, *p):
+        self.update_model(None)
         return True  
 
     def build_widget(self):
         vbox=gtk.VBox()
         hboxMenu = gtk.HBox(spacing=5)
         #liste et boutons
-        self.hboxEspaceSchema = gtk.HBox()
+        self.hboxEspaceSchema = gtk.HPaned()
         self.listeSchemas = dialog.list_selector_widget(
             members=[ (s, s.getTitle()) for s in self.controller.package.getSchemas()])
         hboxMenu.pack_start(self.listeSchemas, expand=True)
@@ -207,15 +208,16 @@ class SchemaEditor (AdhocView):
         self.addNotebook()
         #fin onglets
         #menu pour faire les schemas
-        vBoxExp = gtk.VBox()
-        packExp = gtk.VBox()# sans doute un arbre pour le package voir treeview
+        vBoxExp = gtk.VPaned()
+        packExp = gtk.VBox() # sans doute un arbre pour le package voir treeview
         packExp.pack_start(gtk.Label("Package Explorer"), expand=False)
         self.PE=packExp
-        vBoxExp.pack_start(packExp)
-        vBoxExp.pack_start(gtk.VSeparator(), expand=False)
+        vBoxExp.pack1(packExp, resize=True)
+        #vBoxExp.pack_start(gtk.VSeparator(), expand=False)
         self.TE= TypeExplorer(self.controller, self.controller.package)
-        vBoxExp.pack_start(self.TE, expand=True)
-        self.hboxEspaceSchema.pack_end(vBoxExp, expand=True)
+        vBoxExp.pack2(self.TE)
+        vBoxExp.set_position(5)
+        self.hboxEspaceSchema.pack2(vBoxExp)
         #fin menu schemas
         vbox.pack_start(hboxMenu, expand=False, padding=10)
         vbox.pack_start(gtk.HSeparator(), expand=False)
@@ -315,8 +317,11 @@ class SchemaEditor (AdhocView):
         vbtemp.pack_start(self.books[i][0], expand=True, fill=True)
         vbtemp.pack_start(gtk.HSeparator(), expand=False)	    
         vbtemp.pack_start(hboxConExplorer, expand=False)
-        self.hboxEspaceSchema.pack_start(vbtemp, expand=True, fill=True)
-        self.hboxEspaceSchema.pack_start(gtk.VSeparator(), expand=False)
+        #self.hboxEspaceSchema.pack_start(vbtemp, expand=True, fill=True)
+        #self.hboxEspaceSchema.pack_start(gtk.VSeparator(), expand=False)
+        #self.hboxEspaceSchema.show_all()
+        self.hboxEspaceSchema.pack1(vbtemp, resize=True)
+        self.hboxEspaceSchema.set_position(150)
         self.hboxEspaceSchema.show_all()
         return self.books[i]
 
@@ -328,10 +333,11 @@ class SchemaEditor (AdhocView):
         if (event.button==1):
             scArea = self.addSchemaArea(tsc, schema, self.books[0])
             self.setup_canvas(scArea, schema)
-        if (event.button==3):
-            bk = self.addNotebook()
-            scArea = self.addSchemaArea(tsc, schema, bk)
-            self.setup_canvas(scArea, schema)
+        # was used when more than one notebook could be opened.
+        #if (event.button==3):
+        #    bk = self.addNotebook()
+        #    scArea = self.addSchemaArea(tsc, schema, bk)
+        #    self.setup_canvas(scArea, schema)
         return	
 
     def update_color(self, schema, color):
@@ -619,7 +625,7 @@ class SchemaEditor (AdhocView):
         #Create the canvas   
         canvas = goocanvas.Canvas()
         canvas.modify_base (gtk.STATE_NORMAL, bg_color)
-        canvas.set_bounds (0, 0, 4000, 3000)
+        canvas.set_bounds (0, 0, 1000, 2000)
         #Zoom
         w = gtk.Label ("Zoom:")
         hbox.pack_start (w, False, False, 0)
