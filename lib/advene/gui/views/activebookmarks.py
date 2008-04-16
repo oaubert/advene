@@ -577,6 +577,7 @@ class ActiveBookmark(object):
             self.end_widget=BookmarkWidget(controller=self.controller,
                                            timestamp=v,
                                            display_comments=False)
+            self.end_widget.widget.set_property('can-focus', False)
             parent=self.begin_widget.widget.get_parent()
             parent.pack_start(self.end_widget.widget, expand=False)
             self.end_widget.widget.show_all()
@@ -761,6 +762,7 @@ class ActiveBookmark(object):
                 return True
             b.connect('focus-in-event', set_current)
             self.frame.set_label_widget(b)
+            b.set_property('can-focus', False)
             b.show_all()
             # Update the textview color
             col=self.controller.get_element_color(self.annotation)
