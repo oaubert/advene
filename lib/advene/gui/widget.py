@@ -34,6 +34,7 @@ import struct
 import gtk
 import cairo
 import pango
+import gobject
 
 # Advene part
 import advene.core.config as config
@@ -220,6 +221,7 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         context.paint_with_alpha(self.expose_alpha)
         #self.draw(context, *widget.window.get_size())
         return False
+gobject.type_register(GenericColorButtonWidget)
 
 class AnnotationWidget(GenericColorButtonWidget):
     """ Widget representing an annotation
@@ -478,6 +480,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             context.show_text(title.encode('utf8'))
         except MemoryError:
             print "MemoryError while rendering title for annotation ", self.annotation.id
+gobject.type_register(AnnotationWidget)
 
 class AnnotationTypeWidget(GenericColorButtonWidget):
     """ Widget representing an annotation type
@@ -575,6 +578,7 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
             if ext[2] != self.width:
                 self.width=long(ext[2]) + 5
                 self.reset_surface_size(self.width, self.container.button_height)
+gobject.type_register(AnnotationTypeWidget)
 
 class TagWidget(GenericColorButtonWidget):
     """ Widget representing a tag
@@ -658,6 +662,7 @@ class TagWidget(GenericColorButtonWidget):
         if self.width != w:
             self.reset_surface_size(self.width, self.container.button_height)
             #print "Resetting width", self.width
+gobject.type_register(TagWidget)
 
 class TimestampMarkWidget(GenericColorButtonWidget):
     """ Widget representing an timestamp mark (for note-taking view)
@@ -686,6 +691,7 @@ class TimestampMarkWidget(GenericColorButtonWidget):
         context.line_to(2, height)
         context.fill()
         context.stroke()
+gobject.type_register(TimestampMarkWidget)
 
 class AnnotationRepresentation(gtk.Button):
     """Representation for an annotation.
@@ -742,6 +748,7 @@ class AnnotationRepresentation(gtk.Button):
             self.controller.gui.edit_element(annotation)
             return True
         return False
+gobject.type_register(AnnotationRepresentation)
 
 class RelationRepresentation(gtk.Button):
     """Representation for a relation.
@@ -764,6 +771,7 @@ class RelationRepresentation(gtk.Button):
             self.controller.gui.edit_element(relation)
             return True
         return False
+gobject.type_register(RelationRepresentation)
 
 class TimestampRepresentation(gtk.Button):
     """Representation of a timestamp.
@@ -786,6 +794,9 @@ class TimestampRepresentation(gtk.Button):
         # comment_getter is a method which returns the comment
         # associated to this timestamp
         self.comment_getter=comment_getter
+        # extend_popup_menu is a method which takes the menu and the
+        # element as parameter, and adds appropriate menu items.
+        self.extend_popup_menu=None
         self.highlight=False
 
         style=self.get_style().copy()
@@ -932,6 +943,8 @@ class TimestampRepresentation(gtk.Button):
         item = gtk.MenuItem(_("Invalidate snapshot"))
         item.connect('activate', self.invalidate_snapshot)
         menu.append(item)
+        if self.extend_popup_menu is not None:
+            self.extend_popup_menu(menu, self)
         menu.show_all()
         
         if popup:
@@ -942,3 +955,5 @@ class TimestampRepresentation(gtk.Button):
         # FIXME: does not work ATM
         self.modify_bg(gtk.STATE_NORMAL, color)
         self.modify_base(gtk.STATE_NORMAL, color)
+
+gobject.type_register(TimestampRepresentation)
