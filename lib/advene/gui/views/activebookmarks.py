@@ -913,7 +913,7 @@ class ActiveBookmark(object):
         # Memorize the default textview color.
         self.default_background_color=self.begin_widget.comment_entry.get_style().base[gtk.STATE_NORMAL]
         self.default_frame_color=self.frame.get_style().bg[gtk.STATE_NORMAL]
-        self.current_frame_color=gtk.gdk.color_parse('red')
+        self.current_frame_color=gtk.gdk.color_parse('black')
 
         #if self.annotation is not None:
         self.set_frame_attributes()
