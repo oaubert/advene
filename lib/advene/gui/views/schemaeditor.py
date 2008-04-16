@@ -92,8 +92,22 @@ class SchemaEditor (AdhocView):
 # Functions to update the gui when an event occurs
 #
 ###
+    def getCanvas(self, bookpage):
+        return bookpage[0].get_children()[2].get_children()[0]
+        
+    def update_model(self, package):
+        self.update_list_schemas()
+        for b in self.books:
+            self.removeNoteBook(b)
+        while self.books[0][0].get_n_pages()>0:
+            self.books[0][0].remove_page(0)
+            del self.books[0][1][0]        
+        return True
+    
     def update_schema(self, schema=None, event=None):
-        print "Updating S : %s" % event
+        locs = self.findSchemaAreas(schema)
+        for l in locs:
+            self.setup_canvas(self.getCanvas(l), schema)
         return True
 
     def update_relation(self, relation=None, event=None):
@@ -102,7 +116,7 @@ class SchemaEditor (AdhocView):
             sc = rt.getSchema()
             locs = self.findSchemaAreas(sc)
             for l in locs:
-                rtg = self.findRelationTypeGroup(rt.getId(),l[0].get_children()[2].get_children()[0])
+                rtg = self.findRelationTypeGroup(rt.getId(),self.getCanvas(l))
                 rtg.update()
         return True
     
@@ -112,7 +126,7 @@ class SchemaEditor (AdhocView):
             sc = at.getSchema()
             locs = self.findSchemaAreas(sc)
             for l in locs:
-                atg = self.findAnnotationTypeGroup(at.getId(),l[0].get_children()[2].get_children()[0])
+                atg = self.findAnnotationTypeGroup(at.getId(),self.getCanvas(l))
                 atg.update()
         return True
     
@@ -125,20 +139,17 @@ class SchemaEditor (AdhocView):
         lbooks = self.findSchemaAreas(schema)
         if event == 'AnnotationTypeCreate':
             for lb in lbooks:
-                sca = lb[0]
-                self.addAnnotationTypeGroup(canvas=sca.get_children()[2].get_children()[0], schema=schema, type=annotationtype)
+                self.addAnnotationTypeGroup(canvas=self.getCanvas(lb), schema=schema, type=annotationtype)
         elif event == 'AnnotationTypeDelete':
             for lb in lbooks:
-                sca = lb[0]
-                atg = self.findAnnotationTypeGroup(annotationtype.getId(),sca.get_children()[2].get_children()[0])
+                atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.getCanvas(lb))
                 if atg is not None:
                     atg.remove_drawing_only()
             if self.TE is not None and self.TE.type == annotationtype:
                 self.TE.initWithType(None)
         elif event == 'AnnotationTypeEditEnd':
             for lb in lbooks:
-                sca = lb[0]
-                atg = self.findAnnotationTypeGroup(annotationtype.getId(),sca.get_children()[2].get_children()[0])
+                atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.getCanvas(lb))
                 if atg is not None:
                     atg.update() 
             if self.TE is not None and self.TE.type == annotationtype:
@@ -152,20 +163,17 @@ class SchemaEditor (AdhocView):
         lbooks = self.findSchemaAreas(schema)
         if event == 'RelationTypeCreate':
             for lb in lbooks:
-                sca = lb[0]
-                self.addRelationTypeGroup(canvas=sca.get_children()[2].get_children()[0], schema=schema, type=relationtype)
+                self.addRelationTypeGroup(canvas=self.getCanvas(lb), schema=schema, type=relationtype)
         elif event == 'RelationTypeDelete':
             for lb in lbooks:
-                sca = lb[0]
-                rtg = self.findRelationTypeGroup(relationtype.getId(),sca.get_children()[2].get_children()[0])
+                rtg = self.findRelationTypeGroup(relationtype.getId(),self.getCanvas(lb))
                 if rtg is not None:
                     rtg.remove_drawing_only()
             if self.TE is not None and self.TE.type == relationtype:
                 self.TE.initWithType(None)
         elif event == 'RelationTypeEditEnd':
             for lb in lbooks:
-                sca = lb[0]
-                rtg = self.findRelationTypeGroup(relationtype.getId(),sca.get_children()[2].get_children()[0])
+                rtg = self.findRelationTypeGroup(relationtype.getId(),self.getCanvas(lb))
                 if rtg is not None:
                     rtg.update() 
             if self.TE is not None and self.TE.type == relationtype:
@@ -223,7 +231,7 @@ class SchemaEditor (AdhocView):
         #sw.set_size_request(640, 480)
         return sw
 
-    def update_list_schemas(self, active_element):
+    def update_list_schemas(self, active_element=None):
         store, i = dialog.generate_list_model( elements = [ (s, s.getTitle()) for s in self.controller.package.getSchemas()],active_element=active_element)
         self.listeSchemas.set_model(store)
         if i is None:
@@ -643,6 +651,9 @@ class SchemaEditor (AdhocView):
     def setup_canvas (self, canvas, schema):
         root = canvas.get_root_item ()
         root.connect("button_press_event", self.on_background_button_press, schema)
+        #deleting old drawing
+        while root.get_n_children()>0:
+            root.remove_child (0)
         annotTypes = schema.getAnnotationTypes()
         relTypes = schema.getRelationTypes()
         a=0
@@ -814,6 +825,10 @@ class TypeExplorer (gtk.ScrolledWindow):
     def saveType(self, button):
         self.type.title=self.getTypeName()
         self.type.mimetype=self.getMimeType()
+        if isinstance(self.type, AnnotationType):
+            self.controller.notify('AnnotationTypeEditEnd', annotationtype=self.type)
+        elif isinstance(self.type, RelationType):
+            self.controller.notify('RelationTypeEditEnd', relationtype=self.type)
         #save attributes
         # send controller an event
         # redraw contents
@@ -1082,7 +1097,7 @@ class RelationTypeGroup (goocanvas.Group):
             else:
                 #Annotation group outside schema
                 #we don't remove the link because it doesn't have one
-                print "%s n'est pas dans ce schema" % i.id
+                print "%s n'est pas dans ce schema ou a deja ete traite" % i.id
         parent = self.get_parent()
         child_num = parent.find_child (self)
         parent.remove_child(child_num)
