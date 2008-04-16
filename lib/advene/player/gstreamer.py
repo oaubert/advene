@@ -47,6 +47,14 @@ For set_rate:
         position you want.
 
 Caps negotiation: http://gstreamer.freedesktop.org/data/doc/gstreamer/head/pwg/html/section-nego-upstream.html
+
+Videomixer:
+
+videotestsrc pattern=1 ! video/x-raw-yuv,width=100,height=100 ! videobox border-alpha=0 alpha=0.5 top=-70 bottom=-70 right=-220 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink videotestsrc ! video/x-raw-yuv,width=320, height=240 ! alpha alpha=0.7 ! mix.
+
+This should show a 320x240 pixels video test source with some transparency showing the background checker pattern. Another video test source with just the snow pattern of 100x100 pixels is overlayed on top of the first one on the left vertically centered with a small transparency showing the first video test source behind and the checker pattern under it. 
+
+videotestsrc ! video/x-raw-yuv,width=320, height=240 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink filesrc location=/tmp/a.svg  ! gdkpixbufdec ! videoscale ! video/x-raw-rgb,width=320,height=240 ! ffmpegcolorspace ! alpha alpha=0.5 ! mix. 
 """
 
 import advene.core.config as config
@@ -156,7 +164,7 @@ class Player:
         """Build the snapshot converter pipeline.
         """
         # Snapshot format conversion infrastructure.
-        self.converter=gst.parse_launch('fakesrc name=src ! queue name=queue ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=%d ! pngenc ! fakesink name=sink signal-handoffs=true' % config.data.player['snapshot-dimensions'][0])
+        self.converter=gst.parse_launch('fakesrc name=src ! queue name=queue ! videoscale ! ffmpegcolorspace ! video/x-raw-rgb,width=%d,height=%d ! pngenc ! fakesink name=sink signal-handoffs=true' % config.data.player['snapshot-dimensions'])
         self.converter._lock = Condition()
 
         self.converter.queue=self.converter.get_by_name('queue')
@@ -188,10 +196,30 @@ class Player:
         #self.caption.props.text="Foobar"
         self.imagesink = gst.element_factory_make(sink, 'sink')
 
+#
+#        self.svg_renderer = gst.parse_launch('fakesrc name=svgsrc ! gdkpixbufdec ! ffmpegcolorspace ! videoscale')
+#        mix=gst.element_factory_make("videomixer", "mix")
+#        spad = src.get_static_pad('src')
+#        dpad = mix.get_request_pad('sink_%d')
+#        spad.link(dpad)
+#        mix.link(conv) # conv == ffmpegcolorspace ! xvimagesink
+
+        # Controller for the videomixer position properties
+        # from video-controller.py
+        #control = gst.Controller(dpad, "xpos", "ypos")
+        #control.set_interpolation_mode("xpos", gst.INTERPOLATE_LINEAR)
+        #control.set_interpolation_mode("ypos", gst.INTERPOLATE_LINEAR)
+        #control.set("xpos", 0, 0)
+        #control.set("xpos", 5 * gst.SECOND, 200)
+        #control.set("ypos", 0, 0)
+        #control.set("ypos", 5 * gst.SECOND, 200)
+
+
+
         if sink == 'ximagesink':
             print "Using ximagesink."
             filter = gst.element_factory_make("capsfilter", "filter")
-            filter.set_property("caps", gst.Caps("video/x-raw-yuv, width=%d" % config.data.player['snapshot-dimensions'][0]))
+            filter.set_property("caps", gst.Caps("video/x-raw-yuv, width=%d, height=%s" % config.data.player['snapshot-dimensions']))
             self.filter=filter
 
             csp=gst.element_factory_make('ffmpegcolorspace')
@@ -200,7 +228,6 @@ class Player:
             # http://bugzilla.gnome.org/show_bug.cgi?id=339201 is
             # solved...
             #self.scale=gst.element_factory_make('videoscale')
-
             self.video_sink.add(self.captioner, filter, csp, self.imagesink)
             gst.element_link_many(self.captioner, filter, csp, self.imagesink)
         else:
