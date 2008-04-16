@@ -156,9 +156,14 @@ class ActiveBookmarks(AdhocView):
     def generate_focus_chain(self, *p):
         self.mainbox.set_focus_chain([ w for b in self.bookmarks  for w in (b.widget, b.begin_widget.comment_entry) ])
 
-    def append(self, t, index=None):
+    def append(self, t, index=None, after_current=False):
         b=ActiveBookmark(container=self, begin=t, end=None, content=None)
         b.widget.show_all()
+        if after_current:
+            # Insert the bookmark after the current one.
+            cur=self.get_current_bookmark()
+            if cur is not None:
+                index=self.bookmarks.index(cur) + 1
         if index is None:
             self.bookmarks.append(b)
             self.mainbox.pack_start(b.widget, expand=False)
