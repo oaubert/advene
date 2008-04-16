@@ -114,7 +114,7 @@ class EditElementPopup (object):
         self.controller = controller
         self.window=None
         self.vbox = gtk.VBox ()
-        self.vbox.connect ("key-press-event", self.key_pressed_cb)
+        self.vbox.connect('key-press-event', self.key_pressed_cb)
         self.editable=editable
         # List of defined forms in the window
         self.forms = []
@@ -259,7 +259,7 @@ class EditElementPopup (object):
             d.vbox.add(self.vbox)
             d.vbox.show_all()
 
-            d.connect("key_press_event", dialog.dialog_keypressed_cb)
+            d.connect('key-press-event', dialog.dialog_keypressed_cb)
 
             while True:
                 d.show()
@@ -288,15 +288,15 @@ class EditElementPopup (object):
             hbox = gtk.HButtonBox()
 
             b = gtk.Button (stock=gtk.STOCK_OK)
-            b.connect ("clicked", self.validate_cb, callback)
+            b.connect('clicked', self.validate_cb, callback)
             hbox.add (b)
 
             b = gtk.Button (stock=gtk.STOCK_APPLY)
-            b.connect ("clicked", self.apply_cb, callback)
+            b.connect('clicked', self.apply_cb, callback)
             hbox.add (b)
 
             b = gtk.Button (stock=gtk.STOCK_CANCEL)
-            b.connect ("clicked", self.close_cb)
+            b.connect('clicked', self.close_cb)
             hbox.add (b)
 
             self.vbox.pack_start (hbox, expand=False)
@@ -307,7 +307,7 @@ class EditElementPopup (object):
                 if self.controller and self.controller.gui: 
                     self.controller.gui.unregister_edit_popup(self)
                 return True
-            self.window.connect("destroy", destroy_cb)
+            self.window.connect('destroy', destroy_cb)
 
             if self.controller.gui:
                 self.controller.gui.init_window_size(self.window, 'editpopup')
@@ -335,7 +335,7 @@ class EditElementPopup (object):
         hbox = gtk.HButtonBox()
 
         b = gtk.Button (stock=gtk.STOCK_OK)
-        b.connect ("clicked", lambda w: self.window.destroy ())
+        b.connect('clicked', lambda w: self.window.destroy ())
         hbox.add (b)
 
         self.vbox.pack_start (hbox, expand=False)
@@ -365,7 +365,7 @@ class EditElementPopup (object):
                 self.controller.gui.unregister_edit_popup(self)
             return True
 
-        self.vbox.connect("destroy", handle_destroy)
+        self.vbox.connect('destroy', handle_destroy)
 
         return self.vbox
 
@@ -1270,19 +1270,19 @@ class TextContentHandler (ContentHandler):
             b=gtk.ToolButton()
             b.set_stock_id(gtk.STOCK_OPEN)
             b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
-            b.connect("clicked", self.content_open)
+            b.connect('clicked', self.content_open)
             tb.insert(b, -1)
 
             b=gtk.ToolButton()
             b.set_stock_id(gtk.STOCK_SAVE)
             b.set_tooltip(self.tooltips, _("Save to a file (C-s)"))
-            b.connect("clicked", self.content_save)
+            b.connect('clicked', self.content_save)
             tb.insert(b, -1)
 
             b=gtk.ToolButton()
             b.set_stock_id(gtk.STOCK_REFRESH)
             b.set_tooltip(self.tooltips, _("Reload the file (C-r)"))
-            b.connect("clicked", self.content_reload)
+            b.connect('clicked', self.content_reload)
             tb.insert(b, -1)
 
             if config.data.preferences['expert-mode']:
@@ -1290,7 +1290,7 @@ class TextContentHandler (ContentHandler):
                 i.set_from_file(config.data.advenefile( ('pixmaps', 'browser.png') ))
                 b=gtk.ToolButton(icon_widget=i)
                 b.set_tooltip(self.tooltips, _("Insert a value from the browser (C-i)"))
-                b.connect("clicked", self.browser_open)
+                b.connect('clicked', self.browser_open)
                 tb.insert(b, -1)
 
             vbox.pack_start(tb, expand=False)
@@ -1306,7 +1306,7 @@ class TextContentHandler (ContentHandler):
             textview.set_wrap_mode (gtk.WRAP_CHAR)
             textview.set_auto_indent(True)
             b.set_text (self.element.data)
-            textview.connect ("key-press-event", self.key_pressed_cb)
+            textview.connect('key-press-event', self.key_pressed_cb)
 
             def undo(b):
                 b=textview.get_buffer()
@@ -1323,12 +1323,12 @@ class TextContentHandler (ContentHandler):
             if not compact:
                 b=gtk.ToolButton()
                 b.set_stock_id(gtk.STOCK_UNDO)
-                b.connect("clicked", undo)
+                b.connect('clicked', undo)
                 tb.insert(b, -1)
 
                 b=gtk.ToolButton()
                 b.set_stock_id(gtk.STOCK_REDO)
-                b.connect("clicked", redo)
+                b.connect('clicked', redo)
                 tb.insert(b, -1)
 
         else:
@@ -1336,7 +1336,7 @@ class TextContentHandler (ContentHandler):
             textview.set_editable (self.editable)
             textview.set_wrap_mode (gtk.WRAP_CHAR)
             textview.get_buffer().set_text(self.element.data)
-            textview.connect ("key-press-event", self.key_pressed_cb)
+            textview.connect('key-press-event', self.key_pressed_cb)
         self.view = textview
 
         col=self.controller.get_element_color(self.parent)
@@ -1490,19 +1490,19 @@ class GenericContentHandler (ContentHandler):
         b=gtk.ToolButton()
         b.set_stock_id(gtk.STOCK_OPEN)
         b.set_tooltip(self.tooltips, _("Open a file (C-o)"))
-        b.connect("clicked", self.content_open)
+        b.connect('clicked', self.content_open)
         tb.insert(b, -1)
 
         b=gtk.ToolButton()
         b.set_stock_id(gtk.STOCK_SAVE)
-        b.set_tooltip(self.tooltips, _("Save to a file (C-s)"))
-        b.connect("clicked", self.content_save)
+        b.set_tooltip(self.tooltips, _('Save to a file (C-s)'))
+        b.connect('clicked', self.content_save)
         tb.insert(b, -1)
 
         b=gtk.ToolButton()
         b.set_stock_id(gtk.STOCK_REFRESH)
-        b.set_tooltip(self.tooltips, _("Reload the file (C-r)"))
-        b.connect("clicked", self.content_reload)
+        b.set_tooltip(self.tooltips, _('Reload the file (C-r)'))
+        b.connect('clicked', self.content_reload)
         tb.insert(b, -1)
 
         tb.show_all()
@@ -1510,7 +1510,7 @@ class GenericContentHandler (ContentHandler):
 
         self.filename_entry = gtk.Entry()
         self.filename_entry.set_editable (self.editable)
-        vbox.connect ("key-press-event", self.key_pressed_cb)
+        vbox.connect('key-press-event', self.key_pressed_cb)
 
         vbox.pack_start(self.filename_entry, expand=False)
         self.preview=gtk.VBox()
@@ -1634,7 +1634,7 @@ class EditGenericForm(EditForm):
                 return False
 
             # Allow the entry to get drops of type application/x-color
-            self.entry.connect("drag_data_received", drag_received)
+            self.entry.connect('drag-data-received', drag_received)
             self.entry.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
                                   gtk.DEST_DEFAULT_ALL,
@@ -1962,7 +1962,7 @@ class EditElementListForm(EditForm):
 
         treeview=gtk.TreeView(model=self.store)
         treeview.set_reorderable(True)
-        treeview.connect("button_press_event", self.tree_view_button_cb)
+        treeview.connect('button-press-event', self.tree_view_button_cb)
         self.treeview=treeview
 
         renderer = gtk.CellRendererText()
@@ -1974,11 +1974,11 @@ class EditElementListForm(EditForm):
 
         hbox=gtk.HButtonBox()
         b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect("clicked", self.insert_new, treeview)
+        b.connect('clicked', self.insert_new, treeview)
         hbox.add(b)
 
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
-        b.connect("clicked", self.delete_current, treeview)
+        b.connect('clicked', self.delete_current, treeview)
         hbox.add(b)
 
         vbox.add(hbox)
@@ -2090,57 +2090,3 @@ class EditRelationsForm(EditForm):
         self.view=gtk.Table()
         self.refresh()
         return self.view
-
-if __name__ == "__main__":
-    class Foo:
-        def __init__ (self, name="Foo"):
-            self.name = name
-            self.test = 1
-            self.parent = "toto"
-
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    window.set_default_size (320, 200)
-
-    def key_pressed_cb (win, event):
-        if event.state & gtk.gdk.CONTROL_MASK:
-            # The Control-key is held. Special actions :
-            if event.keyval == gtk.keysyms.q:
-                gtk.main_quit ()
-                return True
-
-    def update_cb (win, form):
-        form.update_element()
-        win.get_toplevel().destroy()
-        return True
-
-    window.connect ("key_press_event", key_pressed_cb)
-    window.connect ("destroy", lambda e: gtk.main_quit())
-    window.set_title ("test")
-
-    vbox = gtk.VBox ()
-    window.add (vbox)
-
-    f = Foo ('Bar')
-    form = EditAttributesForm (f)
-    form.set_attributes (('name', 'test', 'parent'))
-    form.set_editable (('name', 'test'))
-    form.set_labels ({'name':'Nom'})
-    form.set_types ({'name':'string', 'test':'int'})
-
-
-    vbox.add (form.get_view())
-
-    b = gtk.Button (stock=gtk.STOCK_OK)
-    b.connect ("clicked", update_cb, form)
-    hbox = gtk.HButtonBox()
-    vbox.pack_start (hbox, expand=False)
-    hbox.add (b)
-
-    window.show_all()
-    gtk.main ()
-    print """
-    Element: %s
-    Name: %s
-    Test: %d
-    Parent: %s
-    """ % (f, f.name, f.test, f.parent)

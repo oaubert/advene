@@ -80,8 +80,8 @@ class GenericColorButtonWidget(gtk.DrawingArea):
                         gtk.gdk.LEAVE_NOTIFY_MASK |
                         gtk.gdk.SCROLL_MASK)
 
-        self.connect("expose-event", self.expose_cb)
-        self.connect("realize", self.realize_cb)
+        self.connect('expose-event', self.expose_cb)
+        self.connect('realize', self.realize_cb)
         self.connect_after('size-request', self.size_request_cb)
         self.connect('focus-in-event', self.update_widget)
         self.connect('focus-out-event', self.update_widget)
@@ -230,11 +230,11 @@ class AnnotationWidget(GenericColorButtonWidget):
         self.annotation=annotation
         self.active=False
         GenericColorButtonWidget.__init__(self, element=annotation, container=container)
-        self.connect("key_press_event", self.keypress, self.annotation)
-        self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
-        self.connect("drag_data_get", self.drag_sent)
-        self.connect("drag_begin", self._drag_begin)
-        self.connect("drag_end", self._drag_end)
+        self.connect('key-press-event', self.keypress, self.annotation)
+        self.connect('enter-notify-event', lambda b, e: b.grab_focus() and True)
+        self.connect('drag-data-get', self.drag_sent)
+        self.connect('drag-begin', self._drag_begin)
+        self.connect('drag-end', self._drag_end)
         # The widget can generate drags
         self.drag_source_set(gtk.gdk.BUTTON1_MASK,
                              config.data.drag_type['annotation']
@@ -493,9 +493,9 @@ class AnnotationTypeWidget(GenericColorButtonWidget):
         # Playing mark (playing restricted to this type)
         self.playing=False
         GenericColorButtonWidget.__init__(self, element=annotationtype, container=container)
-        self.connect("key_press_event", self.keypress, self.annotationtype)
-        self.connect("enter_notify_event", lambda b, e: b.grab_focus() and True)
-        self.connect("drag_begin", self._drag_begin)
+        self.connect('key-press-event', self.keypress, self.annotationtype)
+        self.connect('enter-notify-event', lambda b, e: b.grab_focus() and True)
+        self.connect('drag-begin', self._drag_begin)
 
     def set_highlight(self, b):
         self.highlight=b
@@ -587,15 +587,15 @@ class TagWidget(GenericColorButtonWidget):
         self.tag=tag
         self.width=60
         GenericColorButtonWidget.__init__(self, element=tag, container=container)
-        self.connect("drag_begin", self._drag_begin)
+        self.connect('drag-begin', self._drag_begin)
         self.drag_source_set(gtk.gdk.BUTTON1_MASK,
                              config.data.drag_type['tag'],
                              gtk.gdk.ACTION_LINK)
         # The button can generate drags
-        self.connect("drag_data_get", self.drag_sent)
+        self.connect('drag-data-get', self.drag_sent)
 
         # Allow the entry to get drops of type application/x-color
-        self.connect("drag_data_received", self.drag_received)
+        self.connect('drag-data-received', self.drag_received)
         self.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                  gtk.DEST_DEFAULT_HIGHLIGHT |
                                  gtk.DEST_DEFAULT_ALL,
@@ -704,8 +704,8 @@ class AnnotationRepresentation(gtk.Button):
                                                           position=annotation.fragment.begin,
                                                           vertical=False,
                                                           height=20))
-        self.connect("button_press_event", self.button_press_handler, annotation)
-        self.connect("drag_data_get", self.drag_sent)
+        self.connect('button-press-event', self.button_press_handler, annotation)
+        self.connect('drag-data-get', self.drag_sent)
         # The widget can generate drags
         self.drag_source_set(gtk.gdk.BUTTON1_MASK,
                              config.data.drag_type['annotation']
@@ -760,7 +760,7 @@ class RelationRepresentation(gtk.Button):
         self.controller=controller
         self.direction=direction
         super(RelationRepresentation, self).__init__(u'%s %s %s' % (self.arrow[direction], controller.get_title(relation), self.arrow[direction]))
-        self.connect("button_press_event", self.button_press_handler, relation)
+        self.connect('button-press-event', self.button_press_handler, relation)
 
     def button_press_handler(self, widget, event, relation):
         if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
@@ -826,8 +826,8 @@ class TimestampRepresentation(gtk.Button):
 
         self.refresh()
 
-        self.connect("button_press_event", self._button_press_handler)
-        self.connect("drag_data_get", self._drag_sent)
+        self.connect('button-press-event', self._button_press_handler)
+        self.connect('drag-data-get', self._drag_sent)
         # The widget can generate drags
         self.drag_source_set(gtk.gdk.BUTTON1_MASK,
                              config.data.drag_type['timestamp']
@@ -870,8 +870,8 @@ class TimestampRepresentation(gtk.Button):
             widget._icon.destroy()
             widget._icon=None
             return True
-        self.connect("drag_begin", _drag_begin)
-        self.connect("drag_end", _drag_end)
+        self.connect('drag-begin', _drag_begin)
+        self.connect('drag-end', _drag_end)
 
         def enter_bookmark(widget, event):
             self.controller.notify('BookmarkHighlight', timestamp=self.value, immediate=True)

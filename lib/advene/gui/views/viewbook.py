@@ -136,13 +136,13 @@ class ViewBook(AdhocView):
                     menu.append(item)
 
                     item = gtk.MenuItem(_("Close"))
-                    item.connect("activate", close_view, view)
+                    item.connect('activate', close_view, view)
                     menu.append(item)
 
                 try:
                     for label, action in view.contextual_actions:
                         item = gtk.MenuItem(label, use_underline=False)
-                        item.connect("activate", action, view)
+                        item.connect('activate', action, view)
                         menu.append(item)
                 except AttributeError:
                     pass
@@ -178,10 +178,10 @@ class ViewBook(AdhocView):
         if self.controller.gui:
             self.controller.gui.tooltips.set_tip(e, name)
         e.add(l)
-        e.connect("button_press_event", popup_menu, v)
+        e.connect('button-press-event', popup_menu, v)
 
         if not permanent:
-            e.connect("drag_data_get", label_drag_sent, v)
+            e.connect('drag-data-get', label_drag_sent, v)
             # The widget can generate drags
             e.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['adhoc-view-instance'],
@@ -353,7 +353,7 @@ class ViewBook(AdhocView):
         notebook.popup_disable()
         notebook.set_scrollable(True)
 
-        notebook.connect("drag_data_received", self.drag_received)
+        notebook.connect('drag-data-received', self.drag_received)
         notebook.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                gtk.DEST_DEFAULT_HIGHLIGHT |
                                gtk.DEST_DEFAULT_DROP |

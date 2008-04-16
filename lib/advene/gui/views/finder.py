@@ -57,7 +57,7 @@ class FinderColumn:
         self.previous=parent
         self.next=None
         self.widget=self.build_widget()
-        self.widget.connect('key_press_event', self.key_pressed_cb)
+        self.widget.connect('key-press-event', self.key_pressed_cb)
 
     def key_pressed_cb(self, col, event):
         if event.keyval == gtk.keysyms.Right:
@@ -224,7 +224,7 @@ class ModelColumn(FinderColumn):
         vbox=gtk.VBox()
 
         self.label=gtk.Button(self.name)
-        self.label.connect("clicked", self.on_column_activation)
+        self.label.connect('clicked', self.on_column_activation)
         vbox.pack_start(self.label, expand=False)
 
         sw = gtk.ScrolledWindow()
@@ -243,8 +243,8 @@ class ModelColumn(FinderColumn):
         selection = self.listview.get_selection()
         selection.unselect_all()
         selection.connect('changed', self.on_changed_selection, self.liststore)
-        self.listview.connect("button-press-event", self.on_button_press)
-        self.listview.connect('key_press_event', self.key_pressed_cb)
+        self.listview.connect('button-press-event', self.on_button_press)
+        self.listview.connect('key-press-event', self.key_pressed_cb)
 
         sw.add(self.listview)
 
@@ -366,7 +366,7 @@ class ViewColumn(FinderColumn):
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['adhoc-view'],
                           gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
-        b.connect("drag_data_get", drag_data_get_cb)
+        b.connect('drag-data-get', drag_data_get_cb)
 
         vbox.pack_start(b, expand=False)
 
@@ -653,7 +653,7 @@ class Finder(AdhocView):
         self.sw=gtk.ScrolledWindow()
         self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-        self.sw.connect('scroll_event', self.scroll_event)
+        self.sw.connect('scroll-event', self.scroll_event)
         vbox.add(self.sw)
 
         self.hbox = gtk.HBox()

@@ -310,8 +310,8 @@ class TreeViewImporter:
         self.store=self.build_liststore()
 
         treeview=gtk.TreeView(model=self.store)
-        treeview.connect("button_press_event", self.tree_view_button_cb)
-        treeview.connect("row-activated", self.row_activated_cb)
+        treeview.connect('button-press-event', self.tree_view_button_cb)
+        treeview.connect('row-activated', self.row_activated_cb)
 
         renderer = gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
@@ -392,7 +392,7 @@ class Importer:
         hb=gtk.HButtonBox()
 
         b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect("clicked", self.add_package)
+        b.connect('clicked', self.add_package)
         hb.pack_start(b, expand=False)
 
         vbox.pack_start(hb, expand=False)
@@ -411,7 +411,7 @@ class Importer:
         vbox.add (self.widget)
         if self.controller.gui:
             self.controller.gui.register_view (self)
-            window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
+            window.connect('destroy', self.controller.gui.close_view_cb, window, self)
 
         if self.controller.gui:
             self.controller.gui.init_window_size(window, 'importeditor')
@@ -419,7 +419,7 @@ class Importer:
         self.buttonbox = gtk.HButtonBox()
 
         b = gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect("clicked", lambda w: window.destroy ())
+        b.connect('clicked', lambda w: window.destroy ())
         self.buttonbox.add (b)
 
         vbox.pack_start(self.buttonbox, expand=False)
@@ -447,7 +447,7 @@ if __name__ == "__main__":
     i=Importer(controller=controller)
     window=i.popup()
 
-    window.connect ("destroy", lambda e: gtk.main_quit())
+    window.connect('destroy', lambda e: gtk.main_quit())
 
     gtk.main ()
 

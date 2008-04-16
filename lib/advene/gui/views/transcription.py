@@ -301,7 +301,7 @@ class TranscriptionView(AdhocView):
             ):
             b=gtk.ToolButton(stock_id=icon)
             b.set_tooltip(self.controller.gui.tooltips, tip)
-            b.connect("clicked", action)
+            b.connect('clicked', action)
             tb.insert(b, -1)
         mainbox.pack_start(tb, expand=False)
 
@@ -327,9 +327,9 @@ class TranscriptionView(AdhocView):
 
         self.generate_buffer_content()
 
-        self.textview.connect("button-press-event", self.button_press_event_cb)
-        self.textview.connect_after("move-cursor", self.move_cursor_cb)
-        self.textview.connect("populate-popup", self.populate_popup_cb)
+        self.textview.connect('button-press-event', self.button_press_event_cb)
+        self.textview.connect_after('move-cursor', self.move_cursor_cb)
+        self.textview.connect('populate-popup', self.populate_popup_cb)
 
         self.update_current_annotation(self.textview, None)
 
@@ -389,7 +389,7 @@ class TranscriptionView(AdhocView):
         # we already did it anyway.
         mainbox.set_no_show_all(True)
 
-        mainbox.connect("key-press-event", self.key_press_event_cb)
+        mainbox.connect('key-press-event', self.key_press_event_cb)
 
         return mainbox
 
@@ -481,7 +481,7 @@ class TranscriptionView(AdhocView):
             return True
 
         item = gtk.MenuItem(_("Play"))
-        item.connect("activate", play_annotation, self.currentannotation)
+        item.connect('activate', play_annotation, self.currentannotation)
         item.show()
         menu.append(item)
 

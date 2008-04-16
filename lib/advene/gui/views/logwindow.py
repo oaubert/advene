@@ -114,13 +114,13 @@ class LogWindow(AdhocView):
         b=gtk.Button(message)
         # Make the message left-aligned
         b.child.set_alignment(0.0, 0.5)
-        b.connect("clicked", self.goto_url, url)
+        b.connect('clicked', self.goto_url, url)
         self.tooltips.set_tip(b, _("Go to %s") % url)
         hb.add(b)
 
         b=gtk.Button(helper.format_time(position))
         b.child.set_alignment(0.0, 0.5)
-        b.connect("clicked", self.goto_position, position)
+        b.connect('clicked', self.goto_position, position)
         self.tooltips.set_tip(b, _("Go to the given position"))
         hb.pack_start(b, expand=False)
 

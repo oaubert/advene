@@ -112,7 +112,7 @@ class BrowserColumn:
         vbox=gtk.VBox()
 
         self.label=gtk.Button(self.name)
-        self.label.connect("clicked", self.on_column_activation)
+        self.label.connect('clicked', self.on_column_activation)
         vbox.pack_start(self.label, expand=False)
 
         sw = gtk.ScrolledWindow()
@@ -129,8 +129,8 @@ class BrowserColumn:
         selection = self.listview.get_selection()
         selection.unselect_all()
         selection.connect('changed', self.on_changed_selection, self.liststore)
-        #self.listview.connect("row-activated", self.row_activated)
-        #self.listview.connect("button-press-event", self.on_button_press)
+        #self.listview.connect('row-activated', self.row_activated)
+        #self.listview.connect('button-press-event', self.on_button_press)
 
         sw.add_with_viewport(self.listview)
 
@@ -311,7 +311,7 @@ class Browser(AdhocView):
         self.sw=gtk.ScrolledWindow()
         self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-        self.sw.connect('scroll_event', self.scroll_event)
+        self.sw.connect('scroll-event', self.scroll_event)
         vbox.add(self.sw)
 
         self.hbox = gtk.HBox()

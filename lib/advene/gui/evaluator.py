@@ -115,8 +115,8 @@ class Evaluator:
             fs.destroy()
             return True
 
-        fs.ok_button.connect_after ("clicked", close_and_save, fs)
-        fs.cancel_button.connect ("clicked", lambda win: fs.destroy ())
+        fs.ok_button.connect_after ('clicked', close_and_save, fs)
+        fs.cancel_button.connect('clicked', lambda win: fs.destroy ())
 
         fs.show ()
         return True
@@ -515,7 +515,7 @@ class Evaluator:
 
         hb=gtk.HButtonBox()
         b=gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect("clicked", lambda b: window.destroy())
+        b.connect('clicked', lambda b: window.destroy())
         hb.add(b)
         vbox.pack_start(hb, expand=False)
 
@@ -525,7 +525,7 @@ class Evaluator:
         """Popup the application window.
         """
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.connect ("destroy", lambda e: window.destroy())
+        window.connect('destroy', lambda e: window.destroy())
         window.set_title ("Python evaluation")
 
         window.add (self.widget)
@@ -564,19 +564,19 @@ class Evaluator:
         hb=gtk.HButtonBox()
 
         b=gtk.Button("_Save output")
-        b.connect("clicked", self.save_output_cb)
+        b.connect('clicked', self.save_output_cb)
         hb.add(b)
 
-        b=gtk.Button("Clear _output")
-        b.connect("clicked", self.clear_output)
+        b=gtk.Button('Clear _output')
+        b.connect('clicked', self.clear_output)
         hb.add(b)
 
-        b=gtk.Button("Clear _expression")
-        b.connect("clicked", self.clear_expression)
+        b=gtk.Button('Clear _expression')
+        b.connect('clicked', self.clear_expression)
         hb.add(b)
 
-        b=gtk.Button("E_valuate expression")
-        b.connect("clicked", self.evaluate_expression)
+        b=gtk.Button('E_valuate expression')
+        b.connect('clicked', self.evaluate_expression)
         hb.add(b)
 
         # So that applications can defined their own buttons
@@ -637,8 +637,8 @@ class Evaluator:
 
             return False
 
-        self.source.connect ("key-press-event", key_pressed_cb)
-        self.output.connect ("key-press-event", key_pressed_cb)
+        self.source.connect('key-press-event', key_pressed_cb)
+        self.output.connect('key-press-event', key_pressed_cb)
 
         vbox.show_all()
 
@@ -653,10 +653,10 @@ if __name__ == "__main__":
     ev.locals_['self']=ev
     window=ev.popup()
 
-    window.connect ("destroy", lambda e: gtk.main_quit())
+    window.connect('destroy', lambda e: gtk.main_quit())
 
     b=gtk.Button(stock=gtk.STOCK_QUIT)
-    b.connect("clicked", lambda e: gtk.main_quit())
+    b.connect('clicked', lambda e: gtk.main_quit())
     ev.hbox.add(b)
     b.show()
 

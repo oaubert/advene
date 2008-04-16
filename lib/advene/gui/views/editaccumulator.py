@@ -165,7 +165,7 @@ class EditAccumulator(AccumulatorPopup):
         mainbox=super(EditAccumulator, self).build_widget()
 
         # The widget can receive drops from annotations
-        mainbox.connect("drag_data_received", self.drag_received)
+        mainbox.connect('drag-data-received', self.drag_received)
         mainbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
                                   gtk.DEST_DEFAULT_ALL,

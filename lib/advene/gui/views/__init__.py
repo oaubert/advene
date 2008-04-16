@@ -360,7 +360,7 @@ class AdhocView(object):
             return True
 
         # Close the popup window when the widget is destroyed
-        self.widget.connect("destroy", close_popup)
+        self.widget.connect('destroy', close_popup)
 
         # Buttons specific to the window, that should be removed from
         # the buttonbox on window close (esp. when reparenting to the
@@ -389,7 +389,7 @@ class AdhocView(object):
             root.set_submenu(menu)
             for label, action in self.contextual_actions:
                 b=gtk.MenuItem(label, use_underline=False)
-                b.connect("activate", action)
+                b.connect('activate', action)
                 menu.append(b)
             window.buttonbox.pack_start(menubar, expand=False)
             window.own_buttons.append(menubar)
@@ -407,7 +407,7 @@ class AdhocView(object):
 
         b = gtk.Button(_("Reattach"))
         b.connect('clicked', self.attach_view, window)
-        b.connect("drag_data_get", drag_sent)
+        b.connect('drag-data-get', drag_sent)
         # The widget can generate drags
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['adhoc-view-instance'],
@@ -419,9 +419,9 @@ class AdhocView(object):
         b = gtk.Button(stock=gtk.STOCK_CLOSE)
 
         if self.controller and self.controller.gui:
-            b.connect ("clicked", self.controller.gui.close_view_cb, window, self)
+            b.connect('clicked', self.controller.gui.close_view_cb, window, self)
         else:
-            b.connect ("clicked", lambda w: window.destroy())
+            b.connect('clicked', lambda w: window.destroy())
         window.own_buttons.append(b)
         window.buttonbox.pack_start (b, expand=False)
 
@@ -437,7 +437,7 @@ class AdhocView(object):
 
         if self.controller and self.controller.gui:
             self.controller.gui.register_view (self)
-            window.cleanup_id=window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
+            window.cleanup_id=window.connect('destroy', self.controller.gui.close_view_cb, window, self)
             self.controller.gui.init_window_size(window, self.view_id)
 
         if config.data.os == 'win32':

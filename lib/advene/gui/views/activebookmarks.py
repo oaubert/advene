@@ -348,7 +348,7 @@ class ActiveBookmarks(AdhocView):
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['timestamp'],
                         gtk.gdk.ACTION_MOVE )
-        b.connect("drag_data_received", remove_drag_received)
+        b.connect('drag-data-received', remove_drag_received)
         i=gtk.ToolItem()
         i.add(b)
         tb.insert(i, -1)
@@ -357,7 +357,7 @@ class ActiveBookmarks(AdhocView):
         i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
         b=gtk.ToolButton(icon_widget=i)
         b.set_tooltip(self.controller.gui.tooltips, _("Insert a bookmark for the current video time"))
-        b.connect("clicked", bookmark_current_time)
+        b.connect('clicked', bookmark_current_time)
         tb.insert(b, -1)
 
         i=gtk.ToolItem()
@@ -387,7 +387,7 @@ class ActiveBookmarks(AdhocView):
             ):
             b=get_small_stock_button(icon)
             self.controller.gui.tooltips.set_tip(b, tip)
-            b.connect("clicked", method)
+            b.connect('clicked', method)
             i=gtk.ToolItem()
             i.add(b)
             tb.insert(i, -1)
@@ -486,10 +486,10 @@ class ActiveBookmarks(AdhocView):
                                    + config.data.drag_type['annotation-type']
                                    ,
                                    gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
-        self.mainbox.connect('drag_data_received', mainbox_drag_received)
-        self.mainbox.connect('drag_motion', mainbox_drag_motion)
-        self.mainbox.connect('drag_end', hide_arrow_mark)
-        self.mainbox.connect('drag_leave', hide_arrow_mark)
+        self.mainbox.connect('drag-data-received', mainbox_drag_received)
+        self.mainbox.connect('drag-motion', mainbox_drag_motion)
+        self.mainbox.connect('drag-end', hide_arrow_mark)
+        self.mainbox.connect('drag-leave', hide_arrow_mark)
         self.mainbox.set_spacing(8)
 
         dropbox=gtk.HBox()
@@ -502,7 +502,7 @@ class ActiveBookmarks(AdhocView):
                                    + config.data.drag_type['annotation-type']
                                    ,
                                    gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
-        dropbox.connect("drag_data_received", mainbox_drag_received)
+        dropbox.connect('drag-data-received', mainbox_drag_received)
         dropbox.show()
 
         v.add(sw)
@@ -546,7 +546,7 @@ class ActiveBookmark(object):
                                             config.data.drag_type['timestamp']
                                             + config.data.drag_type['annotation-type'],
                                             gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
-        self.dropbox.connect("drag_data_received", self.end_drag_received)
+        self.dropbox.connect('drag-data-received', self.end_drag_received)
 
         self.begin_widget=None
         self.end_widget=self.dropbox
@@ -593,8 +593,8 @@ class ActiveBookmark(object):
                                                 config.data.drag_type['timestamp']
                                                 + config.data.drag_type['annotation-type'],
                                                 gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
-            self.end_widget.image.connect("drag_data_received", self.end_drag_received)
-            self.end_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
+            self.end_widget.image.connect('drag-data-received', self.end_drag_received)
+            self.end_widget.image.connect('scroll-event', self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
             self.end_widget.image.connect('key-press-event', self.timestamp_key_press, 'end')
             def focus_bookmark(widget, event):
                 self.container.set_current_bookmark(self)
@@ -883,8 +883,8 @@ class ActiveBookmark(object):
                                               config.data.drag_type['timestamp']
                                               + config.data.drag_type['annotation-type'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
-        self.begin_widget.image.connect("drag_data_received", begin_drag_received)
-        self.begin_widget.image.connect("scroll-event", self.handle_scroll_event, self.get_begin, self.set_begin, lambda v: self.end is None or v < self.end)
+        self.begin_widget.image.connect('drag-data-received', begin_drag_received)
+        self.begin_widget.image.connect('scroll-event', self.handle_scroll_event, self.get_begin, self.set_begin, lambda v: self.end is None or v < self.end)
 
         self.begin_widget.comment_entry.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                               gtk.DEST_DEFAULT_HIGHLIGHT |
@@ -892,7 +892,7 @@ class ActiveBookmark(object):
                                               config.data.drag_type['timestamp']
                                               + config.data.drag_type['annotation-type'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
-        self.begin_widget.comment_entry.connect('drag_data_received', begin_drag_received)
+        self.begin_widget.comment_entry.connect('drag-data-received', begin_drag_received)
         self.begin_widget.image.connect('key-press-event', self.timestamp_key_press, 'begin')
 
         def focus_bookmark(widget, event):
@@ -962,7 +962,7 @@ class ActiveBookmark(object):
                            + config.data.drag_type['tag']
                            ,
                            gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
-        eb.connect("drag_data_get", drag_sent)
+        eb.connect('drag-data-get', drag_sent)
 
         def _drag_begin(widget, context):
             w=gtk.Window(gtk.WINDOW_POPUP)
@@ -1046,8 +1046,8 @@ class ActiveBookmark(object):
                 pass
             return True
 
-        eb.connect("drag_begin", _drag_begin)
-        eb.connect("drag_end", _drag_end)
-        eb.connect("drag_motion", _drag_motion)
+        eb.connect('drag-begin', _drag_begin)
+        eb.connect('drag-end', _drag_end)
+        eb.connect('drag-motion', _drag_motion)
 
         return eb

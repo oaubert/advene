@@ -90,20 +90,20 @@ class EditRuleSet(EditGeneric):
         hb=gtk.HButtonBox()
 
         b=gtk.Button(stock=gtk.STOCK_COPY)
-        b.connect("drag_data_get", self.drag_sent)
+        b.connect('drag-data-get', self.drag_sent)
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['rule'], gtk.gdk.ACTION_COPY)
         self.controller.gui.tooltips.set_tip(b, _("Drag this button to the tab area (of this edit window or another dynamic view edit window) to copy the rule"))
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect("clicked", self.add_rule_cb)
+        b.connect('clicked', self.add_rule_cb)
         b.set_sensitive(self.editable)
         self.controller.gui.tooltips.set_tip(b, _("Add a new rule"))
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
-        b.connect("clicked", self.remove_rule_cb)
+        b.connect('clicked', self.remove_rule_cb)
         b.set_sensitive(self.editable)
         self.controller.gui.tooltips.set_tip(b, _("Remove the current rule"))
         hb.pack_start(b, expand=False)
@@ -220,7 +220,7 @@ class EditRuleSet(EditGeneric):
         notebook.popup_enable()
         notebook.set_scrollable(True)
 
-        notebook.connect("drag_data_received", self.drag_received)
+        notebook.connect('drag-data-received', self.drag_received)
         notebook.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                gtk.DEST_DEFAULT_HIGHLIGHT |
                                gtk.DEST_DEFAULT_ALL,
@@ -240,7 +240,7 @@ class EditRuleSet(EditGeneric):
             notebook.append_page(edit.get_widget(), l)
 
         #b=gtk.Button(rule.name)
-        #b.connect("clicked", popup_edit, rule, catalog)
+        #b.connect('clicked', popup_edit, rule, catalog)
         #b.show()
         #vbox.add(b)
         return notebook
@@ -323,7 +323,7 @@ class EditQuery(EditGeneric):
 
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
         b.set_sensitive(self.editable)
-        b.connect("clicked", self.remove_condition, w, hb)
+        b.connect('clicked', self.remove_condition, w, hb)
         b.show()
         hb.pack_start(b, expand=False)
 
@@ -385,7 +385,7 @@ class EditQuery(EditGeneric):
         # "Add condition" button
         hb=gtk.HBox()
         b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect("clicked", self.add_condition, conditionsbox)
+        b.connect('clicked', self.add_condition, conditionsbox)
         b.set_sensitive(self.editable)
         hb.pack_start(b, expand=False)
         hb.set_homogeneous(False)
@@ -511,7 +511,7 @@ class EditRule(EditGeneric):
 
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
         b.set_sensitive(self.editable)
-        b.connect("clicked", self.remove_condition, w, hb)
+        b.connect('clicked', self.remove_condition, w, hb)
         b.show()
         hb.pack_start(b, expand=False)
 
@@ -537,7 +537,7 @@ class EditRule(EditGeneric):
         hb.add(w.get_widget())
         w.get_widget().show()
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
-        b.connect("clicked", self.remove_action, w, hb)
+        b.connect('clicked', self.remove_action, w, hb)
         b.set_sensitive(self.editable)
         b.show()
         hb.pack_start(b, expand=False)
@@ -563,11 +563,11 @@ class EditRule(EditGeneric):
         self.name_entry=gtk.Entry()
         self.name_entry.set_text(self.model.name)
         self.name_entry.set_editable(self.editable)
-        self.name_entry.connect("changed", self.update_name)
+        self.name_entry.connect('changed', self.update_name)
         hbox.add(self.name_entry)
 
         b=gtk.Button(stock=gtk.STOCK_COPY)
-        b.connect("drag_data_get", self.drag_sent)
+        b.connect('drag-data-get', self.drag_sent)
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['rule'], gtk.gdk.ACTION_COPY)
         hbox.pack_start(b, expand=False)
@@ -591,7 +591,7 @@ class EditRule(EditGeneric):
         # "Add condition" button
         hb=gtk.HBox()
         b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect("clicked", self.add_condition, conditionsbox)
+        b.connect('clicked', self.add_condition, conditionsbox)
         b.set_sensitive(self.editable)
         hb.pack_start(b, expand=False)
         hb.set_homogeneous(False)
@@ -628,7 +628,7 @@ class EditRule(EditGeneric):
         hb=gtk.HBox()
         # Add Action button
         b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect("clicked", self.add_action, actionsbox)
+        b.connect('clicked', self.add_action, actionsbox)
         b.set_sensitive(self.editable)
         hb.pack_start(b, expand=False)
         hb.set_homogeneous(False)
@@ -937,7 +937,7 @@ class EditAction(EditGeneric):
         entry=TALESEntry(controller=self.controller, predefined=predefined)
         entry.set_text(value)
         entry.set_editable(self.editable)
-        entry.entry.connect("changed", self.on_change_parameter, entry, name)
+        entry.entry.connect('changed', self.on_change_parameter, entry, name)
 
         self.tooltips.set_tip(entry.entry, description)
 

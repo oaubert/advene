@@ -190,7 +190,7 @@ class EditWidget(gtk.VBox):
 
         value = self.__get_config(property)
         check.set_active(value)
-        check.connect("toggled", self.__on_change, property,
+        check.connect('toggled', self.__on_change, property,
                       self.CHANGE_CHECKBOX)
 
 
@@ -214,7 +214,7 @@ class EditWidget(gtk.VBox):
 
         value = self.__get_config(property)
         entry.set_text(value)
-        entry.connect("changed", self.__on_change, property,
+        entry.connect('changed', self.__on_change, property,
                       self.CHANGE_ENTRY)
 
     def add_entry_button(self, label, property, help, button_label, callback):
@@ -243,7 +243,7 @@ class EditWidget(gtk.VBox):
 
         value = self.__get_config(property)
         entry.set_text(value)
-        entry.connect("changed", self.__on_change, property,
+        entry.connect('changed', self.__on_change, property,
                       self.CHANGE_ENTRY)
 
 
@@ -268,7 +268,7 @@ class EditWidget(gtk.VBox):
         self.__add_line(1, align, spin_button)
 
         spin_button.set_value(value)
-        spin_button.connect("value-changed", self.__on_change, property,
+        spin_button.connect('value-changed', self.__on_change, property,
                             self.CHANGE_SPIN)
 
 
@@ -300,7 +300,7 @@ class EditWidget(gtk.VBox):
         combo.add_attribute(cell, 'text', 0)
         combo.set_active_iter(active_iter)
 
-        combo.connect("changed", self.__on_change, property, self.CHANGE_OPTION)
+        combo.connect('changed', self.__on_change, property, self.CHANGE_OPTION)
 
         self.__tooltips.set_tip(combo, help)
         self.__add_line(1, align, combo)
@@ -342,10 +342,10 @@ class EditWidget(gtk.VBox):
 
         value = self.__get_config(property)
 
-        btn.connect("clicked", open_filedialog, value, entry)
+        btn.connect('clicked', open_filedialog, value, entry)
 
         entry.set_text(value)
-        entry.connect("changed", self.__on_change, property,
+        entry.connect('changed', self.__on_change, property,
                       self.CHANGE_ENTRY)
 
         self.__tooltips.set_tip(entry, help)
@@ -389,10 +389,10 @@ class EditWidget(gtk.VBox):
 
         value = self.__get_config(property)
 
-        btn.connect("clicked", open_filedialog, value, entry)
+        btn.connect('clicked', open_filedialog, value, entry)
 
         entry.set_text(value)
-        entry.connect("changed", self.__on_change, property,
+        entry.connect('changed', self.__on_change, property,
                       self.CHANGE_ENTRY)
 
         self.__tooltips.set_tip(entry, help)
@@ -417,7 +417,7 @@ class EditWidget(gtk.VBox):
                 widget.response(gtk.RESPONSE_CANCEL)
                 return True
             return False
-        d.connect('key_press_event', dialog_keypressed_cb)
+        d.connect('key-press-event', dialog_keypressed_cb)
 
         self.show_all()
         res=d.run()

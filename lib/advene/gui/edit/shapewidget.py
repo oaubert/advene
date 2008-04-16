@@ -364,7 +364,7 @@ class Shape(object):
                 d.response(gtk.RESPONSE_CANCEL)
                 return True
             return False
-        d.connect("key_press_event", keypressed_cb)
+        d.connect('key-press-event', keypressed_cb)
 
         edit.show_all()
         res=d.run()
@@ -938,11 +938,11 @@ class ShapeDrawer:
         self.pixmap = None
 
         self.widget = gtk.DrawingArea()
-        self.widget.connect("expose_event", self.expose_event)
-        self.widget.connect("configure_event", self.configure_event)
-        self.widget.connect("button_press_event", self.button_press_event)
-        self.widget.connect("button_release_event", self.button_release_event)
-        self.widget.connect("motion_notify_event", self.motion_notify_event)
+        self.widget.connect('expose-event', self.expose_event)
+        self.widget.connect('configure-event', self.configure_event)
+        self.widget.connect('button-press-event', self.button_press_event)
+        self.widget.connect('button-release-event', self.button_release_event)
+        self.widget.connect('motion-notify-event', self.motion_notify_event)
         self.widget.set_events(gtk.gdk.EXPOSURE_MASK | gtk.gdk.LEAVE_NOTIFY_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.POINTER_MOTION_MASK |gtk.gdk.POINTER_MOTION_HINT_MASK)
 
         if self.background:
@@ -1038,7 +1038,7 @@ class ShapeDrawer:
         else:
             i = gtk.MenuItem(item)
         if action is not None:
-            i.connect("activate", action, *param, **kw)
+            i.connect('activate', action, *param, **kw)
         menu.append(i)
 
     def popup_menu(self, shape):
@@ -1316,7 +1316,7 @@ class ShapeEditor:
         sel = gtk.combo_box_new_text()
         for s in l:
             sel.append_text(s)
-        sel.connect("changed", callback)
+        sel.connect('changed', callback)
         sel.set_active(0)
         return sel
 
@@ -1383,8 +1383,8 @@ class ShapeEditor:
         column = gtk.TreeViewColumn('Name', renderer,
                                     text=1)
         self.treeview.append_column(column)
-        self.treeview.connect('row_activated', self.remove_item)
-        self.treeview.connect("button_press_event", self.tree_view_button_cb)
+        self.treeview.connect('row-activated', self.remove_item)
+        self.treeview.connect('button-press-event', self.tree_view_button_cb)
 
         control = gtk.VBox()
 
@@ -1423,11 +1423,11 @@ class ShapeEditor:
             return True
 
         b=gtk.Button(_("Dump SVG"))
-        b.connect("clicked", dump_svg)
+        b.connect('clicked', dump_svg)
         control.pack_start(b, expand=False)
 
         b=gtk.Button(_("Load SVG"))
-        b.connect("clicked", load_svg)
+        b.connect('clicked', load_svg)
         control.pack_start(b, expand=False)
 
         hbox.pack_start(control, expand=False)
@@ -1445,7 +1445,7 @@ def main():
     win = gtk.Window(gtk.WINDOW_TOPLEVEL)
     win.set_title("Shape Editor test")
     #win.set_default_size(800, 600)
-    win.connect("delete-event", lambda w, e: gtk.main_quit())
+    win.connect('delete-event', lambda w, e: gtk.main_quit())
 
     if bg.endswith('.svg'):
         ed=ShapeEditor()

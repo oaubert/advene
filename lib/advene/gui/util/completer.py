@@ -48,13 +48,13 @@ class Completer:
     def connect(self):
         """Register the various callbacks for completion.
         """
-        self.textview.connect("key-press-event", self.key_press_event_cb)
-        self.textview.connect("focus-out-event", self.hide_completion_window)
-        self.textview.get_buffer().connect("delete-range", self.hide_completion_window)
-        self.textview.get_buffer().connect_after("insert-text", self.insert_text_cb)
-        self.textview.connect("paste-clipboard", self.hide_completion_window)
-        self.textview.connect_after("paste-clipboard", self.hide_completion_window)
-        #self.textview.connect("button-press-event", self.__button_press_event_cb)
+        self.textview.connect('key-press-event', self.key_press_event_cb)
+        self.textview.connect('focus-out-event', self.hide_completion_window)
+        self.textview.get_buffer().connect('delete-range', self.hide_completion_window)
+        self.textview.get_buffer().connect_after('insert-text', self.insert_text_cb)
+        self.textview.connect('paste-clipboard', self.hide_completion_window)
+        self.textview.connect_after('paste-clipboard', self.hide_completion_window)
+        #self.textview.connect('button-press-event', self.__button_press_event_cb)
         return True
 
     def insert_text_cb(self, textbuffer, iterator, text, length):
@@ -284,7 +284,7 @@ class Completer:
             self.insert_word_completion(path)
             self.hide_completion_window()
             return True
-        self.treeview.connect("row-activated", treeview_row_activated_cb)
+        self.treeview.connect('row-activated', treeview_row_activated_cb)
 
         style = self.textview.get_style()
         color = style.base[gtk.STATE_SELECTED]
@@ -393,9 +393,9 @@ if __name__ == "__main__":
                 gtk.main_quit ()
                 return True
 
-    window.connect ("key_press_event", key_pressed_cb)
-    window.connect ("destroy", lambda e: gtk.main_quit())
-    window.set_title ("test")
+    window.connect('key_press_event', key_pressed_cb)
+    window.connect('destroy', lambda e: gtk.main_quit())
+    window.set_title ('test')
 
     import gtksourceview
     t=gtksourceview.SourceView(gtksourceview.SourceBuffer())

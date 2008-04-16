@@ -104,7 +104,7 @@ class Exporter(AdhocView):
         line.pack_start(self.filename_entry)
 
         b=gtk.Button(stock=gtk.STOCK_SAVE)
-        b.connect("clicked", select_filename)
+        b.connect('clicked', select_filename)
         line.pack_start(b, expand=False)
 
         # Importer choice list
@@ -120,7 +120,7 @@ class Exporter(AdhocView):
         bb=gtk.HButtonBox()
 
         b=gtk.Button(stock=gtk.STOCK_CONVERT)
-        b.connect("clicked", self.export_file)
+        b.connect('clicked', self.export_file)
         bb.pack_start(b, expand=False)
         self.convert_button=b
 

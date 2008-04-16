@@ -110,7 +110,7 @@ class DVDSelect:
         vbox.add(hbox)
 
         b=gtk.Button(_("Preview"))
-        b.connect("clicked", self.preview)
+        b.connect('clicked', self.preview)
         vbox.add(b)
 
         vbox.show_all()
@@ -135,8 +135,8 @@ if __name__ == "__main__":
         return False
 
     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    window.connect ("key-press-event", key_pressed_cb)
-    window.connect ("destroy", lambda e: gtk.main_quit())
+    window.connect('key-press-event', key_pressed_cb)
+    window.connect('destroy', lambda e: gtk.main_quit())
 
     c = DummyController()
     sel=DVDSelect(controller=c)

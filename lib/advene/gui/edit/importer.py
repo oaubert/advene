@@ -124,14 +124,14 @@ class ExternalImporter(AdhocView):
 
         line.pack_start(gtk.Label(_("Filename")), expand=False)
         self.filename_entry=gtk.Entry()
-        self.filename_entry.connect("changed", updated_filename)
+        self.filename_entry.connect('changed', updated_filename)
         line.pack_start(self.filename_entry)
 
         self.progressbar=gtk.ProgressBar()
         vbox.pack_start(self.progressbar, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_OPEN)
-        b.connect("clicked", select_filename)
+        b.connect('clicked', select_filename)
         line.pack_start(b, expand=False)
 
         # Importer choice list
@@ -145,7 +145,7 @@ class ExternalImporter(AdhocView):
         bb=gtk.HButtonBox()
 
         b=gtk.Button(stock=gtk.STOCK_CONVERT)
-        b.connect("clicked", self.convert_file)
+        b.connect('clicked', self.convert_file)
         b.set_sensitive(False)
         bb.pack_start(b, expand=False)
         self.convert_button=b

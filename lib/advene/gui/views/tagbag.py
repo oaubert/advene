@@ -201,7 +201,7 @@ class TagBag(AdhocView):
                 (_("Remove"), remove)
                 ):
                 item = gtk.MenuItem(label, use_underline=False)
-                item.connect("activate", action, t)
+                item.connect('activate', action, t)
                 menu.append(item)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -211,7 +211,7 @@ class TagBag(AdhocView):
                           config.data.drag_type['tag'],
                           gtk.gdk.ACTION_LINK)
 
-        b.connect("button_press_event", popup_menu)
+        b.connect('button-press-event', popup_menu)
         b.show()
         self.mainbox.pack_start(b, expand=False)
 
@@ -253,7 +253,7 @@ class TagBag(AdhocView):
                                   config.data.drag_type['annotation']
                                   + config.data.drag_type['tag']
                                    , gtk.gdk.ACTION_LINK)
-        self.mainbox.connect("drag_data_received", mainbox_drag_received)
+        self.mainbox.connect('drag-data-received', mainbox_drag_received)
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['tag']:
@@ -278,11 +278,11 @@ class TagBag(AdhocView):
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['tag'], gtk.gdk.ACTION_LINK)
-        b.connect("drag_data_received", remove_drag_received)
+        b.connect('drag-data-received', remove_drag_received)
         hb.pack_start(b, expand=False)
 
         b=get_small_stock_button(gtk.STOCK_ADD)
-        b.connect("clicked", self.new_tag)
+        b.connect('clicked', self.new_tag)
         hb.pack_start(b, expand=False)
 
         v.buttonbox=hb

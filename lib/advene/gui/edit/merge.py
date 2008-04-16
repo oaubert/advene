@@ -141,7 +141,7 @@ class TreeViewMerger:
 
             if name == 'update_content':
                 i=gtk.MenuItem(_("Show diff"))
-                i.connect("activate", show_diff, l)
+                i.connect('activate', show_diff, l)
                 menu.append(i)
 
             menu.show_all()
@@ -169,7 +169,7 @@ class TreeViewMerger:
 
 
         treeview=gtk.TreeView(model=self.store)
-        treeview.connect("button_press_event", tree_view_button_cb)
+        treeview.connect('button-press-event', tree_view_button_cb)
 
         renderer = gtk.CellRendererToggle()
         renderer.set_property('activatable', True)
@@ -231,7 +231,7 @@ class Merger:
         vbox.add (self.widget)
         if self.controller.gui:
             self.controller.gui.register_view (self)
-            window.connect ("destroy", self.controller.gui.close_view_cb, window, self)
+            window.connect('destroy', self.controller.gui.close_view_cb, window, self)
 
         if self.controller.gui:
             self.controller.gui.init_window_size(window, 'merge')
@@ -264,20 +264,20 @@ class Merger:
 
 
         b = gtk.Button(_("All"))
-        b.connect("clicked", select_all)
+        b.connect('clicked', select_all)
         self.buttonbox.add (b)
 
 
-        b = gtk.Button(_("None"))
-        b.connect("clicked", unselect_all)
+        b = gtk.Button(_('None'))
+        b.connect('clicked', unselect_all)
         self.buttonbox.add (b)
 
         b = gtk.Button(stock=gtk.STOCK_OK)
-        b.connect("clicked", validate)
+        b.connect('clicked', validate)
         self.buttonbox.add (b)
 
         b = gtk.Button(stock=gtk.STOCK_CANCEL)
-        b.connect("clicked", lambda b: window.destroy())
+        b.connect('clicked', lambda b: window.destroy())
         self.buttonbox.add (b)
 
         vbox.pack_start(self.buttonbox, expand=False)

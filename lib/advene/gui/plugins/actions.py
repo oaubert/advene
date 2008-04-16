@@ -325,7 +325,7 @@ class DefaultGUIActions:
         e.set_text(destination.content.data)
         v.add(e)
         b=gtk.Button(stock=gtk.STOCK_OK)
-        b.connect("clicked", handle_response, v, e, destination)
+        b.connect('clicked', handle_response, v, e, destination)
         v.add(b)
 
         v.show_all()
@@ -375,7 +375,7 @@ class DefaultGUIActions:
         b=gtk.Button(message)
         vbox.pack_start(b, expand=False)
 
-        b.connect("clicked", handle_response, url, vbox)
+        b.connect('clicked', handle_response, url, vbox)
 
         self.gui.popupwidget.display(widget=vbox, timeout=duration, title=_("URL popup"))
         return True
@@ -411,7 +411,7 @@ class DefaultGUIActions:
         b.add(self.gui.get_illustrated_text(message, position))
         vbox.pack_start(b, expand=False)
 
-        b.connect("clicked", handle_response, position, vbox)
+        b.connect('clicked', handle_response, position, vbox)
 
         self.gui.popupwidget.display(widget=vbox, timeout=duration, title=_("Navigation popup"))
         return True
@@ -444,7 +444,7 @@ class DefaultGUIActions:
 
                 b=gtk.Button()
                 b.add(self.gui.get_illustrated_text(message, position))
-                b.connect("clicked", handle_response, position, vbox)
+                b.connect('clicked', handle_response, position, vbox)
                 vbox.add(b)
 
             duration=self.parse_parameter(context, parameters, 'duration', None)
@@ -513,7 +513,7 @@ class DefaultGUIActions:
                 'annotation_content': self.controller.get_title(a) }
             b.add(self.gui.get_illustrated_text(c, a.fragment.begin))
             vbox.pack_start(b, expand=False)
-            b.connect("clicked", handle_response, a.fragment.begin, vbox)
+            b.connect('clicked', handle_response, a.fragment.begin, vbox)
 
         self.gui.popupwidget.display(widget=vbox, timeout=annotation.fragment.duration, title=_("Relation navigation"))
         return True

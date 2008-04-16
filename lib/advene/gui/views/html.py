@@ -110,8 +110,8 @@ class gtkhtml_wrapper:
             self.set_url(url)
             return True
 
-        c.document.connect("link-clicked", link_clicked)
-        c.document.connect("request-url", request_url)
+        c.document.connect('link-clicked', link_clicked)
+        c.document.connect('request-url', request_url)
 
         c.get_vadjustment().set_value(0)
         w.set_hadjustment(c.get_hadjustment())
@@ -159,8 +159,8 @@ class mozembed_wrapper:
                 self.notify(label=c.get_link_message())
             return False
 
-        w.connect("location", update_location)
-        w.connect("link-message", update_label)
+        w.connect('location', update_location)
+        w.connect('link-message', update_label)
         self.component=w
         return w
 
@@ -219,7 +219,7 @@ class HTMLView(AdhocView):
             (gtk.STOCK_HOME, utbv_menu),
             ):
             b=gtk.ToolButton(stock_id=icon)
-            b.connect("clicked", action)
+            b.connect('clicked', action)
             tb.insert(b, -1)
 
         def entry_validated(e):
@@ -227,7 +227,7 @@ class HTMLView(AdhocView):
             return True
 
         self.url_entry=gtk.Entry()
-        self.url_entry.connect("activate", entry_validated)
+        self.url_entry.connect('activate', entry_validated)
         ti=gtk.ToolItem()
         ti.add(self.url_entry)
         ti.set_expand(True)

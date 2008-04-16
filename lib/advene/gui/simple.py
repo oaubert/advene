@@ -93,7 +93,7 @@ class SimpleAdveneGUI(AdveneGUI):
         gladefile=config.data.advenefile ('simple.glade')
         # Glade init.
         self.gui = gtk.glade.XML(gladefile, domain=gettext.textdomain())
-        self.connect (self.gui)
+        self.connect(self.gui)
 
         # Resize the main window
         window=self.gui.get_widget('win')
@@ -333,13 +333,13 @@ class SimpleAdveneGUI(AdveneGUI):
             self.drawable=gtk.DrawingArea()
             # Ignore the delete event, which is sent when the
             # embedded vout dies (i.e. on movie stop)
-            self.drawable.connect("delete-event", lambda w, e: True)
+            self.drawable.connect('delete-event', lambda w, e: True)
         else:
             self.drawable=gtk.Socket()
             def handle_remove(socket):
                 # Do not kill the widget if the application exits
                 return True
-            self.drawable.connect("plug-removed", handle_remove)
+            self.drawable.connect('plug-removed', handle_remove)
 
         black=gtk.gdk.Color(0, 0, 0)
         for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
@@ -349,7 +349,7 @@ class SimpleAdveneGUI(AdveneGUI):
 
         self.drawable.set_size_request(320, 200)
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
-        self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
+        self.drawable.connect_object('button-press-event', self.debug_cb, self.drawable)
 
         self.player_toolbar=self.get_player_control_toolbar()
 
@@ -409,7 +409,7 @@ class SimpleAdveneGUI(AdveneGUI):
 
         self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
         self.update_loop_button()
-        self.loop_toggle_button.connect("toggled", loop_toggle_cb)
+        self.loop_toggle_button.connect('toggled', loop_toggle_cb)
         self.player_toolbar.insert(self.loop_toggle_button, -1)
 
         # Append the player status label to the toolbar
@@ -427,8 +427,8 @@ class SimpleAdveneGUI(AdveneGUI):
         adj = gtk.Adjustment(0, 0, 100, 1, 1, 10)
         self.gui.slider = gtk.HScale(adj)
         self.gui.slider.set_draw_value(False)
-        self.gui.slider.connect ("button-press-event", self.on_slider_button_press_event)
-        self.gui.slider.connect ("button-release-event", self.on_slider_button_release_event)
+        self.gui.slider.connect('button-press-event', self.on_slider_button_press_event)
+        self.gui.slider.connect('button-release-event', self.on_slider_button_release_event)
 
         # Stack the video components
         v=gtk.VBox()

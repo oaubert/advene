@@ -36,7 +36,7 @@ class RelationView:
         self.relation=relation
         self.controller=controller
         self.widget=self.build_widget()
-        self.widget.connect("clicked", self.activate)
+        self.widget.connect('clicked', self.activate)
 
     def activate(self, button):
         print "Relation %s activated" % self.relation.id
@@ -52,7 +52,7 @@ class RelationView:
                       self.relation.members[1].id))
         b=gtk.Button()
         b.add(l)
-        b.connect("clicked", self.popup)
+        b.connect('clicked', self.popup)
 
         return b
 

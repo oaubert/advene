@@ -140,7 +140,7 @@ class Connect:
         for iteration in dir(a_class):
             dic[iteration] = getattr(self, iteration)
 
-    def connect (self, gui):
+    def connect(self, gui):
         """Connect the class methods with the UI."""
         gui.signal_autoconnect(self.create_dictionary ())
 
@@ -183,7 +183,7 @@ class AdveneGUI (Connect):
         gladefile=config.data.advenefile (config.data.gladefilename)
         # Glade init.
         self.gui = gtk.glade.XML(gladefile, domain=gettext.textdomain())
-        self.connect (self.gui)
+        self.connect(self.gui)
 
         # Resize the main window
         window=self.gui.get_widget('win')
@@ -271,8 +271,8 @@ class AdveneGUI (Connect):
             i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
             b.add(i)
             self.tooltips.set_tip(b, tip)
-            b.connect("drag_data_get", adhoc_view_drag_sent, name)
-            b.connect("clicked", open_view_menu, name)
+            b.connect('drag-data-get', adhoc_view_drag_sent, name)
+            b.connect('clicked', open_view_menu, name)
             b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                               config.data.drag_type['adhoc-view'], gtk.gdk.ACTION_COPY)
             hb.pack_start(b, expand=False)
@@ -858,13 +858,13 @@ class AdveneGUI (Connect):
             self.drawable=gtk.DrawingArea()
             # Ignore the delete event, which is sent when the
             # embedded vout dies (i.e. on movie stop)
-            self.drawable.connect("delete-event", lambda w, e: True)
+            self.drawable.connect('delete-event', lambda w, e: True)
         else:
             self.drawable=gtk.Socket()
             def handle_remove(socket):
                 # Do not kill the widget if the application exits
                 return True
-            self.drawable.connect("plug-removed", handle_remove)
+            self.drawable.connect('plug-removed', handle_remove)
 
         black=gtk.gdk.Color(0, 0, 0)
         for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
@@ -874,7 +874,7 @@ class AdveneGUI (Connect):
 
         self.drawable.set_size_request(320, 200)
         self.drawable.add_events(gtk.gdk.BUTTON_PRESS)
-        self.drawable.connect_object("button-press-event", self.debug_cb, self.drawable)
+        self.drawable.connect_object('button-press-event', self.debug_cb, self.drawable)
 
         self.player_toolbar=self.get_player_control_toolbar()
 
@@ -987,7 +987,7 @@ class AdveneGUI (Connect):
 
         self.loop_toggle_button=gtk.ToggleToolButton(stock_id=gtk.STOCK_REFRESH)
         self.update_loop_button()
-        self.loop_toggle_button.connect("toggled", loop_toggle_cb)
+        self.loop_toggle_button.connect('toggled', loop_toggle_cb)
         self.player_toolbar.insert(self.loop_toggle_button, -1)
 
         # Append the player status label to the toolbar
@@ -1005,12 +1005,12 @@ class AdveneGUI (Connect):
         adj = gtk.Adjustment(0, 0, 100, 1, 1, 10)
         self.gui.slider = gtk.HScale(adj)
         self.gui.slider.set_draw_value(False)
-        self.gui.slider.connect ("button-press-event", self.on_slider_button_press_event)
-        self.gui.slider.connect ("button-release-event", self.on_slider_button_release_event)
+        self.gui.slider.connect('button-press-event', self.on_slider_button_press_event)
+        self.gui.slider.connect('button-release-event', self.on_slider_button_release_event)
         def update_timelabel(s):
             self.time_label.set_text(helper.format_time(s.get_value()))
             return False
-        self.gui.slider.connect ('value-changed', update_timelabel)
+        self.gui.slider.connect('value-changed', update_timelabel)
 
         # Stack the video components
         v=gtk.VBox()
@@ -1053,7 +1053,7 @@ class AdveneGUI (Connect):
                 return True
             return True
 
-        eb.connect('button_press_event', time_pressed)
+        eb.connect('button-press-event', time_pressed)
         h.pack_start(eb, expand=False)
         h.pack_start(self.gui.slider, expand=True)
         v.pack_start(h, expand=False)
@@ -1218,7 +1218,7 @@ class AdveneGUI (Connect):
         for text, stock, callback in tb_list:
             b=gtk.ToolButton(stock)
             b.set_tooltip(self.tooltips, text)
-            b.connect("clicked", callback)
+            b.connect('clicked', callback)
             tb.insert(b, -1)
 
         tb.show_all()
@@ -1249,7 +1249,7 @@ class AdveneGUI (Connect):
         if config.data.preferences['remember-window-size']:
             s=config.data.preferences['windowsize'].setdefault(name, (640,480))
             window.resize(*s)
-            window.connect ("size_allocate", self.resize_cb, name)
+            window.connect('size-allocate', self.resize_cb, name)
         return True
 
     def resize_cb (self, widget, allocation, name):
@@ -1911,7 +1911,7 @@ class AdveneGUI (Connect):
             w.destroy()
             return True
 
-        b.connect("clicked", close_evaluator)
+        b.connect('clicked', close_evaluator)
         b.show()
         ev.hbox.add(b)
 
@@ -2591,7 +2591,7 @@ class AdveneGUI (Connect):
         """Default ruleset editing."""
         w=gtk.Window(gtk.WINDOW_TOPLEVEL)
         w.set_title(_("Standard RuleSet"))
-        w.connect ("destroy", lambda e: w.destroy())
+        w.connect('destroy', lambda e: w.destroy())
 
         vbox=gtk.VBox()
         vbox.set_homogeneous (False)
@@ -2622,23 +2622,23 @@ class AdveneGUI (Connect):
         hb=gtk.HButtonBox()
 
         b=gtk.Button(stock=gtk.STOCK_ADD)
-        b.connect("clicked", edit.add_rule_cb)
+        b.connect('clicked', edit.add_rule_cb)
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_REMOVE)
-        b.connect("clicked", edit.remove_rule_cb)
+        b.connect('clicked', edit.remove_rule_cb)
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_SAVE)
-        b.connect("clicked", save_ruleset, 'default')
+        b.connect('clicked', save_ruleset, 'default')
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_OK)
-        b.connect("clicked", validate_ruleset, 'default')
+        b.connect('clicked', validate_ruleset, 'default')
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_CANCEL)
-        b.connect("clicked", lambda e: w.destroy())
+        b.connect('clicked', lambda e: w.destroy())
         hb.pack_end(b, expand=False)
 
         hb.show_all()
@@ -2720,11 +2720,11 @@ class AdveneGUI (Connect):
         hbox=gtk.HButtonBox()
 
         b=gtk.Button(stock=gtk.STOCK_CLOSE)
-        b.connect("clicked", close, w)
+        b.connect('clicked', close, w)
         hbox.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_REFRESH)
-        b.connect("clicked", refresh, t)
+        b.connect('clicked', refresh, t)
         hbox.pack_start(b, expand=False)
 
         vbox.pack_start(hbox, expand=False)
@@ -2829,7 +2829,7 @@ class AdveneGUI (Connect):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.set_title(_("Title/Chapter selection"))
 
-        window.connect ("destroy", lambda e: window.destroy())
+        window.connect('destroy', lambda e: window.destroy())
 
         vbox=gtk.VBox()
 
@@ -2855,11 +2855,11 @@ class AdveneGUI (Connect):
             return True
 
         b=gtk.Button(stock=gtk.STOCK_OK)
-        b.connect("clicked", validate, sel, window)
+        b.connect('clicked', validate, sel, window)
         hbox.add(b)
 
         b=gtk.Button(stock=gtk.STOCK_CANCEL)
-        b.connect("clicked", cancel, window)
+        b.connect('clicked', cancel, window)
         hbox.add(b)
 
         vbox.add(hbox)

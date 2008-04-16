@@ -97,7 +97,7 @@ class TimeAdjustment:
             al.add(i)
             b.add(al)
 
-            b.connect("clicked", self.update_value_cb, incr_value)
+            b.connect('clicked', self.update_value_cb, incr_value)
             if incr_value < 0:
                 tip=_("Decrement value by %.2f s") % (incr_value / 1000.0)
             else:
@@ -125,8 +125,8 @@ class TimeAdjustment:
         else:
             width=100
         self.image=TimestampRepresentation(self.value, self.controller, width, epsilon=1000/25)
-        self.image.connect("button-press-event", image_button_press)
-        self.image.connect("clicked", image_button_clicked)
+        self.image.connect('button-press-event', image_button_press)
+        self.image.connect('clicked', image_button_clicked)
         self.tooltips.set_tip(self.image, _("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value\nright-click to invalidate screenshot"))
         hbox.pack_start(self.image, expand=False)
 
@@ -157,7 +157,7 @@ class TimeAdjustment:
             i.set_from_file(config.data.advenefile( ( 'pixmaps', 'set-to-now.png') ))
             self.tooltips.set_tip(current_pos, _("Set to current player position"))
             current_pos.add(i)
-            current_pos.connect("clicked", self.use_current_position)
+            current_pos.connect('clicked', self.use_current_position)
             hb.pack_start(current_pos, expand=False)
 
         vbox.pack_start(hbox, expand=False)
@@ -190,7 +190,7 @@ class TimeAdjustment:
 
         if self.editable:
             # The widget can receive drops from annotations
-            vbox.connect("drag_data_received", self.drag_received)
+            vbox.connect('drag-data-received', self.drag_received)
             vbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                gtk.DEST_DEFAULT_HIGHLIGHT |
                                gtk.DEST_DEFAULT_ALL,
@@ -198,7 +198,7 @@ class TimeAdjustment:
                                + config.data.drag_type['timestamp'],
                                gtk.gdk.ACTION_LINK)
             
-            vbox.connect("scroll-event", handle_scroll_event)
+            vbox.connect('scroll-event', handle_scroll_event)
 
         vbox.show_all()
         return vbox

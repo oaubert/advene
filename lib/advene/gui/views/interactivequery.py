@@ -207,11 +207,11 @@ class InteractiveQuery(AdhocView):
         hb=gtk.HButtonBox()
 
         b=gtk.Button(stock=gtk.STOCK_OK)
-        b.connect ("clicked", self.validate)
+        b.connect('clicked', self.validate)
         hb.pack_start(b, expand=False)
 
         b=gtk.Button(stock=gtk.STOCK_CANCEL)
-        b.connect ("clicked", self.cancel)
+        b.connect('clicked', self.cancel)
         hb.pack_start(b, expand=False)
 
         vbox.pack_start(hb, expand=False)
@@ -368,7 +368,7 @@ class InteractiveResult(AdhocView):
         hb.pack_start(replace_entry, expand=False)
         d.vbox.pack_start(hb, expand=False)
 
-        d.connect("key_press_event", dialog.dialog_keypressed_cb)
+        d.connect('key-press-event', dialog.dialog_keypressed_cb)
         d.show_all()
         dialog.center_on_mouse(d)
         res=d.run()
@@ -584,7 +584,7 @@ class InteractiveResult(AdhocView):
             w.destroy()
             return True
 
-        b.connect("clicked", close_evaluator)
+        b.connect('clicked', close_evaluator)
         b.show()
         ev.hbox.add(b)
 

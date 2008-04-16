@@ -224,8 +224,8 @@ class TranscriptionEdit(AdhocView):
         # Memorize the last keypress time
         self.last_keypress_time = 0
 
-        self.textview.connect("button-press-event", self.button_press_event_cb)
-        self.textview.connect("key-press-event", self.key_pressed_cb)
+        self.textview.connect('button-press-event', self.button_press_event_cb)
+        self.textview.connect('key-press-event', self.key_pressed_cb)
         self.textview.get_buffer().create_tag("past", background="#dddddd")
         self.textview.get_buffer().create_tag("ignored", strikethrough=True)
 
@@ -235,7 +235,7 @@ class TranscriptionEdit(AdhocView):
                                     config.data.drag_type['timestamp']
                                     ,
                                     gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
-        self.textview.connect("drag_data_received", self.textview_drag_received)
+        self.textview.connect('drag-data-received', self.textview_drag_received)
         
         # Hook the completer component
         completer=Completer(textview=self.textview,
@@ -441,39 +441,39 @@ class TranscriptionEdit(AdhocView):
         menu.append(item)
 
         item = gtk.MenuItem(_("Go to..."))
-        item.connect("activate", popup_goto, timestamp)
+        item.connect('activate', popup_goto, timestamp)
         menu.append(item)
 
         item = gtk.MenuItem(_("Ignore the following text (toggle)"))
-        item.connect("activate", popup_ignore, button)
+        item.connect('activate', popup_ignore, button)
         menu.append(item)
 
         item = gtk.MenuItem(_("Remove mark"))
-        item.connect("activate", popup_remove)
+        item.connect('activate', popup_remove)
         menu.append(item)
 
         item = gtk.MenuItem(_("Reaction-time offset"))
-        item.connect("activate", popup_modify, -self.options['delay'])
+        item.connect('activate', popup_modify, -self.options['delay'])
         menu.append(item)
 
         item = gtk.MenuItem(_("-1 sec"))
-        item.connect("activate", popup_modify, -1000)
+        item.connect('activate', popup_modify, -1000)
         menu.append(item)
         item = gtk.MenuItem(_("-0.5 sec"))
-        item.connect("activate", popup_modify, -500)
+        item.connect('activate', popup_modify, -500)
         menu.append(item)
         item = gtk.MenuItem(_("-0.1 sec"))
-        item.connect("activate", popup_modify, -100)
+        item.connect('activate', popup_modify, -100)
         menu.append(item)
 
         item = gtk.MenuItem(_("+1 sec"))
-        item.connect("activate", popup_modify, 1000)
+        item.connect('activate', popup_modify, 1000)
         menu.append(item)
         item = gtk.MenuItem(_("+0.5 sec"))
-        item.connect("activate", popup_modify, 500)
+        item.connect('activate', popup_modify, 500)
         menu.append(item)
         item = gtk.MenuItem(_("+0.1 sec"))
-        item.connect("activate", popup_modify, 100)
+        item.connect('activate', popup_modify, 100)
         menu.append(item)
 
         menu.show_all()
@@ -497,7 +497,7 @@ class TranscriptionEdit(AdhocView):
         child.anchor=anchor
         child.connect('clicked', popup_goto)
         child.popup_menu=None
-        child.connect("button-press-event", self.mark_button_press_cb, anchor, child)
+        child.connect('button-press-event', self.mark_button_press_cb, anchor, child)
 
         def handle_scroll_event(button, event):
             if not (event.state & gtk.gdk.CONTROL_MASK):
@@ -525,8 +525,8 @@ class TranscriptionEdit(AdhocView):
                 return True
             return False
 
-        child.connect("scroll-event", handle_scroll_event)
-        child.connect("key-release-event", mark_key_release_cb, anchor, child)
+        child.connect('scroll-event', handle_scroll_event)
+        child.connect('key-release-event', mark_key_release_cb, anchor, child)
         self.tooltips.set_tip(child, "%s" % helper.format_time(timestamp))
         child.value=timestamp
         child.ignore=False
@@ -959,7 +959,7 @@ class TranscriptionEdit(AdhocView):
         empty_contents_toggle.set_active(self.options['empty-annotations'])
         d.vbox.pack_start(empty_contents_toggle, expand=False)
 
-        d.connect("key_press_event", dialog.dialog_keypressed_cb)
+        d.connect('key-press-event', dialog.dialog_keypressed_cb)
 
         d.show_all()
         dialog.center_on_mouse(d)
@@ -1046,7 +1046,7 @@ class TranscriptionEdit(AdhocView):
             (128, _("Huge")),
             ):
             i=gtk.MenuItem(label)
-            i.connect("activate", set_scale, size)
+            i.connect('activate', set_scale, size)
             m.append(i)
         m.show_all()
         m.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -1080,7 +1080,7 @@ class TranscriptionEdit(AdhocView):
             b=gtk.ToolButton(label=text)
             b.set_stock_id(icon)
             b.set_tooltip(self.tooltips, tooltip)
-            b.connect("clicked", callback)
+            b.connect('clicked', callback)
             tb.insert(b, -1)
 
         def handle_toggle(t, option_name):
@@ -1193,7 +1193,7 @@ if __name__ == "__main__":
 
     window = transcription.popup()
 
-    window.connect ("destroy", lambda e: gtk.main_quit())
+    window.connect('destroy', lambda e: gtk.main_quit())
 
     gtk.main ()
 

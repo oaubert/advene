@@ -318,7 +318,7 @@ class CreateElementPopup(object):
 
     def popup(self, modal=False):
         d=self.build_widget(modal)
-        d.connect("key_press_event", dialog.dialog_keypressed_cb)
+        d.connect('key-press-event', dialog.dialog_keypressed_cb)
         self.dialog=d
         while True:
             d.show()
@@ -360,7 +360,7 @@ if __name__ == "__main__":
 
     for (t, l) in element_label.iteritems():
         b = gtk.Button(l)
-        b.connect("clicked", create_element_cb, t)
+        b.connect('clicked', create_element_cb, t)
         b.show()
         vbox.pack_start(b)
 
@@ -374,16 +374,16 @@ if __name__ == "__main__":
         gtk.main_quit ()
 
     b = gtk.Button (stock=gtk.STOCK_SAVE)
-    b.connect ("clicked", validate_cb, package)
+    b.connect('clicked', validate_cb, package)
     hbox.add (b)
 
     b = gtk.Button (stock=gtk.STOCK_QUIT)
-    b.connect ("clicked", lambda w: window.destroy ())
+    b.connect('clicked', lambda w: window.destroy ())
     hbox.add (b)
 
     vbox.set_homogeneous (False)
 
-    window.connect ("destroy", lambda e: gtk.main_quit())
+    window.connect('destroy', lambda e: gtk.main_quit())
 
     window.show_all()
     gtk.main ()

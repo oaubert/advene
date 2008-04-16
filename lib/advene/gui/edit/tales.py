@@ -138,7 +138,7 @@ class TALESEntry:
 
         if config.data.preferences['expert-mode']:
             b=gtk.Button(stock=gtk.STOCK_FIND)
-            b.connect("clicked", self.browse_expression)
+            b.connect('clicked', self.browse_expression)
             hbox.pack_start(b, expand=False)
 
         hbox.show_all()

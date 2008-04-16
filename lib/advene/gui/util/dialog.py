@@ -157,7 +157,7 @@ def list_selector(title=None,
     d.vbox.add(combobox)
     combobox.show_all()
 
-    d.connect("key_press_event", dialog_keypressed_cb)
+    d.connect('key-press-event', dialog_keypressed_cb)
 
     d.show()
     center_on_mouse(d)
@@ -190,7 +190,7 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, callback=None):
         # parsing the markup. In this case, fallback to simple text
         dialog.label.set_text(label)
     dialog.set_position(gtk.WIN_POS_CENTER_ALWAYS)
-    dialog.connect("key_press_event", dialog_keypressed_cb)
+    dialog.connect('key-press-event', dialog_keypressed_cb)
 
     dialog.show()
     center_on_mouse(dialog)
@@ -238,7 +238,7 @@ def yes_no_cancel_popup(title=None,
         l=gtk.Label(text)
         l.show()
         hb.add(l)
-    d.connect("key_press_event", dialog_keypressed_cb)
+    d.connect('key-press-event', dialog_keypressed_cb)
 
     d.show()
     center_on_mouse(d)
@@ -288,7 +288,7 @@ def entry_dialog(title=None,
         for s in completions:
             liststore.append([ s ])
 
-    d.connect("key_press_event", dialog_keypressed_cb)
+    d.connect('key-press-event', dialog_keypressed_cb)
 
     d.vbox.add(e)
 
@@ -340,7 +340,7 @@ def build_optionmenu(elements, current, on_change_element, editable=True):
     optionmenu.pack_start(cell, True)
     optionmenu.add_attribute(cell, 'text', 0)
     optionmenu.set_active_iter(active_iter)
-    optionmenu.connect("changed", change_cb, on_change_element)
+    optionmenu.connect('changed', change_cb, on_change_element)
     optionmenu.set_sensitive(editable)
     optionmenu.show_all()
     return optionmenu
@@ -379,7 +379,7 @@ def title_id_widget(element_title=None,
         id_entry.set_text(helper.title2id(unicode(entry.get_text())))
         return True
 
-    title_entry.connect("changed", update_id)
+    title_entry.connect('changed', update_id)
 
     v.id_entry=id_entry
     v.title_entry=title_entry
@@ -419,7 +419,7 @@ def title_id_dialog(title=_("Name the element"),
 
     v=title_id_widget(element_title, element_id)
     d.vbox.pack_start(v, expand=False)
-    d.connect("key_press_event", dialog_keypressed_cb)
+    d.connect('key-press-event', dialog_keypressed_cb)
     d.id_entry=v.id_entry
     d.title_entry=v.title_entry
     return d
@@ -537,7 +537,7 @@ def get_filename(title=_("Open a file"),
             button._filename=None
         return True
 
-    preview.connect("clicked", do_preview)
+    preview.connect('clicked', do_preview)
 
     fs=gtk.FileChooserDialog(title=title,
                              parent=None,
@@ -566,8 +566,8 @@ def get_filename(title=_("Open a file"),
         fs.add_filter(filters[name])
 
     fs.set_filter(filters[filter])
-    fs.connect("selection_changed", update_preview)
-    fs.connect("key_press_event", dialog_keypressed_cb)
+    fs.connect('selection-changed', update_preview)
+    fs.connect('key-press-event', dialog_keypressed_cb)
 
     if default_dir:
         fs.set_current_folder(default_dir)
@@ -696,7 +696,7 @@ class CategorizedSelector:
             return self.button
         b=gtk.Button(self.description_getter(self.current))
         if self.editable:
-            b.connect("clicked", lambda w: self.popup_menu())
+            b.connect('clicked', lambda w: self.popup_menu())
         b.show()
         self.button=b
         return b

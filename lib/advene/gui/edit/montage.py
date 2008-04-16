@@ -72,7 +72,7 @@ class Montage(AdhocView):
                                      upper=36000,
                                      step_incr=5,
                                      page_incr=1000)
-        self.scale.connect ("value-changed", scale_event)
+        self.scale.connect('value-changed', scale_event)
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
@@ -171,9 +171,9 @@ class Montage(AdhocView):
             return False
 
         w=AnnotationWidget(annotation=annotation, container=self)
-        w.connect("drag_data_get", drag_sent)
-        w.connect("button_press_event", button_press)
-        w.connect("focus-in-event", lambda b, e: self.set_annotation(annotation))
+        w.connect('drag-data-get', drag_sent)
+        w.connect('button-press-event', button_press)
+        w.connect('focus-in-event', lambda b, e: self.set_annotation(annotation))
 
         if position is not None:
             self.contents.insert(position, w)
@@ -270,7 +270,7 @@ class Montage(AdhocView):
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['annotation'], gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
-        b.connect("drag_data_received", drag_received)
+        b.connect('drag-data-received', drag_received)
 
         self.mainbox.pack_start(b, expand=False, fill=False)
         return b
@@ -368,14 +368,14 @@ class Montage(AdhocView):
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['uri-list'], gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
-        b.connect("drag_data_received", remove_drag_received)
+        b.connect('drag-data-received', remove_drag_received)
         ti=gtk.ToolItem()
         ti.add(b)
         tb.insert(ti, -1)
 
         b=gtk.ToolButton(stock_id=gtk.STOCK_MEDIA_PLAY)
         b.set_tooltip(self.controller.gui.tooltips, _("Play the montage"))
-        b.connect("clicked", self.play)
+        b.connect('clicked', self.play)
         tb.insert(b, -1)
 
         def zoom_entry(entry):
@@ -478,7 +478,7 @@ class Montage(AdhocView):
                                    config.data.drag_type['annotation']
                                    + config.data.drag_type['annotation-type'],
                                    gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE)
-        v.connect("drag_data_received", mainbox_drag_received)
+        v.connect('drag-data-received', mainbox_drag_received)
 
         sw=gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)

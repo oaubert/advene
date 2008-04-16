@@ -251,7 +251,7 @@ class SVGContentHandler (ContentHandler):
 
         self.parse_svg()
 
-        self.view.drawer.widget.connect("drag_data_received", self.drawer_drag_received)
+        self.view.drawer.widget.connect('drag-data-received', self.drawer_drag_received)
         self.view.drawer.widget.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                               gtk.DEST_DEFAULT_HIGHLIGHT |
                                               gtk.DEST_DEFAULT_ALL,

@@ -104,8 +104,8 @@ class AnnotationTable(AdhocView):
         select = tree_view.get_selection()
         select.set_mode(gtk.SELECTION_MULTIPLE)
 
-        tree_view.connect("button_press_event", self.tree_view_button_cb)
-        tree_view.connect("row-activated", self.row_activated_cb)
+        tree_view.connect('button-press-event', self.tree_view_button_cb)
+        tree_view.connect('row-activated', self.row_activated_cb)
         #tree_view.set_search_column(COLUMN_CONTENT)
 
         def search_content(model, column, key, it):
@@ -149,7 +149,7 @@ class AnnotationTable(AdhocView):
                                   ,
                                   gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
 
-        #tree_view.connect("drag_data_get", self.drag_data_get_cb)
+        #tree_view.connect('drag-data-get', self.drag_data_get_cb)
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -348,8 +348,8 @@ class GenericTable(AdhocView):
         select = tree_view.get_selection()
         select.set_mode(gtk.SELECTION_MULTIPLE)
 
-        tree_view.connect("button_press_event", self.tree_view_button_cb)
-        tree_view.connect("row-activated", self.row_activated_cb)
+        tree_view.connect('button-press-event', self.tree_view_button_cb)
+        tree_view.connect('row-activated', self.row_activated_cb)
         #tree_view.set_search_column(COLUMN_CONTENT)
 
         def search_content(model, column, key, it):

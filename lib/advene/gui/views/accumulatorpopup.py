@@ -115,7 +115,7 @@ class AccumulatorPopup(AdhocView):
 
             b=get_pixmap_button('small_close.png')
             b.set_relief(gtk.RELIEF_NONE)
-            b.connect("clicked", self.undisplay_cb, widget)
+            b.connect('clicked', self.undisplay_cb, widget)
             hb.pack_start(b, expand=False, fill=False)
 
             f.set_label_widget(hb)

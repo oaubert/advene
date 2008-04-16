@@ -445,12 +445,12 @@ class TreeWidget(AdhocView):
         select = tree_view.get_selection()
         select.set_mode(gtk.SELECTION_SINGLE)
 
-        tree_view.connect("button_press_event", self.tree_view_button_cb)
-        tree_view.connect("row-activated", self.row_activated_cb)
+        tree_view.connect('button-press-event', self.tree_view_button_cb)
+        tree_view.connect('row-activated', self.row_activated_cb)
         tree_view.set_search_column(AdveneTreeModel.COLUMN_TITLE)
 
-        #tree_view.connect("select-cursor-row", self.debug_cb)
-        #select.connect ("changed", self.debug_cb)
+        #tree_view.connect('select-cursor-row', self.debug_cb)
+        #select.connect('changed', self.debug_cb)
 
         cell = gtk.CellRendererText()
         column = gtk.TreeViewColumn(_("Package View"), cell,
@@ -471,7 +471,7 @@ class TreeWidget(AdhocView):
                                   ,
                                   gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
 
-        tree_view.connect("drag_data_get", self.drag_data_get_cb)
+        tree_view.connect('drag-data-get', self.drag_data_get_cb)
 
         try:
             # set_enable_tree_lines is available in gtk >= 2.10

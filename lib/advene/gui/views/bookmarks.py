@@ -225,7 +225,7 @@ class Bookmarks(AdhocView):
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
-        b.connect("drag_data_received", remove_drag_received)
+        b.connect('drag-data-received', remove_drag_received)
         hb.pack_start(b, expand=False)
 
         def bookmark_current_time(b):
@@ -251,7 +251,7 @@ class Bookmarks(AdhocView):
             else:
                 b=gtk.ToolButton(stock_id=icon)
             b.set_tooltip(self.controller.gui.tooltips, tip)
-            b.connect("clicked", action)
+            b.connect('clicked', action)
             tb.insert(b, -1)
         hb.add(tb)
         v.pack_start(hb, expand=False)
@@ -283,7 +283,7 @@ class Bookmarks(AdhocView):
                                   gtk.DEST_DEFAULT_HIGHLIGHT |
                                   gtk.DEST_DEFAULT_ALL,
                                   config.data.drag_type['timestamp'], gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
-        self.mainbox.connect("drag_data_received", mainbox_drag_received)
+        self.mainbox.connect('drag-data-received', mainbox_drag_received)
 
         v.add(sw)
 
@@ -318,7 +318,7 @@ class BookmarkWidget(object):
                 self.controller.update_status("set", self.value, notify=False)
             return True
 
-        self.image.connect("clicked", activate)
+        self.image.connect('clicked', activate)
 
         if self.display_comments:
             hbox=gtk.HBox()

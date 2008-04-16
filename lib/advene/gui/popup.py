@@ -233,7 +233,7 @@ class Menu:
         else:
             i = gtk.MenuItem(item, use_underline=False)
         if action is not None:
-            i.connect("activate", action, *param, **kw)
+            i.connect('activate', action, *param, **kw)
         menu.append(i)
         return i
 
@@ -313,7 +313,7 @@ class Menu:
         hb.add(s)
         d.vbox.pack_start(hb, expand=False)
 
-        d.connect("key_press_event", dialog.dialog_keypressed_cb)
+        d.connect('key-press-event', dialog.dialog_keypressed_cb)
         d.show_all()
         dialog.center_on_mouse(d)
 
@@ -451,7 +451,7 @@ class Menu:
                     m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
                     amenu=gtk.Menu()
                     m.set_submenu(amenu)
-                    amenu.connect("map", build_submenu, at, l)
+                    amenu.connect('map', build_submenu, at, l)
                     submenu.append(m)
             if submenu.get_children():
                 # There were incoming annotations. Use a separator
@@ -467,7 +467,7 @@ class Menu:
                     m=gtk.MenuItem(self.controller.get_title(at), use_underline=False)
                     amenu=gtk.Menu()
                     m.set_submenu(amenu)
-                    amenu.connect("map", build_submenu, at, l)
+                    amenu.connect('map', build_submenu, at, l)
                     submenu.append(m)
             submenu.show_all()
             return False
@@ -476,21 +476,21 @@ class Menu:
             i=gtk.MenuItem(_("Related annotations"), use_underline=False)
             submenu=gtk.Menu()
             i.set_submenu(submenu)
-            submenu.connect("map", build_related, element)
+            submenu.connect('map', build_related, element)
             menu.append(i)
 
             if element.incomingRelations:
                 i=gtk.MenuItem(_("Incoming relations"), use_underline=False)
                 submenu=gtk.Menu()
                 i.set_submenu(submenu)
-                submenu.connect("map", build_submenu, element, element.incomingRelations)
+                submenu.connect('map', build_submenu, element, element.incomingRelations)
                 menu.append(i)
 
             if element.outgoingRelations:
                 i=gtk.MenuItem(_("Outgoing relations"), use_underline=False)
                 submenu=gtk.Menu()
                 i.set_submenu(submenu)
-                submenu.connect("map", build_submenu, element, element.outgoingRelations)
+                submenu.connect('map', build_submenu, element, element.outgoingRelations)
                 menu.append(i)
 
         add_item("")
@@ -499,20 +499,20 @@ class Menu:
         item.add(image_from_position(self.controller,
                                      position=element.fragment.begin,
                                      height=60))
-        item.connect("activate", self.goto_annotation, element)
+        item.connect('activate', self.goto_annotation, element)
         menu.append(item)
 
         #add_item(element.content.data[:40])
-        add_item(_("Begin: %s")
+        add_item(_('Begin: %s')
                  % helper.format_time (element.fragment.begin))
-        add_item(_("End: %s") % helper.format_time (element.fragment.end))
+        add_item(_('End: %s') % helper.format_time (element.fragment.end))
         return
 
     def make_relation_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
         add_item(element.content.data)
-        add_item(_("Members:"))
+        add_item(_('Members:'))
         for a in element.members:
             item=gtk.MenuItem(self.get_title(a), use_underline=False)
             m=Menu(element=a, controller=self.controller)
@@ -525,13 +525,13 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         if self.readonly:
             return
-        add_item(_("Edit package properties..."), self.controller.gui.on_package_properties1_activate)
-        add_item(_("Create a new static view..."), self.create_element, 'staticview', element)
-        add_item(_("Create a new dynamic view..."), self.create_element, 'dynamicview', element)
-        add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
-        #add_item(_("Create a new relation..."), self.create_element, Relation, element)
-        add_item(_("Create a new schema..."), self.create_element, Schema, element)
-        add_item(_("Create a new query..."), self.create_element, Query, element)
+        add_item(_('Edit package properties...'), self.controller.gui.on_package_properties1_activate)
+        add_item(_('Create a new static view...'), self.create_element, 'staticview', element)
+        add_item(_('Create a new dynamic view...'), self.create_element, 'dynamicview', element)
+        add_item(_('Create a new annotation...'), self.create_element, Annotation, element)
+        #add_item(_('Create a new relation...'), self.create_element, Relation, element)
+        add_item(_('Create a new schema...'), self.create_element, Schema, element)
+        add_item(_('Create a new query...'), self.create_element, Query, element)
         return
 
     def make_resources_menu(self, element, menu):
@@ -539,10 +539,10 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         if self.readonly:
             return
-        add_item(_("Create a new folder..."), self.create_element, Resources, element)
-        add_item(_("Create a new resource file..."), self.create_element, ResourceData, element)
-        add_item(_("Insert a new resource file..."), self.insert_resource_data, element)
-        add_item(_("Insert a new resource directory..."), self.insert_resource_directory, element)
+        add_item(_('Create a new folder...'), self.create_element, Resources, element)
+        add_item(_('Create a new resource file...'), self.create_element, ResourceData, element)
+        add_item(_('Insert a new resource file...'), self.insert_resource_data, element)
+        add_item(_('Insert a new resource directory...'), self.insert_resource_directory, element)
         return
 
     def make_resourcedata_menu(self, element, menu):
@@ -560,29 +560,29 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         if self.readonly:
             return
-        add_item(_("Create a new annotation type..."),
+        add_item(_('Create a new annotation type...'),
                  self.create_element, AnnotationType, element)
-        add_item(_("Create a new relation type..."),
+        add_item(_('Create a new relation type...'),
                  self.create_element, RelationType, element)
-        add_item(_("Select a color"), self.pick_color, element)
+        add_item(_('Select a color'), self.pick_color, element)
         return
 
     def make_annotationtype_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
-        add_item(_("Display as transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source="here/annotationTypes/%s/annotations/sorted" % element.id))
-        add_item(_("Display annotations in table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations))
-        add_item(_("Use in a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=element.annotations))
+        add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % element.id))
+        add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations))
+        add_item(_('Use in a montage'), lambda i: self.controller.gui.open_adhoc_view('montage', elements=element.annotations))
 
         if self.readonly:
             return
-        add_item(_("Select a color"), self.pick_color, element)
-        add_item(_("Create a new annotation..."), self.create_element, Annotation, element)
-        add_item(_("Delete all annotations..."), self.delete_elements, element, element.annotations)
-        add_item(_("Renumber annotations"), self.renumber_annotations, element)
+        add_item(_('Select a color'), self.pick_color, element)
+        add_item(_('Create a new annotation...'), self.create_element, Annotation, element)
+        add_item(_('Delete all annotations...'), self.delete_elements, element, element.annotations)
+        add_item(_('Renumber annotations'), self.renumber_annotations, element)
 
         add_item('')
-        i=gtk.MenuItem(_("%d annotations(s)") % len(element.annotations))
+        i=gtk.MenuItem(_('%d annotations(s)') % len(element.annotations))
         menu.append(i)
         i.set_sensitive(False)
 
@@ -593,8 +593,8 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         if self.readonly:
             return
-        add_item(_("Select a color"), self.pick_color, element)
-        add_item(_("Delete all relations..."), self.delete_elements, element, element.relations)
+        add_item(_('Select a color'), self.pick_color, element)
+        add_item(_('Delete all relations...'), self.delete_elements, element, element.relations)
         return
 
     def make_query_menu(self, element, menu):
@@ -609,17 +609,17 @@ class Menu:
                                                     result=res,
                                                     destination='east')
             except Exception, e:
-                self.controller.log(_("Exception in query: %s") % unicode(e))
+                self.controller.log(_('Exception in query: %s') % unicode(e))
             return True
 
-        m=gtk.MenuItem(_("Apply query on..."))
+        m=gtk.MenuItem(_('Apply query on...'))
         menu.append(m)
         sm=gtk.Menu()
         m.set_submenu(sm)
         for (expr, label) in (
-             ('package', _("the package")),
-             ('package/annotations', _("all annotations of the package")),
-             ('package/annotations/first', _("the first annotation of the package")),
+             ('package', _('the package')),
+             ('package/annotations', _('all annotations of the package')),
+             ('package/annotations/first', _('the first annotation of the package')),
             ):
             i=gtk.MenuItem(label)
             i.connect('activate', try_query, expr)
@@ -643,14 +643,14 @@ class Menu:
             self.add_menuitem(menu, *p, **kw)
         t=helper.get_view_type(element)
         if t == 'dynamic':
-            add_item(_("Activate view"), self.activate_stbv, element)
+            add_item(_('Activate view'), self.activate_stbv, element)
         elif t == 'adhoc':
-            add_item(_("Open adhoc view"), self.open_adhoc_view, element)
+            add_item(_('Open adhoc view'), self.open_adhoc_view, element)
         elif t == 'static' and element.matchFilter['class'] in ('package', '*'):
-            add_item(_("Open in web browser"), open_in_browser, element)
+            add_item(_('Open in web browser'), open_in_browser, element)
         if 'html' in element.content.mimetype and helper.get_id(element.rootPackage.views, '_richedit'):
             # The richedit view is available. Propose to use it.
-            add_item(_("Edit in the WYSIWYG editor"), wysiwyg_edit, element)
+            add_item(_('Edit in the WYSIWYG editor'), wysiwyg_edit, element)
         return
 
     def make_bundle_menu(self, element, menu):
@@ -659,11 +659,11 @@ class Menu:
         if self.readonly:
             return
         if element.viewableType == 'query-list':
-            add_item(_("Create a new query..."), self.create_element, Query, element.rootPackage)
+            add_item(_('Create a new query...'), self.create_element, Query, element.rootPackage)
         elif element.viewableType == 'view-list':
-            add_item(_("Create a new static view..."), self.create_element, 'staticview', element.rootPackage)
-            add_item(_("Create a new dynamic view..."), self.create_element, 'dynamicview', element.rootPackage)
+            add_item(_('Create a new static view...'), self.create_element, 'staticview', element.rootPackage)
+            add_item(_('Create a new dynamic view...'), self.create_element, 'dynamicview', element.rootPackage)
         elif element.viewableType == 'schema-list':
-            add_item(_("Create a new schema..."), self.create_element, Schema, element.rootPackage)
+            add_item(_('Create a new schema...'), self.create_element, Schema, element.rootPackage)
         return
 
