@@ -124,8 +124,10 @@ class ActiveBookmarks(AdhocView):
     def remove(self, w):
         """Remove the given widget from mainbox.
         """
+        index=self.bookmarks.index(w)
         self.bookmarks.remove(w)
         w.widget.destroy()
+        self.set_current_bookmark(self.bookmarks[index % len(self.bookmarks)])
         self.generate_focus_chain()
         return True
 
@@ -144,6 +146,8 @@ class ActiveBookmarks(AdhocView):
 
     def set_current_bookmark(self, cur=None):
         b=self.get_current_bookmark()
+        if b == cur:
+            return
         if b is not None:
             b.set_current(False)
         if cur is not None:
@@ -602,6 +606,8 @@ class ActiveBookmark(object):
     end=property(get_end, set_end)
 
     def set_current(self, is_current=True):
+        """Display the 'current' marker (red frame) around the widget.
+        """
         if is_current == self.is_current:
             # Nothing to do
             return
@@ -631,13 +637,14 @@ class ActiveBookmark(object):
     def end_drag_received(self, widget, context, x, y, selection, targetType, time):
         if self.is_widget_in_bookmark(context.get_source_widget()):
             return False
+        self.container.set_current_bookmark(self)
         if targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.data)
             e=long(data['timestamp'])
             if self.end is not None and context.action == gtk.gdk.ACTION_COPY:
                 # Save a copy of the deleted timestamp next to the current bookmark
                 i=self.container.bookmarks.index(self)
-                self.container.append(self.end, index=i+1)
+                self.container.append(self.end, index=i + 1)
             if e < self.begin:
                 # Invert begin and end.
                 self.begin, self.end = e, self.begin
@@ -647,6 +654,7 @@ class ActiveBookmark(object):
             # If the drop was done from within our view, then
             # delete the origin widget.
             self.container.delete_origin_timestamp(context.get_source_widget())
+            self.container.set_current_bookmark(self)
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
@@ -748,6 +756,10 @@ class ActiveBookmark(object):
             b=get_pixmap_button('small_ok.png', handle_ok)
             b.set_relief(gtk.RELIEF_NONE)
             self.controller.gui.tooltips.set_tip(b, _("Validate the annotation"))
+            def set_current(widget, event):
+                self.container.set_current_bookmark(self)
+                return True
+            b.connect('focus-in-event', set_current)
             self.frame.set_label_widget(b)
             b.show_all()
             # Update the textview color
@@ -847,6 +859,8 @@ class ActiveBookmark(object):
                 # If the drop was done from within our view, then
                 # delete the origin widget.
                 self.container.delete_origin_timestamp(context.get_source_widget())
+                # Set the current status
+                self.container.set_current_bookmark(self)
                 return True
             elif targetType == config.data.target_type['annotation-type']:
                 source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
