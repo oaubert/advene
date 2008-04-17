@@ -152,12 +152,32 @@ class ActiveBookmarks(AdhocView):
             b.set_current(False)
         if cur is not None:
             cur.set_current(True)
-        
+
+    def duplicate_bookmark(self, cur=None):
+        """Duplicate a bookmark.
+
+        If no bookmark is given, then try to duplicate the current one.
+        """
+        if cur is None:
+            # Control-D: duplicate current bookmark
+            cur=self.get_current_bookmark()
+        if cur is not None:
+            b=ActiveBookmark(container=cur.container,
+                             begin=cur.begin,
+                             end=cur.end,
+                             content=cur.content,
+                             annotation=cur.annotation)
+            self.append(b, after_current=True)
+        return True
+
     def generate_focus_chain(self, *p):
         self.mainbox.set_focus_chain([ w for b in self.bookmarks  for w in (b.widget, b.begin_widget.comment_entry) ])
 
     def append(self, t, index=None, after_current=False):
-        b=ActiveBookmark(container=self, begin=t, end=None, content=None)
+        if not isinstance(t, ActiveBookmark):
+            b=ActiveBookmark(container=self, begin=t, end=None, content=None)
+        else:
+            b=t
         b.widget.show_all()
         if after_current:
             # Insert the bookmark after the current one.
@@ -491,6 +511,20 @@ class ActiveBookmarks(AdhocView):
         self.mainbox.connect('drag-end', hide_arrow_mark)
         self.mainbox.connect('drag-leave', hide_arrow_mark)
         self.mainbox.set_spacing(8)
+
+        # Shortcuts
+        def mainbox_key_press(widget, event):
+            if event.keyval == gtk.keysyms.Delete or event.keyval == gtk.keysyms.BackSpace:
+                cur=self.get_current_bookmark()
+                if cur is not None:
+                    self.remove(cur)
+                return True
+            elif event.keyval == gtk.keysyms.d and event.state & gtk.gdk.CONTROL_MASK:
+                # Control-D: duplicate current bookmark
+                self.duplicate_bookmark()
+                return True
+            return False
+        self.mainbox.connect('key-press-event', mainbox_key_press)
 
         dropbox=gtk.HBox()
         dropbox.add(gtk.Label(_("Drop timestamps here")))
@@ -829,6 +863,10 @@ class ActiveBookmark(object):
     def timestamp_key_press(self, widget, event, source):
         if event.keyval == gtk.keysyms.Delete or event.keyval == gtk.keysyms.BackSpace:
             self.delete_timestamp(source)
+            return True
+        elif event.keyval == gtk.keysyms.d and event.state & gtk.gdk.CONTROL_MASK:
+            # Control-D: duplicate current bookmark
+            self.container.duplicate_bookmark()
             return True
         return False
 
