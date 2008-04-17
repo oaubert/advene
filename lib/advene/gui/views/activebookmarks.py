@@ -950,6 +950,21 @@ class ActiveBookmark(object):
         self.begin_widget.comment_entry.connect('focus-in-event', focus_bookmark)
         self.begin_widget.image.connect('focus-in-event', focus_bookmark)
 
+        def extend_image_menu(menu, element):
+            for (label, action) in (
+                (_("Duplicate bookmark"), lambda i: self.container.duplicate_bookmark(self)),
+                (_("Remove bookmark"), lambda i: self.container.remove(self)),
+                ):
+                i=gtk.MenuItem(label)
+                i.connect('activate', action)
+                menu.append(i)
+            if self.annotation is None:
+                i=gtk.MenuItem(_("Complete bookmark"))
+                i.connect('activate', lambda i: self.set_end(self.begin + 2000))
+                menu.append(i)
+            return
+        self.begin_widget.image.extend_popup_menu=extend_image_menu
+
         self.begin_widget.comment_entry.set_accepts_tab(False)
 
         box.pack_start(self.begin_widget.widget, expand=True)
