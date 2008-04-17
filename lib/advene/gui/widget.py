@@ -16,7 +16,11 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Annotation widget.
+"""Reusable widgets.
+
+Note that, contrary to a common pattern found in the Advene sources
+(where the real widget is stored as the self.widget attribute), each
+of the widgets defined in this module is a gtk.Widget.
 
 Documentation:
 http://www.tortall.net/mu/wiki/CairoTutorial
