@@ -1152,11 +1152,13 @@ class AdveneGUI (Connect):
                     a=self.open_adhoc_view('activebookmarks', destination='fareast')
 
                 if a is not None:
-                    after_current=(event.state & gtk.gdk.SHIFT_MASK)
-                    b=a.append(pos, after_current=after_current)
+                    b=a.append(pos, after_current=(event.state & gtk.gdk.SHIFT_MASK))
                     b.grab_focus()
-                    # FIXME: use scroll_to_current
-                    a.scroll_to_end()
+                    # We can scroll to the bookmark only after it has
+                    # been allocated a space (and thus the
+                    # scroll_to_bookmark method can know its position
+                    # inside its parent).
+                    b.widget.connect('size-allocate', lambda w, e: a.scroll_to_bookmark(b) and False)
                 return True
         elif event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.Tab:
