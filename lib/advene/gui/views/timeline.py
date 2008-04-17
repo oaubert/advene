@@ -2486,7 +2486,7 @@ class TimeLine(AdhocView):
         # Add the 'New type' button at the end
         b=gtk.Button()
         l=gtk.Label()
-        l.set_markup('<b><span style='normal'>%s</span></b>' % _('+'))
+        l.set_markup('<b><span style="normal">%s</span></b>' % _('+'))
         l.modify_font(self.annotation_type_font)
         b.add(l)
         self.tooltips.set_tip(b, _('Create a new annotation type'))
