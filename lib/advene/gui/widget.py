@@ -951,11 +951,14 @@ class TimestampRepresentation(gtk.Button):
         else:
             v=self._value
         self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=self.epsilon), width=self.width))
-        self.label.set_markup('<small>%s</small>' % helper.format_time(self._value))
+        ts=helper.format_time(self._value)
+        self.label.set_markup('<small>%s</small>' % ts)
         if self.visible_label and self.label.get_child_requisition()[0] <= 1.2 * self.image.get_child_requisition()[0]:
             self.label.show()
+            self.controller.gui.tooltips.set_tip(self, '')
         else:
             self.label.hide()
+            self.controller.gui.tooltips.set_tip(self, ts)
         return True
 
     def set_width(self, w):
