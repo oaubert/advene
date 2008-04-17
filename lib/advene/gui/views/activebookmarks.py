@@ -57,7 +57,7 @@ class ActiveBookmarks(AdhocView):
             (_("Clear"), self.clear),
             )
         self.options={
-            'snapshot_width': 60,
+            'snapshot-size': config.data.preferences['bookmark-snapshot-width'],
             }
         self.controller=controller
         # self.bookmarks is a list of ActiveBookmark objects
@@ -292,6 +292,11 @@ class ActiveBookmarks(AdhocView):
         elif wid == b.end_widget.image:
             b.end=None
 
+    def set_image_size(self, size):
+        self.options['snapshot-size']=size
+        for b in self.bookmarks:
+            b.set_image_size(size)
+
     def build_widget(self):
         v=gtk.VBox()
         hb=gtk.HBox()
@@ -432,18 +437,40 @@ class ActiveBookmarks(AdhocView):
         self.chosen_type_selector=sel
         tb.insert(i, -1)
 
+        def scale_snaphots_menu(i):
+            def set_scale(i, s):
+                self.set_image_size(s)
+                return True
+
+            m=gtk.Menu()
+            s=config.data.preferences['bookmark-snapshot-width']
+            for size, label in (
+                (long(.5 * s), _("Smallish")),
+                (long(.8 * s), _("Small")),
+                (s, _("Normal")),
+                (long(1.2 * s), _("Large")),
+                (long(1.5 * s), _("Larger")),
+                (long(2 * s), _("Huge")),
+                ):
+                i=gtk.MenuItem(label)
+                i.connect('activate', set_scale, size)
+                m.append(i)
+            m.show_all()
+            m.popup(None, None, None, 0, gtk.get_current_event_time())
+            return True
+        
         for (icon, tip, method) in (
             (gtk.STOCK_REDO, _("Reorder active bookmarks"), reorder),
             (gtk.STOCK_CONVERT, _("Complete incomplete bookmarks"), complete),
             (gtk.STOCK_SAVE, _("Save the current state"), self.save_view),
+            (gtk.STOCK_FULLSCREEN, _("Set the size of snaphots"), scale_snaphots_menu),
             ):
             b=get_small_stock_button(icon)
             self.controller.gui.tooltips.set_tip(b, tip)
             b.connect('clicked', method)
             i=gtk.ToolItem()
             i.add(b)
-            tb.insert(i, -1)
-
+            tb.insert(i, -1)        
 
         hb.add(tb)
         v.pack_start(hb, expand=False)
@@ -665,7 +692,8 @@ class ActiveBookmark(object):
             # end was not set. We need to create the proper time adjustment
             self.end_widget=BookmarkWidget(controller=self.controller,
                                            timestamp=v,
-                                           display_comments=False)
+                                           display_comments=False,
+                                           width=self.container.options['snapshot-size'])
             self.end_widget.widget.set_property('can-focus', False)
             parent=self.begin_widget.widget.get_parent()
             parent.pack_start(self.end_widget.widget, expand=False)
@@ -791,6 +819,11 @@ class ActiveBookmark(object):
     def get_content(self):
         return self.begin_widget.comment
     content=property(get_content, set_content)
+
+    def set_image_size(self, s):
+        self.begin_widget.image.set_width(s)
+        if self.end_widget != self.dropbox:
+            self.end_widget.image.set_width(s)
 
     def check_annotation(self):
         if self.end is None:
@@ -979,7 +1012,9 @@ class ActiveBookmark(object):
                 return True
             return False
 
-        self.begin_widget=BookmarkWidget(self.controller, display_comments=True)
+        self.begin_widget=BookmarkWidget(self.controller,
+                                         display_comments=True,
+                                         width=self.container.options['snapshot-size'])
         self.begin_widget.image.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                               gtk.DEST_DEFAULT_HIGHLIGHT |
                                               gtk.DEST_DEFAULT_ALL,
