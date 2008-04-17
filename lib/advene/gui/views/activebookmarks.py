@@ -66,18 +66,7 @@ class ActiveBookmarks(AdhocView):
         self.options.update(opt)
         for n, v in arg:
             if n == 'bookmark':
-                ident, b, e, c = v.split(':')
-                if ident != 'None':
-                    a=helper.get_id(self.controller.package.annotations, ident)
-                else:
-                    a=None
-                begin=long(b)
-                if e == 'None':
-                    end=None
-                else:
-                    end=long(e)
-                content=urllib.unquote(c)
-                b=ActiveBookmark(container=self, begin=begin, end=end, content=content, annotation=a)
+                b=ActiveBookmark(container=self, from_serialisation=v)
                 b.widget.show_all()
                 self.bookmarks.append(b)
 
@@ -549,16 +538,34 @@ class ActiveBookmark(object):
     """An ActiveBookmark can represent a simple bookmark (i.e. a single
     time, with an optional content) or a completed annotation.
 
-    If the annotation parameter is present, it is used as the source of information.
+    If the from_serialisation parameter is present, it is used as the source of information.
+    
+    Else, if the annotation parameter is present, it is used as the source of information.
+
     Else the begin time is mandatory. It can be associated with an optional content.
 
     If the end time is None, then the widget is displayed as a simple
     bookmark. DNDing a timestamp over the begin image will set the end
     time.
     """
-    def __init__(self, container=None, begin=None, end=None, content=None, annotation=None):
+    def __init__(self, container=None, begin=None, end=None, content=None, annotation=None, from_serialisation=None):
         self.container=container
         self.controller=container.controller
+
+        # If from_serialisation, overwrite all other parameters
+        if from_serialisation is not None:
+            ident, b, e, c = from_serialisation.split(':')
+            if ident != 'None':
+                annotation=helper.get_id(self.controller.package.annotations, ident)
+            else:
+                annotation=None
+            begin=long(b)
+            if e == 'None':
+                end=None
+            else:
+                end=long(e)
+            content=urllib.unquote(c)
+
         self.annotation=annotation
         if annotation is not None:
             # Set the attributes
