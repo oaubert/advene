@@ -260,18 +260,18 @@ class ActiveBookmarks(AdhocView):
         adj.value = adj.upper
         return True
 
-    def scroll_to_bookmark(self, b):
-        """Ensure that the given bookmark is visible.
+    def scroll_to_bookmark(self, b=None):
+        """Ensure that the given bookmark (default: current) is visible.
         """
-        y=b.widget.window.get_position()[1]
+        if not self.bookmarks:
+            return
+        b=b or self.get_current_bookmark() or self.bookmarks[0]
+        x, y, w, h, depth=b.widget.window.get_geometry()
         parent=self.mainbox.get_parent()
         pos=parent.get_vadjustment().value
         height=parent.window.get_geometry()[3]
-
-        print "Scroll to bookmark", y, pos, pos + height
-        if y < pos or y > pos + height:
+        if y < pos or y + h > pos + height:
             parent.get_vadjustment().value = y
-
         return True
 
     def delete_origin_timestamp(self, wid):
@@ -705,6 +705,7 @@ class ActiveBookmark(object):
             if (not self.begin_widget.comment_entry.props.has_focus
                 and not self.begin_widget.image.props.has_focus):
                 self.begin_widget.image.grab_focus()
+            self.container.scroll_to_bookmark(self)
         else:
             self.frame.drag_unhighlight()
         self.is_current=is_current
