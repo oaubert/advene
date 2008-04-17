@@ -124,7 +124,7 @@ class ActiveBookmarks(AdhocView):
     def clear(self, *p):
         del self.bookmarks[:]
         self.mainbox.foreach(self.mainbox.remove)
-        self.set_focus_chain([])
+        self.mainbox.set_focus_chain([])
         return True
 
     def get_current_bookmark(self):
@@ -351,6 +351,46 @@ class ActiveBookmarks(AdhocView):
             m.popup(None, widget, None, 0, gtk.get_current_event_time())
             return True
 
+        def do_complete(b, func):
+            l=[ b for b in self.bookmarks if b.annotation is None ]
+            if isinstance(func, long) or isinstance(func, int):
+                for b in l:
+                    b.end=b.begin+func
+            elif func == 'user':
+                d=dialog.entry_dialog(title=_("Bookmark duration"),
+                                      text=_("Enter the duration (in ms) to convert bookmarks into annotations"),
+                                      default="2000")
+                if d is not None:
+                    try:
+                        d=long(d)
+                    except ValueError:
+                        return
+                    for b in l:
+                        b.end=b.begin+d
+            elif func == 'coverage':
+                begin_list=[ b.begin for b in self.bookmarks ]
+                begin_list.sort()
+                for b in l:
+                    val=[ v for v in begin_list if v > b.begin ]
+                    if val:
+                        b.end=val[0]
+                    else:
+                        b.end=self.controller.cached_duration
+
+        def complete(widget):
+            m=gtk.Menu()
+            for t, func in (
+                (_("User-specified duration"), 'user'),
+                (_("2s duration"), 2000),
+                (_("Complete coverage"), 'coverage'),
+                ):
+                i=gtk.MenuItem(t)
+                i.connect('activate', do_complete, func)
+                m.append(i)
+            m.show_all()
+            m.popup(None, widget, None, 0, gtk.get_current_event_time())
+            return True
+            
         b=get_small_stock_button(gtk.STOCK_DELETE)
         self.controller.gui.tooltips.set_tip(b, _("Drop a bookmark here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -393,6 +433,7 @@ class ActiveBookmarks(AdhocView):
 
         for (icon, tip, method) in (
             (gtk.STOCK_REDO, _("Reorder active bookmarks"), reorder),
+            (gtk.STOCK_CONVERT, _("Complete incomplete bookmarks"), complete),
             (gtk.STOCK_SAVE, _("Save the current state"), self.save_view),
             ):
             b=get_small_stock_button(icon)
