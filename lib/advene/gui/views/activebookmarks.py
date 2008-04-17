@@ -679,6 +679,17 @@ class ActiveBookmark(object):
             self.end_widget.image.connect('drag-data-received', self.end_drag_received)
             self.end_widget.image.connect('scroll-event', self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
             self.end_widget.image.connect('key-press-event', self.timestamp_key_press, 'end')
+
+            def extend_end_image_menu(menu, element):
+                for (label, action) in (
+                    (_("Remove end timestamp"), lambda i: self.set_end(None)), 
+                    ):
+                    i=gtk.MenuItem(label)
+                    i.connect('activate', action)
+                    menu.append(i)
+                return
+            self.end_widget.image.extend_popup_menu=extend_end_image_menu
+
             def focus_bookmark(widget, event):
                 self.container.set_current_bookmark(self)
                 return False
