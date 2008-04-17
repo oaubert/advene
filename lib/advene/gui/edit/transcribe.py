@@ -1028,8 +1028,7 @@ class TranscriptionEdit(AdhocView):
     def set_snapshot_scale(self, size):
         self.options['snapshot-size']=size
         for m in self.marks:
-            m.width=size
-            m.refresh()
+            m.set_width(size)
             
     def scale_snaphots_menu(self, i):
         def set_scale(i, s):
