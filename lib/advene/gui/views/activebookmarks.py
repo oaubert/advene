@@ -1003,6 +1003,19 @@ class ActiveBookmark(object):
                 i=gtk.MenuItem(_("Complete bookmark"))
                 i.connect('activate', lambda i: self.set_end(self.begin + 2000))
                 menu.append(i)
+            else:
+                i=gtk.MenuItem(_("Change type to"))
+                sm=gtk.Menu()
+                i.set_submenu(sm)
+                menu.append(i)
+                l=[ (t, self.controller.get_title(t)) 
+                    for t in self.controller.package.annotationTypes
+                    if t != self.annotation.type ]
+                l.sort(key=lambda a: a[1])
+                for (typ, title) in l:
+                    i=gtk.MenuItem(title, use_underline=False)
+                    i.connect('activate', lambda i: self.transtype(typ))
+                    sm.append(i)
             return
         self.begin_widget.image.extend_popup_menu=extend_image_menu
 
