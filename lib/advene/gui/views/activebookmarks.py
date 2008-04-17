@@ -127,7 +127,8 @@ class ActiveBookmarks(AdhocView):
         index=self.bookmarks.index(w)
         self.bookmarks.remove(w)
         w.widget.destroy()
-        self.set_current_bookmark(self.bookmarks[index % len(self.bookmarks)])
+        if self.bookmarks:
+            self.set_current_bookmark(self.bookmarks[index % len(self.bookmarks)])
         self.generate_focus_chain()
         return True
 
