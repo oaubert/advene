@@ -654,6 +654,9 @@ class ActiveBookmark(object):
             return
         if is_current:
             self.frame.modify_bg(gtk.STATE_NORMAL, self.current_frame_color)
+            if (not self.begin_widget.comment_entry.props.has_focus
+                and not self.begin_widget.image.props.has_focus):
+                self.begin_widget.image.grab_focus()
         else:
             self.frame.modify_bg(gtk.STATE_NORMAL, self.default_frame_color)
         self.is_current=is_current
