@@ -783,7 +783,22 @@ class TimestampRepresentation(gtk.Button):
     @ivar label: the label (timestamp) widget
     @type label: gtk.Label
     """
-    def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None):
+    def __init__(self, value, controller, width=None, epsilon=None, comment_getter=None, visible_label=True):
+        """Instanciate a new TimestampRepresentation.
+        
+        @param value: the timestamp value
+        @type value: int
+        @param controller: the controller
+        @type controller: advene.core.Controller
+        @param width: the snapshot width
+        @type width: int
+        @param epsilon: the precision (for snapshot display)
+        @type epsilon: int (ms)
+        @param comment_getter: method returning the associated comment
+        @type comment_getter: method
+        @param visible_label: should the timestamp label be displayed?
+        @type visible_label: boolean
+        """
         super(TimestampRepresentation, self).__init__()
         self._value=value
         self.controller=controller
@@ -791,6 +806,7 @@ class TimestampRepresentation(gtk.Button):
         if epsilon is None:
             epsilon=config.data.preferences['bookmark-snapshot-precision']
         self.epsilon=epsilon
+        self.visible_label=visible_label
         # comment_getter is a method which returns the comment
         # associated to this timestamp
         self.comment_getter=comment_getter
@@ -821,6 +837,9 @@ class TimestampRepresentation(gtk.Button):
         self.label.set_style(style)
         box.pack_start(self.image, expand=False)
         box.pack_start(self.label, expand=False)
+        if not self.visible_label:
+            self.label.set_no_show_all(True)
+            self.label.hide()
         self.add(box)
         self.box=box
 
@@ -921,7 +940,7 @@ class TimestampRepresentation(gtk.Button):
         return False
 
     def refresh(self):
-        """Update the display of the widget according to self._value.
+        """Update the display of the widget according to self._value and self.width
         """
         if self._value is None:
             v=-1
@@ -929,16 +948,36 @@ class TimestampRepresentation(gtk.Button):
             v=self._value
         self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=self.epsilon), width=self.width))
         self.label.set_markup('<small>%s</small>' % helper.format_time(self._value))
+        if self.visible_label and self.label.get_child_requisition()[0] <= 1.2 * self.image.get_child_requisition()[0]:
+            self.label.show()
+        else:
+            self.label.hide()
         return True
 
+    def set_width(self, w):
+        """Set the width of the snapshot and refresh the display.
+        """
+        self.width=w
+        self.refresh()
+
     def invalidate_snapshot(self, *p):
-        # Invalidate the image
+        """Invalidate the snapshot image.
+        """
         self.controller.package.imagecache.invalidate(self.value, self.epsilon)
         self.refresh()
         return True
 
     def popup_menu(self, popup=True):
-        # Display the popup menu
+        """Display the popup menu.
+
+        If self.extend_popup_menu is defined, it must be a method
+        which will be called with the menu and the element as
+        parameters, in order to extend the popup menu with contextual
+        items.
+
+        @param popup: should the menu be immediately displayed as a popup menu
+        @type popup: boolean
+        """
         menu = gtk.Menu()
         item = gtk.MenuItem(_("Invalidate snapshot"))
         item.connect('activate', self.invalidate_snapshot)
