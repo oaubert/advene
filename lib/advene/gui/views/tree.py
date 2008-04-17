@@ -554,7 +554,11 @@ class TreeWidget(AdhocView):
         """
         node = self.get_selected_node (widget)
         if node is not None:
-            self.controller.gui.edit_element(node)
+            # If node is an adhoc-view, then open it.
+            if isinstance(node, View) and helper.get_view_type(node) == 'adhoc':
+                self.controller.gui.open_adhoc_view(node)
+            else:
+                self.controller.gui.edit_element(node)
             return True
         return False
 
