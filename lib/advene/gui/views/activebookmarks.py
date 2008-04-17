@@ -268,10 +268,11 @@ class ActiveBookmarks(AdhocView):
         b=b or self.get_current_bookmark() or self.bookmarks[0]
         x, y, w, h, depth=b.widget.window.get_geometry()
         parent=self.mainbox.get_parent()
-        pos=parent.get_vadjustment().value
+        adj=parent.get_vadjustment()
+        pos=adj.value
         height=parent.window.get_geometry()[3]
         if y < pos or y + h > pos + height:
-            parent.get_vadjustment().value = y
+            parent.get_vadjustment().value = min(y, adj.upper - adj.page_size)
         return True
 
     def delete_origin_timestamp(self, wid):
