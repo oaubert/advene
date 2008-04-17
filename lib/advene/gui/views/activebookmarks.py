@@ -660,12 +660,12 @@ class ActiveBookmark(object):
             # Nothing to do
             return
         if is_current:
-            self.frame.modify_bg(gtk.STATE_NORMAL, self.current_frame_color)
+            self.frame.drag_highlight()
             if (not self.begin_widget.comment_entry.props.has_focus
                 and not self.begin_widget.image.props.has_focus):
                 self.begin_widget.image.grab_focus()
         else:
-            self.frame.modify_bg(gtk.STATE_NORMAL, self.default_frame_color)
+            self.frame.drag_unhighlight()
         self.is_current=is_current
 
     def serialize(self):
@@ -961,8 +961,6 @@ class ActiveBookmark(object):
 
         # Memorize the default textview color.
         self.default_background_color=self.begin_widget.comment_entry.get_style().base[gtk.STATE_NORMAL]
-        self.default_frame_color=self.frame.get_style().bg[gtk.STATE_NORMAL]
-        self.current_frame_color=gtk.gdk.color_parse('black')
 
         #if self.annotation is not None:
         self.set_frame_attributes()
