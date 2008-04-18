@@ -1,9 +1,38 @@
 advene (0.29) unstable; urgency=low
 
+  * The shortcut to start/pause the player has changed: it is now
+    Control+Tab (so that plain Tab/Shift-Tab can be used to navigate in
+    the GUI)
+  
+  * New global shortcuts: Insert or Alt-Space creates a new active
+    bookmark.
+  
   * New exporter: CMML
 
-  * Timeline view: annotations can be merged by DND
+  * New adhoc view: activebookmarks, which can be used to build
+    annotations from timestamps. It can also be exported to HTML.
 
+  * Timeline view: 
+     * annotations can be merged by DND
+     * Dragging an annotation type to another one will propose to
+       duplicate or move all annotations to the new type
+
+  * Note-taking view: timestamp marks are now displaying a
+    screenshot. Their size can be tuned.
+  
+  * Dynamic views: new actions have been defined
+  
+     * Braille (display a message in braille, depends on brltty)
+  
+     * OpenStaticView: open a static view in the web browser
+  
+     * State-related actions (StateSet, StateClear, StateIncr)
+       have been added. They allow to manage a package-specific state in
+       dynamic views. The counter "name" can be accessed through the TALES
+       expression "package/state/name"
+  
+  * Various GUI and usability improvements
+  
  --
 
 advene (0.28) unstable; urgency=low
