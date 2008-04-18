@@ -961,6 +961,15 @@ class TimestampRepresentation(gtk.Button):
             self.controller.gui.tooltips.set_tip(self, ts)
         return True
 
+    def as_html(self):
+        """Return a HTML representation of the widget.
+        """
+        return """<img width="120" border="0" src="%(image_url)s" alt="" /><br /><em><a href="%(player_url)s">%(timestamp)s</a></em>""" % {
+            'image_url': 'http:/media/snapshot/advene/%d' % self._value,
+            'player_url': 'http:/media/play/%d' % self._value,
+            'timestamp': helper.format_time(self._value) 
+            }
+
     def set_width(self, w):
         """Set the width of the snapshot and refresh the display.
         """
