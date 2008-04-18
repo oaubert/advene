@@ -1113,7 +1113,7 @@ class ActiveBookmark(object):
                 l.sort(key=lambda a: a[1])
                 for (typ, title) in l:
                     i=gtk.MenuItem(title, use_underline=False)
-                    i.connect('activate', lambda i: self.transtype(typ))
+                    i.connect('activate', (lambda i, t: self.transtype(t)), typ)
                     sm.append(i)
             return
         self.begin_widget.image.extend_popup_menu=extend_image_menu
