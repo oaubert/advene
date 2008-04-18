@@ -318,7 +318,10 @@ class ActiveBookmarks(AdhocView):
         v.content.data=self.as_html()
         self.controller.package.views.append(v)
         self.controller.notify('ViewCreate', view=v)
-        self.log(_("Bookmark view successfully exported as %s") % v.title)
+        d=dialog.message_dialog(_("Bookmark view successfully exported as %s.\nOpen it in the web browser ?") % v.title, icon=gtk.MESSAGE_QUESTION)
+        if d:
+            c=self.controller.build_context(here=v)
+            self.controller.open_url(c.evaluateValue('package/view/%s/absolute_url' % ident))
         return True
 
     def as_html(self, use_tal=True):
