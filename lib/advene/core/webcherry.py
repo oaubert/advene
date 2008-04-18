@@ -1914,7 +1914,7 @@ class Action(Common):
     """
     def index(self):
         catalog=self.controller.event_handler.catalog
-        res=[ self.start_html(_("Available actions"), duplicate_title=True) ]
+        res=[ self.start_html(_("Available actions"), duplicate_title=True, mode='navigation') ]
         res.append("<ul>")
         d=dict(catalog.get_described_actions(expert=True).iteritems())
         k=d.keys()
