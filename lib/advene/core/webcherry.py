@@ -167,7 +167,6 @@ class Common:
             res.append(_("""
             <p>
             <a href="/admin">Server administration</a> |
-            <a href="/admin/status">Server status</a> |
             <a href="/media">Media control</a> |
             <a href="%(path)s?mode=raw">Raw view</a>
             </p>
@@ -383,7 +382,7 @@ class Media(Common):
     def index(self):
         """Display media status"""
         return "".join( (
-            self.start_html (_('Media information')),
+            self.start_html (_('Media information'), mode='navigation'),
             self.display_media_status () ) )
     index.exposed=True
 
@@ -408,7 +407,7 @@ class Media(Common):
         # snapshot syntax: /media/snapshot/package_alias/NNNN
         res=[]
         if not args:
-            res.append(self.start_html (_("Access to packages snapshots"), duplicate_title=True))
+            res.append(self.start_html (_("Access to packages snapshots"), duplicate_title=True, mode='navigation'))
             res.append ("<ul>")
             for alias in self.controller.packages.keys ():
                 res.append ("""<li><a href="/media/snapshot/%s">%s</a></li>""" % (alias, alias))
@@ -424,7 +423,7 @@ class Media(Common):
             position=long(args[1])
         except IndexError:
             # No position was given. Display all available snapshots
-            res.append(self.start_html (_("Available snapshots for %s") % alias, duplicate_title=True))
+            res.append(self.start_html (_("Available snapshots for %s") % alias, duplicate_title=True, mode='navigation'))
             if (params.has_key('mode') and params['mode'] == 'inline'):
                 template="""<li><a href="/media/snapshot/%(alias)s/%(position)d"><img src="/media/snapshot/%(alias)s/%(position)d" /></a></li>"""
                 res.append ("""<p><a href="/media/snapshot/%s">Display with no inline images</a></p>""" % alias)
@@ -601,7 +600,10 @@ class Application(Common):
         else:
             res.append(_("""<p>Opened adhoc views: %s</p>""") % ", ".join([ v.view_name for v in c.gui.adhoc_views]))
             res.append(_("""<p>Available adhoc views:</p><ul>"""))
-            for name, view in c.gui.registered_adhoc_views.iteritems():
+            l=c.gui.registered_adhoc_views.keys()
+            l.sort()
+            for name in l:
+                view=c.gui.registered_adhoc_views[name]
                 try:
                     description=": " + view.tooltip
                 except AttributeError:
@@ -627,7 +629,7 @@ class Application(Common):
 
     def index(self):
         return "".join( (
-            self.start_html (_('Application information')),
+            self.start_html (_('Application information'), mode='navigation'),
             self.current_stbv(),
             self.current_adhoc() )
             )
@@ -778,12 +780,12 @@ class Access(Common):
                           for (name, ip) in self.controller.server.authorized_hosts.items()])
 
     def index(self):
-        return "".join( ( self.start_html(_('Access control'), duplicate_title=True),
+        return "".join( ( self.start_html(_('Access control'), duplicate_title=True, mode='navigation'),
                           self.display_access_list()) )
     index.exposed=True
 
     def add(self, hostname):
-        res=[self.start_html(_('Access control - add a hostname'), duplicate_title=True)]
+        res=[self.start_html(_('Access control - add a hostname'), duplicate_title=True, mode='navigation')]
         ip=None
         if hostname == '*':
             ip='*'
@@ -800,7 +802,7 @@ class Access(Common):
     add.exposed=True
 
     def delete(self, hostname):
-        res=[self.start_html(_('Access control - delete a hostname'), duplicate_title=True)]
+        res=[self.start_html(_('Access control - delete a hostname'), duplicate_title=True, mode='navigation')]
         ip=None
         try:
             ip = socket.gethostbyname (hostname)
@@ -864,7 +866,7 @@ class Admin(Common):
         This method displays the administration page of the server, which
         should link to all functionalities.
         """
-        res=[ self.start_html (_("Server Administration"), duplicate_title=True) ]
+        res=[ self.start_html (_("Server Administration"), duplicate_title=True, mode='navigation') ]
         if self.controller.server.displaymode == 'raw':
             switch='navigation'
         else:
@@ -902,7 +904,7 @@ class Admin(Common):
         This method displays the data files in the data directory.
         Maybe it should be removed when the server runs embedded.
         """
-        res=[ self.start_html (_("Available files"), duplicate_title=True) ]
+        res=[ self.start_html (_("Available files"), duplicate_title=True, mode='navigation') ]
         res.append ("<ul>")
 
         l=[ os.path.join(config.data.path['data'], n)
@@ -939,7 +941,7 @@ class Admin(Common):
             # cause problems with the GUI
             self.controller.load_package (uri=uri, alias=alias)
             return "".join( (
-                self.start_html (_("Package %s loaded") % alias, duplicate_title=True),
+                self.start_html (_("Package %s loaded") % alias, duplicate_title=True, mode='navigation'),
                 _("""<p>Go to the <a href="/packages/%(alias)s">%(alias)s</a> package, or to the <a href="/packages">package list</a>.""") % { 'alias': alias }
                 ))
         except Exception, e:
@@ -954,7 +956,7 @@ class Admin(Common):
         try:
             self.controller.unregister_package (alias)
             return "".join((
-                self.start_html (_("Package %s deleted") % alias, duplicate_title=True),
+                self.start_html (_("Package %s deleted") % alias, duplicate_title=True, mode='navigation'),
                 _("""<p>Go to the <a href="/packages">package list</a>.""")
                 ))
         except Exception, e:
@@ -975,7 +977,7 @@ class Admin(Common):
                 self.controller.save_package()
                 alias='default'
             return "".join((
-                self.start_html (_("Package %s saved") % alias, duplicate_title=True),
+                self.start_html (_("Package %s saved") % alias, duplicate_title=True, mode='navigation'),
                 _("""<p>Go to the <a href="/packages/%(alias)s">%(alias)s</a> package, or to the <a href="/packages">package list</a>.""") % { 'alias': alias }
                 ))
         except Exception, e:
@@ -989,13 +991,13 @@ class Admin(Common):
         """Reset packages list.
         """
         self.controller.reset()
-        return self.start_html (_('Server reset'), duplicate_title=True)
+        return self.start_html (_('Server reset'), duplicate_title=True, mode='navigation')
     reset.exposed=True
 
     def methods(self):
         """Display available TALES methods.
         """
-        res=[ self.start_html (_('Available TALES methods'), duplicate_title=True) ]
+        res=[ self.start_html (_('Available TALES methods'), duplicate_title=True, mode='navigation') ]
         res.append('<ul>')
         c=self.controller.build_context(here=None)
         k=c.methods.keys()
@@ -1036,7 +1038,7 @@ class Packages(Common):
         packages. The generated list provides links for accessing,
         reloading, saving or removing the package.
         """
-        res=[ self.start_html (_("Loaded package(s)")) ]
+        res=[ self.start_html (_("Loaded package(s)"), mode='navigation') ]
 
         res.append (_("""
         <h1>Loaded package(s)</h1>
@@ -1123,7 +1125,7 @@ class Packages(Common):
         try:
             objet = context.evaluateValue (expr)
         except AdveneException, e:
-            self.start_html (_("Error"), duplicate_title=True)
+            self.start_html (_("Error"), duplicate_title=True, mode='navigation')
             res.append (_("""The TALES expression %s is not valid.""") % tales)
             res.append (unicode(e.args[0]).encode('utf-8'))
             return
@@ -2008,7 +2010,7 @@ class Root(Common):
     def index(self):
         """Display the server root document.
         """
-        res=[ self.start_html (_("Advene webserver"), duplicate_title=True) ]
+        res=[ self.start_html (_("Advene webserver"), duplicate_title=True, mode='navigation') ]
         res.append(_("""<p>Welcome on the <a href="http://liris.cnrs.fr/advene/">Advene</a> webserver run by %(userid)s on %(serveraddress)s.</p>""") %
                          {
                 'userid': config.data.userid,
