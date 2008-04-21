@@ -1761,7 +1761,7 @@ class AdveneGUI (Connect):
         if not config.data.preferences['expert-mode']:
             if media == '':
                 dialog.message_dialog(_("No media association is defined in the package. Please use the 'File/Select a video file' menuitem to associate a media file."), callback=lambda: True)
-            elif not os.path.exists(unicode(media).encode(sys.getfilesystemencoding(), 'ignore')) and not media.startswith('http:'):
+            elif not os.path.exists(unicode(media).encode(sys.getfilesystemencoding(), 'ignore')) and not media.startswith('http:') and not media.startswith('dvd'):
                 dialog.message_dialog(_("The associated media %s could not be found. Please use the 'File/Select a video file' menuitem to associate a media file.") % media, callback=lambda: True)
 
         # FIXME: deactivated for the moment, it freezes the GUI just
