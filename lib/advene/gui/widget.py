@@ -934,9 +934,27 @@ class TimestampRepresentation(gtk.Button):
             return False
         return True
 
+    def goto_and_refresh(self, *p):
+        """Goto the timestamp, and refresh the image if necessary and possible.
+        """
+        if self._value is None:
+            return True
+        self.controller.update_status("start", self._value)
+        cache=self.controller.package.imagecache
+        if not cache.is_initialized(self._value, epsilon=self.epsilon):
+            # The image was invalidated (or not initialized). Use
+            # a timer to update it after some time.
+            def refresh_timeout():
+                if cache.is_initialized(self._value, epsilon=self.epsilon):
+                    # The image was updated. Refresh the display.
+                    self.refresh()
+                return False
+            gobject.timeout_add (500, refresh_timeout)
+        return True
+
     def _button_press_handler(self, widget, event):
         if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS and self._value is not None:
-            self.controller.update_status("start", self._value)
+            self.goto_and_refresh()
             return True
         elif event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS and self.popup_menu is not None:
             self.popup_menu()
