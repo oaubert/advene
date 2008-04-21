@@ -276,9 +276,8 @@ class Player:
         return position
 
     def dvd_uri(self, title=None, chapter=None):
-        # FIXME: todo
-        return "dvd@%s:%s" % (str(title),
-                              str(chapter))
+        # FIXME: find the syntax to specify chapter
+        return "dvd://%s" % str(title)
 
     def check_uri(self):
         if gst.uri_is_valid(self.player.get_property('uri')):
