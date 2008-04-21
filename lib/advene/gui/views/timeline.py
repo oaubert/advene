@@ -1010,24 +1010,8 @@ class TimeLine(AdhocView):
                             break
                 if ok:
                     def merge_annotations(widget, s, d):
-                        if s.type == d.type:
-                            # Merging same-type annotations. Extend
-                            # the annotation bounds.
-                            begin=min(s.fragment.begin, d.fragment.begin)
-                            end=max(s.fragment.end, d.fragment.end)
-                            d.fragment.begin=begin
-                            d.fragment.end=end
-                        # Merging data
-                        mts=s.type.mimetype
-                        mtd=d.type.mimetype
-                        if mtd == 'text/plain' or ( mtd == mts and mtd == 'application/x-advene-structured' ):
-                            d.content.data=d.content.data + '\n' + s.content.data
-                        elif mtd == 'application/x-advene-structured':
-                            # FIXME: should compare fields and merge identical fields
-                            d.content.data=d.content.data + '\nmerged_content="' + cgi.urllib.quote(s.content.data)+'"'
-                        self.controller.notify("AnnotationMerge", package=self.controller.package,comment="")
-                        self.controller.delete_element(s)
-                        self.controller.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations")
+                        self.controller.merge_annotations(s, d, extend_bounds=(s.type == d.type))
+                        return True
                     item=gtk.MenuItem(_("Merge with this annotation"))
                     item.connect('activate', merge_annotations, source, dest)
                     menu.append(item)
