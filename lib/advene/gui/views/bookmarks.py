@@ -313,12 +313,7 @@ class BookmarkWidget(object):
     def build_widget(self):
         self.image=TimestampRepresentation(self.value, self.controller, comment_getter=lambda: self.comment, width=self.width)
 
-        def activate(widget=None):
-            if self.value is not None:
-                self.controller.update_status("set", self.value, notify=False)
-            return True
-
-        self.image.connect('clicked', activate)
+        self.image.connect('clicked', self.image.goto_and_refresh)
 
         if self.display_comments:
             hbox=gtk.HBox()
