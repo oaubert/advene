@@ -1159,6 +1159,40 @@ class AdveneController:
         self.notify("AnnotationCreate", annotation=an, comment="Duplicate annotation")
         return an
 
+    def merge_annotations(self, s, d, extend_bounds=False):
+        """Merge annotation s into annotation d.
+        """
+        if extend_bounds:
+            # Extend the annotation bounds (mostly used for same-type
+            # annotations)
+            begin=min(s.fragment.begin, d.fragment.begin)
+            end=max(s.fragment.end, d.fragment.end)
+            d.fragment.begin=begin
+            d.fragment.end=end
+        # Merging data
+        mts=s.type.mimetype
+        mtd=d.type.mimetype
+        if mtd == 'text/plain':
+            d.content.data=d.content.data + '\n' + s.content.data
+        elif ( mtd == mts and mtd == 'application/x-advene-structured' ):
+            # Compare fields and merge identical fields
+            sdata=s.content.parsed()
+            ddata=d.content.parsed()
+            for k, v in sdata.iteritems():
+                if k in ddata:
+                    # Merge fields
+                    ddata[k] = "|".join( (sdata[k], ddata[k]) )
+                else:
+                    ddata[k] = sdata[k]
+            # Re-encode ddata
+            d.content.data="\n".join( [ "%s=%s" % (k, unicode(v).replace('\n', '%0A')) for (k, v) in ddata.iteritems() if k != '_all' ] )
+        elif mtd == 'application/x-advene-structured':
+            d.content.data=d.content.data + '\nmerged_content="' + cgi.urllib.quote(s.content.data)+'"'
+        self.notify("AnnotationMerge", package=self.package,comment="")
+        self.delete_element(s)
+        self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations")
+        return d
+
     def restart_player (self):
         """Restart the media player."""
         self.player.restart_player ()
