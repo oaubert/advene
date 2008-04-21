@@ -528,18 +528,30 @@ class ActiveBookmarks(AdhocView):
                 self.arrow_mark=shaped_window_from_xpm(arrow_right_xpm)
             if not self.bookmarks:
                 return True
-            if widget == self.mainbox:
-                l=[ b
-                    for b in self.bookmarks
-                    if y < b.widget.get_allocation().y + b.widget.get_allocation().height  ]
-                if l:
-                    y=l[0].widget.get_allocation().y - 10
-                else:
-                    a=self.bookmarks[-1].widget.get_allocation()
-                    y=a.y + a.height
-                rx, ry = widget.window.get_origin()
-                self.arrow_mark.move(long(rx), long(ry + y))
-                self.arrow_mark.show_all()
+            l=[ b
+                for b in self.bookmarks
+                if y < b.widget.get_allocation().y + b.widget.get_allocation().height  ]
+            if l:
+                y=l[0].widget.get_allocation().y - 10
+            else:
+                a=self.bookmarks[-1].widget.get_allocation()
+                y=a.y + a.height
+            rx, ry = widget.window.get_origin()
+            self.arrow_mark.move(long(rx), long(ry + y))
+            self.arrow_mark.show_all()
+            actions=drag_context.actions
+            is_in_view=drag_context.get_source_widget().is_ancestor(widget)
+            if (actions == gtk.gdk.ACTION_MOVE
+                or actions == gtk.gdk.ACTION_LINK):
+                # Only 1 possible action. Use it.
+                drag_context.drag_status(actions, timestamp)
+            elif actions == gtk.gdk.ACTION_COPY and is_in_view and config.data.drag_type['annotation'][0][0] in drag_context.targets:
+                # We cannot just copy an annotation from our own view,
+                # it just can be moved
+                drag_context.drag_status(gtk.gdk.ACTION_MOVE, timestamp)
+            elif gtk.gdk.ACTION_MOVE & actions and is_in_view:
+                # DND from the same view. Force default to move.
+                drag_context.drag_status(gtk.gdk.ACTION_MOVE, timestamp)
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             index=None
@@ -558,7 +570,8 @@ class ActiveBookmarks(AdhocView):
                 if 'comment' in data:
                     b.content=data['comment']
                 # If the drag originated from our own widgets, remove it.
-                self.delete_origin_timestamp(context.get_source_widget())
+                if context.action == gtk.gdk.ACTION_MOVE:
+                    self.delete_origin_timestamp(context.get_source_widget())
                 return True
             elif targetType == config.data.target_type['annotation-type']:
                 # Populate the view with annotation begins
@@ -584,7 +597,7 @@ class ActiveBookmarks(AdhocView):
                         self.bookmarks.append(b)
                     self.refresh()
                 else:
-                    # Dropping from another view. Create a bookmark
+                    # Dropping from another view or copying. Create a bookmark
                     b=ActiveBookmark(container=self, annotation=source)
                     if index is None:
                         self.bookmarks.append(b)
@@ -1176,7 +1189,7 @@ class ActiveBookmark(object):
                            + config.data.drag_type['timestamp']
                            + config.data.drag_type['tag']
                            ,
-                           gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY)
+                           gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
         eb.connect('drag-data-get', drag_sent)
 
         def _drag_begin(widget, context):
