@@ -1015,13 +1015,13 @@ class TimestampRepresentation(gtk.Button):
         @param popup: should the menu be immediately displayed as a popup menu
         @type popup: boolean
         """
+        p=self.controller.player
+
         menu = gtk.Menu()
         item = gtk.MenuItem(_("Invalidate snapshot"))
         item.connect('activate', self.invalidate_snapshot)
         menu.append(item)
 
-        p=self.controller.player
-        menu = gtk.Menu()
         item = gtk.MenuItem(_("Use the current player position"))
         item.connect('activate', lambda i: self.set_value(p.current_position_value))
         if p.status != p.PauseStatus and p.status != p.PlayingStatus:
