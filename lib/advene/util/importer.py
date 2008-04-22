@@ -429,7 +429,10 @@ class LsDVDImporter(GenericImporter):
 
     def __init__(self, regexp=None, encoding='latin1', **kw):
         super(LsDVDImporter, self).__init__(**kw)
-        self.command="/usr/bin/lsdvd -c"
+        lsdvd=helper.find_in_path('lsdvd')
+        if lsdvd is None:
+            raise Exception("Cannot find lsdvd")
+        self.command=self.lsdvd + " -c"
         # FIXME: handle Title- lines
         #Chapter: 01, Length: 00:01:16, Start Cell: 01
         self.regexp="^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<duration>[0-9:]+)"

@@ -2553,7 +2553,12 @@ class AdveneGUI (Connect):
                 _("Do you confirm the creation of annotations matching the DVD chapters?"),
                 icon=gtk.MESSAGE_QUESTION):
                 return True
-            i=advene.util.importer.get_importer('lsdvd', controller=self.controller)
+            try:
+                i=advene.util.importer.get_importer('lsdvd', controller=self.controller)
+            except Exception:
+                dialog.message_dialog(_("Cannot import DVD chapters. Did you install the lsdvd software?"),
+                                        icon=gtk.MESSAGE_ERROR)
+                return True
             i.package=self.controller.package
             i.process_file('lsdvd')
             self.controller.package._modified = True
