@@ -2303,15 +2303,20 @@ class AdveneGUI (Connect):
             if sc == newschema:
                 sctitle=new_schema_title_dialog.title_entry.get_text()
                 scid=new_schema_title_dialog.id_entry.get_text()
-                # FIXME: check for existing id
-                # Create the schema
-                sc=self.controller.package.createSchema(ident=scid)
-                sc.author=config.data.userid
-                sc.date=self.controller.get_timestamp()
-                sc.title=sctitle
-                self.controller.package.schemas.append(sc)
-                self.controller.notify('SchemaCreate', schema=sc)
-                self.edit_element(sc, modal=True)
+                sc=self.controller.package.get_element_by_id(scid)
+                if sc is None:
+                    # Create the schema
+                    sc=self.controller.package.createSchema(ident=scid)
+                    sc.author=config.data.userid
+                    sc.date=self.controller.get_timestamp()
+                    sc.title=sctitle
+                    self.controller.package.schemas.append(sc)
+                    self.controller.notify('SchemaCreate', schema=sc)
+                    self.edit_element(sc, modal=True)
+                else:
+                    dialog.message_dialog(_("You specified an existing identifier. Aborting."))
+                    d.destroy()
+                    return None
         else:
             sc=None
         d.destroy()
