@@ -742,12 +742,16 @@ class AdveneController:
         if event_name in self.modifying_events:
             # Find the element's package
             # Kind of hackish... This information should be clearly available somewhere
-            el=event_name.lower().replace('create','').replace('editend','').replace('delete', '')
-            p=kw[el].ownerPackage
+            el_name=event_name.lower().replace('create','').replace('editend','').replace('delete', '')
+            el=kw[el_name]
+            p=el.ownerPackage
             p._modified = True
             if event_name.endswith('Delete'):
                 # We removed an element, so remove its id from the _idgenerator set
-                p._idgenerator.remove(kw[el].id)
+                p._idgenerator.remove(el.id)
+            elif event_name.endswith('Create'):
+                # We created an element. Make sure its id is registered in the _idgenerator
+                p._idgenerator.add(el.id)
 
         immediate=False
         if immediate in kw:
