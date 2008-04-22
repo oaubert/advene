@@ -1019,6 +1019,15 @@ class TimestampRepresentation(gtk.Button):
         item = gtk.MenuItem(_("Invalidate snapshot"))
         item.connect('activate', self.invalidate_snapshot)
         menu.append(item)
+
+        p=self.controller.player
+        menu = gtk.Menu()
+        item = gtk.MenuItem(_("Use the current player position"))
+        item.connect('activate', lambda i: self.set_value(p.current_position_value))
+        if p.status != p.PauseStatus and p.status != p.PlayingStatus:
+            item.set_sensitive(False)
+        menu.append(item)
+
         if self.extend_popup_menu is not None:
             self.extend_popup_menu(menu, self)
         menu.show_all()
