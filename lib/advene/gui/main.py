@@ -1204,18 +1204,27 @@ class AdveneGUI (Connect):
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
 
-        tb_list = (
-            (_("Play"), gtk.STOCK_MEDIA_PLAY,
+
+        tb_list = [
+            (_("Play [Control-Tab]"), gtk.STOCK_MEDIA_PLAY,
              self.on_b_play_clicked),
-            (_("Pause"), gtk.STOCK_MEDIA_PAUSE,
+            (_("Pause [Control-Tab]"), gtk.STOCK_MEDIA_PAUSE,
              self.on_b_pause_clicked),
             (_("Stop"), gtk.STOCK_MEDIA_STOP,
              self.on_b_stop_clicked),
-            (_("Rewind (%.02f s)") % (config.data.preferences['time-increment'] / 1000.0), gtk.STOCK_MEDIA_REWIND,
+            (_("Rewind (%.02f s) [Control-Left]") % (config.data.preferences['time-increment'] / 1000.0), gtk.STOCK_MEDIA_REWIND,
              self.on_b_rewind_clicked),
-            (_("Forward (%.02f s)" % (config.data.preferences['time-increment'] / 1000.0)), gtk.STOCK_MEDIA_FORWARD,
+            (_("Forward (%.02f s) [Control-Right]" % (config.data.preferences['time-increment'] / 1000.0)), gtk.STOCK_MEDIA_FORWARD,
              self.on_b_forward_clicked),
-            )
+            ]
+
+        # FIXME: loosy check. Should implement a
+        # player.get_capabilities() and check for "frame-by-frame"
+        if 'gstreamer' in self.controller.player.__module__:
+            tb_list.extend( (
+                    (_("Previous frame [Control-Down]"), gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_position (-1000/25, notify=False)),
+                    (_("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_position (1000/25, notify=False)),
+                    ) )
 
         for text, stock, callback in tb_list:
             b=gtk.ToolButton(stock)
