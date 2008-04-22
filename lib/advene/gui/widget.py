@@ -939,9 +939,12 @@ class TimestampRepresentation(gtk.Button):
         """
         if self._value is None:
             return True
-        self.controller.update_status("start", self._value)
         cache=self.controller.package.imagecache
-        if not cache.is_initialized(self._value, epsilon=self.epsilon):
+        # We have to check for is_initialized before doing the
+        # update_status, since the snapshot may be updated by the update_status
+        do_refresh=not cache.is_initialized(self._value, epsilon=self.epsilon)
+        self.controller.update_status("start", self._value)
+        if do_refresh:
             # The image was invalidated (or not initialized). Use
             # a timer to update it after some time.
             def refresh_timeout():
@@ -949,7 +952,7 @@ class TimestampRepresentation(gtk.Button):
                     # The image was updated. Refresh the display.
                     self.refresh()
                 return False
-            gobject.timeout_add (500, refresh_timeout)
+            gobject.timeout_add (100, refresh_timeout)
         return True
 
     def _button_press_handler(self, widget, event):
