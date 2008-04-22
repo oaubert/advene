@@ -279,10 +279,10 @@ class AdhocView(object):
         return self.options, []
 
     def save_view(self, *p):
-        name=self.controller.package._idgenerator.get_id(View)+'_'+self.view_id
+        title, ident=self.controller.package._idgenerator.new_from_title(self._label)
         title, ident=dialog.get_title_id(title=_("Saving %s" % self.view_name),
-                                                  element_title=name,
-                                                  element_id=name,
+                                                  element_title=title,
+                                                  element_id=ident,
                                                   text=_("Enter a view name to save this parametered view"))
         if ident is not None:
             if not re.match(r'^[a-zA-Z0-9_]+$', ident):
