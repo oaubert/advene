@@ -184,7 +184,7 @@ class ImageCache(dict):
             epsilon=self.epsilon
         valids = [ (pos, abs(pos-key))
                    for pos in self.keys()
-                   if abs(pos - key) <= epsilon ]
+                   if pos is not None and abs(pos - key) <= epsilon ]
         valids.sort(key=operator.itemgetter(1))
 
         if valids:
