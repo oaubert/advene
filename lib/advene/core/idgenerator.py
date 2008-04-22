@@ -26,6 +26,7 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
+import advene.util.helper as helper
 
 class Generator:
     """Identifier generator.
@@ -105,3 +106,16 @@ class Generator:
         # Do not append yet.
         #self.existing.append(id_)
         return id_
+
+    def new_from_title(self, title):
+        """Generate a new (title, identifier) from a given title.
+        """
+        root=helper.title2id(title)
+        index=1
+        i="%s%d" % (root, index)
+        while i in self.existing:
+            index += 1
+            i="%s%d" % (root, index)
+        if index != 1:
+            title="%s%d" % (title, index)
+        return title, i
