@@ -2204,18 +2204,31 @@ class AdveneGUI (Connect):
                 # Creation of a new type.
                 attitle=new_type_title_dialog.title_entry.get_text()
                 atid=new_type_title_dialog.id_entry.get_text()
+                at=self.controller.package.get_element_by_id(atid)
+                if at is not None:
+                    dialog.message_dialog(_("You specified a annotation-type identifier that already exists. Aborting."))
+                    d.destroy()
+                    return None
                 sc=schema_selector.get_current_element()
                 if sc == newschema:
                     sctitle=new_schema_title_dialog.title_entry.get_text()
                     scid=new_schema_title_dialog.id_entry.get_text()
-                    # FIXME: check for existing id
-                    # Create the schema
-                    sc=self.controller.package.createSchema(ident=scid)
-                    sc.author=config.data.userid
-                    sc.date=self.controller.get_timestamp()
-                    sc.title=sctitle
-                    self.controller.package.schemas.append(sc)
-                    self.controller.notify('SchemaCreate', schema=sc)
+                    sc=self.controller.package.get_element_by_id(scid)
+                    if sc is None:
+                        # Create the schema
+                        sc=self.controller.package.createSchema(ident=scid)
+                        sc.author=config.data.userid
+                        sc.date=self.controller.get_timestamp()
+                        sc.title=sctitle
+                        self.controller.package.schemas.append(sc)
+                        self.controller.notify('SchemaCreate', schema=sc)
+                    elif isinstance(sc, Schema):
+                        # Warn the user that he is reusing an existing one
+                        dialog.message_dialog(_("You specified a existing schema identifier. Using the existing schema."))
+                    else:
+                        dialog.message_dialog(_("You specified an existing identifier that does not reference a schema. Aborting."))
+                        d.destroy()
+                        return None
                 # Create the type
                 at=sc.createAnnotationType(ident=atid)
                 at.author=config.data.userid
