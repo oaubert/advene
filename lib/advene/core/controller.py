@@ -426,7 +426,7 @@ class AdveneController:
             self.restricted_rule=self.event_handler.internal_rule(event="AnnotationEnd",
                                                                   method=restricted_play)
             p=self.player
-            if p.status == p.PauseStatus or p == p.PlayingStatus:
+            if p.status == p.PauseStatus or p.status == p.PlayingStatus:
                 if [ a for a in self.active_annotations if a.type == at ]:
                     # We are in an annotation of the right type. Do
                     # not move the player, just play from here.
@@ -949,13 +949,14 @@ class AdveneController:
     def set_media(self, uri=None):
         """Set the current media in the video player.
         """
+        p=self.player
         if isinstance(uri, unicode):
             uri=uri.encode('utf8')
-        if self.player.status in (self.player.PlayingStatus, self.player.PauseStatus):
-            self.player.stop(0)
-        self.player.playlist_clear()
+        if p.status == p.PlayingStatus or p.status == p.PauseStatus:
+            p.stop(0)
+        p.playlist_clear()
         if uri is not None:
-            self.player.playlist_add_item (uri)
+            p.playlist_add_item (uri)
         self.notify("MediaChange", uri=uri)
 
     def set_default_media (self, uri, package=None):
