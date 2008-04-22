@@ -1205,14 +1205,14 @@ class AdveneGUI (Connect):
         tb.set_style(gtk.TOOLBAR_ICONS)
 
         tb_list = (
-            (_("Rewind (%.02f s)") % (config.data.preferences['time-increment'] / 1000.0), gtk.STOCK_MEDIA_REWIND,
-             self.on_b_rewind_clicked),
             (_("Play"), gtk.STOCK_MEDIA_PLAY,
              self.on_b_play_clicked),
             (_("Pause"), gtk.STOCK_MEDIA_PAUSE,
              self.on_b_pause_clicked),
-            #(_("Stop"), gtk.STOCK_MEDIA_STOP,
-            # self.on_b_stop_clicked),
+            (_("Stop"), gtk.STOCK_MEDIA_STOP,
+             self.on_b_stop_clicked),
+            (_("Rewind (%.02f s)") % (config.data.preferences['time-increment'] / 1000.0), gtk.STOCK_MEDIA_REWIND,
+             self.on_b_rewind_clicked),
             (_("Forward (%.02f s)" % (config.data.preferences['time-increment'] / 1000.0)), gtk.STOCK_MEDIA_FORWARD,
              self.on_b_forward_clicked),
             )
