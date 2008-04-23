@@ -1738,6 +1738,20 @@ class AdveneController:
             self.cleanup_done = True
         return True
 
+    def move_frame(self, number_of_frames=1):
+        """Pseudo-frame-by-frame navigation.
+
+        @param number_of_frames: the number of frames to advance (possibly negative).
+        """
+        p=self.player
+        if p.status == p.PlayingStatus:
+            self.update_status('pause')
+        elif p.status != p.PauseStatus:
+            self.update_status('start')
+            self.update_status('pause')
+        self.move_position (1000 / 25 * number_of_frames, notify=False)
+        return True
+
     def move_position (self, value, relative=True, notify=True):
         """Helper method : fast forward or rewind by value milliseconds.
 
