@@ -1170,10 +1170,10 @@ class AdveneGUI (Connect):
                     c.update_status("start")
                 return True
             elif event.keyval == gtk.keysyms.Up:
-                c.move_position (1000/25, notify=False)
+                c.move_frame(+1)
                 return True
             elif event.keyval == gtk.keysyms.Down:
-                c.move_position (-1000/25, notify=False)
+                c.move_frame(-1)
                 return True
             elif event.keyval == gtk.keysyms.Right:
                 c.move_position (config.data.preferences['time-increment'], notify=False)
@@ -1222,8 +1222,8 @@ class AdveneGUI (Connect):
         # player.get_capabilities() and check for "frame-by-frame"
         if 'gstreamer' in self.controller.player.__module__:
             tb_list.extend( (
-                    (_("Previous frame [Control-Down]"), gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_position (-1000/25, notify=False)),
-                    (_("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_position (1000/25, notify=False)),
+                    (_("Previous frame [Control-Down]"), gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_frame(-1)),
+                    (_("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_frame(+1)),
                     ) )
 
         for text, stock, callback in tb_list:
