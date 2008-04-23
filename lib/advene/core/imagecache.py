@@ -104,10 +104,14 @@ class ImageCache(dict):
         @param key: the tested key
         @type key: long
         """
+        if key is None:
+            return
         if not dict.has_key (self, key):
             dict.__setitem__(self, key, self.not_yet_available_image)
 
     def has_key (self, key):
+        if key is None:
+            return True
         try:
             self.approximate(key)
             return True
@@ -153,6 +157,8 @@ class ImageCache(dict):
         @param value: an image
         @type value: PNG data
         """
+        if key is None:
+            return value
         key = self.approximate(key)
         if value != self.not_yet_available_image:
             self._modified=True
@@ -184,7 +190,7 @@ class ImageCache(dict):
             epsilon=self.epsilon
         valids = [ (pos, abs(pos-key))
                    for pos in self.keys()
-                   if pos is not None and abs(pos - key) <= epsilon ]
+                   if abs(pos - key) <= epsilon ]
         valids.sort(key=operator.itemgetter(1))
 
         if valids:
@@ -204,6 +210,8 @@ class ImageCache(dict):
         This method is used when the player has some trouble getting
         an accurate screenshot.
         """
+        if key is None:
+            return
         if epsilon is None:
             epsilon=self.epsilon
         key = self.approximate(key, epsilon)
