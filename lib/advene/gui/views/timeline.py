@@ -1001,7 +1001,7 @@ class TimeLine(AdhocView):
                     #we should maybe accept it and delete relations.
                 elif source.type == dest.type:
                     b=min(source.fragment.begin, dest.fragment.begin)
-                    e=min(source.fragment.begin, dest.fragment.begin)
+                    e=max(source.fragment.begin, dest.fragment.begin)
                     for a in source.type.annotations:
                         if a.fragment.begin > b and a.fragment.begin < e:
                             # There is at least one annotation between
