@@ -1407,6 +1407,95 @@ class IRIDataImporter(GenericImporter):
         return self.package
 register(IRIDataImporter)
 
+class EventImporter(GenericImporter):
+    """Event importer.
+    """
+    name=_("Event importer")
+
+    def __init__(self, **kw):
+        super(EventImporter, self).__init__(**kw)
+        self.atypes={}
+        self.schema=None
+        
+    def can_handle(fname):
+        if fname.endswith('.evt'):
+            return 100
+        else:
+            return 0
+    can_handle=staticmethod(can_handle)
+
+    def xml_to_text(self, element):
+        l=[]
+        if isinstance(element, handyxml.HandyXmlWrapper):
+            element=element.node
+        if element.nodeType is xml.dom.Node.TEXT_NODE:
+            # Note: element.data returns a unicode object
+            # that happens to be in the default encoding (iso-8859-1
+            # currently on my system). We encode it to utf-8 to
+            # be sure to deal only with this encoding afterwards.
+            l.append(element.data.encode('utf-8'))
+        elif element.nodeType is xml.dom.Node.ELEMENT_NODE:
+            for e in element.childNodes:
+                l.append(self.xml_to_text(e))
+        return "".join(l)
+
+    def iterator(self, traces):
+        progress=0.5
+        incr=0.95 / len(traces.event)
+
+        for ev in traces.event:
+            try:
+                begin=ev.begin
+            except AttributeError, e:
+                print str(e)
+                begin=0
+            try:
+                end=ev.end
+            except AttributeError, e:
+                print str(e)
+                end=begin
+            try:
+                typeid=ev.type
+            except AttributeError, e:
+                print str(e)
+                typeid="None"
+            if not self.atypes.has_key(typeid):
+                self.atypes[typeid]=self.create_annotation_type(self.schema, typeid)
+            d={
+                'type': self.atypes[typeid],
+                'begin': begin,
+                'end': end,
+                'content': self.xml_to_text(ev),
+            }
+            
+            self.progress(progress, _("Parsing event information"))
+            progress += incr
+            
+            yield d
+
+        
+    def process_file(self, filename):
+        evt=handyxml.xml(filename)
+
+        if evt.node.nodeName != 'events':
+            self.log("This does not look like an event file.")
+            return
+
+        if self.package is None:
+            self.progress(0.1, _("Creating package"))
+            self.package=Package(uri='event_history.xml', source=None)
+
+        p=self.package
+        self.progress(0.2, _("Creating traces schema"))
+        self.schema=self.create_schema('Traces', title="Events imported schema")
+
+        self.progress(0.5, _("Generating traces"))
+        self.convert(self.iterator(evt))
+        self.progress(1.0)
+        return self.package
+
+register(EventImporter)
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print "Should provide a file name and a package name"
@@ -1427,4 +1516,5 @@ if __name__ == "__main__":
     p=i.process_file(fname)
     p.save(pname)
     print i.statistics_formatted()
+
 

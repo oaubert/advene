@@ -1977,20 +1977,40 @@ class AdveneController:
         self.notify('AnnotationDelete', annotation=annotation)
         return True
 
-    def create_event_history_package(self):
+    def create_event_history_package(self, fname=None):
         """Import the event history in a new package.
         """
         self.load_package(alias="Event history")
-        self.import_event_history()
+        self.import_event_history(fname)
         return True
 
-    def import_event_history(self):
-        """Import the event history in the current package.
+    def export_event_history(self, fname=None):
+        """Export the current history to text file.
         """
         i=advene.rules.importer.EventHistoryImporter(package=self.package)
-        i.process_file(self.event_handler.event_history)
-        self.notify("PackageActivate", package=self.package)
+        i.output_to_file(self.event_handler.event_history, fname)        
         return True
+
+    def import_event_history(self, fname=None):
+        """Import the event history in the current package.
+        """
+        if fname is None:
+            i=advene.rules.importer.EventHistoryImporter(package=self.package)
+            i.process_file(self.event_handler.event_history)
+        else:
+            if not os.path.exists(fname):
+                oldfname=fname
+                fname = os.path.join(config.data.path['advene'],oldfname)
+                print "%s not found, trying %s" % (oldfname,fname)
+                if not os.path.exists(fname):
+                    print "%s not found, giving up." % fname
+                    return False
+            imp = advene.util.importer.EventImporter(package=self.package)
+            imp.process_file(fname)
+        self.notify("PackageActivate", package=self.package)
+        self.package._modified=True
+        return True
+
 
 if __name__ == '__main__':
     cont = AdveneController()
