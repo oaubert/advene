@@ -223,9 +223,9 @@ class SchemaEditor (AdhocView):
         vbox.pack_start(gtk.HSeparator(), expand=False)
         vbox.pack_start(self.hboxEspaceSchema, expand=True)
         vbox.pack_start(gtk.HSeparator(), expand=False)
-        boutonModif.connect('button-press-event', self.openSchema )
-        boutonSuppr.connect('clicked', self.delSchema)
-        boutonNew.connect('clicked', self.newSchema)
+        boutonModif.connect("button-press-event", self.openSchema )
+        boutonSuppr.connect("clicked", self.delSchema)
+        boutonNew.connect("clicked", self.newSchema)
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         #sw.add_events(gtk.gdk.BUTTON_PRESS_MASK)
@@ -366,7 +366,7 @@ class SchemaEditor (AdhocView):
             e.modify_bg(gtk.STATE_SELECTED,gtk.gdk.color_parse(color))
             e.modify_bg(gtk.STATE_INSENSITIVE,gtk.gdk.color_parse(color))
         e.add(ongLab)
-        e.connect('button-press-event', self.schemaAreaHandler, book)
+        e.connect("button-press-event", self.schemaAreaHandler, book)
         hb.pack_start(e, expand=False, fill=False)
         b=get_pixmap_button('small_close.png')
         b.set_relief(gtk.RELIEF_NONE)
@@ -390,7 +390,7 @@ class SchemaEditor (AdhocView):
         if (event.button==3):
             menu = gtk.Menu()
             item = gtk.MenuItem(_("Close"))
-            item.connect('activate', self.removeSchemaArea, w, book)
+            item.connect("activate", self.removeSchemaArea, w, book)
             menu.append(item)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -453,16 +453,16 @@ class SchemaEditor (AdhocView):
 
     def setup_rel_signals (self, item):
         #pour capter les events sur les relations du dessin
-        #item.connect('motion-notify-event', self.rel_on_motion_notify)
-        item.connect('button-press-event', self.rel_on_button_press)
-        item.connect('button-release-event', self.rel_on_button_release)
+        #item.connect ("motion_notify_event", self.rel_on_motion_notify)
+        item.connect ("button_press_event", self.rel_on_button_press)
+        item.connect ("button_release_event", self.rel_on_button_release)
         return
 
     def setup_annot_signals (self, item, schema):
         #pour capter les events sur les annotations du dessin
-        item.connect('motion-notify-event', self.annot_on_motion_notify)
-        item.connect('button-press-event', self.annot_on_button_press, schema)
-        item.connect('button-release-event', self.annot_on_button_release)
+        item.connect ("motion_notify_event", self.annot_on_motion_notify)
+        item.connect ("button_press_event", self.annot_on_button_press, schema)
+        item.connect ("button_release_event", self.annot_on_button_release)
 
     def rel_on_button_press (self, item, target, event):
         #on remplit l'explo
@@ -484,7 +484,7 @@ class SchemaEditor (AdhocView):
                 return True
             menu = gtk.Menu()
             itemM = gtk.MenuItem(_("Remove Relation Type"))
-            itemM.connect('activate', menuRem, item )
+            itemM.connect("activate", menuRem, item )
             menu.append(itemM)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -536,7 +536,7 @@ class SchemaEditor (AdhocView):
                 return True
             menu = gtk.Menu()
             itemM = gtk.MenuItem(_("Remove Annotation Type"))
-            itemM.connect('activate', menuRem, item, schema )
+            itemM.connect("activate", menuRem, item, schema )
             menu.append(itemM)
             itemM = gtk.MenuItem(_("Create Relation Type between this one and..."))
             ssmenu = gtk.Menu()
@@ -547,7 +547,7 @@ class SchemaEditor (AdhocView):
                 itemSM.set_submenu(sssmenu)
                 for a in s.getAnnotationTypes(): 
                     itemSSM = gtk.MenuItem(a.title)
-                    itemSSM.connect('activate', menuNew, item, schema, a )
+                    itemSSM.connect("activate", menuNew, item, schema, a )
                     sssmenu.append(itemSSM)
                 ssmenu.append(itemSM)
             menu.append(itemM)
@@ -578,16 +578,16 @@ class SchemaEditor (AdhocView):
                 self.update_color(schema, color)
             menu = gtk.Menu()
             itemM = gtk.MenuItem(_("Select a color"))
-            itemM.connect('activate', pick_color, schema)
+            itemM.connect("activate", pick_color, schema)
             menu.append(itemM)
             itemM = gtk.MenuItem(_("New Annotation Type"))
-            itemM.connect('activate', menuNew, canvas, schema )
+            itemM.connect("activate", menuNew, canvas, schema )
             menu.append(itemM)
             itemM = gtk.MenuItem(_("Copy Annotation Type from Schema..."))
-            #itemM.connect('activate', menuNew, canvas )
+            #itemM.connect("activate", menuNew, canvas )
             menu.append(itemM)
-            itemM = gtk.MenuItem(_('Move Annotation Type from Schema...'))
-            #itemM.connect('activate', menuNew, canvas )
+            itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
+            #itemM.connect("activate", menuNew, canvas )
             menu.append(itemM)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -630,15 +630,15 @@ class SchemaEditor (AdhocView):
         w = gtk.Label ("Zoom:")
         hbox.pack_start (w, False, False, 0)
         adj = gtk.Adjustment (0.65, 0.05, 1.00, 0.05, 0.50, 0.50)
-        adj.connect('value-changed', self.zoom_changed, canvas)
+        adj.connect("value_changed", self.zoom_changed, canvas)
         w = gtk.SpinButton (adj, 0.0, 2)
         w.set_size_request (50, -1)
         hbox.pack_start (w, False, False, 0)
         #Types
         boutonTypeA = gtk.Button(label="AT")
         boutonTypeR = gtk.Button(label="RT")
-        boutonTypeA.connect('button-press-event', self.buttonTypeAHandler, canvas, schema )
-        boutonTypeR.connect('button-press-event', self.buttonTypeRHandler, canvas, schema )
+        boutonTypeA.connect("button-press-event", self.buttonTypeAHandler, canvas, schema )
+        boutonTypeR.connect("button-press-event", self.buttonTypeRHandler, canvas, schema )
         hbox.pack_start (boutonTypeA, False, False, 0)
         hbox.pack_start (boutonTypeR, False, False, 0)
         vbox.pack_start (gtk.VSeparator(), expand=False)
@@ -656,16 +656,20 @@ class SchemaEditor (AdhocView):
     #pour dessiner le schema
     def setup_canvas (self, canvas, schema):
         root = canvas.get_root_item ()
-        root.connect('button-press-event', self.on_background_button_press, schema)
+        root.connect("button_press_event", self.on_background_button_press, schema)
         #deleting old drawing
         while root.get_n_children()>0:
             root.remove_child (0)
         annotTypes = schema.getAnnotationTypes()
         relTypes = schema.getRelationTypes()
         a=0
+        b=0
         for i in annotTypes:
-            self.addAnnotationTypeGroup(canvas, schema, i.getTitle(), i, 20, 20+a*90)
-            a=a+1
+            self.addAnnotationTypeGroup(canvas, schema, i.getTitle(), i, 20+b*160, 20+a*60)
+            b=b+1
+            if b!=0 and b%3==0: # could be 6 but nicer like that
+                b=0
+                a=a+1
         r=0
         for j in relTypes:
             self.addRelationTypeGroup(canvas,schema, j.getTitle(), j)
@@ -689,7 +693,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         hboxAddAtt = gtk.HBox()
         labelAddAtt = gtk.Label("Add attribute")
         boutonAddAtt = gtk.Button("Add")
-        boutonAddAtt.connect('clicked', self.addAttributeSpace )
+        boutonAddAtt.connect("clicked", self.addAttributeSpace )
         hboxAddAtt.pack_start(labelAddAtt)
         hboxAddAtt.pack_start(boutonAddAtt)
         hboxMime = gtk.HBox()
@@ -721,9 +725,9 @@ class TypeExplorer (gtk.ScrolledWindow):
         self.TAtts = []
         espaceBoutons = gtk.HBox()
         self.boutonSave = gtk.Button("Save")
-        self.boutonSave.connect('clicked', self.saveType)
+        self.boutonSave.connect("clicked", self.saveType)
         self.boutonCancel = gtk.Button("Cancel")
-        self.boutonCancel.connect('clicked', self.cancelType )
+        self.boutonCancel.connect("clicked", self.cancelType )
         espaceBoutons.pack_end(self.boutonCancel, expand=False, fill=False)
         espaceBoutons.pack_end(self.boutonSave, expand=False, fill=False)
         vbox.pack_start(labelTypeExplorer, expand=False)
