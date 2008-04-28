@@ -147,15 +147,15 @@ return false;
 } else if (a=="") {
 // pas d'annotation choisie => boucler sur toutes les annotations du type
 req = "here/schemas/"+sch+"/annotationTypes/"+at+"/annotations";
-sHtml = '<span contenteditable="false"><div class="AdveneContent"  style="height: 80px; width: 80px; border: 2px solid #FFCCCC;" ttal:repeat="a '+ req +'"><p style="text-align: center;">'
-} else {
+sHtml = '<span contenteditable="false"><div class="AdveneContent"  style="height: 80px; width: 80px;" ttal:repeat="a '+ req +'"><p style="text-align: center;">'
+} else {//height: 80px; width: 80px; border: 2px solid #FFCCCC;
 // annotation choisie
 req = "here/annotations/"+a;
-sHtml = '<span contenteditable="false"><div class="AdveneContent" style="height: 80px; width: 80px; border: 2px solid #FFCCCC;" ttal:define="a '+req+'"><p style="text-align:center;">'
+sHtml = '<span contenteditable="false"><div class="AdveneContent" style="height: 80px; width: 80px;" ttal:define="a '+req+'"><p style="text-align:center;">'
 }
 if  (document.forms['frmMain'].link_img_vlc.checked)
 {
-        sHtml = sHtml + '<a title="'+document.forms['frmMain'].info_bulle_img.value+'" ttal:attributes="href a/player_url"><img height="25" width="25" alt="a/id" ttal:attributes="src a/snapshot_url" src="'+img_tmp+'" />';
+        sHtml = sHtml + '<a title="'+document.forms['frmMain'].info_bulle_img.value+'" ttal:attributes="href a/player_url"><img ttal:attributes="src a/snapshot_url;alt a/id" src="'+img_tmp+'" />';
 	if  (document.forms['frmMain'].titre.checked)
 	{ 
 		//affiche le nom 
@@ -164,7 +164,7 @@ if  (document.forms['frmMain'].link_img_vlc.checked)
 sHtml = sHtml + ' </a>';
 } else {
 // si pas lien on affiche juste image
-sHtml = sHtml + '<img height="25" width="25" alt="a/id" ttal:attributes="src a/snapshot_url" src="'+img_tmp+'" /> ';
+sHtml = sHtml + '<img ttal:attributes="src a/snapshot_url;alt a/id" src="'+img_tmp+'" /> ';
 	if  (document.forms['frmMain'].titre.checked)
 	{
 		//affiche le nom 
@@ -182,7 +182,7 @@ if  (document.forms['frmMain'].autre_vue.checked)
 {
 	sHtml = sHtml + '<br/><em>(<a title="'+document.forms['frmMain'].titre_vue.value+'" ttal:attributes="href string:${../view/'+ document.forms['frmMain'].vue.value + '">' + document.forms['frmMain'].vue.value + '</a>)</em>';
 }
-sHtml = sHtml + '</p></div></span>';
+sHtml = sHtml + '</p></div></span><br>';
 
 var sfinal = sHtml.replace(/ttal/g, 'tal');
 oEditor.FCK.InsertHtml(sfinal);
