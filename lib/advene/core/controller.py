@@ -1993,7 +1993,7 @@ class AdveneController:
         fname = os.path.join( config.data.path['settings'], fname )
         try:
             stream=open(fname, 'wb')
-        except Exception, e:
+        except (OSError, IOError), e:
             self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
             return True
         start=history[0]['timestamp']
