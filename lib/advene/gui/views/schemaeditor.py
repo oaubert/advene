@@ -469,6 +469,12 @@ class SchemaEditor (AdhocView):
         self.TE.initWithType(item.type)
         self.drawFocusOn(item.line)
         if event.button == 1:
+            if event.type == gtk.gdk._2BUTTON_PRESS:
+                self.controller.gui.open_adhoc_view('generictable', elements=item.type.relations)
+                canvas = item.get_canvas ()
+                canvas.pointer_ungrab (item, event.time)
+                self.dragging = False
+                return True
             self.drag_x = event.x
             self.drag_y = event.y
             fleur = gtk.gdk.Cursor (gtk.gdk.FLEUR)
@@ -478,6 +484,7 @@ class SchemaEditor (AdhocView):
                                 fleur,
                                 event.time)
             self.dragging = True
+
         elif event.button == 3:
             def menuRem(w, item):
                 self.removeRelationTypeGroup(item)
@@ -514,6 +521,12 @@ class SchemaEditor (AdhocView):
         self.TE.initWithType(item.type)
         self.drawFocusOn(item.rect)
         if event.button == 1:
+            if event.type == gtk.gdk._2BUTTON_PRESS:
+                self.controller.gui.open_adhoc_view('table', elements=item.type.annotations)
+                canvas = item.get_canvas ()
+                canvas.pointer_ungrab (item, event.time)
+                self.dragging = False
+                return True
             self.drag_x = event.x
             self.drag_y = event.y
             self.timer_motion=5
