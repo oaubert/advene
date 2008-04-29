@@ -22,8 +22,6 @@ import urllib
 import advene.core.config as config
 import time
 import os.path
-import advene.util.helper as helper
-import advene.util.ElementTree as ET
 
 from gettext import gettext as _
 
