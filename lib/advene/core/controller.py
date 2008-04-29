@@ -1987,8 +1987,37 @@ class AdveneController:
     def export_event_history(self, fname=None):
         """Export the current history to text file.
         """
-        i=advene.rules.importer.EventHistoryImporter(package=self.package)
-        i.output_to_file(self.event_handler.event_history, fname)        
+        history = self.event_handler.event_history
+        if fname is None:
+            fname="event.evt"
+        fname = os.path.join( config.data.path['settings'], fname )
+        try:
+            stream=open(fname, 'wb')
+        except Exception, e:
+            self.log(_("Cannot export to %(fname)s: %(e)s") % locals())
+            return True
+        start=history[0]['timestamp']
+        num=0
+        events=ET.Element('events')
+        for e in history:
+            num=num+1
+            try:
+                begin=e['timestamp']-start
+            except KeyError:
+                stream.close()
+                raise Exception("Begin is mandatory")
+            end=begin+50
+            if e.has_key('content'):
+                content=e['content']+'\nposition='+str(e['movietime'])
+            else:
+                content='position='+str(e['movietime'])
+            type=e['event_name']
+            timestamp=e['timestamp']
+            ET.SubElement(events, 'event', id='e'+str(num), begin=str(long(begin)), end=str(long(end)), type=type).text=content
+        helper.indent(events)
+        ET.ElementTree(events).write(stream, encoding='utf-8')
+        stream.close()
+        self.log(_("Data exported to %s") % fname)
         return True
 
     def import_event_history(self, fname=None):
@@ -2000,7 +2029,7 @@ class AdveneController:
         else:
             if not os.path.exists(fname):
                 oldfname=fname
-                fname = os.path.join(config.data.path['advene'],oldfname)
+                fname = os.path.join(config.data.path['settings'],oldfname)
                 print "%s not found, trying %s" % (oldfname,fname)
                 if not os.path.exists(fname):
                     print "%s not found, giving up." % fname
