@@ -26,7 +26,7 @@ import sets
 import StringIO
 import urllib
 
-import xml.dom.ext.reader.PyExpat
+from advene.util.expat import PyExpat
 
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
@@ -225,7 +225,7 @@ class Condition:
         return True
 
     def from_dom(self, node):
-        if node._get_nodeName() != 'condition':
+        if node.nodeName != 'condition':
             raise Exception("Bad invocation of Condition.from_dom")
         if node.hasAttribute('operator'):
             self.operator=node.getAttribute('operator')
@@ -421,10 +421,10 @@ class Rule:
     def from_xml_string(self, xmlstring, catalog=None):
         """Read the rule from a XML string
         """
-        reader=xml.dom.ext.reader.PyExpat.Reader()
+        reader=PyExpat.Reader()
         s=StringIO.StringIO(xmlstring)
         di=reader.fromStream(s)
-        rulenode=di._get_documentElement()
+        rulenode=di.documentElement
         self.from_dom(domelement=rulenode, catalog=catalog)
         s.close()
 
@@ -487,10 +487,10 @@ class Rule:
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            xml.dom.ext.PrettyPrint(dom, stream)
+            dom.writexml(stream, "", " ", "\n")
             stream.close()
         else:
-            xml.dom.ext.PrettyPrint(dom, stream)
+            dom.writexml(stream, "", " ", "\n")
 
     def xml_repr(self):
         """Return the XML representation of the rule."""
@@ -557,10 +557,10 @@ class SubviewList(list):
     def from_xml_string(self, xmlstring, catalog=None):
         """Read the list from a XML string
         """
-        reader=xml.dom.ext.reader.PyExpat.Reader()
+        reader=PyExpat.Reader()
         s=StringIO.StringIO(xmlstring)
         di=reader.fromStream(s)
-        rulenode=di._get_documentElement()
+        rulenode=di.documentElement
         self.from_dom(domelement=rulenode, catalog=catalog)
         s.close()
 
@@ -592,10 +592,10 @@ class SubviewList(list):
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            xml.dom.ext.PrettyPrint(dom, stream)
+            dom.writexml(stream, "", " ", "\n")
             stream.close()
         else:
-            xml.dom.ext.PrettyPrint(dom, stream)
+            dom.writexml(stream, "", " ", "\n")
 
     def xml_repr(self):
         """Return the XML representation of the rule."""
@@ -637,9 +637,9 @@ class RuleSet(list):
         @type catalog: ECACatalog
         @param uri: the source URI
         """
-        reader=xml.dom.ext.reader.PyExpat.Reader()
+        reader=PyExpat.Reader()
         di=reader.fromStream(open(uri, 'r'))
-        rulesetnode=di._get_documentElement()
+        rulesetnode=di.documentElement
         self.from_dom(domelement=rulesetnode, catalog=catalog, origin=uri)
 
     def from_dom(self, domelement=None, catalog=None, origin=None):
@@ -670,10 +670,10 @@ class RuleSet(list):
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            xml.dom.ext.PrettyPrint(dom, stream)
+            dom.writexml(stream, "", " ", "\n")
             stream.close()
         else:
-            xml.dom.ext.PrettyPrint(dom, stream)
+            dom.writexml(stream, "", " ", "\n")
 
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
@@ -744,12 +744,12 @@ class SimpleQuery:
 
         @param uri: the source URI or a file-like object
         """
-        reader=xml.dom.ext.reader.PyExpat.Reader()
+        reader=PyExpat.Reader()
         if hasattr(uri, 'read'):
             di=reader.fromStream(uri)
         else:
             di=reader.fromStream(open(uri, 'r'))
-        querynode=di._get_documentElement()
+        querynode=di.documentElement
         self.from_dom(domelement=querynode)
 
     def to_xml(self, uri=None, stream=None):
@@ -758,10 +758,10 @@ class SimpleQuery:
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            xml.dom.ext.PrettyPrint(dom, stream)
+            dom.writexml(stream, "", " ", "\n")
             stream.close()
         else:
-            xml.dom.ext.PrettyPrint(dom, stream)
+            dom.writexml(stream, "", " ", "\n")
 
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
@@ -776,7 +776,7 @@ class SimpleQuery:
 
         @param domelement: the DOM element
         """
-        if domelement._get_nodeName() != 'query':
+        if domelement.nodeName != 'query':
             raise Exception("Invalid DOM element for SimpleQuery")
 
         sourcenodes=domelement.getElementsByTagName('source')
@@ -902,12 +902,12 @@ class Quicksearch:
 
         @param uri: the source URI or a file-like object.
         """
-        reader=xml.dom.ext.reader.PyExpat.Reader()
+        reader=PyExpat.Reader()
         if hasattr(uri, 'read'):
             di=reader.fromStream(uri)
         else:
             di=reader.fromStream(open(uri, 'r'))
-        querynode=di._get_documentElement()
+        querynode=di.documentElement
         self.from_dom(domelement=querynode)
 
     def to_xml(self, uri=None, stream=None):
@@ -916,10 +916,10 @@ class Quicksearch:
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            xml.dom.ext.PrettyPrint(dom, stream)
+            dom.writexml(stream, "", " ", "\n")
             stream.close()
         else:
-            xml.dom.ext.PrettyPrint(dom, stream)
+            dom.writexml(stream, "", " ", "\n")
 
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
@@ -934,7 +934,7 @@ class Quicksearch:
 
         @param domelement: the DOM element
         """
-        if domelement._get_nodeName() != 'quicksearch':
+        if domelement.nodeName != 'quicksearch':
             raise Exception("Invalid DOM element for Quicksearch")
 
         sourcenodes=domelement.getElementsByTagName('source')

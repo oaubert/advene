@@ -382,8 +382,8 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
         dict_append = self._dict.__setitem__
 
         for e in self._getModelChildren ():
-            if e._get_namespaceURI () != ns \
-            or e._get_localName () !=ln:
+            if e.namespaceURI != ns \
+            or e.localName !=ln:
                 continue
             item = make_item (parent, element=e)
             list_append (item)
@@ -422,7 +422,7 @@ class AbstractXmlBundle(WritableBundle, modeled.Modeled,
 
         length = len (self)
         model = self._getModel ()
-        elt_list = model._get_childNodes ()
+        elt_list = model.childNodes
 
         # The model element of the bundle may have child elements which
         # are ignored by the bundle. If this is the case, the bundle elements
@@ -557,7 +557,7 @@ class RefBundle (AbstractXmlBundle):
             # ok, element was known
         except KeyError:
             # element must be constructed
-            doc = self._getModel ()._get_ownerDocument ()
+            doc = self._getModel ().ownerDocument
             elt = doc.createElementNS (self._get_namespace_uri (),
                                        self._get_local_name ())
             pkg = self._getParent ().getOwnerPackage ()

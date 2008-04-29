@@ -24,7 +24,6 @@ import sys
 import urllib
 import re
 
-import xml.dom.ext.reader.PyExpat
 import xml.sax
 
 import util.uri
@@ -40,6 +39,7 @@ import advene.model.schema as schema
 import advene.model.view as view
 import advene.model.viewable as viewable
 from advene.model.zippackage import ZipPackage
+from advene.util.expat import PyExpat
 
 from advene.model.bundle import StandardXmlBundle, ImportBundle, InverseDictBundle, SumBundle
 from advene.model.constants import *
@@ -93,7 +93,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         if source is None:
             element = self._make_model()
         else:
-            reader = xml.dom.ext.reader.PyExpat.Reader()
+            reader = PyExpat.Reader()
             if source is _get_from_uri:
                 # Determine the package format (plain XML or AZP)
                 # FIXME: should be done by content rather than extension
@@ -101,11 +101,11 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                     # Advene Zip Package. Do some magic.
                     self.__zip = ZipPackage(abs_uri)
                     f=urllib.pathname2url(self.__zip.getContentsFile())
-                    element = reader.fromUri("file://" + f)._get_documentElement()
+                    element = reader.fromUri("file://" + f).documentElement
                 else:
-                    element = reader.fromUri(abs_uri)._get_documentElement()
+                    element = reader.fromUri(abs_uri).documentElement
             elif hasattr(source, 'read'):
-                element = reader.fromStream(source)._get_documentElement()
+                element = reader.fromStream(source).documentElement
             else:
                 if re.match('[a-zA-Z]:', source):
                     # Windows drive: notation. Convert it to
@@ -120,9 +120,9 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
                     # Advene Zip Package. Do some magic.
                     self.__zip = ZipPackage(source_uri)
                     f=urllib.pathname2url(self.__zip.getContentsFile())
-                    element = reader.fromUri("file://" + f)._get_documentElement()
+                    element = reader.fromUri("file://" + f).documentElement
                 else:
-                    element = reader.fromUri(source_uri)._get_documentElement()
+                    element = reader.fromUri(source_uri).documentElement
 
         modeled.Modeled.__init__(self, element, None)
 
@@ -147,7 +147,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         di = xml.dom.DOMImplementation.DOMImplementation()
         doc = di.createDocument(adveneNS, "package", None)
 
-        elt = doc._get_documentElement()
+        elt = doc.documentElement
         elt.setAttributeNS(xmlNS,   "xml:base", unicode(self.__uri))
         elt.setAttributeNS(xmlnsNS, "xmlns", adveneNS)
         elt.setAttributeNS(xmlnsNS, "xmlns:xlink", xlinkNS)
@@ -309,7 +309,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 
     def serialize(self, stream=sys.stdout):
         """Serialize the Package on the specified stream"""
-        xml.dom.ext.PrettyPrint(self._getModel(), stream)
+        self._getModel().writexml(stream, "", " ", "\n")
 
     def save(self, name=None):
         """Save the Package in the specified file"""

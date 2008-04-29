@@ -46,25 +46,25 @@ class Metaed(object):
         """
         meta = self._getChild((adveneNS, 'meta'))
         if meta is None and create:
-            doc = self._getModel()._get_ownerDocument()
+            doc = self._getModel().ownerDocument
             meta = doc.createElementNS(adveneNS,"meta")
-            self._getModel()._get_childNodes().insert(0, meta)
+            self._getModel().childNodes.insert(0, meta)
         return meta
 
     def _getMetaElement(self, namespace_uri, name, create=False):
         meta = self._getMeta(create)
         if meta is None: return None
 
-        for e in meta._get_childNodes():
-            if e._get_nodeType() is ELEMENT_NODE \
-            and e._get_namespaceURI() == namespace_uri \
-            and e._get_localName() == name:
+        for e in meta.childNodes:
+            if e.nodeType is ELEMENT_NODE \
+            and e.namespaceURI == namespace_uri \
+            and e.localName == name:
                 return e
 
         if create:
-            doc = meta._get_ownerDocument()
+            doc = meta.ownerDocument
             e = doc.createElementNS(namespace_uri, name)
-            meta._get_childNodes().insert(0, e)
+            meta.childNodes.insert(0, e)
             return e
         else:
             return None
@@ -95,11 +95,11 @@ class Metaed(object):
             self._getMeta ().removeChild (e)
             return
 
-        for c in e._get_childNodes():
+        for c in e.childNodes:
             if c.nodeType in (TEXT_NODE, ELEMENT_NODE):
                 e.removeChild(c)
         if value is not None:
-            new = e._get_ownerDocument().createTextNode(value)
+            new = e.ownerDocument.createTextNode(value)
             e.appendChild(new)
             self.meta_cache[n]=value
 
@@ -127,9 +127,9 @@ class Authored(Metaed):
            (leadind and trailing whitespaces) of the previous text content.
         """
         s = ""
-        for n in authorelt._get_childNodes ():
+        for n in authorelt.childNodes:
             if n.nodeType==TEXT_NODE:
-                s += n._get_data ()
+                s += n.data
                 authorelt.removeChild (n)
         if s: author = s.replace (s.strip (), author) # try to keep layout
         return author
@@ -149,14 +149,14 @@ class Authored(Metaed):
                 if eltnode.hasAttributeNS (xlinkNS, 'href'):
                     eltnode.removeAttributeNS (xlinkNS, 'href')
                 author = self.__cleanAuthorElementAndGetLayout (eltnode, author)
-                textnode = eltnode._get_ownerDocument ().createTextNode (author)
+                textnode = eltnode.ownerDocument.createTextNode (author)
                 eltnode.appendChild (textnode)
 
         else: #authorUrl is not None
             if attnode:
                 self._getModel ().removeAttributeNode (attnode)
 
-            doc = self._getModel ()._get_ownerDocument ()
+            doc = self._getModel ().ownerDocument
 
             if eltnode is None:
                 eltnode = self._getMetaElement (dcNS, 'creator', create=True)
@@ -175,14 +175,14 @@ class Authored(Metaed):
         """
         attnode, eltnode = self.__prepareAuthorNodes()
         if attnode:
-            return attnode._get_value()
+            return attnode.value
         if eltnode:
             s = ""
             found = 0
-            for n in eltnode._get_childNodes():
+            for n in eltnode.childNodes:
                 if n.nodeType==TEXT_NODE:
                     found = 1
-                    s += n._get_data()
+                    s += n.data
             if found: return s.strip()
         return None
 
@@ -199,7 +199,7 @@ class Authored(Metaed):
         """Set the author.
            You would probably rather use the author property.
         """
-        if value or self._getModel()._get_parentNode().nodeType==ELEMENT_NODE:
+        if value or self._getModel().parentNode.nodeType==ELEMENT_NODE:
             self.__setAuthorNode(value, self.getAuthorUrl())
         else:
             raise AttributeError("author is a required attribute here")

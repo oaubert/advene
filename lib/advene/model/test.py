@@ -18,7 +18,10 @@
 #
 import unittest
 
-import xml.dom.ext.reader.PyExpat
+import sys
+sys.path.insert(0, ".")
+
+from advene.util.expat import PyExpat
 
 from modeled import Modeled
 
@@ -49,13 +52,13 @@ class ModeledTestCase(unittest.TestCase):
     """ % fooNS
 
     def setUp(self):
-        self.reader = xml.dom.ext.reader.PyExpat.Reader()
+        self.reader = PyExpat.Reader()
         self.doc = self.reader.fromString(self.xml)
-        self.element = self.doc._get_documentElement()
+        self.element = self.doc.documentElement
         self.modeled = Modeled(self.element)
 
         self.doc_w_ns = self.reader.fromString(self.xml_w_ns)
-        self.element_w_ns = self.doc_w_ns._get_documentElement()
+        self.element_w_ns = self.doc_w_ns.documentElement
         self.modeled_w_ns = Modeled(self.element_w_ns)
 
     def tearDown(self):
@@ -71,12 +74,12 @@ class ModeledTestCase(unittest.TestCase):
     def test_getChild__no_arg(self):
         e = self.modeled._getChild()
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"a")
+        self.assertEqual(e.localName,"a")
 
     def test_getChild__match_alone__qname(self):
         e = self.modeled._getChild((None,"d"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"d")
+        self.assertEqual(e.localName,"d")
         e = self.modeled._getChild((None,"g"))
         self.assertEqual(e, None)
 
@@ -91,7 +94,7 @@ class ModeledTestCase(unittest.TestCase):
     def test_getChild__before_alone__qname(self):
         e = self.modeled._getChild(before=(None,"b"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"a")
+        self.assertEqual(e.localName,"a")
         e = self.modeled._getChild(before=(None,"a"))
         self.assertEqual(e, None)
 
@@ -99,7 +102,7 @@ class ModeledTestCase(unittest.TestCase):
         elt = self.modeled._getChild((None,"b"))
         e = self.modeled._getChild(before=elt)
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"a")
+        self.assertEqual(e.localName,"a")
         elt = e
         e = self.modeled._getChild(before=elt)
         self.assertEqual(e, None)
@@ -107,7 +110,7 @@ class ModeledTestCase(unittest.TestCase):
     def test_getChild__after_alone__qname(self):
         e = self.modeled._getChild(after=(None,"e"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"f")
+        self.assertEqual(e.localName,"f")
         e = self.modeled._getChild(after=(None,"f"))
         self.assertEqual(e, None)
 
@@ -115,7 +118,7 @@ class ModeledTestCase(unittest.TestCase):
         elt = self.modeled._getChild((None,"e"))
         e = self.modeled._getChild(after=elt)
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"f")
+        self.assertEqual(e.localName,"f")
         elt = e
         e = self.modeled._getChild(after=elt)
         self.assertEqual(e, None)
@@ -123,21 +126,21 @@ class ModeledTestCase(unittest.TestCase):
     def test_getChild__before_and_match(self):
         e = self.modeled._getChild((None, "e"), before=(None,"f"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(), "e")
+        self.assertEqual(e.localName, "e")
         e = self.modeled._getChild((None, "d"), before=(None,"f"))
         self.assertEqual(e,None)
 
     def test_getChild__before_and_after(self):
         e = self.modeled._getChild(after=(None,"d"),before=(None,"f"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"e")
+        self.assertEqual(e.localName,"e")
         e = self.modeled._getChild(after=(None,"e"),before=(None,"f"))
         self.assertEqual(e,None)
 
     def test_getChild__match_and_after(self):
         e = self.modeled._getChild(after=(None,"d"),match=(None,"e"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"e")
+        self.assertEqual(e.localName,"e")
         e = self.modeled._getChild(after=(None,"d"),match=(None,"f"))
         self.assertEqual(e,None)
 
@@ -146,7 +149,7 @@ class ModeledTestCase(unittest.TestCase):
                                    match=(None,"e"),
                                    before=(None,"f"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"e")
+        self.assertEqual(e.localName,"e")
         e = self.modeled._getChild(after=(None,"a"),
                                    match=(None,"e"),
                                    before=(None,"f"))
@@ -162,27 +165,27 @@ class ModeledTestCase(unittest.TestCase):
                                    match=(None,"c"),
                                    before=(None,"c"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"c")
+        self.assertEqual(e.localName,"c")
         self.assertEqual(e.getAttribute("id"),"2")
         e = self.modeled._getChild((None,"c"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"c")
+        self.assertEqual(e.localName,"c")
         self.assertEqual(e.getAttribute("id"),"1")
         elt = e
         e = self.modeled._getChild(after=elt)
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"c")
+        self.assertEqual(e.localName,"c")
         self.assertEqual(e.getAttribute("id"),"2")
         elt = e
         e = self.modeled._getChild(after=elt)
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"c")
+        self.assertEqual(e.localName,"c")
         self.assertEqual(e.getAttribute("id"),"3")
 
     def test_getChild__match_alone__qname_ns(self):
         e = self.modeled_w_ns._getChild((self.fooNS,"b"))
         self.assert_(e)
-        self.assertEqual(e._get_localName(),"b")
+        self.assertEqual(e.localName,"b")
         e = self.modeled_w_ns._getChild((self.fooNS,"d"))
         self.assertEqual(e,None)
         e = self.modeled_w_ns._getChild((self.fooNS+"bar/","b"))

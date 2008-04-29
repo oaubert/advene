@@ -30,7 +30,7 @@ import mimetypes
 import urllib
 import base64
 
-import xml.dom.ext.reader.PyExpat
+from advene.util.expat import PyExpat
 
 from advene.model.util.auto_properties import auto_properties
 import advene.model.viewable as viewable
@@ -81,8 +81,8 @@ class ResourceData(viewable.Viewable.withClass('data', 'getMimetype')):
     def getModel(self):
         data = self.getData()
         # FIXME: We should ensure that we can parse it as XML
-        reader = xml.dom.ext.reader.PyExpat.Reader()
-        element = reader.fromString(data)._get_documentElement()
+        reader = PyExpat.Reader()
+        element = reader.fromString(data).documentElement
         return element
 
     def getUri (self):

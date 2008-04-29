@@ -209,7 +209,7 @@ class AdveneController:
                 ))
 
     def get_cached_duration(self):
-        if self.package is not None:
+        if self.package is not None and hasattr(self.package, 'cached_duration'):
             return self.package.cached_duration
         else:
             return 0
@@ -1965,9 +1965,9 @@ class AdveneController:
                     break
 
         # Update the cached duration if necessary
-        if self.package.cached_duration <= 0 and self.player.stream_duration > 0:
+        if self.cached_duration <= 0 and self.player.stream_duration > 0:
             print "updating cached duration"
-            self.package.cached_duration = long(self.player.stream_duration)
+            self.cached_duration = long(self.player.stream_duration)
 
         return pos
 

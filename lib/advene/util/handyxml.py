@@ -25,7 +25,7 @@ import os.path, sys, types
 
 from xml.dom import EMPTY_NAMESPACE
 from xml.dom import Node
-from xml.dom.ext.reader import PyExpat
+from advene.util.expat import PyExpat
 
 __version__ = '1.1.20040127'        # History at the end of the file.
 __all__ = ['path', 'xml', 'xpath']

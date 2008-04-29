@@ -16,29 +16,22 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+"""Legacy expat wrapping functions."""
 
-from urlparse import urljoin
 from urllib2 import urlopen
 
-def push(uri, id_):
-    return "%s#%s" % (uri, id_)
+from xml.dom.minidom import parse, parseString
+class PyExpat:
+    """
+    Emulates the legavy PyExpat interface.
+    """
+    class Reader:
+        def fromUri(self, uri):
+            f = urlopen(uri)
+            return parse(f)
 
-def pop(uri):
-    sharp = uri.rfind('#')
-    slash = uri.rfind('/')
-    cut = max(sharp, slash)
-    return uri[:cut], uri[(cut+1):]
+        def fromStream(self, source):
+            return parse(source)
 
-def fragment(uri):
-    sharp = uri.rfind('#')
-    if sharp>0: return uri[(sharp+1):]
-    else: return ''
-
-def no_fragment(uri):
-    sharp = uri.rfind('#')
-    if sharp>0: return uri[:sharp]
-    else: return uri
-
-def open(uri):
-    
-    return urlopen(uri)
+        def fromString(self, s):
+            return parseString(s)

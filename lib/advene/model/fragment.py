@@ -173,9 +173,9 @@ class AbstractNbeFragment (AbstractFragment, modeled.Modeled):
             You probably do not want to use this method directly, but rather
             set an annotation fragment (see advene.annotation.Annotation)
         """
-        doc = element._get_ownerDocument()
+        doc = element.ownerDocument
         new = doc.createElementNS(self.getNamespaceUri(), self.getLocalName())
-        parent = element._get_parentNode()
+        parent = element.parentNode
         parent.replaceChild(new, element)
         # TODO: see how I can make this generic
         self.__init__(element=new, begin=self.getBegin(), end=self.getEnd())
@@ -301,7 +301,7 @@ class __FragmentFactory(dict):
         dict.__setitem__(self, key, cls)
 
     def makeFragment(self, element, parent):
-        key = element._get_namespaceURI(), element._get_localName()
+        key = element.namespaceURI, element.localName
         return self[key](element, parent)
 
 fragmentFactory = __FragmentFactory()
@@ -316,6 +316,7 @@ class _PseudoElement(dict):
         dict.__init__({})
 
     def _get_ownerDocument(self): return None
+    ownerDocument = property(_get_ownerDocument)
 
     def getAttributeNS(self, namespaceURI, localName):
         return self[(namespaceURI, localName)]

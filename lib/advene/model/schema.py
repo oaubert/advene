@@ -265,8 +265,8 @@ class RelationType(AbstractType,
         if e is None:
             return []
         l = []
-        for i in e._get_childNodes ():
-            if i._get_nodeType() is ELEMENT_NODE:
+        for i in e.childNodes:
+            if i.nodeType is ELEMENT_NODE:
                 try:
                     uri = i.getAttributeNS (xlinkNS, 'href')
                     l.append (uri)
@@ -286,7 +286,7 @@ class RelationType(AbstractType,
             self._getModel ().appendChild (e)
         else:
             # we have to empty it
-            while e._get_childNodes ():
+            while e.childNodes:
                 c=e._get_firstChild()
                 e.removeChild(c)
         # Create the children nodes

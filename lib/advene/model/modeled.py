@@ -58,19 +58,19 @@ class Modeled(object):
     def _getDocument(self):
         """Return this object's model owner document.
         """
-        return self.__model._get_ownerDocument()
+        return self.__model.ownerDocument
 
     def _getModelChildren(self):
         """Return a DOM NodeList of the element children of this object's model.
-           Note that this is not equivalent to x.getModel()._get_childNodes()
+           Note that this is not equivalent to x.getModel().childNodes
            since only Element children are returned (and not, for example,
            Text children or Comment children).
         """
-        source = self.__model._get_childNodes()
+        source = self.__model.childNodes
         i = 0
         start = -1
         r = []
-        for e in self.__model._get_childNodes():
+        for e in self.__model.childNodes:
             if e.nodeType == ELEMENT_NODE:
                 if start == -1: start = i
             else:
@@ -118,8 +118,8 @@ class Modeled(object):
         if isinstance(matcher, xml.dom.Node):
             return element == matcher
         else:
-            return matcher[0] == element._get_namespaceURI() \
-               and matcher[1] == element._get_localName()
+            return matcher[0] == element.namespaceURI \
+               and matcher[1] == element.localName
     __match = staticmethod(__match)
 
     def getOwnerPackage(self):
@@ -260,8 +260,8 @@ class Factory:
         """
         uri = modeled.getUri (absolute=False, context=self)
         e1 = modeled._getModel ()
-        ns_uri = e1._get_namespaceURI ()
-        local_name = e1._get_localName ()
+        ns_uri = e1.namespaceURI
+        local_name = e1.localName
 
         e2 = self._getDocument ().createElementNS (ns_uri, local_name)
         e2.setAttributeNS (xlinkNS, 'xlink:href', uri)
@@ -281,7 +281,7 @@ class Factory:
             # FIXME: find a way to do it
             raise AdveneException, \
                       'Can not copy %s in this implementation of DOM' % modeled
-        return e1.cloneNode (deep=True, newOwner=e1._get_ownerDocument ())
+        return e1.cloneNode (deep=True, newOwner=e1.ownerDocument)
 
     def of (theClass):
         class_name = theClass.__name__

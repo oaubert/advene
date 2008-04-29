@@ -16,27 +16,22 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-import xml.dom.ext
 
+import xml.dom
 TEXT_NODE = xml.dom.Node.TEXT_NODE
 ELEMENT_NODE = xml.dom.Node.ELEMENT_NODE
 
 def printElementSource(element, stream):
-#    doc = element._get_ownerDocument()
-#    df = doc.createDocumentFragment()
-#    for e in element._get_childNodes():
-#        df.appendChild(e.cloneNode(True))
-#    xml.dom.ext.Print(df, stream)
-    for e in element._get_childNodes():
-        xml.dom.ext.Print(e, stream)
+    for e in element.childNodes:
+        e.writexml(stream, "", " ", "\n")
 
 def printElementText(element, stream):
-    if element._get_nodeType() is TEXT_NODE:
-        # Note: element._get_data() returns a unicode object
+    if element.nodeType is TEXT_NODE:
+        # Note: element.data returns a unicode object
         # that happens to be in the default encoding (iso-8859-1
         # currently on my system). We encode it to utf-8 to
         # be sure to deal only with this encoding afterwards.
-        stream.write(element._get_data().encode('utf-8'))
-    elif element._get_nodeType() is ELEMENT_NODE:
-        for e in element._get_childNodes():
+        stream.write(element.data.encode('utf-8'))
+    elif element.nodeType is ELEMENT_NODE:
+        for e in element.childNodes:
             printElementText(e, stream)

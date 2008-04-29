@@ -21,7 +21,7 @@ from cStringIO import StringIO
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
 
-import xml.dom.ext.reader.PyExpat
+from advene.util.expat import PyExpat
 
 from advene.model.constants import adveneNS, xlinkNS, TEXT_NODE, ELEMENT_NODE
 
@@ -60,7 +60,7 @@ class Content(modeled.Modeled,
     def setData(self, data):
         """Set the content's data"""
         # TODO: parse XML if any
-        for n in self._getModel()._get_childNodes():
+        for n in self._getModel().childNodes:
             if n.nodeType in (TEXT_NODE, ELEMENT_NODE):
                 self._getModel().removeChild(n)
         if data:
@@ -75,8 +75,8 @@ class Content(modeled.Modeled,
     def getModel(self):
         data = self.getData()
         # FIXME: We should ensure that we can parse it as XML
-        reader = xml.dom.ext.reader.PyExpat.Reader()
-        element = reader.fromString(data)._get_documentElement()
+        reader = PyExpat.Reader()
+        element = reader.fromString(data).documentElement
         return element
 
     def getUri (self, absolute=True):
