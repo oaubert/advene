@@ -22,6 +22,8 @@ import urllib
 import advene.core.config as config
 import time
 import os.path
+import advene.util.helper as helper
+import advene.util.ElementTree as ET
 
 from gettext import gettext as _
 
@@ -90,38 +92,4 @@ class EventHistoryImporter(GenericImporter):
             self.package.schemas.append(schema)
         self.convert(self.iterator(filename))
         return self.package
-
-    def output_to_file(self, filename, output):
-        if output is None:
-            output="event.evt"
-        output = os.path.join( config.data.path['advene'], output )
-        try:
-            stream=open(output, 'wb')
-        except Exception, e:
-            self.log(_("Cannot export to %(output)s: %(e)s") % locals())
-            return True
-        start=filename[0]['timestamp']
-        num=0
-        event = '<?xml version="1.0" encoding="utf-8"?>\n<events>\n'
-        stream.write(event.encode('utf-8'))
-        for e in filename:
-            num=num+1
-            try:
-                begin=e['timestamp']-start
-            except KeyError:
-                stream.close()
-                raise Exception("Begin is mandatory")
-            end=begin+50
-            if e.has_key('content'):
-                content=e['content']+'\nposition='+str(e['movietime'])
-            else:
-                content='position='+str(e['movietime'])
-            type=e['event_name']
-            timestamp=e['timestamp']
-            event = '<event id="e' + str(num) + '" begin="' + str(long(begin)) + '" end="' + str(long(end)) + '" type="' + type + '">' + content + '</event>\n'
-            stream.write(event.encode('utf-8')) #'utf-8' 
-        event='</events>'
-        stream.write(event.encode('utf-8'))           
-        stream.close()
-        self.log(_("Data exported to %s") % output)        
 register(EventHistoryImporter)
