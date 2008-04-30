@@ -73,6 +73,7 @@ class TranscriptionEdit(AdhocView):
         self.contextual_actions = (
             (_("Save view"), self.save_view),
             (_("Save default options"), self.save_default_options),
+            (_("Export as static view"), lambda v, t: self.export_as_static_view()),
             )
 
         self.controller=controller
@@ -738,6 +739,39 @@ class TranscriptionEdit(AdhocView):
                 yield d['content']
                 yield '[%s]' % helper.format_time(d['end'])
             last=d['end']
+
+    def as_html(self):
+        """Return a HTML representation of the view.
+        """
+        res=[]
+        b=self.textview.get_buffer()
+        begin=b.get_start_iter()
+        end=begin.copy()
+
+        ignore_next=False
+        while end.forward_char():
+            a=end.get_child_anchor()
+            if a and a.get_widgets():
+                # Found a TextAnchor
+                child=a.get_widgets()[0]
+
+                text=b.get_text(begin, end, include_hidden_chars=False).replace('\n', '<br />')
+                if ignore_next:
+                    res.extend( ('<strike>', text, '</strike>') )
+                else:
+                    res.append( text )
+                res.append(child.as_html(with_timestamp=False))
+                res.append('\n')
+                ignore_next=child.ignore
+                begin=end.copy()
+
+        # End of buffer.
+        text=b.get_text(begin, end, include_hidden_chars=False).replace('\n', '<br />')
+        if ignore_next:
+            res.extend( ('<strike>', text, '</strike>') )
+        else:
+            res.append( text )        
+        return ''.join(res)
 
     def save_as_cb(self, button=None):
         self.sourcefile=None
