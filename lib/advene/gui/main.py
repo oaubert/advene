@@ -2101,6 +2101,7 @@ class AdveneGUI (Connect):
             ats=[]
         else:
             ats=list(self.controller.package.annotationTypes)
+        newat = None
         if create:
             newat=helper.TitledElement(value=None,
                                        title=_("Create a new annotation type"))

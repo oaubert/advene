@@ -309,7 +309,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
 
     def serialize(self, stream=sys.stdout):
         """Serialize the Package on the specified stream"""
-        self._getModel().writexml(stream, "", " ", "\n")
+        self._getModel().writexml(stream)
 
     def save(self, name=None):
         """Save the Package in the specified file"""

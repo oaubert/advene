@@ -23,7 +23,7 @@ ELEMENT_NODE = xml.dom.Node.ELEMENT_NODE
 
 def printElementSource(element, stream):
     for e in element.childNodes:
-        e.writexml(stream, "", " ", "\n")
+        e.writexml(stream)
 
 def printElementText(element, stream):
     if element.nodeType is TEXT_NODE:

@@ -25,6 +25,7 @@ import re
 import sets
 import StringIO
 import urllib
+import xml.dom.minidom
 
 from advene.util.expat import PyExpat
 
@@ -483,14 +484,14 @@ class Rule:
 
     def to_xml(self, uri=None, stream=None):
         """Save the ruleset to the given URI or stream."""
-        dom=xml.dom.Document.Document(None)
+        dom=xml.dom.minidom.Document()
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            dom.writexml(stream, "", " ", "\n")
+            dom.writexml(stream)
             stream.close()
         else:
-            dom.writexml(stream, "", " ", "\n")
+            dom.writexml(stream)
 
     def xml_repr(self):
         """Return the XML representation of the rule."""
@@ -588,14 +589,14 @@ class SubviewList(list):
 
     def to_xml(self, uri=None, stream=None):
         """Save the ruleset to the given URI or stream."""
-        dom=xml.dom.Document.Document(None)
+        dom=xml.dom.minidom.Document()
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            dom.writexml(stream, "", " ", "\n")
+            dom.writexml(stream)
             stream.close()
         else:
-            dom.writexml(stream, "", " ", "\n")
+            dom.writexml(stream)
 
     def xml_repr(self):
         """Return the XML representation of the rule."""
@@ -666,14 +667,14 @@ class RuleSet(list):
 
     def to_xml(self, uri=None, stream=None):
         """Save the ruleset to the given URI or stream."""
-        dom=xml.dom.Document.Document(None)
+        dom=xml.dom.minidom.Document()
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            dom.writexml(stream, "", " ", "\n")
+            dom.writexml(stream)
             stream.close()
         else:
-            dom.writexml(stream, "", " ", "\n")
+            dom.writexml(stream)
 
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
@@ -754,14 +755,14 @@ class SimpleQuery:
 
     def to_xml(self, uri=None, stream=None):
         """Save the query to the given URI or stream."""
-        dom=xml.dom.Document.Document(None)
+        dom=xml.dom.minidom.Document()
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            dom.writexml(stream, "", " ", "\n")
+            dom.writexml(stream)
             stream.close()
         else:
-            dom.writexml(stream, "", " ", "\n")
+            dom.writexml(stream)
 
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
@@ -912,14 +913,14 @@ class Quicksearch:
 
     def to_xml(self, uri=None, stream=None):
         """Save the query to the given URI or stream."""
-        dom=xml.dom.Document.Document(None)
+        dom=xml.dom.minidom.Document()
         dom.appendChild(self.to_dom(dom))
         if stream is None:
             stream=open(uri, 'w')
-            dom.writexml(stream, "", " ", "\n")
+            dom.writexml(stream)
             stream.close()
         else:
-            dom.writexml(stream, "", " ", "\n")
+            dom.writexml(stream)
 
     def xml_repr(self):
         """Return the XML representation of the ruleset."""
