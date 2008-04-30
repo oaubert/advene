@@ -72,9 +72,6 @@ class ActiveBookmarks(AdhocView):
                 b.widget.show_all()
                 self.bookmarks.append(b)
 
-        # Last selected annotation type. Used to correctly refresh the
-        # type combo when creating a new type.
-        self.last_selected=None
         self.mainbox=gtk.VBox()
         self.widget=self.build_widget()
         self.type = type
@@ -201,15 +198,14 @@ class ActiveBookmarks(AdhocView):
         return True
 
     def update_annotationtype(self, annotationtype=None, event=None):
+        at=self.chosen_type_selector.get_current_element()
         atlist=self.controller.package.annotationTypes
         # Regenerate the annotation type list.
         types=[ (at, 
                  self.controller.get_title(at), 
                  self.controller.get_element_color(at)) for at in atlist ]
         types.sort(key=lambda a: a[1])
-        types.append( (None, _("Create a new type"), None) )
 
-        at=self.last_selected
         if at is None:
             at=helper.get_id(atlist, 'annotation')
             if at is None:
@@ -469,19 +465,8 @@ class ActiveBookmarks(AdhocView):
         i=gtk.ToolItem()
         types=[ (at, self.controller.get_title(at), self.controller.get_element_color(at)) for at in self.controller.package.annotationTypes ]
         types.sort(key=lambda a: a[1])
-        types.append( (None, _("Create a new annotation type"), None) )
 
-        def check_type_update(combo):
-            el=combo.get_current_element()
-            self.last_selected=el
-            if el is None:
-                # Create a new annotation type
-                at=self.controller.gui.ask_for_annotation_type(text=_("Create a new annotation type"),
-                                                               create=True,
-                                                               force_create=True)
-                self.last_selected=at
-
-        sel=dialog.list_selector_widget(members=types, callback=check_type_update)
+        sel=dialog.list_selector_widget(members=types)
         self.controller.gui.tooltips.set_tip(sel, _("Type of the annotations that will be created"))
         i.add(sel)
         self.chosen_type_selector=sel
