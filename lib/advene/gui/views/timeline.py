@@ -2697,13 +2697,14 @@ class TimeLine(AdhocView):
             return False
 
         b=gtk.ToolButton(stock_id=gtk.STOCK_DELETE)
-        self.controller.gui.tooltips.set_tip(b, _('Drop an annotation here to delete it.'))
+        self.controller.gui.tooltips.set_tip(b, _('Delete the selected annotations or drop an annotation here to delete it.'))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['annotation'], 
                         gtk.gdk.ACTION_MOVE )
         b.connect('drag-data-received', remove_drag_received)
+        b.connect('clicked', self.selection_delete)
         tb.insert(b, -1)
 
         # Annotation-type selection button
@@ -3014,7 +3015,9 @@ class TimeLine(AdhocView):
             self.desactivate_annotation(w.annotation, buttons=[w])
         return True
 
-    def selection_delete(self, widget, selection):
+    def selection_delete(self, widget, selection=None):
+        if selection is None:
+            selection=self.get_selected_annotation_widgets()
         for w in selection:
             self.controller.delete_element(w.annotation)
         return True
