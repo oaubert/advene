@@ -636,7 +636,7 @@ class ActiveBookmarks(AdhocView):
                 return True
             return False
         self.mainbox.connect('key-press-event', mainbox_key_press)
-
+        v.add(sw)
         return v
 
 class ActiveBookmark(object):
