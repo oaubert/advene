@@ -141,6 +141,7 @@ class ActiveBookmarks(AdhocView):
             b.set_current(False)
         if cur is not None:
             cur.set_current(True)
+            self.scroll_to_bookmark(cur)
 
     def duplicate_bookmark(self, cur=None):
         """Duplicate a bookmark.
@@ -768,14 +769,13 @@ class ActiveBookmark(object):
     end=property(get_end, set_end)
 
     def set_current(self, is_current=True):
-        """Display the 'current' marker (red frame) around the widget.
+        """Display the 'current' marker (highlight frame) around the widget.
         """
         if is_current == self.is_current:
             # Nothing to do
             return
         if is_current:
             self.frame.drag_highlight()
-            #print "Bookmark ", self.content, ": comment ", self.begin_widget.comment_entry.props.has_focus, ", image", self.begin_widget.image.props.has_focus, ", widget", self.widget.props.has_focus
             if (not self.begin_widget.comment_entry.props.has_focus
                 and not self.begin_widget.image.props.has_focus):
                 self.begin_widget.image.grab_focus()
@@ -1019,6 +1019,29 @@ class ActiveBookmark(object):
             self.end = None
 
     def timestamp_key_press(self, widget, event, source):
+        def move_boomark(index):
+            """Move the bookmark at the given position.
+
+            -1  is for end of the list
+            """
+            self.container.bookmarks.remove(self)
+            if index < 0:
+                self.container.bookmarks.append(self)
+            else:
+                self.container.bookmarks.insert(index, self)
+            self.container.refresh()
+            self.container.set_current_bookmark(self)
+            self.begin_widget.image.grab_focus()
+            return True
+
+        def move_or_navigate(index, event):
+            if event.state & gtk.gdk.SHIFT_MASK:
+                # Shift-up/down/home/end: move the bookmark
+                move_boomark(index)
+            else:
+                # Set the current bookmark
+                self.container.set_current_bookmark(self.container.bookmarks[index])
+
         if event.keyval == gtk.keysyms.Delete or event.keyval == gtk.keysyms.BackSpace:
             self.delete_timestamp(source)
             return True
@@ -1026,6 +1049,27 @@ class ActiveBookmark(object):
             # Control-D: duplicate current bookmark
             self.container.duplicate_bookmark()
             return True
+        elif event.keyval == gtk.keysyms.Up or event.keyval == gtk.keysyms.Down:
+            # Up/Down navigation. It is normally handled by Gtk but
+            # the default behaviour has a corner case which makes it
+            # impractical in this case (going from a bookmark to an
+            # annotation selects the annotation content, and prevents
+            # further navigation). Hence we handle it manually.
+            index=self.container.bookmarks.index(self)
+            if event.keyval == gtk.keysyms.Up:
+                if index == 0:
+                    return True
+                index -= 1
+            else:
+                index += 1
+                if index >= len(self.container.bookmarks):
+                    return True
+            move_or_navigate(index, event)
+            return True
+        elif event.keyval == gtk.keysyms.Home:
+            move_or_navigate(0, event)
+        elif event.keyval == gtk.keysyms.End:
+            move_or_navigate(-1, event)
         return False
 
     def build_widget(self):
