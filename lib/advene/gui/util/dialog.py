@@ -53,18 +53,25 @@ def generate_list_model(elements, active_element=None):
     """Create a TreeModel matching the elements list.
 
     Element 0 is the label.
-    Element 1 is the element (stbv).
+    Element 1 is the element
+    Element 2 is the color (optional)
 
-    @param elements: a list of couples (element, label)
+    @param elements: a list of couples (element, label) or tuples (element, label, color)
     @param active_element: the element that should be preselected
     """
-    store=gtk.ListStore(str, object)
+    store=gtk.ListStore(str, object, str)
     active_iter=None
-    if elements is not None:
-        for element, label in elements:
-            i=store.append( ( label, element ) )
-            if element == active_element:
-                active_iter=i
+    if elements:
+        if len(elements[0]) == 3:
+            for element, label, color in elements:
+                i=store.append( ( label, element, color ) )
+                if element == active_element:
+                    active_iter=i
+        else:
+            for element, label in elements:
+                i=store.append( ( label, element, None ) )
+                if element == active_element:
+                    active_iter=i
     return store, active_iter
 
 def list_selector_widget(members=None,
@@ -74,7 +81,7 @@ def list_selector_widget(members=None,
     """Generate a widget to pick an element from a list.
 
 
-    @param members: list of couples (element, label)
+    @param members: list of couples (element, label) or tuples (element, label, color)
     @type members: list
     @param preselect: the element to preselect
     @type preselect: object
@@ -93,6 +100,7 @@ def list_selector_widget(members=None,
         cell = gtk.CellRendererText()
         combobox.pack_start(cell, expand=True)
         combobox.add_attribute(cell, 'text', 0)
+        combobox.add_attribute(cell, 'background', 2)
 
     combobox.set_active(-1)
     if i is None:
@@ -135,7 +143,7 @@ def list_selector(title=None,
                   entry=False):
     """Pick an element from a list.
 
-    members is a list of couples (element, label).
+    members is a list of couples (element, label) or tuples (element, label, color)
 
     Return None if the action is cancelled.
     """
