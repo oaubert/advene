@@ -141,7 +141,6 @@ class ActiveBookmarks(AdhocView):
             b.set_current(False)
         if cur is not None:
             cur.set_current(True)
-            self.scroll_to_bookmark(cur)
 
     def duplicate_bookmark(self, cur=None):
         """Duplicate a bookmark.
@@ -273,7 +272,7 @@ class ActiveBookmarks(AdhocView):
         pos=adj.value
         height=parent.window.get_geometry()[3]
         if y < pos or y + h > pos + height:
-            parent.get_vadjustment().value = min(y, adj.upper - adj.page_size)
+            adj.value = min(y, adj.upper - adj.page_size)
         return True
 
     def delete_origin_timestamp(self, wid):
@@ -742,6 +741,12 @@ class ActiveBookmark(object):
             self.end_widget.image.connect('drag-motion', self.bound_drag_motion)
             self.end_widget.image.connect('scroll-event', self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
             self.end_widget.image.connect('key-press-event', self.timestamp_key_press, 'end')
+            
+            def end_image_button_press_handler(widget, event):
+                if not self.is_current:
+                    self.container.set_current_bookmark(self)
+                return False
+            self.end_widget.image.connect('button-press-event', end_image_button_press_handler)
 
             def extend_end_image_menu(menu, element):
                 for (label, action) in (
@@ -833,10 +838,10 @@ class ActiveBookmark(object):
         if targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.data)
             e=long(data['timestamp'])
-            #if self.end is not None and context.action == gtk.gdk.ACTION_COPY:
-            #    # Save a copy of the deleted timestamp next to the current bookmark
-            #    i=self.container.bookmarks.index(self)
-            #    self.container.append(self.end, index=i + 1)
+            if self.end is not None:
+                # Save a copy of the deleted timestamp next to the current bookmark
+                i=self.container.bookmarks.index(self)
+                self.container.append(self.end, index=i + 1)
             if e < self.begin:
                 # Invert begin and end.
                 self.begin, self.end = e, self.begin
@@ -1032,6 +1037,7 @@ class ActiveBookmark(object):
             self.container.refresh()
             self.container.set_current_bookmark(self)
             self.begin_widget.image.grab_focus()
+            self.container.scroll_to_bookmark(self)
             return True
 
         def move_or_navigate(index, event):
@@ -1091,10 +1097,9 @@ class ActiveBookmark(object):
                     else:
                         self.end=e
                 else:
-                    #if context.action == gtk.gdk.ACTION_COPY:
-                    #    # Save a copy of the deleted timestamp next to the current bookmark
-                    #    i=self.container.bookmarks.index(self)
-                    #    self.container.append(self.begin, index=i+1)
+                    # Save a copy of the deleted timestamp next to the current bookmark
+                    i=self.container.bookmarks.index(self)
+                    self.container.append(self.begin, index=i + 1)
                     # Reset the begin time.
                     if e > self.end:
                         # Invert new begin and end
