@@ -1749,7 +1749,7 @@ class AdveneController:
         elif p.status != p.PauseStatus:
             self.update_status('start')
             self.update_status('pause')
-        self.move_position (1000 / 25 * number_of_frames, notify=False)
+        self.move_position (int(1000 / 25.0 * number_of_frames), notify=False)
         return True
 
     def move_position (self, value, relative=True, notify=True):
