@@ -292,36 +292,6 @@ class ActiveBookmarks(AdhocView):
         elif wid == b.end_widget.image:
             b.end=None
 
-    def export_as_static_view(self, ident=None):
-        title=None
-        if ident is None:
-            v=self.controller.package._idgenerator.get_id(View)
-            title, ident=dialog.get_title_id(title=_("HTML export"),
-                                      text=_("Specify a name for the export view"),
-                                      element_title=v,
-                                      element_id=v)
-            if ident is None:
-                return True
-        if title is None:
-            title=ident
-        # Create the view
-        v=self.controller.package.createView(
-            ident=ident,
-            author=config.data.userid,
-            date=self.controller.get_timestamp(),
-            clazz='*',
-            content_mimetype="text/html",
-            )
-        v.title=title
-        v.content.data=self.as_html()
-        self.controller.package.views.append(v)
-        self.controller.notify('ViewCreate', view=v)
-        d=dialog.message_dialog(_("Bookmark view successfully exported as %s.\nOpen it in the web browser ?") % v.title, icon=gtk.MESSAGE_QUESTION)
-        if d:
-            c=self.controller.build_context(here=v)
-            self.controller.open_url(c.evaluateValue('package/view/%s/absolute_url' % ident))
-        return True
-
     def as_html(self, use_tal=True):
         res=[ """<table border="1">""" ]
         for b in self.bookmarks:
