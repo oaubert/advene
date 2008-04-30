@@ -758,6 +758,7 @@ class ActiveBookmark(object):
                                                 + config.data.drag_type['annotation-type'],
                                                 gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
             self.end_widget.image.connect('drag-data-received', self.end_drag_received)
+            self.end_widget.image.connect('drag-motion', self.bound_drag_motion)
             self.end_widget.image.connect('scroll-event', self.handle_scroll_event, self.get_end, self.set_end, lambda v: v > self.begin)
             self.end_widget.image.connect('key-press-event', self.timestamp_key_press, 'end')
 
@@ -831,6 +832,19 @@ class ActiveBookmark(object):
                                                                         self.content)
         return res
 
+    def bound_drag_motion(self, widget, drag_context, x, y, timestamp):
+        # Force the correct default action.
+        actions=drag_context.actions
+        is_in_view=drag_context.get_source_widget().is_ancestor(self.container.mainbox)
+        if (actions == gtk.gdk.ACTION_MOVE
+            or actions == gtk.gdk.ACTION_LINK
+            or actions == gtk.gdk.ACTION_COPY):
+            # Only 1 possible action. Use it.
+            drag_context.drag_status(actions, timestamp)
+        elif gtk.gdk.ACTION_MOVE & actions and is_in_view:
+            # DND from the same view. Force default to move.
+            drag_context.drag_status(gtk.gdk.ACTION_MOVE, timestamp)
+        
     def end_drag_received(self, widget, context, x, y, selection, targetType, time):
         if self.is_widget_in_bookmark(context.get_source_widget()):
             return False
@@ -838,10 +852,10 @@ class ActiveBookmark(object):
         if targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.data)
             e=long(data['timestamp'])
-            if self.end is not None and context.action == gtk.gdk.ACTION_COPY:
-                # Save a copy of the deleted timestamp next to the current bookmark
-                i=self.container.bookmarks.index(self)
-                self.container.append(self.end, index=i + 1)
+            #if self.end is not None and context.action == gtk.gdk.ACTION_COPY:
+            #    # Save a copy of the deleted timestamp next to the current bookmark
+            #    i=self.container.bookmarks.index(self)
+            #    self.container.append(self.end, index=i + 1)
             if e < self.begin:
                 # Invert begin and end.
                 self.begin, self.end = e, self.begin
@@ -850,7 +864,8 @@ class ActiveBookmark(object):
             # If the drag originated from our own widgets, remove it.
             # If the drop was done from within our view, then
             # delete the origin widget.
-            self.container.delete_origin_timestamp(context.get_source_widget())
+            if context.action == gtk.gdk.ACTION_MOVE:
+                self.container.delete_origin_timestamp(context.get_source_widget())
             self.container.set_current_bookmark(self)
             return True
         elif targetType == config.data.target_type['annotation-type']:
@@ -1051,10 +1066,10 @@ class ActiveBookmark(object):
                     else:
                         self.end=e
                 else:
-                    if context.action == gtk.gdk.ACTION_COPY:
-                        # Save a copy of the deleted timestamp next to the current bookmark
-                        i=self.container.bookmarks.index(self)
-                        self.container.append(self.begin, index=i+1)
+                    #if context.action == gtk.gdk.ACTION_COPY:
+                    #    # Save a copy of the deleted timestamp next to the current bookmark
+                    #    i=self.container.bookmarks.index(self)
+                    #    self.container.append(self.begin, index=i+1)
                     # Reset the begin time.
                     if e > self.end:
                         # Invert new begin and end
@@ -1065,7 +1080,8 @@ class ActiveBookmark(object):
                 # If the drag originated from our own widgets, remove it.
                 # If the drop was done from within our view, then
                 # delete the origin widget.
-                self.container.delete_origin_timestamp(context.get_source_widget())
+                if context.action == gtk.gdk.ACTION_MOVE:
+                    self.container.delete_origin_timestamp(context.get_source_widget())
                 # Set the current status
                 self.container.set_current_bookmark(self)
                 return True
@@ -1086,6 +1102,7 @@ class ActiveBookmark(object):
                                               + config.data.drag_type['annotation-type'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.begin_widget.image.connect('drag-data-received', begin_drag_received)
+        self.begin_widget.image.connect('drag-motion', self.bound_drag_motion)
         self.begin_widget.image.connect('scroll-event', self.handle_scroll_event, self.get_begin, self.set_begin, lambda v: self.end is None or v < self.end)
 
         self.begin_widget.comment_entry.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
