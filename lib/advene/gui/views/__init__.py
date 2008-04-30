@@ -316,6 +316,40 @@ class AdhocView(object):
                 self.controller.notify("ViewEditEnd", view=v)
         return True
 
+    def export_as_static_view(self, ident=None):
+        """Propose to export the view as a static view.
+
+        The as_html() method must be implemented.
+        """
+        title=None
+        if ident is None:
+            title, ident=self.controller.package._idgenerator.new_from_title("export " + self._label)
+            title, ident=dialog.get_title_id(title=_("HTML export"),
+                                      text=_("Specify a name for the export view"),
+                                      element_title=title,
+                                      element_id=ident)
+            if ident is None:
+                return True
+        if title is None:
+            title=ident
+        # Create the view
+        v=self.controller.package.createView(
+            ident=ident,
+            author=config.data.userid,
+            date=self.controller.get_timestamp(),
+            clazz='*',
+            content_mimetype="text/html",
+            )
+        v.title=title
+        v.content.data=self.as_html()
+        self.controller.package.views.append(v)
+        self.controller.notify('ViewCreate', view=v)
+        d=dialog.message_dialog(_("View successfully exported as %s.\nOpen it in the web browser ?") % v.title, icon=gtk.MESSAGE_QUESTION)
+        if d:
+            c=self.controller.build_context(here=v)
+            self.controller.open_url(c.evaluateValue('package/view/%s/absolute_url' % ident))
+        return True
+
     def get_widget (self):
         """Return the widget."""
         return self.widget
