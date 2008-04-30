@@ -305,6 +305,45 @@ class ActiveBookmarks(AdhocView):
         for b in self.bookmarks:
             b.set_image_size(size)
 
+    def clipboard_get(self, clipboard, selection, info, data):
+        if data is None:
+            return
+        dt=config.data.drag_type
+        b=ActiveBookmark(container=self, from_serialisation=data)
+        if selection.target in ( dt['STRING'][0][0], dt['text-plain'][0][0]):
+            selection.set_text('%s : %s' % (helper.format_time(b.begin), b.content))
+        elif selection.target == dt['timestamp'][0][0]:
+            selection.set(selection.target, 8, encode_drop_parameters(begin=b.begin, comment=b.content))
+        elif selection.target == dt['bookmark'][0][0]:
+            selection.set(selection.target, 8, data)
+        elif selection.target == dt['annotation'][0][0]:
+            if b.annotation is not None:
+                selection.set(selection.target, 8, b.annotation.uri.encode('utf8'))
+        else:
+            del b
+            return False
+        del b
+        return True
+
+    def clipboard_clear(self, clipboard, data):
+        del data
+        return True
+
+    def copy_current_bookmark(self):
+        """Copy the current bookmark into the clipboard.
+        """
+        c=gtk.clipboard_get()
+        cur=self.get_current_bookmark()
+        if cur is None:
+            return None
+        dt=config.data.drag_type
+        t=dt['bookmark'] + dt['timestamp'] + dt['text-plain'] + dt['STRING']
+        if cur.annotation is not None:
+            t=dt['annotation'] + t
+        self.targets=t
+        c.set_with_data(t, self.clipboard_get, self.clipboard_clear, cur.serialize())
+        return cur
+
     def build_widget(self):
         v=gtk.VBox()
         hb=gtk.HBox()
@@ -600,6 +639,25 @@ class ActiveBookmarks(AdhocView):
             elif event.keyval == gtk.keysyms.d and event.state & gtk.gdk.CONTROL_MASK:
                 # Control-D: duplicate current bookmark
                 self.duplicate_bookmark()
+                return True
+            elif event.keyval == gtk.keysyms.c and event.state & gtk.gdk.CONTROL_MASK:
+                # Copy.
+                self.copy_current_bookmark()
+                return True
+            elif event.keyval == gtk.keysyms.x and event.state & gtk.gdk.CONTROL_MASK:
+                # Cut
+                cur = self.copy_current_bookmark()
+                if cur is not None:
+                    self.remove(cur)
+                return True
+            elif event.keyval == gtk.keysyms.v and event.state & gtk.gdk.CONTROL_MASK:
+                # Paste
+                c=gtk.clipboard_get()
+                def paste_bookmark(cl, sel, data):
+                    b=ActiveBookmark(container=self, from_serialisation=sel.data)
+                    self.append(b, after_current=True)
+                    self.set_current_bookmark(b)
+                c.request_contents(config.data.drag_type['bookmark'][0][0], paste_bookmark)
                 return True
             return False
         self.mainbox.connect('key-press-event', mainbox_key_press)
