@@ -435,7 +435,15 @@ class ActiveBookmarks(AdhocView):
             m.show_all()
             m.popup(None, widget, None, 0, gtk.get_current_event_time())
             return True
-            
+        
+        def remove_current(widget):
+            """Remove the current bookmark.
+            """
+            b=self.get_current_bookmark()
+            if b is not None:
+                self.remove(b)
+            return True
+
         b=get_small_stock_button(gtk.STOCK_DELETE)
         self.controller.gui.tooltips.set_tip(b, _("Drop a bookmark here to remove it from the list"))
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
@@ -444,6 +452,7 @@ class ActiveBookmarks(AdhocView):
                         config.data.drag_type['timestamp'],
                         gtk.gdk.ACTION_MOVE )
         b.connect('drag-data-received', remove_drag_received)
+        b.connect('clicked', remove_current)
         i=gtk.ToolItem()
         i.add(b)
         tb.insert(i, -1)
