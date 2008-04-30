@@ -2124,7 +2124,7 @@ class AdveneGUI (Connect):
                 preselect=newat
             else:
                 preselect=None
-            type_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a), self.controller.get_element_by_id(a)) for a in ats],
+            type_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a), self.controller.get_element_color(a)) for a in ats],
                                                       preselect=preselect,
                                                       callback=handle_new_type_selection)
         else:
