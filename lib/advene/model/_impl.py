@@ -64,6 +64,10 @@ class Metaed(object):
         if create:
             doc = meta.ownerDocument
             e = doc.createElementNS(namespace_uri, name)
+            # TODO the following could be managed automatically (and better)
+            # by the serialization, but with minidom it seems that there's no
+            # smart serializer, so...
+            e.setAttribute("xmlns", namespace_uri)
             meta.childNodes.insert(0, e)
             return e
         else:
