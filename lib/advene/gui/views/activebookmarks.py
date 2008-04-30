@@ -34,6 +34,7 @@ from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 from advene.model.view import View
 import advene.util.helper as helper
+import advene.gui.popup
 
 name="ActiveBookmarks view plugin"
 
@@ -1304,5 +1305,14 @@ class ActiveBookmark(object):
         eb.connect('drag-begin', _drag_begin)
         eb.connect('drag-end', _drag_end)
         eb.connect('drag-motion', _drag_motion)
+
+        def _button_press(widget, event):
+            if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+                if self.annotation is not None:
+                    menu=advene.gui.popup.Menu(self.annotation, controller=self.controller)
+                    menu.popup()
+                    return True
+            return False
+        eb.connect('button-press-event', _button_press)
 
         return eb
