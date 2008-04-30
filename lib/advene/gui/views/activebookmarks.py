@@ -1151,10 +1151,20 @@ class ActiveBookmark(object):
         self.begin_widget.image.connect('focus-in-event', focus_bookmark)
 
         def extend_image_menu(menu, element):
-            for (label, action) in (
+            l=[
                 (_("Duplicate bookmark"), lambda i: self.container.duplicate_bookmark(self)),
                 (_("Remove bookmark"), lambda i: self.container.remove(self)),
-                ):
+                ]
+            def remove_begin(i):
+                self.set_begin(self.end)
+                self.set_end(None)
+                return True
+
+            if self.end is not None:
+                l.append(
+                    (_("Remove begin timestamp"), remove_begin)
+                    )
+            for (label, action) in l:
                 i=gtk.MenuItem(label)
                 i.connect('activate', action)
                 menu.append(i)
