@@ -51,6 +51,7 @@ class ShotdetectImporter(GenericImporter):
         p, at=self.init_package(filename=dest,
                                 schemaid='shotdetect', annotationtypeid='shots')
         at.mimetype='application/x-advene-structured'
+        at.setMetaData(config.data.namespace, "representation", 'here/content/parsed/num')
 
         self.package=p
         self.annotationtype=at
