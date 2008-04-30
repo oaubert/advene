@@ -1616,9 +1616,12 @@ class AdveneController:
         url=self.get_default_url(root=True, alias='advene')
 
         # Add defaultview first if it exists
+        if self.package.views.get_by_id('_index_view'): 
+            res.append( (_("Standard summary"), "%s/view/%s" % (url, '_index_view')) )
+
         defaultview=self.package.getMetaData(config.data.namespace,
                                              'default_utbv')
-        if defaultview:
+        if defaultview and self.package.views.get_by_id(defaultview):
             res.append( (_("Default view"), self.get_default_url(alias='advene')) )
 
         for utbv in self.package.views:
