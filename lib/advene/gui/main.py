@@ -2124,7 +2124,7 @@ class AdveneGUI (Connect):
                 preselect=newat
             else:
                 preselect=None
-            type_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in ats],
+            type_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a), self.controller.get_element_by_id(a)) for a in ats],
                                                       preselect=preselect,
                                                       callback=handle_new_type_selection)
         else:
@@ -2174,7 +2174,7 @@ class AdveneGUI (Connect):
                     new_schema_dialog.hide()
                 return True
 
-            schema_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in schemas],
+            schema_selector=dialog.list_selector_widget(members=[ (s, self.controller.get_title(s), self.controller.get_element_color(s)) for s in schemas],
                                                         callback=handle_new_schema_selection)
             self.tooltips.set_tip(schema_selector, _("Choose an existing schema for the new type, or create a new one"))
             new_type_title_dialog.attach(schema_selector, 1, 2, 3, 4)
@@ -2282,7 +2282,7 @@ class AdveneGUI (Connect):
                 new_schema_dialog.hide()
             return True
 
-        schema_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a)) for a in schemas],
+        schema_selector=dialog.list_selector_widget(members=[ (a, self.controller.get_title(a), self.controller.get_element_color(a)) for a in schemas],
                                                     callback=handle_new_schema_selection)
         d.vbox.pack_start(schema_selector, expand=False)
         d.vbox.pack_start(new_schema_dialog, expand=False)

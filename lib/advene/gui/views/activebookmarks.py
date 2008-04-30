@@ -203,9 +203,11 @@ class ActiveBookmarks(AdhocView):
     def update_annotationtype(self, annotationtype=None, event=None):
         atlist=self.controller.package.annotationTypes
         # Regenerate the annotation type list.
-        types=[ (at, self.controller.get_title(at)) for at in atlist ]
+        types=[ (at, 
+                 self.controller.get_title(at), 
+                 self.controller.get_element_color(at)) for at in atlist ]
         types.sort(key=lambda a: a[1])
-        types.append( (None, _("Create a new type")) )
+        types.append( (None, _("Create a new type"), None) )
 
         at=self.last_selected
         if at is None:
@@ -465,9 +467,9 @@ class ActiveBookmarks(AdhocView):
         tb.insert(b, -1)
 
         i=gtk.ToolItem()
-        types=[ (at, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
+        types=[ (at, self.controller.get_title(at), self.controller.get_element_color(at)) for at in self.controller.package.annotationTypes ]
         types.sort(key=lambda a: a[1])
-        types.append( (None, _("Create a new annotation type")) )
+        types.append( (None, _("Create a new annotation type"), None) )
 
         def check_type_update(combo):
             el=combo.get_current_element()
