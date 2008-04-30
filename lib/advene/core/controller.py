@@ -1689,6 +1689,8 @@ class AdveneController:
         """
         if self.gui:
             self.gui.log(msg, level)
+            if config.data.preferences['log-to-terminal']:
+                print unicode(msg).encode('utf-8')
         else:
             # FIXME: handle the level parameter
             print unicode(msg).encode('utf-8')

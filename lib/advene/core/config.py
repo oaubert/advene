@@ -243,6 +243,8 @@ class Config(object):
             'bookmark-snapshot-precision': 150,
             # Width of the image used to display the snapshot drag icon
             'drag-snapshot-width': 50,
+            # log messages also go to the terminal
+            'log-to-terminal': False,
             }
 
         # Player options
