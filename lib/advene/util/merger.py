@@ -362,7 +362,7 @@ class Differ:
             type=at,
             author=s.author,
             fragment=s.fragment.clone())
-        el.date=s.date
+        el.date=s.date or self.controller.get_timestamp()
         el.content.data=s.content.data
         self.destination.annotations.append(el)
         self.translated_ids[s.id]=id_
@@ -379,7 +379,7 @@ class Differ:
             type=at,
             author=s.author,
             fragment=s.fragment.clone())
-        el.date=s.date
+        el.date=s.date or self.controller.get_timestamp()
         el.content.data=s.content.data
         self.destination.annotations.append(el)
         return el
@@ -407,8 +407,8 @@ class Differ:
             type=rt,
             author=s.author,
             members=members)
-        el.date=s.date
-        #el.title=s.title
+        el.date=s.date or self.controller.get_timestamp()
+        el.title=s.title or ''
         el.content.data=s.content.data
         self.destination.relations.append(el)
         return el
@@ -417,8 +417,8 @@ class Differ:
         el=self.destination.createQuery(
             ident=s.id,
             author=s.author)
-        el.data=s.date
-        el.title=s.title
+        el.data=s.date or self.controller.get_timestamp()
+        el.title=s.title or ''
         el.content.data=s.content.data
         el.content.mimetype=s.content.mimetype
         self.destination.queries.append(el)
@@ -429,8 +429,8 @@ class Differ:
             ident=s.id,
             clazz=s.viewableClass,
             author=s.author)
-        el.date=s.date
-        el.title=s.title
+        el.date=s.date or self.controller.get_timestamp()
+        el.title=s.title or ''
         el.matchFilter['class']=s.matchFilter['class']
         if s.matchFilter.has_key('type'):
             el.matchFilter['type']=s.matchFilter['type']
