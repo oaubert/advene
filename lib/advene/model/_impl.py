@@ -95,8 +95,9 @@ class Metaed(object):
         create = (value is not None)
         e = self._getMetaElement(namespace_uri, name, create)
 
-        if e is not None and value is None:
-            self._getMeta ().removeChild (e)
+        if value is None:
+            if e is not None:
+                self._getMeta ().removeChild (e)
             return
 
         for c in e.childNodes:
@@ -352,7 +353,7 @@ class Titled(Metaed):
         """Set the Title.
            You would probably rather use the title property.
         """
-        if value:
+        if value is not None:
             if self._getModel().hasAttributeNS(dcNS, "title"):
                 self._getModel().setAttributeNS(dcNS, "dc:title",
                                                 unicode(value))
