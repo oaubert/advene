@@ -481,12 +481,13 @@ def sorted (target, context):
     if hasattr(target, 'viewableType') and target.viewableType == 'annotation-list' or (
         isinstance(target, list) and len(target) > 0 and hasattr(target[0], 'fragment')):
         l=list(target[:])
-        def compare(a, b):
-            return cmp(a.fragment.begin, b.fragment.begin)
-        l.sort(compare)
-    elif (isinstance(target, list) and len(target) > 0 and hasattr(target[0], '__cmp__')):
+        l.sort(key=lambda e: e.fragment.begin)
+    elif (hasattr(target, '__getslice__') and len(target) > 0 and hasattr(target[0], '__cmp__')):
         l=list(target[:])
         l.sort()
+    elif (hasattr(target, '__getslice__') and len(target) > 0 and hasattr(target[0], 'title')):
+        l=list(target[:])
+        l.sort(key=lambda e: e.title)
     else:
         l=target
     return l
