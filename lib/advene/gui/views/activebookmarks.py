@@ -637,22 +637,6 @@ class ActiveBookmarks(AdhocView):
             return False
         self.mainbox.connect('key-press-event', mainbox_key_press)
 
-        dropbox=gtk.HBox()
-        dropbox.add(gtk.Label(_("Drop timestamps here")))
-        dropbox.set_size_request(-1, 32)
-        dropbox.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-                                   gtk.DEST_DEFAULT_HIGHLIGHT |
-                                   gtk.DEST_DEFAULT_ALL,
-                                   config.data.drag_type['timestamp']
-                                   + config.data.drag_type['annotation-type']
-                                   ,
-                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
-        dropbox.connect('drag-data-received', mainbox_drag_received)
-        dropbox.show()
-
-        v.add(sw)
-        v.pack_start(dropbox, expand=False)
-
         return v
 
 class ActiveBookmark(object):
@@ -795,6 +779,7 @@ class ActiveBookmark(object):
             return
         if is_current:
             self.frame.drag_highlight()
+            #print "Bookmark ", self.content, ": comment ", self.begin_widget.comment_entry.props.has_focus, ", image", self.begin_widget.image.props.has_focus, ", widget", self.widget.props.has_focus
             if (not self.begin_widget.comment_entry.props.has_focus
                 and not self.begin_widget.image.props.has_focus):
                 self.begin_widget.image.grab_focus()
