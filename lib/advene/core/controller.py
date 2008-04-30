@@ -1225,10 +1225,12 @@ class AdveneController:
         'color' metadata of the container (annotation-type for
         annotations, schema for types).
         """
-
         # First try the 'color' metadata from the element itself.
         color=None
-        col=element.getMetaData(config.data.namespace, metadata)
+        try:
+            col=element.getMetaData(config.data.namespace, metadata)
+        except AttributeError:
+            return None
         if col:
             c=self.build_context(here=element)
             try:
