@@ -248,7 +248,7 @@ class GenericViewable(Viewable.withClass('generic')):
                 break
             except AttributeError:
                 pass
-        print "GenericViewable ", str(self._owner_package), str(self._root_package)
+        #print "GenericViewable ", str(self._owner_package), str(self._root_package)
 
     def getRootPackage(self):
         return object.__getattribute__(self, '_root_package')
@@ -257,7 +257,7 @@ class GenericViewable(Viewable.withClass('generic')):
         return object.__getattribute__(self, '_owner_package')
 
     def __getattribute__ (self, name):
-        print "getattr", name
+        #print "getattr", name
         try:
             return object.__getattribute__ (self, name)
         except AttributeError, e:
