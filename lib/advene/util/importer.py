@@ -1416,7 +1416,7 @@ class EventImporter(GenericImporter):
         super(EventImporter, self).__init__(**kw)
         self.atypes={}
         self.schema=None
-        
+
     def can_handle(fname):
         if fname.endswith('.evt'):
             return 100
@@ -1467,13 +1467,13 @@ class EventImporter(GenericImporter):
                 'end': end,
                 'content': self.xml_to_text(ev),
             }
-            
+
             self.progress(progress, _("Parsing event information"))
             progress += incr
-            
+
             yield d
 
-        
+
     def process_file(self, filename):
         evt=handyxml.xml(filename)
 
