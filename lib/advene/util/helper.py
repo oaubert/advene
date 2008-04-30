@@ -197,12 +197,13 @@ def title2id(t):
     It will replace spaces by underscores, accented chars by their
     accented equivalent, and other characters by -
     """
+    t=unicode(t)
     (text, count)=re.subn(r'\s', '_', t)
     res=[]
     for c in text:
         if not valid_re.match(c):
             # Try to normalize
-            m=normalized_re.search(unicodedata.name(unicode(c)))
+            m=normalized_re.search(unicodedata.name(c))
             if m:
                 c=m.group(2)
                 if m.group(1) == 'SMALL':
