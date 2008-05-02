@@ -1847,12 +1847,12 @@ class AdveneController:
             #     print "update_status %s %s" % (status, position)
             if self.player.playlist_get_list():
                 self.player.update_status (status, position)
-                # Update the destination screenshot
-                if hasattr(position, 'value'):
-                    # It is a player.Position. Do a simple conversion
-                    # (which will fail in many cases)
-                    position=position.value
-                self.update_snapshot(position)
+                ## # Update the destination screenshot
+                ## if hasattr(position, 'value'):
+                ##     # It is a player.Position. Do a simple conversion
+                ##     # (which will fail in many cases)
+                ##     position=position.value
+                ## self.update_snapshot(position)
         except Exception, e:
             # FIXME: we should catch more specific exceptions and
             # devise a better feedback than a simple print
