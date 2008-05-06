@@ -1988,7 +1988,7 @@ class AdveneController:
         """Import the event history in a new package.
         """
         self.load_package(alias="Event history")
-        self.import_event_history(fname)
+        self.import_event_history(fname, offset=0)
         return True
 
     def export_event_history(self, fname=None):
@@ -2027,7 +2027,7 @@ class AdveneController:
         self.log(_("Data exported to %s") % fname)
         return True
 
-    def import_event_history(self, fname=None):
+    def import_event_history(self, fname=None, offset=0):
         """Import the event history in the current package.
         """
         if fname is None:
@@ -2042,7 +2042,10 @@ class AdveneController:
                     print "%s not found, giving up." % fname
                     return False
             imp = advene.util.importer.EventImporter(package=self.package)
-            imp.process_file(fname)
+            nbEv = imp.process_file(fname, offset)
+            print "offset : %s" % nbEv
+            # nbEv = offset for futur imports
+            # need to stock this number somewhere
         self.notify("PackageActivate", package=self.package)
         self.package._modified=True
         return True
