@@ -124,10 +124,11 @@ def _findFile(filename):
 # A dictionary from full file paths to parsed XML.
 _xmlcache = {}
 
-def xml(xmlin):
+def xml(xmlin, forced=False):
     """ Parse some XML.
         Argument xmlin can be a string, the filename of some XML;
         or an open file, from which xml is read.
+        forced to True to skip caching check
         The return value is the parsed XML as DOM nodes.
     """
 
@@ -140,7 +141,7 @@ def xml(xmlin):
             raise "Couldn't find XML to parse: %s" % xmlin
 
     if filename:
-        if _xmlcache.has_key(filename):
+        if _xmlcache.has_key(filename) and not forced:
             return _xmlcache[filename]
         xmlin = open(filename)
 
