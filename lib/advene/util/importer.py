@@ -1416,6 +1416,7 @@ class EventImporter(GenericImporter):
         super(EventImporter, self).__init__(**kw)
         self.atypes={}
         self.schema=None
+        self.lid=0
 
     def can_handle(fname):
         if fname.endswith('.evt'):
@@ -1442,8 +1443,14 @@ class EventImporter(GenericImporter):
     def iterator(self, traces):
         progress=0.5
         incr=0.95 / len(traces.event)
-
+        lid=0
         for ev in traces.event:
+            lid=lid+1
+            # if event already imported, we jump to next one
+            if lid<=self.lid:
+                continue
+            else:
+                self.lid=lid
             try:
                 begin=ev.begin
             except AttributeError, e:
@@ -1474,9 +1481,9 @@ class EventImporter(GenericImporter):
             yield d
 
 
-    def process_file(self, filename):
-        evt=handyxml.xml(filename)
-
+    def process_file(self, filename, offset=0):
+        evt=handyxml.xml(filename, forced=True)
+        self.lid=offset
         if evt.node.nodeName != 'events':
             self.log("This does not look like an event file.")
             return
@@ -1492,7 +1499,7 @@ class EventImporter(GenericImporter):
         self.progress(0.5, _("Generating traces"))
         self.convert(self.iterator(evt))
         self.progress(1.0)
-        return self.package
+        return self.lid
 
 register(EventImporter)
 
