@@ -3,6 +3,9 @@ advene (0.29) unstable; urgency=low
   * The shortcut to start/pause the player has changed: it is now
     Control+Tab (so that plain Tab/Shift-Tab can be used to navigate in
     the GUI)
+
+  * Fix XML parsing using standard python modules. It makes Advene usable
+    on Ubuntu Hardy Heron.
   
   * New global shortcuts: Insert or Alt-Space creates a new active
     bookmark.
