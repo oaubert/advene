@@ -663,6 +663,15 @@ class AdveneGUI (Connect):
         self.gui.get_widget("displayvbox").add(self.visualisationwidget)
         self.gui.get_widget("vpaned").set_position(-1)
 
+        def media_changed(context, parameters):
+            if config.data.preferences['expert-mode']:
+                return True
+            uri=context.globals['uri']
+            if uri is not None:
+                # Dummy callback so that the dialog is not Modal.
+                dialog.message_dialog(_("You are now working with the following video:\n%s") % uri, callback=str)
+            return True
+
         for events, method in (
             ("PackageLoad", self.manage_package_load),
             ("PackageActivate", self.manage_package_activate),
@@ -695,6 +704,7 @@ class AdveneGUI (Connect):
                                          'AnnotationType', 'RelationType', 'Schema',
                                          'Resource') ],
               self.handle_element_delete),
+            ('MediaChange', media_changed),
             ):
             if isinstance(events, basestring):
                 self.controller.event_handler.internal_rule (event=events,
