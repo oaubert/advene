@@ -354,6 +354,12 @@ class ECAEngine:
                     d['annotationtype']=d['element']
                 elif isinstance(d['element'],advene.model.schema.RelationType):
                     d['relationtype']=d['element']
+                elif isinstance(d['element'],advene.model.schema.Schema):
+                    d['schema']=d['element']
+                elif isinstance(d['element'],advene.model.view.View):
+                    d['view']=d['element']
+                elif isinstance(d['element'],advene.model.package.Package):
+                    d['package']=d['element']
             if 'annotation' in d:
                 a=d['annotation']
                 if a is not None:
@@ -389,6 +395,24 @@ class ECAEngine:
                      'schema=' + rt.schema.id,
                      'mimetype=' + rt.mimetype)
                     )
+            elif 'schema' in d:
+                s=d['schema']
+                if s is not None:
+                    d['content']= 'schema=' + s.id
+            elif 'view' in d:
+                v=d['view']
+                if v is not None:
+                    if isinstance(v, advene.model.view.View):
+                        d['content']= "\n".join(
+                        ('view=' + v.id,
+                         'content="'+ urllib.quote(v.content.data.encode('utf-8'))+'"')
+                        )
+                    else:
+                        d['content']= 'view=' + str(v)
+            elif 'package' in d:
+                p=d['package']
+                if p is not None:
+                    d['content']= 'package=' + p.title
             self.event_history.append(d)
         delay=0
         if kw.has_key('delay'):
