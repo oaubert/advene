@@ -1044,7 +1044,7 @@ class AdveneController:
         If position is not None, then set the new annotation begin to position.
         """
         if annotation.type == annotationType:
-            # Tranmuting on the same type.
+            # Transmuting on the same type.
             if position is None:
                 # Do not just duplicate the annotation
                 return None
@@ -1108,13 +1108,14 @@ class AdveneController:
             an.content.data = annotation.content.data
         an.setDate(self.get_timestamp())
 
-        if notify:
-            self.notify("AnnotationCreate", annotation=an, comment="Transmute annotation")
-
         if delete and not annotation.relations:
             self.package.annotations.remove(annotation)
             if notify:
+                self.notify('AnnotationMove', annotation=annotation, comment="Transmute annotation")
                 self.notify('AnnotationDelete', annotation=annotation, comment="Transmute annotation")
+
+        if notify:
+            self.notify("AnnotationCreate", annotation=an, comment="Transmute annotation")
 
         return an
 
@@ -1860,9 +1861,8 @@ class AdveneController:
             s=StringIO.StringIO()
             traceback.print_exc (file = s)
             self.log(_("Raised exception in update_status: %s") % str(e), s.getvalue())
-        else:
-            if self.status2eventname.has_key (status) and notify:
-                self.notify (self.status2eventname[status],
+        if self.status2eventname.has_key (status) and notify:
+            self.notify (self.status2eventname[status],
                              position=position,
                              position_before=position_before,
                              immediate=True)
@@ -2032,7 +2032,7 @@ class AdveneController:
         """
         if fname is None:
             i=advene.rules.importer.EventHistoryImporter(package=self.package)
-            i.process_file(self.event_handler.event_history)
+            nbEv = i.process_file(self.event_handler.event_history)
         else:
             if not os.path.exists(fname):
                 oldfname=fname
@@ -2043,13 +2043,120 @@ class AdveneController:
                     return False
             imp = advene.util.importer.EventImporter(package=self.package)
             nbEv = imp.process_file(fname, offset)
-            print "offset : %s" % nbEv
+            # print "offset : %s" % nbEv
             # nbEv = offset for futur imports
             # need to stock this number somewhere
         self.notify("PackageActivate", package=self.package)
         self.package._modified=True
-        return True
+        return nbEv
 
+    def enrich_event_package(self):
+        """Apply transformations to an event package 
+           to generate high level annotations
+        """
+
+        def find_action(annot):
+            atid = annot.type.id
+            a = ["AnnotationCreate"]#bookmark
+            r = ["AnnotationEditEnd","AnnotationDelete",
+                "RelationCreate","AnnotationMerge","AnnotationMove"]
+            n = ["PlayerStart","PlayerStop","PlayerPause",
+                "PlayerResume","PlayerSet","ViewActivation"]#player
+            c = ["AnnotationTypeCreate","RelationTypeCreate",
+                "RelationTypeDelete", "AnnotationTypeDelete",
+                "AnnotationTypeEditEnd", "RelationTypeEditEnd"]#schema
+            v = ["ViewCreate","ViewEditEnd"] # view
+            multi = ["ElementEditBegin","ElementEditEnd","ElementEditDestroy","ElementEditCancel"] # r, c or v
+            if atid in a:
+                return "Annotation"
+            if atid in r:
+                return "Restructuration"
+            if atid in n:
+                return "Navigation"
+            if atid in c:
+                return "Classification"
+            if atid in v:
+                return "View_building"
+            if atid in multi:
+                # need to test something else in annot
+                return "Multi"
+            return "Undefined"
+        
+        schema=self.package.get_element_by_id("Traces")
+        actions={}
+        ac_t = ["Annotation","Restructuration","Navigation","Classification","View_building"]
+        for t in ac_t:
+            action_type = self.package.get_element_by_id(t)
+            if (action_type is None):
+                #Annotation type creation
+                self.package._idgenerator.add(t)
+                action_type=schema.createAnnotationType(
+                    ident=t)
+                action_type.author=config.data.userid
+                action_type.date=time.strftime("%Y-%m-%d")
+                action_type.title="Action "+t
+                action_type.mimetype='application/x-advene-structured'
+                action_type.setMetaData(config.data.namespace, 'color', self.package._color_palette.next())
+                action_type.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+                schema.annotationTypes.append(action_type)
+            actions[t]=action_type
+        last_act="None" # annotation, restructuration, navigation, classification, viw_biulding
+        an_nav = None # current navigation action
+        an_c = None # current action
+        last_evt = None # last event
+        move = 0 # if a move occurs, skip the next 2 events ( create/delete )
+        tmp_annots = [ (a, a.fragment.begin) for a in self.package.getAnnotations() ]
+        tmp_annots.sort(key=operator.itemgetter(1))
+        # need to sort annotations by start time
+        for (an, beg) in tmp_annots:
+            act = find_action(an)
+            if last_evt is not None:
+                last_act = find_action(last_evt)
+            #print "an : %s \ncat : %s \ntype : %s" % (an, act, an.type.id)
+            #undefined or still not recognized event.
+            if act == "Multi" or act == "Undefined":
+                print "undefined action for %s" % an.type.id
+                if last_act !=  "Multi" and last_act != "Undefined" and an_c is not None and an_c.fragment.end < an.fragment.begin:
+                    an_c.fragment.end = an.fragment.begin
+                #last_evt = an
+                continue
+            #navigation event
+            if act == "Navigation":
+                if an_nav is None:
+                    ident=self.package._idgenerator.get_id(Annotation)
+                    an_nav = self.package.createAnnotation(type = actions[act],
+                                            ident = ident,
+                                            fragment=MillisecondFragment(begin=an.fragment.begin,end=an.fragment.end))
+                    an_nav.content.data = "TODO NAV"
+                    self.package.annotations.append(an_nav)
+                else:
+                    an_nav.fragment.end = an.fragment.end
+                    if an.type.id == "PlayerStop" or an.type.id == "PlayerPause":
+                        an_nav=None
+                last_evt = an
+                continue
+            if an.type.id == "AnnotationMove":
+                move = 2
+            if move > 0 and (an.type.id == "AnnotationCreate" or an.type.id == "AnnotationDelete"):
+                an_c.fragment.end = an.fragment.begin #an_c exists, created with move or earlier
+                move = move-1
+                continue
+            #other event from a different type than last one
+            if act != last_act:
+                if an_nav is not None:
+                    an_nav.fragment.end = an.fragment.end
+                if an_c is not None and an_c.fragment.end < an.fragment.begin:
+                    an_c.fragment.end = an.fragment.begin
+                ident=self.package._idgenerator.get_id(Annotation)
+                an_c = self.package.createAnnotation(type = actions[act],
+                                            ident = ident,
+                                            fragment=MillisecondFragment(begin=an.fragment.begin,end=an.fragment.end))
+                an_c.content.data = "TODO"
+                self.package.annotations.append(an_c)
+                last_evt = an
+            #same type of event
+            last_evt = an
+        return True
 
 if __name__ == '__main__':
     cont = AdveneController()
