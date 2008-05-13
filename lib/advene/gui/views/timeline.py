@@ -2133,8 +2133,8 @@ class TimeLine(AdhocView):
         #a.value=u2p(minimum)
         a.lower=float(u2p(self.minimum))
         a.upper=float(u2p(self.maximum))
-        a.step_incr=float(u2p(width / 100))
-        a.page_incr=float(u2p(width / 10))
+        a.step_increment=min(float(u2p(width / 100)), 10)
+        a.page_increment=float(u2p(width / 10))
         a.page_size=float(self.layout.get_size()[0])
         #print "Update: from %.2f to %.2f" % (a.lower, a.upper)
         a.changed ()
@@ -2206,7 +2206,7 @@ class TimeLine(AdhocView):
         else:
             # Plain scroll: scroll the timeline
             a = self.adjustment
-            incr = a.step_incr
+            incr = a.step_increment
 
         if event.direction == gtk.gdk.SCROLL_DOWN:
             val = a.value + incr
@@ -2635,12 +2635,69 @@ class TimeLine(AdhocView):
         sw_legend.add (self.legend)
         content_pane.add1 (sw_legend)
 
+        # Vertical auto-scroll when DNDing
+        def scroll_on_drag(widget, drag_context, x, y, timestamp, vertical=True):
+            adj=widget.get_adjustment()
+            v=adj.value
+            if vertical:
+                pointer=y
+                ref=widget.get_allocation().height / 2
+            else:
+                pointer=x
+                ref=widget.get_allocation().width / 2
+            if pointer > ref:
+                # Try to scroll down
+                v += max(adj.step_increment, adj.page_increment / 3)
+            else:
+                v -= max(adj.step_increment, adj.page_increment / 3)
+            if v < 0:
+                v = 0
+            elif v > adj.upper - adj.page_size:
+                v=adj.upper - adj.page_size
+            adj.value=v
+            return True
+        sb=sw_legend.get_vscrollbar()
+        sb.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                         gtk.DEST_DEFAULT_HIGHLIGHT |
+                         gtk.DEST_DEFAULT_ALL,
+                         config.data.drag_type['annotation']
+                         + config.data.drag_type['timestamp']
+                         + config.data.drag_type['annotation-type']
+                         ,
+                         gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        sb.connect('drag-motion', scroll_on_drag, True)
+
         sw_layout = gtk.ScrolledWindow ()
         sw_layout.set_policy (gtk.POLICY_ALWAYS, gtk.POLICY_AUTOMATIC)
         sw_layout.set_hadjustment (self.adjustment)
         sw_layout.set_vadjustment (sw_legend.get_vadjustment())
         sw_layout.add (self.layout)
         content_pane.add2 (sw_layout)
+
+        # Fix step_increment for vadjustment
+        sw_layout.get_vadjustment().step_increment=10
+
+        sb=sw_layout.get_hscrollbar()
+        sb.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                         gtk.DEST_DEFAULT_HIGHLIGHT |
+                         gtk.DEST_DEFAULT_ALL,
+                         config.data.drag_type['annotation']
+                         + config.data.drag_type['timestamp']
+                         + config.data.drag_type['annotation-type']
+                         ,
+                         gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        sb.connect('drag-motion', scroll_on_drag, False)
+
+        sb=sw_layout.get_vscrollbar()
+        sb.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                         gtk.DEST_DEFAULT_HIGHLIGHT |
+                         gtk.DEST_DEFAULT_ALL,
+                         config.data.drag_type['annotation']
+                         + config.data.drag_type['timestamp']
+                         + config.data.drag_type['annotation-type']
+                         ,
+                         gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        sb.connect('drag-motion', scroll_on_drag)
 
         # Now build the scale_pane
         scale_pane = gtk.HPaned()
