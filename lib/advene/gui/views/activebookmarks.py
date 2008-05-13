@@ -79,6 +79,12 @@ class ActiveBookmarks(AdhocView):
         self.arrow_mark=None
         self.refresh()
 
+    def debug (self, widget, *p):
+        print "Debug event."
+        if p:
+            print "Data: %s" % str(p)
+        return True
+
     def get_type(self):
         if hasattr(self, 'chosen_type_selector'):
             return self.chosen_type_selector.get_current_element()
@@ -524,6 +530,32 @@ class ActiveBookmarks(AdhocView):
         sw.add_with_viewport(self.mainbox)
         self.scrollwindow=sw
 
+        def scroll_on_drag(widget, drag_context, x, y, timestamp):
+            adj=widget.get_adjustment()
+            v=adj.value
+            if y > widget.get_allocation().height / 2:
+                # Try to scroll down
+                v += max(adj.step_increment, adj.page_increment / 3)
+            else:
+                v -= max(adj.step_increment, adj.page_increment / 3)
+            if v < 0:
+                v = 0
+            elif v > adj.upper - adj.page_size:
+                v=adj.upper - adj.page_size
+            adj.value=v
+            return True
+
+        sb=sw.get_vscrollbar()
+        sb.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                         gtk.DEST_DEFAULT_HIGHLIGHT |
+                         gtk.DEST_DEFAULT_ALL,
+                         config.data.drag_type['annotation']
+                         + config.data.drag_type['timestamp']
+                         + config.data.drag_type['annotation-type']
+                         ,
+                         gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+        sb.connect('drag-motion', scroll_on_drag)
+        
         def hide_arrow_mark(*p):
             if self.arrow_mark is not None:
                 self.arrow_mark.hide()
