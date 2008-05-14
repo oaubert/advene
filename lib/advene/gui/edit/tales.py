@@ -98,12 +98,15 @@ class TALESEntry:
     def get_text(self):
         return self.text2tales(self.combo.get_current_element())
 
+    def set_no_show_all(self, b):
+        self.widget.set_no_show_all(b)
+
     def set_editable(self, b):
         self.editable=b
         self.entry.set_editable(b)
 
     def show(self):
-        self.widget.show_all()
+        self.widget.show()
         return True
 
     def hide(self):
