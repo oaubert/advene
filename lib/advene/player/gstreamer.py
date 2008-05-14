@@ -575,6 +575,12 @@ class Player:
             if event.keyval == gtk.keysyms.Escape:
                 self.unfullscreen()
                 return True
+            else:
+                try:
+                    if self.fullscreen_key_handler(widget, event):
+                        return True
+                except AttributeError:
+                    return False
             return False
         if self.fullscreen_window is None:
             self.fullscreen_window=gtk.Window()

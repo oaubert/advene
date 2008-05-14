@@ -1236,6 +1236,8 @@ class AdveneGUI (Connect):
                     (_("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_frame(+1)),
                     (_("Fullscreen"), gtk.STOCK_FULLSCREEN, lambda i: self.controller.player.fullscreen()),
                     ) )
+            # Hook the player control keypress
+            self.controller.player.fullscreen_key_handler = self.process_player_shortcuts
 
         for text, stock, callback in tb_list:
             b=gtk.ToolButton(stock)
