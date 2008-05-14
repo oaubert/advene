@@ -579,6 +579,14 @@ class Player:
         if self.fullscreen_window is None:
             self.fullscreen_window=gtk.Window()
             self.fullscreen_window.connect('key-press-event', keypress)
+            style=self.fullscreen_window.get_style().copy()
+            black=gtk.gdk.color_parse('black')
+            for state in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
+                          gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
+                          gtk.STATE_PRELIGHT):
+                style.bg[state]=black
+                style.base[state]=black
+            self.fullscreen_window.set_style(style)
         self.fullscreen_window.show()
         self.fullscreen_window.window.fullscreen()
         self.imagesink.set_xwindow_id(self.fullscreen_window.window.xid)
