@@ -575,6 +575,11 @@ class Player:
             if event.keyval == gtk.keysyms.Escape:
                 self.unfullscreen()
                 return True
+            elif event.keyval == gtk.keysyms.space:
+                # Since we are in fullscreen, there can be no
+                # confusion with other widgets.
+                self.pause()
+                return True
             else:
                 try:
                     if self.fullscreen_key_handler(widget, event):
