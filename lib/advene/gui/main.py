@@ -1234,6 +1234,7 @@ class AdveneGUI (Connect):
             tb_list.extend( (
                     (_("Previous frame [Control-Down]"), gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_frame(-1)),
                     (_("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_frame(+1)),
+                    (_("Fullscreen"), gtk.STOCK_FULLSCREEN, lambda i: self.controller.player.fullscreen()),
                     ) )
 
         for text, stock, callback in tb_list:
