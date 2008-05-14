@@ -785,6 +785,7 @@ class EditCondition(EditGeneric):
         self.lhs.set_text(self.model.lhs or "")
         self.lhs.set_editable(self.editable)
         self.lhs.show()
+        self.lhs.set_no_show_all(True)
 
         if self.parent is None or isinstance(self.parent, EditRule):
             predef=[ ('string:%s' % at.id,
@@ -801,6 +802,7 @@ class EditCondition(EditGeneric):
         self.rhs.set_text(self.model.rhs or "")
         self.rhs.set_editable(self.editable)
         self.rhs.hide()
+        self.rhs.set_no_show_all(True)
 
         operators={}
         operators.update(Condition.binary_operators)
