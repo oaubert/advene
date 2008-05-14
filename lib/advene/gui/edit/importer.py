@@ -53,13 +53,13 @@ class ExternalImporter(AdhocView):
             # Valid filename. Guess importers
             valid=advene.util.importer.get_valid_importers(n)
             for i in valid:
-                model.append( ( i.name, i) )
+                model.append( ( i.name, i, None) )
             if valid:
                 self.importers.set_active(0)
             self.convert_button.set_sensitive(True)
         else:
             # Invalid filenames. Empty importers and disable convert button
-            model.append( (_("No valid importer"), None) )
+            model.append( (_("No valid importer"), None, None) )
             self.importers.set_active(0)
             self.convert_button.set_sensitive(False)
 
