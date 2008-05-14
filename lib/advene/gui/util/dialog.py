@@ -176,7 +176,7 @@ def list_selector(title=None,
     d.destroy()
     return retval
 
-def message_dialog(label="", icon=gtk.MESSAGE_INFO, callback=None):
+def message_dialog(label="", icon=gtk.MESSAGE_INFO, modal=True, callback=None):
     """Message dialog.
 
     If callback is not None, then the dialog will not be modal and
@@ -187,9 +187,13 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, callback=None):
     else:
         button=gtk.BUTTONS_OK
     if callback is not None:
-        flags=gtk.DIALOG_DESTROY_WITH_PARENT
-    else:
+        # Force non-modal behaviour when there is a callback
+        modal=False
+    if modal:
         flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT
+    else:
+        flags=gtk.DIALOG_DESTROY_WITH_PARENT
+
     dialog = gtk.MessageDialog(None, flags,
                                icon, button)
     dialog.set_markup(label)
