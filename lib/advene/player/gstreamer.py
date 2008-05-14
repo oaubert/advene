@@ -75,6 +75,7 @@ gobject.threads_init()
 import pygst
 pygst.require('0.10')
 import gst
+import gtk
 import os
 from threading import Condition
 
@@ -575,14 +576,13 @@ class Player:
                 self.unfullscreen()
                 return True
             return False
-        import gtk
-        self.fullscreen_window=gtk.Window()
-        self.fullscreen_window.connect('key-press-event', keypress)
+        if self.fullscreen_window is None:
+            self.fullscreen_window=gtk.Window()
+            self.fullscreen_window.connect('key-press-event', keypress)
         self.fullscreen_window.show()
         self.fullscreen_window.window.fullscreen()
         self.imagesink.set_xwindow_id(self.fullscreen_window.window.xid)
 
     def unfullscreen(self):
         self.imagesink.set_xwindow_id(self.xid)
-        self.fullscreen_window.destroy()
-        
+        self.fullscreen_window.hide()
