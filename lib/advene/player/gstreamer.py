@@ -55,6 +55,16 @@ videotestsrc pattern=1 ! video/x-raw-yuv,width=100,height=100 ! videobox border-
 This should show a 320x240 pixels video test source with some transparency showing the background checker pattern. Another video test source with just the snow pattern of 100x100 pixels is overlayed on top of the first one on the left vertically centered with a small transparency showing the first video test source behind and the checker pattern under it. 
 
 videotestsrc ! video/x-raw-yuv,width=320, height=240 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink filesrc location=/tmp/a.svg  ! gdkpixbufdec ! videoscale ! video/x-raw-rgb,width=320,height=240 ! ffmpegcolorspace ! alpha alpha=0.5 ! mix. 
+
+
+Mosaic : 2 videos side-by-side:
+
+videotestsrc pattern=11 !  video/x-raw-yuv,width=320,height=200 ! videobox left=-320 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink videotestsrc pattern=0 ! video/x-raw-yuv,width=320,height=200 ! mix.
+
+puis
+pads=list(mix.pads())
+pads[0].props.xpos=-320
+pads[1].props.xpos=320
 """
 
 import advene.core.config as config
@@ -142,6 +152,8 @@ class Player:
 
         self.xid = None
         self.mute_volume=None
+        # fullscreen gtk.Window
+        self.fullscreen_window=None
 
         self.build_converter()
         self.build_pipeline()
@@ -304,14 +316,14 @@ class Player:
         if not res:
             raise InternalException
 
-    def start(self, position):
+    def start(self, position=0):
         if not self.check_uri():
             return
         self.player.set_state(gst.STATE_PLAYING)
         if position != 0:
             self.set_media_position(position)
 
-    def pause(self, position):
+    def pause(self, position=0):
         if not self.check_uri():
             return
         if self.status == self.PlayingStatus:
@@ -319,10 +331,10 @@ class Player:
         else:
             self.player.set_state(gst.STATE_PLAYING)
 
-    def resume(self, position):
+    def resume(self, position=0):
         self.pause(position)
 
-    def stop(self, position):
+    def stop(self, position=0):
         if not self.check_uri():
             return
         self.player.set_state(gst.STATE_READY)
@@ -556,3 +568,21 @@ class Player:
             i=indent+"  "
             l.extend( [ self.disp(c, i) for c in e.elements() ])
         return ("\n"+indent).join(l)
+
+    def fullscreen(self):
+        def keypress(widget, event):
+            if event.keyval == gtk.keysyms.Escape:
+                self.unfullscreen()
+                return True
+            return False
+        import gtk
+        self.fullscreen_window=gtk.Window()
+        self.fullscreen_window.connect('key-press-event', keypress)
+        self.fullscreen_window.show()
+        self.fullscreen_window.window.fullscreen()
+        self.imagesink.set_xwindow_id(self.fullscreen_window.window.xid)
+
+    def unfullscreen(self):
+        self.imagesink.set_xwindow_id(self.xid)
+        self.fullscreen_window.destroy()
+        
