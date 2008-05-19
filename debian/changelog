@@ -1,3 +1,23 @@
+advene (0.30) unstable; urgency=low
+
+  * Stable release
+  
+  * Important notes (see the following 0.29 notes for more details):
+  
+    * The shortcut to start/pause the player has changed: it is now
+      Control+Tab (so that plain Tab/Shift-Tab can be used to navigate in
+      the GUI)
+  
+    * New adhoc view: activebookmarks, which can be used to build
+      annotations from timestamps. It can also be exported to HTML.  The old
+      bookmarks view still exists, but is deprecated and will be replaced by
+      activebookmarks in future releases.
+  
+    * New global shortcuts: Insert or Alt-Space creates a new active
+      bookmark.
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 19 May 2008 11:47:03 +0200
+
 advene (0.29) unstable; urgency=low
 
   * The shortcut to start/pause the player has changed: it is now
