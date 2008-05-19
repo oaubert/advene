@@ -88,15 +88,16 @@ def get_packages_list():
     """
     l=[]
     def ispackage(pl, dirname, fnames):
-        if sys.platform == 'linux2' and (dirname.endswith('cherrypy') or dirname.endswith('simpletal')):
+        if sys.platform == 'linux2' and ('cherrypy' in dirname or dirname.endswith('simpletal')):
             # On linux (at least, Debian and Ubuntu), cherrypy and
             # simpletal are packaged. So do not consider them in the
             # packages list.
-            fnames=[]
+            fnames[:]=[]
         elif '__init__.py' in fnames:
             l.append(dirname)
     os.path.walk('lib', ispackage, l)
-    return [ ".".join(name.split(os.path.sep)[1:]) for name in l ]
+    res=[ ".".join(name.split(os.path.sep)[1:]) for name in l ]
+    return res
 
 def generate_data_dir(dir_, prefix="", postfix=""):
     """Return a structure suitable for datafiles from a directory.
