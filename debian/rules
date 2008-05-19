@@ -42,7 +42,7 @@ install-python%:
 clean:
 	dh_testdir
 	rm -f build-stamp
-	$(setup) clean
+	python setup.py clean
 	find . -name "*.pyc" | xargs rm -f
 	find . -name "*.pyo" | xargs rm -f
 	rm -rf $(build_dir) $(install_dir)
