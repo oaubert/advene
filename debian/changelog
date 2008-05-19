@@ -37,8 +37,10 @@ advene (0.29) unstable; urgency=low
        expression "package/state/name"
   
   * Various GUI and usability improvements
+
+  * The gstreamer video plugin can display the video fullscreen
   
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 19 May 2008 11:45:25 +0200
 
 advene (0.28) unstable; urgency=low
 
