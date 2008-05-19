@@ -1,5 +1,5 @@
 This package was debianized by Olivier Aubert <olivier.aubert@liris.cnrs.fr> on
-Sun,  7 Mar 2004 16:11:17 +0100.
+Mon May 19 12:31:56 CEST 2008
 
 It was downloaded from http://liris.cnrs.fr/advene/
 
@@ -7,6 +7,19 @@ Upstream Authors:
    Olivier Aubert <olivier.aubert@liris.cnrs.fr>
    Pierre-Antoine Champin <pierre-antoine.champin@liris.cnrs.fr>
    Yannick Prie <yannick.prie@liris.cnrs.fr>
+   Bertrand Richard <bertrand.richard@liris.cnrs.fr>
+
+Files: *
+Copyright: 2003-2008 Olivier Aubert <olivier.aubert@liris.cnrs.fr>
+License: GPL-2+
+  The full text of the GPL is distributed as in
+  /usr/share/common-licenses/GPL-2 on Debian systems.
+
+Files: share/web/fckeditor/*
+Copyright: Copyright (C) 2003-2007 Frederico Caldeira Knabben
+License: GPL-2+
+  The full text of the GPL is distributed as in
+  /usr/share/common-licenses/GPL-2 on Debian systems.
 
 Copyright:
 
