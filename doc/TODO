@@ -1,7 +1,70 @@
-* video slider: update the time when moving the slider
+* streamline ask_for_relationtype method (timeline relation creation)
+
+* Use animations in GUI: http://live.gnome.org/PAF
+
+* activebookmark: normal size -> first on list with a separator or display in bold ?
+
+* Montage: double-click -> goto annotation
+
+* Auto-pause in montage view
+
+* Put Montage view in dynamic views menu
+
+* transcribe: allow to display the old timestamp marks
+
+* timeline popup menu on annotation: offer access to possibly
+   overlapping annotations
+
+* Imagemap/SVG
+
+* Investigate speech recognition:
+   http://www.speech.cs.cmu.edu/cmusphinx/moinmoin/GStreamer 
+
+* transcribe: insert begin/end marks (0, duration)
+
+* website/FAQ: justify "offline" approach (privacy, on the run, performances...)
+
+* activebookmark: DND to accumulator -> move annotation
+
+* gstreamer: svg (wait for gdkpixbufoverlay)
+
+* Synchronise transcribe with annotations/timeline
+ * create new type. On view rename -> set new type title
+ * create/fusion/delete annotations when modifying timestamps
+
+* http://git.or.cz/course/svn.html
+* http://git.or.cz/gitwiki/GitSvnComparsion
+
+* SKOS?: http://www.w3.org/News/2008#item25
+
+* make all simple selections (annotation, timestamp, etc) able to get
+   multiline data to represent element list
+
+* extend textview with possibility to insert images + bold + italic
+   and generate a subset of html. Cf
+   /usr/share/doc/python-gtk2-doc/examples/demos/textview.py
+http://www.gnome.org/~gjc/htmltextview.py
+
+* Dynamic view editing: Categorize events (annotation, player, application)
+
+* Selection: extend-to-next ?
+
+* Global timeline with frame to represent "overview + detail" (p174)
+
+* Dynamic queries/filters (p.178)
+
+* Data brushing p.181 -> selection in a view, highlight in others
+
+* Concatenate selection -> concatenate contents?
+
+* advene2: LGPL license
+
+* Package python-vlc-0.9.0.deb and vlc-svg-0.9.0.deb
+
+* Proeminently put GPL license info on the web site.
 
 * timeline: memorize zoom level and position when changing package
-   (needs a timeline.zoom_level[package] structure)
+   (needs a timeline.zoom_level[package_uri] structure)
 
 * generate a 'fields' metadata for structured annotation types
 
@@ -11,10 +74,6 @@
 
 * Embed VLC:  http://code.revolunet.com/VLCobject/EN
  http://code.revolunet.com/VLCcontrols/EN
-
-* Synchronise transcribe with annotations/timeline
- * create new type. On view rename -> set new type title
- * create/fusion/delete annotations when modifying timestamps
 
 * fix DND from treeview (view on SVG widget)
 
@@ -41,17 +100,12 @@
 
 * shotdetect: allow to specify begin/end times, to allow to redo a segmentation with a new threshold
 
-* Redesign ask_for_annotation_type / ask_for_schema through reusable
-   widgets, put in dialog. Cf transcribe
-
 * Package: static export (to web site) of a set of views+resources/images
 
 * Assistant for generating HTML views from annotations (propose some
    common layouts: plain TOC, illustrated TOC, etc)
 
 * view creation (static/dynamic): step by step wizard
-
-* bookmarks: add a second timestamp (?)
 
 * AdhocView: make self.log display messages in a gtkStatusBar
 
@@ -66,9 +120,6 @@
 * gtk locale in win32
 
 * clearlook theme in win32 ?
-
-* Menu for initial configuration (GUI language [if not 'LANG' in
-   os.environ], paths)
 
 * transcription: option to display timestamp marks and allow to modify
 
@@ -94,13 +145,9 @@
 https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platform/osx/qt_extractor.py
 https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platform/osx/frontend/QuicktimeRenderer.py
 
-* Global shortcut Ctrl-b to add a bookmark
-
 * Thicker frame around widgets in editaccumulator -> not so simple
 
 * editaccumulator: distinguish incomplete annotations (missing entidtime)
-
-* import for transcriber (DGA), voir annotation dans audacity
 
 * edit.elements.annotation: next/prev should reuse the same window
 
@@ -148,11 +195,9 @@ https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platfor
 
 ** timeline parameters: use TALES expressions for each line instead of annotation types (-> we can use queries and also have multiple packages in the same timeline)
 
-** timeline: scrollbar arrows do not work
-
 ** timeline: allow to group annotation types with tags
 
-** timeline: shortcuts for DND (with Ctrl->copy, Shift->move, etc) -> no event received ??
+** timeline: shortcuts for DND (with Ctrl->copy, Shift->move, etc)
 
 ** timeline: Center on related annotation
 
@@ -162,6 +207,10 @@ https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platfor
 http://jokosher.python-hosting.com/wiki/GnonlinNotes
 http://jokosher.org/
 http://jokosher.python-hosting.com/file/JonoEdit/trunk/TimeLine.py?rev=389
+
+* transcribe: add a small timeline on the top that displays the
+position of current marks in the video (with small lines) [cf linkmap
+   in /usr/lib/meld/filediff.py ]
 
 * Importers
 
@@ -176,8 +225,6 @@ http://jokosher.python-hosting.com/file/JonoEdit/trunk/TimeLine.py?rev=389
 ** new signal: DurationUpdate, CurrentAnnotation
 
 ** Make the play + pause button a unique button => not that easy
-
-** Add the possibility to specify a time through a text entry HH:MM:SS
 
 ** review gtk.Style for whole app (viewbook labels and comboboxes smaller, more separation...)
 
@@ -452,10 +499,6 @@ return position, or display in a new video window
 * All GUI views: convert action buttons to toolbars
 
 * navigation history: put 2 snapshots (origin, destination) to contextualize
-
-* transcribe: add a small timeline on the top that displays the
-position of current marks in the video (with small lines) [cf linkmap
-   in /usr/lib/meld/filediff.py ]
 
 * Popups: white on black background
 
@@ -1590,8 +1633,6 @@ of movie time)
 ** Make the package a .zip file, with a MANIFEST, data.xml and
 resources/ directory
 
-* register_adhoc_view(view, name) + use registered views in open_adhoc_view + webserver
-
 * gstreamer: cf tutorial http://www.jonobacon.org/?p=750
 http://www.cin.ufpe.br/~cinlug/wiki/index.php/Apresentando_o_GStreamer
 http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/gst-plugins-base-plugins-textoverlay.html
@@ -1601,11 +1642,17 @@ http://gnosis.cx/download/relax/
 http://www.rexx.com/~dkuhlman/#a-parser-for-relax-ng-compact-syntax
 http://svn.rdflib.net/trunk/rdflib/Literal.py
 
+http://relaxng.org/compact-tutorial-20030326.html
+http://www.ibm.com/developerworks/xml/library/x-tiprng.html
+http://books.xmlschemata.org/relaxng/relax-CHP-8-SECT-1.html
+Datatype reference:
+http://books.xmlschemata.org/relaxng/relax-CHP-19.html
+
 * Timeline: popup menu for transtyping - do not display (or gray) move annotation if it has relations
 
 * timeline: Do not update zoom level immediately.
 
-* Edit element: expant Content frame if there is content in relations
+* Edit element: expand Content frame if there is content in relations
 
 * table view: export selection to .csv format 
 
@@ -2121,4 +2168,213 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * gui.widget: representation for annotation valued data (sound
    enveloppe), cf IRI data
+
+* extract query interpretation code from global_methods to controller 
+
+* DND of element in viewbook: propose to query the element (with
+   submenu/queries)
+
+* video slider: update the time when moving the slider
+
+** Add the possibility to specify a time through a text entry HH:MM:SS
+
+* menu/check_for_updates: display a feedback even when there is no update
+
+* gui.widget: pass annotation upon first invocation of set_cursor
+
+* CMML export view
+
+* timeline: selection -> activate
+ 
+* register_adhoc_view(view, name) + use registered views in open_adhoc_view + webserver
+
+* Dynamic view editing: default rule name: rule1, rule2, rule3...
+
+* + button for dynamic views
+
+* timeline: DND of bookmark in timeline or annotation widget ->
+   annotation creation
+
+* timeline: shift-range -> add new selection
+
+* New actions State-related : SetState, IncrState, ClearState
+
+* timeline: selection submenu => tag selection
+
+* TimeAdjustment: drag source
+
+* viewbook: drag timestamp -> create bookmark view
+
+* general: dnd of image representing position (bookmarks,
+   timeadjustment...) -> define DND widget _icon
+
+* bookmark: double click -> play (unpause)
+
+* EditAccumulator: update frame title when AnnotationEditEnd
+
+* Pb in DND when accents in URI
+
+* activebookmark: use text-annotation for creation by default +
+   display combo box to change
+
+--> Reuse gui.views.bookmarks.BookmarkWidget
+* activebookmark: simple timestamp display (image) + text. When
+   dropping another timestamp, use it as the end timestamp. 
+
+* ACtivebookmarks module
+
+* activebookmark: update the textview color with the type color when
+   setting/unsetting an annotation
+
+* activebookmark: simple DND in the view -> move bookmarks
+
+* activebookmark: update annotation type list
+
+* activebookmark: when moving over a bookmark timestamp, highlight it
+   in the timeline
+
+* activebookmark: annotationtype DND on comment_entry changes type,
+   timestamp DND adds/changes end bound
+
+* investigate DND action (copy, move) + modifiers
+
+* activebookmark: do not erase bookmarks when changing timestamp,
+   generate new bookmarks
+
+* Dynamic view editing: hide mimetype, mach filter
+
+* Global Shortcut for activebookmark
+
+* activebookmark: DEL shortcut
+
+* active bookmark: add a permanent dropzone (fixed width hbox)
+
+* DND icon for annotations: begin/end snapshot (+ representative if
+   defined)
+
+* activebookmarks: allow to reorder bookmarks
+
+* DND timestamp to remove from activebookmark
+
+* transcribe: handle timestamp drops by creating marks
+
+* transcribe: use snapshots instead of arrow as separator or display
+   screenshots as tooltip
+
+* selection.set timestamp: add comment field
+
+* ActiveBookmarks, with incomplete notion (missing end attr). Synchronized with model.
+
+* timeline: draw the bookmark mark on the layout
+
+* timeline: trash can icon
+
+* activebookmark: DND annotation inside view => reorder
+
+* activebookmark: hook text completer in comment textview
+
+* action: open a static view + direct choice
+
+* timeline: remove invalid choices from alignment popup menu
+
+* activebookmark: autoscroll to focus annotation or created bookmark
+
+* Upon element deletion, remove its name from the idgenerator
+
+* popup on query: propose to apply query
+
+* activebookmark: autoscroll?
+
+* transcribe: use defined scale when creating a timestamp mark
+
+* timeline: annotation creation -> streamline windows (only 1 popup
+   with appearing items (schema, etc))
+
+* activebookmark: when dropping an annotatin, display the frame
+
+* DND marks: cf evolution/widgets/table/e-table-header-item.c, search
+   for arrow_up
+
+* activebookmark: DND of annotation -> create annotation
+
+* Player pause/play: Control-Tab
+
+* activebookmark: when replacing a timestamp, put the old one below
+   the current bookmark
+
+* edit.elements: color textview according to type
+
+* ask_for_annotation_type: add tooltips
+
+* activebookmark: if cursor in textview: Tab: select next anntoation;
+   Tab: select next textview
+
+* activebookmark: shift-alt-space: create a new bookmark next to the current one
+
+* All: unify signal names (single quotes, hyphen)
+
+* activebookmarks: after delete: put focus on the next bookmark. Double-delete 
+
+* activebookmarks: duplicate bookmark
+
+* activebookmarks: "Complete" button to automatically complete
+   incomplete bookmarks
+
+* activebookmark: popup menu: allow to select a type
+
+* activebookmark: fix scroll-to-current
+
+* activebookmark: allow to reduce snapshot size per view
+
+* activebookmarks: offer an HTML+TAL export
+
+* active bookmark: popup menu->terminate annotation (+1s duration)
+
+* DND activebookmarks: ctrl+DND -> duplicate
+
+* Control-scroll: scroll-up -> increment
+
+* timeline: click on trash -> delete selected annotations
+
+* activebookmark: remove bottom dropbox
+
+* activebookmark: click on trash -> delete current annotation
+
+* annotation-type list widget: display type colors
+
+* activebookmark: shift-up/down/Home/End: move bookmark
+
+* activebookmark: click on end bookmark -> set current
+
+* activebookmark: remove begin bookmark should delete the annotation if it existed.
+
+* activebookmark: popup menu on frame -> annotation menu
+
+* activebookmark: up/arrows to navigate in bookmarks -> blocks in textview when meeting a complete annotation
+
+* option 'log-to-terminal'
+
+* rename simple text schema into basic
+
+* activebookmark: auto-scroll when DND
+
+** timeline: scrollbar arrows do not work
+
+* activebookmark: check shift dnd behaviour (non deletion of source)
+
+* activebookmark: implement copy/cut/paste features
+
+* DND suggestion: DNDDragMotionCB() in http://wolfpack.twu.net/docs/gtkdnd/index.html 
+
+* Redesign ask_for_annotation_type / ask_for_schema through reusable
+   widgets, put in dialog. Cf transcribe
+
+* bookmarks: add a second timestamp (?)
+
+* Menu for initial configuration (GUI language [if not 'LANG' in
+   os.environ], paths)
+
+* Global shortcut Ctrl-b to add a bookmark
+
+* import for transcriber (DGA), voir annotation dans audacity
 
