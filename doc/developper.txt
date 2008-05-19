@@ -9,8 +9,8 @@ application, and can be reused in other applications.
 
 The main configuration options of the applications are located in
 ``advene.core.config``. The module, upon load, defines a
-``advene.core.config.data`` instance which holds correct values and is a
-singleton shared by all other modules importing ``advene.core.config``.
+``advene.core.config.data`` instance which holds configuration values and is a
+singleton shared by all other modules importing ``advene.core.config``. A common idiom if then to import it through ``import advene.core.config as config`` and to access ``config.data``.
 
 The Advene application is articulated around the
 ``advene.core.controller`` class. This class holds a reference to 
