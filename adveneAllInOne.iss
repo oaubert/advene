@@ -49,11 +49,15 @@ InfoAfterFile=debian\changelog
 OutputBaseFilename=setup_advene_0.30_all_in_one_vlcsvn
 VersionInfoTextVersion=0.30
 
-[Registry]
-Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
+;[Registry]
+;Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Icons]
 Name: {group}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; IconIndex: 0
+Name: {userdesktop}\Advene; Filename: {app}\advene.exe; Tasks: desktopicon
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);
@@ -62,7 +66,7 @@ var
   Uninstall: String;
 begin
   if (CurStep = ssInstall) then begin
-    if RegQueryStringValue(HKLM, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall) then begin
+    if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall) then begin
       if MsgBox('Warning: Old Version will be removed!', mbConfirmation, MB_OKCANCEL)=IDOK then begin
           Exec(RemoveQuotes(Uninstall), ' /SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ResultCode);
       end
