@@ -7,12 +7,7 @@ Upstream Authors:
    Olivier Aubert <olivier.aubert@liris.cnrs.fr>
    Pierre-Antoine Champin <pierre-antoine.champin@liris.cnrs.fr>
    Yannick Prie <yannick.prie@liris.cnrs.fr>
-
-Installation Notes:
-
-  You'll need to install Videolan VLC 0.9.svn-advene in order to properly use this version of Advene. 
-  It can be downloaded from advene website: 
-  http://liris.cnrs.com/advene
+   Bertrand Richard <bertrand.richard@liris.cnrs.fr>
 
 Documentation:
 
