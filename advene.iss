@@ -28,10 +28,10 @@ Source: share\Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}
 [Setup]
 AppCopyright=GPL
 AppName=Advene
-AppVerName=Advene 0.29
+AppVerName=Advene 0.30
 DefaultDirName={pf}\Advene
 ShowLanguageDialog=yes
-VersionInfoVersion=0.29
+VersionInfoVersion=0.30
 VersionInfoCompany=LIRIS
 PrivilegesRequired=none
 LicenseFile=debian\copyright
@@ -39,8 +39,8 @@ DisableFinishedPage=false
 DefaultGroupName=Advene
 VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
-OutputBaseFilename=setup_advene_0.29
-VersionInfoTextVersion=0.29
+OutputBaseFilename=setup_advene_0.30
+VersionInfoTextVersion=0.30
 [Registry]
 Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
 [Icons]
