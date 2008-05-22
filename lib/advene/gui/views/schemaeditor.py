@@ -25,30 +25,16 @@ import advene.core.config as config
 from gettext import gettext as _
 
 import gtk
-import gobject
-import pango
-import re
-import os
-import struct
 import goocanvas
-import cairo
-import array
 
-from advene.model.constants import adveneNS
-from advene.model.package import Package
-from advene.model.annotation import Annotation, Relation
 from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.model.view import View
-from advene.model.resources import ResourceData
-from advene.model.query import Query
 from advene.gui.views import AdhocView
 from advene.gui.util import get_pixmap_button
 from advene.gui.util import dialog
-from advene.gui.popup import Menu
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.elements import get_edit_popup
 import advene.util.helper as helper
-from math import *
+from math import sqrt
 import xml.dom
 ELEMENT_NODE = xml.dom.Node.ELEMENT_NODE
 
@@ -79,6 +65,11 @@ class SchemaEditor (AdhocView):
         self.dragging = False
         self.drag_x = 0
         self.drag_y = 0
+        # for drag & drop with ctrl
+        self.orig_x = 0
+        self.orig_y = 0
+        self.ctrl = False
+        
         self.timer_motion=5
         if package is None and controller is not None:
             package=controller.package
@@ -139,7 +130,10 @@ class SchemaEditor (AdhocView):
         lbooks = self.findSchemaAreas(schema)
         if event == 'AnnotationTypeCreate':
             for lb in lbooks:
-                self.addAnnotationTypeGroup(canvas=self.getCanvas(lb), schema=schema, type=annotationtype)
+                atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.getCanvas(lb))
+                print atg
+                if atg is None:
+                    self.addAnnotationTypeGroup(canvas=self.getCanvas(lb), schema=schema, type=annotationtype)
         elif event == 'AnnotationTypeDelete':
             for lb in lbooks:
                 atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.getCanvas(lb))
@@ -208,16 +202,17 @@ class SchemaEditor (AdhocView):
         self.addNotebook()
         #fin onglets
         #menu pour faire les schemas
-        vBoxExp = gtk.VPaned()
-        packExp = gtk.VBox() # sans doute un arbre pour le package voir treeview
-        packExp.pack_start(gtk.Label("Package Explorer"), expand=False)
-        self.PE=packExp
-        vBoxExp.pack1(packExp, resize=True)
+        #vBoxExp = gtk.VPaned()
+        #packExp = gtk.VBox() # sans doute un arbre pour le package voir treeview
+        #packExp.pack_start(gtk.Label("Package Explorer"), expand=False)
+        #self.PE=packExp
+        #vBoxExp.pack1(packExp, resize=True)
         #vBoxExp.pack_start(gtk.VSeparator(), expand=False)
         self.TE= TypeExplorer(self.controller, self.controller.package)
-        vBoxExp.pack2(self.TE)
-        vBoxExp.set_position(5)
-        self.hboxEspaceSchema.pack2(vBoxExp)
+        #vBoxExp.pack2(self.TE)
+        #vBoxExp.set_position(5)
+        #self.hboxEspaceSchema.pack2(vBoxExp)
+        self.hboxEspaceSchema.pack2(self.TE)
         #fin menu schemas
         vbox.pack_start(hboxMenu, expand=False, padding=10)
         vbox.pack_start(gtk.HSeparator(), expand=False)
@@ -250,10 +245,11 @@ class SchemaEditor (AdhocView):
             self.update_list_schemas( active_element=schema)
 
     def delSchema(self, w):
-        tsc, sc=self.listeSchemas.get_model()[self.listeSchemas.get_active()]
+        sc = self.listeSchemas.get_current_element()
+        tsc = sc.title
         if (sc==None):
             return False
-        if (dialog.message_dialog(label="Voulez-vous effacer ce schema ?", icon=gtk.MESSAGE_QUESTION, callback=None)):
+        if (dialog.message_dialog(label="Voulez-vous effacer le schema %s ?" % tsc, icon=gtk.MESSAGE_QUESTION, callback=None)):
             self.controller.delete_element(sc)
             self.update_list_schemas(None)
             lrem = self.findSchemaAreas(sc)
@@ -326,10 +322,11 @@ class SchemaEditor (AdhocView):
         return self.books[i]
 
     def openSchema(self, w, event):
-        tsc, schema =self.listeSchemas.get_model()[self.listeSchemas.get_active()]
+        schema = self.listeSchemas.get_current_element()
         if (schema==None):
             print "Error opening schema"
             return
+        tsc = schema.title
         if (event.button==1):
             scArea = self.addSchemaArea(tsc, schema, self.books[0])
             self.setup_canvas(scArea, schema)
@@ -438,7 +435,7 @@ class SchemaEditor (AdhocView):
 
 ### Functions to add remove modify AnnotationTypesGroup
     def addAnnotationTypeGroup(self, canvas, schema, name=" ", type=None, rx =20, ry=30):
-        cvgroup = AnnotationGroup(self.controller, canvas, schema, name, type, rx, ry)
+        cvgroup = AnnotationTypeGroup(self.controller, canvas, schema, name, type, rx, ry)
         if cvgroup is not None:
             self.setup_annot_signals(cvgroup, schema)
         return cvgroup
@@ -447,7 +444,7 @@ class SchemaEditor (AdhocView):
     def removeAnnotationTypeGroup(self, group, schema):
         group.remove()
         ### FIXME : propagate to other canvas
-        ### FIXME : delete relation types based on this annotation type in othe shcemas
+        ### FIXME : delete relation types based on this annotation type in other schemas
 
 ### Functions to handle notification signals
 
@@ -456,13 +453,14 @@ class SchemaEditor (AdhocView):
         #item.connect ("motion_notify_event", self.rel_on_motion_notify)
         item.connect ('button-press-event', self.rel_on_button_press)
         item.connect ('button-release-event', self.rel_on_button_release)
-        return
+
 
     def setup_annot_signals (self, item, schema):
         #pour capter les events sur les annotations du dessin
         item.connect ('motion-notify-event', self.annot_on_motion_notify)
         item.connect ('button-press-event', self.annot_on_button_press, schema)
         item.connect ('button-release-event', self.annot_on_button_release)
+
 
     def rel_on_button_press (self, item, target, event):
         #on remplit l'explo
@@ -569,6 +567,8 @@ class SchemaEditor (AdhocView):
         return True
 
     def annot_on_button_release (self, item, target, event):
+        # if ctrl pressed, create new relation
+        #if (event.state & gtk.gdk.CONTROL_MASK): 
         canvas = item.get_canvas ()
         canvas.pointer_ungrab (item, event.time)
         self.dragging = False
@@ -866,13 +866,15 @@ class TypeExplorer (gtk.ScrolledWindow):
 # sur modif contenus, refresh l'explo
 # envoyer event sur modifs contenus
 
-class AnnotationGroup (goocanvas.Group):
+class AnnotationTypeGroup (goocanvas.Group):
     def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, rx =0, ry=0):
         goocanvas.Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.schema=schema
         self.name=name
         self.type=type
+        self.rect = None
+        self.text = None
         self.color = "black"
         self.rels=[] # rel groups
         if type is None:
@@ -882,10 +884,10 @@ class AnnotationGroup (goocanvas.Group):
                                     parent=schema,
                                     controller=self.controller)
             at=cr.popup(modal=True)
-            if (at==None):
+            if at is None:
                 return None
             self.type=at
-            self.name=self.type.title
+        self.name=self.type.title
         nbannot = len(self.type.getAnnotations())
         if (self.controller.get_element_color(self.type) is not None):
             self.color = self.controller.get_element_color(self.type)
@@ -942,6 +944,8 @@ class RelationTypeGroup (goocanvas.Group):
         self.schema=schema
         self.name=name
         self.type=type
+        self.line=None
+        self.text=None
         self.color = "black"
         self.members=members
         if self.type is None:
@@ -951,18 +955,16 @@ class RelationTypeGroup (goocanvas.Group):
                                     parent=schema,
                                     controller=self.controller)
             rt=cr.popup(modal=True)
-            if (rt==None):
+            if (rt is None):
                 return None
             self.type=rt
-            if (len(self.members)==0):
+            if not self.members:
                 pop = get_edit_popup (self.type, self.controller)
                 pop.edit(modal=True)
             else:
                 # FIXME if more than 2 members
                 self.type.hackedMemberTypes=( '#' + self.members[0].id, '#' + self.members[1].id )
-                self.update()
                 #need to propagate edition event
-            return True 
         linked = self.type.getHackedMemberTypes()
         #print "%s %s %s %s %s" % (self.type, self.name, self.schema, self.members, linked)
         #print "%s" % self.members
@@ -1142,3 +1144,5 @@ class RelationTypeGroup (goocanvas.Group):
             nbrel = len(self.type.getRelations())
             self.text.props.text = self.name + " ("+str(nbrel)+")"
         self.redraw()
+
+
