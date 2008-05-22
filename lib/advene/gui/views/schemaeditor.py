@@ -131,7 +131,6 @@ class SchemaEditor (AdhocView):
         if event == 'AnnotationTypeCreate':
             for lb in lbooks:
                 atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.getCanvas(lb))
-                print atg
                 if atg is None:
                     self.addAnnotationTypeGroup(canvas=self.getCanvas(lb), schema=schema, type=annotationtype)
         elif event == 'AnnotationTypeDelete':
@@ -157,7 +156,9 @@ class SchemaEditor (AdhocView):
         lbooks = self.findSchemaAreas(schema)
         if event == 'RelationTypeCreate':
             for lb in lbooks:
-                self.addRelationTypeGroup(canvas=self.getCanvas(lb), schema=schema, type=relationtype)
+                rtg = self.findRelationTypeGroup(relationtype.getId(),self.getCanvas(lb))
+                if rtg is None:
+                    self.addRelationTypeGroup(canvas=self.getCanvas(lb), schema=schema, type=relationtype)
         elif event == 'RelationTypeDelete':
             for lb in lbooks:
                 rtg = self.findRelationTypeGroup(relationtype.getId(),self.getCanvas(lb))
@@ -247,7 +248,7 @@ class SchemaEditor (AdhocView):
     def delSchema(self, w):
         sc = self.listeSchemas.get_current_element()
         tsc = sc.title
-        if (sc==None):
+        if (sc is None):
             return False
         if (dialog.message_dialog(label="Voulez-vous effacer le schema %s ?" % tsc, icon=gtk.MESSAGE_QUESTION, callback=None)):
             self.controller.delete_element(sc)
@@ -323,7 +324,7 @@ class SchemaEditor (AdhocView):
 
     def openSchema(self, w, event):
         schema = self.listeSchemas.get_current_element()
-        if (schema==None):
+        if (schema is None):
             print "Error opening schema"
             return
         tsc = schema.title
@@ -780,14 +781,11 @@ class TypeExplorer (gtk.ScrolledWindow):
             return False
         self.TName.set_text(name)
         return True
-
-    #a faire evoluer en liste
+ 
     def getMimeType(self):
-        tm, m=self.TMimeType.get_model()[self.TMimeType.get_active()]
+        m = self.TMimeType.get_current_element()
+        print m
         return m
-        #return self.TMimeType.get_text()
-
-    #a faire evoluer en liste
     def setMimeType(self, mimetype):
         store, i = dialog.generate_list_model( elements = [ ('text/plain', _("Plain text content")),
                               ('application/x-advene-structured', _("Simple-structured content")),
@@ -800,8 +798,6 @@ class TypeExplorer (gtk.ScrolledWindow):
         if i is not None:
             self.TMimeType.set_active_iter(i) 
         return True
-        #self.TMimeType.set_text(mimetype)
-        #return True
 
     def addAttributeSpace(self, w, nom="New Attribute", type="None", con=""):
         #ajouter eventuellement un contenu directement avec x params
