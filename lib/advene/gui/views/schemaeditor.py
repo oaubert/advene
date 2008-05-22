@@ -55,19 +55,21 @@ class SchemaEditor (AdhocView):
         self.contextual_actions = (
             (_("Refresh"), self.refresh),
             )
-        self.TE=None
-        self.PE=None
-        self.hboxEspaceSchema=None
         self.listeSchemas = None
         self.controller=controller
-        self.options={}
-        self.books={}
+        self.TE=None
+        self.hboxEspaceSchema=None
+        self.schemaArea = None
+        self.canvas = None
+        self.canvasX = 1200
+        self.canvasY = 1000
+        self.sepV = None
+        self.sepH = None
+        self.openedschemas = {}
         self.dragging = False
         self.drag_x = 0
         self.drag_y = 0
         # for drag & drop with ctrl
-        self.orig_x = 0
-        self.orig_y = 0
         self.ctrl = False
         
         self.timer_motion=5
@@ -75,39 +77,104 @@ class SchemaEditor (AdhocView):
             package=controller.package
         self.__package=package
         self.widget = self.build_widget()
-        #print "%s" % self.widget.size_request()
-        # 51/70 ...
+
+    def build_widget(self):
+        #hbox containing Schema menu and buttons
+        hboxMenu = gtk.HBox(spacing=5)
+        self.listeSchemas = dialog.list_selector_widget(
+            members=[ (s, s.getTitle()) for s in self.controller.package.getSchemas()])
+        hboxMenu.pack_start(self.listeSchemas, expand=True)
+        boutonSuppr = gtk.Button(label="Supprimer", stock=gtk.STOCK_DELETE)
+        boutonModif = gtk.Button(label="Modifier", stock=gtk.STOCK_OPEN)
+        boutonNew = gtk.Button(label="Nouveau", stock=gtk.STOCK_NEW)
+        hboxMenu.pack_start(boutonModif, expand=False)
+        hboxMenu.pack_start(boutonSuppr, expand=False)
+        hboxMenu.pack_start(boutonNew, expand=False)
+        boutonModif.connect('clicked', self.openSchema )
+        boutonSuppr.connect('clicked', self.delSchema)
+        boutonNew.connect('clicked', self.newSchema)
+
+        #HPaned containing schema area and Type explorer and Constraint explorer
+        self.hboxEspaceSchema = gtk.HPaned()
+        #   schema area
+        self.schemaArea = self.createSchemaArea()
+        self.openedschemas = []
+        self.hboxEspaceSchema.pack1(self.schemaArea, resize=True)
+        #   type explorer
+        self.TE= TypeExplorer(self.controller, self.controller.package)
+        self.hboxEspaceSchema.pack2(self.TE)
+        #self.hboxEspaceSchema.set_position(150)
+        self.hboxEspaceSchema.show_all()
+
+        #main vbox.
+        vbox=gtk.VBox()        
+        vbox.pack_start(hboxMenu, expand=False, padding=10)
+        vbox.pack_start(gtk.HSeparator(), expand=False)
+        vbox.pack_start(self.hboxEspaceSchema, expand=True)
+        vbox.pack_start(gtk.HSeparator(), expand=False)
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        #sw.add_events(gtk.gdk.BUTTON_PRESS_MASK)
+        sw.add_with_viewport(vbox)
+        return sw
+
+    def createSchemaArea(self):
+        #Constraint explorer
+        hboxConExplorer = gtk.HBox()
+        labelConExplorer = gtk.Label("Constraint Explorer")
+        hboxConExplorer.pack_start(labelConExplorer, expand=False)
+
+        bg_color = gtk.gdk.Color (55000, 55000, 65535, 0)
+        hbox = gtk.HBox (False, 4)
+        #Create the canvas   
+        canvas = goocanvas.Canvas()
+        canvas.modify_base (gtk.STATE_NORMAL, bg_color)
+        canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
+        #Zoom
+        w = gtk.Label ("Zoom:")
+        hbox.pack_start (w, False, False, 0)
+        adj = gtk.Adjustment (0.65, 0.05, 1.00, 0.05, 0.50, 0.50)
+        adj.connect('value-changed', self.zoom_changed, canvas)
+        w = gtk.SpinButton (adj, 0.0, 2)
+        w.set_size_request (50, -1)
+        hbox.pack_start (w, False, False, 0)
+        scrolled_win = gtk.ScrolledWindow ()
+        scrolled_win.add(canvas)
+        self.canvas = canvas
+
+        #schemaArea
+        schemaArea = gtk.VBox(False, 4)
+        schemaArea.set_border_width(4)
+        schemaArea.pack_start (hbox, False, False, 0)
+        schemaArea.pack_start (gtk.VSeparator(), expand=False)
+        schemaArea.pack_start(scrolled_win, True, True, 0)
+        schemaArea.pack_start(gtk.HSeparator(), expand=False)
+        schemaArea.pack_start(hboxConExplorer, expand=False)
+        return schemaArea
 
 ###
 #
 # Functions to update the gui when an event occurs
 #
 ###
-    def getCanvas(self, bookpage):
-        return bookpage[0].get_children()[2].get_children()[0]
-        
+
     def update_model(self, package):
         self.update_list_schemas()
-        for b in self.books:
-            self.removeNoteBook(b)
-        while self.books[0][0].get_n_pages()>0:
-            self.books[0][0].remove_page(0)
-            del self.books[0][1][0]        
+        self.openedschemas=[]
+        self.setup_canvas()        
         return True
     
     def update_schema(self, schema=None, event=None):
-        locs = self.findSchemaAreas(schema)
-        for l in locs:
-            self.setup_canvas(self.getCanvas(l), schema)
+        if schema in self.openedschemas:
+            self.setup_canvas()
         return True
 
     def update_relation(self, relation=None, event=None):
         if event == 'RelationCreate' or event == 'RelationDelete':
             rt = relation.getType()
             sc = rt.getSchema()
-            locs = self.findSchemaAreas(sc)
-            for l in locs:
-                rtg = self.findRelationTypeGroup(rt.getId(),self.getCanvas(l))
+            if sc in self.openedschemas:
+                rtg = self.findRelationTypeGroup(rt.getId(),self.canvas)
                 rtg.update()
         return True
     
@@ -115,119 +182,57 @@ class SchemaEditor (AdhocView):
         if event == 'AnnotationCreate' or event == 'AnnotationDelete':
             at = annotation.getType()
             sc = at.getSchema()
-            locs = self.findSchemaAreas(sc)
-            for l in locs:
-                atg = self.findAnnotationTypeGroup(at.getId(),self.getCanvas(l))
+            if sc in self.openedschemas:
+                atg = self.findAnnotationTypeGroup(at.getId(),self.canvas)
                 atg.update()
         return True
     
     def update_annotationtype(self, annotationtype=None, event=None):
         print "Updating AT : %s" % event
-        # event AnnotationTypeDelete
-        # event AnnotationTypeEditEnd
-        # event AnnotationTypeCreate
         schema = annotationtype.getSchema()
-        lbooks = self.findSchemaAreas(schema)
-        if event == 'AnnotationTypeCreate':
-            for lb in lbooks:
-                atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.getCanvas(lb))
+        if schema in self.openedschemas:
+            if event == 'AnnotationTypeCreate':
+                atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.canvas)
                 if atg is None:
-                    self.addAnnotationTypeGroup(canvas=self.getCanvas(lb), schema=schema, type=annotationtype)
-        elif event == 'AnnotationTypeDelete':
-            for lb in lbooks:
-                atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.getCanvas(lb))
+                    self.addAnnotationTypeGroup(canvas=self.canvas, schema=schema, type=annotationtype)
+            elif event == 'AnnotationTypeDelete':
+                atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.canvas)
                 if atg is not None:
                     atg.remove_drawing_only()
-            if self.TE is not None and self.TE.type == annotationtype:
-                self.TE.initWithType(None)
-        elif event == 'AnnotationTypeEditEnd':
-            for lb in lbooks:
-                atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.getCanvas(lb))
+                if self.TE is not None and self.TE.type == annotationtype:
+                    self.TE.initWithType(None)
+            elif event == 'AnnotationTypeEditEnd':
+                atg = self.findAnnotationTypeGroup(annotationtype.getId(),self.canvas)
                 if atg is not None:
                     atg.update() 
-            if self.TE is not None and self.TE.type == annotationtype:
-                self.TE.initWithType(annotationtype)
+                if self.TE is not None and self.TE.type == annotationtype:
+                    self.TE.initWithType(annotationtype)
         return True
 
     def update_relationtype(self, relationtype=None, event=None):
-        # sca.get_children()[2].get_children()[0] = canvas du notebook
-        # Need to modify notebook.
         schema = relationtype.getSchema()
-        lbooks = self.findSchemaAreas(schema)
-        if event == 'RelationTypeCreate':
-            for lb in lbooks:
-                rtg = self.findRelationTypeGroup(relationtype.getId(),self.getCanvas(lb))
+        if schema in self.openedschemas:
+            if event == 'RelationTypeCreate':
+                rtg = self.findRelationTypeGroup(relationtype.getId(),self.canvas)
                 if rtg is None:
-                    self.addRelationTypeGroup(canvas=self.getCanvas(lb), schema=schema, type=relationtype)
-        elif event == 'RelationTypeDelete':
-            for lb in lbooks:
-                rtg = self.findRelationTypeGroup(relationtype.getId(),self.getCanvas(lb))
+                    self.addRelationTypeGroup(canvas=self.canvas, schema=schema, type=relationtype)
+            elif event == 'RelationTypeDelete':
+                rtg = self.findRelationTypeGroup(relationtype.getId(),self.canvas)
                 if rtg is not None:
                     rtg.remove_drawing_only()
-            if self.TE is not None and self.TE.type == relationtype:
-                self.TE.initWithType(None)
-        elif event == 'RelationTypeEditEnd':
-            for lb in lbooks:
-                rtg = self.findRelationTypeGroup(relationtype.getId(),self.getCanvas(lb))
+                if self.TE is not None and self.TE.type == relationtype:
+                    self.TE.initWithType(None)
+            elif event == 'RelationTypeEditEnd':
+                rtg = self.findRelationTypeGroup(relationtype.getId(),self.canvas)
                 if rtg is not None:
                     rtg.update() 
-            if self.TE is not None and self.TE.type == relationtype:
-                self.TE.initWithType(relationtype)
+                if self.TE is not None and self.TE.type == relationtype:
+                    self.TE.initWithType(relationtype)
         return True
-
 
     def refresh(self, *p):
         self.update_model(None)
         return True  
-
-    def build_widget(self):
-        vbox=gtk.VBox()
-        hboxMenu = gtk.HBox(spacing=5)
-        #liste et boutons
-        self.hboxEspaceSchema = gtk.HPaned()
-        self.listeSchemas = dialog.list_selector_widget(
-            members=[ (s, s.getTitle()) for s in self.controller.package.getSchemas()])
-        hboxMenu.pack_start(self.listeSchemas, expand=True)
-        #penser a connecter le changed event.
-        boutonSuppr = gtk.Button(label="Supprimer", stock=gtk.STOCK_DELETE)
-        #on peut aussi associer une box au bouton pour mettre autre chose
-        boutonModif = gtk.Button(label="Modifier", stock=gtk.STOCK_OPEN)
-        boutonNew = gtk.Button(label="Nouveau", stock=gtk.STOCK_NEW)
-        #penser a connecter les clics
-        hboxMenu.pack_start(boutonModif, expand=False)
-        hboxMenu.pack_start(boutonSuppr, expand=False)
-        hboxMenu.pack_start(boutonNew, expand=False)
-        #fin du menu
-        #onglets schemas
-        self.books=[] # books = [[notebook,[schemaong1,schemaong2]],...]
-        self.addNotebook()
-        #fin onglets
-        #menu pour faire les schemas
-        #vBoxExp = gtk.VPaned()
-        #packExp = gtk.VBox() # sans doute un arbre pour le package voir treeview
-        #packExp.pack_start(gtk.Label("Package Explorer"), expand=False)
-        #self.PE=packExp
-        #vBoxExp.pack1(packExp, resize=True)
-        #vBoxExp.pack_start(gtk.VSeparator(), expand=False)
-        self.TE= TypeExplorer(self.controller, self.controller.package)
-        #vBoxExp.pack2(self.TE)
-        #vBoxExp.set_position(5)
-        #self.hboxEspaceSchema.pack2(vBoxExp)
-        self.hboxEspaceSchema.pack2(self.TE)
-        #fin menu schemas
-        vbox.pack_start(hboxMenu, expand=False, padding=10)
-        vbox.pack_start(gtk.HSeparator(), expand=False)
-        vbox.pack_start(self.hboxEspaceSchema, expand=True)
-        vbox.pack_start(gtk.HSeparator(), expand=False)
-        boutonModif.connect('button-press-event', self.openSchema )
-        boutonSuppr.connect('clicked', self.delSchema)
-        boutonNew.connect('clicked', self.newSchema)
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        #sw.add_events(gtk.gdk.BUTTON_PRESS_MASK)
-        sw.add_with_viewport(vbox)
-        #sw.set_size_request(640, 480)
-        return sw
 
     def update_list_schemas(self, active_element=None):
         store, i = dialog.generate_list_model( elements = [ (s, s.getTitle()) for s in self.controller.package.getSchemas()],active_element=active_element)
@@ -236,6 +241,13 @@ class SchemaEditor (AdhocView):
             i = store.get_iter_first()
         if i is not None:
             self.listeSchemas.set_active_iter(i)
+
+
+##
+#
+#   Functions to create and delete elements
+#
+##
 
     def newSchema(self, w):
         cr = CreateElementPopup(type_=Schema,
@@ -253,160 +265,163 @@ class SchemaEditor (AdhocView):
         if (dialog.message_dialog(label="Voulez-vous effacer le schema %s ?" % tsc, icon=gtk.MESSAGE_QUESTION, callback=None)):
             self.controller.delete_element(sc)
             self.update_list_schemas(None)
-            lrem = self.findSchemaAreas(sc)
-            for tab, book in lrem:
-                self.removeSchemaArea(w, tab, book)
+            if sc in self.openedschemas:
+                self.removeSchemaFromArea(sc)
             return True
         else:
             return False
 
-    # book [0] : Notebook widget, [1] : list of schemas
-    # schema : an advene schema
-    # lsca : a list of [notebookpage,book]
-    def findSchemaAreas(self, schema):
-        lenB = len(self.books)-1
-        while (lenB>=0):
-            book = self.books[lenB]
-            lsca=[]
-            for i in range(book[0].get_n_pages()):
-                if (book[1][i]==schema):
-                    lsca.append([book[0].get_nth_page(i),book])
-            lenB = lenB-1
-        return lsca
-    
-    def removeNoteBook(self, book):
-        if (self.books[0]==book):
-            return False
-            # un seul espace schema (le premier), on ne le supprime pas.
-        indB =-1
-        for i in range(len(self.books)):
-            if (self.books[i]==book):
-                indB=i
-                break
-        if (indB<0):
-            print "Error removing book %s" % book
-            return False
-        self.books.remove(self.books[indB])
-        # on retire ensuite la zone correspondante
-        vb = book[0].get_parent()
-        win = vb.get_parent()
-        ch = win.get_children()
-        # on recherche le separateur qui va avec
-        sep = None
-        for i in range(len(ch)):
-            if (ch[i]==vb):
-                sep=ch[i-1]
-                break
-        win.remove(sep)
-        win.remove(vb)
-        return True
-		    
-    def addNotebook(self):
-        self.books.append([gtk.Notebook(),[]])
-        i = len(self.books)-1
-        self.books[i][0].show()
-        self.books[i][0].show_tabs =1
-        self.books[i][0].popup_disable()
-        hboxConExplorer = gtk.HBox()
-        labelConExplorer = gtk.Label("Constraint Explorer")
-        hboxConExplorer.pack_start(labelConExplorer, expand=False)
-        vbtemp = gtk.VBox()
-        vbtemp.pack_start(self.books[i][0], expand=True, fill=True)
-        vbtemp.pack_start(gtk.HSeparator(), expand=False)	    
-        vbtemp.pack_start(hboxConExplorer, expand=False)
-        #self.hboxEspaceSchema.pack_start(vbtemp, expand=True, fill=True)
-        #self.hboxEspaceSchema.pack_start(gtk.VSeparator(), expand=False)
-        #self.hboxEspaceSchema.show_all()
-        self.hboxEspaceSchema.pack1(vbtemp, resize=True)
-        self.hboxEspaceSchema.set_position(150)
-        self.hboxEspaceSchema.show_all()
-        return self.books[i]
 
-    def openSchema(self, w, event):
+    def openSchema(self, w):
         schema = self.listeSchemas.get_current_element()
         if (schema is None):
-            print "Error opening schema"
+            print "Error opening schema : None"
             return
-        tsc = schema.title
-        if (event.button==1):
-            scArea = self.addSchemaArea(tsc, schema, self.books[0])
-            self.setup_canvas(scArea, schema)
-        # was used when more than one notebook could be opened.
-        #if (event.button==3):
-        #    bk = self.addNotebook()
-        #    scArea = self.addSchemaArea(tsc, schema, bk)
-        #    self.setup_canvas(scArea, schema)
+        if len(self.openedschemas)>=4:
+            print "too many schemas opened, 4 max."
+            return
+        if schema not in self.openedschemas:
+            self.addSchemaToArea(schema)
+        else:
+            print "schema already opened"
         return	
 
-    def update_color(self, schema, color):
-        if color is None:
+    def addSchemaToArea(self, schema):
+        self.openedschemas.append(schema)
+        self.setup_canvas()
+        return
+
+    def removeSchemaFromArea(self, schema):
+        self.openedschemas.remove(schema)
+        self.setup_canvas()
+        return
+
+    def setup_canvas (self):
+        root = self.canvas.get_root_item ()
+        root.connect('button-press-event', self.on_background_button_press)
+        #deleting old drawing
+        while root.get_n_children()>0:
+            root.remove_child (0)
+
+        size = len(self.openedschemas)
+        self.sepV = None
+        self.sepH = None
+        if size<=0:
+            print "No schema to draw"
             return
-        for book in self.books:
-            for i in range(len(book[1])):
-                #FIXME need to find a way to find the good tab (new notebookclass ?)
-                if (book[1][i]==schema):
-                    book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_NORMAL,color)
-                    book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_ACTIVE,color)
-                    book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_PRELIGHT,color)
-                    book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_SELECTED,color)
-                    book[0].get_tab_label(book[0].get_nth_page(i)).get_children()[0].modify_bg(gtk.STATE_INSENSITIVE,color)
-	
-    def addSchemaArea(self, nom, schema, book):
-        ongLab = gtk.Label(nom)
-        ong = self.create_canvas_primitives(nom, schema)
-        hb=gtk.HBox()
-        color = self.controller.get_element_color(schema)
-        e=gtk.EventBox()
-        if (color is not None):
-            e.modify_bg(gtk.STATE_NORMAL,gtk.gdk.color_parse(color))
-            e.modify_bg(gtk.STATE_ACTIVE,gtk.gdk.color_parse(color))
-            e.modify_bg(gtk.STATE_PRELIGHT,gtk.gdk.color_parse(color))
-            e.modify_bg(gtk.STATE_SELECTED,gtk.gdk.color_parse(color))
-            e.modify_bg(gtk.STATE_INSENSITIVE,gtk.gdk.color_parse(color))
-        e.add(ongLab)
-        e.connect('button-press-event', self.schemaAreaHandler, book)
-        hb.pack_start(e, expand=False, fill=False)
-        b=get_pixmap_button('small_close.png')
-        b.set_relief(gtk.RELIEF_NONE)
-        b.connect('clicked',self.removeSchemaArea, ong , book)
-        hb.pack_start(b, expand=False, fill=False)
-        hb.show_all()
-        book[0].append_page(ong, hb)
-        book[0].show_all()
-        book[1].append(schema)
-        return ong.get_children()[2].get_children()[0]
+        if size>4:
+            print "More than 4 schema, fixme!!!"
+            return
+        if size==1:
+            schema = self.openedschemas[0]
+            self.draw_schema_annots(self.canvas, schema, 20, 20, self.canvasX, self.canvasY)
+        if size==2:
+            # vertical separation between the 2 schemas
+            self.draw_schema_annots(self.canvas, self.openedschemas[0], 20, 20, self.canvasX/2, self.canvasY)
+            p = goocanvas.Points ([(self.canvasX/2, 0), (self.canvasX/2, self.canvasY)])
+            self.sepV = goocanvas.Polyline (parent = root,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = "black",
+                                        line_width = 6.0,
+                                        start_arrow = False,
+                                        end_arrow = False
+                                        )
+            self.draw_schema_annots(self.canvas, self.openedschemas[1], 20+self.canvasX/2, 20, self.canvasX, self.canvasY)
+        if size==3:
+            # 1+1/1
+            self.draw_schema_annots(self.canvas, self.openedschemas[0], 20, 20, self.canvasX/2, self.canvasY/2)
+            p = goocanvas.Points ([(self.canvasX/2, 0), (self.canvasX/2, self.canvasY/2)])
+            self.sepV = goocanvas.Polyline (parent = root,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = "black",
+                                        line_width = 6.0,
+                                        start_arrow = False,
+                                        end_arrow = False
+                                        )
+            self.draw_schema_annots(self.canvas, self.openedschemas[1], 20+self.canvasX/2, 20, self.canvasX, self.canvasY/2)
+            p = goocanvas.Points ([(0, self.canvasY/2), (self.canvasX, self.canvasY/2)])
+            self.sepH = goocanvas.Polyline (parent = root,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = "black",
+                                        line_width = 6.0,
+                                        start_arrow = False,
+                                        end_arrow = False
+                                        )
+            self.draw_schema_annots(self.canvas, self.openedschemas[2], 20, 20+self.canvasY/2, self.canvasX, self.canvasY)
+        if size==4:
+            self.draw_schema_annots(self.canvas, self.openedschemas[0], 20, 20, self.canvasX/2, self.canvasY/2)
+            p = goocanvas.Points ([(self.canvasX/2, 0), (self.canvasX/2, self.canvasY)])
+            self.sepV = goocanvas.Polyline (parent = root,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = "black",
+                                        line_width = 6.0,
+                                        start_arrow = False,
+                                        end_arrow = False
+                                        )
+            self.draw_schema_annots(self.canvas, self.openedschemas[1], 20+self.canvasX/2, 20, self.canvasX, self.canvasY/2)
+            self.draw_schema_annots(self.canvas, self.openedschemas[2], 20, 20+self.canvasY/2, self.canvasX/2, self.canvasY)
+            p = goocanvas.Points ([(0, self.canvasY/2), (self.canvasX, self.canvasY/2)])
+            self.sepH = goocanvas.Polyline (parent = root,
+                                        close_path = False,
+                                        points = p,
+                                        stroke_color = "black",
+                                        line_width = 6.0,
+                                        start_arrow = False,
+                                        end_arrow = False
+                                        )
+            self.draw_schema_annots(self.canvas, self.openedschemas[3], 20+self.canvasX/2, 20+self.canvasY/2, self.canvasX, self.canvasY)
+        self.draw_schemas_rels(self.canvas, self.openedschemas)
 
-    def removeSchemaArea(self, w, ong, book):
-        npg = book[0].page_num(ong)
-        book[0].remove_page(npg)
-        del book[1][npg]
-        if (book[0].get_n_pages()==0):
-            self.removeNoteBook(book)
-            # si plus de page on retire l'espace schema.
 
-    def schemaAreaHandler(self, w, event, book):
-        if (event.button==3):
-            menu = gtk.Menu()
-            item = gtk.MenuItem(_("Close"))
-            item.connect('activate', self.removeSchemaArea, w, book)
-            menu.append(item)
-            menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+    def draw_schemas_rels(self, canvas, schemas):
+        r=0
+        for sc in schemas:
+            relTypes = sc.getRelationTypes()
+            for j in relTypes:
+                self.addRelationTypeGroup(canvas, sc, j.getTitle(), j)
+                r=r+1
+        print "%s RelationTypes drawn" % r
+        
+    def draw_schema_annots(self, canvas, schema, xoffset, yoffset, xmax, ymax):
+        self.addSchemaTitle(canvas, schema, xoffset+(xmax-xoffset)/2, yoffset+(ymax-yoffset)/2)
+        annotTypes = schema.getAnnotationTypes()
+        a=0
+        b=0
+        an=0
+        for i in annotTypes:
+            x = xoffset+b*160
+            y = yoffset+a*60
+            self.addAnnotationTypeGroup(canvas, schema, i.getTitle(), i, x, y)
+            an=an+1
+            if x+320<xmax:
+                b=b+1
+            elif y+120<ymax:
+                b=0
+                a=a+1
+        print "%s AnnotationTypes drawn" % an
+        return
 
-    def buttonTypeAHandler(self,w, event, canvas, schema ):
-        if (event.button==1):
-            # ajout d'un nouveau type
-            self.addAnnotationTypeGroup(canvas, schema)
+    def addSchemaTitle(self, canvas, schema, xx, yy):
+        goocanvas.Text (parent = canvas.get_root_item (),
+                                        text = schema.title,
+                                        x = xx, 
+                                        y = yy,
+                                        width = -1,
+                                        anchor = gtk.ANCHOR_CENTER,
+                                        font = "Sans Bold 20")
 
-    def buttonTypeRHandler(self,w, event, canvas, schema ):
-        if (event.button==1):
-            # ajout d'un nouveau type
-            self.addRelationTypeGroup(canvas, schema)
-
-### Functions to add remove modify RelationTypesGroup and redraw them when moving AnnotationTypeGroup
-
+###
+#
+#  Functions to add remove modify RelationTypesGroup and redraw them when moving AnnotationTypeGroup
+#
+###
     def addRelationTypeGroup(self, canvas, schema, name=" ", type=None, members=[]):
-        # FIXME : type out of schema
+        if schema is None:
+            return
         cvgroup = RelationTypeGroup(self.controller, canvas, schema, name, type, members)
         if cvgroup is not None:
             self.setup_rel_signals (cvgroup)
@@ -432,10 +447,16 @@ class SchemaEditor (AdhocView):
 
     def removeRelationTypeGroup(self, group):
         group.remove()
-        ### FIXME : propagate to other canvas
 
-### Functions to add remove modify AnnotationTypesGroup
+###
+#
+#  Functions to add remove modify AnnotationTypesGroup
+#
+###
+
     def addAnnotationTypeGroup(self, canvas, schema, name=" ", type=None, rx =20, ry=30):
+        if schema is None:
+            return
         cvgroup = AnnotationTypeGroup(self.controller, canvas, schema, name, type, rx, ry)
         if cvgroup is not None:
             self.setup_annot_signals(cvgroup, schema)
@@ -444,10 +465,13 @@ class SchemaEditor (AdhocView):
 
     def removeAnnotationTypeGroup(self, group, schema):
         group.remove()
-        ### FIXME : propagate to other canvas
         ### FIXME : delete relation types based on this annotation type in other schemas
 
-### Functions to handle notification signals
+###
+#
+#  Functions to handle notification signals
+#
+###
 
     def setup_rel_signals (self, item):
         #pour capter les events sur les relations du dessin
@@ -464,7 +488,6 @@ class SchemaEditor (AdhocView):
 
 
     def rel_on_button_press (self, item, target, event):
-        #on remplit l'explo
         self.TE.initWithType(item.type)
         self.drawFocusOn(item.line)
         if event.button == 1:
@@ -483,7 +506,6 @@ class SchemaEditor (AdhocView):
                                 fleur,
                                 event.time)
             self.dragging = True
-
         elif event.button == 3:
             def menuRem(w, item):
                 self.removeRelationTypeGroup(item)
@@ -501,7 +523,11 @@ class SchemaEditor (AdhocView):
         canvas.pointer_ungrab (item, event.time)
         self.dragging = False
 
-### events on annotationTypeGroup
+###
+#
+#  events on annotationTypeGroup
+#
+###
 
     def annot_on_motion_notify (self, item, target, event):
         if (self.dragging == True) and (event.state & gtk.gdk.BUTTON1_MASK):
@@ -568,41 +594,85 @@ class SchemaEditor (AdhocView):
         return True
 
     def annot_on_button_release (self, item, target, event):
-        # if ctrl pressed, create new relation
-        #if (event.state & gtk.gdk.CONTROL_MASK): 
+        #if ctrl pressed, create new relation
+        if (event.state & gtk.gdk.CONTROL_MASK): 
+            print "control pressed at release"
+        # TODO
+        # if not in the same schema anymore, ask to change ?
+        # if don't want to change, take back to origin
+
         canvas = item.get_canvas ()
         canvas.pointer_ungrab (item, event.time)
         self.dragging = False
-        # on check si des relations sont liees, auquel cas on les redessine
+        # Relations redraw
         for rtg in item.rels:
             self.rel_redraw(rtg)
 
-### events on background
+### 
+#
+#  events on background
+#
+###
 
-    def on_background_button_press (self, item, target, event, schema):
+    def findSchemaFromXY(self, x, y):
+        size=len(self.openedschemas)
+        if size<=0 or size>4:
+            return None
+        if size==1:
+            return self.openedschemas[0]
+        if size==2:
+            if x>self.sepV.get_bounds().x2:
+                return self.openedschemas[1]
+            return self.openedschemas[0]
+        if size==3:
+            if y>self.sepH.get_bounds().y2:
+                return self.openedschemas[2]
+            if x>self.sepV.get_bounds().x2:
+                return self.openedschemas[1]
+            return self.openedschemas[0]
+        if size==4:
+            if x>self.sepV.get_bounds().x2 and y>self.sepH.get_bounds().y2:
+                return self.openedschemas[3]
+            if x>self.sepV.get_bounds().x2 and y<self.sepH.get_bounds().y1:
+                return self.openedschemas[1]
+            if x<self.sepV.get_bounds().x1 and y >self.sepH.get_bounds().y2:
+                return self.openedschemas[2]
+            return self.openedschemas[0]
+        return None
+
+    def on_background_button_press (self, item, target, event):
         self.TE.initWithType(None)
         canvas = item.get_canvas()
         self.drawFocusOn(canvas)
+        schema = self.findSchemaFromXY(event.x, event.y)
         if (event.button==3):
-            def menuNew(w, canvas, schema):
+            def newRel(w, canvas, schema):
+                self.addRelationTypeGroup(canvas, schema)
+                return True
+            def newAnn(w, canvas, schema):
                 self.addAnnotationTypeGroup(canvas, schema)
                 return True
             def pick_color(w, schema):
                 color = self.controller.gui.update_color(schema)
                 self.update_color(schema, color)
+            def hide(w, schema):
+                self.removeSchemaFromArea(schema)
             menu = gtk.Menu()
             itemM = gtk.MenuItem(_("Select a color"))
             itemM.connect('activate', pick_color, schema)
             menu.append(itemM)
             itemM = gtk.MenuItem(_("New Annotation Type"))
-            itemM.connect('activate', menuNew, canvas, schema )
+            itemM.connect('activate', newAnn, canvas, schema )
             menu.append(itemM)
-            itemM = gtk.MenuItem(_("Copy Annotation Type from Schema..."))
-            #itemM.connect('activate', menuNew, canvas )
+            itemM = gtk.MenuItem(_("New Relation Type"))
+            itemM.connect('activate', newRel, canvas, schema )
             menu.append(itemM)
-            itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
-            #itemM.connect("activate", menuNew, canvas )
+            itemM = gtk.MenuItem(_("Hide this schema"))
+            itemM.connect('activate', hide, schema )
             menu.append(itemM)
+            #itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
+            #itemM.connect("activate", menuMove, canvas )
+            #menu.append(itemM)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
@@ -624,42 +694,6 @@ class SchemaEditor (AdhocView):
                 ite=None
             if ite is not None and ite != item:
                 ite.props.line_width = 2.0
-		    
-    def create_canvas_primitives (self, nom, schema):
-        #if (self.controller.get_element_color(schema) is not None):
-        #   bg_color = self.controller.get_element_color(schema)
-	    #else:
-        bg_color = gtk.gdk.Color (55000, 55000, 65535, 0)
-        vbox = gtk.VBox (False, 4)
-        vbox.set_border_width (4)
-        #w = gtk.Label(nom)
-        hbox = gtk.HBox (False, 4)
-        #vbox.pack_start (w, False, False, 0)
-        vbox.pack_start (hbox, False, False, 0)
-        #Create the canvas   
-        canvas = goocanvas.Canvas()
-        canvas.modify_base (gtk.STATE_NORMAL, bg_color)
-        canvas.set_bounds (0, 0, 1000, 2000)
-        #Zoom
-        w = gtk.Label ("Zoom:")
-        hbox.pack_start (w, False, False, 0)
-        adj = gtk.Adjustment (0.65, 0.05, 1.00, 0.05, 0.50, 0.50)
-        adj.connect('value-changed', self.zoom_changed, canvas)
-        w = gtk.SpinButton (adj, 0.0, 2)
-        w.set_size_request (50, -1)
-        hbox.pack_start (w, False, False, 0)
-        #Types
-        boutonTypeA = gtk.Button(label="AT")
-        boutonTypeR = gtk.Button(label="RT")
-        boutonTypeA.connect('button-press-event', self.buttonTypeAHandler, canvas, schema )
-        boutonTypeR.connect('button-press-event', self.buttonTypeRHandler, canvas, schema )
-        hbox.pack_start (boutonTypeA, False, False, 0)
-        hbox.pack_start (boutonTypeR, False, False, 0)
-        vbox.pack_start (gtk.VSeparator(), expand=False)
-        scrolled_win = gtk.ScrolledWindow ()
-        vbox.pack_start (scrolled_win, True, True, 0)
-        scrolled_win.add(canvas)
-        return vbox
 
     def zoom_changed (self, adj, canvas):
         canvas.set_scale (adj.get_value())
@@ -667,27 +701,6 @@ class SchemaEditor (AdhocView):
     def center_toggled (self, button, data):
         pass
 
-    #pour dessiner le schema
-    def setup_canvas (self, canvas, schema):
-        root = canvas.get_root_item ()
-        root.connect('button-press-event', self.on_background_button_press, schema)
-        #deleting old drawing
-        while root.get_n_children()>0:
-            root.remove_child (0)
-        annotTypes = schema.getAnnotationTypes()
-        relTypes = schema.getRelationTypes()
-        a=0
-        b=0
-        for i in annotTypes:
-            self.addAnnotationTypeGroup(canvas, schema, i.getTitle(), i, 20+b*160, 20+a*60)
-            b=b+1
-            if b!=0 and b%3==0: # could be 6 but nicer like that
-                b=0
-                a=a+1
-        r=0
-        for j in relTypes:
-            self.addRelationTypeGroup(canvas,schema, j.getTitle(), j)
-            r=r+1
 
 ### Type Explorer class
 class TypeExplorer (gtk.ScrolledWindow):
@@ -712,11 +725,6 @@ class TypeExplorer (gtk.ScrolledWindow):
         hboxAddAtt.pack_start(boutonAddAtt)
         hboxMime = gtk.HBox()
         labelMime = gtk.Label("Mime Type : ")
-        #entryMime = gtk.Entry()
-        #self.TMimeType = entryMime
-        
-        self.hboxEspaceSchema = gtk.HBox()
-        
         self.TMimeType = dialog.list_selector_widget(
             members=[ ('text/plain', _("Plain text content")),
                               ('application/x-advene-structured', _("Simple-structured content")),
@@ -807,7 +815,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         eNom.set_text(nom)
         eNom.set_size_request(100, 20)
         eType = gtk.combo_box_new_text()
-        eType.append_text("None") # ajouter tous les types etfocus sur le type type
+        eType.append_text("None") # ajouter tous les types et focus sur le type type
         eContrainte = gtk.Entry() # liste + entry ? bouton + fenetre pour creer ?
         eContrainte.set_text(con)
         eContrainte.set_size_request(50, 20)
@@ -855,13 +863,6 @@ class TypeExplorer (gtk.ScrolledWindow):
     def cancelType(self, button):
         self.initWithType(self.type)
 
-# FIXME :
-# ajouter la gestion d'events 
-# sur ajout/modif/suppr de type, refresh les canvas
-# sur modifs schema, refresh les canvas
-# sur modif contenus, refresh l'explo
-# envoyer event sur modifs contenus
-
 class AnnotationTypeGroup (goocanvas.Group):
     def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, rx =0, ry=0):
         goocanvas.Group.__init__(self, parent = canvas.get_root_item ())
@@ -875,7 +876,6 @@ class AnnotationTypeGroup (goocanvas.Group):
         self.rels=[] # rel groups
         if type is None:
             print "Annotation Type Creation"
-            # appeler la creation du type d'annotation
             cr=CreateElementPopup(type_=AnnotationType,
                                     parent=schema,
                                     controller=self.controller)
