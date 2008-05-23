@@ -616,11 +616,13 @@ class SchemaEditor (AdhocView):
                                             item.get_bounds().y1)
             if dropObj is not None and dropObj.type is not None:
                 print "creating relation between %s and %s" % (item.type, dropObj.type)
-                x = item.rect.get_bounds().x1
-                y = item.rect.get_bounds().y1
-                item.translate (self.orig_x - x, self.orig_y - y)
                 self.addRelationTypeGroup(self.canvas, item.type.getSchema(), name="New Relation", type=None, members=[item.type,dropObj.type])
-                return
+
+            x = item.rect.get_bounds().x1
+            y = item.rect.get_bounds().y1
+            item.translate (self.orig_x - x, self.orig_y - y)
+            for rtg in item.rels:
+                self.rel_redraw(rtg)
             return
         # TODO
         # events drag & drop non implemantes pour goocanvas.group
