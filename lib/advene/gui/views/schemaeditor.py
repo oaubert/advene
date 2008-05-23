@@ -486,7 +486,7 @@ class SchemaEditor (AdhocView):
         item.connect ('button-press-event', self.annot_on_button_press, schema)
         item.connect ('button-release-event', self.annot_on_button_release)
 
-
+        
     def rel_on_button_press (self, item, target, event):
         self.TE.initWithType(item.type)
         self.drawFocusOn(item.line)
@@ -554,6 +554,8 @@ class SchemaEditor (AdhocView):
                 return True
             self.drag_x = event.x
             self.drag_y = event.y
+            self.orig_x = item.rect.get_bounds().x1
+            self.orig_y = item.rect.get_bounds().y1
             self.timer_motion=5
             fleur = gtk.gdk.Cursor (gtk.gdk.FLEUR)
             canvas = item.get_canvas ()
@@ -593,17 +595,59 @@ class SchemaEditor (AdhocView):
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
 
-    def annot_on_button_release (self, item, target, event):
-        #if ctrl pressed, create new relation
-        if (event.state & gtk.gdk.CONTROL_MASK): 
-            print "control pressed at release"
-        # TODO
-        # if not in the same schema anymore, ask to change ?
-        # if don't want to change, take back to origin
+    def findGroupFromXY(self,x,y):
+        root = self.canvas.get_root_item ()
+        for i in range(0, root.get_n_children()):
+            if hasattr(root.get_child(i), 'rect'):
+                x1 = root.get_child(i).get_bounds().x1
+                x2 = root.get_child(i).get_bounds().x2
+                y1 = root.get_child(i).get_bounds().y1
+                y2 = root.get_child(i).get_bounds().y2
+                if x>x1 and x<x2 and y>y1 and y<y2:
+                    return root.get_child(i)
+        return None
 
+    def annot_on_button_release (self, item, target, event):
         canvas = item.get_canvas ()
         canvas.pointer_ungrab (item, event.time)
         self.dragging = False
+        if (event.state & gtk.gdk.CONTROL_MASK): 
+            dropObj = self.findGroupFromXY(item.get_bounds().x1,
+                                            item.get_bounds().y1)
+            if dropObj is not None and dropObj.type is not None:
+                print "creating relation between %s and %s" % (item.type, dropObj.type)
+                x = item.rect.get_bounds().x1
+                y = item.rect.get_bounds().y1
+                item.translate (self.orig_x - x, self.orig_y - y)
+                self.addRelationTypeGroup(self.canvas, item.type.getSchema(), name="New Relation", type=None, members=[item.type,dropObj.type])
+                return
+            return
+        # TODO
+        # events drag & drop non implemantes pour goocanvas.group
+        # drag-motion : on arrive dessus
+        # drag-leave : on en part
+        # drag-data-received quand on lache sur un objet
+        # ...
+        
+        x = item.rect.get_bounds().x1
+        y = item.rect.get_bounds().y1
+        newsc = self.findSchemaFromXY(x, y)
+        oldsc = item.type.getSchema()
+        if oldsc != newsc:
+            if (dialog.message_dialog(label="Do you want to move %s to the %s schema ?" % (item.type.title, newsc.title), icon=gtk.MESSAGE_QUESTION, callback=None)):
+
+                # gerer si des types de relation sont accroches                
+                # oldsc.annotationTypes.remove(item.type)
+                # newsc.annotationTypes.append(item.type)
+                # item.type.__parent = newsc
+                # notify
+                # __parent apparemment en lecture seule, 
+                # si on ne peut pas, oblige de supprimer le type
+                # et en creer un nouveau
+                print "TODO"
+
+            else:
+                item.translate (self.orig_x - x, self.orig_y - y)
         # Relations redraw
         for rtg in item.rels:
             self.rel_redraw(rtg)
