@@ -66,7 +66,7 @@ var
   Uninstall: String;
 begin
   if (CurStep = ssInstall) then begin
-    if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall) then begin
+    if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall) or RegQueryStringValue(HKLM, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Advene_is1', 'UninstallString', Uninstall)then begin
       if MsgBox('Warning: Old Version will be removed!', mbConfirmation, MB_OKCANCEL)=IDOK then begin
           Exec(RemoveQuotes(Uninstall), ' /SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ResultCode);
       end
