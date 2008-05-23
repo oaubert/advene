@@ -69,10 +69,9 @@ class SchemaEditor (AdhocView):
         self.dragging = False
         self.drag_x = 0
         self.drag_y = 0
-        # for drag & drop with ctrl
-        self.ctrl = False
-        
-        self.timer_motion=5
+        self.timer_motion_max=3
+        self.timer_motion=self.timer_motion_max
+
         if package is None and controller is not None:
             package=controller.package
         self.__package=package
@@ -537,7 +536,7 @@ class SchemaEditor (AdhocView):
             # Hack not to redraw at every step
             self.timer_motion= self.timer_motion-1
             if self.timer_motion<=0:
-                self.timer_motion=5
+                self.timer_motion=self.timer_motion_max
                 for rtg in item.rels:
                     self.rel_redraw(rtg)
         return True
@@ -556,7 +555,7 @@ class SchemaEditor (AdhocView):
             self.drag_y = event.y
             self.orig_x = item.rect.get_bounds().x1
             self.orig_y = item.rect.get_bounds().y1
-            self.timer_motion=5
+            self.timer_motion=self.timer_motion_max
             fleur = gtk.gdk.Cursor (gtk.gdk.FLEUR)
             canvas = item.get_canvas ()
             canvas.pointer_grab (item,
@@ -614,29 +613,30 @@ class SchemaEditor (AdhocView):
         if (event.state & gtk.gdk.CONTROL_MASK): 
             dropObj = self.findGroupFromXY(item.get_bounds().x1,
                                             item.get_bounds().y1)
-            if dropObj is not None and dropObj.type is not None:
-                print "creating relation between %s and %s" % (item.type, dropObj.type)
-                self.addRelationTypeGroup(self.canvas, item.type.getSchema(), name="New Relation", type=None, members=[item.type,dropObj.type])
-
             x = item.rect.get_bounds().x1
             y = item.rect.get_bounds().y1
             item.translate (self.orig_x - x, self.orig_y - y)
-            for rtg in item.rels:
-                self.rel_redraw(rtg)
-            return
+            # HACK : to avoid to redraw relations before the item goes back to origin
+            while item.get_bounds().x1 != self.orig_x and item.get_bounds().y1 != self.orig_y:
+                pass
+            if dropObj is not None and dropObj.type is not None:
+                #print "creating relation between %s and %s" % (item.type, dropObj.type)
+                self.addRelationTypeGroup(self.canvas, item.type.getSchema(), name="New Relation", type=None, members=[item.type,dropObj.type])
+
         # TODO
         # events drag & drop non implemantes pour goocanvas.group
         # drag-motion : on arrive dessus
         # drag-leave : on en part
         # drag-data-received quand on lache sur un objet
         # ...
-        
-        x = item.rect.get_bounds().x1
-        y = item.rect.get_bounds().y1
-        newsc = self.findSchemaFromXY(x, y)
-        oldsc = item.type.getSchema()
-        if oldsc != newsc:
-            if (dialog.message_dialog(label="Do you want to move %s to the %s schema ?" % (item.type.title, newsc.title), icon=gtk.MESSAGE_QUESTION, callback=None)):
+        else:
+            
+            x = item.rect.get_bounds().x1
+            y = item.rect.get_bounds().y1
+            newsc = self.findSchemaFromXY(x, y)
+            oldsc = item.type.getSchema()
+            if oldsc != newsc:
+                if (dialog.message_dialog(label="Do you want to move %s to the %s schema ?" % (item.type.title, newsc.title), icon=gtk.MESSAGE_QUESTION, callback=None)):
 
                 # gerer si des types de relation sont accroches                
                 # oldsc.annotationTypes.remove(item.type)
@@ -646,14 +646,16 @@ class SchemaEditor (AdhocView):
                 # __parent apparemment en lecture seule, 
                 # si on ne peut pas, oblige de supprimer le type
                 # et en creer un nouveau
-                print "TODO"
-
-            else:
-                item.translate (self.orig_x - x, self.orig_y - y)
+                    print "TODO"
+                else:
+                    item.translate (self.orig_x - x, self.orig_y - y)
+                    # HACK : to avoid to redraw relations before the item goes back to origin
+                    while item.get_bounds().x1 != self.orig_x and item.get_bounds().y1 != self.orig_y:
+                        pass
         # Relations redraw
         for rtg in item.rels:
             self.rel_redraw(rtg)
-
+            
 ### 
 #
 #  events on background
