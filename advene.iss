@@ -22,7 +22,8 @@ Source: c:\gtk\bin\librsvg-2-2.dll; DestDir: {app}
 Source: c:\gtk\bin\libcroco-0.6-3.dll; DestDir: {app}
 Source: c:\gtk\bin\libgsf-1-114.dll; DestDir: {app}
 Source: c:\gtk\bin\bzip2.dll; DestDir: {app}
-Source: share\Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}
+Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}
+Source: c:\cygwin\usr\local\bin\libgoocanvas.dll; DestDir: {app}
 
 
 [Setup]
