@@ -61,6 +61,9 @@ class SchemaEditor (AdhocView):
         self.hboxEspaceSchema=None
         self.schemaArea = None
         self.canvas = None
+        self.hboxButton = None
+        self.rotButton = None
+        self.exchButton = None
         self.canvasX = 1200
         self.canvasY = 1000
         self.sepV = None
@@ -137,6 +140,7 @@ class SchemaEditor (AdhocView):
         w = gtk.SpinButton (adj, 0.0, 2)
         w.set_size_request (50, -1)
         hbox.pack_start (w, False, False, 0)
+        self.hboxButton = hbox        
         scrolled_win = gtk.ScrolledWindow ()
         scrolled_win.add(canvas)
         self.canvas = canvas
@@ -187,7 +191,6 @@ class SchemaEditor (AdhocView):
         return True
     
     def update_annotationtype(self, annotationtype=None, event=None):
-        print "Updating AT : %s" % event
         schema = annotationtype.getSchema()
         if schema in self.openedschemas:
             if event == 'AnnotationTypeCreate':
@@ -295,6 +298,55 @@ class SchemaEditor (AdhocView):
         self.setup_canvas()
         return
 
+    def rotateSchemaAreas(self, w):
+        temp=self.openedschemas.pop()
+        self.openedschemas.insert(0,temp)
+        self.setup_canvas()
+        print "Rotated schemas"
+
+    def exchangeSchemaAreas(self, w):
+        t1 =self.openedschemas[0]
+        self.openedschemas[0]=self.openedschemas[1]
+        self.openedschemas[1]=t1
+        self.setup_canvas()
+        print "Exchanged %s and %s" % (self.openedschemas[0].title, self.openedschemas[1].title)
+
+    def addTransformButtons(self, nbBut):
+        imrot=''
+        imexch=''
+        if self.exchButton is not None:
+            self.hboxButton.remove(self.exchButton)
+            self.exchButton=None
+        if self.rotButton is not None:
+            self.hboxButton.remove(self.rotButton)
+            self.rotButton=None
+        #self.hboxButton
+        if nbBut<3:
+            self.hboxButton.show_all()
+            return
+        elif nbBut==3:
+            imrot='rot3.png'
+            imexch='exch3.png'
+        elif nbBut==4:
+            imrot='rot4.png'
+            imexch='exch4.png'
+        elif nbBut>4:
+            print "More than 4 schemas... impossible !"
+            return
+        self.rotButton=gtk.Button()
+        ir=gtk.Image()
+        ir.set_from_file(config.data.advenefile( ( 'pixmaps', imrot) ))
+        self.rotButton.add(ir)
+        self.rotButton.connect('clicked', self.rotateSchemaAreas)
+        self.exchButton=gtk.Button()
+        ie=gtk.Image()
+        ie.set_from_file(config.data.advenefile( ( 'pixmaps', imexch) ))
+        self.exchButton.add(ie)
+        self.exchButton.connect('clicked', self.exchangeSchemaAreas)
+        self.hboxButton.pack_start(self.rotButton, False, False, 4)
+        self.hboxButton.pack_start(self.exchButton, False, False, 4)
+        self.hboxButton.show_all()
+
     def setup_canvas (self):
         root = self.canvas.get_root_item ()
         root.connect('button-press-event', self.on_background_button_press)
@@ -305,6 +357,8 @@ class SchemaEditor (AdhocView):
         size = len(self.openedschemas)
         self.sepV = None
         self.sepH = None
+        # add buttons to rotate and change schemas place
+        self.addTransformButtons(size)
         if size<=0:
             print "No schema to draw"
             return
@@ -362,7 +416,7 @@ class SchemaEditor (AdhocView):
                                         end_arrow = False
                                         )
             self.draw_schema_annots(self.canvas, self.openedschemas[1], 20+self.canvasX/2, 20, self.canvasX, self.canvasY/2)
-            self.draw_schema_annots(self.canvas, self.openedschemas[2], 20, 20+self.canvasY/2, self.canvasX/2, self.canvasY)
+            self.draw_schema_annots(self.canvas, self.openedschemas[3], 20, 20+self.canvasY/2, self.canvasX/2, self.canvasY)
             p = goocanvas.Points ([(0, self.canvasY/2), (self.canvasX, self.canvasY/2)])
             self.sepH = goocanvas.Polyline (parent = root,
                                         close_path = False,
@@ -372,7 +426,7 @@ class SchemaEditor (AdhocView):
                                         start_arrow = False,
                                         end_arrow = False
                                         )
-            self.draw_schema_annots(self.canvas, self.openedschemas[3], 20+self.canvasX/2, 20+self.canvasY/2, self.canvasX, self.canvasY)
+            self.draw_schema_annots(self.canvas, self.openedschemas[2], 20+self.canvasX/2, 20+self.canvasY/2, self.canvasX, self.canvasY)
         self.draw_schemas_rels(self.canvas, self.openedschemas)
 
 
@@ -637,16 +691,18 @@ class SchemaEditor (AdhocView):
             oldsc = item.type.getSchema()
             if oldsc != newsc:
                 if (dialog.message_dialog(label="Do you want to move %s to the %s schema ?" % (item.type.title, newsc.title), icon=gtk.MESSAGE_QUESTION, callback=None)):
-
-                # gerer si des types de relation sont accroches                
-                # oldsc.annotationTypes.remove(item.type)
-                # newsc.annotationTypes.append(item.type)
-                # item.type.__parent = newsc
+                # gerer si des types de relation sont accroches
+                    print "todo"
+                    #oldsc.annotationTypes.remove(item.type)
+                    #newsc.annotationTypes.append(item.type)
+                    #item.type.setSchema(newsc)
+                    #self.controller.notify("SchemaEditEnd",schema=oldsc,comment="AnnotationType removed")
+                    #self.controller.notify("SchemaEditEnd",schema=newsc,comment="AnnotationType added")
+                    #self.controller.notify("AnnotationTypeEditEnd",annotationtype=item.type,comment="Schema changed")
                 # notify
                 # __parent apparemment en lecture seule, 
                 # si on ne peut pas, oblige de supprimer le type
                 # et en creer un nouveau
-                    print "TODO"
                 else:
                     item.translate (self.orig_x - x, self.orig_y - y)
                     # HACK : to avoid to redraw relations before the item goes back to origin
@@ -679,12 +735,18 @@ class SchemaEditor (AdhocView):
                 return self.openedschemas[1]
             return self.openedschemas[0]
         if size==4:
+            #
+            #       1  |  2
+            #       ___|___
+            #          |
+            #       4  |  3
+            #
             if x>self.sepV.get_bounds().x2 and y>self.sepH.get_bounds().y2:
-                return self.openedschemas[3]
+                return self.openedschemas[2]
             if x>self.sepV.get_bounds().x2 and y<self.sepH.get_bounds().y1:
                 return self.openedschemas[1]
             if x<self.sepV.get_bounds().x1 and y >self.sepH.get_bounds().y2:
-                return self.openedschemas[2]
+                return self.openedschemas[3]
             return self.openedschemas[0]
         return None
 
