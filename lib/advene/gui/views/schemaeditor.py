@@ -704,24 +704,24 @@ class SchemaEditor (AdhocView):
             newsc = self.findSchemaFromXY(x, y)
             oldsc = item.type.getSchema()
             if oldsc != newsc:
-                if (dialog.message_dialog(label="Do you want to move %s to the %s schema ?" % (item.type.title, newsc.title), icon=gtk.MESSAGE_QUESTION, callback=None)):
+                #if (dialog.message_dialog(label="Do you want to move %s to the %s schema ?" % (item.type.title, newsc.title), icon=gtk.MESSAGE_QUESTION, callback=None)):
                 # gerer si des types de relation sont accroches
-                    print "todo"
-                    oldsc.annotationTypes.remove(item.type)
-                    newsc.annotationTypes.append(item.type)
-                    item.type.setSchema(newsc)
-                    self.controller.notify("SchemaEditEnd",schema=oldsc,comment="AnnotationType removed")
-                    self.controller.notify("SchemaEditEnd",schema=newsc,comment="AnnotationType added")
-                    self.controller.notify("AnnotationTypeEditEnd",annotationtype=item.type,comment="Schema changed")
+                #    print "todo"
+                #    oldsc.annotationTypes.remove(item.type)
+                #    newsc.annotationTypes.append(item.type)
+                #    item.type.setSchema(newsc)
+                #    self.controller.notify("SchemaEditEnd",schema=oldsc,comment="AnnotationType removed")
+                #    self.controller.notify("SchemaEditEnd",schema=newsc,comment="AnnotationType added")
+                #    self.controller.notify("AnnotationTypeEditEnd",annotationtype=item.type,comment="Schema changed")
                 # notify
                 # __parent apparemment en lecture seule, 
                 # si on ne peut pas, oblige de supprimer le type
                 # et en creer un nouveau
-                else:
-                    item.translate (self.orig_x - x, self.orig_y - y)
+                #else:
+                item.translate (self.orig_x - x, self.orig_y - y)
                     # HACK : to avoid to redraw relations before the item goes back to origin
-                    while item.get_bounds().x1 != self.orig_x and item.get_bounds().y1 != self.orig_y:
-                        pass
+                while item.get_bounds().x1 != self.orig_x and item.get_bounds().y1 != self.orig_y:
+                    pass
         # Relations redraw
         for rtg in item.rels:
             self.rel_redraw(rtg)
