@@ -26,8 +26,12 @@ from gettext import gettext as _
 import advene.core.config as config
 import advene.gui.popup
 from advene.gui.util import dialog
+from advene.model.package import Package
+from advene.gui.edit.merge import Merger
 
 from advene.gui.views import AdhocView
+
+dummy_advene_importer = object()
 
 class ExternalImporter(AdhocView):
     view_name = _("Importer")
@@ -49,14 +53,22 @@ class ExternalImporter(AdhocView):
         n=self.filename_entry.get_text()
         model=self.importers.get_model()
         model.clear()
+        if n.lower().endswith('.azp'):
+            model.append( ( _("Advene package importer"), dummy_advene_importer, None) )
+            self.importers.set_active(0)
+            self.convert_button.set_sensitive(True)
+            return
         if os.path.exists(n) and not os.path.isdir(n):
             # Valid filename. Guess importers
             valid=advene.util.importer.get_valid_importers(n)
             for i in valid:
                 model.append( ( i.name, i, None) )
+            if n.lower().endswith('.xml'):
+                model.append( ( _("Advene package importer"), dummy_advene_importer, None) )
             if valid:
                 self.importers.set_active(0)
             self.convert_button.set_sensitive(True)
+            
         else:
             # Invalid filenames. Empty importers and disable convert button
             model.append( (_("No valid importer"), None, None) )
@@ -70,6 +82,19 @@ class ExternalImporter(AdhocView):
         ic=self.importers.get_current_element()
         fname=self.filename_entry.get_text()
         self.widget.get_toplevel().set_title(_('Importing %s') % os.path.basename(fname))
+
+        if ic == dummy_advene_importer:
+            # Invoke the package merge functionality.
+            try:
+                source=Package(uri=fname)
+            except Exception, e:
+                self.log("Cannot load %s file: %s" % (fname, unicode(e)))
+                return True
+            m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
+            m.popup()
+            self.close()
+            return True
+
         if ic is None:
             return True
         i=ic(controller=self.controller, callback=self.progress_callback)
