@@ -273,9 +273,9 @@ class Differ:
 
     def copy_schema(self, s):
         el=self.destination.createSchema(ident=s.id)
-        el.author=s.author
-        el.date=s.date
-        el.title=s.title
+        el.author=s.author or self.source.author
+        el.date=s.date or self.controller.get_timestamp()
+        el.title=s.title or s.id
         self.destination.schemas.append(el)
         return el
 
@@ -287,9 +287,9 @@ class Differ:
             sch=helper.get_id(self.source.schemas, s.schema.id)
             sch=self.copy_schema(sch)
         el=sch.createAnnotationType(ident=s.id)
-        el.author=s.author
-        el.date=s.date
-        el.title=s.title
+        el.author=s.author or self.source.author
+        el.date=s.date or self.controller.get_timestamp()
+        el.title=s.title or s.id
         el.mimetype=s.mimetype
         for n in ('color', 'item_color'):
             el.setMetaData(config.data.namespace, n, (s.getMetaData(config.data.namespace, n) or ''))
@@ -304,9 +304,9 @@ class Differ:
             sch=helper.get_id(self.source.schemas, s.schema.id)
             sch=self.copy_schema(sch)
         el=sch.createRelationType(ident=s.id)
-        el.author=s.author
-        el.date=s.date
-        el.title=s.title
+        el.author=s.author or self.source.author
+        el.date=s.date or self.controller.get_timestamp()
+        el.title=s.title or s.id
         el.mimetype=s.mimetype
         sch.relationTypes.append(el)
         #for n in ('color', 'item_color'):
@@ -360,7 +360,7 @@ class Differ:
         el=self.destination.createAnnotation(
             ident=id_,
             type=at,
-            author=s.author,
+            author=s.author or self.source.author,
             fragment=s.fragment.clone())
         el.date=s.date or self.controller.get_timestamp()
         el.content.data=s.content.data
@@ -377,7 +377,7 @@ class Differ:
         el=self.destination.createAnnotation(
             ident=s.id,
             type=at,
-            author=s.author,
+            author=s.author or self.source.author,
             fragment=s.fragment.clone())
         el.date=s.date or self.controller.get_timestamp()
         el.content.data=s.content.data
@@ -405,18 +405,18 @@ class Differ:
         el=self.destination.createRelation(
             ident=s.id,
             type=rt,
-            author=s.author,
+            author=s.author or self.source.author,
             members=members)
         el.date=s.date or self.controller.get_timestamp()
-        el.title=s.title or ''
         el.content.data=s.content.data
         self.destination.relations.append(el)
+        #el.title=s.title or ''
         return el
 
     def copy_query(self, s):
         el=self.destination.createQuery(
             ident=s.id,
-            author=s.author)
+            author=s.author or self.source.author)
         el.data=s.date or self.controller.get_timestamp()
         el.title=s.title or ''
         el.content.data=s.content.data
@@ -428,7 +428,7 @@ class Differ:
         el=self.destination.createView(
             ident=s.id,
             clazz=s.viewableClass,
-            author=s.author)
+            author=s.author or self.source.author)
         el.date=s.date or self.controller.get_timestamp()
         el.title=s.title or ''
         el.matchFilter['class']=s.matchFilter['class']
