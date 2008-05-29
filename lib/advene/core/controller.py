@@ -77,6 +77,7 @@ if config.data.webserver['mode']:
 
 import threading
 
+gobject.threads_init()
 class AdveneController:
     """AdveneController class.
 
