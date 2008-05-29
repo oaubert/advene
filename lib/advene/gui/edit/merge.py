@@ -202,7 +202,7 @@ class Merger:
         self.controller=controller
         self.sourcepackage=sourcepackage
         self.destpackage=destpackage
-        self.differ=Differ(sourcepackage, destpackage)
+        self.differ=Differ(sourcepackage, destpackage, self.controller)
         self.widget=self.build_widget()
 
     def build_widget(self):
