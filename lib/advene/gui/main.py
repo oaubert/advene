@@ -263,8 +263,9 @@ class AdveneGUI (Connect):
             ('activebookmarks', _('Active bookmarks'), 'activebookmarks.png'),
             ('tagbag', _("Bag of tags"), 'tagbag.png'),
             ('montage', _("Dynamic montage"), 'montage.png'),
+            ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
             ):
-            if name in ('browser', ) and not config.data.preferences['expert-mode']:
+            if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
                 continue
             b=gtk.Button()
             i=gtk.Image()
