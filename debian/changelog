@@ -1,3 +1,9 @@
+advene (0.31) unstable; urgency=low
+
+  * Web server reactiviy issues on Windows XP/Vista have been fixed.
+
+ --
+
 advene (0.30) unstable; urgency=low
 
   * Stable release
