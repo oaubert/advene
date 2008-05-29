@@ -76,8 +76,8 @@ if config.data.webserver['mode']:
     from advene.core.webcherry import AdveneWebServer
 
 import threading
-
 gobject.threads_init()
+
 class AdveneController:
     """AdveneController class.
 
@@ -509,10 +509,10 @@ class AdveneController:
 
         If context is None and expr is not None, then expr will be
         evaluated as a TALES expression and the result will be used to
-        build a new context. This way, passing 
-        context=None, expr='package/annotations' 
+        build a new context. This way, passing
+        context=None, expr='package/annotations'
         will evaluate the query on all package's annotations.
-        
+
         @param query: the query
         @type query: advene.model.queries.Query (hence with a content)
         @param context: the query context
@@ -529,7 +529,7 @@ class AdveneController:
                 context=self.build_context()
                 source=context.evaluateValue(expr)
                 context=self.build_context(here=source)
-                
+
         result=None
         if query.content.mimetype == 'application/x-advene-simplequery':
             qexpr=SimpleQuery()
@@ -1618,7 +1618,7 @@ class AdveneController:
         url=self.get_default_url(root=True, alias='advene')
 
         # Add defaultview first if it exists
-        if self.package.views.get_by_id('_index_view'): 
+        if self.package.views.get_by_id('_index_view'):
             res.append( (_("Standard summary"), "%s/view/%s" % (url, '_index_view')) )
 
         defaultview=self.package.getMetaData(config.data.namespace,
@@ -2052,7 +2052,7 @@ class AdveneController:
         return nbEv
 
     def enrich_event_package(self):
-        """Apply transformations to an event package 
+        """Apply transformations to an event package
            to generate high level annotations
         """
 
@@ -2082,7 +2082,7 @@ class AdveneController:
                 # need to test something else in annot
                 return "Multi"
             return "Undefined"
-        
+
         schema=self.package.get_element_by_id("Traces")
         actions={}
         ac_t = ["Annotation","Restructuration","Navigation","Classification","View_building"]
