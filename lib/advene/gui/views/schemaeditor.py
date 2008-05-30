@@ -26,7 +26,7 @@ from gettext import gettext as _
 
 import gtk
 import goocanvas
-
+import cairo
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.gui.views import AdhocView
 from advene.gui.util import get_pixmap_button
@@ -459,10 +459,12 @@ class SchemaEditor (AdhocView):
         return
 
     def addSchemaTitle(self, canvas, schema, xx, yy):
+        color = self.controller.get_element_color(schema)
         goocanvas.Text (parent = canvas.get_root_item (),
                                         text = schema.title,
                                         x = xx, 
                                         y = yy,
+                                        fill_color = color,
                                         width = -1,
                                         anchor = gtk.ANCHOR_CENTER,
                                         font = "Sans Bold 20")
@@ -574,10 +576,17 @@ class SchemaEditor (AdhocView):
                                 event.time)
             self.dragging = True
         elif event.button == 3:
+            def menuCol(w, item):
+                self.controller.gui.update_color(item.type)
+                return True
             def menuRem(w, item):
                 self.removeRelationTypeGroup(item)
                 return True
+
             menu = gtk.Menu()
+            itemM = gtk.MenuItem(_("Select a color"))
+            itemM.connect('activate', menuCol, item )
+            menu.append(itemM)
             itemM = gtk.MenuItem(_("Remove Relation Type"))
             itemM.connect('activate', menuRem, item )
             menu.append(itemM)
@@ -641,7 +650,14 @@ class SchemaEditor (AdhocView):
                 mem.append(member2)
                 self.addRelationTypeGroup(item.get_canvas(), schema, members=mem)
                 return True
+            def menuCol(w, item):
+                self.controller.gui.update_color(item.type)
+                return True
+
             menu = gtk.Menu()
+            itemM = gtk.MenuItem(_("Select a color"))
+            itemM.connect('activate', menuCol, item )
+            menu.append(itemM)
             itemM = gtk.MenuItem(_("Remove Annotation Type"))
             itemM.connect('activate', menuRem, item, schema )
             menu.append(itemM)
@@ -777,8 +793,7 @@ class SchemaEditor (AdhocView):
                 self.addAnnotationTypeGroup(canvas, schema, rx=x, ry=y)
                 return True
             def pick_color(w, schema):
-                color = self.controller.gui.update_color(schema)
-                self.update_color(schema, color)
+                self.controller.gui.update_color(schema)
             def hide(w, schema):
                 self.removeSchemaFromArea(schema)
             menu = gtk.Menu()
@@ -794,9 +809,6 @@ class SchemaEditor (AdhocView):
             itemM = gtk.MenuItem(_("Hide this schema"))
             itemM.connect('activate', hide, schema )
             menu.append(itemM)
-            #itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
-            #itemM.connect("activate", menuMove, canvas )
-            #menu.append(itemM)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
@@ -825,6 +837,20 @@ class SchemaEditor (AdhocView):
     def center_toggled (self, button, data):
         pass
 
+
+    def export_to_pdf (self, button, canvas):
+        print "In write_pdf_clicked"
+
+        surface = cairo.PDFSurface ("demo.pdf", 9 * 72, 10 * 72)
+        cr = cairo.Context (surface)
+
+        ''' Place it in the middle of our 9x10 page. '''
+        cr.translate (20, 130)
+
+        canvas.render (cr, None, 1.0)
+
+        cr.show_page ()
+    
 
 ### Type Explorer class
 class TypeExplorer (gtk.ScrolledWindow):
@@ -1053,6 +1079,8 @@ class AnnotationTypeGroup (goocanvas.Group):
         self.color = "black"
         if (self.controller.get_element_color(self.type) is not None):
             self.color = self.controller.get_element_color(self.type)
+            if self.rect is not None:
+                self.rect.props.stroke_color = self.color
         if self.text is not None:
             nbannot = len(self.type.getAnnotations())
             self.text.props.text = self.name + " ("+str(nbannot)+")"
@@ -1260,6 +1288,8 @@ class RelationTypeGroup (goocanvas.Group):
         self.color = "black"
         if (self.controller.get_element_color(self.type) is not None):
             self.color = self.controller.get_element_color(self.type)
+            if self.line is not None:
+                self.line.props.stroke_color = self.color
         if self.text is not None:
             nbrel = len(self.type.getRelations())
             self.text.props.text = self.name + " ("+str(nbrel)+")"
