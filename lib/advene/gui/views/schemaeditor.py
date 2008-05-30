@@ -809,6 +809,9 @@ class SchemaEditor (AdhocView):
             itemM = gtk.MenuItem(_("Hide this schema"))
             itemM.connect('activate', hide, schema )
             menu.append(itemM)
+            #itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
+            #itemM.connect("activate", menuMove, canvas )
+            #menu.append(itemM)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
@@ -884,6 +887,20 @@ class TypeExplorer (gtk.ScrolledWindow):
         # a remplacer par la selection de type Mime
         hboxMime.pack_start(labelMime)
         hboxMime.pack_start(self.TMimeType)
+        hboxColor = gtk.HBox()
+        self.bcol = gtk.ColorButton()
+        self.bcol.set_use_alpha(False)
+        self.bcol.connect('color-set', self.colorChange)
+        self.entryCol = gtk.Entry()
+        self.entryCol.connect('changed', self.colorTextChange)
+        hboxColor.pack_start(self.bcol)
+        hboxColor.pack_start(self.entryCol)
+        hboxDesc = gtk.HBox()
+        labelDesc = gtk.Label("Description : ")
+        entryDesc = gtk.Entry()
+        self.TDesc = entryDesc
+        hboxDesc. pack_start(labelDesc)
+        hboxDesc. pack_start(entryDesc)
         hboxId = gtk.HBox()
         labelId1 = gtk.Label("Id :")
         labelId2 = gtk.Label("")
@@ -910,6 +927,8 @@ class TypeExplorer (gtk.ScrolledWindow):
         vbox.pack_start(gtk.HSeparator(), expand=False)
         vbox.pack_start(hboxMime, expand=False, fill=False)
         vbox.pack_start(gtk.HSeparator(), expand=False)
+        vbox.pack_start(hboxColor, expand=False, fill=False)
+        vbox.pack_start(gtk.HSeparator(), expand=False)
         #vbox.pack_start(hboxAddAtt, expand=False, fill=False)
         #vbox.pack_start(gtk.HSeparator(), expand=False)
         #vbox.pack_start(labelAtt, expand=False, fill=False)
@@ -919,8 +938,48 @@ class TypeExplorer (gtk.ScrolledWindow):
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.add_with_viewport(vbox)
 
+
+    def colorTextChange(self, w):
+        col = self.entryCol.get_text()
+        if len(col)!=13:
+            return
+        gtk_color=gtk.gdk.color_parse(col)
+        self.bcol.set_color(gtk_color)
+
+    def colorChange(self, but):
+        col=self.bcol.get_color()
+        self.entryCol.set_text("#%04x%04x%04x" % (col.red, col.green, col.blue))
+        
     def refresh(self, *p):
         return True  
+
+    def setTypeDesc(self, desc=""):
+        if desc is None:
+            return False
+        self.TDesc.set_text(desc)
+        return True
+
+    def getTypeDesc(self):
+        return self.TDesc.get_text()
+
+    def getTypeColor(self):
+        return
+
+    def setTypeColor(self, v):
+        if v is None :
+            v="#000000000000"
+        try:
+            gtk_color=gtk.gdk.color_parse(v)
+            self.bcol.set_color(gtk_color)
+        except:
+            print "exception in color change"
+            pass
+        col=self.bcol.get_color()
+        self.entryCol.set_text("#%04x%04x%04x" % (col.red, col.green, col.blue))
+        return True
+    
+    def getTypeColor(self):
+        return self.bcol.get_color()
 
     def getTypeId(self):
         return self.TId.get_text()
@@ -942,8 +1001,8 @@ class TypeExplorer (gtk.ScrolledWindow):
  
     def getMimeType(self):
         m = self.TMimeType.get_current_element()
-        print m
         return m
+    
     def setMimeType(self, mimetype):
         store, i = dialog.generate_list_model( elements = [ ('text/plain', _("Plain text content")),
                               ('application/x-advene-structured', _("Simple-structured content")),
@@ -987,11 +1046,15 @@ class TypeExplorer (gtk.ScrolledWindow):
             self.setTypeName("")
             self.setTypeId("")
             self.setMimeType("")
+            self.setTypeColor(None)
+            self.setTypeDesc("")
             return True
         self.type = type
         self.setTypeName(self.type.title)
         self.setTypeId(self.type.id)
         self.setMimeType(self.type.mimetype)
+        self.setTypeDesc("Non dipsonible actuellement")
+        self.setTypeColor(self.controller.get_element_color(self.type))
         #boucle sur les attributs pour creer et remplir les lignes
         #if (self.type.mimetype=='application/x-advene-relaxNG'):
             # appel de la fonction qui parse l'arbre
@@ -1000,15 +1063,24 @@ class TypeExplorer (gtk.ScrolledWindow):
         return True
 
     def saveType(self, button):
+        if self.type is None:
+            return
         self.type.title=self.getTypeName()
         self.type.mimetype=self.getMimeType()
+        col = self.getTypeColor()
+        try:
+            self.type.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (col.red,
+                                                                                           col.green,
+                                                                                           col.blue))
+        except:
+            print "erreur couleur save"
+
         if isinstance(self.type, AnnotationType):
             self.controller.notify('AnnotationTypeEditEnd', annotationtype=self.type)
         elif isinstance(self.type, RelationType):
             self.controller.notify('RelationTypeEditEnd', relationtype=self.type)
         #save attributes
         # send controller an event
-        # redraw contents
 
     def cancelType(self, button):
         self.initWithType(self.type)
@@ -1039,7 +1111,14 @@ class AnnotationTypeGroup (goocanvas.Group):
             self.color = self.controller.get_element_color(self.type)
 
         self.rect = self.newRect (rx,ry,self.color)
-        self.text = self.newText (self.name + " ("+str(nbannot)+")",rx+5,ry+10)
+        self.text = self.newText (self.formattedName(),rx+5,ry+10)
+
+    def formattedName(self):
+        nbann = str(len(self.type.getAnnotations()))
+        if len(self.name)+len(nbann)>17:
+            e = 16-len(nbann)
+            return self.name[0:e] + ".. ("+nbann+")"
+        return self.name + " ("+nbann+")"
 
     def newRect(self, xx, yy, color):
         return goocanvas.Rect (parent = self,
@@ -1082,8 +1161,7 @@ class AnnotationTypeGroup (goocanvas.Group):
             if self.rect is not None:
                 self.rect.props.stroke_color = self.color
         if self.text is not None:
-            nbannot = len(self.type.getAnnotations())
-            self.text.props.text = self.name + " ("+str(nbannot)+")"
+            self.text.props.text = self.formattedName()
 	
 class RelationTypeGroup (goocanvas.Group):
     def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, members=[]):
@@ -1162,11 +1240,18 @@ class RelationTypeGroup (goocanvas.Group):
             p = goocanvas.Points ([(x1, y1), (x2, y2)])
         #ligne
         self.line = self.newLine (p,self.color)
-        nbrel = len(self.type.getRelations())
         if (d==0):
-            self.text = self.newText (self.name + " ("+str(nbrel)+")",x1+5,y1-10)	
+            self.text = self.newText (self.formattedName(),x1+5,y1-10)	
         else:
-            self.text = self.newText (self.name + " ("+str(nbrel)+")",(x1+x2)/2, (y1+y2)/2)
+            self.text = self.newText (self.formattedName(),(x1+x2)/2, (y1+y2)/2)
+
+
+    def formattedName(self):
+        nbrel = str(len(self.type.getRelations()))
+        #if len(self.name)+len(nbrel)>17:
+        #    e = 16-len(nbrel)
+        #    return self.name[0:e] + ".. ("+nbrel+")"
+        return self.name + " ("+str(nbrel)+")"
 
     def newText(self, txt, xx, yy):
         return goocanvas.Text (parent = self,
@@ -1247,12 +1332,12 @@ class RelationTypeGroup (goocanvas.Group):
             # modifier en fonction du slot
             p = goocanvas.Points ([(x1, y1), (x1,y1-20), (x1+10, y1-20), (x2+10, y2)])
             if self.text is None:
-                self.text = self.newText (self.name + " ("+str(nbrel)+")",x1+5,y1-10)	
+                self.text = self.newText (self.formattedName(),x1+5,y1-10)	
             self.text.translate(x1-15-self.text.get_bounds().x1, y1-20-self.text.get_bounds().y1)
         else:
             p = goocanvas.Points ([(x1, y1), (x2, y2)])
             if self.text is None:
-                self.text = self.newText (self.name + " ("+str(nbrel)+")",(x1+x2)/2, (y1+y2)/2)
+                self.text = self.newText (self.formattedName(),(x1+x2)/2, (y1+y2)/2)
             self.text.translate((x1+x2-20)/2-self.text.get_bounds().x1, (y1+y2-30)/2-self.text.get_bounds().y1)
         if self.line  is None:
             self.line = self.newLine (p,self.color)
@@ -1292,7 +1377,7 @@ class RelationTypeGroup (goocanvas.Group):
                 self.line.props.stroke_color = self.color
         if self.text is not None:
             nbrel = len(self.type.getRelations())
-            self.text.props.text = self.name + " ("+str(nbrel)+")"
+            self.text.props.text = self.formattedName()
         self.redraw()
 
 
