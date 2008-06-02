@@ -750,7 +750,8 @@ class ActiveBookmark(object):
                                             config.data.drag_type['timestamp']
                                             + config.data.drag_type['annotation-type'],
                                             gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
-        self.dropbox.connect('drag-data-received', self.end_drag_received)
+        self.dropbox.connect('drag-data-received', self.begin_drag_received)
+        self.dropbox.connect('drag-motion', self.bound_drag_motion)
 
         self.begin_widget=None
         self.end_widget=self.dropbox
@@ -892,6 +893,44 @@ class ActiveBookmark(object):
             # DND from the same view. Force default to move.
             drag_context.drag_status(gtk.gdk.ACTION_MOVE, timestamp)
         
+    def begin_drag_received(self, widget, context, x, y, selection, targetType, time):
+        if self.is_widget_in_bookmark(context.get_source_widget()):
+            return False
+        if targetType == config.data.target_type['timestamp']:
+            data=decode_drop_parameters(selection.data)
+            e=long(data['timestamp'])
+            if self.end is None:
+                if e < self.begin:
+                    # Invert begin and end.
+                    self.begin, self.end = e, self.begin
+                else:
+                    self.end=e
+            else:
+                # Save a copy of the deleted timestamp next to the current bookmark
+                i=self.container.bookmarks.index(self)
+                self.container.append(self.begin, index=i + 1)
+                # Reset the begin time.
+                if e > self.end:
+                    # Invert new begin and end
+                    self.begin, self.end = self.end, e
+                else:
+                    self.begin=e
+
+            # If the drag originated from our own widgets, remove it.
+            # If the drop was done from within our view, then
+            # delete the origin widget.
+            if context.action == gtk.gdk.ACTION_MOVE:
+                self.container.delete_origin_timestamp(context.get_source_widget())
+            # Set the current status
+            self.container.set_current_bookmark(self)
+            return True
+        elif targetType == config.data.target_type['annotation-type']:
+            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+            if source is not None:
+                self.transtype(source)
+            return True
+        return False
+
     def end_drag_received(self, widget, context, x, y, selection, targetType, time):
         if self.is_widget_in_bookmark(context.get_source_widget()):
             return False
@@ -1145,44 +1184,6 @@ class ActiveBookmark(object):
 
         box=gtk.HBox()
 
-        def begin_drag_received(widget, context, x, y, selection, targetType, time):
-            if self.is_widget_in_bookmark(context.get_source_widget()):
-                return False
-            if targetType == config.data.target_type['timestamp']:
-                data=decode_drop_parameters(selection.data)
-                e=long(data['timestamp'])
-                if self.end is None:
-                    if e < self.begin:
-                        # Invert begin and end.
-                        self.begin, self.end = e, self.begin
-                    else:
-                        self.end=e
-                else:
-                    # Save a copy of the deleted timestamp next to the current bookmark
-                    i=self.container.bookmarks.index(self)
-                    self.container.append(self.begin, index=i + 1)
-                    # Reset the begin time.
-                    if e > self.end:
-                        # Invert new begin and end
-                        self.begin, self.end = self.end, e
-                    else:
-                        self.begin=e
-
-                # If the drag originated from our own widgets, remove it.
-                # If the drop was done from within our view, then
-                # delete the origin widget.
-                if context.action == gtk.gdk.ACTION_MOVE:
-                    self.container.delete_origin_timestamp(context.get_source_widget())
-                # Set the current status
-                self.container.set_current_bookmark(self)
-                return True
-            elif targetType == config.data.target_type['annotation-type']:
-                source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
-                if source is not None:
-                    self.transtype(source)
-                return True
-            return False
-
         self.begin_widget=BookmarkWidget(self.controller,
                                          display_comments=True,
                                          width=self.container.options['snapshot-size'])
@@ -1192,7 +1193,7 @@ class ActiveBookmark(object):
                                               config.data.drag_type['timestamp']
                                               + config.data.drag_type['annotation-type'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
-        self.begin_widget.image.connect('drag-data-received', begin_drag_received)
+        self.begin_widget.image.connect('drag-data-received', self.begin_drag_received)
         self.begin_widget.image.connect('drag-motion', self.bound_drag_motion)
         self.begin_widget.image.connect('scroll-event', self.handle_scroll_event, self.get_begin, self.set_begin, lambda v: self.end is None or v < self.end)
 
@@ -1202,7 +1203,7 @@ class ActiveBookmark(object):
                                               config.data.drag_type['timestamp']
                                               + config.data.drag_type['annotation-type'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
-        self.begin_widget.comment_entry.connect('drag-data-received', begin_drag_received)
+        self.begin_widget.comment_entry.connect('drag-data-received', self.begin_drag_received)
         self.begin_widget.image.connect('key-press-event', self.timestamp_key_press, 'begin')
 
         def focus_bookmark(widget, event):
