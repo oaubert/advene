@@ -205,7 +205,7 @@ class ActiveBookmarks(AdhocView):
         return True
 
     def update_annotationtype(self, annotationtype=None, event=None):
-        at=self.chosen_type_selector.get_current_element()
+        default=self.chosen_type_selector.get_current_element()
         atlist=self.controller.package.annotationTypes
         # Regenerate the annotation type list.
         types=[ (at, 
@@ -213,12 +213,12 @@ class ActiveBookmarks(AdhocView):
                  self.controller.get_element_color(at)) for at in atlist ]
         types.sort(key=lambda a: a[1])
 
-        if at is None:
-            at=helper.get_id(atlist, 'annotation')
-            if at is None:
-                at=helper.get_id(atlist, 'active_bookmark')
+        if default is None:
+            default=helper.get_id(atlist, 'annotation')
+            if default is None:
+                default=helper.get_id(atlist, 'active_bookmark')
         store, i=dialog.generate_list_model(types,
-                                            active_element=at)
+                                            active_element=default)
         self.chosen_type_selector.set_model(store)
         if i is None:
             i = store.get_iter_first()
@@ -486,6 +486,11 @@ class ActiveBookmarks(AdhocView):
         self.controller.gui.tooltips.set_tip(sel, _("Type of the annotations that will be created"))
         i.add(sel)
         self.chosen_type_selector=sel
+        default=helper.get_id(self.controller.package.annotationTypes, 'annotation')
+        if default is None:
+            default=helper.get_id(self.controller.package.annotationTypes, 'active_bookmark')
+        if default is not None:
+            self.chosen_type_selector.set_current_element(default)
         tb.insert(i, -1)
 
         def scale_snaphots_menu(i):
