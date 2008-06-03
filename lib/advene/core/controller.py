@@ -479,7 +479,13 @@ class AdveneController:
             c=self.build_context()
             source=c.evaluateValue(source)
 
-        words=shlex.split(searched)
+        try:
+            words=shlex.split(searched)
+        except ValueError:
+            # Unbalanced quote. Just do a split along whitespace, the
+            # user may be looking for a string with a quote and not
+            # know it should be escaped.
+            words=searched.split()
 
         mandatory=[ w[1:] for w in words if w.startswith('+') ]
         exceptions=[ w[1:] for w in words if w.startswith('-') ]
