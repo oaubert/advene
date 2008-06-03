@@ -480,7 +480,7 @@ class AdveneController:
             source=c.evaluateValue(source)
 
         try:
-            words=shlex.split(searched)
+            words=[ unicode(w, 'utf8') for w in shlex.split(searched.encode('utf8')) ]
         except ValueError:
             # Unbalanced quote. Just do a split along whitespace, the
             # user may be looking for a string with a quote and not
