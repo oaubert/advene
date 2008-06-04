@@ -757,7 +757,10 @@ gobject.type_register(AnnotationRepresentation)
 class RelationRepresentation(gtk.Button):
     """Representation for a relation.
     """
-    arrow={ 'to': u'\u2192', 'from': u'\u2190' }
+    if config.data.os == 'win32':
+        arrow={ 'to': u'->', 'from': u'<-' }
+    else:
+        arrow={ 'to': u'\u2192', 'from': u'\u2190' }
 
     def __init__(self, relation, controller, direction='to'):
         self.relation=relation
