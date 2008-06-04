@@ -25,6 +25,9 @@ Source: c:\gtk\bin\bzip2.dll; DestDir: {app}
 Source: Win32SoundPlayer\pySoundPlayer.exe; DestDir: {app}
 Source: c:\cygwin\usr\local\bin\libgoocanvas.dll; DestDir: {app}
 
+[Languages]
+Name: Fr; MessagesFile: "compiler:Languages\French.isl"
+Name: En; MessagesFile: "compiler:Default.isl"
 
 [Setup]
 AppCopyright=GPL
@@ -42,7 +45,14 @@ VersionInfoDescription=Annotate DVDs, Exchange on the NEt
 InfoAfterFile=debian\changelog
 OutputBaseFilename=setup_advene_0.30
 VersionInfoTextVersion=0.30
-[Registry]
-Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+;[Registry]
+;Root: HKLM; Subkey: Software\Advene; ValueType: string; ValueName: Path; ValueData: {app}\; Flags: uninsdeletekey
+
 [Icons]
 Name: {group}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; IconIndex: 0
+Name: {userdesktop}\Advene; Filename: {app}\advene.exe; WorkingDir: {app}; IconFilename: {app}\advene.ico; Comment: Annotate DVDs, Exchange on the NEt; Tasks: desktopicon
+
