@@ -517,7 +517,7 @@ class ActiveBookmarks(AdhocView):
         
         for (icon, tip, method) in (
             (gtk.STOCK_REDO, _("Reorder active bookmarks"), reorder),
-            (gtk.STOCK_CONVERT, _("Complete incomplete bookmarks"), complete),
+            (gtk.STOCK_CONVERT, _("Complete bookmarks into annotations"), complete),
             (gtk.STOCK_SAVE, _("Save the current state"), self.save_view),
             (gtk.STOCK_FULLSCREEN, _("Set the size of snaphots"), scale_snaphots_menu),
             ):
