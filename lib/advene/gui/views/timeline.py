@@ -124,7 +124,7 @@ class TimeLine(AdhocView):
             )
         self.options = {
             'highlight': False,
-            # Autoscroll: 0: None, 1: continuous, 2: discrete
+            # Autoscroll: 0: None, 1: continuous, 2: discrete, 3: annotation
             'autoscroll': 1,
             'display-relations': True,
             'display-relation-type': True,
@@ -229,7 +229,8 @@ class TimeLine(AdhocView):
         self.autoscroll_choice = dialog.list_selector_widget(
             members= ( ( 0, _("No scrolling") ),
                        ( 1, _("Continuous scrolling")),
-                       ( 2, _("Discrete scrolling")) ),
+                       ( 2, _("Discrete scrolling")),
+                       ( 3, _("Annotation scrolling")) ),
             preselect= self.options['autoscroll'],
             callback=handle_autoscroll_combo)
 
@@ -541,7 +542,7 @@ class TimeLine(AdhocView):
     def set_autoscroll_mode(self, v):
         """Set the autoscroll value.
         """
-        if v not in (0, 1, 2):
+        if v not in (0, 1, 2, 3):
             return False
         # Update self.autoscroll_choice
         self.autoscroll_choice.set_active(v)
@@ -608,7 +609,7 @@ class TimeLine(AdhocView):
     def activate_annotation_handler (self, context, parameters):
         annotation=context.evaluateValue('annotation')
         if annotation is not None:
-            if self.options['autoscroll'] == 2:
+            if self.options['autoscroll'] == 3:
                 self.scroll_to_annotation(annotation)
             if self.options['highlight']:
                 self.activate_annotation (annotation)
@@ -761,7 +762,7 @@ class TimeLine(AdhocView):
             l=self.list
         if event == 'AnnotationActivate' and annotation in l:
             self.activate_annotation(annotation)
-            if self.options['autoscroll'] == 2:
+            if self.options['autoscroll'] == 3:
                 self.scroll_to_annotation(annotation)
             return True
         if event == 'AnnotationDeactivate' and annotation in l:
@@ -1679,6 +1680,13 @@ class TimeLine(AdhocView):
         if (self.options['autoscroll'] == 1
             and self.controller.player.status == self.controller.player.PlayingStatus):
             self.center_on_position(pos)
+        elif (self.options['autoscroll'] == 2
+              and self.controller.player.status == self.controller.player.PlayingStatus):
+            p=self.unit2pixel(pos)
+            begin=self.adjustment.value
+            end=begin + self.adjustment.page_size
+            if p > end or p < begin:
+                self.center_on_position(pos)
         self.update_current_mark (pos)
         return True
 
