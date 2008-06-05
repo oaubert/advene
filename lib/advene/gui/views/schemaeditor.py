@@ -28,7 +28,7 @@ import gtk
 import goocanvas
 import cairo
 from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.gui.views import AdhocView
+from advene.gui.views import AdhocView, View
 from advene.gui.util import get_pixmap_button
 from advene.gui.util import dialog
 from advene.gui.edit.create import CreateElementPopup
@@ -302,14 +302,13 @@ class SchemaEditor (AdhocView):
         temp=self.openedschemas.pop()
         self.openedschemas.insert(0,temp)
         self.setup_canvas()
-        print "Rotated schemas"
-
+        
     def exchangeSchemaAreas(self, w):
         t1 =self.openedschemas[0]
         self.openedschemas[0]=self.openedschemas[1]
         self.openedschemas[1]=t1
         self.setup_canvas()
-        print "Exchanged %s and %s" % (self.openedschemas[0].title, self.openedschemas[1].title)
+        #print "Exchanged %s and %s" % (self.openedschemas[0].title, self.openedschemas[1].title)
 
     def addTransformButtons(self, nbBut):
         imrot=''
@@ -437,7 +436,7 @@ class SchemaEditor (AdhocView):
             for j in relTypes:
                 self.addRelationTypeGroup(canvas, sc, j.getTitle(), j)
                 r=r+1
-        print "%s RelationTypes drawn" % r
+        #print "%s RelationTypes drawn" % r
         
     def draw_schema_annots(self, canvas, schema, xoffset, yoffset, xmax, ymax):
         self.addSchemaTitle(canvas, schema, xoffset+(xmax-xoffset)/2, yoffset+(ymax-yoffset)/2)
@@ -455,7 +454,7 @@ class SchemaEditor (AdhocView):
             elif y+120<ymax:
                 b=0
                 a=a+1
-        print "%s AnnotationTypes drawn" % an
+        #print "%s AnnotationTypes drawn" % an
         return
 
     def addSchemaTitle(self, canvas, schema, xx, yy):
@@ -480,6 +479,8 @@ class SchemaEditor (AdhocView):
         cvgroup = RelationTypeGroup(self.controller, canvas, schema, name, type, members)
         if cvgroup is not None:
             self.setup_rel_signals (cvgroup)
+            #self.drawFocusOn(cvgroup)
+            #self.TE.initWithType(cvgroup.type)
         return cvgroup
 
     def findRelationTypeGroup(self, typeId, canvas):
@@ -529,6 +530,9 @@ class SchemaEditor (AdhocView):
         cvgroup = AnnotationTypeGroup(self.controller, canvas, schema, name, type, rx, ry)
         if cvgroup is not None:
             self.setup_annot_signals(cvgroup, schema)
+            self.drawFocusOn(cvgroup.rect)
+            self.TE.initWithType(cvgroup.type)
+            #self.widget.set_focus(self.TE.TName)
         return cvgroup
 
 
@@ -536,6 +540,39 @@ class SchemaEditor (AdhocView):
         group.remove()
         ### FIXME : delete relation types based on this annotation type in other schemas
 
+    def create_view_based_on(self, model_obj):
+        id_= model_obj.id+'_view'
+        title_= model_obj.title+' view'
+        if self.controller.package._idgenerator.exists(id_):
+            #on remplace le contenu
+            print 'pas encore fait'
+        else:
+            self.controller.package._idgenerator.add(id_)
+            el=self.controller.package.createView(
+                ident=id_,
+                author=config.data.userid,
+                date=self.controller.get_timestamp(),
+                clazz=self.controller.package.viewableClass,
+                content_mimetype='text/html',
+                )
+            el.title=title_
+            # contenu a adapter
+            el.content.data=u'<h1>test</h1>'
+            if isinstance(model_obj, Schema):
+                el.content.data=u'<h1>Schema %s</h1>\n' % model_obj.title
+                el.content.data += u'<p>Containing the following Annotation Types:</p>\n<ul>\n'
+                for at in model_obj.annotationTypes:
+                    el.content.data += u'<li>%s (%s)</li>\n' % (at, len(at.annotations))
+                el.content.data += u'</ul><p>And the following Relation Types:</p>\n<ul>\n'
+                for rt in model_obj.relationTypes:
+                    el.content.data += u'<li>%s (%s)</li>\n' % (rt, len(rt.relations))
+                el.content.data += u'</ul>\n'
+            # elif isinstance(model_obj, AnnotationType):
+            # elif isinstance(model_obj, RelationType):
+            self.controller.package.views.append(el)
+            self.controller.notify('ViewCreate', view=el)
+
+        print id_
 ###
 #
 #  Functions to handle notification signals
@@ -582,13 +619,17 @@ class SchemaEditor (AdhocView):
             def menuRem(w, item):
                 self.removeRelationTypeGroup(item)
                 return True
-
+            def menuView(w, item):
+                self.create_view_based_on(item.type)
             menu = gtk.Menu()
             itemM = gtk.MenuItem(_("Select a color"))
             itemM.connect('activate', menuCol, item )
             menu.append(itemM)
             itemM = gtk.MenuItem(_("Remove Relation Type"))
             itemM.connect('activate', menuRem, item )
+            menu.append(itemM)
+            itemM = gtk.MenuItem(_("Create HTML view"))
+            itemM.connect('activate', menuView, item )
             menu.append(itemM)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -782,6 +823,8 @@ class SchemaEditor (AdhocView):
 
     def on_background_button_press (self, item, target, event):
         self.TE.initWithType(None)
+        if len(self.openedschemas)<=0:
+            return False
         canvas = item.get_canvas()
         self.drawFocusOn(canvas)
         schema = self.findSchemaFromXY(event.x, event.y)
@@ -796,6 +839,8 @@ class SchemaEditor (AdhocView):
                 self.controller.gui.update_color(schema)
             def hide(w, schema):
                 self.removeSchemaFromArea(schema)
+            def menuView(w, schema):
+                self.create_view_based_on(schema)
             menu = gtk.Menu()
             itemM = gtk.MenuItem(_("Select a color"))
             itemM.connect('activate', pick_color, schema)
@@ -809,6 +854,12 @@ class SchemaEditor (AdhocView):
             itemM = gtk.MenuItem(_("Hide this schema"))
             itemM.connect('activate', hide, schema )
             menu.append(itemM)
+            itemM = gtk.MenuItem(_("Create HTML view"))
+            itemM.connect('activate', menuView, schema )
+            menu.append(itemM)
+            itemM = gtk.MenuItem(_("Export drawing to pdf"))
+            itemM.connect('activate', self.export_to_pdf, canvas)
+            menu.append(itemM)
             #itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
             #itemM.connect("activate", menuMove, canvas )
             #menu.append(itemM)
@@ -817,13 +868,16 @@ class SchemaEditor (AdhocView):
         return True
 
     def drawFocusOn(self, item):
+        #print "focus on %s" % item
         canvas=None
         if isinstance(item, goocanvas.Canvas):
             canvas=item
         else:
             canvas = item.get_canvas()
             item.props.line_width = 4.0
+
         root = canvas.get_root_item()
+
         for i in range(root.get_n_children()):
             if hasattr(root.get_child(i), 'rect'):
                 ite=root.get_child(i).rect
@@ -841,19 +895,20 @@ class SchemaEditor (AdhocView):
         pass
 
 
-    def export_to_pdf (self, button, canvas):
-        print "In write_pdf_clicked"
+    def export_to_pdf (self, w, canvas):
 
-        surface = cairo.PDFSurface ("demo.pdf", 9 * 72, 10 * 72)
+        nompdf = config.data.path['settings']
+        for sc in self.openedschemas:
+            nompdf += sc.id + '_'
+        nompdf += u'.pdf'
+        surface = cairo.PDFSurface (nompdf, self.canvasX, self.canvasY)
         cr = cairo.Context (surface)
-
-        ''' Place it in the middle of our 9x10 page. '''
-        cr.translate (20, 130)
-
+        #cr.translate (20, 130)
+        #if we want to export only 1/4 schema, we need to change X, Y and translate the frame to the middle of the screen
         canvas.render (cr, None, 1.0)
 
         cr.show_page ()
-    
+        dialog.message_dialog(u"%s exported !" % nompdf) 
 
 ### Type Explorer class
 class TypeExplorer (gtk.ScrolledWindow):
@@ -937,6 +992,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         vbox.pack_start(espaceBoutons, expand=False, fill=False)	
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.add_with_viewport(vbox)
+        self.initWithType(None)
 
 
     def colorTextChange(self, w):
@@ -961,9 +1017,6 @@ class TypeExplorer (gtk.ScrolledWindow):
 
     def getTypeDesc(self):
         return self.TDesc.get_text()
-
-    def getTypeColor(self):
-        return
 
     def setTypeColor(self, v):
         if v is None :
@@ -1048,7 +1101,15 @@ class TypeExplorer (gtk.ScrolledWindow):
             self.setMimeType("")
             self.setTypeColor(None)
             self.setTypeDesc("")
+            self.TName.set_sensitive(False)
+            self.bcol.set_sensitive(False)
+            self.entryCol.set_sensitive(False)
+            self.TMimeType.set_sensitive(False)
             return True
+        self.TName.set_sensitive(True)
+        self.bcol.set_sensitive(True)
+        self.entryCol.set_sensitive(True)
+        self.TMimeType.set_sensitive(True)
         self.type = type
         self.setTypeName(self.type.title)
         self.setTypeId(self.type.id)
@@ -1060,6 +1121,7 @@ class TypeExplorer (gtk.ScrolledWindow):
             # appel de la fonction qui parse l'arbre
             # pour chaque element attribut, appel de la fonction qui ajoute une case aux attributs.
         #    pass
+        self.TName.grab_focus()
         return True
 
     def saveType(self, button):
@@ -1069,11 +1131,9 @@ class TypeExplorer (gtk.ScrolledWindow):
         self.type.mimetype=self.getMimeType()
         col = self.getTypeColor()
         try:
-            self.type.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (col.red,
-                                                                                           col.green,
-                                                                                           col.blue))
+            self.type.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (col.red,col.green,col.blue))
         except:
-            print "erreur couleur save"
+            print "Error saving color for %s" % self.type
 
         if isinstance(self.type, AnnotationType):
             self.controller.notify('AnnotationTypeEditEnd', annotationtype=self.type)
@@ -1097,14 +1157,21 @@ class AnnotationTypeGroup (goocanvas.Group):
         self.color = "black"
         self.rels=[] # rel groups
         if type is None:
-            print "Annotation Type Creation"
-            cr=CreateElementPopup(type_=AnnotationType,
-                                    parent=schema,
-                                    controller=self.controller)
-            at=cr.popup(modal=True)
-            if at is None:
+            id_ = self.controller.package._idgenerator.get_id(AnnotationType)
+            self.controller.package._idgenerator.add(id_)
+            el=self.schema.createAnnotationType(
+                    ident=id_)
+            el.author=config.data.userid
+            el.date=self.controller.get_timestamp()
+            el.title=id_
+            el.mimetype='text/plain'
+            el.setMetaData(config.data.namespace, 'color', self.schema.rootPackage._color_palette.next())
+            el.setMetaData(config.data.namespace, 'item_color', 'here/tag_color')
+            self.schema.annotationTypes.append(el)
+            self.controller.notify('AnnotationTypeCreate', annotationtype=el)
+            if el is None:
                 return None
-            self.type=at
+            self.type=el
         self.name=self.type.title
         nbannot = len(self.type.getAnnotations())
         if (self.controller.get_element_color(self.type) is not None):
@@ -1112,6 +1179,7 @@ class AnnotationTypeGroup (goocanvas.Group):
 
         self.rect = self.newRect (rx,ry,self.color)
         self.text = self.newText (self.formattedName(),rx+5,ry+10)
+        
 
     def formattedName(self):
         nbann = str(len(self.type.getAnnotations()))
@@ -1175,8 +1243,6 @@ class RelationTypeGroup (goocanvas.Group):
         self.color = "black"
         self.members=members
         if self.type is None:
-            print "Relation Type Creation"
-            # appeler la creation du type d'annotation
             cr=CreateElementPopup(type_=RelationType,
                                     parent=schema,
                                     controller=self.controller)
