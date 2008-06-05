@@ -976,7 +976,7 @@ class TimestampRepresentation(gtk.Button):
             v=self._value
         if self.width < 9:
             self.image.hide()
-            self.set_size_request(8, 16)
+            self.set_size_request(6, 12)
         else:
             self.image.set_from_pixbuf(png_to_pixbuf (self.controller.package.imagecache.get(v, epsilon=self.epsilon), width=self.width))
             self.set_size_request(-1, -1)
