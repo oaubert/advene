@@ -494,7 +494,7 @@ class TranscriptionEdit(AdhocView):
         b=self.textview.get_buffer()
         anchor=b.create_child_anchor(it)
         # Create the mark representation
-        child=TimestampRepresentation(timestamp, self.controller, width=self.options['snapshot-size'])
+        child=TimestampRepresentation(timestamp, self.controller, width=self.options['snapshot-size'], visible_label=False)
         child.anchor=anchor
         child.connect('clicked', popup_goto)
         child.popup_menu=None
