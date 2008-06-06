@@ -298,61 +298,6 @@ def matching_relationtypes(package, typ1, typ2):
     #print "Matching: %s" % r
     return r
 
-def get_title(controller, element, representation=None):
-    def cleanup(s):
-        i=s.find('\n')
-        if i > 0:
-            return s[:i]
-        else:
-            return s
-
-    if element is None:
-        return _("None")
-    if isinstance(element, unicode) or isinstance(element, str):
-        return element
-    if (isinstance(element, Annotation) or isinstance(element, Relation)
-        and controller is not None):
-
-        if representation is not None and representation != "":
-            c=controller.event_handler.build_context(event='Display', here=element)
-            try:
-                r=c.evaluateValue(representation)
-            except AdveneTalesException:
-                r=element.content.data
-            if not r:
-                r=element.id
-            return cleanup(r)
-
-        expr=element.type.getMetaData(config.data.namespace, "representation")
-        if expr is None or expr == '' or re.match('^\s+', expr):
-            r=element.content.data
-            if element.content.mimetype == 'image/svg+xml':
-                return "SVG graphics"
-            if not r:
-                r=element.id
-            return cleanup(r)
-
-        elif controller is not None:
-            c=controller.event_handler.build_context(event='Display', here=element)
-            try:
-                r=c.evaluateValue(expr)
-            except AdveneTalesException:
-                r=element.content.data
-            if not r:
-                r=element.id
-            return cleanup(r)
-    if isinstance(element, RelationType):
-        if config.data.os == 'win32':
-            arrow=u'->'
-        else:
-            arrow=u'\u2192'
-        return arrow + unicode(cleanup(element.title))
-    if hasattr(element, 'title') and element.title:
-        return unicode(cleanup(element.title))
-    if hasattr(element, 'id') and element.id:
-        return unicode(element.id)
-    return cleanup(unicode(element))
-
 element_label = {
     Package: _("Package"),
     Annotation: _("Annotation"),

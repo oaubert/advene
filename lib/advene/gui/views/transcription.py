@@ -195,13 +195,23 @@ class TranscriptionView(AdhocView):
         l=self.check_modified()
         if l:
             if self.options['representation'] and not parsed_representation.match(self.options['representation']):
-                dialog.message_dialog(label=_("%d annotation(s) were modified\nbut we cannot propagate the modifications\nsince the representation parameter is used.") % len(l))
+                def close_cb():
+                    AdhocView.close(self)
+                    return True
+
+                dialog.message_dialog(label=_("%d annotation(s) were modified\nbut we cannot propagate the modifications\nsince the representation parameter is used.") % len(l), callback=close_cb)
             else:
-                if dialog.message_dialog(label=_("%d annotations were modified.\nDo you want to update their content?") % len(l),
-                                                  icon=gtk.MESSAGE_QUESTION):
+                def handle_modified():
+                    self.log(_("Updating modified annotations"))
                     self.ignore_updates = True
                     self.update_modified(l)
-        AdhocView.close(self)
+                    AdhocView.close(self)
+                    return True
+                dialog.message_dialog(label=_("%d annotations were modified.\nDo you want to update their content?") % len(l),
+                                      icon=gtk.MESSAGE_QUESTION,
+                                      callback=handle_modified)
+        else:
+            AdhocView.close(self)
         return True
 
     def check_modified(self):
@@ -395,10 +405,10 @@ class TranscriptionView(AdhocView):
 
     def representation(self, a):
         if self.options['default-representation']:
-            rep=helper.get_title(self.controller, a)
+            rep=self.controller.get_title(a)
         elif self.options['representation']:
-            rep=helper.get_title(self.controller, a,
-                                 representation=self.options['representation'])
+            rep=self.controller.get_title(a,
+                                          representation=self.options['representation'])
         else:
             rep=a.content.data
         return rep

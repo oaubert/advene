@@ -899,7 +899,57 @@ class AdveneController:
     def get_title(self, element, representation=None):
         """Return the title for the given element.
         """
-        return helper.get_title(self, element, representation)
+        def cleanup(s):
+            i=s.find('\n')
+            if i > 0:
+                return s[:i]
+            else:
+                return s
+
+        if element is None:
+            return _("None")
+        if isinstance(element, unicode) or isinstance(element, str):
+            return element
+        if isinstance(element, Annotation) or isinstance(element, Relation):
+            if representation is not None and representation != "":
+                c=self.event_handler.build_context(event='Display', here=element)
+                try:
+                    r=c.evaluateValue(representation)
+                except AdveneTalesException:
+                    r=element.content.data
+                if not r:
+                    r=element.id
+                return cleanup(r)
+
+            expr=element.type.getMetaData(config.data.namespace, "representation")
+            if expr is None or expr == '' or re.match('^\s+', expr):
+                r=element.content.data
+                if element.content.mimetype == 'image/svg+xml':
+                    return "SVG graphics"
+                if not r:
+                    r=element.id
+                return cleanup(r)
+
+            else:
+                c=self.event_handler.build_context(event='Display', here=element)
+                try:
+                    r=c.evaluateValue(expr)
+                except AdveneTalesException:
+                    r=element.content.data
+                if not r:
+                    r=element.id
+                return cleanup(r)
+        if isinstance(element, RelationType):
+            if config.data.os == 'win32':
+                arrow=u'->'
+            else:
+                arrow=u'\u2192'
+            return arrow + unicode(cleanup(element.title))
+        if hasattr(element, 'title') and element.title:
+            return unicode(cleanup(element.title))
+        if hasattr(element, 'id') and element.id:
+            return unicode(element.id)
+        return cleanup(unicode(element))
 
     def get_default_media (self, package=None):
         """Return the current media for the given package.

@@ -53,7 +53,7 @@ class Menu:
 
     def get_title (self, element):
         """Return the element title."""
-        t=helper.get_title(self.controller, element)
+        t=self.controller.get_title(element)
         if len(t) > 80:
             t=t[:80]
         return t
