@@ -479,7 +479,7 @@ class TranscriptionView(AdhocView):
         item.show()
         menu.append(item)
 
-        item = gtk.MenuItem(_("Annotation %s") % self.currentannotation.id)
+        item = gtk.MenuItem(_("Annotation %s") % self.currentannotation.id, use_underline=False)
         menuc=advene.gui.popup.Menu(self.currentannotation,
                                     controller=self.controller)
         item.set_submenu(menuc.menu)
