@@ -1395,36 +1395,42 @@ class TimeLine(AdhocView):
         e.set_text(self.controller.get_title(annotation))
         e.set_activates_default(True)
 
+        def get_parsed_content(widget, ann):
+            """Return the appropriate data generated from the widget content.
+            """
+            rep=ann.type.getMetaData(config.data.namespace, "representation")
+            if rep is None or rep == '' or re.match('^\s+', rep):
+                r=widget.get_text()
+            else:
+                m=parsed_representation.match(rep)
+                if m:
+                    # We have a simple representation (here/content/parsed/name)
+                    # so we can update the name field.
+                    name=m.group(1)
+                    reg = re.compile('^' + name + '=(.+?)$', re.MULTILINE)
+                    if reg.match(ann.content.data):
+                        r = reg.sub(name + '=' + widget.get_text().replace('\n', '\\n'), ann.content.data)
+                    else:
+                        # The key is not present, add it
+                        if ann.content.data:
+                            r = ann.content.data + "\n%s=%s" % (name,
+                                                                widget.get_text().replace('\n', '\\n'))
+                        else:
+                            r = "%s=%s" % (name,
+                                           widget.get_text().replace('\n', '\\n'))
+                else:
+                    controller.log("Cannot update the annotation, its representation is too complex")
+                    r=ann.content.data
+            return r
+
         def key_handler(widget, event, ann, cb, controller, close_eb):
             if event.keyval == gtk.keysyms.Return:
-                # Validate the entry
-                rep=ann.type.getMetaData(config.data.namespace, "representation")
-                if rep is None or rep == '' or re.match('^\s+', rep):
-                    r=widget.get_text()
-                else:
-                    m=parsed_representation.match(rep)
-                    if m:
-                        # We have a simple representation (here/content/parsed/name)
-                        # so we can update the name field.
-                        name=m.group(1)
-                        reg = re.compile('^' + name + '=(.+?)$', re.MULTILINE)
-                        if reg.match(ann.content.data):
-                            r = reg.sub(name + '=' + widget.get_text().replace('\n', '\\n'), ann.content.data)
-                        else:
-                            # The key is not present, add it
-                            if ann.content.data:
-                                r = ann.content.data + "\n%s=%s" % (name,
-                                                                    widget.get_text().replace('\n', '\\n'))
-                            else:
-                                r = "%s=%s" % (name,
-                                               widget.get_text().replace('\n', '\\n'))
-                    else:
-                        controller.log("Cannot update the annotation, its representation is too complex")
-                        r=ann.content.data
-                ann.content.data = r
+                r=get_parsed_content(widget, ann)
                 if cb:
                     cb('validate', ann)
-                controller.notify('AnnotationEditEnd', annotation=ann)
+                if r != ann.content.data:
+                    ann.content.data = r
+                    controller.notify('AnnotationEditEnd', annotation=ann)
                 close_eb(widget)
                 return True
             elif event.keyval == gtk.keysyms.Escape:
@@ -1433,9 +1439,36 @@ class TimeLine(AdhocView):
                     cb('cancel', ann)
                 close_eb(widget)
                 return True
+            elif event.keyval == gtk.keysyms.Tab:
+                # Validate the current annotation and go to the previous/next one
+                r=get_parsed_content(widget, ann)
+                if cb:
+                    cb('validate', ann)
+                if r != ann.content.data:
+                    ann.content.data = r
+                    controller.notify('AnnotationEditEnd', annotation=ann)
+                # Navigate
+                b=ann.fragment.begin
+                if event.state & gtk.gdk.SHIFT_MASK:
+                    # Previous.
+                    l=[a
+                       for a in ann.type.annotations
+                       if a.fragment.end < b ]
+                    # Sort in reverse order
+                    l.sort(key=lambda a: a.fragment.begin, reverse=True)
+                else:
+                    l=[a
+                       for a in ann.type.annotations
+                       if a.fragment.begin > b ]
+                    l.sort(key=lambda a: a.fragment.begin)
+                if l:
+                    # Edit the previous/next one
+                    self.quick_edit(l[0], callback=cb)
+                close_eb(widget)
+                return True
             return False
         e.connect('key-press-event', key_handler, annotation, callback, self.controller, close_editbox)
-        def grab_focus(widget, event):
+        def grab_focus(widget, event=None, *p):
             widget.grab_focus()
             return False
         e.connect('enter-notify-event', grab_focus)
@@ -1445,12 +1478,10 @@ class TimeLine(AdhocView):
         # Put the entry on the layout
         al=button.get_allocation()
         button.parent.put(e, al.x, al.y)
-        e.grab_focus()
-
+        e.connect('size-allocate', grab_focus)
         # Keep the inspector window open on the annotation
         self.set_annotation(annotation)
-
-        return
+        return e
 
     def annotation_key_press_cb(self, widget, event, annotation):
         """Handle key presses on annotation widgets.
