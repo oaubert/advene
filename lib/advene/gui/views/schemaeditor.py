@@ -896,19 +896,24 @@ class SchemaEditor (AdhocView):
 
 
     def export_to_pdf (self, w, canvas):
-
         nompdf = config.data.path['settings']
         for sc in self.openedschemas:
             nompdf += sc.id + '_'
         nompdf += u'.pdf'
-        surface = cairo.PDFSurface (nompdf, self.canvasX, self.canvasY)
+        name=dialog.get_filename(title=_("Choose a filename to export the schema as PDF"),
+                                 action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                 button=gtk.STOCK_SAVE,
+                                 default_file=nompdf,
+                                 filter='any')
+        if name is None:
+            return
+        surface = cairo.PDFSurface (name, self.canvasX, self.canvasY)
         cr = cairo.Context (surface)
         #cr.translate (20, 130)
         #if we want to export only 1/4 schema, we need to change X, Y and translate the frame to the middle of the screen
         canvas.render (cr, None, 1.0)
-
         cr.show_page ()
-        dialog.message_dialog(u"%s exported !" % nompdf) 
+        dialog.message_dialog(u"%s exported !" % name)
 
 ### Type Explorer class
 class TypeExplorer (gtk.ScrolledWindow):
