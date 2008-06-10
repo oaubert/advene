@@ -33,6 +33,7 @@ from advene.gui.util import get_pixmap_button
 from advene.gui.util import dialog
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.elements import get_edit_popup
+import advene.gui.popup
 import advene.util.helper as helper
 from math import sqrt
 import xml.dom
@@ -613,26 +614,25 @@ class SchemaEditor (AdhocView):
                                 event.time)
             self.dragging = True
         elif event.button == 3:
-            def menuCol(w, item):
-                self.controller.gui.update_color(item.type)
-                return True
             def menuRem(w, item):
                 self.removeRelationTypeGroup(item)
                 return True
             def menuView(w, item):
                 self.create_view_based_on(item.type)
-            menu = gtk.Menu()
-            itemM = gtk.MenuItem(_("Select a color"))
-            itemM.connect('activate', menuCol, item )
-            menu.append(itemM)
+
+            m=advene.gui.popup.Menu(element=item.type, controller=self.controller)
+            menu=m.menu
+
             itemM = gtk.MenuItem(_("Remove Relation Type"))
             itemM.connect('activate', menuRem, item )
-            menu.append(itemM)
+            menu.insert(itemM, 1)
             itemM = gtk.MenuItem(_("Create HTML view"))
             itemM.connect('activate', menuView, item )
-            menu.append(itemM)
+            menu.insert(itemM, 1)
             menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+
+            m.popup()
+
         return True
 
     def rel_on_button_release (self, item, target, event):
@@ -691,17 +691,16 @@ class SchemaEditor (AdhocView):
                 mem.append(member2)
                 self.addRelationTypeGroup(item.get_canvas(), schema, members=mem)
                 return True
-            def menuCol(w, item):
-                self.controller.gui.update_color(item.type)
-                return True
 
-            menu = gtk.Menu()
-            itemM = gtk.MenuItem(_("Select a color"))
-            itemM.connect('activate', menuCol, item )
-            menu.append(itemM)
+            m=advene.gui.popup.Menu(element=item.type, controller=self.controller)
+            menu=m.menu
+
+            menu.insert(gtk.SeparatorMenuItem(), 1)
+
             itemM = gtk.MenuItem(_("Remove Annotation Type"))
             itemM.connect('activate', menuRem, item, schema )
-            menu.append(itemM)
+            menu.insert(itemM, 2)
+
             itemM = gtk.MenuItem(_("Create Relation Type between this one and..."))
             ssmenu = gtk.Menu()
             itemM.set_submenu(ssmenu)
@@ -714,9 +713,10 @@ class SchemaEditor (AdhocView):
                     itemSSM.connect('activate', menuNew, item, schema, a )
                     sssmenu.append(itemSSM)
                 ssmenu.append(itemSM)
-            menu.append(itemM)
+            menu.insert(itemM, 3)
+
             menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            m.popup()
         return True
 
     def findGroupFromXY(self,x,y):
