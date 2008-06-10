@@ -124,7 +124,10 @@ class Resources:
 
     def init_filenames(self):
         if self.filenames is None:
-            self.filenames=os.listdir(self.dir_)
+            try:
+                self.filenames=os.listdir(self.dir_)
+            except OSError:
+                self.filenames=[]
 
     def __str__(self):
         if self.resourcepath == "":
@@ -175,6 +178,8 @@ class Resources:
         To create a new directory, use item == Resources.DIRECTORY_TYPE
         """
         self.filenames = None
+        if not os.path.exists(self.dir_):
+            os.mkdir(self.dir_)
         fname=os.path.join( self.dir_, key )
 
         if item == self.DIRECTORY_TYPE:
