@@ -52,7 +52,6 @@ class PluginCollection(list):
         if it:
             for d, fname in it:
                 p = Plugin(d, fname, self.prefix)
-                print "Registered plugin ", p.name
                 self.append(p)
 
     def standard_plugins(self, d):
