@@ -1927,7 +1927,21 @@ class TimeLine(AdhocView):
                 if (y >= p and y <= p + self.button_height) ]
             if a:
                 # Copy/Move to a[0]
-                self.copy_annotation_type(source, a[0])
+                if source != a[0]:
+                    self.copy_annotation_type(source, a[0])
+                else:
+                    # Create an annotation in the type.
+                    p=self.controller.package
+                    id_ = p._idgenerator.get_id(Annotation)
+                    p._idgenerator.add(id_)
+                    a=p.createAnnotation(ident=id_,
+                                         type=source,
+                                         author=config.data.userid,
+                                         date=self.controller.get_timestamp(),
+                                         fragment=MillisecondFragment(begin=self.pixel2unit(self.adjustment.value + x),
+                                                                      duration=self.pixel2unit(context.get_source_widget().get_allocation().width)))
+                    p.annotations.append(a)
+                    self.controller.notify('AnnotationCreate', annotation=a)
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
