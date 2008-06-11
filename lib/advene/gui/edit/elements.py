@@ -757,7 +757,8 @@ class EditSchemaPopup (EditElementPopup):
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Textual description of the package"))
+                         tooltip=_("Textual description of the package"),
+                         focus=True)
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
 
@@ -812,7 +813,8 @@ class EditAnnotationTypePopup (EditElementPopup):
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Textual description of the package"))
+                         tooltip=_("Textual description of the package"),
+                         focus=True)
 
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
@@ -887,7 +889,8 @@ class EditRelationTypePopup (EditElementPopup):
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Textual description of the package"))
+                         tooltip=_("Textual description of the package"),
+                         focus=True)
 
         self.register_form(f)
         vbox.pack_start(f.get_view(), expand=False)
@@ -1575,7 +1578,7 @@ class EditFragmentForm(EditForm):
 
 class EditGenericForm(EditForm):
     def __init__(self, title=None, getter=None, setter=None,
-                 controller=None, editable=True, tooltip=None, type=None):
+                 controller=None, editable=True, tooltip=None, type=None, focus=False):
         self.title=title
         self.getter=getter
         self.setter=setter
@@ -1585,6 +1588,15 @@ class EditGenericForm(EditForm):
         self.view=None
         self.tooltip=tooltip
         self.type=type
+        self.focus=focus
+
+    def get_focus(self):
+        print "get_focus", self.title, self.focus
+        if self.focus:
+            self.entry.grab_focus()
+            return True
+        else:
+            return False
 
     def get_view(self, compact=False):
         hbox = gtk.HBox()
@@ -1660,7 +1672,7 @@ class EditGenericForm(EditForm):
 class EditMetaForm(EditGenericForm):
     def __init__(self, title=None, element=None, name=None,
                  namespaceid='advenetool', controller=None,
-                 editable=True, tooltip=None, type=None):
+                 editable=True, tooltip=None, type=None, focus=False):
         getter=self.metadata_get_method(element, name, namespaceid)
         setter=self.metadata_set_method(element, name, namespaceid)
         super(EditMetaForm, self).__init__(title=title,
@@ -1669,7 +1681,8 @@ class EditMetaForm(EditGenericForm):
                                            controller=controller,
                                            editable=editable,
                                            tooltip=tooltip,
-                                           type=type)
+                                           type=type,
+                                           focus=focus)
 
 class EditAttributesForm (EditForm):
     """Creates an edit form for the given element."""
