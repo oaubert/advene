@@ -769,15 +769,14 @@ class TimeLine(AdhocView):
             self.desactivate_annotation(annotation)
             return True
         if event == 'AnnotationCreate' and annotation in l:
-            if self.get_widget_for_annotation(annotation):
+            b=self.get_widget_for_annotation(annotation)
+            if b is not None:
                 # It was already created (for instance by the code
                 # in update_legend_widget/create_annotation
+                b.grab_focus()
                 return True
             b=self.create_annotation_widget(annotation)
-            if annotation == self.transmuted_annotation:
-                # Get the focus
-                b.grab_focus()
-            self.layout.show_all()
+            b.grab_focus()
             return True
 
         b = self.get_widget_for_annotation (annotation)
