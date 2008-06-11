@@ -64,6 +64,7 @@ from advene.model.fragment import MillisecondFragment
 from advene.model.view import View
 from advene.model.query import Query
 from advene.model.util.defaultdict import DefaultDict
+from advene.model.tal.context import AdveneTalesException
 
 import advene.model.tal.context
 
