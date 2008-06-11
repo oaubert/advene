@@ -28,17 +28,13 @@ import gtk
 import goocanvas
 import cairo
 from advene.model.schema import Schema, AnnotationType, RelationType
-from advene.gui.views import AdhocView, View
-from advene.gui.util import get_pixmap_button
+from advene.gui.views import AdhocView
 from advene.gui.util import dialog
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.elements import get_edit_popup
 import advene.gui.popup
 import advene.util.helper as helper
 from math import sqrt
-import xml.dom
-ELEMENT_NODE = xml.dom.Node.ELEMENT_NODE
-
 
 name="Schema editor view"
 
