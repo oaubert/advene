@@ -2544,8 +2544,8 @@ class TimeLine(AdhocView):
         return
 
     def get_full_widget(self):
-        '''Return the layout with its controllers.
-        '''
+        """Return the layout with its controllers.
+        """
         vbox = gtk.VBox()
         vbox.connect('key-press-event', self.layout_key_press_cb)
 
@@ -2604,8 +2604,8 @@ class TimeLine(AdhocView):
         return vbox
 
     def selection_menu(self, button=None, popup=True):
-        '''Display the menu for the selection.
-        '''
+        """Display the menu for the selection.
+        """
         def center_and_zoom(m, sel):
             begin=min( [ w.annotation.fragment.begin for w in sel ] )
             end=max( [ w.annotation.fragment.end for w in sel ] )
@@ -2666,7 +2666,7 @@ class TimeLine(AdhocView):
         return m
 
     def get_packed_widget (self):
-        '''Return the widget packed into a scrolledwindow.'''
+        """Return the widget packed into a scrolledwindow."""
         vbox = gtk.VBox ()
 
         content_pane = gtk.HPaned ()
@@ -3089,24 +3089,24 @@ class TimeLine(AdhocView):
         return True
 
     def get_middle_position(self):
-        '''Return the current middle position, in ms.
-        '''
+        """Return the current middle position, in ms.
+        """
         a=self.adjustment
         return self.pixel2unit( a.value + a.page_size / 2 )
 
     def set_middle_position(self, pos):
-        '''Set the current middle position, in ms.
-        '''
+        """Set the current middle position, in ms.
+        """
         self.center_on_position(pos)
 
     def get_selected_annotation_widgets(self):
-        '''Return the list of currently active annotation widgets.
-        '''
+        """Return the list of currently active annotation widgets.
+        """
         return [ w for w in self.layout.get_children() if isinstance(w, AnnotationWidget) and w.active ]
 
     def unselect_all(self, widget=None, selection=None):
-        '''Unselect all annotations.
-        '''
+        """Unselect all annotations.
+        """
         if selection is None:
             selection=self.get_selected_annotation_widgets()
         for w in selection:
