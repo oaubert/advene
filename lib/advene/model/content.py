@@ -206,7 +206,7 @@ class Content(modeled.Modeled,
                     d[k] = urllib.unquote(v)
                 else:
                     d['_error']=l
-                    print "Syntax error in content: >%s<" % l
+                    print "Syntax error in content: >%s<" % l.encode('utf8')
             return d
         elif self.mimetype == 'application/x-advene-values':
             def convert(v):
