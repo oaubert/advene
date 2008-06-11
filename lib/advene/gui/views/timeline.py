@@ -569,6 +569,8 @@ class TimeLine(AdhocView):
                 v.set_annotation(a)
             except AttributeError:
                 pass
+        if self.bookmarks_to_draw:
+            self.bookmarks_to_draw = []
 
     def debug_cb (self, widget, data=None):
         print "Debug event."
