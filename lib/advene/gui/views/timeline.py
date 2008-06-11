@@ -2039,12 +2039,13 @@ class TimeLine(AdhocView):
             self.draw_selection_rectangle(invert=True)
             self.layout_selection=[ [None, None], [None, None] ]
 
-            if (abs(x2-x1) > 20 and abs(y2-y1) > 20):
+            if (abs(x2-x1) > 10 and abs(y2-y1) > 5):
                 # The cursor has been significantly moved. Consider it is a selection.
                 if not (event.state & gtk.gdk.CONTROL_MASK or event.state & gtk.gdk.SHIFT_MASK):
                     # Control or shift was not held: it is a new selection.
                     self.unselect_all()
 
+                res=[]
                 for widget in self.layout.get_children():
                     if not isinstance(widget, AnnotationWidget):
                         continue
@@ -2054,6 +2055,36 @@ class TimeLine(AdhocView):
                     if ( x >= x1 and x + w <= x2
                          and y >= y1 and y + h <= y2):
                         self.activate_annotation(widget.annotation, buttons=[ widget ])
+                        res.append(widget)
+                        
+                if not res:
+                    # No selected annotations. Propose to create a new one.
+                    a=[ at
+                        for (at, p) in self.layer_position.iteritems()
+                        if (y1 >= p and y1 <= p + self.button_height) ]
+                    if not a:
+                        return True
+                    at=a[0]
+                    def create(i):
+                        p=self.controller.package
+                        id_ = p._idgenerator.get_id(Annotation)
+                        p._idgenerator.add(id_)
+                        a=p.createAnnotation(ident=id_,
+                                             type=at,
+                                             author=config.data.userid,
+                                             date=self.controller.get_timestamp(),
+                                             fragment=MillisecondFragment(begin=self.pixel2unit(x1),
+                                                                          end=self.pixel2unit(x2)))
+                        p.annotations.append(a)
+                        self.controller.notify('AnnotationCreate', annotation=a)
+                        return True
+
+                    menu=gtk.Menu()
+                    i=gtk.MenuItem(_("Create a new annotation"))
+                    i.connect('activate', create)
+                    menu.append(i)
+                    menu.show_all()
+                    menu.popup(None, None, None, 0, gtk.get_current_event_time())
                 return True
         return False
 
