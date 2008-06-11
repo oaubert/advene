@@ -2039,10 +2039,7 @@ class AdveneGUI (Connect):
                 self.controller.save_package(alias=alias)
             return True
 
-        marker=self.gui.get_widget ("win").get_title().endswith('(*)')
-        mod=self.controller.package._modified
-        # There is no xor operator in python...
-        if (mod and not marker) or (not mod and marker):
+        if self.gui.get_widget ("win").get_title().endswith('(*)') ^ self.controller.package._modified:
             self.update_window_title()
 
         # Check auto-save
