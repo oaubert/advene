@@ -1809,8 +1809,10 @@ class AdveneGUI (Connect):
 
     def update_window_title(self):
         # Update the main window title
-        self.gui.get_widget ("win").set_title(" - ".join((_("Advene"),
-                                                          self.controller.get_title(self.controller.package))))
+        t=" - ".join((_("Advene"), self.controller.get_title(self.controller.package)))
+        if self.controller.package._modified:
+            t += " (*)"
+        self.gui.get_widget ("win").set_title(t)
         return True
 
     def log (self, msg, level=None):
@@ -2037,6 +2039,10 @@ class AdveneGUI (Connect):
                 self.controller.save_package(alias=alias)
             return True
 
+        if self.controller.package._modified and not self.gui.get_widget ("win").get_title().endswith('(*)'):
+            self.update_window_title()
+
+        # Check auto-save
         if config.data.preferences['package-auto-save'] != 'never':
             t=time.time() * 1000
             if t - self.last_auto_save > config.data.preferences['package-auto-save-interval']:
