@@ -1858,13 +1858,23 @@ class TimeLine(AdhocView):
             return True
 
         if event.keyval >= 49 and event.keyval <= 57:
-            if isinstance(self.quickview.annotation, Annotation):
-                pos=self.quickview.annotation.fragment.begin
-            else:
-                pos=self.get_middle_position()
+            # 1-9 keys set the zoom factor
+            pos=self.get_middle_position()
             self.fraction_adj.value=1.0/pow(2, event.keyval-49)
             self.set_middle_position(pos)
             return True
+        elif event.keyval == gtk.keysyms.plus and event.state & gtk.gdk.CONTROL_MASK:
+            # Zoom in
+            a=self.fraction_adj
+            pos=self.get_middle_position()
+            a.value=min(a.value + a.page_increment, a.upper)
+            self.set_middle_position(pos)
+        elif event.keyval == gtk.keysyms.plus and event.state & gtk.gdk.CONTROL_MASK:
+            # Zoom out
+            a=self.fraction_adj
+            pos=self.get_middle_position()
+            a.value=max(a.value - a.page_increment, a.lower)
+            self.set_middle_position(pos)
         elif event.keyval == gtk.keysyms.e:
             if isinstance(self.quickview.annotation, Annotation):
                 self.controller.gui.edit_element(self.quickview.annotation)
@@ -2857,10 +2867,7 @@ class TimeLine(AdhocView):
                 f=int(i[0])/100.0
             else:
                 return True
-            if isinstance(self.quickview.annotation, Annotation):
-                pos=self.quickview.annotation.fragment.begin
-            else:
-                pos=self.get_middle_position()
+            pos=self.get_middle_position()
             self.fraction_adj.value=f
             self.set_middle_position(pos)
             return True
@@ -2868,19 +2875,13 @@ class TimeLine(AdhocView):
         def zoom_change(combo):
             v=combo.get_current_element()
             if isinstance(v, float):
-                if isinstance(self.quickview.annotation, Annotation):
-                    pos=self.quickview.annotation.fragment.begin
-                else:
-                    pos=self.get_middle_position()
+                pos=self.get_middle_position()
                 self.fraction_adj.value=v
                 self.set_middle_position(pos)
             return True
 
         def zoom(i, factor):
-            if self.quickview.annotation is not None:
-                pos=self.quickview.annotation.fragment.begin
-            else:
-                pos=self.get_middle_position()
+            pos=self.get_middle_position()
             self.fraction_adj.set_value(self.fraction_adj.value * factor)
             self.set_middle_position(pos)
             return True
