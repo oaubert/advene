@@ -169,7 +169,7 @@ class ModelColumn(FinderColumn):
             # There is a next column. Should we still display it ?
             if not [ r
                      for r in self.liststore
-                     if r[self.COLUMN_NODE] == self.next.node ]:
+                     if r[self.COLUMN_NODE][DetailedTreeModel.COLUMN_ELEMENT] == self.next.node[self.COLUMN_NODE] ]:
                 # The next node is no more in the current elements.
                 self.next.close()
                 self.next=None
