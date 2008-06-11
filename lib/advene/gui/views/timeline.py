@@ -595,8 +595,8 @@ class TimeLine(AdhocView):
     def center_on_position(self, position):
         """Scroll the view to center on the given position.
         """
-        (w, h) = self.layout.window.get_size ()
-        pos = self.unit2pixel (position) - w/2
+        alloc = self.layout.get_allocation()
+        pos = self.unit2pixel (position) - (alloc.width / 2)
         a = self.adjustment
         if pos < a.lower:
             pos = a.lower
@@ -855,8 +855,9 @@ class TimeLine(AdhocView):
         menu.popup()
         return True
 
-    def dump_adjustment (self):
-        a = self.adjustment
+    def dump_adjustment (self, a=None):
+        if a is None:
+            a = self.adjustment
         print ("Lower: %.1f\tUpper: %.1f\tValue: %.1f\tPage size: %.1f"
                % (a.lower, a.upper, a.value, a.page_size))
 
@@ -2174,7 +2175,7 @@ class TimeLine(AdhocView):
         a.upper=float(u2p(self.maximum))
         a.step_increment=min(float(u2p(width / 100)), 10)
         a.page_increment=float(u2p(width / 10))
-        a.page_size=float(self.layout.get_size()[0])
+        a.page_size=min(a.upper, self.layout.get_allocation().width)
         #print "Update: from %.2f to %.2f" % (a.lower, a.upper)
         a.changed ()
 
