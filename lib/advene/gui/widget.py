@@ -108,6 +108,15 @@ class GenericColorButtonWidget(gtk.DrawingArea):
         self.draw(cr, w, h)
         cr.paint_with_alpha(0.0)
         widget.drag_source_set_icon(cm, pixmap)
+        widget._icon=pixmap
+        def set_cursor(wid, t=None):
+            try:
+                self.container.set_annotation(t)
+            except AttributeError:
+                # The container does not implement the set_annotation method.
+                return False
+            return True
+        pixmap.set_cursor = set_cursor.__get__(w)
         return True
 
     def reset_surface_size(self, width=None, height=None):
