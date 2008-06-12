@@ -1933,17 +1933,10 @@ class TimeLine(AdhocView):
                     self.copy_annotation_type(source, a[0])
                 else:
                     # Create an annotation in the type.
-                    p=self.controller.package
-                    id_ = p._idgenerator.get_id(Annotation)
-                    p._idgenerator.add(id_)
-                    a=p.createAnnotation(ident=id_,
-                                         type=source,
-                                         author=config.data.userid,
-                                         date=self.controller.get_timestamp(),
-                                         fragment=MillisecondFragment(begin=self.pixel2unit(self.adjustment.value + x),
-                                                                      duration=self.pixel2unit(context.get_source_widget().get_allocation().width)))
-                    p.annotations.append(a)
-                    self.controller.notify('AnnotationCreate', annotation=a)
+                    self.create_annotation(position=self.pixel2unit(self.adjustment.value + x),
+                                           type=source,
+                                           duration=self.pixel2unit(context.get_source_widget().get_allocation().width),
+                                           )
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
@@ -2081,17 +2074,9 @@ class TimeLine(AdhocView):
                         return True
                     at=a[0]
                     def create(i):
-                        p=self.controller.package
-                        id_ = p._idgenerator.get_id(Annotation)
-                        p._idgenerator.add(id_)
-                        a=p.createAnnotation(ident=id_,
-                                             type=at,
-                                             author=config.data.userid,
-                                             date=self.controller.get_timestamp(),
-                                             fragment=MillisecondFragment(begin=self.pixel2unit(x1),
-                                                                          end=self.pixel2unit(x2)))
-                        p.annotations.append(a)
-                        self.controller.notify('AnnotationCreate', annotation=a)
+                        self.create_annotation(position=self.pixel2unit(x1),
+                                               type=at,
+                                               duration=self.pixel2unit(x2-x1))
                         return True
 
                     menu=gtk.Menu()
@@ -2452,19 +2437,9 @@ class TimeLine(AdhocView):
                     and self.controller.player.status != self.controller.player.PauseStatus):
                     return True
                 # Create a new annotation
-                id_=self.controller.package._idgenerator.get_id(Annotation)
-
-                duration=3000
-                el=self.controller.package.createAnnotation(
-                    ident=id_,
-                    type=widget.annotationtype,
-                    author=config.data.userid,
-                    date=self.controller.get_timestamp(),
-                    fragment=MillisecondFragment(begin=long(self.controller.player.current_position_value),
-                                                 duration=duration))
-                self.controller.package.annotations.append(el)
-                el.complete=False
-                self.controller.notify('AnnotationCreate', annotation=el)
+                el=self.create_annotation(position=long(self.controller.player.current_position_value),
+                                       type=widget.annotationtype,
+                                       duration=3000)
                 b=self.create_annotation_widget(el)
                 b.show()
                 self.quick_edit(el, button=widget, callback=set_end_time)
