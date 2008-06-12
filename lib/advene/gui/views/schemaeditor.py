@@ -25,7 +25,11 @@ import advene.core.config as config
 from gettext import gettext as _
 
 import gtk
-import goocanvas
+try:
+    import goocanvas
+except ImportError:
+    goocanvas=None
+
 import cairo
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.gui.views import AdhocView
@@ -40,7 +44,10 @@ name="Schema editor view"
 
 def register(controller):
     #print "Registering plugin SchemaEditor"
-    controller.register_viewclass(SchemaEditor)
+    if goocanvas is None:
+        controller.log("Cannot register SchemaEditor: the goocanvas python module does not seem to be available.")
+    else:
+        controller.register_viewclass(SchemaEditor)
 
 class SchemaEditor (AdhocView):
     view_name = _("Schema Editor")
