@@ -526,10 +526,16 @@ class TranscriptionEdit(AdhocView):
         def handle_scroll_event(button, event):
             if not (event.state & gtk.gdk.CONTROL_MASK):
                 return True
+            if event.state & gtk.gdk.SHIFT_MASK:
+                i='second-scroll-increment'
+            else:
+                i='scroll-increment'
+
             if event.direction == gtk.gdk.SCROLL_DOWN:
-                button.value -= config.data.preferences['scroll-increment']
+                button.value -= config.data.preferences[i]
             elif event.direction == gtk.gdk.SCROLL_UP:
-                button.value += config.data.preferences['scroll-increment']
+                button.value += config.data.preferences[i]
+
             self.tooltips.set_tip(button, "%s" % helper.format_time(button.value))
             if self.tooltips.active_tips_data is None:
                 button.emit('show-help', gtk.WIDGET_HELP_TOOLTIP)

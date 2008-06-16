@@ -192,8 +192,10 @@ class Config(object):
                             },
             'remember-window-size': True,
             'gui': { 'popup-textwidth': 40 },
-            # Scroll increment in ms
+            # Scroll increment in ms (for Control-Scroll)
             'scroll-increment': 100,
+            # Scroll increment in ms (for Control-Shift-Scroll)
+            'second-scroll-increment': 1000,
             # Time increment in ms (FF/REW, Control-Left/Right)
             'time-increment': 2000,
             # Time increment (Control-Shift-Left/Right)

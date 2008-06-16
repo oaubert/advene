@@ -42,7 +42,7 @@ class TimeAdjustment:
         # Small increment
         self.small_increment=config.data.preferences['scroll-increment']
         # Large increment
-        self.large_increment=10 * config.data.preferences['scroll-increment']
+        self.large_increment=config.data.preferences['second-scroll-increment']
         self.image=None
         self.editable=editable
         self.compact=compact
@@ -175,10 +175,15 @@ class TimeAdjustment:
         def handle_scroll_event(button, event):
             if not (event.state & gtk.gdk.CONTROL_MASK):
                 return True
-            if event.direction == gtk.gdk.SCROLL_DOWN:
-                incr=config.data.preferences['scroll-increment']
+            if event.state & gtk.gdk.SHIFT_MASK:
+                i='second-scroll-increment'
             else:
-                incr=-config.data.preferences['scroll-increment']
+                i='scroll-increment'
+            
+            if event.direction == gtk.gdk.SCROLL_DOWN:
+                incr=-config.data.preferences[i]
+            elif event.direction == gtk.gdk.SCROLL_UP:
+                incr=config.data.preferences[i]
 
             v=self.value
             v += incr
