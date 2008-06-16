@@ -27,8 +27,12 @@ from gettext import gettext as _
 import gtk
 try:
     import goocanvas
+    from goocanvas import Group
 except ImportError:
+    # Goocanvas is not available. Define some globals in order not to
+    # fail the module loading, and use them as a guard in register()
     goocanvas=None
+    Group=object
 
 import cairo
 from advene.model.schema import Schema, AnnotationType, RelationType
@@ -1153,7 +1157,7 @@ class TypeExplorer (gtk.ScrolledWindow):
     def cancelType(self, button):
         self.initWithType(self.type)
 
-class AnnotationTypeGroup (goocanvas.Group):
+class AnnotationTypeGroup (Group):
     def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, rx =0, ry=0):
         goocanvas.Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
@@ -1239,7 +1243,7 @@ class AnnotationTypeGroup (goocanvas.Group):
         if self.text is not None:
             self.text.props.text = self.formattedName()
 
-class RelationTypeGroup (goocanvas.Group):
+class RelationTypeGroup (Group):
     def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, members=[]):
         goocanvas.Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
