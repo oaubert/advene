@@ -1186,12 +1186,9 @@ class TranscriptionEdit(AdhocView):
             elif event.keyval == gtk.keysyms.Return:
                 # Insert current timestamp mark
                 if p.status == p.PlayingStatus or p.status == p.PauseStatus:
-                    self.insert_timestamp_mark()
-                return True
-            elif event.keyval == gtk.keysyms.space:
-                # Pause and insert current timestamp mark
-                if p.status == p.PlayingStatus or p.status == p.PauseStatus:
-                    c.update_status("pause")
+                    if event.state & gtk.gdk.SHIFT_MASK:
+                        # If Shift is held, pause/resume the video
+                        c.update_status("pause")
                     self.insert_timestamp_mark()
                 return True
             elif event.keyval == gtk.keysyms.Page_Down:
