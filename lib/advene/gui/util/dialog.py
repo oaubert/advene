@@ -207,7 +207,7 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, modal=True, callback=None):
     dialog.show()
     center_on_mouse(dialog)
 
-    if callback is None:
+    if modal:
         res=dialog.run()
         dialog.destroy()
         if icon == gtk.MESSAGE_QUESTION:
@@ -219,7 +219,7 @@ def message_dialog(label="", icon=gtk.MESSAGE_INFO, modal=True, callback=None):
         # Connect the signal handler.
         def handle_response(d, res):
             d.destroy()
-            if res == gtk.RESPONSE_YES:
+            if res == gtk.RESPONSE_YES and callback is not None:
                 callback()
             return True
         dialog.connect('response', handle_response)
