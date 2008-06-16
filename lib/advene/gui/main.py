@@ -1571,25 +1571,30 @@ class AdveneGUI (Connect):
             if name.content.mimetype == 'application/x-advene-workspace-view':
                 tree=ET.parse(name.content.stream)
 
-                d = gtk.Dialog(title=_("Restoring workspace..."),
-                               parent=None,
-                               flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                               buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                         gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                         ))
-                l=gtk.Label(_("Do you wish to restore the %s workspace ?") % name.title)
-                l.set_line_wrap(True)
-                l.show()
-                d.vbox.pack_start(l, expand=False)
+                if kw.get('ask', True):
+                    d = gtk.Dialog(title=_("Restoring workspace..."),
+                                   parent=None,
+                                   flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                                   buttons=( gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                             gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                             ))
+                    l=gtk.Label(_("Do you wish to restore the %s workspace ?") % name.title)
+                    l.set_line_wrap(True)
+                    l.show()
+                    d.vbox.pack_start(l, expand=False)
 
-                delete_existing_toggle=gtk.CheckButton(_("Clear the current workspace"))
-                delete_existing_toggle.set_active(True)
-                delete_existing_toggle.show()
-                d.vbox.pack_start(delete_existing_toggle, expand=False)
+                    delete_existing_toggle=gtk.CheckButton(_("Clear the current workspace"))
+                    delete_existing_toggle.set_active(True)
+                    delete_existing_toggle.show()
+                    d.vbox.pack_start(delete_existing_toggle, expand=False)
 
-                res=d.run()
-                clear=delete_existing_toggle.get_active()
-                d.destroy()
+                    res=d.run()
+                    clear=delete_existing_toggle.get_active()
+                    d.destroy()
+                else:
+                    res=gtk.RESPONSE_OK
+                    clear=True
+
                 if res == gtk.RESPONSE_OK:
                     def restore(clr):
                         if clr:
@@ -1786,7 +1791,7 @@ class AdveneGUI (Connect):
 
         # FIXME: deactivated for the moment, it freezes the GUI just
         #after the confirmation dialog. To be investigated...
-        #self.check_for_default_adhoc_view(p)
+        self.controller.queue_action(self.check_for_default_adhoc_view, p)
         return True
 
     def check_for_default_adhoc_view(self, package):
@@ -1796,12 +1801,14 @@ class AdveneGUI (Connect):
         if view:
             load=False
             if config.data.preferences['restore-default-workspace'] == 'always':
-                load=True
+                self.controller.queue_action(self.open_adhoc_view, view, ask=False)
             elif config.data.preferences['restore-default-workspace'] == 'ask':
+                def open_view():
+                    self.open_adhoc_view(view, ask=False)
+                    return True
                 load=dialog.message_dialog(_("Do you want to restore the saved workspace ?"),
-                                           icon=gtk.MESSAGE_QUESTION)
-            if load:
-                self.controller.queue_action(self.open_adhoc_view, view)
+                                           icon=gtk.MESSAGE_QUESTION, 
+                                           callback=open_view)
         return False
 
     def update_window_title(self):
@@ -3048,13 +3055,13 @@ class AdveneGUI (Connect):
                 _("ask before saving the current workspace"): 'ask',
                 })
 
-#        ew.add_option(_("On package load,"), 'restore-default-workspace',
-#                      _("Do you wish to load the default workspace with the package?"),
-#                      {
-#                _("never load the default workspace"): 'never',
-#                _("always load the default workspace"): 'always',
-#                _("ask before loading the default workspace"): 'ask',
-#                })
+        ew.add_option(_("On package load,"), 'restore-default-workspace',
+                      _("Do you wish to load the default workspace with the package?"),
+                      {
+                _("never load the default workspace"): 'never',
+                _("always load the default workspace"): 'always',
+                _("ask before loading the default workspace"): 'ask',
+                })
 
         ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
         ew.add_checkbox(_("Caption"), 'display-caption', _("Embed the caption view below the video"))
