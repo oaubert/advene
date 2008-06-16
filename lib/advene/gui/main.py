@@ -668,9 +668,13 @@ class AdveneGUI (Connect):
             if config.data.preferences['expert-mode']:
                 return True
             uri=context.globals['uri']
-            if uri is not None:
-                # Dummy callback so that the dialog is not Modal.
-                dialog.message_dialog(_("You are now working with the following video:\n%s") % uri, callback=str)
+            if not uri:
+                msg=_("No media association is defined in the package. Please use the 'File/Select a video file' menuitem to associate a media file.")
+            elif not os.path.exists(unicode(uri).encode(sys.getfilesystemencoding(), 'ignore')) and not uri.startswith('http:') and not uri.startswith('dvd'):
+                msg=_("The associated media %s could not be found. Please use the 'File/Select a video file' menuitem to associate a media file.")
+            else:
+                msg=_("You are now working with the following video:\n%s") % uri
+            self.controller.queue_action(dialog.message_dialog, msg, modal=False)
             return True
 
         for events, method in (
@@ -1779,13 +1783,6 @@ class AdveneGUI (Connect):
         p._indexer=Indexer(controller=self.controller,
                            package=p)
         p._indexer.initialize()
-
-        media=self.controller.get_default_media(p)
-        if not config.data.preferences['expert-mode']:
-            if media == '':
-                dialog.message_dialog(_("No media association is defined in the package. Please use the 'File/Select a video file' menuitem to associate a media file."), callback=lambda: True)
-            elif not os.path.exists(unicode(media).encode(sys.getfilesystemencoding(), 'ignore')) and not media.startswith('http:') and not media.startswith('dvd'):
-                dialog.message_dialog(_("The associated media %s could not be found. Please use the 'File/Select a video file' menuitem to associate a media file.") % media, callback=lambda: True)
 
         # FIXME: deactivated for the moment, it freezes the GUI just
         #after the confirmation dialog. To be investigated...
