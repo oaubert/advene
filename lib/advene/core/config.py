@@ -194,8 +194,10 @@ class Config(object):
             'gui': { 'popup-textwidth': 40 },
             # Scroll increment in ms
             'scroll-increment': 100,
-            # Time increment in ms
+            # Time increment in ms (FF/REW, Control-Left/Right)
             'time-increment': 2000,
+            # Time increment (Control-Shift-Left/Right)
+            'second-time-increment': 5000,
             'timeline': {
                 'font-size': 10,
                 'button-height': 20,
