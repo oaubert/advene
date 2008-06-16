@@ -919,6 +919,10 @@ class TimeLine(AdhocView):
         return at
 
     def create_annotation(self, position, type, duration=None, content=None):
+        position=long(position)
+        if position > self.controller.cached_duration:
+            return None
+
         id_=self.controller.package._idgenerator.get_id(Annotation)
         if duration is None:
             duration=self.controller.cached_duration / 20
@@ -929,13 +933,17 @@ class TimeLine(AdhocView):
             else:
                 # Should not happen
                 print "Strange, click outside the timeline"
+                return None
+
+        if position + duration > self.controller.cached_duration:
+            duration = self.controller.cached_duration - position
 
         el=self.controller.package.createAnnotation(
             ident=id_,
             type=type,
             author=config.data.userid,
             date=self.controller.get_timestamp(),
-            fragment=MillisecondFragment(begin=long(position),
+            fragment=MillisecondFragment(begin=position,
                                          duration=duration))
         if content is not None:
             el.content.data=content
@@ -2440,9 +2448,10 @@ class TimeLine(AdhocView):
                 el=self.create_annotation(position=long(self.controller.player.current_position_value),
                                        type=widget.annotationtype,
                                        duration=3000)
-                b=self.create_annotation_widget(el)
-                b.show()
-                self.quick_edit(el, button=widget, callback=set_end_time)
+                if el is not None:
+                    b=self.create_annotation_widget(el)
+                    b.show()
+                    self.quick_edit(el, button=widget, callback=set_end_time)
                 return True
             elif event.keyval == gtk.keysyms.space:
                 self.restrict_playing(at, widget)
