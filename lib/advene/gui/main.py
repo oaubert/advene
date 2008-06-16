@@ -1176,7 +1176,7 @@ class AdveneGUI (Connect):
                     b.widget.connect('size-allocate', lambda w, e: a.scroll_to_bookmark(b) and False)
                 return True
         elif event.state & gtk.gdk.CONTROL_MASK:
-            if event.keyval == gtk.keysyms.Tab:
+            if event.keyval == gtk.keysyms.Tab or event.keyval == gtk.keysyms.space:
                 if p.status == p.PlayingStatus:
                     c.update_status("pause")
                 elif p.status == p.PauseStatus:
