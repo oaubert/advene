@@ -46,6 +46,7 @@ from advene.gui.util import encode_drop_parameters, decode_drop_parameters
 from advene.gui.edit.properties import EditWidget
 from advene.gui.util.completer import Completer
 from advene.gui.widget import TimestampRepresentation
+from advene.gui.edit.timeadjustment import TimeAdjustment
 
 class TranscriptionImporter(advene.util.importer.GenericImporter):
     """Transcription importer.
@@ -406,6 +407,24 @@ class TranscriptionEdit(AdhocView):
             c.update_status (status="set", position=pos)
             return True
 
+        def popup_edit(i, button):
+            d = gtk.Dialog(title=_("Enter the new time value"),
+                           parent=None,
+                           flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                           buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+            ta=TimeAdjustment(value=button.value, 
+                              controller=self.controller)
+            d.vbox.pack_start(ta.widget, expand=False)
+            d.show_all()
+            dialog.center_on_mouse(d)
+            res=d.run()
+            retval=None
+            if res == gtk.RESPONSE_OK:
+                button.value = ta.get_value()
+            d.destroy()
+            return True
+
         def popup_ignore(win, button):
             self.toggle_ignore(button)
             return True
@@ -443,6 +462,10 @@ class TranscriptionEdit(AdhocView):
 
         item = gtk.MenuItem(_("Go to..."))
         item.connect('activate', popup_goto, timestamp)
+        menu.append(item)
+
+        item = gtk.MenuItem(_("Edit"))
+        item.connect('activate', popup_edit, button)
         menu.append(item)
 
         item = gtk.MenuItem(_("Ignore the following text (toggle)"))
