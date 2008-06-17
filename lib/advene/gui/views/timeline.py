@@ -308,7 +308,7 @@ class TimeLine(AdhocView):
                                   config.data.drag_type['annotation']
                                   + config.data.drag_type['annotation-type']
                                   + config.data.drag_type['timestamp'],
-                                  gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
+                                  gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_ASK )
 
         self.old_scale_value = self.scale.value
 
@@ -892,13 +892,6 @@ class TimeLine(AdhocView):
         f = 1.0 * x / w
         return f
 
-    def drag_begin(self, widget, context):
-        """Handle drag begin for annotations.
-        """
-        # Determine in which part of the annotation we clicked.
-        widget._drag_fraction = self.annotation_fraction(widget)
-        return False
-
     def create_relation(self, source, dest, rt):
         """Create the reation of type rt between source and dest.
         """
@@ -952,8 +945,14 @@ class TimeLine(AdhocView):
         self.controller.notify('AnnotationCreate', annotation=el)
         return el
 
-    def drag_received(self, widget, context, x, y, selection, targetType, time):
-        #print "drag_received event for %s" % widget.annotation.content.data
+    def annotation_drag_begin(self, widget, context):
+        """Handle drag begin for annotations.
+        """
+        # Determine in which part of the annotation we clicked.
+        widget._drag_fraction = self.annotation_fraction(widget)
+        return False
+
+    def annotation_drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
             source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
             dest=widget.annotation
@@ -1066,11 +1065,13 @@ class TimeLine(AdhocView):
             print "Unknown target type for drag: %d" % targetType
         return True
 
-    def move_or_copy_annotation(self, source, dest, position=None):
+    def move_or_copy_annotation(self, source, dest, position=None, action=gtk.gdk.ACTION_ASK):
         """Display a popup menu to move or copy the source annotation to the dest annotation type.
 
         If position is given (in ms), then the choice will also be
         offered to move/copy the annotation and change its bounds.
+
+        If action is specified, then the popup menu will be shortcircuited.
         """
         def move_annotation(i, an, typ, position=None):
             if an.relations and an.type != typ:
@@ -1100,20 +1101,72 @@ class TimeLine(AdhocView):
                 self.create_relation(an, self.transmuted_annotation, relationtype)
             return self.transmuted_annotation
 
-        def copy_selection(i, sel, typ):
+        def copy_selection(i, sel, typ, delete=False):
             for an in sel:
                 self.transmuted_annotation=self.controller.transmute_annotation(an,
                                                                                 typ,
-                                                                                delete=False)
+                                                                                delete=delete)
             self.unselect_all()
             return self.transmuted_annotation
 
-        # Popup a menu to propose the drop options
+        # Is there an active selection ?
+        selection=[ w.annotation for w in self.get_selected_annotation_widgets() ]
+
+        # If there are compatible relation-types, propose to directly create a relation
+        relationtypes=helper.matching_relationtypes(self.controller.package,
+                                                    source.type,
+                                                    dest)
+
+        if action == gtk.gdk.ACTION_COPY:
+            # Direct copy
+            if len(selection) > 1 and source in selection:
+                if source.type == dest:
+                    return True
+                copy_selection(None, selection, dest)
+            else:
+                if source.type == dest:
+                    position=position
+                else:
+                    position=None
+                copy_annotation(None, source, dest, position=position)
+            return True
+        elif action == gtk.gdk.ACTION_MOVE:
+            if len(selection) > 1 and source in selection:
+                if source.type == dest:
+                    return True
+                copy_selection(None, selection, dest, delete=True)
+            else:
+                if source.type == dest:
+                    position=position
+                else:
+                    position=None
+                move_annotation(None, source, dest, position=position)
+            return True
+        elif action == gtk.gdk.ACTION_LINK:
+            # Copy and create a relation. Ignore the selection (?)
+            if len(relationtypes) == 1:
+                copy_annotation(None, source, dest, relationtype=relationtypes[0])
+            elif not relationtypes:
+                # Create a new relationtype
+                self.log("FIXME: no valid relation type is defined")
+            else:
+                # Multiple valid relationtypes.
+                menu=gtk.Menu()
+                item=gtk.MenuItem(_("Select the appropriate relation type"))
+                menu.append(item)
+                item.set_sensitive(False)
+                for rt in relationtypes:
+                    sitem=gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
+                    sitem.connect('activate', copy_annotation, source, dest, None, rt)
+                    menu.append(sitem)
+                menu.show_all()
+                menu.popup(None, None, None, 0, gtk.get_current_event_time())
+            return True
+
+        # ACTION_ASK: Popup a menu to propose the drop options
         menu=gtk.Menu()
 
         dest_title=self.controller.get_title(dest)
-
-        selection=[ w.annotation for w in self.get_selected_annotation_widgets() ]
 
         if len(selection) > 1 and source in selection:
             if source.type == dest:
@@ -1151,10 +1204,6 @@ class TimeLine(AdhocView):
             if source.relations and source.type != dest:
                 item.set_sensitive(False)
 
-        # If there are compatible relation-types, propose to directly create a relation
-        relationtypes=helper.matching_relationtypes(self.controller.package,
-                                                    source.type,
-                                                    dest)
         if relationtypes:
             if source.type != dest:
                 item=gtk.MenuItem(_("Duplicate and create a relation"), use_underline=False)
@@ -1612,7 +1661,7 @@ class TimeLine(AdhocView):
         b.connect('focus-in-event', focus_in)
 
         # The button can generate drags
-        b.connect('drag-begin', self.drag_begin)
+        b.connect('drag-begin', self.annotation_drag_begin)
 
         b.drag_source_set(gtk.gdk.BUTTON1_MASK,
                           config.data.drag_type['annotation']
@@ -1623,15 +1672,24 @@ class TimeLine(AdhocView):
                           + config.data.drag_type['timestamp']
                           + config.data.drag_type['tag']
                           ,
-                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
+                          gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_ASK )
         # The button can receive drops (to create relations)
-        b.connect('drag-data-received', self.drag_received)
+        b.connect('drag-data-received', self.annotation_drag_received)
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['annotation']
                         + config.data.drag_type['tag']
-                        , gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
+                        , gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE | gtk.gdk.ACTION_ASK )
+
+        def annotation_drag_motion(widget, drag_context, x, y, timestamp):
+            actions=drag_context.actions
+            # Dragging an annotation. Set the default action to ASK.
+            if (config.data.drag_type['annotation'][0][0] in drag_context.targets
+                and not actions in ( gtk.gdk.ACTION_LINK, gtk.gdk.ACTION_COPY, gtk.gdk.ACTION_MOVE )):
+                # No single action was selected. Force ASK
+                drag_context.drag_status(gtk.gdk.ACTION_ASK, timestamp)
+        b.connect('drag-motion', annotation_drag_motion)
 
         # Handle scroll actions
         def handle_scroll_event(button, event):
@@ -1925,14 +1983,14 @@ class TimeLine(AdhocView):
                 if (y >= p and y <= p + self.button_height) ]
             if a:
                 # Copy/Move to a[0]
-                self.move_or_copy_annotation(source, a[0], position=self.pixel2unit(self.adjustment.value + x))
+                self.move_or_copy_annotation(source, a[0], position=self.pixel2unit(self.adjustment.value + x), action=context.actions)
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
                 dest=self.create_annotation_type()
                 if dest is None:
                     return True
-                self.move_or_copy_annotation(source, dest, position=self.pixel2unit(self.adjustment.value + x))
+                self.move_or_copy_annotation(source, dest, position=self.pixel2unit(self.adjustment.value + x), action=context.actions)
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
@@ -2152,6 +2210,12 @@ class TimeLine(AdhocView):
             w._icon.set_cursor(t)
         except AttributeError:
             pass
+        actions=drag_context.actions
+        # Dragging an annotation. Set the default action to ASK.
+        if (config.data.drag_type['annotation'][0][0] in drag_context.targets
+            and not actions in ( gtk.gdk.ACTION_LINK, gtk.gdk.ACTION_COPY, gtk.gdk.ACTION_MOVE )):
+            # No single action was selected. Force ASK
+            drag_context.drag_status(gtk.gdk.ACTION_ASK, timestamp)
         return True
 
     def layout_drag_leave_cb(self, widget, drag_context, timestamp):
