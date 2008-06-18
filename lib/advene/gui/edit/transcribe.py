@@ -121,7 +121,7 @@ class TranscriptionEdit(AdhocView):
             self.load_transcription(filename=filename)
         for n, v in arg:
             if n == 'text':
-                self.load_transcription(buffer=urllib.unquote(v))
+                self.load_transcription(buffer=urllib.unquote_plus(v))
 
     def get_save_arguments(self):
         b=self.textview.get_buffer()
