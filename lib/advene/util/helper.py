@@ -42,6 +42,7 @@ from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
+from advene.model.util.defaultdict import DefaultDict
 import advene.model.zippackage
 
 from advene.model.tal.context import AdveneContext, AdveneTalesException
@@ -602,8 +603,10 @@ def get_video_stream_from_website(url):
 def get_view_type(v):
     """Return the type of the view.
 
-    Return values: static, dynamic, adhoc
+    Return values: static, dynamic, adhoc, None
     """
+    if not isinstance(v, View):
+        return None
     if v.content.mimetype == 'application/x-advene-ruleset':
         return 'dynamic'
     elif (v.content.mimetype == 'application/x-advene-adhoc-view'
@@ -664,3 +667,22 @@ def find_in_path(name):
         if os.path.exists(fullname):
             return fullname
     return None
+
+def overlapping_annotations(t):
+    """Return a set of overlapping annotations (couples)
+    """
+    res=DefaultDict(default=[])
+    l=t.annotations[:]
+    l.sort(key=lambda a: a.fragment.begin)
+    while l:
+        a=l.pop()
+        begin=a.fragment.begin
+        end=a.fragment.end
+        for b in l:
+            be=b.fragment.begin
+            en=b.fragment.end
+            if not (end <= be or en <= begin):
+                res.append( (a, b) )
+    return res
+
+        
