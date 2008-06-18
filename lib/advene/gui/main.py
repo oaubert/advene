@@ -202,6 +202,21 @@ class AdveneGUI (Connect):
         # Will be initialized in get_visualisation_widget
         self.gui.stbv_combo = None
 
+        # Dictionary of registered adhoc views
+        self.registered_adhoc_views={}
+        self.gui_plugins=[]
+
+        # Register plugins.
+        for n in ('plugins', 'views', 'edit'):
+            try:
+                l=self.controller.load_plugins(os.path.join(
+                        os.path.dirname(advene.__file__), 'gui', n),
+                                               prefix="advene_gui_%s" % n)
+                self.gui_plugins.extend(l)
+            except OSError:
+                print "OSerror"
+                pass
+
         # Adhoc view toolbuttons signal handling
         def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
             if targetType == config.data.target_type['adhoc-view']:
@@ -266,6 +281,9 @@ class AdveneGUI (Connect):
             ('schemaeditor', _("Schema editor"), 'schemaeditor.png'),
             ):
             if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
+                continue
+            if name != 'webbrowser' and not name in self.registered_adhoc_views:
+                self.log("Missing badic adhoc view %s" % name)
                 continue
             b=gtk.Button()
             i=gtk.Image()
@@ -360,9 +378,6 @@ class AdveneGUI (Connect):
         self.current_annotation = None
         # Internal rule used for annotation loop
         self.annotation_loop_rule=None
-
-        # Dictionary of registered adhoc views
-        self.registered_adhoc_views={}
 
         # List of active annotation views (timeline, tree, ...)
         self.adhoc_views = []
@@ -633,27 +648,6 @@ class AdveneGUI (Connect):
                 gtk.gdk.threads_init ()
             except RuntimeError:
                 print "*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour."
-
-        try:
-            self.gui_plugins=self.controller.load_plugins(os.path.join(
-                    os.path.dirname(advene.__file__), 'gui', 'plugins'),
-                                                          prefix="advene_gui_plugins")
-        except OSError:
-            pass
-
-        # Register default GUI elements (actions, content_handlers, etc)
-        for m in (advene.gui.views.timeline,
-                  advene.gui.views.browser,
-                  advene.gui.views.finder,
-                  advene.gui.views.activebookmarks,
-                  advene.gui.views.interactivequery,
-                  advene.gui.views.table,
-                  advene.gui.views.bookmarks,
-                  advene.gui.views.tree,
-                  advene.gui.edit.montage,
-                  advene.gui.views.annotationdisplay,
-                  ):
-            m.register(self.controller)
 
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
