@@ -26,6 +26,9 @@ import inspect
 import zipfile
 import zipimport
 
+class PluginException(Exception):
+    pass
+
 class PluginCollection(list):
     """A collection of plugins.
 
@@ -51,8 +54,12 @@ class PluginCollection(list):
 
         if it:
             for d, fname in it:
-                p = Plugin(d, fname, self.prefix)
-                self.append(p)
+                try:
+                    p = Plugin(d, fname, self.prefix)
+                    self.append(p)
+                except PluginException:
+                    # Silently ignore non-plugin files
+                    pass
 
     def standard_plugins(self, d):
         for name in os.listdir(d):
@@ -108,6 +115,10 @@ class Plugin(object):
                 self._plugin = imp.load_source('_'.join( (prefix, name) ), fullname, open(fullname) )
             elif ext == '.pyc':
                 self._plugin = imp.load_compiled('_'.join( (prefix, name) ), fullname, open(fullname) )
+
+        # Is this really a plugin ?
+        if not hasattr(self._plugin, 'name') or not hasattr(self._plugin, 'register'):
+            raise PluginException("%s is not a plugin" % fullname)
         self._filename = fullname
         self.name = self._plugin.name
         self._classes = get_classes()
