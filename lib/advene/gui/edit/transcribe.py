@@ -48,6 +48,11 @@ from advene.gui.util.completer import Completer
 from advene.gui.widget import TimestampRepresentation
 from advene.gui.edit.timeadjustment import TimeAdjustment
 
+name="Note-taking view plugin"
+
+def register(controller):
+    controller.register_viewclass(TranscriptionEdit)
+
 class TranscriptionImporter(advene.util.importer.GenericImporter):
     """Transcription importer.
     """
