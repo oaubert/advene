@@ -236,7 +236,7 @@ class Config(object):
             # Interface langugage. '' means system default.
             'language': '',
             'save-default-workspace': 'never',
-            'restore-default-workspace': 'never',
+            'restore-default-workspace': 'ask',
             # Daily check for updates on the Advene website ?
             'update-check': False,
             # Last update time
