@@ -283,7 +283,7 @@ class AdveneGUI (Connect):
             if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
                 continue
             if name != 'webbrowser' and not name in self.registered_adhoc_views:
-                self.log("Missing badic adhoc view %s" % name)
+                self.log("Missing basic adhoc view %s" % name)
                 continue
             b=gtk.Button()
             i=gtk.Image()
