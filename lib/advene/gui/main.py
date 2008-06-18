@@ -3067,11 +3067,11 @@ class AdveneGUI (Connect):
                 })
 
         ew.add_option(_("On package load,"), 'restore-default-workspace',
-                      _("Do you wish to load the default workspace with the package?"),
+                      _("Do you wish to load the workspace saved with the package?"),
                       {
-                _("never load the default workspace"): 'never',
-                _("always load the default workspace"): 'always',
-                _("ask before loading the default workspace"): 'ask',
+                _("never load the saved workspace"): 'never',
+                _("always load the saved workspace"): 'always',
+                _("ask before loading the saved workspace"): 'ask',
                 })
 
         ew.add_checkbox(_("Scroller"), 'display-scroller', _("Embed the caption scroller below the video"))
