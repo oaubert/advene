@@ -279,12 +279,13 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
             return self.__zip.getResources(package=self)
 
     def get_element_by_id(self, i):
+        uri=self.uri
         for m in (self.getSchemas, self.getViews, self.getAnnotationTypes,
                   self.getRelationTypes, self.getAnnotations,
                   self.getRelations):
-            for el in m():
-                if el.id == i:
-                    return el
+            el=m().get( '#'.join( (uri, i) ), None )
+            if el is not None:
+                return el
         return None
 
     def generate_statistics(self):
