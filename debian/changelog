@@ -1,26 +1,26 @@
 advene (0.31) unstable; urgency=low
 
-   * Global shortcuts: 
-      * Control-Space plays/pauses the video (as Control-Tab) 
+   * Global shortcuts:
+      * Control-Space plays/pauses the video (as Control-Tab)
       * pressing shift while navigating with
         Control-left/right or modifying a value with Control-scroll will use a
-      	larger step, customizable in Edit/Preferences/Time related.
-  
+        larger step, customizable in Edit/Preferences/Time related.
+
    * Web server reactiviy issues on Windows XP/Vista have been fixed.
- 
+
    * The experimental schema editor is available in expert mode.
 
    * Automatic workspace save/restore is now functional. See
      Edit/Preferences/Standard views for customization.
 
-   * Timeline view : 
+   * Timeline view :
       * discrete scrolling is now working similarly as in other
         applications (scroll when the cursor reaches the end of the visible
-    	area).
-      * in quick-edit mode, Tab validates the annotation and edits the next one  	
+        area).
+      * in quick-edit mode, Tab validates the annotation and edits the next one
       * when selecting annotations by drawing a frame, if the selection
-        is empty, then propose to create a new annotation with the 
-  	frame extent as dimension.
+        is empty, then propose to create a new annotation with the
+        frame extent as dimension.
       * standard control/shift modifiers can be used in drag and drop actions
 
  --
@@ -28,18 +28,18 @@ advene (0.31) unstable; urgency=low
 advene (0.30) unstable; urgency=low
 
    * Stable release
-  
+
    * Important notes (see the following 0.29 notes for more details):
-  
+
       * The shortcut to start/pause the player has changed: it is now
         Control+Tab (so that plain Tab/Shift-Tab can be used to navigate in
         the GUI)
-  
+
       * New adhoc view: activebookmarks, which can be used to build
         annotations from timestamps. It can also be exported to HTML.  The old
-      	bookmarks view still exists, but is deprecated and will be replaced by
-      	activebookmarks in future releases.
-  
+        bookmarks view still exists, but is deprecated and will be replaced by
+        activebookmarks in future releases.
+
       * New global shortcuts: Insert or Alt-Space creates a new active
         bookmark.
 
@@ -61,32 +61,32 @@ advene (0.29) unstable; urgency=low
 
    * Fix XML parsing using standard python modules. It makes Advene usable
      on Ubuntu Hardy Heron.
-  
+
    * New exporter: CMML
 
-   * Timeline view: 
+   * Timeline view:
       * annotations can be merged by DND
       * Dragging an annotation type to another one will propose to
        duplicate or move all annotations to the new type
 
    * Note-taking view: timestamp marks are now displaying a
      screenshot. Their size can be tuned.
-  
+
    * Dynamic views: new actions have been defined
-  
+
       * Braille (display a message in braille, depends on brltty)
-  
+
       * OpenStaticView: open a static view in the web browser
-  
+
       * State-related actions (StateSet, StateClear, StateIncr)
        have been added. They allow to manage a package-specific state in
        dynamic views. The counter "name" can be accessed through the TALES
        expression "package/state/name"
-  
+
    * Various GUI and usability improvements
 
    * The gstreamer video plugin can display the video fullscreen
-  
+
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 19 May 2008 11:45:25 +0200
 
 advene (0.28) unstable; urgency=low
@@ -102,48 +102,48 @@ advene (0.27) unstable; urgency=low
     directory - usually something like C:\Documents and settings\Loginname
     If you had a previous configuration file, please copy it to the new
     directory.
-  
+
    * Win32 bugfixes (relation creation, timestamp mark colors, montage...)
 
    * Win32: VLC can be bundled in the Advene installer package
 
    * New adhoc view : finder (column-based finder a la Mac OS X)
 
-   * New actions: 
+   * New actions:
 
       * Pronounce (through Text-To-Speech). Works on MacOS X
        (directly) and Linux (with festival configured to output through
        ALSA, cf http://gentoo-wiki.com/HOWTO_speechd#Use_alsa_output_method ).
-  
+
       * PopupGotoOutgoingRelated: displays a navigation popup based on
        relations.
-  
+
       * PlaySoundClip: plays a soundclip from the 'soundclips' resource
        folder of the package
-  
+
       * PlaySound: plays a sound file
 
    * General:
-  
+
       * Package data can be exported to other formats (SMIL, SVG, MPEG7...)
        through the File/Export menuitem.
-  
+
       * The package can automatically be saved when saving the package. This
        behaviour is tunable in Edit/Preferences/Standard views
-       
+
       * A first-time simple configuration dialog is displayed for new users.
-  
+
       * Advene can check daily if a new release exists, if the appropriate
        option (menu Edit/Preferences/General) is turned on, or through the
        Help/Check for updates menu.
-  
+
       * The SVG-subset editor handles text shapes and links, and shapes can
        be reordered
 
       * A new content mimetype, application/x-advene-values, allows to
        represent a series of values as a bargraph in annotation content
 
-   * Quicksearch: 
+   * Quicksearch:
 
       * Search-options are now displayed when left-clicking on the search
        button.
@@ -151,7 +151,7 @@ advene (0.27) unstable; urgency=low
       * A Google-like syntax can be used: search for multiple word,
        use +word and -word to include/exclude words from the search, use
        quotes to specify "words with whitespaces"
-  
+
       * When searching for a single word, it will also be highlighted in
        opened transcription and note-taking views.
 
@@ -159,16 +159,16 @@ advene (0.27) unstable; urgency=low
        annotations in a query result.
 
    * Timeline:
-  
+
       * Double click on an annotation will open its edit window rather than
        simply edit its content (which is always possible with Return)
-  
+
       * It is possible to select multiple annotations, either with
        shift-click on the annotation widget or by defining a region around
        the annotations. It is then possible to edit, duplicate, delete or
        zoom over selected annotations, through the selection toolbar item or
        the timeline context menu.
-  
+
       * Screenshots can be displayed in the timeline scale, by
        redimensionning the scale vertical dimension. Screenshots are usually
        generated on annotation bounds, but can also be generated every 500ms
@@ -177,19 +177,19 @@ advene (0.27) unstable; urgency=low
       * Buttons for previous/next annotation are present at the right of
        the annotation-type widget. The legend must be resized for them to
        appear, in order not to take too much space by default.
-  
+
       * If the timeline displays only a subset of annotations (e.g. the
        result of a search), the "Restrict playing" will play only the
        selected annotations in the type.
-  
+
    * Note-taking:
-  
+
       * Marks are inserted with double-click
-  
+
       * It is possible to search for a string
-  
+
       * Text automatically scrolls to the current timestamp mark
-  
+
       * New buttons: "Center on current mark", "Activate automatic mark
        insertion" (toggle)
 
@@ -198,27 +198,27 @@ advene (0.27) unstable; urgency=low
       * The convert dialog has been revamped
 
    * Transcription:
-  
+
       * Double-click in the text will play the corresponding annotation
 
    * Dynamic views:
-  
+
       * The TALES expression for the predefined values is displayed in the
        tooltip.
-  
+
       * The composition operator for conditions can be chosen (and/or)
-  
+
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 09 Jan 2008 17:31:39 +0100
 
 advene (0.26) unstable; urgency=low
 
    * Stable release
-  
+
    * When using next/previous navigation button in annotation edit widgets,
     automatically validate the annotation
-  
+
    * Bookmarks: use multiline comments
-  
+
    * New shortcuts:
       * Control-return: split annotation at the current player position
       * Shift-delete: delete the annotation
@@ -229,7 +229,7 @@ advene (0.26) unstable; urgency=low
 advene (0.25) unstable; urgency=low
 
    * Interface language can be specified in the Edit/Preferences/GUI window
-  
+
    * The standard adhoc-views, opened at startup, now must be defined
     through the File/Save worskpace as standard workspace menuitem. The
     previous way (Edit/Preferences/GUI) has been removed.
@@ -295,12 +295,12 @@ advene (0.25) unstable; urgency=low
       * The syntax for TALES expression input has changed: input fields are
       considered as strings by default. The ${expr} syntax must be used to
       enter TALES paths.
-  
+
       * They can now specify subviews (other views that should also be
       activated upon view activation)
-  
+
       * Predefined values are proposed for action parameters
-  
+
    * To rename a view, double-click on its tab.
 
    * Error messages are now saved to ~/.advene/advene.log (for win32 users,
@@ -315,24 +315,24 @@ advene (0.25) unstable; urgency=low
       * It is possible to search annotations and relations based on tags
 
    * Context menu for elements :
-  
+
       * Automatic numbering of annotations: available from the annotation-type
       popup menu
 
       * New actions for annotation types (display in table, use as
       a montage...). Note that most actions are more readily accessible by
       drag-and-drop of the annotation-type into an view zone.
-  
+
    * Settings and logs are saved in $HOME/Library/Preferences/Advene on MacOS X
 
-   * Importers: 
-   
+   * Importers:
+
       * MPEG7 importer (handles FreeTextAnnotations only)
-  
+
       * Anvil importer
-  
+
       * AnnotationGraph importer
-  
+
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 14 Nov 2007 15:44:28 +0100
 
 advene (0.24) unstable; urgency=low
