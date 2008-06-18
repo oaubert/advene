@@ -23,6 +23,7 @@ import advene.core.config as config
 from advene.rules.elements import RegisteredAction
 
 import advene.model.tal.context
+import advene.util.helper as helper
 import textwrap
 import gtk
 
@@ -124,33 +125,26 @@ def register(controller=None):
             ))
 
     controller.register_action(RegisteredAction(
-            name="OpenView",
-            method=ac.action_open_view,
-            description=_("Open a GUI view"),
+            name="OpenInterface",
+            method=ac.action_open_interface,
+            description=_("Open an interface view"),
             parameters={'guiview': _("View name (timeline, tree, transcription, browser, webbrowser, transcribe)"),
                         'destination': _("Destination: popup, south, east"),
                         },
             defaults={'guiview': 'string:timeline',
                       'destination': 'string:south',
                       },
-            predefined={
-                'guiview': (
-                    ('tree', _('Tree view')),
-                    ('timeline', _('Timeline')),
-                    ('transcription', _('Transcription of annotations')),
-                    ('browser', _('Package browser')),
-                    ('transcribe', _('Note-taking editor')),
-                    ('bookmarks', _('Bookmarks')),
-                    ('tagbag', _("Bag of tags")),
-                    ('montage', _("Dynamic montage")),
-                    ),
-                'destination': (
-                    ('string:popup', _("...in its own window")),
-                    ('string:east', _("...embedded east of the video")),
-                    ('string:west', _("...embedded west of the video")),
-                    ('string:south', _("...embedded south of the video")),
-                    ('string:fareast', _("...embedded at the right of the window")),
-                    )},
+            predefined=ac.action_open_interface_predefined,
+            category='gui',
+            ))
+
+    controller.register_action(RegisteredAction(
+            name="OpenView",
+            method=ac.action_open_view,
+            description=_("Open a saved view"),
+            parameters={'id': _("Identifier of the saved view"),
+                        },
+            predefined=ac.action_open_view_predefined,
             category='gui',
             ))
 
@@ -256,8 +250,8 @@ class DefaultGUIActions:
         self.gui.log (message)
         return True
 
-    def action_open_view (self, context, parameters):
-        """Event Handler for the OpenView action.
+    def action_open_interface (self, context, parameters):
+        """Event Handler for the OpenInterface action.
 
         The parameters should have a 'guiview' key and a 'destination' key.
         """
@@ -265,12 +259,67 @@ class DefaultGUIActions:
         dest=self.parse_parameter(context, parameters, 'destination', 'popup')
         if view is None:
             return True
-        if view in ('tree', 'timeline', 'browser', 'transcribe', 'transcription'):
+        if view in controller.gui.registered_adhoc_views:
             self.gui.open_adhoc_view(view, destination=dest)
         else:
             self.gui.log(_("Error: undefined GUI view %s") % view)
         return True
 
+    def action_open_interface_predefined(self, controller):
+        d={
+            'guiview': [ 
+                ( 'string:' + ident, view.view_name)
+                for (ident, view) in controller.gui.registered_adhoc_views.iteritems()
+                ],
+            'destination': (
+                ('string:popup', _("...in its own window")),
+                ('string:east', _("...embedded east of the video")),
+                ('string:west', _("...embedded west of the video")),
+                ('string:south', _("...embedded south of the video")),
+                ('string:fareast', _("...embedded at the right of the window")),
+                )
+            }
+        return d
+        
+    def action_open_view (self, context, parameters):
+        """Event Handler for the OpenView action.
+
+        The parameters should have a 'id' key.
+        """
+        view=self.parse_parameter(context, parameters, 'id', None)
+        if view is None:
+            return True
+        v=self.controller.package.get_element_by_id(view)
+        t=helper.get_view_type(v)
+        if t == 'static':
+            # Static view. If it can be applied to the package, then
+            # apply it. Else open the view itself.
+            if v.matchFilter['class'] in ('package', '*'):
+                ctx=self.controller.build_context()
+                url=ctx.evaluateValue('here/view/%s/absolute_url' % v.id)
+            else:
+                ctx=self.controller.build_context(here=v)
+                url=ctx.evaluateValue('here/absolute_url')
+            if url:
+                self.controller.open_url(url)
+        elif t == 'dynamic':
+            self.controller.activate_stbv(v)
+        elif t == 'adhoc':
+            self.controller.gui.open_adhoc_view(v, 'south')
+        else:
+            self.log(_("Element %s does not look like a view") % view)
+         
+        return True
+
+    def action_open_view_predefined(self, controller):
+        get_title=self.controller.get_title
+        return {
+            'id': [ 
+                ( 'string:' + v.id, get_title(v) )
+                for v in controller.package.views
+                ],
+            }
+        
     def action_popup (self, context, parameters):
         """Popup action.
 
