@@ -1,419 +1,419 @@
 advene (0.31) unstable; urgency=low
 
-  * Web server reactiviy issues on Windows XP/Vista have been fixed.
+   * Web server reactiviy issues on Windows XP/Vista have been fixed.
 
  --
 
 advene (0.30) unstable; urgency=low
 
-  * Stable release
+   * Stable release
   
-  * Important notes (see the following 0.29 notes for more details):
+   * Important notes (see the following 0.29 notes for more details):
   
-    * The shortcut to start/pause the player has changed: it is now
-      Control+Tab (so that plain Tab/Shift-Tab can be used to navigate in
-      the GUI)
+      * The shortcut to start/pause the player has changed: it is now
+        Control+Tab (so that plain Tab/Shift-Tab can be used to navigate in
+        the GUI)
   
-    * New adhoc view: activebookmarks, which can be used to build
-      annotations from timestamps. It can also be exported to HTML.  The old
-      bookmarks view still exists, but is deprecated and will be replaced by
-      activebookmarks in future releases.
+      * New adhoc view: activebookmarks, which can be used to build
+        annotations from timestamps. It can also be exported to HTML.  The old
+      	bookmarks view still exists, but is deprecated and will be replaced by
+      	activebookmarks in future releases.
   
-    * New global shortcuts: Insert or Alt-Space creates a new active
-      bookmark.
+      * New global shortcuts: Insert or Alt-Space creates a new active
+        bookmark.
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 19 May 2008 11:47:03 +0200
 
 advene (0.29) unstable; urgency=low
 
-  * The shortcut to start/pause the player has changed: it is now
-    Control+Tab (so that plain Tab/Shift-Tab can be used to navigate in
-    the GUI)
+   * The shortcut to start/pause the player has changed: it is now
+     Control+Tab (so that plain Tab/Shift-Tab can be used to navigate in
+     the GUI)
 
-  * New adhoc view: activebookmarks, which can be used to build
-    annotations from timestamps. It can also be exported to HTML.  The old
-    bookmarks view still exists, but is deprecated and will be replaced by
-    activebookmarks in future releases.
+   * New adhoc view: activebookmarks, which can be used to build
+     annotations from timestamps. It can also be exported to HTML.  The old
+     bookmarks view still exists, but is deprecated and will be replaced by
+     activebookmarks in future releases.
 
-  * New global shortcuts: Insert or Alt-Space creates a new active
-    bookmark.
+   * New global shortcuts: Insert or Alt-Space creates a new active
+     bookmark.
 
-  * Fix XML parsing using standard python modules. It makes Advene usable
-    on Ubuntu Hardy Heron.
+   * Fix XML parsing using standard python modules. It makes Advene usable
+     on Ubuntu Hardy Heron.
   
-  * New exporter: CMML
+   * New exporter: CMML
 
-  * Timeline view: 
-     * annotations can be merged by DND
-     * Dragging an annotation type to another one will propose to
+   * Timeline view: 
+      * annotations can be merged by DND
+      * Dragging an annotation type to another one will propose to
        duplicate or move all annotations to the new type
 
-  * Note-taking view: timestamp marks are now displaying a
-    screenshot. Their size can be tuned.
+   * Note-taking view: timestamp marks are now displaying a
+     screenshot. Their size can be tuned.
   
-  * Dynamic views: new actions have been defined
+   * Dynamic views: new actions have been defined
   
-     * Braille (display a message in braille, depends on brltty)
+      * Braille (display a message in braille, depends on brltty)
   
-     * OpenStaticView: open a static view in the web browser
+      * OpenStaticView: open a static view in the web browser
   
-     * State-related actions (StateSet, StateClear, StateIncr)
+      * State-related actions (StateSet, StateClear, StateIncr)
        have been added. They allow to manage a package-specific state in
        dynamic views. The counter "name" can be accessed through the TALES
        expression "package/state/name"
   
-  * Various GUI and usability improvements
+   * Various GUI and usability improvements
 
-  * The gstreamer video plugin can display the video fullscreen
+   * The gstreamer video plugin can display the video fullscreen
   
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 19 May 2008 11:45:25 +0200
 
 advene (0.28) unstable; urgency=low
 
-  * Stable release
+   * Stable release
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 12 Feb 2008 11:56:11 +0100
 
 advene (0.27) unstable; urgency=low
 
-  * ! On Win32, the home directory (where the "advene" folder for
-    configuration files is stored) is now stored in the %USERPROFILE%
+   * ! On Win32, the home directory (where the "advene" folder for
+    configuration files is stored) is now stored in the USERPROFILE
     directory - usually something like C:\Documents and settings\Loginname
     If you had a previous configuration file, please copy it to the new
     directory.
   
-  * Win32 bugfixes (relation creation, timestamp mark colors, montage...)
+   * Win32 bugfixes (relation creation, timestamp mark colors, montage...)
 
-  * Win32: VLC can be bundled in the Advene installer package
+   * Win32: VLC can be bundled in the Advene installer package
 
-  * New adhoc view : finder (column-based finder a la Mac OS X)
+   * New adhoc view : finder (column-based finder a la Mac OS X)
 
-  * New actions: 
+   * New actions: 
 
-     * Pronounce (through Text-To-Speech). Works on MacOS X
+      * Pronounce (through Text-To-Speech). Works on MacOS X
        (directly) and Linux (with festival configured to output through
        ALSA, cf http://gentoo-wiki.com/HOWTO_speechd#Use_alsa_output_method ).
   
-     * PopupGotoOutgoingRelated: displays a navigation popup based on
+      * PopupGotoOutgoingRelated: displays a navigation popup based on
        relations.
   
-     * PlaySoundClip: plays a soundclip from the 'soundclips' resource
+      * PlaySoundClip: plays a soundclip from the 'soundclips' resource
        folder of the package
   
-     * PlaySound: plays a sound file
+      * PlaySound: plays a sound file
 
-  * General:
+   * General:
   
-     * Package data can be exported to other formats (SMIL, SVG, MPEG7...)
+      * Package data can be exported to other formats (SMIL, SVG, MPEG7...)
        through the File/Export menuitem.
   
-     * The package can automatically be saved when saving the package. This
+      * The package can automatically be saved when saving the package. This
        behaviour is tunable in Edit/Preferences/Standard views
        
-     * A first-time simple configuration dialog is displayed for new users.
+      * A first-time simple configuration dialog is displayed for new users.
   
-     * Advene can check daily if a new release exists, if the appropriate
+      * Advene can check daily if a new release exists, if the appropriate
        option (menu Edit/Preferences/General) is turned on, or through the
        Help/Check for updates menu.
   
-     * The SVG-subset editor handles text shapes and links, and shapes can
+      * The SVG-subset editor handles text shapes and links, and shapes can
        be reordered
 
-     * A new content mimetype, application/x-advene-values, allows to
+      * A new content mimetype, application/x-advene-values, allows to
        represent a series of values as a bargraph in annotation content
 
-  * Quicksearch: 
+   * Quicksearch: 
 
-     * Search-options are now displayed when left-clicking on the search
+      * Search-options are now displayed when left-clicking on the search
        button.
 
-     * A Google-like syntax can be used: search for multiple word,
+      * A Google-like syntax can be used: search for multiple word,
        use +word and -word to include/exclude words from the search, use
        quotes to specify "words with whitespaces"
   
-     * When searching for a single word, it will also be highlighted in
+      * When searching for a single word, it will also be highlighted in
        opened transcription and note-taking views.
 
-     * It is possible to search/replace text in the content of the
+      * It is possible to search/replace text in the content of the
        annotations in a query result.
 
-  * Timeline:
+   * Timeline:
   
-     * Double click on an annotation will open its edit window rather than
+      * Double click on an annotation will open its edit window rather than
        simply edit its content (which is always possible with Return)
   
-     * It is possible to select multiple annotations, either with
+      * It is possible to select multiple annotations, either with
        shift-click on the annotation widget or by defining a region around
        the annotations. It is then possible to edit, duplicate, delete or
        zoom over selected annotations, through the selection toolbar item or
        the timeline context menu.
   
-     * Screenshots can be displayed in the timeline scale, by
+      * Screenshots can be displayed in the timeline scale, by
        redimensionning the scale vertical dimension. Screenshots are usually
        generated on annotation bounds, but can also be generated every 500ms
        through the Player/Generate Screenshots menuitem.
 
-     * Buttons for previous/next annotation are present at the right of
+      * Buttons for previous/next annotation are present at the right of
        the annotation-type widget. The legend must be resized for them to
        appear, in order not to take too much space by default.
   
-     * If the timeline displays only a subset of annotations (e.g. the
+      * If the timeline displays only a subset of annotations (e.g. the
        result of a search), the "Restrict playing" will play only the
        selected annotations in the type.
   
-  * Note-taking:
+   * Note-taking:
   
-     * Marks are inserted with double-click
+      * Marks are inserted with double-click
   
-     * It is possible to search for a string
+      * It is possible to search for a string
   
-     * Text automatically scrolls to the current timestamp mark
+      * Text automatically scrolls to the current timestamp mark
   
-     * New buttons: "Center on current mark", "Activate automatic mark
+      * New buttons: "Center on current mark", "Activate automatic mark
        insertion" (toggle)
 
-     * Note-taking views can be saved as adhoc-views
+      * Note-taking views can be saved as adhoc-views
 
-     * The convert dialog has been revamped
+      * The convert dialog has been revamped
 
-  * Transcription:
+   * Transcription:
   
-     * Double-click in the text will play the corresponding annotation
+      * Double-click in the text will play the corresponding annotation
 
-  * Dynamic views:
+   * Dynamic views:
   
-     * The TALES expression for the predefined values is displayed in the
+      * The TALES expression for the predefined values is displayed in the
        tooltip.
   
-     * The composition operator for conditions can be chosen (and/or)
+      * The composition operator for conditions can be chosen (and/or)
   
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 09 Jan 2008 17:31:39 +0100
 
 advene (0.26) unstable; urgency=low
 
-  * Stable release
+   * Stable release
   
-  * When using next/previous navigation button in annotation edit widgets,
+   * When using next/previous navigation button in annotation edit widgets,
     automatically validate the annotation
   
-  * Bookmarks: use multiline comments
+   * Bookmarks: use multiline comments
   
-  * New shortcuts:
-    * Control-return: split annotation at the current player position
-    * Shift-delete: delete the annotation
-    * Control-k: select the quicksearch entry field
+   * New shortcuts:
+      * Control-return: split annotation at the current player position
+      * Shift-delete: delete the annotation
+      * Control-k: select the quicksearch entry field
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 21 Nov 2007 17:55:26 +0100
 
 advene (0.25) unstable; urgency=low
 
-  * Interface language can be specified in the Edit/Preferences/GUI window
+   * Interface language can be specified in the Edit/Preferences/GUI window
   
-  * The standard adhoc-views, opened at startup, now must be defined
+   * The standard adhoc-views, opened at startup, now must be defined
     through the File/Save worskpace as standard workspace menuitem. The
     previous way (Edit/Preferences/GUI) has been removed.
 
-  * New adhoc view: montage, proposing a dynamic montage of a sequence of
+   * New adhoc view: montage, proposing a dynamic montage of a sequence of
     annotations.
 
-  * Timeline:
+   * Timeline:
 
-    * new shortcut 'h' to un/highlight the annotation in all open
+      * new shortcut 'h' to un/highlight the annotation in all open
       views
 
-    * new shortcut 'c' to center the view on the current player position
+      * new shortcut 'c' to center the view on the current player position
 
-    * a single left-click on an annotation will play it. This feature can
+      * a single left-click on an annotation will play it. This feature can
       be disabled by a toggle in the toolbar.
 
-    * it is possible to restrict the playing to a specific annotation-type
+      * it is possible to restrict the playing to a specific annotation-type
       by clicking the play button at the left of the annotation title. Click
       again to deactivate it.
 
-    * transtyping annotations can be done by drag and dropping an
+      * transtyping annotations can be done by drag and dropping an
       annotation directly in the timeline (it was previously necessary to
       drop it on the annotation-type title). It is also possible to directly
       duplicate the annotation and create a relation.
 
-    * when creating relations by drag-and-drop of an annotation on another
+      * when creating relations by drag-and-drop of an annotation on another
       one, offer to create a new annotation-type
 
-    * drag and drop of an annotation-type on another one will propose to
+      * drag and drop of an annotation-type on another one will propose to
       copy all annotations or annotations containing a search string.
 
-    * an annotation preview is now displayed at the right of the timeline
+      * an annotation preview is now displayed at the right of the timeline
 
-    * fix display problem on MacOS X and annotation-types update bug
+      * fix display problem on MacOS X and annotation-types update bug
 
-    * a montage view opened from the timeline (button in the top
+      * a montage view opened from the timeline (button in the top
       right-hand corner) will have a zoom level coordinated with the
       timeline
 
-    * if the loop toggle button in the timeline toolbar is active, then
+      * if the loop toggle button in the timeline toolbar is active, then
       playing an annotation (by left-click) will automatically loop on it.
 
-  * Note-taking view
+   * Note-taking view
 
-    * improve the behaviour of the automatic mark insertion feature
+      * improve the behaviour of the automatic mark insertion feature
 
-    * text auto-completion is activated
+      * text auto-completion is activated
 
-  * Bookmarks: it is possible to add comments to bookmarks
+   * Bookmarks: it is possible to add comments to bookmarks
 
-  * Transcription view: new "quick switch" button to switch between
+   * Transcription view: new "quick switch" button to switch between
     different representations.
 
-  * Element edit popups: they now are updated if the edited element is
+   * Element edit popups: they now are updated if the edited element is
     updated by another way (e.g. quick-edit for annotations). For
     annotations, Previous/Next buttons allow to edit the previous/next
     annotation of the same type. It also possible to highlight the edited
     annotation in opened views.
 
-  * Dynamic views:
+   * Dynamic views:
 
-    * The syntax for TALES expression input has changed: input fields are
+      * The syntax for TALES expression input has changed: input fields are
       considered as strings by default. The ${expr} syntax must be used to
       enter TALES paths.
   
-    * They can now specify subviews (other views that should also be
+      * They can now specify subviews (other views that should also be
       activated upon view activation)
   
-    * Predefined values are proposed for action parameters
+      * Predefined values are proposed for action parameters
   
-  * To rename a view, double-click on its tab.
+   * To rename a view, double-click on its tab.
 
-  * Error messages are now saved to ~/.advene/advene.log (for win32 users,
+   * Error messages are now saved to ~/.advene/advene.log (for win32 users,
     it is in \Documents and Settings\Username\Advene, for MacOS X users,
     it is in $HOME/Libray/Preferences/Advene)
 
-  * Quicksearch:
+   * Quicksearch:
 
-    * A search result can be converted to new annotations, or into a montage
+      * A search result can be converted to new annotations, or into a montage
       of existing annotations (from the context menu on view tab)
 
-    * It is possible to search annotations and relations based on tags
+      * It is possible to search annotations and relations based on tags
 
-  * Context menu for elements :
+   * Context menu for elements :
   
-    * Automatic numbering of annotations: available from the annotation-type
+      * Automatic numbering of annotations: available from the annotation-type
       popup menu
 
-    * New actions for annotation types (display in table, use as
+      * New actions for annotation types (display in table, use as
       a montage...). Note that most actions are more readily accessible by
       drag-and-drop of the annotation-type into an view zone.
   
-  * Settings and logs are saved in $HOME/Library/Preferences/Advene on MacOS X
+   * Settings and logs are saved in $HOME/Library/Preferences/Advene on MacOS X
 
-  * Importers: 
+   * Importers: 
    
-    * MPEG7 importer (handles FreeTextAnnotations only)
+      * MPEG7 importer (handles FreeTextAnnotations only)
   
-    * Anvil importer
+      * Anvil importer
   
-    * AnnotationGraph importer
+      * AnnotationGraph importer
   
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed, 14 Nov 2007 15:44:28 +0100
 
 advene (0.24) unstable; urgency=low
 
-  * An expert-mode toggle proposes more features in the GUI
+   * An expert-mode toggle proposes more features in the GUI
 
-  * Transcription view: text is now searchable
+   * Transcription view: text is now searchable
 
-  * Timeline: left click in the upper part (timestamps) sets
+   * Timeline: left click in the upper part (timestamps) sets
     the player position
 
-  * Default options for adhoc views can now be saved (through the view
+   * Default options for adhoc views can now be saved (through the view
     contextual menu, right-click on the view name in the tab).
 
-  * The workspace (GUI layout + opened views) can be saved, either as an
+   * The workspace (GUI layout + opened views) can be saved, either as an
     adhoc-view, or as a default workspace that will be presented on
     application startup.
 
-  * A periodic auto-save feature has been implemented. Refer to the
+   * A periodic auto-save feature has been implemented. Refer to the
     application preferences to activate it.
 
-  * Timeline:
+   * Timeline:
 
       * the behaviour of double-click (goto annotation or edit annotation
         content) can be tuned in the timeline options.
 
       * annotations tooltips are re-enabled
 
-  * Drag and drop of annotations and annotation types to a viewbook
+   * Drag and drop of annotations and annotation types to a viewbook
     proposes to open appropriate views.
 
-  * Text autocompletion is activated for textual content of annotations
+   * Text autocompletion is activated for textual content of annotations
     and views.
 
-  * New proposed mimetype for annotations: image/svg+xml. The graphical
+   * New proposed mimetype for annotations: image/svg+xml. The graphical
     editor has been extended to load/parse a subset of SVG.
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 19 Sep 2007 15:21:00 +0200
 
 advene (0.23) unstable; urgency=low
 
-  * Model: it is possible to open uncompressed .azp packages. The
+   * Model: it is possible to open uncompressed .azp packages. The
     directory name must end with the .azp extension.
 
-  * The FCK editor, WYSISWYG browser-based HTML editor, has been
+   * The FCK editor, WYSISWYG browser-based HTML editor, has been
     integrated.
 
-  * GUI:
-    * Dialogs position is centered on the mouse cursor
-    * New layout: adhoc views can be put at the west, east and south
+   * GUI:
+      * Dialogs position is centered on the mouse cursor
+      * New layout: adhoc views can be put at the west, east and south
       of the video window, as well as the right side of the application
       window
-    * Allow to move adhoc views from one zone to another, through a popup
+      * Allow to move adhoc views from one zone to another, through a popup
       menu or drag and drop.
-    * Quicksearch functionality (text entry at the top right hand corner),
+      * Quicksearch functionality (text entry at the top right hand corner),
       with options through right-click on the search icon
-    * Search results are displayed in a table
-    * Clicking on an adhoc-view icon will display a contextual menu to
+      * Search results are displayed in a table
+      * Clicking on an adhoc-view icon will display a contextual menu to
       offer various display options (embed, popup...)
-    * Element creation: ask for a title, and generate a valid id from it
+      * Element creation: ask for a title, and generate a valid id from it
 
-  * Widget colors:
-    * container types (schema, annotation-type,
+   * Widget colors:
+      * container types (schema, annotation-type,
       relation-type) have a 'color' and 'item_color' metadata attribute,
       which hold TALES expressions returning color (names or code in the
       form #RRGGBB). An element will first check if it has a valid color
       attribute. If not, it will check if its container has a valid
       item_color attribute. If not, it will use its container color.
-    * colored annotations work on Win32
+      * colored annotations work on Win32
 
-  * Timeline: GUI rework
-    * replace zoom slider by a zoom combo box + zoom in/out buttons
-    * draw separators between annotation type lines
-    * replace toolbar mode buttons by a popup menu when drag-and-dropping
+   * Timeline: GUI rework
+      * replace zoom slider by a zoom combo box + zoom in/out buttons
+      * draw separators between annotation type lines
+      * replace toolbar mode buttons by a popup menu when drag-and-dropping
       annotations (relation creation, annotation alignment...)
-    * annotation tooltips are replaced by a status line in the toolbar
+      * annotation tooltips are replaced by a status line in the toolbar
 
-  * Treeview:
-    * views are sorted alphabetically and categorized (static, dynamic, adhoc)
+   * Treeview:
+      * views are sorted alphabetically and categorized (static, dynamic, adhoc)
 
-  * New global method: representation, which returns a concise
+   * New global method: representation, which returns a concise
     representation for the element.
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 07 Jun 2007 13:56:59 +0200
 
 advene (0.22) unstable; urgency=low
 
-  * It is possible to enter a googlevideo/youtube/dailymotion URL in the
+   * It is possible to enter a googlevideo/youtube/dailymotion URL in the
     "File/Select a video stream" dialog.
 
-  * Annotation coloring: a new global method, tag_color, has been
+   * Annotation coloring: a new global method, tag_color, has been
     introduced to offer a color tagging facility. To use it, you must
     specify the TALES expression "here/tag_color" as the "color" attribute
     of the annotation type, and set the tag color through the tag bag
     view.
 
-  * DVD device/drive: it can be configured from the Player preferences window
+   * DVD device/drive: it can be configured from the Player preferences window
 
-  * File import: allow to choose the desired import filter, and display a
+   * File import: allow to choose the desired import filter, and display a
     progress bar
 
-  * Adhoc-views (timeline, transcription...): parametered adhoc-views can
+   * Adhoc-views (timeline, transcription...): parametered adhoc-views can
     be saved as Advene views (for instance, choosing the displayed
     annotation types in the timeline) and restored. To save them, use the
     "Save view" menuitem from the view tab contextual menu (right click on
@@ -438,7 +438,7 @@ advene (0.22) unstable; urgency=low
 
         * Interactive query: offer to activate/desactivate result annotations
 
-  * Web server:
+   * Web server:
 
         * webserver logs are stored in ~/.advene/webserver.log
 
@@ -451,39 +451,39 @@ advene (0.22) unstable; urgency=low
         following line to advene.ini:
         config.data.webserver['engine']='cherrypy'
 
-  * gstreamer plugin: it can display text subtitles, and make snapshots
+   * gstreamer plugin: it can display text subtitles, and make snapshots
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu,  5 Apr 2007 11:04:36 +0200
 
 advene (0.21) unstable; urgency=low
 
-  * New command line options. Do advene --help to see them. It is possible
+   * New command line options. Do advene --help to see them. It is possible
     to specify the alias for packages loaded from the command line, with
     the syntax: alias=uri
 
-  * New file format: .apl (Advene package list). It is used to save a work
+   * New file format: .apl (Advene package list). It is used to save a work
         session (list of opened packages), from the File/Save session menu.
 
-  * The default template is now template.azp, so that new packages have a
+   * The default template is now template.azp, so that new packages have a
     Resources reference by default.
 
-  * A RelationType can specify a "Any annotation type" as member
+   * A RelationType can specify a "Any annotation type" as member
 
-  * Importers: implemented importer for .iri files
+   * Importers: implemented importer for .iri files
 
-  * preliminary tags support has been implemented for annotations and
+   * preliminary tags support has been implemented for annotations and
     relations (based on Frank Wagner work)
 
-  * new annotation methods to deal with relations:
-    * relatedOut and relatedIn return a list of related (outgoing or
+   * new annotation methods to deal with relations:
+      * relatedOut and relatedIn return a list of related (outgoing or
       incoming) annotations.
-    * typedRelatedOut and typedRelatedIn return a dictionary indexed by
+      * typedRelatedOut and typedRelatedIn return a dictionary indexed by
       relation type id, which holds the list of related annotations.
-    * typedIncomingRelations/typedOutgoingRelations: return categorized relations
+      * typedIncomingRelations/typedOutgoingRelations: return categorized relations
 
-  * GUI:
+   * GUI:
 
-    * it is possible to load multiple packages in the GUI. Only one
+      * it is possible to load multiple packages in the GUI. Only one
       package is active at a time (for movie, dynamic views...) but it is
       possible to easily switch between packages (through the Packages
       menuitem) and access to all packages data is possible through the
@@ -496,55 +496,55 @@ advene (0.21) unstable; urgency=low
       The alias is automatically generated from the filename, and can be
       modified in the file selector dialog.
 
-    * merge functionality (menu File/Merge): elements from another package
+      * merge functionality (menu File/Merge): elements from another package
       can be merged into the current package.
 
-    * the player control toolbar has been put beneath the video output,
+      * the player control toolbar has been put beneath the video output,
       and is hidden in embedded adhoc views. The main player control
       toolbar presents a volume control widget.
 
-    * non-text resources/contents are handled by a GenericContentHandler,
+      * non-text resources/contents are handled by a GenericContentHandler,
       that offers loading/saving to/from a file.
 
-    * it is possible to insert a resource directly from a file
+      * it is possible to insert a resource directly from a file
 
-    * if the user tries to open a videofile through the Open package
+      * if the user tries to open a videofile through the Open package
       menuitem, do what is expected (select the videofile).
 
-    * default adhoc views to be opened/embedded on application startup can
+      * default adhoc views to be opened/embedded on application startup can
       be specified through the Preferences menu
 
-    * better drag and drop interaction with other applications
+      * better drag and drop interaction with other applications
 
-    * optionally ask to save the imagecache on exit (cf preferences)
+      * optionally ask to save the imagecache on exit (cf preferences)
 
-    * in interactive query (menu Edit/Find), propose multiple output modes
+      * in interactive query (menu Edit/Find), propose multiple output modes
         (timeline, edit window, python evaluator), and offer a simplified
         search box to search for a string in the annotations content.
 
-  * Views:
+   * Views:
 
-    * view notebooks are also used for the right-hand side of the video
+      * view notebooks are also used for the right-hand side of the video
 
-    * added a GenericContentHandler to edit non-text resources
+      * added a GenericContentHandler to edit non-text resources
 
-    * snapshots can be invalidated from the annotation edition popup
+      * snapshots can be invalidated from the annotation edition popup
      (right-click on the snapshot)
 
-    * in transcription view, annotations can be modified and update the
+      * in transcription view, annotations can be modified and update the
       content accordingly
 
-    * the history view is cleared on media change
+      * the history view is cleared on media change
 
-    * it is possible to duplicate an annotation (same duration)
+      * it is possible to duplicate an annotation (same duration)
 
-    * new 'Caption' view widget intended to replace the caption
+      * new 'Caption' view widget intended to replace the caption
       functionality in non-complete players (experimental)
 
-    * "Loop on annotation" feature, accessible from the context menu of
+      * "Loop on annotation" feature, accessible from the context menu of
       annotations
 
-    * timeline:
+      * timeline:
 
       * it is possible to specify the ordered list of
         displayed annotation types
@@ -592,18 +592,18 @@ advene (0.21) unstable; urgency=low
       * Return on an annotation type will create a new annotation "on the
         fly" (aligned with the current video time).
 
-    * display parameters of the timeline (font-size, button height...) are
+      * display parameters of the timeline (font-size, button height...) are
       customizable through the Preferences dialog
 
-    * if the gtkmozembed or gtkhtml2 library is present, DnD of the web
+      * if the gtkmozembed or gtkhtml2 library is present, DnD of the web
       browser button will embed a HTML view in the GUI.
 
-    * transcription:
+      * transcription:
 
       * allow to get a transcription either for the whole package, or for
         a given annotation type
 
-    * note-taking widget:
+      * note-taking widget:
 
       * it is possible to import existing annotations
 
@@ -619,34 +619,34 @@ advene (0.21) unstable; urgency=low
       * timestamps marks can be auto-inserted when starting to type, by
         setting an appropriate delay in the Preferences
 
-  * Actions:
+   * Actions:
 
-    * new actions: Entry (to allow entry of information through a popup),
+      * new actions: Entry (to allow entry of information through a popup),
                    SetVolume, SetRate
 
-    * new TALES root element: packages (to access all the loaded packages)
+      * new TALES root element: packages (to access all the loaded packages)
 
-    * TALES global methods can be applied on non-advene elements (for
+      * TALES global methods can be applied on non-advene elements (for
       instance lists)
 
-    * Registered actions propose meaningful default values
+      * Registered actions propose meaningful default values
 
-  * Webserver
+   * Webserver
 
-    * /action displays links (with form if necessary for
+      * /action displays links (with form if necessary for
         parameters) in the list of actions
 
-    * /media/current returns the current media file
+      * /media/current returns the current media file
 
-  * Players
+   * Players
 
-    * There is a new gstreamer plugin. It depends on python-gst >= 0.10
+      * There is a new gstreamer plugin. It depends on python-gst >= 0.10
 
  -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Thu,  1 Jun 2006 16:01:10 +0200
 
 advene (0.20) unstable; urgency=low
 
-  * New package format (.azp, for Advene Zip Package) allowing to embed
+   * New package format (.azp, for Advene Zip Package) allowing to embed
     resources (files) in packages. You can save old .xml files into .azp
     files to get them converted. For instance,
     access to resources is done through the TALES expression
@@ -654,357 +654,357 @@ advene (0.20) unstable; urgency=low
     To use this resource in a TAL template, you can then use:
     <link tal:attributes="href package/resources/style.css/absolute_url" type="text/css" rel="stylesheet" />
 
-  * A filename extension (.azp or .xml) is automatically appended if not
+   * A filename extension (.azp or .xml) is automatically appended if not
     present.
 
-  * Advene now depends on gtk >= 2.8
+   * Advene now depends on gtk >= 2.8
 
-  * New global method: related. Returns, for an annotation, its related
+   * New global method: related. Returns, for an annotation, its related
     annotation. It is a shortcut useful for the case of binary relations:
     annotation/related/id
     is equivalent to
     annotation/outgoingRelations/first/members/last/id
 
-  * global methods can be defined by user plugins (in .advene/plugins
+   * global methods can be defined by user plugins (in .advene/plugins
     directory) through controller.register_global_method
 
-  * ! Moved config and preferences files to ~/.advene directory
+   * ! Moved config and preferences files to ~/.advene directory
     (UserDir/advene on Windows)
 
-  * New annotation mimetype (application/x-advene-zone) which allows to
+   * New annotation mimetype (application/x-advene-zone) which allows to
     define rectangular zones.
 
-  * GUI:
-    * a view notebook holds the popupaccumulator below the video. It allows
+   * GUI:
+      * a view notebook holds the popupaccumulator below the video. It allows
       to embed other views (timeline, treeview, transcription...) simply by
       drag and drop of the view toolbutton into the notebook
-    * the treeview can be displayed by default on the right of the video
+      * the treeview can be displayed by default on the right of the video
       window (replacing the less used, for now, URL stack window), see the
       preferences panel
-    * added an element creation toolbar
-    * generic player control shortcuts are used throughout the program:
+      * added an element creation toolbar
+      * generic player control shortcuts are used throughout the program:
         Tab: play/pause
         Control-Left, Control-Right: move forward/backwards
         Home: goto start of the movie
-    * Edit/Preferences now allows to modify paths (data, movies, player, imagecache) (from Frank Wagner)
-    * Imagecache saves files with a .png extension
-    * The not_yet_available image is now loaded from share/pixmaps/notavailable.png
-    * Automatically close non-updateable views on package loading
+      * Edit/Preferences now allows to modify paths (data, movies, player, imagecache) (from Frank Wagner)
+      * Imagecache saves files with a .png extension
+      * The not_yet_available image is now loaded from share/pixmaps/notavailable.png
+      * Automatically close non-updateable views on package loading
 
-  * The dummy player now returns a running time
+   * The dummy player now returns a running time
 
-  * Importer
-    * implemented CMML import
+   * Importer
+      * implemented CMML import
 
-  * Timeline
-    * Add shortcut to edit an annotation: 'e' to edit the selected
+   * Timeline
+      * Add shortcut to edit an annotation: 'e' to edit the selected
       annotation (selection can be moved with arrow keys)
 
-  * TranscriptionEdit:
-    * clicking on a mark now goes to the position. Use the popup menu to remove marks.
-    * control-space now sets a mark and pauses the movie
+   * TranscriptionEdit:
+      * clicking on a mark now goes to the position. Use the popup menu to remove marks.
+      * control-space now sets a mark and pauses the movie
 
-  * Snapshot cache now saves files with a .png extension (from Frank Wagner)
+   * Snapshot cache now saves files with a .png extension (from Frank Wagner)
 
-  * Implemented plugin architecture (user-defined plugins in ~/.advene/plugins)
+   * Implemented plugin architecture (user-defined plugins in ~/.advene/plugins)
 
-  * webserver:
-    * message log is now available from the menu (View->Webserver log), and
+   * webserver:
+      * message log is now available from the menu (View->Webserver log), and
       not displayed on the console
-    * new action: /admin/halt (useful for the standalone case)
-    * new action: /admin/methods displays the list of available TALES methods
-    * new path: /action/ActionName?param=TALESexpr to invoke actions defined
+      * new action: /admin/halt (useful for the standalone case)
+      * new action: /admin/methods displays the list of available TALES methods
+      * new path: /action/ActionName?param=TALESexpr to invoke actions defined
       in the ECA framework
 
-  * Advene no longer depends on the Image module. It only uses it if image
+   * Advene no longer depends on the Image module. It only uses it if image
     type conversion is necessary.
 
-  * Added spanish translations (courtesy of Emmanuel Ayala)
-  * Bugfix in path initialization
+   * Added spanish translations (courtesy of Emmanuel Ayala)
+   * Bugfix in path initialization
 
-  * Multiple instances can now run simultaneously (only the first instance
+   * Multiple instances can now run simultaneously (only the first instance
     activates its webserver)
 
-  * evaluator: changed some shortcuts (see help), implemented expression history
+   * evaluator: changed some shortcuts (see help), implemented expression history
 
  -- Olivier Aubert <oaubert@pepper.info.enstb.org>  Wed, 15 Mar 2006 13:04:10 +0100
 
 advene (0.18) unstable; urgency=low
 
-  * TranscriptionEdit:
-    * It is now embedded into the main GUI
-    * New keybindings:
+   * TranscriptionEdit:
+      * It is now embedded into the main GUI
+      * New keybindings:
       Tab: player play/pause
       Control-Return: insert a timestamp mark with the current position value
       Control-left/right: forward/backward in video
       Control-home: go to beginning of the video
       Control-PageDown/Up: goto the next/previous mark
-  * TranscriptionView:
-    * Sort annotations before displaying them
-  * Textual annotation/view editing:
+   * TranscriptionView:
+      * Sort annotations before displaying them
+   * Textual annotation/view editing:
       handle open/save to a file, with corresponding
       keyboard shortcuts (control-o, control-s), and reload (control-r)
-  * Package properties :
-    * Add a Open button to select associated video file
+   * Package properties :
+      * Add a Open button to select associated video file
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 29 May 2005 18:39:30 +0200
 
 advene (0.17) unstable; urgency=low
 
-  * Main GUI :
-    * Video output is now embedded
-    * Added a --no-embedded option
-    * Added some views (navigation history, urlstack, popups)
+   * Main GUI :
+      * Video output is now embedded
+      * Added a --no-embedded option
+      * Added some views (navigation history, urlstack, popups)
       around the video window
-    * Popups now use the AccumulatorPopup
-    * Screenshots are now displayed in popups
-    * File history is available (next to the open button)
-    * Added -c<configfile> command line option
-    * remove all elements from a given annotationtype or relationtype from
+      * Popups now use the AccumulatorPopup
+      * Screenshots are now displayed in popups
+      * File history is available (next to the open button)
+      * Added -c<configfile> command line option
+      * remove all elements from a given annotationtype or relationtype from
       the contextual menu
-    * The webbrowser icon now displays a UTBV menu
-    * The Edit/Find functionality is implemented (using InteractiveQuery)
-    * Results from the Advene browser can be displayed in a line
+      * The webbrowser icon now displays a UTBV menu
+      * The Edit/Find functionality is implemented (using InteractiveQuery)
+      * Results from the Advene browser can be displayed in a line
 
-  * New action: OpenURL
+   * New action: OpenURL
 
-  * Added default_utbv and default_stbv metadata to package
+   * Added default_utbv and default_stbv metadata to package
 
-  * New config variables:
-     * config.data.webserver['displaymode'] : default display
+   * New config variables:
+      * config.data.webserver['displaymode'] : default display
        mode (default or raw)
-     * config.data.path['moviepath'] : movie files search path
+      * config.data.path['moviepath'] : movie files search path
 
-  * Webserver:
-     * Default display mode is now 'raw'
-     * query parameters are available through the 'request' root element
-     * /media/play now accepts a ?stbv=... parameter
-     * implemented /application/adhoc to open GUI views and
+   * Webserver:
+      * Default display mode is now 'raw'
+      * query parameters are available through the 'request' root element
+      * /media/play now accepts a ?stbv=... parameter
+      * implemented /application/adhoc to open GUI views and
        /application/stbv to activate STBVs
 
-  * Timeline :
-     * implemented annotation alignment (by drag'n drop)
-     * annotations can be transmuted (by DND on an annotation type)
-     * all annotation types (event empty ones) are displayed
-     * new zoom possibility by clicking on timestamps labels
-     * relations can be displayed by moving the cursor
+   * Timeline :
+      * implemented annotation alignment (by drag'n drop)
+      * annotations can be transmuted (by DND on an annotation type)
+      * all annotation types (event empty ones) are displayed
+      * new zoom possibility by clicking on timestamps labels
+      * relations can be displayed by moving the cursor
        over the annotation widgets (option controlled by toolbar)
 
-  * New player module: mplayer (incomplete)
+   * New player module: mplayer (incomplete)
 
-  * TranscriptionEdit :
-     * added adjustment possibilities for the marks, using adjustable
+   * TranscriptionEdit :
+      * added adjustment possibilities for the marks, using adjustable
        reaction time value
-     * it is now possible to create a new annotation type/schema
+      * it is now possible to create a new annotation type/schema
        when doing the conversion
-     * "Save" action preserves timestamps
-     * "Ignore text" functionality
-     * Load/save transcription files handles [xx:xx:xx.xxx] timestamps,
+      * "Save" action preserves timestamps
+      * "Ignore text" functionality
+      * Load/save transcription files handles [xx:xx:xx.xxx] timestamps,
        and ignored text
-     * added player control toolbar
-     * C-s shortcut to save transcription
-     * Insert a default 0-mark
+      * added player control toolbar
+      * C-s shortcut to save transcription
+      * Insert a default 0-mark
 
-  * Importer
-    * implemented PRAAT import
-    * use the userid as author for imported elements
+   * Importer
+      * implemented PRAAT import
+      * use the userid as author for imported elements
 
-  * Internal
-    * Identifiers are now generated through the IDGenerator
+   * Internal
+      * Identifiers are now generated through the IDGenerator
       module (more readable ids)
-    * Evaluator: implemented dict key completion
-    * Use an event queue for notify events, so that the GUI
+      * Evaluator: implemented dict key completion
+      * Use an event queue for notify events, so that the GUI
       does not freeze when receiving input from webserver
       (player interaction, STBV selection, etc)
-    * Edit elements forms now do a simple check
+      * Edit elements forms now do a simple check
       for the validity of TALES expressions
-    * Re-generated API documentation in doc/html
-    * Added an example bin/sample_player
+      * Re-generated API documentation in doc/html
+      * Added an example bin/sample_player
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 13 Mar 2005 22:03:50 +0100
 
 advene (0.16) unstable; urgency=low
 
-  * Normalize DVD naming scheme: dvd@title:chapter
-  * Implemented TALESEntry (use browser to get TALES expressions)
-  * Implemented TranscriptionEdit
-  * Fixed template file (missing mimetype for simpletext annotation type)
-  * Added OpenView action (open a GUI view)
-  * ELANImporter: generate annotation types based on LINGUISTIC_TYPE_REF + TIER_ID
-  * Added '-p' command-line option to select a player ('dummy', 'vlcnative', 'vlcorbit')
-  * New global method: length
-  * Annotations can be resized from the timeline view
+   * Normalize DVD naming scheme: dvd@title:chapter
+   * Implemented TALESEntry (use browser to get TALES expressions)
+   * Implemented TranscriptionEdit
+   * Fixed template file (missing mimetype for simpletext annotation type)
+   * Added OpenView action (open a GUI view)
+   * ELANImporter: generate annotation types based on LINGUISTIC_TYPE_REF + TIER_ID
+   * Added '-p' command-line option to select a player ('dummy', 'vlcnative', 'vlcorbit')
+   * New global method: length
+   * Annotations can be resized from the timeline view
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun, 13 Feb 2005 15:16:40 +0100
 
 advene (0.15) unstable; urgency=low
 
-  * New Win32 related fixes (mostly build-related)
+   * New Win32 related fixes (mostly build-related)
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Mon, 31 Jan 2005 12:09:19 +0100
 
 advene (0.14) unstable; urgency=low
 
-  * Misc Win32 related fixes:
-     * advene.iss file for InnoSetup
-     * get misc parameters from registry
-     * creation of setup-win.py for py2exe support
+   * Misc Win32 related fixes:
+      * advene.iss file for InnoSetup
+      * get misc parameters from registry
+      * creation of setup-win.py for py2exe support
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 27 Jan 2005 17:47:38 +0100
 
 advene (0.13) unstable; urgency=low
 
-  * Check that no relation use the annotation on annotation delete
+   * Check that no relation use the annotation on annotation delete
 
-  * Update to pygtk 2.4
+   * Update to pygtk 2.4
 
-  * Added three toolbars: player control, file operations, views access
+   * Added three toolbars: player control, file operations, views access
 
-  * The package explorer now displays categories for elements (members, attributes, methods)
+   * The package explorer now displays categories for elements (members, attributes, methods)
 
-  * Use the new FileChooser from gtk 2.4
+   * Use the new FileChooser from gtk 2.4
 
-  * Added a "display preview" button in the file selector
+   * Added a "display preview" button in the file selector
 
-  * Added a description parameter to the PopupGoto action
+   * Added a description parameter to the PopupGoto action
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 27 Jan 2005 17:46:24 +0100
 
 advene (0.12) unstable; urgency=low
 
-  * Action and Condition selection is now categorized
+   * Action and Condition selection is now categorized
 
-  * Implemented (unusable) vlchttp (too slow)
+   * Implemented (unusable) vlchttp (too slow)
 
-  * Implemented update of relationtype.membertypes
+   * Implemented update of relationtype.membertypes
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 12 Oct 2004 19:49:47 +0200
 
 advene (0.11) unstable; urgency=low
 
-  * It is possible to save the output of the transcription view
+   * It is possible to save the output of the transcription view
 
-  * Update to match the API changes in simpletal 3.9
+   * Update to match the API changes in simpletal 3.9
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 16 Sep 2004 13:05:50 +0200
 
 advene (0.10) unstable; urgency=low
 
-  * Added ELAN conversion capability
+   * Added ELAN conversion capability
 
-  * Added "Offset" method in popup menu
+   * Added "Offset" method in popup menu
 
-  * Implemented Allen's relations in conditions
+   * Implemented Allen's relations in conditions
 
-  * Implemented TranscriptionView (accessible from popup menu on
+   * Implemented TranscriptionView (accessible from popup menu on
     AnnotationType, or from the Views menu).
 
-  * Implemented read-only edit popup for imported elements
+   * Implemented read-only edit popup for imported elements
 
-  * The MIME-Type is displayed/editable on all content-editing windows
+   * The MIME-Type is displayed/editable on all content-editing windows
 
-  * Autocompletion facility in evaluator window
+   * Autocompletion facility in evaluator window
 
-  * All imports (view, schema, ...) work. A GUI is accessible to edit them from
+   * All imports (view, schema, ...) work. A GUI is accessible to edit them from
     the Edit menu
 
-  * New actions: ActivateSTBV, DisplayPopup2, DisplayPopup3, SendUserEvent
+   * New actions: ActivateSTBV, DisplayPopup2, DisplayPopup3, SendUserEvent
 
-  * Added UserEvent event
+   * Added UserEvent event
 
-  * Window sizes are memorized from one session to another
+   * Window sizes are memorized from one session to another
 
-  * Navigation popups now use SingletonPopup (only one is displayed, timeout handled)
+   * Navigation popups now use SingletonPopup (only one is displayed, timeout handled)
 
-  * Basic GUI for importing external data (menu File/Import).
+   * Basic GUI for importing external data (menu File/Import).
 
-  * DVD chapter import is accessible in the File menu (it needs the chaplin program)
+   * DVD chapter import is accessible in the File menu (it needs the chaplin program)
 
-  * Added members edition GUI for RelationTypes (but the model does not
+   * Added members edition GUI for RelationTypes (but the model does not
     support updating them yet)
 
-  * Implemented DnD of rules in RuleSet editing popups (through the "Copy" button
+   * Implemented DnD of rules in RuleSet editing popups (through the "Copy" button
     in the lower right hand corner)
 
-  * Parameters values are now remembered when editing the action name (so that
+   * Parameters values are now remembered when editing the action name (so that
     scrolling the action name list by mistake does not erase all the values)
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu,  2 Sep 2004 12:13:10 +0200
 
 advene (0.9) unstable; urgency=low
 
-  * New action: DisplayMarker
+   * New action: DisplayMarker
 
-  * When editing actions, parameters are now sorted
+   * When editing actions, parameters are now sorted
 
-  * New component: advene.util.importer which can import data from text
+   * New component: advene.util.importer which can import data from text
     files, srt files, lsdvd, chaplin, xi files. Usable as command-line
     tool for the moment.
 
-  * Validity checks in data input (fragment-related)
+   * Validity checks in data input (fragment-related)
 
-  * The player is now launched at application start
+   * The player is now launched at application start
 
-  * It is now possible to save the output of the evaluator window with C-s
+   * It is now possible to save the output of the evaluator window with C-s
 
-  * Browser is now accessible from generic popup for all elements
+   * Browser is now accessible from generic popup for all elements
 
-  * New shortcut: Control-Return validates current annotation and begins
+   * New shortcut: Control-Return validates current annotation and begins
     editing a new one
 
-  * Annotations in timeline are bold if they have relations
+   * Annotations in timeline are bold if they have relations
 
-  * Added the possibility to edit the description of schemas and its elements
+   * Added the possibility to edit the description of schemas and its elements
 
-  * Annotation-highlighting is accessible from popup menu
+   * Annotation-highlighting is accessible from popup menu
 
-  * Annotations are accessible from the relation popup menu
+   * Annotations are accessible from the relation popup menu
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Fri, 18 Jun 2004 19:36:20 +0200
 
 advene (0.8) unstable; urgency=low
 
-  * New actions: PlayerGoto, Popup, PopupGoto
-  * Added regexp support in conditions
-  * Added missing dependency on python-imaging
-  * The "display" meta-attribute for annotationTypes has been renamed
+   * New actions: PlayerGoto, Popup, PopupGoto
+   * Added regexp support in conditions
+   * Added missing dependency on python-imaging
+   * The "display" meta-attribute for annotationTypes has been renamed
     "representation"
-  * It is now possible to edit the 'representation' attribute for
+   * It is now possible to edit the 'representation' attribute for
     AnnotationTypes
-  * Added a python evaluator window (Control-e to invoke)
+   * Added a python evaluator window (Control-e to invoke)
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue,  1 Jun 2004 00:14:31 +0200
 
 advene (0.7) unstable; urgency=low
 
-  * Unicode-related bug fixes
-  * Some user documentation (doc/user.txt)
-  * Added a "display" meta-attribute to AnnotationTypes and
+   * Unicode-related bug fixes
+   * Some user documentation (doc/user.txt)
+   * Added a "display" meta-attribute to AnnotationTypes and
     RelationTypes. When present, it defines a TALES expression returning
     the representation of the annotation in the timeline view. It is
     useful for structured content for instance.
-  * The timeline legend is now vertically synchronized with the elements
-  * We can now parse XML content data (using the 'parsed' global method)
-  * Implemented Query support and editing
+   * The timeline legend is now vertically synchronized with the elements
+   * We can now parse XML content data (using the 'parsed' global method)
+   * Implemented Query support and editing
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Tue, 11 May 2004 23:12:37 +0200
 
 advene (0.6) unstable; urgency=low
 
-  * A treeview is available in the main application window
-  * Implemented history navigation
-  * DVD title/chapter selector
-  * Display a warning when trying to quit the application with unsaved data
-  * Added a button to quickly edit the current STBV
-  * Numerous bug fixes
+   * A treeview is available in the main application window
+   * Implemented history navigation
+   * DVD title/chapter selector
+   * Display a warning when trying to quit the application with unsaved data
+   * Added a button to quickly edit the current STBV
+   * Numerous bug fixes
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Wed,  5 May 2004 13:19:30 +0200
 
 advene (0.5) unstable; urgency=low
 
-  * The "Update snapshots" functionality is back.
-  * The duration of the stream is now stored as metadata in the package
-  * You can now create elements from the tree view (right-click on package
+   * The "Update snapshots" functionality is back.
+   * The duration of the stream is now stored as metadata in the package
+   * You can now create elements from the tree view (right-click on package
     or annotation-/relation-type) and delete elements from the tree view
     and timeline.
 
@@ -1012,6 +1012,6 @@ advene (0.5) unstable; urgency=low
 
 advene (0.4-1) unstable; urgency=low
 
-  * The Debian package is now generated through debhelper.
+   * The Debian package is now generated through debhelper.
 
  -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Sun,  7 Mar 2004 16:11:17 +0100
