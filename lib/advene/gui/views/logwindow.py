@@ -34,6 +34,11 @@ import gtk
 
 import advene.rules.elements
 
+name="Link view plugin"
+
+def register(controller):
+    controller.register_viewclass(LogWindow)
+
 class LogWindow(AdhocView):
     view_name = _("Links")
     view_id = 'linksview'

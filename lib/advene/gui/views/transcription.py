@@ -42,6 +42,11 @@ import advene.gui.popup
 parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')
 empty_representation = re.compile(r'^\s*$')
 
+name="Transcription view plugin"
+
+def register(controller):
+    controller.register_viewclass(TranscriptionView)
+
 class TranscriptionView(AdhocView):
     view_name = _("Transcription")
     view_id = 'transcription'

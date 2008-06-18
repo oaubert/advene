@@ -43,6 +43,11 @@ import gtk
 
 from advene.gui.widget import TagWidget
 
+name="Tagbag view plugin"
+
+def register(controller):
+    controller.register_viewclass(TagBag)
+
 class TagBag(AdhocView):
     view_name = _("Tag Bag")
     view_id = 'tagbag'
