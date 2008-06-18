@@ -468,6 +468,7 @@ class TreeWidget(AdhocView):
                                   + config.data.drag_type['annotation-type']
                                   + config.data.drag_type['adhoc-view']
                                   + config.data.drag_type['annotation']
+                                  + config.data.drag_type['view']
                                   ,
                                   gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE)
 
@@ -510,6 +511,14 @@ class TreeWidget(AdhocView):
             if not isinstance(el, View):
                 return False
             if helper.get_view_type(el) != 'adhoc':
+                return False
+            selection.set(selection.target, 8,
+                          cgi.urllib.urlencode( {
+                        'id': el.id,
+                        } ).encode('utf8'))
+            return True
+        elif targetType == typ['view']:
+            if not isinstance(el, View):
                 return False
             selection.set(selection.target, 8,
                           cgi.urllib.urlencode( {
