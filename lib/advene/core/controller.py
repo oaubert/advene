@@ -253,7 +253,8 @@ class AdveneController:
             try:
                 self.log("Registering " + p.name)
                 p.register(controller=self)
-            except AttributeError:
+            except AttributeError, e:
+                print "AttributeError in", p.name, ":", str(e)
                 pass
         return l
 
