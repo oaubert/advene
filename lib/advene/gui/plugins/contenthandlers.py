@@ -27,10 +27,12 @@ import StringIO
 import advene.core.config as config
 from advene.gui.edit.elements import ContentHandler, TextContentHandler
 from advene.gui.edit.shapewidget import ShapeDrawer, Rectangle, ShapeEditor
-from advene.gui.util import image_from_position, dialog
+from advene.gui.util import image_from_position, dialog, decode_drop_parameters
+
 from advene.gui.edit.rules import EditRuleSet, EditQuery
 from advene.rules.elements import RuleSet, SimpleQuery
 import advene.util.ElementTree as ET
+import advene.util.helper as helper
 
 name="Default content handlers"
 
@@ -209,11 +211,23 @@ class SVGContentHandler (ContentHandler):
         return True
 
     def drawer_drag_received(self, widget, context, x, y, selection, targetType, time):
+        here=None
+        url=None
+        title=''
         if targetType == config.data.target_type['annotation']:
             here=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
-        elif target_type == config.data.target_type['view']:
-            here=self.controller.package.views.get(unicode(selection.data, 'utf8'))
-        elif target_type == config.data.target_type['uri-list']:
+        elif targetType == config.data.target_type['view']:
+            data=decode_drop_parameters(selection.data)
+            v=self.controller.package.get_element_by_id(data['id'])
+            if v is None:
+                print "Cannot find view", data['id']
+                return True
+            here=v
+            title=self.controller.get_title(v)
+            ctx=self.controller.build_context()
+            root=ctx.evaluateValue('here/absolute_url')
+            url='%s/action/OpenView?id=%s' % (root, v.id)
+        elif targetType == config.data.target_type['uri-list']:
             here=None
             url=unicode(selection.data, 'utf8')
             title=url
@@ -221,10 +235,14 @@ class SVGContentHandler (ContentHandler):
             # Invalid drop target
             return True
 
-        if here is not None:
+        if url is None and here is not None:
             ctx=self.controller.build_context(here=here)
             title=self.controller.get_title(here)
             url=ctx.evaluateValue('here/absolute_url')
+
+        if url is None:
+            print "Cannot guess url"
+            return True
 
         s=self.view.drawer.clicked_shape( (x, y) )
         if s is None:
@@ -255,8 +273,8 @@ class SVGContentHandler (ContentHandler):
         self.view.drawer.widget.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                                               gtk.DEST_DEFAULT_HIGHLIGHT |
                                               gtk.DEST_DEFAULT_ALL,
-                                              config.data.drag_type['annotation']
-                                              + config.data.drag_type['view']
+                                              config.data.drag_type['view']
+                                              + config.data.drag_type['annotation']
                                               + config.data.drag_type['uri-list'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK)
 
