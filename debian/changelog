@@ -1,6 +1,27 @@
 advene (0.31) unstable; urgency=low
 
+   * Global shortcuts: 
+      * Control-Space plays/pauses the video (as Control-Tab) 
+      * pressing shift while navigating with
+        Control-left/right or modifying a value with Control-scroll will use a
+      	larger step, customizable in Edit/Preferences/Time related.
+  
    * Web server reactiviy issues on Windows XP/Vista have been fixed.
+ 
+   * The experimental schema editor is available in expert mode.
+
+   * Automatic workspace save/restore is now functional. See
+     Edit/Preferences/Standard views for customization.
+
+   * Timeline view : 
+      * discrete scrolling is now working similarly as in other
+        applications (scroll when the cursor reaches the end of the visible
+    	area).
+      * in quick-edit mode, Tab validates the annotation and edits the next one  	
+      * when selecting annotations by drawing a frame, if the selection
+        is empty, then propose to create a new annotation with the 
+  	frame extent as dimension.
+      * standard control/shift modifiers can be used in drag and drop actions
 
  --
 
