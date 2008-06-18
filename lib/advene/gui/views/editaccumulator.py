@@ -31,6 +31,11 @@ from advene.gui.views.accumulatorpopup import AccumulatorPopup
 from advene.gui.edit.elements import get_edit_popup
 from advene.gui.util import get_small_stock_button, get_pixmap_button
 
+name="Edit accumulator view plugin"
+
+def register(controller):
+    controller.register_viewclass(EditAccumulator)
+
 class EditAccumulator(AccumulatorPopup):
     """View displaying a limited number of compact editing widgets.
     """
