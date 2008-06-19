@@ -22,7 +22,31 @@ def check_changelog(maindir, version):
         print "Update either the changelog or the lib/advene/core/version.py file"
         sys.exit(1)
     return True
-           
+
+def get_plugin_list(*package):
+    """Return a plugin list from the given package.
+
+    package is in fact a list of path/module path elements.
+    No recursion is done.
+    """
+    
+    path=os.path.sep.join(package)
+
+    prefix='advene.'+'.'.join(package)
+    plugins=[]
+    d=os.path.join('lib', 'advene', path)
+    if not os.path.exists(d):
+        raise Exception("%s does not match a directory (%s does not exist)" % (prefix, d))
+    for n in os.listdir(d):
+        name, ext = os.path.splitext(n)
+        if ext != '.py':
+            continue
+        # Poor man's grep.
+        if [ l for l in  open(os.path.join(d, n)).readlines() if 'def register' in l ]:
+            # It may be a plugin. Include it.
+            plugins.append('.'.join((prefix, name)))
+    return plugins
+
 def get_version():
     """Get the version number of the package."""
     maindir = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -46,7 +70,7 @@ if sys.platform == 'win32':
     platform_options['console'] = [ "bin/advene" ]
     platform_options['options'] = {
 	"py2exe": {
-	    "includes": "pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be," + ",".join( get_plugin_list('plugins'), get_plugin_list('gui', 'plugins'), get_plugin_list('gui', 'views'), get_plugin_list('gui', 'edit') ),
+	    "includes": "pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be," + ",".join( get_plugin_list('plugins')) +","+ ",".join( get_plugin_list('gui', 'plugins')) +","+ ",".join( get_plugin_list('gui', 'views')) +","+ ",".join( get_plugin_list('gui', 'edit') ),
 	    "excludes": [ "Tkconstants","Tkinter","tcl" ],
 	    "dll_excludes": ["libvlc.dll","libvlc-control.dll"],
 	    #         		 ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
@@ -99,28 +123,6 @@ def get_packages_list():
     res=[ ".".join(name.split(os.path.sep)[1:]) for name in l ]
     return res
 
-def get_plugin_list(*package):
-    """Return a plugin list from the given package.
-
-    package is in fact a list of path/module path elements.
-    No recursion is done.
-    """
-    path=os.path.sep.join(package)
-    prefix='.'.join(package)
-
-    plugins=[]
-    d=os.path.join('lib', 'advene', path)
-    if not os.path.exists(d):
-        raise Exception("%s does not match a directory (%s does not exist)" % (prefix, d))
-    for n in os.listdir(d):
-        name, ext = os.path.splitext(n)
-        if ext != '.py':
-            continue
-        # Poor man's grep.
-        if [ l for l in  open(os.path.join(d, n)).readlines() if 'def register' in l ]:
-            # It may be a plugin. Include it.
-            plugins.append('.'.join((prefix, name)))
-    return plugins
                  
 def generate_data_dir(dir_, prefix="", postfix=""):
     """Return a structure suitable for datafiles from a directory.
