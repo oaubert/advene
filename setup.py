@@ -29,12 +29,11 @@ def get_plugin_list(*package):
     package is in fact a list of path/module path elements.
     No recursion is done.
     """
-    
+    package= [ 'advene' ] + list(package)
     path=os.path.sep.join(package)
-
-    prefix='advene.'+'.'.join(package)
+    prefix='.'.join(package)
     plugins=[]
-    d=os.path.join('lib', 'advene', path)
+    d=os.path.join('lib', path)
     if not os.path.exists(d):
         raise Exception("%s does not match a directory (%s does not exist)" % (prefix, d))
     for n in os.listdir(d):
@@ -70,7 +69,7 @@ if sys.platform == 'win32':
     platform_options['console'] = [ "bin/advene" ]
     platform_options['options'] = {
 	"py2exe": {
-	    "includes": "pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be," + ",".join( get_plugin_list('plugins')) +","+ ",".join( get_plugin_list('gui', 'plugins')) +","+ ",".join( get_plugin_list('gui', 'views')) +","+ ",".join( get_plugin_list('gui', 'edit') ),
+	    "includes": "pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
 	    "excludes": [ "Tkconstants","Tkinter","tcl" ],
 	    "dll_excludes": ["libvlc.dll","libvlc-control.dll"],
 	    #         		 ["iconv.dll","intl.dll","libatk-1.0-0.dll", 
@@ -89,7 +88,7 @@ elif sys.platform == 'darwin':
     platform_options['options'] = dict(py2app=dict( 
                     iconfile='mac/Advene.icns',
                     #includes=",".join( [ l.strip() for l in open('mac_includes.txt') ]),
-                    includes="pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be,cPickle,optparse,sets,pprint,cgi,webbrowser,xml.dom.ext.reader.PyExpat,sgmllib,zipfile,shutil,sched,imghdr,BaseHTTPServer,Cookie,ConfigParser,xmlrpclib,Queue,csv,filecmp," + ",".join( get_plugin_list('plugins'), get_plugin_list('gui', 'plugins'), get_plugin_list('gui', 'views'), get_plugin_list('gui', 'edit') ),
+                    includes="pango,pangocairo,cairo,atk,gtk,gtk.keysyms,gobject,xml.sax.drivers2.drv_pyexpat,encodings,encodings.latin_1,encodings.utf_8,encodings.cp850,encodings.cp437,encodings.cp1252,encodings.utf_16_be,cPickle,optparse,sets,pprint,cgi,webbrowser,xml.dom.ext.reader.PyExpat,sgmllib,zipfile,shutil,sched,imghdr,BaseHTTPServer,Cookie,ConfigParser,xmlrpclib,Queue,csv,filecmp," + ",".join( get_plugin_list('plugins') + get_plugin_list('gui', 'plugins') + get_plugin_list('gui', 'views') + get_plugin_list('gui', 'edit') ),
                     argv_emulation=True,
                     site_packages=True,
                     #resources=['resources/License.txt'],
