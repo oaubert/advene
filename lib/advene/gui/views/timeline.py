@@ -3249,7 +3249,7 @@ class TimeLine(AdhocView):
                 self.controller.notify('AnnotationEditEnd', annotation=l[0])
                 # Remove all others
                 for a in l[1:]:
-                    self.controller.delete_annotation(a)
+                    self.controller.delete_element(a)
         return True
 
     def selection_tag(self, widget, selection):

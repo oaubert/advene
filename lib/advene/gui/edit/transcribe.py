@@ -1067,7 +1067,7 @@ class TranscriptionEdit(AdhocView):
                 if delete_existing_toggle.get_active():
                     # Remove all annotations of at type
                     for a in at.annotations:
-                        self.controller.delete_annotation(a)
+                        self.controller.delete_element(a)
 
                 self.options['empty-annotations']=empty_contents_toggle.get_active()
                 finished=True
