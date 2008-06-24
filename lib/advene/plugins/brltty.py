@@ -60,6 +60,13 @@ class BrlEngine:
         self.controller=controller
         self.brlconnection=None
         self.currenttype=None
+        self.revmap=None
+
+    def generate_reverse_mapping(self):
+        self.revmap={}
+        for n, v in brlapi.__dict__.iteritems():
+            if n.startswith('KEY_'):
+                self.revmap[v]=n
 
     def input_handler(self, source=None, condition=None):
         """Handler for BrlTTY input events.
@@ -152,6 +159,15 @@ class BrlEngine:
         elif k == brlapi.KEY_SYM_INSERT:
             # Insert a bookmark
             self.controller.gui.create_bookmark(self.controller.player.current_position_value)
+        else:
+            d=self.brlconnection.expandKeyCode(k)
+            if self.revmap is None:
+                self.generate_reverse_mapping()
+            print "brltty: unknown key ", k, "expanded", str(d)
+            if k in self.revmap:
+                print "Symbol", self.revmap[k]
+            elif d['command'] in self.revmap:
+                print "Command", self.revmap[d['command']]
         return True
 
     def parse_parameter(self, context, parameters, name, default_value):
@@ -179,7 +195,7 @@ class BrlEngine:
             b = brlapi.Connection()
             b.enterTtyMode()
             self.brlconnection=b
-        except brlapi.ConnectionError, e:
+        except (brlapi.ConnectionError, TypeError), e:
             self.controller.log(_("BrlTTY connection error: %s") % unicode(e))
             self.brlconnection=None
 
