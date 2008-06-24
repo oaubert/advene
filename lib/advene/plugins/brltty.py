@@ -64,6 +64,29 @@ class BrlEngine:
     def input_handler(self, source=None, condition=None):
         """Handler for BrlTTY input events.
         """
+        def navigate_bookmark(direction):
+            v=self.controller.gui.find_bookmark_view()
+            if v is None:
+                return
+            cur=v.get_current_bookmark()
+
+            if cur is None:
+                if v.bookmarks:
+                    # Navigate to the first bookmark
+                    bookmark=v.bookmarks[0]
+                else:
+                    return
+            else:
+                index=v.bookmarks.index(cur)
+                index += direction
+                try:
+                    bookmark=v.bookmarks[index]
+                except IndexError:
+                    return
+            self.controller.move_position(bookmark.begin, relative=False)
+            v.set_current_bookmark(bookmark)
+            self.brldisplay(bookmark.content)
+            return
         if not self.brlconnection:
             return True
         k=self.brlconnection.readKey(0)
@@ -74,6 +97,8 @@ class BrlEngine:
             # Next annotation
             if self.currenttype is None:
                 self.controller.move_position(config.data.preferences['time-increment'], relative=True)
+            elif self.currenttype == 'bookmarks':
+                navigate_bookmark(+1)
             else:
                 # Navigate to the next annotation in the type
                 l=[an
@@ -85,6 +110,8 @@ class BrlEngine:
             # Next annotation
             if self.currenttype is None:
                 self.controller.move_position(-config.data.preferences['time-increment'], relative=True)
+            elif self.currenttype == 'bookmarks':
+                navigate_bookmark(-1)
             else:
                 # Navigate to the previous annotation in the type
                 pos=self.controller.player.current_position_value
@@ -95,6 +122,7 @@ class BrlEngine:
         elif k == brlapi.KEY_SYM_UP or k == brlapi.KEY_SYM_DOWN:
             types=list( self.controller.package.annotationTypes )
             types.sort(key=lambda at: at.title or at.id)
+            types.append( 'bookmarks' )
             try:
                 i=types.index(self.currenttype)
             except ValueError:
@@ -112,10 +140,12 @@ class BrlEngine:
                 self.currenttype=types[i]
             except IndexError:
                 self.currenttype=None
-            if self.currenttype is not None:
-                self.brldisplay(self.currenttype.title or self.currenttype.id)
+            if self.currenttype == 'bookmarks':
+                self.brldisplay('Nav. bookmarks')
+            elif self.currenttype is not None:
+                self.brldisplay('Nav. ' + (self.currenttype.title or self.currenttype.id))
             else:
-                self.brldisplay('Nav')            
+                self.brldisplay('Nav. video')            
         elif k == brlapi.KEY_SYM_DELETE:
             # Play/pause
             self.controller.update_status("pause")
@@ -144,7 +174,7 @@ class BrlEngine:
         return result
 
     def init_brlapi(self):
-        print "Connecting brltty..."
+        self.controller.log("Connecting brltty...")
         try:
             b = brlapi.Connection()
             b.enterTtyMode()
@@ -155,7 +185,7 @@ class BrlEngine:
 
     def disconnect_brlapi(self):
         if self.brlconnection is not None:
-            print "Disconnecting brltty"
+            self.controller.log("Disconnecting brltty")
             self.brlconnection.leaveTtyMode()
         
     def brldisplay(self, message):
