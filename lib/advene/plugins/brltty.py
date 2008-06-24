@@ -18,12 +18,14 @@
 #
 
 from gettext import gettext as _
+import gobject
 
 try:
     import brlapi
 except ImportError:
     brlapi = None
 
+import advene.core.config as config
 from advene.rules.elements import RegisteredAction
 import advene.model.tal.context
 
@@ -45,6 +47,11 @@ def register(controller=None):
                     )},            
             category='generic',
             ))
+    engine.init_brlapi()
+    if engine.brlconnection is not None:
+        gobject.io_add_watch(engine.brlconnection.fileDescriptor, 
+                             gobject.IO_IN,
+                             engine.input_handler)
 
 class BrlEngine:
     """BrlEngine.
@@ -52,6 +59,70 @@ class BrlEngine:
     def __init__(self, controller=None):
         self.controller=controller
         self.brlconnection=None
+        self.currenttype=None
+
+    def input_handler(self, source=None, condition=None):
+        """Handler for BrlTTY input events.
+        """
+        if not self.brlconnection:
+            return True
+        k=self.brlconnection.readKey(0)
+        if k is None:
+            return True
+        #command=self.brlconnection.expandKey(k)['command']
+        if k == brlapi.KEY_SYM_RIGHT:
+            # Next annotation
+            if self.currenttype is None:
+                self.controller.move_position(config.data.preferences['time-increment'], relative=True)
+            else:
+                # Navigate to the next annotation in the type
+                l=[an
+                   for an in self.controller.future_begins
+                   if an[0].type == self.currenttype ]
+                if l:
+                    self.controller.queue_action(self.controller.update_status, 'set', l[0][1])
+        elif k == brlapi.KEY_SYM_LEFT:
+            # Next annotation
+            if self.currenttype is None:
+                self.controller.move_position(-config.data.preferences['time-increment'], relative=True)
+            else:
+                # Navigate to the previous annotation in the type
+                pos=self.controller.player.current_position_value
+                l=[ an for an in self.currenttype.annotations if an.fragment.end < pos ]
+                l.sort(key=lambda a: a.fragment.begin, reverse=True)
+                if l:
+                    self.controller.queue_action(self.controller.update_status, 'set', l[0].fragment.begin)
+        elif k == brlapi.KEY_SYM_UP or k == brlapi.KEY_SYM_DOWN:
+            types=list( self.controller.package.annotationTypes )
+            types.sort(key=lambda at: at.title or at.id)
+            try:
+                i=types.index(self.currenttype)
+            except ValueError:
+                if k == brlapi.KEY_SYM_UP:
+                    # So that i-1 => last item
+                    i=0
+                elif k == brlapi.KEY_SYM_DOWN:
+                    # So that i+1 => first item
+                    i=-1
+            if k == brlapi.KEY_SYM_UP:
+                i = i - 1
+            elif k == brlapi.KEY_SYM_DOWN:
+                i = i + 1
+            try:
+                self.currenttype=types[i]
+            except IndexError:
+                self.currenttype=None
+            if self.currenttype is not None:
+                self.brldisplay(self.currenttype.title or self.currenttype.id)
+            else:
+                self.brldisplay('Nav')            
+        elif k == brlapi.KEY_SYM_DELETE:
+            # Play/pause
+            self.controller.update_status("pause")
+        elif k == brlapi.KEY_SYM_INSERT:
+            # Insert a bookmark
+            self.controller.gui.create_bookmark(self.controller.player.current_position_value)
+        return True
 
     def parse_parameter(self, context, parameters, name, default_value):
         """Helper method used in actions.
