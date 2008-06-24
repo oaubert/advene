@@ -1135,6 +1135,28 @@ class AdveneGUI (Connect):
         w=hn.popup()
         return hn, w
 
+    def create_bookmark(self, position, insert_after_current=False):
+        # Capture a screenshot
+        self.controller.update_snapshot(position)
+        # Insert an active bookmark
+        l=[ w for w in self.adhoc_views if w.view_id == 'activebookmarks' ]
+        if l:
+            # There is at least one open view. Use the latest.
+            a=l[-1]
+        else:
+            # No existing view. Create one.
+            a=self.open_adhoc_view('activebookmarks', destination='fareast')
+
+        if a is not None:
+            b=a.append(position, after_current=insert_after_current)
+            b.grab_focus()
+            # We can scroll to the bookmark only after it has
+            # been allocated a space (and thus the
+            # scroll_to_bookmark method can know its position
+            # inside its parent).
+            b.widget.connect('size-allocate', lambda w, e: a.scroll_to_bookmark(b) and False)
+        return True
+
     def process_player_shortcuts(self, win, event):
         """Generic player control shortcuts.
 
@@ -1148,26 +1170,8 @@ class AdveneGUI (Connect):
               or (event.state & gtk.gdk.MOD1_MASK 
                   and event.keyval == gtk.keysyms.space)):
             if p.status in (p.PlayingStatus, p.PauseStatus):
-                pos=p.current_position_value
-                self.controller.update_snapshot(pos)
-                # Capture a screenshot
-                # Insert an active bookmark
-                l=[ w for w in self.adhoc_views if w.view_id == 'activebookmarks' ]
-                if l:
-                    # There is at least one open view. Use the latest.
-                    a=l[-1]
-                else:
-                    # No existing view. Create one.
-                    a=self.open_adhoc_view('activebookmarks', destination='fareast')
-
-                if a is not None:
-                    b=a.append(pos, after_current=(event.state & gtk.gdk.SHIFT_MASK))
-                    b.grab_focus()
-                    # We can scroll to the bookmark only after it has
-                    # been allocated a space (and thus the
-                    # scroll_to_bookmark method can know its position
-                    # inside its parent).
-                    b.widget.connect('size-allocate', lambda w, e: a.scroll_to_bookmark(b) and False)
+                self.create_bookmark(p.current_position_value,
+                                     insert_after_current=(event.state & gtk.gdk.SHIFT_MASK))
                 return True
         elif event.state & gtk.gdk.CONTROL_MASK:
             if event.keyval == gtk.keysyms.Tab or event.keyval == gtk.keysyms.space:
