@@ -149,6 +149,28 @@ class ActiveBookmarks(AdhocView):
         if cur is not None:
             cur.set_current(True)
 
+    def move_boomark(self, bookmark, index):
+        """Move the bookmark at the given position
+
+        -1  is for end of the list
+        """
+        self.bookmarks.remove(bookmark)
+        if index < 0:
+            self.bookmarks.append(bookmark)
+        else:
+            self.bookmarks.insert(index, bookmark)
+        self.refresh()
+        self.set_current_bookmark(bookmark)
+        bookmark.begin_widget.image.grab_focus()
+        self.scroll_to_bookmark(bookmark)
+        return True
+
+    def select_bookmark(self, index):
+        """Set the 'index' bookmark as current.
+        """
+        self.set_current_bookmark(self.bookmarks[index])
+        return True
+
     def duplicate_bookmark(self, cur=None):
         """Duplicate a bookmark.
 
@@ -1134,29 +1156,13 @@ class ActiveBookmark(object):
             self.end = None
 
     def timestamp_key_press(self, widget, event, source):
-        def move_boomark(index):
-            """Move the bookmark at the given position.
-
-            -1  is for end of the list
-            """
-            self.container.bookmarks.remove(self)
-            if index < 0:
-                self.container.bookmarks.append(self)
-            else:
-                self.container.bookmarks.insert(index, self)
-            self.container.refresh()
-            self.container.set_current_bookmark(self)
-            self.begin_widget.image.grab_focus()
-            self.container.scroll_to_bookmark(self)
-            return True
-
         def move_or_navigate(index, event):
             if event.state & gtk.gdk.SHIFT_MASK:
                 # Shift-up/down/home/end: move the bookmark
-                move_boomark(index)
+                self.container.move_boomark(self, index)
             else:
                 # Set the current bookmark
-                self.container.set_current_bookmark(self.container.bookmarks[index])
+                self.container.select_bookmark(index)
 
         if event.keyval == gtk.keysyms.Delete or event.keyval == gtk.keysyms.BackSpace:
             self.delete_timestamp(source)
