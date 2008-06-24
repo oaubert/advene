@@ -25,9 +25,15 @@ from advene.gui.main import AdveneGUI
 
 import time
 import os
+import sys
 
 import advene.core.config as config
+
+from advene.model.schema import Schema, AnnotationType, RelationType
+
 from advene.gui.views.viewbook import ViewBook
+from advene.gui.util import dialog
+from advene.gui.edit.timeadjustment import TimeAdjustment
 
 import gtk
 import gtk.glade
@@ -111,6 +117,20 @@ class SimpleAdveneGUI(AdveneGUI):
         self.slider_move = False
         # Will be initialized in get_visualisation_widget
         self.gui.stbv_combo = None
+        # Dictionary of registered adhoc views
+        self.registered_adhoc_views={}
+        self.gui_plugins=[]
+
+        # Register plugins.
+        for n in ('plugins', 'views', 'edit'):
+            try:
+                l=self.controller.load_plugins(os.path.join(
+                        os.path.dirname(advene.__file__), 'gui', n),
+                                               prefix="advene_gui_%s" % n)
+                self.gui_plugins.extend(l)
+            except OSError:
+                print "OSerror"
+                pass
 
         self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
 
@@ -162,7 +182,13 @@ class SimpleAdveneGUI(AdveneGUI):
         self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
         self.quicksearch_entry.connect('activate', self.do_quicksearch)
         hb.pack_start(self.quicksearch_entry, expand=False)
-        self.quicksearch_button.connect('button-press-event', quicksearch_options, modify_source)
+        def modify_source_and_search(i, expr, label):
+            """Modify the search source and launch the search.
+            """
+            modify_source(i, expr, label)
+            self.do_quicksearch()
+            return True
+        self.quicksearch_button.connect('button-press-event', quicksearch_options, modify_source_and_search)
         hb.pack_start(self.quicksearch_button, expand=False, fill=False)
         hb.show_all()
 
@@ -188,9 +214,6 @@ class SimpleAdveneGUI(AdveneGUI):
         # Internal rule used for annotation loop
         self.annotation_loop_rule=None
 
-        # Dictionary of registered adhoc views
-        self.registered_adhoc_views={}
-
         # List of active annotation views (timeline, tree, ...)
         self.adhoc_views = []
         # List of active element edit popups
@@ -215,29 +238,26 @@ class SimpleAdveneGUI(AdveneGUI):
             except RuntimeError:
                 print "*** WARNING*** : gtk.threads_init not available.\nThis may lead to unexpected behaviour."
 
-        try:
-            self.gui_plugins=self.controller.load_plugins(os.path.join(
-                    os.path.dirname(advene.__file__), 'gui', 'plugins'),
-                                                          prefix="advene_gui_plugins")
-        except OSError:
-            pass
-
-        # Register default GUI elements (actions, content_handlers, etc)
-        for m in (advene.gui.views.timeline,
-                  advene.gui.views.browser,
-                  advene.gui.views.finder,
-                  advene.gui.views.interactivequery,
-                  advene.gui.views.table,
-                  advene.gui.views.bookmarks,
-                  advene.gui.views.tree,
-                  advene.gui.edit.montage,
-                  advene.gui.views.annotationdisplay,
-                  ):
-            m.register(self.controller)
+        # FIXME: We have to register LogWindow actions before we load the ruleset
+        # but we should have an introspection method to do this automatically
+        self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
+        self.register_view(self.logwindow)
 
         self.visualisationwidget=self.get_visualisation_widget()
         self.gui.get_widget("displayvbox").add(self.visualisationwidget)
         self.gui.get_widget("vpaned").set_position(-1)
+        def media_changed(context, parameters):
+            if config.data.preferences['expert-mode']:
+                return True
+            uri=context.globals['uri']
+            if not uri:
+                msg=_("No media association is defined in the package. Please use the 'File/Select a video file' menuitem to associate a media file.")
+            elif not os.path.exists(unicode(uri).encode(sys.getfilesystemencoding(), 'ignore')) and not uri.startswith('http:') and not uri.startswith('dvd'):
+                msg=_("The associated media %s could not be found. Please use the 'File/Select a video file' menuitem to associate a media file.")
+            else:
+                msg=_("You are now working with the following video:\n%s") % uri
+            self.controller.queue_action(dialog.message_dialog, msg, modal=False)
+            return True
 
         for events, method in (
             ("PackageLoad", self.manage_package_load),
@@ -271,6 +291,7 @@ class SimpleAdveneGUI(AdveneGUI):
                                          'AnnotationType', 'RelationType', 'Schema',
                                          'Resource') ],
               self.handle_element_delete),
+            ('MediaChange', media_changed),
             ):
             if isinstance(events, basestring):
                 self.controller.event_handler.internal_rule (event=events,
@@ -310,12 +331,63 @@ class SimpleAdveneGUI(AdveneGUI):
         # Use small toolbar button everywhere
         gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
 
+        self.event_source_update_display=gobject.timeout_add (100, self.update_display)
+        self.event_source_slow_update_display=gobject.timeout_add (1000, self.slow_update_display)
         # Everything is ready. We can notify the ApplicationStart
         self.controller.notify ("ApplicationStart")
         self.event_source_update_display=gobject.timeout_add (100, self.update_display)
         self.event_source_slow_update_display=gobject.timeout_add (1000, self.slow_update_display)
         gtk.main ()
         self.controller.notify ("ApplicationEnd")
+
+    def update_color(self, element):
+        """Update the color for the given element.
+
+        element may be AnnotationType, RelationType or Schema
+        """
+        try:
+            c=self.controller.build_context(here=element)
+            colname=c.evaluateValue(element.getMetaData(config.data.namespace, 'color'))
+            gtk_color=gtk.gdk.color_parse(colname)
+        except:
+            gtk_color=None
+        d=gtk.ColorSelectionDialog(_("Choose a color"))
+        if gtk_color:
+            d.colorsel.set_current_color(gtk_color)
+        res=d.run()
+        if res == gtk.RESPONSE_OK:
+            col=d.colorsel.get_current_color()
+            element.setMetaData(config.data.namespace, 'color', u"string:#%04x%04x%04x" % (col.red,
+                                                                                           col.green,
+                                                                                           col.blue))
+            # Notify the change
+            if isinstance(element, AnnotationType):
+                self.controller.notify('AnnotationTypeEditEnd', annotationtype=element)
+            elif isinstance(element, RelationType):
+                self.controller.notify('RelationTypeEditEnd', relationtype=element)
+            elif isinstance(element, Schema):
+                self.controller.notify('SchemaEditEnd', schema=element)
+        else:
+            col=None
+        d.destroy()
+        return col
+
+    def set_current_annotation(self, a):
+        """Set the current annotation.
+        """
+        self.current_annotation=a
+        self.update_loop_button()
+
+    def update_loop_button(self):
+        """Update the loop button tooltip.
+        """
+        b=self.loop_toggle_button
+        if self.current_annotation is None:
+            mes=_("Select an annotation to loop on it")
+        else:
+            mes=_("Looping on %s") % self.controller.get_title(self.current_annotation)
+        b.set_tooltip(self.tooltips, mes)
+        return True
 
     def get_visualisation_widget(self):
         """Return the main visualisation widget.
@@ -429,6 +501,10 @@ class SimpleAdveneGUI(AdveneGUI):
         self.gui.slider.set_draw_value(False)
         self.gui.slider.connect('button-press-event', self.on_slider_button_press_event)
         self.gui.slider.connect('button-release-event', self.on_slider_button_release_event)
+        def update_timelabel(s):
+            self.time_label.set_text(helper.format_time(s.get_value()))
+            return False
+        self.gui.slider.connect('value-changed', update_timelabel)
 
         # Stack the video components
         v=gtk.VBox()
@@ -436,9 +512,34 @@ class SimpleAdveneGUI(AdveneGUI):
         self.captionview=None
 
         h=gtk.HBox()
+        eb=gtk.EventBox()
         self.time_label=gtk.Label()
         self.time_label.set_text(helper.format_time(None))
-        h.pack_start(self.time_label, expand=False)
+        eb.add(self.time_label)
+
+        def time_pressed(w, event):
+            if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+                d = gtk.Dialog(title=_("Enter the new time value"),
+                               parent=None,
+                               flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                               buttons=( gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                         gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+
+                ta=TimeAdjustment(value=self.gui.slider.get_value(), controller=self.controller, videosync=False, editable=True, compact=False)
+                d.vbox.pack_start(ta.widget, expand=False)
+                d.show_all()
+                dialog.center_on_mouse(d)
+                res=d.run()
+                retval=None
+                if res == gtk.RESPONSE_OK:
+                    t=ta.get_value()
+                    self.controller.update_status ("set", self.controller.create_position (t))
+                d.destroy()
+                return True
+            return True
+
+        eb.connect('button-press-event', time_pressed)
+        h.pack_start(eb, expand=False)
         h.pack_start(self.gui.slider, expand=True)
         v.pack_start(h, expand=False)
 
