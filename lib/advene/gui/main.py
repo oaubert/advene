@@ -1135,10 +1135,7 @@ class AdveneGUI (Connect):
         w=hn.popup()
         return hn, w
 
-    def create_bookmark(self, position, insert_after_current=False):
-        # Capture a screenshot
-        self.controller.update_snapshot(position)
-        # Insert an active bookmark
+    def find_bookmark_view(self):
         l=[ w for w in self.adhoc_views if w.view_id == 'activebookmarks' ]
         if l:
             # There is at least one open view. Use the latest.
@@ -1146,6 +1143,13 @@ class AdveneGUI (Connect):
         else:
             # No existing view. Create one.
             a=self.open_adhoc_view('activebookmarks', destination='fareast')
+        return a
+        
+    def create_bookmark(self, position, insert_after_current=False):
+        # Capture a screenshot
+        self.controller.update_snapshot(position)
+        # Insert an active bookmark
+        a=self.find_bookmark_view()
 
         if a is not None:
             b=a.append(position, after_current=insert_after_current)
