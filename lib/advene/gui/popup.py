@@ -36,6 +36,8 @@ from advene.model.resources import Resources, ResourceData
 from advene.model.view import View
 from advene.model.query import Query
 
+from advene.rules.elements import RuleSet, Rule, Event, Condition, Action
+
 from advene.gui.util import image_from_position, dialog
 from advene.gui.edit.create import CreateElementPopup
 import advene.util.helper as helper
@@ -548,9 +550,6 @@ class Menu:
     def make_resourcedata_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
-
-        def add_item(*p, **kw):
-            self.add_menuitem(menu, *p, **kw)
         if self.readonly:
             return
         return
@@ -567,13 +566,52 @@ class Menu:
         add_item(_('Select a color'), self.pick_color, element)
         return
 
+    def create_dynamic_view(self, at):
+        """Create a caption dynamic view for the given annotation-type.
+        """
+        p=self.controller.package
+        ident='v_caption_%s' % at.id
+        if p.get_element_by_id(ident) is not None:
+            dialog.message_dialog(_("A caption dynamic view for %s already seems to exist.") % self.controller.get_title(at))
+            return True
+        v=p.createView(
+            ident=ident,
+            author=config.data.userid,
+            date=self.controller.get_timestamp(),
+            clazz='package',
+            content_mimetype='application/x-advene-ruleset'
+            )
+        v.title=_("Caption %s annotations") % self.controller.get_title(at)
+        
+        # Build the ruleset
+        r=RuleSet()
+        catalog=self.controller.event_handler.catalog
+
+        ra=catalog.get_action("AnnotationCaption")
+        action=Action(registeredaction=ra, catalog=catalog)
+        action.add_parameter('message', 'annotation/content/data')
+
+        rule=Rule(name=_("Caption the annotation"),
+                  event=Event("AnnotationBegin"),
+                  condition=Condition(lhs='annotation/type/id',
+                                      operator='equals',
+                                      rhs='string:%s' % at.id),
+                  action=action)
+        r.add_rule(rule)
+
+        v.content.data=r.xml_repr()
+        
+        p.views.append(v)
+        self.controller.notify('ViewCreate', view=v)
+        self.controller.activate_stbv(v)
+        return True
+
     def make_annotationtype_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        add_item(_('Generate a caption dynamic view'), lambda i: self.create_dynamic_view(element))
         add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % element.id))
         add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations))
-        add_item(_('Use in a montage'), lambda i: self.controller.gui.open_adhoc_view('montage', elements=element.annotations))
-
         if self.readonly:
             return
         add_item(_('Select a color'), self.pick_color, element)
