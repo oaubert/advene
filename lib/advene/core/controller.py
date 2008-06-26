@@ -1431,6 +1431,20 @@ class AdveneController:
 
         self.register_package(alias, self.package)
 
+        # Compatibility issues in ruleset/queries: since r4503, we are
+        # stricter wrt. namespaces. Fix common problems.
+        for q in self.package.queries:
+            if 'http://liris.cnrs.fr/advene/ruleset' in q.content.data:
+                print "Fixing query", q.id
+                q.content.data = q.content.data.replace('http://liris.cnrs.fr/advene/ruleset',
+                                                        config.data.namespace)
+        for v in self.package.views:
+            if (v.content.mimetype == 'application/x-advene-ruleset'
+                and '<ruleset>' in v.content.data):
+                print "Fixing view ", v.id
+                v.content.data = v.content.data.replace('<ruleset>',
+                                                        '<ruleset xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">')
+                
         # Notification must be immediate, since at application startup, package attributes
         # (_indexer, imagecache) are initialized by events, and may be needed by
         # default views
