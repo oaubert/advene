@@ -35,11 +35,20 @@ name="BrlTTY actions"
 def register(controller=None):
     if brlapi is None:
         controller.log(_("BrlTTY not initialised. There will be no braille support."))
-        return True
-    engine=BrlEngine(controller)
+        method=controller.message_log
+    else:
+        engine=BrlEngine(controller)
+        method=engine.action_brldisplay
+        engine.init_brlapi()
+        if engine.brlconnection is not None:
+            gobject.io_add_watch(engine.brlconnection.fileDescriptor, 
+                                 gobject.IO_IN,
+                                 engine.input_handler)
+
+    # Register the Braille action even if the API is not available.
     controller.register_action(RegisteredAction(
             name="Braille",
-            method=engine.action_brldisplay,
+            method=method,
             description=_("Display a message in Braille"),
             parameters={'message': _("Message to display.")},
             defaults={'message': 'annotation/content/data'},
@@ -48,12 +57,7 @@ def register(controller=None):
                     )},            
             category='generic',
             ))
-    engine.init_brlapi()
-    if engine.brlconnection is not None:
-        gobject.io_add_watch(engine.brlconnection.fileDescriptor, 
-                             gobject.IO_IN,
-                             engine.input_handler)
-
+        
 class BrlEngine:
     """BrlEngine.
     """
