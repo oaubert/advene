@@ -61,6 +61,8 @@ class EditRuleSet(EditGeneric):
         self.editable=editable
         self.controller=controller
         self.widget=self.build_widget()
+        for rule in self.model:
+            self.add_rule(rule)
 
     def remove_rule_cb(self, button=None):
         """Remove the currently activated rule."""
@@ -85,16 +87,7 @@ class EditRuleSet(EditGeneric):
         vbox=gtk.VBox()
         vbox.set_homogeneous (False)
 
-        vbox.add(self.get_widget())
-
-        hb=gtk.HButtonBox()
-
-        b=gtk.Button(stock=gtk.STOCK_COPY)
-        b.connect('drag-data-get', self.drag_sent)
-        b.drag_source_set(gtk.gdk.BUTTON1_MASK,
-                          config.data.drag_type['rule'], gtk.gdk.ACTION_COPY)
-        self.controller.gui.tooltips.set_tip(b, _("Drag this button to the tab area (of this edit window or another dynamic view edit window) to copy the rule"))
-        hb.pack_start(b, expand=False)
+        hb=gtk.HBox()
 
         b=gtk.Button(stock=gtk.STOCK_ADD)
         b.connect('clicked', self.add_rule_cb)
@@ -108,7 +101,10 @@ class EditRuleSet(EditGeneric):
         self.controller.gui.tooltips.set_tip(b, _("Remove the current rule"))
         hb.pack_start(b, expand=False)
 
-        vbox.add(hb)
+        vbox.pack_start(hb, expand=False)
+
+        vbox.add(self.get_widget())
+
         return vbox
 
     def add_rule_cb(self, button=None):
@@ -137,13 +133,24 @@ class EditRuleSet(EditGeneric):
             edit=EditRule(rule, self.catalog, controller=self.controller)
         elif isinstance(rule, SubviewList):
             edit=EditSubviewList(rule, controller=self.controller)
+
+        eb=gtk.EventBox()
         l=gtk.Label(rule.name)
         edit.set_update_label(l)
+        eb.add(l)
+
+        eb.connect('drag-data-get', self.drag_sent)
+        eb.drag_source_set(gtk.gdk.BUTTON1_MASK,
+                           config.data.drag_type['rule'], 
+                           gtk.gdk.ACTION_COPY )
+        eb.show_all()
+
         self.editlist.append(edit)
         #print "Model: %d rules" % len(self.model)
-        self.model.add_rule(rule)
+        if not rule in self.model:
+            self.model.add_rule(rule)
         #print "-> Model: %d rules" % len(self.model)
-        self.widget.append_page(edit.get_widget(), l)
+        self.widget.append_page(edit.get_widget(), eb)
         self.widget.set_current_page(-1)
         return True
 
@@ -224,19 +231,6 @@ class EditRuleSet(EditGeneric):
                                gtk.DEST_DEFAULT_ALL,
                                config.data.drag_type['rule'],
                                gtk.gdk.ACTION_COPY)
-
-        for rule in self.model:
-            if isinstance(rule, Rule):
-                edit=EditRule(rule, self.catalog,
-                              editable=self.editable,
-                              controller=self.controller)
-            elif isinstance(rule, SubviewList):
-                edit=EditSubviewList(rule, controller=self.controller)
-            l=gtk.Label(rule.name)
-            edit.set_update_label(l)
-            self.editlist.append(edit)
-            notebook.append_page(edit.get_widget(), l)
-
         #b=gtk.Button(rule.name)
         #b.connect('clicked', popup_edit, rule, catalog)
         #b.show()
