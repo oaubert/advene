@@ -592,7 +592,6 @@ class SubviewList(list, EtreeMixin):
         """
         self.origin=origin
 
-        # FIXME: check the the element tagname is 'subviewlist'
         assert element.tag == tag('subviewlist'), "Trying to parse %s as a subviewlist" % element.tag
 
         self.name=element.attrib['name']
