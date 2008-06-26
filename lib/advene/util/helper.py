@@ -191,6 +191,7 @@ def package2id (p):
 
 normalized_re=re.compile(r'LATIN (SMALL|CAPITAL) LETTER (\w)')
 valid_re=re.compile(r'[a-zA-Z0-9_]')
+extended_valid_re=re.compile(r'[ -@a-zA-Z0-9_]')
 
 def title2id(t):
     """Convert a unicode title to a valid id.
@@ -211,6 +212,24 @@ def title2id(t):
                     c=c.lower()
             else:
                 c='_'
+        res.append(c)
+    return "".join(res)
+
+def unaccent(t):
+    """Remove accents from a string.
+    """
+    t=unicode(t)
+    res=[]
+    for c in t:
+        if not extended_valid_re.match(c):
+            # Try to normalize
+            m=normalized_re.search(unicodedata.name(c))
+            if m:
+                c=m.group(2)
+                if m.group(1) == 'SMALL':
+                    c=c.lower()
+            else:
+                c=' '
         res.append(c)
     return "".join(res)
 
