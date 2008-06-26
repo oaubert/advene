@@ -121,9 +121,7 @@ class EditRuleSet(EditGeneric):
         for p in ra.parameters:
             action.add_parameter(p, ra.defaults.get(p, ''))
         # Find the next rulename index
-        l=[ int(r.name.replace(_('Rule'), ''))
-            for r in self.model
-            if re.match(_('Rule') + '(\d+)', r.name) ]
+        l=[ int(i) for i in re.findall(unicode(_('Rule')+'\s*(\d+)'), ''.join(r.name for r in self.model)) ]
         idx=max(l or [ 0 ] ) + 1
         rule=Rule(name=_("Rule") + str(idx),
                   event=event,
