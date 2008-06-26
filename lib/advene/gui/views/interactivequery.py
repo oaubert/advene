@@ -84,7 +84,7 @@ class InteractiveQuery(AdhocView):
         l=helper.get_id(self.controller.package.queries, '_interactive')
         if l:
             q=SimpleQuery()
-            q.from_dom(l.content.model)
+            q.from_xml(l.content.stream)
             q.container=l
             return l, q
         else:

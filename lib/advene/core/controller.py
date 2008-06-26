@@ -541,12 +541,12 @@ class AdveneController:
         result=None
         if query.content.mimetype == 'application/x-advene-simplequery':
             qexpr=SimpleQuery()
-            qexpr.from_dom(query.content.model)
+            qexpr.from_xml(query.content.stream)
             result=qexpr.execute(context=context)
         elif query.content.mimetype == 'application/x-advene-quicksearch':
             # Parse quicksearch query
             qexpr=Quicksearch(controller=self)
-            qexpr.from_dom(query.content.model)
+            qexpr.from_xml(query.content.stream)
             if expr is not None:
                 # Override the source... Is it a good idea ?
                 qexpr.source=expr
@@ -1709,8 +1709,8 @@ class AdveneController:
         parsed_views=[]
 
         rs=RuleSet()
-        rs.from_dom(catalog=self.event_handler.catalog,
-                    domelement=view.content.model,
+        rs.from_xml(view.content.stream,
+                    catalog=self.event_handler.catalog,
                     origin=view.uri)
 
         parsed_views.append(view)
@@ -1727,8 +1727,8 @@ class AdveneController:
                         self.log(_("Infinite loop in STBV %(name)s: the %(imp)s view is invoked multiple times.") % { 'name': self.get_title(view),
                                                                                                                       'imp': self.get_title(v) })
                     else:
-                        rs.from_dom(catalog=self.event_handler.catalog,
-                                    domelement=v.content.model,
+                        rs.from_xml(v.content.stream,
+                                    catalog=self.event_handler.catalog,
                                     origin=v.uri)
                         parsed_views.append(v)
                 subviews=rs.filter_subviews()

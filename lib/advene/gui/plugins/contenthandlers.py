@@ -353,8 +353,8 @@ class RuleSetContentHandler (ContentHandler):
     def get_view (self, compact=False):
         """Generate a view widget to edit the ruleset."""
         rs=RuleSet()
-        rs.from_dom(catalog=self.controller.event_handler.catalog,
-                    domelement=self.element.model)
+        rs.from_xml(self.element.stream,
+                    catalog=self.controller.event_handler.catalog)
 
         self.edit=EditRuleSet(rs,
                               catalog=self.controller.event_handler.catalog,
@@ -413,7 +413,7 @@ class SimpleQueryContentHandler (ContentHandler):
     def get_view (self, compact=False):
         """Generate a view widget to edit the ruleset."""
         q=SimpleQuery()
-        q.from_dom(domelement=self.element.model)
+        q.from_xml(self.element.stream)
 
         self.edit=EditQuery(q,
                             controller=self.controller,
