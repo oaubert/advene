@@ -468,17 +468,31 @@ class Rule:
         # Actions
         for actionnode in rulenode.getElementsByTagName('action'):
             name=actionnode.getAttribute('name')
-            if catalog.is_action(name):
-                action=Action(registeredaction=catalog.get_action(name), catalog=catalog)
-            else:
-                # FIXME: we should just display warnings if the action
-                # is not defined ? Or maybe accept it in the case it is defined
-                # in a module loaded later at runtime
-                raise Exception("Undefined action in %s: %s" % (origin, name))
+            param={}
             for paramnode in actionnode.getElementsByTagName('param'):
-                p_name=paramnode.getAttribute('name')
-                p_value=paramnode.getAttribute('value')
-                action.add_parameter(p_name, p_value)
+                param[paramnode.getAttribute('name')]=paramnode.getAttribute('value')
+            if not catalog.is_action(name):
+                # Dynamically register a dummy action with the same
+                # name and parameters, so that it can be edited and saved.
+                def unknown_action(context, parameters):
+                    a=catalog.get_action('Message')
+                    a.method(None, { 'message': _("Unknown action %s") % name })
+                    return True
+
+                catalog.register_action(RegisteredAction(
+                        name=name,
+                        method=unknown_action,
+                        description=_("Unknown action %s") % name,
+                        parameters=dict( (name, _("Unknown parameter %s") % name)
+                                         for (name, value) in param.iteritems() ),
+                        defaults=dict(param),
+                        category='unknown',
+                        ))
+                catalog.action_categories['unknown']=_("Unknown actions")
+
+            action=Action(registeredaction=catalog.get_action(name), catalog=catalog)
+            for name, value in param.iteritems():
+                action.add_parameter(name, value)
             self.add_action(action)
         return self
 
