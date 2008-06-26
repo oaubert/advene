@@ -1186,7 +1186,7 @@ class AdveneGUI (Connect):
         self.controller.move_frame(+1)
 
     def player_rewind_frame(self, event):
-        self.controller.move_frame(+1)
+        self.controller.move_frame(-1)
 
     def player_create_bookmark(self, event):
         p=self.controller.player
