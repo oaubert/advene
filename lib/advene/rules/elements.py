@@ -25,10 +25,9 @@ import re
 import sets
 import StringIO
 import urllib
-import xml.dom.minidom
+import advene.util.ElementTree as ET
 
-from advene.util.expat import PyExpat
-
+import advene.core.config as config
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 
@@ -37,11 +36,58 @@ from gettext import gettext as _
 class Event(str):
     """The Event class represents the various defined events in Advene.
     """
-    pass
 # Warning: if we change the str representation, it messes the indexing
 # in catalog.get_described_events for instance.
 #    def __str__(self):
 #        return "Event %s" % self[:]
+    pass
+    
+def tag(name):
+    return str(ET.QName(config.data.namespace, name))
+
+class EtreeMixin:
+    """This class defines helper methods for conversion to/from ElementTree.
+    
+    The mixed-in class should implement to_etree() and from_etree(element, **kw) methods.
+
+    Optional arguments to from_etree can be 'catalog' and 'origin'.
+    """
+    def to_xml(self, uri=None, stream=None):
+        """Save the instance to the given URI or stream."""
+        root=self.to_etree()
+        etree=ET.ElementTree(root)
+        if stream is None:
+            etree.write(uri)
+        else:
+            etree.write(stream)
+
+    def xml_repr(self):
+        """Return the XML representation of the instance."""
+        s=StringIO.StringIO()
+        self.to_xml(stream=s)
+        buf=s.getvalue()
+        s.close()
+        return buf
+
+    def from_xml_string(self, xmlstring, catalog=None):
+        """Read the rule from a XML string.
+        """
+        s=StringIO.StringIO(xmlstring)
+        rulenode=ET.parse(s).getroot()
+        self.from_etree(domelement=rulenode, catalog=catalog, origin='XML string')
+        s.close()
+
+    def from_xml(self, uri=None, catalog=None, origin=None):
+        """Read the ruleset from a URI.
+
+        @param uri: the source URI
+        @param catalog: the ECAEngine catalog
+        @type catalog: ECACatalog
+        """
+        rulesetnode=ET.parse(uri).getroot()
+        if origin is None and isinstance(uri, basestring):
+            origin=uri
+        self.from_etree(rulesetnode, catalog=catalog, origin=origin)
 
 class ConditionList(list):
     """A list of conditions.
@@ -225,32 +271,26 @@ class Condition:
         """
         return True
 
-    def from_dom(self, node):
-        if node.nodeName != 'condition':
-            raise Exception("Bad invocation of Condition.from_dom")
-        if node.hasAttribute('operator'):
-            self.operator=node.getAttribute('operator')
-        else:
-            self.operator='value'
-        if not node.hasAttribute('lhs'):
-            raise Exception("Invalid condition (no left value) in rule.")
-        self.lhs=node.getAttribute('lhs')
-        if node.hasAttribute('rhs'):
-            self.rhs=node.getAttribute('rhs')
-        else:
-            self.rhs=None
+    def from_etree(self, node, **kw):
+        if node.tag != tag('condition'):
+            raise Exception("Bad invocation of Condition.from_etree")
+        self.operator=node.attrib.get('operator', 'value')
+        if not 'lhs' in node.attrib:
+            raise Exception("Invalid condition (no left value) in condition %s." % self.operator)
+        self.lhs=node.attrib['lhs']
+        self.rhs=node.attrib.get('rhs', None)
         return self
 
-    def to_dom(self, dom):
-        """Create a DOM representation of the condition.
+    def to_etree(self):
+        """Create an ElementTree representation of the condition.
 
-        @return: a DOMElement
+        @return: an ET.Element
         """
-        condnode=dom.createElement('condition')
-        condnode.setAttribute('operator', self.operator)
-        condnode.setAttribute('lhs', self.lhs)
+        condnode=ET.Element(tag('condition'), {
+                'operator': self.operator,
+                'lhs': self.lhs })
         if self.operator in self.binary_operators:
-            condnode.setAttribute('rhs', self.rhs)
+            condnode.attrib['rhs']=self.rhs
         return condnode
 
 class ActionList(list):
@@ -341,21 +381,20 @@ class Action:
         else:
             return self.method(context, self.parameters)
 
-    def to_dom(self, dom):
-        """Create a DOM representation of the action.
+    def to_etree(self):
+        """Create an ElementTree representation of the action.
 
-        @return: a DOMElement
+        @return: an ElementTree.Element
         """
-        node=dom.createElement('action')
-        node.setAttribute('name', self.name)
+        node=ET.Element(tag('action'), { 'name': self.name })
         for pname, pvalue in self.parameters.iteritems():
-            paramnode=dom.createElement('param')
-            node.appendChild(paramnode)
-            paramnode.setAttribute('name', pname)
-            paramnode.setAttribute('value', pvalue)
+            paramnode=ET.Element(tag('param'), {
+                    'name': pname,
+                    'value': pvalue })
+            node.append(paramnode)
         return node
 
-class Rule:
+class Rule(EtreeMixin):
     """Advene Rule, consisting in an Event, a Condition and an Action.
 
     The priority parameter is used to determine the order of execution
@@ -419,18 +458,8 @@ class Rule:
             self.condition=ConditionList()
         self.condition.append(condition)
 
-    def from_xml_string(self, xmlstring, catalog=None):
-        """Read the rule from a XML string
-        """
-        reader=PyExpat.Reader()
-        s=StringIO.StringIO(xmlstring)
-        di=reader.fromStream(s)
-        rulenode=di.documentElement
-        self.from_dom(domelement=rulenode, catalog=catalog)
-        s.close()
-
-    def from_dom(self, domelement=None, catalog=None, origin=None):
-        """Read the rule from a DOM element.
+    def from_etree(self, rulenode, catalog=None, origin=None):
+        """Read the rule from an ElementTree.Element.
 
         @param catalog: the ECAEngine catalog
         @type catalog: ECACatalog
@@ -441,13 +470,12 @@ class Rule:
         self.origin=origin
         if catalog is None:
             catalog=ECACatalog()
-        rulenode=domelement
-        # FIXME: check the the rulenode tagname is 'rule'
-        self.name=rulenode.getAttribute('name')
+        assert rulenode.tag == tag('rule'), "Invalid XML element %s parsed as rule" % rulenode.tag
+        self.name=rulenode.attrib['name']
         # Event
-        eventnodes=rulenode.getElementsByTagName('event')
+        eventnodes=rulenode.findall(tag('event'))
         if len(eventnodes) == 1:
-            name=eventnodes[0].getAttribute('name')
+            name=eventnodes[0].attrib['name']
             if catalog.is_event(name):
                 self.event=Event(name)
             else:
@@ -458,19 +486,20 @@ class Rule:
             raise Exception("Multiple events are associated to rule %s" % self.name)
 
         # Conditions
-        for condnode in rulenode.getElementsByTagName('condition'):
-            self.add_condition(Condition().from_dom(condnode))
+        for condnode in rulenode.findall(tag('condition')):
+            self.add_condition(Condition().from_etree(condnode, catalog=catalog, origin=origin))
 
         # Set the composition mode for the condition
-        for n in rulenode.getElementsByTagName('composition'):
-            self.condition.composition=n.getAttribute('value')
+        for n in rulenode.findall(tag('composition')):
+            self.condition.composition=n.attrib['value']
 
         # Actions
-        for actionnode in rulenode.getElementsByTagName('action'):
-            name=actionnode.getAttribute('name')
+        for actionnode in rulenode.findall(tag('action')):
+            name=actionnode.attrib['name']
             param={}
-            for paramnode in actionnode.getElementsByTagName('param'):
-                param[paramnode.getAttribute('name')]=paramnode.getAttribute('value')
+            for paramnode in actionnode.findall(tag('param')):
+                param[paramnode.attrib['name']]=paramnode.attrib['value']
+        
             if not catalog.is_action(name):
                 # Dynamically register a dummy action with the same
                 # name and parameters, so that it can be edited and saved.
@@ -496,60 +525,38 @@ class Rule:
             self.add_action(action)
         return self
 
-    def to_xml(self, uri=None, stream=None):
-        """Save the ruleset to the given URI or stream."""
-        dom=xml.dom.minidom.Document()
-        dom.appendChild(self.to_dom(dom))
-        if stream is None:
-            stream=open(uri, 'w')
-            dom.writexml(stream)
-            stream.close()
-        else:
-            dom.writexml(stream)
+    def to_etree(self):
+        """Create a ElementTree representation of the rule.
 
-    def xml_repr(self):
-        """Return the XML representation of the rule."""
-        s=StringIO.StringIO()
-        self.to_xml(stream=s)
-        buf=s.getvalue()
-        s.close()
-        return buf
-
-    def to_dom(self, dom):
-        """Create a DOM representation of the rule.
-
-        @return: a DOMElement
+        @return: an ElementTree.Element
         """
-        rulenode=dom.createElement('rule')
-        rulenode.setAttribute('name', self.name)
+        rulenode=ET.Element(tag('rule'), { 'name': self.name })
 
-        eventnode=dom.createElement('event')
-        rulenode.appendChild(eventnode)
-        eventnode.setAttribute('name', self.event[:])
+        rulenode.append(ET.Element(tag('event'), 
+                                   {'name': str(self.event) }))
 
         if self.condition != self.default_condition:
             for cond in self.condition:
                 if cond == self.default_condition:
                     continue
-                rulenode.appendChild(cond.to_dom(dom))
+                rulenode.append(cond.to_etree())
 
-        compnode=dom.createElement('composition')
-        compnode.setAttribute('value', self.condition.composition)
-        rulenode.appendChild(compnode)
+        rulenode.append(ET.Element(tag('composition'), 
+                                   { 'value': self.condition.composition } ))
 
         if isinstance(self.action, ActionList):
             l=self.action
         else:
             l=[self.action]
         for action in l:
-            rulenode.appendChild(action.to_dom(dom))
+            rulenode.append(action.to_etree())
         return rulenode
 
-class SubviewList(list):
+class SubviewList(list, EtreeMixin):
     """List of subview.
 
     It contains a list of *view ids* that are considered as subviews for a
-    ruleset: their rule will be considered as part of the view.
+    ruleset: their rules will be considered as part of the view.
 
     We could store views themselves, but then we would depend on a
     controller when loading the XML representation.
@@ -569,31 +576,22 @@ class SubviewList(list):
         """
         return [ package.get_element_by_id(i) for i in self ]
 
-    def from_xml_string(self, xmlstring, catalog=None):
-        """Read the list from a XML string
-        """
-        reader=PyExpat.Reader()
-        s=StringIO.StringIO(xmlstring)
-        di=reader.fromStream(s)
-        rulenode=di.documentElement
-        self.from_dom(domelement=rulenode, catalog=catalog)
-        s.close()
-
-    def from_dom(self, domelement=None, origin=None, catalog=None):
+    def from_etree(self, element, catalog=None, origin=None):
         """Read the list from a DOM element.
 
         @param catalog: the ECAEngine catalog
         @type catalog: ECACatalog
-        @param domelement: the DOM element
+        @param element: the ElementTree element
         @param origin: the source URI
         @type origin: URI
         """
         self.origin=origin
-        rulenode=domelement
 
-        # FIXME: check the the rulenode tagname is 'subviewlist'
-        self.name=rulenode.getAttribute('name')
-        v=rulenode.getAttribute('value')
+        # FIXME: check the the element tagname is 'subviewlist'
+        assert element.tag == tag('subviewlist'), "Trying to parse %s as a subviewlist" % element.tag
+
+        self.name=element.attrib['name']
+        v=element.attrib['value']
         if v:
             self[:]=v.split(',')
         else:
@@ -601,36 +599,17 @@ class SubviewList(list):
         # Event
         return self
 
-    def to_xml(self, uri=None, stream=None):
-        """Save the ruleset to the given URI or stream."""
-        dom=xml.dom.minidom.Document()
-        dom.appendChild(self.to_dom(dom))
-        if stream is None:
-            stream=open(uri, 'w')
-            dom.writexml(stream)
-            stream.close()
-        else:
-            dom.writexml(stream)
+    def to_etree(self):
+        """Create an ElementTree representation of the subviewlist.
 
-    def xml_repr(self):
-        """Return the XML representation of the rule."""
-        s=StringIO.StringIO()
-        self.to_xml(stream=s)
-        buf=s.getvalue()
-        s.close()
-        return buf
-
-    def to_dom(self, dom):
-        """Create a DOM representation of the subviewlist.
-
-        @return: a DOMElement
+        @return: an ElementTree.Element
         """
-        rulenode=dom.createElement("subviewlist")
-        rulenode.setAttribute('name', self.name)
-        rulenode.setAttribute('value', ','.join( self ) )
-        return rulenode
+        el=ET.Element("subviewlist", 
+                      { 'name': self.name,
+                        'value': ','.join( self ) } )
+        return el
 
-class RuleSet(list):
+class RuleSet(list, EtreeMixin):
     """Set of Rules.
 
     It is a list of Rule and SubviewList instances. Usually, there is
@@ -639,73 +618,42 @@ class RuleSet(list):
     def __init__(self, uri=None, catalog=None, priority=0):
         self.priority=priority
         if uri is not None and catalog is not None:
-            self.from_xml(catalog=catalog, uri=uri)
+            self.from_xml(uri=uri, catalog=catalog)
 
     def add_rule(self, rule):
         """Add a new rule."""
         self.append(rule)
 
-    def from_xml(self, catalog=None, uri=None):
-        """Read the ruleset from a URI.
-
-        @param catalog: the ECAEngine catalog
-        @type catalog: ECACatalog
-        @param uri: the source URI
-        """
-        reader=PyExpat.Reader()
-        di=reader.fromStream(open(uri, 'r'))
-        rulesetnode=di.documentElement
-        self.from_dom(domelement=rulesetnode, catalog=catalog, origin=uri)
-
-    def from_dom(self, domelement=None, catalog=None, origin=None):
+    def from_etree(self, rulesetnode, catalog=None, origin=None):
         """Read the ruleset from a DOM element.
 
         @param catalog: the ECAEngine catalog
         @type catalog: ECACatalog
-        @param domelement: the DOM element
+        @param rulesetnode: the ElementTree.Element
         @param origin: the source URI
         @type origin: URI
         """
+        assert rulesetnode.tag == tag('ruleset'), "Trying to parse %s as a RuleSet" % rulesetnode.tag
         if catalog is None:
             catalog=ECACatalog()
-        ruleset=domelement
-        for rulenode in ruleset.getElementsByTagName('rule'):
+        for rulenode in rulesetnode.findall(tag('rule')):
             rule=Rule(origin=origin, priority=self.priority)
-            rule.from_dom(rulenode, catalog, origin=origin)
+            rule.from_etree(rulenode, catalog=catalog, origin=origin)
             self.append(rule)
-        for rulenode in ruleset.getElementsByTagName('subviewlist'):
+        for rulenode in rulesetnode.findall(tag('subviewlist')):
             rule=SubviewList()
-            rule.from_dom(rulenode, origin=origin)
+            rule.from_etree(rulenode, catalog=catalog, origin=origin)
             self.append(rule)
         return self
 
-    def to_xml(self, uri=None, stream=None):
-        """Save the ruleset to the given URI or stream."""
-        dom=xml.dom.minidom.Document()
-        dom.appendChild(self.to_dom(dom))
-        if stream is None:
-            stream=open(uri, 'w')
-            dom.writexml(stream)
-            stream.close()
-        else:
-            dom.writexml(stream)
+    def to_etree(self):
+        """Create an ElementTree representation of the ruleset.
 
-    def xml_repr(self):
-        """Return the XML representation of the ruleset."""
-        s=StringIO.StringIO()
-        self.to_xml(stream=s)
-        buf=s.getvalue()
-        s.close()
-        return buf
-
-    def to_dom(self, dom):
-        """Create a DOM representation of the ruleset.
-
-        @return: a DOMElement
+        @return: an ElemenTree.Element
         """
-        rulesetnode=dom.createElement('ruleset')
+        rulesetnode=ET.Element(tag('ruleset'))
         for rule in self:
-            rulesetnode.appendChild(rule.to_dom(dom))
+            rulesetnode.append(rule.to_etree())
         return rulesetnode
 
     def filter_subviews(self):
@@ -718,7 +666,7 @@ class RuleSet(list):
             self.remove(s)
         return subviews
 
-class SimpleQuery:
+class SimpleQuery(EtreeMixin):
     """SimpleQuery component.
 
     This query component returns a set of data matching a condition
@@ -754,65 +702,29 @@ class SimpleQuery:
             self.condition=ConditionList()
         self.condition.append(condition)
 
-    def from_xml(self, uri=None):
-        """Read the query from a URI.
+    def from_etree(self, querynode, **kw):
+        """Read the SimpleQuery from an ElementTree.Element.
 
-        @param uri: the source URI or a file-like object
+        @param querynode: the ElementTree.Element
         """
-        reader=PyExpat.Reader()
-        if hasattr(uri, 'read'):
-            di=reader.fromStream(uri)
-        else:
-            di=reader.fromStream(open(uri, 'r'))
-        querynode=di.documentElement
-        self.from_dom(domelement=querynode)
+        assert querynode.tag == tag('query'), "Invalid tag %s for SimpleQuery" % querynode.tag
 
-    def to_xml(self, uri=None, stream=None):
-        """Save the query to the given URI or stream."""
-        dom=xml.dom.minidom.Document()
-        dom.appendChild(self.to_dom(dom))
-        if stream is None:
-            stream=open(uri, 'w')
-            dom.writexml(stream)
-            stream.close()
-        else:
-            dom.writexml(stream)
-
-    def xml_repr(self):
-        """Return the XML representation of the ruleset."""
-        s=StringIO.StringIO()
-        self.to_xml(stream=s)
-        buf=s.getvalue()
-        s.close()
-        return buf
-
-    def from_dom(self, domelement=None):
-        """Read the SimpleQuery from a DOM element.
-
-        @param domelement: the DOM element
-        """
-        if domelement.nodeName != 'query':
-            raise Exception("Invalid DOM element for SimpleQuery")
-
-        sourcenodes=domelement.getElementsByTagName('source')
-        if len(sourcenodes) == 1:
-            self.source=sourcenodes[0].getAttribute('value')
-        elif len(sourcenodes) == 0:
-            raise Exception("No source associated to query")
-        else:
-            raise Exception("Multiple sources are associated to query")
+        sourcenodes=querynode.findall(tag('source'))
+        assert len(sourcenodes) != 0, "No source associated to query"
+        assert len(sourcenodes) == 1, "Multiple sources are associated to query"
+        self.source=sourcenodes[0].attrib['value']
 
         # Conditions
-        for condnode in domelement.getElementsByTagName('condition'):
-            self.add_condition(Condition().from_dom(condnode))
+        for condnode in querynode.findall(tag('condition')):
+            self.add_condition(Condition().from_etree(condnode))
 
         # Set the composition mode for the condition
-        for n in domelement.getElementsByTagName('composition'):
-            self.condition.composition=n.getAttribute('value')
+        for n in querynode.findall(tag('composition')):
+            self.condition.composition=n.attrib['value']
 
-        rnodes=domelement.getElementsByTagName('return')
+        rnodes=querynode.getElementsByTagName('return')
         if len(rnodes) == 1:
-            self.rvalue=rnodes[0].getAttribute('value')
+            self.rvalue=rnodes[0].attrib['value']
         elif len(rnodes) == 0:
             self.rvalue=None
         else:
@@ -820,16 +732,15 @@ class SimpleQuery:
 
         return self
 
-    def to_dom(self, dom):
-        """Create a DOM representation of the query.
+    def to_etree(self):
+        """Create an ElementTree representation of the query.
 
-        @return: a DOMElement
+        @return: an ElementTree.Element
         """
-        qnode=dom.createElement('query')
+        qnode=ET.Element(tag('query'))
 
-        sourcenode=dom.createElement('source')
-        sourcenode.setAttribute('value', self.source)
-        qnode.appendChild(sourcenode)
+        qnode.append(ET.Element(tag('source', 
+                                    { 'value': self.source })))
 
         if self.condition is not None:
             if isinstance(self.condition, Condition):
@@ -839,16 +750,14 @@ class SimpleQuery:
             for cond in l:
                 if cond is None:
                     continue
-                qnode.appendChild(cond.to_dom(dom))
+                qnode.append(cond.to_etree())
 
-            compnode=dom.createElement('composition')
-            compnode.setAttribute('value', self.condition.composition)
-            qnode.appendChild(compnode)
+            qnode.append(ET.Element(tag('composition'),
+                                    { 'value': self.condition.composition }))
 
         if self.rvalue is not None:
-            rnode=dom.createElement('return')
-            rnode.setAttribute('value', self.rvalue)
-            qnode.appendChild(rnode)
+            qnode.append(ET.Element(tag('return'),
+                                    { 'value': self.rvalue }))
 
         return qnode
 
@@ -892,7 +801,7 @@ class SimpleQuery:
             # Not a list. What do we do in this case ?
             return s
 
-class Quicksearch:
+class Quicksearch(EtreeMixin):
     """Quicksearch component.
 
     This quicksearch component returns a set of data matching strings
@@ -912,79 +821,41 @@ class Quicksearch:
         self.case_sensitive=case_sensitive
         self.controller=controller
 
-    def from_xml(self, uri=None):
-        """Read the query from a URI.
+    def from_etree(self, element, **kw):
+        """Read the SimpleQuery from an ElementTree.Element
 
-        @param uri: the source URI or a file-like object.
+        @param element: the ElementTree.Element
         """
-        reader=PyExpat.Reader()
-        if hasattr(uri, 'read'):
-            di=reader.fromStream(uri)
-        else:
-            di=reader.fromStream(open(uri, 'r'))
-        querynode=di.documentElement
-        self.from_dom(domelement=querynode)
-
-    def to_xml(self, uri=None, stream=None):
-        """Save the query to the given URI or stream."""
-        dom=xml.dom.minidom.Document()
-        dom.appendChild(self.to_dom(dom))
-        if stream is None:
-            stream=open(uri, 'w')
-            dom.writexml(stream)
-            stream.close()
-        else:
-            dom.writexml(stream)
-
-    def xml_repr(self):
-        """Return the XML representation of the ruleset."""
-        s=StringIO.StringIO()
-        self.to_xml(stream=s)
-        buf=s.getvalue()
-        s.close()
-        return buf
-
-    def from_dom(self, domelement=None):
-        """Read the SimpleQuery from a DOM element.
-
-        @param domelement: the DOM element
-        """
-        if domelement.nodeName != 'quicksearch':
-            raise Exception("Invalid DOM element for Quicksearch")
-
-        sourcenodes=domelement.getElementsByTagName('source')
-        if len(sourcenodes) == 1:
-            self.source=sourcenodes[0].getAttribute('value')
+        assert element.tag == tag('quicksearch'), "Invalid tag %s for Quicksearch" % element.tag
+        sourcenode=element.find(tag('source'))
+        if sourcenode is not None:
+            self.source=sourcenode.attrib['value']
 
         # Searched string
-        s=domelement.getElementsByTagName('searched')
-        if len(s) == 1:
-            self.searched=urllib.unquote(unicode(s[0].getAttribute('value')).encode('utf-8'))
+        s=element.find('searched')
+        if s is not None:
+            self.searched=urllib.unquote(unicode(s.attrib['value']).encode('utf-8'))
 
         # Case-sensitive
-        s=domelement.getElementsByTagName('case_sensitive')
-        if len(s) == 1:
-            self.case_sensitive=(s[0].getAttribute('value') == '1')
+        s=element.find['case_sensitive']
+        if s is not None:
+            self.case_sensitive=(s.attrib['value'] == '1')
         return self
 
-    def to_dom(self, dom):
-        """Create a DOM representation of the quicksearch.
+    def to_etree(self):
+        """Create an ElementTree representation of the quicksearch.
 
-        @return: a DOMElement
+        @return: an ElementTree.Element
         """
-        qnode=dom.createElement('quicksearch')
+        qnode=ET.Element(tag('quicksearch'))
 
-        n=dom.createElement('source')
-        n.setAttribute('value', self.source)
-        qnode.appendChild(n)
+        qnode.append(ET.Element(tag('source'), { 'value': self.source } ))
+        qnode.append(ET.Element(tag('searched'), 
+                     { 'value': 
+                       urllib.quote(unicode(self.searched).encode('utf-8'))} ))
 
-        n=dom.createElement('searched')
-        n.setAttribute('value', urllib.quote(unicode(self.searched).encode('utf-8')))
-        qnode.appendChild(n)
-
-        n=dom.createElement('case_sensitive')
-        n.setAttribute('value', str(int(self.case_sensitive)))
-        qnode.appendChild(n)
+        qnode.append(ET.Element('case_sensitive'),
+                     { 'value': str(int(self.case_sensitive)) })
 
         return qnode
 
@@ -1289,5 +1160,5 @@ if __name__ == "__main__":
     controller=None
     catalog=ECACatalog()
     r=RuleSet()
-    r.from_xml(catalog=catalog, uri=filename)
+    r.from_xml(uri=filename, catalog=catalog)
     print "Read %d rules." % len(r)
