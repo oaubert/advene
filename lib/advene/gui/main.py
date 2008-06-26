@@ -1161,6 +1161,77 @@ class AdveneGUI (Connect):
             b.widget.connect('size-allocate', lambda w, e: a.scroll_to_bookmark(b) and False)
         return True
 
+    def player_play_pause(self, event):
+        p=self.controller.player
+        if p.status == p.PlayingStatus or p.status == p.PauseStatus:
+            self.controller.update_status('pause')
+        else:
+            self.controller.update_status('start')
+
+    def player_forward(self, event):
+        if event.state & gtk.gdk.SHIFT_MASK:
+            i='second-time-increment'
+        else:
+            i='time-increment'
+        self.controller.move_position (config.data.preferences[i], notify=False)
+
+    def player_rewind(self, event):
+        if event.state & gtk.gdk.SHIFT_MASK:
+            i='second-time-increment'
+        else:
+            i='time-increment'
+        self.controller.move_position (-config.data.preferences[i], notify=False)
+
+    def player_forward_frame(self, event):
+        self.controller.move_frame(+1)
+
+    def player_rewind_frame(self, event):
+        self.controller.move_frame(+1)
+
+    def player_create_bookmark(self, event):
+        p=self.controller.player
+        if p.status in (p.PlayingStatus, p.PauseStatus):
+            self.create_bookmark(p.current_position_value,
+                                 insert_after_current=(event.state & gtk.gdk.SHIFT_MASK))
+
+    def player_home(self, event):
+        self.controller.update_status ("set", self.controller.create_position (0))
+
+    def player_end(self, event):
+        c=self.controller
+        pos = c.create_position (value = -config.data.preferences['time-increment'],
+                                 key = c.player.MediaTime,
+                                 origin = c.player.ModuloPosition)
+        c.update_status ("set", pos)
+
+    control_key_shortcuts={
+        gtk.keysyms.Tab: player_play_pause,
+        gtk.keysyms.space: player_play_pause,
+        gtk.keysyms.Up: player_forward_frame,
+        gtk.keysyms.Down: player_rewind_frame,
+        gtk.keysyms.Right: player_forward,
+        gtk.keysyms.Left: player_rewind,
+        gtk.keysyms.Home: player_home,
+        gtk.keysyms.End: player_end,
+        gtk.keysyms.Insert: player_create_bookmark,
+        }
+
+    key_shortcuts={
+        gtk.keysyms.KP_0: player_play_pause,
+        gtk.keysyms.KP_5: player_create_bookmark,
+        gtk.keysyms.KP_8: player_forward_frame,
+        gtk.keysyms.KP_9: player_rewind_frame,
+        gtk.keysyms.KP_6: player_forward,
+        gtk.keysyms.KP_4: player_rewind,
+        gtk.keysyms.KP_Up: player_forward_frame,
+        gtk.keysyms.KP_Down: player_rewind_frame,
+        gtk.keysyms.KP_Right: player_forward,
+        gtk.keysyms.KP_Left: player_rewind,
+        gtk.keysyms.KP_Home: player_home,
+        gtk.keysyms.KP_End: player_end,
+        gtk.keysyms.KP_Insert: player_create_bookmark,
+        }
+    
     def process_player_shortcuts(self, win, event):
         """Generic player control shortcuts.
 
@@ -1168,59 +1239,19 @@ class AdveneGUI (Connect):
         Control-right/-left: move in the stream
         Control-home/-end: start/end of the stream
         """
+            
         c=self.controller
         p=self.controller.player
-        if (event.keyval == gtk.keysyms.Insert
-              or (event.state & gtk.gdk.MOD1_MASK 
-                  and event.keyval == gtk.keysyms.space)):
-            if p.status in (p.PlayingStatus, p.PauseStatus):
-                self.create_bookmark(p.current_position_value,
-                                     insert_after_current=(event.state & gtk.gdk.SHIFT_MASK))
-                return True
-        elif event.state & gtk.gdk.CONTROL_MASK:
-            if event.keyval == gtk.keysyms.Tab or event.keyval == gtk.keysyms.space:
-                if p.status == p.PlayingStatus:
-                    c.update_status("pause")
-                elif p.status == p.PauseStatus:
-                    c.update_status("resume")
-                else:
-                    c.update_status("start")
-                return True
-            elif event.keyval == gtk.keysyms.Up:
-                c.move_frame(+1)
-                return True
-            elif event.keyval == gtk.keysyms.Down:
-                c.move_frame(-1)
-                return True
-            elif event.keyval == gtk.keysyms.Right:
-                if event.state & gtk.gdk.SHIFT_MASK:
-                    i='second-time-increment'
-                else:
-                    i='time-increment'
-                c.move_position (config.data.preferences[i], notify=False)
-                return True
-            elif event.keyval == gtk.keysyms.Left:
-                if event.state & gtk.gdk.SHIFT_MASK:
-                    i='second-time-increment'
-                else:
-                    i='time-increment'
-                c.move_position (-config.data.preferences[i], notify=False)
-                return True
-            elif event.keyval == gtk.keysyms.Home:
-                c.update_status ("set", self.controller.create_position (0))
-                return True
-            elif event.keyval == gtk.keysyms.End:
-                pos = c.create_position (value = -config.data.preferences['time-increment'],
-                                         key = c.player.MediaTime,
-                                         origin = c.player.ModuloPosition)
-                c.update_status ("set", pos)
-                return True
-            elif event.keyval == gtk.keysyms.Page_Down:
-                # FIXME: Next chapter
-                return True
-            elif event.keyval == gtk.keysyms.Page_Up:
-                # FIXME: Previous chapter
-                return True
+        
+        if event.state & gtk.gdk.MOD1_MASK and event.keyval == gtk.keysyms.space:
+            create_bookmark()
+            return True
+        elif event.keyval in self.key_shortcuts:
+            self.key_shortcuts[event.keyval](self, event)
+            return True            
+        elif event.state & gtk.gdk.CONTROL_MASK and event.keyval in self.control_key_shortcuts:
+            self.control_key_shortcuts[event.keyval](self, event)
+            return True
         return False
 
     def get_player_control_toolbar(self):
@@ -1231,9 +1262,9 @@ class AdveneGUI (Connect):
 
 
         tb_list = [
-            (_("Play [Control-Tab]"), gtk.STOCK_MEDIA_PLAY,
+            (_("Play [Control-Tab / Control-Space]"), gtk.STOCK_MEDIA_PLAY,
              self.on_b_play_clicked),
-            (_("Pause [Control-Tab]"), gtk.STOCK_MEDIA_PAUSE,
+            (_("Pause [Control-Tab / Control-Space]"), gtk.STOCK_MEDIA_PAUSE,
              self.on_b_pause_clicked),
             (_("Stop"), gtk.STOCK_MEDIA_STOP,
              self.on_b_stop_clicked),
