@@ -5,8 +5,16 @@ advene (0.31) unstable; urgency=low
       * pressing shift while navigating with
         Control-left/right or modifying a value with Control-scroll will use a
         larger step, customizable in Edit/Preferences/Time related.
+      * Numeric keypad can be used to control video (5: play/pause,
+        4/6: rewind/forward, 2/8: previous/next frame, 0: create a bookmark)
+      * If BrlTTY is installed, the video can be controlled through a
+        Braille display
 
-   * Web server reactiviy issues on Windows XP/Vista have been fixed.
+   * Automatize generation of "Caption annotation for a given annotation
+     type" dynamic views through the annotation-type popup menu
+
+   * Web server reactiviy issues on Windows XP/Vista have been fixed, as
+     well as a plugin bundling issue in the windows installer.
 
    * The experimental schema editor is available in expert mode.
 
