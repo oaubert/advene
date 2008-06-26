@@ -536,13 +536,18 @@ class Rule(EtreeMixin):
                                    {'name': str(self.event) }))
 
         if self.condition != self.default_condition:
-            for cond in self.condition:
-                if cond == self.default_condition:
-                    continue
-                rulenode.append(cond.to_etree())
 
-        rulenode.append(ET.Element(tag('composition'), 
-                                   { 'value': self.condition.composition } ))
+            if isinstance(self.condition, ConditionList):
+                for cond in self.condition:
+                    if cond == self.default_condition:
+                        continue
+                    rulenode.append(cond.to_etree())
+                    rulenode.append(ET.Element(tag('composition'), 
+                                               { 'value': self.condition.composition } ))
+            else:
+                rulenode.append(self.condition.to_etree())
+                rulenode.append(ET.Element(tag('composition'), 
+                                           { 'value': 'and' } ))
 
         if isinstance(self.action, ActionList):
             l=self.action
