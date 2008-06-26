@@ -74,7 +74,7 @@ class EtreeMixin:
         """
         s=StringIO.StringIO(xmlstring)
         rulenode=ET.parse(s).getroot()
-        self.from_etree(domelement=rulenode, catalog=catalog, origin='XML string')
+        self.from_etree(rulenode, catalog=catalog, origin='XML string')
         s.close()
 
     def from_xml(self, uri=None, catalog=None, origin=None):
@@ -722,7 +722,7 @@ class SimpleQuery(EtreeMixin):
         for n in querynode.findall(tag('composition')):
             self.condition.composition=n.attrib['value']
 
-        rnodes=querynode.getElementsByTagName('return')
+        rnodes=querynode.findall(tag('return'))
         if len(rnodes) == 1:
             self.rvalue=rnodes[0].attrib['value']
         elif len(rnodes) == 0:
