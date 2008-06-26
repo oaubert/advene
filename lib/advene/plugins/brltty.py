@@ -214,6 +214,8 @@ class BrlEngine:
             self.init_brlapi()
         if self.brlconnection is not None:
             self.brlconnection.writeText(helper.unaccent(message))
+        else:
+            self.controller.log(_("Braille display: ") + helper.unaccent(message))
         return True
 
     def action_brldisplay(self, context, parameters):
