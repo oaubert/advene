@@ -1217,12 +1217,18 @@ class AdveneGUI (Connect):
         }
 
     key_shortcuts={
-        gtk.keysyms.KP_0: player_play_pause,
-        gtk.keysyms.KP_5: player_create_bookmark,
+        # Numeric keypad
+        gtk.keysyms.KP_5: player_play_pause,
         gtk.keysyms.KP_8: player_forward_frame,
-        gtk.keysyms.KP_9: player_rewind_frame,
+        gtk.keysyms.KP_2: player_rewind_frame,
         gtk.keysyms.KP_6: player_forward,
         gtk.keysyms.KP_4: player_rewind,
+        gtk.keysyms.KP_7: player_home,
+        gtk.keysyms.KP_1: player_end,
+        gtk.keysyms.KP_0: player_create_bookmark,
+
+        # Symbolic keypad
+        gtk.keysyms.KP_Begin: player_play_pause,
         gtk.keysyms.KP_Up: player_forward_frame,
         gtk.keysyms.KP_Down: player_rewind_frame,
         gtk.keysyms.KP_Right: player_forward,
