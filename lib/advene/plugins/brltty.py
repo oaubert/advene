@@ -28,6 +28,7 @@ except ImportError:
 import advene.core.config as config
 from advene.rules.elements import RegisteredAction
 import advene.model.tal.context
+import advene.util.helper as helper
 
 name="BrlTTY actions"
 
@@ -208,7 +209,7 @@ class BrlEngine:
         if self.brlconnection is None:
             self.init_brlapi()
         if self.brlconnection is not None:
-            self.brlconnection.writeText(message)
+            self.brlconnection.writeText(helper.unaccent(message))
         return True
 
     def action_brldisplay(self, context, parameters):
