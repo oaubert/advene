@@ -205,9 +205,12 @@ class EspeakTTSEngine(TTSEngine):
         """Close the espeak process.
         """
         if self.espeak_process is not None:
-            os.kill(self.espeak_process.pid, signal.SIGTERM)
-            # Is this portable (win32)?
-            self.espeak_process.wait()
+            if config.data.os == 'win32':
+                import win32api
+                win32api.TerminateProcess(int(self.espeak_process._handle), -1)
+            else:
+                os.kill(self.espeak_process.pid, signal.SIGTERM)
+                self.espeak_process.wait()
             self.espeak_process=None
 
     def pronounce (self, sentence):
