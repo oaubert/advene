@@ -604,7 +604,10 @@ def get_filename(title=_("Open a file"),
     fs.destroy()
 
     if filename is not None and not isinstance(filename, unicode):
-        filename=unicode(filename, _fs_encoding)
+        # Strangely, specifying _fs_encoding crashes with accented
+        # characters on win32.
+        # filename=unicode(filename, _fs_encoding)
+        filename=unicode(filename)
 
     if alias:
         return filename, al
