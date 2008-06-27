@@ -211,7 +211,6 @@ class EspeakTTSEngine(TTSEngine):
             self.espeak_process=None
 
     def pronounce (self, sentence):
-        print "pronounce ", sentence.encode('latin1')
         lang=config.data.preferences.get('tts-language', 'en')
         if self.language != lang:
             # Need to restart espeak to use the new language
