@@ -198,15 +198,21 @@ class Player:
         sink='xvimagesink'
         if config.data.player['vout'] == 'x11':
             sink='ximagesink'
+        if config.data.os == 'win32':
+            sink='directdrawsink'
 
         self.player = gst.element_factory_make("playbin", "player")
 
         self.video_sink = gst.Bin()
 
-        self.captioner=gst.element_factory_make('textoverlay', 'captioner')
-        # FIXME: move to config.data
-        self.captioner.props.font_desc='Sans 24'
-        #self.caption.props.text="Foobar"
+        # TextOverlay does not seem to be present in win32 installer. Do without it.
+        try:
+            self.captioner=gst.element_factory_make('textoverlay', 'captioner')
+            # FIXME: move to config.data
+            self.captioner.props.font_desc='Sans 24'
+            #self.caption.props.text="Foobar"
+        except:
+            self.captioner=None
         self.imagesink = gst.element_factory_make(sink, 'sink')
 
 #
@@ -243,10 +249,16 @@ class Player:
             #self.scale=gst.element_factory_make('videoscale')
             self.video_sink.add(self.captioner, filter, csp, self.imagesink)
             gst.element_link_many(self.captioner, filter, csp, self.imagesink)
-        else:
+        elif self.captioner is not None:
             self.video_sink.add(self.captioner, self.imagesink)
             self.captioner.link(self.imagesink)
-        self.video_sink.add_pad(gst.GhostPad('sink', self.captioner.get_pad('video_sink')))
+        else:
+            self.video_sink.add(self.imagesink)
+
+        if self.captioner:
+            self.video_sink.add_pad(gst.GhostPad('sink', self.captioner.get_pad('video_sink')))
+        else:
+            self.video_sink.add_pad(gst.GhostPad('sink', self.imagesink.get_pad('sink')))
 
         self.player.props.video_sink=self.video_sink
 
@@ -401,6 +413,9 @@ class Player:
         return [ None ]
 
     def display_text (self, message, begin, end):
+        if not self.captioner:
+            print "Cannot caption ", message.encode('utf8')
+            return
         if not self.check_uri():
             return
         self.caption.begin=self.position2value(begin)
