@@ -30,10 +30,15 @@ import advene.model.tal.context
 name="Text-To-Speech actions"
 
 def register(controller=None):
-    if config.data.os == 'linux' and FestivalTTSEngine.can_run():
-        engine=FestivalTTSEngine(controller)
-    elif config.data.os == 'darwin':
+    if config.data.os == 'darwin':
+        controller.log("TTS: Using /usr/bin/say")
         engine=MacOSXTTSEngine(controller)
+    elif EspeakTTSEngine.can_run():
+        controller.log("TTS: Using espeak")
+        engine=EspeakTTSEngine(controller)
+    elif FestivalTTSEngine.can_run():
+        controller.log("TTS: Using festival")
+        engine=FestivalTTSEngine(controller)
     else:
         engine=TTSEngine(controller)
     controller.register_action(RegisteredAction(
@@ -110,6 +115,8 @@ class FestivalTTSEngine(TTSEngine):
 (Parameter.set 'Audio_Command "aplay -q -c 1 -t raw -f s16 -r $SR $FILE")
 (Parameter.set 'Audio_Method 'Audio_Command)
 
+    To configure a French language: 
+http://www.culte.org/projets/biglux/devel/lao/franfest.shtml
     """
     def __init__(self, controller=None):
         TTSEngine.__init__(self, controller=controller)
@@ -123,11 +130,13 @@ class FestivalTTSEngine(TTSEngine):
     can_run=staticmethod(can_run)
 
     def pronounce (self, sentence):
-        if self.festival_pipe is None:
-            self.festival_pipe = subprocess.Popen([ self.festival_path, '--pipe' ], shell=False, stdin=subprocess.PIPE).stdin
-        self.festival_pipe.write('(SayText "%s")' % sentence.replace('"', ''))
+        try:
+            if self.festival_pipe is None:
+                self.festival_pipe = subprocess.Popen([ self.festival_path, '--pipe' ], shell=False, stdin=subprocess.PIPE).stdin
+            self.festival_pipe.write('(SayText "%s")\n' % helper.unaccent(sentence))
+        except OSError, e:
+            self.controller.log("TTS Error: ", unicode(e).encode('utf8'))
         return True
-
 
 class MacOSXTTSEngine(TTSEngine):
     """MacOSX TTSEngine.
@@ -160,3 +169,46 @@ http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/114216
 http://www.daniweb.com/code/snippet326.html
 http://www.mindtrove.info/articles/pytts.html
 """
+class EspeakTTSEngine(TTSEngine):
+    """Espeak TTSEngine.
+    """
+    def __init__(self, controller=None):
+        TTSEngine.__init__(self, controller=controller)
+        self.language=None
+        self.espeak_path=helper.find_in_path('espeak')
+        if self.espeak_path is None and config.data.os == 'win32':
+            # Try c:\\Program Files\\eSpeak
+            if os.path.isdir('c:\\Program Files\\eSpeak'):
+                self.espeak_path='c:\\Program Files\\eSpeak\\command_line\\espeak.exe'
+        self.espeak_process=None
+
+    def can_run():
+        """Can this engine run ?
+        """
+        return (os.path.isdir('c:\\Program Files\\eSpeak') or helper.find_in_path('espeak') is not None)
+    can_run=staticmethod(can_run)
+
+    def close(self):
+        """Close the espeak process.
+        """
+        if self.espeak_process is not None:
+            os.kill(self.espeak_process, signal.SIGTERM)
+            # Is this portable (win32)?
+            self.espeak_process.wait()
+            self.espeak_process=None
+
+    def pronounce (self, sentence):
+        print "pronounce ", sentence.encode('latin1')
+        lang=config.data.preferences.get('tts-language', 'en')
+        if self.language != lang:
+            # Need to restart espeak to use the new language
+            self.close()
+            self.language=lang
+        try:
+            if self.espeak_process is None:
+                self.espeak_process = subprocess.Popen([ self.espeak_path, '-v', self.language ], shell=False, stdin=subprocess.PIPE)
+            self.espeak_process.stdin.write(sentence + "\n")
+        except OSError, e:
+            self.controller.log("TTS Error: ", unicode(e).encode('utf8'))
+        return True
+
