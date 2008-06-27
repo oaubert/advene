@@ -2139,7 +2139,7 @@ class AdveneGUI (Connect):
         if not s:
             self.log(_("Empty quicksearch string"))
             return True
-        res=self.search_string(s)
+        res=self.search_string(unicode(s))
         label=_("'%s'") % s
         self.open_adhoc_view('interactiveresult', destination='east', result=res, label=label, query=s)
         return True
