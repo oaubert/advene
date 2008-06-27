@@ -1250,7 +1250,7 @@ class AdveneGUI (Connect):
         p=self.controller.player
         
         if event.state & gtk.gdk.MOD1_MASK and event.keyval == gtk.keysyms.space:
-            create_bookmark()
+            self.player_create_bookmark()
             return True
         elif event.keyval in self.key_shortcuts:
             self.key_shortcuts[event.keyval](self, event)
