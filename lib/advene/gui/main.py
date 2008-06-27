@@ -3034,7 +3034,8 @@ class AdveneGUI (Connect):
                         'remember-window-size', 'expert-mode', 'update-check',
                         'package-auto-save', 'package-auto-save-interval',
                         'bookmark-snapshot-width', 'bookmark-snapshot-precision',
-                        'save-default-workspace', 'restore-default-workspace')
+                        'save-default-workspace', 'restore-default-workspace',
+                        'tts-language', )
         cache={
             'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
             'data': config.data.path['data'],
@@ -3127,6 +3128,16 @@ class AdveneGUI (Connect):
         ew.add_spin(_("Font size"), 'font-size', _("Font size for annotation widgets"), 4, 20)
         ew.add_spin(_("Button height"), 'button-height', _("Height of annotation widgets"), 10, 50)
         ew.add_spin(_("Interline height"), 'interline-height', _("Height of interlines"), 0, 40)
+
+        ew.add_title(_("Text-To-Speech"))
+        ew.add_option(_("TTS language"), 'tts-language',
+                      _("What language settings should be used for text-to-speech"),
+                      {
+                _("French"): 'fr',
+                _("English"): 'en',
+                _("Esperanto"): 'eo',
+                _("Spanish"): 'es',
+                })
 
         res=ew.popup()
         if res:

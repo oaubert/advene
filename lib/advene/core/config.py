@@ -249,6 +249,9 @@ class Config(object):
             'drag-snapshot-width': 50,
             # log messages also go to the terminal
             'log-to-terminal': False,
+            # Language used for TTS. Standard 2 char. specification
+            # (in fact, we use the espeak notation for simplicity).
+            'tts-language': 'en',
             }
 
         # Player options
