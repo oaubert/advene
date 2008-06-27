@@ -20,6 +20,7 @@
 from gettext import gettext as _
 import subprocess
 import os
+import signal
 
 import advene.core.config as config
 from advene.rules.elements import RegisteredAction
@@ -110,19 +111,31 @@ class FestivalTTSEngine(TTSEngine):
     order to be able to mix it with the movie sound if necessary.
 
     For this, in older Festival versions (at least until 1.4.3), the
-    ~/.festivalrc file must contain:
+    ~/.festivalrc file should contain:
 
 (Parameter.set 'Audio_Command "aplay -q -c 1 -t raw -f s16 -r $SR $FILE")
 (Parameter.set 'Audio_Method 'Audio_Command)
 
-    To configure a French language: 
-http://www.culte.org/projets/biglux/devel/lao/franfest.shtml
+    
     """
     def __init__(self, controller=None):
         TTSEngine.__init__(self, controller=controller)
         self.festival_path=helper.find_in_path('festival')
-        self.festival_pipe=None
+        self.aplay_path=helper.find_in_path('aplay')
+        if self.festival_path is None:
+            self.controller.log(_("TTS disabled. Cannot find the application 'festival' in PATH"))
+        if self.aplay_path is None:
+            self.controller.log(_("TTS disabled. Cannot find the application 'aplay' in PATH"))
+        self.festival_process=None
 
+    def init(self):
+        if self.festival_path is not None and self.aplay_path is not None:
+            self.festival_process = subprocess.Popen([ self.festival_path, '--pipe' ], shell=False, stdin=subprocess.PIPE)
+            # Configure festival to use aplay
+            self.festival_process.stdin.write("""(Parameter.set 'Audio_Command "%s -q -c 1 -t raw -f s16 -r $SR $FILE")\n""" % self.aplay_path)
+            self.festival_process.stdin.write("""(Parameter.set 'Audio_Method 'Audio_Command)\n""")
+
+        
     def can_run():
         """Can this engine run ?
         """
@@ -131,11 +144,11 @@ http://www.culte.org/projets/biglux/devel/lao/franfest.shtml
 
     def pronounce (self, sentence):
         try:
-            if self.festival_pipe is None:
-                self.festival_pipe = subprocess.Popen([ self.festival_path, '--pipe' ], shell=False, stdin=subprocess.PIPE).stdin
-            self.festival_pipe.write('(SayText "%s")\n' % helper.unaccent(sentence))
+            self.init()
+            if self.festival_process is not None:
+                self.festival_process.stdin.write('(SayText "%s")\n' % helper.unaccent(sentence))
         except OSError, e:
-            self.controller.log("TTS Error: ", unicode(e).encode('utf8'))
+            self.controller.log(u"TTS Error: " + unicode(e))
         return True
 
 class MacOSXTTSEngine(TTSEngine):
@@ -192,7 +205,7 @@ class EspeakTTSEngine(TTSEngine):
         """Close the espeak process.
         """
         if self.espeak_process is not None:
-            os.kill(self.espeak_process, signal.SIGTERM)
+            os.kill(self.espeak_process.pid, signal.SIGTERM)
             # Is this portable (win32)?
             self.espeak_process.wait()
             self.espeak_process=None
