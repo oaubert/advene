@@ -1749,6 +1749,11 @@ class AdveneController:
 
         self.event_handler.set_ruleset(rs, type_='user')
         for v in parsed_views:
+            if v == view:
+                # Avoid double notification of ViewActivation. We need
+                # to keep it in parsed_views though, in order to
+                # prevent recursion.
+                continue
             self.notify("ViewActivation", view=v, comment="Activate subview of %s" % view.id)
         self.notify("ViewActivation", view=view, comment="Activate STBV")
         return
