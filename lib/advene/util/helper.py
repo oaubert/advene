@@ -442,6 +442,9 @@ def get_statistics(fname):
     if fname.lower().endswith('.azp'):
         # If the file is a .azp, then it may have a
         # META-INF/statistics.xml file. Use it.
+        # Encoding issues on win32:
+        if isinstance(fname, unicode):
+            fname=fname.encode(sys.getfilesystemencoding())
         try:
             z=zipfile.ZipFile(fname, 'r')
         except Exception, e:
