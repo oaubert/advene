@@ -73,6 +73,8 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
            Providing None for the source parameter creates a new Package.
         """
         self.meta_cache={}
+        if isinstance(uri, unicode):
+            uri=uri.encode(sys.getfilesystemencoding())
         if re.match('[a-zA-Z]:', uri):
             # Windows drive: notation. Convert it to
             # a more URI-compatible syntax
