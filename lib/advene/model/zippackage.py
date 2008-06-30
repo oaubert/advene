@@ -307,7 +307,7 @@ class ZipPackage:
         # Generation of the manifest file
         fname=self.tempfile(u"META-INF", u"manifest.xml")
         tree=ET.ElementTree(self.list_to_manifest(manifest))
-        tree.write(fname)
+        tree.write(fname, encoding='utf-8')
         if z is not None:
             # Generation of the manifest file
             z.write( fname,
