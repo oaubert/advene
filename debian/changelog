@@ -8,10 +8,14 @@ advene (0.31) unstable; urgency=low
       * Numeric keypad can be used to control video (5: play/pause,
         4/6: rewind/forward, 2/8: previous/next frame, 0: create a bookmark)
       * If BrlTTY is installed, the video can be controlled through a
-        Braille display
+        Braille display.
 
+   * Experimental speech synthesis support is available on all
+     platforms. You need to install the espeak application from
+     http://espeak.sourceforge.net/
+  
    * Automatize generation of "Caption annotation for a given annotation
-     type" dynamic views through the annotation-type popup menu
+     type" dynamic views through the annotation-type popup menu.
 
    * Web server reactiviy issues on Windows XP/Vista have been fixed, as
      well as a plugin bundling issue in the windows installer.
