@@ -188,9 +188,7 @@ class AdveneGUI (Connect):
         # Resize the main window
         window=self.gui.get_widget('win')
         self.init_window_size(window, 'main')
-        window.set_icon_list(*[ gtk.gdk.pixbuf_new_from_file(config.data.advenefile( ( 'pixmaps', 'icon_advene%d.png' % size ) ))
-                                for size in (16, 32, 48, 64, 128) ])
-
+        window.set_icon_list(*self.get_icon_list())
         self.tooltips = gtk.Tooltips()
 
         # Last auto-save time (in ms)
@@ -388,6 +386,15 @@ class AdveneGUI (Connect):
 
         # Populate default STBV and type lists
         self.update_gui()
+
+    def get_icon_list(self):
+        """Return the list of icon pixbuf appropriate for Window.set_icon_list.
+        """
+        if not hasattr(self, '_icon_list'):
+            self._icon_list=[ gtk.gdk.pixbuf_new_from_file(config.data.advenefile( 
+                        ( 'pixmaps', 'icon_advene%d.png' % size ) )) 
+                              for size in (16, 32, 48, 64, 128) ]
+        return self._icon_list
 
     def annotation_lifecycle(self, context, parameters):
         """Method used to update the active views.
