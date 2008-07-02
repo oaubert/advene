@@ -7,7 +7,7 @@ Source: dist\w9xpopen.exe; DestDir: {app}
 Source: dist\share\*; DestDir: {app}\share; Flags: recursesubdirs
 Source: dist\doc\*; DestDir: {app}\doc; Flags: recursesubdirs
 Source: dist\locale\*; DestDir: {app}\locale; Flags: recursesubdirs
-Source: share\pixmaps\dvd.ico; DestDir: {app}; DestName: advene.ico
+Source: share\pixmaps\advene.ico; DestDir: {app}; DestName: advene.ico
 Source: c:\gtk\etc\*; DestDir: {app}\etc; Flags: recursesubdirs
 Source: examples\*v6.azp; DestDir: {app}\examples
 Source: c:\gtk\lib\gtk-2.0\*; DestDir: {app}\lib\gtk-2.0; Flags: recursesubdirs
