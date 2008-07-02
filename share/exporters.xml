@@ -1,11 +1,9 @@
-
-<package xmlns='http://experience.univ-lyon1.fr/advene/ns' xmlns:dc='http://purl.org/dc/elements/1.1/' xmlns:xlink='http://www.w3.org/1999/xlink' dc:date='2004-06-15' dc:creator='oaubert'>
+<package dc:creator="oaubert" dc:date="2004-06-15" xmlns="http://experience.univ-lyon1.fr/advene/ns" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink">
   <meta>
-    <tag_colors xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>
-    </tag_colors>
-    <duration xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>1800000</duration>
-    <title xmlns='http://purl.org/dc/elements/1.1/'>Export package</title>
-    <mediafile xmlns='http://experience.univ-lyon1.fr/advene/ns/advenetool'>
+    <tag_colors xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"></tag_colors>
+    <duration xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">1800000</duration>
+    <title xmlns="http://purl.org/dc/elements/1.1/">Export package</title>
+    <mediafile xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">
     </mediafile>
   </meta>
   <imports/>
@@ -13,392 +11,392 @@
   <queries/>
   <schemas/>
   <views>
-    <view dc:date='2004-06-14' dc:creator='oaubert' id='srt' viewable-class='package'>
+    <view dc:creator="oaubert" dc:date="2004-06-14" id="srt" viewable-class="package">
       <meta>
-        <title xmlns='http://purl.org/dc/elements/1.1/'>SRT subtitles</title>
+        <title xmlns="http://purl.org/dc/elements/1.1/">SRT subtitles</title>
       </meta>
-      <content mime-type='text/plain'>&lt;pre>
-&lt;span tal:omit-tag="" tal:repeat="a here/annotations/sorted">
-&lt;span tal:replace="python:repeat['a'].getIndex()+1" >Index&lt;/span>
-&lt;span tal:replace="a/fragment/formatted/begin" >Begin&lt;/span> --> &lt;span tal:replace="a/fragment/formatted/end" >End&lt;/span>
-&lt;span tal:replace="a/content/data">Content&lt;/span>
-&lt;/span>
-&lt;/pre>
+      <content mime-type="text/plain">&lt;pre&gt;
+&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;
+&lt;span tal:replace=&quot;python:repeat['a'].getIndex()+1&quot; &gt;Index&lt;/span&gt;
+&lt;span tal:replace=&quot;a/fragment/formatted/begin&quot; &gt;Begin&lt;/span&gt; --&gt; &lt;span tal:replace=&quot;a/fragment/formatted/end&quot; &gt;End&lt;/span&gt;
+&lt;span tal:replace=&quot;a/content/data&quot;&gt;Content&lt;/span&gt;
+&lt;/span&gt;
+&lt;/pre&gt;
 </content>
     </view>
-    <view dc:date='2004-06-14' dc:creator='oaubert' id='smil' viewable-class='package'>
+    <view dc:creator="oaubert" dc:date="2004-06-14" id="smil" viewable-class="package">
       <meta>
-        <title xmlns='http://purl.org/dc/elements/1.1/'>SMIL</title>
+        <title xmlns="http://purl.org/dc/elements/1.1/">SMIL</title>
       </meta>
-      <content mime-type='text/smil'>&lt;smil xmlns="http://www.w3.org/2001/SMIL20/Language">
- &lt;head>
-  &lt;meta name="copyright" tal:attributes="content here/author" />
-  &lt;layout>
-   &lt;root-layout width="300" height="200" background-color="white" />
-   &lt;region id="narrator" left="75" top="50" width="32" height="32" />
-  &lt;/layout>
- &lt;/head>
- &lt;body>
-  &lt;div tal:omit-tag='' tal:repeat='e here/annotations/sorted'>
-      &lt;text region="narrator" tal:attributes='
+      <content mime-type="text/smil">&lt;smil xmlns=&quot;http://www.w3.org/2001/SMIL20/Language&quot;&gt;
+ &lt;head&gt;
+  &lt;meta name=&quot;copyright&quot; tal:attributes=&quot;content here/author&quot; /&gt;
+  &lt;layout&gt;
+   &lt;root-layout width=&quot;300&quot; height=&quot;200&quot; background-color=&quot;white&quot; /&gt;
+   &lt;region id=&quot;narrator&quot; left=&quot;75&quot; top=&quot;50&quot; width=&quot;32&quot; height=&quot;32&quot; /&gt;
+  &lt;/layout&gt;
+ &lt;/head&gt;
+ &lt;body&gt;
+  &lt;div tal:omit-tag='' tal:repeat='e here/annotations/sorted'&gt;
+      &lt;text region=&quot;narrator&quot; tal:attributes='
       id    e/id ;
       begin e/fragment/formatted/begin ; 
       end   e/fragment/formatted/end' 
-      tal:content="e/content/data">Texte&lt;/text>
-  &lt;/div>
- &lt;/body>
-&lt;/smil>
+      tal:content=&quot;e/content/data&quot;&gt;Texte&lt;/text&gt;
+  &lt;/div&gt;
+ &lt;/body&gt;
+&lt;/smil&gt;
 </content>
     </view>
-    <view dc:date='2006-01-18' dc:creator='oaubert' id='svg' viewable-class='package'>
+    <view dc:creator="oaubert" dc:date="2006-01-18" id="svg" viewable-class="package">
       <meta>
-        <title xmlns='http://purl.org/dc/elements/1.1/'>SVG</title>
+        <title xmlns="http://purl.org/dc/elements/1.1/">SVG</title>
       </meta>
-      <content mime-type='image/svg+xml'>&lt;svg tal:define="scale python:4 ; offset python:150 ; duration package/meta/advenetool/duration"  xmlns='http://www.w3.org/2000/svg'  xmlns:xlink='http://www.w3.org/1999/xlink'  version='1'   x='0' y='0' tal:attributes="width python:offset + long(duration) / scale ; height python:60+30*len(package.annotationTypes)">
+      <content mime-type="image/svg+xml">&lt;svg tal:define=&quot;scale python:4 ; offset python:150 ; duration package/meta/advenetool/duration&quot;  xmlns='http://www.w3.org/2000/svg'  xmlns:xlink='http://www.w3.org/1999/xlink'  version='1'   x='0' y='0' tal:attributes=&quot;width python:offset + long(duration) / scale ; height python:60+30*len(package.annotationTypes)&quot;&gt;
 
-&lt;!-- Header generation -->
-&lt;span tal:omit-tag="" tal:repeat="i python:range(int(duration) / 1000)">
-  &lt;span tal:omit-tag="" tal:define="t python:i*1000 ; pos python:offset+t/scale">
-    &lt;line tal:attributes="x1 pos ; x2 pos" y1="0" y2="20" stroke="black" />
-    &lt;text tal:attributes="x python:pos-20" y="10" tal:content="t/formatted"  font-family="sans-serif" font-size="10" stroke="black">Timestamp&lt;/text>
-  &lt;/span>
-&lt;/span>
+&lt;!-- Header generation --&gt;
+&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;i python:range(int(duration) / 1000)&quot;&gt;
+  &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;t python:i*1000 ; pos python:offset+t/scale&quot;&gt;
+    &lt;line tal:attributes=&quot;x1 pos ; x2 pos&quot; y1=&quot;0&quot; y2=&quot;20&quot; stroke=&quot;black&quot; /&gt;
+    &lt;text tal:attributes=&quot;x python:pos-20&quot; y=&quot;10&quot; tal:content=&quot;t/formatted&quot;  font-family=&quot;sans-serif&quot; font-size=&quot;10&quot; stroke=&quot;black&quot;&gt;Timestamp&lt;/text&gt;
+  &lt;/span&gt;
+&lt;/span&gt;
 
-&lt;!-- Looping on annotation types -->
-&lt;span tal:omit-tag="" tal:repeat="at here/annotationTypes">
+&lt;!-- Looping on annotation types --&gt;
+&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;at here/annotationTypes&quot;&gt;
 
- &lt;span tal:omit-tag="" tal:define="vpos python:30+30*repeat['at'].getIndex()+30" >
+ &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;vpos python:30+30*repeat['at'].getIndex()+30&quot; &gt;
 
-  &lt;a tal:attributes="href at/absolute_url">
-    &lt;text x="2" tal:attributes="y vpos ; id at/id"  tal:content="at/title" stroke="black" font-size="13" font-family="sans-serif">Titre&lt;/text>
-  &lt;/a>
+  &lt;a tal:attributes=&quot;href at/absolute_url&quot;&gt;
+    &lt;text x=&quot;2&quot; tal:attributes=&quot;y vpos ; id at/id&quot;  tal:content=&quot;at/title&quot; stroke=&quot;black&quot; font-size=&quot;13&quot; font-family=&quot;sans-serif&quot;&gt;Titre&lt;/text&gt;
+  &lt;/a&gt;
 
-  &lt;!-- Looping on annotations -->
-    &lt;span tal:omit-tag=""   tal:define="rpos python:vpos-15" tal:repeat="a at/annotations">
+  &lt;!-- Looping on annotations --&gt;
+    &lt;span tal:omit-tag=&quot;&quot;   tal:define=&quot;rpos python:vpos-15&quot; tal:repeat=&quot;a at/annotations&quot;&gt;
 
-	&lt;a tal:attributes="href a/absolute_url">
-      &lt;rect tal:attributes="x python:offset + a.fragment.begin / scale; width python:a.fragment.duration / scale ; y rpos"  height="20" fill="none" stroke="black">&lt;/rect>
-      &lt;text tal:attributes="x python:offset + a.fragment.begin / scale; y vpos ; id a/id"  tal:content="a/content/data" fill="black" stroke="black" font-size="12" font-family="sans-serif">Texte&lt;/text>
-      &lt;/a>
-    &lt;/span>
+	&lt;a tal:attributes=&quot;href a/absolute_url&quot;&gt;
+      &lt;rect tal:attributes=&quot;x python:offset + a.fragment.begin / scale; width python:a.fragment.duration / scale ; y rpos&quot;  height=&quot;20&quot; fill=&quot;none&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;
+      &lt;text tal:attributes=&quot;x python:offset + a.fragment.begin / scale; y vpos ; id a/id&quot;  tal:content=&quot;a/content/data&quot; fill=&quot;black&quot; stroke=&quot;black&quot; font-size=&quot;12&quot; font-family=&quot;sans-serif&quot;&gt;Texte&lt;/text&gt;
+      &lt;/a&gt;
+    &lt;/span&gt;
 
-  &lt;/span>
+  &lt;/span&gt;
 
-&lt;/span>
-&lt;/svg>
+&lt;/span&gt;
+&lt;/svg&gt;
 </content>
     </view>
-    <view dc:date='2005-03-07' dc:creator='oaubert' id='tsv' viewable-class='*'>
+    <view dc:creator="oaubert" dc:date="2005-03-07" id="tsv" viewable-class="*">
       <meta>
-        <title xmlns='http://purl.org/dc/elements/1.1/'>Spreadsheet (tab separated values)</title>
+        <title xmlns="http://purl.org/dc/elements/1.1/">Spreadsheet (tab separated values)</title>
       </meta>
-      <content mime-type='text/tab-separated-values'>&lt;span tal:omit-tag="" tal:repeat="a here/annotations/sorted">
-&lt;span tal:replace="a/fragment/formatted/begin" >Begin&lt;/span>	&lt;span tal:replace="a/fragment/formatted/end" >End&lt;/span>	&lt;span tal:replace="a/content/data">Content&lt;/span>
-&lt;/span></content>
+      <content mime-type="text/tab-separated-values">&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;
+&lt;span tal:replace=&quot;a/fragment/formatted/begin&quot; &gt;Begin&lt;/span&gt;	&lt;span tal:replace=&quot;a/fragment/formatted/end&quot; &gt;End&lt;/span&gt;	&lt;span tal:replace=&quot;a/content/data&quot;&gt;Content&lt;/span&gt;
+&lt;/span&gt;</content>
     </view>
-    <view dc:date='2006-01-26' dc:creator='oaubert' id='index' viewable-class='package'>
+    <view dc:creator="oaubert" dc:date="2006-01-26" id="index" viewable-class="package">
       <meta>
-        <title xmlns='http://purl.org/dc/elements/1.1/'>index</title>
+        <title xmlns="http://purl.org/dc/elements/1.1/">index</title>
       </meta>
-      <content mime-type='text/html'>&lt;h1>About this export_views package&lt;/h1>
+      <content mime-type="text/html">&lt;h1&gt;About this export_views package&lt;/h1&gt;
 
-&lt;p>This package provides some views that can be used to export some package data to another format. Currently supported formats are &lt;/p>
-&lt;ul>
-&lt;li>SMIL : a basic &lt;a href="http://www.w3.org/TR/REC-smil/">SMIL&lt;/a> rendering of annotations. It can be applied to a package.&lt;/li>
-&lt;li>SRT subtitles : subtitles in the SRT format (used by some video players).&lt;/li>
-&lt;li>SVG : all annotations on a timeline, in a graphical representation&lt;/li>
-&lt;li>spreadsheet : a tab-separated-value conversion.&lt;/li>
-&lt;/ul>
+&lt;p&gt;This package provides some views that can be used to export some package data to another format. Currently supported formats are &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;SMIL : a basic &lt;a href=&quot;http://www.w3.org/TR/REC-smil/&quot;&gt;SMIL&lt;/a&gt; rendering of annotations. It can be applied to a package.&lt;/li&gt;
+&lt;li&gt;SRT subtitles : subtitles in the SRT format (used by some video players).&lt;/li&gt;
+&lt;li&gt;SVG : all annotations on a timeline, in a graphical representation&lt;/li&gt;
+&lt;li&gt;spreadsheet : a tab-separated-value conversion.&lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;p>You can either import the export_views package (through the &lt;em>Edit/Package imports&lt;/em> menu), or copy/paste the contents of a view into one of your own views, to adapt if better to your needs.&lt;/p>
+&lt;p&gt;You can either import the export_views package (through the &lt;em&gt;Edit/Package imports&lt;/em&gt; menu), or copy/paste the contents of a view into one of your own views, to adapt if better to your needs.&lt;/p&gt;
 </content>
     </view>
-    <view dc:date='2006-02-07' dc:creator='oaubert' id='timeline' viewable-class='package'>
+    <view dc:creator="oaubert" dc:date="2006-02-07" id="timeline" viewable-class="package">
       <meta>
-        <title xmlns='http://purl.org/dc/elements/1.1/'>HTML+CSS timeline</title>
+        <title xmlns="http://purl.org/dc/elements/1.1/">HTML+CSS timeline</title>
       </meta>
-      <content mime-type='text/html'>&lt;html>
+      <content mime-type="text/html">&lt;html&gt;
 
-&lt;head>
-&lt;title>Timeline view for &lt;span tal:replace="here/title">titre&lt;/span>&lt;/title>
-&lt;!-- Generate the style header -->
-&lt;style type="text/css">
+&lt;head&gt;
+&lt;title&gt;Timeline view for &lt;span tal:replace=&quot;here/title&quot;&gt;titre&lt;/span&gt;&lt;/title&gt;
+&lt;!-- Generate the style header --&gt;
+&lt;style type=&quot;text/css&quot;&gt;
 
-&lt;span tal:omit-tag="" tal:repeat="at here/annotationTypes">
+&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;at here/annotationTypes&quot;&gt;
 
-  &lt;span tal:omit-tag="" tal:define="vpos python:5*repeat['at'].getIndex()+5" >
+  &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;vpos python:5*repeat['at'].getIndex()+5&quot; &gt;
 
-        &lt;span tal:replace="string: 
+        &lt;span tal:replace=&quot;string: 
 div.${at/id} { 
-  background:gray;
+  background:${at/color};
   border:thin;
   position:absolute;
   left:1ex;
   top:${vpos}ex;
-}">style&lt;/span>
+}&quot;&gt;style&lt;/span&gt;
 
-    &lt;span tal:omit-tag="" tal:repeat="a at/annotations">
-        &lt;span tal:replace="string: 
+    &lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a at/annotations&quot;&gt;
+        &lt;span tal:replace=&quot;string: 
 div.${a/id} { 
-  background:yellow;
+  background:${a/color};
   border:thin;
   position:absolute;
   left:${python: a.fragment.begin/100}ex;
   top:0ex;
-}">style&lt;/span>
+}&quot;&gt;style&lt;/span&gt;
 
-  &lt;/span>
- &lt;/span>
-&lt;/span>
-&lt;/style>
+  &lt;/span&gt;
+ &lt;/span&gt;
+&lt;/span&gt;
+&lt;/style&gt;
 
-&lt;/head>
-&lt;body>
+&lt;/head&gt;
+&lt;body&gt;
 
-&lt;!-- Annotation types -->
-&lt;div tal:repeat="at here/annotationTypes" tal:attributes="class at/id">
+&lt;!-- Annotation types --&gt;
+&lt;div tal:repeat=&quot;at here/annotationTypes&quot; tal:attributes=&quot;class at/id&quot;&gt;
 
-&lt;a tal:attributes="href at/absolute_url"
-     tal:content="at/title">Annotation type&lt;/a>
+&lt;a tal:attributes=&quot;href at/absolute_url&quot;
+     tal:content=&quot;at/title&quot;&gt;Annotation type&lt;/a&gt;
 
-&lt;div tal:repeat="a at/annotations" tal:attributes="class a/id">
+&lt;div tal:repeat=&quot;a at/annotations&quot; tal:attributes=&quot;class a/id&quot;&gt;
 
-&lt;a tal:attributes="href a/absolute_url; 
-                              title string: ${a/fragment/formatted/begin} - ${a/fragment/formatted/end}" 
-     tal:content="a/content/data">Data&lt;/a>
-&lt;/div>
+&lt;a tal:attributes=&quot;href a/absolute_url; 
+                              title string: ${a/fragment/formatted/begin} - ${a/fragment/formatted/end}&quot; 
+     tal:content=&quot;a/representation&quot;&gt;Data&lt;/a&gt;
+&lt;/div&gt;
 
-&lt;/div>
+&lt;/div&gt;
 
 
-&lt;/body>
+&lt;/body&gt;
 
-&lt;/html>
+&lt;/html&gt;
 </content>
     </view>
-    <view dc:date='2007-10-23' dc:creator='oaubert' id='mpeg7' viewable-class='*'>
+    <view dc:creator="oaubert" dc:date="2007-10-23" id="mpeg7" viewable-class="*">
       <meta>
-        <title xmlns='http://purl.org/dc/elements/1.1/'>MPEG7 (experimental)</title>
+        <title xmlns="http://purl.org/dc/elements/1.1/">MPEG7 (experimental)</title>
       </meta>
-      <content mime-type='text/html'>&lt;?xml version="1.0" encoding="utf-8"?>
-&lt;Mpeg7 xmlns="urn:mpeg:mpeg7:schema:2001"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:mpeg7="urn:mpeg:mpeg7:schema:2001"
-       xsi:schemaLocation="urn:mpeg:mpeg7:schema:2001 mpeg7-2001-valid.xsd">
-  &lt;Description xsi:type="ContentEntityType">
-    &lt;MultimediaContent xsi:type="AudioVisualType">
-      &lt;AudioVisual>
-        &lt;MediaLocator>
-          &lt;MediaUri tal:content="here/ownerPackage/meta/advenetool/mediafile">file.mpg&lt;/MediaUri>
-        &lt;/MediaLocator>
-        &lt;TemporalDecomposition>
+      <content mime-type="text/html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;Mpeg7 xmlns=&quot;urn:mpeg:mpeg7:schema:2001&quot;
+       xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+       xmlns:mpeg7=&quot;urn:mpeg:mpeg7:schema:2001&quot;
+       xsi:schemaLocation=&quot;urn:mpeg:mpeg7:schema:2001 mpeg7-2001-valid.xsd&quot;&gt;
+  &lt;Description xsi:type=&quot;ContentEntityType&quot;&gt;
+    &lt;MultimediaContent xsi:type=&quot;AudioVisualType&quot;&gt;
+      &lt;AudioVisual&gt;
+        &lt;MediaLocator&gt;
+          &lt;MediaUri tal:content=&quot;here/ownerPackage/meta/advenetool/mediafile&quot;&gt;file.mpg&lt;/MediaUri&gt;
+        &lt;/MediaLocator&gt;
+        &lt;TemporalDecomposition&gt;
 
-	&lt;span tal:repeat="a here/annotations/sorted" tal:omit-tag="">
-          &lt;AudioVisualSegment tal:attributes="id a/id">
-            &lt;TextAnnotation>
-              &lt;FreeTextAnnotation tal:content="a/content/data">Data&lt;/FreeTextAnnotation>
-            &lt;/TextAnnotation>
-            &lt;MediaTime>
-              &lt;MediaTimePoint FIXME>T00:19:07:9596160F14112000&lt;/MediaTimePoint>
-              &lt;MediaDuration FIXME>PT00H00M35S6773760N14112000F&lt;/MediaDuration>
-            &lt;/MediaTime>
-          &lt;/AudioVisualSegment>
+	&lt;span tal:repeat=&quot;a here/annotations/sorted&quot; tal:omit-tag=&quot;&quot;&gt;
+          &lt;AudioVisualSegment tal:attributes=&quot;id a/id&quot;&gt;
+            &lt;TextAnnotation&gt;
+              &lt;FreeTextAnnotation tal:content=&quot;a/content/data&quot;&gt;Data&lt;/FreeTextAnnotation&gt;
+            &lt;/TextAnnotation&gt;
+            &lt;MediaTime&gt;
+              &lt;MediaTimePoint FIXME&gt;T00:19:07:9596160F14112000&lt;/MediaTimePoint&gt;
+              &lt;MediaDuration FIXME&gt;PT00H00M35S6773760N14112000F&lt;/MediaDuration&gt;
+            &lt;/MediaTime&gt;
+          &lt;/AudioVisualSegment&gt;
 
-        &lt;/TemporalDecomposition>
-      &lt;/AudioVisual>
-    &lt;/MultimediaContent>
-  &lt;/Description>
-&lt;/Mpeg7>
+        &lt;/TemporalDecomposition&gt;
+      &lt;/AudioVisual&gt;
+    &lt;/MultimediaContent&gt;
+  &lt;/Description&gt;
+&lt;/Mpeg7&gt;
 </content>
     </view>
-    <view dc:date='2007-12-11' dc:creator='oaubert' id='iri' viewable-class='package'>
+    <view dc:creator="oaubert" dc:date="2007-12-11" id="iri" viewable-class="package">
       <meta>
-        <title xmlns='http://purl.org/dc/elements/1.1/'>IRI</title>
+        <title xmlns="http://purl.org/dc/elements/1.1/">IRI</title>
       </meta>
-      <content mime-type='application/xml'>&lt;?xml version="1.0" encoding="UTF-8"?>
-&lt;iri>
-  &lt;head>
-    &lt;meta name="id" tal:attributes="content python:options['aliases'][package]"/>
-    &lt;meta name="title" tal:attributes="content package/title"/>
-    &lt;meta name="author" content=""/>
-    &lt;meta name="contributor" tal:attributes="content package/author"/>
-    &lt;meta name="type" content="Film"/>
-    &lt;meta name="copyright" content=""/>
-    &lt;meta name="date" tal:attributes="content package/date"/>
-    &lt;meta name="abstract" tal:attributes="content string:Converted from ${package/uri}"/>
-  &lt;/head>
-  &lt;body>
-    &lt;ensembles>
-      &lt;ensemble tal:repeat="sch package/schemas"
-      tal:attributes="id sch/id ; author sch/author ; date
-      sch/date ; title sch/title ; abstract sch/meta/dc/description">
-	&lt;decoupage tal:repeat="at sch/annotationTypes" tal:attributes="id at/id ; dur
+      <content mime-type="application/xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;iri&gt;
+  &lt;head&gt;
+    &lt;meta name=&quot;id&quot; tal:attributes=&quot;content python:options['aliases'][package]&quot;/&gt;
+    &lt;meta name=&quot;title&quot; tal:attributes=&quot;content package/title&quot;/&gt;
+    &lt;meta name=&quot;author&quot; content=&quot;&quot;/&gt;
+    &lt;meta name=&quot;contributor&quot; tal:attributes=&quot;content package/author&quot;/&gt;
+    &lt;meta name=&quot;type&quot; content=&quot;Film&quot;/&gt;
+    &lt;meta name=&quot;copyright&quot; content=&quot;&quot;/&gt;
+    &lt;meta name=&quot;date&quot; tal:attributes=&quot;content package/date&quot;/&gt;
+    &lt;meta name=&quot;abstract&quot; tal:attributes=&quot;content string:Converted from ${package/uri}&quot;/&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;ensembles&gt;
+      &lt;ensemble tal:repeat=&quot;sch package/schemas&quot;
+      tal:attributes=&quot;id sch/id ; author sch/author ; date
+      sch/date ; title sch/title ; abstract sch/meta/dc/description&quot;&gt;
+	&lt;decoupage tal:repeat=&quot;at sch/annotationTypes&quot; tal:attributes=&quot;id at/id ; dur
       package/cached_duration ;  color at/color ;
       author at/author ; date at/date ;  title at/title ; label
-      at/representation ; abstract at/meta/dc/description">
-	  &lt;elements>
-	    &lt;element tal:repeat="a at/annotations/sorted"
-		     order="" prev="" next="" 
-		     tal:attributes="id a/id ; begin a/fragment/begin
+      at/representation ; abstract at/meta/dc/description&quot;&gt;
+	  &lt;elements&gt;
+	    &lt;element tal:repeat=&quot;a at/annotations/sorted&quot;
+		     order=&quot;&quot; prev=&quot;&quot; next=&quot;&quot; 
+		     tal:attributes=&quot;id a/id ; begin a/fragment/begin
 		     ; dur a/fragment/duration ;  author a/author ;
 		     date a/date ; title a/representation ; abstract
-		     a/content/data ; src string:http://localhost:1234${a/snapshot_url}" />
-	  &lt;/elements>
-	  &lt;views>
-	  &lt;/views>
-	&lt;/decoupage>
-      &lt;/ensemble>
-    &lt;/ensembles>
-    &lt;links/>
-    &lt;medias>
-      &lt;media id="audio"/>
-      &lt;media id="image"/>
-      &lt;media id="text"/>
-      &lt;media id="video">
-	&lt;video id="media" q="BQ" begin="0" tal:attributes="src
-	package/meta/advenetool/mediafile ; dur package/cached_duration"/>
-      &lt;/media>
-    &lt;/medias>
-    &lt;display>
-    &lt;decoupage tal:repeat="at package/annotationTypes" tal:attributes="idensemble at/schema/id ; id at/id ; position repeat/at/index"/>
-    &lt;/display>
-  &lt;/body>
-&lt;/iri>
+		     a/content/data ; src string:http://localhost:1234${a/snapshot_url}&quot; /&gt;
+	  &lt;/elements&gt;
+	  &lt;views&gt;
+	  &lt;/views&gt;
+	&lt;/decoupage&gt;
+      &lt;/ensemble&gt;
+    &lt;/ensembles&gt;
+    &lt;links/&gt;
+    &lt;medias&gt;
+      &lt;media id=&quot;audio&quot;/&gt;
+      &lt;media id=&quot;image&quot;/&gt;
+      &lt;media id=&quot;text&quot;/&gt;
+      &lt;media id=&quot;video&quot;&gt;
+	&lt;video id=&quot;media&quot; q=&quot;BQ&quot; begin=&quot;0&quot; tal:attributes=&quot;src
+	package/meta/advenetool/mediafile ; dur package/cached_duration&quot;/&gt;
+      &lt;/media&gt;
+    &lt;/medias&gt;
+    &lt;display&gt;
+    &lt;decoupage tal:repeat=&quot;at package/annotationTypes&quot; tal:attributes=&quot;idensemble at/schema/id ; id at/id ; position repeat/at/index&quot;/&gt;
+    &lt;/display&gt;
+  &lt;/body&gt;
+&lt;/iri&gt;
 </content>
     </view>
-    <view dc:date='2008-01-17' dc:creator='oaubert' id='Advene2' viewable-class='package'>
+    <view dc:creator="oaubert" dc:date="2008-01-17" id="Advene2" viewable-class="package">
       <meta>
-        <title xmlns='http://purl.org/dc/elements/1.1/'>Advene2</title>
+        <title xmlns="http://purl.org/dc/elements/1.1/">Advene2</title>
       </meta>
-      <content mime-type='application/xml'>&lt;!-- Cinelab Advene XML exporter - v0.1 -->
-&lt;package xmlns="http://advene.liris.cnrs.fr/ns/cinelab/0.1#"
-                xmlns:dc="http://purl.org/dc/elements/1.1/"
-                xmlns:adv="http://advene.liris.cnrs.fr/ns/meta/"
-                xmlns:trans="http://advene.liris.cnrs.fr/ns/transition/">
-  &lt;meta>
-    &lt;adv:main_media id-ref="m1"/>
-    &lt;dc:creator tal:content="package/author">author&lt;/dc:creator>
-  &lt;/meta>
-  &lt;annotation-types>
-    &lt;annotation-type tal:repeat="a package/annotationTypes" tal:attributes="id a/id">
-      &lt;meta>
-        &lt;dc:creator tal:content="a/author">author&lt;/dc:creator>
-        &lt;dc:modified tal:content="a/date">date&lt;/dc:modified>
-        &lt;trans:mimetype tal:content="a/mimetype">date&lt;/trans:mimetype>
-      &lt;/meta>
-    &lt;/annotation-type>
-  &lt;/annotation-types>
-  &lt;relation-types>
-    &lt;relation-type tal:repeat="a package/relationTypes" tal:attributes="id a/id">
-      &lt;meta>
-        &lt;dc:creator tal:content="a/author">author&lt;/dc:creator>
-        &lt;dc:modified tal:content="a/date">date&lt;/dc:modified>
-        &lt;trans:mimetype tal:content="a/mimetype">date&lt;/trans:mimetype>
-      &lt;/meta>
-    &lt;/relation-type>
-  &lt;/relation-types>
-  &lt;medias>
-    &lt;media frame-of-reference="http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0" id="m1" tal:attributes="url package/meta/advenetool/mediafile" />
-  &lt;/medias>
-  &lt;resources tal:condition="package/resources">
-    &lt;resource tal:repeat="r package/resources" tal:attributes="id string::userfile:${python:r.resourcepath.replace('/',':')}">
-      &lt;content tal:condition="python: r.mimetype.startswith('text') or r.mimetype.startswith('image/svg')"
-                     tal:attributes="mimetype r/mimetype" tal:content="r/data" />
-      &lt;content tal:condition="python: not(r.mimetype.startswith('text') or r.mimetype.startswith('image/svg'))"
-                     encoding="base64" tal:attributes="mimetype r/mimetype" tal:content="r/dataBase64" />
-      &lt;meta>
-        &lt;dc:creator tal:content="r/author">author&lt;/dc:creator>
-        &lt;dc:modified tal:content="r/date">date&lt;/dc:modified>
-      &lt;/meta>
-    &lt;/resource>
-  &lt;/resources>
-  &lt;annotations>
-    &lt;annotation tal:repeat="a package/annotations" tal:attributes="begin a/fragment/begin ; end a/fragment/end ; id a/id" media="m1">
-      &lt;content tal:attributes="mimetype a/content/mimetype" tal:content="a/content/data" />
-      &lt;meta>
-        &lt;dc:creator tal:content="a/author">author&lt;/dc:creator>
-        &lt;dc:modified tal:content="a/date">date&lt;/dc:modified>
-      &lt;/meta>
-    &lt;/annotation>
-  &lt;/annotations>
-  &lt;relations>
-    &lt;relation tal:repeat="r package/relations" tal:attributes="id r/id">
-      &lt;members>
-        &lt;member tal:repeat="m r/members" tal:attributes="id-ref m/id" />
-      &lt;/members>
-      &lt;content tal:attributes="mimetype r/content/mimetype" tal:content="r/content/data" />
-      &lt;meta>
-        &lt;dc:creator tal:content="r/author">author&lt;/dc:creator>
-        &lt;dc:modified tal:content="r/date">date&lt;/dc:modified>
-      &lt;/meta>
-    &lt;/relation>
-  &lt;/relations>
-  &lt;views>
-    &lt;view tal:repeat="v package/views" tal:attributes="id v/id">
-      &lt;content tal:attributes="mimetype v/content/mimetype" tal:content="v/content/data" />
-      &lt;meta>
-        &lt;dc:creator tal:content="v/author">author&lt;/dc:creator>
-        &lt;dc:modified tal:content="v/date">date&lt;/dc:modified>
-      &lt;/meta>
-    &lt;/view>
-  &lt;/views>
-  &lt;queries>
-    &lt;query tal:repeat="q package/queries" tal:attributes="id q/id">
-      &lt;content tal:attributes="mimetype q/content/mimetype" tal:content="q/content/data" />
-      &lt;meta>
-        &lt;dc:creator tal:content="q/author">author&lt;/dc:creator>
-        &lt;dc:modified tal:content="q/date">date&lt;/dc:modified>
-      &lt;/meta>
-    &lt;/query>
-  &lt;/queries>
-  &lt;schemas>
-    &lt;schema tal:repeat="s package/schemas" tal:attributes="id s/id">
-      &lt;items>
-        &lt;item tal:repeat="i s/annotationTypes" tal:attributes="id-ref i/id" />
-        &lt;item tal:repeat="i s/relationTypes" tal:attributes="id-ref i/id" />
-      &lt;/items>
-      &lt;meta>
-        &lt;dc:creator tal:content="s/author">author&lt;/dc:creator>
-        &lt;dc:modified tal:content="s/date">date&lt;/dc:modified>
-      &lt;/meta>
-    &lt;/schema>
-  &lt;/schemas>
+      <content mime-type="application/xml">&lt;!-- Cinelab Advene XML exporter - v0.1 --&gt;
+&lt;package xmlns=&quot;http://advene.liris.cnrs.fr/ns/cinelab/0.1#&quot;
+                xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;
+                xmlns:adv=&quot;http://advene.liris.cnrs.fr/ns/meta/&quot;
+                xmlns:trans=&quot;http://advene.liris.cnrs.fr/ns/transition/&quot;&gt;
+  &lt;meta&gt;
+    &lt;adv:main_media id-ref=&quot;m1&quot;/&gt;
+    &lt;dc:creator tal:content=&quot;package/author&quot;&gt;author&lt;/dc:creator&gt;
+  &lt;/meta&gt;
+  &lt;annotation-types&gt;
+    &lt;annotation-type tal:repeat=&quot;a package/annotationTypes&quot; tal:attributes=&quot;id a/id&quot;&gt;
+      &lt;meta&gt;
+        &lt;dc:creator tal:content=&quot;a/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:modified tal:content=&quot;a/date&quot;&gt;date&lt;/dc:modified&gt;
+        &lt;trans:mimetype tal:content=&quot;a/mimetype&quot;&gt;date&lt;/trans:mimetype&gt;
+      &lt;/meta&gt;
+    &lt;/annotation-type&gt;
+  &lt;/annotation-types&gt;
+  &lt;relation-types&gt;
+    &lt;relation-type tal:repeat=&quot;a package/relationTypes&quot; tal:attributes=&quot;id a/id&quot;&gt;
+      &lt;meta&gt;
+        &lt;dc:creator tal:content=&quot;a/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:modified tal:content=&quot;a/date&quot;&gt;date&lt;/dc:modified&gt;
+        &lt;trans:mimetype tal:content=&quot;a/mimetype&quot;&gt;date&lt;/trans:mimetype&gt;
+      &lt;/meta&gt;
+    &lt;/relation-type&gt;
+  &lt;/relation-types&gt;
+  &lt;medias&gt;
+    &lt;media frame-of-reference=&quot;http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0&quot; id=&quot;m1&quot; tal:attributes=&quot;url package/meta/advenetool/mediafile&quot; /&gt;
+  &lt;/medias&gt;
+  &lt;resources tal:condition=&quot;package/resources&quot;&gt;
+    &lt;resource tal:repeat=&quot;r package/resources&quot; tal:attributes=&quot;id string::userfile:${python:r.resourcepath.replace('/',':')}&quot;&gt;
+      &lt;content tal:condition=&quot;python: r.mimetype.startswith('text') or r.mimetype.startswith('image/svg')&quot;
+                     tal:attributes=&quot;mimetype r/mimetype&quot; tal:content=&quot;r/data&quot; /&gt;
+      &lt;content tal:condition=&quot;python: not(r.mimetype.startswith('text') or r.mimetype.startswith('image/svg'))&quot;
+                     encoding=&quot;base64&quot; tal:attributes=&quot;mimetype r/mimetype&quot; tal:content=&quot;r/dataBase64&quot; /&gt;
+      &lt;meta&gt;
+        &lt;dc:creator tal:content=&quot;r/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:modified tal:content=&quot;r/date&quot;&gt;date&lt;/dc:modified&gt;
+      &lt;/meta&gt;
+    &lt;/resource&gt;
+  &lt;/resources&gt;
+  &lt;annotations&gt;
+    &lt;annotation tal:repeat=&quot;a package/annotations&quot; tal:attributes=&quot;begin a/fragment/begin ; end a/fragment/end ; id a/id&quot; media=&quot;m1&quot;&gt;
+      &lt;content tal:attributes=&quot;mimetype a/content/mimetype&quot; tal:content=&quot;a/content/data&quot; /&gt;
+      &lt;meta&gt;
+        &lt;dc:creator tal:content=&quot;a/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:modified tal:content=&quot;a/date&quot;&gt;date&lt;/dc:modified&gt;
+      &lt;/meta&gt;
+    &lt;/annotation&gt;
+  &lt;/annotations&gt;
+  &lt;relations&gt;
+    &lt;relation tal:repeat=&quot;r package/relations&quot; tal:attributes=&quot;id r/id&quot;&gt;
+      &lt;members&gt;
+        &lt;member tal:repeat=&quot;m r/members&quot; tal:attributes=&quot;id-ref m/id&quot; /&gt;
+      &lt;/members&gt;
+      &lt;content tal:attributes=&quot;mimetype r/content/mimetype&quot; tal:content=&quot;r/content/data&quot; /&gt;
+      &lt;meta&gt;
+        &lt;dc:creator tal:content=&quot;r/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:modified tal:content=&quot;r/date&quot;&gt;date&lt;/dc:modified&gt;
+      &lt;/meta&gt;
+    &lt;/relation&gt;
+  &lt;/relations&gt;
+  &lt;views&gt;
+    &lt;view tal:repeat=&quot;v package/views&quot; tal:attributes=&quot;id v/id&quot;&gt;
+      &lt;content tal:attributes=&quot;mimetype v/content/mimetype&quot; tal:content=&quot;v/content/data&quot; /&gt;
+      &lt;meta&gt;
+        &lt;dc:creator tal:content=&quot;v/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:modified tal:content=&quot;v/date&quot;&gt;date&lt;/dc:modified&gt;
+      &lt;/meta&gt;
+    &lt;/view&gt;
+  &lt;/views&gt;
+  &lt;queries&gt;
+    &lt;query tal:repeat=&quot;q package/queries&quot; tal:attributes=&quot;id q/id&quot;&gt;
+      &lt;content tal:attributes=&quot;mimetype q/content/mimetype&quot; tal:content=&quot;q/content/data&quot; /&gt;
+      &lt;meta&gt;
+        &lt;dc:creator tal:content=&quot;q/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:modified tal:content=&quot;q/date&quot;&gt;date&lt;/dc:modified&gt;
+      &lt;/meta&gt;
+    &lt;/query&gt;
+  &lt;/queries&gt;
+  &lt;schemas&gt;
+    &lt;schema tal:repeat=&quot;s package/schemas&quot; tal:attributes=&quot;id s/id&quot;&gt;
+      &lt;items&gt;
+        &lt;item tal:repeat=&quot;i s/annotationTypes&quot; tal:attributes=&quot;id-ref i/id&quot; /&gt;
+        &lt;item tal:repeat=&quot;i s/relationTypes&quot; tal:attributes=&quot;id-ref i/id&quot; /&gt;
+      &lt;/items&gt;
+      &lt;meta&gt;
+        &lt;dc:creator tal:content=&quot;s/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:modified tal:content=&quot;s/date&quot;&gt;date&lt;/dc:modified&gt;
+      &lt;/meta&gt;
+    &lt;/schema&gt;
+  &lt;/schemas&gt;
 
-&lt;/package></content>
+&lt;/package&gt;</content>
     </view>
-    <view dc:date='2008-02-14' dc:creator='oaubert' id='CMML' viewable-class='package'>
+    <view dc:creator="oaubert" dc:date="2008-02-14" id="CMML" viewable-class="package">
       <meta>
-        <title xmlns='http://purl.org/dc/elements/1.1/'>CMML</title>
+        <title xmlns="http://purl.org/dc/elements/1.1/">CMML</title>
       </meta>
-      <content mime-type='text/xml'>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <content mime-type="text/xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
 
-&lt;!-- This view can be applied either to a package, or to an annotation-type -->
+&lt;!-- This view can be applied either to a package, or to an annotation-type --&gt;
 
-&lt;cmml>
+&lt;cmml&gt;
 
-&lt;stream timebase="npt:0">
-  &lt;import id="a1" contenttype="video/mpeg" tal:attributes="src package/meta/advenetool/mediafile" start="npt:0">&lt;/import>
-&lt;/stream>
+&lt;stream timebase=&quot;npt:0&quot;&gt;
+  &lt;import id=&quot;a1&quot; contenttype=&quot;video/mpeg&quot; tal:attributes=&quot;src package/meta/advenetool/mediafile&quot; start=&quot;npt:0&quot;&gt;&lt;/import&gt;
+&lt;/stream&gt;
 
-&lt;head>
-&lt;title tal:content="here/title | string:No title">Title (type or package's)&lt;/title>
-&lt;meta name="DC.audience" content="General">&lt;/meta>
-&lt;meta name="DC.author" tal:attributes="content here/author | string:No author">&lt;/meta>
-&lt;meta name="DC.description" tal:attributes="content here/description | string:No description">&lt;/meta>
-&lt;meta name="DC.format" content="video">&lt;/meta>
-&lt;meta name="DC.language" content="English">&lt;/meta>
-&lt;meta name="DC.publisher" tal:attributes="content here/author | string:No author">&lt;/meta>
-&lt;meta name="DESCRIPTION" tal:attributes="content here/description | string:No description">&lt;/meta>
-&lt;meta name="TYPE" content="video">&lt;/meta>
-&lt;/head>
+&lt;head&gt;
+&lt;title tal:content=&quot;here/title | string:No title&quot;&gt;Title (type or package's)&lt;/title&gt;
+&lt;meta name=&quot;DC.audience&quot; content=&quot;General&quot;&gt;&lt;/meta&gt;
+&lt;meta name=&quot;DC.author&quot; tal:attributes=&quot;content here/author | string:No author&quot;&gt;&lt;/meta&gt;
+&lt;meta name=&quot;DC.description&quot; tal:attributes=&quot;content here/description | string:No description&quot;&gt;&lt;/meta&gt;
+&lt;meta name=&quot;DC.format&quot; content=&quot;video&quot;&gt;&lt;/meta&gt;
+&lt;meta name=&quot;DC.language&quot; content=&quot;English&quot;&gt;&lt;/meta&gt;
+&lt;meta name=&quot;DC.publisher&quot; tal:attributes=&quot;content here/author | string:No author&quot;&gt;&lt;/meta&gt;
+&lt;meta name=&quot;DESCRIPTION&quot; tal:attributes=&quot;content here/description | string:No description&quot;&gt;&lt;/meta&gt;
+&lt;meta name=&quot;TYPE&quot; content=&quot;video&quot;&gt;&lt;/meta&gt;
+&lt;/head&gt;
 
-&lt;clip tal:repeat="a here/annotations/sorted" tal:attributes="id a/id ; start string:npt:${a/fragment/begin/formatted} ; end string:npt:${a/fragment/end/formatted}">
-&lt;a tal:attributes="href a/absolute_url" tal:content="a/representation">Annotation representation&lt;/a>
-&lt;img tal:attributes="src a/snapshot_url">&lt;/img>
-&lt;desc tal:content="a/content/data">Content&lt;/desc>
-&lt;/clip>
+&lt;clip tal:repeat=&quot;a here/annotations/sorted&quot; tal:attributes=&quot;id a/id ; start string:npt:${a/fragment/begin/formatted} ; end string:npt:${a/fragment/end/formatted}&quot;&gt;
+&lt;a tal:attributes=&quot;href a/absolute_url&quot; tal:content=&quot;a/representation&quot;&gt;Annotation representation&lt;/a&gt;
+&lt;img tal:attributes=&quot;src a/snapshot_url&quot;&gt;&lt;/img&gt;
+&lt;desc tal:content=&quot;a/content/data&quot;&gt;Content&lt;/desc&gt;
+&lt;/clip&gt;
 
-&lt;/cmml>
+&lt;/cmml&gt;
 </content>
     </view>
   </views>
