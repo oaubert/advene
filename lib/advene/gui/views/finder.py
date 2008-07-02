@@ -162,6 +162,14 @@ class ModelColumn(FinderColumn):
         if self.node is None:
             return True
         self.label.set_label(self.name)
+        col=self.node[DetailedTreeModel.COLUMN_COLOR]
+        if col:
+            try:
+                color=gtk.gdk.color_parse(col)
+                style = self.label.modify_bg(gtk.STATE_NORMAL, color)
+            except ValueError:
+                pass
+
         for row in self.get_valid_members(node):
             self.liststore.append(row)
 
@@ -224,6 +232,13 @@ class ModelColumn(FinderColumn):
         vbox=gtk.VBox()
 
         self.label=gtk.Button(self.name, use_underline=False)
+        col=self.node[DetailedTreeModel.COLUMN_COLOR]
+        if col:
+            try:
+                color=gtk.gdk.color_parse(col)
+                style = self.label.modify_bg(gtk.STATE_NORMAL, color)
+            except ValueError:
+                pass
         self.label.connect('clicked', self.on_column_activation)
         vbox.pack_start(self.label, expand=False)
 
