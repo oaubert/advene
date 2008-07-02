@@ -126,7 +126,7 @@ class Exporter(AdhocView):
         self.filename_entry.connect('activate', self.export_file)
         line.pack_start(self.filename_entry)
 
-        b=gtk.Button(stock=gtk.STOCK_INDEX)
+        b=gtk.Button(stock=gtk.STOCK_OPEN)
         b.connect('clicked', select_filename)
         line.pack_start(b, expand=False)
 
