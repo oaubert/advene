@@ -18,16 +18,18 @@
 #
 """VLC library functions."""
 
-import advene.core.config as config
 import time
 import StringIO
 import inspect
 import md5
 import os
+import sys
 import re
 import zipfile
 import urllib
 import unicodedata
+
+import advene.core.config as config
 
 try:
     import Image
