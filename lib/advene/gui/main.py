@@ -1217,6 +1217,8 @@ class AdveneGUI (Connect):
         }
 
     key_shortcuts={
+        gtk.keysyms.Insert: player_create_bookmark,
+
         # Numeric keypad
         gtk.keysyms.KP_5: player_play_pause,
         gtk.keysyms.KP_8: player_forward_frame,
