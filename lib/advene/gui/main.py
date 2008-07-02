@@ -1150,6 +1150,12 @@ class AdveneGUI (Connect):
         else:
             # No existing view. Create one.
             a=self.open_adhoc_view('activebookmarks', destination='fareast')
+            # Make the fareast view visible if needed
+            p=self.pane['fareast']
+            w=p.get_allocation().width
+            if abs(w - p.get_position()) < 30:
+                # Less than 50 visible pixels. Enlarge.
+                p.set_position(w - 256)
         return a
         
     def create_bookmark(self, position, insert_after_current=False):
