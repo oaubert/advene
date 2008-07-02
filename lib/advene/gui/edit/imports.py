@@ -404,7 +404,6 @@ class Importer:
     def popup(self):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.set_title (_("Package %s") % (self.controller.package.title or _("No title")))
-
         vbox = gtk.VBox()
         window.add (vbox)
 
@@ -415,6 +414,7 @@ class Importer:
 
         if self.controller.gui:
             self.controller.gui.init_window_size(window, 'importeditor')
+            window.set_icon_list(self.controller.gui.get_icon_list())
 
         self.buttonbox = gtk.HButtonBox()
 

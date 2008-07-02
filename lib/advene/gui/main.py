@@ -2710,6 +2710,7 @@ class AdveneGUI (Connect):
         w=gtk.Window(gtk.WINDOW_TOPLEVEL)
         w.set_title(_("Standard RuleSet"))
         w.connect('destroy', lambda e: w.destroy())
+        w.set_icon_list(*self.get_icon_list())
 
         vbox=gtk.VBox()
         vbox.set_homogeneous (False)
@@ -2810,6 +2811,7 @@ class AdveneGUI (Connect):
 
     def on_webserver_log1_activate (self, button=None, data=None):
         w=gtk.Window()
+        w.set_icon_list(w.get_icon_list())
 
         def refresh(b, t):
             b=t.get_buffer()
