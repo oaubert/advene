@@ -1733,7 +1733,8 @@ class AdveneGUI (Connect):
         view._destination=destination
         view.set_label(label or view.view_name)
         if destination == 'popup':
-            view.popup(label=label)
+            w=view.popup(label=label)
+            dialog.center_on_mouse(w)
         elif destination in ('south', 'east', 'west', 'fareast'):
             self.viewbook[destination].add_view(view, name=label)
         return view
@@ -3389,7 +3390,7 @@ class AdveneGUI (Connect):
         return True
 
     def on_export_activate (self, button=None, data=None):
-        self.open_adhoc_view('exporter', destination='east')
+        self.open_adhoc_view('exporter', destination='popup')
         return True
 
     def generate_screenshots(self, *p):
