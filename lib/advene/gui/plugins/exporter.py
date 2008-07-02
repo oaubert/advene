@@ -88,7 +88,7 @@ class Exporter(AdhocView):
                 d=None
             filename=dialog.get_filename(title=_("Choose the destination file for export"),
                                                   action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                                  button=gtk.STOCK_SAVE,
+                                                  button=gtk.STOCK_INDEX,
                                                   default_dir=d,
                                                   filter='any')
             if not filename:
