@@ -473,6 +473,7 @@ class AdhocView(object):
             self.controller.gui.register_view (self)
             window.cleanup_id=window.connect('destroy', self.controller.gui.close_view_cb, window, self)
             self.controller.gui.init_window_size(window, self.view_id)
+            window.set_icon_list(*self.controller.gui.get_icon_list())
 
         if config.data.os == 'win32':
             # Force resize for win32
