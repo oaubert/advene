@@ -14,6 +14,7 @@
     <view dc:creator="oaubert" dc:date="2004-06-14" id="srt" viewable-class="package">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">SRT subtitles</title>
+	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">srt</extension>
       </meta>
       <content mime-type="text/plain">&lt;pre&gt;
 &lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;
@@ -27,6 +28,7 @@
     <view dc:creator="oaubert" dc:date="2004-06-14" id="smil" viewable-class="package">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">SMIL</title>
+	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">smil</extension>
       </meta>
       <content mime-type="text/smil">&lt;smil xmlns=&quot;http://www.w3.org/2001/SMIL20/Language&quot;&gt;
  &lt;head&gt;
@@ -51,6 +53,7 @@
     <view dc:creator="oaubert" dc:date="2006-01-18" id="svg" viewable-class="package">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">SVG</title>
+	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">svg</extension>
       </meta>
       <content mime-type="image/svg+xml">&lt;svg tal:define=&quot;scale python:4 ; offset python:150 ; duration package/meta/advenetool/duration&quot;  xmlns='http://www.w3.org/2000/svg'  xmlns:xlink='http://www.w3.org/1999/xlink'  version='1'   x='0' y='0' tal:attributes=&quot;width python:offset + long(duration) / scale ; height python:60+30*len(package.annotationTypes)&quot;&gt;
 
@@ -89,6 +92,7 @@
     <view dc:creator="oaubert" dc:date="2005-03-07" id="tsv" viewable-class="*">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">Spreadsheet (tab separated values)</title>
+	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">tsv</extension>
       </meta>
       <content mime-type="text/tab-separated-values">&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;
 &lt;span tal:replace=&quot;a/fragment/formatted/begin&quot; &gt;Begin&lt;/span&gt;	&lt;span tal:replace=&quot;a/fragment/formatted/end&quot; &gt;End&lt;/span&gt;	&lt;span tal:replace=&quot;a/content/data&quot;&gt;Content&lt;/span&gt;
@@ -114,6 +118,7 @@
     <view dc:creator="oaubert" dc:date="2006-02-07" id="timeline" viewable-class="package">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">HTML+CSS timeline</title>
+	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">html</extension>
       </meta>
       <content mime-type="text/html">&lt;html&gt;
 
@@ -133,6 +138,7 @@ div.${at/id} {
   position:absolute;
   left:1ex;
   top:${vpos}ex;
+  width:45ex;
 }&quot;&gt;style&lt;/span&gt;
 
     &lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a at/annotations&quot;&gt;
@@ -141,7 +147,8 @@ div.${a/id} {
   background:${a/color};
   border:thin;
   position:absolute;
-  left:${python: a.fragment.begin/100}ex;
+  left:${python:50+a.fragment.begin/100}ex;
+  width:${python:a.fragment.duration/100}ex;
   top:0ex;
 }&quot;&gt;style&lt;/span&gt;
 
@@ -177,6 +184,7 @@ div.${a/id} {
     <view dc:creator="oaubert" dc:date="2007-10-23" id="mpeg7" viewable-class="*">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">MPEG7 (experimental)</title>
+	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">mp7</extension>
       </meta>
       <content mime-type="text/html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;Mpeg7 xmlns=&quot;urn:mpeg:mpeg7:schema:2001&quot;
@@ -212,6 +220,7 @@ div.${a/id} {
     <view dc:creator="oaubert" dc:date="2007-12-11" id="iri" viewable-class="package">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">IRI</title>
+	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">iri</extension>
       </meta>
       <content mime-type="application/xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;iri&gt;
@@ -267,6 +276,7 @@ div.${a/id} {
     <view dc:creator="oaubert" dc:date="2008-01-17" id="Advene2" viewable-class="package">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">Advene2</title>
+	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">advene2.xml</extension>
       </meta>
       <content mime-type="application/xml">&lt;!-- Cinelab Advene XML exporter - v0.1 --&gt;
 &lt;package xmlns=&quot;http://advene.liris.cnrs.fr/ns/cinelab/0.1#&quot;
@@ -367,6 +377,7 @@ div.${a/id} {
     <view dc:creator="oaubert" dc:date="2008-02-14" id="CMML" viewable-class="package">
       <meta>
         <title xmlns="http://purl.org/dc/elements/1.1/">CMML</title>
+	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">cmml</extension>
       </meta>
       <content mime-type="text/xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
 
