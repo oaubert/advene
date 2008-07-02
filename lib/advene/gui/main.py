@@ -1721,6 +1721,8 @@ class AdveneGUI (Connect):
                     self.edit_accumulator = None
                     return False
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
+            elif not config.data.preferences['expert-mode']:
+                dialog.message_dialog(_("The EditAccumulator view is already active"))
         elif name in self.registered_adhoc_views:
             view=self.registered_adhoc_views[name](controller=self.controller,
                                                    parameters=parameters, **kw)
@@ -2397,7 +2399,7 @@ class AdveneGUI (Connect):
         return sc
 
     def popup_edit_accumulator(self, *p):
-        self.open_adhoc_view('editaccumulator')
+        self.open_adhoc_view('editaccumulator', destination='fareast')
         return True
 
     def on_exit(self, source=None, event=None):
