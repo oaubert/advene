@@ -87,10 +87,10 @@ class Exporter(AdhocView):
             else:
                 d=None
             filename=dialog.get_filename(title=_("Choose the destination file for export"),
-                                                  action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                                  button=gtk.STOCK_INDEX,
-                                                  default_dir=d,
-                                                  filter='any')
+                                         action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                         button=gtk.STOCK_SAVE,
+                                         default_dir=d,
+                                         filter='any')
             if not filename:
                 return True
             self.filename_entry.set_text(filename)
@@ -101,9 +101,10 @@ class Exporter(AdhocView):
 
         line.pack_start(gtk.Label(_("Filename")), expand=False)
         self.filename_entry=gtk.Entry()
+        self.filename_entry.connect('activate', self.export_file)
         line.pack_start(self.filename_entry)
 
-        b=gtk.Button(stock=gtk.STOCK_SAVE)
+        b=gtk.Button(stock=gtk.STOCK_INDEX)
         b.connect('clicked', select_filename)
         line.pack_start(b, expand=False)
 
@@ -122,7 +123,17 @@ class Exporter(AdhocView):
         b=gtk.Button(stock=gtk.STOCK_CONVERT)
         b.connect('clicked', self.export_file)
         bb.pack_start(b, expand=False)
+        b.set_sensitive(False)
         self.convert_button=b
+
+        def update_buttons(e):
+            fname=e.get_text()
+            if fname:
+                self.convert_button.set_sensitive(True)
+            else:
+                self.convert_button.set_sensitive(False)
+            return True
+        self.filename_entry.connect('changed', update_buttons)
 
         vbox.buttonbox=bb
         vbox.pack_start(bb, expand=False)
