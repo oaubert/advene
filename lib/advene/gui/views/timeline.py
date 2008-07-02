@@ -1407,9 +1407,9 @@ class TimeLine(AdhocView):
         elif event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS and event.state & gtk.gdk.CONTROL_MASK:
             # Control + click : set annotation begin/end time to current time
             f=self.annotation_fraction(widget)
-            if f < .25:
+            if f < .40:
                 at='begin'
-            elif f > .75:
+            elif f > .60:
                 at='end'
             else:
                 return False
