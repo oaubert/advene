@@ -295,6 +295,8 @@ class ActiveBookmarks(AdhocView):
         if not self.bookmarks:
             return
         b=b or self.get_current_bookmark() or self.bookmarks[0]
+        if b.widget.window is None:
+            return True
         x, y, w, h, depth=b.widget.window.get_geometry()
         parent=self.mainbox.get_parent()
         adj=parent.get_vadjustment()
