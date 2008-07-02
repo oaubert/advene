@@ -709,9 +709,17 @@ class AdveneController:
 
         # If no package is defined yet, load the template
         if self.package is None:
-            self.load_package ()
-        if media is not None:
-            self.set_default_media(media)
+            # Do not activate, in order to prevent the triggering of a
+            # MediaChange event. If the user only provided a movie
+            # file on the command line, the appropriate MediaChange
+            # will be notified through set_default_media
+            self.load_package (activate=False)
+            if media is not None:
+                self.set_default_media(media, self.package)
+            self.activate_package(self.aliases[self.package])
+        else:
+            if media is not None:
+                self.set_default_media(media)
 
         # Register private mime.types if necessary
         if config.data.os != 'linux':
@@ -744,6 +752,9 @@ class AdveneController:
                 event_name,
                 helper.format_time(self.player.current_position_value),
                 str(kw))
+            import traceback
+            traceback.print_stack()
+            print "-" * 80
 
         # Set the package._modified state
         # This does not really belong here, but it is the more convenient and
