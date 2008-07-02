@@ -11,22 +11,12 @@ then
   exit 1
 fi
 
-wget --quiet 'http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneUserGuide' -O $output
-
-if [ $? == 0 ]
-then
-	perl -pi -e 's/.+wiki(header|footer|pagelink).+//;' -e 's!/advene/advene.css!advene.css!;' -e 's!.+(Last\sedited.+?)<a.+?>(.+?)</a>.+!$1 $2!;' -e 's!"wiki\.pl\?AdveneUserGuide!"!g;' -e 's/http:\#/\#/g;' -e 's!<a href.+?>\?</a>!!g' $output
-	echo "User documentation updated in $output"
-else
-	echo "Wget error. $output is now corrupted."
-fi
-
 # Shortcuts
-wget --quiet 'http://liris.cnrs.fr/advene/twiki/bin/wiki.pl?AdveneShortcuts' -O $shortcuts
+wget --quiet 'http://liris.cnrs.fr/advene/wiki/index.php/AdveneShortcuts' -O $shortcuts
 
 if [ $? == 0 ]
 then
-	perl -pi -e 's/.+wiki(header|footer|pagelink).+//;' -e 's!/advene/advene.css!advene.css!;' -e 's!.+(Last\sedited.+?)<a.+?>(.+?)</a>.+!$1 $2!;' -e 's!"wiki\.pl\?AdveneShortcuts!"!g;' -e 's/http:\#/\#/g;' -e 's!<a href.+?>\?</a>!!g' $shortcuts
+    perl -pi -e 's/<(style|link|script).+?<\/\1>//; s/<span class=.editsection.+?<\/span>//; s/<div id=.jump-to-nav.+?<\/div>//; s/.+siteSub.+//; s!<head>!<head><link rel="stylesheet" type="text/css"  href="http://liris.cnrs.fr/advene/advene.css" />!; exit(0) if /Retrieved/' $shortcuts
 	echo "Shortcuts help updated in $shortcuts"
 else
 	echo "Wget error. $shortcuts is now corrupted."
