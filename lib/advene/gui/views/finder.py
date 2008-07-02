@@ -223,7 +223,7 @@ class ModelColumn(FinderColumn):
     def build_widget(self):
         vbox=gtk.VBox()
 
-        self.label=gtk.Button(self.name)
+        self.label=gtk.Button(self.name, use_underline=False)
         self.label.connect('clicked', self.on_column_activation)
         vbox.pack_start(self.label, expand=False)
 
@@ -261,7 +261,7 @@ class AnnotationColumn(FinderColumn):
     def build_widget(self):
         vbox=gtk.VBox()
 
-        l=gtk.Button(_("Annotation"))
+        l=gtk.Button(_("Annotation"), use_underline=False)
         vbox.pack_start(l, expand=False)
         self.view=AnnotationDisplay(controller=self.controller, annotation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
         vbox.add(self.view.widget)
@@ -278,7 +278,7 @@ class RelationColumn(FinderColumn):
     def build_widget(self):
         vbox=gtk.VBox()
 
-        l=gtk.Button(_("Relation"))
+        l=gtk.Button(_("Relation"), use_underline=False)
         vbox.pack_start(l, expand=False)
         self.view=RelationDisplay(controller=self.controller, relation=self.node[DetailedTreeModel.COLUMN_ELEMENT])
         vbox.add(self.view.widget)
@@ -428,7 +428,7 @@ class QueryColumn(FinderColumn):
              ('package/annotations', _("all annotations of the package")),
              ('package/annotations/first', _("the first annotation of the package")),
             ):
-            b=gtk.Button(label)
+            b=gtk.Button(label, use_underline=False)
             b.connect('clicked', try_query, expr)
             v.pack_start(b, expand=False)
             self.apply_buttons.append(b)
