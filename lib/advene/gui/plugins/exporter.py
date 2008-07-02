@@ -27,6 +27,7 @@ import advene.core.config as config
 import advene.gui.popup
 from advene.gui.util import dialog
 from advene.model.package import Package
+import advene.util.helper as helper
 
 from advene.gui.views import AdhocView
 
@@ -53,6 +54,7 @@ class Exporter(AdhocView):
 
         self.importer_package=Package(uri=config.data.advenefile('exporters.xml'))
         self.widget=self.build_widget()
+        self.filename_entry.set_text(self.generate_default_filename())
 
     def export_file(self, *p):
         v=self.exporters.get_current_element()
@@ -77,6 +79,26 @@ class Exporter(AdhocView):
         self.log(_("Data exported to %s") % fname)
         self.close()
         return True
+
+    def generate_default_filename(self, f=None):
+        if f is None:
+            # Get the current package title.
+            f=self.controller.package.title
+            if f == 'Template package':
+                # Use a better name
+                f=os.path.splitext(os.path.basename(self.controller.package.uri))[0]
+            f=helper.title2id(f)
+        else:
+            # A filename was provided. Strip the extension.
+            f=os.path.splitext(f)[0]
+        # Add a pertinent extension
+        v=self.exporters.get_current_element()
+        if v is None:
+            return f
+        ext=v.getMetaData(config.data.namespace, 'extension')
+        if not ext:
+            ext = helper.title2id(v.id)
+        return '.'.join( (f, ext) )
 
     def build_widget(self):
         vbox=gtk.VBox()
@@ -112,10 +134,15 @@ class Exporter(AdhocView):
         line=gtk.HBox()
         vbox.pack_start(line, expand=False)
 
+        def update_extension(sel):
+            self.filename_entry.set_text(self.generate_default_filename(self.filename_entry.get_text()))
+            return True
+
         line.pack_start(gtk.Label(_("Export filter")), expand=False)
         self.exporters=dialog.list_selector_widget([ ( v, v.title )
                                                      for v in self.importer_package.views
-                                                     if v.id != 'index' ], None)
+                                                     if v.id != 'index' ],
+                                                   callback=update_extension)
         line.pack_start(self.exporters, expand=False)
 
         bb=gtk.HButtonBox()
