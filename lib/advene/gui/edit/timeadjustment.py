@@ -124,7 +124,7 @@ class TimeAdjustment:
             width=50
         else:
             width=100
-        self.image=TimestampRepresentation(self.value, self.controller, width, epsilon=1000/25)
+        self.image=TimestampRepresentation(self.value, self.controller, width, epsilon=1000/25, visible_label=False)
         self.image.connect('button-press-event', image_button_press)
         self.image.connect('clicked', image_button_clicked)
         self.tooltips.set_tip(self.image, _("Click to play\ncontrol+click to set to current time\ncontrol+scroll to modify value\nright-click to invalidate screenshot"))
