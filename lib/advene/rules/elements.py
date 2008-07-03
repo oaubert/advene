@@ -743,8 +743,8 @@ class SimpleQuery(EtreeMixin):
         """
         qnode=ET.Element(tag('query'))
 
-        qnode.append(ET.Element(tag('source', 
-                                    { 'value': self.source })))
+        qnode.append(ET.Element(tag('source'), 
+                                    { 'value': self.source }))
 
         if self.condition is not None:
             if isinstance(self.condition, Condition):
