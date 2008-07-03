@@ -15,14 +15,11 @@
         <title xmlns="http://purl.org/dc/elements/1.1/">SRT subtitles</title>
 	<extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">srt</extension>
       </meta>
-      <content mime-type="text/plain">&lt;pre&gt;
-&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;
+      <content mime-type="text/plain">&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;
 &lt;span tal:replace=&quot;python:repeat['a'].getIndex()+1&quot; &gt;Index&lt;/span&gt;
 &lt;span tal:replace=&quot;a/fragment/formatted/begin&quot; &gt;Begin&lt;/span&gt; --&gt; &lt;span tal:replace=&quot;a/fragment/formatted/end&quot; &gt;End&lt;/span&gt;
 &lt;span tal:replace=&quot;a/content/data&quot;&gt;Content&lt;/span&gt;
-&lt;/span&gt;
-&lt;/pre&gt;
-</content>
+&lt;/span&gt;</content>
     </view>
     <view dc:creator="oaubert" dc:date="2004-06-14" id="smil" viewable-class="package">
       <meta>
