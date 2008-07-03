@@ -504,8 +504,8 @@ class TimeLine(AdhocView):
 
             if not self.maximum:
                 # self.maximum == 0, so try to compute it
-                b,e=self.bounds()
-                self.maximum = e
+                self.maximum = self.bounds()[1]
+
             if self.maximum != oldmax:
                 # Reset to display whole timeline
                 (w, h)=self.layout.window.get_size()
@@ -625,6 +625,12 @@ class TimeLine(AdhocView):
                 self.desactivate_annotation (annotation)
         return True
 
+    def duration_update_handler(self, context, parameters):
+        if self.maximum != long(context.globals['duration']):
+            # Need a refresh
+            self.update_model()
+        return True
+        
     def register_callback (self, controller=None):
         """Add the activate handler for annotations.
         """
@@ -642,6 +648,8 @@ class TimeLine(AdhocView):
                                                         method=self.bookmark_highlight_handler),
                 controller.event_handler.internal_rule (event="BookmarkUnhighlight",
                                                         method=self.bookmark_unhighlight_handler),
+                controller.event_handler.internal_rule (event="DurationUpdate",
+                                                        method=self.duration_update_handler),
                 ))
 
     def type_restricted_handler(self, context, parameters):
