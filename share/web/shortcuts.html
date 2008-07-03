@@ -35,7 +35,7 @@ var wgUserName = null;
 var wgUserLanguage = "en";
 var wgContentLanguage = "en";
 var wgBreakFrames = false;
-var wgCurRevisionId = "322";
+var wgCurRevisionId = "327";
 /*]]>*/</script>
                 
 		
@@ -57,7 +57,7 @@ var wgCurRevisionId = "322";
 
 			<div id="contentSub"></div>
 												<!-- start content -->
-			<!-- Bad Behavior 2.0.11 run time: 19.318 ms --><table id="toc" class="toc" summary="Contents"><tr><td><div id="toctitle"><h2>Contents</h2></div>
+			<!-- Bad Behavior 2.0.11 run time: 19.514 ms --><table id="toc" class="toc" summary="Contents"><tr><td><div id="toctitle"><h2>Contents</h2></div>
 <ul>
 <li class="toclevel-1"><a href="#Advene_shortcuts"><span class="tocnumber">1</span> <span class="toctext">Advene shortcuts</span></a>
 <ul>
@@ -85,6 +85,8 @@ var wgCurRevisionId = "322";
 </ul>
 </td></tr></table>
 <a name="Advene_shortcuts"></a><h1> <span class="mw-headline"> Advene shortcuts </span></h1>
+<p>This wiki documents the shortcuts available in the most recent version of Advene (0.32). [<a href="http://liris.cnrs.fr/advene/wiki/index.php?title=AdveneShortcuts&amp;oldid=301" class="external text" title="http://liris.cnrs.fr/advene/wiki/index.php?title=AdveneShortcuts&amp;oldid=301" rel="nofollow">Shortcuts for the 0.30 version</a>] are available through this document history.
+</p>
 <a name="Generic_player_shortcuts"></a><h2> <span class="mw-headline"> Generic player shortcuts </span></h2>
 <p>These shortcuts are available in most parts/views of the interface.
 </p>
@@ -135,9 +137,8 @@ var wgCurRevisionId = "322";
 </li><li> p&nbsp;: play the annotation (either at the beginning or the end, depending on the cursor position)
 </li><li> space&nbsp;: play the focused annotation (even if the cursor is not on the annotation widget)
 </li><li> control+click&nbsp;: set the annotation begin or end (depending on the cursor position) to the current movie time
-</li><li> control+scroll&nbsp;: update the annotation begin or end (depending on the cursor position) time
-</li><li> control+shift+scroll&nbsp;: move the annotation (update both begin and end times)
-</li><li> control+return&nbsp;: split the annotation at the current player position
+</li><li> control+scroll&nbsp;: update the annotation begin or end (depending on the cursor position) time. Holding Shift uses a larger increment
+</li><li> control+return&nbsp;: split the annotation at the current player position (if the position is in the anntotation's bounds)
 </li><li> shift+delete&nbsp;: delete the annotation
 </li><li> Drag-and-drop of an annotation on another one: popup a menu to propose to create a relation, merge annotations or align bounds.
 </li></ul>
@@ -164,7 +165,7 @@ var wgCurRevisionId = "322";
 </li><li> Control-PageDown/PageUp&nbsp;: go to next/previous mark
 </li><li> Control-Scroll on a mark: update the mark timestamp. If the play-on-scroll option is set, the player will be set to the new position when the control key is released.
 </li><li> Control-Shift-Scroll: update the timestamp with a larger step (customizable through Edit/Preferences/Time related)
-</li><li> Control-Click in the text: move cursor (instead of inserting a mark)
+</li><li> Control-Click in the text in single-click-insert mode&nbsp;: move cursor (instead of inserting a mark)
 </li></ul>
 <a name="Element_Edition_popup"></a><h2> <span class="mw-headline"> Element Edition popup </span></h2>
 <a name="Text_and_generic_content_handler"></a><h3> <span class="mw-headline"> Text and generic content handler </span></h3>
@@ -197,5 +198,5 @@ var wgCurRevisionId = "322";
 </li><li> Control-H:   display source for element before cursor
 </li></ul>
 
-<!-- Saved in parser cache with key advene-public_:pcache:idhash:6-0!1!0!!en!2 and timestamp 20080702085928 -->
+<!-- Saved in parser cache with key advene-public_:pcache:idhash:6-0!1!0!!en!2 and timestamp 20080703095205 -->
 <div class="printfooter">
