@@ -1779,12 +1779,8 @@ class AdveneController(object):
         """
         if self.gui:
             self.gui.log(msg, level)
-            if config.data.preferences['log-to-terminal']:
-                print unicode(msg).encode('utf-8')
-        else:
-            # FIXME: handle the level parameter
+        if config.data.preferences['log-to-terminal'] or not self.gui:
             print unicode(msg).encode('utf-8')
-        return
 
     def message_log (self, context, parameters):
         """Event Handler for the message action.
