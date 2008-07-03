@@ -47,7 +47,7 @@ def register(controller):
 # Matching between element classes and the FinderColumn class
 CLASS2COLUMN={}
 
-class FinderColumn:
+class FinderColumn(object):
     """Abstract FinderColumn class.
     """
     def __init__(self, controller=None, node=None, callback=None, parent=None):
