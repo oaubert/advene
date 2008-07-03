@@ -2414,6 +2414,12 @@ class AdveneGUI (Connect):
 
     def popup_edit_accumulator(self, *p):
         self.open_adhoc_view('editaccumulator', destination='fareast')
+        # Make the fareast view visible if needed
+        p=self.pane['fareast']
+        w=p.get_allocation().width
+        if abs(w - p.get_position()) < 30:
+            # Less than 50 visible pixels. Enlarge.
+            p.set_position(w - 256)
         return True
 
     def on_exit(self, source=None, event=None):
