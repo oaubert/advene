@@ -114,12 +114,6 @@ class FinderColumn:
         self.node=node
         return True
 
-    def get_name(self):
-        if self.node is None:
-            return "FIXME"
-        return self.node[self.COLUMN_TITLE]
-    name=property(fget=get_name, doc="Displayed name for the element")
-
     def build_widget(self):
         return gtk.Label("Generic finder column")
 
