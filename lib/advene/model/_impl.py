@@ -321,7 +321,7 @@ class Dated(Metaed):
         """Set the date.
            You would probably rather use the date property.
         """
-        if value:
+        if value is not None:
             self._getModel().setAttributeNS(dcNS, "dc:date", unicode(value))
         else:
             self._getModel().removeAttributeNS(dcNS, "date")
