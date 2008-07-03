@@ -79,7 +79,7 @@ if config.data.webserver['mode']:
 import threading
 gobject.threads_init()
 
-class AdveneController:
+class AdveneController(object):
     """AdveneController class.
 
     The main attributes for this class are:
@@ -211,17 +211,17 @@ class AdveneController:
                 ))
 
     def get_cached_duration(self):
-        if self.package is not None and hasattr(self.package, 'cached_duration'):
+        try:
             return self.package.cached_duration
-        else:
+        except AttributeError:
             return 0
 
     def set_cached_duration(self, value):
         if self.package is not None:
             self.package.cached_duration = long(value)
 
-    cached_duration = property(fget=get_cached_duration,
-                               fset=set_cached_duration,
+    cached_duration = property(get_cached_duration,
+                               set_cached_duration,
                                doc="Cached duration for the current package")
 
     def self_loop(self):
@@ -1436,9 +1436,9 @@ class AdveneController:
                 v=long(float(duration))
             except ValueError:
                 v=0
-            self.package.cached_duration = v
+            self.cached_duration = v
         else:
-            self.package.cached_duration = 0
+            self.cached_duration = 0
 
         self.register_package(alias, self.package)
 
@@ -1525,9 +1525,9 @@ class AdveneController:
         # Reset the cached duration
         duration = self.package.getMetaData (config.data.namespace, "duration")
         if duration is not None:
-            self.package.cached_duration = long(float(duration))
+            self.cached_duration = long(float(duration))
         else:
-            self.package.cached_duration = 0
+            self.cached_duration = 0
 
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
@@ -1604,7 +1604,7 @@ class AdveneController:
 
         # Check if we know the stream duration. If so, save it as
         # package metadata
-        d=p.cached_duration
+        d=self.cached_duration
         if d > 0:
             p.setMetaData (config.data.namespace,
                            "duration", unicode(d))
@@ -2062,8 +2062,8 @@ class AdveneController:
 
         # Update the cached duration if necessary
         if self.cached_duration <= 0 and self.player.stream_duration > 0:
-            print "updating cached duration"
-            self.cached_duration = long(self.player.stream_duration)
+            self.cached_duration=long(self.player.stream_duration)
+            self.notify('DurationUpdate', duration=self.cached_duration)
 
         return pos
 
