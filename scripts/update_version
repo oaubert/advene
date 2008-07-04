@@ -1,5 +1,6 @@
 #! /bin/sh
 
+svn up
 svnrev=`svn info | awk '/Revision/{print $2}'`
 builddate=`date +%Y%m%d`
 
