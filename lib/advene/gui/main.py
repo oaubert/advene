@@ -2823,7 +2823,7 @@ class AdveneGUI (Connect):
 
     def on_webserver_log1_activate (self, button=None, data=None):
         w=gtk.Window()
-        w.set_icon_list(w.get_icon_list())
+        w.set_icon_list(*w.get_icon_list())
 
         def refresh(b, t):
             b=t.get_buffer()

@@ -233,7 +233,7 @@ class Merger:
             self.controller.gui.register_view (self)
             window.connect('destroy', self.controller.gui.close_view_cb, window, self)
             self.controller.gui.init_window_size(window, 'merge')
-            window.set_icon_list(self.controller.gui.get_icon_list())
+            window.set_icon_list(*self.controller.gui.get_icon_list())
 
         self.buttonbox = gtk.HButtonBox()
 
