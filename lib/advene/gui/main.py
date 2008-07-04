@@ -1747,7 +1747,8 @@ class AdveneGUI (Connect):
         view.set_label(label or view.view_name)
         if destination == 'popup':
             w=view.popup(label=label)
-            dialog.center_on_mouse(w)
+            if isinstance(w, gtk.Window):
+                dialog.center_on_mouse(w)
         elif destination in ('south', 'east', 'west', 'fareast'):
             self.viewbook[destination].add_view(view, name=label)
         return view
