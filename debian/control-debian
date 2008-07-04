@@ -1,15 +1,15 @@
 Source: advene
 Maintainer: Olivier Aubert <olivier.aubert@liris.cnrs.fr>
-Build-Depends: debhelper (>= 5.0.38), python-all-dev (>= 2.3.5-11), python-central (>= 0.5.6)
+Build-Depends: debhelper (>= 5.0.38), python-all-dev (>= 2.3.5-11), python-central (>= 0.5.6), python (>= 2.4)
 Standards-Version: 3.6.0
 Section: graphics
 Priority: optional
-XS-Python-Version: >= 2.3
+XS-Python-Version: >= 2.4
 
 Package: advene
-XB-Python-Version: >= 2.3
+XB-Python-Version: ${python:Versions}
 Architecture: all
-Depends: ${python:Depends}, python-gtk2 (>=2.10), python-gobject, python-cairo, python-glade2 (>=2.10), python-simpletal (>=3.0), python-gst0.10, gstreamer0.10-plugins-base, gstreamer0.10-x, python-cherrypy3 (>=3.0.0)
+Depends: ${python:Depends}, python-central (>= 0.5.6), python2.4 | python2.5, python-gtk2 (>=2.10), python-gobject, python-cairo, python-glade2 (>=2.10), python-simpletal (>=3.0), python-gst0.10, gstreamer0.10-plugins-base, gstreamer0.10-x, python-cherrypy3 (>=3.0.0)
 Recommends: vlc-plugin-svg, firefox | www-browser, python-vlc, python-imaging
 Description: Annotate DVDs, Exchange on the Net
  The Advene (Annotate DVd, Exchange on the NEt) project is aimed
