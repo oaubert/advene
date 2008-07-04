@@ -1,3 +1,9 @@
+advene (0.32) unstable; urgency=low
+
+   * Stable release. See the following 0.29 notes for more details.
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Fri, 04 Jul 2008 15:45:00 +0200
+
 advene (0.31) unstable; urgency=low
 
    * Global shortcuts:
@@ -35,7 +41,7 @@ advene (0.31) unstable; urgency=low
         frame extent as dimension.
       * standard control/shift modifiers can be used in drag and drop actions
 
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 03 Jul 2008 17:20:11 +0200
 
 advene (0.30) unstable; urgency=low
 
