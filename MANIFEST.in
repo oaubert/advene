@@ -1,6 +1,8 @@
 recursive-include doc/ *
 include debian/changelog
+include debian/advene.desktop
 include advene.iss AUTHORS COPYING Makefile MANIFEST.in
 recursive-include scripts/ *
 include setup.cfg setup.py setup-win.py
 recursive-include share/ *
+recursive-include locale/ *
