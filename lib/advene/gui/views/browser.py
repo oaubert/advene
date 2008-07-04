@@ -213,7 +213,7 @@ class Browser(AdhocView):
 
         try:
             el=context.evaluateValue("/".join(path))
-        except AdveneException, e:
+        except (AdveneException, TypeError), e:
             # Delete all next columns
             if columnbrowser is None:
                 cb=self.rootcolumn.next
