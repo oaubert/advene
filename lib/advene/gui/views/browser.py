@@ -111,7 +111,7 @@ class BrowserColumn:
     def build_widget(self):
         vbox=gtk.VBox()
 
-        self.label=gtk.Button(self.name)
+        self.label=gtk.Button(self.name, use_underline=False)
         self.label.connect('clicked', self.on_column_activation)
         vbox.pack_start(self.label, expand=False)
 
