@@ -391,6 +391,9 @@ class Config(object):
 
         # Content-handlers
         self.content_handlers = []
+        
+        # Players, indexed by plugin name
+        self.players = {}
 
         # Global methods (user-defined)
         self.global_methods = {}
@@ -546,10 +549,10 @@ class Config(object):
         self.global_methods[name]=method
         return True
 
-    def register_player_plugin(self, module):
+    def register_player(self, player):
         """Register a player plugin.
         """
-        self.player_plugins[module.name] = module
+        self.players[player.player_id] = player
         return True
 
     def get_content_handler(self, mimetype):
