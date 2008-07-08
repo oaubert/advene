@@ -72,12 +72,22 @@ import advene.core.config as config
 import gobject
 gobject.threads_init()
 
-import pygst
-pygst.require('0.10')
-import gst
+try:
+    import pygst
+    pygst.require('0.10')
+    import gst
+except ImportError:
+    gst=None
+
 import gtk
 import os
 from threading import Condition
+
+name="GStreamer video player"
+
+def register(controller):
+    if gst is not None:
+        controller.register_player(Player)
 
 class StreamInformation:
     def __init__(self):
@@ -125,6 +135,9 @@ class Caption:
     pass
 
 class Player:
+    player_id='gstreamer'
+    player_capabilities=[ 'seek', 'pause', 'caption', 'frame-by-frame' ]
+
     # Class attributes
     AbsolutePosition=0
     RelativePosition=1
@@ -265,6 +278,13 @@ class Player:
         bus = self.player.get_bus()
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', self.on_sync_message)
+##        bus.add_signal_watch()
+##        def debug_message(bus, message):
+##            if message.structure is None:
+##                return
+##            print "gst message", message.structure.get_name()
+##            return True
+##        bus.connect('message', debug_message)
 
     def position2value(self, p):
         """Returns a position in ms.

@@ -24,9 +24,13 @@
 import os
 import ctypes
 
-if os.name=='nt':
-    # FIXME: use registry to locate DLL
+# FIXME: use registry to locate DLL
+try:
     QTMLClient = ctypes.CDLL(r'C:\Program Files\QuickTime\QTSystem\QTMLClient.dll')
+except:
+    QTMLClient=None
+if QTMLClient is None:
+    raise ImportError("Cannot find Quicktime DLL")
 
 # OSErr SInt16 MacTypes.h
 # OSStatus SInt32 MacTypes.h

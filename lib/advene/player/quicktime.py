@@ -23,7 +23,17 @@ import sys
 import gtk
 import gobject
 
-import qtmovie
+try:
+    import qtmovie
+except ImportError:
+    qtmovie=None
+
+name="Quicktime video player"
+
+def register(controller=None):
+    if qtmovie is not None:
+        controller.register_player(Player)
+
 
 class StreamInformation:
     def __init__(self):

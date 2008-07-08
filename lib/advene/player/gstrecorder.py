@@ -26,11 +26,21 @@ import advene.core.config as config
 import gobject
 gobject.threads_init()
 
-import pygst
-pygst.require('0.10')
-import gst
+try:
+    import pygst
+    pygst.require('0.10')
+    import gst
+except ImportError:
+    gst=None
+
 import os
 from threading import Condition
+
+name="GStreamer video recorder"
+
+def register(controller=None):
+    if gst is not None:
+        controller.register_player(Player)
 
 class StreamInformation:
     def __init__(self):
@@ -69,6 +79,9 @@ class Caption:
     pass
 
 class Player:
+    player_id='gstrecorder'
+    player_capabilities=[ 'record' ]
+
     # Class attributes
     AbsolutePosition=0
     RelativePosition=1

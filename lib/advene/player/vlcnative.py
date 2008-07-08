@@ -21,12 +21,16 @@
 
 import advene.core.config as config
 
-import vlc
+try:
+    import vlc
+except ImportError:
+    vlc=None
 
-name="Default GUI actions"
+name="VLC video player"
 
 def register(controller=None):
-    config.data.register_player_plugin()
+    if vlc is not None:
+        controller.register_player(Player)
 
 class Snapshot:
     def __init__(self, d=None):
@@ -58,30 +62,34 @@ class Player(object):
     @ivar status: the player's current status
     @type status: vlc.Status
     """
-    # Class attributes
-    AbsolutePosition=vlc.AbsolutePosition
-    RelativePosition=vlc.RelativePosition
-    ModuloPosition=vlc.ModuloPosition
+    player_id='vlc'
+    player_capabilities=[ 'seek', 'pause', 'caption', 'svg' ]
 
-    ByteCount=vlc.ByteCount
-    SampleCount=vlc.SampleCount
-    MediaTime=vlc.MediaTime
+    if vlc is not None:
+        # Class attributes
+        AbsolutePosition=vlc.AbsolutePosition
+        RelativePosition=vlc.RelativePosition
+        ModuloPosition=vlc.ModuloPosition
 
-    # Status
-    PlayingStatus=vlc.PlayingStatus
-    PauseStatus=vlc.PauseStatus
-    ForwardStatus=vlc.ForwardStatus
-    BackwardStatus=vlc.BackwardStatus
-    InitStatus=vlc.InitStatus
-    EndStatus=vlc.EndStatus
-    UndefinedStatus=vlc.UndefinedStatus
+        ByteCount=vlc.ByteCount
+        SampleCount=vlc.SampleCount
+        MediaTime=vlc.MediaTime
 
-    # Exceptions
-    PositionKeyNotSupported=vlc.PositionKeyNotSupported
-    PositionOriginNotSupported=vlc.PositionOriginNotSupported
-    InvalidPosition=vlc.InvalidPosition
-    PlaylistException=vlc.PlaylistException
-    InternalException=vlc.InternalException
+        # Status
+        PlayingStatus=vlc.PlayingStatus
+        PauseStatus=vlc.PauseStatus
+        ForwardStatus=vlc.ForwardStatus
+        BackwardStatus=vlc.BackwardStatus
+        InitStatus=vlc.InitStatus
+        EndStatus=vlc.EndStatus
+        UndefinedStatus=vlc.UndefinedStatus
+
+        # Exceptions
+        PositionKeyNotSupported=vlc.PositionKeyNotSupported
+        PositionOriginNotSupported=vlc.PositionOriginNotSupported
+        InvalidPosition=vlc.InvalidPosition
+        PlaylistException=vlc.PlaylistException
+        InternalException=vlc.InternalException
 
     def __getattribute__ (self, name):
         """

@@ -25,6 +25,11 @@ It also presents the API that should be implemented by alternative players.
 
 from time import time
 
+name="Dummy video player"
+
+def register(controller):
+    controller.register_player(Player)
+
 class StreamInformation:
     def __init__(self):
         self.streamstatus=None
@@ -55,6 +60,9 @@ class InternalException(Exception):
     pass
 
 class Player:
+    player_id='dummy'
+    player_capabilities=[ 'seek', 'pause', 'caption', 'svg', 'frame-by-frame' ]
+
     # Class attributes
     AbsolutePosition=0
     RelativePosition=1

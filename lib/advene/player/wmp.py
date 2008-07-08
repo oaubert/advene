@@ -19,8 +19,11 @@
 """Windows MediaPlayer interface
 """
 
-import win32com
-import win32com.client
+try:
+    import win32com
+    import win32com.client
+except ImportError:
+    win32com=None
 
 class StreamInformation:
     def __init__(self):
