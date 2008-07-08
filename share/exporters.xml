@@ -67,15 +67,16 @@
  &lt;span tal:omit-tag=&quot;&quot; tal:define=&quot;vpos python:30+30*repeat['at'].getIndex()+30&quot; &gt;
 
   &lt;a tal:attributes=&quot;href at/absolute_url&quot;&gt;
-    &lt;text x=&quot;2&quot; tal:attributes=&quot;y vpos ; id at/id&quot;  tal:content=&quot;at/title&quot; stroke=&quot;black&quot; font-size=&quot;13&quot; font-family=&quot;sans-serif&quot;&gt;Titre&lt;/text&gt;
+      &lt;rect x=&quot;1&quot; tal:attributes=&quot;y python:vpos-15 ; width python:offset-10 ; style string:fill:${at/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;
+    &lt;text x=&quot;3&quot; tal:attributes=&quot;y vpos ; id at/id&quot;  tal:content=&quot;at/title&quot; stroke=&quot;black&quot; font-size=&quot;13&quot; font-family=&quot;sans-serif&quot;&gt;Titre&lt;/text&gt;
   &lt;/a&gt;
 
   &lt;!-- Looping on annotations --&gt;
     &lt;span tal:omit-tag=&quot;&quot;   tal:define=&quot;rpos python:vpos-15&quot; tal:repeat=&quot;a at/annotations&quot;&gt;
 
 	&lt;a tal:attributes=&quot;href a/absolute_url&quot;&gt;
-      &lt;rect tal:attributes=&quot;x python:offset + a.fragment.begin / scale; width python:a.fragment.duration / scale ; y rpos&quot;  height=&quot;20&quot; fill=&quot;none&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;
-      &lt;text tal:attributes=&quot;x python:offset + a.fragment.begin / scale; y vpos ; id a/id&quot;  tal:content=&quot;a/content/data&quot; fill=&quot;black&quot; stroke=&quot;black&quot; font-size=&quot;12&quot; font-family=&quot;sans-serif&quot;&gt;Texte&lt;/text&gt;
+      &lt;rect tal:attributes=&quot;x python:offset + a.fragment.begin / scale; width python:a.fragment.duration / scale ; y rpos ; style string:fill:${a/color | string:none}&quot;  height=&quot;20&quot; stroke=&quot;black&quot;&gt;&lt;/rect&gt;
+      &lt;text tal:attributes=&quot;x python:offset + a.fragment.begin / scale; y vpos ; id a/id&quot;  tal:content=&quot;a/content/data&quot; stroke=&quot;black&quot; font-size=&quot;12&quot; font-family=&quot;sans-serif&quot;&gt;Texte&lt;/text&gt;
       &lt;/a&gt;
     &lt;/span&gt;
 
