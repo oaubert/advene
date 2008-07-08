@@ -120,6 +120,8 @@ from advene.gui.views.editaccumulator import EditAccumulator
 from advene.gui.views.tagbag import TagBag
 import advene.gui.views.annotationdisplay
 
+from simpletal import simpleTAL
+
 class Connect:
     """Glade XML interconnection with python class.
 
@@ -3412,9 +3414,78 @@ class AdveneGUI (Connect):
         return True
 
     def on_export_activate (self, button=None, data=None):
-        self.open_adhoc_view('exporter', destination='popup')
-        return True
+        importer_package=Package(uri=config.data.advenefile('exporters.xml'))
+        
+        def generate_default_filename(filter, filename=None):
+            """Generate a filename for the given filter.
+            """
+            if filename is None:
+                # Get the current package title.
+                filename=self.controller.package.title
+                if filename == 'Template package':
+                    # Use a better name
+                    filename=os.path.splitext(os.path.basename(self.controller.package.uri))[0]
+                filename=helper.title2id(filename)
+            else:
+                # A filename was provided. Strip the extension.
+                filename=os.path.splitext(filename)[0]
+            # Add a pertinent extension
+            if filter is None:
+                return filename
+            ext=filter.getMetaData(config.data.namespace, 'extension')
+            if not ext:
+                ext = helper.title2id(filter.id)
+            return '.'.join( (filename, ext) )
+        
+        fs = gtk.FileChooserDialog(title=_("Export package data"),
+                                   parent=self.gui.get_widget('win'),
+                                   action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                   buttons=( gtk.STOCK_CONVERT, gtk.RESPONSE_OK,
+                                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
+        def update_extension(sel):
+            filter=sel.get_current_element()
+            f=generate_default_filename(filter, os.path.basename(fs.get_filename()))
+            fs.set_current_name(f)
+            return True
+        exporters=dialog.list_selector_widget([ ( v, v.title )
+                                                for v in importer_package.views
+                                                if v.id != 'index' ],
+                                              callback=update_extension)
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Export format")), expand=False)
+        hb.pack_start(exporters)
+        fs.set_extra_widget(hb)
 
+        fs.show_all()
+        fs.set_current_name(generate_default_filename(exporters.get_current_element()))
+        self.fs=fs
+        res=fs.run()
+        
+        if res == gtk.RESPONSE_OK:
+            filter=exporters.get_current_element()
+            filename=fs.get_filename()
+            ctx=self.controller.build_context()
+
+            try:
+                stream=open(filename, 'wb')
+            except Exception, e:
+                self.log(_("Cannot export to %(filename)s: %(e)s") % locals())
+                return True
+
+            kw = {}
+            if filter.content.mimetype is None or filter.content.mimetype.startswith('text/'):
+                compiler = simpleTAL.HTMLTemplateCompiler ()
+                compiler.parseTemplate (filter.content.stream, 'utf-8')
+                compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8')
+            else:
+                compiler = simpleTAL.XMLTemplateCompiler ()
+                compiler.parseTemplate (filter.content.stream)
+                compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
+            stream.close()
+            self.log(_("Data exported to %s") % filename)
+        fs.destroy()
+        return True
+        
     def generate_screenshots(self, *p):
         """Generate screenshots.
         """
