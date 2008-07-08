@@ -57,7 +57,7 @@ class PluginCollection(list):
                 try:
                     p = Plugin(d, fname, self.prefix)
                     self.append(p)
-                except PluginException:
+                except (PluginException, ImportError):
                     # Silently ignore non-plugin files
                     pass
 
