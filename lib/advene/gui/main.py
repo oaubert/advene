@@ -2448,13 +2448,19 @@ class AdveneGUI (Connect):
                     if response == gtk.RESPONSE_CANCEL:
                         return True
                     elif response == gtk.RESPONSE_YES:
-                        p.imagecache.save (helper.mediafile2id (media))
+                        try:
+                            p.imagecache.save (helper.mediafile2id (media))
+                        except OSError, e:
+                            self.log(_("Cannot save imagecache for %(media)s: %(e)s") % locals())
                     elif response == gtk.RESPONSE_NO:
                         p.imagecache._modified=False
                         pass
                 elif config.data.preferences['imagecache-save-on-exit'] == 'always':
                     media=self.controller.get_default_media(package=p)
-                    p.imagecache.save (helper.mediafile2id (media))
+                    try:
+                        p.imagecache.save (helper.mediafile2id (media))
+                    except OSError, e:
+                        self.log(_("Cannot save imagecache for %(media)s: %(e)s") % locals())
 
         if self.controller.on_exit():
             gtk.main_quit()
@@ -3244,9 +3250,13 @@ class AdveneGUI (Connect):
         return True
 
     def on_save_imagecache1_activate (self, button=None, data=None):
-        id_ = helper.mediafile2id (self.controller.get_default_media())
-        d=self.controller.package.imagecache.save (id_)
-        self.log(_("Imagecache saved to %s") % d)
+        media=self.controller.get_default_media()
+        id_ = helper.mediafile2id (media)
+        try:
+            d=self.controller.package.imagecache.save (id_)
+            self.log(_("Imagecache saved to %s") % d)
+        except OSError, e:
+            self.log(_("Cannot save imagecache for %(media)s: %(e)s") % locals())
         return True
 
     def on_restart_player1_activate (self, button=None, data=None):
