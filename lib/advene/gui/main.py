@@ -393,8 +393,8 @@ class AdveneGUI (Connect):
         """Return the list of icon pixbuf appropriate for Window.set_icon_list.
         """
         if not hasattr(self, '_icon_list'):
-            self._icon_list=[ gtk.gdk.pixbuf_new_from_file(config.data.advenefile( 
-                        ( 'pixmaps', 'icon_advene%d.png' % size ) )) 
+            self._icon_list=[ gtk.gdk.pixbuf_new_from_file(config.data.advenefile(
+                        ( 'pixmaps', 'icon_advene%d.png' % size ) ))
                               for size in (16, 32, 48, 64, 128) ]
         return self._icon_list
 
@@ -1159,7 +1159,7 @@ class AdveneGUI (Connect):
                 # Less than 50 visible pixels. Enlarge.
                 p.set_position(w - 256)
         return a
-        
+
     def create_bookmark(self, position, insert_after_current=False):
         # Capture a screenshot
         self.controller.update_snapshot(position)
@@ -1254,7 +1254,7 @@ class AdveneGUI (Connect):
         gtk.keysyms.KP_End: player_end,
         gtk.keysyms.KP_Insert: player_create_bookmark,
         }
-    
+
     def process_player_shortcuts(self, win, event):
         """Generic player control shortcuts.
 
@@ -1262,16 +1262,16 @@ class AdveneGUI (Connect):
         Control-right/-left: move in the stream
         Control-home/-end: start/end of the stream
         """
-            
+
         c=self.controller
         p=self.controller.player
-        
+
         if event.state & gtk.gdk.MOD1_MASK and event.keyval == gtk.keysyms.space:
             self.player_create_bookmark(event)
             return True
         elif event.keyval in self.key_shortcuts:
             self.key_shortcuts[event.keyval](self, event)
-            return True            
+            return True
         elif event.state & gtk.gdk.CONTROL_MASK and event.keyval in self.control_key_shortcuts:
             self.control_key_shortcuts[event.keyval](self, event)
             return True
@@ -1875,7 +1875,7 @@ class AdveneGUI (Connect):
                     self.open_adhoc_view(view, ask=False)
                     return True
                 load=dialog.message_dialog(_("Do you want to restore the saved workspace ?"),
-                                           icon=gtk.MESSAGE_QUESTION, 
+                                           icon=gtk.MESSAGE_QUESTION,
                                            callback=open_view)
         return False
 
@@ -2200,7 +2200,7 @@ class AdveneGUI (Connect):
             ats.append(newat)
 
         # Anticipated declaration of some widgets, which need to be
-        # updated in the handle_new_type/schema_selection callback.            
+        # updated in the handle_new_type/schema_selection callback.
         new_type_dialog=gtk.VBox()
         new_schema_dialog=gtk.VBox()
 
@@ -2237,8 +2237,8 @@ class AdveneGUI (Connect):
             self.tooltips.set_tip(new_type_title_dialog.title_entry, _("Title of the new type"))
             self.tooltips.set_tip(new_type_title_dialog.id_entry, _("Id of the new type. It is generated from the title, but you may change it if necessary."))
             new_type_dialog.pack_start(new_type_title_dialog, expand=False)
-            
-            # Mimetype                
+
+            # Mimetype
             type_list=(
                 ('text/plain', _("Plain text content")),
                 ('application/x-advene-structured', _("Simple-structured content")),
@@ -2251,7 +2251,7 @@ class AdveneGUI (Connect):
 
             new_type_title_dialog.attach(gtk.Label(_("Content type")), 0, 1, 2, 3)
             new_type_title_dialog.attach(mimetype_selector, 1, 2, 2, 3)
-            
+
             new_type_title_dialog.attach(gtk.Label(_("Schema")), 0, 1, 3, 4)
 
             schemas=list(self.controller.package.schemas)
@@ -2357,9 +2357,9 @@ class AdveneGUI (Connect):
         l.set_line_wrap(True)
         l.show()
         d.vbox.pack_start(l, expand=False)
-        
+
         # Anticipated declaration of some widgets, which need to be
-        # updated in the handle_new_type/schema_selection callback.            
+        # updated in the handle_new_type/schema_selection callback.
         new_schema_dialog=gtk.VBox()
 
         schemas=list(self.controller.package.schemas)
@@ -3415,7 +3415,7 @@ class AdveneGUI (Connect):
 
     def on_export_activate (self, button=None, data=None):
         importer_package=Package(uri=config.data.advenefile('exporters.xml'))
-        
+
         def generate_default_filename(filter, filename=None):
             """Generate a filename for the given filter.
             """
@@ -3436,7 +3436,7 @@ class AdveneGUI (Connect):
             if not ext:
                 ext = helper.title2id(filter.id)
             return '.'.join( (filename, ext) )
-        
+
         fs = gtk.FileChooserDialog(title=_("Export package data"),
                                    parent=self.gui.get_widget('win'),
                                    action=gtk.FILE_CHOOSER_ACTION_SAVE,
@@ -3460,7 +3460,7 @@ class AdveneGUI (Connect):
         fs.set_current_name(generate_default_filename(exporters.get_current_element()))
         self.fs=fs
         res=fs.run()
-        
+
         if res == gtk.RESPONSE_OK:
             filter=exporters.get_current_element()
             filename=fs.get_filename()
@@ -3485,7 +3485,7 @@ class AdveneGUI (Connect):
             self.log(_("Data exported to %s") % filename)
         fs.destroy()
         return True
-        
+
     def generate_screenshots(self, *p):
         """Generate screenshots.
         """
