@@ -1441,7 +1441,7 @@ class TimeLine(AdhocView):
             return True
         return False
 
-    def quick_edit(self, annotation, button=None, callback=None):
+    def quick_edit(self, annotation, button=None, callback=None, move_cursor=False):
         """Quickly edit a textual annotation
 
         If defined, the callback method will be called with 'validate'
@@ -1530,7 +1530,7 @@ class TimeLine(AdhocView):
                     l.sort(key=lambda a: a.fragment.begin)
                 if l:
                     # Edit the previous/next one
-                    self.quick_edit(l[0], callback=cb)
+                    self.quick_edit(l[0], callback=cb, move_cursor=True)
                 close_eb(widget)
                 return True
             return False
@@ -1548,6 +1548,10 @@ class TimeLine(AdhocView):
         e.connect('size-allocate', grab_focus)
         # Keep the inspector window open on the annotation
         self.set_annotation(annotation)
+        if move_cursor:
+            d=gtk.gdk.display_get_default()
+            x,y=button.window.get_deskrelative_origin()
+            d.warp_pointer(d.get_default_screen(), x + 2, y + 2)
         return e
 
     def annotation_key_press_cb(self, widget, event, annotation):
