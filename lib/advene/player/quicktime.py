@@ -31,9 +31,10 @@ except ImportError:
 name="Quicktime video player"
 
 def register(controller=None):
-    if qtmovie is not None:
-        controller.register_player(Player)
-
+    if qtmovie is None:
+        return False
+    controller.register_player(Player)
+    return True
 
 class StreamInformation:
     def __init__(self):

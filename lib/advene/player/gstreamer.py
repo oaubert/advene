@@ -86,8 +86,10 @@ from threading import Condition
 name="GStreamer video player"
 
 def register(controller):
-    if gst is not None:
-        controller.register_player(Player)
+    if gst is None:
+        return False
+    controller.register_player(Player)
+    return True
 
 class StreamInformation:
     def __init__(self):

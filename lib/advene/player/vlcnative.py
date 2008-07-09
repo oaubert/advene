@@ -29,8 +29,10 @@ except ImportError:
 name="VLC video player"
 
 def register(controller=None):
-    if vlc is not None:
-        controller.register_player(Player)
+    if vlc is None:
+        return False
+    controller.register_player(Player)
+    return True
 
 class Snapshot:
     def __init__(self, d=None):

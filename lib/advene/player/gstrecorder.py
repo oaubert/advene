@@ -39,8 +39,10 @@ from threading import Condition
 name="GStreamer video recorder"
 
 def register(controller=None):
-    if gst is not None:
-        controller.register_player(Player)
+    if gst is None:
+        return False
+    controller.register_player(Player)
+    return True
 
 class StreamInformation:
     def __init__(self):

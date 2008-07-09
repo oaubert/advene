@@ -29,6 +29,7 @@ name="Dummy video player"
 
 def register(controller):
     controller.register_player(Player)
+    return True
 
 class StreamInformation:
     def __init__(self):
