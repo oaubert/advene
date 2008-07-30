@@ -2003,17 +2003,6 @@ class AdveneGUI (Connect):
         for v in self.adhoc_views:
             ev.locals_[v.view_id]=v
         w=ev.popup()
-        b=gtk.Button(stock=gtk.STOCK_CLOSE)
-
-        def close_evaluator(*p):
-            ev.save_history()
-            w.destroy()
-            return True
-
-        b.connect('clicked', close_evaluator)
-        b.show()
-        ev.hbox.add(b)
-
         self.init_window_size(w, 'evaluator')
 
         return True
