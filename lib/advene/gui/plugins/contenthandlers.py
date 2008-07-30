@@ -31,6 +31,7 @@ from advene.gui.util import image_from_position, dialog, decode_drop_parameters
 
 from advene.gui.edit.rules import EditRuleSet, EditQuery
 from advene.rules.elements import RuleSet, SimpleQuery
+from advene.gui.edit.htmleditor import HTMLEditor
 import advene.util.ElementTree as ET
 import advene.util.helper as helper
 
@@ -38,7 +39,8 @@ name="Default content handlers"
 
 def register(controller=None):
     for c in (ZoneContentHandler, SVGContentHandler,
-              RuleSetContentHandler, SimpleQueryContentHandler):
+              RuleSetContentHandler, SimpleQueryContentHandler,
+              HTMLContentHandler):
         controller.register_content_handler(c)
 
 class ZoneContentHandler (ContentHandler):
@@ -425,3 +427,146 @@ class SimpleQueryContentHandler (ContentHandler):
         scroll_win.add_with_viewport(self.view)
 
         return scroll_win
+
+class HTMLContentHandler (ContentHandler):
+    """Create a HTML edit form for the given element."""
+    def can_handle(mimetype):
+        res=0
+        if mimetype == 'text/html':
+            res=90
+        return res
+    can_handle=staticmethod(can_handle)
+
+    def __init__ (self, element, controller=None, parent=None, **kw):
+        self.element = element
+        self.controller=controller
+        self.parent=parent
+        self.editable = True
+        self.fname=None
+        # HTMLEditor component (gtk.Textview subclass)
+        self.editor = None
+
+        # Widgets holding editors (basic and html)
+        self.view = None
+        self.sourceview=None
+
+        self.editing_source=False
+        self.tooltips=gtk.Tooltips()
+
+    def set_editable (self, boolean):
+        self.editable = boolean
+        if self.sourceview:
+            self.sourceview.set_editable(boolean)
+
+    def update_element (self):
+        """Update the element fields according to the values in the view."""
+        if not self.editable:
+            return False
+
+        if self.editing_source:
+            self.sourceview.update_element()
+            # We applied our modifications to the HTML source, so
+            # parse the source again in the HTML editor
+            if self.editor is not None:
+                self.editor.set_text(self.element.data)
+            return True
+
+        if self.editor is None:
+            return True
+
+        self.element.data = self.editor.get_html()
+        # Update the HTML source representation
+        if self.sourceview is not None:
+            self.sourceview.content_set(self.element.data)
+        return True
+
+    def editor_drag_received(self, widget, context, x, y, selection, targetType, time):
+        """Handle the drop from an annotation to the editor.
+        """
+        print "editor_drag_received", x, y, helper.format_time(time)
+        if targetType == config.data.target_type['annotation']:
+            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+            # We received a drop. Determine the location.
+            # FIXME: propose various choices (insert content, insert snapshot, etc)
+            self.editor.get_buffer().insert_at_cursor(source.content.data)
+            return True
+        elif targetType == config.data.target_type['annotation-type']:
+            source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
+            # FIXME
+            self.editor.get_buffer().insert_at_cursor(source.title)
+            return True
+        elif targetType == config.data.target_type['timestamp']:
+            data=decode_drop_parameters(selection.data)
+            t=long(data['timestamp'])
+            # FIXME: propose various choices (insert timestamp, insert snapshot, etc)
+            self.editor.get_buffer().insert_at_cursor(helper.format_time(t))
+            return True
+        else:
+            print "Unknown target type for drop: %d" % targetType
+        return False
+
+    def get_view (self, compact=False):
+        """Generate a view widget for editing HTML."""
+        vbox=gtk.VBox()
+
+        self.editor=HTMLEditor()
+        self.editor.set_text(self.element.data)
+
+        self.editor.connect('drag-data-received', self.editor_drag_received)
+        self.editor.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                                  gtk.DEST_DEFAULT_HIGHLIGHT |
+                                  gtk.DEST_DEFAULT_ALL,
+                                  config.data.drag_type['annotation']
+                                  + config.data.drag_type['annotation-type']
+                                  + config.data.drag_type['timestamp'],
+                                  gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_ASK )
+        
+        self.view = gtk.VBox()
+
+        tb=gtk.Toolbar()
+        for (icon, action) in (
+            (gtk.STOCK_BOLD, lambda i: self.editor.apply_html_tag('b')),
+            (gtk.STOCK_ITALIC, lambda i: self.editor.apply_html_tag('i')),
+            ):
+            b=gtk.ToolButton(icon)
+            b.connect('clicked', action)
+            tb.insert(b, -1)
+            b.show()
+        self.view.pack_start(tb, expand=False)
+        self.view.add(self.editor)
+
+        def edit_wysiwyg(*p):
+            vbox.foreach(vbox.remove)
+            vbox.add(self.view)
+
+            b=gtk.Button(_("Edit source"))
+            b.connect('clicked', edit_source)
+            vbox.pack_start(b, expand=False)
+            self.editing_source=False
+            vbox.show_all()
+            return True
+
+        def edit_source(*p):
+            if self.sourceview is None:
+                self.sourceview=TextContentHandler(element=self.element,
+                                                   controller=self.controller,
+                                                   parent=self.parent)
+                self.sourceview.widget=self.sourceview.get_view()
+
+            vbox.foreach(vbox.remove)
+            vbox.add(self.sourceview.widget)
+
+            b=gtk.Button(_("WYSIWYG editor"))
+            b.connect('clicked', edit_wysiwyg)
+            vbox.pack_start(b, expand=False)
+            self.editing_source=True
+            vbox.show_all()
+            return True
+
+        # FIXME: this test should be reverted once the HTMLEditor code
+        # is stabilized.
+        if config.data.preferences['expert-mode']:
+            edit_wysiwyg()
+        else:
+            edit_source()
+        return vbox
