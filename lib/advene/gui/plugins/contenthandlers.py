@@ -489,6 +489,9 @@ class HTMLContentHandler (ContentHandler):
             # We received a drop. Determine the location.
             # FIXME: propose various choices (insert content, insert snapshot, etc)
             self.editor.get_buffer().insert_at_cursor(source.content.data)
+            self.editor.handle_img('img', attr=( 
+                    ('tal:attributes', 'src package/annotations/%s/snapshot_url' % source.id ),
+                    ('src', 'http://localhost:1234/media/snapshot/advene/%d' % source.fragment.begin) ))
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
