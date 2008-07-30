@@ -465,7 +465,7 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                     endmark._startmark=smark
                     smark._endmark=endmark
             else:
-                if tag in self.__formats:
+                if tagname in self.__formats:
                     self.__tb.apply_tag(tag, *bounds)
                 # Insert marks
                 mark = self.__tb.create_mark(None, bounds[0], True)
