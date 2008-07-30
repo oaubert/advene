@@ -25,6 +25,8 @@
 # TODO:
 # - Handle TAL attributes (replace, repeat, content at least)
 # - Insert bullets in list items
+# - Handle list item insertion
+# - Handle annotation + annotation-type DND
 
 import pygtk
 pygtk.require('2.0')
@@ -505,6 +507,7 @@ if __name__ == "__main__":
     sb.add(t)
     sb.show()
 
+    sys.path.insert(0, '..')
     from evaluator import Evaluator
     import os
 
