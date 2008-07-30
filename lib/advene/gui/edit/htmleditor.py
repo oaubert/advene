@@ -26,7 +26,10 @@
 # - Handle TAL attributes (replace, repeat, content at least)
 # - Insert bullets in list items
 # - Handle list item insertion
-# - Handle annotation + annotation-type DND
+# - Define a insert_tag(tagname, attr, content), which can be nested:
+#   insert_tag('a', {'href': 'f.html'}, insert_tag('img', {'src': 'foo.jpg'})
+# - Define a property box, which updates with the cursor position (displays current context + attributes for the appropriate tags (esp. <a>))
+
 
 import pygtk
 pygtk.require('2.0')
@@ -369,13 +372,13 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                 if m._endtag in self.__standalone:
                     continue
                 #fd.write(b.get_text(textstart, i).replace('\n', '__NEWLINEEND__'))
-                fd.write(b.get_text(textstart, i).replace('\n', '<br/>'))
+                fd.write(b.get_text(textstart, i).replace('\n', '<br>'))
                 fd.write("</%s>\n" % m._endtag)
                 textstart=i.copy()
 
             for m in startmarks:
                 #fd.write(b.get_text(textstart, i).replace('\n', '__NEWLINESTART__'))
-                fd.write(b.get_text(textstart, i).replace('\n', '<br/>'))
+                fd.write(b.get_text(textstart, i).replace('\n', '<br>'))
                 if m._tag in self.__standalone:
                     closing='/>'
                 else:
@@ -394,7 +397,7 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             if not i.forward_char():
                 break
         # Write the remaining text
-        fd.write(b.get_text(textstart, b.get_end_iter()).replace('\n', '<br/>'))
+        fd.write(b.get_text(textstart, b.get_end_iter()).replace('\n', '<br>'))
         if fd == sys.stdout:
             # fd.flush() + newline
             fd.write('\n')
