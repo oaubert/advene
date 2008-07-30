@@ -45,7 +45,22 @@ class Evaluator:
         self.history_index = None
         if self.historyfile:
             self.load_history ()
+        self.control_shortcuts = {
+            gtk.keysyms.w: self.close,
+            gtk.keysyms.l: self.clear_expression,
+            gtk.keysyms.d: lambda: self.display_completion(completeprefix=False),
+            gtk.keysyms.h: lambda: self.display_info(self.get_selection_or_cursor(), typ="doc"),
+            gtk.keysyms.H: lambda: self.display_info(self.get_selection_or_cursor(), typ="source"),
+            gtk.keysyms.Return: self.evaluate_expression,
+            gtk.keysyms.s: self.save_output_cb,
+            gtk.keysyms.n: self.next_entry,
+            gtk.keysyms.p: self.previous_entry,
+            gtk.keysyms.Page_Down: lambda: self.scroll_output(+1),
+            gtk.keysyms.Page_Up: lambda: self.scroll_output(-1),
+            }
+
         self.widget=self.build_widget()
+
 
     def load_history(self, name=None):
         """Load the command history.
@@ -101,6 +116,13 @@ class Evaluator:
         """
         b=self.output.get_buffer()
         b.delete(*b.get_bounds())
+        return True
+
+    def scroll_output(self, d):
+        a=self.resultscroll.get_vadjustment()
+        if a.value + d * a.page_increment < a.upper:
+            a.value += d * a.page_increment
+        a.value_changed ()
         return True
 
     def save_output_cb(self, *p, **kw):
@@ -521,22 +543,75 @@ class Evaluator:
 
         return window
 
-    def popup(self):
+    def popup(self, embedded=True):
         """Popup the application window.
         """
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.connect('destroy', lambda e: window.destroy())
+        window.connect('destroy', lambda e: gtk.main_quit())
+        window.connect('key-press-event', self.key_pressed_cb)
         window.set_title ("Python evaluation")
+
+        if embedded:
+            # Add the Close button to the toolbar
+            b=gtk.ToolButton(gtk.STOCK_CLOSE)
+            b.connect('clicked', self.close)
+            self.toolbar.insert(b, -1)
+            self.control_shortcuts[gtk.keysyms.w] = self.close
+        else:
+            # Add the Quit button to the toolbar
+            b=gtk.ToolButton(gtk.STOCK_QUIT)
+            b.connect('clicked', lambda b: window.destroy())
+            self.toolbar.insert(b, -1)
+            self.control_shortcuts[gtk.keysyms.q] = lambda: gtk.main_quit()
 
         window.add (self.widget)
         window.show_all()
+        window.resize(800, 600)
         self.help()
+        self.source.grab_focus()
         return window
+
+    def key_pressed_cb(self, win, event):
+        """Handle key press event.
+        """
+        if event.keyval == gtk.keysyms.F1:
+            self.help()
+            return True
+        if event.keyval == gtk.keysyms.Tab:
+            self.display_completion()
+            return True
+
+        if event.state & gtk.gdk.CONTROL_MASK:
+            action=self.control_shortcuts.get(event.keyval)
+            if action:
+                action()
+                return True
+
+        return False
 
     def build_widget(self):
         """Build the evaluator widget.
         """
         vbox=gtk.VBox()
+
+        tb=gtk.Toolbar()
+        tb.set_style(gtk.TOOLBAR_ICONS)
+        # Use small toolbar button everywhere
+        gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
+
+        for (icon, action) in (
+            (gtk.STOCK_SAVE, self.save_output_cb),
+            (gtk.STOCK_CLEAR, self.clear_output),
+            (gtk.STOCK_DELETE, self.clear_expression),
+            (gtk.STOCK_EXECUTE, self.evaluate_expression),
+            ):
+            b=gtk.ToolButton(icon)
+            b.connect('clicked', action)
+            tb.insert(b, -1)
+
+        # So that applications can define their own buttons
+        self.toolbar=tb
+        vbox.pack_start(tb, expand=False)
 
         self.source=gtk.TextView ()
         self.source.set_editable(True)
@@ -561,84 +636,8 @@ class Evaluator:
         f.add(self.resultscroll)
         vbox.add(f)
 
-        hb=gtk.HButtonBox()
-
-        b=gtk.Button("_Save output")
-        b.connect('clicked', self.save_output_cb)
-        hb.add(b)
-
-        b=gtk.Button('Clear _output')
-        b.connect('clicked', self.clear_output)
-        hb.add(b)
-
-        b=gtk.Button('Clear _expression')
-        b.connect('clicked', self.clear_expression)
-        hb.add(b)
-
-        b=gtk.Button('E_valuate expression')
-        b.connect('clicked', self.evaluate_expression)
-        hb.add(b)
-
-        # So that applications can defined their own buttons
-        self.hbox=hb
-
-        vbox.pack_start(hb, expand=False)
-
-        def key_pressed_cb (win, event):
-            """Handle key press event.
-            """
-            if event.keyval == gtk.keysyms.F1:
-                self.help()
-                return True
-            if event.keyval == gtk.keysyms.Tab:
-                self.display_completion()
-                return True
-
-            if event.state & gtk.gdk.CONTROL_MASK:
-                if event.keyval == gtk.keysyms.w:
-                    self.close()
-                    return True
-                elif event.keyval == gtk.keysyms.l:
-                    self.clear_expression()
-                    return True
-                elif event.keyval == gtk.keysyms.d:
-                    item=self.display_completion(completeprefix=False)
-                    return True
-                elif event.keyval == gtk.keysyms.h:
-                    self.display_info(self.get_selection_or_cursor(), typ="doc")
-                    return True
-                elif event.keyval == gtk.keysyms.H:
-                    self.display_info(self.get_selection_or_cursor(), typ="source")
-                    return True
-                elif event.keyval == gtk.keysyms.Return:
-                    self.evaluate_expression()
-                    return True
-                elif event.keyval == gtk.keysyms.s:
-                    self.save_output_cb()
-                    return True
-                elif event.keyval == gtk.keysyms.n:
-                    self.next_entry()
-                    return True
-                elif event.keyval == gtk.keysyms.p:
-                    self.previous_entry()
-                    return True
-                elif event.keyval == gtk.keysyms.Page_Down:
-                    a=self.resultscroll.get_vadjustment()
-                    if a.value + a.page_increment < a.upper:
-                        a.value += a.page_increment
-                    a.value_changed ()
-                    return True
-                elif event.keyval == gtk.keysyms.Page_Up:
-                    a=self.resultscroll.get_vadjustment()
-                    if a.value - a.page_increment >= a.lower:
-                        a.value -= a.page_increment
-                    a.value_changed ()
-                    return True
-
-            return False
-
-        self.source.connect('key-press-event', key_pressed_cb)
-        self.output.connect('key-press-event', key_pressed_cb)
+        self.source.connect('key-press-event', self.key_pressed_cb)
+        self.output.connect('key-press-event', self.key_pressed_cb)
 
         vbox.show_all()
 
