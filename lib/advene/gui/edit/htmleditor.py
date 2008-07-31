@@ -26,10 +26,9 @@
 # - Handle TAL attributes (replace, repeat, content at least)
 # - Insert bullets in list items
 # - Handle list item insertion
-# - Define a insert_tag(tagname, attr, content), which can be nested:
-#   insert_tag('a', {'href': 'f.html'}, insert_tag('img', {'src': 'foo.jpg'})
 # - Define a property box, which updates with the cursor position (displays current context + attributes for the appropriate tags (esp. <a>))
-
+# - Handle drag-motion so  that cursor position follows mouse
+# - Use \u2063 between contiguous tags
 
 import pygtk
 pygtk.require('2.0')
@@ -211,27 +210,25 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             # from network... this program is now potentially hackable
             # ;)
             loader = gtk.gdk.PixbufLoader()
-            dims = [0, 0]
+
             # process width and height attributes
-            w = dattr.get('width')
-            h = dattr.get('height')
-            def set_size(pixbuf, w, h, dims):
-                '''FIXME: floats should be relative to the whole
-                textview, and resize with it. This needs new
-                pifbufs for every resize, gtk.gdk.Pixbuf.scale_simple
-                or similar.
-                '''
-                if type(dims[0]) == float:
-                    dims[0] = int(dims[0]*w)
-                elif not dims[0]:
-                    dims[0] = w
-                if type(dims[1]) == float:
-                    dims[1] = int(dims[1]*h)
-                if not dims[1]:
-                    dims[1] = h
-                loader.set_size(*dims)
-            if w or h:
-                loader.connect('size-prepared', set_size, dims)
+            attrwidth = dattr.get('width')
+            attrheight = dattr.get('height')
+
+            def set_size(pixbuf, width, height):
+                if attrwidth and attrheight:
+                    # Both are specified. Simple use them.
+                    width, height = attrwidth, attrheight
+                elif attrwidth and not attrheight:
+                    # Only width is specified.
+                    height = 1.0 * attrheight / attrwidth * width
+                    width = attrwidth
+                elif attrheight and not attrwidth:
+                    width = 1.0 * attrwidth / attrheight * height
+                    height = attrheight
+                loader.set_size(int(width), int(height))
+            if attrwidth or attrheight:
+                loader.connect('size-prepared', set_size)
             loader.write(data)
             loader.close()
             pixbuf = loader.get_pixbuf()
@@ -365,7 +362,8 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                 m._index=index
                 index += 1
             endmarks=sorted( (m for m in i.get_marks() if hasattr(m, '_endtag')),
-                             key=lambda e: -e._startmark._index )
+                             #key=lambda e: -e._startmark._index )
+                             key=lambda e: 1)
 
             # First close tags, before opening new ones.
             for m in endmarks:
