@@ -481,6 +481,23 @@ class HTMLContentHandler (ContentHandler):
             self.sourceview.content_set(self.element.data)
         return True
 
+    def editor_drag_motion(self, widget, drag_context, x, y, timestamp):
+        #w=drag_context.get_source_widget()
+        (x, y) = widget.window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT,
+                                                  int(x),
+                                                  int(y))
+        it=widget.get_iter_at_location(x, y)
+        if it is None:
+            print "Error in get_iter_at_location"
+            return False
+        # Set the cursor position
+        widget.get_buffer().place_cursor(it)
+        
+        # Dragging an annotation. Enforce only annotation target.
+        #if config.data.drag_type['annotation'][0][0] in drag_context.targets:
+        #    pass
+        return True
+
     def editor_drag_received(self, widget, context, x, y, selection, targetType, time):
         """Handle the drop from an annotation to the editor.
         """
@@ -543,6 +560,7 @@ class HTMLContentHandler (ContentHandler):
                                   + config.data.drag_type['annotation-type']
                                   + config.data.drag_type['timestamp'],
                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_ASK )
+        self.editor.connect('drag-motion', self.editor_drag_motion)
         
         self.view = gtk.VBox()
 
