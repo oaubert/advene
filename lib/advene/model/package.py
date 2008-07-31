@@ -283,7 +283,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
     def get_element_by_id(self, i):
         uri=self.uri
         for m in (self.getSchemas, self.getViews, self.getAnnotationTypes,
-                  self.getRelationTypes, self.getAnnotations,
+                  self.getRelationTypes, self.getAnnotations, self.getQueries,
                   self.getRelations):
             el=m().get( '#'.join( (uri, i) ), None )
             if el is not None:
