@@ -261,7 +261,7 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             mark._tag=tag
             mark._attr=attr
             mark._startmark=mark
-            mark._endtag=mark
+            mark._endmark=mark
             self.__tb.insert(cursor, alt)
 
     def handle_starttag(self, tag, attr):
