@@ -28,7 +28,7 @@
 # - Handle list item insertion
 # - Define a property box, which updates with the cursor position (displays current context + attributes for the appropriate tags (esp. <a>))
 # - Handle drag-motion so  that cursor position follows mouse
-# - Use \u2063 between contiguous tags
+# - Fix spurious <br> insertion
 
 import pygtk
 pygtk.require('2.0')
@@ -366,8 +366,20 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         # the corresponding endmarks with the right order
         index=0
 
-        def output_text(fr, to):
-            fd.write(b.get_text(fr, to).replace('\n', '<br>').replace(u'\u2063', ''))
+        self._last_endtag=None
+
+        def output_text(fr, to, tag):
+            """Output text data.
+            
+            Appropriately strip starting newline if it was inserted
+            after a block endtag.
+            """
+            txt=b.get_text(fr, to).replace(u'\u2063', '')
+            if self._last_endtag in self.__block:
+                txt=txt.lstrip()
+            txt=txt.replace('\n', '<br>')
+            self._last_endtag=None
+            fd.write(txt)
 
         while True:
             p=i.get_pixbuf()
@@ -378,11 +390,14 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                 if hasattr(m, '_endtag'):
                     if m._endtag in self.__standalone:
                         continue
-                    output_text(textstart, i)
-                    fd.write("</%s>\n" % m._endtag)
+                    output_text(textstart, i, m._endtag)
+                    fd.write("</%s>" % m._endtag)
+                    if m._endtag in self.__block:
+                        fd.write('\n')
                     textstart=i.copy()
+                    self._last_endtag=m._endtag
                 elif hasattr(m, '_tag'):
-                    output_text(textstart, i)
+                    output_text(textstart, i, m._tag)
                     if m._tag in self.__standalone:
                         closing='/>'
                     else:
@@ -394,14 +409,14 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                     else:
                         fd.write("<%s%s" % (m._tag, closing))
 
-                    if m._tag in self.__block:
+                    if m._tag in self.__block or m._tag == 'br':
                         fd.write('\n')
                     textstart=i.copy()
             
             if not i.forward_char():
                 break
         # Write the remaining text
-        output_text(textstart, b.get_end_iter())
+        output_text(textstart, b.get_end_iter(), 'end')
         if fd == sys.stdout:
             # fd.flush() + newline
             fd.write('\n')
