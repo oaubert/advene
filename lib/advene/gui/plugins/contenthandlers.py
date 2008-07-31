@@ -443,6 +443,7 @@ class HTMLContentHandler (ContentHandler):
         self.parent=parent
         self.editable = True
         self.fname=None
+        self.last_dndtime=None
         # HTMLEditor component (gtk.Textview subclass)
         self.editor = None
 
@@ -483,15 +484,34 @@ class HTMLContentHandler (ContentHandler):
     def editor_drag_received(self, widget, context, x, y, selection, targetType, time):
         """Handle the drop from an annotation to the editor.
         """
-        print "editor_drag_received", x, y, helper.format_time(time)
+        # FIXME: Upon DND, TextView receives the event twice. Some
+        # posts from 2004 signal the same problem, some hacks can be
+        # found in existing code :
+        #   widget.emit_stop_by_name ("drag-data-received")
+        #   context.finish(False, False, time)
+        #   widget.stop_emission("drag-data-received")
+        # but none of them seems to work here. Just use a basic approach,
+        # imagining that nobody is fast enough to really do two DNDs
+        # at the same time.
+        if time == self.last_dndtime:
+            return True
+        self.last_dndtime=time
+
         if targetType == config.data.target_type['annotation']:
             source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
             # We received a drop. Determine the location.
             # FIXME: propose various choices (insert content, insert snapshot, etc)
             self.editor.get_buffer().insert_at_cursor(source.content.data)
-            self.editor.handle_img('img', attr=( 
-                    ('tal:attributes', 'src package/annotations/%s/snapshot_url' % source.id ),
-                    ('src', 'http://localhost:1234/media/snapshot/advene/%d' % source.fragment.begin) ))
+            #self.editor.handle_img('img', attr=( 
+            #        ('tal:attributes', 'src package/annotations/%s/snapshot_url' % source.id ),
+            #        ('src', 'http://localhost:1234/media/snapshot/advene/%d' % source.fragment.begin) ))
+            ctx=self.controller.build_context(source)
+            self.editor.feed('<a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s" /></a>' % { 
+                    'id': source.id,
+                    # FIXME: should get base server address from somewhere
+                    'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
+                    'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
+                    })
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
