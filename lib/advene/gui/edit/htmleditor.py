@@ -234,16 +234,16 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             pixbuf = loader.get_pixbuf()
         else:
             pixbuf=None
-        it=self.__tb.get_end_iter()
+        cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
         if pixbuf is not None:
-            self.__tb.insert_pixbuf(it, pixbuf)
+            self.__tb.insert_pixbuf(cursor, pixbuf)
             pixbuf._attr=attr
         else:
-            end_iter = self.__tb.get_end_iter()
-            mark = self.__tb.create_mark(None, end_iter, True)
+            cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+            mark = self.__tb.create_mark(None, cursor, True)
             mark._tag=tag
             mark._attr=attr
-            self.__tb.insert(it, alt)
+            self.__tb.insert(cursor, alt)
 
     def handle_starttag(self, tag, attr):
         """Tag opening.
@@ -266,12 +266,12 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             #if self.__last in self.__open:
             #    self.handle_endtag(self.__last)
             self.__last = tag
-            end_iter = self.__tb.get_end_iter()
-            self.__tb.insert(end_iter, "\n")
+            cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+            self.__tb.insert(cursor, "\n")
 
         # Mark the position of tag for further application of formatting
-        end_iter = self.__tb.get_end_iter()
-        mark = self.__tb.create_mark(None, end_iter, True)
+        cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+        mark = self.__tb.create_mark(None, cursor, True)
         mark._tag=tag
         mark._attr=attr
         mark.has_tal = [ (k, v) for (k, v) in attr if k.startswith('tal:') ]
@@ -281,11 +281,11 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             self.__tags[tag] = [ mark ]
 
         if tag == 'br':
-            self.__tb.insert(end_iter, '\n')
+            self.__tb.insert(cursor, '\n')
         elif tag == 'li' or tag == 'dt':
             # FIXME: should insert a bullet here, and maybe render
             # nested lists
-            self.__tb.insert(end_iter, '\n   ')
+            self.__tb.insert(cursor, '\n   ')
             
 
     def handle_data(self, data):
@@ -297,8 +297,8 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         space. In the first line we do this service.
         """
         data = ' '.join(data.split()) + ' '
-        end_iter = self.__tb.get_end_iter()
-        self.__tb.insert(end_iter, data)
+        cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+        self.__tb.insert(cursor, data)
 
 
     def handle_endtag(self, tag):
@@ -313,17 +313,17 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         simple.
         """
         # Create an end-mark to be able to restore HTML tags
-        end_iter = self.__tb.get_end_iter()
-        mark = self.__tb.create_mark(None, end_iter, True)
+        cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+        mark = self.__tb.create_mark(None, cursor, True)
         mark._endtag=tag
         try:
             start_mark = self.__tags[tag].pop()
             start = self.__tb.get_iter_at_mark(start_mark)
-            end = self.__tb.get_end_iter()
+            cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
             if tag in self.__formats:
-                self.__tb.apply_tag_by_name(tag, start, end)
+                self.__tb.apply_tag_by_name(tag, start, cursor)
             if start_mark.has_tal:
-                self.__tb.apply_tag_by_name('tal', start, end)
+                self.__tb.apply_tag_by_name('tal', start, cursor)
             mark._startmark=start_mark
             start_mark._endmark=mark
             return
