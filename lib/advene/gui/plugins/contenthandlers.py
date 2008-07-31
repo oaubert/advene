@@ -565,12 +565,15 @@ class HTMLContentHandler (ContentHandler):
         self.view = gtk.VBox()
 
         tb=gtk.Toolbar()
-        for (icon, action) in (
-            (gtk.STOCK_BOLD, lambda i: self.editor.apply_html_tag('b')),
-            (gtk.STOCK_ITALIC, lambda i: self.editor.apply_html_tag('i')),
+        tb.set_style(gtk.TOOLBAR_ICONS)
+        for (icon, tooltip, action) in (
+            (gtk.STOCK_BOLD, _("Bold"), lambda i: self.editor.apply_html_tag('b')),
+            (gtk.STOCK_ITALIC, _("Italic"), lambda i: self.editor.apply_html_tag('i')),
+            (gtk.STOCK_UNDERLINE, _("Header"), lambda i: self.editor.apply_html_tag('h2')),
             ):
             b=gtk.ToolButton(icon)
             b.connect('clicked', action)
+            b.set_tooltip_text(tooltip)
             tb.insert(b, -1)
             b.show()
         self.view.pack_start(tb, expand=False)
