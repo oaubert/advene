@@ -190,6 +190,24 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             if v:
                 print "Unbalanced tag", k
 
+    def _get_iter_for_creating_mark(self):
+        """Return an appropriate iter for creating a mark.
+        """
+        cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+        m=[ m for m in cursor.get_marks() if hasattr(m, '_tag') or hasattr(m, '_endtag') ]
+        if m:
+            # There is already a mark/tag at the current cursor
+            # position. So if we add a new mark here, we cannot
+            # guarantee their order.
+            # Insert an invisile chara to alleviate this problem.
+            self.__tb.insert_at_cursor(u'\u2063')
+            cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+            # Safety test. Normally useles...
+            m=[ m for m in cursor.get_marks() if hasattr(m, '_tag') or hasattr(m, '_endtag') ]
+            if m:
+                print "Strange, there should be not tag mark here."
+        return cursor
+        
     def handle_img(self, tag, attr):
         dattr=dict(attr)
         # Wait maximum 1s for connection 
@@ -234,15 +252,16 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             pixbuf = loader.get_pixbuf()
         else:
             pixbuf=None
-        cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+        cursor = self._get_iter_for_creating_mark()
         if pixbuf is not None:
             self.__tb.insert_pixbuf(cursor, pixbuf)
             pixbuf._attr=attr
         else:
-            cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
             mark = self.__tb.create_mark(None, cursor, True)
             mark._tag=tag
             mark._attr=attr
+            mark._startmark=mark
+            mark._endtag=mark
             self.__tb.insert(cursor, alt)
 
     def handle_starttag(self, tag, attr):
@@ -266,11 +285,10 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             #if self.__last in self.__open:
             #    self.handle_endtag(self.__last)
             self.__last = tag
-            cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
-            self.__tb.insert(cursor, "\n")
+            self.__tb.insert_at_cursor("\n")
 
         # Mark the position of tag for further application of formatting
-        cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+        cursor = self._get_iter_for_creating_mark()
         mark = self.__tb.create_mark(None, cursor, True)
         mark._tag=tag
         mark._attr=attr
@@ -313,13 +331,12 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         simple.
         """
         # Create an end-mark to be able to restore HTML tags
-        cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+        cursor = self._get_iter_for_creating_mark()
         mark = self.__tb.create_mark(None, cursor, True)
         mark._endtag=tag
         try:
             start_mark = self.__tags[tag].pop()
             start = self.__tb.get_iter_at_mark(start_mark)
-            cursor = self.__tb.get_iter_at_mark(self.__tb.get_insert())
             if tag in self.__formats:
                 self.__tb.apply_tag_by_name(tag, start, cursor)
             if start_mark.has_tal:
@@ -349,53 +366,42 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         # the corresponding endmarks with the right order
         index=0
 
+        def output_text(fr, to):
+            fd.write(b.get_text(fr, to).replace('\n', '<br>').replace(u'\u2063', ''))
+
         while True:
             p=i.get_pixbuf()
             if p is not None:
                 fd.write("<img %s/>" % " ".join( '%s="%s"' % (k, v) for (k, v) in p._attr ))
 
-            # Make sure that we handle 'a' anchors as most inline.
-            startmarks=sorted((m for m in i.get_marks() if hasattr(m, '_tag')),
-                              key=lambda e: e._tag == 'a')
-            # Initialize startsmarks index
-            for m in startmarks:
-                m._index=index
-                index += 1
-            endmarks=sorted( (m for m in i.get_marks() if hasattr(m, '_endtag')),
-                             #key=lambda e: -e._startmark._index )
-                             key=lambda e: 1)
+            for m in i.get_marks():
+                if hasattr(m, '_endtag'):
+                    if m._endtag in self.__standalone:
+                        continue
+                    output_text(textstart, i)
+                    fd.write("</%s>\n" % m._endtag)
+                    textstart=i.copy()
+                elif hasattr(m, '_tag'):
+                    output_text(textstart, i)
+                    if m._tag in self.__standalone:
+                        closing='/>'
+                    else:
+                        closing='>'
+                    if m._attr:
+                        fd.write("<%s %s%s" % (m._tag, 
+                                              " ".join( '%s="%s"' % (k, v) for (k, v) in m._attr ),
+                                               closing))
+                    else:
+                        fd.write("<%s%s" % (m._tag, closing))
 
-            # First close tags, before opening new ones.
-            for m in endmarks:
-                if m._endtag in self.__standalone:
-                    continue
-                #fd.write(b.get_text(textstart, i).replace('\n', '__NEWLINEEND__'))
-                fd.write(b.get_text(textstart, i).replace('\n', '<br>'))
-                fd.write("</%s>\n" % m._endtag)
-                textstart=i.copy()
-
-            for m in startmarks:
-                #fd.write(b.get_text(textstart, i).replace('\n', '__NEWLINESTART__'))
-                fd.write(b.get_text(textstart, i).replace('\n', '<br>'))
-                if m._tag in self.__standalone:
-                    closing='/>'
-                else:
-                    closing='>'
-                if m._attr:
-                    fd.write("<%s %s%s" % (m._tag, 
-                                          " ".join( '%s="%s"' % (k, v) for (k, v) in m._attr ),
-                                           closing))
-                else:
-                    fd.write("<%s%s" % (m._tag, closing))
-
-                if m._tag in self.__block:
-                    fd.write('\n')
-                textstart=i.copy()
+                    if m._tag in self.__block:
+                        fd.write('\n')
+                    textstart=i.copy()
             
             if not i.forward_char():
                 break
         # Write the remaining text
-        fd.write(b.get_text(textstart, b.get_end_iter()).replace('\n', '<br>'))
+        output_text(textstart, b.get_end_iter())
         if fd == sys.stdout:
             # fd.flush() + newline
             fd.write('\n')
@@ -480,17 +486,14 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                 mark._endmark=endmark
         else:
             # No selection.
-            start = self.__tb.get_iter_at_mark(self.__tb.get_insert())
+            start = self._get_iter_for_creating_mark()
 
             mark = self.__tb.create_mark(None, start, True)
             mark._tag=tagname
             mark._attr=attr
             mark.has_tal = [ (k, v) for (k, v) in attr if k.startswith('tal:') ]
 
-            # Insert a space to be sure to distinguish between
-            # opening and closing mark.
-            anchor=self.__tb.insert_at_cursor(' ')
-            end=self.__tb.get_iter_at_mark(self.__tb.get_insert())
+            end=self._get_iter_for_creating_mark()
             if tag in self.__formats:
                 self.__tb.apply_tag(tag, start, end)
 
@@ -502,7 +505,7 @@ class HTMLEditor(gtk.TextView, HTMLParser):
 if __name__ == "__main__":
     t = HTMLEditor()
     s = open("p.html").read()
-    #t.set_text(s)
+    t.set_text(s)
     t.show()
     sb = gtk.ScrolledWindow()
     sb.add(t)
@@ -544,6 +547,5 @@ if __name__ == "__main__":
         return False
     w.connect('key-press-event', key_press)
 
-    t.set_text('Foo <b>bar</b> baz')
     t.grab_focus()
     gtk.main()
