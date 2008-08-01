@@ -27,7 +27,6 @@
 # - Insert bullets in list items
 # - Handle list item insertion
 # - Define a property box, which updates with the cursor position (displays current context + attributes for the appropriate tags (esp. <a>))
-# - Handle drag-motion so  that cursor position follows mouse
 # - Fix spurious <br> insertion
 
 import pygtk
@@ -79,7 +78,8 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                  'pixels-below-lines': 2 },
          'dt': { 'font': "sans bold 10",
                  'pixels-above-lines': 3,
-                 'pixels-below-lines': 2 },
+                 'pixels-below-lines': 2,
+                 'left-margin': 48 },
          'p': { 'font': "sans 10",
                 'pixels-above-lines': 4,
                 'pixels-below-lines': 4 },
@@ -95,7 +95,7 @@ class HTMLEditor(gtk.TextView, HTMLParser):
          'table': {},
          'br': {},
          'img': {},
-         'li': {},
+         'li': { 'left-margin': 48 },
          'ul': {},
          'ol': {},
          'tal': { 'background': 'violet' }
@@ -188,7 +188,7 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         self.feed(txt.encode('utf-8'))
         for k, v in self.__tags.iteritems():
             if v:
-                print "Unbalanced tag", k
+                print "Unbalanced tag at end ", k
 
     def _get_iter_for_creating_mark(self):
         """Return an appropriate iter for creating a mark.
@@ -303,7 +303,7 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         elif tag == 'li' or tag == 'dt':
             # FIXME: should insert a bullet here, and maybe render
             # nested lists
-            self.__tb.insert(cursor, '\n   ')
+            self.__tb.insert(cursor, '\n')
             
 
     def handle_data(self, data):
