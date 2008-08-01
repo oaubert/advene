@@ -1857,8 +1857,6 @@ class AdveneGUI (Connect):
                            package=p)
         p._indexer.initialize()
 
-        # FIXME: deactivated for the moment, it freezes the GUI just
-        #after the confirmation dialog. To be investigated...
         self.controller.queue_action(self.check_for_default_adhoc_view, p)
         return True
 
