@@ -16,7 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-"""Python expressions evaluator.
+"""Python expression evaluator.
 """
 
 import os
@@ -196,9 +196,9 @@ class Evaluator:
         self.log("""Evaluator window help:
 
         F1: display this help
-        Control-w: close the window
 
-        Control-Return: evaluate the expression
+        Control-Return: evaluate the expression. If a selection is
+                        active, evaluate only the selection.
 
         Control-l: clear the expression buffer
         Control-S: save the expression buffer
