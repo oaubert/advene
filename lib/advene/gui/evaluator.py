@@ -280,13 +280,25 @@ class Evaluator:
             if typ == "doc":
                 d=res.__doc__
             elif typ == "source":
-                d="[Code found in " + inspect.getabsfile(res) + "]\n\n" + inspect.getsource(res)
+                try:
+                    d="[Code found in " + inspect.getabsfile(res)
+                except TypeError:
+                    d=None
+                try:
+                    source=inspect.getsource(res)
+                except TypeError:
+                    source=''
+                if d and source:
+                    d += "]\n\n" + source
             self.clear_output()
             if d is not None:
                 self.log("%s for %s:\n\n" % (typ, repr(expr)))
                 self.log(unicode(d))
             else:
-                self.log("No available documentation for %s" % expr)
+                if typ == 'doc':
+                    self.log("No available documentation for %s" % expr)
+                else:
+                    self.log("Cannot get source for %s" % expr)
         except Exception:
             f=StringIO.StringIO()
             traceback.print_exc(file=f)
