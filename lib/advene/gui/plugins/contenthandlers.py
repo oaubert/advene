@@ -580,7 +580,10 @@ class HTMLContentHandler (ContentHandler):
             tb.insert(b, -1)
             b.show()
         self.view.pack_start(tb, expand=False)
-        self.view.add(self.editor)
+        sw=gtk.ScrolledWindow()
+        sw.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw.add(self.editor)
+        self.view.add(sw)
 
         def edit_wysiwyg(*p):
             vbox.foreach(vbox.remove)
