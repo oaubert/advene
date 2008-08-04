@@ -341,6 +341,8 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                 self.__tb.apply_tag_by_name(tag, start, cursor)
             if start_mark.has_tal:
                 self.__tb.apply_tag_by_name('tal', start, cursor)
+            if tag in self.__block:
+                self.__tb.insert(cursor, '\n')
             mark._startmark=start_mark
             start_mark._endmark=mark
             return
@@ -377,6 +379,8 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             txt=b.get_text(fr, to).replace(u'\u2063', '')
             if self._last_endtag in self.__block:
                 txt=txt.lstrip()
+            if tag in self.__block:
+                txt=txt.rstrip()
             txt=txt.replace('\n', '<br>')
             self._last_endtag=None
             fd.write(txt)
