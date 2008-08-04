@@ -29,6 +29,8 @@ from advene.gui.views import AdhocView
 import advene.util.helper as helper
 from advene.gui.util import get_pixmap_button, dialog, decode_drop_parameters
 import advene.util.ElementTree as ET
+from advene.model.annotation import Annotation
+from advene.model.view import View
 
 class ViewBook(AdhocView):
     """Notebook containing multiple views
@@ -209,6 +211,36 @@ class ViewBook(AdhocView):
 
         return True
 
+    def create_static_view(self, element=None):
+        """Create a static view from a given element.
+        """
+        if isinstance(element, Annotation):
+            an_title=self.controller.get_title(element)
+            p=self.controller.package
+            ident=p._idgenerator.get_id(View)
+            v=self.controller.package.createView(
+                ident=ident,
+                author=config.data.userid,
+                date=self.controller.get_timestamp(),
+                clazz='package',
+                content_mimetype='text/html'
+                )
+            v.title=_("Comment on %s") % an_title
+            p.views.append(v)
+            p._idgenerator.add(ident)
+
+            ctx=self.controller.build_context(element)
+            v.content.data=_("""<h1>Comment on %(title)s</h1>
+<a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s" /></a>""") % { 
+                'title': an_title,
+                'id': element.id,
+                'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
+                'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
+                }
+            self.controller.notify('ViewCreate', view=v, immediate=True)
+            self.controller.gui.edit_element(v)
+        return True
+
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['adhoc-view']:
             data=decode_drop_parameters(selection.data)
@@ -313,6 +345,7 @@ class ViewBook(AdhocView):
             i=gtk.MenuItem(_("Use annotation %s :") % title, use_underline=False)
             menu.append(i)
             for label, action in (
+                (_("to create a new static view"), lambda i: self.create_static_view(element=a)),
                 (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
                 (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
                 (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
