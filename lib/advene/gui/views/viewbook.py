@@ -229,7 +229,7 @@ class ViewBook(AdhocView):
             if len(elements) > 1:
                 v.title=_("Comment on set of annotations")
             else:
-                v.title=_("Comment on %s") % an_title
+                v.title=_("Comment on %s") % self.controller.get_title(elements[0])
             p.views.append(v)
             p._idgenerator.add(ident)
 
