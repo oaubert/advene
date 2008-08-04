@@ -19,8 +19,6 @@
 """Python expressions evaluator.
 """
 
-# FIXME: completion of named parameters: inspect.getargspec
-
 import os
 import StringIO
 import traceback
@@ -48,6 +46,7 @@ class Evaluator:
         self.control_shortcuts = {
             gtk.keysyms.w: self.close,
             gtk.keysyms.l: self.clear_expression,
+            gtk.keysyms.f: lambda: self.fill_method_parameters(),
             gtk.keysyms.d: lambda: self.display_completion(completeprefix=False),
             gtk.keysyms.h: lambda: self.display_info(self.get_selection_or_cursor(), typ="doc"),
             gtk.keysyms.H: lambda: self.display_info(self.get_selection_or_cursor(), typ="source"),
@@ -213,6 +212,7 @@ class Evaluator:
         Tab: perform autocompletion
         Control-h:   display docstring for element before cursor
         Control-H:   display source for element before cursor
+        Control-f:   auto-fill parameters for a function
         """)
         return True
 
@@ -407,7 +407,6 @@ class Evaluator:
             b.place_cursor(end)
         else:
             begin,end=b.get_bounds()
-            begin,end=b.get_bounds()
             cursor=b.get_iter_at_mark(b.get_insert())
         expr=b.get_text(begin, cursor)
         if expr.endswith('.'):
@@ -500,12 +499,50 @@ class Evaluator:
                     if not expr.endswith('.') and not trailingdot:
                         element='.'+element
                 b.insert_at_cursor(element)
+                print "element ", attr+element, "completion", completion
+                if attr+element in completion:
+                    self.fill_method_parameters()
 
             if len(completion) > 1:
                 completion.sort()
                 self.log("\n".join(completion))
 
         return True
+
+    def fill_method_parameters(self):
+        """Fill the parameter names for the method before cursor.
+        """
+        b=self.source.get_buffer()
+        if b.get_selection_bounds():
+            begin, end = b.get_selection_bounds()
+            cursor=end
+            b.place_cursor(end)
+        else:
+            begin,end=b.get_bounds()
+            cursor=b.get_iter_at_mark(b.get_insert())
+        expr=b.get_text(begin, cursor)
+        try:
+            res=eval(expr, self.globals_, self.locals_)
+        except (Exception, SyntaxError):
+            res=None
+        if inspect.ismethod(res):
+            res=res.im_func
+        if inspect.isfunction(res):
+            # Complete with getargspec
+            (args, varargs, varkw, defaults)=inspect.getargspec(res)
+            if args and args[0] == 'self':
+                args.pop(0)
+            if varargs:
+                args.append("*" + varargs)
+            if varkw:
+                args.append("**" + varkw)
+
+            beginmark=b.create_mark(None, cursor, True)
+            b.insert_at_cursor("(%s)" % ", ".join(args))
+            it=b.get_iter_at_mark(beginmark)
+            it.forward_char()
+            b.move_mark_by_name('selection_bound', it)
+            b.delete_mark(beginmark)
 
     def get_selection_or_cursor(self):
         """Return either the selection or what is on the line before the cursor.
