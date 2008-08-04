@@ -184,7 +184,7 @@ class Evaluator:
         """Log a message.
         """
         b=self.output.get_buffer()
-        begin,end=b.get_bounds()
+        end=b.get_bounds()[1]
         b.place_cursor(end)
         for l in p:
             b.insert_at_cursor(l)
@@ -355,8 +355,8 @@ class Evaluator:
                         try:
                             o=eval(obj, self.globals_, self.locals_)
                         except Exception, e:
-                            self.log('\n\n[Unable to store data in %s[%s]]'
-                                     % (obj, attr))
+                            self.log('\n\n[Unable to store data in %s[%s]]:\n%s'
+                                     % (obj, attr, e))
                             return True
                         #print "%s, %s" % (o, attr)
                         o[attr]=res
@@ -459,8 +459,7 @@ class Evaluator:
                                      for a in dir(res)
                                      if a.startswith(attr) ]
                     except Exception, e:
-                        print "Exception when trying to complete attribute for %s starting with %s" % (expr, attr)
-                        pass
+                        print "Exception when trying to complete attribute for %s starting with %s:\n%s" % (expr, attr, e)
                     if completion and attr == '':
                         # Do not display private elements by default.
                         # Display them when completion is invoked
@@ -478,9 +477,8 @@ class Evaluator:
                                          for k in o.keys()
                                          if k.startswith(key) ]
                         except Exception, e:
-                            print "Exception when trying to complete dict key for %s starting with %s" % (expr, attr)
+                            print "Exception when trying to complete dict key for %s starting with %s:\n%s" % (expr, attr, e)
 
-                            pass
         self.clear_output()
         if completion is None:
             f=StringIO.StringIO()
@@ -650,14 +648,9 @@ if __name__ == "__main__":
                                           '.pyeval.log'))
 
     ev.locals_['self']=ev
-    window=ev.popup()
+    window=ev.popup(embedded=False)
 
     window.connect('destroy', lambda e: gtk.main_quit())
-
-    b=gtk.Button(stock=gtk.STOCK_QUIT)
-    b.connect('clicked', lambda e: gtk.main_quit())
-    ev.hbox.add(b)
-    b.show()
 
     gtk.main ()
     ev.save_history(ev.historyfile)
