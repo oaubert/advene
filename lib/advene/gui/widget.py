@@ -346,6 +346,8 @@ class AnnotationWidget(GenericColorButtonWidget):
             try:
                 widgets=self.container.get_selected_annotation_widgets()
             except AttributeError:
+                widgets=None
+            if not widgets:
                 widgets=[ widget ]
             selection.set(selection.target, 8, "\n".join( w.annotation.uri for w in widgets ).encode('utf8'))
         elif targetType == config.data.target_type['uri-list']:
