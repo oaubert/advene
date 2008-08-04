@@ -237,10 +237,11 @@ class TagBag(AdhocView):
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                a=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
-                for tag in a.tags:
-                    if not tag in self.tags:
-                        self.tags.append(tag)
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                for a in sources:
+                    for tag in a.tags:
+                        if not tag in self.tags:
+                            self.tags.append(tag)
                 self.refresh()
             elif targetType == config.data.target_type['tag']:
                 tags=unicode(selection.data, 'utf8').split(',')

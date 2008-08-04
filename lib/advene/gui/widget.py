@@ -343,7 +343,11 @@ class AnnotationWidget(GenericColorButtonWidget):
         """Handle the drag-sent event.
         """
         if targetType == config.data.target_type['annotation']:
-            selection.set(selection.target, 8, widget.annotation.uri.encode('utf8'))
+            try:
+                widgets=self.container.get_selected_annotation_widgets()
+            except AttributeError:
+                widgets=[ widget ]
+            selection.set(selection.target, 8, "\n".join( w.annotation.uri for w in widgets ).encode('utf8'))
         elif targetType == config.data.target_type['uri-list']:
             c=self.controller.build_context(here=widget.annotation)
             uri=c.evaluateValue('here/absolute_url')
@@ -735,6 +739,7 @@ class AnnotationRepresentation(gtk.Button):
         """Handle the drag-sent event.
         """
         if targetType == config.data.target_type['annotation']:
+            
             selection.set(selection.target, 8, widget.annotation.uri.encode('utf8'))
         elif targetType == config.data.target_type['uri-list']:
             c=self.controller.build_context(here=widget.annotation)

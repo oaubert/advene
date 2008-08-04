@@ -211,11 +211,12 @@ class ViewBook(AdhocView):
 
         return True
 
-    def create_static_view(self, element=None):
-        """Create a static view from a given element.
+    def create_static_view(self, elements=None):
+        """Create a static view from the given elements.
         """
-        if isinstance(element, Annotation):
-            an_title=self.controller.get_title(element)
+        if not elements:
+            return True
+        if isinstance(elements[0], Annotation):
             p=self.controller.package
             ident=p._idgenerator.get_id(View)
             v=self.controller.package.createView(
@@ -225,18 +226,24 @@ class ViewBook(AdhocView):
                 clazz='package',
                 content_mimetype='text/html'
                 )
-            v.title=_("Comment on %s") % an_title
+            if len(elements) > 1:
+                v.title=_("Comment on set of annotations")
+            else:
+                v.title=_("Comment on %s") % an_title
             p.views.append(v)
             p._idgenerator.add(ident)
 
-            ctx=self.controller.build_context(element)
-            v.content.data=_("""<h1>Comment on %(title)s</h1>
-<a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s" /></a>""") % { 
-                'title': an_title,
-                'id': element.id,
-                'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
-                'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
-                }
+            data=[]
+            for element in elements:
+                ctx=self.controller.build_context(element)
+                data.append(_("""<h1>Comment on %(title)s</h1>
+    <a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s" /></a><br>""") % { 
+                    'title': self.controller.get_title(element),
+                    'id': element.id,
+                    'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
+                    'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
+                    })
+            v.content.data="\n".join(data)
             self.controller.notify('ViewCreate', view=v, immediate=True)
             self.controller.gui.edit_element(v)
         return True
@@ -338,38 +345,52 @@ class ViewBook(AdhocView):
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
         elif targetType == config.data.target_type['annotation']:
-            a=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
             # Propose a menu to open various views for the annotation:
             menu=gtk.Menu()
-            title=self.controller.get_title(a)
-            i=gtk.MenuItem(_("Use annotation %s :") % title, use_underline=False)
-            menu.append(i)
-            for label, action in (
-                (_("to create a new static view"), lambda i: self.create_static_view(element=a)),
-                (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
-                (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
-                (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
-                (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('bookmarks', history=[ a.fragment.begin ], destination=self.location)),
-                ):
-                i=gtk.MenuItem(label, use_underline=False)
-                i.connect('activate', action)
+            
+            if len(sources) == 1:
+                a=sources[0]
+                title=self.controller.get_title(a)
+                i=gtk.MenuItem(_("Use annotation %s :") % title, use_underline=False)
                 menu.append(i)
+                for label, action in (
+                    (_("to create a new static view"), lambda i: self.create_static_view(elements=sources)),
+                    (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
+                    (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
+                    (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
+                    (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('bookmarks', history=[ a.fragment.begin ], destination=self.location)),
+                    ):
+                    i=gtk.MenuItem(label, use_underline=False)
+                    i.connect('activate', action)
+                    menu.append(i)
 
-            def apply_query(m, q):
-                ctx=self.controller.build_context(here=a)
-                res, qexpr=self.controller.evaluate_query(q, context=ctx)
-                self.controller.gui.open_adhoc_view('interactiveresult', query=q, result=res, destination=self.location)
-                return True
+                def apply_query(m, q):
+                    ctx=self.controller.build_context(here=a)
+                    res, qexpr=self.controller.evaluate_query(q, context=ctx)
+                    self.controller.gui.open_adhoc_view('interactiveresult', query=q, result=res, destination=self.location)
+                    return True
 
-            if self.controller.package.queries:
-                sm=gtk.Menu()
-                for q in self.controller.package.queries:
-                    i=gtk.MenuItem(self.controller.get_title(q))
-                    i.connect('activate', apply_query, q)
-                    sm.append(i)
-                i=gtk.MenuItem(_("as the context for the query..."), use_underline=False)
-                i.set_submenu(sm)
+                if self.controller.package.queries:
+                    sm=gtk.Menu()
+                    for q in self.controller.package.queries:
+                        i=gtk.MenuItem(self.controller.get_title(q))
+                        i.connect('activate', apply_query, q)
+                        sm.append(i)
+                    i=gtk.MenuItem(_("as the context for the query..."), use_underline=False)
+                    i.set_submenu(sm)
+                    menu.append(i)
+            else:
+                title=_("Set of annotations")
+                i=gtk.MenuItem(_("Use annotations:"), use_underline=False)
                 menu.append(i)
+                for label, action in (
+                    (_("to create a new static view"), lambda i: self.create_static_view(elements=sources)),
+                    (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', history=[ a.fragment.begin ], destination=self.location)),
+                    ):
+                    i=gtk.MenuItem(label, use_underline=False)
+                    i.connect('activate', action)
+                    menu.append(i)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
             return True

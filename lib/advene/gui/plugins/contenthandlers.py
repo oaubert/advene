@@ -217,7 +217,7 @@ class SVGContentHandler (ContentHandler):
         url=None
         title=''
         if targetType == config.data.target_type['annotation']:
-            here=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+            here=self.controller.package.annotations.get(unicode(selection.data, 'utf8').split('\n')[0])
         elif targetType == config.data.target_type['view']:
             data=decode_drop_parameters(selection.data)
             v=self.controller.package.get_element_by_id(data['id'])
@@ -515,20 +515,21 @@ class HTMLContentHandler (ContentHandler):
         self.last_dndtime=time
 
         if targetType == config.data.target_type['annotation']:
-            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
-            # We received a drop. Determine the location.
-            # FIXME: propose various choices (insert content, insert snapshot, etc)
-            self.editor.get_buffer().insert_at_cursor(source.content.data)
-            #self.editor.handle_img('img', attr=( 
-            #        ('tal:attributes', 'src package/annotations/%s/snapshot_url' % source.id ),
-            #        ('src', 'http://localhost:1234/media/snapshot/advene/%d' % source.fragment.begin) ))
-            ctx=self.controller.build_context(source)
-            self.editor.feed('<a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s" /></a>' % { 
-                    'id': source.id,
-                    # FIXME: should get base server address from somewhere
-                    'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
-                    'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
-                    })
+            for uri in unicode(selection.data, 'utf8').split('\n'):
+                source=self.controller.package.annotations.get(uri)
+                # We received a drop. Determine the location.
+                # FIXME: propose various choices (insert content, insert snapshot, etc)
+                self.editor.get_buffer().insert_at_cursor(source.content.data)
+                #self.editor.handle_img('img', attr=( 
+                #        ('tal:attributes', 'src package/annotations/%s/snapshot_url' % source.id ),
+                #        ('src', 'http://localhost:1234/media/snapshot/advene/%d' % source.fragment.begin) ))
+                ctx=self.controller.build_context(source)
+                self.editor.feed('<a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s" /></a><br>' % { 
+                        'id': source.id,
+                        # FIXME: should get base server address from somewhere
+                        'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
+                        'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
+                        })
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
@@ -550,6 +551,8 @@ class HTMLContentHandler (ContentHandler):
         vbox=gtk.VBox()
 
         self.editor=HTMLEditor()
+        # For debug:
+        self.controller.gui.ht=self.editor
         self.editor.set_text(self.element.data)
 
         self.editor.connect('drag-data-received', self.editor_drag_received)

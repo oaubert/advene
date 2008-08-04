@@ -680,7 +680,7 @@ class TreeWidget(AdhocView):
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         #print "drag_received event for %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:
-            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8').split('\n')[0])
             dest=widget.annotation
             self.create_relation_popup(source, dest)
         else:

@@ -649,28 +649,28 @@ class ActiveBookmarks(AdhocView):
                         b.content=self.controller.get_title(a)
                 return True
             elif targetType == config.data.target_type['annotation']:
-                source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
-                l=[ b for b in self.bookmarks if b.annotation == source ]
-                if l:
-                    # We are dropping from the same view. Reorder
-                    b=l[0]
-                    i=self.bookmarks.index(b)
-                    self.bookmarks.remove(b)
-                    if i < index:
-                        self.bookmarks.insert(index - 1, b)
-                    elif index is not None:
-                        self.bookmarks.insert(index, b)
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                for source in sources:
+                    l=[ b for b in self.bookmarks if b.annotation == source ]
+                    if l:
+                        # We are dropping from the same view. Reorder
+                        b=l[0]
+                        i=self.bookmarks.index(b)
+                        self.bookmarks.remove(b)
+                        if i < index:
+                            self.bookmarks.insert(index - 1, b)
+                        elif index is not None:
+                            self.bookmarks.insert(index, b)
+                        else:
+                            self.bookmarks.append(b)
                     else:
-                        self.bookmarks.append(b)
-                    self.refresh()
-                else:
-                    # Dropping from another view or copying. Create a bookmark
-                    b=ActiveBookmark(container=self, annotation=source)
-                    if index is None:
-                        self.bookmarks.append(b)
-                    else:
-                        self.bookmarks.insert(index, b)
-                    self.refresh()
+                        # Dropping from another view or copying. Create a bookmark
+                        b=ActiveBookmark(container=self, annotation=source)
+                        if index is None:
+                            self.bookmarks.append(b)
+                        else:
+                            self.bookmarks.insert(index, b)
+                self.refresh()
                 return True
             else:
                 print "Unknown target type for drop: %d" % targetType

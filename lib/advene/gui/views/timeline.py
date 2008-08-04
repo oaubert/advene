@@ -29,7 +29,7 @@ from gettext import gettext as _
 # Advene part
 import advene.core.config as config
 
-from advene.model.schema import AnnotationType, RelationType
+from advene.model.schema import RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.fragment import MillisecondFragment
 from advene.gui.views import AdhocView
@@ -962,7 +962,7 @@ class TimeLine(AdhocView):
 
     def annotation_drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8').split('\n')[0])
             dest=widget.annotation
 
             if source == dest:
@@ -1073,14 +1073,18 @@ class TimeLine(AdhocView):
             print "Unknown target type for drag: %d" % targetType
         return True
 
-    def move_or_copy_annotation(self, source, dest, position=None, action=gtk.gdk.ACTION_ASK):
-        """Display a popup menu to move or copy the source annotation to the dest annotation type.
+    def move_or_copy_annotations(self, sources, dest, position=None, action=gtk.gdk.ACTION_ASK):
+        """Display a popup menu to move or copy the sources annotation to the dest annotation type.
 
         If position is given (in ms), then the choice will also be
         offered to move/copy the annotation and change its bounds.
 
         If action is specified, then the popup menu will be shortcircuited.
         """
+        if not sources:
+            return True
+        source=sources[0]
+
         def move_annotation(i, an, typ, position=None):
             if an.relations and an.type != typ:
                 dialog.message_dialog(_("Cannot delete the annotation : it has relations."),
@@ -1111,14 +1115,12 @@ class TimeLine(AdhocView):
 
         def copy_selection(i, sel, typ, delete=False):
             for an in sel:
+                # FIXME: if sel.typ == an.typ
                 self.transmuted_annotation=self.controller.transmute_annotation(an,
                                                                                 typ,
                                                                                 delete=delete)
             self.unselect_all()
             return self.transmuted_annotation
-
-        # Is there an active selection ?
-        selection=[ w.annotation for w in self.get_selected_annotation_widgets() ]
 
         # If there are compatible relation-types, propose to directly create a relation
         relationtypes=helper.matching_relationtypes(self.controller.package,
@@ -1127,10 +1129,10 @@ class TimeLine(AdhocView):
 
         if action == gtk.gdk.ACTION_COPY:
             # Direct copy
-            if len(selection) > 1 and source in selection:
+            if len(sources) > 1:
                 if source.type == dest:
                     return True
-                copy_selection(None, selection, dest)
+                copy_selection(None, sources, dest)
             else:
                 if source.type == dest:
                     position=position
@@ -1139,10 +1141,10 @@ class TimeLine(AdhocView):
                 copy_annotation(None, source, dest, position=position)
             return True
         elif action == gtk.gdk.ACTION_MOVE:
-            if len(selection) > 1 and source in selection:
+            if len(sources) > 1:
                 if source.type == dest:
                     return True
-                copy_selection(None, selection, dest, delete=True)
+                copy_selection(None, sources, dest, delete=True)
             else:
                 if source.type == dest:
                     position=position
@@ -1176,11 +1178,11 @@ class TimeLine(AdhocView):
 
         dest_title=self.controller.get_title(dest)
 
-        if len(selection) > 1 and source in selection:
-            if source.type == dest:
+        if len(sources) > 1:
+            if sources.type == dest:
                 return True
             item=gtk.MenuItem(_("Duplicate selection to type %s") % dest_title, use_underline=False)
-            item.connect('activate', copy_selection, selection, dest)
+            item.connect('activate', copy_selection, sources, dest)
             menu.append(item)
             menu.show_all()
             menu.popup(None, None, None, 0, gtk.get_current_event_time())
@@ -1289,9 +1291,9 @@ class TimeLine(AdhocView):
 
     def annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
             dest=widget.annotationtype
-            self.move_or_copy_annotation(source, dest)
+            self.move_or_copy_annotations(sources, dest)
         elif targetType == config.data.target_type['annotation-type']:
             # Copy annotations
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
@@ -1315,14 +1317,13 @@ class TimeLine(AdhocView):
 
     def new_annotation_type_drag_received_cb(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
-            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
-
+            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
             # Create a type
             dest=self.create_annotation_type()
             if dest is None:
                 return True
 
-            self.move_or_copy_annotation(source, dest)
+            self.move_or_copy_annotations(sources, dest)
             return True
         elif targetType == config.data.target_type['timestamp']:
             typ=self.create_annotation_type()
@@ -1486,7 +1487,7 @@ class TimeLine(AdhocView):
                             r = "%s=%s" % (name,
                                            widget.get_text().replace('\n', '\\n'))
                 else:
-                    controller.log("Cannot update the annotation, its representation is too complex")
+                    self.controller.log("Cannot update the annotation, its representation is too complex")
                     r=ann.content.data
             return r
 
@@ -1984,7 +1985,7 @@ class TimeLine(AdhocView):
         """Handle the drop from an annotation to the layout.
         """
         if targetType == config.data.target_type['annotation']:
-            source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+            sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
             # We received a drop. Determine the location.
 
             # Correct y value according to scrollbar position
@@ -1995,14 +1996,14 @@ class TimeLine(AdhocView):
                 if (y >= p and y <= p + self.button_height) ]
             if a:
                 # Copy/Move to a[0]
-                self.move_or_copy_annotation(source, a[0], position=self.pixel2unit(self.adjustment.value + x), action=context.actions)
+                self.move_or_copy_annotations(sources, a[0], position=self.pixel2unit(self.adjustment.value + x), action=context.actions)
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
                 dest=self.create_annotation_type()
                 if dest is None:
                     return True
-                self.move_or_copy_annotation(source, dest, position=self.pixel2unit(self.adjustment.value + x), action=context.actions)
+                self.move_or_copy_annotations(sources, dest, position=self.pixel2unit(self.adjustment.value + x), action=context.actions)
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
@@ -2908,9 +2909,10 @@ class TimeLine(AdhocView):
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                source=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
-                if source is not None:
-                    self.controller.delete_element(source)
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                if sources:
+                    for a in sources:
+                        self.controller.delete_element(a)
                 return True
             return False
 

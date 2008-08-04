@@ -249,14 +249,16 @@ class Montage(AdhocView):
         """
         def drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                ann=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
-                self.insert(ann, i)
-                # If the origin is from the same montage, then
-                # consider it is a move and remove the origin
-                # annotation
-                w=context.get_source_widget()
-                if w in self.contents:
-                    self.contents.remove(w)
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                for ann in sources:
+                    ann=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+                    self.insert(ann, i)
+                    # If the origin is from the same montage, then
+                    # consider it is a move and remove the origin
+                    # annotation
+                    w=context.get_source_widget()
+                    if w in self.contents:
+                        self.contents.remove(w)
                 self.refresh()
                 return True
             else:
@@ -453,14 +455,16 @@ class Montage(AdhocView):
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                ann=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
-                self.insert(ann)
-                # If the origin is from the same montage, then
-                # consider it is a move and remove the origin
-                # annotation
-                w=context.get_source_widget()
-                if w in self.contents:
-                    self.contents.remove(w)
+                sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
+                for ann in sources:
+                    ann=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
+                    self.insert(ann, i)
+                    # If the origin is from the same montage, then
+                    # consider it is a move and remove the origin
+                    # annotation
+                    w=context.get_source_widget()
+                    if w in self.contents:
+                        self.contents.remove(w)
                 self.refresh()
                 return True
             elif targetType == config.data.target_type['annotation-type']:
