@@ -73,8 +73,7 @@ class Evaluator:
         except IOError:
             return
         for l in f:
-            l=l.rstrip().replace('\\n', "\n")
-            self.history.append(l)
+            self.history.append(l.rstrip())
         f.close()
         return
 
@@ -90,7 +89,6 @@ class Evaluator:
         except IOError:
             return
         for l in self.history:
-            l=l.replace("\n", '\\n')
             f.write(l + "\n")
         f.close()
         return
