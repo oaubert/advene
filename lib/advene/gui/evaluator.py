@@ -499,7 +499,6 @@ class Evaluator:
                     if not expr.endswith('.') and not trailingdot:
                         element='.'+element
                 b.insert_at_cursor(element)
-                print "element ", attr+element, "completion", completion
                 if attr+element in completion:
                     self.fill_method_parameters()
 
