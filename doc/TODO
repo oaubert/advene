@@ -1,8 +1,42 @@
+* Import dialog: use a standard fileselector with a import-filter list
+
+* See http://damien.krotkine.com/claws/ MacOS X gtk
+* pseudo-Wysiwyg component (using gtk.Layout / goocanvas /
+   gtk.TextView ?)
+
+* When DND rule in STBV editing, use the current edited rule and not
+   the saved one -> hard
+
+* Revamp player API (player.position, player.duration, ...)
+
+* fix players (vlc, gstreamer) to be able to start from a given
+   position
+
+* implement DND from finder columns
+
+* finder: implement set_current_element method
+
+* Biblio: Pliny: A model for digital support of scholarship 
+  http://journals.tdl.org/jodi/article/view/209/198
+
+* Bug in Advene2 export -> resources
+
+* Template: in _package_view, propose to Open adhoc views
+
+* Imagemap/SVG
+
+* LdT: handle #RRGGBB color specification
+
+* gstreamer win32/mac:
+http://bugzilla.songbirdnest.com/show_bug.cgi?id=8345
+http://bugzilla.songbirdnest.com/show_bug.cgi?id=8011
+http://blog.songbirdnest.com/2008/03/26/gstreamer-progress/
+
+* improve search results navigation (cf PA post on May 2)
+
 * streamline ask_for_relationtype method (timeline relation creation)
 
 * Use animations in GUI: http://live.gnome.org/PAF
-
-* activebookmark: normal size -> first on list with a separator or display in bold ?
 
 * Montage: double-click -> goto annotation
 
@@ -10,12 +44,8 @@
 
 * Put Montage view in dynamic views menu
 
-* transcribe: allow to display the old timestamp marks
-
 * timeline popup menu on annotation: offer access to possibly
    overlapping annotations
-
-* Imagemap/SVG
 
 * Investigate speech recognition:
    http://www.speech.cs.cmu.edu/cmusphinx/moinmoin/GStreamer 
@@ -43,7 +73,10 @@
 * extend textview with possibility to insert images + bold + italic
    and generate a subset of html. Cf
    /usr/share/doc/python-gtk2-doc/examples/demos/textview.py
-http://www.gnome.org/~gjc/htmltextview.py
+http://www.gnome.org/~gjc/htmltextview.py (original version)
+/usr/share/gajim/src/htmltextview.py (new version)
+
+http://code.google.com/p/facilhtml/source/browse/trunk/htmlrender.py
 
 * Dynamic view editing: Categorize events (annotation, player, application)
 
@@ -111,10 +144,6 @@ http://www.gnome.org/~gjc/htmltextview.py
 
 * AdveneTypes a la XSD
 
-* default_workspace/default_adhoc_view (workspace) with option on
-   startup (open default workspace never/always/ask). Save package
-   will save default workspace -> OK for saving, PB when restoring.
-
 * Inspector: make editable (text at least)
 
 * gtk locale in win32
@@ -122,8 +151,6 @@ http://www.gnome.org/~gjc/htmltextview.py
 * clearlook theme in win32 ?
 
 * transcription: option to display timestamp marks and allow to modify
-
-* slave view for edit popup (e.g. quick edit, to synchronize content) ?
 
 * Montage: extend with 2nd video (cf bout-a-bout) ?
 
@@ -158,8 +185,6 @@ https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platfor
 * interactive result: allow to DND the icon for new visualisations
    (timeline...) [hard because of the transmission of the parameters
    in DND and anyway buttons are now in a toolbar, which prevents DND]
-
-* annotationdisplay:  handle multiple data types (esp. graphics and SVG), source switch
 
 * slave view: record master view id in options when saving
 
@@ -197,8 +222,6 @@ https://develop.participatoryculture.org/trac/democracy/browser/trunk/tv/platfor
 
 ** timeline: allow to group annotation types with tags
 
-** timeline: shortcuts for DND (with Ctrl->copy, Shift->move, etc)
-
 ** timeline: Center on related annotation
 
 ** timeline: find a way to render overlapping buttons (cf goocanvas)
@@ -220,9 +243,7 @@ position of current marks in the video (with small lines) [cf linkmap
 
 * Main GUI
 
-** Remove additional buttons from popup views that have been re-embedded
-
-** new signal: DurationUpdate, CurrentAnnotation
+** new signal: CurrentAnnotation
 
 ** Make the play + pause button a unique button => not that easy
 
@@ -239,8 +260,6 @@ position of current marks in the video (with small lines) [cf linkmap
 ** Tag cloud view (maybe in swf via python-ming)
 
 ** flash generation: http://www.swfmill.org/
-
-** waveform functionality. Cf http://jokosher.python-hosting.com/file/jokosher-extra/Waveform.py
 
 * Players
 
@@ -291,8 +310,6 @@ Cf http://blog.hill-street.net/?p=7 for implementations comparison
 * importer GUI: when trying to import .azp, advice to use Merge instead.
 
 * importer GUI: allow to define parameters (customize checkbox => new dialog)
-
-* cherrypy: handle already in use socket case
 
 * Hook to define new events (spatial events: EnterZone, LeaveZone... for instance)
 
@@ -2377,4 +2394,77 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Global shortcut Ctrl-b to add a bookmark
 
 * import for transcriber (DGA), voir annotation dans audacity
+
+* Activebookmarks: select textannotation by default
+
+* quick edit: Tab navigation
+
+* timeline: zoom should really preserve middle position
+
+* timeline; if defining an empty selection, propose to create an
+   annotation with dimensions
+
+* On AT creation, put focus on Description entry in element edit popup
+
+* timeline: reset bookmarks_to_draw on enter-event + manual reset
+
+* transcribe: allow to display the old timestamp marks
+
+* annotationdisplay:  handle multiple data types (esp. graphics and SVG), source switch
+
+** Remove additional buttons from popup views that have been re-embedded
+
+** waveform functionality. Cf
+   http://jokosher.python-hosting.com/file/jokosher-extra/Waveform.py
+   -> cf application/x-advene-values mimetype
+
+* cherrypy: handle already in use socket case
+
+* Bug in movie file info dialog if package has a non-existing media
+   associated (None, movie)
+
+* default_workspace/default_adhoc_view (workspace) with option on
+   startup (open default workspace never/always/ask). Save package
+   will save default workspace 
+
+* timeline: annotation DND: set default action to ACTION_ASK, and respect
+   ACTION_COPY/ACTION_MOVE 
+
+* action: OpenView -> open a saved view designated by its id (static,
+   dynamic, adhoc) + OpenInterface -> old OpenView
+
+* Keypad video navigation
+
+* Handle undefined methods (Braille) in Edit window
+
+* Rulenames in STBV : increment index Rule1...
+
+* Edit STBV: make tabs draggable, remove Copy button. Move add/delete
+   to top
+
+* AT popup menu -> generate STBV to display annotations as captions
+
+* Pb accents sous windows (Mes Vidéos) -> pas de msg d'erreur
+
+* Export dialog: preseed entry field with generated name
+
+* Export dialog: Enter keypress in entry => validate
+
+** timeline: shortcuts for DND (with Ctrl->copy, Shift->move, etc)
+
+** new signal: DurationUpdate
+
+* browser: use_underline=False
+
+* Export dialog: use a standard fileselector with a export-filter list
+ 
+* Timeline: Tab in quick-edit->move cursor so that focus follows
+   correctly
+
+* Fix DND annotation->viewbook / Use in a query
+
+* Allow annotation selection DND (multiple lines)
+
+* Viewbook drop of annotation: propose to create a new view with the
+   selected annotations
 
