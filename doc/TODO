@@ -1,6 +1,7 @@
 * Import dialog: use a standard fileselector with a import-filter list
 
-* See http://damien.krotkine.com/claws/ MacOS X gtk
+* See http://damien.krotkine.com/claws/  for packaging native MacOS X gtk
+
 * pseudo-Wysiwyg component (using gtk.Layout / goocanvas /
    gtk.TextView ?)
 
@@ -2467,4 +2468,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Viewbook drop of annotation: propose to create a new view with the
    selected annotations
+
+* Edit view popup: add a "Visualise in web browser" button
 
