@@ -41,6 +41,7 @@ register_global_method(method, name=None)
 register_action(action)
 register_viewclass(class)
 register_importer(importer)
+register_player(player_class)
 
 Example
 =======
@@ -70,3 +71,12 @@ Content-type handlers have to inherit from advene.gui.edit.elements.ContentHandl
 Actions must be wrapped in a advene.rules.elements.RegisteredAction
 
 Global methods must respect the signature: function(context, target)
+
+Player plugins respect the player API. The dummy.py player basically
+serves as reference for this API.
+- they define a player_capabilities list of strings :
+  * svg : able to caption svg
+  * caption : able to caption text
+  * pause : able to be paused
+  * record : able to record
+  * frame-by-frame : able to do frame-by-frame
