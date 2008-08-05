@@ -251,8 +251,16 @@ class AdveneController(object):
         l=advene.core.plugin.PluginCollection(directory, prefix)
         for p in l:
             try:
-                self.log("Registering " + p.name)
-                p.register(controller=self)
+                # Do not log plugin info if it could not be
+                # initialized (return False).  For compatibility with
+                # previous plugin API, the test must be explicitly
+                # done as "is False", since old versions of
+                # register did not have a return clause (and thus
+                # return None)
+                if p.register(controller=self) is False:
+                    self.log("Could not register " + p.name)
+                else:
+                    self.log("Registering " + p.name)
             except AttributeError, e:
                 print "AttributeError in", p.name, ":", str(e)
                 pass
@@ -345,6 +353,11 @@ class AdveneController(object):
         """Register an importer.
         """
         advene.util.importer.register(imp)
+
+    def register_player(self, imp):
+        """Register a video player.
+        """
+        config.data.register_player(imp)
 
     def register_videotime_action(self, t, action):
         """Register an action to be executed when reaching the given movie time.
@@ -645,6 +658,13 @@ class AdveneController(object):
         """
         if args is None:
             args=[]
+
+        try:
+            self.player_plugins=self.load_plugins(os.path.join(os.path.dirname(advene.__file__), 'player'),
+                                                  prefix="advene_player_plugins")
+        except OSError, e:
+            print "Error while loading player plugins", str(e).encode('utf-8')
+            pass
 
         try:
             self.user_plugins=self.load_plugins(config.data.advenefile('plugins', 'settings'),
