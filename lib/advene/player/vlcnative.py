@@ -104,6 +104,24 @@ class Player(object):
             return self.mc.__getattribute__ (name)
             raise self.InternalException(e)
 
+    def playlist_add_item(self, name):
+        try:
+            self.mc.playlist_add_item(name)
+        except AttributeError:
+            self.mc.set_mrl(name)
+
+    def playlist_clear(self):
+        try:
+            self.mc.playlist_clear()
+        except AttributeError:
+            self.mc.set_mrl('')
+
+    def playlist_get_list(self):
+        try:
+            return self.mc.playlist_get_list()
+        except AttributeError:
+            return [ self.mc.get_mrl(name) ]
+
     def is_active (self):
         """Checks whether the player is active.
 
