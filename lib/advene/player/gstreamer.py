@@ -342,6 +342,8 @@ class Player:
     def set_media_position(self, position):
         if not self.check_uri():
             return
+        if self.current_status() == self.UndefinedStatus:
+            self.player.set_state(gst.STATE_PAUSED)
         p = long(self.position2value(position) * gst.MSECOND)
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
                                    gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
@@ -354,9 +356,9 @@ class Player:
     def start(self, position=0):
         if not self.check_uri():
             return
-        self.player.set_state(gst.STATE_PLAYING)
         if position != 0:
             self.set_media_position(position)
+        self.player.set_state(gst.STATE_PLAYING)
 
     def pause(self, position=0):
         if not self.check_uri():
