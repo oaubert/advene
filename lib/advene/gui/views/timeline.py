@@ -2732,6 +2732,10 @@ class TimeLine(AdhocView):
             self.center_on_position( (begin + end) / 2 )
             return True
 
+        def create_static(m, sel):
+            self.controller.create_static_view([ w.annotation for w in sel])
+            return True
+
         m=gtk.Menu()
         l=self.get_selected_annotation_widgets()
         n=len(l)
@@ -2746,31 +2750,20 @@ class TimeLine(AdhocView):
             i=gtk.SeparatorMenuItem()
             m.append(i)
 
-            i=gtk.MenuItem(_('Unselect all annotations'))
-            i.connect('activate', self.unselect_all, l)
-            m.append(i)
-
-            i=gtk.MenuItem(_('Highlight selection in other views'))
-            i.connect('activate', self.selection_highlight, l)
-            m.append(i)
-            i=gtk.MenuItem(_('Tag selection'))
-            i.connect('activate', self.selection_tag, l)
-            m.append(i)
-            i=gtk.MenuItem(_('Delete selected annotations'))
-            i.connect('activate', self.selection_delete, l)
-            m.append(i)
-            i=gtk.MenuItem(_('Display selection in a table'))
-            i.connect('activate', self.selection_as_table, l)
-            m.append(i)
-            i=gtk.MenuItem(_('Center and zoom on selection'))
-            i.connect('activate', center_and_zoom, l)
-            m.append(i)
-            i=gtk.MenuItem(_('Edit selected annotations'))
-            i.connect('activate', self.selection_edit, l)
-            m.append(i)
-            i=gtk.MenuItem(_('Merge annotations'))
-            i.connect('activate', self.selection_merge, l)
-            m.append(i)
+            for (label, action) in (
+                (_('Unselect all annotations'), self.unselect_all),
+                (_('Create a static view'), create_static),
+                (_('Highlight selection in other views'), self.selection_highlight),
+                (_('Tag selection'), self.selection_tag),
+                (_('Delete selected annotations'), self.selection_delete),
+                (_('Display selection in a table'), self.selection_as_table),
+                (_('Center and zoom on selection'), center_and_zoom),
+                (_('Edit selected annotations'), self.selection_edit),
+                (_('Merge annotations'), self.selection_merge),
+                ):
+                i=gtk.MenuItem(label)
+                i.connect('activate', action, l)
+                m.append(i)
 
         m.show_all()
         if popup:
