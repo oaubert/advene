@@ -413,12 +413,15 @@ class AdveneGUI (Connect):
             except AttributeError:
                 pass
         # Update the content indexer
-        if event.endswith('EditEnd'):
+        if event.endswith('EditEnd') or event.endswith('Create'):
             self.controller.package._indexer.element_update(annotation)
             # Refresh the edit popup
             for e in [ e for e in self.edit_popups if e.element == annotation
                        or e.element in annotation.relations ]:
                 e.refresh()
+            # Update the type fieldnames
+            if annotation.content.mimetype.endswith('/x-advene-structured'):
+                annotation.type._fieldnames.update(helper.common_fieldnames([ annotation ]))
 
         # Refresh the edit popup for the associated relations
         for e in [ e for e in self.edit_popups if e.element in annotation.relations ]:

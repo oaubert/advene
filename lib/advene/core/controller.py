@@ -1663,6 +1663,13 @@ class AdveneController(object):
             self.log (", ".join(l))
             return True
 
+        # Cache common fieldnames for structured content
+        for at in p.annotationTypes:
+            if at.mimetype.endswith('/x-advene-structured'):
+                at._fieldnames=helper.common_fieldnames(at.annotations)
+            else:
+                at._fieldnames=[]
+            
         p.imagecache.clear ()
         mediafile = self.get_default_media()
         if mediafile is not None and mediafile != "":
