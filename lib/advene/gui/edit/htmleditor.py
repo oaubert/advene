@@ -136,11 +136,14 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                 # Remove marks
                 for m in it.get_marks():
                     if hasattr(m, '_tag'):
-                        b.remove_tag_by_name(m._tag, 
-                                             b.get_iter_at_mark(m),
-                                             b.get_iter_at_mark(m._endmark))
-                        b.delete_mark(m)
-                        b.delete_mark(m._endmark)
+                        try:
+                            b.remove_tag_by_name(m._tag, 
+                                                 b.get_iter_at_mark(m),
+                                                 b.get_iter_at_mark(m._endmark))
+                            b.delete_mark(m)
+                            b.delete_mark(m._endmark)
+                        except AttributeError, e:
+                            print "Exception for %s" % m._tag, unicode(e).encode('utf-8')
                     elif  hasattr(m, '_endtag'):
                         b.remove_tag_by_name(m._endtag, 
                                              b.get_iter_at_mark(m._startmark),
@@ -300,6 +303,8 @@ class HTMLEditor(gtk.TextView, HTMLParser):
 
         if tag == 'br':
             self.__tb.insert(cursor, '\n')
+            mark._endmark=mark
+            mark._startmark=mark
         elif tag == 'li' or tag == 'dt':
             # FIXME: should insert a bullet here, and maybe render
             # nested lists
