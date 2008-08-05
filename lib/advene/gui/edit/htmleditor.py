@@ -393,7 +393,7 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         while True:
             p=i.get_pixbuf()
             if p is not None:
-                fd.write("<img %s/>" % " ".join( '%s="%s"' % (k, v) for (k, v) in p._attr ))
+                fd.write("<img %s></img>" % " ".join( '%s="%s"' % (k, v) for (k, v) in p._attr ))
 
             for m in i.get_marks():
                 if hasattr(m, '_endtag'):
