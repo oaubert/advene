@@ -49,11 +49,12 @@ from advene.model.query import Query
 from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.views.browser import Browser
 from advene.gui.views.tagbag import TagBag
-
 from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, name2color
 from advene.gui.util.completer import Completer
 import advene.gui.popup
 from advene.gui.widget import AnnotationRepresentation, RelationRepresentation
+
+import advene.util.helper as helper
 
 # FIXME: handle 'time' type, with hh:mm:ss.mmm display in attributes
 
@@ -294,6 +295,36 @@ class EditElementPopup (object):
             b = gtk.Button (stock=gtk.STOCK_APPLY)
             b.connect('clicked', self.apply_cb, callback)
             hbox.add (b)
+
+            def apply_and_open(b, cb):
+                self.apply_cb(b, None, cb)
+                # Open in web browser
+                ctx=self.controller.build_context()
+                url=ctx.evaluateValue('here/view/%s/absolute_url' % self.element.id)
+                self.controller.open_url(url)
+                return True
+
+            def apply_and_activate(b, cb):
+                self.apply_cb(b, None, cb)
+                self.controller.activate_stbv(self.element)
+                p=self.controller.player
+                if p.status == p.PauseStatus:
+                    self.controller.update_status('resume')
+                elif p.status == p.PlayingStatus:
+                    pass
+                else:
+                    self.controller.update_status('start')
+                return True
+
+            if isinstance(self.element, View):
+                t = helper.get_view_type(self.element)
+                if t == 'static' and self.element.matchFilter['class'] in ('package', '*'):
+                    b = get_pixmap_button( 'web.png', apply_and_open, callback)
+                    self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
+                elif t == 'dynamic':
+                    b = get_small_stock_button( gtk.STOCK_MEDIA_PLAY, apply_and_activate, callback )
+                    self.controller.gui.tooltips.set_tip(b, _("Apply changes and activate the view"))
+                hbox.add(b)
 
             b = gtk.Button (stock=gtk.STOCK_CANCEL)
             b.connect('clicked', self.close_cb)
