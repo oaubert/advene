@@ -403,7 +403,7 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                 elif hasattr(m, '_tag'):
                     output_text(textstart, i, m._tag)
                     if m._tag in self.__standalone:
-                        closing='/>'
+                        closing='></%s>' % m._tag
                     else:
                         closing='>'
                     if m._attr:
