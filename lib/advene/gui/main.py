@@ -1370,7 +1370,7 @@ class AdveneGUI (Connect):
             pop=None
         else:
 
-            pop.edit (modal)
+            pop.edit (modal=modal)
         return pop
 
     def update_package_list (self):
