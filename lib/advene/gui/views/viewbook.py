@@ -22,15 +22,12 @@
 import advene.core.config as config
 
 import gtk
-import cgi
 
 from gettext import gettext as _
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
 from advene.gui.util import get_pixmap_button, dialog, decode_drop_parameters
 import advene.util.ElementTree as ET
-from advene.model.annotation import Annotation
-from advene.model.view import View
 
 class ViewBook(AdhocView):
     """Notebook containing multiple views
@@ -211,43 +208,6 @@ class ViewBook(AdhocView):
 
         return True
 
-    def create_static_view(self, elements=None):
-        """Create a static view from the given elements.
-        """
-        if not elements:
-            return True
-        if isinstance(elements[0], Annotation):
-            p=self.controller.package
-            ident=p._idgenerator.get_id(View)
-            v=self.controller.package.createView(
-                ident=ident,
-                author=config.data.userid,
-                date=self.controller.get_timestamp(),
-                clazz='package',
-                content_mimetype='text/html'
-                )
-            if len(elements) > 1:
-                v.title=_("Comment on set of annotations")
-            else:
-                v.title=_("Comment on %s") % self.controller.get_title(elements[0])
-            p.views.append(v)
-            p._idgenerator.add(ident)
-
-            data=[]
-            for element in elements:
-                ctx=self.controller.build_context(element)
-                data.append(_("""<h1>Comment on %(title)s</h1>
-    <a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s"></a><br>""") % { 
-                    'title': self.controller.get_title(element),
-                    'id': element.id,
-                    'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
-                    'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
-                    })
-            v.content.data="\n".join(data)
-            self.controller.notify('ViewCreate', view=v, immediate=True)
-            self.controller.gui.edit_element(v)
-        return True
-
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['adhoc-view']:
             data=decode_drop_parameters(selection.data)
@@ -355,7 +315,7 @@ class ViewBook(AdhocView):
                 i=gtk.MenuItem(_("Use annotation %s :") % title, use_underline=False)
                 menu.append(i)
                 for label, action in (
-                    (_("to create a new static view"), lambda i: self.create_static_view(elements=sources)),
+                    (_("to create a new static view"), lambda i: self.controller.create_static_view(elements=sources)),
                     (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
                     (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
                     (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
@@ -385,7 +345,7 @@ class ViewBook(AdhocView):
                 i=gtk.MenuItem(_("Use annotations:"), use_underline=False)
                 menu.append(i)
                 for label, action in (
-                    (_("to create a new static view"), lambda i: self.create_static_view(elements=sources)),
+                    (_("to create a new static view"), lambda i: self.controller.create_static_view(elements=sources)),
                     (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', history=[ a.fragment.begin ], destination=self.location)),
                     ):
                     i=gtk.MenuItem(label, use_underline=False)

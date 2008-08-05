@@ -71,7 +71,6 @@ import advene.model.tal.context
 import advene.util.helper as helper
 import advene.util.importer
 import advene.util.ElementTree as ET
-import advene.rules.importer
 
 if config.data.webserver['mode']:
     from advene.core.webcherry import AdveneWebServer
@@ -2255,6 +2254,44 @@ class AdveneController(object):
                 last_evt = an
             #same type of event
             last_evt = an
+        return True
+
+    def create_static_view(self, elements=None):
+        """Create a static view from the given elements.
+        """
+        if not elements:
+            return True
+        if isinstance(elements[0], Annotation):
+            p=self.package
+            ident=p._idgenerator.get_id(View)
+            v=p.createView(
+                ident=ident,
+                author=config.data.userid,
+                date=self.get_timestamp(),
+                clazz='package',
+                content_mimetype='text/html'
+                )
+            if len(elements) > 1:
+                v.title=_("Comment on set of annotations")
+            else:
+                v.title=_("Comment on %s") % self.get_title(elements[0])
+            p.views.append(v)
+            p._idgenerator.add(ident)
+
+            data=[]
+            for element in elements:
+                ctx=self.build_context(element)
+                data.append(_("""<h1>Comment on %(title)s</h1>
+    <a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s"></img></a><br>""") % { 
+                    'title': self.get_title(element),
+                    'id': element.id,
+                    'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
+                    'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
+                    })
+            v.content.data="\n".join(data)
+            self.notify('ViewCreate', view=v, immediate=True)
+            if self.gui is not None:
+                self.gui.edit_element(v)
         return True
 
 if __name__ == '__main__':
