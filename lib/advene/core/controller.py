@@ -2272,7 +2272,7 @@ class AdveneController(object):
                 content_mimetype='text/html'
                 )
             if len(elements) > 1:
-                v.title=_("Comment on set of annotations")
+                v.title=_("Comment on set of %d annotations") % len(elements)
             else:
                 v.title=_("Comment on %s") % self.get_title(elements[0])
             p.views.append(v)
