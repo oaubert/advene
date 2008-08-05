@@ -709,4 +709,12 @@ def overlapping_annotations(t):
                 res.append( (a, b) )
     return res
 
-        
+def common_fieldnames(elements):
+    """Extract common fieldnames from simple structured elements.
+    """
+    regexp=re.compile('^(\w+)=.*')
+    res=set()
+    for e in elements:
+        if e.content.mimetype == 'application/x-advene-structured':
+            res.update( (regexp.findall(l) or [ '_error' ])[0] for l in e.content.data.split('\n') )
+    return res
