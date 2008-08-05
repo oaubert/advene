@@ -24,7 +24,6 @@ import advene.core.config as config
 from gettext import gettext as _
 
 import sys
-import time
 import re
 
 import gtk
@@ -197,6 +196,8 @@ class CreateElementPopup(object):
                 date=self.get_date(),
                 fragment=MillisecondFragment(begin=0,
                                              duration=self.controller.player.stream_duration))
+            if el.type._fieldnames:
+                el.content.data="\n".join( sorted(el.type._fieldnames) )
             parent.annotations.append(el)
             self.controller.notify('AnnotationCreate', annotation=el)
         elif self.type_ == Relation:
