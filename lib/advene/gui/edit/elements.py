@@ -596,11 +596,19 @@ class EditViewPopup (EditElementPopup):
         vbox = gtk.VBox ()
 
         f = self.make_registered_form (element=self.element,
-                                       fields=('id', 'uri', 'title',
+                                       fields=('title', ),
+                                       editable=editable,
+                                       editables=('title', ),
+                                       labels={ 'title':     _('Title') }
+                                       )
+        vbox.pack_start (f.get_view (), expand=False)
+
+        f = self.make_registered_form (element=self.element,
+                                       fields=('id', 'uri',
                                                'author', 'date'),
                                        types={ 'type': 'advene' },
                                        editable=editable,
-                                       editables=('title', 'author', 'date'),
+                                       editables=('author', 'date'),
                                        labels={'id':     _('Id'),
                                                'uri':    _('URI'),
                                                'author': _('Author'),
@@ -650,16 +658,23 @@ class EditQueryPopup (EditElementPopup):
         vbox = gtk.VBox ()
 
         f = self.make_registered_form (element=self.element,
-                                       fields=('id', 'uri', 'title',
+                                       fields=('title', ),
+                                       editable=editable,
+                                       editables=('title', ),
+                                       labels={ 'title':     _('Title') }
+                                       )
+        vbox.pack_start (f.get_view (), expand=False)
+
+        f = self.make_registered_form (element=self.element,
+                                       fields=('id', 'uri',
                                                'author', 'date'),
                                        editable=editable,
-                                       editables=('title', 'author', 'date'),
+                                       editables=('author', 'date'),
                                        labels={'id':     _('Id'),
                                                'uri':    _('URI'),
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-
         vbox.pack_start (self.expandable(f.get_view (), expanded=not compact),
                          expand=False)
 
