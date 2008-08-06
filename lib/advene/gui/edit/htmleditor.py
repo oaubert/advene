@@ -335,6 +335,8 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         labels and apply the formatting. The process is extremely
         simple.
         """
+        if tag in self.__standalone:
+            return
         # Create an end-mark to be able to restore HTML tags
         cursor = self._get_iter_for_creating_mark()
         mark = self.__tb.create_mark(None, cursor, True)
