@@ -395,6 +395,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         elif event.keyval == gtk.keysyms.Delete and event.state & gtk.gdk.SHIFT_MASK:
             # Delete annotation
             p=annotation.ownerPackage
+            self.controller.notify('ElementEditBegin', element=annotation, immediate=True)
             p.annotations.remove(annotation)
             self.controller.notify('AnnotationDelete', annotation=annotation)
             return True

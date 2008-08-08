@@ -186,20 +186,26 @@ class Menu:
         if offset is None:
             return True
         if isinstance(el, Annotation):
+            self.controller.notify('ElementEditBegin', element=el, immediate=True)
             el.fragment.begin += offset
             el.fragment.end += offset
             self.controller.notify('AnnotationEditEnd', annotation=el)
+            self.controller.notify('ElementEditCancel', element=el)
         elif isinstance(el, AnnotationType) or isinstance(el, Package):
             for a in el.annotations:
+                self.controller.notify('ElementEditBegin', element=a, immediate=True)
                 a.fragment.begin += offset
                 a.fragment.end += offset
                 self.controller.notify('AnnotationEditEnd', annotation=a)
+                self.controller.notify('ElementEditCancel', element=a)
         elif isinstance(el, Schema):
             for at in el.annotationTypes:
                 for a in at.annotations:
+                    self.controller.notify('ElementEditBegin', element=a, immediate=True)
                     a.fragment.begin += offset
                     a.fragment.end += offset
                     self.controller.notify('AnnotationEditEnd', annotation=a)
+                    self.controller.notify('ElementEditCancel', element=a)
         return True
 
     def copy_id (self, widget, el):
@@ -331,19 +337,25 @@ class Menu:
                 if a.type.mimetype == 'application/x-advene-structured':
                     if re_struct.search(a.content.data):
                         # A 'num' field is present. Update it.
-                        a.content.data=re_struct.sub("num=%d" % (i+1), a.content.data)
+                        data=re_struct.sub("num=%d" % (i+1), a.content.data)
                     else:
                         # Insert the num field
-                        a.content.data=("num=%d\n" % (i+1)) + a.content.data
+                        data=("num=%d\n" % (i+1)) + a.content.data
                 elif re_number.search(a.content.data):
                     # There is a number. Simply substitute the new one.
-                    a.content.data=re_number.sub(str(i+1), a.content.data)
+                    data=re_number.sub(str(i+1), a.content.data)
                 elif a.type.mimetype == 'text/plain':
                     # Overwrite the contents
-                    a.content.data=str(i+1)
+                    data=str(i+1)
                 else:
-                    continue
-                self.controller.notify('AnnotationEditEnd', annotation=a)
+                    data=None
+                if data is not None:
+                    # FIXME: for this kind of batch operations, we
+                    # should record the global changes.
+                    self.controller.notify('ElementEditBegin', element=a, immediate=True)
+                    a.content.data=data
+                    self.controller.notify('AnnotationEditEnd', annotation=a)
+                    self.controller.notify('ElementEditCancel', element=a)
         else:
             ret=None
 

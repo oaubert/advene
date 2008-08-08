@@ -83,7 +83,7 @@ def get_edit_popup (el, controller=None, editable=True):
                 return p
     for c in _edit_popup_list:
         if c.can_edit (el):
-            controller.notify('ElementEditBegin', element=el)
+            controller.notify('ElementEditBegin', element=el, immediate=True)
             return c(el, controller, editable)
     raise TypeError(_("No edit popup available for element %s") % el)
 
@@ -321,10 +321,11 @@ class EditElementPopup (object):
                 if t == 'static' and self.element.matchFilter['class'] in ('package', '*'):
                     b = get_pixmap_button( 'web.png', apply_and_open, callback)
                     self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
+                    hbox.add(b)
                 elif t == 'dynamic':
                     b = get_small_stock_button( gtk.STOCK_MEDIA_PLAY, apply_and_activate, callback )
                     self.controller.gui.tooltips.set_tip(b, _("Apply changes and activate the view"))
-                hbox.add(b)
+                    hbox.add(b)
 
             b = gtk.Button (stock=gtk.STOCK_CANCEL)
             b.connect('clicked', self.close_cb)

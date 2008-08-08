@@ -1078,6 +1078,7 @@ class AdveneController(object):
         if isinstance(el, Annotation):
             # We iterate on a copy of relations, since it may be
             # modified during the loop
+            self.notify('ElementEditBegin', element=el, immediate=True)
             for r in el.relations[:]:
                 [ a.relations.remove(r) for a in r.members if r in a.relations ]
                 self.delete_element(r, immediate_notify=immediate_notify)
@@ -1136,11 +1137,14 @@ class AdveneController(object):
             elif delete:
                 # If delete, then we can simply move the annotation
                 # without deleting it.
+                if notify:
+                    self.notify('ElementEditBegin', element=annotation, immediate=True)
                 d=annotation.fragment.duration
                 annotation.fragment.begin=position
                 annotation.fragment.end=position+d
                 if notify:
                     self.notify("AnnotationEditEnd", annotation=annotation, comment="Transmute annotation")
+                    self.notify('ElementEditCancel', element=annotation)
                 return annotation
         ident=self.package._idgenerator.get_id(Annotation)
         an = self.package.createAnnotation(type = annotationType,
@@ -1194,11 +1198,12 @@ class AdveneController(object):
         an.setDate(self.get_timestamp())
 
         if delete and not annotation.relations:
+            if notify:
+                self.notify('ElementEditBegin', element=annotation, immediate=True)
             self.package.annotations.remove(annotation)
             if notify:
                 self.notify('AnnotationMove', annotation=annotation, comment="Transmute annotation")
                 self.notify('AnnotationDelete', annotation=annotation, comment="Transmute annotation")
-
         if notify:
             self.notify("AnnotationCreate", annotation=an, comment="Transmute annotation")
 
@@ -1237,8 +1242,10 @@ class AdveneController(object):
                                            fragment=annotation.fragment.clone())
 
         # Shorten the first one.
+        self.notify('ElementEditBegin', element=annotation, immediate=True)
         annotation.fragment.end = position
         self.notify("AnnotationEditEnd", annotation=annotation, comment="Duplicate annotation")
+        self.notify('ElementEditCancel', element=annotation)
 
         # Shorten the second one
         an.fragment.begin = position
@@ -1253,6 +1260,7 @@ class AdveneController(object):
     def merge_annotations(self, s, d, extend_bounds=False):
         """Merge annotation s into annotation d.
         """
+        self.notify('ElementEditBegin', element=d, immediate=True)
         if extend_bounds:
             # Extend the annotation bounds (mostly used for same-type
             # annotations)
@@ -1282,6 +1290,7 @@ class AdveneController(object):
         self.notify("AnnotationMerge", package=self.package,comment="")
         self.delete_element(s)
         self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations")
+        self.notify('ElementEditCancel', element=d)
         return d
 
     def restart_player (self):

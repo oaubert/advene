@@ -2483,6 +2483,9 @@ class AdveneGUI (Connect):
                 self.quicksearch_entry.grab_focus()
                 self.quicksearch_entry.select_region(0, -1)
                 return True
+            elif event.keyval == gtk.keysyms.z:
+                self.controller.undomanager.undo()
+                return True
         return False
 
     def on_new1_activate (self, button=None, data=None):
@@ -2695,6 +2698,10 @@ class AdveneGUI (Connect):
         w=v.popup()
         dialog.center_on_mouse(w)
         return False
+
+    def on_undo1_activate (self, button=None, data=None):
+        self.controller.undomanager.undo()
+        return True
 
     def on_find1_activate (self, button=None, data=None):
         self.open_adhoc_view('interactivequery', destination='east')

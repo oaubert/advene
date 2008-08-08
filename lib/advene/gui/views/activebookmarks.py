@@ -218,8 +218,10 @@ class ActiveBookmarks(AdhocView):
         for wid in self.bookmarks:
             if wid.annotation is not None and wid.content != wid.annotation.content.data:
                 # Mismatch in contents -> update the annotation
+                self.controller.notify('ElementEditBegin', element=wid.annotation, immediate=True)
                 wid.annotation.content.data=wid.content
                 self.controller.notify('AnnotationEditEnd', annotation=wid.annotation)
+                self.controller.notify('ElementEditCancel', element=wid.annotation)
         return True
 
     def update_model(self, package=None, partial_update=False):
@@ -1074,9 +1076,11 @@ class ActiveBookmark(object):
                 self.set_frame_attributes()
             else:
                 # Update the annotation
+                self.controller.notify('ElementEditBegin', element=self.annotation, immediate=True)
                 self.annotation.fragment.begin=self.begin
                 self.annotation.fragment.end=self.end
                 self.controller.notify('AnnotationEditEnd', annotation=self.annotation)
+                self.controller.notify('ElementEditCancel', element=self.annotation)
         return True
 
     def set_frame_attributes(self):

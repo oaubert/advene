@@ -884,10 +884,13 @@ class TimeLine(AdhocView):
         else:
             print "Unknown drag mode: %s" % mode
 
+        
         if new['begin'] < new['end']:
+            self.controller.notify('ElementEditBegin', element=source, immediate=True)
             for k in ('begin', 'end'):
                 setattr(source.fragment, k, new[k])
-        self.controller.notify("AnnotationEditEnd", annotation=source)
+            self.controller.notify("AnnotationEditEnd", annotation=source)
+            self.controller.notify('ElementEditCancel', element=source)
         return True
 
     def annotation_fraction(self, widget):
@@ -1062,8 +1065,10 @@ class TimeLine(AdhocView):
             tags=unicode(selection.data, 'utf8').split(',')
             a=widget.annotation
             l=[t for t in tags if not t in a.tags ]
+            self.controller.notify('ElementEditBegin', element=a, immediate=True)
             a.tags = a.tags + l
             self.controller.notify('AnnotationEditEnd', annotation=a)
+            self.controller.notify('ElementEditCancel', element=a)
         else:
             print "Unknown target type for drop: %d" % targetType
         return True
@@ -1426,10 +1431,12 @@ class TimeLine(AdhocView):
             else:
                 return False
             f=annotation.fragment
+            self.controller.notify('ElementEditBegin', element=annotation, immediate=True)
             setattr(f, at, long(self.controller.player.current_position_value))
             if f.begin > f.end:
                 f.begin, f.end = f.end, f.begin
             self.controller.notify('AnnotationEditEnd', annotation=annotation)
+            self.controller.notify('ElementEditCancel', element=annotation)
             return True
         elif (event.button == 1
               and event.type == gtk.gdk.BUTTON_PRESS
@@ -1500,8 +1507,10 @@ class TimeLine(AdhocView):
                 if cb:
                     cb('validate', ann)
                 if r != ann.content.data:
+                    self.controller.notify('ElementEditBegin', element=ann, immediate=True)
                     ann.content.data = r
                     controller.notify('AnnotationEditEnd', annotation=ann)
+                    self.controller.notify('ElementEditCancel', element=ann)
                 close_eb(widget)
                 return True
             elif event.keyval == gtk.keysyms.Escape:
@@ -1516,8 +1525,10 @@ class TimeLine(AdhocView):
                 if cb:
                     cb('validate', ann)
                 if r != ann.content.data:
+                    self.controller.notify('ElementEditBegin', element=ann, immediate=True)
                     ann.content.data = r
                     controller.notify('AnnotationEditEnd', annotation=ann)
+                    self.controller.notify('ElementEditCancel', element=ann)
                 # Navigate
                 b=ann.fragment.begin
                 if event.state & gtk.gdk.SHIFT_MASK:
@@ -1723,6 +1734,9 @@ class TimeLine(AdhocView):
 
             fr=self.annotation_fraction(button)
             f=button.annotation.fragment
+
+            self.controller.notify('ElementEditBegin', element=button.annotation, immediate=True)
+
             if event.state & gtk.gdk.SHIFT_MASK:
                 f.begin += incr
                 f.end += incr
@@ -1732,6 +1746,8 @@ class TimeLine(AdhocView):
                 f.end += incr
 
             self.controller.notify('AnnotationEditEnd', annotation=button.annotation)
+            self.controller.notify('ElementEditCancel', element=button.annotation)
+
             self.set_annotation(button.annotation)
             button.grab_focus()
             return True
@@ -2522,6 +2538,7 @@ class TimeLine(AdhocView):
                         an.fragment.end=self.controller.player.current_position_value
                     elif action == 'cancel':
                         # Delete the annotation
+                        self.controller.notify('ElementEditBegin', element=an, immediate=True)
                         self.controller.package.annotations.remove(an)
                         self.controller.notify('AnnotationDelete', annotation=an)
                     return True
@@ -3255,8 +3272,10 @@ class TimeLine(AdhocView):
                 l.sort(key=lambda a: a.fragment.begin)
                 end=max( a.fragment.end for a in l )
                 # Resize the first annotation
+                self.controller.notify('ElementEditBegin', element=l[0], immediate=True)
                 l[0].fragment.end=end
                 self.controller.notify('AnnotationEditEnd', annotation=l[0])
+                self.controller.notify('ElementEditCancel', element=l[0])
                 # Remove all others
                 for a in l[1:]:
                     self.controller.delete_element(a)
@@ -3274,6 +3293,8 @@ class TimeLine(AdhocView):
                                   icon=gtk.MESSAGE_ERROR)
             return True
         for w in selection:
+            self.controller.notify('ElementEditBegin', element=w.annotation, immediate=True)
             w.annotation.addTag(tag)
             self.controller.notify('AnnotationEditEnd', annotation=w.annotation)
+            self.controller.notify('ElementEditCancel', element=w.annotation)
         return True
