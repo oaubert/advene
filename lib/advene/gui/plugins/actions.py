@@ -286,9 +286,7 @@ class DefaultGUIActions:
 
         The parameters should have a 'id' key.
         """
-        view=self.parse_parameter(context, parameters, 'id', None)
-        if view is None:
-            return True
+        view=parameters['id']
         v=self.controller.package.get_element_by_id(view)
         t=helper.get_view_type(v)
         if t == 'static':
@@ -304,6 +302,9 @@ class DefaultGUIActions:
                 self.controller.open_url(url)
         elif t == 'dynamic':
             self.controller.activate_stbv(v)
+            p=self.controller.player
+            if p.status != p.PlayingStatus:
+                self.controller.update_status('start')
         elif t == 'adhoc':
             self.controller.gui.open_adhoc_view(v, 'south')
         else:
