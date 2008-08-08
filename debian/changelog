@@ -1,3 +1,20 @@
+advene (0.33) unstable; urgency=low
+
+  * Undo support is available, only when modifying or suppressing an
+    annotation, a view or a query.
+
+  * A basic WYSIWYG HTML editor allows to edit HTML contents directly from
+    the GUI (as opposed to the browser-based FCKEditor which is more
+    complete and still available).
+  
+  * Drag-and-drop of an annotation or a selection over a viewbook proposes
+    to create a new static view based on the annotations.
+
+  * The export dialog uses a standard fileselector with an export filter
+    selector
+
+ --
+
 advene (0.32) unstable; urgency=low
 
    * Stable release. See the following 0.29 notes for more details.
