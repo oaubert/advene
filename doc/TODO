@@ -2471,3 +2471,13 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * Edit view popup: add a "Visualise in web browser" button
 
+* content.parsed for structured content: return a dict-like object
+   allowing r/w access (-> not efficient because of update after each
+   attribute modification). Or implement a sync() method which writes the
+   content back (-> not simple since it should keep a reference to the
+   original object). Or unparse() -> more explicit.
+
+* Use ElementEditBegin/End to implement a basic undo feature
+
+* timeline: shift-Del should honour selection
+
