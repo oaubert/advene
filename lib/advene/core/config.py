@@ -711,6 +711,7 @@ class Config(object):
         if filters != []:
             # Some filters have been defined
             args.extend (['--vout-filter', ":".join(filters)])
+        args.extend( '--snapshot-width 160 --snapshot-height 100'.split() )
         #print "player args", args
         return [ str(i) for i in args ]
 
