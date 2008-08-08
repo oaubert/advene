@@ -2924,8 +2924,9 @@ class TimeLine(AdhocView):
             if targetType == config.data.target_type['annotation']:
                 sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
                 if sources:
+                    batch_id=object()
                     for a in sources:
-                        self.controller.delete_element(a)
+                        self.controller.delete_element(a, batch_id=batch_id)
                 return True
             return False
 
@@ -3242,8 +3243,9 @@ class TimeLine(AdhocView):
     def selection_delete(self, widget, selection=None):
         if selection is None:
             selection=self.get_selected_annotation_widgets()
+        batch_id=object()
         for w in selection:
-            self.controller.delete_element(w.annotation)
+            self.controller.delete_element(w.annotation, batch_id=batch_id)
         return True
 
     def selection_as_table(self, widget, selection):
@@ -3268,17 +3270,18 @@ class TimeLine(AdhocView):
         for t in list(types):
             l=[ w.annotation for w in selection if w.annotation.type == t ]
             if len(l) > 1:
+                batch_id=object()
                 # We need at least 2 annotations
                 l.sort(key=lambda a: a.fragment.begin)
                 end=max( a.fragment.end for a in l )
                 # Resize the first annotation
                 self.controller.notify('ElementEditBegin', element=l[0], immediate=True)
                 l[0].fragment.end=end
-                self.controller.notify('AnnotationEditEnd', annotation=l[0])
+                self.controller.notify('AnnotationEditEnd', annotation=l[0], batch=batch_id)
                 self.controller.notify('ElementEditCancel', element=l[0])
                 # Remove all others
                 for a in l[1:]:
-                    self.controller.delete_element(a)
+                    self.controller.delete_element(a, batch_id=batch_id)
         return True
 
     def selection_tag(self, widget, selection):
@@ -3292,9 +3295,10 @@ class TimeLine(AdhocView):
             dialog.message_dialog(_('The tag contains invalid characters'),
                                   icon=gtk.MESSAGE_ERROR)
             return True
+        batch_id=object()
         for w in selection:
             self.controller.notify('ElementEditBegin', element=w.annotation, immediate=True)
             w.annotation.addTag(tag)
-            self.controller.notify('AnnotationEditEnd', annotation=w.annotation)
+            self.controller.notify('AnnotationEditEnd', annotation=w.annotation, batch=batch_id)
             self.controller.notify('ElementEditCancel', element=w.annotation)
         return True

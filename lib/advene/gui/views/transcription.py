@@ -262,12 +262,13 @@ class TranscriptionView(AdhocView):
 
         b=self.textview.get_buffer()
         impossible=[]
+        batch_id=object()
         for a in l:
             beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
             enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
             self.controller.notify('ElementEditBegin', element=a, immediate=True)
             if update(a, b.get_text(beginiter, enditer)):
-                self.controller.notify("AnnotationEditEnd", annotation=a)
+                self.controller.notify("AnnotationEditEnd", annotation=a, batch=batch_id)
             else:
                 impossible.append(a)
             self.controller.notify('ElementEditCancel', element=a)

@@ -226,9 +226,10 @@ class Menu:
         return True
 
     def delete_elements (self, widget, el, elements):
+        batch_id=object()
         if isinstance(el, AnnotationType) or isinstance(el, RelationType):
             for e in elements:
-                self.controller.delete_element(e)
+                self.controller.delete_element(e, batch_id=batch_id)
         return True
 
     def pick_color(self, widget, element):
@@ -333,6 +334,7 @@ class Menu:
             offset=s.get_value_as_int()-1
             l=at.annotations
             l.sort(key=lambda a: a.fragment.begin)
+            batch_id=object()
             for i, a in enumerate(l[offset:]):
                 if a.type.mimetype == 'application/x-advene-structured':
                     if re_struct.search(a.content.data):
@@ -354,7 +356,7 @@ class Menu:
                     # should record the global changes.
                     self.controller.notify('ElementEditBegin', element=a, immediate=True)
                     a.content.data=data
-                    self.controller.notify('AnnotationEditEnd', annotation=a)
+                    self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
                     self.controller.notify('ElementEditCancel', element=a)
         else:
             ret=None

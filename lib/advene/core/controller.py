@@ -1068,7 +1068,7 @@ class AdveneController(object):
             id_ = helper.mediafile2id (uri)
             self.package.imagecache.load (id_)
 
-    def delete_element (self, el, immediate_notify=False):
+    def delete_element (self, el, immediate_notify=False, batch_id=None):
         """Delete an element from its package.
 
         Take care of all dependencies (for instance, annotations which
@@ -1081,9 +1081,9 @@ class AdveneController(object):
             self.notify('ElementEditBegin', element=el, immediate=True)
             for r in el.relations[:]:
                 [ a.relations.remove(r) for a in r.members if r in a.relations ]
-                self.delete_element(r, immediate_notify=immediate_notify)
+                self.delete_element(r, immediate_notify=immediate_notify, batch_id=batch_id)
             p.annotations.remove(el)
-            self.notify('AnnotationDelete', annotation=el, immediate=immediate_notify)
+            self.notify('AnnotationDelete', annotation=el, immediate=immediate_notify, batch=batch_id)
         elif isinstance(el, Relation):
             for a in el.members:
                 if el in a.relations:
@@ -1092,33 +1092,33 @@ class AdveneController(object):
             self.notify('RelationDelete', relation=el, immediate=immediate_notify)
         elif isinstance(el, AnnotationType):
             for a in el.annotations:
-                self.delete_element(a, immediate_notify=True)
+                self.delete_element(a, immediate_notify=True, batch_id=batch_id)
             el.schema.annotationTypes.remove(el)
             self.notify('AnnotationTypeDelete', annotationtype=el, immediate=immediate_notify)
         elif isinstance(el, RelationType):
             for r in el.relations:
-                self.delete_element(r, immediate_notify=True)
+                self.delete_element(r, immediate_notify=True, batch_id=batch_id)
             el.schema.relationTypes.remove(el)
             self.notify('RelationTypeDelete', relationtype=el, immediate=immediate_notify)
         elif isinstance(el, Schema):
             for at in el.annotationTypes:
-                self.delete_element(at, immediate_notify=True)
+                self.delete_element(at, immediate_notify=True, batch_id=batch_id)
             for rt in el.relationTypes:
-                self.delete_element(rt, immediate_notify=True)
+                self.delete_element(rt, immediate_notify=True, batch_id=batch_id)
             p.schemas.remove(el)
             self.notify('SchemaDelete', schema=el, immediate=immediate_notify)
         elif isinstance(el, View):
             self.controller.notify('ElementEditBegin', element=el, immediate=True)
             p.views.remove(el)
-            self.notify('ViewDelete', view=el, immediate=immediate_notify)
+            self.notify('ViewDelete', view=el, immediate=immediate_notify, batch=batch_id)
         elif isinstance(el, Query):
             self.controller.notify('ElementEditBegin', element=el, immediate=True)            
             p.queries.remove(el)
-            self.notify('QueryDelete', query=el, immediate=immediate_notify)
+            self.notify('QueryDelete', query=el, immediate=immediate_notify, batch=batch_id)
         elif isinstance(el, Resources) or isinstance(el, ResourceData):
             if isinstance(el, Resources):
                 for c in el.children():
-                    self.delete_element(c, immediate_notify=True)
+                    self.delete_element(c, immediate_notify=True, batch_id=batch_id)
             p=el.parent
             del(p[el.id])
             self.notify('ResourceDelete', resource=el, immediate=immediate_notify)
@@ -1262,6 +1262,7 @@ class AdveneController(object):
     def merge_annotations(self, s, d, extend_bounds=False):
         """Merge annotation s into annotation d.
         """
+        batch_id=object()
         self.notify('ElementEditBegin', element=d, immediate=True)
         if extend_bounds:
             # Extend the annotation bounds (mostly used for same-type
@@ -1289,9 +1290,9 @@ class AdveneController(object):
             d.content.data="\n".join( [ "%s=%s" % (k, unicode(v).replace('\n', '%0A')) for (k, v) in ddata.iteritems() if k != '_all' ] )
         elif mtd == 'application/x-advene-structured':
             d.content.data=d.content.data + '\nmerged_content="' + cgi.urllib.quote(s.content.data)+'"'
-        self.notify("AnnotationMerge", package=self.package,comment="")
-        self.delete_element(s)
-        self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations")
+        self.notify("AnnotationMerge", package=self.package, comment="", batch=batch_id)
+        self.delete_element(s, batch_id=batch_id)
+        self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations", batch=batch_id)
         self.notify('ElementEditCancel', element=d)
         return d
 

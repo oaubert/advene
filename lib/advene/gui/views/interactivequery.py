@@ -379,11 +379,12 @@ class InteractiveResult(AdhocView):
             replace=replace_entry.get_text()
             l=self.table.get_elements()
             count=0
+            batch_id=object()
             for a in l:
                 if search in a.content.data:
                     self.controller.notify('ElementEditBegin', element=a, immediate=True)
                     a.content.data = a.content.data.replace(search, replace)
-                    self.controller.notify('AnnotationEditEnd', annotation=a)
+                    self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
                     self.controller.notify('ElementEditCancel', element=a)
                     count += 1
             self.log(_('%(search)s has been replaced by %(replace)s in %(count)d annotation(s).') % locals())
