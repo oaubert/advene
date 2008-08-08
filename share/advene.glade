@@ -279,6 +279,15 @@
 		<widget class="GtkMenu" id="menuitem2_menu">
 
 		  <child>
+		    <widget class="GtkImageMenuItem" id="undo1">
+		      <property name="visible">True</property>
+		      <property name="label">gtk-undo</property>
+		      <property name="use_stock">True</property>
+		      <signal name="activate" handler="on_undo1_activate" last_modification_time="Thu Aug  7 19:19:00 CEST 2008"/>
+		    </widget>
+		  </child>
+
+		  <child>
 		    <widget class="GtkImageMenuItem" id="find1">
 		      <property name="visible">True</property>
 		      <property name="label">gtk-find</property>
