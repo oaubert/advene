@@ -367,7 +367,12 @@ class AnnotationWidget(GenericColorButtonWidget):
         """Handle the key-press event.
         """
         if event.keyval == gtk.keysyms.e:
-            self.controller.gui.edit_element(annotation)
+            try:
+                widgets=self.container.get_selected_annotation_widgets()
+                for w in widgets:
+                    self.controller.gui.edit_element(w.annotation)
+            except AttributeError:
+                self.controller.gui.edit_element(annotation)
             return True
         elif event.keyval == gtk.keysyms.h:
             if self.active:
@@ -391,8 +396,14 @@ class AnnotationWidget(GenericColorButtonWidget):
             c.gui.set_current_annotation(annotation)
             return True
         elif event.keyval == gtk.keysyms.Delete and event.state & gtk.gdk.SHIFT_MASK:
-            # Delete annotation
-            self.controller.delete_element(annotation)
+            # Delete annotation or selection
+            try:
+                widgets=self.container.get_selected_annotation_widgets()
+                batch_id=object()
+                for w in widgets:
+                    self.controller.delete_element(w.annotation, batch_id=batch_id)
+            except AttributeError:
+                self.controller.delete_element(annotation)
             return True
         return False
 
