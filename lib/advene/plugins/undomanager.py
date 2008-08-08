@@ -25,6 +25,7 @@ from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
 from advene.model.view import View
 from advene.model.query import Query
+from cPickle import dumps, loads
 
 name="Undo Manager"
 
@@ -88,7 +89,9 @@ class UndoHistory:
         if hasattr(el, 'fragment'):
             d['begin']=long(el.fragment.begin)
             d['end']=long(el.fragment.end)
-        for a in ('id', 'title', 'author', 'date', 'viewableClass', 'tags', 'type'):
+        if hasattr(el, 'tags'):
+            d['tags']=dumps(el.tags)
+        for a in ('id', 'title', 'author', 'date', 'viewableClass', 'type'):
             if hasattr(el, a):
                 d[a]=getattr(el, a)
         return d
@@ -193,6 +196,8 @@ class UndoHistory:
                     element.fragment.begin=v
                 elif k == 'end':
                     element.fragment.end=v
+                elif k == 'tags':
+                    element.tags=loads(v)
             if isinstance(element, Annotation):
                 self.controller.notify('AnnotationEditEnd', annotation=element, undone=True)
             elif isinstance(element, View):
@@ -211,6 +216,8 @@ class UndoHistory:
                     fragment=MillisecondFragment(begin=data['begin'],
                                                  end=data['end']))
                 el.content.data=data['content']
+                if 'tags' in data:
+                    el.tags=loads(data['tags'])
                 self.controller.package.annotations.append(el)
                 el.complete=True
                 self.controller.notify('AnnotationCreate', annotation=el, undone=True)
@@ -227,6 +234,8 @@ class UndoHistory:
                 el.title=data['title']
                 el.content.data=data['content']
                 el.content.mimetype=data['mimetype']
+                if 'tags' in data:
+                    el.tags=loads(data['tags'])
                 self.controller.package.views.append(el)
                 self.controller.notify('ViewCreate', view=el, undone=True)
             elif element == 'query':
@@ -237,6 +246,8 @@ class UndoHistory:
                 el.title=data['title']
                 el.content.mimetype=data['mimetype']
                 el.content.data=data['content']
+                if 'tags' in data:
+                    el.tags=loads(data['tags'])
                 self.controller.package.queries.append(el)
                 self.controller.notify('QueryCreate', query=el, undone=True)
             else:
