@@ -1,3 +1,6 @@
+* Rename ElementEditBegin/ElementEditCancel by
+   EditSessionStart/EditSessionEnd
+
 * Import dialog: use a standard fileselector with a import-filter list
 
 * See http://damien.krotkine.com/claws/  for packaging native MacOS X gtk
