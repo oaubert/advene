@@ -792,11 +792,7 @@ class AdveneController(object):
                 # We created an element. Make sure its id is registered in the _idgenerator
                 p._idgenerator.add(el.id)
 
-        immediate=False
-        if immediate in kw:
-            immediate=kw['immediate']
-            del kw['immediate']
-        if immediate:
+        if 'immediate' in kw:
             self.event_handler.notify(event_name, *param, **kw)
         else:
             self.queue_action(self.event_handler.notify, event_name, *param, **kw)
