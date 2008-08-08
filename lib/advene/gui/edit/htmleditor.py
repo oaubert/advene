@@ -160,6 +160,17 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         """
         self.set_text(self.get_html())
 
+    def html_reset(self):
+        """Clear the buffer contents.
+        """
+        # Empty the buffer
+        b=self.get_buffer()
+        b.delete(*b.get_bounds())
+
+        # Clear all tags.
+        self.__last = None
+        self.__tags = {}
+
     def set_text(self, txt):
         """Set text.
 
@@ -172,6 +183,7 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         The name is to follow the apparent agreement on names of
         PyGTK.
         """
+        self.html_reset()
         if not isinstance(txt, unicode):
             # <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
             l=re.findall('http-equiv.+content-type.+charset=([\w\d-]+)', txt)
@@ -185,9 +197,6 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             except UnicodeDecodeError:
                 # Fallback to latin1.
                 txt=unicode(txt, 'latin1')
-        # Empty the buffer
-        b=self.__tb
-        b.delete(*b.get_bounds())
         self.feed(txt.encode('utf-8'))
         for k, v in self.__tags.iteritems():
             if v:
