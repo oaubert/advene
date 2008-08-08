@@ -32,8 +32,6 @@ def register(controller):
     controller.undomanager=UndoHistory(controller)
     controller.undomanager.register()
 
-# FIXME: think about batch changes (cf offset in gui.popup)
-
 class UndoHistory:
     def __init__(self, controller=None):
         self.controller=controller
@@ -41,8 +39,16 @@ class UndoHistory:
         # FIXME: history and _edits should be specific to each package
 
         # In history, store triples (action, element, values)
-        # where action is 'changed', 'deleted' or 'created'
+        # where action is 'batch', 'changed', 'deleted' or 'created'.
+        # If action is 'batch', then its element is the batch id, and
+        # its values is a history-like structure.
         self.history=[]
+
+        # Hold intermediate batch_history. Only 1 batch can be active
+        # at a time.
+        self.batch_id=None
+        self.batch_history=None
+
         self._rules=[]
         self._edits={}
 
@@ -112,6 +118,18 @@ class UndoHistory:
             # Do not record it.
             #print "EditEnd in Undo context"
             return
+        batch=context.globals.get('batch', None)
+        if batch:
+            if batch == self.batch_id:
+                history=self.batch_history
+            else:
+                self.batch_id=batch
+                self.batch_history=[]
+                history=self.batch_history
+                self.history.append( ('batch', batch, history) )
+        else:
+            history=self.history
+
         event=context.evaluateValue('event')
         el=event.replace('EditEnd', '').lower()
         element=context.evaluateValue(el)
@@ -120,7 +138,7 @@ class UndoHistory:
             new=self.get_cached_representation(element)
             changed=[ (k, v) for (k, v) in cached.iteritems() if new[k] != v ]
             # Store changed elements in history
-            self.history.append( ('changed', element, changed) )
+            history.append( ('changed', element, changed) )
             self._edits[element]=new
             #print "Saving diff for ", element
 
@@ -130,22 +148,39 @@ class UndoHistory:
         event=context.evaluateValue('event')
         el=event.replace('Delete', '').lower()
         element=context.evaluateValue(el)
+        batch=context.globals.get('batch', None)
+        if batch:
+            if batch == self.batch_id:
+                history=self.batch_history
+            else:
+                self.batch_id=batch
+                self.batch_history=[]
+                history=self.batch_history
+                self.history.append( ('batch', batch, history) )
+        else:
+            history=self.history
+
         if element in self._edits:
             # Store deleted elements in history. We store here the
             # element type (annotation, view...) as second parameter
-            self.history.append( ('deleted', el, self._edits[element]) )
+            history.append( ('deleted', el, self._edits[element]) )
             del self._edits[element]
             #print "Saving content for ", el
 
     def log(self, *p):
         self.controller.log("UndoManager: " + str(p))
 
-    def undo(self):
+    def undo(self, operation=None):
         """Undo the last operation.
         """
-        if not self.history:
-            return
-        (action, element, data)=self.history.pop()
+        if operation is not None:
+            (action, element, data)=operation
+        else:
+
+            if not self.history:
+                return
+            (action, element, data)=self.history.pop()
+
         if action == 'changed':
             for (k, v) in data:
                 if k in ('id', 'title', 'author', 'date', 'type'):
@@ -206,5 +241,9 @@ class UndoHistory:
                 self.controller.notify('QueryCreate', query=el, undone=True)
             else:
                 self.log("Unknown element %s for undoing delete" % element)
+        elif action == 'batch':
+            for op in data:
+                self.undo(operation=op)
+            del data[:]
         else:
             self.log("Unknown operation %s for undo" % action)
