@@ -517,13 +517,10 @@ class HTMLContentHandler (ContentHandler):
         if targetType == config.data.target_type['annotation']:
             for uri in unicode(selection.data, 'utf8').split('\n'):
                 source=self.controller.package.annotations.get(uri)
-                # We received a drop. Determine the location.
-                # FIXME: propose various choices (insert content, insert snapshot, etc)
-                self.editor.get_buffer().insert_at_cursor(source.content.data)
-                #self.editor.handle_img('img', attr=( 
-                #        ('tal:attributes', 'src package/annotations/%s/snapshot_url' % source.id ),
-                #        ('src', 'http://localhost:1234/media/snapshot/advene/%d' % source.fragment.begin) ))
+                if source is None:
+                    return True
                 ctx=self.controller.build_context(source)
+                # FIXME: propose various choices (insert timestamp, insert snapshot, etc)
                 self.editor.feed('<a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s" /></a><br>' % { 
                         'id': source.id,
                         # FIXME: should get base server address from somewhere
