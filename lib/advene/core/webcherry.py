@@ -1952,25 +1952,12 @@ class Action(Common):
                     ))
 
         # Check for missing parameters
-        missing=[]
-        invalid=[]
-        for p in ra.parameters:
-            if not p in query:
-                missing.append(p)
-            elif not helper.is_valid_tales(query[p]):
-                invalid.append(p)
-
+        missing=[ p for p in ra.parameters if not p in query ]
         if missing:
             res=[ self.start_html (_('Error'), duplicate_title=True) ]
             res.append (_('Missing parameter(s) :<ul>'))
             for p in missing:
                 res.append('<li>%s: %s</li>' % (p, ra.parameters[p]))
-            return "".join(res)
-        if invalid:
-            res=[ self.start_html (_('Error'), duplicate_title=True) ]
-            res.append (_('<p>Invalid parameter(s), they do not look like TALES expressions:</p><ul>'))
-            for p in invalid:
-                res.append('<li>%s (%s): %s</li>' % (p, ra.parameters[p], query[p]))
             return "".join(res)
         self.controller.queue_registered_action(ra, query)
         return self.send_no_content()
