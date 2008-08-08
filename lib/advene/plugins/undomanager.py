@@ -162,6 +162,10 @@ class UndoHistory:
                 self.history.append( ('batch', batch, history) )
         else:
             history=self.history
+            # Implicitly close a previous batch_history
+            if self.batch_id is not None:
+                self.batch_id=None
+                self.batch_history=[]
 
         if element in self._edits:
             # Store deleted elements in history. We store here the
