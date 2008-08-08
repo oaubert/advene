@@ -498,6 +498,33 @@ class HTMLContentHandler (ContentHandler):
         #    pass
         return True
 
+    def insert_annotation_content(self, choice, annotation):
+        """
+        choice: list of one or more strings: 'snapshot', 'timestamp', 'content'
+        """
+        ctx=self.controller.build_context(annotation)
+        d={ 
+            'id': annotation.id,
+            # FIXME: should get base server address from somewhere
+            'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
+            'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
+            'timestamp': helper.format_time(annotation.fragment.begin),
+            'content': self.controller.get_title(annotation),
+            }
+        data=[ """<a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s>""" % d ]
+        if 'snapshot' in choice:
+        # FIXME: propose various choices (insert timestamp, insert snapshot, etc)
+            data.append("""<img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s" ></img><br>""" % d)
+        if 'timestamp' in choice:
+            data.append("""<em tal:content="a/fragment/formatted/begin">%(timestamp)s</em><br>""" % d)
+        if 'content' in choice:
+            data.append("""<span tal:content="a/representation">%(content)s</span>""" % d)
+        
+        data.append('</a>')
+
+        self.editor.feed("\n".join(data))
+        return True
+        
     def editor_drag_received(self, widget, context, x, y, selection, targetType, time):
         """Handle the drop from an annotation to the editor.
         """
@@ -519,14 +546,20 @@ class HTMLContentHandler (ContentHandler):
                 source=self.controller.package.annotations.get(uri)
                 if source is None:
                     return True
-                ctx=self.controller.build_context(source)
-                # FIXME: propose various choices (insert timestamp, insert snapshot, etc)
-                self.editor.feed('<a tal:define="a package/annotations/%(id)s" tal:attributes="href a/player_url" href=%(href)s><img width="160" height="100" tal:attributes="src a/snapshot_url" src="%(imgurl)s" /></a><br>' % { 
-                        'id': source.id,
-                        # FIXME: should get base server address from somewhere
-                        'href': 'http://localhost:1234' + ctx.evaluateValue('here/player_url'),
-                        'imgurl': 'http://localhost:1234' + ctx.evaluateValue('here/snapshot_url'),
-                        })
+                m=gtk.Menu()
+                for (title, choice) in (
+                    (_("Snapshot only"), ('snapshot', )),
+                    (_("Content only"), ('content', )),
+                    (_("Timestamp only"), ('timestamp', )),
+                    (_("Snapshot+timestamp"), ('snapshot', 'timestamp')),
+                    (_("Snapshot+content"), ('snapshot', 'content')),
+                    (_("Snapshot+timestamp+content"), ('snapshot', 'timestamp', 'content')),
+                    ):
+                    i=gtk.MenuItem(title)
+                    i.connect('activate', (lambda it, ann, data: self.insert_annotation_content(data, ann)), source, choice)
+                    m.append(i)
+                m.show_all()
+                m.popup(None, None, None, 0, gtk.get_current_event_time())
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
