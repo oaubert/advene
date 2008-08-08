@@ -550,6 +550,10 @@ class Evaluator:
             b.insert_at_cursor("(%s)" % ", ".join(args))
             it=b.get_iter_at_mark(beginmark)
             it.forward_char()
+            if not args:
+                # No args inserted. Put the cursor after the closing
+                # parenthesis.
+                it.forward_char()
             b.move_mark_by_name('selection_bound', it)
             b.delete_mark(beginmark)
 
