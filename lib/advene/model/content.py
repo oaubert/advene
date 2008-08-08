@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 from cStringIO import StringIO
+import urllib
 
 import advene.model.modeled as modeled
 import advene.model.viewable as viewable
@@ -31,6 +32,57 @@ import advene.model.util.uri
 from advene.model.util.auto_properties import auto_properties
 from advene.model.util.mimetype import MimeType
 
+class StructuredContent(dict,object):
+    """Dict-like object representing structured data.
+    
+    It provides methods for parsing from/unparsing to Advene
+    simple-structured content.
+    
+    Note that it cannot do synchronous updates when writing since:
+       - it should do a content update after each attribute
+         modification, which would not be efficient.
+       - it should have a reference to the controller ECAEngine, 
+         which is not available here.
+    So prefer a more verbose but explicit behaviour.
+    """
+    def __init__(self, *p, **kw):
+        if p and isinstance(p[0], basestring):
+            # Initialize with a content.
+            self.parse(p[0])
+        else:
+            dict.__init__(self, *p, **kw)
+
+    def parse(self, data):
+        """Parse a data string.
+        """
+        self.clear()
+        self['_all']=data
+        for l in data.splitlines():
+            if not l:
+                # Ignore empty lines
+                continue
+            if '=' in l:
+                (k, v) = l.split('=', 1)
+                self[k] = urllib.unquote(v)
+            else:
+                self['_error']=l
+                print "Syntax error in content: >%s<" % l.encode('utf8')
+
+    def unparse(self):
+        """Return the encoded version of the dictionary.
+        """
+        def quote(v):
+            """Poor man's urllib.quote.
+
+            It should preserve the readability of the content while
+            being compatible with RFC2396 when decoding.
+            """
+            return v.replace('\n', '%0A').replace('=', '%3D').replace('%', '%25')
+
+        return "\n".join( ("%s=%s" % (k, quote(v))) 
+                          for (k, v) in self.iteritems() 
+                          if not k.startswith('_') )
+        
 class Content(modeled.Modeled,
               viewable.Viewable.withClass('content', 'getMimetype')):
     """
@@ -193,21 +245,7 @@ class Content(modeled.Modeled,
         if (self.mimetype in ( 'application/x-advene-structured',
                                'text/x-advene-structured',
                                'application/x-advene-zone' ) ):
-            import urllib
-
-            d={}
-            d['_all']=self.data
-            for l in self.data.splitlines():
-                if len(l) == 0:
-                    # Ignore empty lines
-                    continue
-                if '=' in l:
-                    (k, v) = l.split('=', 1)
-                    d[k] = urllib.unquote(v)
-                else:
-                    d['_error']=l
-                    print "Syntax error in content: >%s<" % l.encode('utf8')
-            return d
+            return StructuredContent(self.data)
         elif self.mimetype == 'application/x-advene-values':
             def convert(v):
                 try:
