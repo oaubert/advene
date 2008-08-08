@@ -643,10 +643,10 @@ class HTMLContentHandler (ContentHandler):
             vbox.show_all()
             return True
 
-        # FIXME: this test should be reverted once the HTMLEditor code
-        # is stabilized.
-        if config.data.preferences['expert-mode']:
-            edit_wysiwyg()
-        else:
-            edit_source()
+        # FIXME: this test should be activated for the release
+        #if config.data.preferences['expert-mode']:
+        #    edit_source()
+        #else:
+        #    edit_wysiwyg()
+        edit_wysiwyg()
         return vbox
