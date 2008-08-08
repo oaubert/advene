@@ -369,10 +369,13 @@ class AnnotationWidget(GenericColorButtonWidget):
         if event.keyval == gtk.keysyms.e:
             try:
                 widgets=self.container.get_selected_annotation_widgets()
+            except AttributeError:
+                widgets=None
+            if not widgets:
+                self.controller.gui.edit_element(annotation)
+            else:
                 for w in widgets:
                     self.controller.gui.edit_element(w.annotation)
-            except AttributeError:
-                self.controller.gui.edit_element(annotation)
             return True
         elif event.keyval == gtk.keysyms.h:
             if self.active:
