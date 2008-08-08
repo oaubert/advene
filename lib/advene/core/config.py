@@ -707,7 +707,7 @@ class Config(object):
         if self.player['svg']:
             args.extend( [ '--text-renderer', 'svg' ] )
         if self.player['bundled']:
-            args.append( [ '--no-plugins-cache' ] )
+            args.append( '--no-plugins-cache' )
         if filters != []:
             # Some filters have been defined
             args.extend (['--vout-filter', ":".join(filters)])
