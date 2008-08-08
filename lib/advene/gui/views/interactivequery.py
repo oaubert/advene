@@ -140,6 +140,7 @@ class InteractiveQuery(AdhocView):
         # Overwriting an existing query
         if q:
             create=False
+            self.controller.notify('ElementEditBegin', element=q, immediate=True)
         else:
             create=True
             # Create the query
@@ -157,6 +158,7 @@ class InteractiveQuery(AdhocView):
             self.controller.notify('QueryCreate', query=q)
         else:
             self.controller.notify('QueryEditEnd', query=q)
+            self.controller.notify('ElementEditCancel', element=q)
         return q
 
     def validate(self, button=None):
