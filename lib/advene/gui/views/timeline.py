@@ -1410,9 +1410,6 @@ class TimeLine(AdhocView):
             if self.loop_toggle_button.get_active():
                 self.controller.gui.loop_on_annotation_gui(annotation)
             return True
-        elif event.button == 1 and not event.state & gtk.gdk.SHIFT_MASK:
-            self.unselect_all()
-            return True
 
     def annotation_button_press_cb(self, widget, event, annotation):
         """Handle button presses on annotation widgets.
