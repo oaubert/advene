@@ -606,7 +606,7 @@ class HTMLContentHandler (ContentHandler):
             ):
             b=gtk.ToolButton(icon)
             b.connect('clicked', action)
-            b.set_tooltip_text(tooltip)
+            b.set_tooltip(self.tooltips, tooltip)
             tb.insert(b, -1)
             b.show()
         self.view.pack_start(tb, expand=False)
