@@ -2058,7 +2058,7 @@ class AdveneGUI (Connect):
 
             if self.controller.player.status != self.oldstatus:
                 self.oldstatus = self.controller.player.status
-                self.gui.player_status.set_text (self.statustext[self.controller.player.status])
+                self.gui.player_status.set_text(self.statustext.get(self.controller.player.status, _("Unknown")))
 
             # Update the position mark in the registered views
             # Note: beware when implementing update_position in views:
@@ -2077,7 +2077,7 @@ class AdveneGUI (Connect):
             self.time_label.set_text(helper.format_time(None))
             if self.controller.player.status != self.oldstatus:
                 self.oldstatus = self.controller.player.status
-                self.gui.player_status.set_text (self.statustext[self.controller.player.status])
+                self.gui.player_status.set_text(self.statustext.get(self.controller.player.status, _("Unknown")))
             # New position_update call to handle the starting case (the first
             # returned status is None)
             self.controller.position_update ()
@@ -2897,7 +2897,7 @@ class AdveneGUI (Connect):
             self.log (_("Duration         : %(time)s (%(ms)d ms)") % {
                     'time': helper.format_time(self.controller.player.stream_duration),
                     'ms': self.controller.player.stream_duration })
-            self.log (_("Status           : %s") % self.statustext[self.controller.player.status])
+            self.log (_("Status           : %s") % self.statustext.get(self.controller.player.status, _("Unknown")))
         else:
             self.log (_("Player not active."))
         return True
