@@ -3,11 +3,6 @@
 
 * Import dialog: use a standard fileselector with a import-filter list
 
-* See http://damien.krotkine.com/claws/  for packaging native MacOS X gtk
-
-* pseudo-Wysiwyg component (using gtk.Layout / goocanvas /
-   gtk.TextView ?)
-
 * When DND rule in STBV editing, use the current edited rule and not
    the saved one -> hard
 
@@ -2483,4 +2478,9 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Use ElementEditBegin/End to implement a basic undo feature
 
 * timeline: shift-Del should honour selection
+
+* pseudo-Wysiwyg component (using gtk.Layout / goocanvas /
+   gtk.TextView ?)
+
+* See http://damien.krotkine.com/claws/  for packaging native MacOS X gtk
 
