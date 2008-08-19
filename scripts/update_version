@@ -1,7 +1,15 @@
 #! /bin/sh
 
-svn up
-svnrev=`svn info | awk '/Revision/{print $2}'`
+svnrev='Unknown'
+if [ -d .svn ]
+then
+    svn up
+    svnrev=`svn info | awk '/Revision/{print $2}'`
+elif [ -d .git ]
+then
+    svnrev=`git show HEAD | perl -lne 'print $1 if /git-svn-id.+advene.trunk@(\d+)/'`
+fi
+
 builddate=`date +%Y%m%d`
 
 perl -pi -e "s/date=.+/date='$builddate'/; s/svn=.+/svn='$svnrev'/" lib/advene/core/version.py
