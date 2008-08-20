@@ -29,6 +29,7 @@
 # - Define a property box, which updates with the cursor position (displays current context + attributes for the appropriate tags (esp. <a>))
 # - Fix spurious <br> insertion
 
+import gobject
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -39,6 +40,35 @@ import socket
 import StringIO
 import re
 from HTMLParser import HTMLParser
+
+broken_xpm="""20 22 5 1
+  c black
+. c gray20
+X c gray60
+o c gray100
+O c None
+.............OOOOOOO
+.oooooooooo.o.OOOOOO
+.oooooooooo.oo.OOOOO
+.oooooooooo.ooo.OOOO
+.oooooooooo.oooo.OOO
+.oooooooooo . . . OO
+.oooooooooo       OO
+.ooooooooooooXXXX OO
+.oooooooooooooXXX OO
+.oooooooooooooooX OO
+.o.ooooooooooo.oX OO
+.. .ooo.ooo.o. .X OO
+  O .o. .o. . O . OO
+ OOO . O . O OOO  OO
+OO OO OOO OOOO OO OO
+O o OOO OOO O o OOOO
+ ooo O o O o ooo OOO
+ oooo ooo ooooooX OO
+.oooooooooooooooX OO
+.oooooooooooooooX OO
+..XXXXXXXXXXXXXX. OO
+OO                OO""".splitlines()
 
 class HTMLEditor(gtk.TextView, HTMLParser):
 
@@ -235,15 +265,15 @@ class HTMLEditor(gtk.TextView, HTMLParser):
             print "Error loading %s: %s" % (dattr['src'], ex)
             data = None
             alt=dattr.get('alt', 'Broken image')
+        # Process width and height attributes
+        attrwidth = dattr.get('width')
+        attrheight = dattr.get('height')
+
         if data is not None:
             # Caveat: GdkPixbuf is known not to be safe to load images
             # from network... this program is now potentially hackable
             # ;)
             loader = gtk.gdk.PixbufLoader()
-
-            # process width and height attributes
-            attrwidth = dattr.get('width')
-            attrheight = dattr.get('height')
 
             def set_size(pixbuf, width, height):
                 if attrwidth and attrheight:
@@ -259,11 +289,18 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                 loader.set_size(int(width), int(height))
             if attrwidth or attrheight:
                 loader.connect('size-prepared', set_size)
-            loader.write(data)
-            loader.close()
-            pixbuf = loader.get_pixbuf()
+            try:
+                loader.write(data)
+                loader.close()
+                pixbuf = loader.get_pixbuf()
+            except gobject.GError:
+                pixbuf=None                        
         else:
             pixbuf=None
+
+        if pixbuf is None:
+            pixbuf=gtk.gdk.pixbuf_new_from_xpm_data(broken_xpm)
+
         cursor = self._get_iter_for_creating_mark()
         if pixbuf is not None:
             self.__tb.insert_pixbuf(cursor, pixbuf)
