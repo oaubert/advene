@@ -282,7 +282,7 @@ class HTMLEditor(textview_class, HTMLParser):
             data = f.read()
             alt=dattr.get('alt', '')
         except Exception, ex: 
-            print "Error loading %s: %s" % (dattr['src'], ex)
+            print "Error loading %s: %s" % (dattr.get('src', _("[No src attribute]")), ex)
             data = None
             alt=dattr.get('alt', 'Broken image')
         # Process width and height attributes
