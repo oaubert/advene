@@ -40,6 +40,15 @@ import socket
 import StringIO
 import re
 from HTMLParser import HTMLParser
+try:
+    import gtksourceview
+except ImportError:
+    gtksourceview=None
+
+if gtksourceview is None:
+    textview_class=gtk.TextView
+else:
+    textview_class=gtksourceview.SourceView
 
 broken_xpm="""20 22 5 1
   c black
@@ -70,7 +79,7 @@ O o OOO OOO O o OOOO
 ..XXXXXXXXXXXXXX. OO
 OO                OO""".splitlines()
 
-class HTMLEditor(gtk.TextView, HTMLParser):
+class HTMLEditor(textview_class, HTMLParser):
 
     # Define the inline tags (unused for now)
     __inline = [ "b", "i", "strong", "a", "em" ]
@@ -142,6 +151,8 @@ class HTMLEditor(gtk.TextView, HTMLParser):
         """
         gtk.TextView.__init__(self, *cnf, **kw)
         HTMLParser.__init__(self)
+        if gtksourceview is not None:
+            self.set_buffer(gtksourceview.SourceBuffer())
         self.set_editable(True)
         self.set_wrap_mode(gtk.WRAP_WORD)
         self.__tb = self.get_buffer()
@@ -184,6 +195,15 @@ class HTMLEditor(gtk.TextView, HTMLParser):
                     break
             return True
         self.__tb.connect('delete-range', delete_range)
+
+    def can_undo(self):
+        return (gtksourceview is not None and self.get_buffer().can_undo())
+
+    def undo(self, *p):
+        b=self.get_buffer()
+        if b.can_undo():
+            b.undo()
+        return True
 
     def refresh(self):
         """Refresh the current view.
@@ -600,6 +620,12 @@ if __name__ == "__main__":
         ):
         b=gtk.ToolButton(icon)
         b.connect('clicked', action)
+        ev.toolbar.insert(b, -1)
+        b.show()
+
+    if gtksourceview is not None:
+        b=gtk.ToolButton(gtk.STOCK_UNDO)
+        b.connect('clicked', lambda i: t.undo())
         ev.toolbar.insert(b, -1)
         b.show()
 
