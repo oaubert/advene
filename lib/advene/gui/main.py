@@ -762,6 +762,9 @@ class AdveneGUI (Connect):
 
         # Use small toolbar button everywhere
         gtk.settings_get_default().set_property('gtk_toolbar_icon_size', gtk.ICON_SIZE_SMALL_TOOLBAR)
+        play=self.player_toolbar.get_children()[0]
+        play.set_flags(play.flags() | gtk.CAN_FOCUS)
+        play.grab_focus()
 
         self.event_source_update_display=gobject.timeout_add (100, self.update_display)
         self.event_source_slow_update_display=gobject.timeout_add (1000, self.slow_update_display)
