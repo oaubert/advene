@@ -374,7 +374,7 @@ class Indexer:
             s=self.index.get(context.type.id, [])
         elif isinstance(context, gtk.TextBuffer):
             s=set(self.get_words(context.get_text(*context.get_bounds())))
-            s=self.index['views']
+            s.update(self.index['views'])
         else:
             s=self.index['views']
 
