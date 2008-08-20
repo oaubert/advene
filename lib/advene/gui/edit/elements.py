@@ -1395,10 +1395,11 @@ class TextContentHandler (ContentHandler):
             self.view.modify_base(gtk.STATE_NORMAL, color)
             
         # Hook the completer component
-        completer=Completer(textview=self.view,
-                            controller=self.controller,
-                            element=self.parent,
-                            indexer=self.parent.rootPackage._indexer)
+        if hasattr(self.parent.rootPackage, '_indexer'):
+            completer=Completer(textview=self.view,
+                                controller=self.controller,
+                                element=self.parent,
+                                indexer=self.parent.rootPackage._indexer)
 
         scroll_win = gtk.ScrolledWindow ()
         scroll_win.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
