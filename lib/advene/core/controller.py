@@ -1108,11 +1108,11 @@ class AdveneController(object):
             p.schemas.remove(el)
             self.notify('SchemaDelete', schema=el, immediate=immediate_notify)
         elif isinstance(el, View):
-            self.controller.notify('ElementEditBegin', element=el, immediate=True)
+            self.notify('ElementEditBegin', element=el, immediate=True)
             p.views.remove(el)
             self.notify('ViewDelete', view=el, immediate=immediate_notify, batch=batch_id)
         elif isinstance(el, Query):
-            self.controller.notify('ElementEditBegin', element=el, immediate=True)            
+            self.notify('ElementEditBegin', element=el, immediate=True)            
             p.queries.remove(el)
             self.notify('QueryDelete', query=el, immediate=immediate_notify, batch=batch_id)
         elif isinstance(el, Resources) or isinstance(el, ResourceData):
