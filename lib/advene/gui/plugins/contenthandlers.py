@@ -609,6 +609,13 @@ class HTMLContentHandler (ContentHandler):
             b.set_tooltip(self.tooltips, tooltip)
             tb.insert(b, -1)
             b.show()
+
+        if self.editor.can_undo():
+            b=gtk.ToolButton(gtk.STOCK_UNDO)
+            b.connect('clicked', lambda i: self.editor.undo())
+            tb.insert(b, -1)
+            b.show()
+
         self.view.pack_start(tb, expand=False)
         sw=gtk.ScrolledWindow()
         sw.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
