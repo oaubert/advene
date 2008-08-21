@@ -13,7 +13,7 @@ advene (0.33) unstable; urgency=low
   * The export dialog uses a standard fileselector with an export filter
     selector
 
- --
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 21 Aug 2008 18:14:36 +0200
 
 advene (0.32) unstable; urgency=low
 
