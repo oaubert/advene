@@ -2484,3 +2484,7 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * See http://damien.krotkine.com/claws/  for packaging native MacOS X gtk
 
+* focus on something more sensible than New button at startup
+
+* gstreamer-image overlay: cf boxtream / encoder / setImageOverlay
+
