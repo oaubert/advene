@@ -486,11 +486,17 @@ class ActiveBookmarks(AdhocView):
 
         b=get_small_stock_button(gtk.STOCK_DELETE)
         self.controller.gui.tooltips.set_tip(b, _("Drop a bookmark here to remove it from the list"))
+        if config.data.os == 'win32':
+            # DND on win32 is partially broken: it will not detect
+            # ACTION_MOVE only. We have to add ACTION_COPY.
+            flags=gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE
+        else:
+            flags=gtk.gdk.ACTION_MOVE
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
                         config.data.drag_type['timestamp'],
-                        gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
+                        flags )
         b.connect('drag-data-received', remove_drag_received)
         b.connect('clicked', remove_current)
         i=gtk.ToolItem()
