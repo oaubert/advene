@@ -1,3 +1,9 @@
+advene (0.34) unstable; urgency=low
+
+  * Stable release. See the following 0.33 notes for more details.
+
+ -- Olivier Aubert <olivier.aubert@liris.cnrs.fr>  Thu, 21 Aug 2008 18:15:19 +0200
+
 advene (0.33) unstable; urgency=low
 
   * Undo support is available, only when modifying or suppressing an
