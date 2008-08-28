@@ -1187,7 +1187,7 @@ class TimeLine(AdhocView):
         dest_title=self.controller.get_title(dest)
 
         if len(sources) > 1:
-            if sources.type == dest:
+            if source.type == dest:
                 return True
             item=gtk.MenuItem(_("Duplicate selection to type %s") % dest_title, use_underline=False)
             item.connect('activate', copy_selection, sources, dest)
