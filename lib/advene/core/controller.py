@@ -1296,6 +1296,17 @@ class AdveneController(object):
         self.notify('ElementEditCancel', element=d)
         return d
 
+    def select_player(self, p):
+        """Activate the given player.
+        """
+        # Stop the current player.
+        self.player.exit()
+        self.player=p()
+        self.notify('PlayerChange', player=p)
+        mediafile = self.get_default_media()
+        if mediafile != "":
+            self.set_media(mediafile)
+        
     def restart_player (self):
         """Restart the media player."""
         self.player.restart_player ()
