@@ -16,7 +16,7 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#"""Module displaying active time bookmarks."""
+"""Module displaying active time bookmarks."""
 
 from gettext import gettext as _
 import gtk
