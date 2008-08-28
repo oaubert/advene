@@ -300,8 +300,8 @@ class EditElementPopup (object):
                 self.apply_cb(b, None, cb)
                 # Open in web browser
                 ctx=self.controller.build_context()
-                url=ctx.evaluateValue('here/view/%s/absolute_url' % self.element.id)
-                self.controller.open_url(url)
+                url=ctx.evaluateValue('here/absolute_url')
+                self.controller.open_url('/'.join( (url, 'view', self.element.id) ))
                 return True
 
             def apply_and_activate(b, cb):
