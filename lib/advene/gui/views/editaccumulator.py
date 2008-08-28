@@ -51,7 +51,7 @@ class EditAccumulator(AccumulatorPopup):
 
     def edit(self, element):
         e=get_edit_popup(element, self.controller)
-        if e.window:
+        if e._widget:
             # The edit popup is already open
             return True
         w=e.compact()
@@ -92,7 +92,7 @@ class EditAccumulator(AccumulatorPopup):
             return True
 
         w.connect('destroy', handle_destroy)
-        e.window=w
+
         if self.controller and self.controller.gui:
             self.controller.gui.register_edit_popup(e)
 
