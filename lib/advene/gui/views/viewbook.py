@@ -28,6 +28,7 @@ from advene.gui.views import AdhocView
 import advene.util.helper as helper
 from advene.gui.util import get_pixmap_button, dialog, decode_drop_parameters
 import advene.util.ElementTree as ET
+from advene.gui.edit.elements import get_edit_popup
 
 class ViewBook(AdhocView):
     """Notebook containing multiple views
@@ -209,6 +210,12 @@ class ViewBook(AdhocView):
         return True
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
+        def create_and_open_view(sources):
+            v=self.controller.create_static_view(elements=sources)
+            p=get_edit_popup(v, controller=self.controller)
+            self.add_view(p, name=_("Edit %s") % self.controller.get_title(v))
+            return True
+
         if targetType == config.data.target_type['adhoc-view']:
             data=decode_drop_parameters(selection.data)
             label=None
@@ -315,7 +322,7 @@ class ViewBook(AdhocView):
                 i=gtk.MenuItem(_("Use annotation %s :") % title, use_underline=False)
                 menu.append(i)
                 for label, action in (
-                    (_("to create a new static view"), lambda i: self.controller.create_static_view(elements=sources)),
+                    (_("to create a new static view"), lambda i: create_and_open_view(sources)),
                     (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
                     (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
                     (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
@@ -345,7 +352,7 @@ class ViewBook(AdhocView):
                 i=gtk.MenuItem(_("Use annotations:"), use_underline=False)
                 menu.append(i)
                 for label, action in (
-                    (_("to create a new static view"), lambda i: self.controller.create_static_view(elements=sources)),
+                    (_("to create a new static view"), lambda i: create_and_open_view(sources)),
                     (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', history=[ a.fragment.begin ], destination=self.location)),
                     ):
                     i=gtk.MenuItem(label, use_underline=False)
