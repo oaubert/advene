@@ -1313,6 +1313,7 @@ class AdveneController(object):
         mediafile = self.get_default_media()
         if mediafile != "":
             self.set_media(mediafile)
+        self.notify('PlayerChange', player=p)
 
     def get_timestamp(self):
         """Return a formatted timestamp for the current date.
