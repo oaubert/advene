@@ -53,6 +53,7 @@ from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button, n
 from advene.gui.util.completer import Completer
 import advene.gui.popup
 from advene.gui.widget import AnnotationRepresentation, RelationRepresentation
+from advene.gui.views import AdhocView
 
 import advene.util.helper as helper
 
@@ -78,7 +79,7 @@ def get_edit_popup (el, controller=None, editable=True):
     """Return the right edit popup for the given element."""
     if controller and controller.gui:
         for p in controller.gui.edit_popups:
-            if p.element == el and p.window:
+            if p.element == el and p._widget:
                 # The edit popup is already open.
                 return p
     for c in _edit_popup_list:
@@ -93,7 +94,7 @@ class EditPopupClass (type):
         if hasattr (cls, 'can_edit'):
             _edit_popup_list.append(cls)
 
-class EditElementPopup (object):
+class EditElementPopup (AdhocView):
     """Abstract class for editing Advene elements.
 
     To create a specialized edit window, define the make_widget
@@ -106,14 +107,13 @@ class EditElementPopup (object):
     """
     __metaclass__ = EditPopupClass
 
+    view_name = _("Edit Window")
+    view_id = 'editwindow'
+
     def __init__ (self, el, controller=None, editable=True):
         """Create an edit window for the given element."""
-        self.view_name = _("Edit Window")
-        self.view_id = 'editwindow'
-
+        super(EditElementPopup, self).__init__(controller=controller)
         self.element = el
-        self.controller = controller
-        self.window=None
         self.vbox = gtk.VBox ()
         self.vbox.connect('key-press-event', self.key_pressed_cb)
         self.editable=editable
@@ -123,9 +123,82 @@ class EditElementPopup (object):
             controller.gui.register_edit_popup(self)
         # Dictionary of callbacks according to keys
         self.key_cb = {}
+        self._widget=None
+        # callback method invoked upon modification/validation.
+        self.callback=None
 
-    def set_label(self, l):
-        self._label=l
+    @property
+    def widget(self):
+        """Compatibility property to integrate in the AdhocView framework.
+        """
+        if self._widget is None:
+            vbox=gtk.VBox()
+
+            vbox.pack_start(self.make_widget())
+
+            # Button bar
+            hbox = gtk.HButtonBox()
+
+            b = gtk.Button (stock=gtk.STOCK_OK)
+            b.connect('clicked', self.validate_cb)
+            hbox.add (b)
+
+            b = gtk.Button (stock=gtk.STOCK_APPLY)
+            b.connect('clicked', self.apply_cb)
+            hbox.add (b)
+
+            def apply_and_open(b):
+                self.apply_cb(b, None)
+                # Open in web browser
+                ctx=self.controller.build_context()
+                url=ctx.evaluateValue('here/absolute_url')
+                self.controller.open_url('/'.join( (url, 'view', self.element.id) ))
+                return True
+
+            def apply_and_activate(b):
+                self.apply_cb(b, None)
+                self.controller.activate_stbv(self.element)
+                p=self.controller.player
+                if p.status == p.PauseStatus:
+                    self.controller.update_status('resume')
+                elif p.status == p.PlayingStatus:
+                    pass
+                else:
+                    self.controller.update_status('start')
+                return True
+
+            if isinstance(self.element, View):
+                t = helper.get_view_type(self.element)
+                if t == 'static' and self.element.matchFilter['class'] in ('package', '*'):
+                    b = get_pixmap_button( 'web.png', apply_and_open)
+                    self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
+                    hbox.add(b)
+                elif t == 'dynamic':
+                    b = get_small_stock_button( gtk.STOCK_MEDIA_PLAY, apply_and_activate)
+                    self.controller.gui.tooltips.set_tip(b, _("Apply changes and activate the view"))
+                    hbox.add(b)
+
+            vbox.pack_start (hbox, expand=False)
+
+            def destroy_cb(*p):
+                if self.controller and self.controller.gui: 
+                    self.controller.gui.unregister_edit_popup(self)
+                return True
+            vbox.connect('destroy', destroy_cb)
+
+            def initial_focus(w, event):
+                for f in self.forms:
+                    try:
+                        if f.get_focus():
+                            break
+                    except:
+                        continue
+                return False
+            vbox.connect('expose-event', initial_focus)
+
+            self._widget=vbox
+
+        return self._widget
 
     def register_form (self, f):
         self.forms.append(f)
@@ -148,7 +221,7 @@ class EditElementPopup (object):
         """Create the editing widget (and return it)."""
         raise Exception ("This method should be defined in the subclasses.")
 
-    def apply_cb (self, button=None, event=None, callback=None):
+    def apply_cb (self, button=None, event=None):
         """Method called when applying a form."""
         if not self.editable:
             return True
@@ -168,23 +241,20 @@ class EditElementPopup (object):
         except AttributeError:
             pass
 
-        if callback is not None:
-            callback (element=self.element)
+        if self.callback is not None:
+            self.callback (element=self.element)
         return True
 
-    def validate_cb (self, button=None, event=None, callback=None):
+    def validate_cb (self, button=None, event=None):
         """Method called when validating a form."""
-        if self.apply_cb(button, event, callback):
-            if self.window is not None:
-                self.controller.notify("ElementEditEnd", element=self.element, comment="Window closed")
-                self.window.destroy ()
+        if self.apply_cb(button, event):
+            self.controller.notify("ElementEditEnd", element=self.element, comment="Window closed")
+            self.close()
         return True
 
     def close_cb (self, button=None, data=None):
         """Method called when closing a form."""
-        if self.window is not None:
-            self.controller.notify("ElementEditCancel", element=self.element, comment="Window closed")
-            self.window.destroy ()
+        self.controller.notify("ElementEditCancel", element=self.element, comment="Window closed")
         return True
 
     def key_pressed_cb (self, widget=None, event=None):
@@ -220,20 +290,10 @@ class EditElementPopup (object):
         fr.set_expanded(expanded)
         return fr
 
-    def popup(self, *p, **kw):
-        return self.edit(*p, **kw)
-
     def edit (self, callback=None, modal=False, label=None):
         """Display the edit window.
         """
-        if hasattr(self, 'window') and self.window:
-            try:
-                self.window.set_urgency_hint(True)
-            except AttributeError:
-                # Does not exist in gtk < 2.8
-                pass
-            return True
-
+        self.callback=callback
         self.key_cb[gtk.keysyms.Return] = self.validate_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
 
@@ -277,105 +337,14 @@ class EditElementPopup (object):
                     if self.controller and self.controller.gui:
                         self.controller.gui.unregister_edit_popup(self)
                     break
-
-            return self.element
         else:
-            # Non-modal case
-            self.window = gtk.Window (gtk.WINDOW_TOPLEVEL)
-            self.window.set_position(gtk.WIN_POS_MOUSE)
-            self.window.set_title(title)
+            self.popup(label=title)
 
-            # Button bar
-            hbox = gtk.HButtonBox()
-
-            b = gtk.Button (stock=gtk.STOCK_OK)
-            b.connect('clicked', self.validate_cb, callback)
-            hbox.add (b)
-
-            b = gtk.Button (stock=gtk.STOCK_APPLY)
-            b.connect('clicked', self.apply_cb, callback)
-            hbox.add (b)
-
-            def apply_and_open(b, cb):
-                self.apply_cb(b, None, cb)
-                # Open in web browser
-                ctx=self.controller.build_context()
-                url=ctx.evaluateValue('here/absolute_url')
-                self.controller.open_url('/'.join( (url, 'view', self.element.id) ))
-                return True
-
-            def apply_and_activate(b, cb):
-                self.apply_cb(b, None, cb)
-                self.controller.activate_stbv(self.element)
-                p=self.controller.player
-                if p.status == p.PauseStatus:
-                    self.controller.update_status('resume')
-                elif p.status == p.PlayingStatus:
-                    pass
-                else:
-                    self.controller.update_status('start')
-                return True
-
-            if isinstance(self.element, View):
-                t = helper.get_view_type(self.element)
-                if t == 'static' and self.element.matchFilter['class'] in ('package', '*'):
-                    b = get_pixmap_button( 'web.png', apply_and_open, callback)
-                    self.controller.gui.tooltips.set_tip(b, _("Apply changes and visualise in web browser"))
-                    hbox.add(b)
-                elif t == 'dynamic':
-                    b = get_small_stock_button( gtk.STOCK_MEDIA_PLAY, apply_and_activate, callback )
-                    self.controller.gui.tooltips.set_tip(b, _("Apply changes and activate the view"))
-                    hbox.add(b)
-
-            b = gtk.Button (stock=gtk.STOCK_CANCEL)
-            b.connect('clicked', self.close_cb)
-            hbox.add (b)
-
-            self.vbox.pack_start (hbox, expand=False)
-
-            self.window.add(self.vbox)
-
-            def destroy_cb(*p):
-                if self.controller and self.controller.gui: 
-                    self.controller.gui.unregister_edit_popup(self)
-                return True
-            self.window.connect('destroy', destroy_cb)
-
-            if self.controller.gui:
-                self.controller.gui.init_window_size(self.window, 'editpopup')
-            self.window.show_all ()
-            dialog.center_on_mouse(self.window)
-            for f in self.forms:
-                try:
-                    if f.get_focus():
-                        break
-                except:
-                    continue
-            return self.element
+        return self.element
 
     def display (self):
         """Display the display window (not editable)."""
-        if hasattr(self, 'window') and self.window:
-            self.window.set_urgency_hint(True)
-            return True
-
-        self.key_cb[gtk.keysyms.Return] = self.close_cb
-        self.key_cb[gtk.keysyms.Escape] = self.close_cb
-
-        self.vbox.add (self.make_widget (editable=False))
-        # Button bar
-        hbox = gtk.HButtonBox()
-
-        b = gtk.Button (stock=gtk.STOCK_OK)
-        b.connect('clicked', lambda w: self.window.destroy ())
-        hbox.add (b)
-
-        self.vbox.pack_start (hbox, expand=False)
-
-        self.window.set_title (_("Display %s") % self.get_title())
-        if self.controller.gui:
-            self.controller.gui.init_window_size(self.window, 'editpopup')
-        self.window.show_all ()
+        self.popup(label=_("Display %s") % self.get_title())
 
     def compact(self, callback=None):
         """Display the compact edit window.
@@ -383,6 +352,7 @@ class EditElementPopup (object):
         self.key_cb[gtk.keysyms.Return] = self.validate_cb
         self.key_cb[gtk.keysyms.Escape] = self.close_cb
 
+        self.callback=callback
         if hasattr(self.element, 'isImported') and self.element.isImported():
             self.editable=False
         elif hasattr(self.element, 'schema') and self.element.schema.isImported():
@@ -390,7 +360,7 @@ class EditElementPopup (object):
 
         w=self.make_widget (editable=self.editable, compact=True)
         self.vbox.add (w)
-        self.window = self.vbox
+        self._widget = self.vbox
 
         def handle_destroy(*p):
             if self.controller and self.controller.gui:
@@ -440,10 +410,6 @@ class EditAnnotationPopup (EditElementPopup):
         if l:
             a=l[0]
             new=self.controller.gui.edit_element(a)
-            # It is in a popup window. Use the same positioning
-            if hasattr(new, 'window') and hasattr(self, 'window'):
-                x, y=self.window.get_position()
-                new.window.move(x, y)
             # Validate the current one
             self.validate_cb()
         return True
