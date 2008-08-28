@@ -264,8 +264,6 @@ position of current marks in the video (with small lines) [cf linkmap
 
 * Players
 
-** make player modules into plugins, allow to select
-
 ** gstreamer: implement svgoverlay component
 
 ** VLC: convert svg module to use rgba blending (cf http://trac.videolan.org/vlc/changeset/19548 )
@@ -2491,4 +2489,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * gstreamer-image overlay: cf boxtream / encoder / setImageOverlay
 
 * Make EditElementPopup a AdhocView
+
+** make player modules into plugins, allow to select
 
