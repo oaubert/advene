@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-21 16:27+0200\n"
-"PO-Revision-Date: 2008-08-21 16:29+0200\n"
+"PO-Revision-Date: 2008-08-22 14:52+0200\n"
 "Last-Translator: Olivier Aubert <olivier.aubert@liris.cnrs.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
 "MIME-Version: 1.0\n"
@@ -6414,7 +6414,7 @@ msgstr "List d'éléments non-typés"
 #: ../lib/advene/model/bundle.py:367
 #, python-format
 msgid "List of %s elements"
-msgstr "Liste de %s éléments"
+msgstr "Liste d'éléments de type %s"
 
 #: ../lib/advene/model/zippackage.py:188 ../lib/advene/model/zippackage.py:190
 #: ../lib/advene/util/helper.py:460 ../lib/advene/util/helper.py:462
