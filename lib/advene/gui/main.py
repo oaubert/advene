@@ -2487,7 +2487,10 @@ class AdveneGUI (Connect):
                 self.quicksearch_entry.select_region(0, -1)
                 return True
             elif event.keyval == gtk.keysyms.z:
-                self.controller.undomanager.undo()
+                try:
+                    self.controller.undomanager.undo()
+                except AttributeError:
+                    pass
                 return True
         return False
 
@@ -2703,7 +2706,10 @@ class AdveneGUI (Connect):
         return False
 
     def on_undo1_activate (self, button=None, data=None):
-        self.controller.undomanager.undo()
+        try:
+            self.controller.undomanager.undo()
+        except AttributeError:
+            pass
         return True
 
     def on_find1_activate (self, button=None, data=None):
