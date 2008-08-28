@@ -2275,7 +2275,7 @@ class AdveneController(object):
         """Create a static view from the given elements.
         """
         if not elements:
-            return True
+            return None
         if isinstance(elements[0], Annotation):
             p=self.package
             ident=p._idgenerator.get_id(View)
@@ -2305,9 +2305,8 @@ class AdveneController(object):
                     })
             v.content.data="\n".join(data)
             self.notify('ViewCreate', view=v, immediate=True)
-            if self.gui is not None:
-                self.gui.edit_element(v)
-        return True
+            return v
+        return None
 
 if __name__ == '__main__':
     cont = AdveneController()
