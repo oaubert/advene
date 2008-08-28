@@ -611,6 +611,14 @@
 		    </widget>
 		  </child>
 
+		  <child>
+		    <widget class="GtkMenuItem" id="select_player1">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">_Select player</property>
+		      <property name="use_underline">True</property>
+		    </widget>
+		  </child>
+
 
 		</widget>
 	      </child>

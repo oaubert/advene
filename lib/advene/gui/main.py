@@ -710,6 +710,7 @@ class AdveneGUI (Connect):
               self.relationtype_lifecycle),
             ("PlayerSet", self.updated_position_cb),
             ("PlayerStop", self.player_stop_cb),
+            ("PlayerChange", self.updated_player_cb),
             ("ViewActivation", self.on_view_activation),
             ( [ '%sDelete' % v for v in ('Annotation', 'Relation', 'View',
                                          'AnnotationType', 'RelationType', 'Schema',
@@ -746,6 +747,29 @@ class AdveneGUI (Connect):
         # Populate the file history menu
         for filename in config.data.preferences['history']:
             self.append_file_history_menu(filename)
+
+        def build_player_menu(menu):
+            if menu.get_children():
+                # The menu was previously populated, but the player may have changed.
+                # Clear it to update it.
+                menu.foreach(menu.remove)
+
+            # Populate the "Select player" menu
+            for ident, p in config.data.players.iteritems():
+                def select_player(i, p):
+                    self.controller.select_player(p)
+                    return True
+                i=gtk.MenuItem(ident)
+                i.connect('activate', select_player, p)
+                menu.append(i)
+                i.show()
+                if self.controller.player.player_id == ident:
+                    i.set_sensitive(False)
+            return True
+
+        menu=gtk.Menu()
+        self.gui.get_widget('select_player1').set_submenu(menu)
+        menu.connect('map', build_player_menu)
 
         defaults=config.data.advenefile( ('defaults', 'workspace.xml'), 'settings')
         if os.path.exists(defaults):
@@ -1181,6 +1205,17 @@ class AdveneGUI (Connect):
             # inside its parent).
             b.widget.connect('size-allocate', lambda w, e: a.scroll_to_bookmark(b) and False)
         return True
+
+    def updated_player_cb(self, context, parameter):
+        # The player is initialized. We can register the drawable id
+        try:
+            self.controller.player.set_widget(self.drawable)
+        except AttributeError:
+            if config.data.os == 'win32':
+                self.visual_id=self.drawable.window.handle
+            else:
+                self.visual_id=self.drawable.window.xid
+            self.controller.player.set_visual(self.visual_id)
 
     def player_play_pause(self, event):
         p=self.controller.player
