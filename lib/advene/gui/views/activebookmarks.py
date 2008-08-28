@@ -773,6 +773,7 @@ class ActiveBookmark(object):
             content=annotation.content.data
 
         self.is_current=False
+        self.last_drag_time=None
 
         # begin_widget and end_widget are both instances of BookmarkWidget.
         # end_widget may be self.dropbox (if end is not initialized yet)
@@ -931,6 +932,9 @@ class ActiveBookmark(object):
             drag_context.drag_status(gtk.gdk.ACTION_MOVE, timestamp)
         
     def begin_drag_received(self, widget, context, x, y, selection, targetType, time):
+        if self.last_drag_time == time:
+            return True
+        self.last_drag_time=time
         if self.is_widget_in_bookmark(context.get_source_widget()):
             return False
         if targetType == config.data.target_type['timestamp']:
