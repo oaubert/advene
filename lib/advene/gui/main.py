@@ -359,17 +359,7 @@ class AdveneGUI (Connect):
 
         # Player status
         p=self.controller.player
-        self.active_player_status=(p.PlayingStatus, p.PauseStatus,
-                                   p.ForwardStatus, p.BackwardStatus)
-        self.statustext={
-            p.PlayingStatus  : _("Playing"),
-            p.PauseStatus    : _("Pause"),
-            p.ForwardStatus  : _("Forward"),
-            p.BackwardStatus : _("Backward"),
-            p.InitStatus     : _("Init"),
-            p.EndStatus      : _("End"),
-            p.UndefinedStatus: _("Undefined"),
-            }
+        self.update_player_labels()
         self.gui.player_status = self.gui.get_widget ("player_status")
         self.oldstatus = "NotStarted"
 
@@ -397,6 +387,24 @@ class AdveneGUI (Connect):
                         ( 'pixmaps', 'icon_advene%d.png' % size ) ))
                               for size in (16, 32, 48, 64, 128) ]
         return self._icon_list
+
+    def update_player_labels(self):
+        """Update the representation of player status.
+
+        They may change when another player is selected.
+        """
+        p=self.controller.player
+        self.active_player_status=(p.PlayingStatus, p.PauseStatus,
+                                   p.ForwardStatus, p.BackwardStatus)
+        self.statustext={
+            p.PlayingStatus  : _("Playing"),
+            p.PauseStatus    : _("Pause"),
+            p.ForwardStatus  : _("Forward"),
+            p.BackwardStatus : _("Backward"),
+            p.InitStatus     : _("Init"),
+            p.EndStatus      : _("End"),
+            p.UndefinedStatus: _("Undefined"),
+            }
 
     def annotation_lifecycle(self, context, parameters):
         """Method used to update the active views.
@@ -1207,6 +1215,7 @@ class AdveneGUI (Connect):
         return True
 
     def updated_player_cb(self, context, parameter):
+        self.update_player_labels()
         # The player is initialized. We can register the drawable id
         try:
             self.controller.player.set_widget(self.drawable)
