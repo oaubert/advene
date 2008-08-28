@@ -3292,11 +3292,6 @@ class AdveneGUI (Connect):
             else:
                 config.data.player['verbose'] = cache['level']
             self.controller.restart_player ()
-            try:
-                self.controller.player.set_widget(self.drawable)
-            except AttributeError:
-                if self.visual_id:
-                    self.controller.player.set_visual(self.visual_id)
         return True
 
     def on_save_imagecache1_activate (self, button=None, data=None):
@@ -3312,11 +3307,6 @@ class AdveneGUI (Connect):
     def on_restart_player1_activate (self, button=None, data=None):
         self.log (_("Restarting player..."))
         self.controller.restart_player ()
-        try:
-            self.controller.player.set_widget(self.drawable)
-        except AttributeError:
-            if self.visual_id:
-                self.controller.player.set_visual(self.visual_id)
         return True
 
     def on_slider_button_press_event (self, button=None, data=None):
