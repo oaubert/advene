@@ -292,8 +292,6 @@ http://www.zkoss.org/zkdemo/userguide/
 
 ** search result: if different types (or different than annotations), display a tree with the selected elements, one branch per type (annotation, schema, view...)
 
-* signal PlayerRestart event and use it in gui.main to reset the xid
-
 * Use JSON for structured content + simple schema described in JSON
   (name, type, constraints) :
 [ {'name': 'foo', 'type': 'int', 'constraints': { 'lower': 0, 'upper': 256 } },
@@ -639,9 +637,6 @@ AdveneException: item Package (english_teacher.xml) has no QName prefix in Packa
 
 ** Model: implement relationtype.members R/W (and make that a list of
 AnnotationTypes rather than their ids) -> DONE for R/W.
-
-** model: rewrite the model with a new format (.zip) using
-http://effbot.org/zone/celementtree.htm ? -> DONE (.azp)
 
 ** model: implement a data PATH variable to look for packages. Insert
 the current package's pwd first as default.
@@ -1240,6 +1235,9 @@ res.startswith('<html>') [useful for Kupu]
 * On player restart, redo set_visual
 
 * plugin infrastructure is not compatible with pyinstaller. -> DONE
+
+** model: rewrite the model with a new format (.zip) using
+http://effbot.org/zone/celementtree.htm ? -> DONE (.azp)
 
 * AZP: make work on win32 (urllib.pathname2url) -> DONE
 
@@ -2491,4 +2489,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Make EditElementPopup a AdhocView
 
 ** make player modules into plugins, allow to select
+
+* signal PlayerRestart event and use it in gui.main to reset the xid
 
