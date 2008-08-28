@@ -1,5 +1,3 @@
-* Make EditElementPopup a AdhocView
-
 * Undo for activebookmarks
 
 * Rename ElementEditBegin/ElementEditCancel by
@@ -2491,4 +2489,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * focus on something more sensible than New button at startup
 
 * gstreamer-image overlay: cf boxtream / encoder / setImageOverlay
+
+* Make EditElementPopup a AdhocView
 
