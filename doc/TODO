@@ -1,3 +1,5 @@
+* Make EditElementPopup a AdhocView
+
 * Undo for activebookmarks
 
 * Rename ElementEditBegin/ElementEditCancel by
