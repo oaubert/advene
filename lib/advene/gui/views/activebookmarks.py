@@ -1236,6 +1236,7 @@ class ActiveBookmark(object):
                                               + config.data.drag_type['annotation-type'],
                                               gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_MOVE )
         self.begin_widget.comment_entry.connect('drag-data-received', self.begin_drag_received)
+        self.begin_widget.comment_entry.connect('drag-motion', self.bound_drag_motion)
         self.begin_widget.image.connect('key-press-event', self.timestamp_key_press, 'begin')
 
         def focus_bookmark(widget, event):
