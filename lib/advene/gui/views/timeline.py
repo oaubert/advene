@@ -2753,7 +2753,9 @@ class TimeLine(AdhocView):
             return True
 
         def create_static(m, sel):
-            self.controller.create_static_view([ w.annotation for w in sel])
+            v=self.controller.create_static_view([ w.annotation for w in sel])
+            if v is not None:
+                self.controller.gui.edit_element(v)
             return True
 
         m=gtk.Menu()
