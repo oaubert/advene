@@ -131,6 +131,7 @@ class Player:
         self.pipeline=gst.parse_launch('v4l2src queue-size=4 ! video/x-raw-yuv,width=352,height=288 ! tee name=tee ! ffmpegcolorspace ! ffenc_mpeg4 bitrate=400000 ! queue ! avimux name=mux ! filesink location=%s  alsasrc device=hw:1,0 ! lame ! mux.  tee. ! queue ! xvimagesink name=sink sync=false' % self.videofile)
         #self.pipeline=gst.parse_launch('alsasrc name=source device=hw:1,0 ! lame ! filesink location=%s' % self.videofile)
         #self.player = self.pipeline.get_by_name('source')
+        self.imagesink=self.pipeline.get_by_name('sink')
         self.player=self.pipeline
 
 
@@ -352,6 +353,8 @@ class Player:
 
     def set_visual(self, xid):
         self.xid = xid
+        self.imagesink.set_xwindow_id(self.xid)
+        self.imagesink.set_property('force-aspect-ratio', True)
         return True
 
     def restart_player(self):
