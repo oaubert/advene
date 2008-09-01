@@ -21,6 +21,8 @@
 Based on gst >= 0.10 API.
 """
 
+import tempfile
+
 import advene.core.config as config
 
 import gobject
@@ -211,9 +213,13 @@ class Player:
 
     def playlist_add_item(self, item):
         if os.path.exists(item):
-            print "%s already exists. Will not overwrite" % item
-            return
-        self.videofile=item
+            # tempfile.mktemp should not be used for security reasons.
+            # But the probability of a tempfile attack against Advene
+            # is rather low at the time of writing this comment.
+            self.videofile=tempfile.mktemp('.avi', 'record_')
+            print "%s already exists. We will not overwrite, so use %s instead " % (item, self.videofile)
+        else:
+            self.videofile=item
         self.build_pipeline()
 
     def playlist_clear(self):
