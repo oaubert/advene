@@ -10,8 +10,7 @@
 
 * Revamp player API (player.position, player.duration, ...)
 
-* fix players (vlc, gstreamer) to be able to start from a given
-   position
+* fix players (vlc, gstreamer) to be able to start from a given position
 
 * implement DND from finder columns
 
@@ -2491,4 +2490,8 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 ** make player modules into plugins, allow to select
 
 * signal PlayerRestart event and use it in gui.main to reset the xid
+
+* PlayerChange: if recorder, then change the toolbar buttons
+
+* PlayerChange: restore fullscreen button for gstreamer
 
