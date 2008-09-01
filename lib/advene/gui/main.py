@@ -797,6 +797,7 @@ class AdveneGUI (Connect):
         play=self.player_toolbar.get_children()[0]
         play.set_flags(play.flags() | gtk.CAN_FOCUS)
         play.grab_focus()
+        self.update_control_toolbar(self.player_toolbar)
 
         self.event_source_update_display=gobject.timeout_add (100, self.update_display)
         self.event_source_slow_update_display=gobject.timeout_add (1000, self.slow_update_display)
@@ -1214,17 +1215,47 @@ class AdveneGUI (Connect):
             b.widget.connect('size-allocate', lambda w, e: a.scroll_to_bookmark(b) and False)
         return True
 
+    def update_control_toolbar(self, tb=None):
+        if tb is None:
+            tb=self.player_toolbar
+        p=self.controller.player
+
+        buttons=dict( (b.get_stock_id(), b) 
+                      for b in tb.get_children()
+                      if hasattr(b, 'get_stock_id') )
+
+        if gtk.STOCK_MEDIA_PLAY in buttons and 'record' in p.player_capabilities:
+            buttons[gtk.STOCK_MEDIA_PLAY].set_stock_id(gtk.STOCK_MEDIA_RECORD)
+        elif gtk.STOCK_MEDIA_RECORD in buttons:
+            buttons[gtk.STOCK_MEDIA_RECORD].set_stock_id(gtk.STOCK_MEDIA_PLAY)
+        # else: should not happen.
+
+        if 'frame-by-frame' in p.player_capabilities:
+            buttons[gtk.STOCK_MEDIA_PREVIOUS].show()
+            buttons[gtk.STOCK_MEDIA_NEXT].show()
+        else:
+            buttons[gtk.STOCK_MEDIA_PREVIOUS].hide()
+            buttons[gtk.STOCK_MEDIA_NEXT].hide()
+        if hasattr(p, 'fullscreen'):
+            buttons[gtk.STOCK_FULLSCREEN].show()
+        else:
+            buttons[gtk.STOCK_FULLSCREEN].hide()
+
     def updated_player_cb(self, context, parameter):
         self.update_player_labels()
+        p=self.controller.player
         # The player is initialized. We can register the drawable id
         try:
-            self.controller.player.set_widget(self.drawable)
+            p.set_widget(self.drawable)
         except AttributeError:
             if config.data.os == 'win32':
                 self.visual_id=self.drawable.window.handle
             else:
                 self.visual_id=self.drawable.window.xid
-            self.controller.player.set_visual(self.visual_id)
+            p.set_visual(self.visual_id)
+        self.update_control_toolbar(self.player_toolbar)
+        # Hook the player control keypress.
+        self.controller.player.fullscreen_key_handler = self.process_player_shortcuts
 
     def player_play_pause(self, event):
         p=self.controller.player
@@ -1332,8 +1363,11 @@ class AdveneGUI (Connect):
         """
         tb=gtk.Toolbar()
         tb.set_style(gtk.TOOLBAR_ICONS)
-
-
+        
+        # Note: beware, the order of buttons is significant here since
+        # they can be updated by the updated_player_cb method. In case
+        # of modification, ensure that both methods are still
+        # consistent.
         tb_list = [
             (_("Play [Control-Tab / Control-Space]"), gtk.STOCK_MEDIA_PLAY,
              self.on_b_play_clicked),
@@ -1345,18 +1379,10 @@ class AdveneGUI (Connect):
              self.on_b_rewind_clicked),
             (_("Forward (%.02f s) [Control-Right]" % (config.data.preferences['time-increment'] / 1000.0)), gtk.STOCK_MEDIA_FORWARD,
              self.on_b_forward_clicked),
+            (_("Previous frame [Control-Down]"), gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_frame(-1)),
+            (_("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_frame(+1)),
+            ( (_("Fullscreen"), gtk.STOCK_FULLSCREEN, lambda i: self.controller.player.fullscreen()) )
             ]
-
-        # FIXME: loosy check. Should implement a
-        # player.get_capabilities() and check for "frame-by-frame"
-        if 'gstreamer' in self.controller.player.__module__:
-            tb_list.extend( (
-                    (_("Previous frame [Control-Down]"), gtk.STOCK_MEDIA_PREVIOUS, lambda i: self.controller.move_frame(-1)),
-                    (_("Next frame [Control-Up]"), gtk.STOCK_MEDIA_NEXT, lambda i: self.controller.move_frame(+1)),
-                    (_("Fullscreen"), gtk.STOCK_FULLSCREEN, lambda i: self.controller.player.fullscreen()),
-                    ) )
-            # Hook the player control keypress
-            self.controller.player.fullscreen_key_handler = self.process_player_shortcuts
 
         for text, stock, callback in tb_list:
             b=gtk.ToolButton(stock)
@@ -1365,7 +1391,8 @@ class AdveneGUI (Connect):
             tb.insert(b, -1)
 
         tb.show_all()
-
+        # Call update_control_toolbar()
+        self.update_control_toolbar(tb)
         return tb
 
     def loop_on_annotation_gui(self, a, goto=False):
