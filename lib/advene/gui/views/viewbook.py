@@ -342,7 +342,7 @@ class ViewBook(AdhocView):
                     (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
                     (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
                     (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
-                    (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('bookmarks', history=[ a.fragment.begin ], destination=self.location)),
+                    (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin ], destination=self.location)),
                     ):
                     i=gtk.MenuItem(label, use_underline=False)
                     i.connect('activate', action)
@@ -370,7 +370,7 @@ class ViewBook(AdhocView):
                 for label, action in (
                     (_("to edit them"), lambda i: edit_selection(sources)),
                     (_("to create a new static view"), lambda i: create_and_open_view(sources)),
-                    (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', history=[ a.fragment.begin ], destination=self.location)),
+                    (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin for a in sources ], destination=self.location)),
                     ):
                     i=gtk.MenuItem(label, use_underline=False)
                     i.connect('activate', action)
@@ -380,8 +380,8 @@ class ViewBook(AdhocView):
             return True
         elif targetType == config.data.target_type['timestamp']:
             data=decode_drop_parameters(selection.data)
-            v=self.controller.gui.open_adhoc_view('bookmarks', destination=self.location)
-            v.append(long(data['timestamp']), data.get('comment', ''))
+            v=self.controller.gui.open_adhoc_view('activebookmarks', destination=self.location)
+            v.append(long(data['timestamp']), comment=data.get('comment', ''))
             return True
         return False
 
