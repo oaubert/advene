@@ -1,3 +1,6 @@
+* htmleditor: when suppressing a tag with tal: instructions (define,
+   ...), recreate it ? Or delete the whole block ?
+
 * Undo for activebookmarks
 
 * Rename ElementEditBegin/ElementEditCancel by
@@ -55,8 +58,6 @@ http://blog.songbirdnest.com/2008/03/26/gstreamer-progress/
 * website/FAQ: justify "offline" approach (privacy, on the run, performances...)
 
 * activebookmark: DND to accumulator -> move annotation
-
-* gstreamer: svg (wait for gdkpixbufoverlay)
 
 * Synchronise transcribe with annotations/timeline
  * create new type. On view rename -> set new type title
@@ -121,9 +122,6 @@ http://code.google.com/p/facilhtml/source/browse/trunk/htmlrender.py
    annotation to a shape, then have it work as a link.
 
 * adhoc view: imagemap, with DND of annotation to the image
-
-* timeline: when DND an annotation, check if there is a selection and
-   act accordingly
 
 * fix timeline relation lines display
 
@@ -2495,3 +2493,7 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 
 * PlayerChange: restore fullscreen button for gstreamer
 
+* timeline: when DND an annotation, check if there is a selection and
+   act accordingly
+
+* gstreamer: svg (wait for gstgdkpixbufoverlay)
