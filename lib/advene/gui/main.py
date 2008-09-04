@@ -1806,15 +1806,14 @@ class AdveneGUI (Connect):
                 return None
             view=get_edit_popup(element, self.controller)
         elif name == 'editaccumulator':
+            view=EditAccumulator(controller=self.controller, scrollable=True)
             if not self.edit_accumulator:
-                self.edit_accumulator=EditAccumulator(controller=self.controller, scrollable=True)
-                view=self.edit_accumulator
+                # The first opened accumulator becomes the default one.
+                self.edit_accumulator=view
                 def handle_accumulator_close(w):
                     self.edit_accumulator = None
                     return False
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
-            elif not config.data.preferences['expert-mode']:
-                dialog.message_dialog(_("The EditAccumulator view is already active"))
         elif name in self.registered_adhoc_views:
             view=self.registered_adhoc_views[name](controller=self.controller,
                                                    parameters=parameters, **kw)
