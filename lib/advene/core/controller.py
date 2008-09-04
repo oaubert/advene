@@ -1302,6 +1302,9 @@ class AdveneController(object):
         # Stop the current player.
         self.player.exit()
         self.player=p()
+        if not 'record' in p.player_capabilities:
+            # Store the selected player if it is not a recorder.
+            config.data.player['plugin']=p.player_id
         self.notify('PlayerChange', player=p)
         mediafile = self.get_default_media()
         if mediafile != "":
