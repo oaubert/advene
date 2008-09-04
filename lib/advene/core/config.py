@@ -276,6 +276,9 @@ class Config(object):
             'snapshot-chroma': 'RV32',
             'dvd-device': '/dev/dvd',
             }
+        if self.os == 'linux':
+            # Use gstreamer by default on linux
+            self.player['plugin']='gstreamer'
 
         self.webserver = {
             'port': 1234,
