@@ -262,6 +262,11 @@ class AnnotationWidget(GenericColorButtonWidget):
         self.no_image_pixbuf=None
 
     def _drag_begin(self, widget, context):
+        try:
+            widgets=self.container.get_selected_annotation_widgets()
+        except AttributeError:
+            widgets=[]
+
         w=gtk.Window(gtk.WINDOW_POPUP)
         w.set_decorated(False)
 
@@ -316,7 +321,10 @@ class AnnotationWidget(GenericColorButtonWidget):
                     end.set_from_pixbuf(png_to_pixbuf (cache.get(t.fragment.end), width=config.data.preferences['drag-snapshot-width']))
                     end.show()
                     padding.show()
-                    l.set_text(self.controller.get_title(t))
+                    if widgets:
+                        l.set_text(_("Set of %s annotations") % len(widgets))
+                    else:
+                        l.set_text(self.controller.get_title(t))
             wid._current=t
             return True
 
