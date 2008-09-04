@@ -318,7 +318,7 @@ class ViewBook(AdhocView):
                 (_("as a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=at.annotations, destination=self.location, label=title)),
                 (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=at.annotations, destination=self.location, label=title)),
                 (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=at, destination=self.location, label=_("Query %s") % title)),
-                (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location, label=_("Browsing %s") % title)),
+                (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location, label=_("Browsing %s") % title)),
                 ):
                 i=gtk.MenuItem(label, use_underline=False)
                 i.connect('activate', action)
@@ -340,7 +340,7 @@ class ViewBook(AdhocView):
                     (_("to edit it"), lambda i: edit_annotation(a)),
                     (_("to create a new static view"), lambda i: create_and_open_view(sources)),
                     (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
-                    (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
+                    (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
                     (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
                     (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('bookmarks', history=[ a.fragment.begin ], destination=self.location)),
                     ):
