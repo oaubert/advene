@@ -1827,7 +1827,6 @@ class TimeLine(AdhocView):
             begin=self.adjustment.value
             end=begin + self.adjustment.page_size
             if p > end or p < begin:
-                print "autoscroll:", p, begin, end
                 self.center_on_position(pos)
         self.update_current_mark (pos)
         return True
