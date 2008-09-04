@@ -1300,7 +1300,7 @@ class AdveneController(object):
         """Activate the given player.
         """
         # Stop the current player.
-        self.player.stop()
+        self.player.stop(0)
         self.player.exit()
         # Start the new one
         self.player=p()
