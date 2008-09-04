@@ -22,6 +22,9 @@ Based on gst >= 0.10 API.
 
 See http://pygstdocs.berlios.de/pygst-reference/index.html for API
 
+SVG support depends on the unofficial gdkpixbufoverlay element. It can
+be obtained (as a patch) from http://bugzilla.gnome.org/show_bug.cgi?id=550443
+
 FIXME:
 - fullscreen (reparent to its own gtk.Window and use gtk.Window.(un)fullscreen )
 - get/set_rate
@@ -56,6 +59,8 @@ This should show a 320x240 pixels video test source with some transparency showi
 
 videotestsrc ! video/x-raw-yuv,width=320, height=240 ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink filesrc location=/tmp/a.svg  ! gdkpixbufdec ! videoscale ! video/x-raw-rgb,width=320,height=240 ! ffmpegcolorspace ! alpha alpha=0.5 ! mix. 
 
+Working pipeline (but it does not correctly handle transparency):
+filesrc location=/tmp/a.svg ! gdkpixbufdec ! ffmpegcolorspace ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink videotestsrc ! mix.
 
 Mosaic : 2 videos side-by-side:
 
@@ -68,6 +73,7 @@ pads[1].props.xpos=320
 """
 
 import advene.core.config as config
+import tempfile
 
 import gobject
 gobject.threads_init()
@@ -179,6 +185,11 @@ class Player:
         self.caption.begin=-1
         self.caption.end=-1
 
+        self.overlay=Caption()
+        self.overlay.filename=''
+        self.overlay.begin=-1
+        self.overlay.end=-1
+
         self.videofile=None
         self.status=Player.UndefinedStatus
         self.current_position_value = 0
@@ -228,6 +239,12 @@ class Player:
             #self.caption.props.text="Foobar"
         except:
             self.captioner=None
+
+        try:
+            self.imageoverlay=gst.element_factory_make('gdkpixbufoverlay', 'overlay')
+        except:
+            self.imageoverlay=None
+
         self.imagesink = gst.element_factory_make(sink, 'sink')
 
 #
@@ -265,8 +282,13 @@ class Player:
             self.video_sink.add(self.captioner, filter, csp, self.imagesink)
             gst.element_link_many(self.captioner, filter, csp, self.imagesink)
         elif self.captioner is not None:
-            self.video_sink.add(self.captioner, self.imagesink)
-            self.captioner.link(self.imagesink)
+            if self.imageoverlay is not None:
+                self.video_sink.add(self.captioner, self.imageoverlay, self.imagesink)
+                self.captioner.link(self.imageoverlay)
+                self.imageoverlay.link(self.imagesink)
+            else:
+                self.video_sink.add(self.captioner, self.imagesink)
+                self.captioner.link(self.imagesink)
         else:
             self.video_sink.add(self.imagesink)
 
@@ -437,10 +459,21 @@ class Player:
         return [ None ]
 
     def display_text (self, message, begin, end):
+        if not self.check_uri():
+            return
+        if message.startswith('<svg'):
+            if self.imageoverlay is None:
+                print "Cannot overlay SVG"
+                return True
+            self.overlay.begin=self.position2value(begin)
+            self.overlay.end=self.position2value(end)
+            self.overlay.filename=tempfile.mktemp('.svg', 'adv')
+            open(self.overlay.filename, 'w').write(message)
+            self.imageoverlay.props.image_name=self.overlay.filename
+            return True
+        
         if not self.captioner:
             print "Cannot caption ", message.encode('utf8')
-            return
-        if not self.check_uri():
             return
         self.caption.begin=self.position2value(begin)
         self.caption.end=self.position2value(end)
@@ -564,6 +597,13 @@ class Player:
         if self.caption.text and (s.position < self.caption.begin
                                   or s.position > self.caption.end):
             self.display_text('', -1, -1)
+        if self.overlay.filename and (s.position < self.overlay.begin
+                                      or s.position > self.overlay.end):
+            self.imageoverlay.props.image_name=''
+            self.overlay.begin=-1
+            self.overlay.end=-1
+            os.unlink(self.overlay.filename)
+            self.overlay.filename=''
 
     def set_visual(self, xid):
         self.xid = xid
