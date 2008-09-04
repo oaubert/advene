@@ -1300,7 +1300,9 @@ class AdveneController(object):
         """Activate the given player.
         """
         # Stop the current player.
+        self.player.stop()
         self.player.exit()
+        # Start the new one
         self.player=p()
         if not 'record' in p.player_capabilities:
             # Store the selected player if it is not a recorder.
