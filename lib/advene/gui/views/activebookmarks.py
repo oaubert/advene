@@ -52,7 +52,7 @@ class ActiveBookmarks(AdhocView):
     view_name = _("ActiveBookmarks")
     view_id = 'activebookmarks'
     tooltip= _("ActiveBookmarks")
-    def __init__(self, controller=None, parameters=None, type=None):
+    def __init__(self, controller=None, elements=None, parameters=None, type=None):
         super(ActiveBookmarks, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = (
@@ -70,6 +70,13 @@ class ActiveBookmarks(AdhocView):
         for n, v in arg:
             if n == 'bookmark':
                 b=ActiveBookmark(container=self, from_serialisation=v)
+                b.widget.show_all()
+                self.bookmarks.append(b)
+
+        if elements is not None:
+            # A list of initial timestamps was provided
+            for t in elements:
+                b=ActiveBookmark(container=self, begin=t)
                 b.widget.show_all()
                 self.bookmarks.append(b)
 
@@ -191,9 +198,9 @@ class ActiveBookmarks(AdhocView):
     def generate_focus_chain(self, *p):
         self.mainbox.set_focus_chain([ w for b in self.bookmarks  for w in (b.widget, b.begin_widget.comment_entry) ])
 
-    def append(self, t, index=None, after_current=False):
+    def append(self, t, index=None, after_current=False, comment=None):
         if not isinstance(t, ActiveBookmark):
-            b=ActiveBookmark(container=self, begin=t, end=None, content=None)
+            b=ActiveBookmark(container=self, begin=t, end=None, content=comment)
         else:
             b=t
         b.widget.show_all()
