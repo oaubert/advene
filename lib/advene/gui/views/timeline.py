@@ -1626,7 +1626,9 @@ class TimeLine(AdhocView):
         if not annotation.type in self.layer_position:
             # The annotation is not displayed
             return None
-
+        if annotation.fragment.begin > self.maximum or annotation.fragment.end < self.minimum:
+            # Not displayed
+            return None
         b = AnnotationWidget(annotation=annotation, container=self)
         # Put at a default position.
         self.layout.put(b, 0, 0)
@@ -1825,6 +1827,7 @@ class TimeLine(AdhocView):
             begin=self.adjustment.value
             end=begin + self.adjustment.page_size
             if p > end or p < begin:
+                print "autoscroll:", p, begin, end
                 self.center_on_position(pos)
         self.update_current_mark (pos)
         return True
