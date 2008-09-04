@@ -2323,6 +2323,37 @@ class AdveneController(object):
             v.content.data="\n".join(data)
             self.notify('ViewCreate', view=v, immediate=True)
             return v
+        elif isinstance(elements[0], AnnotationType):
+            p=self.package
+            ident=p._idgenerator.get_id(View)
+            v=p.createView(
+                ident=ident,
+                author=config.data.userid,
+                date=self.get_timestamp(),
+                clazz='package',
+                content_mimetype='text/html'
+                )
+            at_title=self.get_title(elements[0])
+            v.title=_("List of %s annotations") % at_title
+            p.views.append(v)
+            p._idgenerator.add(ident)
+
+            data=["""<div tal:define="at package/annotationTypes/%s">""" % elements[0].id,
+                  """<h1>List of <em tal:content="at/representation">%s</em> annotations</h1>""" % at_title,
+                  """<div style="float:left; height:200; width:250" tal:repeat="a at/annotations">
+<p style="text-align: center">
+<a title="Play this annotation" tal:attributes="href a/player_url">
+	<img style="border:1px solid #FFCCCC; height:100px; width:160px;" class="screenshot" alt="" tal:attributes="src a/snapshot_url" />
+	<br>
+	<strong tal:content="a/representation">Content</strong>
+</a><br>
+<span style="font-size: 0.8em">(<span tal:content="a/fragment/formatted/begin">Begin timestamp</span> - <span tal:content="a/fragment/formatted/end">End timestamp</span>)</span>
+<br> 
+</p>
+</div></div>"""]
+            v.content.data="\n".join(data)
+            self.notify('ViewCreate', view=v, immediate=True)
+            return v
         return None
 
 if __name__ == '__main__':
