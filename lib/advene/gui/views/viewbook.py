@@ -216,6 +216,21 @@ class ViewBook(AdhocView):
             self.add_view(p, name=_("Edit %s") % self.controller.get_title(v))
             return True
 
+        def edit_annotation(a):
+            p=get_edit_popup(a, controller=self.controller)
+            self.add_view(p, name=_("Edit %s") % self.controller.get_title(a))
+            return True
+
+        def edit_selection(sources):
+            """Edit the selected elements in an edit accumulator.
+            """
+            v=self.controller.gui.open_adhoc_view('editaccumulator',
+                                                  destination=self.location)
+            if v is not None:
+                for a in sources:
+                    v.edit(a)
+            return True
+
         if targetType == config.data.target_type['adhoc-view']:
             data=decode_drop_parameters(selection.data)
             label=None
@@ -322,6 +337,7 @@ class ViewBook(AdhocView):
                 i=gtk.MenuItem(_("Use annotation %s :") % title, use_underline=False)
                 menu.append(i)
                 for label, action in (
+                    (_("to edit it"), lambda i: edit_annotation(a)),
                     (_("to create a new static view"), lambda i: create_and_open_view(sources)),
                     (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
                     (_("in the package browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
@@ -352,6 +368,7 @@ class ViewBook(AdhocView):
                 i=gtk.MenuItem(_("Use annotations:"), use_underline=False)
                 menu.append(i)
                 for label, action in (
+                    (_("to edit them"), lambda i: edit_selection(sources)),
                     (_("to create a new static view"), lambda i: create_and_open_view(sources)),
                     (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', history=[ a.fragment.begin ], destination=self.location)),
                     ):
