@@ -125,7 +125,7 @@ class TimeLine(AdhocView):
         self.options = {
             'highlight': False,
             # Autoscroll: 0: None, 1: continuous, 2: discrete, 3: annotation
-            'autoscroll': 1,
+            'autoscroll': 2,
             'display-relations': True,
             'display-relation-type': True,
             'display-relation-content': True,
