@@ -623,6 +623,11 @@ class Menu:
     def make_annotationtype_menu(self, element, menu):
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
+        def create_static(at):
+            v=self.controller.create_static_view([ at ])
+            self.controller.gui.edit_element(v)
+            return True
+        add_item(_('Create a static view'), lambda i: create_static(element))
         add_item(_('Generate a caption dynamic view'), lambda i: self.create_dynamic_view(element))
         add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % element.id))
         add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations))
