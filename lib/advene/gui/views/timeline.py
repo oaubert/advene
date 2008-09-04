@@ -716,6 +716,7 @@ class TimeLine(AdhocView):
             color=self.colors['active']
         for b in buttons:
             b.set_active(True)
+        self.update_selection_button()
         return True
 
     def desactivate_annotation (self, annotation, buttons=None):
@@ -728,6 +729,7 @@ class TimeLine(AdhocView):
                 return True
         for b in buttons:
             b.set_active(False)
+        self.update_selection_button()
         return True
 
     def toggle_annotation (self, annotation):
@@ -1617,6 +1619,7 @@ class TimeLine(AdhocView):
                 pass
             return False
         self.layout.foreach(desactivate)
+        self.update_selection_button()
         return True
 
     def create_annotation_widget(self, annotation):
@@ -2973,6 +2976,7 @@ class TimeLine(AdhocView):
         b.set_tooltip(self.tooltips, _('Selection actions'))
         b.connect('clicked', self.selection_menu)
         tb.insert(b, -1)
+        self.selection_button=b
 
         # Relation display toggle
         def handle_toggle(b, option):
@@ -3228,6 +3232,15 @@ class TimeLine(AdhocView):
         """
         self.center_on_position(pos)
 
+    def update_selection_button(self):
+        b=self.selection_button
+        if len(self.get_selected_annotation_widgets()) > 1:
+            if not b.props.sensitive:
+                b.set_sensitive(True)
+        else:
+            if b.props.sensitive:
+                b.set_sensitive(False)
+            
     def get_selected_annotation_widgets(self):
         """Return the list of currently active annotation widgets.
         """
