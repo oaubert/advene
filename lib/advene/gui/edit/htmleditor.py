@@ -324,6 +324,7 @@ class HTMLEditor(textview_class, HTMLParser):
         cursor = self._get_iter_for_creating_mark()
         if pixbuf is not None:
             self.__tb.insert_pixbuf(cursor, pixbuf)
+            pixbuf._tag=tag
             pixbuf._attr=attr
         else:
             mark = self.__tb.create_mark(None, cursor, True)
@@ -507,8 +508,6 @@ class HTMLEditor(textview_class, HTMLParser):
         i=b.get_start_iter()
 
         while True:
-            if i.equal(cursor):
-                break
             for m in i.get_marks():
                 if hasattr(m, '_endtag'):
                     # Remove the opening tag from the context
@@ -518,8 +517,12 @@ class HTMLEditor(textview_class, HTMLParser):
                         print "Cannot remove start mark for ", m._endtag
                 elif hasattr(m, '_tag') and not m._tag in self.__standalone:
                     context.append(m)
+            if i.equal(cursor):
+                break
             if not i.forward_char():
                 break
+        if i.get_pixbuf():
+            context.append(i.get_pixbuf())
         return context
 
     def get_html(self):
