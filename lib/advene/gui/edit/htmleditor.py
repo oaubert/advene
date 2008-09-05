@@ -625,8 +625,40 @@ class ContextDisplay(gtk.TreeView):
     def __init__(self):
         super(ContextDisplay, self).__init__()
         self.set_model(gtk.TreeStore(object, str, str))
-        self.append_column(gtk.TreeViewColumn("Name", gtk.CellRendererText(), text=1))
-        self.append_column(gtk.TreeViewColumn("Value", gtk.CellRendererText(), text=2))
+
+        def edited_cell(renderer, path, newtext, col):
+            model=self.get_model()
+            row=model[path]
+            parent=model.iter_parent(model.get_iter_from_string(path))
+            mark=row[0]
+            row[col]=newtext
+
+            if parent is None:
+                # Changed the tag name
+                mark._tag=newtext
+                mark._endmark._endtag=newtext
+            else:
+                # Changed an attribute. Regenerate the whole _attr
+                # list
+                l=[]
+                it=model.iter_children(parent)
+                while it is not None:
+                    l.append( model.get(it, 1, 2) )
+                    it=model.iter_next(it)
+                mark._attr=l
+                
+            print "Edited", mark._tag, mark._attr
+            return False
+
+        cell=gtk.CellRendererText()
+        cell.set_property('editable', True)
+        cell.connect('edited', edited_cell, 1)
+        self.append_column(gtk.TreeViewColumn("Name", cell, text=1))
+
+        cell=gtk.CellRendererText()
+        cell.set_property('editable', True)
+        cell.connect('edited', edited_cell, 2)
+        self.append_column(gtk.TreeViewColumn("Value", cell, text=2))
         
     def set_context(self, context):
         model=self.get_model()
@@ -667,7 +699,9 @@ if __name__ == "__main__":
     context_data.show()
 
     p=gtk.HPaned()
-    p.add1(context_data)
+    sw=gtk.ScrolledWindow()
+    sw.add(context_data)
+    p.add1(sw)
     p.add2(sb)
     p.set_position(100)
     p.show_all()
