@@ -26,8 +26,6 @@
 # - Handle TAL attributes (replace, repeat, content at least)
 # - Insert bullets in list items
 # - Handle list item insertion
-# - Define a property box, which updates with the cursor position (displays current context + attributes for the appropriate tags (esp. <a>))
-# - Fix spurious <br> insertion
 
 import gobject
 import pygtk
