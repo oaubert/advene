@@ -84,13 +84,13 @@ class HTMLEditor(textview_class, HTMLParser):
     # Define the inline tags (unused for now)
     __inline = [ "b", "i", "strong", "a", "em" ]
 
-    # Here define the tags that generate their own blocks: 
+    # Here define the tags that generate their own blocks:
     __block = [ "h1", "h2", "h3", "p", "dl", "dt", "dd", "head", "table" ]
 
     # Here some tags that we will not render
     __ignore = [ "body", "html", "div", "title", "style", "td", "tr", "form", "span", "script" ]
 
-    # Here some tags that are usually left open: 
+    # Here some tags that are usually left open:
     __open = [ "dt", "dd", "p", "li" ]
 
     # Standalone tags without content
@@ -141,7 +141,7 @@ class HTMLEditor(textview_class, HTMLParser):
          }
 
     def __init__(self, *cnf, **kw):
-        """Initialisation of HTMLParser and TextView. 
+        """Initialisation of HTMLParser and TextView.
 
         The TextView must be editable and not be configured with
          'word-wraping', ie breaking line within words. Formatting
@@ -178,7 +178,7 @@ class HTMLEditor(textview_class, HTMLParser):
                 for m in it.get_marks():
                     if hasattr(m, '_tag'):
                         try:
-                            b.remove_tag_by_name(m._tag, 
+                            b.remove_tag_by_name(m._tag,
                                                  b.get_iter_at_mark(m),
                                                  b.get_iter_at_mark(m._endmark))
                             b.delete_mark(m)
@@ -186,7 +186,7 @@ class HTMLEditor(textview_class, HTMLParser):
                         except AttributeError, e:
                             print "Exception for %s" % m._tag, unicode(e).encode('utf-8')
                     elif  hasattr(m, '_endtag'):
-                        b.remove_tag_by_name(m._endtag, 
+                        b.remove_tag_by_name(m._endtag,
                                              b.get_iter_at_mark(m._startmark),
                                              b.get_iter_at_mark(m))
                         b.delete_mark(m)
@@ -269,10 +269,10 @@ class HTMLEditor(textview_class, HTMLParser):
             if m:
                 print "Strange, there should be not tag mark here."
         return cursor
-        
+
     def handle_img(self, tag, attr):
         dattr=dict(attr)
-        # Wait maximum 1s for connection 
+        # Wait maximum 1s for connection
         socket.setdefaulttimeout(1)
         try:
             src=dattr['src']
@@ -281,7 +281,7 @@ class HTMLEditor(textview_class, HTMLParser):
             f = urllib2.urlopen(src)
             data = f.read()
             alt=dattr.get('alt', '')
-        except Exception, ex: 
+        except Exception, ex:
             print "Error loading %s: %s" % (dattr.get('src', _("[No src attribute]")), ex)
             data = None
             alt=dattr.get('alt', 'Broken image')
@@ -314,7 +314,7 @@ class HTMLEditor(textview_class, HTMLParser):
                 loader.close()
                 pixbuf = loader.get_pixbuf()
             except gobject.GError:
-                pixbuf=None                        
+                pixbuf=None
         else:
             pixbuf=None
 
@@ -375,7 +375,7 @@ class HTMLEditor(textview_class, HTMLParser):
             # FIXME: should insert a bullet here, and maybe render
             # nested lists
             self.__tb.insert(cursor, '\n')
-            
+
 
     def handle_data(self, data):
         """
@@ -436,7 +436,7 @@ class HTMLEditor(textview_class, HTMLParser):
         b=self.__tb
         i=b.get_start_iter()
         textstart=i.copy()
-        
+
         # We add an index for every startmark, so that we can close
         # the corresponding endmarks with the right order
         index=0
@@ -445,7 +445,7 @@ class HTMLEditor(textview_class, HTMLParser):
 
         def output_text(fr, to, tag):
             """Output text data.
-            
+
             Appropriately strip starting newline if it was inserted
             after a block endtag.
             """
@@ -480,7 +480,7 @@ class HTMLEditor(textview_class, HTMLParser):
                     else:
                         closing='>'
                     if m._attr:
-                        fd.write("<%s %s%s" % (m._tag, 
+                        fd.write("<%s %s%s" % (m._tag,
                                               " ".join( '%s="%s"' % (k, v) for (k, v) in m._attr ),
                                                closing))
                     else:
@@ -489,7 +489,7 @@ class HTMLEditor(textview_class, HTMLParser):
                     if m._tag in self.__block or m._tag == 'br':
                         fd.write('\n')
                     textstart=i.copy()
-            
+
             if not i.forward_char():
                 break
         # Write the remaining text
@@ -527,13 +527,13 @@ class HTMLEditor(textview_class, HTMLParser):
         res=s.getvalue()
         s.close()
         return res
-    
+
     def _find_enclosing_marks(self, tagname, begin, end):
         """Return the iterators and marks corresponding to tagname in the begin-end selection.
         """
         it=begin.copy()
         while True:
-            t=[ m 
+            t=[ m
                 for m in it.get_marks()
                 if hasattr(m, '_tag') and m._tag == tagname ]
             if t or not it.backward_char():
@@ -544,13 +544,13 @@ class HTMLEditor(textview_class, HTMLParser):
         else:
             # We did not find any matching tag. Strange...
             return (begin, end, None, None)
-        
+
         # Look for the matching endtag mark, starting from begin
         # anyway.
         endmark=startmark._endmark
         enditer=self.__tb.get_iter_at_mark(endmark)
         return (startiter, enditer, startmark, endmark)
-        
+
     def apply_html_tag(self, tagname, attr=None):
         if attr is None:
             attr={}
