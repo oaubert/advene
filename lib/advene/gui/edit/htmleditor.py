@@ -91,7 +91,7 @@ class HTMLEditor(textview_class, HTMLParser):
     __ignore = [ "body", "html", "div", "title", "style", "td", "tr", "form", "span", "script" ]
 
     # Here some tags that are usually left open:
-    __open = [ "dt", "dd", "p", "li" ]
+    __open = [ "dt", "dd", "p", "li", 'input' ]
 
     # Standalone tags without content
     __standalone = [ 'img', 'br' ]
@@ -512,7 +512,10 @@ class HTMLEditor(textview_class, HTMLParser):
             for m in i.get_marks():
                 if hasattr(m, '_endtag'):
                     # Remove the opening tag from the context
-                    context.remove(m._startmark)
+                    try:
+                        context.remove(m._startmark)
+                    except ValueError:
+                        print "Cannot remove start mark for ", m._endtag
                 elif hasattr(m, '_tag') and not m._tag in self.__standalone:
                     context.append(m)
             if not i.forward_char():
