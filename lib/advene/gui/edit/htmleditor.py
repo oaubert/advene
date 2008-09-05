@@ -498,6 +498,27 @@ class HTMLEditor(textview_class, HTMLParser):
             # fd.flush() + newline
             fd.write('\n')
 
+    def get_current_context(self, cursor=None):
+        b=self.__tb
+        if cursor is None:
+            cursor=b.get_iter_at_mark(b.get_insert())
+
+        context=[]
+        i=b.get_start_iter()
+
+        while True:
+            if i.equal(cursor):
+                break
+            for m in i.get_marks():
+                if hasattr(m, '_endtag'):
+                    # Remove the opening tag from the context
+                    context.remove(m._startmark)
+                elif hasattr(m, '_tag') and not m._tag in self.__standalone:
+                    context.append(m)
+            if not i.forward_char():
+                break
+        return context
+
     def get_html(self):
         """Return the buffer contents as html.
         """
