@@ -326,7 +326,7 @@ class TimeLine(AdhocView):
         # The page_size is the really displayed area
         self.adjustment = gtk.Adjustment ()
         self.update_adjustment ()
-        self.adjustment.set_value (u2p(minimum))
+        self.adjustment.set_value(u2p(minimum, absolute=True))
 
         # Dictionary holding the vertical position for each type
         self.layer_position = {}
@@ -345,7 +345,8 @@ class TimeLine(AdhocView):
         # on the first expose signal
         def set_default_parameters(widget, event, zoom, pos, pane):
             self.fraction_adj.value=zoom
-            self.adjustment.set_value(u2p(pos))
+            if pos >= self.minimum and pos <= self.maximum:
+                self.adjustment.set_value(u2p(pos, absolute=True))
             self.resize_legend_widget(self.legend)
             # Set annotation inspector width, so that it does not auto-resize
             if pane is None:
@@ -366,7 +367,7 @@ class TimeLine(AdhocView):
 
     def get_save_arguments(self):
         arguments = [ ('annotation-type', at.id) for at in self.annotationtypes ]
-        arguments.append( ('position', self.pixel2unit(self.adjustment.value) ) )
+        arguments.append( ('position', self.pixel2unit(self.adjustment.value, absolute=True) ) )
         arguments.append( ('zoom', self.fraction_adj.value) )
         self.options['pane-position']=self.inspector_pane.get_position()
         return self.options, arguments
@@ -459,7 +460,7 @@ class TimeLine(AdhocView):
         context.set_line_width(2)
 
         for t in self.bookmarks_to_draw:
-            x=self.unit2pixel(t)
+            x=self.unit2pixel(t, absolute=True)
             if x < begin:
                 # The bookmark is outside. Draw an arrow.
                 context.move_to(begin + 16, 2)
@@ -598,7 +599,7 @@ class TimeLine(AdhocView):
         """Scroll the view to center on the given position.
         """
         alloc = self.layout.get_allocation()
-        pos = self.unit2pixel (position) - (alloc.width / 2)
+        pos = self.unit2pixel(position, absolute=True) - (alloc.width / 2)
         a = self.adjustment
         if pos < a.lower:
             pos = a.lower
@@ -725,11 +726,17 @@ class TimeLine(AdhocView):
             else:
                 self.activate_annotation (annotation, buttons=button)
 
-    def unit2pixel (self, v):
-        return (long(v / self.scale.value)) or 1
+    def unit2pixel (self, v, absolute=False):
+        if absolute:
+            return (long( ( v - self.minimum) / self.scale.value )) or 1
+        else:
+            return (long(v / self.scale.value)) or 1
 
-    def pixel2unit (self, v):
-        return v * self.scale.value
+    def pixel2unit (self, v, absolute=False):
+        if absolute:
+            return long((v * self.scale.value) + self.minimum)
+        else:
+            return long(v * self.scale.value)
 
     def get_element_color(self, element):
         """Return the gtk color for the given element.
@@ -748,7 +755,7 @@ class TimeLine(AdhocView):
             'id': a.id,
             'begin': helper.format_time(a.fragment.begin),
             'end': helper.format_time(a.fragment.end) }
-        self.layout.move(b, self.unit2pixel(a.fragment.begin), self.layer_position[a.type])
+        self.layout.move(b, self.unit2pixel(a.fragment.begin, absolute=True), self.layer_position[a.type])
         return True
 
     def update_annotation (self, annotation=None, event=None):
@@ -837,7 +844,7 @@ class TimeLine(AdhocView):
             self.center_on_position(ann.fragment.begin)
             return True
 
-        p=self.pixel2unit(widget.allocation.x + x)
+        p=self.pixel2unit(widget.allocation.x + x, absolute=True)
         menu=advene.gui.popup.Menu(ann, controller=self.controller)
         menu.add_menuitem(menu.menu,
                           _("Split at %s") % helper.format_time(p),
@@ -918,7 +925,7 @@ class TimeLine(AdhocView):
         if duration is None:
             duration=self.controller.cached_duration / 20
             # Make the end bound not override the screen
-            d=long(self.pixel2unit(self.adjustment.value + self.layout.window.get_size()[0]) - position)
+            d=long(self.pixel2unit(self.adjustment.value + self.layout.window.get_size()[0], absolute=True) - position)
             if d > 0:
                 duration=min(d, duration)
             else:
@@ -1663,10 +1670,10 @@ class TimeLine(AdhocView):
                 a = self.adjustment
                 start=a.value
                 finish=a.value + a.page_size
-                begin = self.unit2pixel (annotation.fragment.begin)
+                begin = self.unit2pixel(annotation.fragment.begin, absolute=True)
                 if begin >= start and begin <= finish:
                     return False
-                end = self.unit2pixel (annotation.fragment.end)
+                end = self.unit2pixel(annotation.fragment.end, absolute=True)
                 if end >= start and end <= finish:
                     return False
                 if begin <= start and end >= finish:
@@ -1761,7 +1768,7 @@ class TimeLine(AdhocView):
                               max(self.layer_position.values() or (0,))
                               + self.button_height + config.data.preferences['timeline']['interline-height'])
 
-        self.scale_layout.set_size (u2p (self.maximum - self.minimum), 40)
+        self.scale_layout.set_size(u2p (self.maximum - self.minimum), 40)
 
     def draw_current_mark (self):
         u2p = self.unit2pixel
@@ -1774,7 +1781,7 @@ class TimeLine(AdhocView):
         self.current_marker = a
         a.mark = self.current_position
         a.pos = 0
-        self.layout.put (a, u2p(a.mark), a.pos)
+        self.layout.put(a, u2p(a.mark, absolute=True), a.pos)
         a.show ()
 
         a = GenericColorButtonWidget('scale_layout_current_mark', container=self)
@@ -1784,7 +1791,7 @@ class TimeLine(AdhocView):
         self.current_marker_scale = a
         a.mark = self.current_position
         a.pos = 0
-        self.scale_layout.put (a, u2p(a.mark), a.pos)
+        self.scale_layout.put (a, u2p(a.mark, absolute=True), a.pos)
         a.show ()
 
     def update_current_mark (self, pos=None):
@@ -1793,12 +1800,14 @@ class TimeLine(AdhocView):
             pos = self.current_position
         else:
             self.current_position = pos
+        p=u2p(pos, absolute=True)
         a = self.current_marker
         a.mark = pos
-        self.layout.move (a, u2p(pos), a.pos)
+        self.layout.move (a, p, a.pos)
+
         a = self.current_marker_scale
         a.mark = pos
-        self.scale_layout.move (a, u2p(pos), a.pos)
+        self.scale_layout.move (a, p, a.pos)
 
     def update_position (self, pos):
         if pos is None:
@@ -1808,7 +1817,7 @@ class TimeLine(AdhocView):
             self.center_on_position(pos)
         elif (self.options['autoscroll'] == 2
               and self.controller.player.status == self.controller.player.PlayingStatus):
-            p=self.unit2pixel(pos)
+            p=self.unit2pixel(pos, absolute=True)
             begin=self.adjustment.value
             end=begin + self.adjustment.page_size
             if p > end or p < begin:
@@ -1820,34 +1829,6 @@ class TimeLine(AdhocView):
         # The position was reset. Deactive active annotations.
         self.deactivate_all()
         self.update_current_mark(self.minimum)
-        return True
-
-    def mark_press_cb(self, eventbox, event, t):
-        # What is the current relative position of the
-        # mark in the window ?
-        a = self.adjustment
-        (w, h) = self.layout.window.get_size ()
-        rel = (self.unit2pixel(t) - a.value) / float(w)
-
-        f=self.fraction_adj.value
-        if event.button == 1:
-            f=f/2.0
-        elif event.button == 3:
-            f=min(f*2.0, 1.0)
-        else:
-            return False
-        if f > 1.0:
-            f = 1.0
-        self.fraction_adj.value=f
-
-        # Center the view around the selected mark
-        pos = self.unit2pixel (t) - ( w * rel )
-        if pos < a.lower:
-            pos = a.lower
-        elif pos > a.upper - a.page_size:
-            pos = a.upper - a.page_size
-        a.set_value (pos)
-        self.update_position (None)
         return True
 
     def update_scale_screenshots(self, *p):
@@ -1875,7 +1856,7 @@ class TimeLine(AdhocView):
         if abs(height - self.current_scale_height) > 10:
             # The position changed significantly. Update the display.
             self.current_scale_height=height
-            self.scale_layout.set_size (self.unit2pixel(self.maximum - self.minimum), 25 + height)
+            self.scale_layout.set_size(self.unit2pixel(self.maximum, absolute=True), 25 + height)
 
             # Remove previous images
             def remove_image(w):
@@ -1889,7 +1870,7 @@ class TimeLine(AdhocView):
 
                 # Evaluate screenshot width.
                 width=int(height * 4.0 / 3) + 5
-                step = long(self.pixel2unit (width))
+                step = self.pixel2unit(width)
                 t = self.minimum
 
                 u2p=self.unit2pixel
@@ -1900,7 +1881,7 @@ class TimeLine(AdhocView):
                     i.expose_signal=i.connect('expose-event', display_image, height, step)
                     i.pos = 20
                     i.show()
-                    self.scale_layout.put(i, u2p(i.mark), i.pos)
+                    self.scale_layout.put(i, u2p(i.mark, absolute=True), i.pos)
 
                     t += step
 
@@ -1912,7 +1893,7 @@ class TimeLine(AdhocView):
         t = self.minimum
 
         while t <= self.maximum:
-            x = u2p(t)
+            x = u2p(t, absolute=True)
 
             # Draw label
             l = gtk.Label ("|" + helper.format_time (t))
@@ -1981,7 +1962,7 @@ class TimeLine(AdhocView):
             x, y = win.get_pointer()
             # Note: x is here relative to the visible portion of the window. Thus we must
             # add self.adjustment.value
-            position=long(self.pixel2unit(self.adjustment.value + x))
+            position=self.pixel2unit(self.adjustment.value + x, absolute=True)
             c=self.controller
             pos = c.create_position (value=position,
                                      key=c.player.MediaTime,
@@ -2005,14 +1986,14 @@ class TimeLine(AdhocView):
                 if (y >= p and y <= p + self.button_height) ]
             if a:
                 # Copy/Move to a[0]
-                self.move_or_copy_annotations(sources, a[0], position=self.pixel2unit(self.adjustment.value + x), action=context.actions)
+                self.move_or_copy_annotations(sources, a[0], position=self.pixel2unit(self.adjustment.value + x, absolute=True), action=context.actions)
             else:
                 # Maybe we should propose to create a new annotation-type ?
                 # Create a type
                 dest=self.create_annotation_type()
                 if dest is None:
                     return True
-                self.move_or_copy_annotations(sources, dest, position=self.pixel2unit(self.adjustment.value + x), action=context.actions)
+                self.move_or_copy_annotations(sources, dest, position=self.pixel2unit(self.adjustment.value + x, absolute=True), action=context.actions)
             return True
         elif targetType == config.data.target_type['annotation-type']:
             source=self.controller.package.annotationTypes.get(unicode(selection.data, 'utf8'))
@@ -2026,7 +2007,7 @@ class TimeLine(AdhocView):
                     self.copy_annotation_type(source, a[0])
                 else:
                     # Create an annotation in the type.
-                    self.create_annotation(position=self.pixel2unit(self.adjustment.value + x),
+                    self.create_annotation(position=self.pixel2unit(self.adjustment.value + x, absolute=True),
                                            type=source,
                                            duration=self.pixel2unit(context.get_source_widget().get_allocation().width),
                                            )
@@ -2070,11 +2051,11 @@ class TimeLine(AdhocView):
         y=long(p.get_vadjustment().value + y)
 
         if event.button == 3:
-            self.context_cb (timel=self, position=self.pixel2unit(x), height=y)
+            self.context_cb (timel=self, position=self.pixel2unit(x, absolute=True), height=y)
             return True
         elif event.button == 1:
             c=self.controller
-            pos = c.create_position (value=self.pixel2unit(x),
+            pos = c.create_position (value=self.pixel2unit(x, absolute=True),
                                      key=c.player.MediaTime,
                                      origin=c.player.AbsolutePosition)
             c.update_status (status="set", position=pos)
@@ -2094,13 +2075,13 @@ class TimeLine(AdhocView):
         y=long(p.get_vadjustment().value + y)
 
         if event.button == 3:
-            self.context_cb (timel=self, position=self.pixel2unit(x), height=y)
+            self.context_cb (timel=self, position=self.pixel2unit(x, absolute=True), height=y)
             return True
         elif event.button == 1:
             if event.type == gtk.gdk._2BUTTON_PRESS:
                 # Double click in the layout: in all cases, goto the position
                 c=self.controller
-                pos = c.create_position (value=self.pixel2unit(x),
+                pos = c.create_position (value=self.pixel2unit(x, absolute=True),
                                          key=c.player.MediaTime,
                                          origin=c.player.AbsolutePosition)
                 c.update_status (status="set", position=pos)
@@ -2167,7 +2148,7 @@ class TimeLine(AdhocView):
                         return True
                     at=a[0]
                     def create(i):
-                        self.create_annotation(position=self.pixel2unit(x1),
+                        self.create_annotation(position=self.pixel2unit(x1, absolute=True),
                                                type=at,
                                                duration=self.pixel2unit(x2-x1))
                         return True
@@ -2213,7 +2194,7 @@ class TimeLine(AdhocView):
 
         if state & gtk.gdk.BUTTON1_MASK:
             # Display current time
-            self.set_annotation(long(self.pixel2unit(self.adjustment.value + x)))
+            self.set_annotation(self.pixel2unit(self.adjustment.value + x, absolute=True))
             if self.layout_selection[0][0] is None:
                 return False
             if self.layout_selection[1][0] is not None:
@@ -2226,7 +2207,7 @@ class TimeLine(AdhocView):
         return True
 
     def layout_drag_motion_cb(self, widget, drag_context, x, y, timestamp):
-        t=long(self.pixel2unit(self.adjustment.value +  x))
+        t=self.pixel2unit(self.adjustment.value +  x, absolute=True)
         w=drag_context.get_source_widget()
         try:
             w._icon.set_cursor(t)
@@ -2311,8 +2292,8 @@ class TimeLine(AdhocView):
         width = self.maximum - self.minimum
 
         #a.value=u2p(minimum)
-        a.lower=float(u2p(self.minimum))
-        a.upper=float(u2p(self.maximum))
+        a.lower=float(u2p(self.minimum, absolute=True))
+        a.upper=float(u2p(self.maximum, absolute=True))
         a.step_increment=min(float(u2p(width / 100)), 10)
         a.page_increment=float(u2p(width / 10))
         a.page_size=min(a.upper, self.layout.get_allocation().width)
@@ -2382,7 +2363,7 @@ class TimeLine(AdhocView):
             # Memorize mouse position (in units)
             # Get x, y (relative to the layout allocation)
             x,y=widget.get_pointer()
-            mouse_position=self.pixel2unit(event.x)
+            mouse_position=self.pixel2unit(event.x, absolute=True)
         else:
             # Plain scroll: scroll the timeline
             a = self.adjustment
@@ -2404,7 +2385,7 @@ class TimeLine(AdhocView):
 
         # Try to preserve the mouse position when zooming
         if zoom:
-            self.adjustment.value=self.unit2pixel(mouse_position) - x
+            self.adjustment.value=self.unit2pixel(mouse_position, absolute=True) - x
         return True
 
     def redraw_event(self, widget=None, data=None):
@@ -2416,7 +2397,7 @@ class TimeLine(AdhocView):
             if isinstance(w, AnnotationWidget):
                 w.update_widget()
                 self.layout.move (w,
-                                  self.unit2pixel(w.annotation.fragment.begin),
+                                  self.unit2pixel(w.annotation.fragment.begin, absolute=True),
                                   self.layer_position[w.annotation.type])
             return True
 
@@ -3212,7 +3193,7 @@ class TimeLine(AdhocView):
         """Return the current middle position, in ms.
         """
         a=self.adjustment
-        return self.pixel2unit( a.value + a.page_size / 2 )
+        return self.pixel2unit( a.value + a.page_size / 2, absolute=True )
 
     def set_middle_position(self, pos):
         """Set the current middle position, in ms.
