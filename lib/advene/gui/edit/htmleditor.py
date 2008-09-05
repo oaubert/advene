@@ -616,9 +616,15 @@ class HTMLEditor(textview_class, HTMLParser):
             mark._endmark=endmark
 
 if __name__ == "__main__":
+    import sys
+    
+    try:
+        source=sys.argv[1]
+    except IndexError:
+        source="p.html"
+
     t = HTMLEditor()
-    s = open("p.html").read()
-    t.set_text(s)
+    t.set_text(open(source).read())
     t.show()
     sb = gtk.ScrolledWindow()
     sb.add(t)
@@ -631,6 +637,16 @@ if __name__ == "__main__":
     ev=Evaluator(globals_=globals(), locals_=locals(),
                  historyfile=os.path.join(os.getenv('HOME'),
                                           '.pyeval.log'))
+
+    context_label=gtk.Label()
+    context_label.set_alignment(0.1, 0.5)
+    def cursor_moved(buf, it, mark):
+        if mark.get_name() == 'insert':
+            context_label.set_text("Context:" + " - ".join( m._tag for m in t.get_current_context(it) ) )
+        return True
+    t.get_buffer().connect('mark-set', cursor_moved)
+    ev.widget.pack_start(context_label, expand=False)
+    context_label.show()
     ev.widget.add(sb)
 
     for (icon, action) in (
