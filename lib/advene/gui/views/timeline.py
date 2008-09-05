@@ -689,21 +689,6 @@ class TimeLine(AdhocView):
         for r in self.registered_rules:
             controller.event_handler.remove_rule(r, type_="internal")
 
-    def set_widget_background_color(self, widget, color=None):
-        if isinstance(widget, AnnotationWidget):
-            widget.update_widget()
-            return True
-        if color is None:
-            try:
-                color=widget._default_color
-            except AttributeError:
-                return True
-        for style in (gtk.STATE_ACTIVE, gtk.STATE_NORMAL,
-                      gtk.STATE_SELECTED, gtk.STATE_INSENSITIVE,
-                      gtk.STATE_PRELIGHT):
-            widget.modify_bg (style, color)
-        return True
-
     def activate_annotation (self, annotation, buttons=None, color=None):
         """Activate the representation of the given annotation."""
         if buttons is None:
