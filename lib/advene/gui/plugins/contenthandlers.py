@@ -31,7 +31,7 @@ from advene.gui.util import image_from_position, dialog, decode_drop_parameters
 
 from advene.gui.edit.rules import EditRuleSet, EditQuery
 from advene.rules.elements import RuleSet, SimpleQuery
-from advene.gui.edit.htmleditor import HTMLEditor
+from advene.gui.edit.htmleditor import HTMLEditor, ContextDisplay
 import advene.util.ElementTree as ET
 import advene.util.helper as helper
 
@@ -594,7 +594,7 @@ class HTMLContentHandler (ContentHandler):
                                   + config.data.drag_type['timestamp'],
                                   gtk.gdk.ACTION_COPY | gtk.gdk.ACTION_LINK | gtk.gdk.ACTION_ASK )
         self.editor.connect('drag-motion', self.editor_drag_motion)
-        
+
         self.view = gtk.VBox()
 
         tb=gtk.Toolbar()
@@ -620,7 +620,20 @@ class HTMLContentHandler (ContentHandler):
         sw=gtk.ScrolledWindow()
         sw.set_policy (gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         sw.add(self.editor)
-        self.view.add(sw)
+
+        context_data=ContextDisplay()
+        def cursor_moved(buf, it, mark):
+            if mark.get_name() == 'insert':
+                context_data.set_context(self.editor.get_current_context(it))
+            return True
+        self.editor.get_buffer().connect('mark-set', cursor_moved)
+
+        p=gtk.HPaned()
+        p.add1(context_data)
+        p.add2(sw)
+        p.set_position(100)
+        p.show_all()
+        self.view.add(p)
 
         def edit_wysiwyg(*p):
             vbox.foreach(vbox.remove)
