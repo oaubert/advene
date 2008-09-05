@@ -637,10 +637,11 @@ if __name__ == "__main__":
     try:
         source=sys.argv[1]
     except IndexError:
-        source="p.html"
+        source=None
 
     t = HTMLEditor()
-    t.set_text(open(source).read())
+    if source is not None:
+        t.set_text(open(source).read())
     t.show()
     sb = gtk.ScrolledWindow()
     sb.add(t)
