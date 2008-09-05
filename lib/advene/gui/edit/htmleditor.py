@@ -282,7 +282,7 @@ class HTMLEditor(textview_class, HTMLParser):
             data = f.read()
             alt=dattr.get('alt', '')
         except Exception, ex:
-            print "Error loading %s: %s" % (dattr.get('src', _("[No src attribute]")), ex)
+            print "Error loading %s: %s" % (dattr.get('src', "[No src attribute]"), ex)
             data = None
             alt=dattr.get('alt', 'Broken image')
         # Process width and height attributes
@@ -618,9 +618,22 @@ class HTMLEditor(textview_class, HTMLParser):
             endmark._startmark=mark
             mark._endmark=endmark
 
+class ContextDisplay(gtk.TreeView):
+    def __init__(self):
+        super(ContextDisplay, self).__init__()
+        self.set_model(gtk.TreeStore(object, str, str))
+        self.append_column(gtk.TreeViewColumn("Name", gtk.CellRendererText(), text=1))
+        self.append_column(gtk.TreeViewColumn("Value", gtk.CellRendererText(), text=2))
+        
+    def set_context(self, context):
+        model=self.get_model()
+        model.clear()
+        for m in context:
+            tagligne=model.append( None, ( m, m._tag, '' ) )
+            for (k, v) in m._attr:
+                model.append(tagligne, ( m, k, v ) )
+
 if __name__ == "__main__":
-    import sys
-    
     try:
         source=sys.argv[1]
     except IndexError:
@@ -641,16 +654,20 @@ if __name__ == "__main__":
                  historyfile=os.path.join(os.getenv('HOME'),
                                           '.pyeval.log'))
 
-    context_label=gtk.Label()
-    context_label.set_alignment(0.1, 0.5)
+    context_data=ContextDisplay()
     def cursor_moved(buf, it, mark):
         if mark.get_name() == 'insert':
-            context_label.set_text("Context:" + " - ".join( m._tag for m in t.get_current_context(it) ) )
+            context_data.set_context(t.get_current_context(it))
         return True
     t.get_buffer().connect('mark-set', cursor_moved)
-    ev.widget.pack_start(context_label, expand=False)
-    context_label.show()
-    ev.widget.add(sb)
+    context_data.show()
+
+    p=gtk.HPaned()
+    p.add1(context_data)
+    p.add2(sb)
+    p.set_position(100)
+    p.show_all()
+    ev.widget.add(p)
 
     for (icon, action) in (
         (gtk.STOCK_CONVERT, lambda i: t.dump_html()),
