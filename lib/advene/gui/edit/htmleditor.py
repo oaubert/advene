@@ -647,9 +647,9 @@ if __name__ == "__main__":
     sb.add(t)
     sb.show()
 
-    sys.path.insert(0, '..')
-    from evaluator import Evaluator
     import os
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+    from evaluator import Evaluator
 
     ev=Evaluator(globals_=globals(), locals_=locals(),
                  historyfile=os.path.join(os.getenv('HOME'),
