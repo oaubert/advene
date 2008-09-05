@@ -545,9 +545,9 @@ class HTMLEditor(textview_class, HTMLParser):
                     self.__tb.delete_mark(endmark)
                 elif startiter.equal(bounds[0]):
                     # Remove the begin mark
-                    startmark.move(end)
+                    startmark.move(bounds[1])
                 elif enditer.equal(bounds[1]):
-                    endmark.move(begin)
+                    endmark.move(bounds[0])
                 else:
                     # We are untagging a portion of a larger
                     # string. Then we must create new marks as
