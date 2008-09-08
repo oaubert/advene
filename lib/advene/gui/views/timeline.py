@@ -121,6 +121,8 @@ class TimeLine(AdhocView):
             (_("Refresh"), self.refresh),
             (_("Save view"), self.save_view),
             (_("Save default options"), self.save_default_options),
+            (_("Limit display to current area"), self.limit_display),
+            (_("Display whole movie"), self.unlimit_display),
             )
         self.options = {
             'highlight': False,
@@ -384,7 +386,7 @@ class TimeLine(AdhocView):
 
     def update_relation_lines(self):
         self.layout.queue_draw()
-    
+
     def draw_relation_lines(self, layout, event):
         if self.bookmarks_to_draw:
             self.draw_bookmarks(layout, event)
@@ -631,7 +633,7 @@ class TimeLine(AdhocView):
             # Need a refresh
             self.update_model()
         return True
-        
+
     def register_callback (self, controller=None):
         """Add the activate handler for annotations.
         """
@@ -878,7 +880,7 @@ class TimeLine(AdhocView):
         else:
             print "Unknown drag mode: %s" % mode
 
-        
+
         if new['begin'] < new['end']:
             self.controller.notify('ElementEditBegin', element=source, immediate=True)
             for k in ('begin', 'end'):
@@ -2138,7 +2140,7 @@ class TimeLine(AdhocView):
                          and y >= y1 and y + h <= y2):
                         self.activate_annotation(widget.annotation, buttons=[ widget ])
                         res.append(widget)
-                        
+
                 if not res:
                     # No selected annotations. Propose to create a new one.
                     a=[ at
@@ -2330,6 +2332,31 @@ class TimeLine(AdhocView):
             self.zoom_combobox.child.set_text('%d%%' % long(100 * fraction))
         return False
 
+    def limit_display(self, *p):
+        """Limit the timeline to the currently displayed area.
+        """
+        mi=self.pixel2unit(self.adjustment.value, absolute=True)
+        ma=self.pixel2unit(self.adjustment.value + self.adjustment.page_size, absolute=True)
+        # Cannot do the assignment immediately, since unit2pixel uses self.minimum
+        self.minimum = mi
+        self.maximum = ma
+        self.update_model(partial_update=True)
+        self.fraction_adj.value=1.0
+        return True
+
+    def unlimit_display(self, *p):
+        self.minimum=0
+        self.maximum=self.controller.cached_duration
+        if not self.maximum:
+            # self.maximum == 0, so try to compute it
+            self.maximum = self.bounds()[1]
+        if not self.maximum:
+            # Not valid data either. Use a default value.
+            self.maximum=42000
+        self.update_model(partial_update=True)
+        self.fraction_adj.value=1.0
+        return True
+
     def fraction_event (self, widget=None, *p):
         """Set the zoom factor to display the given fraction of the movie.
 
@@ -2343,11 +2370,13 @@ class TimeLine(AdhocView):
         if w < 2:
             return True
 
+        if self.minimum == self.maximum:
+            return True
+
         fraction=self.fraction_adj.value
         v = (self.maximum - self.minimum) / float(w) * fraction
         # New width in pixel
-        width=(self.maximum - self.minimum) / v
-        if v < 5 or width > 65535:
+        if v < 5 or (self.maximum - self.minimum) / v > 65535:
             self.log(_("Cannot zoom more"))
             self.fraction_adj.value=self.scale.value * float(w) / (self.maximum - self.minimum)
             return True
@@ -2915,7 +2944,7 @@ class TimeLine(AdhocView):
         b.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
                         gtk.DEST_DEFAULT_HIGHLIGHT |
                         gtk.DEST_DEFAULT_ALL,
-                        config.data.drag_type['annotation'], 
+                        config.data.drag_type['annotation'],
                         gtk.gdk.ACTION_MOVE )
         b.connect('drag-data-received', remove_drag_received)
         b.connect('clicked', self.selection_delete)
@@ -3215,7 +3244,7 @@ class TimeLine(AdhocView):
         else:
             if b.props.sensitive:
                 b.set_sensitive(False)
-            
+
     def get_selected_annotation_widgets(self):
         """Return the list of currently active annotation widgets.
         """
