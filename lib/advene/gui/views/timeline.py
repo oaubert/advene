@@ -2980,6 +2980,7 @@ class TimeLine(AdhocView):
         b.set_tooltip(self.tooltips, _('Selection actions'))
         b.connect('clicked', self.selection_menu)
         tb.insert(b, -1)
+        b.set_sensitive(False)
         self.selection_button=b
 
         # Relation display toggle
