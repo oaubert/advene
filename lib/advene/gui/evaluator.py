@@ -596,7 +596,6 @@ class Evaluator:
         """Popup the application window.
         """
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.connect('destroy', lambda e: gtk.main_quit())
         window.connect('key-press-event', self.key_pressed_cb)
         window.set_title ("Python evaluation")
 
@@ -611,6 +610,7 @@ class Evaluator:
             b=gtk.ToolButton(gtk.STOCK_QUIT)
             b.connect('clicked', lambda b: window.destroy())
             self.toolbar.insert(b, -1)
+            window.connect('destroy', lambda e: gtk.main_quit())
             self.control_shortcuts[gtk.keysyms.q] = lambda: gtk.main_quit()
 
         window.add (self.widget)
