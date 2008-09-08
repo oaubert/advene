@@ -2344,12 +2344,19 @@ class TimeLine(AdhocView):
             return True
 
         fraction=self.fraction_adj.value
-
-        self.zoom_combobox.child.set_text('%d%%' % long(100 * fraction))
         v = (self.maximum - self.minimum) / float(w) * fraction
+        # New width in pixel
+        width=(self.maximum - self.minimum) / v
+        if v < 5 or width > 65535:
+            self.log(_("Cannot zoom more"))
+            self.fraction_adj.value=self.scale.value * float(w) / (self.maximum - self.minimum)
+            return True
+
         # Is it worth redrawing the whole timeline ?
         if abs(v - self.scale.value) / float(self.scale.value) > 0.01:
             self.scale.set_value(v)
+        self.zoom_combobox.child.set_text('%d%%' % long(100 * fraction))
+
         return True
 
     def layout_scroll_cb(self, widget=None, event=None):
