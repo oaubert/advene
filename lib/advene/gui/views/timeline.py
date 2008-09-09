@@ -160,6 +160,10 @@ class TimeLine(AdhocView):
                 default_position=int(float(v))
             elif n == 'zoom':
                 default_zoom=float(v)
+            elif n == 'minimum':
+                minimum=long(v)
+            elif n == 'maximum':
+                maximum=long(v)
         if ats:
             annotationtypes=ats
 
@@ -369,6 +373,8 @@ class TimeLine(AdhocView):
 
     def get_save_arguments(self):
         arguments = [ ('annotation-type', at.id) for at in self.annotationtypes ]
+        arguments.append( ('minimum', self.minimum ) )
+        arguments.append( ('maximum', self.maximum ) )
         arguments.append( ('position', self.pixel2unit(self.adjustment.value, absolute=True) ) )
         arguments.append( ('zoom', self.fraction_adj.value) )
         self.options['pane-position']=self.inspector_pane.get_position()
