@@ -264,6 +264,8 @@ class AnnotationWidget(GenericColorButtonWidget):
     def _drag_begin(self, widget, context):
         try:
             widgets=self.container.get_selected_annotation_widgets()
+            if not widget in widgets:
+                widgets=[]
         except AttributeError:
             widgets=[]
 
@@ -353,6 +355,8 @@ class AnnotationWidget(GenericColorButtonWidget):
         if targetType == config.data.target_type['annotation']:
             try:
                 widgets=self.container.get_selected_annotation_widgets()
+                if not widget in widgets:
+                    widgets=None
             except AttributeError:
                 widgets=None
             if not widgets:
@@ -379,6 +383,8 @@ class AnnotationWidget(GenericColorButtonWidget):
         if event.keyval == gtk.keysyms.e:
             try:
                 widgets=self.container.get_selected_annotation_widgets()
+                if not widget in widgets:
+                    widgets=None
             except AttributeError:
                 widgets=None
             if not widgets:
@@ -412,6 +418,8 @@ class AnnotationWidget(GenericColorButtonWidget):
             # Delete annotation or selection
             try:
                 widgets=self.container.get_selected_annotation_widgets()
+                if not widget in widgets:
+                    widgets=None
             except AttributeError:
                 widgets=None
             if not widgets:
