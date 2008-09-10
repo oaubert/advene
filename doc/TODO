@@ -1,3 +1,5 @@
+* investigate cherrypy crash when displaying a dialog
+
 * htmleditor: when suppressing a tag with tal: instructions (define,
    ...), recreate it ? Or delete the whole block ?
 
