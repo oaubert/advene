@@ -372,7 +372,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             selection.set(selection.target, 8, widget.annotation.content.data.encode('utf8'))
         elif targetType == config.data.target_type['timestamp']:
             selection.set(selection.target, 8, encode_drop_parameters(timestamp=widget.annotation.fragment.begin,
-                                                                      comment=self.controller.get_title(self.annotation)))
+                                                                      comment=self.controller.get_title(widget.annotation)))
         else:
             return False
         return True
