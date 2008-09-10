@@ -28,7 +28,8 @@ The X{AdveneEventHandler} is used by the application to handle events
 notifications and actions triggering.
 """
 
-import sys, time
+import sys
+import time
 import os
 import cgi
 import socket
@@ -1423,7 +1424,10 @@ class AdveneController(object):
                 self.activate_package(default_alias)
             return
         else:
-            p = Package (uri=uri)
+            t=time.time()
+            p = Package(uri=uri)
+            dur=time.time()-t
+            self.log("Loaded package in %f seconds" % dur)
             # Check if the imported package was found. Else it will
             # fail when accessing elements...
             for i in p.imports:
