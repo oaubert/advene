@@ -65,6 +65,12 @@ class ImageCache(dict):
     @ivar autosync: if True, directly store snapshots on disk
     @type autosync: boolean
     """
+    # The content of the not_yet_available_file file. We could use
+    # CachedString but as it is frequently used, let us keep it in memory.
+    not_yet_available_image = TypedString(open(config.data.advenefile( ( 'pixmaps', 
+                                                                         'notavailable.png' ) ), 'rb').read())
+    not_yet_available_image.contenttype='image/png'
+
     def __init__ (self, name=None, epsilon=20):
         """Initialize the Imagecache
 
@@ -78,14 +84,6 @@ class ImageCache(dict):
         # value = self.not_yet_available_image if the image has
         # not yet been updated.
         dict.__init__ (self)
-
-        # The content of the not_yet_available_file file. We could use
-        # CachedString but as it is frequently used, let us keep it in memory.
-        f=open(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ), 'rb')
-        s=TypedString(f.read())
-        f.close()
-        s.contenttype='image/png'
-        self.not_yet_available_image = s
 
         self._modified=False
 
