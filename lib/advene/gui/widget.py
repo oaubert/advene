@@ -42,6 +42,8 @@ import gobject
 
 # Advene part
 import advene.core.config as config
+from advene.core.imagecache import ImageCache
+
 from advene.gui.util import png_to_pixbuf
 from advene.gui.util import encode_drop_parameters
 import advene.util.helper as helper
@@ -307,7 +309,7 @@ class AnnotationWidget(GenericColorButtonWidget):
                 t=self.annotation
             cache=self.controller.package.imagecache
             if self.no_image_pixbuf is None:
-                self.no_image_pixbuf=png_to_pixbuf(cache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
+                self.no_image_pixbuf=png_to_pixbuf(ImageCache.not_yet_available_image, width=config.data.preferences['drag-snapshot-width'])
             if not t == w._current:
                 if isinstance(t, long) or isinstance(t, int):
                     if cache.is_initialized(t, epsilon=config.data.preferences['bookmark-snapshot-precision']):
