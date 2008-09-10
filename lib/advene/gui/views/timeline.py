@@ -2384,7 +2384,6 @@ class TimeLine(AdhocView):
         # New width in pixel
         if v < 5 or (self.maximum - self.minimum) / v > 65535:
             self.log(_("Cannot zoom more"))
-            self.fraction_adj.value=self.scale.value * float(w) / (self.maximum - self.minimum)
             return True
 
         # Is it worth redrawing the whole timeline ?
