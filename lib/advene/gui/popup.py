@@ -192,19 +192,21 @@ class Menu:
             self.controller.notify('AnnotationEditEnd', annotation=el)
             self.controller.notify('ElementEditCancel', element=el)
         elif isinstance(el, AnnotationType) or isinstance(el, Package):
+            batch_id=object()
             for a in el.annotations:
                 self.controller.notify('ElementEditBegin', element=a, immediate=True)
                 a.fragment.begin += offset
                 a.fragment.end += offset
-                self.controller.notify('AnnotationEditEnd', annotation=a)
+                self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
                 self.controller.notify('ElementEditCancel', element=a)
         elif isinstance(el, Schema):
+            batch_id=object()
             for at in el.annotationTypes:
                 for a in at.annotations:
                     self.controller.notify('ElementEditBegin', element=a, immediate=True)
                     a.fragment.begin += offset
                     a.fragment.end += offset
-                    self.controller.notify('AnnotationEditEnd', annotation=a)
+                    self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
                     self.controller.notify('ElementEditCancel', element=a)
         return True
 
