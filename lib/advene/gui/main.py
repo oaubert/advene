@@ -3556,7 +3556,10 @@ class AdveneGUI (Connect):
             else:
                 compiler = simpleTAL.XMLTemplateCompiler ()
                 compiler.parseTemplate (filter.content.stream)
-                compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
+                try:
+                    compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
+                except simpleTALES.ContextContentException, e:
+                    self.log(_("Error when exporting: %s") % unicode(e))
             stream.close()
             self.log(_("Data exported to %s") % filename)
         fs.destroy()
