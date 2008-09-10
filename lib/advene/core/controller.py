@@ -1830,7 +1830,7 @@ class AdveneController(object):
         """
         if self.gui:
             self.gui.log(msg, level)
-        if config.data.preferences['log-to-terminal'] or not self.gui:
+        else:
             print unicode(msg).encode('utf-8')
 
     def message_log (self, context, parameters):
