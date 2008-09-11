@@ -134,7 +134,7 @@ class EditElementPopup (AdhocView):
         if self._widget is None:
             vbox=gtk.VBox()
 
-            vbox.pack_start(self.make_widget())
+            vbox.pack_start(self.make_widget(editable=self.editable))
 
             # Button bar
             hbox = gtk.HButtonBox()
@@ -301,9 +301,6 @@ class EditElementPopup (AdhocView):
             self.editable=False
         elif hasattr(self.element, 'schema') and self.element.schema.isImported():
             self.editable=False
-
-        w=self.make_widget (editable=self.editable)
-        self.vbox.add (w)
 
         if self.editable:
             title=_("Edit %s") % self.get_title()
