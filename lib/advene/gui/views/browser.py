@@ -44,6 +44,28 @@ class BrowserColumn:
         self.next=None
         self.previous=parent
         self.widget=self.build_widget()
+        self.widget.connect('key-press-event', self.key_pressed_cb)
+
+    def key_pressed_cb(self, col, event):
+        if event.keyval == gtk.keysyms.Right:
+            # Next column
+            if self.next is not None:
+                self.next.get_focus()
+            return True
+        elif event.keyval == gtk.keysyms.Left:
+            # Previous column
+            if self.previous is not None:
+                self.previous.get_focus()
+            return True
+        return False
+
+    def get_focus(self):
+        self.listview.grab_focus()
+        cursor=self.listview.get_cursor()[0]
+        if cursor == (0,):
+            # Initial selection. Directly put the cursor on the second element.
+            self.listview.set_cursor((1,))
+        return True
 
     def get_widget(self):
         return self.widget
@@ -125,6 +147,7 @@ class BrowserColumn:
         column = gtk.TreeViewColumn("Attributes", renderer, text=0)
         column.set_widget(gtk.Label())
         self.listview.append_column(column)
+        self.listview.connect('key-press-event', self.key_pressed_cb)
 
         selection = self.listview.get_selection()
         selection.unselect_all()
@@ -229,7 +252,7 @@ class Browser(AdhocView):
                 print "Browser exception", str(e)
                 #dialog.message_dialog(_("Exception: %s") % e,
                 #                           icon=gtk.MESSAGE_WARNING)
-            return
+            return True
 
         self._update_view(path, el)
 
