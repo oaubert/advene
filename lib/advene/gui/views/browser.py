@@ -22,6 +22,7 @@
 import sys
 
 # Advene part
+import advene.core.config as config
 from advene.gui.util import dialog
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
@@ -247,11 +248,10 @@ class Browser(AdhocView):
                 cb=cb.next
             if columnbrowser is not None:
                 columnbrowser.next=None
-                columnbrowser.listview.get_selection().unselect_all()
-                self._update_view(path, Exception(_("Expression returned None")))
-                print "Browser exception", str(e)
-                #dialog.message_dialog(_("Exception: %s") % e,
-                #                           icon=gtk.MESSAGE_WARNING)
+                self._update_view(path, Exception(_("Expression returned None (there was an exception)")))
+                if config.data.preferences['expert-mode']:
+                    self.log("Exception when evaluating %s :\n%s" % ("/".join(path),
+                                                                     str(e)))
             return True
 
         self._update_view(path, el)
