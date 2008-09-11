@@ -289,6 +289,8 @@ div.${a/id} {
       &lt;meta&gt;
         &lt;color tal:content=&quot;string:string:${at/color}&quot;&gt;color&lt;/color&gt;
         &lt;dc:creator tal:content=&quot;at/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:created tal:content=&quot;at/date&quot;&gt;date&lt;/dc:created&gt;
+        &lt;dc:contributor tal:content=&quot;at/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;at/date&quot;&gt;date&lt;/dc:modified&gt;
         &lt;trans:mimetype tal:content=&quot;at/mimetype&quot;&gt;type&lt;/trans:mimetype&gt;
         &lt;representation tal:content=&quot;python:at.getMetaData('http://experience.univ-lyon1.fr/advene/ns/advenetool','representation')&quot;&gt;representation&lt;/representation&gt;
@@ -299,6 +301,8 @@ div.${a/id} {
     &lt;relation-type tal:repeat=&quot;rt package/relationTypes&quot; tal:attributes=&quot;id rt/id&quot;&gt;
       &lt;meta&gt;
         &lt;dc:creator tal:content=&quot;rt/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:created tal:content=&quot;rt/date&quot;&gt;date&lt;/dc:created&gt;
+        &lt;dc:contributor tal:content=&quot;rt/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;rt/date&quot;&gt;date&lt;/dc:modified&gt;
         &lt;trans:mimetype tal:content=&quot;rt/mimetype&quot;&gt;type&lt;/trans:mimetype&gt;
       &lt;/meta&gt;
@@ -313,6 +317,8 @@ div.${a/id} {
       &lt;meta&gt;
         &lt;type tal:attributes=&quot;id-ref a/type/id&quot;&gt;&lt;/type&gt;
         &lt;dc:creator tal:content=&quot;a/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:created tal:content=&quot;a/date&quot;&gt;date&lt;/dc:created&gt;
+        &lt;dc:contributor tal:content=&quot;a/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;a/date&quot;&gt;date&lt;/dc:modified&gt;
       &lt;/meta&gt;
     &lt;/annotation&gt;
@@ -326,6 +332,8 @@ div.${a/id} {
       &lt;meta&gt;
          &lt;type tal:attributes=&quot;id-ref r/type/id&quot;&gt;&lt;/type&gt;
         &lt;dc:creator tal:content=&quot;r/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:created tal:content=&quot;r/date&quot;&gt;date&lt;/dc:created&gt;
+        &lt;dc:contributor tal:content=&quot;r/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;r/date&quot;&gt;date&lt;/dc:modified&gt;
       &lt;/meta&gt;
     &lt;/relation&gt;
@@ -335,6 +343,8 @@ div.${a/id} {
       &lt;content tal:attributes=&quot;mimetype v/content/mimetype&quot; tal:content=&quot;v/content/data&quot; /&gt;
       &lt;meta&gt;
         &lt;dc:creator tal:content=&quot;v/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:created tal:content=&quot;v/date&quot;&gt;date&lt;/dc:created&gt;
+        &lt;dc:contributor tal:content=&quot;v/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;v/date&quot;&gt;date&lt;/dc:modified&gt;
       &lt;/meta&gt;
     &lt;/view&gt;
@@ -344,6 +354,8 @@ div.${a/id} {
       &lt;content tal:attributes=&quot;mimetype q/content/mimetype&quot; tal:content=&quot;q/content/data&quot; /&gt;
       &lt;meta&gt;
         &lt;dc:creator tal:content=&quot;q/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:created tal:content=&quot;q/date&quot;&gt;date&lt;/dc:created&gt;
+        &lt;dc:contributor tal:content=&quot;q/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;q/date&quot;&gt;date&lt;/dc:modified&gt;
       &lt;/meta&gt;
     &lt;/query&gt;
@@ -356,6 +368,8 @@ div.${a/id} {
       &lt;/items&gt;
       &lt;meta&gt;
         &lt;dc:creator tal:content=&quot;s/author&quot;&gt;author&lt;/dc:creator&gt;
+        &lt;dc:created tal:content=&quot;s/date&quot;&gt;date&lt;/dc:created&gt;
+        &lt;dc:contributor tal:content=&quot;s/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;s/date&quot;&gt;date&lt;/dc:modified&gt;
       &lt;/meta&gt;
     &lt;/schema&gt;
