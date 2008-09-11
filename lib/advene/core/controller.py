@@ -941,7 +941,7 @@ class AdveneController(object):
             return element
         if isinstance(element, Annotation) or isinstance(element, Relation):
             if representation is not None and representation != "":
-                c=self.event_handler.build_context(event='Display', here=element)
+                c=self.build_context(here=element)
                 try:
                     r=c.evaluateValue(representation)
                 except AdveneTalesException:
@@ -960,7 +960,7 @@ class AdveneController(object):
                 return cleanup(r)
 
             else:
-                c=self.event_handler.build_context(event='Display', here=element)
+                c=self.build_context(here=element)
                 try:
                     r=c.evaluateValue(expr)
                 except AdveneTalesException:
