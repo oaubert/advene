@@ -742,7 +742,7 @@ class EditCondition(EditGeneric):
         if self.parent is None or isinstance(self.parent, EditRule):
             predefined=[
                 ('annotation/fragment', _('The annotation fragment') ),
-                ('annotation/fragment/end', _('The annotation begin time') ),
+                ('annotation/fragment/begin', _('The annotation begin time') ),
                 ('annotation/fragment/end', _('The annotation end time') ),
                 ('annotation/fragment/duration', _('The annotation duration') ),
                 ('annotation/type/id', _('The id of the annotation type') ),
