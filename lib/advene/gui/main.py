@@ -1420,7 +1420,7 @@ class AdveneGUI (Connect):
         if config.data.preferences['remember-window-size']:
             s=config.data.preferences['windowsize'].setdefault(name, (640,480))
             window.resize(*s)
-            window.connect('size-allocate', self.resize_cb, name)
+            window.connect('size-request', self.resize_cb, name)
         return True
 
     def resize_cb (self, widget, allocation, name):
