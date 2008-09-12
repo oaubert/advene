@@ -1291,7 +1291,7 @@ class AdveneController(object):
             d.content.data="\n".join( [ "%s=%s" % (k, unicode(v).replace('\n', '%0A')) for (k, v) in ddata.iteritems() if k != '_all' ] )
         elif mtd == 'application/x-advene-structured':
             d.content.data=d.content.data + '\nmerged_content="' + cgi.urllib.quote(s.content.data)+'"'
-        self.notify("AnnotationMerge", package=self.package, comment="", batch=batch_id)
+        self.notify("AnnotationMerge", annotation=d,comment="Merge annotations", batch=batch_id)
         self.delete_element(s, batch_id=batch_id)
         self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations", batch=batch_id)
         self.notify('ElementEditCancel', element=d)
@@ -1528,8 +1528,6 @@ class AdveneController(object):
         @type alias: string
         @param package: the package itself
         @type package: advene.model.Package
-        @param imagecache: the imagecache associated to the package
-        @type imagecache: advene.core.ImageCache
         """
         # If we load a new file and only the template package was present,
         # then remove the template package
