@@ -954,7 +954,7 @@ class TimeLine(AdhocView):
         if content is not None:
             el.content.data=content
         elif el.type._fieldnames:
-            el.content.data="\n".join( sorted(el.type._fieldnames) )
+            el.content.data="\n".join( "%s=" % f for f in sorted(el.type._fieldnames) )
 
         self.controller.package.annotations.append(el)
         el.complete=False
