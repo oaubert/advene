@@ -60,6 +60,13 @@ class Evaluator:
 
         self.widget=self.build_widget()
 
+    def true_cb(self, *p):
+        print "true_cb", str(p)
+        return True
+
+    def false_cb(self, *p):
+        print "false_cb", str(p)
+        return False
 
     def load_history(self, name=None):
         """Load the command history.
@@ -700,6 +707,7 @@ if __name__ == "__main__":
 
     ev.locals_['self']=ev
     window=ev.popup(embedded=False)
+    ev.locals_['w']=window
 
     window.connect('destroy', lambda e: gtk.main_quit())
 
