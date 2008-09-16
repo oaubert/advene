@@ -20,9 +20,11 @@
 """
 
 import os
+import time
 import StringIO
 import traceback
 import gtk
+import gobject
 import re
 import __builtin__
 import inspect
@@ -356,7 +358,9 @@ class Evaluator:
             expr=m.group(2)
 
         try:
+            t0=time.time()
             res=eval(expr, self.globals_, self.locals_)
+            self.status_message("Execution time: %f s" % (time.time() - t0))
             self.clear_output()
             try:
                 self.log(unicode(res))
@@ -626,6 +630,15 @@ class Evaluator:
         self.help()
         self.source.grab_focus()
         return window
+    
+    def status_message(self, m):
+        cid=self.statusbar.get_context_id('info')
+        message_id=self.statusbar.push(cid, unicode(m))
+        # Display the message only 4 seconds
+        def undisplay():
+            self.statusbar.pop(cid)
+            return False
+        gobject.timeout_add(4000, undisplay)
 
     def key_pressed_cb(self, win, event):
         """Handle key press event.
@@ -694,6 +707,10 @@ class Evaluator:
 
         self.source.connect('key-press-event', self.key_pressed_cb)
         self.output.connect('key-press-event', self.key_pressed_cb)
+
+        self.statusbar=gtk.Statusbar()
+        self.statusbar.set_has_resize_grip(False)
+        vbox.pack_start(self.statusbar, expand=False)
 
         vbox.show_all()
 
