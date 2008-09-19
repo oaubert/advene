@@ -543,6 +543,10 @@ class Evaluator:
             begin,end=b.get_bounds()
             cursor=b.get_iter_at_mark(b.get_insert())
         expr=b.get_text(begin, cursor)
+
+        m=re.match('.+[=\(\[\s](.+?)$', expr)
+        if m:
+            expr=m.group(1)
         try:
             res=eval(expr, self.globals_, self.locals_)
         except (Exception, SyntaxError):
