@@ -251,7 +251,6 @@ class Montage(AdhocView):
             if targetType == config.data.target_type['annotation']:
                 sources=[ self.controller.package.annotations.get(uri) for uri in unicode(selection.data, 'utf8').split('\n') ]
                 for ann in sources:
-                    ann=self.controller.package.annotations.get(unicode(selection.data, 'utf8'))
                     self.insert(ann, i)
                     # If the origin is from the same montage, then
                     # consider it is a move and remove the origin
