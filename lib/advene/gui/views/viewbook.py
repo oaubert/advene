@@ -358,7 +358,7 @@ class ViewBook(AdhocView):
                 if self.controller.package.queries:
                     sm=gtk.Menu()
                     for q in self.controller.package.queries:
-                        i=gtk.MenuItem(self.controller.get_title(q))
+                        i=gtk.MenuItem(self.controller.get_title(q), use_underline=False)
                         i.connect('activate', apply_query, q)
                         sm.append(i)
                     i=gtk.MenuItem(_("as the context for the query..."), use_underline=False)
