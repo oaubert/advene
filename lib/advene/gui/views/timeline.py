@@ -29,7 +29,7 @@ from gettext import gettext as _
 # Advene part
 import advene.core.config as config
 
-from advene.model.schema import RelationType
+from advene.model.schema import AnnotationType, RelationType
 from advene.model.annotation import Annotation, Relation
 from advene.model.fragment import MillisecondFragment
 from advene.gui.views import AdhocView
@@ -76,6 +76,15 @@ class QuickviewBar(gtk.HBox):
             b="   " + helper.format_time(a)
             e=""
             c=_("Current time")
+        elif isinstance(a, AnnotationType):
+            if len(a.annotations):
+                b="   " + helper.format_time(min(a.fragment.begin for a in a.annotations))
+                e=" - " + helper.format_time(max(a.fragment.end for a in a.annotations))
+            else:
+                b=""
+                e=""
+            c=self.controller.get_title(a)
+            c += " (" + a.id + ")"
         else:
             b="   " + helper.format_time(a.fragment.begin)
             e=" - " + helper.format_time(a.fragment.end)
@@ -2594,6 +2603,7 @@ class TimeLine(AdhocView):
                 for w in layout.get_children():
                     if isinstance(w, AnnotationTypeWidget) and w.annotationtype.schema == button.annotationtype.schema:
                         w.set_highlight(True)
+                self.set_annotation(button.annotationtype)
                 return False
 
             def focus_out(button, event):

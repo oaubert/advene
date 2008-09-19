@@ -24,9 +24,12 @@ import gobject
 from gettext import gettext as _
 
 import advene.core.config as config
+from advene.core.imagecache import ImageCache
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
 from advene.gui.util import png_to_pixbuf
+from advene.model.annotation import Annotation
+from advene.model.schema import AnnotationType
 
 name="Annotation display plugin"
 
@@ -44,7 +47,7 @@ class AnnotationDisplay(AdhocView):
         self.contextual_actions = ()
         self.controller=controller
         self.annotation=annotation
-        self.no_image_pixbuf=png_to_pixbuf(controller.package.imagecache.not_yet_available_image, width=50)
+        self.no_image_pixbuf=png_to_pixbuf(ImageCache.not_yet_available_image, width=50)
         self.widget=self.build_widget()
 
     def set_annotation(self, a=None):
@@ -85,6 +88,27 @@ class AnnotationDisplay(AdhocView):
                 'end': '--:--:--:--',
                 'contents': '',
                 'imagecontents': None}
+        elif isinstance(self.annotation, AnnotationType):
+            col=self.controller.get_element_color(self.annotation)
+            if col:
+                title='<span background="%s">Annotation Type <b>%s</b></span>' % (col, self.controller.get_title(self.annotation))
+            else:
+                title='Annotation <b>%s</b>' % self.controller.get_title(self.annotation)
+            if len(self.annotation.annotations):
+                b=min(a.fragment.begin for a in self.annotation.annotations)
+                e=max(a.fragment.end for a in self.annotation.annotations)
+            else:
+                b=None
+                e=None
+            d={ 'title': title,
+                'begin': helper.format_time(b),
+                'end': helper.format_time(e),
+                'contents': _("%(total)s\nId: %(id)s") % {
+                    'total': helper.format_element_name('annotation', len(self.annotation.annotations)),
+                    'id': self.annotation.id 
+                    },
+                'imagecontents': None,
+                }
         else:
             col=self.controller.get_element_color(self.annotation)
             if col:
@@ -138,16 +162,19 @@ class AnnotationDisplay(AdhocView):
                     self.label['imagecontents'].set_from_pixbuf(d['imagecontents'])
             else:
                 self.label[k].set_text(v)
-        if self.annotation is not None:
+        if self.annotation is None or isinstance(self.annotation, AnnotationType):
+            self.label['image'].hide()
+        else:
             if isinstance(self.annotation, int) or isinstance(self.annotation, long):
                 b=self.annotation
-            else:
+            elif isinstance(self.annotation, Annotation):
                 b=self.annotation.fragment.begin
-            cache=self.controller.package.imagecache
+            cache=self.controller.gui.imagecache
             if cache.is_initialized(b, epsilon=config.data.preferences['bookmark-snapshot-precision']):
                 self.label['image'].set_from_pixbuf(png_to_pixbuf (cache.get(b, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
             elif self.label['image'].get_pixbuf() != self.no_image_pixbuf:
                 self.label['image'].set_from_pixbuf(self.no_image_pixbuf)
+            self.label['image'].show()
         return False
 
     def build_widget(self):
