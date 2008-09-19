@@ -291,6 +291,7 @@ div.${a/id} {
   &lt;annotation-types&gt;
     &lt;annotation-type tal:repeat=&quot;at package/annotationTypes&quot; tal:attributes=&quot;id at/id&quot;&gt;
       &lt;meta&gt;
+        &lt;dc:title tal:content=&quot;at/title&quot;&gt;title&lt;/dc:title&gt;
         &lt;color tal:content=&quot;string:string:${at/color}&quot;&gt;color&lt;/color&gt;
         &lt;dc:creator tal:content=&quot;at/author&quot;&gt;author&lt;/dc:creator&gt;
         &lt;dc:created tal:content=&quot;at/date&quot;&gt;date&lt;/dc:created&gt;
@@ -304,6 +305,7 @@ div.${a/id} {
   &lt;relation-types&gt;
     &lt;relation-type tal:repeat=&quot;rt package/relationTypes&quot; tal:attributes=&quot;id rt/id&quot;&gt;
       &lt;meta&gt;
+        &lt;dc:title tal:content=&quot;at/title&quot;&gt;title&lt;/dc:title&gt;
         &lt;dc:creator tal:content=&quot;rt/author&quot;&gt;author&lt;/dc:creator&gt;
         &lt;dc:created tal:content=&quot;rt/date&quot;&gt;date&lt;/dc:created&gt;
         &lt;dc:contributor tal:content=&quot;rt/author&quot;&gt;author&lt;/dc:contributor&gt;
@@ -354,6 +356,7 @@ div.${a/id} {
     &lt;view tal:repeat=&quot;v package/views&quot; tal:attributes=&quot;id v/id&quot;&gt;
       &lt;content tal:attributes=&quot;mimetype v/content/mimetype&quot; tal:content=&quot;v/content/data&quot; /&gt;
       &lt;meta&gt;
+        &lt;dc:title tal:content=&quot;v/title&quot;&gt;title&lt;/dc:title&gt;
         &lt;dc:creator tal:content=&quot;v/author&quot;&gt;author&lt;/dc:creator&gt;
         &lt;dc:created tal:content=&quot;v/date&quot;&gt;date&lt;/dc:created&gt;
         &lt;dc:contributor tal:content=&quot;v/author&quot;&gt;author&lt;/dc:contributor&gt;
@@ -365,6 +368,7 @@ div.${a/id} {
     &lt;query tal:repeat=&quot;q package/queries&quot; tal:attributes=&quot;id q/id&quot;&gt;
       &lt;content tal:attributes=&quot;mimetype q/content/mimetype&quot; tal:content=&quot;q/content/data&quot; /&gt;
       &lt;meta&gt;
+        &lt;dc:title tal:content=&quot;q/title&quot;&gt;title&lt;/dc:title&gt;
         &lt;dc:creator tal:content=&quot;q/author&quot;&gt;author&lt;/dc:creator&gt;
         &lt;dc:created tal:content=&quot;q/date&quot;&gt;date&lt;/dc:created&gt;
         &lt;dc:contributor tal:content=&quot;q/author&quot;&gt;author&lt;/dc:contributor&gt;
@@ -379,6 +383,7 @@ div.${a/id} {
         &lt;item tal:repeat=&quot;i s/relationTypes&quot; tal:attributes=&quot;id-ref i/id&quot; /&gt;
       &lt;/items&gt;
       &lt;meta&gt;
+        &lt;dc:title tal:content=&quot;s/title&quot;&gt;title&lt;/dc:title&gt;
         &lt;dc:creator tal:content=&quot;s/author&quot;&gt;author&lt;/dc:creator&gt;
         &lt;dc:created tal:content=&quot;s/date&quot;&gt;date&lt;/dc:created&gt;
         &lt;dc:contributor tal:content=&quot;s/author&quot;&gt;author&lt;/dc:contributor&gt;
