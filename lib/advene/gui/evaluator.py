@@ -28,6 +28,7 @@ import gobject
 import re
 import __builtin__
 import inspect
+import itertools
 
 class Evaluator:
     """Evaluator popup window.
@@ -553,6 +554,11 @@ class Evaluator:
             (args, varargs, varkw, defaults)=inspect.getargspec(res)
             if args and args[0] == 'self':
                 args.pop(0)
+                if defaults:
+                    n=len(defaults)
+                    cp=args[:-n]
+                    cp.extend("=".join( (k, repr(v)) ) for (k, v) in itertools.izip(args[-n:], defaults))
+                    args=cp
             if varargs:
                 args.append("*" + varargs)
             if varkw:
