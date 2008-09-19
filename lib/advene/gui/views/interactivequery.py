@@ -375,8 +375,8 @@ class InteractiveResult(AdhocView):
         dialog.center_on_mouse(d)
         res=d.run()
         if res == gtk.RESPONSE_OK:
-            search=search_entry.get_text()
-            replace=replace_entry.get_text()
+            search=search_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
+            replace=replace_entry.get_text().replace('\\n', '\n').replace('%n', '\n').replace('\\t', '\t').replace('%t', '\t')
             l=self.table.get_elements()
             count=0
             batch_id=object()
