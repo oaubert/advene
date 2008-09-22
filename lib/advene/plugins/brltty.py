@@ -33,6 +33,11 @@ import advene.util.helper as helper
 name="BrlTTY actions"
 
 def register(controller=None):
+    # The BrailleInput event has a 'cursor' parameter, which is the
+    # cursor position, available through the request/cursor TALES
+    # expression
+    controller.register_event('BrailleInput', _("Input from the braille table."))
+
     if brlapi is None:
         controller.log(_("BrlTTY not initialised. There will be no braille support."))
         method=controller.message_log
@@ -57,7 +62,11 @@ def register(controller=None):
                     )},            
             category='generic',
             ))
-        
+
+class InputRequest(object):
+    def __init__(self, cursor):
+        self.cursor=str(cursor)
+
 class BrlEngine:
     """BrlEngine.
     """
@@ -166,6 +175,9 @@ class BrlEngine:
             self.controller.gui.create_bookmark(self.controller.player.current_position_value)
         else:
             d=self.brlconnection.expandKeyCode(k)
+            if d['command'] == brlapi.KEY_CMD_ROUTE:
+                self.controller.notify('BrailleInput', request=InputRequest(d['argument']))
+                return True
             if self.revmap is None:
                 self.generate_reverse_mapping()
             print "brltty: unknown key ", k, "expanded", str(d)
