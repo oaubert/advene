@@ -1,3 +1,7 @@
+* exporters/advene2: export description metadata
+
+* browser: if object ISA generator, add option to convert it to a list (enumerate)
+
 * investigate cherrypy crash when displaying a dialog
 
 * htmleditor: when suppressing a tag with tal: instructions (define,
