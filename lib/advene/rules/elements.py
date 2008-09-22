@@ -25,6 +25,7 @@ import re
 import StringIO
 import urllib
 import advene.util.ElementTree as ET
+import itertools
 
 import advene.core.config as config
 from advene.model.annotation import Annotation
@@ -643,14 +644,15 @@ class RuleSet(list, EtreeMixin):
         @type origin: URI
         """
         assert rulesetnode.tag == tag('ruleset') or rulesetnode.tag == 'ruleset', "Trying to parse %s as a RuleSet" % rulesetnode.tag
-        compatibility=(rulesetnode.tag == 'ruleset')
         if catalog is None:
             catalog=ECACatalog()
-        for rulenode in rulesetnode.findall(tag('rule', old=compatibility)):
+        for rulenode in itertools.chain(rulesetnode.findall(tag('rule')),
+                                        rulesetnode.findall('rule')):
             rule=Rule(origin=origin, priority=self.priority)
             rule.from_etree(rulenode, catalog=catalog, origin=origin)
             self.append(rule)
-        for rulenode in rulesetnode.findall(tag('subviewlist', old=compatibility)):
+        for rulenode in itertools.chain(rulesetnode.findall(tag('subviewlist')),
+                                        rulesetnode.findall('subviewlist')):
             rule=SubviewList()
             rule.from_etree(rulenode, catalog=catalog, origin=origin)
             self.append(rule)
