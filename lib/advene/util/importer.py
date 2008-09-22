@@ -204,7 +204,7 @@ class GenericImporter(object):
         at.title=title or at.id.title()
         at.mimetype=mimetype or 'text/plain'
         if description:
-            at.setMetaData(config.data.namespace, "description", description)
+            at.setMetaData(config.data.namespace_prefix['dc'], "description", description)
         if representation:
             at.setMetaData(config.data.namespace, "representation", representation)
         try:
@@ -226,7 +226,7 @@ class GenericImporter(object):
         schema.date=date or self.timestamp
         schema.title=title or "Generated schema"
         if description:
-            schema.setMetaData(config.data.namespace, "description", description)
+            schema.setMetaData(config.data.namespace_prefix['dc'], "description", description)
         self.package.schemas.append(schema)
         self.update_statistics('schema')
         return schema
