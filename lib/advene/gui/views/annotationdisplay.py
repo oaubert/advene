@@ -103,8 +103,9 @@ class AnnotationDisplay(AdhocView):
             d={ 'title': title,
                 'begin': helper.format_time(b),
                 'end': helper.format_time(e),
-                'contents': _("Schema %(schema)s\n%(total)s\nId: %(id)s") % {
+                'contents': _("Schema %(schema)s\n%(description)s\n%(total)s\nId: %(id)s") % {
                     'schema': self.controller.get_title(self.annotation.schema),
+                    'description': self.annotation.getMetaData(config.data.namespace_prefix['dc'], "description") or "",
                     'total': helper.format_element_name('annotation', len(self.annotation.annotations)),
                     'id': self.annotation.id 
                     },
