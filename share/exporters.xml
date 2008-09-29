@@ -297,7 +297,7 @@ div.${a/id} {
         &lt;dc:created tal:content=&quot;at/date&quot;&gt;date&lt;/dc:created&gt;
         &lt;dc:contributor tal:content=&quot;at/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;at/date&quot;&gt;date&lt;/dc:modified&gt;
-        &lt;trans:mimetype tal:content=&quot;at/mimetype&quot;&gt;type&lt;/trans:mimetype&gt;
+        &lt;dc:description tal:content=&quot;at/meta/dc/description | string:''&quot;&gt;description&lt;/dc:description&gt;
         &lt;representation tal:content=&quot;python:at.getMetaData('http://experience.univ-lyon1.fr/advene/ns/advenetool','representation')&quot;&gt;representation&lt;/representation&gt;
       &lt;/meta&gt;
     &lt;/annotation-type&gt;
@@ -310,7 +310,7 @@ div.${a/id} {
         &lt;dc:created tal:content=&quot;rt/date&quot;&gt;date&lt;/dc:created&gt;
         &lt;dc:contributor tal:content=&quot;rt/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;rt/date&quot;&gt;date&lt;/dc:modified&gt;
-        &lt;trans:mimetype tal:content=&quot;rt/mimetype&quot;&gt;type&lt;/trans:mimetype&gt;
+        &lt;dc:description tal:content=&quot;at/meta/dc/description | string:''&quot;&gt;description&lt;/dc:description&gt;        
       &lt;/meta&gt;
     &lt;/relation-type&gt;
   &lt;/relation-types&gt;
@@ -361,6 +361,7 @@ div.${a/id} {
         &lt;dc:created tal:content=&quot;v/date&quot;&gt;date&lt;/dc:created&gt;
         &lt;dc:contributor tal:content=&quot;v/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;v/date&quot;&gt;date&lt;/dc:modified&gt;
+        &lt;dc:description tal:content=&quot;v/meta/dc/description | string:''&quot;&gt;description&lt;/dc:description&gt;
       &lt;/meta&gt;
     &lt;/view&gt;
   &lt;/views&gt;
@@ -373,10 +374,12 @@ div.${a/id} {
         &lt;dc:created tal:content=&quot;q/date&quot;&gt;date&lt;/dc:created&gt;
         &lt;dc:contributor tal:content=&quot;q/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;q/date&quot;&gt;date&lt;/dc:modified&gt;
+        &lt;dc:description tal:content=&quot;q/meta/dc/description | string:''&quot;&gt;description&lt;/dc:description&gt;
       &lt;/meta&gt;
     &lt;/query&gt;
   &lt;/queries&gt;
-  &lt;schemas&gt;
+  
+    &lt;schemas&gt;
     &lt;schema tal:repeat=&quot;s package/schemas&quot; tal:attributes=&quot;id s/id&quot;&gt;
       &lt;items&gt;
         &lt;item tal:repeat=&quot;i s/annotationTypes&quot; tal:attributes=&quot;id-ref i/id&quot; /&gt;
@@ -388,7 +391,8 @@ div.${a/id} {
         &lt;dc:created tal:content=&quot;s/date&quot;&gt;date&lt;/dc:created&gt;
         &lt;dc:contributor tal:content=&quot;s/author&quot;&gt;author&lt;/dc:contributor&gt;
         &lt;dc:modified tal:content=&quot;s/date&quot;&gt;date&lt;/dc:modified&gt;
-      &lt;/meta&gt;
+        &lt;dc:description tal:content=&quot;s/meta/dc/description | string:''&quot;&gt;description&lt;/dc:description&gt;
+       &lt;/meta&gt;
     &lt;/schema&gt;
   &lt;/schemas&gt;
 
