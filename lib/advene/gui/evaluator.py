@@ -552,6 +552,7 @@ class Evaluator:
             res=None
         if inspect.ismethod(res):
             res=res.im_func
+        args=None
         if inspect.isfunction(res):
             # Complete with getargspec
             (args, varargs, varkw, defaults)=inspect.getargspec(res)
@@ -566,7 +567,11 @@ class Evaluator:
                 args.append("*" + varargs)
             if varkw:
                 args.append("**" + varkw)
+        elif inspect.isbuiltin(res) and res.__doc__:
+            # Extract parameters from docstring
+            args=re.findall('\((.*)\)', res.__doc__.splitlines()[0])
 
+        if args is not None:
             beginmark=b.create_mark(None, cursor, True)
             b.insert_at_cursor("(%s)" % ", ".join(args))
             it=b.get_iter_at_mark(beginmark)
