@@ -1,4 +1,7 @@
-* exporters/advene2: export description metadata
+* exporters/advene2: export annotation type/relation type constraint
+   as :constraint:name view
+
+* exporters/advene2: export description metadata 
 
 * browser: if object ISA generator, add option to convert it to a list (enumerate)
 
