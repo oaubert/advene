@@ -121,8 +121,6 @@ from advene.gui.views.editaccumulator import EditAccumulator
 from advene.gui.views.tagbag import TagBag
 import advene.gui.views.annotationdisplay
 
-from simpletal import simpleTAL
-
 class Connect:
     """Glade XML interconnection with python class.
 
@@ -3505,7 +3503,6 @@ class AdveneGUI (Connect):
         return True
 
     def on_export_activate (self, button=None, data=None):
-        importer_package=Package(uri=config.data.advenefile('exporters.xml'))
 
         def generate_default_filename(filter, filename=None):
             """Generate a filename for the given filter.
@@ -3538,10 +3535,8 @@ class AdveneGUI (Connect):
             f=generate_default_filename(filter, os.path.basename(fs.get_filename()))
             fs.set_current_name(f)
             return True
-        exporters=dialog.list_selector_widget(sorted(( ( v, v.title )
-                                                       for v in importer_package.views
-                                                       if v.id != 'index' ), key=operator.itemgetter(1)),
-                                              callback=update_extension)
+        exporters=dialog.list_selector_widget( ( (v, v.title) for v in self.controller.get_export_filters() ),
+                                               callback=update_extension )
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Export format")), expand=False)
         hb.pack_start(exporters)
@@ -3553,30 +3548,8 @@ class AdveneGUI (Connect):
         res=fs.run()
 
         if res == gtk.RESPONSE_OK:
-            filter=exporters.get_current_element()
-            filename=fs.get_filename()
-            ctx=self.controller.build_context()
-
-            try:
-                stream=open(filename, 'wb')
-            except Exception, e:
-                self.log(_("Cannot export to %(filename)s: %(e)s") % locals())
-                return True
-
-            kw = {}
-            if filter.content.mimetype is None or filter.content.mimetype.startswith('text/'):
-                compiler = simpleTAL.HTMLTemplateCompiler ()
-                compiler.parseTemplate (filter.content.stream, 'utf-8')
-                compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8')
-            else:
-                compiler = simpleTAL.XMLTemplateCompiler ()
-                compiler.parseTemplate (filter.content.stream)
-                try:
-                    compiler.getTemplate ().expand (context=ctx, outputFile=stream, outputEncoding='utf-8', suppressXMLDeclaration=True)
-                except simpleTALES.ContextContentException, e:
-                    self.log(_("Error when exporting: %s") % unicode(e))
-            stream.close()
-            self.log(_("Data exported to %s") % filename)
+            self.controller.apply_export_filter(exporters.get_current_element(), 
+                                                fs.get_filename())
         fs.destroy()
         return True
 
