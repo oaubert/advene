@@ -579,3 +579,24 @@ def color(target, context):
             return col
     else:
         return None
+
+def transition_fix_ns(target, context):
+    """Replace old namespaces into new ones.
+
+    This method is used by the Advene1->Advene2 export filter.
+    """
+    return target.replace("http://experience.univ-lyon1.fr/advene/ns/advenetool", 
+                          "http://advene.org/ns/advene-application/2.0")
+    
+def transition_fix_date(target, context):
+    """Reformat dates into iso8601 format.
+
+    This method is used by the Advene1->Advene2 export filter.
+    """
+    import re
+    import datetime
+    m=re.search('(\d\d\d\d)-(\d\d?)-(\d\d)', target)
+    if m:
+        return datetime.datetime(long(m.group(1)), long(m.group(2)), long(m.group(3))).isoformat()
+    else:
+        return target
