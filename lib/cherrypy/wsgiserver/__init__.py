@@ -913,6 +913,8 @@ class CherryPyWSGIServer(object):
             if msg == "Resource temporarily unavailable":
                 # Just try again. See http://www.cherrypy.org/ticket/479.
                 return
+            if x.args[0] == 4:
+                return
             raise
     
     def _get_interrupt(self):
