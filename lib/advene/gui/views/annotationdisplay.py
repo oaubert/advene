@@ -171,7 +171,7 @@ class AnnotationDisplay(AdhocView):
                 b=self.annotation
             elif isinstance(self.annotation, Annotation):
                 b=self.annotation.fragment.begin
-            cache=self.controller.gui.imagecache
+            cache=self.controller.package.imagecache
             if cache.is_initialized(b, epsilon=config.data.preferences['bookmark-snapshot-precision']):
                 self.label['image'].set_from_pixbuf(png_to_pixbuf (cache.get(b, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
             elif self.label['image'].get_pixbuf() != self.no_image_pixbuf:
