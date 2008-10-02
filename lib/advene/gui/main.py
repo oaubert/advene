@@ -34,13 +34,11 @@ import textwrap
 import re
 import urllib2
 import socket
-import operator
 
 import advene.core.config as config
 import advene.core.version
 
 import gtk
-import gtk.glade
 import gobject
 import pprint
 
@@ -59,8 +57,6 @@ except locale.Error:
 gettext.bindtextdomain(APP, config.data.path['locale'])
 gettext.textdomain(APP)
 gettext.install(APP, localedir=config.data.path['locale'], unicode=True)
-gtk.glade.bindtextdomain(APP, config.data.path['locale'])
-gtk.glade.textdomain(APP)
 # The following line is useless, since gettext.install defines _ as a
 # builtin. However, code checking applications need to be explicitly
 # told that _ is imported.
@@ -119,38 +115,76 @@ from advene.gui.views.scroller import ScrollerView
 from advene.gui.views.caption import CaptionView
 from advene.gui.views.editaccumulator import EditAccumulator
 from advene.gui.views.tagbag import TagBag
-import advene.gui.views.annotationdisplay
 
-class Connect:
-    """Glade XML interconnection with python class.
-
-    Abstract class defining helper functions to interconnect
-    glade XML files and methods of a python class.
+class DummyGlade:
+    """Transition class.
     """
-    def create_dictionary (self):
-        """Create a (name, function) dictionary for the current class."""
-        d = {}
-        self.create_dictionary_for_class (self.__class__, d)
-        return d
+    def __init__(self, menu_definition):
+        self.tooltips=gtk.Tooltips()
+        self.win=gtk.Window()
+        v=gtk.VBox()
+        self.win.add(v)
 
-    def create_dictionary_for_class (self, a_class, dic):
-        """Create a (name, function) dictionary for the specified class."""
-        bases = a_class.__bases__
-        for iteration in bases:
-            self.create_dictionary_for_class (iteration, dic)
-        for iteration in dir(a_class):
-            dic[iteration] = getattr(self, iteration)
+        self.menubar=gtk.MenuBar()
+        self.build_menubar(menu_definition, self.menubar)
+        v.pack_start(self.menubar, expand=False)
 
-    def connect(self, gui):
-        """Connect the class methods with the UI."""
-        gui.signal_autoconnect(self.create_dictionary ())
+        hb=gtk.HBox()
 
-    def gtk_widget_hide (self, widget):
-        """Generic hide() method."""
-        widget.hide ()
-        return True
+        self.fileop_toolbar=gtk.Toolbar()
+        self.fileop_toolbar.set_style(gtk.TOOLBAR_ICONS)
+        hb.pack_start(self.fileop_toolbar, expand=True)
 
-class AdveneGUI (Connect):
+        self.adhoc_hbox=gtk.HBox()
+        hb.pack_start(self.adhoc_hbox, expand=True)
+        self.search_hbox=gtk.HBox()
+        hb.pack_start(self.search_hbox, expand=False)
+        v.pack_start(hb, expand=False)
+        
+        self.vpaned=gtk.VPaned()
+
+        self.displayvbox=gtk.VBox()
+        self.vpaned.add1(self.displayvbox)
+
+        sw=gtk.ScrolledWindow()
+        self.logmessages=gtk.TextView()
+        sw.add(self.logmessages)
+        self.vpaned.pack2(sw)
+
+        v.add(self.vpaned)
+
+        self.package_list_menu=gtk.Menu()
+        self.win.show_all()
+        
+    def build_menubar(self, items, menu=None):
+        """Populate the menu with data taken from items.
+        """
+        if menu is None:
+            menu=gtk.Menu()
+        for (name, action, tooltip) in items:
+            if name.startswith('gtk-'):
+                i=gtk.ImageMenuItem(stock_id=name)
+            elif not name:
+                i=gtk.SeparatorMenuItem()
+            else:
+                i=gtk.MenuItem(name)
+            if isinstance(action, tuple):
+                # There is a submenu
+                m=self.build_menubar(action)
+                i.set_submenu(m)
+            elif action is not None:
+                i.connect('activate', action)
+            if tooltip:
+                self.tooltips.set_tip(i, tooltip)
+            
+            if name == _("_Select player"):
+                self.select_player_menuitem=i
+            elif name == _("Packages"):
+                self.package_list_menu=i
+            menu.append(i)
+        return menu
+
+class AdveneGUI(object):
     """Main GUI class.
 
     Some entry points in the methods:
@@ -174,29 +208,118 @@ class AdveneGUI (Connect):
     @ivar preferences: the current preferences
     @type preferences: dict
     """
-
     def __init__ (self):
         """Initializes the GUI and other attributes.
         """
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
 
-        gladefile=config.data.advenefile (config.data.gladefilename)
-        # Glade init.
-        self.gui = gtk.glade.XML(gladefile, domain=gettext.textdomain())
-        self.connect(self.gui)
+        self.tooltips = gtk.Tooltips()
+
+        menu_definition=(
+            (_("_File"), (
+                    ( _("gtk-new"), self.on_new1_activate, _("") ),
+                    ( _("gtk-open"), self.on_open1_activate, _("") ),
+                    ( _("gtk-save"), self.on_save1_activate, _("") ),
+                    ( _("gtk-save-as"), self.on_save_as1_activate, _("") ),
+                    ( _("gtk-close"), self.on_close1_activate, _("") ),
+                    ( _(""), None, _("") ),
+                    ( _("Save session"), self.on_save_session1_activate, _("Save the current session (list of opened packages)") ),
+                    ( _("Save workspace"), (
+                            ( _("...as package view"), self.on_save_workspace_as_package_view1_activate, _("") ),
+                            ( _("...as standard workspace"), self.on_save_workspace_as_default1_activate, _("Use the current layout as standard workspace in the future") )), _("")),
+                    ( _(""), None, _("") ),
+                    ( _("Select a video file"), self.on_b_addfile_clicked, _("Select a video file") ),
+                    ( _("Select a DVD"), self.on_b_selectdvd_clicked, _("Select a chapter from a DVD") ),
+                    ( _("Select a video stream"), self.on_select_a_video_stream1_activate, _("Enter a video stream address") ),
+                    ( _(""), None, _("") ),
+                    ( _("_Import File"), self.on_import_file1_activate, _("Import data from an external source") ),
+                    ( _(""), None, _("") ),
+                    ( _("Merge package"), self.on_merge_package_activate, _("Merge elements from another package") ),
+                    ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters") ),
+                    ( _(""), None, _("") ),
+                    ( _("Export..."), self.on_export_activate, _("Export data to another format") ),
+                    ( _(""), None, _("") ),
+                    ( _("gtk-quit"), self.on_exit, _("") ),
+                    ( _(""), None, _("") ),
+                    ), _("") ),
+            (_("_Edit"), (
+                    ( _("gtk-undo"), self.on_undo1_activate, _("") ),
+                    ( _("gtk-find"), self.on_find1_activate, _("") ),
+                    ( _("gtk-delete"), self.on_delete1_activate, _("") ),
+                    ( _("Create"), (
+                            ( _("Schema"), self.on_create_schema_activate, _("") ),
+                            ( _("View"), self.on_create_view_activate, _("") ),
+                            ( _("Query"), self.on_create_query_activate, _("") ),
+                            ( _("Annotation Type"), self.on_create_annotation_type_activate, _("") ),
+                            ( _("Relation Type"), self.on_create_relation_type_activate, _("") ),
+                            ), _("") ),
+                    ( _("Package _Imports"), self.on_package_imports1_activate, _("Edit imported element from other packages") ),
+                    ( _("_Standard Ruleset"), self.on_edit_ruleset1_activate, _("Edit the standard rules") ),
+                    ( _("P_ackage properties"), self.on_package_properties1_activate, _("Edit package properties") ),
+                    ( _("P_references"), self.on_preferences1_activate, _("Interface preferences") ),
+                    ), _("") ),
+            (_("_View"), (
+                    ( _("Take notes on the fly"), self.on_adhoc_transcribe_activate, _("Take notes on the fly as a timestamped transcription") ),
+                    ( _("_TreeView"), self.on_adhoc_treeview_activate, _("Display the package's content as a tree") ),
+                    ( _("T_imeline"), self.on_adhoc_timeline_activate, _("Display annotations on a timeline") ),
+                    ( _("_URL stack"), self.on_view_urlstack_activate, _("") ),
+                    ( _("T_ranscription"), (
+                            ( _("of an annotation type"), self.on_adhoc_transcription_activate, _("Display the transcription for an annotation type") ),
+                            ( _("of the whole package"), self.on_adhoc_transcription_package_activate, _("Transcription of the whole package") ),
+                            ), _("")),
+                    ( _("_Package Browser"), self.on_adhoc_browser_activate, _("Browse the package's data") ),
+                    ( _("_Start Web Browser"), self.on_adhoc_web_browser_activate, _("Start the web browser") ),
+                    ( _(""), None, _("") ),
+                    ( _("Evaluator"), self.on_evaluator2_activate, _("Open python evaluator window") ),
+                    ( _("Webserver log"), self.on_webserver_log1_activate, _("") ),
+                    ( _("Navigation _History"), self.on_navigationhistory1_activate, _("Display navigation history") ),
+                    ( _("_MediaInformation"), self.on_view_mediainformation_activate, _("Display information about the media") ),
+                    ), _("") ),
+            (_("_Player"), (
+                    ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
+                    ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
+                    ( _("_Configure player"), self.on_configure_player1_activate, _("Configure the player") ),
+                    ( _("Capture screenshots"), self.generate_screenshots, _("Generate screenshots for the current video") ),
+                    ( _("_Select player"), None, _("Select the player plugin") ),
+                    ), _("") ),
+            (_("Packages"), (
+                    ( _("No package"), None, _("") ),
+                    ), _("") ),
+            (_("_Help"), (
+                    ( _("gtk-help"), self.on_help1_activate, _("") ),
+                    ( _("Get support"), self.on_support1_activate, _("") ),
+                    ( _("Check for updates"), self.check_for_update, _("") ),
+                    ( _("Display shortcuts"), self.on_helpshortcuts_activate, _("") ),
+                    ( _("_About"), self.on_about1_activate, _("") ),
+                    ), _("") ),
+            )
+    
+        self.gui = DummyGlade(menu_definition)
+        for (stock, callback, tip) in (
+            (gtk.STOCK_OPEN, self.on_open1_activate, _("Open a package file")),
+            (gtk.STOCK_SAVE, self.on_save1_activate, _("Save the current package")),
+            (gtk.STOCK_SAVE_AS, self.on_save_as1_activate, _("Save the package with a new name")),
+            (gtk.STOCK_FLOPPY, self.on_b_addfile_clicked, _("Select movie file...")),
+            (gtk.STOCK_CDROM, self.on_b_selectdvd_clicked, _("Select DVD")),
+            (gtk.STOCK_QUIT, self.on_exit, _("Quit")),
+            ):
+            b=gtk.ToolButton(stock)
+            b.set_tooltip(self.tooltips, tip)
+            b.connect('clicked', callback)
+            self.gui.fileop_toolbar.insert(b, -1)
+        self.gui.fileop_toolbar.show_all()
 
         # Resize the main window
-        window=self.gui.get_widget('win')
+        window=self.gui.win
+        window.connect('key-press-event', self.on_win_key_press_event)
         self.init_window_size(window, 'main')
         window.set_icon_list(*self.get_icon_list())
-        self.tooltips = gtk.Tooltips()
 
         # Last auto-save time (in ms)
         self.last_auto_save=time.time()*1000
 
         # Frequently used GUI widgets
-        self.gui.logmessages = self.gui.get_widget("logmessages")
         self.slider_move = False
         # Will be initialized in get_visualisation_widget
         self.gui.stbv_combo = None
@@ -263,7 +386,7 @@ class AdveneGUI (Connect):
             return True
 
         # Generate the adhoc view buttons
-        hb=self.gui.get_widget('adhoc_hbox')
+        hb=self.gui.adhoc_hbox
         for name, tip, pixmap in (
             ('tree', _('Tree view'), 'treeview.png'),
             ('timeline', _('Timeline'), 'timeline.png'),
@@ -345,7 +468,7 @@ class AdveneGUI (Connect):
 
         if config.data.preferences['quicksearch-source'] is None:
             modify_source(None, None, _("All annotations"))
-        hb=self.gui.get_widget('search_hbox')
+        hb=self.gui.search_hbox
 
         self.quicksearch_entry.connect('activate', self.do_quicksearch)
         hb.pack_start(self.quicksearch_entry, expand=False)
@@ -362,7 +485,6 @@ class AdveneGUI (Connect):
         # Player status
         p=self.controller.player
         self.update_player_labels()
-        self.gui.player_status = self.gui.get_widget ("player_status")
         self.oldstatus = "NotStarted"
 
         self.last_slow_position = 0
@@ -677,8 +799,8 @@ class AdveneGUI (Connect):
         self.register_view(self.logwindow)
 
         self.visualisationwidget=self.get_visualisation_widget()
-        self.gui.get_widget("displayvbox").add(self.visualisationwidget)
-        self.gui.get_widget("vpaned").set_position(-1)
+        self.gui.displayvbox.add(self.visualisationwidget)
+        self.gui.vpaned.set_position(-1)
 
         def media_changed(context, parameters):
             if config.data.preferences['expert-mode']:
@@ -739,20 +861,24 @@ class AdveneGUI (Connect):
         self.controller.init(args)
 
         self.visual_id = None
-        # The player is initialized. We can register the drawable id
-        try:
-            if not config.data.player['embedded']:
-                raise Exception()
+
+        def register_drawable(drawable):
+            # The player is initialized. We can register the drawable id
             try:
-                self.controller.player.set_widget(self.drawable)
-            except AttributeError:
-                if config.data.os == 'win32':
-                    self.visual_id=self.drawable.window.handle
-                else:
-                    self.visual_id=self.drawable.window.xid
-                self.controller.player.set_visual(self.visual_id)
-        except Exception, e:
-            self.log("Cannot set visual: %s" % unicode(e))
+                if not config.data.player['embedded']:
+                    raise Exception()
+                try:
+                    self.controller.player.set_widget(self.drawable)
+                except AttributeError:
+                    if config.data.os == 'win32':
+                        self.visual_id=self.drawable.window.handle
+                    else:
+                        self.visual_id=self.drawable.window.xid
+                    self.controller.player.set_visual(self.visual_id)
+            except Exception, e:
+                self.log("Cannot set visual: %s" % unicode(e))
+            return True
+        self.drawable.connect_after('realize', register_drawable)
 
         # Populate the file history menu
         for filename in config.data.preferences['history']:
@@ -778,7 +904,7 @@ class AdveneGUI (Connect):
             return True
 
         menu=gtk.Menu()
-        self.gui.get_widget('select_player1').set_submenu(menu)
+        self.gui.select_player_menuitem.set_submenu(menu)
         menu.connect('map', build_player_menu)
 
         defaults=config.data.advenefile( ('defaults', 'workspace.xml'), 'settings')
@@ -1127,7 +1253,7 @@ class AdveneGUI (Connect):
         self.pane['east']=gtk.HPaned()
         self.pane['south']=gtk.VPaned()
         self.pane['fareast']=gtk.HPaned()
-        self.pane['main']=self.gui.get_widget('vpaned')
+        self.pane['main']=self.gui.vpaned
 
         # pack all together
         self.pane['west'].add1(self.viewbook['west'].widget)
@@ -1149,13 +1275,9 @@ class AdveneGUI (Connect):
 
         # URL stack
         self.viewbook['west'].add_view(self.logwindow, permanent=True)
-        # URL stack is embedded, the menu item is useless :
-        self.gui.get_widget('urlstack1').set_property('visible', False)
 
         # Navigation history
         self.navigation_history=Bookmarks(controller=self.controller, closable=True, display_comments=False)
-        # Navigation history is embedded. The menu item is useless :
-        self.gui.get_widget('navigationhistory1').set_property('visible', False)
         self.viewbook['west'].add_view(self.navigation_history, name=_("History"), permanent=True)
         # Make the history snapshots + border visible
         self.pane['west'].set_position (config.data.preferences['bookmark-snapshot-width'] + 20)
@@ -1462,7 +1584,7 @@ class AdveneGUI (Connect):
     def update_package_list (self):
         """Update the list of loaded packages.
         """
-        menu=self.gui.get_widget('package_list_menu')
+        menu=self.gui.package_list_menu
 
         def activate_package(button, alias):
             self.controller.activate_package (alias)
@@ -1526,9 +1648,8 @@ class AdveneGUI (Connect):
                         'error': unicode(e)}, gtk.MESSAGE_ERROR)
             return True
 
-        # We cannot set the widget name to something more sensible (like
-        # filemenu) because Glade resets names when editing the menu
-        menu=self.gui.get_widget('menuitem1_menu')
+        # FIXME: should use gtk.RecentChooserMenu
+        menu=self.gui.menubar.get_children()[0].get_submenu()
         i=gtk.MenuItem(label=unicode(os.path.basename(filename)), use_underline=False)
         i.connect('activate', open_history_file, filename)
         self.tooltips.set_tip(i, _("Open %s") % filename)
@@ -1604,7 +1725,7 @@ class AdveneGUI (Connect):
         </workspace>
         """
         workspace=ET.Element('workspace')
-        w=self.gui.get_widget('win')
+        w=self.gui.win
         d={}
         d['x'], d['y']=w.get_position()
         d['width'], d['height']=w.get_size()
@@ -1664,7 +1785,7 @@ class AdveneGUI (Connect):
                 layout=node
         # Restore layout
         if layout and not preserve_layout:
-            w=self.gui.get_widget('win')
+            w=self.gui.win
             w.move(long(layout.attrib['x']), long(layout.attrib['y']))
             w.resize(long(layout.attrib['width']), long(layout.attrib['height']))
             for pane in layout:
@@ -1967,7 +2088,7 @@ class AdveneGUI (Connect):
         t=" - ".join((_("Advene"), self.controller.get_title(self.controller.package)))
         if self.controller.package._modified:
             t += " (*)"
-        self.gui.get_widget ("win").set_title(t)
+        self.gui.win.set_title(t)
         return True
 
     def log (self, msg, level=None):
@@ -2185,7 +2306,7 @@ class AdveneGUI (Connect):
                 self.controller.save_package(alias=alias)
             return True
 
-        if self.gui.get_widget ("win").get_title().endswith('(*)') ^ self.controller.package._modified:
+        if self.gui.win.get_title().endswith('(*)') ^ self.controller.package._modified:
             self.update_window_title()
 
         # Check auto-save
@@ -2538,7 +2659,7 @@ class AdveneGUI (Connect):
 
         if self.controller.on_exit():
             # Memorize application window size/position
-            self.resize_cb(self.gui.get_widget('win'), None, 'main')
+            self.resize_cb(self.gui.win, None, 'main')
             gtk.main_quit()
             return False
         else:
@@ -2568,6 +2689,9 @@ class AdveneGUI (Connect):
                 # Get the cursor in the quicksearch entry
                 self.quicksearch_entry.grab_focus()
                 self.quicksearch_entry.select_region(0, -1)
+                return True
+            elif event.keyval == gtk.keysyms.q:
+                self.on_exit()
                 return True
             elif event.keyval == gtk.keysyms.z:
                 try:
@@ -3161,7 +3285,6 @@ class AdveneGUI (Connect):
                         'save-default-workspace', 'restore-default-workspace',
                         'tts-language', )
         cache={
-            'toolbarstyle': self.gui.get_widget("toolbar_fileop").get_style(),
             'data': config.data.path['data'],
             'plugins': config.data.path['plugins'],
             'advene': config.data.path['advene'],
@@ -3186,12 +3309,6 @@ class AdveneGUI (Connect):
         ew.add_spin(_("History size"), "history-size-limit", _("History filelist size limit"),
                     -1, 20)
         ew.add_checkbox(_("Remember window size"), "remember-window-size", _("Remember the size of opened windows"))
-        ew.add_option(_("Toolbar style"), "toolbarstyle", _("Toolbar style"),
-                      { _('Icons only'): gtk.TOOLBAR_ICONS,
-                        _('Text only'): gtk.TOOLBAR_TEXT,
-                        _('Both'): gtk.TOOLBAR_BOTH,
-                        }
-                     )
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
         ew.add_spin(_("Bookmark snapshot width"), 'bookmark-snapshot-width', _("Width of the snapshots representing bookmarks"), 50, 400)
         ew.add_spin(_("Bookmark snapshot precision"), 'bookmark-snapshot-precision', _("Precision (in ms) of the displayed bookmark snapshots."), 25, 500)
@@ -3267,7 +3384,6 @@ class AdveneGUI (Connect):
         if res:
             for k in direct_options:
                 config.data.preferences[k] = cache[k]
-            self.gui.get_widget('toolbar_fileop').set_style(cache['toolbarstyle'])
             for k in ('font-size', 'button-height', 'interline-height'):
                 config.data.preferences['timeline'][k] = cache[k]
             for k in ('data', 'moviepath', 'plugins', 'imagecache', 'advene'):
@@ -3526,7 +3642,7 @@ class AdveneGUI (Connect):
             return '.'.join( (filename, ext) )
 
         fs = gtk.FileChooserDialog(title=_("Export package data"),
-                                   parent=self.gui.get_widget('win'),
+                                   parent=self.gui.win,
                                    action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                    buttons=( gtk.STOCK_CONVERT, gtk.RESPONSE_OK,
                                              gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL ))
