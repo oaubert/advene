@@ -75,7 +75,7 @@ if config.data.preferences['language']:
 
 print config.data.version_string, "run at", time.strftime("%F %H:%M:%S %z"), "on", sys.platform
 
-if config.data.os in ('darwin', 'linux') and not 'DISPLAY' in os.environ:
+if config.data.os in ('linux') and not 'DISPLAY' in os.environ:
     print "The DISPLAY environment variable is not set. Cannot continue."
     sys.exit(1)
 
