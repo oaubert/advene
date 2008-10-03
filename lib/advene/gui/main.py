@@ -107,13 +107,10 @@ import advene.gui.edit.imports
 import advene.gui.edit.properties
 import advene.gui.edit.montage
 from advene.gui.edit.timeadjustment import TimeAdjustment
-from advene.gui.views.transcription import TranscriptionView
-from advene.gui.edit.transcribe import TranscriptionEdit
 from advene.gui.views.viewbook import ViewBook
 from advene.gui.views.html import HTMLView
 from advene.gui.views.scroller import ScrollerView
 from advene.gui.views.caption import CaptionView
-from advene.gui.views.editaccumulator import EditAccumulator
 from advene.gui.views.tagbag import TagBag
 
 class DummyGlade:
@@ -1910,8 +1907,7 @@ class AdveneGUI(object):
                     kwargs['source']="here/annotationTypes/%s/annotations/sorted" % at.id
                     if label is None:
                         label=self.controller.get_title(at)
-
-            view = TranscriptionView(**kwargs)
+            view = self.registered_adhoc_views[name](**kwargs)
         elif name == 'webbrowser' or name == 'htmlview':
             if destination != 'popup' and HTMLView._engine is not None:
                 view = HTMLView(controller=self.controller)
@@ -1926,7 +1922,7 @@ class AdveneGUI(object):
                 filename=kw['filename']
             except KeyError:
                 filename=None
-            view=TranscriptionEdit(controller=self.controller, filename=filename, parameters=parameters, **kw)
+            view=self.registered_adhoc_views[name](controller=self.controller, filename=filename, parameters=parameters, **kw)
         elif name == 'edit':
             try:
                 element=kw['element']
@@ -1936,7 +1932,7 @@ class AdveneGUI(object):
                 return None
             view=get_edit_popup(element, self.controller)
         elif name == 'editaccumulator':
-            view=EditAccumulator(controller=self.controller, scrollable=True)
+            view=self.registered_adhoc_views[name](controller=self.controller, scrollable=True)
             if not self.edit_accumulator:
                 # The first opened accumulator becomes the default one.
                 self.edit_accumulator=view
@@ -2194,11 +2190,16 @@ class AdveneGUI(object):
             a=p.annotations[-1]
         except IndexError:
             a=None
+        try:
+            at=p.all.annotation_types[-1]
+        except IndexError:
+            at=None
 
         ev=Evaluator(globals_=globals(),
                      locals_={'package': p,
                               'p': p,
                               'a': a,
+                              'at': at,
                               'c': self.controller,
                               'g': self,
                               'pp': pprint.pformat },
