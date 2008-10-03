@@ -150,7 +150,6 @@ class DummyGlade:
 
         v.add(self.vpaned)
 
-        self.package_list_menu=gtk.Menu()
         self.win.show_all()
         
     def build_menubar(self, items, menu=None):
@@ -177,7 +176,8 @@ class DummyGlade:
             if name == _("_Select player"):
                 self.select_player_menuitem=i
             elif name == _("Packages"):
-                self.package_list_menu=i
+                self.package_list_menu=gtk.Menu()
+                i.set_submenu(self.package_list_menu)
             menu.append(i)
         return menu
 
