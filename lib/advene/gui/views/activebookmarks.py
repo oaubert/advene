@@ -18,6 +18,7 @@
 
 """Module displaying active time bookmarks."""
 
+import os
 from gettext import gettext as _
 import gtk
 import gobject
@@ -1433,9 +1434,11 @@ class ActiveBookmark(object):
                 pass
             return True
 
-        eb.connect('drag-begin', _drag_begin)
-        eb.connect('drag-end', _drag_end)
-        eb.connect('drag-motion', _drag_motion)
+        # drag_set_icon_cursor does not work on native Gtk on MacOS X
+        if not (config.data.os == 'darwin' and not os.environ.get('DISPLAY')):
+            eb.connect('drag-begin', _drag_begin)
+            eb.connect('drag-end', _drag_end)
+            eb.connect('drag-motion', _drag_motion)
 
         def _button_press(widget, event):
             if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
