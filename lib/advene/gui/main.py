@@ -2191,7 +2191,7 @@ class AdveneGUI(object):
         except IndexError:
             a=None
         try:
-            at=p.all.annotation_types[-1]
+            at=p.annotationTypes[-1]
         except IndexError:
             at=None
 
