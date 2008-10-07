@@ -259,7 +259,7 @@ class DefaultGUIActions:
         dest=self.parse_parameter(context, parameters, 'destination', 'popup')
         if view is None:
             return True
-        if view in controller.gui.registered_adhoc_views:
+        if self.controller.gui is not None and view in self.controller.gui.registered_adhoc_views:
             self.gui.open_adhoc_view(view, destination=dest)
         else:
             self.gui.log(_("Error: undefined GUI view %s") % view)

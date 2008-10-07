@@ -19,7 +19,6 @@
 """Transcription view.
 """
 
-import sys
 import re
 import sets
 
@@ -28,7 +27,6 @@ import gtk
 import advene.core.config as config
 
 # Advene part
-from advene.model.package import Package
 from advene.gui.edit.properties import EditWidget
 
 import advene.util.helper as helper
@@ -36,7 +34,7 @@ import advene.util.helper as helper
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
+from advene.gui.util import dialog, get_pixmap_button
 import advene.gui.popup
 
 parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')

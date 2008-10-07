@@ -18,10 +18,8 @@
 #
 
 from advene.util.importer import GenericImporter, register
-import urllib
 import advene.core.config as config
 import time
-import os.path
 
 from gettext import gettext as _
 

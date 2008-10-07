@@ -28,7 +28,6 @@ import urllib
 from gettext import gettext as _
 
 from advene.model.content import Content
-from advene.model.view import View
 from advene.gui.util import dialog
 import advene.util.helper as helper
 

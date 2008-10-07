@@ -167,12 +167,6 @@ class RelationsBox:
                 print "Unknown event %s" % event
         return True
 
-    def update_relation (self, element=None):
-        """Update a relation's representation."""
-        bs = self.get_widget_for_relation (element)
-        for b in bs:
-            self.update_button (b)
-
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         #print "drag_sent event from %s" % widget.annotation.content.data
         if targetType == config.data.target_type['annotation']:

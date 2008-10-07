@@ -19,11 +19,9 @@
 
 # Advene browser, a la NeXT's workspace manager
 # FIXME: implement set_path to directly display a given path
-import sys
 
 # Advene part
 import advene.core.config as config
-from advene.gui.util import dialog
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
 from advene.model.exception import AdveneException

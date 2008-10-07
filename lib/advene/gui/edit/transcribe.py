@@ -42,7 +42,7 @@ from gettext import gettext as _
 
 from advene.gui.views import AdhocView
 from advene.gui.util import dialog, get_pixmap_button, get_small_stock_button
-from advene.gui.util import encode_drop_parameters, decode_drop_parameters
+from advene.gui.util import decode_drop_parameters
 from advene.gui.edit.properties import EditWidget
 from advene.gui.util.completer import Completer
 from advene.gui.widget import TimestampRepresentation

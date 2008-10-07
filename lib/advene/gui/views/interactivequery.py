@@ -20,7 +20,6 @@
 
 Display the query results in a view (timeline, tree, etc).
 """
-import time
 from gettext import gettext as _
 import pprint
 
@@ -32,9 +31,8 @@ from advene.gui.edit.rules import EditQuery
 from advene.model.bundle import AbstractBundle
 from advene.rules.elements import SimpleQuery, Condition, Quicksearch
 from advene.model.annotation import Annotation
-from advene.model.query import Query
 from advene.model.tal.context import AdveneTalesException
-from advene.gui.util import dialog, get_small_stock_button, get_pixmap_button
+from advene.gui.util import dialog, get_small_stock_button
 
 from advene.gui.views import AdhocView
 import advene.gui.evaluator

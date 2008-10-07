@@ -26,7 +26,7 @@ FIXME: replace button dropzone by EventBox 1pixel wide, with visual feedback
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
-from advene.gui.util import get_small_stock_button, name2color, get_pixmap_button
+from advene.gui.util import get_small_stock_button, name2color
 import advene.gui.util.dialog as dialog
 from advene.gui.views import AdhocView
 from advene.gui.widget import AnnotationWidget

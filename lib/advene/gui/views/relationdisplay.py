@@ -20,13 +20,9 @@
 """
 
 import gtk
-import gobject
 from gettext import gettext as _
 
-import advene.core.config as config
 from advene.gui.views import AdhocView
-import advene.util.helper as helper
-from advene.gui.util import png_to_pixbuf
 from advene.gui.widget import AnnotationRepresentation
 
 name="Relation display plugin"

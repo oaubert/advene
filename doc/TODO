@@ -1,3 +1,5 @@
+* HTMLeditor: implement basic css parsing
+
 * use HTMLeditor component as viewer if mozembed is not available.
 
 * htmleditor: when suppressing a tag with tal: instructions (define,

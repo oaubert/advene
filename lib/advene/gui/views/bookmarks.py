@@ -26,7 +26,7 @@ import urllib
 import advene.core.config as config
 import advene.util.helper as helper
 from advene.gui.util import get_small_stock_button, dialog
-from advene.gui.util import encode_drop_parameters, decode_drop_parameters
+from advene.gui.util import decode_drop_parameters
 from advene.gui.util.completer import Completer
 from advene.gui.views import AdhocView
 from advene.gui.widget import TimestampRepresentation

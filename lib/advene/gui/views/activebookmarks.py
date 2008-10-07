@@ -33,7 +33,6 @@ from advene.gui.views import AdhocView
 from advene.gui.views.bookmarks import BookmarkWidget
 from advene.model.annotation import Annotation
 from advene.model.fragment import MillisecondFragment
-from advene.model.view import View
 import advene.util.helper as helper
 import advene.gui.popup
 

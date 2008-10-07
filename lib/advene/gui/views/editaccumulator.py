@@ -29,7 +29,7 @@ from gettext import gettext as _
 import advene.core.config as config
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 from advene.gui.edit.elements import get_edit_popup
-from advene.gui.util import get_small_stock_button, get_pixmap_button
+from advene.gui.util import get_pixmap_button
 
 name="Edit accumulator view plugin"
 
