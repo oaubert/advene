@@ -33,16 +33,17 @@ except ImportError:
     # fail the module loading, and use them as a guard in register()
     goocanvas=None
     Group=object
-
 import cairo
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.gui.views import AdhocView
+from advene.gui.util import get_pixmap_button
 from advene.gui.util import dialog
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.elements import get_edit_popup
-import advene.gui.popup
 import advene.util.helper as helper
 from math import sqrt
+import advene.gui.popup
+
 
 name="Schema editor view"
 
@@ -74,6 +75,8 @@ class SchemaEditor (AdhocView):
         self.exchButton = None
         self.canvasX = 1200
         self.canvasY = 1000
+        self.swX = 0
+        self.swY = 0
         self.sepV = None
         self.sepH = None
         self.openedschemas = {}
@@ -140,18 +143,20 @@ class SchemaEditor (AdhocView):
         canvas = goocanvas.Canvas()
         canvas.modify_base (gtk.STATE_NORMAL, bg_color)
         canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
+        scrolled_win = gtk.ScrolledWindow ()
+        scrolled_win.add(canvas)
+        self.canvas = canvas
+
         #Zoom
         w = gtk.Label ("Zoom:")
         hbox.pack_start (w, False, False, 0)
-        adj = gtk.Adjustment (0.65, 0.05, 1.00, 0.05, 0.50, 0.50)
+        adj = gtk.Adjustment (1, 1, 2, 0.5, 1, 1)
         adj.connect('value-changed', self.zoom_changed, canvas)
         w = gtk.SpinButton (adj, 0.0, 2)
         w.set_size_request (50, -1)
         hbox.pack_start (w, False, False, 0)
         self.hboxButton = hbox
-        scrolled_win = gtk.ScrolledWindow ()
-        scrolled_win.add(canvas)
-        self.canvas = canvas
+        canvas.connect('size-allocate', self.sw_resize, adj)
 
         #schemaArea
         schemaArea = gtk.VBox(False, 4)
@@ -161,8 +166,20 @@ class SchemaEditor (AdhocView):
         schemaArea.pack_start(scrolled_win, True, True, 0)
         schemaArea.pack_start(gtk.HSeparator(), expand=False)
         schemaArea.pack_start(hboxConExplorer, expand=False)
+        
         return schemaArea
 
+    def sw_resize(self, w, size, adj):
+        #print adj.get_value()
+        self.swX = size.width
+        self.swY = size.height
+        self.canvasX=size.width*4
+        self.canvasY=size.height*4
+        self.canvas.set_bounds(0, 0, self.canvasX, self.canvasY)
+        self.setup_canvas()
+        #print self.canvas.get_bounds()
+        #print "%s %s" % (size.width, size.height)
+        
 ###
 #
 # Functions to update the gui when an event occurs
@@ -174,7 +191,7 @@ class SchemaEditor (AdhocView):
         self.openedschemas=[]
         self.setup_canvas()
         return True
-
+    
     def update_schema(self, schema=None, event=None):
         if schema in self.openedschemas:
             self.setup_canvas()
@@ -188,7 +205,7 @@ class SchemaEditor (AdhocView):
                 rtg = self.findRelationTypeGroup(rt.getId(),self.canvas)
                 rtg.update()
         return True
-
+    
     def update_annotation (self, annotation=None, event=None):
         if event == 'AnnotationCreate' or event == 'AnnotationDelete':
             at = annotation.getType()
@@ -197,7 +214,7 @@ class SchemaEditor (AdhocView):
                 atg = self.findAnnotationTypeGroup(at.getId(),self.canvas)
                 atg.update()
         return True
-
+    
     def update_annotationtype(self, annotationtype=None, event=None):
         schema = annotationtype.getSchema()
         if schema in self.openedschemas:
@@ -310,7 +327,7 @@ class SchemaEditor (AdhocView):
         temp=self.openedschemas.pop()
         self.openedschemas.insert(0,temp)
         self.setup_canvas()
-
+        
     def exchangeSchemaAreas(self, w):
         t1 =self.openedschemas[0]
         self.openedschemas[0]=self.openedschemas[1]
@@ -367,17 +384,17 @@ class SchemaEditor (AdhocView):
         # add buttons to rotate and change schemas place
         self.addTransformButtons(size)
         if size<=0:
-            print "No schema to draw"
+            #print "No schema to draw"
             return
         if size>4:
             print "More than 4 schema, fixme!!!"
             return
         if size==1:
             schema = self.openedschemas[0]
-            self.draw_schema_annots(self.canvas, schema, 20, 20, self.canvasX, self.canvasY)
+            self.draw_schema_annots(self.canvas, schema, 20, 60, self.canvasX, self.canvasY)
         if size==2:
             # vertical separation between the 2 schemas
-            self.draw_schema_annots(self.canvas, self.openedschemas[0], 20, 20, self.canvasX/2, self.canvasY)
+            self.draw_schema_annots(self.canvas, self.openedschemas[0], 20, 60, self.canvasX/2, self.canvasY)
             p = goocanvas.Points ([(self.canvasX/2, 0), (self.canvasX/2, self.canvasY)])
             self.sepV = goocanvas.Polyline (parent = root,
                                         close_path = False,
@@ -387,10 +404,10 @@ class SchemaEditor (AdhocView):
                                         start_arrow = False,
                                         end_arrow = False
                                         )
-            self.draw_schema_annots(self.canvas, self.openedschemas[1], 20+self.canvasX/2, 20, self.canvasX, self.canvasY)
+            self.draw_schema_annots(self.canvas, self.openedschemas[1], 20+self.canvasX/2, 60, self.canvasX, self.canvasY)
         if size==3:
             # 1+1/1
-            self.draw_schema_annots(self.canvas, self.openedschemas[0], 20, 20, self.canvasX/2, self.canvasY/2)
+            self.draw_schema_annots(self.canvas, self.openedschemas[0], 20, 60, self.canvasX/2, self.canvasY/2)
             p = goocanvas.Points ([(self.canvasX/2, 0), (self.canvasX/2, self.canvasY/2)])
             self.sepV = goocanvas.Polyline (parent = root,
                                         close_path = False,
@@ -400,7 +417,7 @@ class SchemaEditor (AdhocView):
                                         start_arrow = False,
                                         end_arrow = False
                                         )
-            self.draw_schema_annots(self.canvas, self.openedschemas[1], 20+self.canvasX/2, 20, self.canvasX, self.canvasY/2)
+            self.draw_schema_annots(self.canvas, self.openedschemas[1], 20+self.canvasX/2, 60, self.canvasX, self.canvasY/2)
             p = goocanvas.Points ([(0, self.canvasY/2), (self.canvasX, self.canvasY/2)])
             self.sepH = goocanvas.Polyline (parent = root,
                                         close_path = False,
@@ -410,9 +427,9 @@ class SchemaEditor (AdhocView):
                                         start_arrow = False,
                                         end_arrow = False
                                         )
-            self.draw_schema_annots(self.canvas, self.openedschemas[2], 20, 20+self.canvasY/2, self.canvasX, self.canvasY)
+            self.draw_schema_annots(self.canvas, self.openedschemas[2], 20, 60+self.canvasY/2, self.canvasX, self.canvasY)
         if size==4:
-            self.draw_schema_annots(self.canvas, self.openedschemas[0], 20, 20, self.canvasX/2, self.canvasY/2)
+            self.draw_schema_annots(self.canvas, self.openedschemas[0], 20, 60, self.canvasX/2, self.canvasY/2)
             p = goocanvas.Points ([(self.canvasX/2, 0), (self.canvasX/2, self.canvasY)])
             self.sepV = goocanvas.Polyline (parent = root,
                                         close_path = False,
@@ -422,8 +439,8 @@ class SchemaEditor (AdhocView):
                                         start_arrow = False,
                                         end_arrow = False
                                         )
-            self.draw_schema_annots(self.canvas, self.openedschemas[1], 20+self.canvasX/2, 20, self.canvasX, self.canvasY/2)
-            self.draw_schema_annots(self.canvas, self.openedschemas[3], 20, 20+self.canvasY/2, self.canvasX/2, self.canvasY)
+            self.draw_schema_annots(self.canvas, self.openedschemas[1], 20+self.canvasX/2, 60, self.canvasX, self.canvasY/2)
+            self.draw_schema_annots(self.canvas, self.openedschemas[3], 20, 60+self.canvasY/2, self.canvasX/2, self.canvasY)
             p = goocanvas.Points ([(0, self.canvasY/2), (self.canvasX, self.canvasY/2)])
             self.sepH = goocanvas.Polyline (parent = root,
                                         close_path = False,
@@ -433,7 +450,7 @@ class SchemaEditor (AdhocView):
                                         start_arrow = False,
                                         end_arrow = False
                                         )
-            self.draw_schema_annots(self.canvas, self.openedschemas[2], 20+self.canvasX/2, 20+self.canvasY/2, self.canvasX, self.canvasY)
+            self.draw_schema_annots(self.canvas, self.openedschemas[2], 20+self.canvasX/2, 60+self.canvasY/2, self.canvasX, self.canvasY)
         self.draw_schemas_rels(self.canvas, self.openedschemas)
 
 
@@ -445,7 +462,7 @@ class SchemaEditor (AdhocView):
                 self.addRelationTypeGroup(canvas, sc, j.getTitle(), j)
                 r=r+1
         #print "%s RelationTypes drawn" % r
-
+        
     def draw_schema_annots(self, canvas, schema, xoffset, yoffset, xmax, ymax):
         self.addSchemaTitle(canvas, schema, xoffset+(xmax-xoffset)/2, yoffset+(ymax-yoffset)/2)
         annotTypes = schema.getAnnotationTypes()
@@ -453,13 +470,13 @@ class SchemaEditor (AdhocView):
         b=0
         an=0
         for i in annotTypes:
-            x = xoffset+b*160
-            y = yoffset+a*60
+            x = xoffset+b*300
+            y = yoffset+a*80
             self.addAnnotationTypeGroup(canvas, schema, i.getTitle(), i, x, y)
             an=an+1
-            if x+320<xmax:
+            if x+600<xmax:
                 b=b+1
-            elif y+120<ymax:
+            elif y+160<ymax:
                 b=0
                 a=a+1
         #print "%s AnnotationTypes drawn" % an
@@ -525,16 +542,16 @@ class SchemaEditor (AdhocView):
         if rx is None or ry is None:
             if part == 0:
                 rx = 20
-                ry = 30
+                ry = 60
             if part == 1:
                 rx = self.sepV.get_bounds().x2 + 20
-                ry = 30
+                ry = 60
             if (part == 2 and len(self.openedschemas)==3) or part == 3:
                 rx = 20
-                ry = self.sepH.get_bounds().y2 + 30
+                ry = self.sepH.get_bounds().y2 + 60
             if part == 2 and len(self.openedschemas)==4:
                 rx = self.sepV.get_bounds().x2 + 20
-                ry = self.sepH.get_bounds().y2 + 30
+                ry = self.sepH.get_bounds().y2 + 60
         cvgroup = AnnotationTypeGroup(self.controller, canvas, schema, name, type, rx, ry)
         if cvgroup is not None:
             self.setup_annot_signals(cvgroup, schema)
@@ -626,10 +643,10 @@ class SchemaEditor (AdhocView):
                 return True
             def menuView(w, item):
                 self.create_view_based_on(item.type)
-
+                
             m=advene.gui.popup.Menu(element=item.type, controller=self.controller)
             menu=m.menu
-
+            
             itemM = gtk.MenuItem(_("Remove Relation Type"))
             itemM.connect('activate', menuRem, item )
             menu.insert(itemM, 1)
@@ -637,9 +654,7 @@ class SchemaEditor (AdhocView):
             itemM.connect('activate', menuView, item )
             menu.insert(itemM, 1)
             menu.show_all()
-
             m.popup()
-
         return True
 
     def rel_on_button_release (self, item, target, event):
@@ -698,16 +713,12 @@ class SchemaEditor (AdhocView):
                 mem.append(member2)
                 self.addRelationTypeGroup(item.get_canvas(), schema, members=mem)
                 return True
-
             m=advene.gui.popup.Menu(element=item.type, controller=self.controller)
             menu=m.menu
-
             menu.insert(gtk.SeparatorMenuItem(), 1)
-
             itemM = gtk.MenuItem(_("Remove Annotation Type"))
             itemM.connect('activate', menuRem, item, schema )
             menu.insert(itemM, 2)
-
             itemM = gtk.MenuItem(_("Create Relation Type between this one and..."))
             ssmenu = gtk.Menu()
             itemM.set_submenu(ssmenu)
@@ -721,7 +732,6 @@ class SchemaEditor (AdhocView):
                     sssmenu.append(itemSSM)
                 ssmenu.append(itemSM)
             menu.insert(itemM, 3)
-
             menu.show_all()
             m.popup()
         return True
@@ -762,7 +772,6 @@ class SchemaEditor (AdhocView):
         # drag-data-received quand on lache sur un objet
         # ...
         else:
-
             x = item.rect.get_bounds().x1
             y = item.rect.get_bounds().y1
             newsc = self.findSchemaFromXY(x, y)
@@ -789,7 +798,7 @@ class SchemaEditor (AdhocView):
         # Relations redraw
         for rtg in item.rels:
             self.rel_redraw(rtg)
-
+            
 ###
 #
 #  events on background
@@ -896,13 +905,12 @@ class SchemaEditor (AdhocView):
                 ite.props.line_width = 2.0
 
     def zoom_changed (self, adj, canvas):
-        canvas.set_scale (adj.get_value())
+        canvas.set_scale (adj.get_value()/4)
 
-    def center_toggled (self, button, data):
-        pass
 
 
     def export_to_pdf (self, w, canvas):
+
         nompdf = config.data.path['settings']
         for sc in self.openedschemas:
             nompdf += sc.id + '_'
@@ -1017,7 +1025,7 @@ class TypeExplorer (gtk.ScrolledWindow):
     def colorChange(self, but):
         col=self.bcol.get_color()
         self.entryCol.set_text("#%04x%04x%04x" % (col.red, col.green, col.blue))
-
+        
     def refresh(self, *p):
         return True
 
@@ -1042,7 +1050,7 @@ class TypeExplorer (gtk.ScrolledWindow):
         col=self.bcol.get_color()
         self.entryCol.set_text("#%04x%04x%04x" % (col.red, col.green, col.blue))
         return True
-
+    
     def getTypeColor(self):
         return self.bcol.get_color()
 
@@ -1054,7 +1062,7 @@ class TypeExplorer (gtk.ScrolledWindow):
             return False
         self.TId.set_text(name)
         return True
-
+    
     def getTypeName(self):
         return self.TName.get_text()
 
@@ -1063,11 +1071,11 @@ class TypeExplorer (gtk.ScrolledWindow):
             return False
         self.TName.set_text(name)
         return True
-
+    
     def getMimeType(self):
         m = self.TMimeType.get_current_element()
         return m
-
+    
     def setMimeType(self, mimetype):
         store, i = dialog.generate_list_model( elements = [ ('text/plain', _("Plain text content")),
                               ('application/x-advene-structured', _("Simple-structured content")),
@@ -1159,7 +1167,7 @@ class TypeExplorer (gtk.ScrolledWindow):
 
 class AnnotationTypeGroup (Group):
     def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, rx =0, ry=0):
-        goocanvas.Group.__init__(self, parent = canvas.get_root_item ())
+        Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.schema=schema
         self.name=name
@@ -1190,9 +1198,8 @@ class AnnotationTypeGroup (Group):
             self.color = self.controller.get_element_color(self.type)
 
         self.rect = self.newRect (rx,ry,self.color)
-        self.text = self.newText (self.formattedName(),rx+5,ry+10)
-
-
+        self.text = self.newText (self.formattedName(),rx+5,ry+30)
+        
     def formattedName(self):
         nbann = str(len(self.type.getAnnotations()))
         if len(self.name)+len(nbann)>17:
@@ -1204,8 +1211,8 @@ class AnnotationTypeGroup (Group):
         return goocanvas.Rect (parent = self,
                                     x = xx,
                                     y = yy,
-                                    width = 140,
-                                    height = 40,
+                                    width = 280,
+                                    height = 60,
                                     fill_color_rgba = 0x3cb37150,
                                     stroke_color = color,
                                     line_width = 2.0)
@@ -1217,8 +1224,7 @@ class AnnotationTypeGroup (Group):
                                         y = yy,
                                         width = -1,
                                         anchor = gtk.ANCHOR_W,
-                                        font = "Sans Bold 10")
-
+                                        font = "Sans Bold 22")
 
     def remove(self):
         while (len(self.rels)>0):
@@ -1232,7 +1238,7 @@ class AnnotationTypeGroup (Group):
         parent = self.get_parent()
         child_num = parent.find_child (self)
         parent.remove_child (child_num)
-
+        
     def update(self):
         self.name=self.type.title
         self.color = "black"
@@ -1242,10 +1248,10 @@ class AnnotationTypeGroup (Group):
                 self.rect.props.stroke_color = self.color
         if self.text is not None:
             self.text.props.text = self.formattedName()
-
+            
 class RelationTypeGroup (Group):
     def __init__(self, controller=None, canvas=None, schema=None, name=" ", type=None, members=[]):
-        goocanvas.Group.__init__(self, parent = canvas.get_root_item ())
+        Group.__init__(self, parent = canvas.get_root_item ())
         self.controller=controller
         self.schema=schema
         self.name=name
@@ -1313,13 +1319,13 @@ class RelationTypeGroup (Group):
 
         if d==0:
             # verify slot to attach the relation on annotation type before doing that
-            p = goocanvas.Points ([(x1, y1), (x1,y1-20), (x1+10, y1-20), (x2+10, y2)])
+            p = goocanvas.Points ([(x1, y1), (x1,y1-40), (x1+30, y1-40), (x2+30, y2)])
         else:
             p = goocanvas.Points ([(x1, y1), (x2, y2)])
         #ligne
         self.line = self.newLine (p,self.color)
         if (d==0):
-            self.text = self.newText (self.formattedName(),x1+5,y1-10)
+            self.text = self.newText (self.formattedName(),x1+15,y1-40)	
         else:
             self.text = self.newText (self.formattedName(),(x1+x2)/2, (y1+y2)/2)
 
@@ -1338,7 +1344,7 @@ class RelationTypeGroup (Group):
                                         y = yy,
                                         width = -1,
                                         anchor = gtk.ANCHOR_CENTER,
-                                        font = "Sans Bold 10")
+                                        font = "Sans Bold 22")
     def newLine(self, p, color):
         return goocanvas.Polyline (parent = self,
                                         close_path = False,
@@ -1351,7 +1357,7 @@ class RelationTypeGroup (Group):
                                         arrow_length = 4.0,
                                         arrow_width = 3.0
                                         )
-
+        
     #FIXME : hack to find id from type's uri
     def getIdFromURI(self, uri):
         return uri[1:]
@@ -1408,15 +1414,15 @@ class RelationTypeGroup (Group):
         nbrel = len(self.type.getRelations())
         if d==0:
             # modifier en fonction du slot
-            p = goocanvas.Points ([(x1, y1), (x1,y1-20), (x1+10, y1-20), (x2+10, y2)])
+            p = goocanvas.Points ([(x1, y1), (x1,y1-40), (x1+30, y1-40), (x2+30, y2)])
             if self.text is None:
-                self.text = self.newText (self.formattedName(),x1+5,y1-10)
-            self.text.translate(x1-15-self.text.get_bounds().x1, y1-20-self.text.get_bounds().y1)
+                self.text = self.newText (self.formattedName(),x1,y1)	
+            self.text.translate(x1-130-self.text.get_bounds().x1, y1-60-self.text.get_bounds().y1)
         else:
             p = goocanvas.Points ([(x1, y1), (x2, y2)])
             if self.text is None:
                 self.text = self.newText (self.formattedName(),(x1+x2)/2, (y1+y2)/2)
-            self.text.translate((x1+x2-20)/2-self.text.get_bounds().x1, (y1+y2-30)/2-self.text.get_bounds().y1)
+            self.text.translate((x1+x2)/2-self.text.get_bounds().x1, (y1+y2)/2-self.text.get_bounds().y1)
         if self.line  is None:
             self.line = self.newLine (p,self.color)
         self.line.props.points=p
@@ -1424,7 +1430,7 @@ class RelationTypeGroup (Group):
     def remove(self):
         self.controller.delete_element(self.type)
         self.remove_drawing_only()
-
+        
     def remove_drawing_only(self):
         for i in self.members:
             gr = self.findAnnotationTypeGroup(i.id, self.get_canvas())
