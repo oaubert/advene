@@ -569,7 +569,7 @@ class Evaluator:
                 args.append("**" + varkw)
         elif inspect.isbuiltin(res) and res.__doc__:
             # Extract parameters from docstring
-            args=re.findall('\((.*)\)', res.__doc__.splitlines()[0])
+            args=re.findall('\((.*?)\)', res.__doc__.splitlines()[0])
 
         if args is not None:
             beginmark=b.create_mark(None, cursor, True)
