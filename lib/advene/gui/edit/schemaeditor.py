@@ -145,18 +145,54 @@ class SchemaEditor (AdhocView):
         canvas.set_bounds (0, 0, self.canvasX, self.canvasY)
         scrolled_win = gtk.ScrolledWindow ()
         scrolled_win.add(canvas)
+
+        def on_background_scroll(widget, event):
+            zoom=event.state & gtk.gdk.CONTROL_MASK
+            if zoom:
+                # Control+scroll: zoom in/out
+                a = self.zoom_adj
+                incr = -a.step_increment
+            elif event.state & gtk.gdk.SHIFT_MASK:
+                # Horizontal scroll
+                a = scrolled_win.get_hadjustment()
+                incr = a.step_increment
+            else:
+                # Vertical scroll
+                a = scrolled_win.get_vadjustment()
+                incr = a.step_increment
+                
+            if event.direction == gtk.gdk.SCROLL_DOWN:
+                val = a.value + incr
+                if val > a.upper - a.page_size:
+                    val = a.upper - a.page_size
+                elif val < a.lower:
+                    val = a.lower
+                if val != a.value:
+                    a.value = val
+            elif event.direction == gtk.gdk.SCROLL_UP:
+                val = a.value - incr
+                if val < a.lower:
+                    val = a.lower
+                elif val > a.upper - a.page_size:
+                    val = a.upper - a.page_size
+                if val != a.value:
+                    a.value = val
+            
+            return True
+        canvas.connect('scroll-event', on_background_scroll)
+
         self.canvas = canvas
 
         #Zoom
         w = gtk.Label ("Zoom:")
         hbox.pack_start (w, False, False, 0)
-        adj = gtk.Adjustment (1, 1, 2, 0.5, 1, 1)
-        adj.connect('value-changed', self.zoom_changed, canvas)
-        w = gtk.SpinButton (adj, 0.0, 2)
+        self.zoom_adj = gtk.Adjustment(1, 0.2, 2, 0.1, 0.5)
+        self.zoom_adj.connect('value-changed', self.zoom_changed, canvas)
+        w = gtk.SpinButton (self.zoom_adj, 0.0, 2)
         w.set_size_request (50, -1)
         hbox.pack_start (w, False, False, 0)
         self.hboxButton = hbox
-        canvas.connect('size-allocate', self.sw_resize, adj)
+        canvas.connect('size-allocate', self.sw_resize, self.zoom_adj)
 
         #schemaArea
         schemaArea = gtk.VBox(False, 4)
