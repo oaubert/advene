@@ -85,6 +85,7 @@ class SchemaEditor (AdhocView):
         self.drag_y = 0
         self.timer_motion_max=3
         self.timer_motion=self.timer_motion_max
+        self.drag_coordinates=None
 
         if package is None and controller is not None:
             package=controller.package
@@ -180,6 +181,27 @@ class SchemaEditor (AdhocView):
             
             return True
         canvas.connect('scroll-event', on_background_scroll)
+
+        def on_background_motion(widget, event):
+            if not event.state & gtk.gdk.BUTTON1_MASK:
+                return False
+            if not self.drag_coordinates:
+                self.drag_coordinates=(event.x_root, event.y_root)
+                return False            
+            x, y = self.drag_coordinates
+            
+            a=scrolled_win.get_hadjustment()
+            v=a.value + x - event.x_root
+            if v > a.lower and v < a.upper:
+                a.value=v
+            a=scrolled_win.get_vadjustment()
+            v=a.value + y - event.y_root
+            if v > a.lower and v < a.upper:
+                a.value=v
+            
+            self.drag_coordinates= (event.x_root, event.y_root)
+            return False
+        canvas.connect('motion-notify-event', on_background_motion)
 
         self.canvas = canvas
 
@@ -410,6 +432,7 @@ class SchemaEditor (AdhocView):
     def setup_canvas (self):
         root = self.canvas.get_root_item ()
         root.connect('button-press-event', self.on_background_button_press)
+        root.connect('button-release-event', self.on_background_button_release)
         #deleting old drawing
         while root.get_n_children()>0:
             root.remove_child (0)
@@ -873,50 +896,58 @@ class SchemaEditor (AdhocView):
             return self.openedschemas[0]
         return None
 
+    def on_background_button_release(self, item, widget, event):
+        if event.button == 1:
+            self.drag_coordinates=None
+        return False
+
     def on_background_button_press (self, item, target, event):
+        if event.button != 3:
+            return False
+
         self.TE.initWithType(None)
         if len(self.openedschemas)<=0:
             return False
         canvas = item.get_canvas()
         self.drawFocusOn(canvas)
         schema = self.findSchemaFromXY(event.x, event.y)
-        if (event.button==3):
-            def newRel(w, canvas, schema):
-                self.addRelationTypeGroup(canvas, schema)
-                return True
-            def newAnn(w, canvas, schema, x, y):
-                self.addAnnotationTypeGroup(canvas, schema, rx=x, ry=y)
-                return True
-            def pick_color(w, schema):
-                self.controller.gui.update_color(schema)
-            def hide(w, schema):
-                self.removeSchemaFromArea(schema)
-            def menuView(w, schema):
-                self.create_view_based_on(schema)
-            menu = gtk.Menu()
-            itemM = gtk.MenuItem(_("Select a color"))
-            itemM.connect('activate', pick_color, schema)
-            menu.append(itemM)
-            itemM = gtk.MenuItem(_("New Annotation Type"))
-            itemM.connect('activate', newAnn, canvas, schema, event.x, event.y )
-            menu.append(itemM)
-            itemM = gtk.MenuItem(_("New Relation Type"))
-            itemM.connect('activate', newRel, canvas, schema )
-            menu.append(itemM)
-            itemM = gtk.MenuItem(_("Hide this schema"))
-            itemM.connect('activate', hide, schema )
-            menu.append(itemM)
-            itemM = gtk.MenuItem(_("Create HTML view"))
-            itemM.connect('activate', menuView, schema )
-            menu.append(itemM)
-            itemM = gtk.MenuItem(_("Export drawing to pdf"))
-            itemM.connect('activate', self.export_to_pdf, canvas)
-            menu.append(itemM)
-            #itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
-            #itemM.connect("activate", menuMove, canvas )
-            #menu.append(itemM)
-            menu.show_all()
-            menu.popup(None, None, None, 0, gtk.get_current_event_time())
+
+        def newRel(w, canvas, schema):
+            self.addRelationTypeGroup(canvas, schema)
+            return True
+        def newAnn(w, canvas, schema, x, y):
+            self.addAnnotationTypeGroup(canvas, schema, rx=x, ry=y)
+            return True
+        def pick_color(w, schema):
+            self.controller.gui.update_color(schema)
+        def hide(w, schema):
+            self.removeSchemaFromArea(schema)
+        def menuView(w, schema):
+            self.create_view_based_on(schema)
+        menu = gtk.Menu()
+        itemM = gtk.MenuItem(_("Select a color"))
+        itemM.connect('activate', pick_color, schema)
+        menu.append(itemM)
+        itemM = gtk.MenuItem(_("New Annotation Type"))
+        itemM.connect('activate', newAnn, canvas, schema, event.x, event.y )
+        menu.append(itemM)
+        itemM = gtk.MenuItem(_("New Relation Type"))
+        itemM.connect('activate', newRel, canvas, schema )
+        menu.append(itemM)
+        itemM = gtk.MenuItem(_("Hide this schema"))
+        itemM.connect('activate', hide, schema )
+        menu.append(itemM)
+        itemM = gtk.MenuItem(_("Create HTML view"))
+        itemM.connect('activate', menuView, schema )
+        menu.append(itemM)
+        itemM = gtk.MenuItem(_("Export drawing to pdf"))
+        itemM.connect('activate', self.export_to_pdf, canvas)
+        menu.append(itemM)
+        #itemM = gtk.MenuItem(_("Move Annotation Type from Schema..."))
+        #itemM.connect("activate", menuMove, canvas )
+        #menu.append(itemM)
+        menu.show_all()
+        menu.popup(None, None, None, 0, gtk.get_current_event_time())
         return True
 
     def drawFocusOn(self, item):
