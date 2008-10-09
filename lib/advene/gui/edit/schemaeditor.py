@@ -185,6 +185,8 @@ class SchemaEditor (AdhocView):
         def on_background_motion(widget, event):
             if not event.state & gtk.gdk.BUTTON1_MASK:
                 return False
+            if self.dragging:
+                return False
             if not self.drag_coordinates:
                 self.drag_coordinates=(event.x_root, event.y_root)
                 return False            
