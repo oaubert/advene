@@ -1888,9 +1888,7 @@ class AdveneGUI(object):
                 self.log(_("Cannot identify the adhoc view %s") % name.id)
                 return None
 
-        if name == 'tagbag':
-            view=TagBag(self.controller, parameters=parameters, tags=list(self.controller.get_defined_tags()))
-        elif name == 'transcription':
+        if name == 'transcription':
             kwargs={ 'controller': self.controller,
                      'parameters': parameters }
             if 'source' in kw:
