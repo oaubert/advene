@@ -2585,12 +2585,21 @@ class AdveneController(object):
             output.close()
             
         f=open(os.path.join(destination, "index.html"), 'w')
+        defaultview=self.package.getMetaData(config.data.namespace, 'default_utbv')
+        v=self.package.views.get_by_id(defaultview)
+        if defaultview and v:
+            default=_("""<p><strong>You should probably begin at <a href="%(href)s">%(title)s</a>.</strong></p>""") % { 'href': v.id,
+                                                                                                                        'title': self.get_title(v) }
+        else:
+            default=''
         f.write("""<html><head>%(title)s</head>
 <body>
 <h1>%(title)s views</h1>
+%(default)s
 <ul>
 %(data)s
 </ul></body></html>""" % { 'title': self.package.title,
+                           'default': default,
                            'data': "\n".join( '<li><a href="%s">%s</a>' % (url_translation[view_url[v]],
                                                                            v.title)
                                               for v in views ) })
