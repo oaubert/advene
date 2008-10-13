@@ -2505,7 +2505,7 @@ class AdveneController(object):
                 print "Exception when evaluating", address
                 print unicode(e).encode('utf-8')
                 return 'unconverted.html?error_for_' + output
-                
+            
             if not isinstance(content, basestring):
                 return 'unconverted.html?not_a_string_' + output
 
@@ -2523,6 +2523,10 @@ class AdveneController(object):
                     # The destination has already been processed
                     continue
                 l=link.replace(self.server.urlbase, '')
+                if l.startswith('http:'):
+                    # It is an external link
+                    url_translation[link]=link
+                    continue
                 m=re.match('packages/[^/]+/(.+)', l)
                 if m:
                     # It is a view
@@ -2537,8 +2541,8 @@ class AdveneController(object):
 
             # Replace all URL references.
             for link in re.findall(r'''href=['"](.+?)['"> ]''', content):
-                #print "Replacing %s by %s" % (str(link), str(url_translation[link]))
-                content=content.replace(link, url_translation[link])
+                if link != url_translation[link]:
+                    content=content.replace(link, url_translation[link])
 
             # FIXME: Replace actions by javascript code inviting to run Advene (?)
             content=re.sub(r'''(href=.unconverted.html.)''', r'''onClick="return false;" \1''', content)
