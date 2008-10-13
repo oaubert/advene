@@ -2416,7 +2416,7 @@ class AdveneController(object):
         self.log(_("Data exported to %s") % filename)
         return True
 
-    def website_export(self, destination='/tmp/n', views=None, max_depth=3):
+    def website_export(self, destination='/tmp/n', views=None, max_depth=3, progress_callback=None):
         """Export a set of static views to a directory.
 
         The intent of this export is to be able to quickly publish a
@@ -2425,12 +2425,16 @@ class AdveneController(object):
         @param destination: the destination directory
         @type destination: path
         @param views: the list of views to export
+        @param max_depth: maximum recursion depth
+        @param progress_callback: if defined, the method will be called with a float in 0..1 and a message indicating progress 
         """
         if views is None:
             views=[ v
                     for v in self.package.views
                     if (v.matchFilter['class'] == 'package'
                         and helper.get_view_type(v) == 'static') ]
+
+        main_step=1.0/len(views)
 
         if os.path.exists(destination) and not os.path.isdir(destination):
             self.log(_("%s exists but is not a directory. Cancelling website export") % destination)
@@ -2448,6 +2452,10 @@ class AdveneController(object):
         url_translation={}
         used_resources=[]
 
+        progress=0
+        if progress_callback:
+            progress_callback(progress, _("Starting export"))
+
         def export_page(url, depth=0):
             """Export the given URL.
 
@@ -2458,7 +2466,8 @@ class AdveneController(object):
             if depth > max_depth:
                 self.log(_("Maximum recursion depth exceeded when trying to export %s") % url)
                 return 'unconverted.html?max_depth_exceeded'
-            self.log("exporting %s (%d)" % (url, depth) )
+                
+            #self.log("exporting %s (%d)" % (url, depth) )
             m=re.search('(.+)#(.+)', url)
             if m:
                 url=m.group(1)
@@ -2534,7 +2543,6 @@ class AdveneController(object):
 
             # FIXME: Replace actions by javascript code inviting to run Advene (?)
 
-            print "Writing %s to %s\n" % (url, output)
             # Write the result.
             f=open(os.path.join(destination, output), 'w')
             f.write(content)
@@ -2550,14 +2558,20 @@ class AdveneController(object):
             url_translation[link]=v.id
             view_url[v]=link
 
+        progress=.1
         for v in views:
             link=view_url[v]
+            if progress_callback:
+                progress_callback(progress, _("Exporting ") + v.title)
             export_page(link)
+            progress += main_step
+
+        if progress_callback:
+            progress_callback(.95, _("Copying resources"))
 
         # Copy used resources
         for path in used_resources:
             dest=os.path.join(destination, 'resources', path)
-            print "Exporting resource %s to %s" % (path, dest)
 
             d=os.path.dirname(dest)
             if not os.path.isdir(d):
@@ -2589,6 +2603,9 @@ class AdveneController(object):
 <p>Advene was unable to export this resource.</p>
 </body></html>""" % { 'title': self.get_title(self.package) })
         f.close()
+
+        if progress_callback:
+            progress_callback(1.0, _("Export complete"))
 
 if __name__ == '__main__':
     cont = AdveneController()
