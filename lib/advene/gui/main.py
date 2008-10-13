@@ -238,7 +238,7 @@ class AdveneGUI(object):
                     ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters") ),
                     ( "", None, "" ),
                     ( _("Export..."), self.on_export_activate, _("Export data to another format") ),
-                    ( _("Views export..."), self.on_website_export_activate, _("Export views to a website") ),
+                    ( _("Website export..."), self.on_website_export_activate, _("Export views to a website") ),
                     ( "", None, "" ),
                     ( _("gtk-quit"), self.on_exit, "" ),
                     ( "", None, "" ),
@@ -3631,7 +3631,7 @@ class AdveneGUI(object):
         dirname_entry=gtk.Entry()
         hb.add(dirname_entry)
 
-        d=gtk.Button(stock=gtk.STOCK_DIRECTORY)
+        d=gtk.Button(stock=gtk.STOCK_OPEN)
         def select_dir(*p):
             d=dialog.get_dirname(_("Specify the output directory"))
             if d is not None:
@@ -3668,6 +3668,8 @@ class AdveneGUI(object):
                                            max_depth=max_depth.get_value_as_int(),
                                            progress_callback=cb)
             return True
+
+        dirname_entry.connect('activate', do_conversion)
 
         def do_cancel(*p):
             w.destroy()
