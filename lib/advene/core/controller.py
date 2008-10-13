@@ -2416,6 +2416,180 @@ class AdveneController(object):
         self.log(_("Data exported to %s") % filename)
         return True
 
+    def website_export(self, destination='/tmp/n', views=None, max_depth=3):
+        """Export a set of static views to a directory.
+
+        The intent of this export is to be able to quickly publish a
+        comment in the form of a set of static views.
+
+        @param destination: the destination directory
+        @type destination: path
+        @param views: the list of views to export
+        """
+        if views is None:
+            views=[ v
+                    for v in self.package.views
+                    if (v.matchFilter['class'] == 'package'
+                        and helper.get_view_type(v) == 'static') ]
+
+        if os.path.exists(destination) and not os.path.isdir(destination):
+            self.log(_("%s exists but is not a directory. Cancelling website export") % destination)
+            return
+        elif not os.path.exists(destination):
+            helper.recursive_mkdir(destination)
+
+        if not os.path.isdir(destination):
+            self.log(_("%s does not exist") % destination)
+            return
+        imgdir=os.path.join(destination, 'imagecache')
+        if not os.path.isdir(imgdir):
+            helper.recursive_mkdir(imgdir)
+
+        url_translation={}
+        used_resources=[]
+
+        def export_page(url, depth=0):
+            """Export the given URL.
+
+            @param url: the source url
+            @param depth: the current recursion depth.
+            @return: the output name of the converted url
+            """
+            if depth > max_depth:
+                self.log(_("Maximum recursion depth exceeded when trying to export %s") % url)
+                return 'unconverted.html?max_depth_exceeded'
+            self.log("exporting %s (%d)" % (url, depth) )
+            m=re.search('(.+)#(.+)', url)
+            if m:
+                url=m.group(1)
+            m=re.search('packages/(advene|%s)/(.*)' % self.current_alias, url)
+            if m:
+                # Absolute url
+                address=m.group(2)
+            elif url in (v.id for v in self.package.views):
+                # Relative url.
+                address='view/'+url
+            else:
+                return "unconverted.html?unknown_url_%s" % url.replace('/', '_')
+
+            m=re.match('(\w+)/(.+)', address)
+            if m:
+                if m.group(1) == 'resources':
+                    # We have a resource.
+                    url_translation[url]=address
+                    used_resources.append(m.group(2))
+                    return address
+                elif m.group(1) in ('view', 'annotations', 'relations', 'views', 'schemas', 'annotationTypes', 'relationTypes', 'queries'):
+                    # We skip the first element, which is either view/
+                    # (for toplevel views), or a bundle (annotations, views...)
+                    output=m.group(2).replace('/', '_')
+                else:
+                    # Can be a query over a package, or a relative pathname
+                    output=address.replace('/', '_')
+            else:
+                output=address.replace('/', '_')
+
+            # Generate the view
+            ctx=self.build_context()
+            try:
+                content=ctx.evaluateValue('here/%s' % address)
+            except Exception, e:
+                print "Exception when evaluating", address
+                print unicode(e).encode('utf-8')
+                return 'unconverted.html?error_for_' + output
+                
+            if not isinstance(content, basestring):
+                return 'unconverted.html?not_a_string_' + output
+
+            # Extract and copy snapshots + resources
+            content=re.sub(r'/packages/[^/]+/(imagecache/\d+)', r'\1.png', content)
+            for t in re.findall('imagecache/(\d+)', content):
+                # FIXME: not robust wrt. multiple packages/videos
+                f=open(os.path.join(imgdir, '%s.png' % t), 'wb')
+                f.write(str(self.package.imagecache[t]))
+                f.close()
+
+            # Convert all links
+            for link in re.findall(r'''href=['"](.+?)['"> ]''', content):
+                if link in url_translation:
+                    # The destination has already been processed
+                    continue
+                l=link.replace(self.server.urlbase, '')
+                m=re.match('packages/[^/]+/(.+)', l)
+                if m:
+                    # It is a view
+                    url_translation[link]=export_page(link, depth+1)
+                else:
+                    if not '/' in l and l in (v.id for v in self.package.views):
+                        # It should be a relative link.
+                        url_translation[link]=export_page(os.path.dirname(url)+"/"+link, depth+1)
+                    else:
+                        # It is another element.
+                        url_translation[link]='unconverted.html?' + l.replace('/', '_')
+
+            # Replace all URL references.
+            for link in re.findall(r'''href=['"](.+?)['"> ]''', content):
+                #print "Replacing %s by %s" % (str(link), str(url_translation[link]))
+                content=content.replace(link, url_translation[link])
+
+            # FIXME: Replace actions by javascript code inviting to run Advene (?)
+
+            print "Writing %s to %s\n" % (url, output)
+            # Write the result.
+            f=open(os.path.join(destination, output), 'w')
+            f.write(content)
+            f.close()
+            
+            return output
+
+        view_url={}
+        ctx=self.build_context()
+        # Pre-seed url translations for base views
+        for v in views:
+            link="/".join( (ctx.globals['options']['package_url'], 'view', v.id) )
+            url_translation[link]=v.id
+            view_url[v]=link
+
+        for v in views:
+            link=view_url[v]
+            export_page(link)
+
+        # Copy used resources
+        for path in used_resources:
+            dest=os.path.join(destination, 'resources', path)
+            print "Exporting resource %s to %s" % (path, dest)
+
+            d=os.path.dirname(dest)
+            if not os.path.isdir(d):
+                helper.recursive_mkdir(d)
+
+            r=self.package.resources
+            for element in path.split('/'):
+                r=r[element]                
+            output=open(dest, 'wb')
+            output.write(r.data)
+            output.close()
+            
+        f=open(os.path.join(destination, "index.html"), 'w')
+        f.write("""<html><head>%(title)s</head>
+<body>
+<h1>%(title)s views</h1>
+<ul>
+%(data)s
+</ul></body></html>""" % { 'title': self.package.title,
+                           'data': "\n".join( '<li><a href="%s">%s</a>' % (url_translation[view_url[v]],
+                                                                           v.title)
+                                              for v in views ) })
+        f.close()
+
+        f=open(os.path.join(destination, "unconverted.html"), 'w')
+        f.write("""<html><head>%(title)s - not converted</head>
+<body>
+<h1>%(title)s - not converted resource</h1>
+<p>Advene was unable to export this resource.</p>
+</body></html>""" % { 'title': self.get_title(self.package) })
+        f.close()
+
 if __name__ == '__main__':
     cont = AdveneController()
     try:
