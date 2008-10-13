@@ -3722,7 +3722,7 @@ class AdveneGUI(object):
             f=generate_default_filename(filter, os.path.basename(fs.get_filename()))
             fs.set_current_name(f)
             return True
-        exporters=dialog.list_selector_widget( ( (v, v.title) for v in self.controller.get_export_filters() ),
+        exporters=dialog.list_selector_widget( [ (v, v.title) for v in self.controller.get_export_filters() ],
                                                callback=update_extension )
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Export format")), expand=False)
