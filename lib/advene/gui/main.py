@@ -238,6 +238,7 @@ class AdveneGUI(object):
                     ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters") ),
                     ( "", None, "" ),
                     ( _("Export..."), self.on_export_activate, _("Export data to another format") ),
+                    ( _("Views export..."), self.on_website_export_activate, _("Export views to a website") ),
                     ( "", None, "" ),
                     ( _("gtk-quit"), self.on_exit, "" ),
                     ( "", None, "" ),
@@ -2210,7 +2211,6 @@ class AdveneGUI(object):
         for v in self.adhoc_views:
             ev.locals_[v.view_id]=v
         w=ev.popup()
-        self.init_window_size(w, 'evaluator')
 
         return True
 
@@ -3617,6 +3617,74 @@ class AdveneGUI(object):
         ET.ElementTree(root).write(stream, encoding='utf-8')
         stream.close()
         self.controller.log(_("Standard workspace has been saved"))
+        return True
+
+    def on_website_export_activate(self, button=None, data=None):
+        w=gtk.Window()
+
+        v=gtk.VBox()
+        w.set_title(_("Website export"))
+        v.add(gtk.Label(_("Exporting views to a website")))
+        
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Output directory")), expand=False)
+        dirname_entry=gtk.Entry()
+        hb.add(dirname_entry)
+
+        d=gtk.Button(stock=gtk.STOCK_DIRECTORY)
+        def select_dir(*p):
+            d=dialog.get_dirname(_("Specify the output directory"))
+            if d is not None:
+                dirname_entry.set_text(d)
+            return True
+        d.connect('clicked', select_dir)
+        hb.pack_start(d, expand=False)
+        v.pack_start(hb, expand=False)
+
+        hb=gtk.HBox()
+        hb.pack_start(gtk.Label(_("Maximum recursion depth")), expand=False)
+        adj=gtk.Adjustment(3, 1, 9, 1)
+        max_depth=gtk.SpinButton(adj)
+        hb.pack_start(max_depth, expand=False)
+        v.pack_start(hb, expand=False)
+
+        pb=gtk.ProgressBar()
+        v.pack_start(pb, expand=False)
+        
+        def cb(val, msg):
+            if val > 0 and val <= 1.0:
+                pb.set_fraction(val)
+            pb.set_text(msg)
+            while gtk.events_pending():
+                gtk.main_iteration()
+            return True
+        
+        def do_conversion(b):
+            d=dirname_entry.get_text()
+            if not d:
+                return False
+            b.set_sensitive(False)
+            self.controller.website_export(destination=d,
+                                           max_depth=max_depth.get_value_as_int(),
+                                           progress_callback=cb)
+            return True
+
+        def do_cancel(*p):
+            w.destroy()
+            return True
+
+        hb=gtk.HButtonBox()
+        b=gtk.Button(stock=gtk.STOCK_CONVERT)
+        b.connect('clicked', do_conversion)
+        hb.add(b)
+        b=gtk.Button(stock=gtk.STOCK_CLOSE)
+        b.connect('clicked', do_cancel)
+        hb.add(b)
+        v.pack_start(hb, expand=False)
+
+        w.add(v)
+
+        w.show_all()       
         return True
 
     def on_export_activate (self, button=None, data=None):
