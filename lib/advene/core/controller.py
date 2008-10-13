@@ -2464,7 +2464,6 @@ class AdveneController(object):
             @return: the output name of the converted url
             """
             if depth > max_depth:
-                self.log(_("Maximum recursion depth exceeded when trying to export %s") % url)
                 return 'unconverted.html?max_depth_exceeded'
                 
             #self.log("exporting %s (%d)" % (url, depth) )
@@ -2542,6 +2541,7 @@ class AdveneController(object):
                 content=content.replace(link, url_translation[link])
 
             # FIXME: Replace actions by javascript code inviting to run Advene (?)
+            content=re.sub(r'''(href=.unconverted.html.)''', r'''onClick="return false;" \1''', content)
 
             # Write the result.
             f=open(os.path.join(destination, output), 'w')
