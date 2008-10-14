@@ -2546,7 +2546,9 @@ class AdveneController(object):
             # Replace all URL references.
             for link in re.findall(r'''href=['"](.+?)['"> ]''', content):
                 if link != url_translation[link]:
-                    content=content.replace(link, url_translation[link])
+                    content=re.sub('''(href=['"])%s(['"> ])''' % link,
+                                   r'''\1''' + url_translation[link] + r'''\2''',
+                                   content)
 
             # FIXME: Replace actions by javascript code inviting to run Advene (?)
             content=re.sub(r'''(href=.unconverted.html.)''', r'''onClick="return false;" \1''', content)
