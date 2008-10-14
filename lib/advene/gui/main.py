@@ -453,7 +453,7 @@ class AdveneGUI(object):
             source_expressions=[ (_("All annotations"),
                                   None) ] + [
                 (_("Annotations of type %s") % self.controller.get_title(at),
-                 'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags') ]
+                 'here/annotationTypes/%s/annotations' % at.id) for at in self.controller.package.annotationTypes ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags'), (_("Ids"), 'ids') ]
             for (label, expression) in source_expressions:
                 i=gtk.CheckMenuItem(label)
                 i.set_active(expression == config.data.preferences['quicksearch-source'])
