@@ -2456,6 +2456,10 @@ class AdveneController(object):
         if progress_callback:
             progress_callback(progress, _("Starting export"))
 
+        def unconverted(url, reason):
+            #return 'unconverted.html?' + reason.replace(' ', '_')
+            return url
+
         def export_page(url, depth=0):
             """Export the given URL.
 
@@ -2464,7 +2468,7 @@ class AdveneController(object):
             @return: the output name of the converted url
             """
             if depth > max_depth:
-                return 'unconverted.html?max_depth_exceeded'
+                return unconverted(url, 'max depth exceeded')
                 
             #self.log("exporting %s (%d)" % (url, depth) )
             m=re.search('(.+)#(.+)', url)
@@ -2478,7 +2482,7 @@ class AdveneController(object):
                 # Relative url.
                 address='view/'+url
             else:
-                return "unconverted.html?unknown_url_%s" % url.replace('/', '_')
+                return unconverted(url, 'unknown url')
 
             m=re.match('(\w+)/(.+)', address)
             if m:
@@ -2504,10 +2508,10 @@ class AdveneController(object):
             except Exception, e:
                 print "Exception when evaluating", address
                 print unicode(e).encode('utf-8')
-                return 'unconverted.html?error_for_' + output
+                return unconverted(url, 'error for ' + output)
             
             if not isinstance(content, basestring):
-                return 'unconverted.html?not_a_string_' + output
+                return unconverted(url, 'not a string ' + output)
 
             # Extract and copy snapshots + resources
             content=re.sub(r'/packages/[^/]+/(imagecache/\d+)', r'\1.png', content)
@@ -2537,7 +2541,7 @@ class AdveneController(object):
                         url_translation[link]=export_page(os.path.dirname(url)+"/"+link, depth+1)
                     else:
                         # It is another element.
-                        url_translation[link]='unconverted.html?' + l.replace('/', '_')
+                        url_translation[link]=unconverted(link, 'unhandled link')
 
             # Replace all URL references.
             for link in re.findall(r'''href=['"](.+?)['"> ]''', content):
