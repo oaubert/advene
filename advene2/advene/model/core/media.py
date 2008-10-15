@@ -44,7 +44,7 @@ class Media(PackageElement):
         The unit is known if the frame of reference is in the default Advene
         namespace.
 
-        NB: this is specifid to the cinelab application model.
+        NB: this is specific to the cinelab application model.
         """
         return self._unit
 
@@ -55,7 +55,7 @@ class Media(PackageElement):
         The origin is known if the frame of reference is in the default Advene
         namespace.
 
-        NB: this is specifid to the cinelab application model.
+        NB: this is specific to the cinelab application model.
         """
         return self._origin
 
