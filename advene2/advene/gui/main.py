@@ -96,9 +96,6 @@ from advene.gui.util import get_small_stock_button, image_from_position, dialog,
 #import advene.gui.views.tree
 from advene.gui.views import AdhocViewParametersParser
 import advene.gui.views.timeline
-#import advene.gui.views.table
-#import advene.gui.views.interactivequery
-#import advene.gui.views.finder
 #import advene.gui.views.activebookmarks
 #from advene.gui.views.bookmarks import Bookmarks
 #from advene.gui.edit.rules import EditRuleSet
@@ -433,7 +430,7 @@ class AdveneGUI(Connect):
                 e.refresh()
             # Update the type fieldnames
             if annotation.content.mimetype.endswith('/x-advene-structured'):
-                annotation.type._fieldnames.update(helper.common_fieldnames([ annotation ]))
+                annotation.type.meta[config.data.transientns+'fieldnames']=helper.common_fieldnames([ annotation ])
 
         # Refresh the edit popup for the associated relations
         for e in [ e for e in self.edit_popups if e.element in annotation.relations ]:
