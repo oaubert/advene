@@ -423,7 +423,7 @@ class Config(object):
         """Parse command-line options.
         """
         parser=OptionParser(usage="""Advene - annotate digital videos, exchange on the Net.
-    %prog [options] [file.azp|file.xml|alias=uri]""")
+    %prog [options] [file.czp|file.xml|alias=uri]""")
 
         parser.add_option("-v", "--version", dest="version", action="store_true",
                           help="Display version number and exit.")
