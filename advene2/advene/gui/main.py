@@ -3134,7 +3134,7 @@ class AdveneGUI(Connect):
             self.controller.package.creator = cache['creator']
             self.controller.package.created = cache['created']
             self.controller.package.contributor = cache['contributor']
-            self.controller.package.contributed = cache['contributed']
+            self.controller.package.contributed = cache['modified']
             self.controller.package.title = cache['title']
             self.update_window_title()
             self.controller.set_default_media(cache['media'])
