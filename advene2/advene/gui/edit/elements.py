@@ -799,7 +799,7 @@ class EditRelationTypePopup (EditElementPopup):
         vbox.add(f.get_view ())
 
         # FIXME
-        #members=[ ('#'+at.id, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
+        #members=[ ('#'+at.id, self.controller.get_title(at)) for at in self.controller.package.all.annotation_types ]
         #members.append( ('', _("Any annotation type")) )
         #f = EditElementListForm(
         #    title=_("Members"),

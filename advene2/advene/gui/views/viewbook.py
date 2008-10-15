@@ -322,7 +322,7 @@ class ViewBook(AdhocView):
             menu.append(i)
             for label, action in (
                 (_("to create a new static view"), lambda i: create_and_open_view([ at ])),
-                (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % at.id, destination=self.location, label=title)),
+                (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotation_types/%s/annotations' % at.id, destination=self.location, label=title)),
                 (_("in a timeline"), lambda i: self.controller.gui.open_adhoc_view('timeline', elements=at.annotations, annotationtypes=[ at ], destination=self.location, label=title)),
                 (_("as a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=at.annotations, destination=self.location, label=title)),
                 (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=at.annotations, destination=self.location, label=title)),

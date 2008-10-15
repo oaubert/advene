@@ -177,7 +177,7 @@ class Menu:
 
     def display_transcription(self, widget, annotationtype):
         self.controller.gui.open_adhoc_view('transcription',
-                                            source="here/annotationTypes/%s/annotations/sorted" % annotationtype.id)
+                                            source="here/annotation_types/%s/annotations" % annotationtype.id)
         return True
 
     def offset_element (self, widget, el):
@@ -627,7 +627,7 @@ class Menu:
             return True
         add_item(_('Create a static view'), lambda i: create_static(element))
         add_item(_('Generate a caption dynamic view'), lambda i: self.create_dynamic_view(element))
-        add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotationTypes/%s/annotations/sorted' % element.id))
+        add_item(_('Display as transcription'), lambda i: self.controller.gui.open_adhoc_view('transcription', source='here/annotation_types/%s/annotations' % element.id))
         add_item(_('Display annotations in table'), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations))
         if self.readonly:
             return
