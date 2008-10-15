@@ -1,6 +1,11 @@
 Important improvements
 ======================
 
+- remove all list generations ending with "," in backends/sqlite.py
+
+- replace executescript by a list of execute in backends/sqlite.py -- 
+  make the .sql file a .py file
+
 - implement read or write locking, "force", and "readonly" in _SqliteBackend
 
 - implement notification of events (probably with a mixin for registration/
