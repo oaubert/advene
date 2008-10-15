@@ -112,7 +112,7 @@ class _AllGroup(CamGroupMixin, CoreAllGroup):
 
     def count_schemas(self):
         o = self._owner
-        meta = [(_cam_system_type, "annotation-type", False)] 
+        meta = [(_cam_system_type, "schema", False)] 
         return sum( be.count_lists(pdict, meta=meta)
                     for be, pdict in o._backends_dict.items() )
 
