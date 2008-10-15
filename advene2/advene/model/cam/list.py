@@ -1,6 +1,7 @@
 from advene.model.cam.consts import CAMSYS_TYPE
 from advene.model.cam.element import CamElementMixin
 from advene.model.cam.group import CamGroupMixin
+import advene.model.cam.util.bookkeeping as bk
 from advene.model.core.list import List as CoreList
 
 class List(CoreList, CamGroupMixin, CamElementMixin) :
@@ -9,6 +10,7 @@ class List(CoreList, CamGroupMixin, CamElementMixin) :
     def instantiate(cls, owner, id, *args):
         r = super(List, cls).instantiate(owner, id, *args)
         r._transtype()
+        r._self_connect("modified-items", bk.update_element)
         return r
 
     def __iter__(self):

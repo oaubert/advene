@@ -1476,12 +1476,12 @@ class TestEvents(TestCase):
         hid2 = self.a1().connect("pre-modified", self.attr_handler, "pre")
         hid1 = self.a1().connect("modified-meta", self.meta_handler)
         hid2 = self.a1().connect("pre-modified-meta", self.meta_handler, "pre")
-        self.a1().enter_no_event_section()
-        self.a1().media = self.m2()
-        self.a1().begin = 11
-        self.a1().end = 12
-        self.a1().set_meta(DC_NS_PREFIX + "creator", "somebody else")
-        self.assertEqual(self.buf, [])
+        self.a1().enter_no_event_section(); \
+            self.a1().media = self.m2(); \
+            self.a1().begin = 11; \
+            self.a1().end = 12; \
+            self.a1().set_meta(DC_NS_PREFIX + "creator", "somebody else"); \
+            self.assertEqual(self.buf, [])
         self.a1().exit_no_event_section()
         self.a1().end = 13
         self.assertNotEqual(self.buf, [])

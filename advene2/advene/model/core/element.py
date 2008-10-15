@@ -123,7 +123,7 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         This method will usually perform checks and conversions from its actual
         arguments to the data expected to the backend. It is responsible for
         1/ storing the data in the backend and 2/ initializing the instance
-        (for which it may reuse instantiate to reduce redundancy).
+        (for which it should reuse instantiate to reduce redundancy).
 
         Note that this method *should* be tolerant w.r.t. its parameters,
         especially accepting both element instances or ID-refs.
@@ -244,12 +244,14 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         references the the deleted element will not continue to exist in
         packages that are not currently loaded.
         """
+        self.emit("pre-deleted")
         for r in self.iter_references():
             r.cut()
         self._owner._backend.delete_element(self._owner._id, self._id,
                                             self.ADVENE_TYPE)
-        self.__class__ = DeletedPackageElement
         del self._owner._elements[self._id]
+        self.emit("deleted")
+        self.__class__ = DeletedPackageElement
 
     @autoproperty
     def _get_id(self):
@@ -268,6 +270,7 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         importers = o._importers
         assert not o.has_element(new_id)
         old_id = self._id
+        self.emit("pre-renamed")
         # renaming in the owner package
         o._backend.rename_element(o._id, old_id, self.ADVENE_TYPE, new_id)
         # best effort renaming in all (known) importing packages
@@ -298,20 +301,21 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
         # NB: since this method is embeded in a property, it can not easily
         # be overloaded, that is why we implement this here rather than in
         # import_.py
-        if self.ADVENE_TYPE is not IMPORT: return
-        del o._imports_dict[old_id]
-        o._imports_dict[new_id] = self._imported
-        self._imported._importers[o] = new_id
-        for eid, rel, ref \
-        in o._backend.iter_references_with_import(o._id, new_id):
-            old_idref = "%s:%s" % (old_id, ref)
-            new_idref = "%s:%s" % (new_id, ref)
-            if eid == "":
-                o._update_caches(old_idref, new_idref, None, rel)
-            else:
-                e = o._elements.get(eid) # only update *instantiated* elts
-                if e is not None:
-                    e._update_caches(old_idref, new_idref, None, rel)
+        if self.ADVENE_TYPE is IMPORT:
+            del o._imports_dict[old_id]
+            o._imports_dict[new_id] = self._imported
+            self._imported._importers[o] = new_id
+            for eid, rel, ref \
+            in o._backend.iter_references_with_import(o._id, new_id):
+                old_idref = "%s:%s" % (old_id, ref)
+                new_idref = "%s:%s" % (new_id, ref)
+                if eid == "":
+                    o._update_caches(old_idref, new_idref, None, rel)
+                else:
+                    e = o._elements.get(eid) # only update *instantiated* elts
+                    if e is not None:
+                        e._update_caches(old_idref, new_idref, None, rel)
+        self.emit("renamed")
 
     def _update_caches(self, old_idref, new_idref, element, relation):
         """

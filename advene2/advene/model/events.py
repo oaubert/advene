@@ -341,11 +341,26 @@ gobject.signal_new("modified-content-data", ElementEventDelegate,
 
 gobject.signal_new("pre-renamed", ElementEventDelegate,
                    gobject.SIGNAL_RUN_FIRST,
-                   gobject.TYPE_NONE, (object,))
+                   gobject.TYPE_NONE, ())
 
 gobject.signal_new("renamed", ElementEventDelegate,
                    gobject.SIGNAL_RUN_FIRST,
-                   gobject.TYPE_NONE, (object,))
+                   gobject.TYPE_NONE, ())
+
+# signal:`deleted`
+# ----------------
+#
+# Emitted when the ID of this element is deleted.
+#
+# This signal also has a "pre-" form.
+
+gobject.signal_new("pre-deleted", ElementEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST,
+                   gobject.TYPE_NONE, ())
+
+gobject.signal_new("deleted", ElementEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST,
+                   gobject.TYPE_NONE, ())
 
 # signal:`added-tag`
 # ------------------

@@ -77,7 +77,11 @@ class XmlParserBase(object):
         if st.elem.tag != expected:
             raise ParserError("expecting %s, found %s" %
                               (expected, self.stream.elem.tag))
-        self._handle([], {})
+        self.package.enter_no_event_section()
+        try:
+            self._handle([], {})
+        finally:
+            self.package.exit_no_event_section()
 
     def required(self, tag, *args, **kw):
         stream = self.stream
@@ -128,7 +132,7 @@ class XmlParserBase(object):
             if ev == "end" and el.tag == tag:
                 break
         return el
-    
+
     def _handle(self, args, kw, ):
         stream = self.stream
         elem = self.stream.elem

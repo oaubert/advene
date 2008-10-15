@@ -84,7 +84,7 @@ class WithTypeConstraintMixin(object):
                 got_id = value
                 got = self._owner.get(value, None)
             else:
-                got_id = value._id
+                got_id = getattr(value, "_id", None)
                 got = value
             if got_id != expected_id \
             or got is None \

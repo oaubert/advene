@@ -10,12 +10,12 @@ from advene.model.cam.tag import Tag
 from advene.model.cam.list import List
 from advene.model.cam.query import Query
 from advene.model.cam.import_ import Import
+import advene.model.cam.util.bookkeeping as bk
 from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX
 from advene.model.core.package import Package as CorePackage
 from advene.model.core.all_group import AllGroup as CoreAllGroup
 from advene.model.core.own_group import OwnGroup as CoreOwnGroup
 
-from datetime import datetime
 from warnings import warn
 from weakref import ref as wref
 
@@ -285,20 +285,22 @@ class Package(CorePackage):
         ns.setdefault(DC_NS_PREFIX, "dc")
         self._set_namespaces_with_dict(ns)
         if create:
-            now = datetime.now().isoformat()
-            self.created = now
-            self.modified = now
+            bk.init(self, self)
+        self.connect("modified-meta", bk.update)
+        self.connect("created", bk.init)
+        self.connect("tag::added", bk.update)
+        self.connect("tag::removed", bk.update)
+
 
     def save(self, serializer=None):
-        self.modified = datetime.now().isoformat()
-        super(Package, self).save(self, serializer)
+        super(Package, self).save(serializer)
 
     def save_as(self, filename, change_url=False, serializer=None, erase=False):
         self.modified = datetime.now().isoformat()
-        super(Package, self).save_as(filename, change_url, serializer, erase)
+        super(Package, self).save_as(self, filename, change_url, serializer,
+                                     erase)
 
     def close(self):
-        self.modified = datetime.now().isoformat()
         super(Package, self).close()
 
     def create_tag(self, id):
@@ -445,10 +447,10 @@ class Package(CorePackage):
 
 _bootstrap_ref = lambda: None
 
-Package.make_metadata_property(DC_NS_PREFIX + "creator", default="")
-Package.make_metadata_property(DC_NS_PREFIX + "contributor", default="")
-Package.make_metadata_property(DC_NS_PREFIX + "created", default="")
-Package.make_metadata_property(DC_NS_PREFIX + "modified", default="")
+Package.make_metadata_property(bk.CREATOR, default="")
+Package.make_metadata_property(bk.CONTRIBUTOR, default="")
+Package.make_metadata_property(bk.CREATED, default="")
+Package.make_metadata_property(bk.MODIFIED, default="")
 
 Package.make_metadata_property(DC_NS_PREFIX + "title", default="")
 Package.make_metadata_property(DC_NS_PREFIX + "description", default="")

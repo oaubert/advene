@@ -285,9 +285,9 @@ class Parser(XmlParserBase):
         self.optional_sequence("items", elt, [0])
         self.optional_sequence("tags", element=elt)
         self.optional("meta", elt)
-        
+
     # utility methods
-            
+
     def handle_meta(self, obj):
         elem = self.complete_current()
         for child in elem:

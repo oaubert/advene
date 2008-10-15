@@ -124,7 +124,7 @@ def main():
     at1.mimetype = "text/plain"
     print at1.mimetype
     print at1.element_constraint.content_data
-    at1.element_constraint = None
+    #at1.element_constraint = None
 
     #print "NB: the following warnings are normal when serializing CAM "\
     #      "package to .bzp (.czp will be the prefered format)"

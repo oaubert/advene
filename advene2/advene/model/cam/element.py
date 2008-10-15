@@ -1,6 +1,8 @@
 from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX
 from advene.model.cam.consts import CAM_TYPE, CAMSYS_TYPE
 from advene.model.cam.exceptions import SemanticError, UnsafeUseWarning
+import advene.model.cam.util.bookkeeping as bk
+from advene.model.core.content import WithContentMixin
 from advene.model.core.element import PackageElement, ElementCollection
 from advene.model.tales import tales_property, tales_use_as_context
 
@@ -14,6 +16,17 @@ class CamElementMixin(PackageElement):
     correct MRO, it explicitly inherit PackageElement, but it is indeed a mixin
     class (having no implication in instance creation).
     """
+
+    @classmethod
+    def instantiate(cls, *args):
+        r = super(CamElementMixin, cls).instantiate(*args)
+        r._self_connect("renamed", bk.update_element)
+        r._self_connect("deleted", bk.update_owner)
+        r._self_connect("modified", bk.update_element)
+        r._self_connect("modified-meta", bk.update_element)
+        if isinstance(r, WithContentMixin):
+            r._self_connect("modified-content-data", bk.update_element)
+        return r
 
     def set_meta(self, key, value, val_is_idref=False):
         if key == CAMSYS_TYPE:
@@ -98,10 +111,10 @@ class CamElementMixin(PackageElement):
 
 _make_meta = CamElementMixin.make_metadata_property
 
-_make_meta(DC_NS_PREFIX + "creator", default="")
-_make_meta(DC_NS_PREFIX + "contributor", default="")
-_make_meta(DC_NS_PREFIX + "created", default="")
-_make_meta(DC_NS_PREFIX + "modified", default="")
+_make_meta(bk.CREATOR, default="")
+_make_meta(bk.CONTRIBUTOR, default="")
+_make_meta(bk.CREATED, default="")
+_make_meta(bk.MODIFIED, default="")
 
 _make_meta(DC_NS_PREFIX + "title", default="")
 _make_meta(DC_NS_PREFIX + "description", default="")
