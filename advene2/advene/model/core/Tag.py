@@ -2,11 +2,11 @@
 I define the class Tag.
 """
 
-from PackageElement import PackageElement, TAG
+from advene.model.core.PackageElement import PackageElement, TAG
 
-class Tag (PackageElement):
+class Tag(PackageElement):
 
     ADVENE_TYPE = TAG 
 
-    def __init__ (self, owner, id):
-        PackageElement.__init__ (self, owner, id)
+    def __init__(self, owner, id):
+        PackageElement.__init__(self, owner, id)

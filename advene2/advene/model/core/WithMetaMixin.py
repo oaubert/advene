@@ -2,7 +2,7 @@ from advene import RAISE
 
 class WithMetaMixin:
     """
-    I am a mixin for a class with methods _get_meta (self, key) and _set_meta
+    I am a mixin for a class with methods _get_meta(self, key) and _set_meta
     (self, key, val). I provide them with equivalent methods get_meta and
     set_meta method, that cache the values of metadata to reduce access to
     the backend.
@@ -13,20 +13,20 @@ class WithMetaMixin:
 
     # TODO : do the actual caching
 
-    def get_meta (self, key, default=None):
+    def get_meta(self, key, default=None):
         """
         Return the metadata with given key.
 
         If the given key does not exist: an KeyError is raised if default is RAISE, else default is 
         returned.
         """
-        return self._get_meta (key, default)
+        return self._get_meta(key, default)
 
-    def set_meta (self, key, val):
-        return self._set_meta (key, val)
+    def set_meta(self, key, val):
+        return self._set_meta(key, val)
 
     @classmethod
-    def make_metadata_property (cls, key, alias=None):
+    def make_metadata_property(cls, key, alias=None):
         """
         Attempts to create a python property in cls mapping to metadata key.
 
@@ -36,20 +36,20 @@ class WithMetaMixin:
         Raises an AttributeError if cls already has a member with that name.
         """
         if alias is None:
-            cut = max (key.rfind("#"), key.rfind("/"))
+            cut = max(key.rfind("#"), key.rfind("/"))
             alias = key[cut+1:]
 
-        if hasattr (cls, alias):
-            raise AttributeError, alias
+        if hasattr(cls, alias):
+            raise AttributeError(alias)
 
-        def getter (obj):
-            return obj.get_meta (key)
+        def getter(obj):
+            return obj.get_meta(key)
 
-        def setter (obj, val):
-            return obj.set_meta (key, val)
+        def setter(obj, val):
+            return obj.set_meta(key, val)
 
-        def deller (obj):
-            return self.set_meta (key, None)
+        def deller(obj):
+            return self.set_meta(key, None)
 
-        setattr (cls, alias, property (getter, setter, deller))
+        setattr(cls, alias, property(getter, setter, deller))
  

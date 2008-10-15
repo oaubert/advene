@@ -15,34 +15,37 @@ See the reference implementation ``sqlite_backend``_.
 
 def iter_backends():
     global _backends
-    return iter (_backends)
+    return iter(_backends)
 
-def register_backend (b):
+def register_backend(b):
     global _backends
-    _backends.insert (0, b)
+    _backends.insert(0, b)
 
-def unregister_backend (b):
+def unregister_backend(b):
     global _backends
-    _backends.remove (b)
+    _backends.remove(b)
 
 # backend related exceptions
 
-class NoBackendClaiming (Exception):
+class NoBackendClaiming(Exception):
     pass
 
-class PackageInUse (Exception):
+class PackageInUse(Exception):
     pass
 
-class InternalError (Exception):
-    def __init__ (self, msg, original_exception=None, *args):
+class InternalError(Exception):
+    def __init__(self, msg, original_exception=None, *args):
         self.args = (msg, original_exception) + args
-    def __str__ (self):
+    def __str__(self):
         return "%s\nOriginal message:\n%s" % self.args[:2]
 
 # implementation
 
 _backends = []
 
+# default registration
+# NB: do not import sooner, because sqlite_backend relies on the definitions
+#     above
 import advene.model.backends.sqlite_backend
 
-register_backend (sqlite_backend)
+register_backend(sqlite_backend)

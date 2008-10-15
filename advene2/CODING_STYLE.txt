@@ -1,49 +1,87 @@
+PROLOGUE
+--------
+
+Coding styles from PEP 8 [TODO] should be applied, unless explicitly overriden by rules below.
+
 NAMES
 -----
 
-use underscored_names (python style) for attributes and methods
-use CaptializedNames (java style) for class names
-NB: some classes could be function; they may be named in python_style
+* use underscored_names (python style) for attributes and methods
+* use CaptializedNames (java style) for class names
+* NB: some "factory" functions are sometimes implemented as classes; those may 
+be named in python_style
 
-module names are lowercase, short-names (preferably meaningful).
-packages must be named in python style
+* module names are lowercase, short-names (preferably meaningful).
+* packages must be named in python style
 
-words composing an identifier should always be separated (in the appropriate
+* words composing an identifier should always be separated (in the appropriate
 style)
-words should not be abbreviated
+* words must not be abbreviated (unless the abbreviation is unambiguous in the
+context of the application)
 
-method names should start with a verb
-boolean property names should be an adjective
-other property names should be a noun
-iterable property names should be plural
-
-SYNTAX
-------
-
-relative import is authorized only when the module name is a class name
+* method names should start with a verb
+* boolean property names should be an adjective
+* other property names should be a noun
+* iterable property names should be plural
 
 SEMANTIC
 --------
 
-read-only properties should be prefered to methods with only self as parameter
+read-only properties should be prefered to methods with only self as
+parameter
 
 methods and properties should rather return an iterator than another iterable,
-except when the iterable is already available and may be safely returned
+except when the iterable is already available and may be safely shared with 
+caller
 
 as a consequence, generic APIs should stick to iterators, since they should not
 make asumption on the availability of an iterable in the underlying 
 implementations
 
-whenever possible, the raising of an exception should be avoidable, and should
-not be the default behaviour. A good practice is to accept advene.RAISE as a
-special parameter to indicate that an exception should be raised in the
-appropriate case.
+Exception
++++++++++
+
+whenever possible, the raising of an exception should be avoidable, for 
+optization concerns. A good practice is to accept an optional parameter which 
+would be the default value to be returned on errors. E.g.:::
+
+  # the following raises an exception if foo is absent
+  f = my_package.get_element("foo")
+  # the following returns None if foo is absent
+  f = my_package.get_element("foo", None)
+  # alternative with a keyword optional parameter
+  f = my_package.get_element("foo", if_absent=None)
+
+If the optional parameter is a keyword parameter, its name should be explicit
+with respect to the semantics of the method.
+
 
 REFERENCES
 ----------
 
-Weak references are intensievly used, to enable efficient collecting of the objects and freeing of resources.
+Weak references are intensievly used, to enable efficient collecting of the
+objects and freeing of resources.
 
-The rule of thumb is: in a hierarchy of objects, children should strongly reference their parent (because they need it for most tasks), while parents should only weakly reference their children, and re-generate them whenever needed. This is especially true in the backend-supported objects; the backend does not keep track of all the objects referencing it, so it is cleaned whenever collected by the GC.
+The rule of thumb is: in a hierarchy of objects, children should strongly
+reference their parent (because they need it for most tasks), while parents
+should only weakly reference their children, and re-generate them whenever
+needed. This is especially true in the backend-supported objects; the backend
+does not keep track of all the objects referencing it, so it is cleaned
+whenever collected by the GC.
 
-However, there ar exceptions. Contents are mere *attributes* of their parent, and are unlikely to be referenced by themselves, so they will keep being regenerated, whhich might prove costlty (especially for contents containing big data). So those objects will be strongly referenced by their parent, and will maintain a weak reference to their parent, but a strong reference to their grand-parent (i.e. Package), in order to be able to re-generate their parents eventually (though this is not likely to happen often, since Contents are not expected to be referenced outside their parent).
+However, there ar exceptions. Contents, for example, are mere *attributes* of
+their parent, and are unlikely to be referenced by themselves, so they will
+keep being regenerated, which might prove costlty (especially for contents
+containing big data). So those objects will be strongly referenced by their
+parent, and will maintain a weak reference to their parent, but a strong
+reference to their grand-parent (i.e. Package), in order to be able to
+re-generate their parents eventually (though this is not likely to happen
+often, since Contents are not expected to be referenced outside their parent).
+
+Reference Cache
++++++++++++++++
+
+Of course, reference caches may be implemented to reduce the number of
+collecting-regenerating of objects. Beware however, that the overhead of python
+functions involved in cache management may exceed the benefits... If
+implemented, this should be thoroughly tested.

@@ -1,4 +1,4 @@
-class ModelError (Exception):
+class ModelError(Exception):
     """
     Integrity constraints of the Advene model have been violated.
     """

@@ -2,9 +2,9 @@
 I define the class List.
 """
 
-from PackageElement import PackageElement, LIST
+from advene.model.core.PackageElement import PackageElement, LIST
 
-class List (PackageElement):
+class List(PackageElement):
 
     ADVENE_TYPE = LIST 
 

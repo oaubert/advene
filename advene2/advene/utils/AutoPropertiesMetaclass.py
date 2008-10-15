@@ -29,7 +29,7 @@ class AutoPropertiesMetaclass(type):
         for name, f in dict.iteritems():
             try:
                 nb_args = (f.func_code.co_argcount
-                           - len (f.func_defaults or ()))
+                           - len(f.func_defaults or ()))
             except AttributeError:
                 continue
             propname = None
@@ -42,7 +42,7 @@ class AutoPropertiesMetaclass(type):
             if propname:
                 props[propname] = 1
 
-        for propname in props.iterkeys ():
+        for propname in props.iterkeys():
             fget = getattr(cls, "_get_%s" % propname, None)
             fset = getattr(cls, "_set_%s" % propname, None)
             fdel = getattr(cls, "_del_%s" % propname, None)

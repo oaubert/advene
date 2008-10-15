@@ -1,16 +1,9 @@
 - conform to PEP 8
 
-  * replace: raise ExceptionClass, message
-         by: raise ExceptionClass (message) 
-
-  * replace: url[:7] == "sqlite"
-         by: url.startswith ("sqlite")
-
   * rename files without starting capital
 
-  * no relative imports
-
 - add indexes in the SQL schema (Annotations.f_begin at least)
+  and test its efficiency
 
 - implement "external" contents (url attribute)
 
@@ -18,3 +11,7 @@
 
 - make content data independant from other attributes (mimetype, schema) in
   the backend and update the API accordingly
+
+- make elements dirtiable
+
+- remove the infamous RAISE

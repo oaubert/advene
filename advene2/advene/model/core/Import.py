@@ -2,53 +2,53 @@
 I define the class Import.
 """
 
-from PackageElement import PackageElement, IMPORT
+from advene.model.core.PackageElement import PackageElement, IMPORT
 
-class Import (PackageElement):
+class Import(PackageElement):
 
     ADVENE_TYPE = IMPORT 
 
-    def __init__ (self, owner, id, url, uri):
-        PackageElement.__init__ (self, owner, id)
+    def __init__(self, owner, id, url, uri):
+        PackageElement.__init__(self, owner, id)
         self._url = url
         self._uri = uri
         self._imported = owner._imports_dict[id]
 
-    def __in__ (self, element):
+    def __in__(self, element):
         return element in self._imported._all
 
     @property
-    def medias (self):
+    def medias(self):
         return self._imported._all.medias
 
     @property
-    def annotations (self):
+    def annotations(self):
         return self._imported._all.annotations
 
     @property
-    def relations (self):
+    def relations(self):
         return self._imported._all.relations
 
     @property
-    def views (self):
+    def views(self):
         return self._imported._all.views
 
     @property
-    def resources (self):
+    def resources(self):
         return self._imported._all.resources
 
     @property
-    def tags (self):
+    def tags(self):
         return self._imported._all.tags
 
     @property
-    def lists (self):
+    def lists(self):
         return self._imported._all.lists
 
     @property
-    def imports (self):
+    def imports(self):
         return self._imported._all.imports
 
     @property
-    def queries (self):
+    def queries(self):
         return self._imported._all.queries
