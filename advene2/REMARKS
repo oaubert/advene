@@ -5,6 +5,9 @@
       id are very unlikely to be callable, so the risk of an undetected clash
       is very limited.
 
+  oa: ok for named parameters, but you also use it as variables (for
+      instance dir), which is a Bad Thing(TM)
+
 * some standard metadata (dc_description, dc_author,etc) should return '' if not set,
   not raise an exception, or always be initialized.
 
@@ -109,3 +112,9 @@ The handling of missing elements:
 * package.get_by_uri ?? Or have p.get also handle URIs (split fragment and check base URI)
 
 * annotation a: how to get a.relations ? a.incomingRelations, a.outgoingRelations...
+
+* typedRelatedIn/Out, incomingRelations/outgoingRelations
+
+* annotationTypes/relationTypes in TALES expressions becomes annotation_types/relation_types ?
+
+* package.get(id) -> wrapper to have package/get/id in TALES
