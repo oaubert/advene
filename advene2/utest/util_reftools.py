@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from advene.utils.reftools import WeakValueDictWithCallback
+from advene.util.reftools import WeakValueDictWithCallback
 
 class A(object):
     def __init__(self, name):

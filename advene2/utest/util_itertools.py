@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
-from advene.utils.itertools import interclass
-from advene.utils.itertools import _IterHead
+from advene.util.itertools import interclass
+from advene.util.itertools import _IterHead
 
 class Sortable(object):
     def __init__(self, i):
