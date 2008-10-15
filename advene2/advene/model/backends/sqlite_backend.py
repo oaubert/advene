@@ -300,7 +300,6 @@ class _SqliteBackend (object):
         """
         ``media`` is the id-ref of an own or directly imported media.
         """
-        # assertions for debug
         assert (isinstance (begin, int) and begin >= 0), begin
         assert (isinstance (  end, int) and   end >= begin), (begin, end)
 
@@ -692,6 +691,48 @@ class _SqliteBackend (object):
             w += ")"
 
         return s,w,args
+
+    # updating
+
+    def update_media (self, package_id, id, url):
+        try:
+            self._conn.execute ("UPDATE Medias SET url = ? "
+                                "WHERE package = ? AND id = ?",
+                                (url, package_id, id,))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not update", e)
+
+    def update_annotation (self, package_id, id, media, begin, end):
+        """
+        ``media`` is the id-ref of an own or directly imported media.
+        """
+        assert (isinstance (begin, int) and begin >= 0), begin
+        assert (isinstance (  end, int) and   end >= begin), (begin, end)
+
+        p,s = _split_id_ref (media) # also assert that media has len<=2
+        assert p != "" or self.has_element(package_id, s, MEDIA), media
+
+        try:
+            self._conn.execute ("UPDATE Annotations SET media_p = ?, "
+                                "media_i = ?, fbegin = ?, fend = ? "
+                                "WHERE package = ? and id = ?",
+                                (p, s, begin, end, package_id, id,))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("could not update", e)
+
+    def update_import (self, package_id, id, url, uri):
+        try:
+            self._conn.execute ("UPDATE Imports SET url = ?, uri = ? "
+                                "WHERE package = ? and id = ?",
+                                (url, uri, package_id, id,))
+            self._conn.commit()
+        except sqlite.Error, e:
+            self._conn.rollback()
+            raise InternalError ("error in updating", e)
 
     # content
 

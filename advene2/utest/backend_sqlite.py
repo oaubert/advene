@@ -745,6 +745,23 @@ class TestHandleElements (TestCase):
         self.assertEqual (ref,
             get ((self.pid1, self.pid2), uri_alt=("", self.i1_uri)))
 
+    def test_update_media (self):
+        self.be.update_media (self.pid1, "m1", "http://foo.com/m1.avi")
+        self.assertEqual (('m', self.pid1, "m1", "http://foo.com/m1.avi"),
+                          self.be.get_element (self.pid1, "m1"))
+
+    def test_update_annotation (self):
+        self.be.update_annotation (self.pid1, "a1", "m1", 25, 30)
+        self.assertEqual (('a', self.pid1, "a1", "m1", 25, 30),
+                          self.be.get_element (self.pid1, "a1"))
+
+    def test_update_import (self):
+        self.be.update_import (self.pid1, "i1", "http://foo.com/advene/db",
+                                                "urn:xyz")
+        self.assertEqual (('i', self.pid1, "i1",
+                           "http://foo.com/advene/db", "urn:xyz"),
+                          self.be.get_element (self.pid1, "i1"))
+
     def test_content (self):
         mime = "text/html"
         data = "<em>hello</em> world"
