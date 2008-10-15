@@ -166,6 +166,13 @@ class TestImports(TestCase):
         self.assert_(self.p4.closed)
 
     def tearDown(self):
+        try:
+            if self.p1 and not self.p1.closed: self.p1.close()
+            if self.p2 and not self.p2.closed: self.p2.close()
+            if self.p3 and not self.p3.closed: self.p3.close()
+            if self.p4 and not self.p4.closed: self.p4.close()
+        except ValueError: 
+            pass
         unlink(self.db)
         rmdir(self.dirname)
 
