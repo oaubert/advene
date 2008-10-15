@@ -53,9 +53,27 @@ class WithTypeConstraintMixin(object):
              raise TypeError, "element-constraint can not be changed"
         super(WithTypeConstraintMixin, self).set_meta(key, value, val_is_idref)
 
+    def check_element(self, e):
+        """
+        Applies the element_constraint to the given element and returns the
+        result.
+        """
+        return self.element_constraint.apply_to(e)
+
+    def check_all(self, package=None):
+        """
+        Applies the element_constraint to all the elements in the given
+        package (session.package) if None, and return the aggregated result.
+        """
+        check = self.element_constraint.apply_to
+        r = True
+        for e in self.iter_elements(package):
+            r = r & check(e)
+        return r
+
     @autoproperty
     def _get_mimetype(self):
-        return self.element_constraint.content_parsed["mimetype"]
+        return self.element_constraint.content_parsed["mimetype"] or "*/*"
 
     @autoproperty
     def _set_mimetype(self, mimetype):

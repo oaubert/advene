@@ -1,8 +1,6 @@
 Needed improvements
 ===================
 
-- R/W annotationtype.mimetype (could handle jokers such as None, '*' or text/*')
-
 - auto-update of creator/created/contributor/modified. For package,
    update contributor/modified upon package saving.
 
