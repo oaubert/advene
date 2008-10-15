@@ -33,6 +33,7 @@ from advene.model.cam.package import Package
 from advene.model.cam.annotation import Annotation
 from advene.model.cam.relation import Relation
 from advene.model.cam.tag import AnnotationType, RelationType
+from advene.model.cam.list import Schema
 from advene.model.cam.resource import Resource
 from advene.model.cam.view import View
 from advene.model.cam.query import Query
@@ -202,17 +203,16 @@ class Menu:
                 a.end += offset
                 self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
                 self.controller.notify('ElementEditCancel', element=a)
-        #elif isinstance(el, Schema):
-        #    batch_id=object()
-        #    for at in el.annotationTypes:
-        #        for a in at.annotations:
-        #            self.controller.notify('ElementEditBegin', element=a, immediate=True)
-        #            a.begin += offset
-        #            a.end += offset
-        #            self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
-        #            self.controller.notify('ElementEditCancel', element=a)
+        elif isinstance(el, Schema):
+            batch_id=object()
+            for at in el.annotation_types:
+                for a in at.annotations:
+                    self.controller.notify('ElementEditBegin', element=a, immediate=True)
+                    a.begin += offset
+                    a.end += offset
+                    self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
+                    self.controller.notify('ElementEditCancel', element=a)
         return True
-
     def copy_id (self, widget, el):
         clip=gtk.clipboard_get()
         clip.set_text(el.id)
@@ -289,7 +289,7 @@ class Menu:
             Relation: self.make_relation_menu,
             AnnotationType: self.make_annotationtype_menu,
             RelationType: self.make_relationtype_menu,
-            #Schema: self.make_schema_menu,
+            Schema: self.make_schema_menu,
             View: self.make_view_menu,
             Package: self.make_package_menu,
             Query: self.make_query_menu,
@@ -357,8 +357,6 @@ class Menu:
                 else:
                     data=None
                 if data is not None:
-                    # FIXME: for this kind of batch operations, we
-                    # should record the global changes.
                     self.controller.notify('ElementEditBegin', element=a, immediate=True)
                     a.content.data=data
                     self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
