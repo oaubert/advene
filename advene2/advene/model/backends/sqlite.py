@@ -406,6 +406,20 @@ class _SqliteBackend(object):
         """Return the backend-URL the given package is bound to."""
         return "sqlite:%s%s" % (pathname2url(self._path), package_id)
 
+    def get_url(self, package_id):
+        # for the sake of completeness only: this should not be useful, since
+        # the URL is told to the backend by the package itself
+        q = "SELECT url FROM Packages WHERE id = ?"
+        return self._curs.execute(q, (package_id,)).fetchone()[0]
+
+    def update_url(self, package_id, uri):
+        q = "UPDATE Packages SET url = ? WHERE id = ?"
+        execute = self._curs.execute
+        try:
+            execute(q, (uri, package_id,))
+        except sqlite.Error, e:
+            raise InternalError("could not update", e)
+
     def get_uri(self, package_id):
         q = "SELECT uri FROM Packages WHERE id = ?"
         return self._curs.execute(q, (package_id,)).fetchone()[0]

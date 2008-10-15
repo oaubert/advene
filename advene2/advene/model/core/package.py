@@ -1,3 +1,7 @@
+from os import curdir
+from os.path import abspath, exists
+from urlparse import urljoin, urlparse
+from urllib import pathname2url, url2pathname
 from urllib2 import URLError
 from weakref import WeakKeyDictionary, WeakValueDictionary, ref
 
@@ -22,6 +26,7 @@ from advene.model.core.meta import WithMetaMixin
 from advene.model.exceptions import \
     ModelError, NoClaimingError, NoSuchElementError, UnreachableImportError
 from advene.model.parsers.register import iter_parsers
+from advene.model.serializers.register import iter_serializers
 from advene.utils.autoproperty import autoproperty
 from advene.utils.files import smart_urlopen
 
@@ -42,10 +47,11 @@ class Package(object, WithMetaMixin):
 
     def __init__(self, url, create=False, readonly=False, force=False):
         assert not (create and readonly)
-        self._url      = url
+        self._url = url = _make_absolute(url)
         self._readonly = readonly
         self._backend = None
         self._transient = False
+        self._serializer = None
         parser = None
         if create:
             for b in iter_backends():
@@ -78,6 +84,7 @@ class Package(object, WithMetaMixin):
                         cmax = c
                         parser = p
                 if cmax > 0:
+                    self._serializer = parser.SERIALIZER
                     backend, package_id = self._make_transient_backend()
                 else:
                     f.close()
@@ -221,7 +228,60 @@ class Package(object, WithMetaMixin):
             if p is not None:
                 p._importers.pop(self, None)
         self._imports_dict = None
-    
+
+    def save(self, serializer=None):
+        """Save the package to disk if its URL is in the "file:" scheme.
+
+        A specific serializer module can be provided, else if the package was
+        parsed and the parser had a corresponding serializer, that one will be
+        used; else, the extension of the filename will be used to guess the
+        serializer to use.
+
+        Note that the file will be silently erased if it already exists.
+        """
+        p = urlparse(self._url)
+        if p.scheme != "file":
+            raise ValueError("Can not save to URL %s" % self._url)
+        filename = url2pathname(p.path)
+
+        self.save_as(filename, serializer=serializer or self._serializer,
+                     change_url=True, erase=True)
+        # above, change_url is set to force to remember the serializer
+
+    def save_as(self, filename, change_url=False, serializer=None,
+                      erase=False):
+        """Save the package under the given `filename`.
+
+        If `change_url` is set, the URL of the package will be changed to the
+        corresponding ``file:`` URL.
+
+        A specific serializer module can be provided, else the extension of the
+        filename will be used to guess the serializer to use.
+
+        Note that if the file exists, an exception will be raised.
+        """
+        if exists(filename) and not erase:
+            raise Exception("File already exists %s" % filename) 
+
+        s = serializer
+        if s is None:
+            for s in iter_serializers():
+                if filename.endswith(s.EXTENSION):
+                    break
+            else:
+                raise Exception("Can not guess correct serializer for %s" %
+                                filename)
+
+        f = open(filename, "w")
+        s.serialize_to(self, f)
+        f.close()
+
+        if change_url:
+            filename = abspath(filename)
+            self._url = url = "file:" + pathname2url(filename)
+            self._backend.update_url(self._id, self._url)
+            self._serializer = serializer
+        
 
     @autoproperty
     def _get_url(self):
@@ -548,3 +608,8 @@ class Package(object, WithMetaMixin):
     # given element) -- combination of several backend methods
     # TODO
 
+
+def _make_absolute(url):
+    abscurdir = abspath(curdir)
+    abslocal = "file:" + pathname2url(abscurdir) + "/"
+    return urljoin(abslocal, url)

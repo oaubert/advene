@@ -251,6 +251,19 @@ class TestPackageHandling(TestCase):
             unlink(self.filename)
         del P._L[:] # not required, but saves memory
 
+    def test_url(self):
+        be, pid1 = create(P(IN_MEMORY_URL))
+        _ , pid2 = create(P("%s;foo" % IN_MEMORY_URL))
+        try:
+            for pid in(pid1, pid2,):
+                be.update_url(pid, "file:/tmp/foo")
+                self.assertEqual("file:/tmp/foo", be.get_url(pid))
+                be.update_url(pid, "file:/tmp/bar")
+                self.assertEqual("file:/tmp/bar", be.get_url(pid))
+        finally:
+            be.close(pid1)
+            be.close(pid2)
+
     def test_uri(self):
         be, pid1 = create(P(IN_MEMORY_URL))
         _ , pid2 = create(P("%s;foo" % IN_MEMORY_URL))

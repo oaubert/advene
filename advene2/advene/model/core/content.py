@@ -14,7 +14,7 @@ be the former should be eventually deprecated...
 
 from os import mkdir, path, tmpfile, tmpnam, unlink
 from urllib2 import urlopen, url2pathname
-from urlparse import urlparse
+from urlparse import urljoin, urlparse
 from warnings import filterwarnings
 from weakref import ref
 
@@ -136,7 +136,8 @@ class WithContentMixin:
                 filename = path.join(base, url2pathname(url[10:]))
                 f = self.__as_file = PackagedDataFile(filename, self)
             else:
-                f = urlopen(url)
+                abs = urljoin(self._owner._url, url)
+                f = urlopen(abs)
         else:
             if self.__as_file:
                 raise IOError("content already opened as a file")
