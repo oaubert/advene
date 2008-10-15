@@ -467,11 +467,10 @@ class ECAEngine:
             try:
                 # FIXME: not sure it will work...
                 if rule.origin:
-                    v=self.controller.package.all.views[rule.origin]
+                    v=self.controller.package.get(rule.origin)
             except KeyError:
                 # rule.origin is not a view from the package. It may be
                 # default_rule.xml for instance
-                print "Cannot find origin view for ", v
                 pass
             context.setLocal('view', v)
             self.schedule(rule.action, context, delay=delay, immediate=immediate)
