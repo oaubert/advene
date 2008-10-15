@@ -397,7 +397,7 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, ref)
 
     def test_closed(self):
-        self.p1.connect("closed", self.default_handler)
+        self.p1.connect("package-closed", self.default_handler)
         self.p2.close()
         self.assertEqual(self.buf, [])
         ref = [(self.p1, self.p1.url, self.p1.uri)]
@@ -405,14 +405,14 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, ref)
 
     def test_closed_disconnected(self):
-        hid = self.p1.connect("closed", self.default_handler)
+        hid = self.p1.connect("package-closed", self.default_handler)
         self.p1.disconnect(hid)
         self.p1.close()
         self.assertEqual(self.buf, [])
 
-    def test_changed_uri(self):
-        hid1 = self.p1.connect("changed::uri", self.attr_handler)
-        hid2 = self.p1.connect("pre-changed::uri", self.attr_handler, "pre")
+    def test_modified_uri(self):
+        hid1 = self.p1.connect("modified::uri", self.attr_handler)
+        hid2 = self.p1.connect("pre-modified::uri", self.attr_handler, "pre")
         self.p2.uri = "urn:12345"
         self.assertEqual(self.buf, [])
         self.p1.uri = "urn:67890"
@@ -424,9 +424,9 @@ class TestEvents(TestCase):
         self.p1.uri = "urn:abcdef"
         self.assertEqual(self.buf, [])
 
-    def test_changed_any(self):
-        hid1 = self.p1.connect("changed", self.attr_handler)
-        hid2 = self.p1.connect("pre-changed", self.attr_handler, "pre")
+    def test_modified_any(self):
+        hid1 = self.p1.connect("modified", self.attr_handler)
+        hid2 = self.p1.connect("pre-modified", self.attr_handler, "pre")
         self.p2.uri = "urn:12345"
         self.assertEqual(self.buf, [])
         self.p1.uri = "urn:67890"
@@ -438,11 +438,11 @@ class TestEvents(TestCase):
         self.p1.uri = "urn:abcdef"
         self.assertEqual(self.buf, [])
 
-    def test_changed_meta(self):
+    def test_modified_meta(self):
         k = DC_NS_PREFIX + "creator"
         k2 = DC_NS_PREFIX + "title"
-        hid1 = self.p1.connect("changed-meta::" + k, self.meta_handler)
-        hid2 = self.p1.connect("pre-changed-meta::" + k, self.meta_handler, 1)
+        hid1 = self.p1.connect("modified-meta::" + k, self.meta_handler)
+        hid2 = self.p1.connect("pre-modified-meta::" + k, self.meta_handler, 1)
         self.p1.set_meta(k2, "hello world")
         self.assertEqual(self.buf, [])
         self.p2.set_meta(k, "pchampin")
@@ -464,10 +464,10 @@ class TestEvents(TestCase):
         self.p1.set_meta(k, "oaubert")
         self.assertEqual(self.buf, [])
 
-    def test_changed_meta_any(self):
+    def test_modified_meta_any(self):
         k = DC_NS_PREFIX + "creator"
-        hid1 = self.p1.connect("changed-meta", self.meta_handler)
-        hid2 = self.p1.connect("pre-changed-meta", self.meta_handler, "pre")
+        hid1 = self.p1.connect("modified-meta", self.meta_handler)
+        hid2 = self.p1.connect("pre-modified-meta", self.meta_handler, "pre")
         self.p2.set_meta(k, "pchampin")
         self.assertEqual(self.buf, [])
         self.p1.set_meta(k, "pchampin")
@@ -487,7 +487,7 @@ class TestEvents(TestCase):
 
     def test_modify_media(self):
         k = DC_NS_PREFIX + "creator"
-        hid = self.p1.connect("media::changed", self.elt_handler)
+        hid = self.p1.connect("media::modified", self.elt_handler)
         m = self.p1.create_media("m", "file:/tmp/foo.avi")
         m2 = self.p2.create_media("m", "file:/tmp/foo.avi")
         a = self.p1.create_annotation("a", m, 10, 20, "text/plain")
@@ -501,28 +501,28 @@ class TestEvents(TestCase):
             a.set_meta(k, "creator%s" % i)
 
         do_changes()
-        self.assertEqual(self.buf, [(self.p1, m, "changed", ("url", m.url,)),])
+        self.assertEqual(self.buf, [(self.p1, m, "modified", ("url", m.url,)),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("media::pre-changed", self.elt_handler)
+        hid = self.p1.connect("media::pre-modified", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-                         [(self.p1, m, "pre-changed", ("url", m.url,)),])
+                         [(self.p1, m, "pre-modified", ("url", m.url,)),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("media::changed-meta", self.elt_handler)
+        hid = self.p1.connect("media::modified-meta", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-                         [(self.p1, m, "changed-meta", (k, m.get_meta(k))),])
+                         [(self.p1, m, "modified-meta", (k, m.get_meta(k))),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("media::pre-changed-meta", self.elt_handler)
+        hid = self.p1.connect("media::pre-modified-meta", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-            [(self.p1, m, "pre-changed-meta", (k, m.get_meta(k))),])
+            [(self.p1, m, "pre-modified-meta", (k, m.get_meta(k))),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
@@ -531,7 +531,7 @@ class TestEvents(TestCase):
 
     def test_modify_annotation(self):
         k = DC_NS_PREFIX + "creator"
-        hid = self.p1.connect("annotation::changed", self.elt_handler)
+        hid = self.p1.connect("annotation::modified", self.elt_handler)
         m = self.p1.create_media("m", "file:/tmp/foo.avi")
         m2 = self.p2.create_media("m", "file:/tmp/foo.avi")
         a = self.p1.create_annotation("a", m, 10, 20, "text/plain")
@@ -546,28 +546,28 @@ class TestEvents(TestCase):
             a.set_meta(k, "creator%s" % i)
 
         do_changes()
-        self.assertEqual(self.buf, [(self.p1, a, "changed", ("end", a.end,)),])
+        self.assertEqual(self.buf, [(self.p1, a, "modified", ("end", a.end,)),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("annotation::pre-changed", self.elt_handler)
+        hid = self.p1.connect("annotation::pre-modified", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-                         [(self.p1, a, "pre-changed", ("end", a.end,)),])
+                         [(self.p1, a, "pre-modified", ("end", a.end,)),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("annotation::changed-meta", self.elt_handler)
+        hid = self.p1.connect("annotation::modified-meta", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-                         [(self.p1, a, "changed-meta", (k, a.get_meta(k))),])
+                         [(self.p1, a, "modified-meta", (k, a.get_meta(k))),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("annotation::pre-changed-meta", self.elt_handler)
+        hid = self.p1.connect("annotation::pre-modified-meta", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-            [(self.p1, a, "pre-changed-meta", (k, a.get_meta(k))),])
+            [(self.p1, a, "pre-modified-meta", (k, a.get_meta(k))),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
@@ -576,7 +576,7 @@ class TestEvents(TestCase):
 
     def test_modify_relation(self):
         k = DC_NS_PREFIX + "creator"
-        hid = self.p1.connect("relation::changed-items", self.elt_handler)
+        hid = self.p1.connect("relation::modified-items", self.elt_handler)
         m = self.p1.create_media("m", "file:/tmp/foo.avi")
         m2 = self.p2.create_media("m", "file:/tmp/foo.avi")
         a = self.p1.create_annotation("a", m, 10, 20, "text/plain")
@@ -599,28 +599,28 @@ class TestEvents(TestCase):
 
         do_changes()
         self.assertEqual(self.buf,
-                         [(self.p1, r, "changed-items", (slice(2,2), [a,])),])
+                         [(self.p1, r, "modified-items", (slice(2,2), [a,])),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("relation::pre-changed-items", self.elt_handler)
+        hid = self.p1.connect("relation::pre-modified-items", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-            [(self.p1, r, "pre-changed-items",(slice(3,3), [a,])),])
+            [(self.p1, r, "pre-modified-items",(slice(3,3), [a,])),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("relation::changed-meta", self.elt_handler)
+        hid = self.p1.connect("relation::modified-meta", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-            [(self.p1, r, "changed-meta", (k, r.get_meta(k))),])
+            [(self.p1, r, "modified-meta", (k, r.get_meta(k))),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("relation::pre-changed-meta", self.elt_handler)
+        hid = self.p1.connect("relation::pre-modified-meta", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-            [(self.p1, r, "pre-changed-meta", (k, r.get_meta(k))),])
+            [(self.p1, r, "pre-modified-meta", (k, r.get_meta(k))),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
@@ -629,7 +629,7 @@ class TestEvents(TestCase):
 
     def test_modify_list(self):
         k = DC_NS_PREFIX + "creator"
-        hid = self.p1.connect("list::changed-items", self.elt_handler)
+        hid = self.p1.connect("list::modified-items", self.elt_handler)
         m = self.p1.create_media("m", "file:/tmp/foo.avi")
         m2 = self.p2.create_media("m", "file:/tmp/foo.avi")
         a = self.p1.create_annotation("a", m, 10, 20, "text/plain")
@@ -652,28 +652,28 @@ class TestEvents(TestCase):
 
         do_changes()
         self.assertEqual(self.buf,
-                         [(self.p1, L, "changed-items", (slice(2,2), [a,])),])
+                         [(self.p1, L, "modified-items", (slice(2,2), [a,])),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("list::pre-changed-items", self.elt_handler)
+        hid = self.p1.connect("list::pre-modified-items", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-            [(self.p1, L, "pre-changed-items",(slice(3,3), [a,])),])
+            [(self.p1, L, "pre-modified-items",(slice(3,3), [a,])),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("list::changed-meta", self.elt_handler)
+        hid = self.p1.connect("list::modified-meta", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-            [(self.p1, L, "changed-meta", (k, L.get_meta(k))),])
+            [(self.p1, L, "modified-meta", (k, L.get_meta(k))),])
         del self.buf[:]
         self.p1.disconnect(hid)
 
-        hid = self.p1.connect("list::pre-changed-meta", self.elt_handler)
+        hid = self.p1.connect("list::pre-modified-meta", self.elt_handler)
         do_changes()
         self.assertEqual(self.buf,
-            [(self.p1, L, "pre-changed-meta", (k, L.get_meta(k))),])
+            [(self.p1, L, "pre-modified-meta", (k, L.get_meta(k))),])
         del self.buf[:]
         self.p1.disconnect(hid)
 

@@ -899,11 +899,11 @@ class TestEvents(TestCase):
     def element_handler(self, obj, element, removed=None):
         self.tag_handler(element, obj, removed)
 
-    def test_changed_meta(self):
+    def test_modified_meta(self):
         k = DC_NS_PREFIX + "creator"
         k2 = DC_NS_PREFIX + "title"
-        hid1 = self.m1().connect("changed-meta::" + k, self.meta_handler)
-        hid2 = self.m1().connect("pre-changed-meta::" + k, self.meta_handler, 1)
+        hid1 = self.m1().connect("modified-meta::" + k, self.meta_handler)
+        hid2 = self.m1().connect("pre-modified-meta::" + k, self.meta_handler, 1)
         self.m1().set_meta(k2, "hello world")
         self.assertEqual(self.buf, [])
         self.a1().set_meta(k, "pchampin")
@@ -925,10 +925,10 @@ class TestEvents(TestCase):
         self.m1().set_meta(k, "oaubert")
         self.assertEqual(self.buf, [])
 
-    def test_changed_meta_any(self):
+    def test_modified_meta_any(self):
         k = DC_NS_PREFIX + "creator"
-        hid1 = self.m1().connect("changed-meta", self.meta_handler)
-        hid2 = self.m1().connect("pre-changed-meta", self.meta_handler, "pre")
+        hid1 = self.m1().connect("modified-meta", self.meta_handler)
+        hid2 = self.m1().connect("pre-modified-meta", self.meta_handler, "pre")
         self.a1().set_meta(k, "pchampin")
         self.assertEqual(self.buf, [])
         self.m1().set_meta(k, "pchampin")
@@ -992,9 +992,9 @@ class TestEvents(TestCase):
         self.p1.dissociate_tag(self.a1(), self.t1())
         self.assertEqual(self.buf, [])
 
-    def test_with_content_changed_mimetype(self):
-        hid1 = self.a1().connect("changed::content_mimetype", self.attr_handler)
-        hid2 = self.a1().connect("pre-changed::content_mimetype",
+    def test_with_content_modified_mimetype(self):
+        hid1 = self.a1().connect("modified::content_mimetype", self.attr_handler)
+        hid2 = self.a1().connect("pre-modified::content_mimetype",
                                self.attr_handler, "pre")
         self.a1().begin = 11
         self.assertEqual(self.buf, [])
@@ -1008,9 +1008,9 @@ class TestEvents(TestCase):
         self.a1().content_mimetype = "image/png"
         self.assertEqual(self.buf, [])
 
-    def test_with_content_changed_model(self):
-        hid1 = self.a1().connect("changed::content_model", self.attr_handler)
-        hid2 = self.a1().connect("pre-changed::content_model",
+    def test_with_content_modified_model(self):
+        hid1 = self.a1().connect("modified::content_model", self.attr_handler)
+        hid2 = self.a1().connect("pre-modified::content_model",
                                self.attr_handler, "pre")
         self.a1().begin = 11
         self.assertEqual(self.buf, [])
@@ -1024,9 +1024,9 @@ class TestEvents(TestCase):
         self.a1().content_model = self.R2()
         self.assertEqual(self.buf, [])
 
-    def test_with_content_changed_url(self):
-        hid1 = self.a1().connect("changed::content_url", self.attr_handler)
-        hid2 = self.a1().connect("pre-changed::content_url",
+    def test_with_content_modified_url(self):
+        hid1 = self.a1().connect("modified::content_url", self.attr_handler)
+        hid2 = self.a1().connect("pre-modified::content_url",
                                self.attr_handler, "pre")
         self.a1().begin = 11
         self.assertEqual(self.buf, [])
@@ -1040,8 +1040,8 @@ class TestEvents(TestCase):
         self.a1().content_url = "file:/bar"
         self.assertEqual(self.buf, [])
 
-    def test_with_content_changed_data(self):
-        hid1 = self.a1().connect("changed-content-data", self.default_handler)
+    def test_with_content_modified_data(self):
+        hid1 = self.a1().connect("modified-content-data", self.default_handler)
         self.a1().begin = 11
         self.assertEqual(self.buf, [])
         self.a1().content_data = "listen carefully"
@@ -1053,9 +1053,9 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, [])
 
 
-    def test_media_changed_url(self):
-        hid1 = self.m1().connect("changed::url", self.attr_handler)
-        hid2 = self.m1().connect("pre-changed::url", self.attr_handler, "pre")
+    def test_media_modified_url(self):
+        hid1 = self.m1().connect("modified::url", self.attr_handler)
+        hid2 = self.m1().connect("pre-modified::url", self.attr_handler, "pre")
         self.m1().frame_of_reference = FOREF_PREFIX + "s;o=0"
         self.assertEqual(self.buf, [])
         self.m1().url = "file:/foo.avi"
@@ -1067,9 +1067,9 @@ class TestEvents(TestCase):
         self.m1().url = "file:/bar./avi"
         self.assertEqual(self.buf, [])
 
-    def test_media_changed_frame_of_reference(self):
-        hid1 = self.m1().connect("changed::frame_of_reference", self.attr_handler)
-        hid2 = self.m1().connect("pre-changed::frame_of_reference",
+    def test_media_modified_frame_of_reference(self):
+        hid1 = self.m1().connect("modified::frame_of_reference", self.attr_handler)
+        hid2 = self.m1().connect("pre-modified::frame_of_reference",
                                self.attr_handler, "pre")
         self.m1().url = "file:/foo.avi"
         self.assertEqual(self.buf, [])
@@ -1083,9 +1083,9 @@ class TestEvents(TestCase):
         self.m1().frame_of_reference = FOREF_PREFIX + "ms;o=1"
         self.assertEqual(self.buf, [])
 
-    def test_media_changed_any(self):
-        hid1 = self.m1().connect("changed", self.attr_handler)
-        hid2 = self.m1().connect("pre-changed", self.attr_handler, "pre")
+    def test_media_modified_any(self):
+        hid1 = self.m1().connect("modified", self.attr_handler)
+        hid2 = self.m1().connect("pre-modified", self.attr_handler, "pre")
         self.m1().frame_of_reference = FOREF_PREFIX + "s;o=0"
         self.assertEqual(self.buf, [(self.m1(), "frame_of_reference",
                                      FOREF_PREFIX + "s;o=0",)]*2)
@@ -1102,9 +1102,9 @@ class TestEvents(TestCase):
         self.m1().frame_of_reference = FOREF_PREFIX + "ms;o=1"
         self.assertEqual(self.buf, [])
 
-    def test_annotation_changed_media(self):
-        hid1 = self.a1().connect("changed::media", self.attr_handler)
-        hid2 = self.a1().connect("pre-changed::media", self.attr_handler, "pre")
+    def test_annotation_modified_media(self):
+        hid1 = self.a1().connect("modified::media", self.attr_handler)
+        hid2 = self.a1().connect("pre-modified::media", self.attr_handler, "pre")
         self.a1().begin = 11
         self.assertEqual(self.buf, [])
         self.a1().media = self.m2()
@@ -1116,9 +1116,9 @@ class TestEvents(TestCase):
         self.a1().media = self.m1()
         self.assertEqual(self.buf, [])
 
-    def test_annotation_changed_begin(self):
-        hid1 = self.a1().connect("pre-changed::begin", self.attr_handler, "pre")
-        hid2 = self.a1().connect("changed::begin", self.attr_handler)
+    def test_annotation_modified_begin(self):
+        hid1 = self.a1().connect("pre-modified::begin", self.attr_handler, "pre")
+        hid2 = self.a1().connect("modified::begin", self.attr_handler)
         self.a1().end = 21
         self.assertEqual(self.buf, [])
         self.a1().begin = 11
@@ -1130,9 +1130,9 @@ class TestEvents(TestCase):
         self.a1().begin = 12
         self.assertEqual(self.buf, [])
 
-    def test_annotation_changed_end(self):
-        hid1 = self.a1().connect("changed::end", self.attr_handler)
-        hid2 = self.a1().connect("pre-changed::end", self.attr_handler, "pre")
+    def test_annotation_modified_end(self):
+        hid1 = self.a1().connect("modified::end", self.attr_handler)
+        hid2 = self.a1().connect("pre-modified::end", self.attr_handler, "pre")
         self.a1().begin = 11
         self.assertEqual(self.buf, [])
         self.a1().end = 21
@@ -1144,9 +1144,9 @@ class TestEvents(TestCase):
         self.a1().end = 22
         self.assertEqual(self.buf, [])
 
-    def test_annotation_changed_any(self):
-        hid1 = self.a1().connect("changed", self.attr_handler)
-        hid2 = self.a1().connect("pre-changed", self.attr_handler, "pre")
+    def test_annotation_modified_any(self):
+        hid1 = self.a1().connect("modified", self.attr_handler)
+        hid2 = self.a1().connect("pre-modified", self.attr_handler, "pre")
         self.a1().media = self.m2()
         self.assertEqual(self.buf, [(self.a1(), "media", self.m2()),]*2)
         self.assertEqual(self.callback_errors, [])
@@ -1174,8 +1174,8 @@ class TestEvents(TestCase):
 
     def test_relation_setitem(self):
         self.r1().append(self.a1())
-        hid1 = self.r1().connect("changed-items", self.default_handler)
-        hid2 = self.r1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.r1().connect("modified-items", self.default_handler)
+        hid2 = self.r1().connect("pre-modified-items", self.default_handler)
         self.r1()[0] = self.a2()
         s = slice(0,1)
         L = [self.a2(),]
@@ -1188,8 +1188,8 @@ class TestEvents(TestCase):
 
     def test_relation_delitem(self):
         self.r1().extend([self.a1(), self.a2()])
-        hid1 = self.r1().connect("changed-items", self.default_handler)
-        hid2 = self.r1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.r1().connect("modified-items", self.default_handler)
+        hid2 = self.r1().connect("pre-modified-items", self.default_handler)
         del self.r1()[0]
         s = slice(0,1)
         self.assertEqual(self.buf, [(self.r1(), s, []),]*2)
@@ -1200,8 +1200,8 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, [])
 
     def test_relation_append(self):
-        hid1 = self.r1().connect("changed-items", self.default_handler)
-        hid2 = self.r1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.r1().connect("modified-items", self.default_handler)
+        hid2 = self.r1().connect("pre-modified-items", self.default_handler)
         self.r1().append(self.a1())
         s = slice(0,0)
         L = [self.a1(),]
@@ -1214,8 +1214,8 @@ class TestEvents(TestCase):
 
     def test_relation_set_slice(self):
         self.r1().extend([self.a1(), self.a2()])
-        hid1 = self.r1().connect("changed-items", self.default_handler)
-        hid2 = self.r1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.r1().connect("modified-items", self.default_handler)
+        hid2 = self.r1().connect("pre-modified-items", self.default_handler)
         s = slice(1,2)
         L = [self.a2(), self.a1()]
         self.r1()[s] = L
@@ -1228,8 +1228,8 @@ class TestEvents(TestCase):
 
     def test_relation_del_slice(self):
         self.r1().extend([self.a1(), self.a2(), self.a1(), self.a2()])
-        hid1 = self.r1().connect("changed-items", self.default_handler)
-        hid2 = self.r1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.r1().connect("modified-items", self.default_handler)
+        hid2 = self.r1().connect("pre-modified-items", self.default_handler)
         s = slice(0,1)
         del self.r1()[s]
         self.assertNotEqual(self.buf, [])
@@ -1240,8 +1240,8 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, [])
 
     def test_relation_extend(self):
-        hid1 = self.r1().connect("changed-items", self.default_handler)
-        hid2 = self.r1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.r1().connect("modified-items", self.default_handler)
+        hid2 = self.r1().connect("pre-modified-items", self.default_handler)
         self.r1().extend([self.a1(), self.a2(),])
         self.assertNotEqual(self.buf, [])
         del self.buf[:]
@@ -1252,8 +1252,8 @@ class TestEvents(TestCase):
 
     def test_list_setitem(self):
         self.L1().append(self.a1())
-        hid1 = self.L1().connect("changed-items", self.default_handler)
-        hid2 = self.L1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.L1().connect("modified-items", self.default_handler)
+        hid2 = self.L1().connect("pre-modified-items", self.default_handler)
         self.L1()[0] = self.a2()
         s = slice(0,1)
         L = [self.a2(),]
@@ -1266,8 +1266,8 @@ class TestEvents(TestCase):
 
     def test_list_delitem(self):
         self.L1().extend([self.a1(), self.a2()])
-        hid1 = self.L1().connect("changed-items", self.default_handler)
-        hid2 = self.L1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.L1().connect("modified-items", self.default_handler)
+        hid2 = self.L1().connect("pre-modified-items", self.default_handler)
         del self.L1()[0]
         s = slice(0,1)
         self.assertEqual(self.buf, [(self.L1(), s, []),]*2)
@@ -1278,8 +1278,8 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, [])
 
     def test_list_append(self):
-        hid1 = self.L1().connect("changed-items", self.default_handler)
-        hid2 = self.L1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.L1().connect("modified-items", self.default_handler)
+        hid2 = self.L1().connect("pre-modified-items", self.default_handler)
         self.L1().append(self.a1())
         s = slice(0,0)
         L = [self.a1(),]
@@ -1292,8 +1292,8 @@ class TestEvents(TestCase):
 
     def test_list_set_slice(self):
         self.L1().extend([self.a1(), self.a2()])
-        hid1 = self.L1().connect("changed-items", self.default_handler)
-        hid2 = self.L1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.L1().connect("modified-items", self.default_handler)
+        hid2 = self.L1().connect("pre-modified-items", self.default_handler)
         s = slice(1,2)
         L = [self.a2(), self.a1()]
         self.L1()[s] = L
@@ -1306,8 +1306,8 @@ class TestEvents(TestCase):
 
     def test_list_del_slice(self):
         self.L1().extend([self.a1(), self.a2(), self.a1(), self.a2()])
-        hid1 = self.L1().connect("changed-items", self.default_handler)
-        hid2 = self.L1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.L1().connect("modified-items", self.default_handler)
+        hid2 = self.L1().connect("pre-modified-items", self.default_handler)
         s = slice(0,1)
         del self.L1()[s]
         self.assertNotEqual(self.buf, [])
@@ -1318,8 +1318,8 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, [])
 
     def test_list_extend(self):
-        hid1 = self.L1().connect("changed-items", self.default_handler)
-        hid2 = self.L1().connect("pre-changed-items", self.default_handler)
+        hid1 = self.L1().connect("modified-items", self.default_handler)
+        hid2 = self.L1().connect("pre-modified-items", self.default_handler)
         self.L1().extend([self.a1(), self.a2(),])
         self.assertNotEqual(self.buf, [])
         del self.buf[:]
@@ -1328,9 +1328,9 @@ class TestEvents(TestCase):
         self.L1().extend([self.a2(), self.a1(),])
         self.assertEqual(self.buf, [])
 
-    def test_import_changed_url(self):
-        hid1 = self.i1().connect("changed::url", self.attr_handler)
-        hid2 = self.i1().connect("pre-changed::url", self.attr_handler, "pre")
+    def test_import_modified_url(self):
+        hid1 = self.i1().connect("modified::url", self.attr_handler)
+        hid2 = self.i1().connect("pre-modified::url", self.attr_handler, "pre")
         self.i1().uri = "file:/foo.bzp"
         self.assertEqual(self.buf, [])
         self.i1().url = "file:/foo.bzp"
@@ -1342,9 +1342,9 @@ class TestEvents(TestCase):
         self.i1().url = "file:/bar.bzp"
         self.assertEqual(self.buf, [])
 
-    def test_import_changed_uri(self):
-        hid1 = self.i1().connect("changed::uri", self.attr_handler)
-        hid2 = self.i1().connect("pre-changed::uri", self.attr_handler, "pre")
+    def test_import_modified_uri(self):
+        hid1 = self.i1().connect("modified::uri", self.attr_handler)
+        hid2 = self.i1().connect("pre-modified::uri", self.attr_handler, "pre")
         self.i1().url = "file:/foo.bzp"
         self.assertEqual(self.buf, [])
         self.i1().uri = "file:/foo.bzp"
@@ -1356,9 +1356,9 @@ class TestEvents(TestCase):
         self.i1().uri = "file:/bar.bzp"
         self.assertEqual(self.buf, [])
 
-    def test_import_changed_any(self):
-        hid1 = self.i1().connect("changed", self.attr_handler)
-        hid2 = self.i1().connect("pre-changed", self.attr_handler, "pre")
+    def test_import_modified_any(self):
+        hid1 = self.i1().connect("modified", self.attr_handler)
+        hid2 = self.i1().connect("pre-modified", self.attr_handler, "pre")
         self.i1().url = "file:/foo.bzp"
         self.assertEqual(self.buf, [(self.i1(), "url", "file:/foo.bzp"),]*2)
         self.assertEqual(self.callback_errors, [])
