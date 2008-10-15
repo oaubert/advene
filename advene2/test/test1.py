@@ -75,7 +75,7 @@ if __name__ == "__main__":
         advene_ns % "frame_of_reference/ms;o=0")
     a1 = p.create_annotation("a1", m1, 20, 30, "text/plain")
     a2 = p.create_annotation("a2", m1, 0, 20, "text/plain")
-    r1 = p.create_relation("r1", "text/plain")
+    r1 = p.create_relation("r1")
     try:
         a2 = p.create_annotation("a2", m1, 0, 20, "text/plain")
     except AssertionError:

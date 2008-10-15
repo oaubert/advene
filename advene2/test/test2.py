@@ -104,7 +104,7 @@ if __name__ == "__main__":
     p1.associate_tag(a3, t2)
 
     m3 = p3.create_media("m3", "urn:xyz", foref)
-    r3 = p3.create_relation("r3", "text/plain", members=[a5, a3])
+    r3 = p3.create_relation("r3", members=[a5, a3])
     L3 = p3.create_list("L3", items=[a5, r3, a3])
     v3 = p3.create_view("v3", "text/plain")
     q3 = p3.create_query("q3", "text/plain")

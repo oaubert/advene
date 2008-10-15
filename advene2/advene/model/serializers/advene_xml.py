@@ -185,13 +185,14 @@ class _Serializer(object):
     # common methods
 
     def _serialize_content(self, elt, xelt):
-        xc = SubElement(xelt, "content",
-                       mimetype=elt.content_mimetype)
-        if elt.content_url:
-            # TODO manage packaged: URLs
-            xc.set("url", elt.content_url)
-        else:
-            xc.text = elt.content_data
+        if elt.content_mimetype != "x-advene/none":
+            xc = SubElement(xelt, "content",
+                           mimetype=elt.content_mimetype)
+            if elt.content_url:
+                # TODO manage packaged: URLs
+                xc.set("url", elt.content_url)
+            else:
+                xc.text = elt.content_data
 
     def _serialize_meta(self, obj, xobj):
         xm = SubElement(xobj, "meta")

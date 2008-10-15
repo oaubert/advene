@@ -19,6 +19,7 @@ from weakref import ref
 
 from advene import _RAISE
 from advene.model.core.dirty import DirtyMixin
+from advene.model.core.element import RELATION
 from advene.model.exceptions import ModelError
 from advene.model.parsers import PARSER_META_PREFIX
 from advene.utils.autoproperty import autoproperty
@@ -30,7 +31,7 @@ class WithContentMixin(DirtyMixin):
 
     I assume that I will be mixed in subclasses of PackageElement.
 
-    Note that there are 3 kinds of contents:
+    Note that there are 4 kinds of contents:
 
       backend-stored contents:
         those content have no URL, and are stored directly in the backend;
@@ -42,6 +43,9 @@ class WithContentMixin(DirtyMixin):
         they have a URL in the special ``packaged:`` scheme, meaning that their
         data is stored in the local filesystem (usually extracted from a zipped
         package); their data can be modified through this class.
+      empty content:
+        only authorized for relations; they are marked by the special mimetype
+        "x-advene/none"; neither their schema, URL nor data can be modified.
 
     Note that properties `content_data` and `content_url` are not independant
     when set. See their documentation for more detail.
@@ -150,6 +154,13 @@ class WithContentMixin(DirtyMixin):
     def _set_content_mimetype(self, mimetype, _init=False):
         if not _init and self.__mimetype is None: # shouldn't happen, but safer
             self._load_content_info()
+        if mimetype == "x-advene/none":
+            if  self.ADVENE_TYPE != RELATION:
+                raise ModelError("Only relations may have an empty content")
+            elif not _init:
+                self._set_content_schema(None)
+                self._set_content_url("")
+                self._set_content_data("")
         self.__mimetype = mimetype
         if not _init:
             self.add_cleaning_operation_once(self.__clean_info)
@@ -171,6 +182,8 @@ class WithContentMixin(DirtyMixin):
         # and resource may be an id-ref rather than an element
         if not _init and self.__schema_idref is None:
             self._load_content_info()
+        if self.__mimetype == "x-advene/none" and (not _init or resource):
+            raise ModelError("Can not set schema of empty content")
         op = self._owner
         if resource is None or _init and resource == "":
             self.__schema_idref = ""
@@ -219,6 +232,8 @@ class WithContentMixin(DirtyMixin):
         """See `_get_content_url`."""
         if not _init and self.__url is None: # should not happen, but safer
             self._load_content_info()
+        if self.__mimetype == "x-advene/none" and (not _init or url):
+            raise ModelError("Can not set URL of empty content")
         if url != self.__url: # prevents to erase the data cache for no reason
             assert not url.startswith("packaged:") \
                 or self._owner.get_meta(PACKAGED_ROOT, None) is not None
@@ -272,6 +287,8 @@ class WithContentMixin(DirtyMixin):
         if url is None: # should not happen, but that's safer
             self._load_content_info()
             url = self.__url
+        if self.__mimetype == "x-advene/none":
+            raise ModelError("Can not set URL of empty content")
         if url.startswith("packaged:"):
             f = self.get_content_as_file()
             f.truncate()

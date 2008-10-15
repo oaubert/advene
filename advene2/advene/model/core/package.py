@@ -407,7 +407,8 @@ class Package(object, WithMetaMixin, DirtyMixin):
                                         mimetype, schema_idref, url)
         return Annotation(self, id, media, begin, end, mimetype, schema, url)
 
-    def create_relation(self, id, mimetype, schema=None, url="", members=()):
+    def create_relation(self, id, mimetype="x-advene/none", schema=None,
+                        url="", members=()):
         assert not self.has_element(id)
         if schema is not None:
             schema_idref = schema.make_idref_in(self)

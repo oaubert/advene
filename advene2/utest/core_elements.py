@@ -8,8 +8,10 @@ from warnings  import filterwarnings
 from advene.model.backends.sqlite import _set_module_debug
 from advene.model.core.content import PACKAGED_ROOT
 from advene.model.core.media import FOREF_PREFIX
+from advene.model.core.element import RELATION
 from advene.model.core.package import Package, UnreachableImportError, \
                                       NoSuchElementError
+from advene.model.exceptions import ModelError
 
 filterwarnings("ignore", "tmpnam is a potential security risk to your program")
 _set_module_debug(True) # enable all asserts in backend_sqlite
@@ -146,6 +148,21 @@ class TestElements(TestCase):
         self.assertEqual(None, e.content_schema_idref)
         self.assertEqual(None, e.content.schema_idref)
         s.delete()
+
+        # empty content
+        if e.ADVENE_TYPE == RELATION:
+            e.content_mimetype = "x-advene/none"
+            self.assertEqual(None, e.content_schema)
+            self.assertEqual(None, e.content_schema_idref)
+            self.assertEqual("", e.content_url)
+            self.assertEqual("", e.content_data)
+            self.assertRaises(ModelError, setattr, e, "content_schema", s)
+            self.assertRaises(ModelError, setattr, e, "content_url", url)
+            self.assertRaises(ModelError, setattr, e, "content_data", "")
+            e.content_mimetype = "text/plain"
+        else:
+            self.assertRaises(ModelError, setattr, e, "content_mimetype",
+                              "x-advene/none")
 
         unlink(filename)
         e.content_url = ""
