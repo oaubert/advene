@@ -28,8 +28,7 @@ from advene.gui.views import AdhocView
 import advene.util.helper as helper
 from advene.gui.util import get_pixmap_button, dialog, decode_drop_parameters
 import xml.etree.ElementTree as ET
-# FIXME
-#from advene.gui.edit.elements import get_edit_popup
+from advene.gui.edit.elements import get_edit_popup
 
 class ViewBook(AdhocView):
     """Notebook containing multiple views
