@@ -2,6 +2,8 @@
 I define the class of annotations.
 """
 
+import itertools
+
 from advene.model.consts import _RAISE
 from advene.model.core.element import PackageElement, ElementCollection, \
                                       ANNOTATION, MEDIA, RESOURCE, RELATION
@@ -227,11 +229,38 @@ class Annotation(PackageElement, WithContentMixin):
 
     @property
     def incoming_relations(self):
+        """List of incoming relations.
+        """
         return self.relations.filter(position=0)
 
     @property
     def outgoing_relations(self):
+        """List of outgoing relations.
+        """
         return self.relations.filter(position=1)
+
+    @property
+    def related(self):
+        """List (iterator) of related annotations
+        """
+        return itertools.chain(
+            (r[1] for r in self.incoming_relations),
+            (r[0] for r in self.outgoing_relations)
+            )
+
+    @property
+    def typed_related_in(self):
+        """List of tuples (relation type, list of related incoming annotations)
+        """
+        return [ (at, (r[1] for r in l)) for (at, l) in 
+                 itertools.groupby(self.incoming_relations, key=lambda e: e.type) ]
+    
+    @property
+    def typed_related_out(self):
+        """List of tuples (relation type, list of related outgoing annotations)
+        """
+        return [ (at, (r[0] for r in l)) for (at, l) in 
+                 itertools.groupby(self.outgoing_relations, key=lambda e: e.type) ]
 
     @tales_property
     def _tales_relations(annotation, context):
