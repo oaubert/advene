@@ -78,8 +78,12 @@ class QuickviewBar(gtk.HBox):
             e=""
             c=_("Current time")
         elif isinstance(a, AnnotationType):
-            b="   " + helper.format_time(min(a.begin for a in a.annotations))
-            e=" - " + helper.format_time(max(a.end for a in a.annotations))
+            if len(a.annotations):
+                b="   " + helper.format_time(min(a.begin for a in a.annotations))
+                e=" - " + helper.format_time(max(a.end for a in a.annotations))
+            else:
+                b=""
+                e=""
             c=self.controller.get_title(a)
             c += " (" + a.id + ")"
         else:
