@@ -363,6 +363,10 @@ class Package(CorePackage):
     def _tales_schemas(self):
         return self.all.schemas
 
+    @property
+    def _tales_medias(self):
+        return self.all.medias
+
 _bootstrap_ref = lambda: None
 
 Package.make_metadata_property(DC_NS_PREFIX + "creator", default="")
