@@ -580,8 +580,7 @@ class TranscriptionView(AdhocView):
                 annotationid=beginmarks[0].replace('b_', '')
 
         if annotationid is not None:
-            a=self.package.annotations['#'.join( (self.package.uri,
-                                                  annotationid) )]
+            a=self.package.get(annotationid)
             if a != self.currentannotation:
                 if self.currentannotation is not None:
                     self.untag_annotation(self.currentannotation, "current")
