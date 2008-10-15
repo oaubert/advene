@@ -14,8 +14,10 @@ class XmlParserBase(object):
     The idea is that subclasses define ``handle_X`` methods where X is the
     unqualified tag.
 
-    Property `backend` and `package_id` are useful to feed the package's
-    backend -- preferable to attacking the package directly.
+    Property `package` holds the package to parse into.
+
+    DEPRECATED: Property `backend` and `package_id` are useful to feed the
+    package's backend.
 
     Property `current` always points to the current element (with the
     ElementTree API). Note that the element will have its attribute, but not
@@ -67,8 +69,8 @@ class XmlParserBase(object):
 
     def parse(self):
         f = self.file
-        self.backend = self.package._backend
-        self.package_id = self.package._id
+        self.backend = self.package._backend # TODO: remove (deprecated)
+        self.package_id = self.package._id # TODO: remove (deprecated)
         self.stream = st = Stream(f)
         if st.elem.tag != self.tag_template % self.root:
             raise ParserError("expecting %s, found %s" %

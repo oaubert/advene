@@ -125,14 +125,14 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         self._all_wref       = lambda: None
         self._uri            = None
         self._event_delegate = PackageEventDelegate(self)
+        self._imports_dict   = imports_dict = {}
+        self._importers      = WeakKeyDictionary()
+        self._backends_dict  = None
+
 
         if parser:
             parser.parse_into(f, self)
             f.close()
-
-        self._imports_dict = imports_dict = {}
-        self._importers = WeakKeyDictionary()
-        self._backends_dict = None
 
         # use self.__class__ as package_class (rather than Package directly)
         # so that application model subclasses do not mix with core packages.
@@ -371,8 +371,14 @@ class Package(object, WithMetaMixin, WithEventsMixin):
 
     # element retrieval
 
-    def has_element(self, id):
-        return id in self._elements or self._backend.has_element(self._id, id)
+    def has_element(self, id, element_type=None):
+        if element_type is None:
+            return id in self._elements \
+                or self._backend.has_element(self._id, id)
+        else:
+            e = self._elements.get(id)
+            return (e is not None and e.ADVENE_TYPE == element_type) \
+                or self._backend.has_element(self._id, id, element_type)
 
     def get_element(self, id, default=_RAISE):
         """Get the element with the given id-ref.
@@ -466,10 +472,25 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         return r
 
     def _can_reference(self, element):
-        """ Return True iff element is owned or directly imported by this package.
         """
-        o = element._owner
-        return o is self  or  o in self._imports_dict.values()
+        Return True iff element is owned or directly imported by this package.
+
+        element can be either an instance of PackageElement or an id-ref.
+        Note that if element is the id-ref of an imported element, its
+        existence in the imported package is *not* checked (but it is checked
+        that the import exists).
+        """
+        if hasattr(element, "ADVENE_TYPE"):
+            o = element._owner
+            return o is self  or  o in self._imports_dict.values()
+        else:
+            path = str(element).split(":")
+            if len(path) > 2:
+                return False
+            elif len(path) == 2:
+                return self.has_element(path[0], IMPORT)
+            else:
+                return self.has_element(path[0])
 
     def make_id_for (self, pkg, id):
         """Compute an id-ref in this package for an element.
@@ -533,7 +554,10 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         assert not self.has_element(id)
         media_id = media.make_id_in(self)
         if model is not None:
-            model_id = model.make_id_in(self)
+            if hasattr(model, "ADVENE_TYPE"):
+                model_id = model.make_id_in(self)
+            else:
+                model_id = str(model)
         else:
             model_id = ""
         self._backend.create_annotation(self._id, id, media_id, begin, end,
@@ -549,7 +573,10 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """
         assert not self.has_element(id)
         if model is not None:
-            model_id = model.make_id_in(self)
+            if hasattr(model, "ADVENE_TYPE"):
+                model_id = model.make_id_in(self)
+            else:
+                model_id = str(model)
         else:
             model_id = ""
         self._backend.create_relation(self._id, id,
@@ -564,7 +591,10 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """
         assert not self.has_element(id)
         if model is not None:
-            model_id = model.make_id_in(self)
+            if hasattr(model, "ADVENE_TYPE"):
+                model_id = model.make_id_in(self)
+            else:
+                model_id = str(model)
         else:
             model_id = ""
         self._backend.create_view(self._id, id, mimetype, model_id, url)
@@ -577,7 +607,10 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """
         assert not self.has_element(id)
         if model is not None:
-            model_id = model.make_id_in(self)
+            if hasattr(model, "ADVENE_TYPE"):
+                model_id = model.make_id_in(self)
+            else:
+                model_id = str(model)
         else:
             model_id = ""
         self._backend.create_resource(self._id, id, mimetype, model_id, url)
@@ -609,7 +642,10 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """
         assert not self.has_element(id)
         if model is not None:
-            model_id = model.make_id_in(self)
+            if hasattr(model, "ADVENE_TYPE"):
+                model_id = model.make_id_in(self)
+            else:
+                model_id = str(model)
         else:
             model_id = ""
         self._backend.create_query(self._id, id, mimetype, model_id, url)
@@ -636,25 +672,54 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         self.emit("created::import", r)
         return r
 
+    def _create_import_in_parser(self, id, url, uri):
+        """
+        As it name implies, this method is stricly reserced to parsers for
+        creating imports without actually loading them. It *must not* be
+        called elsewhere (it would corrupt the package w.r.t. imports).
+        """
+        self._backend.create_import(self._id, id, url, uri)
+        return self.get(id)
+
     # tags management
 
     def associate_tag(self, element, tag):
-        """Associate the given element to the given tag on behalf of this package.
+        """
+        Associate the given element to the given tag on behalf of this package.
+
+        `element` must normally be a PackageElement instance and `tag` a TAG
+        instance. In the case one of them is an imported element, the id-ref
+        can actually be given instead of the actual element, but this should be
+        used only in situation where robustness to unreachable elements is
+        desirable (e.g. parsers).
         """
         assert self._can_reference(element)
         assert self._can_reference(tag)
-        assert tag.ADVENE_TYPE == TAG
-        if element._owner is self:
+        assert hasattr(element, "ADVENE_TYPE")  or  element.find(":") != -1
+        assert getattr(tag, "ADVENE_TYPE", None) == TAG  or  tag.find(":")!=-1
+
+        if not hasattr(element, "_owner"):
+            id_e = element
+        elif element._owner is self:
             id_e = element._id
         else:
             id_e = element.make_id_in(self)
-        if tag._owner is self:
+
+        if not hasattr(tag, "_owner"):
+            id_t = tag
+        elif tag._owner is self:
             id_t = tag._id
         else:
             id_t = tag.make_id_in(self)
+
         self._backend.associate_tag(self._id, id_e, id_t)
-        element.emit("added-tag", tag)
-        tag.emit("added", element)
+        element_emit = getattr(element, "emit", None)
+        if element_emit:
+            element.emit("added-tag", tag)
+        tag_emit = getattr(tag, "emit", None)
+        if tag_emit:
+            tag_emit("added", element)
+
 
     def dissociate_tag(self, element, tag):
         """Dissociate the given element to the given tag on behalf of this package.

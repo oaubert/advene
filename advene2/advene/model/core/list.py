@@ -116,31 +116,49 @@ class List(PackageElement, WithContentMixin, GroupMixin):
             del self[i-offset]
 
     def insert(self, i, a):
-        assert hasattr(a, "ADVENE_TYPE")
+        # this method accepts a strict id-ref instead of a real element
         o = self._owner
         assert o._can_reference(a)
+        if hasattr(a, "ADVENE_TYPE"):
+            aid = a.make_id_in(o)
+        else:
+            aid = str(a)
+            assert ":" in aid
+            a = None
         c = len(self._cache)
         if i > c : i = c
         if i < -c: i = 0
         if i < 0 : i += c 
-        aid = a.make_id_in(o)
         self._ids.insert(i,aid)
-        self._cache.insert(i,ref(a))
+        if a is not None:
+            a = ref(a)
+        else:
+            a = lambda: None
+        self._cache.insert(i,a)
         o._backend.insert_item(o._id, self._id, aid, i, c)
         # NB: it is important to pass to the backend the length c computed
         # *before* inserting the item
         
     def append(self, a):
-        assert hasattr(a, "ADVENE_TYPE")
+        # this method accepts a strict id-ref instead of a real element
         o = self._owner
         assert o._can_reference(a)
-        aid = a.make_id_in(o)
+        if hasattr(a, "ADVENE_TYPE"):
+            aid = a.make_id_in(o)
+        else:
+            aid = str(a)
+            assert ":" in aid
+            a = None
         c = len(self._cache)
         s = slice(c,c)
         L = [a,]
         self.emit("pre-changed-items", s, L)
         self._ids.append(aid)
-        self._cache.append(ref(a))
+        if a is not None:
+            a = ref(a)
+        else:
+            a = lambda: None
+        self._cache.append(a)
         o._backend.insert_item(o._id, self._id, aid, -1, c)
         self.emit("changed-items", s, L)
         # NB: it is important to pass to the backend the length c computed

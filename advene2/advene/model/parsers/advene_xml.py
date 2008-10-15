@@ -111,17 +111,29 @@ class _Parser(XmlParserBase):
         XmlParserBase.__init__(self, file_, package, namespace_uri, root)
         self._postponed = []
 
-    def do_or_postpone(self, id, function, *args, **kw):
-        """If id has been created in backend, execute function,
-           else postpone its execution.
+    def do_or_postpone(self, id, function, function2=None):
+        """
+        If `identified` an imported element, function is invoked with `id` as
+        its argument.
+
+        If `id` is a plain identifier, it is checked whether `self.package` has
+        such an element. If so, function is invoked with that element as its
+        argument; else, its execution is postponed.
 
         This is useful because some elements in the serialization may refer to
         other elements that are defined further.
+
+        If function2 is provided and the invocation is postponed, then it will
+        be function2 rather than function that will be invoked.
         """
-        if ":" in id or self.backend.has_element(self.package_id, id):
-            function(*args, **kw)
+        if ":" in id:
+            elt = id
         else:
-            self._postponed.append((function, args, kw))
+            elt = self.package.get(id, None)
+        if elt is not None:
+            function(elt)
+        else:
+            self._postponed.append((function2 or function, id))
 
     def optional_sequence(self, tag, *args, **kw):
         items_name = kw.pop("items_name", None)
@@ -139,17 +151,15 @@ class _Parser(XmlParserBase):
             stream.pushback()
 
     def handle_package(self):
-        be = self.backend
-        pid = self.package_id
+        pa = self.package
         namespaces = "\n".join([ " ".join(el)
                                 for el in self.ns_stack if el[0] ])
         if namespaces:
-            be.set_meta(pid, "", "",
-                        PARSER_META_PREFIX+"namespaces", namespaces, False)
+            pa.set_meta(PARSER_META_PREFIX+"namespaces", namespaces)
         uri = self.current.get("uri")
         if uri is not None:
-            be.update_uri(pid, uri)
-        self.optional("meta", "", "")
+            pa.uri = uri
+        self.optional("meta", pa)
         self.optional_sequence("imports")
         self.optional_sequence("tags")
         self.optional_sequence("medias")
@@ -161,59 +171,53 @@ class _Parser(XmlParserBase):
         self.optional_sequence("lists")
         self.optional_sequence("external-tag-associations",
                                items_name="association")
-        for f, a, k in self._postponed:
-            f(*a, **k)
+        for f, id in self._postponed:
+            elt = self.package.get(id)
+            f(elt)
 
     def handle_import(self):
-        be = self.backend
-        pid = self.package_id
         id = self.get_attribute("id")
         url = self.get_attribute("url")
         uri = self.get_attribute("uri", "")
-        be.create_import(pid, id, url, uri)
-        self.optional_sequence("tags", element_id=id)
-        self.optional("meta", id, IMPORT)
+        elt = self.package._create_import_in_parser(id, url, uri)
+        self.optional_sequence("tags", element=elt)
+        self.optional("meta", elt)
 
-    def handle_tag(self, element_id=None):
-        be = self.backend
-        pid = self.package_id
-        if element_id is None:
+    def handle_tag(self, element=None):
+        if element is None:
             # tag definition in package
             id = self.get_attribute("id")
-            be.create_tag(pid, id)
+            elt = self.package.create_tag(id)
             self.optional_sequence("imported-elements", items_name="element",
-                                   tag_id=id)
-            self.optional_sequence("tags", element_id=id)
-            self.optional("meta", id, TAG)
+                                   advene_tag=elt)
+            self.optional_sequence("tags", element=elt)
+            self.optional("meta", elt)
         else:
             # tag association in element
             id = self.get_attribute("id-ref")
-            self.do_or_postpone(id, be.associate_tag, pid, element_id, id)
+            self.do_or_postpone(id,
+                lambda tag: self.package.associate_tag(element, tag))
 
     def handle_media(self):
-        be = self.backend
-        pid = self.package_id
         id = self.get_attribute("id")
         url = self.get_attribute("url")
         foref = self.get_attribute("frame-of-reference")
-        be.create_media(pid, id, url, foref)
+        elt = self.package.create_media(id, url, foref)
 
-        self.optional_sequence("tags", element_id=id)
-        self.optional("meta", id, MEDIA)
+        self.optional_sequence("tags", element=elt)
+        self.optional("meta", elt)
         
     def handle_resource(self):
-        be = self.backend
-        pid = self.package_id
         id = self.get_attribute("id")
-        self.required("content", RESOURCE, be.create_resource, id)
-        self.optional_sequence("tags", element_id=id)
-        self.optional("meta", id, RESOURCE)
+        elt = self.required("content", self.package.create_resource, id)
+        self.optional_sequence("tags", element=elt)
+        self.optional("meta", elt)
 
     def handle_annotation(self):
-        be = self.backend
-        pid = self.package_id
         id = self.get_attribute("id")
         media = self.get_attribute("media")
+        if not ":" in media:
+            media = self.package.get(media)
         begin = self.get_attribute("begin")
         try:
             begin = int(begin)
@@ -226,53 +230,47 @@ class _Parser(XmlParserBase):
             raise ParserError("wrong end value for %s" % id)
         if end < begin:
             raise ParserError("end is before begin in %s" % id)
-        self.required("content", ANNOTATION, be.create_annotation, id, media,
-                      begin, end)
-        self.optional_sequence("tags", element_id=id)
-        self.optional("meta", id, ANNOTATION)
+        elt = self.required("content", self.package.create_annotation,
+                                       id, media, begin, end)
+        self.optional_sequence("tags", element=elt)
+        self.optional("meta", elt)
 
     def handle_relation(self):
-        be = self.backend
-        pid = self.package_id
         id = self.get_attribute("id")
-        be.create_relation(pid, id, "x-advene/none", "", "")
-        self.optional_sequence("members", id, [0])
-        self.optional("content", RELATION, be.update_content_info, id,
-                      RELATION)
-        self.optional_sequence("tags", element_id=id)
-        self.optional("meta", id, RELATION)
+        elt = self.package.create_relation(id, "x-advene/none")
+        self.optional_sequence("members", elt, [0])
+        def update_content_info(mimetype, model, url):
+            elt.content_mimetype = mimetype
+            elt.content_model = model
+            elt.content_url = url
+            return elt
+        self.optional("content", update_content_info)
+        self.optional_sequence("tags", element=elt)
+        self.optional("meta", elt)
 
     def handle_view(self):
-        be = self.backend
-        pid = self.package_id
         id = self.get_attribute("id")
-        self.required("content", VIEW, be.create_view, id)
-        self.optional_sequence("tags", element_id=id)
-        self.optional("meta", id, VIEW)
+        elt = self.required("content", self.package.create_view, id)
+        self.optional_sequence("tags", element=elt)
+        self.optional("meta", elt)
 
     def handle_query(self):
-        be = self.backend
-        pid = self.package_id
         id = self.get_attribute("id")
-        self.required("content", QUERY, be.create_query, id)
-        self.optional_sequence("tags", element_id=id)
-        self.optional("meta", id, QUERY)
+        elt = self.required("content", self.package.create_query, id)
+        self.optional_sequence("tags", element=elt)
+        self.optional("meta", elt)
 
     def handle_list(self):
-        be = self.backend
-        pid = self.package_id
         id = self.get_attribute("id")
-        be.create_list(pid, id)
-        self.optional_sequence("items", id, [0])
-        self.optional_sequence("tags", element_id=id)
-        self.optional("meta", id, LIST)
+        elt = self.package.create_list(id)
+        self.optional_sequence("items", elt, [0])
+        self.optional_sequence("tags", element=elt)
+        self.optional("meta", elt)
         
     # utility methods
             
-    def handle_meta(self, owner_id, typ):
+    def handle_meta(self, obj):
         elem = self.complete_current()
-        be = self.backend
-        pid = self.package_id
         for child in elem:
             key = child.tag
             if key.startswith("{"):
@@ -283,19 +281,18 @@ class _Parser(XmlParserBase):
                                   key)
             val = child.get("id-ref")
             if val is None:
-               be.set_meta(pid, owner_id, typ, key, child.text, False)
+                obj.set_meta(key, child.text, False)
+            elif ":" in val:
+                obj.set_meta(key, val, True)
             else:
-               is_id = True
-               self.do_or_postpone(val,
-                   be.set_meta, pid, owner_id, typ, key, val, True)
+                self.do_or_postpone(val, lambda val: obj.set_meta(key, val))
 
-    def handle_content(self, typ, backend_method, element_id, *args):
-        be = self.backend
-        pid = self.package_id
+    def handle_content(self, creation_method, *args):
         mimetype = self.get_attribute("mimetype")
         url = self.get_attribute("url", "")
         model = self.get_attribute("model", "")
-        backend_method(pid, element_id, *args + (mimetype, model, url))
+        elt = creation_method(*args + (mimetype, "", url))
+        self.do_or_postpone(model, elt._set_content_model)
         elem = self.complete_current()
         if len(elem):
             raise ParserError("no XML tag allowed in content; use &lt;tag>")
@@ -304,40 +301,35 @@ class _Parser(XmlParserBase):
             raise ParserError("content can not have both url (%s) and data" %
                               url)
         elif data:
-            be.update_content_data(pid, element_id, typ, data)
+            elt.content_data = data
+        return elt
 
-    def handle_member(self, relation_id, count):
-        # NB: count is a *list* containing the count, that is passed and
-        # updated through all members, so as to keep track of the number of
-        # members already added
-        be = self.backend
-        pid = self.package_id
-        id = self.get_attribute("id-ref")
-        be.insert_member(pid, relation_id, id, -1, count[0])
-        count[0] += 1
+    def handle_member(self, relation, c):
+        # c is a 1-length list containing the virtual length of the list,
+        # i.e. the length counting the postponed elements
+        a = self.get_attribute("id-ref")
+        if ":" not in a:
+            a = self.package.get(a)
+        relation.append(a)
+        c[0] += 1
 
-    def handle_item(self, list_id, count):
-        # NB: count is a *list* containing the count, that is passed and
-        # updated through all members, so as to keep track of the number of
-        # members already added
-        be = self.backend
-        pid = self.package_id
+    def handle_item(self, lst, c):
+        # c is a 1-length list containing the virtual length of the list,
+        # i.e. the length counting the postponed elements
         id = self.get_attribute("id-ref")
-        self.do_or_postpone(id, be.insert_item, pid, list_id, id, -1, count[0])
-        count[0] += 1
+        self.do_or_postpone(id, lambda e: lst.insert(c[0], e))
+        c[0] += 1
 
-    def handle_element(self, tag_id):
-        be = self.backend
-        pid = self.package_id
+    def handle_element(self, advene_tag):
         id = self.get_attribute("id-ref")
-        be.associate_tag(pid, id, tag_id)
+        # should only be imported, so no check
+        self.package.associate_tag(id, advene_tag)
 
     def handle_association(self):
-        be = self.backend
-        pid = self.package_id
         elt_id = self.get_attribute("element")
         tag_id = self.get_attribute("tag")
-        be.associate_tag(pid, elt_id, tag_id)
+        # both tag and element should be imported, so no check
+        self.package.associate_tag(elt_id, tag_id)
 
 
 #

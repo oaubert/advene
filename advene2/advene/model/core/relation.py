@@ -116,14 +116,20 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
             del self[i-offset]
 
     def insert(self, i, a):
-        assert getattr(a, "ADVENE_TYPE", None) == ANNOTATION
+        # this method accepts a strict id-ref instead of a real element
         o = self._owner
         assert o._can_reference(a)
+        if hasattr(a, "ADVENE_TYPE"):
+            assert a.ADVENE_TYPE == ANNOTATION
+            aid = a.make_id_in(o)
+        else:
+            aid = str(a)
+            assert ":" in aid
+            a = None
         c = len(self._cache)
         if i > c : i = c
         if i < -c: i = 0
         if i < 0 : i += c 
-        aid = a.make_id_in(o)
         self._ids.insert(i,aid)
         self._cache.insert(i,a)
         o._backend.insert_member(o._id, self._id, aid, i, c)
@@ -131,10 +137,16 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         # *before* inserting the member
         
     def append(self, a):
-        assert getattr(a, "ADVENE_TYPE", None) == ANNOTATION
+        # this method accepts a strict id-ref instead of a real element
         o = self._owner
         assert o._can_reference(a)
-        aid = a.make_id_in(o)
+        if hasattr(a, "ADVENE_TYPE"):
+            assert a.ADVENE_TYPE == ANNOTATION
+            aid = a.make_id_in(o)
+        else:
+            aid = str(a)
+            assert ":" in aid
+            a = None
         c = len(self._cache)
         s = slice(c,c)
         L = [a,]

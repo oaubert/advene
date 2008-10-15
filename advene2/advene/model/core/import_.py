@@ -15,7 +15,7 @@ class Import(PackageElement):
         PackageElement.__init__(self, owner, id)
         self._url = url
         self._uri = uri
-        self._imported = owner._imports_dict[id]
+        self._imported = owner._imports_dict.get(id)
 
     def delete(self):
         super(Import, self).delete()
@@ -49,7 +49,10 @@ class Import(PackageElement):
 
     @autoproperty
     def _get_package(self):
-        return self._imported
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        else:
+            return self._imported
 
     def __store(self):
         o = self._owner
@@ -58,72 +61,72 @@ class Import(PackageElement):
     # group interface
 
     def __contains__(self, element):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return element in self._imported._all
 
     @property
     def medias(self):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported._all.medias
 
     @property
     def annotations(self):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported._all.annotations
 
     @property
     def relations(self):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported._all.relations
 
     @property
     def views(self):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported._all.views
 
     @property
     def resources(self):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported._all.resources
 
     @property
     def tags(self):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported._all.tags
 
     @property
     def lists(self):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported._all.lists
 
     @property
     def imports(self):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported._all.imports
 
     @property
     def queries(self):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported._all.queries
 
     # dict interface
 
     def __getitem__ (self, i):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported[i]
 
     def get(self, i, default=None):
-        if self._imported:
+        if not self._imported:
             raise UnreachableImportError(self._id)
         return self._imported.get(i, default)

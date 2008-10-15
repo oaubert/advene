@@ -203,14 +203,17 @@ class WithContentMixin:
         """
         # if _init is True, no backend operation is performed,
         # and resource may be an id-ref rather than an element
+        # else, resource may be only a strict id-ref
         if not _init and self.__model_id is None:
             self._load_content_info()
         if self.__mimetype == "x-advene/none" and (not _init or resource):
             raise ModelError("Can not set model of empty content")
         op = self._owner
-        if hasattr(resource, "ADVENE_TYPE") and not op._can_reference(resource):
+        if resource and not op._can_reference(resource):
+            if hasattr(op, "ADVENE_TYPE"):
+                resource = op.make_id_for(resource)
             raise ModelError("Package %s can not reference resource %s" %
-                             op.uri, resource.make_id_in(op))
+                             (op.uri, resource))
 
         if not _init:
             self.emit("pre-changed::content_model", "content_model", resource)
@@ -218,7 +221,8 @@ class WithContentMixin:
             self.__model_id = ""
             if self.__model_wref():
                 del self.__model_wref
-        elif _init and isinstance(resource, basestring):
+        elif isinstance(resource, basestring):
+            assert _init or ":" not in resource
             self.__model_id = resource
         else:
             self.__model_id = resource.make_id_in(op)

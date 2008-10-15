@@ -185,12 +185,17 @@ class WithMetaMixin:
                 val = default
         return val
 
-    def set_meta(self, key, val):
+    def set_meta(self, key, val, val_is_idref=False):
         """Set the metadata.
 
         ``val`` can either be a PackageElement or a string. If an element, it
         must be directly imported by the package of self, or a ModelError will
         be raised.
+
+        Use `val_is_idref` only if you know what you are doing: it forces `val`
+        to be interpreted as an id-ref rather than a plain string; if the
+        id-ref has an import-prefix, only the existence of the import is
+        checked. This is mainly useful for parsers.
         """
         if hasattr(self, "ADVENE_TYPE"):
             p = self._owner
@@ -206,6 +211,12 @@ class WithMetaMixin:
             vstr = val.make_id_in(p)
             vstr_is_id = True
             val = (ref(val), vstr)
+        elif val_is_idref:
+            if not p._can_reference(val):
+                raise ModelError, "Element or import does not exist %s" % val
+            vstr = val
+            vstr_is_id = True
+            val = (None, val)
         else:
             vstr = str(val)
             vstr_is_id = False
