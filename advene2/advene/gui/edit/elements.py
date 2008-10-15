@@ -666,6 +666,7 @@ class EditPackagePopup (EditElementPopup):
         vbox=gtk.VBox()
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uriref',
+                                               'title',
                                                'creator', 'created',
                                                'contributor', 'modified',
                                                'description'),
@@ -673,6 +674,7 @@ class EditPackagePopup (EditElementPopup):
                                        editable=editable,
                                        editables=('description'),
                                        labels={'id':     _('Id'),
+                                               'title': _('Title'),
                                                'uriref':    _('URI'),
                                                'creator': _('Creator'),
                                                'contributor': _('Contributor'),
@@ -738,6 +740,7 @@ class EditAnnotationTypePopup (EditElementPopup):
 
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uriref',
+                                               'title',
                                                'creator', 'created',
                                                'contributor', 'modified',
                                                'description', 'representation',
@@ -748,6 +751,7 @@ class EditAnnotationTypePopup (EditElementPopup):
                                        editable=editable,
                                        editables=('contributor', 'description', 'representation', 'color', 'element_color'),
                                        labels={'id':     _('Id'),
+                                               'title': _('Title'),
                                                'uriref':    _('URI'),
                                                'creator': _('Creator'),
                                                'contributor': _('Contributor'),
@@ -773,6 +777,7 @@ class EditRelationTypePopup (EditElementPopup):
 
         f = self.make_registered_form (element=self.element,
                                        fields=('id', 'uriref',
+                                               'title',
                                                'creator', 'created',
                                                'contributor', 'modified',
                                                'description', 'representation',
@@ -783,6 +788,7 @@ class EditRelationTypePopup (EditElementPopup):
                                        editable=editable,
                                        editables=('contributor', 'description', 'representation', 'color', 'element_color'),
                                        labels={'id':     _('Id'),
+                                               'title': _('Title'),
                                                'uriref':    _('URI'),
                                                'creator': _('Creator'),
                                                'contributor': _('Contributor'),
