@@ -16,10 +16,10 @@ class Relation(CamGroupMixin, CoreRelation, CamElementMixin):
             if advene_type:
                 if advene_type is not TAG \
                 or value.get_meta(CAMSYS_TYPE, None) != "relation-type":
-                    raise SemanticError("not an relation type")
+                    raise SemanticError("not a relation type")
             else:
                 if not val_is_idref:
-                    raise SemanticError("not an relation type")
+                    raise SemanticError("not a relation type")
 
             old_type = self.get_meta(key, None)
             owner = self._owner
