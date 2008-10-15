@@ -293,12 +293,16 @@ class AdveneGUI(Connect):
         hb.show_all()
 
         self.quicksearch_button=get_small_stock_button(gtk.STOCK_FIND)
+        self.quicksearch_entry=gtk.Entry()
+        self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
+        self.quicksearch_entry.connect('activate', self.do_quicksearch)
 
         def modify_source(i, expr, label):
             """Modify the quicksearch source, and update the tooltip accordingly.
             """
             config.data.preferences['quicksearch-source']=expr
             self.tooltips.set_tip(self.quicksearch_button, _("Searching on %s.\nLeft click to launch the search, right-click to set the quicksearch options") % label)
+            self.tooltips.set_tip(self.quicksearch_entry, _('String to search in %s') % label)
             return True
 
         def quicksearch_options(button, event, method):
@@ -325,7 +329,7 @@ class AdveneGUI(Connect):
                  # FIXME: invalid expression here. We should use iter_elements(p)
                  'here/all/annotation_types/%s/annotations' % at.id) for at in self.controller.package.all.annotation_types ] + [ (_("Views"), 'here/views'), (_("Tags"), 'tags') ]
             for (label, expression) in l:
-                i=gtk.CheckMenuItem(label)
+                i=gtk.CheckMenuItem(label, use_underline=False)
                 i.set_active(expression == config.data.preferences['quicksearch-source'])
                 i.connect('activate', method, expression, label)
                 submenu.append(i)
@@ -339,9 +343,6 @@ class AdveneGUI(Connect):
         if config.data.preferences['quicksearch-source'] is None:
             modify_source(None, None, _("All annotations"))
         hb=self.gui.get_widget('search_hbox')
-        self.quicksearch_entry=gtk.Entry()
-        self.tooltips.set_tip(self.quicksearch_entry, _('String to search'))
-        self.quicksearch_entry.connect('activate', self.do_quicksearch)
         hb.pack_start(self.quicksearch_entry, expand=False)
         def modify_source_and_search(i, expr, label):
             """Modify the search source and launch the search.
@@ -772,7 +773,7 @@ class AdveneGUI(Connect):
                 def select_player(i, p):
                     self.controller.select_player(p)
                     return True
-                i=gtk.MenuItem(ident)
+                i=gtk.MenuItem(ident, use_underline=False)
                 i.connect('activate', select_player, p)
                 menu.append(i)
                 i.show()
