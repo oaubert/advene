@@ -295,8 +295,8 @@ class _Parser(XmlParserBase):
         pid = self.package_id
         mimetype = self.get_attribute("mimetype")
         url = self.get_attribute("url", "")
-        schema = self.get_attribute("schema", "")
-        backend_method(pid, element_id, *args + (mimetype, schema, url))
+        model = self.get_attribute("model", "")
+        backend_method(pid, element_id, *args + (mimetype, model, url))
         elem = self.complete_current()
         if len(elem):
             raise ParserError("no XML tag allowed in content; use &lt;tag>")

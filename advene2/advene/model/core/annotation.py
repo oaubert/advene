@@ -13,7 +13,7 @@ class Annotation(PackageElement, WithContentMixin):
 
     ADVENE_TYPE = ANNOTATION
 
-    def __init__(self, owner, id, media, begin, end, mimetype, schema, url):
+    def __init__(self, owner, id, media, begin, end, mimetype, model, url):
         """FIXME: missing docstring.
         """
         PackageElement.__init__(self, owner, id)
@@ -27,7 +27,7 @@ class Annotation(PackageElement, WithContentMixin):
         self._begin = begin
         self._end   = end
         self._set_content_mimetype(mimetype, _init=True)
-        self._set_content_schema(schema, _init=True)
+        self._set_content_model(model, _init=True)
         self._set_content_url(url, _init=True)
 
     def __str__(self):

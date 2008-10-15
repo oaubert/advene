@@ -204,8 +204,8 @@ class _Serializer(object):
         if elt.content_mimetype != "x-advene/none":
             xc = SubElement(xelt, "content",
                            mimetype=elt.content_mimetype)
-            if elt.content_schema_id:
-                xc.set("schema", elt.content_schema_id)
+            if elt.content_model_id:
+                xc.set("model", elt.content_model_id)
             if elt.content_url:
                 # TODO manage packaged: URLs
                 xc.set("url", elt.content_url)

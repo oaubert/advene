@@ -9,8 +9,6 @@ Important improvements
 - augment backend method iter_tags_with_element with attributes tag_with_prefix
   and tag_exclude_prefix ; may be symetric iter_elements_with_tags
 
-- rename schema to model (in content.py and associate)
-
 - there should be only 2 ways of itering over collections:
   - yielding elemements or None when unreachable
   - yieldings ids
@@ -26,7 +24,7 @@ Important improvements
 - implement notification of events (probably with a mixin for registration/
   unregistration mechanisms)
 
-- implement content handlers for queries and schemas, in the same way it has
+- implement content handlers for queries and models, in the same way it has
   been done for views
 
 - implement TALES support, and find a *clean* way to add TALES-specific

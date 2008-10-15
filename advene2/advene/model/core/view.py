@@ -11,13 +11,13 @@ class View(PackageElement, WithContentMixin):
 
     ADVENE_TYPE = VIEW
 
-    def __init__(self, owner, id, mimetype, schema, url):
+    def __init__(self, owner, id, mimetype, model, url):
         """FIXME: missing docstring.
         """
         PackageElement.__init__(self, owner, id)
         self._handler = None
         self._set_content_mimetype(mimetype, _init=True)
-        self._set_content_schema(schema, _init=True)
+        self._set_content_model(model, _init=True)
         self._set_content_url(url, _init=True)
 
     def _update_content_handler(self):

@@ -608,7 +608,7 @@ class TestHandleElements(TestCase):
         self.be.set_meta(self.pid1, "a1", ANNOTATION, key, "i1:a5", True)
         self.be.set_meta(self.pid1, "", "", key, "i1:a6", True)
         ref = frozenset([("a1", "media", "i1:m3"),
-            ("a2", "content_schema", "i1:R3"), ("r1", 0, "i1:a5"),
+            ("a2", "content_model", "i1:R3"), ("r1", 0, "i1:a5"),
             ("l1", 0, "i1:a5"), ("", ":tag", "i1:t3"),
             ("", ":tagged", "i1:a5"), ("", "meta %s" % key, "i1:a6"),
             ("a1", "meta %s" % key, "i1:a5"),])
@@ -930,10 +930,10 @@ class TestHandleElements(TestCase):
         for i in [self.a4, self.r1, self.v1, self.R1, self.q1,
                   self.a5, self.r3, self.v3, self.q3,]:
             typ = T[i[1][0]]
-            if i[0] is self.pid1: schema = "i1:R3"
-            else:                 schema = "R3"
+            if i[0] is self.pid1: model = "i1:R3"
+            else:                 model = "R3"
             # checking various combination of info
-            for info in ((mime, schema, url), (mime, schema, ""),
+            for info in ((mime, model, url), (mime, model, ""),
                          (mime, "", url), (mime, "", "")):
                 self.be.update_content_info(i[0], i[1], typ, *info)
                 self.assertEqual(info, 
@@ -954,7 +954,7 @@ class TestHandleElements(TestCase):
             self.assertEqual((mime, "", ""), 
                              self.be.get_content_info(i[0], i[1], typ))
 
-    def test_iter_contents_with_schema(self):
+    def test_iter_contents_with_model(self):
         self.be.create_resource(self.pid2, "R4", "text/plain", "", "")
         self.be.create_resource(self.pid2, "R5", "text/plain", "", "")
         self.be.update_content_info(self.pid1, "a1", ANNOTATION,
@@ -988,7 +988,7 @@ class TestHandleElements(TestCase):
         pids = (self.pid1, self.pid2)
         R3_uri = "%s#R3" % self.url2
         self.assertEqual(ref,
-            frozenset(self.be.iter_contents_with_schema(pids, R3_uri)))
+            frozenset(self.be.iter_contents_with_model(pids, R3_uri)))
 
     def test_metadata(self):
         dc_creator = "http://purl.org/dc/elements/1.1/creator"
@@ -1393,7 +1393,7 @@ class TestRenameElement(TestCase):
         self.assertEqual("foo", self.be.get_element(self.pid2, "a5")[3])
         self.assertEqual("foo", self.be.get_element(self.pid2, "a6")[3])
 
-    def test_rename_refs_schema(self):
+    def test_rename_refs_model(self):
         self.be.create_resource(self.pid2, "R4", "text/plain", "", "") 
         self.be.update_content_info(self.pid1, "a1", ANNOTATION,
                                     "text/plain", "i1:R3", "")
@@ -1700,7 +1700,7 @@ class TestRobustIterations(TestCase):
         "iter_lists": [pids,],
         "iter_queries": [pids,],
         "iter_imports": [pids,],
-        "iter_contents_with_schema": [pids, "%s#R3" % url2,],
+        "iter_contents_with_model": [pids, "%s#R3" % url2,],
         "iter_meta": [pid1, "", ""],
         "iter_members": [pid1, "r1",],
         "iter_relations_with_member": [pids, "%s#a1" % url1,],

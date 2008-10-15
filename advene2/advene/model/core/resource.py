@@ -9,9 +9,9 @@ class Resource(PackageElement, WithContentMixin):
 
     ADVENE_TYPE = RESOURCE
 
-    def __init__(self, owner, id, mimetype, schema, url):
+    def __init__(self, owner, id, mimetype, model, url):
         PackageElement.__init__(self, owner, id)
         self._set_content_mimetype(mimetype, _init=True)
-        self._set_content_schema(schema, _init=True)
+        self._set_content_model(model, _init=True)
         self._set_content_url(url, _init=True)
 

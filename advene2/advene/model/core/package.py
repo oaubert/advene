@@ -500,57 +500,57 @@ class Package(object, WithMetaMixin):
         return Media(self, id, url, frame_of_reference)
 
     def create_annotation(self, id, media, begin, end,
-                                mimetype, schema=None, url=""):
+                                mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
         media_id = media.make_id_in(self)
-        if schema is not None:
-            schema_id = schema.make_id_in(self)
+        if model is not None:
+            model_id = model.make_id_in(self)
         else:
-            schema_id = ""
+            model_id = ""
         self._backend.create_annotation(self._id, id, media_id, begin, end,
-                                        mimetype, schema_id, url)
-        return Annotation(self, id, media, begin, end, mimetype, schema, url)
+                                        mimetype, model_id, url)
+        return Annotation(self, id, media, begin, end, mimetype, model, url)
 
-    def create_relation(self, id, mimetype="x-advene/none", schema=None,
+    def create_relation(self, id, mimetype="x-advene/none", model=None,
                         url="", members=()):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        if schema is not None:
-            schema_id = schema.make_id_in(self)
+        if model is not None:
+            model_id = model.make_id_in(self)
         else:
-            schema_id = ""
+            model_id = ""
         self._backend.create_relation(self._id, id,
-                                      mimetype, schema_id, url)
-        r = Relation(self, id, mimetype, schema, url, True)
+                                      mimetype, model_id, url)
+        r = Relation(self, id, mimetype, model, url, True)
         for m in members:
             # let the relation do it, with all the checking it needs
             r.append(m)
         return r
 
-    def create_view(self, id, mimetype, schema=None, url=""):
+    def create_view(self, id, mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        if schema is not None:
-            schema_id = schema.make_id_in(self)
+        if model is not None:
+            model_id = model.make_id_in(self)
         else:
-            schema_id = ""
-        self._backend.create_view(self._id, id, mimetype, schema_id, url)
-        return View(self, id, mimetype, schema, url)
+            model_id = ""
+        self._backend.create_view(self._id, id, mimetype, model_id, url)
+        return View(self, id, mimetype, model, url)
 
-    def create_resource(self, id, mimetype, schema=None, url=""):
+    def create_resource(self, id, mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        if schema is not None:
-            schema_id = schema.make_id_in(self)
+        if model is not None:
+            model_id = model.make_id_in(self)
         else:
-            schema_id = ""
-        self._backend.create_resource(self._id, id, mimetype, schema_id, url)
-        return Resource(self, id, mimetype, schema, url)
+            model_id = ""
+        self._backend.create_resource(self._id, id, mimetype, model_id, url)
+        return Resource(self, id, mimetype, model, url)
 
     def create_tag(self, id):
         """FIXME: missing docstring.
@@ -570,16 +570,16 @@ class Package(object, WithMetaMixin):
             L.append(i)
         return L
 
-    def create_query(self, id, mimetype, schema=None, url=""):
+    def create_query(self, id, mimetype, model=None, url=""):
         """FIXME: missing docstring.
         """
         assert not self.has_element(id)
-        if schema is not None:
-            schema_id = schema.make_id_in(self)
+        if model is not None:
+            model_id = model.make_id_in(self)
         else:
-            schema_id = ""
-        self._backend.create_query(self._id, id, mimetype, schema_id, url)
-        return Query(self, id, mimetype, schema, url)
+            model_id = ""
+        self._backend.create_query(self._id, id, mimetype, model_id, url)
+        return Query(self, id, mimetype, model, url)
 
     def create_import(self, id, package):
         """FIXME: missing docstring.

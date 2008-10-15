@@ -52,17 +52,17 @@ CREATE TABLE Contents (
   package  TEXT NOT NULL,
   element  TEXT NOT NULL,
   mimetype TEXT NOT NULL,
-  schema_p TEXT NOT NULL,
-  schema_i TEXT NOT NULL,
+  model_p  TEXT NOT NULL,
+  model_i  TEXT NOT NULL,
   url      TEXT NOT NULL,
   data     BLOB NOT NULL,
   PRIMARY KEY (package, element),
   FOREIGN KEY (package, element)  references Elements (package, id),
-  -- the following foreign key may be violated by empty strings in schema_p
-  FOREIGN KEY (package, schema_p) references Imports  (package, id)
+  -- the following foreign key may be violated by empty strings in model_p
+  FOREIGN KEY (package, model_p) references Imports  (package, id)
   -- only elements with a content should be referenced by element
-  -- if not empty, schema_i must identify an own or directly imported (from 
-  -- schema_p) resource
+  -- if not empty, model_i must identify an own or directly imported (from 
+  -- model_p) resource
 );
 
 CREATE TABLE Medias (

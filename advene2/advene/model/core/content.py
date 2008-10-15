@@ -43,7 +43,7 @@ class WithContentMixin:
         package); their data can be modified through this class.
       empty content:
         only authorized for relations; they are marked by the special mimetype
-        "x-advene/none"; neither their schema, URL nor data can be modified.
+        "x-advene/none"; neither their model, URL nor data can be modified.
 
     It follows that content-related properties are not independant from one
     another. Property `content_mimetype` has higher priority, as it is used to
@@ -61,12 +61,12 @@ class WithContentMixin:
     modified.
     """
 
-    __mimetype    = None
-    __schema_id   = None
-    __schema_wref = staticmethod(lambda: None)
-    __url         = None
-    __data        = None # backend data, unless __as_file is not None
-    __as_file     = None 
+    __mimetype   = None
+    __model_id   = None
+    __model_wref = staticmethod(lambda: None)
+    __url        = None
+    __data       = None # backend data, unless __as_file is not None
+    __as_file    = None 
 
     __cached_content = staticmethod(lambda: None)
 
@@ -75,10 +75,10 @@ class WithContentMixin:
         pass
 
     def _load_content_info(self):
-        """Load the content info (mimetype, schema, url)."""
+        """Load the content info (mimetype, model, url)."""
         # should actually never be called
         o = self._owner
-        self.__mimetype, self.__schema_id, self.__url = \
+        self.__mimetype, self.__model_id, self.__url = \
             o._backend.get_content_info(o._id, self._id, self.ADVENE_TYPE)
 
     def __store_info(self):
@@ -86,7 +86,7 @@ class WithContentMixin:
         o = self._owner
         o._backend.update_content_info(o._id, self._id, self.ADVENE_TYPE,
                                        self.__mimetype or "",
-                                       self.__schema_id or "",
+                                       self.__model_id or "",
                                        self.__url or "")
 
     def __store_data(self):
@@ -95,25 +95,25 @@ class WithContentMixin:
         o._backend.update_content_data(o._id, self._id, self.ADVENE_TYPE,
                                        self.__data or "")
 
-    def get_content_schema(self, default=None):
-        """Return the resource used as the schema of the content of this element.
+    def get_content_model(self, default=None):
+        """Return the resource used as the model of the content of this element.
 
-        Return None if that content has no schema.
-        If the schema can not be retrieved, the default value is returned.
+        Return None if that content has no model.
+        If the model can not be retrieved, the default value is returned.
 
-        See also `content_schema` and `content_schema_id`.
+        See also `content_model` and `content_model_id`.
         """
-        # NB: if the default value is _RAISE and the schema is unreachable,
+        # NB: if the default value is _RAISE and the model is unreachable,
         # and exception will be raised.
 
-        mid = self.__schema_id
+        mid = self.__model_id
         if mid is None:
             self._load_content_info()
-            mid = self.__schema_id
+            mid = self.__model_id
         if mid:
-            m = self.__schema_wref()
+            m = self.__model_wref()
             if m is None:
-                m = self._owner.get_element(self.__schema_id, default)
+                m = self._owner.get_element(self.__model_id, default)
                 if m is not default:
                     self._media_wref = ref(m)
             return m
@@ -177,7 +177,7 @@ class WithContentMixin:
             if  self.ADVENE_TYPE != RELATION:
                 raise ModelError("Only relations may have an empty content")
             elif not _init:
-                self._set_content_schema(None)
+                self._set_content_model(None)
                 self._set_content_url("")
                 self._set_content_data("")
         self.__mimetype = mimetype
@@ -186,55 +186,55 @@ class WithContentMixin:
         self._update_content_handler()
 
     @autoproperty       
-    def _get_content_schema(self):
-        """The resource used as the schema of the content of this element.
+    def _get_content_model(self):
+        """The resource used as the model of the content of this element.
 
-        None if that content has no schema.  
-        If the schema can not be retrieved, an exception is raised.
+        None if that content has no model.  
+        If the model can not be retrieved, an exception is raised.
 
-        See also `get_content_schema` and `content_schema_id`.
+        See also `get_content_model` and `content_model_id`.
         """
-        return self.get_content_schema(_RAISE)
+        return self.get_content_model(_RAISE)
 
     @autoproperty
-    def _set_content_schema(self, resource, _init=False):
+    def _set_content_model(self, resource, _init=False):
         """FIXME: missing docstring.
         """
         # if _init is True, no backend operation is performed,
         # and resource may be an id-ref rather than an element
-        if not _init and self.__schema_id is None:
+        if not _init and self.__model_id is None:
             self._load_content_info()
         if self.__mimetype == "x-advene/none" and (not _init or resource):
-            raise ModelError("Can not set schema of empty content")
+            raise ModelError("Can not set model of empty content")
         op = self._owner
         if resource is None or _init and resource == "":
-            self.__schema_id = ""
-            if self.__schema_wref():
-                del self.__schema_wref
+            self.__model_id = ""
+            if self.__model_wref():
+                del self.__model_wref
         elif _init and isinstance(resource, basestring):
-            self.__schema_id = resource
+            self.__model_id = resource
         else:
             if not op._can_reference(resource):
                 raise ModelError("Package %s can not reference resource %s" %
                                  op.uri, resource.make_id_in(op))
-            self.__schema_id = resource.make_id_in(op)
-            self.__schema_wref  = ref(resource)
+            self.__model_id = resource.make_id_in(op)
+            self.__model_wref  = ref(resource)
         if not _init:
             self.__store_info()
 
     @autoproperty
-    def _get_content_schema_id(self):
-        """The id-ref of the content schema, or an empty string.
+    def _get_content_model_id(self):
+        """The id-ref of the content model, or an empty string.
 
         This is a read-only property giving the id-ref of the resource held
-        by `content_schema`, or an empty string if there is no schema.
+        by `content_model`, or an empty string if there is no model.
 
         Note that this property is accessible even if the corresponding
-        schema is unreachable.
+        model is unreachable.
 
-        See also `get_content_schema` and `content_schema`.
+        See also `get_content_model` and `content_model`.
         """
-        return self.__schema_id or ""
+        return self.__model_id or ""
 
     @autoproperty
     def _get_content_url(self):
@@ -248,7 +248,7 @@ class WithContentMixin:
         other hand, changing from backend-store to packaged and vice-versa
         keeps the data.
 
-        Finally, note that setting the URL to one in the ``packaged:`` schema
+        Finally, note that setting the URL to one in the ``packaged:`` model
         will automatically create a temporary directory and set the
         PACKAGED_ROOT metadata of the package to that directory.
         """
@@ -386,8 +386,8 @@ class Content(object):
     def __init__(self, owner_element):
         self._owner_elt = owner_element
 
-    def get_schema(self, default=None):
-        return self._owner_elt.get_content_schema(default)
+    def get_model(self, default=None):
+        return self._owner_elt.get_content_model(default)
 
     @autoproperty
     def _get_mimetype(self):
@@ -398,24 +398,24 @@ class Content(object):
         return self._owner_elt._set_content_mimetype(mimetype)
 
     @autoproperty
-    def _get_schema(self):
-        return self._owner_elt._get_content_schema()
+    def _get_model(self):
+        return self._owner_elt._get_content_model()
 
     @autoproperty
-    def _set_schema(self, schema):
-        return self._owner_elt._set_content_schema(schema)
+    def _set_model(self, model):
+        return self._owner_elt._set_content_model(model)
 
     @autoproperty
-    def _get_schema_id(self):
-        """The id-ref of the schema, or None.
+    def _get_model_id(self):
+        """The id-ref of the model, or None.
 
         This is a read-only property giving the id-ref of the resource held
-        by `schema`, or None if there is no schema.
+        by `model`, or None if there is no model.
 
         Note that this property is accessible even if the corresponding
-        schema is unreachable.
+        model is unreachable.
         """
-        return self._owner_elt._get_content_schema_id()
+        return self._owner_elt._get_content_model_id()
 
     @autoproperty
     def _get_url(self):

@@ -129,7 +129,7 @@ def _diff_imported_elements(t1, t2):
 
 def _diff_contents(elt1, elt2):
     r = _diff_attr(elt1, elt2, "content_mimetype") \
-         + _diff_attr(elt1, elt2, "content_schema_id") \
+         + _diff_attr(elt1, elt2, "content_model_id") \
          + _diff_attr(elt1, elt2, "content_url")
     if elt1.content_url == elt2.content_url \
     and (not elt1.content_url or elt1.content_url.startswith("packaged:")):

@@ -34,7 +34,7 @@ class TestElements(TestCase):
     # utility methodes for mixins and common behaviours
 
     def _test_with_content(self, e):
-        # content related attributes (schema is tested below)
+        # content related attributes (model is tested below)
         self.assertEqual("text/plain", e.content_mimetype)
         self.assertEqual("text/plain", e.content.mimetype)
         self.assertEqual("", e.content_url)
@@ -141,32 +141,32 @@ class TestElements(TestCase):
         # file has been cleaned
         self.assert_(not exists(filename), filename)
 
-        # schema
-        self.assertEqual(None, e.content_schema)
-        self.assertEqual(None, e.content.schema)
-        self.assertEqual("", e.content_schema_id)
-        self.assertEqual("", e.content.schema_id)
-        s = e._owner.create_resource("myschema", "test/plain")
-        e.content_schema = s
-        self.assertEqual(s, e.content_schema)
-        self.assertEqual(s, e.content.schema)
-        self.assertEqual("myschema", e.content_schema_id)
-        self.assertEqual("myschema", e.content.schema_id)
-        e.content_schema = None
-        self.assertEqual(None, e.content_schema)
-        self.assertEqual(None, e.content.schema)
-        self.assertEqual("", e.content_schema_id)
-        self.assertEqual("", e.content.schema_id)
+        # model
+        self.assertEqual(None, e.content_model)
+        self.assertEqual(None, e.content.model)
+        self.assertEqual("", e.content_model_id)
+        self.assertEqual("", e.content.model_id)
+        s = e._owner.create_resource("mymodel", "test/plain")
+        e.content_model = s
+        self.assertEqual(s, e.content_model)
+        self.assertEqual(s, e.content.model)
+        self.assertEqual("mymodel", e.content_model_id)
+        self.assertEqual("mymodel", e.content.model_id)
+        e.content_model = None
+        self.assertEqual(None, e.content_model)
+        self.assertEqual(None, e.content.model)
+        self.assertEqual("", e.content_model_id)
+        self.assertEqual("", e.content.model_id)
         s.delete()
 
         # empty content
         if e.ADVENE_TYPE == RELATION:
             e.content_mimetype = "x-advene/none"
-            self.assertEqual(None, e.content_schema)
-            self.assertEqual("", e.content_schema_id)
+            self.assertEqual(None, e.content_model)
+            self.assertEqual("", e.content_model_id)
             self.assertEqual("", e.content_url)
             self.assertEqual("", e.content_data)
-            self.assertRaises(ModelError, setattr, e, "content_schema", s)
+            self.assertRaises(ModelError, setattr, e, "content_model", s)
             self.assertRaises(ModelError, setattr, e, "content_url", url)
             self.assertRaises(ModelError, setattr, e, "content_data", "")
             e.content_mimetype = "text/plain"
@@ -622,10 +622,10 @@ class TestUnreachable(TestCase):
         i = p1.create_import("p2", p2)
         m = p2.create_media("m", "http://example.com/m.avi",
                             FOREF_PREFIX+"ms;o=0")
-        s = p2.create_resource("schema", "text/plain")
+        s = p2.create_resource("model", "text/plain")
         d = p1.create_resource("desc", "text/plain")
         a2 = p2.create_annotation("a2", m, 0, 10, "text/plain")
-        a1 = p1.create_annotation("a1", m, 0, 10, "text/plain", schema=s)
+        a1 = p1.create_annotation("a1", m, 0, 10, "text/plain", model=s)
         r = p1.create_relation("r", "text/plain", members=[a1, a2,])
         l = p1.create_list("l", items=[a1, s])
         t1 = p1.create_tag("t1")
@@ -666,12 +666,12 @@ class TestUnreachable(TestCase):
         return both_tests
 
     @_make_both_tests
-    def test_schema(self, exception_type):
+    def test_model(self, exception_type):
         p1 = Package(self.url1)
-        self.assertEquals("p2:schema", p1["a1"].content_schema_id)
+        self.assertEquals("p2:model", p1["a1"].content_model_id)
         self.assertRaises(exception_type,
-                          getattr, p1["a1"], "content_schema")
-        self.assertEquals(None, p1["a1"].get_content_schema(None))
+                          getattr, p1["a1"], "content_model")
+        self.assertEquals(None, p1["a1"].get_content_model(None))
         p1.close()
 
     @_make_both_tests
@@ -702,13 +702,13 @@ class TestUnreachable(TestCase):
         p1 = Package(self.url1)
         L = p1["l"]
         a1 = p1["a1"]
-        self.assertEquals("p2:schema", L.get_item_id(1))
+        self.assertEquals("p2:model", L.get_item_id(1))
         self.assertRaises(exception_type, L.__getitem__, 1)
         self.assertEquals(None, L.get_item(1))
         iter(L).next() # no exception before the actual yield
         self.assertRaises(exception_type, list, iter(L))
-        self.assertEquals([a1, "p2:schema",], list(L.iter_items()))
-        self.assertEquals(["a1", "p2:schema",], list(L.iter_items_ids()))
+        self.assertEquals([a1, "p2:model",], list(L.iter_items()))
+        self.assertEquals(["a1", "p2:model",], list(L.iter_items_ids()))
         p1.close()
 
     @_make_both_tests

@@ -24,10 +24,10 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
 
     ADVENE_TYPE = RELATION
 
-    def __init__(self, owner, id, mimetype, schema, url, _new=False):
+    def __init__(self, owner, id, mimetype, model, url, _new=False):
         PackageElement.__init__(self, owner, id)
         self._set_content_mimetype(mimetype, _init=True)
-        self._set_content_schema(schema, _init=True)
+        self._set_content_model(model, _init=True)
         self._set_content_url(url, _init=True)
 
         if _new:
