@@ -41,7 +41,7 @@ class OwnGroup(GroupMixin):
         if at is not None:
             begin_max = end_min = at
         o = self._owner
-        for i in o._backend.iter_annotations((o._id,), None, None,
+        for i in o._backend.iter_annotations((o._id,), None,
                                               media,
                                               begin, begin_min, begin_max,
                                               end, end_min, end_max):
@@ -111,8 +111,8 @@ class OwnGroup(GroupMixin):
         if at is not None:
             begin_max = end_min = at
         o = self._owner
-        return o._backend.annotation_count((o._id,), None, None,
-                                           media, medias,
+        return o._backend.annotation_count((o._id,), None,
+                                           media,
                                            begin, begin_min, begin_max,)
 
     def relation_count(self):
