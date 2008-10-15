@@ -295,8 +295,7 @@ class Package(CorePackage):
 
     def save_as(self, filename, change_url=False, serializer=None, erase=False):
         self.modified = datetime.now().isoformat()
-        super(Package, self).save_as(self, filename, change_url, serializer,
-                                     erase)
+        super(Package, self).save_as(filename, change_url, serializer, erase)
 
     def close(self):
         self.modified = datetime.now().isoformat()
