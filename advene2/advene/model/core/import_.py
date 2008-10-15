@@ -14,6 +14,27 @@ class Import(PackageElement):
         self._uri = uri
         self._imported = owner._imports_dict[id]
 
+    def _get_url(self):
+        return self._url
+
+    def _set_url(self, url):
+        assert url
+        self._url = url
+        self.add_cleaning_operation_once(self.__clean)
+
+    def _get_uri(self):
+        return self._uri
+
+    def _set_uri(self, uri):
+        self._uri = uri
+        self.add_cleaning_operation_once(self.__clean)
+
+    def __clean(self):
+        o = self.owner
+        o._backend.update_import(o._id, self._id, url, uri)
+
+    # group interface
+
     def __in__(self, element):
         return element in self._imported._all
 

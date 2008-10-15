@@ -16,6 +16,9 @@ class Media(PackageElement):
         return self._url
 
     def _set_url(self, url):
-        o = self._owner
-        o._backend.update_media(o._id, self.id, url)
         self._url = url
+        self.add_cleaning_operation_once(self.__clean)
+
+    def __clean(self):
+        o = self._owner
+        o._backend.update_media(o._id, self.id, self._url)

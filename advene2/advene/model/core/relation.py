@@ -15,35 +15,48 @@ class Relation(PackageElement, WithContentMixin):
     of a relation. I also try to efficiently cache the results I know.
     """
 
+    # The use of add_cleaning_operation is complicated here.
+    # We could choose to have a single cleaning operation, performed once on
+    # cleaning, completely rewriting the member list.
+    # We have chosen to enqueue every atomic operation on the member list in
+    # the cleaning operation pending list, and perform them all on cleaning,
+    # which is more efficient that the previous solution if cleaning is 
+    # performed often enough.
+    #
+    # A third solution would be to try to optimize the cleaning by not
+    # executing atomic operations which will be cancelled by further
+    # operations. For example:::
+    #     r[1] = a1
+    #     r[1] = a2
+    # will execute backend.update_member twice, while only the second one
+    # is actually useful. So...
+    #
+    # TODO: optimize cleaning as described above
+
     ADVENE_TYPE = RELATION
 
     def __init__(self, owner, id):
         PackageElement.__init__(self, owner, id)
+        self._count = owner._backend.count_members(owner._id, self._id)
         self._cache = None
 
     def __len__(self):
-        L = self._cache
-        if L is None:
-            o = self._owner
-            c = o._backend.count_members(o._id, self._id)
-            self._cache = [None,] * c
+        if self._cache is None:
+            return self._count
         else:
-            c = len(L)
-        return c
+            return len(self._cache)
 
     def __iter__(self):
-        o = self._owner
-        it = o._backend.iter_members(o._id, self._id)
-        L = self._cache
-        if L is None:
-            it = list(it)
-            L = self._cache = [None,] * len(it)
-
-        for i,id in enumerate(it):
-            e = L[i]
-            if e is None:
+        if self._cache is not None:
+            for e in iter(self._cache):
+                yield e
+        else:
+            L = self._cache = [None,] * self._count
+            o = self._owner
+            it = o._backend.iter_members(o._id, self._id)
+            for i,id in enumerate(it):
                 e = L[i] = self._owner.get_element(id)
-            yield e
+                yield e
 
     def __getitem__(self, i):
         if isinstance(i, slice): return self._get_slice(i)
@@ -55,37 +68,42 @@ class Relation(PackageElement, WithContentMixin):
         o = self._owner
         assert o._can_reference(a)
         L = self._cache
-        if L is not None:
-            c = len(L)
-        else:
-            c = self.__len__() # also prepares cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
             L = self._cache
+        c = len(L)
         assert -c <= i < c
         idref = a.make_idref_for(o)
-        o._backend.update_member(o._id, self._id, idref, i)
         L[i] = a
+        self.add_cleaning_operation(o._backend.update_member,
+                                    o._id, self._id, idref, i)
 
     def __delitem__(self, i):
         if isinstance(i, slice): return self._del_slice(i)
         L = self._cache
-        if L is not None:
-            c = len(L)
-        else:
-            c = self.__len__() # also prepares cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
             L = self._cache
+        c = len(L)
         assert -c <= i < c
         o = self._owner
-        o._backend.remove_member(o._id, self._id, i)
         del L[i]
+        self.add_cleaning_operation(o._backend.remove_member,
+                                    o._id, self._id, i)
 
     def _get_slice(self, s):
-        c = self.__len__() # also prepares cache
-        for i in range(c)[s]:
-            self[i] # retrieve ith element
-        return self._cache[s]
+        L = self._cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
+            L = self._cache
+        return L[s]
 
     def _set_slice(self, s, annotations):
-        c = self.__len__() # also prepares cache
+        L = self._cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
+            L = self._cache
+        c = len(L)
         indices = range(c)[s]
         same_length = (len(annotations) == len(indices))
         if s.step is None and not same_length:
@@ -103,7 +121,11 @@ class Relation(PackageElement, WithContentMixin):
                 self.__setitem__(j, annotations[i])
         
     def _del_slice(self,s):
-        c = self.__len__() # also prepares cache
+        L = self._cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
+            L = self._cache
+        c = len(L)
         indices = range(c)[s]
         indices.sort()
         offset = 0
@@ -111,25 +133,34 @@ class Relation(PackageElement, WithContentMixin):
             del self[i-offset]
 
     def insert(self, i, a):
-        o = self._owner
-        c = self.__len__() # also prepares cache
         assert a.ADVENE_TYPE == ANNOTATION
+        o = self._owner
         assert o._can_reference(a)
-        idref = a.make_idref_for(o)
+        L = self._cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
+            L = self._cache
+        c = len(L)
         if i > c : i = c
         if i < -c: i = 0
         if i < 0 : i += c 
-        o._backend.insert_member(o._id, self._id, idref, i)
-        self._cache.insert(i,a)
+        idref = a.make_idref_for(o)
+        L.insert(i,a)
+        self.add_cleaning_operation(o._backend.insert_member,
+                                    o._id, self._id, idref, i)
         
     def append(self, a):
-        o = self._owner
-        c = self.__len__() # also prepares cache
         assert a.ADVENE_TYPE == ANNOTATION
+        o = self._owner
         assert o._can_reference(a)
+        L = self._cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
+            L = self._cache
         idref = a.make_idref_for(o)
-        o._backend.insert_member(o._id, self._id, idref, -1)
-        self._cache.append(a)
+        L.append(a)
+        self.add_cleaning_operation(o._backend.insert_member,
+                                    o._id, self._id, idref, -1)
 
     def extend(self, annotations):
         for a in annotations:
@@ -141,15 +172,12 @@ class Relation(PackageElement, WithContentMixin):
         Use self[i] instead, unless you want to avoid exceptions on retrieval
         errors. Note also that IndexErrors are not avoided by this method.
         """
-        L = self._cache
-        if L is None:
-            self.__len__() # prepare cache
-            L = self._cache
-        r = L[i] # also ensures that i is a valid index
-        if r is None:
-            o = self._owner
+        if self._cache is None:
+            i = xrange(self._count)[i] # check index and convert negative
             id = o._backend.get_member(o._id, self._id, i)
             r = o.get_element(id, default)
-            if r is not default: L[i] = r
-        return r
+            # TODO implement associative cache here? (in addition to _cache)
+            return r
+        else:
+            return self._cache[i]
 

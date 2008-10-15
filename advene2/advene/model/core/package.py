@@ -82,11 +82,15 @@ class Package(object, WithMetaMixin, DirtyMixin):
         It is an error to use a package or any of its elements or attributes
         when the package has been closed. The behaviour is undefined.
         """
-        for e in self._elements.itervalues():
+        # use values instead of itervalues below, because cleaning may cause
+        # elements to vanish from the WeakValueDictionary, and dict to not
+        # like to be changed while being iterated
+        for e in self._elements.values():
             if e.dirty:
                 e.clean()
         self.clean()
         self._backend.close(self._id)
+        self._backend = None
 
     def _get_url(self):
         return self._url

@@ -6,7 +6,8 @@
 - make content data independant from other attributes (mimetype, schema) in
   the backend and update the API accordingly
 
-- make elements dirtiable
+- make content metadata and length of list-like elements available directly
+  (i.e. from get_element)
 
 - remove unused code in advene/utils once we are sure we won't use it
 

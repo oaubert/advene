@@ -86,7 +86,7 @@ class WithContentMixin(DirtyMixin):
         if self.__mimetype is None:
             self._load_content_metadata()
         self.__mimetype = mimetype
-        self.add_cleaning_operation(self.__clean_metadata)
+        self.add_cleaning_operation_once(self.__clean_metadata)
        
     def _get_content_schema(self, default=_RAISE):
         """
@@ -118,7 +118,7 @@ class WithContentMixin(DirtyMixin):
             assert op._can_reference(resource)
             self.__schema_idref = resource.make_idref_for(op)
             self.__schema_wref  = ref(resource)
-        self.add_cleaning_operation(self.__clean_metadata)
+        self.add_cleaning_operation_once(self.__clean_metadata)
 
     def _get_content_data(self):
         r = self.__data
@@ -131,7 +131,7 @@ class WithContentMixin(DirtyMixin):
         if self.__data is None:
             self._load_content_data()
         self.__data = data
-        self.add_cleaning_operation(self.__clean_data)
+        self.add_cleaning_operation_once(self.__clean_data)
 
     content_mimetype = property(_get_content_data, _set_content_data)
     content_schema   = property(_get_content_schema, _set_content_schema)

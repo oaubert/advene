@@ -279,8 +279,12 @@ class _SqliteBackend(object):
             conn.commit()
             conn.close()
             self._conn = None
-            if self._path in _cache:
-                del _cache[self._path]
+            # the following is necessary to break a cyclic reference:
+            # self._bound references self._check_unused, which, as a bound
+            # method, references self
+            self._bound = None
+            # the following is not stricly necessary, but does no harm ;)
+            if self._path in _cache: del _cache[self._path]
 
     # package uri
 

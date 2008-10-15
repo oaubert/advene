@@ -1,100 +1,131 @@
 """
-I define the class List.
+I define the class of lists.
 """
 
-from advene.model.core.element import PackageElement, LIST
+from weakref import ref
 
-class List(PackageElement):
+from advene import _RAISE
+from advene.model.core.element \
+  import PackageElement, LIST
+from advene.model.core.content import WithContentMixin
 
-    ADVENE_TYPE = LIST 
+class List(PackageElement, WithContentMixin):
+    """
+    I expose the protocol of a basic collection, to give access to the items
+    of a list. I also try to efficiently cache the results I know.
+    """
+
+    # The use of add_cleaning_operation is complicated here.
+    # We could choose to have a single cleaning operation, performed once on
+    # cleaning, completely rewriting the item list.
+    # We have chosen to enqueue every atomic operation on the item list in
+    # the cleaning operation pending list, and perform them all on cleaning,
+    # which is more efficient that the previous solution if cleaning is 
+    # performed often enough.
+    #
+    # A third solution would be to try to optimize the cleaning by not
+    # executing atomic operations which will be cancelled by further
+    # operations. For example:::
+    #     r[1] = a1
+    #     r[1] = a2
+    # will execute backend.update_item twice, while only the second one
+    # is actually useful. So...
+    #
+    # TODO: optimize cleaning as described above
+
+    ADVENE_TYPE = LIST
 
     def __init__(self, owner, id):
         PackageElement.__init__(self, owner, id)
+        self._count = owner._backend.count_items(owner._id, self._id)
         self._cache = None
 
     def __len__(self):
-        L = self._cache
-        if L is None:
-            o = self._owner
-            c = o._backend.count_items(o._id, self._id)
-            self._cache = [None,] * c
+        if self._cache is None:
+            return self._count
         else:
-            c = len(L)
-        return c
+            return len(self._cache)
 
     def __iter__(self):
-        o = self._owner
-        it = o._backend.iter_items(o._id, self._id)
-        L = self._cache
-        if L is None:
-            it = list(it)
-            L = self._cache = [None,] * len(it)
-
-        for i,id in enumerate(it):
-            e = L[i]
-            if e is None:
+        if self._cache is not None:
+            for e in iter(self._cache):
+                yield e
+        else:
+            L = self._cache = [None,] * self._count
+            o = self._owner
+            it = o._backend.iter_items(o._id, self._id)
+            for i,id in enumerate(it):
                 e = L[i] = self._owner.get_element(id)
-            yield e
+                yield e
 
     def __getitem__(self, i):
         if isinstance(i, slice): return self._get_slice(i)
-        return self.get_item(i)
+        return self.get_item(i, _RAISE)
 
     def __setitem__(self, i, a):
         if isinstance(i, slice): return self._set_slice(i, a)
-        assert hasattr(a,"ADVENE_TYPE")
+        assert hasattr(a, "ADVENE_TYPE")
         o = self._owner
         assert o._can_reference(a)
         L = self._cache
-        if L is not None:
-            c = len(L)
-        else:
-            c = self.__len__() # also prepares cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
             L = self._cache
+        c = len(L)
         assert -c <= i < c
         idref = a.make_idref_for(o)
-        o._backend.update_item(o._id, self._id, idref, i)
         L[i] = a
+        self.add_cleaning_operation(o._backend.update_item,
+                                    o._id, self._id, idref, i)
 
     def __delitem__(self, i):
         if isinstance(i, slice): return self._del_slice(i)
         L = self._cache
-        if L is not None:
-            c = len(L)
-        else:
-            c = self.__len__() # also prepares cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
             L = self._cache
+        c = len(L)
         assert -c <= i < c
         o = self._owner
-        o._backend.remove_item(o._id, self._id, i)
         del L[i]
+        self.add_cleaning_operation(o._backend.remove_item,
+                                    o._id, self._id, i)
 
     def _get_slice(self, s):
-        c = self.__len__() # also prepares cache
-        for i in range(c)[s]:
-            self[i] # retrieve ith element
-        return self._cache[s]
+        L = self._cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
+            L = self._cache
+        return L[s]
 
-    def _set_slice(self, s, annotations):
-        c = self.__len__() # also prepares cache
+    def _set_slice(self, s, elements):
+        L = self._cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
+            L = self._cache
+        c = len(L)
         indices = range(c)[s]
-        same_length = (len(annotations) == len(indices))
+        same_length = (len(elements) == len(indices))
         if s.step is None and not same_length:
             self._del_slice(s)
             insertpoint = s.start or 0
-            for a in annotations:
+            for a in elements:
                 self.insert(insertpoint, a)
                 insertpoint += 1
         else:
             if not same_length:
                 raise ValueError("attempt to assign sequence of size %s to "
                                  "extended slice of size %s"
-                                 % (len(annotations), len(indices)))
+                                 % (len(elements), len(indices)))
             for i,j in enumerate(indices):
-                self.__setitem__(j, annotations[i])
+                self.__setitem__(j, elements[i])
         
     def _del_slice(self,s):
-        c = self.__len__() # also prepares cache
+        L = self._cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
+            L = self._cache
+        c = len(L)
         indices = range(c)[s]
         indices.sort()
         offset = 0
@@ -102,45 +133,51 @@ class List(PackageElement):
             del self[i-offset]
 
     def insert(self, i, a):
+        assert hasattr(a, "ADVENE_TYPE")
         o = self._owner
-        c = self.__len__() # also prepares cache
-        assert hasattr(a,"ADVENE_TYPE")
         assert o._can_reference(a)
-        idref = a.make_idref_for(o)
+        L = self._cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
+            L = self._cache
+        c = len(L)
         if i > c : i = c
         if i < -c: i = 0
         if i < 0 : i += c 
-        o._backend.insert_item(o._id, self._id, idref, i)
-        self._cache.insert(i,a)
+        idref = a.make_idref_for(o)
+        L.insert(i,a)
+        self.add_cleaning_operation(o._backend.insert_item,
+                                    o._id, self._id, idref, i)
         
     def append(self, a):
+        assert hasattr(a, "ADVENE_TYPE")
         o = self._owner
-        c = self.__len__() # also prepares cache
-        assert hasattr(a,"ADVENE_TYPE")
         assert o._can_reference(a)
+        L = self._cache
+        if L is None:
+            for i in self.__iter__(): pass # generate _cache
+            L = self._cache
         idref = a.make_idref_for(o)
-        o._backend.insert_item(o._id, self._id, idref, -1)
-        self._cache.append(a)
+        L.append(a)
+        self.add_cleaning_operation(o._backend.insert_item,
+                                    o._id, self._id, idref, -1)
 
-    def extend(self, annotations):
-        for a in annotations:
+    def extend(self, elements):
+        for a in elements:
             self.append(a)
 
     def get_item(self, i, default=None):
-        """Return item with index i, or default if it can not be retrieved.
+        """Return element with index i, or default if it can not be retrieved.
 
         Use self[i] instead, unless you want to avoid exceptions on retrieval
         errors. Note also that IndexErrors are not avoided by this method.
         """
-        L = self._cache
-        if L is None:
-            self.__len__() # prepare cache
-            L = self._cache
-        r = L[i] # also ensures that i is a valid index
-        if r is None:
-            o = self._owner
+        if self._cache is None:
+            i = xrange(self._count)[i] # check index and convert negative
             id = o._backend.get_item(o._id, self._id, i)
             r = o.get_element(id, default)
-            if r is not default: L[i] = r
-        return r
+            # TODO implement associative cache here? (in addition to _cache)
+            return r
+        else:
+            return self._cache[i]
 

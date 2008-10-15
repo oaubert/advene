@@ -46,26 +46,26 @@ class Annotation(PackageElement, WithContentMixin):
         assert o._can_reference(media)
 
         midref = media.make_idref_for(o)
-        if not _init:
-            o._backend.update_annotation(o._id, self.id,
-                                         midref, self.begin, self.end)
         self._media_idref = midref
         self._media_wref  = ref(media)
+        if not _init:
+            self.add_cleaning_operation_once(self.__clean)
 
     def _get_begin(self):
         return self._begin
 
     def _set_begin(self, val):
-        o = self._owner
-        o._backend.update_annotation(o._id, self._id,
-                                     self._media_idref, val, self._end)
         self._begin = val
+        self.add_cleaning_operation_once(self.__clean)
 
     def _get_end(self):
         return self._end
 
     def _set_end(self, val):
+        self._end = val
+        self.add_cleaning_operation_once(self.__clean)
+
+    def __clean(self):
         o = self._owner
         o._backend.update_annotation(o._id, self._id,
-                                     self._media_idref, self._begin, val)
-        self._end = val
+                                     self._media_idref, self._begin, self._end)

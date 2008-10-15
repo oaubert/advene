@@ -2,6 +2,12 @@ from os import unlink
 from os.path import exists, join, split
 import gc
 import sys
+from weakref import ref
+
+import advene.model.core.dirty as dirty
+
+## uncomment the following to disable differed cleaning
+#dirty.DirtyMixin = dirty.DirtyMixinInstantCleaning
 
 from advene.model.core.package import Package
 
@@ -24,6 +30,17 @@ def trace_wrap_all (obj):
             f = getattr (obj, k)
             od[k] = trace_wrapper (f)
 
+def print_lastchance(mode=0):
+    if mode == 0:
+        print dirty.DirtyMixin._DirtyMixin__lastchance.keys()
+    elif mode == 1:
+        print dirty.DirtyMixin._DirtyMixin__lastchance.values()
+    else:
+        print dirty.DirtyMixin._DirtyMixin__lastchance.items()
+
+def print_elements(p):
+    print [(k,id(v)) for k,v in p._elements.items()]
+
 if __name__ == "__main__":
 
 
@@ -34,16 +51,17 @@ if __name__ == "__main__":
     p = Package(uri, create=True)
     #trace_wrap_all (p._backend)
 
+    p.dc_creator = "pchampin"
     m1 = p.create_media("m1", "http://champin.net/stream.avi")
     a1 = p.create_annotation("a1", m1, 20, 30)
-    p.create_annotation("a2", m1, 0, 20)
-    p.create_relation("r1")
+    a1.begin += 1
+    a2 = p.create_annotation("a2", m1, 0, 20)
+    p.get_element("a1").content_data = "hello"
+    r1 = p.create_relation("r1")
+    r1.extend((a1, a2))
     print [a._id for a in p.own.annotations]
     print p.get("a1")
     print p["a2"]
-    p.get_element("a1").content_data = "hello"
-    p.dc_creator = "pchampin"
-    a1.begin += 1
     
 
     NB = 10
@@ -51,15 +69,16 @@ if __name__ == "__main__":
     for i in range(NB):
         p.create_annotation("aa%s" % i, m1, i*10, i*10+9)
     print "done"
+    r1.insert(1, p.get("aa1"))
 
-    # ensure that backend is collected
-    a1 = None; a = None; m1 = None;
-
-    p.close(); p = None; gc.collect()
+    bw = ref(p._backend)
+    p.close()
     print
 
     print "about to re-load package"
     p = Package(uri)
+    # ensure that backend has changed
+    assert p._backend is not bw()
     print "package loaded"
     #trace_wrap_all (p._backend)
 

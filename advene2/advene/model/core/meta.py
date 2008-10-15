@@ -41,7 +41,7 @@ class WithMetaMixin(DirtyMixin):
             dirty = self.__dirty = {}
         self.__cache[self,key] = val
         dirty[key] = val
-        self.add_cleaning_operation(self.__clean)
+        self.add_cleaning_operation_once(self.__clean)
 
     def __clean(self):
         dirty = self.__dirty
