@@ -3,7 +3,13 @@ Needed improvements
 
 - R/W annotationtype.mimetype (could handle jokers such as None, '*' or text/*')
 
-- auto-update of creator/created/contributor/modified
+- auto-update of creator/created/contributor/modified. For package,
+   update contributor/modified upon package saving.
+
+- How to do package.get(foo) in TALES ? package/foo ? package/get/foo?
+
+- How to express the same thing as matchFilter (essentially, which
+   element does the view apply on).
 
 Important improvements
 ======================
