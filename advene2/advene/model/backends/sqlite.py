@@ -324,7 +324,7 @@ class _FlushableIterator(object):
        All cursors (or cursor based iterators) are wrapped info a
        _FlushableIterator before being returned, and the latter is weakly
        referenced by the backend instance. Whenever a transaction is started,
-       all known _FlusableIterators are flushed, i.e. they internally change
+       all known _FlushableIterators are flushed, i.e. they internally change
        their underlying iterator into a list, so that the transaction can be
        committed, but users can continue to transparently use them.
 
@@ -333,7 +333,7 @@ class _FlushableIterator(object):
        but allows to wrap iterators that are not cursors but relying on a
        cursor, e.g.:::
 
-           return _FlusableIterator(( r[1] for r in conn.execute(query) ))
+           return _FlusableIterator(( r[1] for r in conn.execute(query) ), be)
     """
     __slots__ = ["_cursor", "__weakref__",]
     def __init__ (self, cursor, backend):
