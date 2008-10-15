@@ -386,7 +386,7 @@ class ViewColumn(FinderColumn):
         t=helper.get_view_type(self.element)
         if t == 'static':
             c=self.controller.build_context()
-            url=c.evaluateValue('here/view/%s/absolute_url' % self.element.id)
+            url=c.evaluate('here/absolute_url') + '/view/' % self.element.id
             self.controller.open_url(url)
         elif t == 'dynamic':
             self.controller.activate_stbv(self.element)
