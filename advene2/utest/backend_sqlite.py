@@ -528,6 +528,21 @@ class TestHandleElements(TestCase):
         for i in self.own + self.imported:
             self.assertEqual(self.be.get_element(*i[:2])[1:], i)
 
+    def test_iter_references_with_import(self):
+        self.be.update_content(self.pid1, "a2", ANNOTATION,
+                               "test/plain", "", "i1:R3")
+        self.be.insert_member(self.pid1, "r1", "i1:a5", 0)
+        self.be.insert_item(self.pid1, "l1", "i1:a5", 0)
+        self.be.associate_tag(self.pid1, "v1", "i1:t3")
+        self.be.associate_tag(self.pid1, "i1:a5", "t1")
+        ref = frozenset([("a1", "media", "i1:m3"),
+            ("a2", "content_schema", "i1:R3"), ("r1", 0, "i1:a5"),
+            ("l1", 0, "i1:a5"), ("", ":tag", "i1:t3"),
+            ("", ":tagged", "i1:a5"),])
+
+        self.assertEqual(ref,
+            frozenset(self.be.iter_references_with_import(self.pid1, "i1",)))
+
     def test_iter_medias(self):
 
         # the following function makes assert expression fit in one line...
@@ -1476,8 +1491,10 @@ class TestRobustIterations(TestCase):
     url2 = TestHandleElements.url2
     url3 = IN_MEMORY_URL + pid3
     pids = (pid1, pid2)
+    i2_url = "http://example.com/advene/db2#R5"
 
     iter_methods = {
+        "iter_references_with_import": [pid1, "i1",],
         "iter_medias": [pids,],
         "iter_annotations": [pids,],
         "iter_relations": [pids,],
@@ -1487,6 +1504,7 @@ class TestRobustIterations(TestCase):
         "iter_lists": [pids,],
         "iter_queries": [pids,],
         "iter_imports": [pids,],
+        "iter_contents_with_schema": [pids, "%s#R3" % url2,],
         "iter_meta": [pid1, "", ""],
         "iter_members": [pid1, "r1",],
         "iter_relations_with_member": [pids, "%s#a1" % url1,],
@@ -1495,12 +1513,11 @@ class TestRobustIterations(TestCase):
         "iter_tags_with_element": [pids, "%s#a1" % url1,],
         "iter_elements_with_tag": [pids, "%s#t1" % url1,],
         "iter_tagging": [pids, "%s#a1" % url1, "%s#t1" % url1,],
-        # TODO add referrers searching methods
     }
 
     update_methods = {
-        "close": None, # rather tested with bind and create
         "update_uri": [pid1, "urn:1234",],
+        "close": None, # rather tested with bind and create
         "create_media": [pid1, "mX", "file:///tmp/mX.ogm",],
         "create_annotation": [pid1, "aX", "m1", 0, 10,],
         "create_relation": [pid1, "rX",],
@@ -1513,6 +1530,9 @@ class TestRobustIterations(TestCase):
         "update_media": [pid1, "m1", "file:///tmp/mX.ogm",],
         "update_annotation": [pid1, "a1", "m1", 0, 666,],
         "update_import": [pid1, "i1", "file:///tmp/pkg", ""],
+        "rename_element": [pid1, "i1", IMPORT, "renamed",],
+        "rename_references": [pids, "%s#R5" % i2_url, "renamed",],
+        "delete_element": [pid2, "q3", QUERY,],
         "update_content": [pid1, "a1", ANNOTATION, "test/html", "", "",],
         "set_meta": [pid1, "", "", "pac#test2", "bar",],
         "insert_member": [pid1, "r1", "a3", -1],
@@ -1523,7 +1543,6 @@ class TestRobustIterations(TestCase):
         "remove_item": [pid1, "l1", 0],
         "associate_tag": [pid1, "a2", "t1",],
         "dissociate_tag": [pid1, "t1", "t1",],
-        # TODO add renaming methods and destroying methods
     }
 
     def setUp(self):
@@ -1537,9 +1556,16 @@ class TestRobustIterations(TestCase):
             b.insert_member(self.pid1, "r1", "i1:a5", -1)
             b.insert_item(self.pid1, "l1", "r1", -1)
             b.insert_item(self.pid1, "l1", "i1:r3", -1)
+            b.insert_item(self.pid1, "l1", "i2:R5", -1)
             b.associate_tag(self.pid1, "a1",    "t1")
             b.associate_tag(self.pid1, "a1",    "i1:t3")
             b.associate_tag(self.pid1, "i1:a5", "t1")
+            b.update_content(self.pid1, "a1", ANNOTATION,
+                             "text/plain", "", "i1:R3",)
+            b.update_content(self.pid2, "r3", RELATION,
+                             "text/plain", "", "R3",)
+            b.update_content(self.pid2, "a5", ANNOTATION,
+                             "text/plain", "", "i3:R5",)
         except:
             self.tearDown()
             raise

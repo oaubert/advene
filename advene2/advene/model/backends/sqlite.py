@@ -578,6 +578,54 @@ class _SqliteBackend(object):
         else:
             return(t, package_id, id)
 
+    def iter_references_with_import(self, package_id, id):
+        """Iter over all the elements relying on the identified import.
+
+        Yields 3-tuples where the first item is either an element id-ref 
+        or an empty string to identify the package itself and the third item is
+        the id-ref of an element imported through the import in question. The
+        second item describes the relation between the first and third ones. It
+        can be either:
+          an int i
+            in that case, the imported element is the i'th item of the (list-
+            like) element identified by the first item.
+          and attribute name with an element as its value
+            in that case, the imported element is the value of the attribute 
+            for the element or package identified by the first item.
+          the special string ":tag"
+            the imported element is a tag, to which this package identified by
+            the first item associates at least one element.
+          the special string ":tagged"
+            this package associates at least one tag to the imported element.
+
+        The attribute names that may be returned are ``media`` and
+        ``content_schema``.
+        """
+        q = """SELECT id, ?, media_i FROM Annotations
+                 WHERE package = ? AND media_p = ?
+               UNION
+               SELECT element, ?, schema_i FROM Contents
+                 WHERE package = ? AND schema_p = ?
+               UNION
+               SELECT relation, ord, member_i FROM RelationMembers
+                 WHERE package = ? AND member_p = ?
+               UNION
+               SELECT list, ord, item_i FROM ListItems
+                 WHERE package = ? AND item_p = ?
+               UNION
+               SELECT ?, ?, tag_i FROM Tagged
+                 WHERE package = ? AND tag_p = ?
+               UNION
+               SELECT ?, ?, element_i FROM Tagged
+                 WHERE package = ? AND element_p = ?
+            """
+        args = ["media", package_id, id, "content_schema", package_id, id,
+                package_id, id, package_id, id, "", ":tag", package_id, id,
+                "", ":tagged", package_id, id,]
+        c = self._conn.execute(q, args)
+        r = ( (i[0], i[1], "%s:%s" % (id, i[2])) for i in c )
+        return _FlushableIterator(r, self)
+
     def iter_medias(self, package_ids,
                     id=None,  id_alt=None,
                     url=None, url_alt=None,
@@ -1255,8 +1303,8 @@ class _SqliteBackend(object):
         q = "SELECT join_id_ref(member_p,member_i) AS member " \
             "FROM RelationMembers " \
             "WHERE package = ? AND relation = ? ORDER BY ord"
-        for r in self._conn.execute(q, (package_id, id)):
-            yield r[0]
+        r = ( i[0] for i in self._conn.execute(q, (package_id, id)) )
+        return _FlushableIterator(r, self)
 
     def remove_member(self, package_id, id, pos):
         """
@@ -1407,8 +1455,8 @@ class _SqliteBackend(object):
         q = "SELECT join_id_ref(item_p,item_i) AS item " \
             "FROM ListItems " \
             "WHERE package = ? AND list = ? ORDER BY ord"
-        for r in self._conn.execute(q, (package_id, id)):
-            yield r[0]
+        r = ( i[0] for i in self._conn.execute(q, (package_id, id)) )
+        return _FlushableIterator(r, self)
 
     def remove_item(self, package_id, id, pos):
         """
