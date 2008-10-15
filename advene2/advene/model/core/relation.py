@@ -24,6 +24,10 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
 
     ADVENE_TYPE = RELATION
 
+    # attributes that do not prevent relations to be volatile
+    _cache = None
+    _ids = None
+
     @classmethod
     def instantiate(cls, owner, id, mimetype, model, url):
         r = super(Relation, cls).instantiate(owner, id)

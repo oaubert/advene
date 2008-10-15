@@ -11,6 +11,11 @@ class Import(PackageElement, GroupMixin):
 
     ADVENE_TYPE = IMPORT
 
+    # attributes that do not prevent imports to be volatile
+    _url = None
+    _uri = None
+    _imported = None
+
     @classmethod
     def instantiate(cls, owner, id, url, uri):
         r = super(Import, cls).instantiate(owner, id)

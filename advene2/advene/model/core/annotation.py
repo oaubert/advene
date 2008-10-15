@@ -17,6 +17,12 @@ class Annotation(PackageElement, WithContentMixin):
 
     ADVENE_TYPE = ANNOTATION
 
+    # attributes that do not prevent annotations to be volatile
+    _begin = None
+    _end = None
+    _media_id = None
+    _media = None
+
     @classmethod
     def instantiate(cls, owner, id,
                     media, begin, end, mimetype, model, url):

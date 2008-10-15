@@ -8,7 +8,7 @@ from unittest import TestCase, main
 from advene.model.backends.sqlite import _set_module_debug
 from advene.model.consts import DC_NS_PREFIX
 from advene.model.core.content import PACKAGED_ROOT
-from advene.model.core.media import FOREF_PREFIX
+from advene.model.core.media import FOREF_PREFIX, DEFAULT_FOREF
 from advene.model.core.element import RELATION
 from advene.model.core.package import Package, UnreachableImportError, \
                                       NoSuchElementError
@@ -24,8 +24,7 @@ rdfs_seeAlso = "http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso"
 class TestElements(TestCase):
     def setUp(self):
         self.p = Package("file:/tmp/p", create=True)
-        self.foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
-        self.p.create_media("m1", "http://example.com/m1.avi", self.foref)
+        self.p.create_media("m1", "http://example.com/m1.avi")
 
         self.q = Package("file:/tmp/q", create=True)
 
@@ -34,6 +33,33 @@ class TestElements(TestCase):
         self.p.close()
 
     # utility methodes for mixins and common behaviours
+
+    def _test_volatile(self, eid, package=None):
+        # PRECONDITION: the element identified by eid must have no instance
+        # referenced outside this function
+        #
+        # NB: we can not test that objects are volatile by comparing the python
+        # id at two points of their lifetime, because python recycles ids.
+        # Hence we use out knowledge of the implementation: we check that the
+        # element disappeared from p._elements.
+        # This is not good unit-test practice, but I have no better solution
+        # for the moment.
+        p = package or self.p
+        gc.collect()
+        # by default, elements are volatile
+        self.assertEqual(p._elements.get(eid), None)
+
+        p.get(eid).foo = "foo"
+        p.get(eid).bar = "bar"
+        del p.get(eid).foo
+        gc.collect()
+        # custom attributes makes them heavier
+        self.assertNotEqual(p._elements.get(eid), None)
+
+        del p.get(eid).bar
+        gc.collect()
+        # removing all custom attributes makes them volatile again
+        self.assertEqual(p._elements.get(eid), None)
 
     def _test_with_content(self, e):
         # content related attributes (model is tested below)
@@ -388,7 +414,7 @@ class TestElements(TestCase):
         t1 = p.create_tag("t1")
         t2 = p.create_tag("t2")
         t3 = p.create_tag("t3")
-        tm = p.create_media("tm", "http://example.com/tm.avi", self.foref)
+        tm = p.create_media("tm", "http://example.com/tm.avi")
         ta1 = p.create_annotation("ta1", tm, 0, 10, "text/plain")
         ta2 = p.create_annotation("ta2", tm, 5, 15, "text/plain")
         p.associate_tag(tm, t1)
@@ -459,7 +485,7 @@ class TestElements(TestCase):
         eq(ids((t3,), q), frozenset(tm.iter_my_tag_ids(q, 0)))
         eq(ids((t2,), q), frozenset(ta1.iter_my_tag_ids(q, 0)))
         eq(ids((t1,), q), frozenset(ta2.iter_my_tag_ids(q, 0)))
- 
+
         eq(frozenset((t1, t3)), frozenset(e.iter_my_tags(p)))
         eq(frozenset((t1, t2)), frozenset(tm.iter_my_tags(p)))
         eq(frozenset((t1,)), frozenset(ta1.iter_my_tags(p)))
@@ -560,25 +586,44 @@ class TestElements(TestCase):
         p = self.p
         self._test_with_meta(p)
 
+    def test_media(self):
+        p = self.p
+        self._test_volatile("m1")
+        m = p.get("m1")
+        self.assertEqual(m.url, "http://example.com/m1.avi")
+        m.url = "http://example.com/m2.ogg"
+        m = p.get("m1")
+        self.assertEqual(m.url, "http://example.com/m2.ogg")
+        self.assertEqual(m.frame_of_reference, DEFAULT_FOREF)
+        m.frame_of_reference = FOREF_PREFIX + "s;o=42"
+        m = p.get("m1")
+        self.assertEqual(m.frame_of_reference, FOREF_PREFIX + "s;o=42")
+
     def test_annotation(self):
         p = self.p
         m = p["m1"]
-        a = p.create_annotation("a1", m, 10, 25, "text/plain")
+        p.create_annotation("a1", m, 10, 25, "text/plain")
+        self._test_volatile("a1")
+        a = p.get("a1")
         self.assertEqual( m, a.media)
         self.assertEqual(10, a.begin)
         self.assertEqual(25, a.end)
         self.assertEqual(15, a.duration)
         a.begin += 5
+        a = p.get("a1")
         self.assertEqual(15, a.begin)
         self.assertEqual(25, a.end)
         a.end += 10
+        a = p.get("a1")
         self.assertEqual(15, a.begin)
         self.assertEqual(35, a.end)
         a.duration += 5
+        a = p.get("a1")
         self.assertEqual(15, a.begin)
         self.assertEqual(40, a.end)
-        m2 = p.create_media("m2", "http://example.com/m2.avi", self.foref)
+        m2 = p.create_media("m2", "http://example.com/m2.avi")
         a.media = m2
+        a = p.get("a1")
         self.assertEqual(m2, a.media)
         self._test_with_content(a)
         self._test_with_meta(a)
@@ -610,7 +655,9 @@ class TestElements(TestCase):
         a = [ p.create_annotation("a%s" % i, m, i*10, i*10+19, "text/plain")
               for i in xrange(20) ]
 
-        r = p.create_relation("r1", "text/plain")
+        p.create_relation("r1", "text/plain")
+        self._test_volatile("r1")
+        r = p.get("r1")
         self._test_list_like(r, a, "member")
         self._test_with_content(r)
         self._test_with_meta(r)
@@ -624,7 +671,9 @@ class TestElements(TestCase):
         a = [ p.create_relation("r%s" % i, "text/plain") for i in xrange(10) ] \
           + [ p.create_list("x%s" % i) for i in xrange(10) ]
 
-        L = p.create_list("l1")
+        p.create_list("l1")
+        self._test_volatile("l1")
+        L = p.get("l1")
         self._test_list_like(L, a, "item")
         self._test_with_meta(L)
         self._test_with_tag(L)
@@ -632,6 +681,39 @@ class TestElements(TestCase):
         L2 = p.create_list("l2", items=a)
         self.assertEquals(a, list(L2))
 
+    def test_tag(self):
+        p = self.p
+        p.create_tag("t1")
+        self._test_volatile("t1")
+
+    def test_import(self):
+        p = self.p
+        q = self.q
+        q.create_import("i1", p)
+        self._test_volatile("i1", package=q)
+        i = q.get("i1")
+        # TODO test attributes
+
+    def test_query(self):
+        p = self.p
+        p.create_query("q1", "text/plain")
+        self._test_volatile("q1")
+        q = p.get("q1")
+        # TODO test content handler
+
+    def test_view(self):
+        p = self.p
+        p.create_view("v1", "text/plain")
+        self._test_volatile("v1")
+        v = p.get("v1")
+        # TODO test content handler
+
+    def test_resource(self):
+        p = self.p
+        p.create_resource("R1", "text/plain")
+        self._test_volatile("R1")
+        R = p.get("R1")
+        # TODO test content handler
 
 class TestTagAsGroup(TestCase):
     def setUp(self):
@@ -1378,58 +1460,6 @@ class TestEvents(TestCase):
         self.i1().url = "file:/bar.bzp"
         self.i1().uri = "file:/bar.bzp"
         self.assertEqual(self.buf, [])
-
-
-class TestVolatile(TestCase):
-
-    def setUp(self):
-        self.p = Package("urn:1234", True)
-        self.p.create_tag("t1")
-
-    def tearDown(self):
-        self.p.close()
-
-    def test_volatile_elements(self):
-        t1 = self.p.get("t1")
-        # add dummy attribute to t1 ...
-        t1.foo = "bar"
-        # ... but don't keep the volatile instance,
-        del t1
-        # so after garbage collecting...
-        gc.collect()
-        # ...a new realization of the instance should not have that attribute
-        # anymore
-        self.assert_(not hasattr(self.p.get("t1"), "foo"))
-
-    def test_weighted_elements(self):
-        t1 = self.p.get("t1")
-        # add dummy attribute to t1 ...
-        t1.foo = "bar"
-        # ... and make it heavy so that it stays around
-        t1._increase_weight()
-        # ... even when unreferenced
-        del t1
-        # so after garbage collecting...
-        gc.collect()
-        # ... the dummy attribute is still there
-        self.assert_(hasattr(self.p.get("t1"), "foo"))
-
-    def test_unweighted_elements(self):
-        t1 = self.p.get("t1")
-        # add dummy attribute to t1 ...
-        t1.foo = "bar"
-        # ... and make it heavy so that it stays around
-        t1._increase_weight()
-        # ... even when unreferenced
-        del t1
-        # however we make it light again
-        self.p.get("t1")._decrease_weight()
-        # so after garbage collecting...
-        gc.collect()
-        # ...a new realization of the instance should not have that attribute
-        # anymore
-        self.assert_(not hasattr(self.p.get("t1"), "foo"))
-
 
 
 if __name__ == "__main__":

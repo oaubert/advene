@@ -11,6 +11,9 @@ class View(PackageElement, WithContentMixin):
 
     ADVENE_TYPE = VIEW
 
+    # attributes that do not prevent views to be volatile
+    _handler = None
+
     @classmethod
     def instantiate(cls, owner, id, mimetype, model, url):
         r = super(View, cls).instantiate(owner, id)

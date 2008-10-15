@@ -13,6 +13,12 @@ class Media(PackageElement):
 
     ADVENE_TYPE = MEDIA
 
+    # attributes that do not prevent medias to be volatile
+    _url = None
+    _frame_of_reference = None
+    _unit = None
+    _origin = None
+
     @classmethod
     def instantiate(cls, owner, id, url, frame_of_reference):
         r = super(Media, cls).instantiate(owner, id)

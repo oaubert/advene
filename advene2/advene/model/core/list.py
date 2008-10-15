@@ -10,7 +10,9 @@ from advene.model.core.content import WithContentMixin
 from advene.model.core.group import GroupMixin
 
 class List(PackageElement, WithContentMixin, GroupMixin):
-    """I expose the protocol of a basic collection, to give access to the items of a list. 
+    """
+    I expose the protocol of a basic collection, to give access to the items
+    of a list.
 
     I also try to efficiently cache the results I know.
     """
@@ -24,6 +26,10 @@ class List(PackageElement, WithContentMixin, GroupMixin):
     # retrieved from the backend.
 
     ADVENE_TYPE = LIST
+
+    # attributes that do not prevent lists to be volatile
+    _cache = None
+    _ids = None
 
     @classmethod
     def instantiate(cls, owner, id):

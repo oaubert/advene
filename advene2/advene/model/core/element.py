@@ -39,6 +39,40 @@ def get_advene_type_label(typ):
 
 
 class PackageElement(object, WithMetaMixin, WithEventsMixin):
+    """
+    I am the common subclass of all package element.
+
+
+    Package elements are unique volatile instances:
+    * unique, because it is enforced that the same element will never be
+      represented by two distinct instances; hence, elements can be compared
+      with the ``is`` operator as well as ``==``
+    * volatile, because it is not guaranteed that, at two instants, the
+      instance representing a given element will be the same; unused instances
+      may be freed at any time, and a new instance will be created on demand.
+
+    This should normally normally be transparent for the user.
+
+    Developper note
+    ===============
+    So that volatility is indeed transparent to users, the `__setattr__` method
+    has been overridden: since custom attributes are not stored in the backend,
+    the instance should be kept in memory as long as it has custom attributes.
+
+    As a consequence, all "non-custom" attributes (i.e. those that will be
+    correctly re-generated when the element is re-instantiated) must be
+    declared as class attribute (usually with None as their default value).
+
+    This must also be true of subclasses of elements (NB: mixin classes should
+    normally already do that).
+    """
+
+    # the __setattr__ overridding requires that all attributs relying on the
+    # backend are always present:
+    _id = None
+    _owner = None
+    _weight = 0
+    _event_delegate = None
 
     def __init__(self, owner, id):
         """
@@ -62,6 +96,23 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         """
         r = cls(owner, id)
         return r
+
+    def __setattr__(self, name, value):
+        """
+        Make instance heavier when a new custom attribute is created.
+        """
+        if name not in self.__dict__ and not hasattr(self.__class__, name):
+            #print "=== weightening", self.id, "because of", name
+            self._increase_weight()
+        super(PackageElement, self).__setattr__(name, value)
+
+    def __delattr__(self, name):
+        """
+        Make instance lighter when a custom attribute is deleted.
+        """
+        super(PackageElement, self).__delattr__(name)
+        if not hasattr(self.__class__, name):
+            self._decrease_weight()
 
     @classmethod
     def create_new(cls, owner, id):

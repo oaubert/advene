@@ -460,8 +460,8 @@ class WithContentMixin:
     @autoproperty
     def _get_content_as_file(self):
         """
-        Return a *copy* of this emelement's content data wrapped in a file-like
-        object.
+        This property returns a *copy* of this element's content data wrapped in
+        a file-like object.
 
         Note that the returned file-like object may be writable, but the
         written data will *not* be reflected back to the content. Also, if the
