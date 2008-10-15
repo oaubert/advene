@@ -1,33 +1,68 @@
-- in backends bind and create, make claim methods lock the database, to prevent
-  race conditions
-
-- improve all_group implementation by factorizing same backend operations
-  (in progress)
+Important improvements
+======================
 
 - finish the implementation of _SqliteBackend
+
+- in sqlite bind and create, lock (exclusive) the database before the claim,
+  to prevent race conditions
+
+- improve all_group implementation by factorizing same backend operations
+
+- implement "external" contents (url attribute)
 
 - implement force and readonly in _SqliteBackend
 
 - implement file-based backends, and builtin backend
+
+Minor improvements, to do one day
+=================================
+
+Element related
+---------------
 
 - make dirty/clean more aggressive: creation of elements should be added to
   their cleaning operations, but beware: that involves cleaning elements on
   which they depend -- e.g. before creating an annotation, its media must
   be clean -- because it may require creation too
 
-- implement "external" contents (url attribute)
-
-- make subcollections (annotations, medias...) of all and own groups dict-like
-
-- make content data independant from other attributes (mimetype, schema) in
-  the backend and update the API accordingly
+Content related
+---------------
 
 - make content metadata of elements with content, and length of list-like
   elements available directly (i.e. from get_element)
 
-- remove unused code in advene/utils once we are sure we won't use it
+- make content data independant from other attributes (mimetype, schema) in
+  the backend and update the API accordingly
 
 - add support for file-access (rather than getter/setter) to content data
 
+Backend related
+---------------
+
+- reflect changes in the import structure in _imports_dict and _backends_dict,
+  without having to reload the package
+
 - add indexes in the SQL schema (Annotations.f_begin at least)
   and test its efficiency
+
+Misc
+----
+
+- remove unused code in advene/utils once we are sure we won't use it
+
+Open questions
+==============
+
+- Olivier would like collection-like objects (own-group, all-group, relations,
+  lists...) to implement __getitem__. I do not see the real added value since,
+  if you know the id, you would rather call package[id] than package.own[id]
+  or package.own.annotations[id]. To discuss...
+
+- in the cinelab application model, some metadata properties are assumed to
+  contain id-refs. However, the core model (and the backend) do not know those
+  are id-refs, and do not, e.g., update them on a renaming...
+  Should the core model distinguish free-text meta-data from id-ref metadata,
+  or should the cinelab implementation manage those meta-data alone.
+  Note that the second solution might be expensive (instanciating all elements
+  possibly containin the metadata, just to check if it is there and requires
+  updating...)
