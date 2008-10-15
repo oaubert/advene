@@ -9,10 +9,7 @@ A set of session variables are predefined and have a default value (use
 be used butg must be prefixed with "x_".
 
 All errors (trying to read or delete an non-existant session variable, or
-trying to set an invalid one) raise KeyError.
-
-A thread using session variables should call ``session._clean()`` before
-terminating, in order to free memory space occupied by its session variables.
+trying to set an invalid one) raise AttributeError.
 
 E.g.::
     from advene.util.session import session
@@ -24,87 +21,47 @@ E.g.::
 
 import os
 import sys
-from thread import get_ident, allocate_lock
+from threading import local
 from shutil import rmtree
 
 class _Session(object):
     def __init__(self, **kw):
         self._default = dict(kw)
-        self._dicts = {}
-        self._lock = allocate_lock()
+        self._data = local()
 
-    def __getattribute__(self, name):
-        if name[0] == "_":
-            return object.__getattribute__(self, name)
-
-        L = self._lock
-        thread_id = get_ident()
-        L.acquire()
-        try:
-            d = self._dicts.get(thread_id)
-            if d is None or name not in d:
-                return self._default[name]
-            else:
-                return d[name]
-        finally:
-            L.release()
+    def __getattr__(self, name):
+        r = getattr(self._data, name, None)
+        if r is None:
+            try:
+                r = self._default[name]
+            except KeyError, e:
+                raise AttributeError(*e.args)
+        return r
 
     def __setattr__(self, name, value):
         if name[0] == "_":
             return object.__setattr__(self, name, value)
         if name not in self._default and name[:2] != "x_":
-            raise KeyError("%s is not a session variable "
-                           "(use 'x_%s' instead" % (name, name))
-        L = self._lock
-        thread_id = get_ident()
-        _dicts = self._dicts
-        L.acquire()
-        try:
-            d = _dicts.get(thread_id)
-            if d is None: d = _dicts[thread_id] = {}
-            d[name] = value
-        finally:
-            L.release()
+            raise AttributeError("%s is not a session variable "
+                                 "(use 'x_%s' instead)" % (name, name))
+        setattr(self._data, name, value)
 
     def __delattr__(self, name):
         if name[0] == "_":
             return object.__delattr__(self, name)
-
-        L = self._lock
-        thread_id = get_ident()
-        _dicts = self._dicts
-        L.acquire()
-        try:
-            d = _dicts.get(thread_id)
-            if d is None: d = _dicts[thread_id] = {}
-            del d[name]
-        finally:
-            L.release()
+        delattr(self._data, name)
 
     def _dir(self):
-        L = self._lock
-        thread_id = get_ident()
-        L.acquire()
         r1 = frozenset(self._default.iterkeys())
-        r2 = frozenset(self._dicts.get(thread_id, {}).iterkeys())
+        r2 = frozenset(i for i in dir(self._data) if i[0] != "_")
         r = r1.union(r2)
-        L.release()
         return list(r)
-
-    def _clean(self):
-        L = self._lock
-        thread_id = get_ident()
-        L.acquire()
-        try:
-            del self._dicts[thread_id]
-        finally:
-            L.release()
 
 tempdir_list = []
 
 def cleanup():
     """Remove the temp. directories used during the session.
-    
+
     No check is done to see wether it is in use or not. This
     method is intended to be used at the end of the application,
     to clean up the mess.
@@ -113,8 +70,7 @@ def cleanup():
         print "Cleaning up %s" % d
         if os.path.isdir(d.encode(sys.getfilesystemencoding())):
             rmtree(d, ignore_errors=True)
-    
+
 session = _Session(
     package = None,
-    user = None,
-)
+    user = None,)

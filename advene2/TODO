@@ -15,8 +15,6 @@ Needed improvements
 
 - Encoding issues when using accented characters in atributes
 
-- replace package session with threading.local
-
 - auto-update of creator/created/contributor/modified. For package,
    update contributor/modified upon package saving.
 
@@ -24,10 +22,14 @@ Needed improvements
 
 - annotation_type.schemas
 
+- text-types registration mechanism (i.e. those not serialized in base64)
+
 Important improvements
 ======================
 
 - add the synchronized decorator to all methods that need it
+
+- make package loadind/saving robust to Windows filenames.
 
 - finish the implementation of utest/core_package test_modify_X methods
 

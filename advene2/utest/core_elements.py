@@ -732,7 +732,7 @@ class TestTagAsGroup(TestCase):
         session.package = p
 
     def tearDown(self):
-        session._clean()
+        pass
 
     def testError(self):
         del session.package

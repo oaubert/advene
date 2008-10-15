@@ -26,27 +26,17 @@ class TestSession(TestCase):
         del session.user
         self.assertEquals(session.user, None)
 
-    def testSingleThreadClean(self):
-        session.user = "pchampin"
-        session._clean()
-        self.assertEquals(session.user, None)
-
     def testSingleThreadRWDX(self):
-        self.assertRaises(KeyError, lambda: session.x_info)
+        self.assertRaises(AttributeError, lambda: session.x_info)
         session.x_info = "more info"
         self.assertEquals(session.x_info, "more info")
         del session.x_info
-        self.assertRaises(KeyError, lambda: session.x_info)
-
-    def testSingleThreadCleanX(self):
-        session.x_info = "more info"
-        session._clean()
-        self.assertRaises(KeyError, lambda: session.x_info)
+        self.assertRaises(AttributeError, lambda: session.x_info)
 
     def testSingleThreadUnauthorized(self):
         def set_unauthorized():
             session.foobar = "this is not a valid session variable"
-        self.assertRaises(KeyError, set_unauthorized)
+        self.assertRaises(AttributeError, set_unauthorized)
 
     def testMultipleThread(self):
         e = Event()
@@ -60,6 +50,7 @@ class TestSession(TestCase):
         e.wait()
         doit("u101")
         self.assertEquals(check, ["u42", "u101",])
+        del session.user
 
     def testMultipleThreadX(self):
         e = Event()
@@ -73,6 +64,7 @@ class TestSession(TestCase):
         e.wait()
         doit("u101")
         self.assertEquals(check, ["u42", "u101",])
+        del session.x_info
 
     def testMultipleThreadUndefined(self):
         e = Event()
