@@ -55,6 +55,12 @@ class CamGroupMixin(GroupMixin):
     def count_relation_types(self):
         return len(list(self.iter_relation_types()))
 
+    def count_user_lists(self):
+        return len(list(self.iter_user_lists()))
+
+    def count_schemas(self):
+        return len(list(self.iter_schemas()))
+
     @property
     def user_tags(group):
         class GroupUserTags(ElementCollection):

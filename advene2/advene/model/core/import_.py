@@ -151,6 +151,51 @@ class Import(PackageElement, GroupMixin):
             raise UnreachableImportError(self._id)
         return self._imported.own.iter_queries()
 
+    def count_medias(self):
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        return self._imported.own.count_medias()
+
+    def count_annotations(self):
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        return self._imported.own.count_annotations()
+
+    def count_relations(self):
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        return self._imported.own.count_relations()
+
+    def count_views(self):
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        return self._imported.own.count_views()
+
+    def count_resources(self):
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        return self._imported.own.count_resources()
+
+    def count_tags(self):
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        return self._imported.own.count_tags()
+
+    def count_lists(self):
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        return self._imported.own.count_lists()
+
+    def count_imports(self):
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        return self._imported.own.count_imports()
+
+    def count_queries(self):
+        if not self._imported:
+            raise UnreachableImportError(self._id)
+        return self._imported.own.count_queries()
+
     # dict interface
 
     def __getitem__ (self, i):
