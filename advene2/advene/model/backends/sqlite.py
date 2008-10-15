@@ -1041,34 +1041,31 @@ class _SqliteBackend(object):
         assert _DF or uri is None  or  uri_alt is None
 
         q = "SELECT ?, package, id, url, uri FROM Imports " \
-            "WHERE package in (" + "?," * len(package_ids) + ")"
+            "WHERE package in (" + ",".join( [ "?" for e in package_ids ]) + ")"
         args = [IMPORT,] + list(package_ids)
         if id is not None:
             q += " AND id = ?"
             args.append(id)
         if id_alt is not None:
             q += " AND id IN ("
-            for i in id_alt:
-                q += "?,"
-                args.append(i)
+            q += ",".join( [ "?" for e in id_alt ] )
+            args.extend(id_alt)
             q += ")"
         if url is not None:
             q += " AND url = ?"
             args.append(url)
         if url_alt is not None:
             q += " AND url IN ("
-            for i in url_alt:
-                q += "?,"
-                args.append(i)
+            q += ",".join( [ "?" for e in url_alt ] )
+            args.extend(id_alt)
             q += ")"
         if uri is not None:
             q += " AND uri = ?"
             args.append(uri)
         if uri_alt is not None:
             q += " AND uri IN ("
-            for i in uri_alt:
-                q += "?,"
-                args.append(i)
+            q += ",".join( [ "?" for e in uri_alt ] )
+            args.extend(id_alt)
             q += ")"
 
         r = self._conn.execute(q, args)
