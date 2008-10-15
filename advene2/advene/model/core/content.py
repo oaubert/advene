@@ -28,7 +28,23 @@ PACKAGED_ROOT = "%spackage_root" % PARSER_META_PREFIX
 class WithContentMixin(DirtyMixin):
     """I provide functionality for elements with a content.
 
-    This mixin assumes that it will be mixed in subclasses of PackageElement.
+    I assume that I will be mixed in subclasses of PackageElement.
+
+    Note that there are 3 kinds of contents:
+
+      backend-stored contents:
+        those content have no URL, and are stored directly in the backend;
+        their data can be modified through this class.
+      external contents:
+        they have a URL at which their data is stored; their data can not be
+        modified through this class.
+      packaged contents:
+        they have a URL in the special ``packaged:`` scheme, meaning that their
+        data is stored in the local filesystem (usually extracted from a zipped
+        package); their data can be modified through this class.
+
+    Note that properties `content_data` and `content_url` are not independant
+    when set. See their documentation for more detail.
     """
 
     __mimetype     = None
@@ -84,6 +100,43 @@ class WithContentMixin(DirtyMixin):
                 if m is not default:
                     self._media_wref = ref(m)
             return m
+
+    def get_content_as_file(self):
+        """Returns a file-like object giving access to the content data.
+
+        The file-like object is updatable unless the content is external.
+
+        It is an error to try to modify the data while such a file-like object
+        is opened. An exception will thus be raised whenever this method is
+        invoked or `content_data` is set before a previously returned file-like
+        object is closed.
+
+        See also `content_data`.
+        """
+        url = self.__url
+        if url is None: # should not happen, but that's safer
+            self._load_content_info()
+            url = self.__url
+        packaged = url.startswith("packaged:")
+
+        if url: # non-empty string
+            if url.startswith("packaged:"):
+                # special URL scheme
+                if self.__as_file:
+                    raise IOError("content already opened as a file")
+                o = self._owner
+                prefix = o.get_meta(PACKAGED_ROOT, None)
+                assert prefix is not None
+                base = url2pathname(urlparse(prefix)[2])
+                filename = path.join(base, url2pathname(url[10:]))
+                f = self.__as_file = PackagedDataFile(filename, self)
+            else:
+                f = urlopen(url)
+        else:
+            if self.__as_file:
+                raise IOError("content already opened as a file")
+            f = self.__as_file = ContentDataFile(self)
+        return f
 
     @autoproperty
     def _get_content_mimetype(self):
@@ -150,6 +203,11 @@ class WithContentMixin(DirtyMixin):
 
     @autoproperty
     def _get_content_url(self):
+        """This property holds the URL of the content, or an empty string.
+
+        Important: if this property is set on a backend-stored content, the
+        data is erased from the backend.
+        """
         r = self.__url
         if r is None: # should not happen, but that's safer
             self._load_content_info()
@@ -158,6 +216,7 @@ class WithContentMixin(DirtyMixin):
 
     @autoproperty
     def _set_content_url(self, url, _init=False):
+        """See `_get_content_url`."""
         if not _init and self.__url is None: # should not happen, but safer
             self._load_content_info()
         if url != self.__url: # prevents to erase the data cache for no reason
@@ -168,9 +227,21 @@ class WithContentMixin(DirtyMixin):
                 self.add_cleaning_operation_once(self.__clean_info)
             if self.__data is not None:
                 del self.__data
+                # NB: data needs no erasing in the backend, because the backend
+                # must do it itself whenever the URL is set
 
     @autoproperty       
     def _get_content_data(self):
+        """This property holds the data of the content.
+
+        It can be read whatever the kind of content (backend-stored, external
+        or packaged). However, only backend-stored and packaged can have their
+        data safely modified. Trying to set the data of an external content
+        will raise a `ValueError`. Its `content_url` must first be set to the
+        empty string or a ``packaged:`` URL.
+
+        See also `get_content_as_file`.
+        """
         url = self.__url
         if url is None: # should not happen, but that's safer
             self._load_content_info()
@@ -183,7 +254,7 @@ class WithContentMixin(DirtyMixin):
             r = f.read()
             f.seek(pos)
         elif url: # non-empty string
-            f = self._get_content_as_file()
+            f = self.get_content_as_file()
             r = f.read()
             f.close()
         else:
@@ -196,56 +267,28 @@ class WithContentMixin(DirtyMixin):
 
     @autoproperty
     def _set_content_data(self, data):
+        """ See `_get_content_data`."""
         url = self.__url
         if url is None: # should not happen, but that's safer
             self._load_content_info()
             url = self.__url
         if url.startswith("packaged:"):
-            f = self._get_content_as_file()
+            f = self.get_content_as_file()
             f.truncate()
             f.write(data)
             f.close()
             # no cleaning required since the backend sees no change
         else:
             if url:
-                self.__url = ""
-                # NB: the backend must do it by itself,
-                # so cleaning the info is not required
+                raise AttributeError, "content has a url, can not set data"
             elif self.__as_file:
-                # NB: an existing __as_file on the old url is not a problem
                 raise IOError, "content already opened as a file"
             self.__data = data
             self.add_cleaning_operation_once(self.__clean_data)
-
-    @autoproperty
-    def _get_content_as_file(self):
-        url = self.__url
-        if url is None: # should not happen, but that's safer
-            self._load_content_info()
-            url = self.__url
-        packaged = url.startswith("packaged:")
-
-        if url: # non-empty string
-            if url.startswith("packaged:"):
-                # special URL scheme
-                if self.__as_file:
-                    raise IOError("content already opened as a file")
-                o = self._owner
-                prefix = o.get_meta(PACKAGED_ROOT, None)
-                assert prefix is not None
-                base = url2pathname(urlparse(prefix)[2])
-                filename = path.join(base, url2pathname(url[10:]))
-                f = self.__as_file = PackagedDataFile(filename, self)
-            else:
-                f = urlopen(url)
-        else:
-            if self.__as_file:
-                raise IOError("content already opened as a file")
-            f = self.__as_file = ContentDataFile(self)
-        return f
         
     @autoproperty
     def _get_content(self):
+        """Return a `Content` instance representing the content."""
         c = self.__cached_content()
         if c is None:
             c = Content(self)
@@ -310,9 +353,8 @@ class Content(object):
     def _set_data(self, data):
         return self._owner_elt._set_content_data(data)
 
-    @autoproperty
-    def _get_as_file(self):
-        return self._owner_elt._get_content_as_file()
+    def get_as_file(self):
+        return self._owner_elt.get_content_as_file()
 
 
 class PackagedDataFile(file):

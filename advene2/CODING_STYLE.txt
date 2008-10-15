@@ -29,9 +29,12 @@ SEMANTIC
 --------
 
 * read-only properties should be prefered to methods with only self as
-parameter
+parameter, if appropriate
 * for method with optional parameters and only self as a required parameter,
-a read-only property should also exist (see Exceptions_ below)
+a read-only property should also exist if appropriate (see Exceptions_ below)
+* it is not appropriate for a method to be replaced by a read-only property
+if the method involves much computing, or if its value is not considered as
+a property of the object (e.g. when a new value is generated on each call).
 
 methods and properties should rather return an iterator than another iterable,
 except when the iterable is already available and may be safely shared with 

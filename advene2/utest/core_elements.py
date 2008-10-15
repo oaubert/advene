@@ -62,20 +62,22 @@ class TestElements(TestCase):
         self.assertEqual(lines, e.content_data)
         self.assertEqual(lines, e.content.data)
 
-        f = e.content_as_file 
+        f = e.get_content_as_file()
         self.assertEqual(lines, f.read())
         f.close()
 
-        f = e.content.as_file 
+        f = e.content.get_as_file()
         self.assertEqual(lines, f.read())
         f.close()
 
-        # backend-stored content (cancels url)
+        # backend-stored content
+        self.assertRaises(AttributeError, setattr, e, "content_data", "x")
+        e.content_url = ""
         e.content_data = "good moaning"
         self.assertEqual("", e.content_url)
         self.assertEqual("", e.content.url)
 
-        f = e.content_as_file
+        f = e.get_content_as_file()
         self.assertEqual("good moaning", f.read())
         f.seek(0)
         f.truncate()
@@ -88,11 +90,11 @@ class TestElements(TestCase):
         self.assertEqual(pos, f.tell())
         self.assertRaises(IOError, setattr, e, "content_data", "foo")
         self.assertRaises(IOError, setattr, e.content, "data", "foo")
-        self.assertRaises(IOError, getattr, e, "content_as_file")
-        self.assertRaises(IOError, getattr, e.content, "as_file")
+        self.assertRaises(IOError, e.get_content_as_file)
+        self.assertRaises(IOError, e.content.get_as_file)
         f.close()
 
-        # package-stored content (backend sees URL, users sees internal)
+        # packaged content
         filename = tmpnam()
         base, file  = split(filename)
         base_url = "file:" + pathname2url(base)
@@ -110,7 +112,7 @@ class TestElements(TestCase):
         self.assertEqual("still packaged data", f.read())
         f.close()
 
-        f = e.content_as_file
+        f = e.get_content_as_file()
         self.assertEqual("still packaged data", f.read())
         f.seek(0)
         f.truncate()
@@ -123,8 +125,8 @@ class TestElements(TestCase):
         self.assertEqual(pos, f.tell())
         self.assertRaises(IOError, setattr, e, "content_data", "foo")
         self.assertRaises(IOError, setattr, e.content, "data", "foo")
-        self.assertRaises(IOError, getattr, e, "content_as_file")
-        self.assertRaises(IOError, getattr, e.content, "as_file")
+        self.assertRaises(IOError, e.get_content_as_file)
+        self.assertRaises(IOError, e.content.get_as_file)
         f.close()
 
         # schema

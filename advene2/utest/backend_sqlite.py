@@ -921,7 +921,10 @@ class TestHandleElements(TestCase):
             self.be.update_content_data(i[0], i[1], typ, "")
             self.assertEqual("", self.be.get_content_data(i[0], i[1], typ))
             # checking exclusivity of data and url
+            self.be.update_content_info(i[0], i[1], typ, mime, "", url)
             self.be.update_content_data(i[0], i[1], typ, data)
+            self.assertEqual((mime, "", ""),
+                             self.be.get_content_info(i[0], i[1], typ))
             self.be.update_content_info(i[0], i[1], typ, mime, "", url)
             self.assertEqual("", self.be.get_content_data(i[0], i[1], typ))
             self.be.update_content_data(i[0], i[1], typ, data)
