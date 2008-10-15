@@ -586,16 +586,12 @@ class _SqliteBackend(object):
 
         Specific parameters
         -------------------
-        media
-          id-ref of the media this annotation refs to
-        begin, end
-          int boundaries of the annotated temporal fragment
         mimetype
-          the mimetype of the annotation content
+          the mimetype of the view content
         schema
-          the id-ref of the schema for the annotation content (can be empty)
+          the id-ref of the schema for the view content (can be empty)
         url
-          if non empty, the annotation content will be not be stored, and will
+          if non empty, the view content will be not be stored, and will
           be fetched on demand from that URL
 
         Raise a ModelException if the identifier already exists in the package.
@@ -621,16 +617,12 @@ class _SqliteBackend(object):
 
         Specific parameters
         -------------------
-        media
-          id-ref of the media this annotation refs to
-        begin, end
-          int boundaries of the annotated temporal fragment
         mimetype
-          the mimetype of the annotation content
+          the mimetype of the resource content
         schema
-          the id-ref of the schema for the annotation content (can be empty)
+          the id-ref of the schema for the resource content (can be empty)
         url
-          if non empty, the annotation content will be not be stored, and will
+          if non empty, the resource content will be not be stored, and will
           be fetched on demand from that URL
 
         Raise a ModelException if the identifier already exists in the package.
@@ -684,16 +676,12 @@ class _SqliteBackend(object):
 
         Specific parameters
         -------------------
-        media
-          id-ref of the media this annotation refs to
-        begin, end
-          int boundaries of the annotated temporal fragment
         mimetype
-          the mimetype of the annotation content
+          the mimetype of the query content
         schema
-          the id-ref of the schema for the annotation content (can be empty)
+          the id-ref of the schema for the query content (can be empty)
         url
-          if non empty, the annotation content will be not be stored, and will
+          if non empty, the query content will be not be stored, and will
           be fetched on demand from that URL
 
         Raise a ModelException if the identifier already exists in the package.
