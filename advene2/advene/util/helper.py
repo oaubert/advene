@@ -365,27 +365,37 @@ def get_valid_members (el):
     if l:
         l.insert(0, _('---- Elements ----'))
 
+    # Introspection
     pl=sorted(e[0].replace('_tales_', '')
-            for e in inspect.getmembers(type(el))
-            if isinstance(e[1], property) and e[1].fget is not None)
+              for e in inspect.getmembers(type(el))
+              if isinstance(e[1], property) and e[1].fget is not None)
     if pl:
         l.append(_('---- Attributes ----'))
         l.extend(pl)
 
-    pl=sorted(name
-              for (name, method) in inspect.getmembers(el)
-              if name in ('first', 'rest') 
-              or (isinstance(method, types.MethodType) 
-                  and len(inspect.getargspec(method)[0]) == 1 + len(inspect.getargspec(method)[3] or [])
-                  and not name.startswith('_')
-                  and not name == 'close')
-              or (isinstance(method, types.BuiltinMethodType)
-                  and not name.startswith('_')
-                  # No inspect.getargspec: guess from the docstring
-                  # No parameters
-                  and ('()' in (method.__doc__ or '').splitlines()[0]
-                       # Or only optional parameters
-                       or '([' in (method.__doc__ or '').splitlines()[0])))
+    pl=[]
+    for (name, method) in inspect.getmembers(el):
+        if name in ('first', 'rest'):
+            pl.append(name)
+        elif isinstance(method, types.MethodType) or isinstance(method, type):
+            if name.startswith('_') or name == 'close':
+                continue
+            if isinstance(method, type):
+                method=getattr(method, '__init__', method)
+            argspec=inspect.getargspec(method)
+            if len(argspec[0]) == 1 + len(argspec[3] or []):
+                pl.append(name)
+            continue
+        elif isinstance(method, types.BuiltinMethodType):
+            if name.startswith('_'):
+                continue
+            # No inspect.getargspec: guess from the docstring
+            doc=(method.__doc__ or '').splitlines()[0]
+            if '()' in doc or '([' in doc:
+                pl.append(name)
+            continue
+        elif not name.startswith('_') and not name in l:
+            pl.append(name)
     if pl:
         l.append(_('---- Methods ----'))
         l.extend(pl)
