@@ -7,7 +7,7 @@ class WithMetaMixin:
     set_meta method, that cache the values of metadata to reduce access to
     the backend.
 
-    I also provides an alias mechanism to make frequent metadata easily
+    I also provide an alias mechanism to make frequent metadata easily
     accessible as python properties.
     """
 
@@ -42,13 +42,13 @@ class WithMetaMixin:
         if hasattr (cls, alias):
             raise AttributeError, alias
 
-        def getter (self):
-            return self.get_meta (key)
+        def getter (obj):
+            return obj.get_meta (key)
 
-        def setter (self, val):
-            return self.set_meta (key, val)
+        def setter (obj, val):
+            return obj.set_meta (key, val)
 
-        def deller (self):
+        def deller (obj):
             return self.set_meta (key, None)
 
         setattr (cls, alias, property (getter, setter, deller))
