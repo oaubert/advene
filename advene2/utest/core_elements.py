@@ -65,11 +65,11 @@ class TestElements(TestCase):
         self.assertEqual(lines, e.content_data)
         self.assertEqual(lines, e.content.data)
 
-        f = e.get_content_as_file()
+        f = e.get_content_as_synced_file()
         self.assertEqual(lines, f.read())
         f.close()
 
-        f = e.content.get_as_file()
+        f = e.content.get_as_synced_file()
         self.assertEqual(lines, f.read())
         f.close()
 
@@ -80,7 +80,7 @@ class TestElements(TestCase):
         self.assertEqual("", e.content_url)
         self.assertEqual("", e.content.url)
 
-        f = e.get_content_as_file()
+        f = e.get_content_as_synced_file()
         self.assertEqual("good moaning", f.read())
         f.seek(0)
         f.truncate()
@@ -93,8 +93,8 @@ class TestElements(TestCase):
         self.assertEqual(pos, f.tell())
         self.assertRaises(IOError, setattr, e, "content_data", "foo")
         self.assertRaises(IOError, setattr, e.content, "data", "foo")
-        self.assertRaises(IOError, e.get_content_as_file)
-        self.assertRaises(IOError, e.content.get_as_file)
+        self.assertRaises(IOError, e.get_content_as_synced_file)
+        self.assertRaises(IOError, e.content.get_as_synced_file)
         f.close()
 
         # packaged content
@@ -117,8 +117,8 @@ class TestElements(TestCase):
         f = open(filename, "r")
         self.assertEqual("still packaged data", f.read())
         f.close()
-        # get packaged content as_file
-        f = e.get_content_as_file()
+        # get packaged content as_synced_file
+        f = e.get_content_as_synced_file()
         self.assertEqual("still packaged data", f.read())
         f.seek(0)
         f.truncate()
@@ -131,8 +131,8 @@ class TestElements(TestCase):
         self.assertEqual(pos, f.tell())
         self.assertRaises(IOError, setattr, e, "content_data", "foo")
         self.assertRaises(IOError, setattr, e.content, "data", "foo")
-        self.assertRaises(IOError, e.get_content_as_file)
-        self.assertRaises(IOError, e.content.get_as_file)
+        self.assertRaises(IOError, e.get_content_as_synced_file)
+        self.assertRaises(IOError, e.content.get_as_synced_file)
         f.close()
 
         # back to backend-stored

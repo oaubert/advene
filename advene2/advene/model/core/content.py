@@ -81,8 +81,8 @@ class WithContentMixin:
     __model_id   = None
     __model_wref = staticmethod(lambda: None)
     __url        = None
-    __data       = None # backend data, unless __as_file is not None
-    __as_file    = None
+    __data       = None # backend data, unless __as_synced_file is not None
+    __as_synced_file    = None
     __handler    = None
 
     __cached_content = staticmethod(lambda: None)
@@ -200,7 +200,7 @@ class WithContentMixin:
                     self._media_wref = ref(m)
             return m
 
-    def get_content_as_file(self):
+    def get_content_as_synced_file(self):
         """Return a file-like object giving access to the content data.
 
         The file-like object is updatable unless the content is external.
@@ -220,21 +220,21 @@ class WithContentMixin:
         if url: # non-empty string
             if url.startswith("packaged:"):
                 # special URL scheme
-                if self.__as_file:
+                if self.__as_synced_file:
                     raise IOError("content already opened as a file")
                 o = self._owner
                 prefix = o.get_meta(PACKAGED_ROOT, None)
                 assert prefix is not None, "No root is specified for packaged: paths"
                 base = url2pathname(urlparse(prefix).path)
                 filename = path.join(base, url2pathname(url[10:]))
-                f = self.__as_file = PackagedDataFile(filename, self)
+                f = self.__as_synced_file = PackagedDataFile(filename, self)
             else:
                 abs = urljoin(self._owner._url, url)
                 f = urlopen(abs)
         else:
-            if self.__as_file:
+            if self.__as_synced_file:
                 raise IOError("content already opened as a file")
-            f = self.__as_file = ContentDataFile(self)
+            f = self.__as_synced_file = ContentDataFile(self)
         return f
 
     @autoproperty
@@ -351,10 +351,10 @@ class WithContentMixin:
         oldurl = self.__url
         if oldurl.startswith("packaged:"):
             # delete packaged data
-            f = self.__as_file
+            f = self.__as_synced_file
             if f:
                 f.close()
-                del self.__as_file
+                del self.__as_synced_file
             rootdir = self._owner.get_meta(PACKAGED_ROOT)
             pname = url2pathname(oldurl[10:])
             fname = path.join(rootdir, pname)
@@ -398,13 +398,13 @@ class WithContentMixin:
         will raise a `ValueError`. Its `content_url` must first be set to the
         empty string or a ``packaged:`` URL.
 
-        See also `get_content_as_file`.
+        See also `get_content_as_synced_file`.
         """
         url = self.__url
         if url is None: # should not happen, but that's safer
             self._load_content_info()
             url = self.__url
-        f = self.__as_file
+        f = self.__as_synced_file
         if f: # backend data or "packaged:" url
             # NB: this is not threadsafe
             pos = f.tell()
@@ -412,7 +412,7 @@ class WithContentMixin:
             r = f.read()
             f.seek(pos)
         elif url: # non-empty string
-            f = self.get_content_as_file()
+            f = self.get_content_as_synced_file()
             r = f.read()
             f.close()
         else:
@@ -433,7 +433,7 @@ class WithContentMixin:
         if self.__mimetype == "x-advene/none":
             raise ModelError("Can not set data of empty content")
         if url.startswith("packaged:"):
-            f = self.get_content_as_file()
+            f = self.get_content_as_synced_file()
             diff = None # TODO make a diff object
             f.truncate()
             f.write(data)
@@ -441,7 +441,7 @@ class WithContentMixin:
         else:
             if url:
                 raise AttributeError("content has a url, can not set data")
-            elif self.__as_file:
+            elif self.__as_synced_file:
                 raise IOError("content already opened as a file")
             diff = None # TODO make a diff object
             self.__data = data
@@ -526,8 +526,8 @@ class Content(object):
     def _get_parsed(self):
         return self._owner_elt._get_content_parsed()
 
-    def get_as_file(self):
-        return self._owner_elt.get_content_as_file()
+    def get_as_synced_file(self):
+        return self._owner_elt.get_content_as_synced_file()
 
 
 class PackagedDataFile(file):
@@ -542,7 +542,7 @@ class PackagedDataFile(file):
     def close(self):
         self.seek(0)
         self._element._WithContentMixin__data = self.read()
-        self._element._WithContentMixin__as_file = None
+        self._element._WithContentMixin__as_synced_file = None
         file.close(self)
         self._element = None
 
@@ -574,7 +574,7 @@ class ContentDataFile(object):
     def close(self):
         self.seek(0)
         self._element._WithContentMixin__data = self.read()
-        self._element._WithContentMixin__as_file = None
+        self._element._WithContentMixin__as_synced_file = None
         self._file.close()
         self._element = None
 
