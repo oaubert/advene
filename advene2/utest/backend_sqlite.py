@@ -6,7 +6,7 @@ from warnings  import filterwarnings
 
 from advene.model.backends.sqlite \
   import claims_for_create, create, claims_for_bind, bind, IN_MEMORY_URL, \
-         PackageInUse, InternalError
+         PackageInUse, InternalError, _set_module_debug
 from advene.model.core.content import Content
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
@@ -26,6 +26,7 @@ T = {
 }
 
 filterwarnings("ignore", "tmpnam is a potential security risk to your program")
+_set_module_debug(True) # enable assert statements in backends.sqlite
 
 class P:
     """A dummy package class for testing purpose

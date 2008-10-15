@@ -3,7 +3,7 @@ I am the reference implementation for advene backends modules.
 
 A backend module can be registered by invoking
 `advene.model.backends.register` with the module as its sole argument. It must
-implement 4 functions: `claims_for_create` , `claims_for_bind` , create_ and 
+implement 4 functions: `claims_for_create` , `claims_for_bind` , create_ and
 bind_ . The two latters return a *backend instance* with a standard API, for
 which `_SqliteBackend` provides a reference implementation.
 
@@ -12,7 +12,7 @@ which `_SqliteBackend` provides a reference implementation.
 #TODO: the backend does not ensure an exclusive access to the sqlite file.
 #      this is contrary to the backend specification.
 #      We should explore sqlite locking and use it (seems that multiple
-#      read-only access is possible), but also the possibility to lock 
+#      read-only access is possible), but also the possibility to lock
 #      differently each package in the database.
 
 from pysqlite2 import dbapi2 as sqlite
@@ -27,9 +27,32 @@ from advene.model.core.element \
 from advene.utils.reftools import WeakValueDictWithCallback
 
 
-BACKEND_VERSION = "0.1"
+BACKEND_VERSION = "1.0"
 
 IN_MEMORY_URL = "sqlite::memory:"
+
+_DF = True # means that assert will succeed, i.e. *no* debug
+
+def _get_module_debug():
+    """Return the state of the module's debug flag.
+
+    The debug flag enables a bunch of ``assert`` statements.
+    See also `_set_module_debug`.
+
+    NB: The benefit of disabling debug is not highly significant with sqlite,
+    but this would be different with a distant DBMS (because asserts often
+    invoke backend methods, resulting on extra queries to the database). Since
+    it is expected that a backend implementation over such a DBMS will be done
+    by copying and adapting this module, it seems like a good idea to have it.
+    """
+    global _DF
+    return not _DF # _DF == True means "no debug"
+
+def _set_module_debug(b):
+    """Set the module's debug flaf. See  _get_module_debug`."""
+    global _DF
+    _DF = not b # _DF == True means "no debug"
+
 
 
 def claims_for_create(url):
@@ -81,7 +104,7 @@ def create(package, force=False, url=None):
       for parsed-into-backend packages)
     """
     url = url or package.url
-    assert(claims_for_create(url)), "url = %r" % url
+    assert _DF or (claims_for_create(url)), "url = %r" % url
     if force:
         raise NotImplementedError("This backend can not force creation of "
                                    "existing package")
@@ -112,7 +135,7 @@ def create(package, force=False, url=None):
                 curs.executescript(sql)
                 curs.execute("INSERT INTO Version VALUES (?)",
                              (BACKEND_VERSION,))
-                curs.execute("INSERT INTO Packages VALUES (?,?,?)", 
+                curs.execute("INSERT INTO Packages VALUES (?,?,?)",
                              (_DEFAULT_PKGID, "", "",))
             except sqlite.OperationalError, e:
                 curs.execute("ROLLBACK")
@@ -184,7 +207,7 @@ def bind(package, force=False, url=None):
       for parsed-into-backend packages)
     """
     url = url or package.url
-    assert(claims_for_bind(url)), url
+    assert _DF or (claims_for_bind(url)), url
     if force:
         raise NotImplementedError("This backend can not force access to "
                                    "locked package")
@@ -228,7 +251,7 @@ def _get_connection(path):
         for v in c:
             if v[0] != BACKEND_VERSION: return None
         return cx
-        
+
     except sqlite.DatabaseError:
         return None
     except sqlite.OperationalError:
@@ -251,7 +274,7 @@ def _split_id_ref(id_ref):
         return "", id_ref
     prefix, suffix = id_ref[:colon], id_ref[colon+1:]
     colon = suffix.find(":")
-    assert colon <= 0, "id-path has length > 2"
+    assert _DF or colon <= 0, "id-path has length > 2"
     return prefix, suffix
 
 def _split_uri_ref(uri_ref):
@@ -270,10 +293,10 @@ class _FlushableIterator(object):
        being used. So it is unsafe for _SqliteBackend to return cursors direcly
        because it may hinder further execution of methods using transactions.
 
-       On the other hand, it may be inefficient to flush all cursors into lists 
+       On the other hand, it may be inefficient to flush all cursors into lists
        before returning them. This class provides an efficient solution.
 
-       All cursors (or cursor based iterators) are wrapped info a 
+       All cursors (or cursor based iterators) are wrapped info a
        _FlushableIterator before being returned, and the latter is weakly
        referenced by the backend instance. Whenever a transaction is started,
        all known _FlusableIterators are flushed, i.e. they internally change
@@ -309,7 +332,7 @@ class _SqliteBackend(object):
     =======================
 
     When the parameters *or* return type of methods depend on the element type
-    they handle, distinct methods with the element type in their name are 
+    they handle, distinct methods with the element type in their name are
     defined (e.g. `create_annotation` vs. `create_view`). On the other hand, if
     neither the parameters nor the return value change (type-wise) w.r.t. the
     element type, a single method is defined, with the element type as a
@@ -341,7 +364,7 @@ class _SqliteBackend(object):
 
     element_type
       one of the constants defined in `advene.model.core.element`. It is always
-      used in conjunction with ``package_id`` and ``id`` and *must* be 
+      used in conjunction with ``package_id`` and ``id`` and *must* be
       consistent with them (i.e. be the type of the identified element if it
       exists). The behaviour of the method is *unspecified* if ``element_type``
       is not consistent. As a consequence, the fact that this particular
@@ -411,11 +434,11 @@ class _SqliteBackend(object):
 
         Raise a ModelException if the identifier already exists in the package.
         """
-        assert(isinstance(begin, int) and begin >= 0), begin
-        assert(isinstance(  end, int) and   end >= begin), (begin, end)
+        assert _DF or (isinstance(begin, int) and begin >= 0), begin
+        assert _DF or (isinstance(end, int) and end >= begin), (begin, end)
 
         p,s = _split_id_ref(media) # also assert that media has depth < 2
-        assert p != "" or self.has_element(package_id, s, MEDIA), media
+        assert _DF or p != "" or self.has_element(package_id, s, MEDIA), media
 
         _create_element = self._create_element
         execute = self._curs.execute
@@ -521,7 +544,7 @@ class _SqliteBackend(object):
         except sqlite.Error, e:
             execute("ROLLBACK")
             raise InternalError("error in creating",e)
-        
+
     def create_import(self, package_id, id, url, uri):
         """Create a new import with the given data.
 
@@ -564,7 +587,7 @@ class _SqliteBackend(object):
             "LEFT JOIN Annotations a " \
                    "ON e.package = a.package AND e.id = a.id " \
             "LEFT JOIN Imports i ON e.package = i.package AND e.id = i.id " \
-            "WHERE e.package = ? AND e.id = ?" 
+            "WHERE e.package = ? AND e.id = ?"
         r = self._curs.execute(q, (package_id, id,)).fetchone()
         if r is None:
             return None
@@ -581,7 +604,7 @@ class _SqliteBackend(object):
     def iter_references_with_import(self, package_id, id):
         """Iter over all the elements relying on the identified import.
 
-        Yields 3-tuples where the first item is either an element id-ref 
+        Yields 3-tuples where the first item is either an element id-ref
         or an empty string to identify the package itself and the third item is
         the id-ref of an element imported through the import in question. The
         second item describes the relation between the first and third ones. It
@@ -590,7 +613,7 @@ class _SqliteBackend(object):
             in that case, the imported element is the i'th item of the (list-
             like) element identified by the first item.
           and attribute name with an element as its value
-            in that case, the imported element is the value of the attribute 
+            in that case, the imported element is the value of the attribute
             for the element or package identified by the first item.
           the special string ":tag"
             the imported element is a tag, to which this package identified by
@@ -633,9 +656,9 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form(MEDIA, package_id, id, url,).
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
-        assert( id is None  or   id_alt is None), ( id,  id_alt)
-        assert(url is None  or  url_alt is None), (url, url_alt)
+        assert _DF or not isinstance(package_ids, basestring)
+        assert _DF or ( id is None  or   id_alt is None), ( id,  id_alt)
+        assert _DF or (url is None  or  url_alt is None), (url, url_alt)
 
         q = "SELECT ?, package, id, url FROM Medias " \
             "WHERE package in (" + "?," * len(package_ids) + ")"
@@ -676,11 +699,11 @@ class _SqliteBackend(object):
         ``media`` is the uri-ref of a media ;
         ``media_alt`` is an iterable of uri-refs.
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
-        assert(   id is None  or     id_alt is None)
-        assert(media is None  or  media_alt is None)
-        assert(begin is None  or  begin_min is None and begin_max is None)
-        assert(  end is None  or    end_min is None and   end_max is None)
+        assert _DF or not isinstance(package_ids, basestring)
+        assert _DF or    id is None or    id_alt is None
+        assert _DF or media is None or media_alt is None
+        assert _DF or begin is None or begin_min is None and begin_max is None
+        assert _DF or   end is None or   end_min is None and   end_max is None
 
         if media is not None:
             media_alt = (media,)
@@ -748,7 +771,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (RELATION, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, RELATION, id, id_alt)
@@ -759,7 +782,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (VIEW, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, VIEW, id, id_alt)
@@ -770,7 +793,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (RESOURCE, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, RESOURCE, id, id_alt)
@@ -781,7 +804,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (TAG, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, TAG, id, id_alt)
@@ -792,7 +815,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (LIST, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, LIST, id, id_alt)
@@ -803,7 +826,7 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (QUERY, package_id, id,).
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         selectfrom, where, args = \
             self._make_element_query(package_ids, QUERY, id, id_alt)
@@ -818,10 +841,10 @@ class _SqliteBackend(object):
         """
         Yield tuples of the form (IMPORT, package_id, id, url, uri).
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
-        assert( id is None  or   id_alt is None)
-        assert(url is None  or  url_alt is None)
-        assert(uri is None  or  uri_alt is None)
+        assert _DF or not isinstance(package_ids, basestring)
+        assert _DF or  id is None  or   id_alt is None
+        assert _DF or url is None  or  url_alt is None
+        assert _DF or uri is None  or  uri_alt is None
 
         q = "SELECT ?, package, id, url, uri FROM Imports " \
             "WHERE package in (" + "?," * len(package_ids) + ")"
@@ -860,7 +883,7 @@ class _SqliteBackend(object):
     # element updating
 
     def update_media(self, package_id, id, url):
-        assert self.has_element(package_id, id, MEDIA)
+        assert _DF or self.has_element(package_id, id, MEDIA)
         execute = self._curs.execute
         try:
             execute("UPDATE Medias SET url = ? "
@@ -873,12 +896,12 @@ class _SqliteBackend(object):
         """
         ``media`` is the id-ref of an own or directly imported media.
         """
-        assert self.has_element(package_id, id, ANNOTATION)
-        assert(isinstance(begin, int) and begin >= 0), begin
-        assert(isinstance(  end, int) and   end >= begin), (begin, end)
+        assert _DF or self.has_element(package_id, id, ANNOTATION)
+        assert _DF or isinstance(begin, int) and begin >= 0, begin
+        assert _DF or isinstance(  end, int) and   end >= begin, (begin, end)
 
         p,s = _split_id_ref(media) # also assert that media has depth < 2
-        assert p != "" or self.has_element(package_id, s, MEDIA), media
+        assert _DF or p != "" or self.has_element(package_id, s, MEDIA), media
 
         execute = self._curs.execute
         try:
@@ -891,7 +914,7 @@ class _SqliteBackend(object):
             raise InternalError("could not update", e)
 
     def update_import(self, package_id, id, url, uri):
-        assert self.has_element(package_id, id, IMPORT)
+        assert _DF or self.has_element(package_id, id, IMPORT)
         execute = self._curs.execute
         try:
             execute("UPDATE Imports SET url = ?, uri = ? "
@@ -913,8 +936,8 @@ class _SqliteBackend(object):
         also use `rename_references`. This however does update the id-ref of
         imported elements if the renamed element is an import.
         """
-        assert self.has_element(package_id, old_id, element_type)
-        assert not self.has_element(package_id, new_id)
+        assert _DF or self.has_element(package_id, old_id, element_type)
+        assert _DF or not self.has_element(package_id, new_id)
 
         # NB: all the queries after the first one (and hence the transaction)
         # are only required because sqlite does not implement foreign keys;
@@ -930,7 +953,7 @@ class _SqliteBackend(object):
                 execute("UPDATE Contents SET element = ? " \
                          "WHERE package = ? AND element = ?",
                         args)
-            
+
             if element_type == MEDIA:
                 execute("UPDATE Medias SET id = ? "\
                          "WHERE package = ? AND id = ?",
@@ -980,7 +1003,7 @@ class _SqliteBackend(object):
         Apply the change of id of an element (formerly known as old_uriref)
         in all references to that element in package_ids.
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
         element_u, element_i = _split_uri_ref(old_uriref)
         args = [new_id,] + list(package_ids) \
              + [element_i, element_u, element_u,]
@@ -1044,10 +1067,10 @@ class _SqliteBackend(object):
 
         NB: This does not delete references to that element, *even* in the same
         package. The appropriate methods (`iter_annotations`,
-        `iter_relations_with_member`, etc.) must be used to detect and delete 
+        `iter_relations_with_member`, etc.) must be used to detect and delete
         those references prior to deletion.
         """
-        assert self.has_element(package_id, id, element_type)
+        assert _DF or self.has_element(package_id, id, element_type)
 
         # NB: all the queries after the first one (and hence the transaction)
         # are only required because sqlite does not implement foreign keys;
@@ -1062,7 +1085,7 @@ class _SqliteBackend(object):
                 execute("DELETE FROM Contents " \
                          "WHERE package = ? AND element = ?",
                         args)
-            
+
             if element_type == MEDIA:
                 execute("DELETE FROM Medias WHERE package = ? AND id = ?",
                         args)
@@ -1101,11 +1124,11 @@ class _SqliteBackend(object):
         ``schema`` is the id-ref of an own or directly imported resource,
         or an empty string to specify no schema (not None).
         """
-        assert self.has_element(package_id, id, element_type)
+        assert _DF or self.has_element(package_id, id, element_type)
         if schema:
             p,s = _split_id_ref(schema) # also assert that schema has depth < 2
-            assert p == "" or self.has_element(package_id,p,IMPORT), p
-            assert p != "" or self.has_element(package_id,s,RESOURCE), schema
+            assert _DF or p == "" or self.has_element(package_id,p,IMPORT), p
+            assert _DF or p != "" or self.has_element(package_id,s,RESOURCE), s
         else:
             p,s = "",""
 
@@ -1121,12 +1144,12 @@ class _SqliteBackend(object):
 
     def iter_contents_with_schema(self, package_ids, schema):
         """
-        Return tuples of the form (package_id, id) of all the 
+        Return tuples of the form (package_id, id) of all the
         elements with a content having the given schema.
 
         @param schema the uri-ref of a resource
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         schema_u, schema_i = _split_uri_ref(schema)
 
@@ -1149,7 +1172,7 @@ class _SqliteBackend(object):
         If package metadata is targeted, id should be an empty string (in
         that case, element_type will be ignored).
         """
-        assert id == "" or self.has_element(package_id, id, element_type)
+        assert _DF or id == "" or self.has_element(package_id, id, element_type)
         q = """SELECT key, value FROM Meta
                WHERE package = ? AND element = ? ORDER BY key"""
         r = ( (d[0], d[1])
@@ -1162,7 +1185,7 @@ class _SqliteBackend(object):
         If package metadata is targeted, id should be an empty string (in
         that case, element_type will be ignored).
         """
-        assert id == "" or self.has_element(package_id, id, element_type)
+        assert _DF or id == "" or self.has_element(package_id, id, element_type)
         q = """SELECT value FROM Meta
                WHERE package = ? AND element = ? AND KEY = ?"""
         d = self._curs.execute(q, (package_id, id, key,)).fetchone()
@@ -1177,7 +1200,7 @@ class _SqliteBackend(object):
         If package metadata is targeted, id should be an empty string (in
         that case, element_type will be ignored).
         """
-        assert id == "" or self.has_element(package_id, id, element_type)
+        assert _DF or id == "" or self.has_element(package_id, id, element_type)
         q = """SELECT value FROM Meta
                WHERE package = ? AND element = ? and key = ?"""
         c = self._curs.execute(q, (package_id, id, key))
@@ -1218,12 +1241,13 @@ class _SqliteBackend(object):
         NB: the total number of members, n, if known, may be provided, as an
         optimization.
         """
-        assert self.has_element(package_id, id, RELATION)
+        assert _DF or self.has_element(package_id, id, RELATION)
         if n < 0:
             n = self.count_members(package_id, id)
-        assert -1 <= pos <= n, pos
+        assert _DF or -1 <= pos <= n, pos
         p,s = _split_id_ref(member) # also assert that member has depth < 2
-        assert p != "" or self.has_element(package_id, s, ANNOTATION), member
+        assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
+        assert _DF or p != "" or self.has_element(package_id, s, ANNOTATION), s
         if pos == -1:
             pos = n
         execute = self._curs.execute
@@ -1248,11 +1272,12 @@ class _SqliteBackend(object):
         Remobv the member at the given position in the identified relation.
         ``member`` is the id-ref of an own or directly imported member.
         """
-        assert self.has_element(package_id, id, RELATION)
-        assert 0 <= pos < self.count_members(package_id, id), pos
+        assert _DF or self.has_element(package_id, id, RELATION)
+        assert _DF or 0 <= pos < self.count_members(package_id, id), pos
 
         p,s = _split_id_ref(member) # also assert that member has depth < 2
-        assert p != "" or self.has_element(package_id, s, ANNOTATION), member
+        assert _DF or p == "" or self.has_element(package_id, p, IMPORT), p
+        assert _DF or p != "" or self.has_element(package_id, s, ANNOTATION), s
 
         execute = self._curs.execute
         try:
@@ -1280,10 +1305,10 @@ class _SqliteBackend(object):
         NB: the total number of members, n, if known, may be provided, as an
         optimization.
         """
-        assert self.has_element(package_id, id, RELATION)
+        assert _DF or self.has_element(package_id, id, RELATION)
         if __debug__:
             n = self.count_members(package_id, id)
-            assert -n <= pos < n, pos
+            assert _DF or -n <= pos < n, pos
 
         if pos < 0:
             if n < 0:
@@ -1299,7 +1324,7 @@ class _SqliteBackend(object):
         """
         Iter over all the members of the identified relation.
         """
-        assert self.has_element(package_id, id, RELATION)
+        assert _DF or self.has_element(package_id, id, RELATION)
         q = "SELECT join_id_ref(member_p,member_i) AS member " \
             "FROM RelationMembers " \
             "WHERE package = ? AND relation = ? ORDER BY ord"
@@ -1310,8 +1335,8 @@ class _SqliteBackend(object):
         """
         Remove the member at the given position in the identified relation.
         """
-        assert self.has_element(package_id, id, RELATION)
-        assert 0 <= pos < self.count_members(package_id, id), pos
+        assert _DF or self.has_element(package_id, id, RELATION)
+        assert _DF or 0 <= pos < self.count_members(package_id, id), pos
 
         execute = self._curs.execute
         self._begin_transaction()
@@ -1329,12 +1354,12 @@ class _SqliteBackend(object):
 
     def iter_relations_with_member(self, package_ids, member, pos=None):
         """
-        Return tuples of the form (RELATION, package_id, id) of all the 
+        Return tuples of the form (RELATION, package_id, id) of all the
         relations having the given member, at the given position if given.
 
         @param member the uri-ref of an annotation
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         member_u, member_i = _split_uri_ref(member)
 
@@ -1370,12 +1395,12 @@ class _SqliteBackend(object):
         NB: the total number of members, n, if known, may be provided, as an
         optimization.
         """
-        assert self.has_element(package_id, id, LIST)
+        assert _DF or self.has_element(package_id, id, LIST)
         if n < 0:
             n = self.count_items(package_id, id)
-        assert -1 <= pos <= n, pos
+        assert _DF or -1 <= pos <= n, pos
         p,s = _split_id_ref(item) # also assert that item has depth < 2
-        assert p != "" or self.has_element(package_id, s), item
+        assert _DF or p != "" or self.has_element(package_id, s), item
         if pos == -1:
             pos = n
         execute = self._curs.execute
@@ -1400,11 +1425,11 @@ class _SqliteBackend(object):
         Remobv the item at the given position in the identified list.
         ``item`` is the id-ref of an own or directly imported item.
         """
-        assert self.has_element(package_id, id, LIST)
-        assert 0 <= pos < self.count_items(package_id, id), pos
+        assert _DF or self.has_element(package_id, id, LIST)
+        assert _DF or 0 <= pos < self.count_items(package_id, id), pos
 
         p,s = _split_id_ref(item) # also assert that item has depth < 2
-        assert p != "" or self.has_element(package_id, s), item
+        assert _DF or p != "" or self.has_element(package_id, s), item
 
         execute = self._curs.execute
         try:
@@ -1432,10 +1457,10 @@ class _SqliteBackend(object):
         NB: the total number of members, n, if known, may be provided, as an
         optimization.
         """
-        assert self.has_element(package_id, id, LIST)
+        assert _DF or self.has_element(package_id, id, LIST)
         if __debug__:
             n = self.count_items(package_id, id)
-            assert -n <= pos < n, pos
+            assert _DF or -n <= pos < n, pos
 
         if pos < 0:
             if n < 0:
@@ -1451,7 +1476,7 @@ class _SqliteBackend(object):
         """
         Iter over all the items of the identified list.
         """
-        assert self.has_element(package_id, id, LIST)
+        assert _DF or self.has_element(package_id, id, LIST)
         q = "SELECT join_id_ref(item_p,item_i) AS item " \
             "FROM ListItems " \
             "WHERE package = ? AND list = ? ORDER BY ord"
@@ -1462,8 +1487,8 @@ class _SqliteBackend(object):
         """
         Remove the item at the given position in the identified list.
         """
-        assert self.has_element(package_id, id, LIST)
-        assert 0 <= pos < self.count_items(package_id, id), pos
+        assert _DF or self.has_element(package_id, id, LIST)
+        assert _DF or 0 <= pos < self.count_items(package_id, id), pos
 
         execute = self._curs.execute
         self._begin_transaction()
@@ -1482,12 +1507,12 @@ class _SqliteBackend(object):
 
     def iter_lists_with_item(self, package_ids, item, pos=None):
         """
-        Return tuples of the form (LIST, package_id, id) of all the 
+        Return tuples of the form (LIST, package_id, id) of all the
         lists having the given item, at the given position if given.
 
         @param item the uri-ref of an element
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         item_u, item_i = _split_uri_ref(item)
 
@@ -1548,7 +1573,7 @@ class _SqliteBackend(object):
 
         @param element the uri-ref of an element
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         element_u, element_i = _split_uri_ref(element)
         q = "SELECT t.package, join_id_ref(tag_p, tag_i) " \
@@ -1569,7 +1594,7 @@ class _SqliteBackend(object):
 
         @param tag the uri-ref of a tag
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         tag_u, tag_i = _split_uri_ref(tag)
         q = "SELECT t.package, join_id_ref(element_p, element_i) " \
@@ -1591,7 +1616,7 @@ class _SqliteBackend(object):
         @param element the uri-ref of an element
         @param tag the uri-ref of a tag
         """
-        assert not isinstance(package_ids, basestring), "list if ids expected"
+        assert _DF or not isinstance(package_ids, basestring)
 
         element_u, element_i = _split_uri_ref(element)
         tag_u, tag_i = _split_uri_ref(tag)
@@ -1683,7 +1708,7 @@ class _SqliteBackend(object):
         for i in self._iterators.iterkeys():
             i.flush()
         self._curs.execute("BEGIN %s" % mode)
-        
+
     def _create_element(self, execute, package_id, id, element_type):
         """Perform controls and insertions common to all elements.
 
@@ -1702,10 +1727,10 @@ class _SqliteBackend(object):
                               id=None, id_alt=None):
         """
         Return the selectfrom part of the query, the where part of the query,
-        and the argument list, of a query returning all the elements 
+        and the argument list, of a query returning all the elements
         matching the parameters.
         """
-        assert(id is None or id_alt is None)
+        assert _DF or id is None or id_alt is None
 
         s = "SELECT typ, package, id FROM Elements"
         w = " WHERE package in (" + "?," * len(package_ids) + ") "\

@@ -4,6 +4,7 @@ import gc
 import sys
 from weakref import ref
 
+import advene.model.backends.sqlite as backend_sqlite
 import advene.model.core.dirty as dirty
 
 ## uncomment the following to disable differed cleaning
@@ -13,6 +14,8 @@ from advene.model.core.package import Package
 
 uri = "sqlite:%s" % (join (split (__file__)[0], "test1.db"))
 #uri = "sqlite::memory:"
+
+backend_sqlite._set_module_debug(True)
 
 _indent = []
 def trace_wrapper (f):
@@ -53,7 +56,7 @@ if __name__ == "__main__":
     Package.make_metadata_property ("dc#Creator", "dc_creator")
 
     p = Package(uri, create=True)
-    #trace_wrap_all (p._backend)
+    trace_wrap_all (p._backend)
 
     p.dc_creator = "pchampin"
     m1 = p.create_media("m1", "http://champin.net/stream.avi")
