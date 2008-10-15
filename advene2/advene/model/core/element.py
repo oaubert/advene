@@ -2,11 +2,12 @@
 I define the common super-class of all package element classes.
 """
 
-from advene.model.core.meta    import WithMetaMixin
-from advene.model.events       import ElementEventDelegate, WithEventsMixin
-from advene.model.tales        import tales_context_function
+from advene.model.core.meta   import WithMetaMixin
+from advene.model.events      import ElementEventDelegate, WithEventsMixin
+from advene.model.tales       import tales_context_function
 from advene.util.alias        import alias
 from advene.util.autoproperty import autoproperty
+from advene.util.session      import session
 
 # the following constants must be used as values of a property ADVENE_TYPE
 # in all subclasses of PackageElement
@@ -144,8 +145,11 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
     # tag management
 
-    def iter_my_tags(self, package, inherited=True):
+    def iter_my_tags(self, package=None, inherited=True):
         """Iter over the tags associated with this element in ``package``.
+
+        If ``package`` is not set, the session variable ``package`` is used
+        instead. If the latter is not set, a TypeError is raised.
 
         If ``inherited`` is set to False, the tags associated by imported
         packages of ``package`` will not be yielded.
@@ -156,9 +160,12 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         """
         return self._iter_my_tags_or_tag_ids(package, inherited, True)
 
-    def iter_my_tag_ids(self, package, inherited=True, _get=0):
+    def iter_my_tag_ids(self, package=None, inherited=True, _get=0):
         """Iter over the id-refs of the tags associated with this element in
         ``package``.
+
+        If ``package`` is not set, the session variable ``package`` is used
+        instead. If the latter is not set, a TypeError is raised.
 
         If ``inherited`` is set to False, the tags associated by imported
         packages of ``package`` will not be yielded.
@@ -167,6 +174,10 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         """
         # this actually also implements iter_my_tags
         # see _iter_my_tags_or_tag_ids below
+        if package is None:
+            package = session.package
+        if package is None:
+            raise TypeError("no package set in session, must be specified")
         u = self._get_uriref()
         if not inherited:
             pids = (package._id,)
@@ -194,28 +205,41 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         # _iter_my_tags_or_tag_id.
         # However, for efficiency reasons, that private method and
         # iter_my_tag_ids have been merged into one. Both names are necessary
-        # necessary because the "public" iter_my_tag_ids may be overridden
-        # while the "private" method should not. Hence that alias.
+        # because the "public" iter_my_tag_ids may be overridden while the
+        # "private" method should not. Hence that alias.
         pass
 
-    def iter_taggers(self, tag, package):
+    def iter_taggers(self, tag, package=None):
         """Iter over all the packages associating this element to ``tag``.
 
-        ``package`` is the top-level package.
+        ``package`` is the top-level package. If not provided, the ``package``
+        session variable is used. If the latter is unset, a TypeError is
+        raised.
         """
+        if package is None:
+            package = session.package
+        if package is None:
+            raise TypeError("no package set in session, must be specified")
         eu = self._get_uriref()
         tu = tag._get_uriref()
         for be, pdict in package._backends_dict.iteritems():
             for pid in be.iter_taggers(pdict, eu, tu):
                 yield pdict[pid]
 
-    def has_tag(self, tag, package, inherited=True):
+    def has_tag(self, tag, package=None, inherited=True):
         """Is this element associated to ``tag`` by ``package``.
+
+        If ``package`` is not provided, the ``package`` session variable is
+        used. If the latter is unset, a TypeError is raised.
 
         If ``inherited`` is set to False, only return True if ``package``
         itself associates this element to ``tag``; else return True also if
         the association is inherited from an imported package.
         """
+        if package is None:
+            package = session.package
+        if package is None:
+            raise TypeError("no package set in session, must be specified")
         if not inherited:
             eu = self._get_uriref()
             tu = tag._get_uriref()

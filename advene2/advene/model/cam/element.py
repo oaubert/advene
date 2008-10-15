@@ -25,7 +25,7 @@ class CamElement(PackageElement):
                 raise SemanticError("cam:system-type can not be changed")
         return super(CamElement, self).del_meta(key)
 
-    def iter_my_tags(self, package, inherited=True, _guard=True):
+    def iter_my_tags(self, package=None, inherited=True, _guard=True):
         """
         This method is inherited from core.Package but is unsafe on
         cam.Package. Use instead `iter_my_user_tags`.
@@ -33,12 +33,12 @@ class CamElement(PackageElement):
         if _guard: warn("use iter_my_user_tags instead", UnsafeUseWarning, 2)
         return super(CamElement, self).iter_my_tags(package, inherited)
 
-    def iter_my_user_tags(self, package, inherited=True):
+    def iter_my_user_tags(self, package=None, inherited=True):
         for t in self.iter_my_tags(package, inherited, _guard=False):
             if t.get_meta(CAMSYS_TYPE, None) is None:
                 yield t
 
-    def iter_my_tag_ids(self, package, inherited=True, _guard=True):
+    def iter_my_tag_ids(self, package=None, inherited=True, _guard=True):
         """
         This method is inherited from core.Package but is unsafe on
         cam.Package. Use instead `iter_my_user_tag_ids`.
@@ -46,7 +46,7 @@ class CamElement(PackageElement):
         if _guard: warn("use iter_my_user_tag_ids instead", UnsafeUseWarning, 2)
         return super(CamElement, self).iter_my_tag_ids(package, inherited)
 
-    def iter_my_user_tag_ids(self, package, inherited=True, _guard=True):
+    def iter_my_user_tag_ids(self, package=None, inherited=True, _guard=True):
         """
         FIXME: missing docstring
         """

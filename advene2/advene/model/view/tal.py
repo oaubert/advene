@@ -54,8 +54,7 @@ def apply_to(view, obj, refpkg=None):
     # (or rely on f.headers['date'], but that would require to hack content.py
     #  to make that field *always* present - might be a good idea...)
 
-    c = AdveneContext()
-    c.addGlobal("here", obj)
+    c = AdveneContext(here=obj)
     c.addGlobal("view", view)
     if refpkg is None:
         if hasattr(obj, "ADVENE_TYPE"):

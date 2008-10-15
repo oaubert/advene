@@ -13,6 +13,7 @@ from advene.model.core.element import RELATION
 from advene.model.core.package import Package, UnreachableImportError, \
                                       NoSuchElementError
 from advene.model.exceptions import ModelError
+from advene.util.session import session
 
 _set_module_debug(True) # enable all asserts in backend_sqlite
 
@@ -606,6 +607,26 @@ class TestElements(TestCase):
 
         L2 = p.create_list("l2", items=a)
         self.assertEquals(a, list(L2))
+
+
+class TestTagAsGroup(TestCase):
+    def setUp(self):
+        p = Package("file:/tmp/p", create=True)
+        self.m1 = p.create_media("m1", "http://example.com/m1.avi")
+        self.t1 = p.create_tag("t1")
+        p.associate_tag(self.m1, self.t1)
+        session.package = p
+
+    def tearDown(self):
+        session._clean()
+
+    def testError(self):
+        del session.package
+        self.assertRaises(TypeError, list, self.t1)
+        self.assertRaises(TypeError, list, self.t1.medias)
+
+    def testWorking(self):
+        self.assertEquals(list(self.t1), [self.m1,])
 
 
 class TestUnreachable(TestCase):

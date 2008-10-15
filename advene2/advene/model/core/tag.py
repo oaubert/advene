@@ -1,17 +1,30 @@
 """
 I define the class Tag.
+
+Note that Tag inherits GroupMixin, but can only be considered a group in the
+context of a package in which tag-element associations are considered. That
+implicit context-package is given by the ``package`` session variable in
+`advene.util.session`. If that session variable is not set, using a tag as
+a group will raise a TypeError.
 """
 
 from advene.model.core.element import PackageElement, TAG
+from advene.model.core.group import GroupMixin
+from advene.util.alias import alias
+from advene.util.session import session
 
-class Tag(PackageElement):
+class Tag(PackageElement, GroupMixin):
 
     ADVENE_TYPE = TAG 
 
     def __init__(self, owner, id):
         PackageElement.__init__(self, owner, id)
 
-    def iter_elements(self, package, inherited=True):
+    def __iter__(self):
+        # required by GroupMixin
+        return self.iter_elements()
+
+    def iter_elements(self, package=None, inherited=True):
         """Iter over the elements associated with this tag in ``package``.
 
         If ``inherited`` is set to False, the elements associated by imported
@@ -21,11 +34,14 @@ class Tag(PackageElement):
 
         See also `iter_element_ids`.
         """
-        return self.iter_element_ids(package, inherited, True)
+        return self._iter_elements_or_element_ids(package, inherited, True)
 
-    def iter_element_ids(self, package, inherited=True, _get=False):
+    def iter_element_ids(self, package=None, inherited=True, _get=False):
         """Iter over the id-refs of the elements associated with this tag in
         ``package``.
+
+        If ``package`` is not provided, the ``package`` session variable is
+        used. If the latter is unset, a TypeError is raised.
 
         If ``inherited`` is set to False, the elements associated by imported
         packages of ``package`` will not be yielded.
@@ -33,6 +49,10 @@ class Tag(PackageElement):
         See also `iter_elements`.
         """
         # this actually also implements iter_elements
+        if package is None:
+            package = session.package
+        if package is None:
+            raise TypeError("no package set in session, must be specified")
         u = self._get_uriref()
         if not inherited:
             pids = (package._id,)
@@ -53,8 +73,22 @@ class Tag(PackageElement):
                         y = package.make_id_for(p, eid)
                     yield y
 
-    def has_element(self, element, package, inherited=True):
+    @alias(iter_element_ids)
+    def _iter_elements_or_element_ids(self):
+        # iter_element_ids and iter_elements have a common implementation.
+        # Normally, it should be located in a "private" method named
+        # _iter_elements_or_element_ids.
+        # However, for efficiency reasons, that private method and
+        # iter_element_ids have been merged into one. Both names are necessary
+        # because the "public" iter_my_tag_ids may be overridden while the
+        # "private" method should not. Hence that alias.
+        pass
+
+    def has_element(self, element, package=None, inherited=True):
         """Is this tag associated to ``element`` by ``package``.
+
+        If ``package`` is not provided, the ``package`` session variable is
+        used. If the latter is unset, a TypeError is raised.
 
         If ``inherited`` is set to False, only returns True if ``package`` 
         itself associates this tag to ``element``; else returns True also if

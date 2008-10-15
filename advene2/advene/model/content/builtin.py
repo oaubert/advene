@@ -29,8 +29,9 @@ def parse_content(obj):
         if '=' in l:
             key, val = l.split("=", 1)
             key = key.strip()
+            val = val.strip()
             r[key] = urllib.unquote_plus(val)
         else:
-            r['_error']=l 
+            r['_error']=l
             print "Syntax error in content: >%s<" % l.encode('utf8')
     return r
