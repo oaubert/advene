@@ -101,8 +101,12 @@ class Annotation(PackageElement, WithContentMixin):
         return getattr(other, "ADVENE_TYPE", None) is ANNOTATION \
            and self._cmp(other) >= 0
 
-    def __contains__(self, an_int):
-        return self._begin <= an_int <= self._end
+    def __contains__(self, other):
+        if type(self) == type(other):
+            return self.begin <= other.begin and other.end <= self.end
+        else:
+            o = long(other)
+            return self._begin <= other <= self._end
 
     def get_media(self, default=None):
         """Return the media associated to this annotation.
