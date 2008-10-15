@@ -500,7 +500,7 @@ class AdveneController(object):
             source=c.evaluate(source)
 
         # Replace standard \n/\t escape, because \ are parsed by shlex
-        words=words.replace('\\n', '%n').replace('\\t', '%t')
+        searched=searched.replace('\\n', '%n').replace('\\t', '%t')
         try:
             words=[ unicode(w, 'utf8').replace('%n', "\n").replace('%t', "\t") for w in shlex.split(searched.encode('utf8')) ]
         except ValueError:
