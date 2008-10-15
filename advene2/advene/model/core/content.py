@@ -59,7 +59,7 @@ class WithContentMixin:
 
     According to CODING_STYLE, a mixin class should not require any
     initialization. However, whenever an element is instantiated from backend
-    data, its content information are available, so it would be a waste of
+    data, its content information is available, so it would be a waste of
     CPU time (and possibly network traffic) to reload those info from the
     backend from the sake of purity.
 
@@ -89,11 +89,16 @@ class WithContentMixin:
 
     def _instantiate_content(self, mimetype, model, url):
         """
+        This is method is for optimization only: it is not strictly required
+        (though recommended) to call it at instantiate time (see class
+        docstring).
+
         No integrity constraint is checked: the backend is assumed to be sane.
         """
         self.__mimetype = mimetype
         self.__model_id = model
         self.__url = url
+        self._update_content_handler()
 
     def _check_content(self, mimetype=None, model_id=None, url=None):
         """
@@ -149,6 +154,7 @@ class WithContentMixin:
             self.__handler = hmax
         else:
             self.__handler = None
+
 
     def _load_content_info(self):
         """Load the content info (mimetype, model, url)."""
