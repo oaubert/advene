@@ -425,7 +425,7 @@ class AdveneGUI(Connect):
                 e.refresh()
             # Update the type fieldnames
             if annotation.content.mimetype.endswith('/x-advene-structured'):
-                annotation.type.meta[config.data.transientns+'fieldnames']=helper.common_fieldnames([ annotation ])
+                annotation.owner._fieldnames[annotation.type.id].update(helper.common_fieldnames([ annotation ]))
 
         # Refresh the edit popup for the associated relations
         for e in [ e for e in self.edit_popups if e.element in annotation.relations ]:
