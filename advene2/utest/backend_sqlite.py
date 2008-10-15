@@ -142,7 +142,7 @@ class TestCreateBackend(TestCase):
         b,p = create(P(IN_MEMORY_URL))
         self.assert_(b._path, ":memory:")
         self.assertEqual(IN_MEMORY_URL, b.get_bound_url(p))
-        b.close(p)
+        b.delete(p)
 
     def test_create_with_other_url(self):
         b,p = create(P("http://example.com/a_package"), url=IN_MEMORY_URL)
@@ -269,8 +269,8 @@ class TestPackageHandling(TestCase):
                 be.update_url(pid, "file:/tmp/bar")
                 self.assertEqual("file:/tmp/bar", be.get_url(pid))
         finally:
-            be.close(pid1)
-            be.close(pid2)
+            be.delete(pid1)
+            be.delete(pid2)
 
     def test_uri(self):
         be, pid1 = create(P(IN_MEMORY_URL))
@@ -284,8 +284,8 @@ class TestPackageHandling(TestCase):
                 be.update_uri(pid, "")
                 self.assertEqual("", be.get_uri(pid))
         finally:
-            be.close(pid1)
-            be.close(pid2)
+            be.delete(pid1)
+            be.delete(pid2)
 
     def test_close(self):
         be, pid2 = create(P(self.url2))
@@ -351,7 +351,7 @@ class TestCreateElement(TestCase):
         self.be, self.pid = create(P(self.url2))
 
     def tearDown(self):
-        self.be.close(self.pid)
+        self.be.delete(self.pid)
         del P._L[:] # not required, but saves memory
 
     def test_create_media(self):
@@ -482,6 +482,7 @@ class TestHandleElements(TestCase):
             content = ("text/plain", "", "")
             self.url1 = "http://example.com/p1"
             self.url2 = "http://example.com/p2"
+            # TODO: problem because bootstrap package keeps sqlite::memory: alive... force another in-memory backend to be created.
             self.be, self.pid1 = create(P(self.url1), url=IN_MEMORY_URL)
             _,       self.pid2 = create(P(self.url2), url=IN_MEMORY_URL+";foo")
 
@@ -569,12 +570,12 @@ class TestHandleElements(TestCase):
             self.be.create_query(*self.q3)
             self.be.update_uri(self.pid2, self.i1_uri)
         except:
-            self.tearDown()
-            raise
+            try: self.tearDown()
+            finally: raise
 
     def tearDown(self):
-        self.be.close(self.pid1)
-        self.be.close(self.pid2)
+        self.be.delete(self.pid1)
+        self.be.delete(self.pid2)
         del P._L[:] # not required, but saves memory
 
     def test_has_element(self):
@@ -819,6 +820,57 @@ class TestHandleElements(TestCase):
         ref = frozenset([self.t1, self.t3])
         self.assertEqual(ref,
             get((self.pid1, self.pid2,), id=("t1","t3"),))
+
+        self.be.set_meta(self.pid1, "t1", TAG, "foo", "hello", 0)
+        self.be.set_meta(self.pid1, "t2", TAG, "foo", "world", 0)
+        self.be.set_meta(self.pid1, "t1", TAG, "bar", "i1:t3", 1)
+        self.be.set_meta(self.pid2, "t3", TAG, "bar", "t3", 1)
+        t3u = "%s#t3" % self.url2
+
+        ref = frozenset([self.t3])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("foo", None, 1,)]))
+
+        ref = frozenset([self.t1])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("foo", "hello", 0,)]))
+
+        ref = frozenset([])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("foo", t3u, 1,)]))
+
+        ref = frozenset([self.t2])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("bar", None, 0,)]))
+
+        ref = frozenset([])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("bar", "hello", 0,)]))
+
+        ref = frozenset([self.t1, self.t3])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("bar", t3u, 1,)]))
+
+        ref = frozenset([self.t1])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("foo", "hello", 0),
+                                         ("bar", t3u, 1,)]))
+
+        ref = frozenset([])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("foo", "world", 0),
+                                         ("bar", t3u, 1,)]))
+
+        ref = frozenset([self.t1])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="t1",
+                                   meta=[("foo", "hello", 0),
+                                         ("bar", t3u, 1,)]))
+
+        ref = frozenset([])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="t1",
+                                   meta=[("foo", "world", 0),
+                                         ("bar", t3u, 1,)]))
+
 
     def test_iter_lists(self):
 
@@ -1103,6 +1155,56 @@ class TestHandleElements(TestCase):
         ref = len([self.t1, self.t3])
         self.assertEqual(ref,
             get((self.pid1, self.pid2,), id=("t1","t3"),))
+
+        self.be.set_meta(self.pid1, "t1", TAG, "foo", "hello", 0)
+        self.be.set_meta(self.pid1, "t2", TAG, "foo", "world", 0)
+        self.be.set_meta(self.pid1, "t1", TAG, "bar", "i1:t3", 1)
+        self.be.set_meta(self.pid2, "t3", TAG, "bar", "t3", 1)
+        t3u = "%s#t3" % self.url2
+
+        ref = len([self.t3])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("foo", None, 1,)]))
+
+        ref = len([self.t1])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("foo", "hello", 0,)]))
+
+        ref = len([])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("foo", t3u, 1,)]))
+
+        ref = len([self.t2])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("bar", None, 0,)]))
+
+        ref = len([])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("bar", "hello", 0,)]))
+
+        ref = len([self.t1, self.t3])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("bar", t3u, 1,)]))
+
+        ref = len([self.t1])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("foo", "hello", 0),
+                                         ("bar", t3u, 1,)]))
+
+        ref = len([])
+        self.assertEqual(ref, get((self.pid1, self.pid2,),
+                                   meta=[("foo", "world", 0),
+                                         ("bar", t3u, 1,)]))
+
+        ref = len([self.t1])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="t1",
+                                   meta=[("foo", "hello", 0),
+                                         ("bar", t3u, 1,)]))
+
+        ref = len([])
+        self.assertEqual(ref, get((self.pid1, self.pid2,), id="t1",
+                                   meta=[("foo", "world", 0),
+                                         ("bar", t3u, 1,)]))
 
     def test_count_lists(self):
 
@@ -1858,7 +1960,7 @@ class TestDeleteElement(TestCase):
         self.be, self.pid = create(P(self.url2))
 
     def tearDown(self):
-        self.be.close(self.pid)
+        self.be.delete(self.pid)
         del P._L[:] # not required, but saves memory
 
     def test_delete_media(self):
@@ -2074,6 +2176,9 @@ class TestRobustIterations(TestCase):
                         if args2 is None: continue # special case for close
                         try:
                             getattr(b, n2)(*args2)
+                        except AssertionError:
+                            print "===", n2, args2
+                            raise
                         except InternalError, e:
                             self.fail("%s during %s raise:\n %s" % (n2, n, e))
                         except sqlite.Error, e:
@@ -2152,8 +2257,8 @@ class TestRetrieveDataWithSameId(TestCase):
 
     def tearDown(self):
         if hasattr(self, "be") and self.be:
-            self.be.close(self.pid1)
-            self.be.close(self.pid2)
+            self.be.delete(self.pid1)
+            self.be.delete(self.pid2)
         del P._L[:] # not required, but saves memory
 
     def test_has_element(self):

@@ -101,10 +101,10 @@ class AllGroup(GroupMixin, object):
             for i in be.iter_tags(pdict):
                 yield pdict[i[1]].get_element(i)
 
-    def iter_imports(self):
+    def iter_imports(self, url=None, uri=None):
         o = self._owner
         for be, pdict in o._backends_dict.items():
-            for i in be.iter_imports(pdict):
+            for i in be.iter_imports(pdict, None, url, uri):
                 yield pdict[i[1]].get_element(i)
 
     def iter_queries(self):
@@ -177,8 +177,8 @@ class AllGroup(GroupMixin, object):
         return sum( be.query_count(pdict)
                     for be, pdict in o._backends_dict.items() )
 
-    def import_count(self):
+    def import_count(self, url=None, uri=None):
         o = self._owner
-        return sum( be.import_count(pdict)
+        return sum( be.import_count(pdict, url, uri)
                     for be, pdict in o._backends_dict.items() )
 

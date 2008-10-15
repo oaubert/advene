@@ -243,11 +243,15 @@ class WithMetaMixin:
         return _MetaDict(self)
 
     @classmethod
-    def make_metadata_property(cls, key, alias=None):
+    def make_metadata_property(cls, key, alias=None, default=_RAISE):
         """Attempts to create a python property in cls mapping to metadata key.
 
         If alias is None, key is considered as a URI, and the last part of
         that URI (after # or /) is used.
+
+        If default is not provided, an exception is raised whenever the
+        property is accessed when it is not set. Else, the default value will
+        be returned is that case.
 
         Raises an AttributeError if cls already has a member with that name.
 
@@ -261,13 +265,13 @@ class WithMetaMixin:
             raise AttributeError(alias)
 
         def getter(obj):
-            return obj.get_meta(key)
+            return obj.get_meta(key, default)
 
         def setter(obj, val):
             return obj.set_meta(key, val)
 
         def deller(obj):
-            return self.del_meta(key)
+            return obj.del_meta(key)
 
         setattr(cls, alias, property(getter, setter, deller))
 

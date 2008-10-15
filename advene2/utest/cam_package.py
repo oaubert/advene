@@ -6,7 +6,7 @@ from unittest import TestCase, main
 from urllib import pathname2url
 
 from advene.model.consts import DC_NS_PREFIX
-from advene.model.core.package import Package
+from advene.model.cam.package import Package
 from advene.model.backends.sqlite import _set_module_debug
 
 _set_module_debug(True) # enable all asserts in backend_sqlite
@@ -33,11 +33,13 @@ class TestImports(TestCase):
         self.p2 = Package(self.url+";p2", create=True)
         self.p3 = Package(self.url+";p3", create=True)
         self.p4 = Package(self.url+";p4", create=True)
+        cam = self.p1.get("cam").package
+        camdep = (cam._backend, cam._id)
 
-        self.d1 = frozenset(((self.p1._backend, self.p1._id),))
-        self.d2 = frozenset(((self.p2._backend, self.p2._id),))
-        self.d3 = frozenset(((self.p3._backend, self.p3._id),))
-        self.d4 = frozenset(((self.p4._backend, self.p4._id),))
+        self.d1 = frozenset(((self.p1._backend, self.p1._id), camdep))
+        self.d2 = frozenset(((self.p2._backend, self.p2._id), camdep))
+        self.d3 = frozenset(((self.p3._backend, self.p3._id), camdep))
+        self.d4 = frozenset(((self.p4._backend, self.p4._id), camdep))
 
     def _dependencies(self, p):
         return frozenset(

@@ -1,30 +1,19 @@
 from unittest import TestCase, main
 from urllib import pathname2url
 
-from advene.model.consts import PARSER_META_PREFIX
+from advene.model.consts import PARSER_META_PREFIX, DC_NS_PREFIX, RDFS_NS_PREFIX
 from advene.model.core.diff import *
-from advene.model.core.element import PackageElement
-from advene.model.core.media import FOREF_PREFIX
 from advene.model.core.package import Package
 
-foref = FOREF_PREFIX+"ms;o=0"
-dc_creator = "http://purl.org/dc/elements/1.1/creator"
-dc_description = "http://purl.org/dc/elements/1.1/description"
-rdfs_seeAlso = "http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso"
-
-Package.make_metadata_property(dc_creator, "dc_creator")
-Package.make_metadata_property(dc_description, "dc_description")
-Package.make_metadata_property(rdfs_seeAlso, "rdfs_seeAlso")
-PackageElement.make_metadata_property(dc_creator, "dc_creator")
-PackageElement.make_metadata_property(dc_description, "dc_description")
-PackageElement.make_metadata_property(rdfs_seeAlso, "rdfs_seeAlso")
-
+dc_creator = DC_NS_PREFIX + "creator"
+dc_description = DC_NS_PREFIX + "description"
+rdfs_seeAlso = RDFS_NS_PREFIX + "seeAlso"
 
 def fill_package_step_by_step(p, empty=False):
     if empty:
         yield "empty"
     p3 = Package("urn:xyz", create=True)
-    m3 = p3.create_media("m3", "http://example.com/m3.ogm", foref)
+    m3 = p3.create_media("m3", "http://example.com/m3.ogm")
     a3 = p3.create_annotation("a3", m3, 123, 456, "text/plain")
     r3 = p3.create_relation("r3", "text/plain", members=[a3,])
     L3 = p3.create_list("L3", items=[a3, m3, r3,])
@@ -35,8 +24,8 @@ def fill_package_step_by_step(p, empty=False):
 
     p.uri = "http://example.com/my-package"; yield 1
     i = p.create_import("i", p3); yield 2
-    m = p.create_media("m", "http://example.com/m.ogm", foref); yield 3
-    m.rdfs_seeAlso = m3; yield 4
+    m = p.create_media("m", "http://example.com/m.ogm"); yield 3
+    m.set_meta(rdfs_seeAlso, m3); yield 4
     Rb = p.create_resource("Rb", "x-advene/regexp"); yield 5
     Rb.content_data = "g.*g"; yield 6
     a = p.create_annotation("a", m, 123, 456, "text/plain", Rb); yield 7
@@ -52,20 +41,19 @@ def fill_package_step_by_step(p, empty=False):
     Ra = p.create_resource("Ra", "text/css"); yield 17
     sorted_p_own = list(p.own); sorted_p_own.sort(key=lambda x: x._id)
     for e in sorted_p_own:
-        e.dc_creator = "pchampin"; yield 18, e.id
+        e.set_meta(dc_creator, "pchampin"); yield 18, e.id
         p.associate_tag(e, t); yield 19, e.id
         p.associate_tag(e, t3); yield 20, e.id
     sorted_p3_own = list(p3.own); sorted_p3_own.sort(key=lambda x: x._id)
     for e in sorted_p3_own:
         p.associate_tag(e, t); yield 21, e.id
         p.associate_tag(e, t3); yield 22, e.id
-    p.dc_creator = "pchampin"; yield 23, e.id
-    p.dc_description = "this is a package used for testing diff"; yield 24
+    p.set_meta(dc_creator, "pchampin"); yield 23, e.id
+    p.set_meta(dc_description, "a package used for testing diff"); yield 24
     p.set_meta(PARSER_META_PREFIX+"namespaces",
                "dc http://purl.org/dc/elements/1.1/")
     yield "done"
     
-
 class TestDiffPackage(TestCase):
     def setUp(self):
         self.p1 = Package("file:/tmp/p1", create=True)

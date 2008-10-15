@@ -882,12 +882,12 @@ class _SqliteBackend(object):
         r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
-    def iter_tags(self, package_ids, id=None):
+    def iter_tags(self, package_ids, id=None, meta=None):
         """
         Yield tuples of the form (TAG, package_id, id,).
         """
         selectfrom, where, args = \
-            self._element_query(package_ids, TAG, id)
+            self._element_query(package_ids, TAG, id, meta)
         r = self._conn.execute(selectfrom+where, args)
         return _FlushableIterator(r, self)
 
@@ -1001,12 +1001,12 @@ class _SqliteBackend(object):
                                 args)
         return r.next()[0]
 
-    def tag_count(self, package_ids, id=None):
+    def tag_count(self, package_ids, id=None, meta=None):
         """
         Return the number of tags matching the criteria.
         """
         selectfrom, where, args = \
-            self._element_query(package_ids, TAG, id)
+            self._element_query(package_ids, TAG, id, meta)
         r = self._conn.execute("select count(*) from (%s)"
                                 % (selectfrom+where),
                                 args)
@@ -2021,7 +2021,7 @@ class _SqliteBackend(object):
                 (package_id, id, element_type))
 
     def _element_query(self, package_ids, element_type, 
-                       id=None):
+                       id=None, meta=None):
         """
         Return the selectfrom part of the query, the where part of the query,
         and the argument list, of a query returning all the elements
@@ -2029,26 +2029,67 @@ class _SqliteBackend(object):
 
         The result has structure (type, package_id, id,).
         If element_type is a type with content, content fields are added.
+
+        The meta parameter, if given, is an iterable of triples of the form
+        (key, value, uriref_flag). If uriref_flag is false, the value is
+        interpreted as a string; if it is true, the value is interpreted as the
+        uri-ref of an element. Note that value can also be None. This parameter
+        is used to filter elements that have the given (key, value) pair in
+        their metadata (value set to None filtering elements having no value
+        for the given key).
+         
         """
         assert _DF or not isinstance(package_ids, basestring)
 
         s = "SELECT e.typ, e.package, e.id%s FROM Elements e%s"
+        args = []
+
         if element_type in (ANNOTATION, RELATION, VIEW, QUERY, RESOURCE):
             s = s % (", mimetype, join_id_ref(model_p, model_i), url",
                      " JOIN Contents c ON e.package = c.package and "\
                                            "e.id = c.element")
         else:
-            s = s % ("", "") 
+            s = s % ("", "") # remove %s's
         w = " WHERE e.package IN (" \
             + ",".join( "?" for i in package_ids ) + ")" \
             " AND typ = ?"
-        args = list(package_ids) + [element_type,]
+        args.extend(package_ids)
+        args.append(element_type)
+
         if isinstance(id, basestring):
             w += " AND id = ?"
             args.append(id)
         elif id is not None:
             w += " AND id IN (" + ",".join( "?" for i in id ) + ")"
             args.extend(id)
+
+        if meta is None: meta = ()
+        for k,v,u in meta:
+           if v is None:
+               w += " AND 0 == (SELECT count(*) FROM Meta m "\
+                          "WHERE m.package = e.package AND m.element = e.id "\
+                          "AND m.key = ?)"
+               args.append(k)
+           elif not u:
+               w += " AND 1 == (SELECT count(*) FROM Meta m "\
+                          "WHERE m.package = e.package AND m.element = e.id "\
+                          "AND m.key = ? AND m.value = ?)"
+               args.extend([k, v])
+           else:
+               v_u, v_i = _split_uri_ref(v)
+               w += " AND e.id in ("\
+                       "SELECT m.element FROM Meta m "\
+                       "JOIN Imports i ON e.package = i.package "\
+                       "WHERE ? in (i.url, i.uri) "\
+                       "AND m.package = e.package AND m.element = e.id "\
+                       "AND m.key = ? AND m.value_p = i.id AND m.value_i = ? "\
+                       "UNION "\
+                       "SELECT m.element FROM Meta m "\
+                       "JOIN Packages p ON e.package = p.id "\
+                       "WHERE ? in (p.url, p.uri) "\
+                       "AND m.package = e.package AND m.element = e.id "\
+                       "AND m.key = ? AND m.value_p = '' AND m.value_i = ?)"
+               args.extend([v_u, k, v_i, v_u, k, v_i])
 
         return s,w,args
 

@@ -90,9 +90,9 @@ class OwnGroup(GroupMixin, object):
         for i in o._backend.iter_queries((o._id,)):
             yield o.get_element(i)
 
-    def iter_imports(self):
+    def iter_imports(self, url=None, uri=None):
         o = self._owner
-        for i in o._backend.iter_imports((o._id,)):
+        for i in o._backend.iter_imports((o._id,), None, url, uri):
             yield o.get_element(i)
 
     def media_count(self):
@@ -139,6 +139,6 @@ class OwnGroup(GroupMixin, object):
         o = self._owner
         return o._backend.query_count((o._id,))
 
-    def import_count(self):
+    def import_count(self, url=None, uri=None):
         o = self._owner
-        return o._backend.import_count((o._id,))
+        return o._backend.import_count((o._id,), url, uri)

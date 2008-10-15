@@ -8,15 +8,13 @@ from weakref import ref
 import advene.model.backends.sqlite as backend_sqlite
 from advene.model.consts import DC_NS_PREFIX
 from advene.model.core.content import PACKAGED_ROOT
-from advene.model.core.element import PackageElement
 from advene.model.core.package import Package
-
-
 
 base = split(__file__)[0]
 
 package_url = "sqlite:%s" % (join (base, "test1.db"))
-#package_url = "sqlite::memory:"
+
+dc_creator = DC_NS_PREFIX + "creator"
 
 backend_sqlite._set_module_debug(False)
 
@@ -50,15 +48,12 @@ if __name__ == "__main__":
     content_file = join(base, "a1.txt")
     if exists (content_file): unlink (content_file)
 
-    Package.make_metadata_property (DC_NS_PREFIX+"creator", "dc_creator")
-    PackageElement.make_metadata_property (DC_NS_PREFIX+"creator", "dc_creator")
-
     p = Package(package_url, create=True)
     #trace_wrap_all (p._backend)
 
     advene_ns = "http://advene.liris.cnrs.fr/ns/%s"
 
-    p.dc_creator = "pchampin"
+    p.meta[dc_creator] = "pchampin"
     m1 = p.create_media("m1", "http://champin.net/stream.avi",
         advene_ns % "frame_of_reference/ms;o=0")
     a1 = p.create_annotation("a1", m1, 20, 30, "text/plain")
@@ -80,7 +75,7 @@ if __name__ == "__main__":
     p.set_meta(PACKAGED_ROOT, base)
     a1.content_url = "packaged:/a1.txt"
     a1.content_data = "You, stupid woman!"
-    a1.dc_creator = "rartois"
+    a1.meta[dc_creator] = "rartois"
 
     a2.set_meta(advene_ns % "meta/created_from", a1)
 
@@ -117,10 +112,10 @@ if __name__ == "__main__":
     a2 = p.get_element ("a2")
     print id(a1) == id(p.get_element ("a1"))
     print a1.content_data
-    print p.dc_creator
+    print p.meta[dc_creator]
     print p.get_meta(advene_ns % "meta/main_media")
     print a1.begin, a1.duration, a1.end
-    print a1.dc_creator
+    print a1.meta[dc_creator]
     print a2.meta[advene_ns % "meta/created_from"]
     a2.del_meta(advene_ns % "meta/foo")
     print list(a2.iter_meta())
@@ -129,6 +124,7 @@ if __name__ == "__main__":
 
     fname=join(base, 'test1.bzp')
     print "Saving as ", fname
+    if exists (fname): unlink (fname)
     p.save_as(fname)
 
     l = None; a1 = None; a2 = None; p.close(); p = None

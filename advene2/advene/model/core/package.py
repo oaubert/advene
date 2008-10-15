@@ -33,20 +33,33 @@ from advene.utils.files import smart_urlopen
 
 
 _constructor = {
-    MEDIA: Media,
-    ANNOTATION: Annotation,
-    RELATION: Relation,
-    VIEW: View,
-    RESOURCE: Resource,
-    TAG: Tag,
-    LIST: List,
-    QUERY: Query,
-    IMPORT: Import,
+    MEDIA: "media_factory",
+    ANNOTATION: "annotation_factory",
+    RELATION: "relation_factory",
+    VIEW: "view_factory",
+    RESOURCE: "resource_factory",
+    TAG: "tag_factory",
+    LIST: "list_factory",
+    QUERY: "query_factory",
+    IMPORT: "import_factory",
 }
 
 class Package(object, WithMetaMixin, WithEventsMixin):
     """FIXME: missing docstring.
     """
+
+    annotation_factory = Annotation
+    all_factory = AllGroup
+    import_factory = Import
+    list_factory = List
+    media_factory = Media
+    relation_factory = Relation
+    resource_factory = Resource
+    own_factory = OwnGroup
+    query_factory = Query
+    tag_factory = Tag
+    view_factory = View
+
     def __init__(self, url, create=False, readonly=False, force=False):
         """FIXME: missing docstring.
         
@@ -119,18 +132,21 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         self._importers = WeakKeyDictionary()
         self._backends_dict = None
 
+        # use self.__class__ as package_class (rather than Package directly)
+        # so that application model subclasses do not mix with core packages.
+        package_class = self.__class__
         for _, _, iid, url, uri in backend.iter_imports((package_id,)):
             p = None
             try:
-                p = Package(url)
+                p = package_class(url)
             except NoClaimingError:
                 if uri:
                     try:
-                        p = Package(url)
+                        p = package_class(url)
                     except NoClaimingError:
                         pass
             except PackageInUse, e:
-                if isinstance(e.message, Package):
+                if isinstance(e.message, package_class):
                     p = e.message
             if p is None:
                 pass # TODO: issue a warning, may be change automatically...
@@ -335,7 +351,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def _get_own(self):
         r = self._own_wref()
         if r is None:
-            r = OwnGroup(self)
+            r = self.own_factory(self)
             self._own_wref = ref(r)
         return r
 
@@ -343,7 +359,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
     def _get_all(self):
         r = self._all_wref()
         if r is None:
-            r = AllGroup(self)
+            r = self.all_factory(self)
             self._all_wref = ref(r)
         return r
 
@@ -442,7 +458,8 @@ class Package(object, WithMetaMixin, WithEventsMixin):
                 r = default
             else:
                 type, init = c[0], c[2:]
-                r = _constructor[type] (self, *init)
+                factory = getattr(self, _constructor[type])
+                r = factory(self, *init)
                 # NB: PackageElement.__init__ stores instances in _elements
         return r
 
@@ -503,7 +520,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """
         assert not self.has_element(id)
         self._backend.create_media(self._id, id, url, frame_of_reference)
-        r = Media(self, id, url, frame_of_reference)
+        r = self.media_factory(self, id, url, frame_of_reference)
         self.emit("created::media", r)
         return r
 
@@ -519,7 +536,8 @@ class Package(object, WithMetaMixin, WithEventsMixin):
             model_id = ""
         self._backend.create_annotation(self._id, id, media_id, begin, end,
                                         mimetype, model_id, url)
-        r = Annotation(self, id, media, begin, end, mimetype, model, url)
+        r = self.annotation_factory(self, id, media, begin, end,
+                                              mimetype, model, url)
         self.emit("created::annotation", r)
         return r
 
@@ -534,7 +552,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
             model_id = ""
         self._backend.create_relation(self._id, id,
                                       mimetype, model_id, url)
-        r = Relation(self, id, mimetype, model, url, True)
+        r = self.relation_factory(self, id, mimetype, model, url, True)
         r.extend(members) # let r do it, with all the checking it needs
         self.emit("created::relation", r)
         return r
@@ -561,7 +579,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         else:
             model_id = ""
         self._backend.create_resource(self._id, id, mimetype, model_id, url)
-        r =  Resource(self, id, mimetype, model, url)
+        r =  self.resource_factory(self, id, mimetype, model, url)
         self.emit("created::resource", r)
         return r
 
@@ -570,7 +588,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """
         assert not self.has_element(id)
         self._backend.create_tag(self._id, id)
-        r = Tag(self, id)
+        r = self.tag_factory(self, id)
         self.emit("created::tag", r)
         return r
 
@@ -579,7 +597,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         """
         assert not self.has_element(id)
         self._backend.create_list(self._id, id)
-        L = List(self, id, True)
+        L = self.list_factory(self, id, True)
         L.extend(items) # let L do it, with all the checking it needs
         self.emit("created::list", L)
         return L
@@ -593,7 +611,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         else:
             model_id = ""
         self._backend.create_query(self._id, id, mimetype, model_id, url)
-        r = Query(self, id, mimetype, model, url)
+        r = self.query_factory(self, id, mimetype, model, url)
         self.emit("created::query", r)
         return r
 
@@ -612,7 +630,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         self._imports_dict[id] = package
         self._update_backends_dict()
         package._importers[self] = id
-        r = Import(self, id, package._url, uri)
+        r = self.import_factory(self, id, package._url, uri)
         self.emit("created::import", r)
         return r
 

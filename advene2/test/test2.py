@@ -5,7 +5,7 @@ import sys
 from weakref import ref
 
 from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX, PARSER_META_PREFIX
-from advene.model.core.package import Package
+from advene.model.cam.package import Package
 
 _indent = []
 def trace_wrapper (f):
@@ -47,8 +47,6 @@ if __name__ == "__main__":
 
     if exists (filea): unlink (filea)
     if exists (fileb): unlink (fileb)
-
-    Package.make_metadata_property (DC_NS_PREFIX+"creator", "dc_creator")
 
     p1 = Package(url1, create=True)
     p2 = Package(url2, create=True)

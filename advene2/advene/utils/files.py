@@ -3,8 +3,8 @@ I contain utility functions to handle local and distant files.
 """
 
 from os import mkdir, path
-from os.path import exists
-from urllib import url2pathname
+from os.path import dirname, exists, join
+from urllib import pathname2url, url2pathname
 from urllib2 import urlopen
 from urlparse import urlparse
 
@@ -40,7 +40,10 @@ def smart_urlopen(url):
     else:
         return urlopen(url)
 
-__url_proxy = {}
+__url_proxy = {
+    "http://liris.cnrs.fr/advene/cam/bootstrap":
+        "file:" + pathname2url(join(dirname(__file__), "bootstrap.bzp")),
+}
 
 def add_url_proxy(url, proxy_url):
     """

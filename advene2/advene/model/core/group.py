@@ -186,6 +186,9 @@ class _GroupCollection(object):
     def __init__(self, group, can_be_filtered=True):
         self._g = group
 
+    def __repr__(self):
+        return "[" + ",".join(e.id for e in self) + "]"
+
     def get(self, key):
         e = self._g._owner.get(key)
         if e in self:
