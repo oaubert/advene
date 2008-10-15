@@ -28,7 +28,6 @@ import gobject
 import re
 import __builtin__
 import inspect
-import itertools
 
 class Evaluator:
     """Evaluator popup window.
@@ -553,6 +552,7 @@ class Evaluator:
             res=None
         if inspect.ismethod(res):
             res=res.im_func
+        args=None
         if inspect.isfunction(res):
             # Complete with getargspec
             (args, varargs, varkw, defaults)=inspect.getargspec(res)
@@ -561,13 +561,17 @@ class Evaluator:
                 if defaults:
                     n=len(defaults)
                     cp=args[:-n]
-                    cp.extend("=".join( (k, repr(v)) ) for (k, v) in itertools.izip(args[-n:], defaults))
+                    cp.extend("=".join( (k, repr(v)) ) for (k, v) in zip(args[-n:], defaults))
                     args=cp
             if varargs:
                 args.append("*" + varargs)
             if varkw:
                 args.append("**" + varkw)
+        elif inspect.isbuiltin(res) and res.__doc__:
+            # Extract parameters from docstring
+            args=re.findall('\((.*)\)', res.__doc__.splitlines()[0])
 
+        if args is not None:
             beginmark=b.create_mark(None, cursor, True)
             b.insert_at_cursor("(%s)" % ", ".join(args))
             it=b.get_iter_at_mark(beginmark)
