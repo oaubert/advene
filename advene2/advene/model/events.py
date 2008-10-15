@@ -173,7 +173,7 @@ gobject.signal_new("created", PackageEventDelegate,
                    gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
                    gobject.TYPE_NONE, (object,))
 
-# signal:`closed`
+# signal:`package-closed`
 # ----------------
 #
 # Emitted when the package is closed.
@@ -185,7 +185,7 @@ gobject.signal_new("created", PackageEventDelegate,
 #     * the package URI
 #
 
-gobject.signal_new("closed", PackageEventDelegate,
+gobject.signal_new("package-closed", PackageEventDelegate,
                    gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (object, object,))
 

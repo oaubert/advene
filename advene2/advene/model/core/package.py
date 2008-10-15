@@ -257,7 +257,7 @@ class Package(object, WithMetaMixin, WithEventsMixin):
         else:
             self._backend.close(self._id)
         self._backend = None
-        self.emit("closed", self._url, self._uri)
+        self.emit("package-closed", self._url, self._uri)
 
     def _finish_close(self):
         """FIXME: missing docstring.
