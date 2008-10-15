@@ -28,7 +28,7 @@ class SqliteBackend (object):
         """
         Create a SqliteBackend instance for a new URL which will be created.
         """
-        assert (SqliteBackend.claims_for_bind (url))
+        assert (SqliteBackend.claims_for_create (url))
 
         conn = sqlite.connect (url[7:])
         f = open (join (split (__file__)[0], "init.sql"))

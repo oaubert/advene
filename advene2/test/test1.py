@@ -69,4 +69,3 @@ if __name__ == "__main__":
     print p.get_element ("a1")
     print p.get_element ("a1").content
     print p.get_element ("a1")
-    p.close()
