@@ -8,10 +8,10 @@ from os import listdir, mkdir, path, tmpnam
 from os.path import exists, isdir
 from urllib import pathname2url, url2pathname
 from urlparse import urlparse
-from warnings import filterwarnings
 from zipfile import ZipFile, ZIP_DEFLATED
 
 from advene.model.consts import PACKAGED_ROOT
+from advene.model.core.content import create_temporary_packaged_root
 import advene.model.serializers.advene_xml as advene_xml
 
 NAME = "Generic Advene Zipped Package"
@@ -50,18 +50,9 @@ class _Serializer(object):
             self.compression = ZIP_DEFLATED
         else:
             self.compression = compression
-        root = package.get_meta(PACKAGED_ROOT, None)
-        if root is None:
-            filterwarnings("ignore",
-                "tmpnam is a potential security risk to your program")
-            self.dir = dir = tmpnam()
-            mkdir(dir)
-            url = "file:" + pathname2url(dir) + "/"
-            package.set_meta(PACKAGED_ROOT, url)
-            # TODO use notification to clean it when package is closed
-        else:
-            assert root.startswith("file:")
-            self.dir = dir = url2pathname(urlparse(root).path)
+        self.dir = dir = package.get_meta(PACKAGED_ROOT, None)
+        if dir is None:
+            self.dir = dir = create_temporary_packaged_root(package)
 
         if not exists(path.join(dir, "mimetype")):
             f = open(path.join(dir, "mimetype"), "w")
@@ -95,7 +86,7 @@ if __name__ == "__main__":
     if not exists("/tmp/foo/data"): mkdir("/tmp/foo/data")
 
     # it is now safe to define the packaged-root of the package...
-    p.set_meta(PACKAGED_ROOT, "file:/tmp/foo")
+    p.set_meta(PACKAGED_ROOT, "/tmp/foo")
     # ... and to create packaged contents
     r = p.create_resource("R1", "text/plain", None, "packaged:/data/R1.txt")
     # this actually writes in /tmp/foo/data/R1.txt

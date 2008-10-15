@@ -1,7 +1,7 @@
 import gc
-from os import tmpnam, unlink
-from os.path import abspath, split
-from urllib import pathname2url
+from os import path, tmpnam, unlink
+from os.path import abspath, exists, split
+from urllib import pathname2url, url2pathname
 from unittest import TestCase, main
 from warnings  import filterwarnings
 
@@ -35,7 +35,7 @@ class TestElements(TestCase):
     # utility methodes for mixins and common behaviours
 
     def _test_with_content(self, e):
-        # content related attributes
+        # content related attributes (schema is tested below)
         self.assertEqual("text/plain", e.content_mimetype)
         self.assertEqual("text/plain", e.content.mimetype)
         self.assertEqual("", e.content_url)
@@ -97,23 +97,26 @@ class TestElements(TestCase):
         f.close()
 
         # packaged content
-        filename = tmpnam()
-        base, file  = split(filename)
-        base_url = "file:" + pathname2url(base)
-        file_url = "packaged:/" + pathname2url(file)
+        file_url = "packaged:/data/test"
+        e.content_url = file_url
+        base = e._owner.get_meta(PACKAGED_ROOT, None)
+        self.assert_(base) # packaged root automatically created
+        filename = path.join(base, url2pathname("data/test"))
+        self.assert_(exists(filename), filename) # file automatically created
+        # data has not been changed
+        self.assertEqual("hello chaps", e.content_data)
+        self.assertEqual("hello chaps", e.content.data)
+        # data in file are in sync
         f = open(filename, "w")
         f.write("packaged data")
         f.close()
-        e._owner.set_meta(PACKAGED_ROOT, base_url)
-        e.content_url = file_url
         self.assertEqual("packaged data", e.content_data)
         self.assertEqual("packaged data", e.content.data)
         e.content_data = "still packaged data"
-
         f = open(filename, "r")
         self.assertEqual("still packaged data", f.read())
         f.close()
-
+        # get packaged content as_file
         f = e.get_content_as_file()
         self.assertEqual("still packaged data", f.read())
         f.seek(0)
@@ -130,6 +133,14 @@ class TestElements(TestCase):
         self.assertRaises(IOError, e.get_content_as_file)
         self.assertRaises(IOError, e.content.get_as_file)
         f.close()
+
+        # back to backend-stored
+        e.content_url = ""
+        # data is still there
+        self.assertEqual("hello chaps", e.content_data)
+        self.assertEqual("hello chaps", e.content.data)
+        # file has been cleaned
+        self.assert_(not exists(filename), filename)
 
         # schema
         self.assertEqual(None, e.content_schema)
@@ -164,7 +175,6 @@ class TestElements(TestCase):
             self.assertRaises(ModelError, setattr, e, "content_mimetype",
                               "x-advene/none")
 
-        unlink(filename)
         e.content_url = ""
         e._owner.del_meta(PACKAGED_ROOT)
 

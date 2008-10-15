@@ -12,15 +12,17 @@ the form e.content_X, which might be slightly more efficient (less lookup). May
 be the former should be eventually deprecated...
 """
 
-from os import tmpfile, path
+from os import mkdir, path, tmpfile, tmpnam, unlink
 from urllib2 import urlopen, url2pathname
 from urlparse import urlparse
+from warnings import filterwarnings
 from weakref import ref
 
 from advene.model.consts import _RAISE, PACKAGED_ROOT
 from advene.model.core.element import RELATION
 from advene.model.exceptions import ModelError
 from advene.utils.autoproperty import autoproperty
+from advene.utils.files import recursive_mkdir
 
 class WithContentMixin:
     """I provide functionality for elements with a content.
@@ -43,8 +45,12 @@ class WithContentMixin:
         only authorized for relations; they are marked by the special mimetype
         "x-advene/none"; neither their schema, URL nor data can be modified.
 
-    Note that properties `content_data` and `content_url` are not independant
-    when set. See their documentation for more detail.
+    It follows that content-related properties are not independant from one
+    another. Property `content_mimetype` has higher priority, as it is used to
+    decide whether the content is empty or not (hence whether the other 
+    properties can be set or not). Then `content_url` is used to decide between
+    the three other kinds of content, in order to decide whether `content_data`
+    can be set or not. See the documentation of each property for more detail.
     """
 
     __mimetype     = None
@@ -139,6 +145,11 @@ class WithContentMixin:
 
     @autoproperty
     def _get_content_mimetype(self):
+        """The mimetype of this element's content.
+
+        If set to "x-advene/none", the other properties are erased and become
+        unsettable. Note that it is only possible for relations.
+        """
         r = self.__mimetype
         if r is None: # should not happen, but that's safer
             self._load_content_info()
@@ -197,10 +208,10 @@ class WithContentMixin:
 
     @autoproperty
     def _get_content_schema_idref(self):
-        """The id-ref of the content schema, or None.
+        """The id-ref of the content schema, or an empty string.
 
         This is a read-only property giving the id-ref of the resource held
-        by `content_schema`, or None if there is no schema.
+        by `content_schema`, or an empty string if there is no schema.
 
         Note that this property is accessible even if the corresponding
         schema is unreachable.
@@ -213,8 +224,17 @@ class WithContentMixin:
     def _get_content_url(self):
         """This property holds the URL of the content, or an empty string.
 
-        Important: if this property is set on a backend-stored content, the
-        data is erased from the backend.
+        Its value determines whether the content is backend-stored, external
+        or packaged.
+
+        Note that setting a standard URL (i.e. not in the ``packaged:`` scheme)
+        to a backend-stored or packaged URL will discard its data. On the
+        other hand, changing from backend-store to packaged and vice-versa
+        keeps the data.
+
+        Finally, note that setting the URL to one in the ``packaged:`` schema
+        will automatically create a temporary directory and set the
+        PACKAGED_ROOT metadata of the package to that directory.
         """
         r = self.__url
         if r is None: # should not happen, but that's safer
@@ -229,16 +249,49 @@ class WithContentMixin:
             self._load_content_info()
         if self.__mimetype == "x-advene/none" and (not _init or url):
             raise ModelError("Can not set URL of empty content")
-        if url != self.__url: # prevents to erase the data cache for no reason
-            assert not url.startswith("packaged:") \
-                or self._owner.get_meta(PACKAGED_ROOT, None) is not None
+        if url == self.__url:
+            return
+        if _init:
             self.__url = url
-            if not _init:
-                self.__store_info()
-            if self.__data is not None:
+            return
+
+        oldurl = self.__url
+        if oldurl.startswith("packaged:"):
+            # delete packaged data
+            f = self.__as_file
+            if f:
+                f.close()
+                del self.__as_file
+            rootdir = self._owner.get_meta(PACKAGED_ROOT)
+            pname = url2pathname(oldurl[10:])
+            fname = path.join(rootdir, pname)
+            if not url or url.startswith("packaged:"):
+                f = open(fname)
+                self.__data = f.read()
+                f.close()
+            unlink(fname)
+
+        if url.startswith("packaged:"):
+            rootdir = self._owner.get_meta(PACKAGED_ROOT, None)
+            if rootdir is None:
+                rootdir = create_temporary_packaged_root(self._owner)
+            if self.__data:
+                seq = url.split("/")[1:]
+                dir = recursive_mkdir(rootdir, seq[:-1])
+                fname = path.join(dir, seq[-1])
+                f = open(fname, "w")
+                f.write(self.__data)
+                f.close()
+        if url:
+            if self.__data:
                 del self.__data
-                # NB: data needs no erasing in the backend, because the backend
-                # must do it itself whenever the URL is set
+                # don't need to remove data from backend, that will be done
+                # when setting URL
+       
+        self.__url = url
+        self.__store_info()
+        if not url:
+            self.__store_data()
 
     @autoproperty       
     def _get_content_data(self):
@@ -283,7 +336,7 @@ class WithContentMixin:
             self._load_content_info()
             url = self.__url
         if self.__mimetype == "x-advene/none":
-            raise ModelError("Can not set URL of empty content")
+            raise ModelError("Can not set data of empty content")
         if url.startswith("packaged:"):
             f = self.get_content_as_file()
             f.truncate()
@@ -291,9 +344,9 @@ class WithContentMixin:
             f.close()
         else:
             if url:
-                raise AttributeError, "content has a url, can not set data"
+                raise AttributeError("content has a url, can not set data")
             elif self.__as_file:
-                raise IOError, "content already opened as a file"
+                raise IOError("content already opened as a file")
             self.__data = data
             self.__store_data()
         
@@ -444,3 +497,13 @@ class ContentDataFile(object):
 
     @autoproperty
     def _set_softspace(self, val): self._file.softspace = val
+
+
+def create_temporary_packaged_root(package):
+    filterwarnings("ignore",
+        "tmpnam is a potential security risk to your program")
+    dir = tmpnam()
+    mkdir(dir)
+    package.set_meta(PACKAGED_ROOT, dir)
+    # TODO use notification to clean it when package is closed
+    return dir

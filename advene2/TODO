@@ -25,7 +25,7 @@ Misc
 - find a better alternative to tmpnam in advene_zip's (parser and serialiser)
 
 - use notification of events, once implemented, to clean the package root
-  created by advene_zip serializer and parser
+  created by parsers/advene_zip.py and content.py
 
 Open questions and remarks
 ==========================

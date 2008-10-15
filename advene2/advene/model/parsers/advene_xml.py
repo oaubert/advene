@@ -72,8 +72,7 @@ class _Parser(XmlParserBase):
             dirname = path.split(filename)[0]
             if exists(path.join(dirname, "mimetype")):
                 # it is now very likely that this is a manually-unzipped pkg
-                root = "file:" + url2pathname(dirname)
-                self.package.set_meta(PACKAGED_ROOT, root)
+                self.package.set_meta(PACKAGED_ROOT, dirname)
         XmlParserBase.parse(self)
 
     # end of public interface

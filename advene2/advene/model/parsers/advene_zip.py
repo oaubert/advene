@@ -5,7 +5,6 @@ See `advene.model.parsers.advene_xml` for the reference implementation.
 """
 
 from os import mkdir, path, tmpnam
-from os.path import exists
 import sys
 from urllib import url2pathname, pathname2url
 from urlparse import urlparse, urljoin
@@ -15,6 +14,7 @@ from zipfile import ZipFile
 
 from advene.model.consts import PACKAGED_ROOT
 import advene.model.parsers.advene_xml as advene_xml
+from advene.utils.files import recursive_mkdir 
 
 NAME = "Generic Advene Zipped Package"
 
@@ -71,7 +71,7 @@ class _Parser(object):
         "Do the actual parsing."
         backend = self.package._backend
         pid = self.package._id
-        backend.set_meta(pid, "", "", PACKAGED_ROOT, self.dir_url, False)
+        backend.set_meta(pid, "", "", PACKAGED_ROOT, self.dir, False)
         # TODO use notification to clean it when package is closed
         advene_xml.parse_into(self.file_url, self.package)
 
@@ -88,26 +88,17 @@ class _Parser(object):
         z = ZipFile(f, "r")
         names = z.namelist()
         for zname in names:
-            fname = _recursive_mkdir(dir, zname.split("/"))
-            #print "=== extracting", zname, "to", fname
-            if fname:
+            seq = zname.split("/")
+            dirname = recursive_mkdir(dir, seq[:-1])
+            if seq[-1]:
+                fname = path.join(dirname, seq[-1])
                 g = open(fname, "w")
                 g.write(z.read(zname))
                 g.close()
         f.close()
 
-        self.dir_url = dir_url = "file:" + pathname2url(dir) + "/"
-        self.file_url = urljoin(self.dir_url, "content.xml")
+        
+        self.file_url = "file:" + pathname2url(dir) + "/content.xml"
         self.package = package
         self.file = file
 
-def _recursive_mkdir(dir, elems):
-    if len(elems) > 1:
-        newdir = path.join(dir, elems[0])
-        if not exists(newdir):
-            mkdir(newdir)
-        return _recursive_mkdir(newdir, elems[1:])
-    elif elems[0]: # the last item may be empty
-        return path.join(dir, elems[0])
-    else: # empty last item, was only a directory name
-        return None

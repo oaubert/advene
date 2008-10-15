@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     a1.begin += 1
     a1.duration += 1
-    p.set_meta(PACKAGED_ROOT, pathname2url(base))
+    p.set_meta(PACKAGED_ROOT, base)
     a1.content_url = "packaged:/a1.txt"
     a1.content_data = "You, stupid woman!"
     a1.dc_creator = "rartois"
