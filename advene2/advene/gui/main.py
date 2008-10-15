@@ -34,6 +34,7 @@ import textwrap
 import re
 import urllib2
 import socket
+import operator
 
 import advene.core.config as config
 import advene.core.version
@@ -3517,9 +3518,9 @@ class AdveneGUI(Connect):
             f=generate_default_filename(filter, os.path.basename(fs.get_filename()))
             fs.set_current_name(f)
             return True
-        exporters=dialog.list_selector_widget([ ( v, v.title )
-                                                for v in importer_package.views
-                                                if v.id != 'index' ],
+        exporters=dialog.list_selector_widget(sorted(( ( v, v.title )
+                                                       for v in importer_package.views
+                                                       if v.id != 'index' ), key=operator.itemgetter(1)),
                                               callback=update_extension)
         hb=gtk.HBox()
         hb.pack_start(gtk.Label(_("Export format")), expand=False)
