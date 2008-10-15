@@ -134,3 +134,20 @@ def has_type(obj, type):
         return "true"
     else:
         return ""
+
+
+@_wrap_method(
+    output_mimetype = "text/plain",
+    mimetype = "a mimetype that the element's content mimetype, if any, must "\
+               "match"
+)
+def basic_element_constraint(obj, mimetype=None):
+    if mimetype is not None:
+        m = getattr(obj, "content_mimetype", None)
+        if m is not None:
+            if m != mimetype:
+                # TODO manage generic mimetypes (with '*')
+                return ""
+    return "true"
+
+#

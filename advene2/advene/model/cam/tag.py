@@ -37,3 +37,5 @@ Tag.make_metadata_property(CAM_NS_PREFIX + "representation", default=None)
 Tag.make_metadata_property(CAM_NS_PREFIX + "color", default=None)
 Tag.make_metadata_property(CAM_NS_PREFIX + "element-color",
                            "element_color", default=None)
+Tag.make_metadata_property(CAM_NS_PREFIX + "element-constraint",
+                           "element_constraint", default=None)

@@ -1,6 +1,10 @@
 Important improvements
 ======================
 
+- fix the name clash btw PackageElement.iter_tags and GroupMixin.iter_tags:
+  rename PackageElement.iter_tags to iter_my_tags (and then my_elements in
+  Tag?)
+
 - prevent annotations/relations to be untyped
 
 - implement ID generator
