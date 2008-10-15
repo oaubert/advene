@@ -24,7 +24,7 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
     def __init__(self, owner, id):
         self._id    = id
         self._owner = owner
-        self._destroyed = True
+        self._deleted = False
         owner._elements[id] = self # cache to prevent duplicate instanciation
         self._dirty = False
 
@@ -62,11 +62,18 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
             c = parent.get(c)
         return r
 
-    def destroy(self):
-        if self._destroyed: return
-        #self._owner._backend.destroy(self._id) # TODO
-        self._destroyed = True
-        self.__class__ = DestroyedPackageElement
+    def delete(self):
+        if self._deleted: return
+        self._deleted = True
+        #self.__class__ = DestroyedPackageElement
+        self.add_cleaning_operation(self._owner._backend.delete_element,
+                                    self._owner._id, self._id,
+                                    self.ADVENE_TYPE)
+        # TODO the following is a quick and dirty solution to have the rest of
+        # the implementation work once an element has been deleted.
+        # This should be reconsidered, and maybe improved.
+        del self._owner._elements[self._id]
+        self.clean()
 
     @autoproperty        
     def _get_id(self):
