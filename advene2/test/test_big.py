@@ -68,7 +68,7 @@ if __name__ == "__main__":
     m8 = r["m8"]
  
     measure_time() # take origin
-    l1 = len([ a for a in r.all.iter_annotations(medias=(m7, m8), at=100) ])
+    l1 = len([ a for a in r.all.iter_annotations(media=(m7, m8), at=100) ])
     measure_time("building annotations sublist (efficient)")
 
     l2 =  len([ a for a in r.all.annotations

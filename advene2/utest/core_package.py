@@ -413,63 +413,44 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, [])
 
     def test_changed_uri(self):
-        hid = self.p1.connect("changed::uri", self.attr_handler)
+        hid1 = self.p1.connect("changed::uri", self.attr_handler)
+        hid2 = self.p1.connect("pre-changed::uri", self.attr_handler, "pre")
         self.p2.uri = "urn:12345"
         self.assertEqual(self.buf, [])
         self.p1.uri = "urn:67890"
-        self.assertEqual(self.buf, [(self.p1, "uri", "urn:67890"),])
+        self.assertEqual(self.buf, [(self.p1, "uri", "urn:67890"),]*2)
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
-        self.p1.disconnect(hid)
+        self.p1.disconnect(hid1)
+        self.p1.disconnect(hid2)
         self.p1.uri = "urn:abcdef"
         self.assertEqual(self.buf, [])
 
     def test_changed_any(self):
-        hid = self.p1.connect("changed", self.attr_handler)
+        hid1 = self.p1.connect("changed", self.attr_handler)
+        hid2 = self.p1.connect("pre-changed", self.attr_handler, "pre")
         self.p2.uri = "urn:12345"
         self.assertEqual(self.buf, [])
         self.p1.uri = "urn:67890"
-        self.assertEqual(self.buf, [(self.p1, "uri", "urn:67890"),])
+        self.assertEqual(self.buf, [(self.p1, "uri", "urn:67890"),]*2)
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
-        self.p1.disconnect(hid)
-        self.p1.uri = "urn:abcdef"
-        self.assertEqual(self.buf, [])
-
-    def test_pre_changed_uri(self):
-        hid = self.p1.connect("pre-changed::uri", self.attr_handler, "pre")
-        self.p2.uri = "urn:12345"
-        self.assertEqual(self.buf, [])
-        self.p1.uri = "urn:67890"
-        self.assertEqual(self.buf, [(self.p1, "uri", "urn:67890"),])
-        self.assertEqual(self.callback_errors, [])
-        del self.buf[:]
-        self.p1.disconnect(hid)
-        self.p1.uri = "urn:abcdef"
-        self.assertEqual(self.buf, [])
-
-    def test_pre_changed_any(self):
-        hid = self.p1.connect("pre-changed", self.attr_handler, "pre")
-        self.p2.uri = "urn:12345"
-        self.assertEqual(self.buf, [])
-        self.p1.uri = "urn:67890"
-        self.assertEqual(self.buf, [(self.p1, "uri", "urn:67890"),])
-        self.assertEqual(self.callback_errors, [])
-        del self.buf[:]
-        self.p1.disconnect(hid)
+        self.p1.disconnect(hid1)
+        self.p1.disconnect(hid2)
         self.p1.uri = "urn:abcdef"
         self.assertEqual(self.buf, [])
 
     def test_changed_meta(self):
         k = DC_NS_PREFIX + "creator"
         k2 = DC_NS_PREFIX + "title"
-        hid = self.p1.connect("changed-meta::" + k, self.meta_handler)
+        hid1 = self.p1.connect("changed-meta::" + k, self.meta_handler)
+        hid2 = self.p1.connect("pre-changed-meta::" + k, self.meta_handler, 1)
         self.p1.set_meta(k2, "hello world")
         self.assertEqual(self.buf, [])
         self.p2.set_meta(k, "pchampin")
         self.assertEqual(self.buf, [])
         self.p1.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [(self.p1, k, "pchampin"),])
+        self.assertEqual(self.buf, [(self.p1, k, "pchampin"),]*2)
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
         self.p1.del_meta(k2)
@@ -477,72 +458,32 @@ class TestEvents(TestCase):
         self.p2.del_meta(k)
         self.assertEqual(self.buf, [])
         self.p1.del_meta(k)
-        self.assertEqual(self.buf, [(self.p1, k, None)])
+        self.assertEqual(self.buf, [(self.p1, k, None)]*2)
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
-        self.p1.disconnect(hid)
+        self.p1.disconnect(hid1)
+        self.p1.disconnect(hid2)
         self.p1.set_meta(k, "oaubert")
         self.assertEqual(self.buf, [])
 
     def test_changed_meta_any(self):
         k = DC_NS_PREFIX + "creator"
-        hid = self.p1.connect("changed-meta", self.meta_handler)
+        hid1 = self.p1.connect("changed-meta", self.meta_handler)
+        hid2 = self.p1.connect("pre-changed-meta", self.meta_handler, "pre")
         self.p2.set_meta(k, "pchampin")
         self.assertEqual(self.buf, [])
         self.p1.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [(self.p1, k, "pchampin"),])
+        self.assertEqual(self.buf, [(self.p1, k, "pchampin"),]*2)
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
         self.p2.del_meta(k)
         self.assertEqual(self.buf, [])
         self.p1.del_meta(k)
-        self.assertEqual(self.buf, [(self.p1, k, None)])
+        self.assertEqual(self.buf, [(self.p1, k, None)]*2)
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
-        self.p1.disconnect(hid)
-        self.p1.set_meta(k, "oaubert")
-        self.assertEqual(self.buf, [])
-
-    def test_pre_changed_meta(self):
-        k = DC_NS_PREFIX + "creator"
-        k2 = DC_NS_PREFIX + "title"
-        hid = self.p1.connect("pre-changed-meta::" + k, self.meta_handler, 1)
-        self.p1.set_meta(k2, "hello world")
-        self.assertEqual(self.buf, [])
-        self.p2.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [])
-        self.p1.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [(self.p1, k, "pchampin"),])
-        self.assertEqual(self.callback_errors, [])
-        del self.buf[:]
-        self.p1.del_meta(k2)
-        self.assertEqual(self.buf, [])
-        self.p2.del_meta(k)
-        self.assertEqual(self.buf, [])
-        self.p1.del_meta(k)
-        self.assertEqual(self.buf, [(self.p1, k, None)])
-        self.assertEqual(self.callback_errors, [])
-        del self.buf[:]
-        self.p1.disconnect(hid)
-        self.p1.set_meta(k, "oaubert")
-        self.assertEqual(self.buf, [])
-
-    def test_pre_changed_meta_any(self):
-        k = DC_NS_PREFIX + "creator"
-        hid = self.p1.connect("pre-changed-meta", self.meta_handler, 1)
-        self.p2.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [])
-        self.p1.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [(self.p1, k, "pchampin"),])
-        self.assertEqual(self.callback_errors, [])
-        del self.buf[:]
-        self.p2.del_meta(k)
-        self.assertEqual(self.buf, [])
-        self.p1.del_meta(k)
-        self.assertEqual(self.buf, [(self.p1, k, None)])
-        self.assertEqual(self.callback_errors, [])
-        del self.buf[:]
-        self.p1.disconnect(hid)
+        self.p1.disconnect(hid1)
+        self.p1.disconnect(hid2)
         self.p1.set_meta(k, "oaubert")
         self.assertEqual(self.buf, [])
 

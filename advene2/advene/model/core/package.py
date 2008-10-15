@@ -23,9 +23,9 @@ from advene.model.core.import_ import Import
 from advene.model.core.all_group import AllGroup
 from advene.model.core.own_group import OwnGroup
 from advene.model.core.meta import WithMetaMixin
-from advene.model.core.events import PackageEventDelegate, WithEventsMixin
 from advene.model.exceptions import \
     ModelError, NoClaimingError, NoSuchElementError, UnreachableImportError
+from advene.model.events import PackageEventDelegate, WithEventsMixin
 from advene.model.parsers.register import iter_parsers
 from advene.model.serializers.register import iter_serializers
 from advene.utils.autoproperty import autoproperty

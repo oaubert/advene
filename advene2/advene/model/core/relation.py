@@ -68,16 +68,23 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         o = self._owner
         assert o._can_reference(a)
         aid = a.make_id_in(o)
+        s = slice(i, i+1)
+        L = [a,]
+        self.emit("pre-changed-items", s, L)
         self._ids[i] = aid
         self._cache[i] = a
         o._backend.update_member(o._id, self._id, aid, i)
+        self.emit("changed-items", s, L)
 
     def __delitem__(self, i):
         if isinstance(i, slice): return self._del_slice(i)
+        s = slice(i, i+1)
+        self.emit("pre-changed-items", s, [])
         del self._ids[i] # also guarantees that is is a valid index
         del self._cache[i]
         o = self._owner
         o._backend.remove_member(o._id, self._id, i)
+        self.emit("changed-items", s, [])
 
     def _get_slice(self, s):
         c = len(self._cache)
@@ -129,9 +136,13 @@ class Relation(PackageElement, WithContentMixin, GroupMixin):
         assert o._can_reference(a)
         aid = a.make_id_in(o)
         c = len(self._cache)
+        s = slice(c,c)
+        L = [a,]
+        self.emit("pre-changed-items", s, L)
         self._ids.append(aid)
         self._cache.append(a)
         o._backend.insert_member(o._id, self._id, aid, -1, c)
+        self.emit("changed-items", s, L)
         # NB: it is important to pass to the backend the length c computed
         # *before* appending the member
 

@@ -70,10 +70,12 @@ class Annotation(PackageElement, WithContentMixin):
         assert o._can_reference(media)
 
         mid = media.make_id_in(o)
+        self.emit("pre-changed::media", "media", media)
         self._media_id = mid
         self._media = media
         if not _init:
             self.__store()
+        self.emit("changed::media", "media", media)
 
     @autoproperty
     def _get_media_id(self):
@@ -95,8 +97,10 @@ class Annotation(PackageElement, WithContentMixin):
 
     @autoproperty
     def _set_begin(self, val):
+        self.emit("pre-changed::begin", "begin", val)
         self._begin = val
         self.__store()
+        self.emit("changed::begin", "begin", val)
 
     @autoproperty
     def _get_end(self):
@@ -104,8 +108,10 @@ class Annotation(PackageElement, WithContentMixin):
 
     @autoproperty
     def _set_end(self, val):
+        self.emit("pre-changed::end", "end", val)
         self._end = val
         self.__store()
+        self.emit("changed::end", "end", val)
 
     @autoproperty
     def _get_duration(self):

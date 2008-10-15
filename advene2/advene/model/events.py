@@ -68,7 +68,7 @@ class WithEventsMixin:
         Prevent the handler identified by handler_id to be invoked until it is
         unblocked.
 
-        NB: this has been renamed from GObject.handler_is_connected to comply
+        NB: this has been renamed from GObject.handler_block to comply
         with Advene coding style (methode names should start with a verb).
         """
         return self._event_delegate.handler_block(handler_id)
@@ -78,7 +78,7 @@ class WithEventsMixin:
         Unblock the blocked handler identified by handler_id so it can be
         invoked again.
 
-        NB: this has been renamed from GObject.handler_is_connected to comply
+        NB: this has been renamed from GObject.handler_unblock to comply
         with Advene coding style (methode names should start with a verb).
         """
         return self._event_delegate.handler_unblock(handler_id)
@@ -99,6 +99,13 @@ class WithEventsMixin:
         """
         return self._stop_emi(detailed_signal)
 
+    # synonyms for the sake of readability in GTK applications
+
+    handler_is_connected = has_handler
+    handler_block = block_handler
+    handler_unblock = unblock_handler
+
+
 # Common signals
 # ==============
 #
@@ -111,7 +118,8 @@ class WithEventsMixin:
 #
 # Emitted everytime an attribute is changed in the object
 # 
-# detail:: (depending on the object type) uri, url, foref, media, begin, end
+# detail:: (depending on the object type) uri, url, frame_of_reference, media,
+#          begin, end
 # params::
 #     * the attribute name
 #     * the new value of the changed attribute
@@ -192,6 +200,11 @@ gobject.signal_new("closed", ElementEventDelegate,
 #     * a slice with only positive indices, relative to the old structure,
 #       embeding all the changed indices
 #     * a python list representing the new structure of the slice
+#
+# NB: because of the current implementation, some operations (set a slice,
+# delete a slice, extend) are actually implemented using more atomic operations
+# (__setitem__, __delitem__, append) and will hence emit no event by themselves
+# but let the underlying operations send several "atomic" events.
 #
 # This signal also has a "pre-" form.
 

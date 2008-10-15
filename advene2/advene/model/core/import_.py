@@ -31,8 +31,10 @@ class Import(PackageElement):
     @autoproperty
     def _set_url(self, url):
         assert url
+        self.emit("pre-changed::url", "url", url)
         self._url = url
         self.__store()
+        self.emit("changed::url", "url", url)
 
     @autoproperty
     def _get_uri(self):
@@ -40,8 +42,10 @@ class Import(PackageElement):
 
     @autoproperty
     def _set_uri(self, uri):
+        self.emit("pre-changed::uri", "uri", uri)
         self._uri = uri
         self.__store()
+        self.emit("changed::uri", "uri", uri)
 
     @autoproperty
     def _get_package(self):

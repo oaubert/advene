@@ -180,6 +180,9 @@ class GroupMixin:
         return GroupImports(group)
 
 class _GroupCollection(object):
+    """
+    A collection of elements contained in a group.
+    """
     def __init__(self, group):
         self._g = group
 

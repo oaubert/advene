@@ -180,10 +180,12 @@ class WithContentMixin:
                 self._set_content_model(None)
                 self._set_content_url("")
                 self._set_content_data("")
+        self.emit("pre-changed::content_mimetype", "content_mimetype", mimetype)
         self.__mimetype = mimetype
         if not _init:
             self.__store_info()
         self._update_content_handler()
+        self.emit("changed::content_mimetype", "content_mimetype", mimetype)
 
     @autoproperty       
     def _get_content_model(self):
@@ -207,6 +209,12 @@ class WithContentMixin:
         if self.__mimetype == "x-advene/none" and (not _init or resource):
             raise ModelError("Can not set model of empty content")
         op = self._owner
+        if hasattr(resource, "ADVENE_TYPE") and not op._can_reference(resource):
+            raise ModelError("Package %s can not reference resource %s" %
+                             op.uri, resource.make_id_in(op))
+
+        if not _init:
+            self.emit("pre-changed::content_model", "content_model", resource)
         if resource is None or _init and resource == "":
             self.__model_id = ""
             if self.__model_wref():
@@ -214,13 +222,11 @@ class WithContentMixin:
         elif _init and isinstance(resource, basestring):
             self.__model_id = resource
         else:
-            if not op._can_reference(resource):
-                raise ModelError("Package %s can not reference resource %s" %
-                                 op.uri, resource.make_id_in(op))
             self.__model_id = resource.make_id_in(op)
             self.__model_wref  = ref(resource)
         if not _init:
             self.__store_info()
+            self.emit("changed::content_model", "content_model", resource)
 
     @autoproperty
     def _get_content_model_id(self):
@@ -303,11 +309,13 @@ class WithContentMixin:
                 del self.__data
                 # don't need to remove data from backend, that will be done
                 # when setting URL
-       
+
+        self.emit("pre-changed::content_url", "content_url", url)       
         self.__url = url
         self.__store_info()
         if not url:
             self.__store_data()
+        self.emit("changed::content_url", "content_url", url)       
 
     @autoproperty       
     def _get_content_data(self):
@@ -355,6 +363,7 @@ class WithContentMixin:
             raise ModelError("Can not set data of empty content")
         if url.startswith("packaged:"):
             f = self.get_content_as_file()
+            diff = None # TODO make a diff object
             f.truncate()
             f.write(data)
             f.close()
@@ -363,8 +372,10 @@ class WithContentMixin:
                 raise AttributeError("content has a url, can not set data")
             elif self.__as_file:
                 raise IOError("content already opened as a file")
+            diff = None # TODO make a diff object
             self.__data = data
             self.__store_data()
+        self.emit("changed-content-data", diff)
         
     @autoproperty
     def _get_content(self):

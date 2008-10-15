@@ -765,8 +765,14 @@ class TestEvents(TestCase):
         self.m1 = self.p2.create_media("m1", "file:/tmp/test.avi")
         self.t1 = self.p2.create_tag("t1")
         self.t2 = self.p2.create_tag("t2")
-        self.p1.create_import("i1", self.p2)
+        self.R1 = self.p2.create_resource("R1", "text/plain")
+        self.R2 = self.p2.create_resource("R2", "text/plain")
+        self.i1 = self.p1.create_import("i1", self.p2)
         self.a1 = self.p1.create_annotation("a1", self.m1, 10, 20, "text/plain")
+        self.m2 = self.p1.create_media("m2", "file:/tmp/test2.avi")
+        self.a2 = self.p1.create_annotation("a2", self.m2, 30, 40, "text/plain")
+        self.r1 = self.p1.create_relation("r1")
+        self.L1 = self.p1.create_list("L1")
 
         self.buf = []
         self.callback_errors = []
@@ -826,13 +832,14 @@ class TestEvents(TestCase):
     def test_changed_meta(self):
         k = DC_NS_PREFIX + "creator"
         k2 = DC_NS_PREFIX + "title"
-        hid = self.m1.connect("changed-meta::" + k, self.meta_handler)
+        hid1 = self.m1.connect("changed-meta::" + k, self.meta_handler)
+        hid2 = self.m1.connect("pre-changed-meta::" + k, self.meta_handler, 1)
         self.m1.set_meta(k2, "hello world")
         self.assertEqual(self.buf, [])
         self.a1.set_meta(k, "pchampin")
         self.assertEqual(self.buf, [])
         self.m1.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [(self.m1, k, "pchampin"),])
+        self.assertEqual(self.buf, [(self.m1, k, "pchampin"),]*2)
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
         self.m1.del_meta(k2)
@@ -840,72 +847,32 @@ class TestEvents(TestCase):
         self.a1.del_meta(k)
         self.assertEqual(self.buf, [])
         self.m1.del_meta(k)
-        self.assertEqual(self.buf, [(self.m1, k, None)])
+        self.assertEqual(self.buf, [(self.m1, k, None)]*2)
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
-        self.m1.disconnect(hid)
+        self.m1.disconnect(hid1)
+        self.m1.disconnect(hid2)
         self.m1.set_meta(k, "oaubert")
         self.assertEqual(self.buf, [])
 
     def test_changed_meta_any(self):
         k = DC_NS_PREFIX + "creator"
-        hid = self.m1.connect("changed-meta", self.meta_handler)
+        hid1 = self.m1.connect("changed-meta", self.meta_handler)
+        hid2 = self.m1.connect("pre-changed-meta", self.meta_handler, "pre")
         self.a1.set_meta(k, "pchampin")
         self.assertEqual(self.buf, [])
         self.m1.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [(self.m1, k, "pchampin"),])
+        self.assertEqual(self.buf, [(self.m1, k, "pchampin"),]*2)
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
         self.a1.del_meta(k)
         self.assertEqual(self.buf, [])
         self.m1.del_meta(k)
-        self.assertEqual(self.buf, [(self.m1, k, None)])
+        self.assertEqual(self.buf, [(self.m1, k, None)]*2)
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
-        self.m1.disconnect(hid)
-        self.m1.set_meta(k, "oaubert")
-        self.assertEqual(self.buf, [])
-
-    def test_pre_changed_meta(self):
-        k = DC_NS_PREFIX + "creator"
-        k2 = DC_NS_PREFIX + "title"
-        hid = self.m1.connect("pre-changed-meta::" + k, self.meta_handler, 1)
-        self.m1.set_meta(k2, "hello world")
-        self.assertEqual(self.buf, [])
-        self.a1.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [])
-        self.m1.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [(self.m1, k, "pchampin"),])
-        self.assertEqual(self.callback_errors, [])
-        del self.buf[:]
-        self.m1.del_meta(k2)
-        self.assertEqual(self.buf, [])
-        self.a1.del_meta(k)
-        self.assertEqual(self.buf, [])
-        self.m1.del_meta(k)
-        self.assertEqual(self.buf, [(self.m1, k, None)])
-        self.assertEqual(self.callback_errors, [])
-        del self.buf[:]
-        self.m1.disconnect(hid)
-        self.m1.set_meta(k, "oaubert")
-        self.assertEqual(self.buf, [])
-
-    def test_pre_changed_meta_any(self):
-        k = DC_NS_PREFIX + "creator"
-        hid = self.m1.connect("pre-changed-meta", self.meta_handler, 1)
-        self.a1.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [])
-        self.m1.set_meta(k, "pchampin")
-        self.assertEqual(self.buf, [(self.m1, k, "pchampin"),])
-        self.assertEqual(self.callback_errors, [])
-        del self.buf[:]
-        self.a1.del_meta(k)
-        self.assertEqual(self.buf, [])
-        self.m1.del_meta(k)
-        self.assertEqual(self.buf, [(self.m1, k, None)])
-        self.assertEqual(self.callback_errors, [])
-        del self.buf[:]
-        self.m1.disconnect(hid)
+        self.m1.disconnect(hid1)
+        self.m1.disconnect(hid2)
         self.m1.set_meta(k, "oaubert")
         self.assertEqual(self.buf, [])
 
@@ -940,7 +907,7 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, [(self.m1, self.t1,),])
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
-        self.m1.disconnect(hid)
+        self.t1.disconnect(hid)
         self.p1.associate_tag(self.a1, self.t1)
         self.assertEqual(self.buf, [])
         del self.buf[:]
@@ -951,10 +918,391 @@ class TestEvents(TestCase):
         self.assertEqual(self.buf, [(self.m1, self.t1,),])
         self.assertEqual(self.callback_errors, [])
         del self.buf[:]
-        self.m1.disconnect(hid)
+        self.t1.disconnect(hid)
         self.p1.dissociate_tag(self.a1, self.t1)
         self.assertEqual(self.buf, [])
- 
+
+    def test_with_content_changed_mimetype(self):
+        hid1 = self.a1.connect("changed::content_mimetype", self.attr_handler)
+        hid2 = self.a1.connect("pre-changed::content_mimetype",
+                               self.attr_handler, "pre")
+        self.a1.begin = 11
+        self.assertEqual(self.buf, [])
+        self.a1.content_mimetype = "text/html"
+        self.assertEqual(self.buf,
+                         [(self.a1, "content_mimetype", "text/html"),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.disconnect(hid1)
+        self.a1.disconnect(hid2)
+        self.a1.content_mimetype = "image/png"
+        self.assertEqual(self.buf, [])
+
+    def test_with_content_changed_model(self):
+        hid1 = self.a1.connect("changed::content_model", self.attr_handler)
+        hid2 = self.a1.connect("pre-changed::content_model",
+                               self.attr_handler, "pre")
+        self.a1.begin = 11
+        self.assertEqual(self.buf, [])
+        self.a1.content_model = self.R1
+        self.assertEqual(self.buf,
+                         [(self.a1, "content_model", self.R1),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.disconnect(hid1)
+        self.a1.disconnect(hid2)
+        self.a1.content_model = self.R2
+        self.assertEqual(self.buf, [])
+
+    def test_with_content_changed_url(self):
+        hid1 = self.a1.connect("changed::content_url", self.attr_handler)
+        hid2 = self.a1.connect("pre-changed::content_url",
+                               self.attr_handler, "pre")
+        self.a1.begin = 11
+        self.assertEqual(self.buf, [])
+        self.a1.content_url = "file:/foo"
+        self.assertEqual(self.buf,
+                         [(self.a1, "content_url", "file:/foo"),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.disconnect(hid1)
+        self.a1.disconnect(hid2)
+        self.a1.content_url = "file:/bar"
+        self.assertEqual(self.buf, [])
+
+    def test_with_content_changed_data(self):
+        hid1 = self.a1.connect("changed-content-data", self.default_handler)
+        self.a1.begin = 11
+        self.assertEqual(self.buf, [])
+        self.a1.content_data = "listen carefully"
+        self.assertEqual(self.buf,
+                         [(self.a1, None),])
+        del self.buf[:]
+        self.a1.disconnect(hid1)
+        self.a1.content_url = "I shall say this only once"
+        self.assertEqual(self.buf, [])
+
+
+    def test_media_changed_url(self):
+        hid1 = self.m1.connect("changed::url", self.attr_handler)
+        hid2 = self.m1.connect("pre-changed::url", self.attr_handler, "pre")
+        self.m1.frame_of_reference = FOREF_PREFIX + "s;o=0"
+        self.assertEqual(self.buf, [])
+        self.m1.url = "file:/foo.avi"
+        self.assertEqual(self.buf, [(self.m1, "url", "file:/foo.avi"),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid1)
+        self.m1.disconnect(hid2)
+        self.m1.url = "file:/bar./avi"
+        self.assertEqual(self.buf, [])
+        
+    def test_media_changed_frame_of_reference(self):
+        hid1 = self.m1.connect("changed::frame_of_reference", self.attr_handler)
+        hid2 = self.m1.connect("pre-changed::frame_of_reference",
+                               self.attr_handler, "pre")
+        self.m1.url = "file:/foo.avi"
+        self.assertEqual(self.buf, [])
+        self.m1.frame_of_reference = FOREF_PREFIX + "s;o=0"
+        self.assertEqual(self.buf, [(self.m1, "frame_of_reference",
+                                     FOREF_PREFIX + "s;o=0",)]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid1)
+        self.m1.disconnect(hid2)
+        self.m1.frame_of_reference = FOREF_PREFIX + "ms;o=1"
+        self.assertEqual(self.buf, [])
+        
+    def test_media_changed_any(self):
+        hid1 = self.m1.connect("changed", self.attr_handler)
+        hid2 = self.m1.connect("pre-changed", self.attr_handler, "pre")
+        self.m1.frame_of_reference = FOREF_PREFIX + "s;o=0"
+        self.assertEqual(self.buf, [(self.m1, "frame_of_reference",
+                                     FOREF_PREFIX + "s;o=0",)]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.url = "file:/foo.avi"
+        self.assertEqual(self.buf, [(self.m1, "url", "file:/foo.avi"),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.m1.disconnect(hid1)
+        self.m1.disconnect(hid2)
+        self.m1.url = "file:/bar./avi"
+        self.assertEqual(self.buf, [])
+        self.m1.frame_of_reference = FOREF_PREFIX + "ms;o=1"
+        self.assertEqual(self.buf, [])
+
+    def test_annotation_changed_media(self):
+        hid1 = self.a1.connect("changed::media", self.attr_handler)
+        hid2 = self.a1.connect("pre-changed::media", self.attr_handler, "pre")
+        self.a1.begin = 11
+        self.assertEqual(self.buf, [])
+        self.a1.media = self.m2
+        self.assertEqual(self.buf, [(self.a1, "media", self.m2),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.disconnect(hid1)
+        self.a1.disconnect(hid2)
+        self.a1.media = self.m1
+        self.assertEqual(self.buf, [])
+        
+    def test_annotation_changed_begin(self):
+        hid1 = self.a1.connect("pre-changed::begin", self.attr_handler, "pre")
+        hid2 = self.a1.connect("changed::begin", self.attr_handler)
+        self.a1.end = 21
+        self.assertEqual(self.buf, [])
+        self.a1.begin = 11
+        self.assertEqual(self.buf, [(self.a1, "begin", 11),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.disconnect(hid1)
+        self.a1.disconnect(hid2)
+        self.a1.begin = 12
+        self.assertEqual(self.buf, [])
+        
+    def test_annotation_changed_end(self):
+        hid1 = self.a1.connect("changed::end", self.attr_handler)
+        hid2 = self.a1.connect("pre-changed::end", self.attr_handler, "pre")
+        self.a1.begin = 11
+        self.assertEqual(self.buf, [])
+        self.a1.end = 21
+        self.assertEqual(self.buf, [(self.a1, "end", 21),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.disconnect(hid1)
+        self.a1.disconnect(hid2)
+        self.a1.end = 22
+        self.assertEqual(self.buf, [])
+
+    def test_annotation_changed_any(self):
+        hid1 = self.a1.connect("changed", self.attr_handler)
+        hid2 = self.a1.connect("pre-changed", self.attr_handler, "pre")
+        self.a1.media = self.m2
+        self.assertEqual(self.buf, [(self.a1, "media", self.m2),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.begin = 11
+        self.assertEqual(self.buf, [(self.a1, "begin", 11),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.end = 21
+        self.assertEqual(self.buf, [(self.a1, "end", 21),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.content_mimetype = "text/html"
+        self.assertEqual(self.buf,
+                         [(self.a1, "content_mimetype", "text/html"),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.a1.disconnect(hid1)
+        self.a1.disconnect(hid2)
+        self.a1.media = self.m1
+        self.a1.begin = 12
+        self.a1.end = 22
+        self.a1.content_mimetype = "image/png"
+        self.assertEqual(self.buf, [])
+
+    def test_relation_setitem(self):
+        self.r1.append(self.a1)
+        hid1 = self.r1.connect("changed-items", self.default_handler)
+        hid2 = self.r1.connect("pre-changed-items", self.default_handler)
+        self.r1[0] = self.a2
+        s = slice(0,1)
+        L = [self.a2,]
+        self.assertEqual(self.buf, [(self.r1, s, L),]*2)
+        del self.buf[:]
+        self.r1.disconnect(hid1)
+        self.r1.disconnect(hid2)
+        self.r1[0] = self.a2
+        self.assertEqual(self.buf, [])
+
+    def test_relation_delitem(self):
+        self.r1.extend([self.a1, self.a2])
+        hid1 = self.r1.connect("changed-items", self.default_handler)
+        hid2 = self.r1.connect("pre-changed-items", self.default_handler)
+        del self.r1[0]
+        s = slice(0,1)
+        self.assertEqual(self.buf, [(self.r1, s, []),]*2)
+        del self.buf[:]
+        self.r1.disconnect(hid1)
+        self.r1.disconnect(hid2)
+        del self.r1[0]
+        self.assertEqual(self.buf, [])
+
+    def test_relation_append(self):
+        hid1 = self.r1.connect("changed-items", self.default_handler)
+        hid2 = self.r1.connect("pre-changed-items", self.default_handler)
+        self.r1.append(self.a1)
+        s = slice(0,0)
+        L = [self.a1,]
+        self.assertEqual(self.buf, [(self.r1, s, L),]*2)
+        del self.buf[:]
+        self.r1.disconnect(hid1)
+        self.r1.disconnect(hid2)
+        self.r1.append(self.a2)
+        self.assertEqual(self.buf, [])
+
+    def test_relation_set_slice(self):
+        self.r1.extend([self.a1, self.a2])
+        hid1 = self.r1.connect("changed-items", self.default_handler)
+        hid2 = self.r1.connect("pre-changed-items", self.default_handler)
+        s = slice(1,2)
+        L = [self.a2, self.a1]
+        self.r1[s] = L
+        self.assertNotEqual(self.buf, [])
+        del self.buf[:]
+        self.r1.disconnect(hid1)
+        self.r1.disconnect(hid2)
+        self.r1[1:2] = [self.a1, self.a2,]
+        self.assertEqual(self.buf, [])
+
+    def test_relation_del_slice(self):
+        self.r1.extend([self.a1, self.a2, self.a1, self.a2])
+        hid1 = self.r1.connect("changed-items", self.default_handler)
+        hid2 = self.r1.connect("pre-changed-items", self.default_handler)
+        s = slice(0,1)
+        del self.r1[s]
+        self.assertNotEqual(self.buf, [])
+        del self.buf[:]
+        self.r1.disconnect(hid1)
+        self.r1.disconnect(hid2)
+        del self.r1[0:1]
+        self.assertEqual(self.buf, [])
+
+    def test_relation_extend(self):
+        hid1 = self.r1.connect("changed-items", self.default_handler)
+        hid2 = self.r1.connect("pre-changed-items", self.default_handler)
+        self.r1.extend([self.a1, self.a2,])
+        self.assertNotEqual(self.buf, [])
+        del self.buf[:]
+        self.r1.disconnect(hid1)
+        self.r1.disconnect(hid2)
+        self.r1.extend([self.a2, self.a1,])
+        self.assertEqual(self.buf, [])
+
+    def test_list_setitem(self):
+        self.L1.append(self.a1)
+        hid1 = self.L1.connect("changed-items", self.default_handler)
+        hid2 = self.L1.connect("pre-changed-items", self.default_handler)
+        self.L1[0] = self.a2
+        s = slice(0,1)
+        L = [self.a2,]
+        self.assertEqual(self.buf, [(self.L1, s, L),]*2)
+        del self.buf[:]
+        self.L1.disconnect(hid1)
+        self.L1.disconnect(hid2)
+        self.L1[0] = self.a2
+        self.assertEqual(self.buf, [])
+
+    def test_list_delitem(self):
+        self.L1.extend([self.a1, self.a2])
+        hid1 = self.L1.connect("changed-items", self.default_handler)
+        hid2 = self.L1.connect("pre-changed-items", self.default_handler)
+        del self.L1[0]
+        s = slice(0,1)
+        self.assertEqual(self.buf, [(self.L1, s, []),]*2)
+        del self.buf[:]
+        self.L1.disconnect(hid1)
+        self.L1.disconnect(hid2)
+        del self.L1[0]
+        self.assertEqual(self.buf, [])
+
+    def test_list_append(self):
+        hid1 = self.L1.connect("changed-items", self.default_handler)
+        hid2 = self.L1.connect("pre-changed-items", self.default_handler)
+        self.L1.append(self.a1)
+        s = slice(0,0)
+        L = [self.a1,]
+        self.assertEqual(self.buf, [(self.L1, s, L),]*2)
+        del self.buf[:]
+        self.L1.disconnect(hid1)
+        self.L1.disconnect(hid2)
+        self.L1.append(self.a2)
+        self.assertEqual(self.buf, [])
+
+    def test_list_set_slice(self):
+        self.L1.extend([self.a1, self.a2])
+        hid1 = self.L1.connect("changed-items", self.default_handler)
+        hid2 = self.L1.connect("pre-changed-items", self.default_handler)
+        s = slice(1,2)
+        L = [self.a2, self.a1]
+        self.L1[s] = L
+        self.assertNotEqual(self.buf, [])
+        del self.buf[:]
+        self.L1.disconnect(hid1)
+        self.L1.disconnect(hid2)
+        self.L1[1:2] = [self.a1, self.a2,]
+        self.assertEqual(self.buf, [])
+
+    def test_list_del_slice(self):
+        self.L1.extend([self.a1, self.a2, self.a1, self.a2])
+        hid1 = self.L1.connect("changed-items", self.default_handler)
+        hid2 = self.L1.connect("pre-changed-items", self.default_handler)
+        s = slice(0,1)
+        del self.L1[s]
+        self.assertNotEqual(self.buf, [])
+        del self.buf[:]
+        self.L1.disconnect(hid1)
+        self.L1.disconnect(hid2)
+        del self.L1[0:1]
+        self.assertEqual(self.buf, [])
+
+    def test_list_extend(self):
+        hid1 = self.L1.connect("changed-items", self.default_handler)
+        hid2 = self.L1.connect("pre-changed-items", self.default_handler)
+        self.L1.extend([self.a1, self.a2,])
+        self.assertNotEqual(self.buf, [])
+        del self.buf[:]
+        self.L1.disconnect(hid1)
+        self.L1.disconnect(hid2)
+        self.L1.extend([self.a2, self.a1,])
+        self.assertEqual(self.buf, [])
+
+    def test_import_changed_url(self):
+        hid1 = self.i1.connect("changed::url", self.attr_handler)
+        hid2 = self.i1.connect("pre-changed::url", self.attr_handler, "pre")
+        self.i1.uri = "file:/foo.bzp"
+        self.assertEqual(self.buf, [])
+        self.i1.url = "file:/foo.bzp"
+        self.assertEqual(self.buf, [(self.i1, "url", "file:/foo.bzp"),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.i1.disconnect(hid1)
+        self.i1.disconnect(hid2)
+        self.i1.url = "file:/bar.bzp"
+        self.assertEqual(self.buf, [])
+
+    def test_import_changed_uri(self):
+        hid1 = self.i1.connect("changed::uri", self.attr_handler)
+        hid2 = self.i1.connect("pre-changed::uri", self.attr_handler, "pre")
+        self.i1.url = "file:/foo.bzp"
+        self.assertEqual(self.buf, [])
+        self.i1.uri = "file:/foo.bzp"
+        self.assertEqual(self.buf, [(self.i1, "uri", "file:/foo.bzp"),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.i1.disconnect(hid1)
+        self.i1.disconnect(hid2)
+        self.i1.uri = "file:/bar.bzp"
+        self.assertEqual(self.buf, [])
+
+    def test_import_changed_any(self):
+        hid1 = self.i1.connect("changed", self.attr_handler)
+        hid2 = self.i1.connect("pre-changed", self.attr_handler, "pre")
+        self.i1.url = "file:/foo.bzp"
+        self.assertEqual(self.buf, [(self.i1, "url", "file:/foo.bzp"),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.i1.uri = "file:/foo.bzp"
+        self.assertEqual(self.buf, [(self.i1, "uri", "file:/foo.bzp"),]*2)
+        self.assertEqual(self.callback_errors, [])
+        del self.buf[:]
+        self.i1.disconnect(hid1)
+        self.i1.disconnect(hid2)
+        self.i1.url = "file:/bar.bzp"
+        self.i1.uri = "file:/bar.bzp"
+        self.assertEqual(self.buf, [])
+
 if __name__ == "__main__":
     main()
 
