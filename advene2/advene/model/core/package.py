@@ -17,7 +17,6 @@ from advene.model.core.query import Query
 from advene.model.core.import_ import Import
 from advene.model.core.all_group import AllGroup
 from advene.model.core.own_group import OwnGroup
-from advene.model.core.dirty import DirtyMixin
 from advene.model.core.meta import WithMetaMixin
 from advene.model.exceptions import \
     ModelError, NoClaimingError, NoSuchElementError, UnreachableImportError
@@ -37,7 +36,7 @@ _constructor = {
     IMPORT: Import,
 }
 
-class Package(object, WithMetaMixin, DirtyMixin):
+class Package(object, WithMetaMixin):
 
     def __init__(self, url, create=False, readonly=False, force=False):
         assert not (create and readonly)
@@ -170,9 +169,6 @@ class Package(object, WithMetaMixin, DirtyMixin):
     def close (self):
         """Free all external resources used by the package's backend.
 
-        If the package has dirty elements, clean them (since they are dirty,
-        they can not be garbage collected, so they must be in _elements).
-
         It is an error to close a package that is imported by another one,
         unless they are part of an import cycle. In the latter case, this
         package will be closed, and the other packages in the cycle will
@@ -203,13 +199,6 @@ class Package(object, WithMetaMixin, DirtyMixin):
                 p._finish_close()
 
     def _do_close(self):
-        # use values instead of itervalues below, because cleaning may cause
-        # elements to vanish from the WeakValueDictionary, and dict to not
-        # like to be changed while being iterated
-        for e in self._elements.values():
-            if e.dirty:
-                e.clean()
-        self.clean()
         if self._transient:
             self._backend.delete(self._id)
         else:
@@ -244,8 +233,10 @@ class Package(object, WithMetaMixin, DirtyMixin):
     def _set_uri(self, uri):
         if uri is None: uri = ""
         self._uri = uri
-        self.add_cleaning_operation_once(self._backend.update_uri,
-                                         self._id, self._uri)
+        self._backend.update_uri(self._id, self._uri)
+        for pkg, iid in self._importers.iteritems():
+            imp = pkg[iid]
+            imp._set_uri(uri)
 
     @autoproperty
     def _get_own(self):

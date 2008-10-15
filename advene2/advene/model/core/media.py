@@ -25,7 +25,7 @@ class Media(PackageElement):
     @autoproperty
     def _set_url(self, url):
         self._url = url
-        self.add_cleaning_operation_once(self.__clean)
+        self.__store()
 
     @autoproperty
     def _get_frame_of_reference(self):
@@ -34,7 +34,7 @@ class Media(PackageElement):
     @autoproperty
     def _set_frame_of_reference(self, frame_of_reference):
         self._frame_of_reference = frame_of_reference
-        self.add_cleaning_operation_once(self.__clean)
+        self.__store()
 
     @autoproperty
     def _get_unit(self):
@@ -70,7 +70,7 @@ class Media(PackageElement):
             self._origin = None
         
 
-    def __clean(self):
+    def __store(self):
         o = self._owner
         o._backend.update_media(o._id, self.id, self._url,
                                 self._frame_of_reference)

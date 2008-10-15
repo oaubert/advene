@@ -64,15 +64,18 @@ if __name__ == "__main__":
     list(p.all.annotations)
     measure_time("building annotations list")
 
-    m7 = p["m7"]
+    m7 = r["m7"]
  
     measure_time() # take origin
-    print [ a.id for a in p.all.iter_annotations(m7, begin_min=100) ]
+    l1 = len([ a for a in r.all.iter_annotations(m7, begin_min=100) ])
     measure_time("building annotations sublist (efficient)")
 
-    print [ a.id for a in p.all.annotations
-                 if a.media == m7 and a.begin >= 100 ]
+    l2 =  len([ a for a in r.all.annotations
+                 if a.media == m7 and a.begin >= 100 ])
     measure_time("building annotations sublist (less efficient)")
+
+    assert l1==l2, (l1, l2)
+    print "(sublist was %s elements long)" % l1
 
     p.close()
     q.close()

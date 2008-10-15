@@ -69,7 +69,7 @@ class Annotation(PackageElement, WithContentMixin):
         self._media_idref = midref
         self._media = media
         if not _init:
-            self.add_cleaning_operation_once(self.__clean)
+            self.__store()
 
     @autoproperty
     def _get_media_idref(self):
@@ -92,7 +92,7 @@ class Annotation(PackageElement, WithContentMixin):
     @autoproperty
     def _set_begin(self, val):
         self._begin = val
-        self.add_cleaning_operation_once(self.__clean)
+        self.__store()
 
     @autoproperty
     def _get_end(self):
@@ -101,7 +101,7 @@ class Annotation(PackageElement, WithContentMixin):
     @autoproperty
     def _set_end(self, val):
         self._end = val
-        self.add_cleaning_operation_once(self.__clean)
+        self.__store()
 
     @autoproperty
     def _get_duration(self):
@@ -120,7 +120,7 @@ class Annotation(PackageElement, WithContentMixin):
     def _set_duration(self, val):
         self._set_end(self._begin + val)
 
-    def __clean(self):
+    def __store(self):
         o = self._owner
         o._backend.update_annotation(o._id, self._id,
                                      self._media_idref, self._begin, self._end)

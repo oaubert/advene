@@ -4,11 +4,6 @@ import gc
 import sys
 from weakref import ref
 
-import advene.model.core.dirty as dirty
-
-## uncomment the following to disable differed cleaning
-#dirty.DirtyMixin = dirty.DirtyMixinInstantCleaning
-
 from advene.model.consts import DC_NS_PREFIX, RDFS_NS_PREFIX, PARSER_META_PREFIX
 from advene.model.core.package import Package
 
@@ -31,14 +26,6 @@ def trace_wrap_all (obj):
         if k[0] != "_" and callable (v):
             f = getattr (obj, k)
             od[k] = trace_wrapper (f)
-
-def print_lastchance(mode=0):
-    if mode == 0:
-        print dirty.DirtyMixin._DirtyMixin__lastchance.keys()
-    elif mode == 1:
-        print dirty.DirtyMixin._DirtyMixin__lastchance.values()
-    else:
-        print dirty.DirtyMixin._DirtyMixin__lastchance.items()
 
 def print_elements(p):
     print [(k,id(v)) for k,v in p._elements.items()]

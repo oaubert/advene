@@ -32,7 +32,7 @@ class Import(PackageElement):
     def _set_url(self, url):
         assert url
         self._url = url
-        self.add_cleaning_operation_once(self.__clean)
+        self.__store()
 
     @autoproperty
     def _get_uri(self):
@@ -41,13 +41,13 @@ class Import(PackageElement):
     @autoproperty
     def _set_uri(self, uri):
         self._uri = uri
-        self.add_cleaning_operation_once(self.__clean)
+        self.__store()
 
     @autoproperty
     def _get_package(self):
         return self._imported
 
-    def __clean(self):
+    def __store(self):
         o = self._owner
         o._backend.update_import(o._id, self._id, self._url, self._uri)
 

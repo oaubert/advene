@@ -5,7 +5,6 @@ I define the common super-class of all package element classes.
 from itertools import chain
 
 from advene.model.consts       import _RAISE
-from advene.model.core.dirty   import DirtyMixin
 from advene.model.core.meta    import WithMetaMixin
 from advene.utils.autoproperty import autoproperty
 
@@ -21,14 +20,13 @@ QUERY      = 'q'
 VIEW       = 'v'
 RESOURCE   = 'R'
 
-class PackageElement(object, WithMetaMixin, DirtyMixin):
+class PackageElement(object, WithMetaMixin):
 
     def __init__(self, owner, id):
         self._id    = id
         self._owner = owner
         self._deleted = False
         owner._elements[id] = self # cache to prevent duplicate instanciation
-        self._dirty = False
 
     def make_idref_in(self, pkg):
         """
@@ -69,14 +67,12 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
         if self._deleted: return
         self._deleted = True
         #self.__class__ = DestroyedPackageElement
-        self.add_cleaning_operation(self._owner._backend.delete_element,
-                                    self._owner._id, self._id,
-                                    self.ADVENE_TYPE)
+        self._owner._backend.delete_element(self._owner._id, self._id,
+                                            self.ADVENE_TYPE)
         # TODO the following is a quick and dirty solution to have the rest of
         # the implementation work once an element has been deleted.
         # This should be reconsidered, and maybe improved.
         del self._owner._elements[self._id]
-        self.clean()
 
     @autoproperty        
     def _get_id(self):
@@ -118,8 +114,6 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
             default = None
         else: # yield_idrefs is false
             default = _RAISE
-        # cleaning the owner is required to have URI-refs in sync with backend
-        self._owner.clean()
         u = self._get_uriref()
         if not inherited:
             pids = (package._id,)

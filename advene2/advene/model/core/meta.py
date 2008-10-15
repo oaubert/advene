@@ -3,11 +3,10 @@ from itertools import chain
 from weakref import ref
 
 from advene.model.consts import _RAISE
-from advene.model.core.dirty import DirtyMixin
 from advene.model.exceptions import ModelError
 from advene.utils.sorted_dict import SortedDict
 
-class WithMetaMixin(DirtyMixin):
+class WithMetaMixin:
     """Metadata access mixin.
 
     I factorize all metradata-related code for classes Package and
@@ -24,8 +23,6 @@ class WithMetaMixin(DirtyMixin):
 
     __cache = None # SortedDict of all known metadata
                    # values are either string or (weakref, idref)
-    __dirty = None # dict of dirty metadata
-                   # values are (val_as_string, val_is_idref)
     __cache_is_complete = False # is self.__cache complete?
 
     def iter_meta(self):
@@ -58,17 +55,15 @@ class WithMetaMixin(DirtyMixin):
                         v = p.get_element(tpl[1], _RAISE)
                 yield k, v
         else:
-            # retrieve data from backend *and __dirty*, and cache them
-            iter_backend = p._backend.iter_meta(p._id, eid, typ)
-            iter_all = self._mix_dirty_and_backend(iter_backend)
+            # retrieve data from backend and cache them
             cache = self.__cache
             if cache is None:
                 cache = self.__cache = SortedDict()
-            for k, v, v_is_idref in iter_all:
+            for k, v, v_is_idref in p._backend.iter_meta(p._id, eid, typ):
                 if v_is_idref:
-                    # it is no use looking in the cache: if the element is in
-                    # the meta cache, it will also be in the package cache,
-                    # and the retrieval from the package will be as efficient
+                    # it is no use looking in cache: if the element is in it,
+                    # then it will also be in the package's cache, and the
+                    # retrieval from the package will be as efficient
                     e = p.get_element(v, _RAISE)
                     cache[k] = (ref(e), v)
                     v = e
@@ -106,10 +101,9 @@ class WithMetaMixin(DirtyMixin):
                     v = metadata_value(v, False)
                 yield k, v
         else:
-            # retrieve data from backend *and __dirty*
-            iter_backend = p._backend.iter_meta(p._id, eid, typ)
-            iter_all = self._mix_dirty_and_backend(iter_backend)
-            for k, v, v_is_idref in iter_all:
+            # retrieve data from backend
+            cache = self.__cache
+            for k, v, v_is_idref in p._backend.iter_meta(p._id, eid, typ):
                 yield k, metadata_value(v, v_is_idref)
 
     def get_meta(self, key, default=_RAISE):
@@ -213,11 +207,7 @@ class WithMetaMixin(DirtyMixin):
         if cache is None:
             cache = self.__cache = SortedDict()
         cache[key] = val
-        dirty = self.__dirty
-        if dirty is None:
-            dirty = self.__dirty = SortedDict()
-        dirty[key] = vstr, vstr_is_idref
-        self.add_cleaning_operation_once(self.__clean)
+        p._backend.set_meta(p._id, eid, typ, key, vstr, vstr_is_idref)
 
     def del_meta(self, key):
         """Delete the metadata.
@@ -235,79 +225,11 @@ class WithMetaMixin(DirtyMixin):
         cache = self.__cache
         if cache is not None and key in cache:
             del cache[key]
-        dirty = self.__dirty
-        if dirty is None:
-            dirty = self.__dirty = SortedDict()
-        dirty[key] = None, False
-        self.add_cleaning_operation_once(self.__clean)
+        p._backend.set_meta(p._id, eid, typ, key, None, False)
 
     @property
     def meta(self):
         return _MetaDict(self)
-
-    def __clean(self):
-        dirty = self.__dirty
-        if dirty:
-            if hasattr(self, "ADVENE_TYPE"):
-                p = self._owner
-                eid = self._id
-                typ = self.ADVENE_TYPE
-            else:
-                p = self
-                eid = ""
-                typ = ""
-        while dirty:
-            k,v = dirty.popitem()
-            val, val_is_idref = v
-            try:
-                p._backend.set_meta(p._id, eid, typ, k, val, val_is_idref)
-            except:
-                dirty[k] = v
-                raise
-
-    def _mix_dirty_and_backend(self, iter_backend):
-        """
-        This method is used in iter_meta.
-
-        It yields values of the form (key, stringvalue, val_is_idref),
-        homogeneous to what the backend method returns.
-
-        However, this method takes into account the __dirty dict, inserting
-        new keys at the right place, overriding changed values, and avoiding
-        deleted keys.
-        """
-        dirty = self.__dirty
-        if dirty is None:
-            dirty = self.__dirty = SortedDict()
-        iter_dirty = ( (k,v[0],v[1]) for k,v in dirty.iteritems() )
-
-        iter_dirty = chain(iter_dirty, [None,]) # eschew StopIteration
-        iter_backend = chain(iter_backend, [None,]) # idem
-
-        next_dirty = iter_dirty.next()
-        next_backend = iter_backend.next()
-        while next_dirty and next_backend:
-            if next_dirty[0] <= next_backend[0]:
-                if next_dirty[0] == next_backend[0]:
-                    # dirty overrides backend
-                    next_backend = iter_backend.next()
-                if next_dirty[1] is not None: # avoid deleted keys
-                    yield next_dirty
-                next_dirty = iter_dirty.next()
-            else:
-                yield next_backend
-                next_backend = iter_backend.next()
-        # flush non-empty one
-        if next_dirty:
-            yield next_dirty
-            for i in iter_dirty:
-                if i is not None:
-                    yield i
-        elif next_backend:
-            yield next_backend
-            for i in iter_backend:
-                if i is not None:
-                    yield i
 
     @classmethod
     def make_metadata_property(cls, key, alias=None):

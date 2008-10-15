@@ -18,12 +18,11 @@ from urlparse import urlparse
 from weakref import ref
 
 from advene.model.consts import _RAISE, PACKAGED_ROOT
-from advene.model.core.dirty import DirtyMixin
 from advene.model.core.element import RELATION
 from advene.model.exceptions import ModelError
 from advene.utils.autoproperty import autoproperty
 
-class WithContentMixin(DirtyMixin):
+class WithContentMixin:
     """I provide functionality for elements with a content.
 
     I assume that I will be mixed in subclasses of PackageElement.
@@ -64,20 +63,19 @@ class WithContentMixin(DirtyMixin):
         self.__mimetype, self.__schema_idref, self.__url = \
             o._backend.get_content_info(o._id, self._id, self.ADVENE_TYPE)
 
-    def __clean_info(self):
+    def __store_info(self):
+        "store info in backend"
         o = self._owner
         o._backend.update_content_info(o._id, self._id, self.ADVENE_TYPE,
                                        self.__mimetype or "",
                                        self.__schema_idref or "",
                                        self.__url or "")
 
-    def __clean_data(self):
+    def __store_data(self):
+        "store data in backend"
         o = self._owner
-        # NB: its is possible that data has been modified, then that a URL
-        # has been set; in that case, we do need to actually clean the data.
-        if not self.__url:
-            o._backend.update_content_data(o._id, self._id, self.ADVENE_TYPE,
-                                           self.__data or "")
+        o._backend.update_content_data(o._id, self._id, self.ADVENE_TYPE,
+                                       self.__data or "")
 
     def get_content_schema(self, default=None):
         """
@@ -160,7 +158,7 @@ class WithContentMixin(DirtyMixin):
                 self._set_content_data("")
         self.__mimetype = mimetype
         if not _init:
-            self.add_cleaning_operation_once(self.__clean_info)
+            self.__store_info()
 
     @autoproperty       
     def _get_content_schema(self):
@@ -195,7 +193,7 @@ class WithContentMixin(DirtyMixin):
             self.__schema_idref = resource.make_idref_in(op)
             self.__schema_wref  = ref(resource)
         if not _init:
-            self.add_cleaning_operation_once(self.__clean_info)
+            self.__store_info()
 
     @autoproperty
     def _get_content_schema_idref(self):
@@ -236,7 +234,7 @@ class WithContentMixin(DirtyMixin):
                 or self._owner.get_meta(PACKAGED_ROOT, None) is not None
             self.__url = url
             if not _init:
-                self.add_cleaning_operation_once(self.__clean_info)
+                self.__store_info()
             if self.__data is not None:
                 del self.__data
                 # NB: data needs no erasing in the backend, because the backend
@@ -291,14 +289,13 @@ class WithContentMixin(DirtyMixin):
             f.truncate()
             f.write(data)
             f.close()
-            # no cleaning required since the backend sees no change
         else:
             if url:
                 raise AttributeError, "content has a url, can not set data"
             elif self.__as_file:
                 raise IOError, "content already opened as a file"
             self.__data = data
-            self.add_cleaning_operation_once(self.__clean_data)
+            self.__store_data()
         
     @autoproperty
     def _get_content(self):
@@ -417,18 +414,15 @@ class ContentDataFile(object):
 
     def truncate(self, *args):
         self._file.truncate(*args)
-        self._element.add_cleaning_operation_once(
-            self._element._WithContentMixin__clean_data)
+        self._element._WithContentMixin__store_data()
 
     def write(self, str_):
         self._file.write(str_)
-        self._element.add_cleaning_operation_once(
-            self._element._WithContentMixin__clean_data)
+        self._element._WithContentMixin__store_data()
 
     def writelines(self, seq):
         self._file.writelines(seq)
-        self._element.add_cleaning_operation_once(
-            self._element._WithContentMixin__clean_data)
+        self._element._WithContentMixin__store_data()
 
     @property
     def closed(self): return self._file.closed

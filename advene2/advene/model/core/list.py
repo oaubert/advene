@@ -23,22 +23,6 @@ class List(PackageElement, WithContentMixin, GroupMixin):
     # retrieved from the package. If the id-ref is None, the id-ref is
     # retrieved from the backend.
 
-    # The use of add_cleaning_operation is complicated here.
-    # We could choose to have a single cleaning operation, performed once on
-    # cleaning, completely rewriting the element list.
-    # We have chosen to enqueue every atomic operation on the element list in
-    # the cleaning operation pending list, and perform them all on cleaning,
-    # which is more efficient that the previous solution if cleaning is 
-    # performed often enough.
-    #
-    # A third solution would be to try to optimize the cleaning by not
-    # executing atomic operations which will be cancelled by further
-    # operations. For example:::
-    #     l[1] = e1
-    #     l[1] = e2
-    # will execute backend.update_item twice, while only the second one
-    # is actually useful. So...
-
     ADVENE_TYPE = LIST
 
     def __init__(self, owner, id, _new=False):
@@ -81,16 +65,14 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         idref = a.make_idref_in(o)
         self._idrefs[i] = idref
         self._cache[i] = ref(a)
-        self.add_cleaning_operation(o._backend.update_item,
-                                    o._id, self._id, idref, i)
+        o._backend.update_item(o._id, self._id, idref, i)
 
     def __delitem__(self, i):
         if isinstance(i, slice): return self._del_slice(i)
         del self._idrefs[i] # also guarantees that is is a valid index
         del self._cache[i]
         o = self._owner
-        self.add_cleaning_operation(o._backend.remove_item,
-                                    o._id, self._id, i)
+        o._backend.remove_item(o._id, self._id, i)
 
     def _get_slice(self, s):
         c = len(self._cache)
@@ -132,8 +114,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         idref = a.make_idref_in(o)
         self._idrefs.insert(i,idref)
         self._cache.insert(i,ref(a))
-        self.add_cleaning_operation(o._backend.insert_item,
-                                    o._id, self._id, idref, i, c)
+        o._backend.insert_item(o._id, self._id, idref, i, c)
         # NB: it is important to pass to the backend the length c computed
         # *before* inserting the item
         
@@ -145,8 +126,7 @@ class List(PackageElement, WithContentMixin, GroupMixin):
         c = len(self._cache)
         self._idrefs.append(idref)
         self._cache.append(ref(a))
-        self.add_cleaning_operation(o._backend.insert_item,
-                                    o._id, self._id, idref, -1, c)
+        o._backend.insert_item(o._id, self._id, idref, -1, c)
         # NB: it is important to pass to the backend the length c computed
         # *before* appending the item
 

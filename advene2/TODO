@@ -8,14 +8,6 @@ Important improvements
 Minor improvements, to do one day
 =================================
 
-Element related
----------------
-
-- make dirty/clean more aggressive: creation of elements should be added to
-  their cleaning operations, but beware: that involves cleaning elements on
-  which they depend -- e.g. before creating an annotation, its media must
-  be clean -- because it may require creation too
-
 Backend related
 ---------------
 
@@ -43,8 +35,13 @@ Open questions and remarks
   if you know the id, you would rather call package[id] than package.own[id]
   or package.own.annotations[id]. To discuss...
 
-- the dirty/clean principle may improve performances in the long run, but it
-  causes a few vicious bugs: operations relying on the backend may be fooled
-  by the fact that the backend is not up-to-date... So if you get an
-  unexplained bug, ask yourself if the buggy function relies on caches or on
-  the backend, and try cleaning all the involved objects.
+- from Jul 13 2007 to Aug 03 2007, module advene.model.core.dirty was used to
+  delay accesses to the backend, in order to make modifications more
+  responsive. It appeared that this was no a good idea: the backend is not only
+  used for storage, but also for *indexing*. As a consequence, many methods
+  rely on the backend for efficient retrieval of sequences of objects, hence
+  requiring the cleaning of involved objects, and hindering access for the
+  sake of modifications. So that functionality has been discarded. Should it
+  become necessary in the future (the current sqlite backend seems to be
+  responsive enough, anyway), it should probably be implemented at the backend
+  level itself.
