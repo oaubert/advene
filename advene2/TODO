@@ -1,6 +1,10 @@
 Important improvements
 ======================
 
+- implement deletion of package elements
+
+- automatically fill creator/contributor and dates metadata
+
 - prevent annotations/relations to be untyped
 
 - implement ID generator
