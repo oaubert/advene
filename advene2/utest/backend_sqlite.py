@@ -846,9 +846,9 @@ class TestHandleElements (TestCase):
         pids = (self.pid1, self.pid2,)
         a5_uri_ref = "%s#a5" % self.i1_uri
         self.assertEqual (frozenset ((RELATION,)+i for i in [self.r1, self.r3]),
-                          frozenset (rel_w_member (a5_uri_ref, pids)))
+                          frozenset (rel_w_member (pids, a5_uri_ref,)))
         self.assertEqual (frozenset ([(RELATION,)+self.r1,]),
-                          frozenset (rel_w_member (a5_uri_ref, pids, 1)))
+                          frozenset (rel_w_member (pids, a5_uri_ref, 1)))
 
     def test_items (self):
 
@@ -883,9 +883,9 @@ class TestHandleElements (TestCase):
         pids = (self.pid1, self.pid2,)
         r3_uri_ref = "%s#r3" % self.i1_uri
         self.assertEqual (frozenset ((LIST,)+i for i in [self.l1, self.l3]),
-                          frozenset (lst_w_item (r3_uri_ref, pids)))
+                          frozenset (lst_w_item (pids, r3_uri_ref,)))
         self.assertEqual (frozenset ([(LIST,)+self.l1,]),
-                          frozenset (lst_w_item (r3_uri_ref, pids, 1)))
+                          frozenset (lst_w_item (pids, r3_uri_ref, 1)))
 
 
 class TestRetrieveDataWithSameId (TestCase):

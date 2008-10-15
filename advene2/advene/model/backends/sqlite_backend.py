@@ -734,6 +734,18 @@ class _SqliteBackend (object):
             self._conn.rollback()
             raise InternalError ("error in updating", e)
 
+    # reference finding
+
+    # TODO
+
+    # renaming
+
+    # TODO
+
+    # deletion
+
+    # TODO
+
     # content
 
     def get_content (self, package_id, id, element_type):
@@ -941,7 +953,7 @@ class _SqliteBackend (object):
             self._conn.rollback()
             raise InternalError ("could not delete or update", e)
 
-    def get_relations_with_member (self, member, package_ids, pos=None):
+    def get_relations_with_member (self, package_ids, member, pos=None):
         """
         Return tuples of the form (RELATION, package_id, id) of all the 
         relations having the given member, at the given position if given.
@@ -1076,7 +1088,7 @@ class _SqliteBackend (object):
             self._conn.rollback()
             raise InternalError ("could not delete or update", e)
 
-    def get_lists_with_item (self, item, package_ids, pos=None):
+    def get_lists_with_item (self, package_ids, item, pos=None):
         """
         Return tuples of the form (LIST, package_id, id) of all the 
         lists having the given item, at the given position if given.
@@ -1102,5 +1114,9 @@ class _SqliteBackend (object):
             args.append (pos)
 
         return self._conn.execute (q, args)
+
+    # tagged elements
+
+    # TODO 
 
     # end of the class
