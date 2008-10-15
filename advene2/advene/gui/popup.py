@@ -339,7 +339,6 @@ class Menu:
             re_struct=re.compile('^num=(\d+)$', re.MULTILINE)
             offset=s.get_value_as_int()-1
             l=at.annotations
-            l.sort(key=lambda a: a.fragment.begin)
             batch_id=object()
             for i, a in enumerate(l[offset:]):
                 if a.type.mimetype == 'application/x-advene-structured':

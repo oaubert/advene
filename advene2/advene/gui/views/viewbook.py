@@ -348,7 +348,7 @@ class ViewBook(AdhocView):
                     (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=a, destination=self.location, label=_("Query %s") % title)),
                     (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=a, destination=self.location, label=_("Browse %s") % title)),
                     (_("to display its contents"), lambda i: self.controller.gui.open_adhoc_view('annotationdisplay', annotation=a, destination=self.location, label=_("%s") % title)) ,
-                    (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin ], destination=self.location)),
+                    (_("as a bookmark"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.begin ], destination=self.location)),
                     ):
                     i=gtk.MenuItem(label, use_underline=False)
                     i.connect('activate', action)
@@ -376,7 +376,7 @@ class ViewBook(AdhocView):
                 for label, action in (
                     (_("to edit them"), lambda i: edit_selection(sources)),
                     (_("to create a new static view"), lambda i: create_and_open_view(sources)),
-                    (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.fragment.begin for a in sources ], destination=self.location)),
+                    (_("as bookmarks"), lambda i: self.controller.gui.open_adhoc_view('activebookmarks', elements=[ a.begin for a in sources ], destination=self.location)),
                     ):
                     i=gtk.MenuItem(label, use_underline=False)
                     i.connect('activate', action)

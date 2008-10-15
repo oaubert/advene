@@ -176,12 +176,10 @@ class Condition:
         return self.match == self.truematch
 
     def convert_value(self, element, mode='begin'):
-        """Converts a value (Annotation, Fragment or number) into a number.
-        Mode is used for Annotation and Fragment and tells wether to consider
+        """Converts a value (Annotation or number) into a number.
+        Mode is used for Annotation and tells wether to consider
         begin or end."""
         if isinstance(element, Annotation):
-            rv=getattr(element.fragment, mode)
-        elif isinstance(element, MillisecondFragment):
             rv=getattr(element, mode)
         else:
             try:
@@ -221,32 +219,13 @@ class Condition:
                 rv=self.convert_value(right, 'begin')
                 return lv == rv
             elif self.operator == 'overlaps':
-                if isinstance(left, Annotation):
-                    lv=left.fragment
-                elif isinstance(left, MillisecondFragment):
-                    lv=left
-                else:
-                    raise Exception(_("Unknown type for overlaps comparison"))
-                if isinstance(right, Annotation):
-                    rv=right.fragment
-                elif isinstance(right, MillisecondFragment):
-                    rv=right
-                else:
-                    raise Exception(_("Unknown type for overlaps comparison"))
+                # lv, rv MUST be annotations
+                assert isinstance(lv, Annotation), "overlap only applies to annotations (invalid left value)"
+                assert isinstance(rv, Annotation), "overlap only applies to annotations (invalid right value)"
+                lv=left
+                rv=right
                 return (lv.begin in rv or rv.begin in lv)
             elif self.operator == 'during':
-                if isinstance(left, Annotation):
-                    lv=left.fragment
-                elif isinstance(left, MillisecondFragment):
-                    lv=left
-                else:
-                    raise Exception(_("Unknown type for during comparison"))
-                if isinstance(right, Annotation):
-                    rv=right.fragment
-                elif isinstance(right, MillisecondFragment):
-                    rv=right
-                else:
-                    raise Exception(_("Unknown type for during comparison"))
                 return lv in rv
             elif self.operator == 'starts':
                 lv=self.convert_value(left, 'begin')

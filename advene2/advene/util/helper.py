@@ -639,14 +639,14 @@ def overlapping_annotations(t):
     """
     res=DefaultDict(default=[])
     l=t.annotations[:]
-    l.sort(key=lambda a: a.fragment.begin)
+    l.sort(key=lambda a: a.begin)
     while l:
         a=l.pop()
-        begin=a.fragment.begin
-        end=a.fragment.end
+        begin=a.begin
+        end=a.end
         for b in l:
-            be=b.fragment.begin
-            en=b.fragment.end
+            be=b.begin
+            en=b.end
             if not (end <= be or en <= begin):
                 res.append( (a, b) )
     return res

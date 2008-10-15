@@ -374,7 +374,7 @@ class AnnotationWidget(GenericColorButtonWidget):
               or targetType == config.data.target_type['STRING']):
             selection.set(selection.target, 8, "\n".join(w.annotation.content.data.encode('utf8') for w in widgets))
         elif targetType == config.data.target_type['timestamp']:
-            l=(encode_drop_parameters(timestamp=w.annotation.fragment.begin,
+            l=(encode_drop_parameters(timestamp=w.annotation.begin,
                                       comment=self.controller.get_title(w.annotation)) for w in widgets)
             selection.set(selection.target, 8, "\n".join(l))
         else:
@@ -788,7 +788,7 @@ class AnnotationRepresentation(gtk.Button):
         elif targetType == config.data.target_type['timestamp']:
             selection.set(selection.target, 
                           8, 
-                          encode_drop_parameters(timestamp=widget.annotation.fragment.begin,
+                          encode_drop_parameters(timestamp=widget.annotation.begin,
                                                  comment=self.controller.get_title(widget.annotation)))
         else:
             return False

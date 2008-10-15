@@ -1428,6 +1428,8 @@ class GenericContentHandler (ContentHandler):
 config.data.register_content_handler(GenericContentHandler)
 
 class EditFragmentForm(EditForm):
+    """Edit the bounds of an annotation.
+    """
     def __init__(self, element=None, controller=None, editable=True):
         self.begin=None
         self.end=None

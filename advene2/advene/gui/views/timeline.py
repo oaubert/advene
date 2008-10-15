@@ -598,7 +598,7 @@ class TimeLine(AdhocView):
     def scroll_to_annotation(self, annotation):
         """Scroll the view to put the annotation in the middle.
         """
-        self.center_on_position(annotation.fragment.begin)
+        self.center_on_position(annotation.begin)
         self.update_position (None)
         return True
 
@@ -1209,7 +1209,7 @@ class TimeLine(AdhocView):
             if source.relations:
                 item.set_sensitive(False)
 
-        if position is not None and abs(position-source.fragment.begin) > 1000:
+        if position is not None and abs(position-source.begin) > 1000:
             item=gtk.MenuItem(_("Duplicate to type %(type)s at %(position)s") % {
                     'type': dest_title,
                     'position': helper.format_time(position) }, use_underline=False)
@@ -1401,7 +1401,7 @@ class TimeLine(AdhocView):
             self.controller.gui.set_current_annotation(annotation)
             # Goto annotation if not already playing it
             p=self.controller.player.current_position_value
-            # We do not use 'p in annotation.fragment' since if we are
+            # We do not use 'p in annotation' since if we are
             # at the end of the annotation, we may want to go back to its beginning
             if p >= annotation.begin and p < annotation.end:
                 return True
@@ -2551,11 +2551,12 @@ class TimeLine(AdhocView):
             elif event.keyval == gtk.keysyms.Return:
                 def set_end_time(action, an):
                     if action == 'validate':
-                        an.fragment.end=self.controller.player.current_position_value
+                        an.end=self.controller.player.current_position_value
+                        self.controller.notify('ElementEditEnd', element=an, immediate=True)
                     elif action == 'cancel':
                         # Delete the annotation
                         self.controller.notify('ElementEditBegin', element=an, immediate=True)
-                        self.controller.package.annotations.remove(an)
+                        an.delete()
                         self.controller.notify('AnnotationDelete', annotation=an)
                     return True
 
