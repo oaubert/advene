@@ -28,6 +28,8 @@ from advene.core.imagecache import ImageCache
 from advene.gui.views import AdhocView
 import advene.util.helper as helper
 from advene.gui.util import png_to_pixbuf
+from advene.model.cam.annotation import Annotation
+from advene.model.cam.tag import AnnotationType
 
 name="Annotation display plugin"
 
@@ -86,6 +88,22 @@ class AnnotationDisplay(AdhocView):
                 'end': '--:--:--:--',
                 'contents': '',
                 'imagecontents': None}
+        elif isinstance(self.annotation, AnnotationType):
+            col=self.controller.get_element_color(self.annotation)
+            if col:
+                title='<span background="%s">Annotation Type <b>%s</b></span>' % (col, self.controller.get_title(self.annotation))
+            else:
+                title='Annotation <b>%s</b>' % self.controller.get_title(self.annotation)
+
+            d={ 'title': title,
+                'begin': helper.format_time(min(a.begin for a in self.annotation.annotations)),
+                'end': helper.format_time(max(a.end for a in self.annotation.annotations)),
+                'contents': _("%(size)d annotation(s)\nId: %(id)s") % {
+                    'size': len(self.annotation.annotations),
+                    'id': self.annotation.id 
+                    },
+                'imagecontents': None,
+                }
         else:
             col=self.controller.get_element_color(self.annotation)
             if col:
@@ -147,13 +165,20 @@ class AnnotationDisplay(AdhocView):
         if self.annotation is not None:
             if isinstance(self.annotation, int) or isinstance(self.annotation, long):
                 b=self.annotation
-            else:
+            elif isinstance(self.annotation, Annotation):
                 b=self.annotation.begin
-            cache=self.controller.gui.imagecache
-            if cache.is_initialized(b, epsilon=config.data.preferences['bookmark-snapshot-precision']):
-                self.label['image'].set_from_pixbuf(png_to_pixbuf (cache.get(b, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
-            elif self.label['image'].get_pixbuf() != self.no_image_pixbuf:
-                self.label['image'].set_from_pixbuf(self.no_image_pixbuf)
+            else:
+                b=None
+
+            if b is None:
+                self.label['image'].hide()
+            else:
+                cache=self.controller.gui.imagecache
+                if cache.is_initialized(b, epsilon=config.data.preferences['bookmark-snapshot-precision']):
+                    self.label['image'].set_from_pixbuf(png_to_pixbuf (cache.get(b, epsilon=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
+                elif self.label['image'].get_pixbuf() != self.no_image_pixbuf:
+                    self.label['image'].set_from_pixbuf(self.no_image_pixbuf)
+                self.label['image'].show()
         return False
 
     def build_widget(self):

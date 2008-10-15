@@ -31,6 +31,7 @@ import advene.core.config as config
 
 from advene.model.cam.tag import RelationType
 from advene.model.cam.annotation import Annotation
+from advene.model.cam.tag import AnnotationType
 from advene.model.cam.relation import Relation
 from advene.gui.views import AdhocView
 from advene.gui.edit.create import CreateElementPopup
@@ -76,6 +77,11 @@ class QuickviewBar(gtk.HBox):
             b="   " + helper.format_time(a)
             e=""
             c=_("Current time")
+        elif isinstance(a, AnnotationType):
+            b="   " + helper.format_time(min(a.begin for a in a.annotations))
+            e=" - " + helper.format_time(max(a.end for a in a.annotations))
+            c=self.controller.get_title(a)
+            c += " (" + a.id + ")"
         else:
             b="   " + helper.format_time(a.begin)
             e=" - " + helper.format_time(a.end)
@@ -2596,19 +2602,19 @@ class TimeLine(AdhocView):
 
             # FIXME: no more schema ?
             #self.tooltips.set_tip(b, _("From schema %s") % self.controller.get_title(t.schema))
-            #def focus_in(button, event):
-            #    for w in layout.get_children():
-            #        if isinstance(w, AnnotationTypeWidget) and w.annotationtype.schema == button.annotationtype.schema:
-            #            w.set_highlight(True)
-            #    return False
-            #
+            def focus_in(button, event):
+                #for w in layout.get_children():
+                #    if isinstance(w, AnnotationTypeWidget) and w.annotationtype.schema == button.annotationtype.schema:
+                #        w.set_highlight(True)
+                self.set_annotation(button.annotationtype)
+                return False
+            
             #def focus_out(button, event):
             #    for w in layout.get_children():
             #        if isinstance(w, AnnotationTypeWidget) and w.highlight:
             #            w.set_highlight(False)
             #    return False
-            #
-            #b.connect('focus-in-event', focus_in)
+            b.connect('focus-in-event', focus_in)
             #b.connect('focus-out-event', focus_out)
 
             # The button can receive drops (to transmute annotations)
