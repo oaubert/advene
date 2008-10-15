@@ -1,7 +1,11 @@
 * frame-of-reference: verbose and not easy to manipulate. Better: <media origin="0" unit="ms" ...>
 
+-> ok
+
 * p.annotations should default to p.all.annotations. p.own and p.all
   should be used to ensure there is no ambiguity, but they are more verbose
+
+-> I don't like it, but ok
 
 * Maybe all iterators (relations, annotations, groups...) should have
   an appropriate __str__ method, to make it easier to interact/explore

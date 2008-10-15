@@ -1,6 +1,23 @@
 Important improvements
 ======================
 
+- rename advene core to advene cam
+
+- add parameters X_with_prefix and X_exclude_prefix in backend_methods
+  (id_with_prefix, id_exclude_prefix, media_with_prefix, etc...)
+
+- augment backend method iter_tags_with_element with attributes tag_with_prefix
+  and tag_exclude_prefix ; may be symetric iter_elements_with_tags
+
+- rename schema to model (in content.py and associate)
+
+- replace idref by id anywhere its appropriate (improve l=readability)
+
+- there should be only 2 ways of itering over collections:
+  - yielding elemements or None when unreachable
+  - yieldings ids
+ -> update the code accordingly
+
 - remove all list generations ending with "," in backends/sqlite.py
 
 - replace executescript by a list of execute in backends/sqlite.py -- 
