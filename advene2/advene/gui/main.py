@@ -3482,7 +3482,7 @@ class AdveneGUI(Connect):
         return True
 
     def on_export_activate (self, button=None, data=None):
-        importer_package=Package(uri=config.data.advenefile('exporters.xml'))
+        importer_package=Package(url=config.data.advenefile('exporters.xml'))
 
         def generate_default_filename(filter, filename=None):
             """Generate a filename for the given filter.
