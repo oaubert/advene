@@ -47,3 +47,4 @@ _textual_mimetypes = []
 # default registration
 
 register_textual_mimetype("image/svg")
+register_textual_mimetype("image/svg+xml")
