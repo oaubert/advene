@@ -142,5 +142,30 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
                         y = package.make_idref_for(p, tid)
                     yield y
 
+    def iter_taggers(self, tag, package):
+        """Iter over all the packages associating this element to ``tag``.
+
+        ``package`` is the top-level package.
+        """
+        eu = self._get_uriref()
+        tu = tag._get_uriref()
+        for be, pdict in package._backends_dict.iteritems():
+            for pid in be.iter_taggers(pdict, eu, tu):
+                yield pdict[pid]
+
+    def has_tag(self, tag, package, inherited=True):
+        """Is this element associated to ``tag`` by ``package``.
+
+        If ``inherited`` is set to False, only returns True if ``package`` 
+        itself associates this element to ``tag``; else returns True also if
+        the association is inherited from an imported package.
+        """
+        if not inherited:
+            eu = self._get_uriref()
+            tu = tag._get_uriref()
+            it = package._backend.iter_taggers((package._id,), eu, tu)
+            return bool(list(it))
+        else:
+            return list(self.iter_taggers(tag, package))
 
 # TODO: provide class DestroyedPackageElement.

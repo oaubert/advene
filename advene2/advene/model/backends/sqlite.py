@@ -1888,7 +1888,7 @@ class _SqliteBackend(object):
         r = self._conn.execute(q, args)
         return _FlushableIterator(r, self)
 
-    def iter_tagging(self, package_ids, element, tag):
+    def iter_taggers(self, package_ids, element, tag):
         """Iter over all the packages associating element to tag.
 
         @param element the uri-ref of an element
@@ -1915,6 +1915,19 @@ class _SqliteBackend(object):
 
         r = ( i[0] for i in self._conn.execute(q, args) )
         return _FlushableIterator(r, self)
+
+    def iter_external_tagging(self, package_id):
+        """Iter over all tagging involving two imported elements.
+
+        This is useful for serialization.
+        """
+        q = "SELECT join_id_ref(element_p, element_i), " \
+                   "join_id_ref(tag_p, tag_i) " \
+            "FROM Tagged t " \
+            "WHERE t.package = ? AND element_p > '' AND tag_p > ''"
+        r = self._conn.execute(q, (package_id,))
+        return _FlushableIterator(r, self)
+
 
     # end of the backend interface
 

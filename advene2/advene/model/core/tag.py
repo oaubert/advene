@@ -65,4 +65,15 @@ class Tag(PackageElement):
                         y = package.make_idref_for(p, eid)
                     yield y
 
+    def has_element(self, element, package, inherited=True):
+        """Is this tag associated to ``element`` by ``package``.
+
+        If ``inherited`` is set to False, only returns True if ``package`` 
+        itself associates this tag to ``element``; else returns True also if
+        the association is inherited from an imported package.
+        """
+        if not inherited:
+            return element.has_tag(self, package, False)
+        else:
+            return list(element.iter_taggers(self, package))
  

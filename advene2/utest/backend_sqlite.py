@@ -1193,15 +1193,19 @@ class TestHandleElements(TestCase):
         )
 
         self.assertEquals( frozenset((self.pid1, self.pid2)), frozenset(self.
-         be.iter_tagging(pids, "%s#a5" % self.url2, "%s#t3" % self.i1_uri))
+         be.iter_taggers(pids, "%s#a5" % self.url2, "%s#t3" % self.i1_uri))
         )
 
         self.assertEquals( frozenset((self.pid1, self.pid2)), frozenset(self.
-         be.iter_tagging(pids, "%s#a5" % self.i1_uri, "%s#t3" % self.url2))
+         be.iter_taggers(pids, "%s#a5" % self.i1_uri, "%s#t3" % self.url2))
         )
 
         self.assertEquals( frozenset(), frozenset(self.be.
-         iter_tagging((self.pid1,), "%s#a3" % self.i1_uri, "%s#t6" % self.url2))
+         iter_taggers((self.pid1,), "%s#a3" % self.i1_uri, "%s#t6" % self.url2))
+        )
+
+        self.assertEquals( frozenset((("i1:a5", "i1:t3"),)), frozenset(self.
+         be.iter_external_tagging(self.pid1))
         )
 
         self.be.dissociate_tag(self.pid1, "a1",    "t1")
@@ -1678,7 +1682,8 @@ class TestRobustIterations(TestCase):
         "iter_lists_with_item": [pids, "%s#r1" % url1,],
         "iter_tags_with_element": [pids, "%s#a1" % url1,],
         "iter_elements_with_tag": [pids, "%s#t1" % url1,],
-        "iter_tagging": [pids, "%s#a1" % url1, "%s#t1" % url1,],
+        "iter_taggers": [pids, "%s#a1" % url1, "%s#t1" % url1,],
+        "iter_external_tagging": [pid1,],
     }
 
     update_methods = {
@@ -1727,6 +1732,7 @@ class TestRobustIterations(TestCase):
             b.associate_tag(self.pid1, "a1",    "t1")
             b.associate_tag(self.pid1, "a1",    "i1:t3")
             b.associate_tag(self.pid1, "i1:a5", "t1")
+            b.associate_tag(self.pid1, "i1:a5", "i1:t3")
             b.update_content_info(self.pid1, "a1", ANNOTATION,
                                   "text/plain", "i1:R3", "")
             b.update_content_info(self.pid2, "r3", RELATION,
