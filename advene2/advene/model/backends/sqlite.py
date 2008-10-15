@@ -24,6 +24,7 @@ import re
 
 from advene.model.backends.exceptions \
   import ClaimFailure, NoSuchPackage, InternalError, PackageInUse, WrongFormat
+import advene.model.backends.sqlite_init as sqlite_init
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
 from advene.model.exceptions import ModelError
@@ -143,14 +144,9 @@ def create(package, force=False, url=None):
         curs.execute("BEGIN EXCLUSIVE")
         if must_init:
             # initialize database
-            f = open(join(split(__file__)[0], "sqlite_init.sql"))
-            sql = f.read()
-            f.close()
             try:
-                curs.executescript(sql)
-                if sqlite.version_info > (2,3,2):
-                    # actually, executescript changed somewhere btw 2.3.2 & 2.3.5
-                    curs.execute("BEGIN EXCLUSIVE")
+                for sql in sqlite_init.statements:
+                    curs.execute(sql)
                 curs.execute("INSERT INTO Version VALUES (?)",
                              (BACKEND_VERSION,))
                 curs.execute("INSERT INTO Packages VALUES (?,?,?)",

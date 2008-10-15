@@ -1,3 +1,4 @@
+statements = """--"
 -- about NULL values and foreign keys
 -- ==================================
 --
@@ -13,7 +14,7 @@
 CREATE TABLE Version (
   version TEXT PRIMARY KEY
   -- will contain a single line with the backend version used to create this file
-);
+);--cut
 
 CREATE TABLE Packages (
   id  TEXT PRIMARY KEY,
@@ -21,7 +22,7 @@ CREATE TABLE Packages (
   url TEXT NOT NULL 
   -- column url is set when binding a pattern, to remember with which URL the
   --  package was open
-);
+);--cut
 
 CREATE TABLE Elements (
   package TEXT NOT NULL,
@@ -30,7 +31,7 @@ CREATE TABLE Elements (
   PRIMARY KEY (package, id)
   FOREIGN KEY (package) references Packages (id)
   -- type must be m,a,r,t,l,q,v,R,i
-);
+);--cut
 
 CREATE TABLE Meta (
   package TEXT NOT NULL,
@@ -46,7 +47,7 @@ CREATE TABLE Meta (
   -- else, the metadata is about the package itself
   --
   -- either value or value_i must be empty
-);
+);--cut
 
 CREATE TABLE Contents (
   package  TEXT NOT NULL,
@@ -63,7 +64,7 @@ CREATE TABLE Contents (
   -- only elements with a content should be referenced by element
   -- if not empty, model_i must identify an own or directly imported (from 
   -- model_p) resource
-);
+);--cut
 
 CREATE TABLE Medias (
   package TEXT NOT NULL,
@@ -73,7 +74,7 @@ CREATE TABLE Medias (
   PRIMARY KEY (package, id),
   FOREIGN KEY (package, id) references Elements (package, id)
   -- typ of the referenced element must me 'm'
-);
+);--cut
 
 CREATE TABLE Annotations (
   package TEXT NOT NULL,
@@ -89,7 +90,7 @@ CREATE TABLE Annotations (
   -- typ of the referenced element must me 'a'
   -- Annotations must have a content
   -- media_i must be the id of an own or directly imported (from media_p) media
-);
+);--cut
 
 CREATE TABLE RelationMembers (
   package  TEXT NOT NULL,
@@ -105,7 +106,7 @@ CREATE TABLE RelationMembers (
   -- for each relation, ord should be a consecutive sequence starting from 0
   -- member_i must be the id of an own or directly imported (from member_p)
   -- annotation
-);
+);--cut
 
 CREATE TABLE ListItems (
   package TEXT NOT NULL,
@@ -121,7 +122,7 @@ CREATE TABLE ListItems (
   -- for each list, ord must be a consecutive sequence starting from 0
   -- item_i must be the id of an own or directly imported (from item_p)
   -- element
-);
+);--cut
 
 CREATE TABLE Imports (
   package TEXT NOT NULL,
@@ -132,7 +133,7 @@ CREATE TABLE Imports (
   FOREIGN KEY (package, id) references Elements (package, id)
   -- typ of the referenced element must me 'i'
   -- if not empty, uri should be the uri of the directly imported package
-);
+);--cut
 
 CREATE TABLE Tagged (
   package   TEXT NOT NULL,
@@ -147,4 +148,4 @@ CREATE TABLE Tagged (
   -- element_i must be the id of an own or directly imported (from 
   -- element_p) element
   -- tag_i must be the id of an own or directly imported (from tag_p) tag
-);
+);--cut""".split(";--cut")[:-1]
