@@ -194,7 +194,7 @@ def _contains_package (cx, pkgid):
 
 def _split_id_ref (id_ref):
     """
-    Slit an id_ref into a prefix and a suffix.
+    Split an id_ref into a prefix and a suffix.
     Return None prefix if id_ref is a plain id.
     Raise an AssertionError if id_ref has length > 2.
     """
@@ -238,7 +238,7 @@ class _SqliteBackend (object):
     def close (self):
         """
         Close the backend. Has the effect of closing, for example, underlying
-        connexions to other services. As a consequence, this method should not
+        connections to other services. As a consequence, this method should not
         be invoked by individual packages, for a backend instance may be shared
         by several packages. A package should rather ensure that it maintains
         no reference to the backend instance, so that the garbage collector
