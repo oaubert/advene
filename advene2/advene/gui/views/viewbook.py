@@ -250,9 +250,12 @@ class ViewBook(AdhocView):
                 name=data['name']
                 def stbv_name(v):
                     f=v.content.as_file
-                    n=ET.parse(f).getroot().attrib.get('id')
+                    try:
+                        n=ET.parse(f).getroot().attrib.get('id')
+                    except:
+                        n=None
                     f.close()
-                    return f                    
+                    return n
                 saved=[ v
                         for v in self.controller.package.all.views
                         if v.content.mimetype == 'application/x-advene-adhoc-view'
