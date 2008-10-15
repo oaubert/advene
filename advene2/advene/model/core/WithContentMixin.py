@@ -8,7 +8,6 @@ from Content import Content
 class WithContentMixin:
     @property
     def content (self):
-        # TODO manage schema and url
         c = getattr (self, "_cached_content", None)
         if c is None:
             o = self._owner

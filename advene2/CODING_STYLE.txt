@@ -38,3 +38,12 @@ whenever possible, the raising of an exception should be avoidable, and should
 not be the default behaviour. A good practice is to accept advene.RAISE as a
 special parameter to indicate that an exception should be raised in the
 appropriate case.
+
+REFERENCES
+----------
+
+Weak references are intensievly used, to enable efficient collecting of the objects and freeing of resources.
+
+The rule of thumb is: in a hierarchy of objects, children should strongly reference their parent (because they need it for most tasks), while parents should only weakly reference their children, and re-generate them whenever needed. This is especially true in the backend-supported objects; the backend does not keep track of all the objects referencing it, so it is cleaned whenever collected by the GC.
+
+However, there ar exceptions. Contents are mere *attributes* of their parent, and are unlikely to be referenced by themselves, so they will keep being regenerated, whhich might prove costlty (especially for contents containing big data). So those objects will be strongly referenced by their parent, and will maintain a weak reference to their parent, but a strong reference to their grand-parent (i.e. Package), in order to be able to re-generate their parents eventually (though this is not likely to happen often, since Contents are not expected to be referenced outside their parent).
