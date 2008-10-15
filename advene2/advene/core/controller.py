@@ -31,7 +31,6 @@ notifications and actions triggering.
 import sys
 import time
 import os
-import cgi
 import socket
 import re
 import webbrowser
@@ -39,7 +38,6 @@ import urllib
 import StringIO
 import gobject
 import shlex
-import itertools
 import operator
 import tempfile
 
@@ -62,7 +60,7 @@ from advene.model.cam.relation import Relation
 from advene.model.cam.tag import AnnotationType, RelationType
 from advene.model.cam.list import Schema
 from advene.model.cam.resource import Resource
-from advene.model.consts import DC_NS_PREFIX, ADVENE_NS_PREFIX
+from advene.model.consts import ADVENE_NS_PREFIX
 import advene.util.session
 from advene.model.cam.view import View
 from advene.model.cam.query import Query
@@ -74,6 +72,8 @@ import advene.util.helper as helper
 #import advene.util.importer
 import xml.etree.ElementTree as ET
 #import advene.rules.importer
+
+from simpletal import simpleTAL, simpleTALES
 
 if config.data.webserver['mode']:
     from advene.server.webcherry import AdveneWebServer
@@ -1271,7 +1271,7 @@ class AdveneController(object):
         mediafile = self.get_current_mediafile()
         if mediafile:
             self.set_mediafile(mediafile)
-        self.notify('PlayerChange', player=p)
+        self.notify('PlayerChange', player=self.player)
 
     def get_element_color(self, element):
         """Return the color for the given element.
