@@ -25,6 +25,16 @@ In some cases, the naming convention and method decorators are not sufficient (i
 
 Note that the wrapping will happen just before traversing: TALES will never return a wrapped object as the result of an expression.
 
+TALES Global Methods
+====================
+
+TALES global methods are functions that are available anywhere in a TALES path.
+
+Warning
+-------
+
+TALES global method should be avoided as much as possible, since they clutter the attribute space in interactive TALES editing, and may induce unexpected behaviours. However, there are some uses to them.
+
 """
 from simpletal import simpleTALES
 
@@ -168,11 +178,15 @@ class AdveneContext(simpleTALES.Context):
         else:
             try:
                 return val[path]
-            except TypeError:
+            except Exception:
                 try:
                     return val[int(path)]
                 except Exception:
-                    raise simpleTALES.PATHNOTFOUNDEXCEPTION
+                    gm = get_global_method(path)
+                    if gm is not None:
+                        return gm(val, self)
+                    else:
+                        raise simpleTALES.PATHNOTFOUNDEXCEPTION
 
     def _eval(self, val):
         if callable(val):
@@ -188,3 +202,47 @@ class AdveneContext(simpleTALES.Context):
         else:
             return val
 
+
+# global method registration
+
+def get_global_method(name):
+    """
+    Retrieves a global method, or return None if no such global method has been
+    registered.
+    """
+    global _global_methods
+    return _global_methods.get(name)
+
+def iter_global_methods():
+    """
+    Iter over all the global method names.
+    """
+    global _global_methods
+    return iter(_global_methods)
+
+def register_global_method(f, name=None):
+    """
+    Register f as a global method, under the given name, or under its own
+    name if no name is provided.
+
+    f must accept two arguments: the object retrieved from the previous TALES
+    path, and the TALES context.
+    """
+    global _global_methods
+    _global_methods[name or f.func_name] = f
+
+def unregister_global_method(f_or_name):
+    """
+    Unregister a global method. The parameter is the name of the global method,
+    or can be the function if it has been registered under its own name.
+    """
+    global _global_methods
+    name = getattr(f_or_name, "func_name", f_or_name)
+    del _global_methods[name]
+
+_global_methods = {}
+
+def _gm_repr(obj, context):
+    return repr(obj)
+
+register_global_method(_gm_repr, "repr")
