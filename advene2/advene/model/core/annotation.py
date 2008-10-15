@@ -3,10 +3,11 @@ I define the class of annotations.
 """
 
 from advene.model.consts import _RAISE
-from advene.model.core.element import PackageElement, \
+from advene.model.core.element import PackageElement, ElementCollection, \
                                       ANNOTATION, MEDIA, RESOURCE
 from advene.model.core.content import WithContentMixin
 from advene.util.autoproperty import autoproperty
+from advene.util.session import session
 
 
 class Annotation(PackageElement, WithContentMixin):
@@ -170,3 +171,70 @@ class Annotation(PackageElement, WithContentMixin):
         o = self._owner
         o._backend.update_annotation(o._id, self._id,
                                      self._media_id, self._begin, self._end)
+
+    # relation management shortcuts
+
+    def iter_relations(self, package=None, position=None):
+        """
+        Iter over all the relations involving this annotation, from the point of
+        view of `package`.
+
+        If `position` is provided, only the relation where this annotations is
+        in the given position are yielded.
+
+        If ``package`` is not provided, the ``package`` session variable is
+        used. If the latter is unset, a TypeError is raised.
+        """
+        if package is None:
+            package = session.package
+        if package is None:
+            raise TypeError("no package set in session, must be specified")
+        return package.all.iter_relations(member=self, position=position)
+
+    def count_relations(self, package=None, position=None):
+        """
+        Count all the relations involving this annotation, from the point of
+        view of `package`.
+
+        If `position` is provided, only the relation where this annotations is
+        in the given position are counted.
+
+        If ``package`` is not provided, the ``package`` session variable is
+        used. If the latter is unset, a TypeError is raised.
+        """
+        # TODO optimize this (this implies enhancing the backend API)
+        return len(list(self.iter_relations(package, position)))
+
+    @property
+    def relations(annotation):
+        class AnnotationRelations(ElementCollection):
+            __iter__ = annotation.iter_relations
+            __len__ = annotation.count_relations
+            def __contains__(self, r):
+                return self in r
+        return AnnotationRelations(session.package)
+
+    @property
+    def incoming_relations(annotation):
+        class IncomingRelations(ElementCollection):
+            def __iter__(self):
+                return annotation.iter_relations(position=0)
+            def __len__(self):
+                return annotation.count_relations(position=0)
+            def __contains__(self, r):
+                return self in r
+            _allow_filter=False
+        return IncomingRelations(session.package)
+
+    @property
+    def outgoing_relations(annotation):
+        class OutgoingRelations(ElementCollection):
+            def __iter__(self):
+                return annotation.iter_relations(position=1)
+            def __len__(self):
+                return annotation.count_relations(position=1)
+            def __contains__(self, r):
+                return self in r
+            _allow_filter=False
+        return OutgoingRelations(session.package)
+

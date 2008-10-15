@@ -188,7 +188,6 @@ class TestElements(TestCase):
         e.content_mimetype = "application/x-advene-builtin-view"
         self.assertEqual(e.content_parsed, d)
         self.assertEqual(e.content.parsed, d)
- 
 
     def _test_with_meta(self, e):
 
@@ -396,7 +395,7 @@ class TestElements(TestCase):
         def ids(elts, p):
             return frozenset( t.make_id_in(p) for t in elts )       
         eq = self.assertEqual
- 
+
         eq(frozenset((t1, t3)), frozenset(e.iter_my_tags(p)))
         eq(frozenset((t1, t2)), frozenset(tm.iter_my_tags(p)))
         eq(frozenset((t1,)), frozenset(ta1.iter_my_tags(p)))
@@ -578,6 +577,25 @@ class TestElements(TestCase):
         self._test_with_content(a)
         self._test_with_meta(a)
         self._test_with_tag(a)
+
+        a2 = p.create_annotation("a2", m, 42, 43, "test/plain")
+        r1 = p.create_relation("r1", members=[a])
+        r2 = p.create_relation("r2", members=[a2])
+        q = self.q
+        #q.create_import("i", p) # already done in _test_with_tag
+        r3 = q.create_relation("r3", members=[a])
+        r4 = q.create_relation("r4", members=[a2])
+        self.assertEqual(frozenset(a.iter_relations(p)), frozenset([r1,]))
+        self.assertEqual(frozenset(a.iter_relations(q)), frozenset([r1, r3]))
+        self.assertEqual(a.count_relations(p), 1)
+        self.assertEqual(a.count_relations(q), 2)
+        session.package = q
+        r1[0:0] = [a2,a2]
+        r3.append(a2)
+        r4.append(a)
+        self.assertEqual(frozenset(a.relations), frozenset([r1,r3,r4]))
+        self.assertEqual(frozenset(a.incoming_relations), frozenset([r3]))
+        self.assertEqual(frozenset(a.outgoing_relations), frozenset([r4]))
 
     def test_relation(self):
         p = self.p

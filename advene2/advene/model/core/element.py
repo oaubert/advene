@@ -469,6 +469,12 @@ class ElementCollection(object):
     the use of the filter method.
     """
     def __init__(self, owner_package):
+        """
+        Initialise the element collection.
+
+        `owner_package`is used only in the `get` method, to provide a context
+        to the ID-ref.
+        """
         self._owner = owner_package
 
     def __iter__(self):
@@ -528,7 +534,7 @@ class ElementCollection(object):
         else:
             return None
 
-    _allow_filterin = True
+    _allow_filter = True
 
     def filter(self, **kw):
         """
