@@ -1411,14 +1411,21 @@ class AdveneGUI(Connect):
         if config.data.preferences['remember-window-size']:
             s=config.data.preferences['windowsize'].setdefault(name, (640,480))
             window.resize(*s)
-            window.connect('size-allocate', self.resize_cb, name)
+            pos=config.data.preferences['windowposition'].get(name, None)
+            if pos:
+                window.move(*pos)
+            if name != 'main':
+                # The main GUI is regularly reallocated (at each update_display), so
+                # do not update continuously. Just do it on application exit.
+                window.connect('size-request', self.resize_cb, name)
         return True
 
     def resize_cb (self, widget, allocation, name):
         """Memorize the new dimensions of the widget.
         """
-        config.data.preferences['windowsize'][name] = (allocation.width,
-                                                       allocation.height)
+        parent=widget.get_toplevel()
+        config.data.preferences['windowsize'][name] = parent.get_size()
+        config.data.preferences['windowposition'][name] = parent.get_position()
         #print "New size for %s: %s" %  (name, config.data.preferences['windowsize'][name])
         return False
 
@@ -2519,6 +2526,8 @@ class AdveneGUI(Connect):
                         self.log(_("Cannot save imagecache for %(media)s: %(e)s") % locals())
 
         if self.controller.on_exit():
+            # Memorize application window size/position
+            self.resize_cb(self.gui.get_widget('win'), None, 'main')
             gtk.main_quit()
             return False
         else:
