@@ -247,7 +247,6 @@ class ECAEngine:
         globals_={
             'annotation': None,
             'relation': None,
-            'activeAnnotations': controller.active_annotations,
             'context': None,
             'event': event
             }
