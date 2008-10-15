@@ -19,7 +19,7 @@ from weakref import ref
 from advene import _RAISE
 from advene.model import PARSER_META_PREFIX, ModelError
 from advene.model.core.dirty import DirtyMixin
-from advene.utils.autoproperties import AutoPropertiesMetaclass
+from advene.utils.autoproperty import autoproperty
 
 PACKAGED_ROOT = "%spackage_root" % PARSER_META_PREFIX
 
@@ -31,35 +31,42 @@ class Content(object):
     equivalent ones in WithContentMixin, with prefix "content_".
     """
 
-    __metaclass__ = AutoPropertiesMetaclass
-
     def __init__(self, owner_element):
         self._owner_elt = owner_element
 
+    @autoproperty
     def _get_mimetype(self):
         return self._owner_elt._get_content_mimetype()
 
+    @autoproperty
     def _set_mimetype(self, mimetype):
         return self._owner_elt._set_content_mimetype(mimetype)
 
+    @autoproperty
     def _get_schema(self):
         return self._owner_elt._get_content_schema()
 
+    @autoproperty
     def _set_schema(self, schema):
         return self._owner_elt._set_content_schema(schema)
 
+    @autoproperty
     def _get_url(self):
         return self._owner_elt._get_content_url()
 
+    @autoproperty
     def _set_url(self, url):
         return self._owner_elt._set_content_url(url)
 
+    @autoproperty
     def _get_data(self):
         return self._owner_elt._get_content_data()
 
+    @autoproperty
     def _set_data(self, data):
         return self._owner_elt._set_content_data(data)
 
+    @autoproperty
     def _get_as_file(self):
         return self._owner_elt._get_content_as_file()
 
@@ -111,6 +118,7 @@ class WithContentMixin(DirtyMixin):
             o._backend.update_content_data(o._id, self._id, self.ADVENE_TYPE,
                                            self.__data or "")
 
+    @autoproperty
     def _get_content_mimetype(self):
         r = self.__mimetype
         if r is None: # should not happen, but that's safer
@@ -118,13 +126,15 @@ class WithContentMixin(DirtyMixin):
             r = self.__mimetype
         return r
 
+    @autoproperty
     def _set_content_mimetype(self, mimetype, _init=False):
         if not _init and self.__mimetype is None: # should not happen
             self._load_content_info()
         self.__mimetype = mimetype
         if not _init:
             self.add_cleaning_operation_once(self.__clean_info)
-       
+
+    @autoproperty       
     def _get_content_schema(self, default=_RAISE):
         """
         Return the resource used as the schema of the content of this element,
@@ -144,6 +154,7 @@ class WithContentMixin(DirtyMixin):
                     self._media_wref = ref(m)
             return m
 
+    @autoproperty
     def _set_content_schema(self, resource, _init=False):
         if not _init and self.__schema_idref is None:
             self._load_content_info()
@@ -161,6 +172,7 @@ class WithContentMixin(DirtyMixin):
         if not _init:
             self.add_cleaning_operation_once(self.__clean_info)
 
+    @autoproperty
     def _get_content_url(self):
         r = self.__url
         if r is None: # should not happen, but that's safer
@@ -168,6 +180,7 @@ class WithContentMixin(DirtyMixin):
             r = self.__url
         return r
 
+    @autoproperty
     def _set_content_url(self, url, _init=False):
         if not _init and self.__url is None: # should not happen
             self._load_content_info()
@@ -181,7 +194,8 @@ class WithContentMixin(DirtyMixin):
                 del self.__data
                 # NB: the backend must do it by itself,
                 # so cleaning the data is not required
-       
+
+    @autoproperty       
     def _get_content_data(self):
         url = self.__url
         if url is None: # should not happen
@@ -201,6 +215,7 @@ class WithContentMixin(DirtyMixin):
                         get_content_data(op._id, self._id, self.ADVENE_TYPE)
         return r
 
+    @autoproperty
     def _set_content_data(self, data):
         url = self.__url
         if url is None: # should not happen, but that's safer
@@ -213,6 +228,7 @@ class WithContentMixin(DirtyMixin):
             # NB: the backend must do it by itself,
             # so cleaning the info is not required
 
+    @autoproperty
     def _get_content_as_file(self):
         url = self.__url
         if url is None: # should not happen
@@ -234,15 +250,8 @@ class WithContentMixin(DirtyMixin):
                 f = self.__as_file = ContentDataFile(self)
         return f
         
-
-    content_mimetype = property(_get_content_data, _set_content_data)
-    content_schema   = property(_get_content_schema, _set_content_schema)
-    content_url      = property(_get_content_url, _set_content_url)
-    content_data     = property(_get_content_data, _set_content_data)
-    content_as_file  = property(_get_content_as_file)
-
-    @property
-    def content(self):
+    @autoproperty
+    def _get_content(self):
         c = self.__cached_content()
         if c is None:
             c = Content(self)

@@ -18,7 +18,7 @@ from advene.model.core.all_group import AllGroup
 from advene.model.core.own_group import OwnGroup
 from advene.model.core.dirty import DirtyMixin
 from advene.model.core.meta import WithMetaMixin
-from advene.utils.autoproperties import AutoPropertiesMetaclass
+from advene.utils.autoproperty import autoproperty
 
 
 _constructor = {
@@ -34,8 +34,6 @@ _constructor = {
 }
 
 class Package(object, WithMetaMixin, DirtyMixin):
-
-    __metaclass__ = AutoPropertiesMetaclass
 
     def __init__(self, url, create=False, readonly=False, force=False,
                  _imported_by=None):
@@ -143,18 +141,22 @@ class Package(object, WithMetaMixin, DirtyMixin):
         self._backend.close(self._id)
         self._backend = None
 
+    @autoproperty
     def _get_url(self):
         return self._url
 
+    @autoproperty
     def _get_readonly(self):
         return self._readonly
 
+    @autoproperty
     def _get_uri(self):
         r = self._uri
         if r is None:
             r = self._uri = self._backend.get_uri(self._id) 
         return r
 
+    @autoproperty
     def _set_uri(self, uri):
         if uri is None: uri = ""
         self._uri = uri
@@ -334,6 +336,7 @@ class Package(object, WithMetaMixin, DirtyMixin):
         self._imports_dict[id] = package
         return Import(self, id, package._url, uri)
 
+    @autoproperty
     def _get_own(self):
         r = self._own_wref()
         if r is None:
@@ -341,6 +344,7 @@ class Package(object, WithMetaMixin, DirtyMixin):
             self._own_wref = ref(r)
         return r
 
+    @autoproperty
     def _get_all(self):
         r = self._all_wref()
         if r is None:

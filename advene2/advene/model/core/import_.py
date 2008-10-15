@@ -3,6 +3,8 @@ I define the class Import.
 """
 
 from advene.model.core.element import PackageElement, IMPORT
+from advene.utils.autoproperty import autoproperty
+ 
 
 class Import(PackageElement):
 
@@ -14,21 +16,26 @@ class Import(PackageElement):
         self._uri = uri
         self._imported = owner._imports_dict[id]
 
+    @autoproperty
     def _get_url(self):
         return self._url
 
+    @autoproperty
     def _set_url(self, url):
         assert url
         self._url = url
         self.add_cleaning_operation_once(self.__clean)
 
+    @autoproperty
     def _get_uri(self):
         return self._uri
 
+    @autoproperty
     def _set_uri(self, uri):
         self._uri = uri
         self.add_cleaning_operation_once(self.__clean)
 
+    @autoproperty
     def _get_package(self):
         return self._imported
 

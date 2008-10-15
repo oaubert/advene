@@ -2,11 +2,9 @@ from unittest import TestCase, main
 from weakref import ref
 
 from advene.model.core.dirty import DirtyMixin
-from advene.utils.autoproperties import AutoPropertiesMetaclass
+from advene.utils.autoproperty import autoproperty
 
 class C(object, DirtyMixin):
-    __metaclass__ = AutoPropertiesMetaclass
-
     def __init__(self, ref_ab, ref_xy):
         self.ref_ab = ref_ab
         self.ref_xy = ref_xy
@@ -16,30 +14,38 @@ class C(object, DirtyMixin):
         self.dirty_xy = {}
         self.L = []
 
+    @autoproperty
     def _get_a(self):
         return self.cache_ab["a"]
 
+    @autoproperty
     def _set_a(self, val):
         self.cache_ab["a"] = self.dirty_ab["a"] = val
         self.add_cleaning_operation_once(self.clean_ab)
 
+    @autoproperty
     def _get_b(self):
         return self.cache_ab["b"]
 
+    @autoproperty
     def _set_b(self, val):
         self.cache_ab["b"] = self.dirty_ab["b"] = val
         self.add_cleaning_operation_once(self.clean_ab)
 
+    @autoproperty
     def _get_x(self):
         return self.cache_xy["x"]
 
+    @autoproperty
     def _set_x(self, val):
         self.cache_xy["x"] = self.dirty_xy["x"] = val
         self.add_cleaning_operation_once(self.clean_xy)
 
+    @autoproperty
     def _get_y(self):
         return self.cache_xy["y"]
 
+    @autoproperty
     def _set_y(self, val):
         self.cache_xy["y"] = self.dirty_xy["y"] = val
         self.add_cleaning_operation_once(self.clean_xy)

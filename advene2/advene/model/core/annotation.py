@@ -5,6 +5,7 @@ I define the class of annotations.
 from advene import _RAISE
 from advene.model.core.element import PackageElement, ANNOTATION, MEDIA
 from advene.model.core.content import WithContentMixin
+from advene.utils.autoproperty import autoproperty
 
 class Annotation(PackageElement, WithContentMixin):
 
@@ -41,6 +42,7 @@ class Annotation(PackageElement, WithContentMixin):
             or self._end - other._end \
             or cmp(self._media_idref, other._media_idref)
 
+    @autoproperty
     def _get_media(self, default=_RAISE):
         r = self._media
         if r is None:
@@ -48,6 +50,7 @@ class Annotation(PackageElement, WithContentMixin):
                 self._owner.get_element(self._media_idref, default)
         return r
 
+    @autoproperty
     def _set_media(self, media, _init=False):
         o = self._owner
 
@@ -60,23 +63,38 @@ class Annotation(PackageElement, WithContentMixin):
         if not _init:
             self.add_cleaning_operation_once(self.__clean)
 
+    @autoproperty
     def _get_begin(self):
         return self._begin
 
+    @autoproperty
     def _set_begin(self, val):
         self._begin = val
         self.add_cleaning_operation_once(self.__clean)
 
+    @autoproperty
     def _get_end(self):
         return self._end
 
+    @autoproperty
     def _set_end(self, val):
         self._end = val
         self.add_cleaning_operation_once(self.__clean)
 
+    @autoproperty
     def _get_duration(self):
+        """The duration of this annotation.
+
+        This property is a shortcut for ``self.end - self.begin``. Setting it
+        will update self.end accordingly, leaving self.begin unchanged.
+        return self._end - self._begin.
+
+        This property will also be changed by setting self.begin or self.end,
+        since each of this property leaves the other one unchanged when set.
+        """
         return self._end - self._begin
 
+    @autoproperty
     def _set_duration(self, val):
         self._set_end(self._begin + val)
 

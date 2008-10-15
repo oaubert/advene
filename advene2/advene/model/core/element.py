@@ -2,10 +2,10 @@
 I define the common super-class of all package element classes.
 """
 
-from advene                      import _RAISE
-from advene.model.core.dirty     import DirtyMixin
-from advene.model.core.meta      import WithMetaMixin
-from advene.utils.autoproperties import AutoPropertiesMetaclass
+from advene                    import _RAISE
+from advene.model.core.dirty   import DirtyMixin
+from advene.model.core.meta    import WithMetaMixin
+from advene.utils.autoproperty import autoproperty
 
 # the following constants must be used as values of a property ADVENE_TYPE
 # in all subclasses of PackageElement
@@ -20,8 +20,6 @@ VIEW       = 'v'
 RESOURCE   = 'R'
 
 class PackageElement(object, WithMetaMixin, DirtyMixin):
-
-    __metaclass__ = AutoPropertiesMetaclass
 
     def __init__(self, owner, id):
         self._id    = id
@@ -70,10 +68,12 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
         #self._owner._backend.destroy(self._id) # TODO
         self._destroyed = True
         self.__class__ = DestroyedPackageElement
-        
+
+    @autoproperty        
     def _get_id(self):
         return self._id
 
+    @autoproperty
     def _get_uriref(self):
         o = self._owner
         u = o._uri or o._url
