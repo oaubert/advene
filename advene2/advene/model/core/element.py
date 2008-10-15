@@ -23,7 +23,7 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
 
     def __init__(self, owner, id):
         """
-        Element basic initialization. 
+        Element basic initialization.
 
         NB: __init__ is usually invoked *before* the element has been added to
         the backend, so no operation should be performed that require the
@@ -87,7 +87,29 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
         # This should be reconsidered, and maybe improved.
         del self._owner._elements[self._id]
 
-    @autoproperty        
+    def emit(self, detailed_signal, *args):
+        """
+        Override WithEventsMixin.emit in order to automatically emit the
+        package signal corresponding to each element signal.
+        """
+        WithEventsMixin.emit(self, detailed_signal, *args)
+        s = {
+            MEDIA      : 'media',
+            ANNOTATION : 'annotation',
+            RELATION   : 'relation',
+            TAG        : 'tag',
+            LIST       : 'list',
+            IMPORT     : 'import',
+            QUERY      : 'query',
+            VIEW       : 'view',
+            RESOURCE   : 'resource',
+        }[self.ADVENE_TYPE]
+        colon = detailed_signal.find(":")
+        if colon > 0: detailed_signal = detailed_signal[:colon]
+        s = "%s::%s" % (s, detailed_signal)
+        self._owner.emit(s, self, detailed_signal, args)
+
+    @autoproperty
     def _get_id(self):
         """
         The identifier of this element in the context of its owner package.
@@ -160,7 +182,7 @@ class PackageElement(object, WithMetaMixin, WithEventsMixin):
     def has_tag(self, tag, package, inherited=True):
         """Is this element associated to ``tag`` by ``package``.
 
-        If ``inherited`` is set to False, only return True if ``package`` 
+        If ``inherited`` is set to False, only return True if ``package``
         itself associates this element to ``tag``; else return True also if
         the association is inherited from an imported package.
         """

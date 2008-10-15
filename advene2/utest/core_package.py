@@ -21,7 +21,7 @@ class TestCreation(TestCase):
         # if the second times works (with create=True), then transient works
         p = Package("x-invalid-scheme:xyz", create=True)
         p.close()
-        
+
 
 class TestImports(TestCase):
     def setUp(self):
@@ -170,7 +170,7 @@ class TestImports(TestCase):
             if self.p2 and not self.p2.closed: self.p2.close()
             if self.p3 and not self.p3.closed: self.p3.close()
             if self.p4 and not self.p4.closed: self.p4.close()
-        except ValueError: 
+        except ValueError:
             pass
         unlink(self.db)
         rmdir(self.dirname)
@@ -192,7 +192,7 @@ class TestEvents(TestCase):
             if self.p1 and not self.p1.closed: self.p1.close()
             if self.p2 and not self.p2.closed: self.p2.close()
             if self.p3 and not self.p3.closed: self.p3.close()
-        except ValueError: 
+        except ValueError:
             pass
         unlink(self.db)
         rmdir(self.dirname)
@@ -224,6 +224,8 @@ class TestEvents(TestCase):
                                             (key, actual_val, val))
         self.default_handler(obj, key, val)
 
+    def elt_handler(self, pkg, elt, signal, params):
+        self.default_handler(pkg, elt, signal, params)
 
     def test_create_media(self):
         hid = self.p1.connect("created::media", self.default_handler)
@@ -482,6 +484,45 @@ class TestEvents(TestCase):
         self.p1.disconnect(hid2)
         self.p1.set_meta(k, "oaubert")
         self.assertEqual(self.buf, [])
+
+    def test_modify_media(self):
+        k = DC_NS_PREFIX + "creator"
+        hid = self.p1.connect("media::changed", self.elt_handler)
+        m = self.p1.create_media("m", "file:/tmp/foo.avi")
+        self.assertEqual(self.buf, [])
+        a = self.p1.create_annotation("a", m, 10, 20, "text/plain")
+        self.assertEqual(self.buf, [])
+        m.url = "file:/tmp/foo2.avi"
+        m.set_meta(k, "creator2")
+        self.assertEqual(self.buf, [(self.p1, m, "changed", ("url", m.url,)),])
+        del self.buf[:]
+        self.p1.disconnect(hid)
+        hid = self.p1.connect("media::pre-changed", self.elt_handler)
+        m.url = "file:/tmp/foo3.avi"
+        m.set_meta(k, "creator3")
+        self.assertEqual(self.buf, [(self.p1, m, "pre-changed",
+                                              ("url", m.url,)),])
+        del self.buf[:]
+        self.p1.disconnect(hid)
+        hid = self.p1.connect("media::changed-meta", self.elt_handler)
+        m.url = "file:/tmp/foo4.avi"
+        m.set_meta(k, "creator4")
+        self.assertEqual(self.buf, [(self.p1, m, "changed-meta",
+                                              (k, "creator4")),])
+        del self.buf[:]
+        self.p1.disconnect(hid)
+        hid = self.p1.connect("media::pre-changed-meta", self.elt_handler)
+        m.url = "file:/tmp/foo5.avi"
+        m.set_meta(k, "creator5")
+        self.assertEqual(self.buf, [(self.p1, m, "pre-changed-meta",
+                                              (k, "creator5")),])
+        del self.buf[:]
+        self.p1.disconnect(hid)
+        m.url = "file:/tmp/foo6.avi"
+        m.set_meta(k, "creator6")
+        self.assertEqual(self.buf, [])
+
+    # TODO other element types
 
 if __name__ == "__main__":
     main()

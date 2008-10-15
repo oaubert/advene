@@ -185,9 +185,66 @@ gobject.signal_new("created", PackageEventDelegate,
 #     * the package URI
 #
 
-gobject.signal_new("closed", ElementEventDelegate,
+gobject.signal_new("closed", PackageEventDelegate,
                    gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (object, object,))
+
+# signals:<element_type>
+# ----------------------
+#
+# Instead of subscribint to each individual element, one can choose to
+# subscribe globally to all elements of a given type in a package, using
+# the signal named after that element type.
+#
+# The detail for this signal is the name of the corresponding element signal,
+# without its detail. E.g. media::changed, list::pre-changed-items...
+#
+# signal:: media, annotation, relation, tag, list, query, view, resource,
+#          import
+#
+# detail:: any element related signal
+#
+# params::
+#     * the element to which the event is related
+#     * a list of ojects corresponding to the parameters of the element       
+#       signal
+
+gobject.signal_new("media", PackageEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.TYPE_NONE, (object,str,object,))
+
+gobject.signal_new("annotation", PackageEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.TYPE_NONE, (object,str,object,))
+
+gobject.signal_new("relation", PackageEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.TYPE_NONE, (object,str,object,))
+
+gobject.signal_new("tag", PackageEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.TYPE_NONE, (object,str,object,))
+
+gobject.signal_new("list", PackageEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.TYPE_NONE, (object,str,object,))
+
+gobject.signal_new("query", PackageEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.TYPE_NONE, (object,str,object,))
+
+gobject.signal_new("view", PackageEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.TYPE_NONE, (object,str,object,))
+
+gobject.signal_new("resource", PackageEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.TYPE_NONE, (object,str,object,))
+
+gobject.signal_new("import", PackageEventDelegate,
+                   gobject.SIGNAL_RUN_FIRST|gobject.SIGNAL_DETAILED,
+                   gobject.TYPE_NONE, (object,str,object,))
+
 
 # Element signals
 # ===============
@@ -292,3 +349,6 @@ gobject.signal_new("added", ElementEventDelegate,
 gobject.signal_new("removed", ElementEventDelegate,
                    gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (object,)) 
+
+# TODO :
+# * signal de suppression pour les elements
