@@ -2026,7 +2026,7 @@ class Root(Common):
             if len(self.controller.packages) <= 2:
                 alias='advene'
                 p=self.controller.packages['advene']
-                defaultview=p.getMetaData(config.data.namespace, 'default_utbv')
+                defaultview=p.meta.get("/".join( (config.data.namespace, 'default_utbv') ))
                 if defaultview:
                     mes=_("""the <a href="/packages/%(alias)s/view/%(view)s">loaded package's default view</a>""") % {'alias': alias, 'view': defaultview}
                 else:

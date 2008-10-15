@@ -876,7 +876,7 @@ class EditForm(object):
     def metadata_get_method(self, element, data, namespaceid='advenetool'):
         namespace = config.data.namespace_prefix[namespaceid]
         def get_method():
-            expr=element.getMetaData(namespace, data)
+            expr=element.meta.get("/".join( (namespace, data) ))
             if expr is None:
                 expr=""
             if re.match('^\s+$', expr):

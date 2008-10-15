@@ -3500,7 +3500,7 @@ class AdveneGUI(Connect):
             # Add a pertinent extension
             if filter is None:
                 return filename
-            ext=filter.getMetaData(config.data.namespace, 'extension')
+            ext=filter.meta.get("/".join( (config.data.namespace, 'extension') ) )
             if not ext:
                 ext = helper.title2id(filter.id)
             return '.'.join( (filename, ext) )
