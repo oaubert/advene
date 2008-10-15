@@ -2,6 +2,8 @@
 I define the common super-class of all package element classes.
 """
 
+from itertools import chain
+
 from advene                    import _RAISE
 from advene.model.core.dirty   import DirtyMixin
 from advene.model.core.meta    import WithMetaMixin
@@ -28,9 +30,9 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
         owner._elements[id] = self # cache to prevent duplicate instanciation
         self._dirty = False
 
-    def make_idref_for(self, pkg):
+    def make_idref_in(self, pkg):
         """
-        Compute the id-ref for this element in the context of the given
+        Compute an id-ref for this element in the context of the given
         package.
         """
         if self._owner is pkg:
@@ -47,11 +49,12 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
             if p is self._owner:
                 found = True
             else:
-                visited[p] = True
-                for prefix2,p2 in p._imports_dict.iteritems():
-                    if p2 not in visited:
-                        queue.append((prefix2,p2))
-                        parent[(prefix2,p2)] = (prefix,p)
+                if p is not None:
+                    visited[p] = True
+                    for prefix2,p2 in p._imports_dict.iteritems():
+                        if p2 not in visited:
+                            queue.append((prefix2,p2))
+                            parent[(prefix2,p2)] = (prefix,p)
                 current += 1
         if not found:
             raise ValueError("Element is not reachable from that package")
@@ -84,6 +87,60 @@ class PackageElement(object, WithMetaMixin, DirtyMixin):
         o = self._owner
         u = o._uri or o._url
         return "%s#%s" % (u, self._id)
+
+    # tag management
+
+    def iter_tags(self, package, inherited=True, yield_idrefs=False):
+        """Iter over the tags associated with this element in ``package``.
+
+        If ``inherited`` is set to False, the tags associated by imported
+        packages of ``package`` will not be yielded.
+
+        If a tag is unreachable, an exception will be raised at the time it
+        must be yielded, unless yield_idrefs is set to True, in which case the
+        id-ref of the tag is yielded instead.
+
+        See also `iter_tag_idrefs`.
+        """
+        return self.iter_tag_idrefs(package, inherited, yield_idrefs and 1 or 2)
+
+    def iter_tag_idrefs(self, package, inherited=True, _try_get=0):
+        """Iter over the id-refs of the tags associated with this element in
+        ``package``.
+
+        If ``inherited`` is set to False, the tags associated by imported
+        packages of ``package`` will not be yielded.
+
+        See also `iter_tags`.
+        """
+        # this actually also implements iter_tags
+        if _try_get == 1: # yield_idrefs is true
+            default = None
+        else: # yield_idrefs is false
+            default = _RAISE
+        u = self._get_uriref()
+        if not inherited:
+            pids = (package._id,)
+            get_element = package.get_element
+            for pid, tid in package._backend.iter_tags_with_element(pids, u):
+                if _try_get:
+                    y = package.get_element(tid, default)
+                    if y is None: # only possible when yield_idrefs is true
+                        y = tid
+                else:
+                    y = tid
+                yield y
+        else:
+            for be, pdict in package._backends_dict.iteritems():
+                for pid, tid in be.iter_tags_with_element(pdict, u):
+                    p = pdict[pid]
+                    if _try_get:
+                        y = p.get_element(tid, default)
+                        if y is None: # only possible when yield_idrefs is true
+                            y = package.make_idref_for(p, tid)
+                    else:
+                        y = package.make_idref_for(p, tid)
+                    yield y
 
 
 # TODO: provide class DestroyedPackageElement.

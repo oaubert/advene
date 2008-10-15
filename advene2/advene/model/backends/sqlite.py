@@ -22,11 +22,11 @@ from urllib    import url2pathname, pathname2url
 from weakref   import WeakKeyDictionary, WeakValueDictionary
 import re
 
-from advene.model import ModelError
 from advene.model.backends \
   import ClaimFailure, NoSuchPackage, InternalError, PackageInUse, WrongFormat
 from advene.model.core.element \
   import MEDIA, ANNOTATION, RELATION, VIEW, RESOURCE, TAG, LIST, QUERY, IMPORT
+from advene.model.exceptions import ModelError
 from advene.utils.reftools import WeakValueDictWithCallback
 
 

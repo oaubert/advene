@@ -17,9 +17,6 @@ Element related
 Backend related
 ---------------
 
-- reflect changes in the import structure in _imports_dict and _backends_dict,
-  without having to reload the package
-
 - add indexes in the SQL schema (Annotations.f_begin at least)
   and test its efficiency
 

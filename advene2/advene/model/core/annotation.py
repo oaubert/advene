@@ -23,13 +23,6 @@ class Annotation(PackageElement, WithContentMixin):
         self._begin = begin
         self._end   = end
         self._set_content_mimetype(mimetype, _init=True)
-        if schema:
-            if not hasattr(schema, "ADVENE_TYPE"):
-                # internally, we may sometimes pass backend data directly,
-                # where schema is an id-ref rather than a Media instance
-                schema = owner.get_element(schema)
-        else:
-            schema = None # could be an empty string
         self._set_content_schema(schema, _init=True)
         self._set_content_url(url, _init=True)
 
@@ -42,13 +35,28 @@ class Annotation(PackageElement, WithContentMixin):
             or self._end - other._end \
             or cmp(self._media_idref, other._media_idref)
 
-    @autoproperty
-    def _get_media(self, default=_RAISE):
+    def get_media(self, default=None):
+        """Return the media associated to this annotation.
+
+        If the media is unreachable, the ``default`` value is returned.
+
+        See also `media` and `media_idref`.
+        """
         r = self._media
         if r is None:
             r = self._media = \
                 self._owner.get_element(self._media_idref, default)
         return r
+
+    @autoproperty
+    def _get_media(self):
+        """The media associated to this annotation.
+
+        If the media instance is unreachable, an exception is raised.
+
+        See also `get_media` and `media_idref`.
+        """
+        return self.get_media(_RAISE)
 
     @autoproperty
     def _set_media(self, media, _init=False):
@@ -57,11 +65,25 @@ class Annotation(PackageElement, WithContentMixin):
         assert media.ADVENE_TYPE == MEDIA
         assert o._can_reference(media)
 
-        midref = media.make_idref_for(o)
+        midref = media.make_idref_in(o)
         self._media_idref = midref
         self._media = media
         if not _init:
             self.add_cleaning_operation_once(self.__clean)
+
+    @autoproperty
+    def _get_media_idref(self):
+        """The id-ref of this annotation's media.
+
+        This is a read-only property giving the id-ref of the resource held
+        by `media`.
+
+        Note that this property is accessible even if the corresponding
+        media is unreachable.
+
+        See also `get_media` and `media`.
+        """
+        return self._media_idref
 
     @autoproperty
     def _get_begin(self):

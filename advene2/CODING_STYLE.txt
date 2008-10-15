@@ -28,8 +28,10 @@ context of the application)
 SEMANTIC
 --------
 
-read-only properties should be prefered to methods with only self as
+* read-only properties should be prefered to methods with only self as
 parameter
+* for method with optional parameters and only self as a required parameter,
+a read-only property should also exist (see Exceptions_ below)
 
 methods and properties should rather return an iterator than another iterable,
 except when the iterable is already available and may be safely shared with 
@@ -39,8 +41,8 @@ as a consequence, generic APIs should stick to iterators, since they should not
 make asumption on the availability of an iterable in the underlying 
 implementations
 
-Exception
-+++++++++
+Exceptions
+++++++++++
 
 When a method can not return the expected result, the default behaviour should
 be to raise an exception. However, the raising of an exception should be
@@ -55,6 +57,20 @@ parameter which would be the default value to be returned. E.g.:::
   f = my_package.get_element("foo", default=None)
 
 If the optional parameter is a keyword parameter, it should be named "default".
+
+There is an exception (!) to that rule, however: whenever a more pythonic
+syntax exists (property, __getitem__) which is equivalent to the method, then
+that syntax should raise an exception, while the explicit method call should
+return a default value (with None as the default default value). This is
+consistent with python dictionaries and the ``[i] vs. get(i)`` alternative.
+E.g.:::
+
+  # the following raises an exception if the member is unreachable
+  m = my_annotation.media
+  # the following returns None if the member is unreachable
+  m = my_annotation.get_media()
+  # the following returns "error" if the member is unreachable
+  m = my_annotation.get_media("error")
 
 Mixin classes
 +++++++++++++
@@ -81,10 +97,10 @@ prefix) to reduce the risk of name clash.
 REFERENCES
 ----------
 
-In order to avoid memory leaks, reference cycle and __del__ methods should be
+In order to avoid memory leaks, reference cycles and __del__ methods should be
 avoided. The former prevent automatic freeing of memory when objects are
 unreachable (the garbage collector has to detect the cycle), while the latter
-completely prevents the garbage collector to opperate on reference cycles.
+completely prevent the garbage collector to opperate on reference cycles.
 Stricty speaking, cycles without __del__ or __del__ without cycles are ok, but
 as a rule of thumb, it is better to avoid both.
 

@@ -62,8 +62,6 @@ if __name__ == "__main__":
 
     Package.make_metadata_property ("dc#Creator", "dc_creator")
 
-
-
     p1 = Package(url1, create=True)
     p2 = Package(url2, create=True)
     p3 = Package(url3, create=True)
@@ -84,28 +82,23 @@ if __name__ == "__main__":
     p5.create_import("p3", p3)
     p7.create_import("p5", p5) # will not be loaded again; just a decoy
 
-    for p in [p1, p2, p3, p4, p5, p6, p7]: p.close()
-
-    # reconnect backends
-    dummya = Package("sqlite:%s" % filea)
-    dummyb = Package("sqlite:%s" % fileb)
-    #trace_wrap_all(dummya._backend)
-    #trace_wrap_all(dummyb._backend)
-
-    print
-
-    p1 = Package(url1)
-    p3 = p1["p3"].package
-    p4 = p3["p4"].package
-    p5 = p3["p5"].package
-    p6 = p5["p6"].package
+    trace_wrap_all(p1._backend)
+    trace_wrap_all(p4._backend)
 
     foref = "http://advene.liris.cnrs.fr/ns/frame_of_reference/ms;o=0"
     m4 = p4.create_media("m4", "http://example.com/m4.ogm", foref)
     m6 = p6.create_media("m6", "http://example.com/m6.ogm", foref)
     a3 = p3.create_annotation("a3", m4, 30, 39, "text/plain")
     a5 = p5.create_annotation("a5", m6, 50, 59, "text/plain")
+    t2 = p2.create_tag("t2")
+    t4 = p4.create_tag("t4")
+    t6 = p6.create_tag("t6")
+    p3.associate_tag(a5, t4)
+    p5.associate_tag(a3, t6)
+    p5.associate_tag(a5, t6)
+    p1.associate_tag(a3, t2)
 
+    print
     print [i.id for i in p3.own.annotations]
     print [i.id for i in p4.own.medias]
     print [i.id for i in p5.own.annotations]
@@ -117,3 +110,20 @@ if __name__ == "__main__":
     print [i.id for i in p5.all.annotations]
     print [i.id for i in p1.all.medias]
     print [i.id for i in p1.all.annotations]
+    print
+    print [t.id for t in a3.iter_tags(p5)]
+    print [t.id for t in a3.iter_tags(p1, False)]
+    print [t.id for t in a3.iter_tags(p1)]
+    print [i for i in a3.iter_tag_idrefs(p1)]
+    print
+    print [ e.id for e in t6.iter_elements(p5, False) ]
+    print [ e.id for e in t6.iter_elements(p5) ]
+    print [ i for i in t6.iter_element_idrefs(p5) ]
+
+    p1.close()
+    p7.close()
+    p2.close()
+    p3.close()
+    p4.close()
+    p6.close()
+    assert p5.closed

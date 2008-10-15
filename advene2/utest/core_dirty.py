@@ -148,7 +148,6 @@ class TestDirty(TestCase):
         self.assert_(not self.o.dirty)
         self.assert_(self.o.consistent)
 
-
     def testCleanSeveralOperations(self):
         self.o.a = "foo"
         self.o.x = "bar"

@@ -98,23 +98,6 @@ if __name__ == "__main__":
 
     a2.set_meta(advene_ns % "meta/created_from", a1)
 
-    # testing as_file with internal data
-    c = a2.content
-    c.data = "good <em>moaning</em>"
-    print c.data
-    f = c.as_file
-    print f.info()["content-type"]
-    c.mimetype = "text/html"
-    print f.info()["content-type"]
-    f.seek(0,2) # seek end of file
-    pos = f.tell()
-    f.write(" I have a missage fur you")
-    print c.data
-    f.seek(pos)
-    f.truncate()
-    print c.data
-    f.close()
-
     a1.set_meta(advene_ns % "meta/foo", "bar")
     a2.meta[advene_ns % "meta/foo"] = "bar"
     
