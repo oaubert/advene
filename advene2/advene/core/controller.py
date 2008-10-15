@@ -251,9 +251,18 @@ class AdveneController(object):
         l=advene.core.plugin.PluginCollection(directory, prefix)
         for p in l:
             try:
-                self.log("Registering " + p.name)
-                p.register(controller=self)
-            except AttributeError:
+                # Do not log plugin info if it could not be
+                # initialized (return False).  For compatibility with
+                # previous plugin API, the test must be explicitly
+                # done as "is False", since old versions of
+                # register did not have a return clause (and thus
+                # return None)
+                if p.register(controller=self) is False:
+                    self.log("Could not register " + p.name)
+                else:
+                    self.log("Registering " + p.name)
+            except AttributeError, e:
+                print "AttributeError in", p.name, ":", str(e)
                 pass
         return l
 
@@ -1079,6 +1088,7 @@ class AdveneController(object):
                 annotation.end=position+d
                 if notify:
                     self.notify("AnnotationEditEnd", annotation=annotation, comment="Transmute annotation")
+                    self.notify('ElementEditCancel', element=annotation)
                 return annotation
         if move:
             an = annotation
@@ -1153,6 +1163,8 @@ class AdveneController(object):
     def merge_annotations(self, s, d, extend_bounds=False):
         """Merge annotation s into annotation d.
         """
+        batch_id=object()
+        self.notify('ElementEditBegin', element=d, immediate=True)
         if extend_bounds:
             # Extend the annotation bounds (mostly used for same-type
             # annotations)
@@ -1164,17 +1176,35 @@ class AdveneController(object):
         # FIXME: handle differing mimetypes
         d.content.data=d.content.data + '\n' + s.content.data
 
-        self.notify("AnnotationMerge", annotation=d,comment="Merge annotations")
-        self.delete_element(s)
-        self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations")
+        self.notify("AnnotationMerge", annotation=d,comment="Merge annotations", batch=batch_id)
+        self.delete_element(s, batch_id=batch_id)
+        self.notify("AnnotationEditEnd", annotation=d, comment="Merge annotations", batch=batch_id)
+        self.notify('ElementEditCancel', element=d)
         return d
 
+    def select_player(self, p):
+        """Activate the given player.
+        """
+        # Stop the current player.
+        self.player.stop(0)
+        self.player.exit()
+        # Start the new one
+        self.player=p()
+        if not 'record' in p.player_capabilities:
+            # Store the selected player if it is not a recorder.
+            config.data.player['plugin']=p.player_id
+        self.notify('PlayerChange', player=p)
+        mediafile = self.get_current_mediafile()
+        if mediafile != "":
+            self.set_media(mediafile)
+        
     def restart_player (self):
         """Restart the media player."""
         self.player.restart_player ()
         mediafile = self.get_current_mediafile()
         if mediafile:
             self.set_mediafile(mediafile)
+        self.notify('PlayerChange', player=p)
 
     def get_element_color(self, element):
         """Return the color for the given element.
@@ -1467,8 +1497,12 @@ class AdveneController(object):
         """
         p=context.evaluate('package')
 
-        # FIXME: to be implemented. Default creator/contributor value
-        # p.default_values.userid = config.data.userid
+        # Cache common fieldnames for structured content
+        for at in p.annotationTypes:
+            if at.mimetype.endswith('/x-advene-structured'):
+                at.meta[config.data.transientns+'fieldnames']=helper.common_fieldnames(at.annotations)
+            else:
+                at.meta[config.data.transientns+'fieldnames']=[]
 
         for m in p.all.medias:
             ic=self.package.imagecache[m.id]
@@ -1519,7 +1553,8 @@ class AdveneController(object):
 
         for utbv in self.package.all.views:
             #FIXME: should return only toplevel views.
-            res.append( (self.get_title(utbv), "%s/view/%s" % (url, utbv.id)) )
+            if helper.get_view_type(utbv) == 'static':
+                res.append( (self.get_title(utbv), "%s/view/%s" % (url, utbv.id)) )
         return res
 
     def activate_stbv(self, view=None, force=False):
@@ -1541,8 +1576,8 @@ class AdveneController(object):
         parsed_views=[]
 
         rs=RuleSet()
-        rs.from_dom(catalog=self.event_handler.catalog,
-                    domelement=view.content.model,
+        rs.from_xml(view.content.get_as_file(),
+                    catalog=self.event_handler.catalog,
                     origin=view.uri)
 
         parsed_views.append(view)
@@ -1559,14 +1594,19 @@ class AdveneController(object):
                         self.log(_("Infinite loop in STBV %(name)s: the %(imp)s view is invoked multiple times.") % { 'name': self.get_title(view),
                                                                                                                       'imp': self.get_title(v) })
                     else:
-                        rs.from_dom(catalog=self.event_handler.catalog,
-                                    domelement=v.content.model,
+                        rs.from_xml(v.content.get_as_file(),
+                                    catalog=self.event_handler.catalog,
                                     origin=v.uri)
                         parsed_views.append(v)
                 subviews=rs.filter_subviews()
 
         self.event_handler.set_ruleset(rs, type_='user')
         for v in parsed_views:
+            if v == view:
+                # Avoid double notification of ViewActivation. We need
+                # to keep it in parsed_views though, in order to
+                # prevent recursion.
+                continue
             self.notify("ViewActivation", view=v, comment="Activate subview of %s" % view.id)
         self.notify("ViewActivation", view=view, comment="Activate STBV")
         return
@@ -1586,7 +1626,6 @@ class AdveneController(object):
         else:
             # FIXME: handle the level parameter
             print unicode(msg).encode('utf-8')
-        return
 
     def message_log (self, context, parameters):
         """Event Handler for the message action.
