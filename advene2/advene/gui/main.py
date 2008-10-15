@@ -105,6 +105,7 @@ from advene.gui.edit.create import CreateElementPopup
 #from advene.gui.edit.importer import ExternalImporter
 from advene.gui.evaluator import Evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
+from advene.gui.views.logwindow import LogWindow
 #import advene.gui.edit.imports
 #import advene.gui.edit.properties
 #import advene.gui.edit.montage
@@ -676,8 +677,8 @@ class AdveneGUI(Connect):
 
         # FIXME: We have to register LogWindow actions before we load the ruleset
         # but we should have an introspection method to do this automatically
-        #self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
-        #self.register_view(self.logwindow)
+        self.logwindow=LogWindow(controller=self.controller)
+        self.register_view(self.logwindow)
 
         self.visualisationwidget=self.get_visualisation_widget()
         self.gui.get_widget("displayvbox").add(self.visualisationwidget)
@@ -1150,7 +1151,7 @@ class AdveneGUI(Connect):
         # Open default views:
 
         # URL stack
-        #self.viewbook['west'].add_view(self.logwindow, permanent=True)
+        self.viewbook['west'].add_view(self.logwindow, permanent=True)
         # URL stack is embedded, the menu item is useless :
         self.gui.get_widget('urlstack1').set_property('visible', False)
 
@@ -3099,30 +3100,38 @@ class AdveneGUI(Connect):
 
     def on_package_properties1_activate (self, button=None, data=None):
         cache={
-            'author': self.controller.package.author,
-            'date': self.controller.package.date,
+            'creator': self.controller.package.creator,
+            'created': self.controller.package.created,
+            'contributor': self.controller.package.contributor,
+            'modified': self.controller.package.modified,
             'media': self.controller.get_current_mediafile() or "",
             'duration': str(self.controller.package.cached_duration),
             'title': self.controller.package.title or ""
             }
         def reset_duration(b, entry):
+            # FIXME
             v=long(self.controller.player.stream_duration)
             entry.set_text(str(v))
             return True
 
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Package properties"))
-        ew.add_entry(_("Author"), "author", _("Author name"))
-        ew.add_entry(_("Date"), "date", _("Package creation date"))
+        ew.add_entry(_("Creator"), "creator", _("Author name"))
+        ew.add_entry(_("Created"), "created", _("Package creation date"))
+        ew.add_entry(_("Contributor"), "contributor", _("Contributor name"))
+        ew.add_entry(_("Contributed"), "modified", _("Package modification date"))
         ew.add_entry(_("Title"), "title", _("Package title"))
+        # FIXME: allow to manipulate Media instances
         ew.add_file_selector(_("Associated media"), 'media', _("Select a movie file"))
         ew.add_entry_button(_("Duration"), "duration", _("Media duration in ms"), _("Reset"), reset_duration)
 
         res=ew.popup()
 
         if res:
-            self.controller.package.author = cache['author']
-            self.controller.package.date = cache['date']
+            self.controller.package.creator = cache['creator']
+            self.controller.package.created = cache['created']
+            self.controller.package.contributor = cache['contributor']
+            self.controller.package.contributed = cache['contributed']
             self.controller.package.title = cache['title']
             self.update_window_title()
             self.controller.set_default_media(cache['media'])
