@@ -50,6 +50,7 @@ from advene.core.mediacontrol import PlayerFactory
 from advene.core.imagecache import ImageCache
 import advene.core.idgenerator
 
+
 from advene.rules.elements import RuleSet, RegisteredAction, SimpleQuery, Quicksearch
 import advene.rules.ecaengine
 import advene.rules.actions
@@ -61,6 +62,7 @@ from advene.model.cam.tag import AnnotationType, RelationType
 from advene.model.cam.list import Schema
 from advene.model.cam.resource import Resource
 from advene.model.consts import ADVENE_NS_PREFIX
+from advene.model.content.register import register_textual_mimetype
 import advene.util.session
 from advene.model.cam.view import View
 from advene.model.cam.query import Query
@@ -211,6 +213,10 @@ class AdveneController(object):
                 defaults={'message': 'annotation/content/data'},
                 category='gui',
                 ))
+
+        # Register textual contents in the model
+        for mt in config.data.text_mimetypes:
+            register_textual_mimetype(mt)
 
     def get_cached_duration(self):
         if self.package is not None and hasattr(self.package, 'cached_duration'):

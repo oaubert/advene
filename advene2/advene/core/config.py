@@ -315,6 +315,10 @@ class Config(object):
             'application/x-advene-workspace-view',
             'application/x-advene-quicksearch',
             'application/x-advene-values',
+            'application/x-advene-ruleset',
+            'application/x-advene-simplequery',
+            'application/x-advene-type-constraint',
+            'application/xml',
             )
 
         # Drag and drop parameters for URIed element and other elements
