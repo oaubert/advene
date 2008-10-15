@@ -183,7 +183,7 @@ class _GroupCollection(object):
     """
     A collection of elements contained in a group.
     """
-    def __init__(self, group):
+    def __init__(self, group, can_be_filtered=True):
         self._g = group
 
     def get(self, key):
@@ -224,6 +224,20 @@ class _GroupCollection(object):
             if item == i:
                 return True
 
+    def filter(self, **kw):
+        """
+        Use underlying iter method with the given keywords to make a filtered
+        version of that collection.
+        """
+        class FilteredCollection(_GroupCollection):
+            def __iter__ (self):
+                return self._g.__iter__(**kw)
+            def __len__(self):
+                return self._g.__len__(**kw)
+            def filter(self, **kw):
+                raise NotImplementedError("can not filter twice")
+        return FilteredCollection(self)
+
     @property
     def _tales_size(self):
         """Return the size of the group.
@@ -243,4 +257,6 @@ class _GroupCollection(object):
                 for i in it: yield i
             def __len__(self):
                 return self._g.__len__()-1
+            def filter(self, **kw):
+                raise NotImplementedError("RestCollection can not be filtered")
         return RestCollection(self)
