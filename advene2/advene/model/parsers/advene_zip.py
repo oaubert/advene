@@ -103,7 +103,7 @@ class Parser(object):
 
     def __init__(self, file_, package):
         assert self.claims_for_parse(file_) > 0
-        self.dir = dir = mkdtemp()
+        self.dir = d = mkdtemp()
 
         if hasattr(file_, "seek"):
             g = None
@@ -117,7 +117,7 @@ class Parser(object):
         names = z.namelist()
         for zname in names:
             seq = zname.split("/")
-            dirname = recursive_mkdir(dir, seq[:-1])
+            dirname = recursive_mkdir(d, seq[:-1])
             if seq[-1]:
                 fname = path.join(dirname, seq[-1])
                 h = open(fname, "w")
@@ -127,6 +127,6 @@ class Parser(object):
         if g is not None:
             g.close()
 
-        self.content = path.join(dir, "content.xml")
+        self.content = path.join(d, "content.xml")
         self.package = package
 
