@@ -156,21 +156,24 @@ class PackageElement(WithMetaMixin, WithEventsMixin, object):
             else:
                 return ""
 
-        elttype = getattr(element, "ADVENE_TYPE", None)
-        if elttype is not None and type is not None and elttype != type:
-            raise ModelError("type mismatch", element, type)
-        if not pkg._can_reference(element):
-            raise ModelError("can not reference", pkg, element)
-        if elttype is None and type is not None:
-            element = pkg.get(element)
+        if isinstance(element, basestring):
+            assert ":" in element and element[0] != ":" # imported
+            element_id = element
+            element = pkg.get(element_id)
             if element is not None and element.ADVENE_TYPE != type:
                 raise ModelError("type mismatch", element, type)
-        # if no exception was raised
-        if elttype is None:
-            return element
-        else:
-            return element.make_id_in(pkg)
+            else:
+                # silently succeed, for the sake of parsers
+                return element_id
 
+        assert isinstance(element, PackageElement)
+        if type is not None:
+            elttype = element.ADVENE_TYPE
+            if elttype != type:
+                raise ModelError("type mismatch", element, type)
+        if not pkg._can_reference(element):
+            raise ModelError("can not reference", pkg, element)
+        return element.make_id_in(pkg)
 
     def make_id_in(self, pkg):
         """Compute an id-ref for this element in the context of the given package.

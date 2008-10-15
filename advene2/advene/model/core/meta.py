@@ -3,6 +3,7 @@ from weakref import ref
 from advene.model.consts import _RAISE, PARSER_META_PREFIX
 from advene.model.exceptions import ModelError
 from advene.model.tales import tales_property
+from advene.util.alias import alias
 from advene.util.sorted_dict import SortedDict
 
 class WithMetaMixin(object):
@@ -138,7 +139,7 @@ class WithMetaMixin(object):
         All exceptions can be avoided by providing a ``default`` value, that
         will be returned instead of raising an exception.
         """
-        return self.get_meta_id(key, default, False)
+        return self._get_meta_id_or_ref(key, default, False)
 
     def get_meta_id(self, key, default=_RAISE, _return_id=True):
         """
@@ -202,6 +203,17 @@ class WithMetaMixin(object):
                 val = default
         return val
 
+    @alias(get_meta_id)
+    def _get_meta_id_or_ref(self):
+        # get_meta and get_meta_id have a common implementation.
+        # Normally, it should be located in a "private" method named
+        # _get_meta_id_or_ref.
+        # However, for efficiency reasons, that private method and
+        # get_meta_id have been merged into one. Both names are necessary
+        # because the "public" get_meta_id may be overridden while the
+        # "private" method should not. Hence that alias.
+        pass
+
     def set_meta(self, key, val, val_is_idref=False):
         """Set the metadata.
 
@@ -229,7 +241,7 @@ class WithMetaMixin(object):
             vstr_is_id = True
             val = (ref(val), vstr)
         elif val_is_idref:
-            assert ":" in val, "Only strict id-ref allowed (no :)"
+            assert ":" in val and val[0] != ":", "Expected *strict* id-ref"
             if not p._can_reference(val):
                 raise ModelError, "Element or import does not exist %s" % val
             vstr = val

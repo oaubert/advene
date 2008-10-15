@@ -1,7 +1,10 @@
 from advene.model.cam.consts import CAMSYS_TYPE, CAM_NS_PREFIX
 from advene.model.cam.element import CamElementMixin
+from advene.model.consts import _RAISE
 from advene.model.core.tag import Tag as CoreTag
 from advene.util.autoproperty import autoproperty
+
+CAM_ELEMENT_CONSTRAINT = CAM_NS_PREFIX + "element-constraint"
 
 class Tag(CoreTag, CamElementMixin):
 
@@ -33,13 +36,14 @@ class Tag(CoreTag, CamElementMixin):
             newtype = Tag
         if self.__class__ is newtype:
             return
-        if newtype in (AnnotationType, RelationType):
-            if self.element_constraint is None:
-                c = self._owner.create_view(
-                        ":constraint:%s" % self._id,
-                        "application/x-advene-type-constraint",
-                )
-                self.element_constraint = c
+        # NB: the following is now delayed to the first get_meta
+        #if newtype in (AnnotationType, RelationType):
+        #    if self.element_constraint is None:
+        #        c = self._owner.create_view(
+        #                ":constraint:%s" % self._id,
+        #                "application/x-advene-type-constraint",
+        #        )
+        #        self.element_constraint = c
         self.__class__ = newtype
 
 
@@ -48,9 +52,47 @@ class WithTypeConstraintMixin(object):
     Implement shortcut attributes to the underlying type-constraint.
     """
 
+    def _make_constraint(self):
+        c = self._owner.create_view(
+                ":constraint:%s" % self._id,
+                "application/x-advene-type-constraint",
+        )
+        super(WithTypeConstraintMixin, self) \
+                .set_meta(CAM_ELEMENT_CONSTRAINT, c)
+        return c
+
+
+    def get_meta(self, key, default=_RAISE):
+        if key == CAM_ELEMENT_CONSTRAINT:
+            r = super(WithTypeConstraintMixin, self).get_meta(key, None) \
+                or self._make_constraint()
+        else:
+            r = super(WithTypeConstraintMixin, self).get_meta(key, default)
+        return r
+
+    def get_meta_id(self, key, default=_RAISE):
+        if key == CAM_ELEMENT_CONSTRAINT:
+            r = super(WithTypeConstraintMixin, self).get_meta_id(key, None) \
+                or self._make_constraint().id
+        else:
+            r = super(WithTypeConstraintMixin, self).get_meta_id(key, default)
+        return r
+
     def set_meta(self, key, value, val_is_idref=False):
-        if key == CAM_NS_PREFIX + "element-constraint":
-             raise TypeError, "element-constraint can not be changed"
+        if key == CAM_ELEMENT_CONSTRAINT:
+            # do not _make_constraint, since this could be the parser setting it
+            expected_id = ":constraint:" + self._id
+            if val_is_idref:
+                got_id = value
+                got = self._owner.get(value, None)
+            else:
+                got_id = value._id
+                got = value
+            if got_id != expected_id \
+            or got is None \
+            or got.content_mimetype != "application/x-advene-type-constraint":
+                raise TypeError, "element-constraint can not be changed"
+
         super(WithTypeConstraintMixin, self).set_meta(key, value, val_is_idref)
 
     def check_element(self, e):
@@ -103,5 +145,5 @@ Tag.make_metadata_property(CAM_NS_PREFIX + "representation", default=None)
 Tag.make_metadata_property(CAM_NS_PREFIX + "color", default=None)
 Tag.make_metadata_property(CAM_NS_PREFIX + "element-color",
                            "element_color", default=None)
-Tag.make_metadata_property(CAM_NS_PREFIX + "element-constraint",
+Tag.make_metadata_property(CAM_ELEMENT_CONSTRAINT,
                            "element_constraint", default=None)

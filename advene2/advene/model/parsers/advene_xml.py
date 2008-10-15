@@ -186,7 +186,7 @@ class Parser(XmlParserBase):
         self.optional("meta", pa)
         self.manage_package_subelements()
         for f, id in self._postponed:
-            if ":" in id:
+            if ":" in id and id[0] != ":": # imported
                 elt = id
             else:
                 elt = self.package.get(id)
@@ -223,7 +223,7 @@ class Parser(XmlParserBase):
 
         self.optional_sequence("tags", element=elt)
         self.optional("meta", elt)
-        
+
     def handle_resource(self):
         id = self.get_attribute("id")
         elt = self.required("content", self.package.create_resource, id)
@@ -233,8 +233,10 @@ class Parser(XmlParserBase):
     def handle_annotation(self):
         id = self.get_attribute("id")
         media = self.get_attribute("media")
-        if not ":" in media:
+        if not ":" in media or media[0] == ":": # same package
             media = self.package.get(media)
+        if media is None:
+            raise ParserError("unknown media %s" % self.get_attribute("media"))
         begin = self.get_attribute("begin")
         try:
             begin = int(begin)
@@ -299,7 +301,7 @@ class Parser(XmlParserBase):
             val = child.get("id-ref")
             if val is None:
                 obj.set_meta(key, child.text, False)
-            elif ":" in val:
+            elif ":" in val and val[0] != ":": # imported
                 obj.set_meta(key, val, True)
             else:
                 self.do_or_postpone(val, partial(obj.set_meta, key))

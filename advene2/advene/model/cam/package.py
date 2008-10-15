@@ -234,9 +234,23 @@ class Package(CorePackage):
         ns = self._get_namespaces_as_dict()
         ns.setdefault(DC_NS_PREFIX, "dc")
         self._set_namespaces_with_dict(ns)
-        now = datetime.now().isoformat()
-        self.created = now
-        self.modified = now
+        if create:
+            now = datetime.now().isoformat()
+            self.created = now
+            self.modified = now
+
+    def save(self, serializer=None):
+        self.modified = datetime.now().isoformat()
+        super(Package, self).save(self, serializer)
+
+    def save_as(self, filename, change_url=False, serializer=None, erase=False):
+        self.modified = datetime.now().isoformat()
+        super(Package, self).save_as(self, filename, change_url, serializer,
+                                     erase)
+
+    def close(self):
+        self.modified = datetime.now().isoformat()
+        super(Package, self).close()
 
     def create_tag(self, id):
         """

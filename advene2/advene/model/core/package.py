@@ -694,7 +694,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             else:
                 id_e = element.make_id_in(self)
         else:
-            assert ":" in element, "Only strict id-refs are allowed (no :)"
+            assert ":" in element and element[0] != ":", "Expected *strict* id-ref"
             id_e = unicode(element)
         tag_owner = getattr(tag, "_owner", None)
         if tag_owner:
@@ -703,7 +703,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             else:
                 id_t = tag.make_id_in(self)
         else:
-            assert ":" in tag, "Only strict id-refs are allowed (no :)"
+            assert ":" in tag and tag[0] != ":", "Expected *strict* id-ref"
             id_t = unicode(tag)
 
         self._backend.associate_tag(self._id, id_e, id_t)
@@ -724,7 +724,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             else:
                 id_e = element.make_id_in(self)
         else:
-            assert ":" in element, "Only strict id-refs are allowed (no :)"
+            assert ":" in element and element[0] != ":", "Expected *strict* id-ref"
             id_e = unicode(element)
         tag_owner = getattr(tag, "_owner", None)
         if tag_owner:
@@ -733,7 +733,7 @@ class Package(WithMetaMixin, WithEventsMixin, object):
             else:
                 id_t = tag.make_id_in(self)
         else:
-            assert ":" in tag, "Only strict id-refs are allowed (no :)"
+            assert ":" in tag and tag[0] != ":", "Expected *strict* id-ref"     
             id_t = unicode(tag)
 
         self._backend.dissociate_tag(self._id, id_e, id_t)

@@ -9,12 +9,8 @@ backend_sqlite._set_module_debug(True) # enable assert statements
 dirname = path.dirname(__file__)
 pythonpath.append(dir)
 
-print """================
-WARNING: serpar.py has been temporarily banned.
-================"""
-
 for i in listdir(dirname):
-    if i.endswith(".py") and i != "all.py" and i != "serpar.py":
+    if i.endswith(".py") and i != "all.py":
         modulename = i[:-3]
         m = __import__(modulename, globals(), locals(), ["*",], level=0)
         for j in dir(m):

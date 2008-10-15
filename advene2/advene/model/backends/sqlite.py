@@ -35,7 +35,7 @@ BACKEND_VERSION = "1.2"
 
 IN_MEMORY_URL = "sqlite:%3Amemory%3A"
 
-_DF = True # means that assert will succeed, i.e. *no* debug
+_DF = False # means that assert will succeed, i.e. *no* debug
 # this flag exists so that assertion do not impair efficiency *even* in
 # non-optimized mode (because advene is bound to be in non-optimized mode
 # for quite a long time ;-) )

@@ -98,3 +98,9 @@ Open questions and remarks
   become necessary in the future (the current sqlite backend seems to be
   responsive enough, anyway), it should probably be implemented at the backend
   level itself.
+
+- may be it is a bad idea that parsers use the Package API instead of the
+  backend API (it provides more checks, but also more automated behaviours
+  that need to be circumvented for the parser, like the creation of
+  element-constraint view in Annotation/Relation types). So this should be
+  reconsidered.

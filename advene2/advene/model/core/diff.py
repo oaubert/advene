@@ -113,9 +113,9 @@ def _diff_items(l1, l2):
 
 def _diff_imported_elements(t1, t2):
     l1 = [ i for i in enumerate(t1.iter_element_ids(t1._owner)) 
-             if ":" in i[1] ]
+             if ":" in i[1] and i[1][0] != ":" ]
     l2 = [ i for i in enumerate(t2.iter_element_ids(t2._owner)) 
-             if ":" in i[1] ]
+             if ":" in i[1] and i[1][0] != ":" ]
     r = []
     for e1, e2 in _xzip(l1, l2, lambda x: x):
         if e1 is None:
