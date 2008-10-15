@@ -262,7 +262,7 @@ class ViewBook(AdhocView):
                     for at in self.controller.package.all.annotation_types:
                         title=self.controller.get_title(at)
                         i=gtk.MenuItem(title, use_underline=False)
-                        i.connect('activate', lambda i, s, t: self.controller.gui.open_adhoc_view(name, source=s, label=t, destination=self.location), "here/annotation_types/%s/annotations/sorted" % at.id, title)
+                        i.connect('activate', lambda i, s, t: self.controller.gui.open_adhoc_view(name, source=s, label=t, destination=self.location), "here/all/annotation_types/%s/annotations/sorted" % at.id, title)
                         sm.append(i)
                 elif saved:
                     menu=gtk.Menu()
