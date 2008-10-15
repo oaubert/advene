@@ -477,6 +477,9 @@ class ElementCollection(object):
         """
         self._owner = owner_package
 
+    def __eq__(self, other):
+        return tuple(self) == tuple(other)
+
     def __iter__(self):
         """
         Default implementation relying on __len__ and __getitem__.
