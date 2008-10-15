@@ -1,6 +1,4 @@
 
-- in backend, rename get_annotations & co. as iter_annotations & co.
-
 - implement "external" contents (url attribute)
 
 - make subcollections (annotations, medias...) of all and own groups dict-like

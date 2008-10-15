@@ -436,16 +436,16 @@ class _SqliteBackend(object):
             return None
         t = r[0]
         if t == MEDIA:
-            return self.get_medias((package_id,), id=id).next()
+            return self.iter_medias((package_id,), id=id).next()
         elif t == ANNOTATION:
-            return self.get_annotations((package_id,), id=id).next()
+            return self.iter_annotations((package_id,), id=id).next()
         elif t == IMPORT:
-            return self.get_imports((package_id,), id=id).next()
+            return self.iter_imports((package_id,), id=id).next()
         else:
             return(t, package_id, id)
 
-    def get_medias(self, package_ids,
-                     id=None,  id_alt=None,
+    def iter_medias(self, package_ids,
+                    id=None,  id_alt=None,
                     url=None, url_alt=None,
                    ):
         """
@@ -479,11 +479,11 @@ class _SqliteBackend(object):
 
         return self._conn.execute(q, args)
 
-    def get_annotations(self, package_ids,
-                            id=None,    id_alt=None,
+    def iter_annotations(self, package_ids,
+                         id=None,    id_alt=None,
                          media=None, media_alt=None,
-                         begin=None,    begin_min=None, begin_max=None,
-                           end=None,      end_min=None,   end_max=None,
+                         begin=None, begin_min=None, begin_max=None,
+                         end=None,   end_min=None,   end_max=None,
                         ):
         """
         Yield tuples of the form
@@ -559,7 +559,7 @@ class _SqliteBackend(object):
 
         return self._conn.execute(q, args)
 
-    def get_relations(self, package_ids,
+    def iter_relations(self, package_ids,
                        id=None, id_alt=None):
         """
         Yield tuples of the form (RELATION, package_id, id,).
@@ -570,7 +570,7 @@ class _SqliteBackend(object):
             self._make_element_query(package_ids, RELATION, id, id_alt)
         return self._conn.execute(selectfrom+where, args)
 
-    def get_views(self, package_ids, id=None, id_alt=None):
+    def iter_views(self, package_ids, id=None, id_alt=None):
         """
         Yield tuples of the form (VIEW, package_id, id,).
         """
@@ -580,7 +580,7 @@ class _SqliteBackend(object):
             self._make_element_query(package_ids, VIEW, id, id_alt)
         return self._conn.execute(selectfrom+where, args)
 
-    def get_resources(self, package_ids, id=None, id_alt=None):
+    def iter_resources(self, package_ids, id=None, id_alt=None):
         """
         Yield tuples of the form (RESOURCE, package_id, id,).
         """
@@ -590,7 +590,7 @@ class _SqliteBackend(object):
             self._make_element_query(package_ids, RESOURCE, id, id_alt)
         return self._conn.execute(selectfrom+where, args)
 
-    def get_tags(self, package_ids, id=None, id_alt=None):
+    def iter_tags(self, package_ids, id=None, id_alt=None):
         """
         Yield tuples of the form (TAG, package_id, id,).
         """
@@ -600,7 +600,7 @@ class _SqliteBackend(object):
             self._make_element_query(package_ids, TAG, id, id_alt)
         return self._conn.execute(selectfrom+where, args)
 
-    def get_lists(self, package_ids, id=None, id_alt=None):
+    def iter_lists(self, package_ids, id=None, id_alt=None):
         """
         Yield tuples of the form (LIST, package_id, id,).
         """
@@ -610,7 +610,7 @@ class _SqliteBackend(object):
             self._make_element_query(package_ids, LIST, id, id_alt)
         return self._conn.execute(selectfrom+where, args)
 
-    def get_queries(self, package_ids, id=None, id_alt=None):
+    def iter_queries(self, package_ids, id=None, id_alt=None):
         """
         Yield tuples of the form (QUERY, package_id, id,).
         """
@@ -620,8 +620,8 @@ class _SqliteBackend(object):
             self._make_element_query(package_ids, QUERY, id, id_alt)
         return self._conn.execute(selectfrom+where, args)
 
-    def get_imports(self, package_ids,
-                       id=None,   id_alt=None,
+    def iter_imports(self, package_ids,
+                      id=None,   id_alt=None,
                       url=None,  url_alt=None,
                       uri=None,  uri_alt=None,
                     ):
@@ -952,7 +952,7 @@ class _SqliteBackend(object):
             self._conn.rollback()
             raise InternalError("could not delete or update", e)
 
-    def get_relations_with_member(self, package_ids, member, pos=None):
+    def iter_relations_with_member(self, package_ids, member, pos=None):
         """
         Return tuples of the form (RELATION, package_id, id) of all the 
         relations having the given member, at the given position if given.
@@ -1087,7 +1087,7 @@ class _SqliteBackend(object):
             self._conn.rollback()
             raise InternalError("could not delete or update", e)
 
-    def get_lists_with_item(self, package_ids, item, pos=None):
+    def iter_lists_with_item(self, package_ids, item, pos=None):
         """
         Return tuples of the form (LIST, package_id, id) of all the 
         lists having the given item, at the given position if given.
@@ -1153,7 +1153,7 @@ class _SqliteBackend(object):
             conn.rollback()
             raise InternalError("could not delete", e)
 
-    def iter_tags(self, package_ids, element):
+    def iter_tags_with_element(self, package_ids, element):
         """Iter over all the tags associated to element in the given packages.
 
         @param element the uri-ref of an element
@@ -1173,7 +1173,7 @@ class _SqliteBackend(object):
 
         return self._conn.execute(q, args)
 
-    def iter_tagged(self, package_ids, tag):
+    def iter_elements_with_tag(self, package_ids, tag):
         """Iter over all the elements associated to tag in the given packages.
 
         @param tag the uri-ref of a tag

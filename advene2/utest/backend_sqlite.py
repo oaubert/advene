@@ -515,11 +515,11 @@ class TestHandleElements(TestCase):
         for i in self.own + self.imported:
             self.assertEqual(self.be.get_element(*i[:2])[1:], i)
 
-    def test_get_medias(self):
+    def test_iter_medias(self):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return frozenset( i[1:] for i in self.be.get_medias(*a, **k) ) 
+            return frozenset( i[1:] for i in self.be.iter_medias(*a, **k) ) 
 
         ref = frozenset([self.m1, self.m2, self.m3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -550,7 +550,7 @@ class TestHandleElements(TestCase):
         self.assertEqual(ref,
             get((self.pid1, self.pid2), id="m1", url=self.m2_url,))
 
-    def test_get_annotations(self):
+    def test_iter_annotations(self):
 
         # NB: annotations are ordered, so we compare lists
         # NB: it is IMPORTANT that the identifiers of annotations do not
@@ -560,7 +560,7 @@ class TestHandleElements(TestCase):
         # the following function makes assert expression fit in one line...
 
         def get(*a, **k):
-            return [ i[1:] for i in self.be.get_annotations(*a, **k) ]
+            return [ i[1:] for i in self.be.iter_annotations(*a, **k) ]
 
         ref = [self.a4, self.a3, self.a2, self.a1, self.a5, self.a6,]
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -623,11 +623,11 @@ class TestHandleElements(TestCase):
         self.assertEqual(ref,
             get((self.pid1, self.pid2), media=media2, end_max=30,))
 
-    def test_get_relations(self):
+    def test_iter_relations(self):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return frozenset( i[1:] for i in self.be.get_relations(*a, **k) ) 
+            return frozenset( i[1:] for i in self.be.iter_relations(*a, **k) ) 
 
         ref = frozenset([self.r1, self.r2, self.r3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -649,7 +649,7 @@ class TestHandleElements(TestCase):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return frozenset( i[1:] for i in self.be.get_views(*a, **k) ) 
+            return frozenset( i[1:] for i in self.be.iter_views(*a, **k) ) 
 
         ref = frozenset([self.v1, self.v2, self.v3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -667,11 +667,11 @@ class TestHandleElements(TestCase):
         self.assertEqual(ref,
             get((self.pid1, self.pid2,), id_alt=("v1","v3"),))
 
-    def test_get_resources(self):
+    def test_iter_resources(self):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return frozenset( i[1:] for i in self.be.get_resources(*a, **k) ) 
+            return frozenset( i[1:] for i in self.be.iter_resources(*a, **k) ) 
 
         ref = frozenset([self.R1, self.R2, self.R3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -689,11 +689,11 @@ class TestHandleElements(TestCase):
         self.assertEqual(ref,
             get((self.pid1, self.pid2,), id_alt=("R1","R3"),))
 
-    def test_get_tags(self):
+    def test_iter_tags(self):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return frozenset( i[1:] for i in self.be.get_tags(*a, **k) ) 
+            return frozenset( i[1:] for i in self.be.iter_tags(*a, **k) ) 
 
         ref = frozenset([self.t1, self.t2, self.t3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -711,11 +711,11 @@ class TestHandleElements(TestCase):
         self.assertEqual(ref,
             get((self.pid1, self.pid2,), id_alt=("t1","t3"),))
 
-    def test_get_lists(self):
+    def test_iter_lists(self):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return frozenset( i[1:] for i in self.be.get_lists(*a, **k) ) 
+            return frozenset( i[1:] for i in self.be.iter_lists(*a, **k) ) 
 
         ref = frozenset([self.l1, self.l2, self.l3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -733,11 +733,11 @@ class TestHandleElements(TestCase):
         self.assertEqual(ref,
             get((self.pid1, self.pid2,), id_alt=("l1","l3"),))
 
-    def test_get_queries(self):
+    def test_iter_queries(self):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return frozenset( i[1:] for i in self.be.get_queries(*a, **k) ) 
+            return frozenset( i[1:] for i in self.be.iter_queries(*a, **k) ) 
 
         ref = frozenset([self.q1, self.q2, self.q3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -755,11 +755,11 @@ class TestHandleElements(TestCase):
         self.assertEqual(ref,
             get((self.pid1, self.pid2,), id_alt=("q1","q3"),))
 
-    def test_get_imports(self):
+    def test_iter_imports(self):
 
         # the following function makes assert expression fit in one line...
         def get(*a, **k):
-            return frozenset( i[1:] for i in self.be.get_imports(*a, **k) ) 
+            return frozenset( i[1:] for i in self.be.iter_imports(*a, **k) ) 
 
         ref = frozenset([self.i1, self.i2, self.i3,])
         self.assertEqual(ref, get((self.pid1, self.pid2,),))
@@ -888,7 +888,7 @@ class TestHandleElements(TestCase):
         self.be.insert_member(self.pid1, "r2", "a4", -1)
         self.be.insert_member(self.pid2, "r3", "a5", -1)
         self.be.insert_member(self.pid2, "r3", "a6", -1)
-        rel_w_member = self.be.get_relations_with_member
+        rel_w_member = self.be.iter_relations_with_member
         pids = (self.pid1, self.pid2,)
         # with url in uri-ref
         a5_uri_ref = "%s#a5" % self.url2
@@ -935,7 +935,7 @@ class TestHandleElements(TestCase):
         self.be.insert_item(self.pid1, "l2", "a4", -1)
         self.be.insert_item(self.pid2, "l3", "r3", -1)
         self.be.insert_item(self.pid2, "l3", "a6", -1)
-        lst_w_item = self.be.get_lists_with_item
+        lst_w_item = self.be.iter_lists_with_item
         pids = (self.pid1, self.pid2,)
         # with url in uri-ref
         r3_uri_ref = "%s#r3" % self.url2
@@ -966,47 +966,49 @@ class TestHandleElements(TestCase):
         a5 = frozenset(((self.pid2, "a5"),))
         a6 = frozenset(((self.pid2, "a6"),))
         pids = (self.pid1, self.pid2,)
+        elts_w_tag = self.be.iter_elements_with_tag
 
         self.assertEqual( a1.union(a5i),
-            frozenset(self.be.iter_tagged(pids, "%s#t1" % self.url1))
+            frozenset(elts_w_tag(pids, "%s#t1" % self.url1))
         )
 
         self.assertEqual( a2.union(a5i).union(a6),
-            frozenset(self.be.iter_tagged(pids, "%s#t3" % self.url2))
+            frozenset(elts_w_tag(pids, "%s#t3" % self.url2))
         )
 
         self.assertEqual( a2.union(a5i).union(a6),
-            frozenset(self.be.iter_tagged(pids, "%s#t3" % self.i1_uri))
+            frozenset(elts_w_tag(pids, "%s#t3" % self.i1_uri))
         )
 
         self.assertEqual( a2.union(a5i),
-            frozenset(self.be.iter_tagged((self.pid1,), "%s#t3" % self.i1_uri))
+            frozenset(elts_w_tag((self.pid1,), "%s#t3" % self.i1_uri))
         )
 
         t1 = frozenset(((self.pid1, "t1"),))
         t3i = frozenset(((self.pid1, "i1:t3"),))
         t3 = frozenset(((self.pid2, "t3"),))
+        tags_w_elt = self.be.iter_tags_with_element
 
         self.assertEquals( t1,
-            frozenset(self.be.iter_tags(pids, "%s#a1" % self.url1))
+            frozenset(tags_w_elt(pids, "%s#a1" % self.url1))
         )
 
         self.assertEquals( t1.union(t3i),
-            frozenset(self.be.iter_tags(pids, "%s#a5" % self.url2))
+            frozenset(tags_w_elt(pids, "%s#a5" % self.url2))
         )
 
         self.assertEquals( t1.union(t3i),
-            frozenset(self.be.iter_tags(pids, "%s#a5" % self.i1_uri))
+            frozenset(tags_w_elt(pids, "%s#a5" % self.i1_uri))
         )
 
         self.be.associate_tag(self.pid2, "a5", "t3")
 
         self.assertEquals( t1.union(t3i).union(t3),
-            frozenset(self.be.iter_tags(pids, "%s#a5" % self.i1_uri))
+            frozenset(tags_w_elt(pids, "%s#a5" % self.i1_uri))
         )
 
         self.assertEquals( t3,
-            frozenset(self.be.iter_tags((self.pid2,), "%s#a5" % self.i1_uri))
+            frozenset(tags_w_elt((self.pid2,), "%s#a5" % self.i1_uri))
         )
 
         self.assertEquals( frozenset((self.pid1, self.pid2)), frozenset(self.
@@ -1096,77 +1098,77 @@ class TestRetrieveDataWithSameId(TestCase):
         self.assertEqual(self.be.get_element(self.pid1, "i")[1:], self.i1)
         self.assertEqual(self.be.get_element(self.pid2, "i")[1:], self.i2)
 
-    def test_get_medias(self):
+    def test_iter_medias(self):
         self.assertEqual(2, len(list(
-            self.be.get_medias((self.pid1, self.pid2), id="m",))))
+            self.be.iter_medias((self.pid1, self.pid2), id="m",))))
         self.assertEqual(1, len(list(
-            self.be.get_medias((self.pid1,), id="m",))))
+            self.be.iter_medias((self.pid1,), id="m",))))
         self.assertEqual(1, len(list(
-            self.be.get_medias((self.pid2,), id="m",))))
+            self.be.iter_medias((self.pid2,), id="m",))))
 
-    def test_get_annotations(self):
+    def test_iter_annotations(self):
         self.assertEqual(2, len(list(
-            self.be.get_annotations((self.pid1, self.pid2), id="a",))))
+            self.be.iter_annotations((self.pid1, self.pid2), id="a",))))
         self.assertEqual(1, len(list(
-            self.be.get_annotations((self.pid1,), id="a",))))
+            self.be.iter_annotations((self.pid1,), id="a",))))
         self.assertEqual(1, len(list(
-            self.be.get_annotations((self.pid2,), id="a",))))
+            self.be.iter_annotations((self.pid2,), id="a",))))
 
-    def test_get_relations(self):
+    def test_iter_relations(self):
         self.assertEqual(2, len(list(
-            self.be.get_relations((self.pid1, self.pid2), id="r",))))
+            self.be.iter_relations((self.pid1, self.pid2), id="r",))))
         self.assertEqual(1, len(list(
-            self.be.get_relations((self.pid1,), id="r",))))
+            self.be.iter_relations((self.pid1,), id="r",))))
         self.assertEqual(1, len(list(
-            self.be.get_relations((self.pid2,), id="r",))))
+            self.be.iter_relations((self.pid2,), id="r",))))
 
-    def test_get_views(self):
+    def test_iter_views(self):
         self.assertEqual(2, len(list(
-            self.be.get_views((self.pid1, self.pid2), id="v",))))
+            self.be.iter_views((self.pid1, self.pid2), id="v",))))
         self.assertEqual(1, len(list(
-            self.be.get_views((self.pid1,), id="v",))))
+            self.be.iter_views((self.pid1,), id="v",))))
         self.assertEqual(1, len(list(
-            self.be.get_views((self.pid2,), id="v",))))
+            self.be.iter_views((self.pid2,), id="v",))))
 
-    def test_get_resources(self):
+    def test_iter_resources(self):
         self.assertEqual(2, len(list(
-            self.be.get_resources((self.pid1, self.pid2), id="R",))))
+            self.be.iter_resources((self.pid1, self.pid2), id="R",))))
         self.assertEqual(1, len(list(
-            self.be.get_resources((self.pid1,), id="R",))))
+            self.be.iter_resources((self.pid1,), id="R",))))
         self.assertEqual(1, len(list(
-            self.be.get_resources((self.pid2,), id="R",))))
+            self.be.iter_resources((self.pid2,), id="R",))))
 
-    def test_get_tags(self):
+    def test_iter_tags(self):
         self.assertEqual(2, len(list(
-            self.be.get_tags((self.pid1, self.pid2), id="t",))))
+            self.be.iter_tags((self.pid1, self.pid2), id="t",))))
         self.assertEqual(1, len(list(
-            self.be.get_tags((self.pid1,), id="t",))))
+            self.be.iter_tags((self.pid1,), id="t",))))
         self.assertEqual(1, len(list(
-            self.be.get_tags((self.pid2,), id="t",))))
+            self.be.iter_tags((self.pid2,), id="t",))))
 
-    def test_get_lists(self):
+    def test_iter_lists(self):
         self.assertEqual(2, len(list(
-            self.be.get_lists((self.pid1, self.pid2), id="l",))))
+            self.be.iter_lists((self.pid1, self.pid2), id="l",))))
         self.assertEqual(1, len(list(
-            self.be.get_lists((self.pid1,), id="l",))))
+            self.be.iter_lists((self.pid1,), id="l",))))
         self.assertEqual(1, len(list(
-            self.be.get_lists((self.pid2,), id="l",))))
+            self.be.iter_lists((self.pid2,), id="l",))))
 
-    def test_get_queries(self):
+    def test_iter_queries(self):
         self.assertEqual(2, len(list(
-            self.be.get_queries((self.pid1, self.pid2), id="q",))))
+            self.be.iter_queries((self.pid1, self.pid2), id="q",))))
         self.assertEqual(1, len(list(
-            self.be.get_queries((self.pid1,), id="q",))))
+            self.be.iter_queries((self.pid1,), id="q",))))
         self.assertEqual(1, len(list(
-            self.be.get_queries((self.pid2,), id="q",))))
+            self.be.iter_queries((self.pid2,), id="q",))))
 
-    def test_get_imports(self):
+    def test_iter_imports(self):
         self.assertEqual(2, len(list(
-            self.be.get_imports((self.pid1, self.pid2), id="i",))))
+            self.be.iter_imports((self.pid1, self.pid2), id="i",))))
         self.assertEqual(1, len(list(
-            self.be.get_imports((self.pid1,), id="i",))))
+            self.be.iter_imports((self.pid1,), id="i",))))
         self.assertEqual(1, len(list(
-            self.be.get_imports((self.pid2,), id="i",))))
+            self.be.iter_imports((self.pid2,), id="i",))))
 
 
 if __name__ == "__main__":

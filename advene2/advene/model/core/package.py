@@ -64,7 +64,7 @@ class Package(object, WithMetaMixin, DirtyMixin):
         self._uri      = backend.get_uri(package_id)
 
         self._imports_dict = imports_dict = {}
-        for _, id, url, uri in backend.get_imports((package_id,)):
+        for _, id, url, uri in backend.iter_imports((package_id,)):
             p = Package(url)
             if p is None: p = Package(uri)
             # NB: even there, p could still be None
